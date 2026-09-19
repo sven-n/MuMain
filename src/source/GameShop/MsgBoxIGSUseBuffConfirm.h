@@ -60,8 +60,8 @@ public:
     bool Update();
     bool Render();
 
-    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType,
-        wchar_t* pszItemName, wchar_t* pszBuffName);
+    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType, wchar_t* pszItemName,
+                    wchar_t* pszBuffName);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -87,11 +87,11 @@ private:
 
     wchar_t m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
 
-    int			m_iDesciptionLine;
+    int m_iDesciptionLine;
 
-    int			m_iStorageSeq;
-    int			m_iStorageItemSeq;
-    WORD		m_wItemCode;
+    int m_iStorageSeq;
+    int m_iStorageItemSeq;
+    WORD m_wItemCode;
     char m_szItemType;
     wchar_t m_szCurrentBuffName[MAX_TEXT_LENGTH];
 };

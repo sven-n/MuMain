@@ -9,6 +9,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionLogin[]      = L"LOGIN";
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
     inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
+    inline constexpr wchar_t CfgSectionRender[] = L"Render";
 }
 
 namespace CfgKeys
@@ -39,6 +40,12 @@ namespace CfgKeys
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
+
+    // Render
+    // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
+    inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
+    inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
+    inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
 }
 
 namespace CfgDefaults
@@ -56,8 +63,8 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultEncryptedUsername[] = L"";
     inline constexpr wchar_t CfgDefaultEncryptedPassword[] = L"";
 
-    inline constexpr wchar_t CfgDefaultServerIP[] = L"127.127.127.127";
-    inline constexpr int CfgDefaultServerPort = 44406;
+    inline constexpr wchar_t CfgDefaultServerIP[] = L"localhost";
+    inline constexpr int CfgDefaultServerPort = 44405;
 
     inline constexpr int CfgDefaultZoom = 1735;  // OrbitalCamera DEFAULT_RADIUS — matches Default-cam camera-to-Hero distance
 
@@ -68,4 +75,11 @@ namespace CfgDefaults
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
     // the user picks a font. Any value is passed through as the GDI face name.
     inline constexpr wchar_t CfgDefaultFont[] = L"";
+
+    // Legacy config compatibility only. SDL GPU ignores this key and default.
+    inline constexpr bool CfgDefaultCoreProfile = true;
+
+    // Opt-in until real effects have been visually checked on target hardware.
+    inline constexpr bool CfgDefaultSortParticleDraws = false;
+    inline constexpr bool CfgDefaultVSync = true;
 }

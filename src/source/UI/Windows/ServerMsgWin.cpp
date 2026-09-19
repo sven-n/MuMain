@@ -6,30 +6,21 @@
 #include "ServerMsgWin.h"
 #include "UI/Legacy/UIControls.h"
 
+// cppcheck-suppress uninitMemberVar
+CServerMsgWin::CServerMsgWin() {}
 
-
-
-CServerMsgWin::CServerMsgWin()
-{
-}
-
-CServerMsgWin::~CServerMsgWin()
-{
-}
+CServerMsgWin::~CServerMsgWin() {}
 
 void CServerMsgWin::Create()
 {
-    SImgInfo aiiDescBg[WE_BG_MAX] =
-    {
-        { BITMAP_LOG_IN + 11, 0, 0, 4, 4 },
-        { BITMAP_LOG_IN + 12, 0, 0, 512, 6 },
-        { BITMAP_LOG_IN + 12, 0, 6, 512, 6 },
-        { BITMAP_LOG_IN + 13, 0, 0, 3, 4 },
-        { BITMAP_LOG_IN + 13, 3, 0, 3, 4 }
-    };
+    SImgInfo aiiDescBg[WE_BG_MAX] = {{BITMAP_LOG_IN + 11, 0, 0, 4, 4},
+                                     {BITMAP_LOG_IN + 12, 0, 0, 512, 6},
+                                     {BITMAP_LOG_IN + 12, 0, 6, 512, 6},
+                                     {BITMAP_LOG_IN + 13, 0, 0, 3, 4},
+                                     {BITMAP_LOG_IN + 13, 3, 0, 3, 4}};
     CWinEx::Create(aiiDescBg, 1, SMW_MSG_LINE_MAX * 5);
 
-    ::memset(m_aszMsg, 0, sizeof(char) * SMW_MSG_LINE_MAX * SMW_MSG_ROW_MAX);
+    ::memset(m_aszMsg, 0, sizeof(wchar_t) * SMW_MSG_LINE_MAX * SMW_MSG_ROW_MAX);
     m_nMsgLine = 0;
 }
 
@@ -73,7 +64,6 @@ void CServerMsgWin::RenderControls()
     for (i = 0; i < m_nMsgLine; ++i)
     {
         g_pRenderText->RenderText(int((CWin::GetXPos() + 11) / g_fScreenRate_x),
-            int((CWin::GetYPos() + 12 + i * 20) / g_fScreenRate_y),
-            m_aszMsg[i]);
+                                  int((CWin::GetYPos() + 12 + i * 20) / g_fScreenRate_y), m_aszMsg[i]);
     }
 }

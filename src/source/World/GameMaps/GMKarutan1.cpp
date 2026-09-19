@@ -18,15 +18,9 @@
 #include "Engine/AI/GOBoid.h"
 #include "UI/NewUI/NewUISystem.h"
 
+CGMKarutan1::CGMKarutan1() {}
 
-
-CGMKarutan1::CGMKarutan1()
-{
-}
-
-CGMKarutan1::~CGMKarutan1()
-{
-}
+CGMKarutan1::~CGMKarutan1() {}
 
 CGMKarutan1Ptr CGMKarutan1::Make()
 {
@@ -75,7 +69,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         vec3_t vPos, vRelativePos, vLight0;
         Vector(0.f, 0.f, 0.f, vPos);
-        float flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f;//+0.1f;
+        float flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f; //+0.1f;
         Vector(flumi * 1.9f, flumi * 1.1f, flumi * 1.1f, vLight0);
 
         Vector(10.f, 0.f, -6.f, vRelativePos);
@@ -85,13 +79,13 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         b->TransformPosition(BoneTransform[14], vRelativePos, vPos);
         CreateSprite(BITMAP_SHINY + 5, vPos, 1.2f, vLight0, o);
     }
-    return true;
+        return true;
     case 72:
     {
         vec3_t vPos, vRelativePos, vLight0, vLight1;
         Vector(0.f, 0.f, 0.f, vPos);
         Vector(20.f, 0.f, 0.f, vRelativePos);
-        float flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f;//+0.1f;
+        float flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f; //+0.1f;
         Vector(flumi * 1.3f, flumi * 1.3f, flumi * 1.9f, vLight0);
         Vector(0.15f, 0.15f, 0.15f, vLight1);
 
@@ -102,7 +96,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         CreateSprite(BITMAP_SPARK + 1, vPos, 4.0f, vLight0, o);
         CreateSprite(BITMAP_SPARK + 1, vPos, 1.5f, vLight1, o);
     }
-    return true;
+        return true;
     case 113:
     {
         vec3_t vLightFire;
@@ -125,7 +119,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
             break;
         }
     }
-    return true;
+        return true;
     case 114:
         if (rand_fps_check(3))
         {
@@ -195,90 +189,90 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     case MODEL_BONE_SCORPION:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
         if (o->CurrentAction != MONSTER01_DIE)
         {
             float fLumi = sinf(WorldTime * 0.002f) + 0.5f;
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BONE_SCORPION_SKIN_EFFECT);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_BONE_SCORPION_SKIN_EFFECT);
         }
         return true;
     case MODEL_CRYPTA:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
         if (o->CurrentAction != MONSTER01_DIE)
         {
             float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_KRYPTA_BALL_EFFECT);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_KRYPTA_BALL_EFFECT);
         }
         return true;
     case MODEL_CRYPOS:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
         Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
         return true;
     case MODEL_CONDRA:
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
 
             float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CONDRA_SKIN_EFFECT);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CONDRA_SKIN_EFFECT2);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_CONDRA_SKIN_EFFECT);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_CONDRA_SKIN_EFFECT2);
 
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight * 0.9f,
-                WorldTime * 0.0010f, o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight * 0.9f, WorldTime * 0.0010f,
+                          o->BlendMeshTexCoordV);
             Vector(0.4f, 0.95f, 1.0f, b->BodyLight);
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, o->BlendMeshLight * 0.3f,
-                WorldTime * 0.0015f, o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, o->BlendMeshLight * 0.3f, WorldTime * 0.0015f,
+                          o->BlendMeshTexCoordV);
         }
         return true;
     case MODEL_NACONDRA:
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
 
             float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT2);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT3);
+            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT2);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT3);
 
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
 
             Vector(1.0f, 0.1f, 1.0f, b->BodyLight);
-            b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 4, o->BlendMeshLight * 0.9f,
-                WorldTime * 0.0010f, o->BlendMeshTexCoordV);
+            b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 4, o->BlendMeshLight * 0.9f, WorldTime * 0.0010f,
+                          o->BlendMeshTexCoordV);
             Vector(0.7f, 0.4f, 1.0f, b->BodyLight);
-            b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, o->BlendMeshLight * 0.7f,
-                WorldTime * 0.0015f, o->BlendMeshTexCoordV);
+            b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, o->BlendMeshLight * 0.7f, WorldTime * 0.0015f,
+                          o->BlendMeshTexCoordV);
         }
         return true;
-#endif	// ASG_ADD_KARUTAN_MONSTERS
+#endif // ASG_ADD_KARUTAN_MONSTERS
     }
 
     return false;
@@ -300,7 +294,8 @@ void CGMKarutan1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 3:
     case 56:
     case 62:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
         break;
     case 54:
     {
@@ -311,7 +306,8 @@ void CGMKarutan1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 55:
     case 57:
         b->StreamMesh = 0;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
         b->StreamMesh = -1;
         break;
     case 58:
@@ -408,7 +404,7 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
 
         OBJECT* o = &pCharacter->Object;
 
-        vec3_t vColor = { 1.5f, 0.1f, 0.5f };
+        vec3_t vColor = {1.5f, 0.1f, 0.5f};
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 24, o, 10.f, -1, 0, 0, -1, vColor);
         break;
     }
@@ -423,7 +419,8 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     vec3_t p, Position;
     vec3_t Light;
-    float Luminosity = (float)(rand() % 8 + 2) * 0.1f;;
+    float Luminosity = (float)(rand() % 8 + 2) * 0.1f;
+    ;
 
     switch (o->Type)
     {
@@ -620,23 +617,25 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
     {
         float Start_Frame = 0.f;
         float End_Frame = 9.0f;
-        if ((pObject->AnimationFrame >= Start_Frame && pObject->AnimationFrame <= End_Frame
-            && pObject->CurrentAction == MONSTER01_ATTACK1)
-            || (pObject->AnimationFrame >= Start_Frame && pObject->AnimationFrame <= End_Frame
-                && pObject->CurrentAction == MONSTER01_ATTACK2))
+        if ((pObject->AnimationFrame >= Start_Frame && pObject->AnimationFrame <= End_Frame &&
+             pObject->CurrentAction == MONSTER01_ATTACK1) ||
+            (pObject->AnimationFrame >= Start_Frame && pObject->AnimationFrame <= End_Frame &&
+             pObject->CurrentAction == MONSTER01_ATTACK2))
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(1.0f, 1.2f, 1.2f, Light);
 
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
+            float fActionSpeed =
+                pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; ++i)
             {
-                pModel->Animation(BoneTransform, fAnimationFrame, pObject->PriorAnimationFrame, pObject->PriorAction, pObject->Angle, pObject->HeadAngle);
+                pModel->Animation(BoneTransform, fAnimationFrame, pObject->PriorAnimationFrame, pObject->PriorAction,
+                                  pObject->Angle, pObject->HeadAngle);
 
                 Vector(0.f, 0.f, 0.f, StartRelative);
                 Vector(0.f, 0.f, 0.f, EndRelative);
@@ -652,43 +651,39 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
     break;
     case MODEL_CRYPOS:
     {
-        float Start_Frame = 0.f;//3.5f;
-        float End_Frame = 6.0f;//6.7f;
-        if ((pObject->AnimationFrame >= Start_Frame && pObject->AnimationFrame <= End_Frame
-            && pObject->CurrentAction == MONSTER01_ATTACK1))
+        float Start_Frame = 0.f; // 3.5f;
+        float End_Frame = 6.0f;  // 6.7f;
+        if ((pObject->AnimationFrame >= Start_Frame && pObject->AnimationFrame <= End_Frame &&
+             pObject->CurrentAction == MONSTER01_ATTACK1))
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(1.f, 0.05f, 0.0f, Light);
 
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
+            float fActionSpeed =
+                pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             int i;
             for (i = 0; i < 10; ++i)
             {
-                pModel->Animation(BoneTransform, fAnimationFrame,
-                    pObject->PriorAnimationFrame, pObject->PriorAction, pObject->Angle,
-                    pObject->HeadAngle);
+                pModel->Animation(BoneTransform, fAnimationFrame, pObject->PriorAnimationFrame, pObject->PriorAction,
+                                  pObject->Angle, pObject->HeadAngle);
 
                 Vector(0.f, 0.f, 0.f, StartRelative);
                 Vector(0.f, 0.f, 0.f, EndRelative);
 
                 Vector(2.f, 2.f, 2.f, pModel->BodyLight);
 
-                pModel->TransformPosition(
-                    BoneTransform[156], StartRelative, StartPos, false);
-                pModel->TransformPosition(
-                    BoneTransform[153], EndRelative, EndPos, false);
+                pModel->TransformPosition(BoneTransform[156], StartRelative, StartPos, false);
+                pModel->TransformPosition(BoneTransform[153], EndRelative, EndPos, false);
                 CreateBlur(pCharacter, StartPos, EndPos, Light, 1, false, 0);
                 CreateBlur(pCharacter, StartPos, EndPos, Light, 1, false, 2);
 
-                pModel->TransformPosition(
-                    BoneTransform[149], StartRelative, StartPos, false);
-                pModel->TransformPosition(
-                    BoneTransform[146], EndRelative, EndPos, false);
+                pModel->TransformPosition(BoneTransform[149], StartRelative, StartPos, false);
+                pModel->TransformPosition(BoneTransform[146], EndRelative, EndPos, false);
                 CreateBlur(pCharacter, StartPos, EndPos, Light, 1, false, 1);
                 CreateBlur(pCharacter, StartPos, EndPos, Light, 1, false, 3);
 
@@ -718,9 +713,8 @@ bool CGMKarutan1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_CRYPOS:
-        if (o->CurrentAction == MONSTER01_ATTACK2
-            && (o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f)
-            && rand_fps_check(1))
+        if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f) &&
+            rand_fps_check(1))
         {
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
             OBJECT* to = &tc->Object;
@@ -864,7 +858,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 
     return false;
 }
-#endif	// ASG_ADD_KARUTAN_MONSTERS
+#endif // ASG_ADD_KARUTAN_MONSTERS
 
 void CGMKarutan1::PlayBGM()
 {
@@ -884,4 +878,4 @@ bool IsKarutanMap()
     return gMapManager.WorldActive == WD_80KARUTAN1 || gMapManager.WorldActive == WD_81KARUTAN2;
 }
 
-#endif	// ASG_ADD_MAP_KARUTAN
+#endif // ASG_ADD_MAP_KARUTAN

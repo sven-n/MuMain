@@ -135,7 +135,6 @@ bool SEASON3B::CNewUICryWolf::Render()
         return true;
 
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     wchar_t Text[300];
 
@@ -293,7 +292,6 @@ bool SEASON3B::CNewUICryWolf::Render()
 
     g_pCryWolfInterface->Render(538, 392, 104, 37, 0.f, 0.f, 104.f / 128.f, 36.f / 64.f, 12);
 
-    glColor3f(1.f, 0.6f, 0.3f);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
@@ -329,27 +327,21 @@ bool SEASON3B::CNewUICryWolf::Render()
 
     if (m_bTimeStart == true && m_CrywolfState == CRYWOLF_STATE_START)
     {
+        const DWORD timerColor = View_Bal
+            ? RGBA(255, 77, 77, 255)
+            : RGBA(255, 255, 255, 255);
         m_iSecond = m_iSecond - (GetTickCount() - m_dwSyncTime);
-
-        if (View_Bal == false)
-        {
-            glColor3f(1.f, 1.0f, 1.0f);
-        }
-        else
-        {
-            glColor3f(1.f, 0.3f, 0.3f);
-        }
 
         if (m_iMinute < 10)
         {
-            RenderNumber2D(510 + 60, 384 + 18, 0, 14, 14);
+            RenderNumber2D(510 + 60, 384 + 18, 0, 14, 14, timerColor);
         }
-        RenderNumber2D(510 + 70, 384 + 18, m_iMinute, 14, 14);
+        RenderNumber2D(510 + 70, 384 + 18, m_iMinute, 14, 14, timerColor);
         if (m_iSecond / 1000 < 10)
         {
-            RenderNumber2D(520 + 77, 384 + 18, 0, 14, 14);
+            RenderNumber2D(520 + 77, 384 + 18, 0, 14, 14, timerColor);
         }
-        RenderNumber2D(520 + 87, 384 + 18, m_iSecond / 1000, 14, 14);
+        RenderNumber2D(520 + 87, 384 + 18, m_iSecond / 1000, 14, 14, timerColor);
 
         m_dwSyncTime = GetTickCount();
 
@@ -495,9 +487,9 @@ float SEASON3B::CNewUICryWolf::ConvertY(float y)
 
 bool SEASON3B::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)
 {
-    glColor4f(1.f, 1.f, 1.f, Alpha);
-
-    RenderImage(IMAGE_MVP_INTERFACE + Index, Posx, Posy, nPosx, nPosy, u, v, su, sv);
+    const BYTE alpha = static_cast<BYTE>(std::clamp(Alpha, 0.f, 1.f) * 255.f);
+    RenderImage(IMAGE_MVP_INTERFACE + Index, Posx, Posy, nPosx, nPosy, u, v, su, sv,
+        RGBA(255, 255, 255, alpha));
 
     return true;
 }

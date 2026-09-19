@@ -12,8 +12,10 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopList.h"
 
+#include <climits>
 #include <filesystem>
 #include <fstream>
+#include <vector>
 
 CShopList::CShopList() // OK
 {
@@ -37,14 +39,15 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+    const auto narrowPath = mu_narrow_path(szFilePath);
+    ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+        ifs.open(narrowPath, std::ifstream::in);
         LastError = GetLastError();
     }
 
@@ -103,14 +106,15 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+    const auto narrowPath = mu_narrow_path(szFilePath);
+    ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+        ifs.open(narrowPath, std::ifstream::in);
         LastError = GetLastError();
     }
 
@@ -154,14 +158,15 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+    const auto narrowPath = mu_narrow_path(szFilePath);
+    ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+        ifs.open(narrowPath, std::ifstream::in);
         LastError = GetLastError();
     }
 
@@ -217,7 +222,7 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 {
     std::ifstream ifs;
 
-    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
+    ifs.open(mu_narrow_path(szFilePath), std::ifstream::in);
 
     if (!ifs.is_open())
     {
@@ -254,11 +259,26 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 
     if (encode == FE_UNICODE)
     {
-        // UTF-16LE input: std::ifstream::getline read the raw little-endian bytes
-        // into a narrow buffer, so they already are wide characters. Reinterpret
-        // is the correct decode here (catalog files are ANSI today, so this path
-        // is not normally exercised, but keep it lossless rather than empty).
-        result = reinterpret_cast<const wchar_t*>(buffer);
+        const auto* bytes = reinterpret_cast<const unsigned char*>(buffer);
+        for (std::size_t index = 0; bytes[index] != 0 || bytes[index + 1] != 0; index += 2)
+        {
+            const std::uint16_t codeUnit = static_cast<std::uint16_t>(bytes[index]) |
+                (static_cast<std::uint16_t>(bytes[index + 1]) << 8);
+#if WCHAR_MAX > 0xFFFF
+            if (codeUnit >= 0xD800 && codeUnit <= 0xDBFF)
+            {
+                const std::uint16_t low = static_cast<std::uint16_t>(bytes[index + 2]) |
+                    (static_cast<std::uint16_t>(bytes[index + 3]) << 8);
+                if (low >= 0xDC00 && low <= 0xDFFF)
+                {
+                    result.push_back(static_cast<wchar_t>(0x10000 + ((codeUnit - 0xD800) << 10) + (low - 0xDC00)));
+                    index += 2;
+                    continue;
+                }
+            }
+#endif
+            result.push_back(static_cast<wchar_t>(codeUnit));
+        }
         return result;
     }
 
@@ -276,12 +296,9 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
         return result; // empty string on conversion failure
     }
 
-    auto lpWideCharStr = new WCHAR[cchWideChar];
-    MultiByteToWideChar(codePage, 0, buffer, -1, lpWideCharStr, cchWideChar);
-
-    result = lpWideCharStr;
-
-    delete[] lpWideCharStr;
+    std::vector<wchar_t> wide(static_cast<std::size_t>(cchWideChar));
+    if (MultiByteToWideChar(codePage, 0, buffer, -1, wide.data(), cchWideChar) > 0)
+        result = wide.data();
 
     return result;
 }

@@ -347,7 +347,7 @@ constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell
 
 #define MAX_MINIMAP_NAME    100
 
-#define MAX_MONSTER_NAME    40
+#define MAX_MONSTER_NAME    64
 
 constexpr int MAX_ITEM_TYPE = 16;
 

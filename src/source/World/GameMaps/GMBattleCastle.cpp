@@ -9,6 +9,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -24,6 +25,7 @@
 #include "Guild/GuildCache.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Camera/CameraProjection.h"
+#include "UI/Scaling/UITransform.h"
 
 
 extern  int     WaterTextureNumber;
@@ -572,17 +574,20 @@ namespace battleCastle
 
     void    StartFog(vec3_t Color)
     {
-        glEnable(GL_FOG);
-
-        glFogfv(GL_FOG_COLOR, Color);
-        glFogf(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_START, 2000.f);
-        glFogf(GL_FOG_END, 2700.f);
+        mu::FogParams fogParams{};
+        fogParams.mode = GL_LINEAR;
+        fogParams.start = 2000.f;
+        fogParams.end = 2700.f;
+        fogParams.color[0] = Color[0];
+        fogParams.color[1] = Color[1];
+        fogParams.color[2] = Color[2];
+        fogParams.color[3] = 1.0f;
+        mu::GetRenderer().SetFog(fogParams);
     }
 
     void    EndFog(void)
     {
-        glDisable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(false);
     }
 
     void    RenderBaseSmoke(void)
@@ -592,12 +597,14 @@ namespace battleCastle
 
         EnableAlphaTest();
 
-        glColor3f(0.3f, 0.3f, 0.25f);
+        const DWORD smokeColor = RGBA(77, 77, 64, 255);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
         EnableAlphaBlend();
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
     }
 
     bool CreateFireSnuff(PARTICLE* o)
@@ -1216,7 +1223,6 @@ namespace battleCastle
             if (IsBattleCastleStart() == false)
             {
                 DisableAlphaBlend();
-                glColor3f(0.f, 0.f, 0.f);
                 b->RenderBodyShadow(o->BlendMesh, o->HiddenMesh);
             }
             return true;
@@ -1226,7 +1232,6 @@ namespace battleCastle
             if (IsBattleCastleStart())
             {
                 b->BeginRender(o->Alpha);
-                glColor3fv(b->BodyLight);
                 b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
                 b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);

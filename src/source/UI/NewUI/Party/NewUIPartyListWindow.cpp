@@ -203,7 +203,6 @@ bool CNewUIPartyListWindow::Render()
         return true;
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -213,14 +212,14 @@ bool CNewUIPartyListWindow::Render()
     {
         int iVal = i * m_iVal;
 
-        glColor4f(0.f, 0.f, 0.f, 0.9f);
-        RenderColor(float(m_Pos.x + 2), float(m_Pos.y + 2 + iVal), PARTY_LIST_WINDOW_WIDTH - 3, PARTY_LIST_WINDOW_HEIGHT - 6);
+        RenderColorQuadARGB(float(m_Pos.x + 2), float(m_Pos.y + 2 + iVal), PARTY_LIST_WINDOW_WIDTH - 3,
+            PARTY_LIST_WINDOW_HEIGHT - 6, 0xE6000000u);
         EnableAlphaTest();
 
         if (Party[i].index == -1)
         {
-            glColor4f(0.3f, 0.f, 0.f, 0.5f);
-            RenderColor(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3, PARTY_LIST_WINDOW_HEIGHT - 6);
+            RenderColorQuadARGB(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3,
+                PARTY_LIST_WINDOW_HEIGHT - 6, 0x804D0000u);
             EnableAlphaTest();
         }
         else
@@ -232,20 +231,19 @@ bool CNewUIPartyListWindow::Render()
 
                 if (g_isCharacterBuff(pObj, eBuff_Defense) == true)
                 {
-                    glColor4f(0.2f, 1.f, 0.2f, 0.2f);
-                    RenderColor(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3, PARTY_LIST_WINDOW_HEIGHT - 6);
+                    RenderColorQuadARGB(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3,
+                        PARTY_LIST_WINDOW_HEIGHT - 6, 0x3333FF33u);
                     EnableAlphaTest();
                 }
             }
             if (m_iSelectedCharacter != -1 && m_iSelectedCharacter == i)
             {
-                glColor4f(0.4f, 0.4f, 0.4f, 0.7f);
-                RenderColor(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3, PARTY_LIST_WINDOW_HEIGHT - 6);
+                RenderColorQuadARGB(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3,
+                    PARTY_LIST_WINDOW_HEIGHT - 6, 0xB3666666u);
                 EnableAlphaTest();
             }
         }
 
-        EndRenderColor();
         RenderImage(IMAGE_PARTY_LIST_BACK, m_Pos.x, m_Pos.y + iVal, PARTY_LIST_WINDOW_WIDTH, PARTY_LIST_WINDOW_HEIGHT);
 
         if (i == 0)
@@ -325,27 +323,22 @@ void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
         }
 
         EnableAlphaTest();
-        glColor4f(0.f, 0.f, 0.f, 0.5f);
-        RenderColor((float)(ScreenX + 1), (float)(ScreenY + 1), Width + 4.f, 5.f);
+        RenderColorQuadARGB((float)(ScreenX + 1), (float)(ScreenY + 1), Width + 4.f, 5.f, 0x80000000u);
 
         EnableAlphaBlend();
-        glColor3f(0.2f, 0.0f, 0.0f);
-        RenderColor((float)ScreenX, (float)ScreenY, Width + 4.f, 5.f);
-
-        glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-        RenderColor((float)(ScreenX + 2), (float)(ScreenY + 2), Width, 1.f);
+        RenderColorQuadARGB((float)ScreenX, (float)ScreenY, Width + 4.f, 5.f, 0xFF330000u);
+        RenderColorQuadARGB((float)(ScreenX + 2), (float)(ScreenY + 2), Width, 1.f, 0xFF320A00u);
 
         int stepHP = std::min<int>(10, p->stepHP);
 
-        glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
         for (int k = 0; k < stepHP; ++k)
         {
-            RenderColor((float)(ScreenX + 2 + (k * 4)), (float)(ScreenY + 2), 3.f, 2.f);
+            RenderColorQuadARGB((float)(ScreenX + 2 + (k * 4)), (float)(ScreenY + 2), 3.f, 2.f,
+                0xFFFA0A00u);
         }
         DisableAlphaBlend();
     }
     DisableAlphaBlend();
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 float CNewUIPartyListWindow::GetLayerDepth()

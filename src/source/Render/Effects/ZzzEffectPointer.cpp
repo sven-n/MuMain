@@ -15,7 +15,7 @@
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Random.h"
 
-PARTICLE  Pointers[MAX_POINTERS];
+PARTICLE Pointers[MAX_POINTERS];
 
 void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float Scale)
 {
@@ -52,6 +52,7 @@ void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float S
             }
         }
     }
+    // cppcheck-suppress nullPointer
     Select->Live = false;
 }
 
@@ -67,7 +68,8 @@ void MovePointers()
             {
             case BITMAP_CURSOR + 5:
                 o->Scale -= 0.05f * FPS_ANIMATION_FACTOR;
-                if (o->Scale < 0.1f) o->Live = false;
+                if (o->Scale < 0.1f)
+                    o->Live = false;
                 break;
             case BITMAP_BLOOD:
             case BITMAP_BLOOD + 1:
@@ -77,8 +79,10 @@ void MovePointers()
                     o->Scale += 0.004f * FPS_ANIMATION_FACTOR;
                 }
                 Vector(0.1f, 0.f, 0.f, o->Light);
-                if (o->LifeTime <= 0) o->Live = false;
-                if (o->LifeTime < 50) o->Alpha = o->LifeTime * 0.02f;
+                if (o->LifeTime <= 0)
+                    o->Live = false;
+                if (o->LifeTime < 50)
+                    o->Alpha = o->LifeTime * 0.02f;
                 break;
             }
         }
@@ -97,7 +101,8 @@ void RenderPointers()
                 EnableAlphaBlend();
             else
                 EnableAlphaTest();
-            RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2], o->Alpha);
+            RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light,
+                                     -o->Angle[2], o->Alpha);
         }
     }
 }

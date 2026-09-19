@@ -1,17 +1,19 @@
-#ifndef __DSPLAYSOUND_H__
-#define __DSPLAYSOUND_H__
+#pragma once
+
+// Story 7.8.1: Include WinCompat.h so HRESULT/BOOL/HWND are available on all platforms.
+// Forward-declare OBJECT for function parameters that use OBJECT* pointers.
+#include "Core/Platform/WinCompat.h"
+struct OBJECT;
 
 #define MAX_CHANNEL 4
 
+// npc
+#define SOUND_NPC 160
+#define SOUND_NPC_END 210
 
-
-//npc
-#define SOUND_NPC                  160
-#define SOUND_NPC_END              210
-
-//monster
-#define SOUND_MONSTER              210
-#define SOUND_MONSTER_END          450
+// monster
+#define SOUND_MONSTER 210
+#define SOUND_MONSTER_END 450
 
 enum ESound
 {
@@ -882,58 +884,58 @@ enum ESound
     SOUND_DOPPELGANGER_LUGARD_BREATH,
     SOUND_DOPPELGANGER_JEWELBOX_OPEN,
 
-    SOUND_EMPIREGUARDIAN_WEATHER_RAIN,					// ImperialGuardianFort_out1.wav
-    SOUND_EMPIREGUARDIAN_WEATHER_FOG,					// ImperialGuardianFort_out2.wav
-    SOUND_EMPIREGUARDIAN_WEATHER_STORM,					// ImperialGuardianFort_out3.wav
+    SOUND_EMPIREGUARDIAN_WEATHER_RAIN,  // ImperialGuardianFort_out1.wav
+    SOUND_EMPIREGUARDIAN_WEATHER_FOG,   // ImperialGuardianFort_out2.wav
+    SOUND_EMPIREGUARDIAN_WEATHER_STORM, // ImperialGuardianFort_out3.wav
 
-    SOUND_EMPIREGUARDIAN_INDOOR_SOUND,					// ImperialGuardianFort_in.wav
+    SOUND_EMPIREGUARDIAN_INDOOR_SOUND, // ImperialGuardianFort_in.wav
 
-    SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE,		// GaionKalein_move.wav
-    SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE,		// GaionKalein_rage.wav
-    SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH,		// GrandWizard_death.wav
+    SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE,  // GaionKalein_move.wav
+    SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE,  // GaionKalein_rage.wav
+    SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH, // GrandWizard_death.wav
 
-    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01,		// Jelint_attack1.wav
-    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03,		// Jelint_attack3.wav
-    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01,			// Jelint_move01.wav
-    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02,			// Jelint_move02.wav
-    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE,			// Jelint_rage.wav
-    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH,			// Jelint_death.wav
+    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01, // Jelint_attack1.wav
+    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03, // Jelint_attack3.wav
+    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01,   // Jelint_move01.wav
+    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02,   // Jelint_move02.wav
+    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE,     // Jelint_rage.wav
+    SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH,    // Jelint_death.wav
 
-    SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02,		// Raymond_attack2.wav
-    SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE,			// Raymond_rage.wav
+    SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02, // Raymond_attack2.wav
+    SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE,     // Raymond_rage.wav
 
-    SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03,		// Ercanne_attack3.wav
+    SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03, // Ercanne_attack3.wav
 
-    SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02,// 1Deasuler_attack2.wav
-    SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03,// 1Deasuler_attack3.wav
+    SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02, // 1Deasuler_attack2.wav
+    SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03, // 1Deasuler_attack3.wav
 
-    SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01,// 2Vermont_attack1.wav
-    SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02,// 2Vermont_attack2.wav
-    SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH,	// 2Vermont_death.wav
+    SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01, // 2Vermont_attack1.wav
+    SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02, // 2Vermont_attack2.wav
+    SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH,    // 2Vermont_death.wav
 
-    SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02,			// 3Cato_attack2.wav
-    SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE,				// 3Cato_move.wav
+    SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02, // 3Cato_attack2.wav
+    SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE,     // 3Cato_move.wav
 
-    SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02,			// 4Gallia_attack2.wav
+    SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02, // 4Gallia_attack2.wav
 
-    SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02,			// QuaterMaster_attack2.wav
+    SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02, // QuaterMaster_attack2.wav
 
-    SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01,			// CombatMaster_attack1.wav
-    SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02,			// CombatMaster_attack2.wav
-    SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03,			// CombatMaster_attack3.wav
+    SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01, // CombatMaster_attack1.wav
+    SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02, // CombatMaster_attack2.wav
+    SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03, // CombatMaster_attack3.wav
 
-    SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH,				// GrandWizard_death.wav
+    SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH, // GrandWizard_death.wav
 
-    SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH,			// AssassinMaster_Death.wav
+    SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH, // AssassinMaster_Death.wav
 
-    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01,		// CavalryLeader_attack1.wav
-    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02,		// CavalryLeader_attack2.wav
-    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01,			// CavalryLeader_move01.wav
-    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02,			// CavalryLeader_move02.wav
+    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01, // CavalryLeader_attack1.wav
+    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02, // CavalryLeader_attack2.wav
+    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01,   // CavalryLeader_move01.wav
+    SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02,   // CavalryLeader_move02.wav
 
-    SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02,				// Defender_attack2.wav
+    SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02, // Defender_attack2.wav
 
-    SOUND_EMPIREGUARDIAN_PRIEST_STOP,					// Priest_stay.wav
+    SOUND_EMPIREGUARDIAN_PRIEST_STOP, // Priest_stay.wav
 
     SOUND_RAGESKILL_THRUST,
     SOUND_RAGESKILL_THRUST_ATTACK,
@@ -951,64 +953,58 @@ enum ESound
     SOUND_RAGESKILL_BUFF_2,
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-    SOUND_KARUTAN_TCSCORPION_ATTACK,					// ToxyChainScorpion_attack.wav
-    SOUND_KARUTAN_TCSCORPION_DEATH,						// ToxyChainScorpion_death.wav
-    SOUND_KARUTAN_TCSCORPION_HIT,						// ToxyChainScorpion_hit.wav
+    SOUND_KARUTAN_TCSCORPION_ATTACK, // ToxyChainScorpion_attack.wav
+    SOUND_KARUTAN_TCSCORPION_DEATH,  // ToxyChainScorpion_death.wav
+    SOUND_KARUTAN_TCSCORPION_HIT,    // ToxyChainScorpion_hit.wav
 
-    SOUND_KARUTAN_BONESCORPION_ATTACK,					// BoneScorpion_attack.wav
-    SOUND_KARUTAN_BONESCORPION_DEATH,					// BoneScorpion_death.wav
-    SOUND_KARUTAN_BONESCORPION_HIT,						// BoneScorpion_hit.wav
+    SOUND_KARUTAN_BONESCORPION_ATTACK, // BoneScorpion_attack.wav
+    SOUND_KARUTAN_BONESCORPION_DEATH,  // BoneScorpion_death.wav
+    SOUND_KARUTAN_BONESCORPION_HIT,    // BoneScorpion_hit.wav
 
-    SOUND_KARUTAN_ORCUS_MOVE1,							// Orcus_move1.wav
-    SOUND_KARUTAN_ORCUS_MOVE2,							// Orcus_move2.wav
-    SOUND_KARUTAN_ORCUS_ATTACK1,						// Orcus_attack_1.wav
-    SOUND_KARUTAN_ORCUS_ATTACK2,						// Orcus_attack_2.wav
-    SOUND_KARUTAN_ORCUS_DEATH,							// Orcus_death.wav
+    SOUND_KARUTAN_ORCUS_MOVE1,   // Orcus_move1.wav
+    SOUND_KARUTAN_ORCUS_MOVE2,   // Orcus_move2.wav
+    SOUND_KARUTAN_ORCUS_ATTACK1, // Orcus_attack_1.wav
+    SOUND_KARUTAN_ORCUS_ATTACK2, // Orcus_attack_2.wav
+    SOUND_KARUTAN_ORCUS_DEATH,   // Orcus_death.wav
 
-    SOUND_KARUTAN_GOLOCH_MOVE1,							// Goloch_move1.wav
-    SOUND_KARUTAN_GOLOCH_MOVE2,							// Goloch_move2.wav
-    SOUND_KARUTAN_GOLOCH_ATTACK,						// Goloch_attack.wav
-    SOUND_KARUTAN_GOLOCH_DEATH,							// Goloch_death.wav
+    SOUND_KARUTAN_GOLOCH_MOVE1,  // Goloch_move1.wav
+    SOUND_KARUTAN_GOLOCH_MOVE2,  // Goloch_move2.wav
+    SOUND_KARUTAN_GOLOCH_ATTACK, // Goloch_attack.wav
+    SOUND_KARUTAN_GOLOCH_DEATH,  // Goloch_death.wav
 
-    SOUND_KARUTAN_CRYPTA_MOVE1,							// Crypta_move1.wav
-    SOUND_KARUTAN_CRYPTA_MOVE2,							// Crypta_move2.wav
-    SOUND_KARUTAN_CRYPTA_ATTACK,						// Crypta_attack.wav
-    SOUND_KARUTAN_CRYPTA_DEATH,							// Crypta_death.wav
+    SOUND_KARUTAN_CRYPTA_MOVE1,  // Crypta_move1.wav
+    SOUND_KARUTAN_CRYPTA_MOVE2,  // Crypta_move2.wav
+    SOUND_KARUTAN_CRYPTA_ATTACK, // Crypta_attack.wav
+    SOUND_KARUTAN_CRYPTA_DEATH,  // Crypta_death.wav
 
-    SOUND_KARUTAN_CRYPOS_MOVE1,							// Crypos_move1.wav
-    SOUND_KARUTAN_CRYPOS_MOVE2,							// Crypos_move2.wav
-    SOUND_KARUTAN_CRYPOS_ATTACK1,						// Crypos_attack_1.wav
-    SOUND_KARUTAN_CRYPOS_ATTACK2,						// Crypos_attack_2.wav
+    SOUND_KARUTAN_CRYPOS_MOVE1,   // Crypos_move1.wav
+    SOUND_KARUTAN_CRYPOS_MOVE2,   // Crypos_move2.wav
+    SOUND_KARUTAN_CRYPOS_ATTACK1, // Crypos_attack_1.wav
+    SOUND_KARUTAN_CRYPOS_ATTACK2, // Crypos_attack_2.wav
 
-    SOUND_KARUTAN_CONDRA_MOVE1,							// Condra_move1.wav
-    SOUND_KARUTAN_CONDRA_MOVE2,							// Condra_move2.wav
-    SOUND_KARUTAN_CONDRA_ATTACK,						// Condra_attack.wav
-    SOUND_KARUTAN_CONDRA_DEATH,							// Condra_death.wav
+    SOUND_KARUTAN_CONDRA_MOVE1,  // Condra_move1.wav
+    SOUND_KARUTAN_CONDRA_MOVE2,  // Condra_move2.wav
+    SOUND_KARUTAN_CONDRA_ATTACK, // Condra_attack.wav
+    SOUND_KARUTAN_CONDRA_DEATH,  // Condra_death.wav
 
-    SOUND_KARUTAN_NARCONDRA_ATTACK,						// NarCondra_attack.wav
-#endif	// ASG_ADD_KARUTAN_MONSTERS
+    SOUND_KARUTAN_NARCONDRA_ATTACK, // NarCondra_attack.wav
+#endif                              // ASG_ADD_KARUTAN_MONSTERS
 
 #ifdef ASG_ADD_MAP_KARUTAN
-    SOUND_KARUTAN_DESERT_ENV,							// Karutan_desert_env.wav
-    SOUND_KARUTAN_INSECT_ENV,							// Karutan_insect_env.wav
-    SOUND_KARUTAN_KARDAMAHAL_ENV,						// Kardamahal_entrance_env.wav
-#endif	// ASG_ADD_MAP_KARUTAN
+    SOUND_KARUTAN_DESERT_ENV,     // Karutan_desert_env.wav
+    SOUND_KARUTAN_INSECT_ENV,     // Karutan_insect_env.wav
+    SOUND_KARUTAN_KARDAMAHAL_ENV, // Kardamahal_entrance_env.wav
+#endif                            // ASG_ADD_MAP_KARUTAN
 
     MAX_BUFFER
 };
 
-HRESULT InitDirectSound(HWND hDlg);
-void    SetEnableSound(bool b);
-void    FreeDirectSound();
-
-void    LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL, bool Enable3DSound = false);
-HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = NULL, BOOL bLooped = false);
-void    StopBuffer(ESound Buffer, BOOL bResetPosition);
-void    AllStopSound(void);
-void    Set3DSoundPosition();
+void LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL,
+                  bool Enable3DSound = false);
+HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = nullptr, BOOL bLooped = false);
+void StopBuffer(ESound Buffer, BOOL bResetPosition);
+void AllStopSound(void);
+void Set3DSoundPosition();
 HRESULT ReleaseBuffer(int Buffer);
-HRESULT RestoreBuffers(int Buffer, int Channel);
-void	SetVolume(int Buffer, long vol);
-void	SetMasterVolume(long vol);
-
-#endif //__DSPLAYSOUND_H__
+void SetVolume(int Buffer, long vol);
+void SetMasterVolume(long vol);

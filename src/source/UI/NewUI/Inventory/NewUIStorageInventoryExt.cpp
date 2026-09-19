@@ -11,12 +11,12 @@
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 
-
 using namespace SEASON3B;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+// cppcheck-suppress uninitMemberVar
 CNewUIStorageInventoryExt::CNewUIStorageInventoryExt()
 {
     m_pNewUIMng = nullptr;
@@ -32,8 +32,7 @@ CNewUIStorageInventoryExt::~CNewUIStorageInventoryExt()
 
 bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
-    if (nullptr == pNewUIMng || nullptr == g_pNewUI3DRenderMng
-        || nullptr == g_pNewItemMng)
+    if (nullptr == pNewUIMng || nullptr == g_pNewUI3DRenderMng || nullptr == g_pNewItemMng)
     {
         return false;
     }
@@ -42,7 +41,8 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(INTERFACE_STORAGE_EXT, this);
 
     m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15, MAX_SHOP_INVENTORY))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15,
+                                             y + 36, 8, 15, MAX_SHOP_INVENTORY))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
@@ -139,8 +139,6 @@ bool CNewUIStorageInventoryExt::Update()
 bool CNewUIStorageInventoryExt::Render()
 {
     EnableAlphaTest();
-
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderBackImage();
     RenderText();
@@ -254,8 +252,7 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
                 const int nSrcIndex = pPickedItem->GetSourceLinealPos();
                 const auto sourceStorageType = pPickedItem->GetSourceStorageType();
                 const auto targetStorageType = m_pNewInventoryCtrl->GetStorageType();
-                SendRequestEquipmentItem(sourceStorageType, nSrcIndex,
-                    pItemObj, targetStorageType, nDstIndex);
+                SendRequestEquipmentItem(sourceStorageType, nSrcIndex, pItemObj, targetStorageType, nDstIndex);
             }
         }
         else
@@ -264,7 +261,7 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
             {
                 m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
             }
-            else 
+            else
             {
                 m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
             }
@@ -395,7 +392,8 @@ void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::sp
         {
             g_pMyInventory->DeleteItem(m_nBackupSourceInvenIndex);
         }
-        else if (m_nBackupSourceInvenIndex >= MAX_MY_INVENTORY_INDEX && m_nBackupSourceInvenIndex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (m_nBackupSourceInvenIndex >= MAX_MY_INVENTORY_INDEX &&
+                 m_nBackupSourceInvenIndex < MAX_MY_INVENTORY_EX_INDEX)
         {
             g_pMyInventoryExt->DeleteItem(m_nBackupSourceInvenIndex);
         }

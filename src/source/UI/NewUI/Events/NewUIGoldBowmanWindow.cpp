@@ -33,7 +33,7 @@ CNewUIGoldBowmanWindow::CNewUIGoldBowmanWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
-    ZeroMemory(g_strGiftName, sizeof(char) * 64);
+    ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
 }
 
 CNewUIGoldBowmanWindow::~CNewUIGoldBowmanWindow()
@@ -91,13 +91,13 @@ void CNewUIGoldBowmanWindow::Release()
 
 void CNewUIGoldBowmanWindow::OpeningProcess()
 {
-    ZeroMemory(g_strGiftName, sizeof(char) * 64);
+    ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
     ChangeEditBox(UISTATE_NORMAL);
 }
 
 void CNewUIGoldBowmanWindow::ClosingProcess()
 {
-    ZeroMemory(g_strGiftName, sizeof(char) * 64);
+    ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
     ChangeEditBox(UISTATE_HIDE);
     SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
@@ -145,20 +145,19 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
         }
         else
         {
-            wchar_t strSerial[12];
-            memset(&strSerial, 0, sizeof(char) * 12);
+            wchar_t strSerial[12] = {};
             m_EditBox->GetText(strSerial);
 
             wchar_t strSerial1[5] = L"0,";
-            memcpy(strSerial1, strSerial, sizeof(char) * 4); strSerial1[4] = 0;
+            wmemcpy(strSerial1, strSerial, 4); strSerial1[4] = 0;
 
             wchar_t strSerial2[5] = L"0,";
-            memcpy(strSerial2, strSerial + 4, sizeof(char) * 4); strSerial2[4] = 0;
+            wmemcpy(strSerial2, strSerial + 4, 4); strSerial2[4] = 0;
 
             wchar_t strSerial3[5] = L"0,";
-            memcpy(strSerial3, strSerial + 8, sizeof(char) * 4); strSerial3[4] = 0;
+            wmemcpy(strSerial3, strSerial + 8, 4); strSerial3[4] = 0;
 
-            SocketClient->ToGameServer()->SendLuckyNumberRequest(strSerial1, strSerial2, strSerial3);
+            SocketClient->ToGameServer()->SendLuckyNumberRequest(MU_C16(strSerial1), MU_C16(strSerial2), MU_C16(strSerial3));
         }
     }
 
@@ -242,37 +241,37 @@ void CNewUIGoldBowmanWindow::RenderTexts()
     auto name = getMonsterName(236); // npc Name file
     RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::EnterThe12DigitLuckyNumber); //"100%%
     RenderText(Text, m_Pos.x, m_Pos.y + 80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::WrittenOnThe100WinningCard);
     RenderText(Text, m_Pos.x, m_Pos.y + 95, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::LuckyNumberRegistrationPeriod);
     RenderText(Text, m_Pos.x, m_Pos.y + 110, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::Oct282003Nov30);
     RenderText(Text, m_Pos.x, m_Pos.y + 125, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     /////////////////////////////// bottom text /////////////////////////////////////////////////////
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::EnterTheLuckyNumber);
     RenderText(Text, m_Pos.x, m_Pos.y + 180, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::ExAUS919DKL2J9);
     RenderText(Text, m_Pos.x, m_Pos.y + 195, 190, 0, 0xFF18FF00, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::PleaseMakeSureToDifferentiate);
     RenderText(Text, m_Pos.x, m_Pos.y + 210, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    memset(&Text, 0, sizeof(char) * 100);
+    Text[0] = L'\0';
     mu_swprintf(Text, I18N::Game::AlphabetOAndNumber0AndAlphabetIAndNumber1);
     RenderText(Text, m_Pos.x, m_Pos.y + 225, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
@@ -296,7 +295,6 @@ void CNewUIGoldBowmanWindow::RendeerButton()
 bool CNewUIGoldBowmanWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     RenderFrame();
     RenderTexts();
     RendeerButton();

@@ -16,71 +16,53 @@
 
 namespace
 {
-    template <typename Container, typename T>
-    constexpr bool Contains(const Container& container, const T& value)
+template <typename Container, typename T> constexpr bool Contains(const Container& container, const T& value)
+{
+    for (const auto& item : container)
     {
-        for (const auto& item : container)
+        if (item == value)
         {
-            if (item == value)
-            {
-                return true;
-            }
+            return true;
         }
-        return false;
     }
-
-    constexpr std::array<int, 12> kDarkLordHairModels{
-        MODEL_SKELETON1,
-        MODEL_SKELETON2,
-        MODEL_SKELETON3,
-        MODEL_SKELETON_PCBANG,
-        MODEL_HALLOWEEN,
-        MODEL_XMAS_EVENT_CHANGE_GIRL,
-        MODEL_GM_CHARACTER,
-        MODEL_CURSEDTEMPLE_ALLIED_PLAYER,
-        MODEL_CURSEDTEMPLE_ILLUSION_PLAYER,
-        MODEL_XMAS2008_SNOWMAN,
-        MODEL_PANDA,
-        MODEL_SKELETON_CHANGED,
-    };
-
-    constexpr std::array<int, 6> kDarkCloakModels{
-        MODEL_HALLOWEEN,
-        MODEL_XMAS_EVENT_CHANGE_GIRL,
-        MODEL_GM_CHARACTER,
-        MODEL_XMAS2008_SNOWMAN,
-        MODEL_PANDA,
-        MODEL_SKELETON_CHANGED,
-    };
-
-    constexpr std::array<short, 8> kChangeRingTypes{
-        ITEM_TRANSFORMATION_RING,
-        ITEM_ELITE_TRANSFER_SKELETON_RING,
-        ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
-        ITEM_CHRISTMAS_TRANSFORMATION_RING,
-        ITEM_GAME_MASTER_TRANSFORMATION_RING,
-        ITEM_SNOWMAN_TRANSFORMATION_RING,
-        ITEM_PANDA_TRANSFORMATION_RING,
-        ITEM_SKELETON_TRANSFORMATION_RING,
-    };
-
-    constexpr std::array<short, 6> kIcarusBanRingTypes{
-        ITEM_TRANSFORMATION_RING,
-        ITEM_ELITE_TRANSFER_SKELETON_RING,
-        ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
-        ITEM_CHRISTMAS_TRANSFORMATION_RING,
-        ITEM_GAME_MASTER_TRANSFORMATION_RING,
-        ITEM_SNOWMAN_TRANSFORMATION_RING,
-    };
+    return false;
 }
 
-CChangeRingManager::CChangeRingManager()
-{
-}
+constexpr std::array<int, 12> kDarkLordHairModels{
+    MODEL_SKELETON1,
+    MODEL_SKELETON2,
+    MODEL_SKELETON3,
+    MODEL_SKELETON_PCBANG,
+    MODEL_HALLOWEEN,
+    MODEL_XMAS_EVENT_CHANGE_GIRL,
+    MODEL_GM_CHARACTER,
+    MODEL_CURSEDTEMPLE_ALLIED_PLAYER,
+    MODEL_CURSEDTEMPLE_ILLUSION_PLAYER,
+    MODEL_XMAS2008_SNOWMAN,
+    MODEL_PANDA,
+    MODEL_SKELETON_CHANGED,
+};
 
-CChangeRingManager::~CChangeRingManager()
-{
-}
+constexpr std::array<int, 6> kDarkCloakModels{
+    MODEL_HALLOWEEN, MODEL_XMAS_EVENT_CHANGE_GIRL, MODEL_GM_CHARACTER, MODEL_XMAS2008_SNOWMAN,
+    MODEL_PANDA,     MODEL_SKELETON_CHANGED,
+};
+
+constexpr std::array<short, 8> kChangeRingTypes{
+    ITEM_TRANSFORMATION_RING,           ITEM_ELITE_TRANSFER_SKELETON_RING,    ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
+    ITEM_CHRISTMAS_TRANSFORMATION_RING, ITEM_GAME_MASTER_TRANSFORMATION_RING, ITEM_SNOWMAN_TRANSFORMATION_RING,
+    ITEM_PANDA_TRANSFORMATION_RING,     ITEM_SKELETON_TRANSFORMATION_RING,
+};
+
+constexpr std::array<short, 6> kIcarusBanRingTypes{
+    ITEM_TRANSFORMATION_RING,           ITEM_ELITE_TRANSFER_SKELETON_RING,    ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
+    ITEM_CHRISTMAS_TRANSFORMATION_RING, ITEM_GAME_MASTER_TRANSFORMATION_RING, ITEM_SNOWMAN_TRANSFORMATION_RING,
+};
+} // namespace
+
+CChangeRingManager::CChangeRingManager() {}
+
+CChangeRingManager::~CChangeRingManager() {}
 
 void CChangeRingManager::LoadItemModel()
 {

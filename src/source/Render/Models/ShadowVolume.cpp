@@ -12,6 +12,8 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Core/Utilities/BaseCls.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 
 CQueue<CShadowVolume*> m_qSV;
 
@@ -22,12 +24,10 @@ void InsertShadowVolume(CShadowVolume* psv)
 
 void RenderShadowVolumesAsFrame(void)
 {
-    glPolygonMode(GL_FRONT, GL_LINE);
-    glDepthMask(true);
+    mu::GetRenderer().SetPolygonMode(GL_FRONT, GL_LINE);
+    mu::GetRenderer().SetDepthMask(true);
     DisableAlphaBlend();
     DisableTexture();
-    vec3_t vLight = { 0.4f, 0.f, 0.f };
-    glColor3fv(vLight);
 
     while (m_qSV.GetCount() > 0)
     {
@@ -37,7 +37,7 @@ void RenderShadowVolumesAsFrame(void)
         delete psv;
     }
 
-    glPolygonMode(GL_FRONT, GL_FILL);
+    mu::GetRenderer().SetPolygonMode(GL_FRONT, GL_FILL);
 }
 
 void ShadeWithShadowVolumes(void)
@@ -45,10 +45,10 @@ void ShadeWithShadowVolumes(void)
     DisableAlphaBlend();
 
     DisableDepthMask();
-    glEnable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetStencilTest(true);
 
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
+    mu::GetRenderer().SetColorMask(false, false, false, false);
+    mu::GetRenderer().SetStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
 
     while (m_qSV.GetCount() > 0)
     {
@@ -58,9 +58,9 @@ void ShadeWithShadowVolumes(void)
         delete psv;
     }
 
-    glFrontFace(GL_CCW);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDisable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetFrontFace(GL_CCW);
+    mu::GetRenderer().SetColorMask(true, true, true, true);
+    mu::GetRenderer().SetStencilTest(false);
     EnableDepthMask();
 }
 
@@ -68,12 +68,12 @@ void RenderShadowToScreen(void)
 {
     DisableDepthTest();
     DisableDepthMask();
-    glEnable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetStencilTest(true);
 
-    glStencilFunc(GL_LEQUAL, 0x1, 0xFFFFFFFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    mu::GetRenderer().SetStencilFunc(GL_LEQUAL, 0x1, 0xFFFFFFFF);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-    glDepthFunc(GL_ALWAYS);
+    mu::GetRenderer().SetDepthFunc(GL_ALWAYS);
 
     EnableAlphaBlendMinus();
     DisableTexture();
@@ -88,15 +88,16 @@ void RenderShadowToScreen(void)
     p[2][0] = 0.f + Width; p[2][1] = Height;
     p[3][0] = 0.f + Width; p[3][1] = 0.f;
     //BeginBitmap();
-    glBegin(GL_TRIANGLE_FAN);
-    glColor3fv(vLight);
-    for (int i = 0; i < 4; i++)
-    {
-        glVertex2f(p[i][0], p[i][1]);
-    }
-    glEnd();
-    glDepthFunc(GL_LESS);
-    glDisable(GL_STENCIL_TEST);
+    const std::uint32_t color = mu::PackABGR(vLight[0], vLight[1], vLight[2], 1.f);
+    const mu::Vertex2D vertices[4] = {
+        {p[0][0], p[0][1], 0.f, 0.f, color},
+        {p[1][0], p[1][1], 0.f, 0.f, color},
+        {p[2][0], p[2][1], 0.f, 0.f, color},
+        {p[3][0], p[3][1], 0.f, 0.f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
+    mu::GetRenderer().SetDepthFunc(GL_LESS);
+    mu::GetRenderer().SetStencilTest(false);
     EnableDepthMask();
 }
 
@@ -117,7 +118,8 @@ void CShadowVolume::Clear(void)
     m_pEdges = NULL;
 }
 
-BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga)
+BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o,
+                                     bool SkipTga)
 {
     if (o->Alpha < 0.01f)
     {
@@ -140,7 +142,8 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
 
         if (Bitmaps[b->IndexTexture[i]].Components == 4)
         {
-            if (SkipTga) continue;
+            if (SkipTga)
+                continue;
         }
         iNumTriangles += std::max<int>(0, b->Meshs[i].NumTriangles);
     }
@@ -158,7 +161,8 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
         if (Bitmaps[b->IndexTexture[i]].Components == 4)
         {
             Tga = true;
-            if (SkipTga) continue;
+            if (SkipTga)
+                continue;
         }
         DeterminateSilhouette(i, ppVertexTransformed, b->Meshs[i].NumTriangles, b->Meshs[i].Triangles, Tga);
     }
@@ -168,7 +172,9 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
 
 void CShadowVolume::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga)
 {
-    m_vLight[0] = -1.f; m_vLight[1] = 0.03f; m_vLight[2] = -1.f;
+    m_vLight[0] = -1.f;
+    m_vLight[1] = 0.03f;
+    m_vLight[2] = -1.f;
     VectorNormalize(m_vLight);
 
     if (!GetReadyToCreate(ppVertexTransformed, b, o, SkipTga))
@@ -252,9 +258,9 @@ void CShadowVolume::DeterminateSilhouette(short nMesh, vec3_t ppVertexTransforme
         if (pTriangle->Front)
         {
             short* pnVertexIndex = pTriangle->VertexIndex;
-            //AddEdge( pnVertexIndex[0], pnVertexIndex[1], nMesh);
-            //AddEdge( pnVertexIndex[1], pnVertexIndex[2], nMesh);
-            //AddEdge( pnVertexIndex[2], pnVertexIndex[0], nMesh);
+            // AddEdge( pnVertexIndex[0], pnVertexIndex[1], nMesh);
+            // AddEdge( pnVertexIndex[1], pnVertexIndex[2], nMesh);
+            // AddEdge( pnVertexIndex[2], pnVertexIndex[0], nMesh);
             AddEdgeFast(pnVertexIndex[0], pnVertexIndex[1], nMesh, iTriangle, 0, pTriangles);
             AddEdgeFast(pnVertexIndex[1], pnVertexIndex[2], nMesh, iTriangle, 1, pTriangles);
             AddEdgeFast(pnVertexIndex[2], pnVertexIndex[0], nMesh, iTriangle, 2, pTriangles);
@@ -296,23 +302,24 @@ void CShadowVolume::RenderAsFrame(void)
 
 void CShadowVolume::RenderShadowVolume(void)
 {
-    glBegin(GL_TRIANGLES);
-
+    static thread_local std::vector<mu::Vertex3D> vertices;
+    vertices.resize(static_cast<std::size_t>(m_nNumVertices));
     for (int i = 0; i < m_nNumVertices; ++i)
     {
-        glVertex3fv(m_pVertices[i]);
+        vertices[static_cast<std::size_t>(i)] = {
+            m_pVertices[i][0], m_pVertices[i][1], m_pVertices[i][2], 0.f, 0.f, 1.f, 0.f, 0.f, 0xFFFFFFFFu,
+        };
     }
-
-    glEnd();
+    mu::GetRenderer().RenderTriangles(vertices, 0u);
 }
 
 void CShadowVolume::Shade(void)
 {
-    glFrontFace(GL_CCW);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    mu::GetRenderer().SetFrontFace(GL_CCW);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     RenderShadowVolume();
 
-    glFrontFace(GL_CW);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+    mu::GetRenderer().SetFrontFace(GL_CW);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
     RenderShadowVolume();
 }

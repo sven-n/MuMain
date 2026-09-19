@@ -24,6 +24,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
+#include "Core/Text/TextLineWrap.h"
 
 using namespace SEASON3B;
 
@@ -47,6 +48,38 @@ extern wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
 extern char	View_Suc_Or_Fail;
 
 extern int BuyCost;
+
+namespace
+{
+void SelectMessageFont(BYTE fontType)
+{
+    g_pRenderText->SetFont(fontType == MSGBOX_FONT_BOLD ? g_hFontBold : g_hFont);
+}
+
+int AppendWrappedText(type_vector_msgdata& messages, const type_string& text, DWORD color, BYTE fontType,
+                      int maxWidth)
+{
+    SelectMessageFont(fontType);
+    auto lines = WrapTextToWidth(text, maxWidth, [](const wchar_t* line, size_t length)
+    {
+        return g_pRenderText->MeasureText(line, static_cast<int>(length)).cx;
+    });
+    if (lines.empty())
+    {
+        lines.emplace_back();
+    }
+
+    for (const auto& line : lines)
+    {
+        auto* message = new MSGBOX_TEXTDATA;
+        message->strMsg = line;
+        message->dwColor = color;
+        message->byFontType = fontType;
+        messages.push_back(message);
+    }
+    return static_cast<int>(lines.size());
+}
+} // namespace
 
 SEASON3B::CNewUIMessageBoxButton::CNewUIMessageBoxButton()
 {
@@ -171,21 +204,15 @@ void SEASON3B::CNewUIMessageBoxButton::Update()
 
 void SEASON3B::CNewUIMessageBoxButton::Render()
 {
-    if (m_bEnable == false)
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
-    }
-    else
-    {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+    const DWORD buttonColor = m_bEnable
+        ? RGBA(255, 255, 255, 255)
+        : RGBA(204, 204, 204, 230);
     BITMAP_t* pImage = &Bitmaps[m_dwTexType];
-    RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
+    RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
         (0.5f / (float)pImage->Width), ((static_cast<float>(m_EventState) * m_fButtonHeight + 0.5f) / (float)pImage->Height),
         (m_fButtonWidth - 0.5f) / (float)pImage->Width - (0.5f / (float)pImage->Width),
-        (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height));
+        (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height), buttonColor);
 #else //KJH_ADD_INGAMESHOP_UI_SYSTEM
     float fv = 0.f;
     float fBtnOrigWidth = 0.f;
@@ -224,30 +251,30 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
         fv = 0.f;
     }
 
-    if (m_bEnable == false)
-    {
-        glColor4f(0.6f, 0.6f, 0.6f, 0.6f);
-    }
+    const DWORD buttonColor = m_bEnable
+        ? RGBA(255, 255, 255, 255)
+        : RGBA(153, 153, 153, 153);
 
     if (m_dwSizeType == MSGBOX_BTN_SIZE_OK || m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_SMALL)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 64.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 64.f, fBtnOrigHeight / 128.f, buttonColor);
     }
     else if (m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 128.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 128.f, fBtnOrigHeight / 128.f, buttonColor);
     }
     else if (m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_BIG)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 256.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 256.f, fBtnOrigHeight / 128.f, buttonColor);
     }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     if (m_strText.size() > 0)
     {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        SIZE Fontsize;
-
         g_pRenderText->SetFont(g_hFont);
 
         if (m_bEnable == false)
@@ -261,10 +288,8 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 
         g_pRenderText->SetBgColor(0);
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
-
-        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
-        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
+        const SIZE Fontsize = g_pRenderText->MeasureText(
+            m_strText.c_str(), static_cast<int>(m_strText.size()));
 
         int x = m_x + ((m_width / 2) - (Fontsize.cx / 2));
         int y = m_y + ((m_height / 2) - (Fontsize.cy / 2));
@@ -279,13 +304,12 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
         }
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
         int x;
-        SIZE TextSize;
         size_t TextExtentWidth;
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
         g_pRenderText->SetFont(g_hFont);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            m_strText.c_str(), static_cast<int>(m_strText.size()));
+        TextExtentWidth = static_cast<size_t>(TextSize.cx);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0);
 
@@ -481,95 +505,7 @@ void SEASON3B::CNewUICommonMessageBox::AddMsg(const type_string& strMsg, DWORD d
 
 int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType, int _TextSize)
 {
-    SIZE TextSize;
-    size_t TextExtentWidth;
-    int iLine = 0;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-    TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    if (TextExtentWidth <= (DWORD)_TextSize)
-    {
-        auto* pMsg = new MSGBOX_TEXTDATA;
-        pMsg->strMsg = strMsg;
-        pMsg->dwColor = dwColor;
-        pMsg->byFontType = byFontType;
-        m_MsgDataList.push_back(pMsg);
-
-        iLine = 1;
-        return iLine;
-    }
-
-    type_string strCutText, strRemainText;
-    strRemainText = strMsg;
-
-    bool bLoop = true;
-    while (bLoop)
-    {
-        int prev_offset = 0;
-        for (int cur_offset = 0; cur_offset < (int)strRemainText.size(); )
-        {
-            prev_offset = cur_offset;
-            size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str() + cur_offset));
-            cur_offset += offset;
-
-            type_string strTemp(strRemainText, 0, cur_offset/* size */);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-            TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-            if (TextExtentWidth > (DWORD)_TextSize && cur_offset != 0)
-            {
-                // Break at the last space before the overflow so a word is not
-                // split across lines. If the first character alone is wider than
-                // the box (prev_offset == 0), cut that character so the loop
-                // still makes progress instead of hanging; and when the line has
-                // no space, fall back to the exact character cut.
-                int cutSize = cur_offset;
-                int nextStart = cur_offset;
-                if (prev_offset > 0)
-                {
-                    cutSize = prev_offset;
-                    nextStart = prev_offset;
-                    size_t spacePos = strRemainText.rfind(L' ', (size_t)prev_offset);
-                    if (spacePos != type_string::npos && spacePos > 0)
-                    {
-                        cutSize = (int)spacePos;        // line ends before the space
-                        nextStart = (int)spacePos + 1;  // next line starts after it
-                    }
-                }
-
-                strCutText = type_string(strRemainText, 0, cutSize);
-                strRemainText = type_string(strRemainText, nextStart, strRemainText.size() - nextStart);
-
-                auto* pMsg = new MSGBOX_TEXTDATA;
-                pMsg->strMsg = strCutText;
-                pMsg->dwColor = dwColor;
-                pMsg->byFontType = byFontType;
-                m_MsgDataList.push_back(pMsg);
-                iLine++;
-
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-                TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-                if (TextExtentWidth <= (DWORD)_TextSize)
-                {
-                    auto* pMsg = new MSGBOX_TEXTDATA;
-                    pMsg->strMsg = strRemainText;
-                    pMsg->dwColor = dwColor;
-                    pMsg->byFontType = byFontType;
-                    m_MsgDataList.push_back(pMsg);
-                    iLine++;
-
-                    bLoop = false;
-                    break;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return iLine;
+    return AppendWrappedText(m_MsgDataList, strMsg, dwColor, byFontType, _TextSize);
 }
 
 bool SEASON3B::CNewUICommonMessageBox::Update()
@@ -591,7 +527,6 @@ bool SEASON3B::CNewUICommonMessageBox::Update()
 bool SEASON3B::CNewUICommonMessageBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -644,12 +579,10 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -912,78 +845,8 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::SetAddCallbackFunc()
 
 int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    SIZE TextSize;
-    size_t TextExtentWidth;
-    int iLine = 0;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-    TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
-    {
-        auto* pMsg = new MSGBOX_TEXTDATA;
-        pMsg->strMsg = strMsg;
-        pMsg->dwColor = dwColor;
-        pMsg->byFontType = byFontType;
-        m_MsgDataList.push_back(pMsg);
-
-        iLine = 1;
-        return iLine;
-    }
-
-    type_string strCutText, strRemainText;
-    strRemainText = strMsg;
-
-    bool bLoop = true;
-    while (bLoop)
-    {
-        int prev_offset = 0;
-
-        for (int cur_offset = 0; cur_offset < (int)strRemainText.size(); )
-        {
-            prev_offset = cur_offset;
-            size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str() + cur_offset));
-            cur_offset += offset;
-
-            type_string strTemp(strRemainText, 0, cur_offset/* size */);
-
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-            TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-            if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH_3DITEM && cur_offset != 0)
-            {
-                strCutText = type_string(strRemainText, 0, prev_offset/* size */);
-                strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
-
-                auto* pMsg = new MSGBOX_TEXTDATA;
-                pMsg->strMsg = strCutText;
-                pMsg->dwColor = dwColor;
-                pMsg->byFontType = byFontType;
-                m_MsgDataList.push_back(pMsg);
-                iLine++;
-
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-                TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-                if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
-                {
-                    auto* pMsg = new MSGBOX_TEXTDATA;
-                    pMsg->strMsg = strRemainText;
-                    pMsg->dwColor = dwColor;
-                    pMsg->byFontType = byFontType;
-                    m_MsgDataList.push_back(pMsg);
-                    iLine++;
-
-                    bLoop = false;
-                    break;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return iLine;
+    return AppendWrappedText(
+        m_MsgDataList, strMsg, dwColor, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH_3DITEM));
 }
 
 void SEASON3B::CNewUI3DItemCommonMsgBox::SetButtonInfo()
@@ -1044,7 +907,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
 bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -1116,12 +978,10 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + 60 + ((GetSize().cx - 60) / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -1396,7 +1256,12 @@ bool SEASON3B::CTradeAlertMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    DWORD adwColor[4] = { RGBA(255, 178, 0, 255), RGBA(255, 178, 0, 255), RGBA(255, 178, 0, 255), RGBA(255, 32, 32, 255) };
+    DWORD adwColor[4] = {
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 32, 32, 255))
+    };
 
     for (int i = 0; i < 4; ++i)
         pMsgBox->AddMsg(I18N::Game::Lookup(371 + i), adwColor[i], MSGBOX_FONT_BOLD);
@@ -1552,7 +1417,7 @@ CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewU
     wchar_t shopTitle[MAX_SHOPTITLE]{};
     g_pMyShopInventory->GetTitle(shopTitle);
     wcscpy(g_szPersonalShopTitle, shopTitle);
-    SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
+    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
 
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -2924,7 +2789,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
         int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
         if (sourceIndex >= 0)
         {
-            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, MU_C16(pCha->ID), sourceIndex);
         }
     }
 
@@ -3086,7 +2951,7 @@ bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, GuildList[DeleteIndex].Name, 0x03);
+    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(GuildList[DeleteIndex].Name), 0x03);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3451,7 +3316,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CN
 
 CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(DeleteID);
+    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(DeleteID));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

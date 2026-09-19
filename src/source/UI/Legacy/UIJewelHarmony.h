@@ -3,7 +3,7 @@
 #define MAXHARMONYJEWELOPTIONTYPE 3
 #define MAXHARMONYJEWELOPTIONINDEX 10
 
-//#define IS_BUTTON_SORT
+// #define IS_BUTTON_SORT
 
 struct HarmonyJewelOption
 {
@@ -39,11 +39,10 @@ struct StrikingPower
     int SI_attackpowerRate;
     int SI_skillattackpower;
 
-    StrikingPower() : SI_minattackpower(0),
-        SI_maxattackpower(0),
-        SI_magicalpower(0),
-        SI_attackpowerRate(0),
-        SI_skillattackpower(0) {}
+    StrikingPower()
+        : SI_minattackpower(0), SI_maxattackpower(0), SI_magicalpower(0), SI_attackpowerRate(0), SI_skillattackpower(0)
+    {
+    }
 };
 
 struct StrengthenDefense
@@ -59,13 +58,13 @@ struct StrengthenDefense
 struct StrengthenCapability
 {
     NaturalAbility SI_NB;
-    bool		   SI_isNB;
+    bool SI_isNB;
 
-    StrikingPower  SI_SP;
-    bool           SI_isSP;
+    StrikingPower SI_SP;
+    bool SI_isSP;
 
     StrengthenDefense SI_SD;
-    bool			  SI_isSD;
+    bool SI_isSD;
 
     StrengthenCapability() : SI_isNB(false), SI_isSP(false), SI_isSD(false) {}
 };
@@ -87,9 +86,9 @@ public:
     static JewelHarmonyInfo* MakeInfo();
 
 public:
-    const StrengthenItem		GetItemType(int type);
+    const StrengthenItem GetItemType(int type);
     const HARMONYJEWELOPTION& GetHarmonyJewelOptionInfo(int type, int option);
-    void						GetStrengthenCapability(StrengthenCapability* pitemSC, const ITEM* pitem, const int index);
+    void GetStrengthenCapability(StrengthenCapability* pitemSC, const ITEM* pitem, const int index);
 
 public:
     const bool IsHarmonyJewelOption(int type, int option);
@@ -99,11 +98,10 @@ private:
     const bool OpenJewelHarmonyInfoFile(const std::wstring& filename);
 
 private:
-    HARMONYJEWELOPTION		m_OptionData[MAXHARMONYJEWELOPTIONTYPE][MAXHARMONYJEWELOPTIONINDEX];
+    HARMONYJEWELOPTION m_OptionData[MAXHARMONYJEWELOPTIONTYPE][MAXHARMONYJEWELOPTIONINDEX];
 };
 
-inline
-const HARMONYJEWELOPTION& JewelHarmonyInfo::GetHarmonyJewelOptionInfo(int type, int option)
+inline const HARMONYJEWELOPTION& JewelHarmonyInfo::GetHarmonyJewelOptionInfo(int type, int option)
 {
     return m_OptionData[type][option - 1];
 }

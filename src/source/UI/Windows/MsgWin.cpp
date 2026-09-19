@@ -28,7 +28,6 @@
 
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 CMsgWin::CMsgWin()
 {
@@ -156,6 +155,12 @@ bool CMsgWin::CursorInWin(int nArea)
 
 void CMsgWin::UpdateWhileActive(double dDeltaTick)
 {
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
+        g_pSinglePasswdInputBox != nullptr && g_pSinglePasswdInputBox->GetState() == UISTATE_NORMAL)
+    {
+        g_pSinglePasswdInputBox->DoAction();
+    }
+
     CInput& rInput = CInput::Instance();
 
     if (rInput.IsKeyDown(VK_RETURN))
@@ -494,6 +499,13 @@ void CMsgWin::ManageOKClick()
 
 void CMsgWin::ManageCancelClick()
 {
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
+        g_pSinglePasswdInputBox != nullptr)
+    {
+        g_pSinglePasswdInputBox->SetText(NULL);
+        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
+    }
+
     CUIMng& rUIMng = CUIMng::Instance();
     m_nMsgCode = -1;
     rUIMng.HideWin(this);
@@ -513,6 +525,7 @@ void CMsgWin::InitResidentNumInput()
         g_pSinglePasswdInputBox->SetOption(UIOPTION_NULL);
         g_pSinglePasswdInputBox->SetBackColor(0, 0, 0, 0);
         g_pSinglePasswdInputBox->SetTextLimit(20);
+        g_pSinglePasswdInputBox->SetText(NULL);
         g_pSinglePasswdInputBox->GiveFocus();
     }
 }
@@ -527,5 +540,5 @@ void CMsgWin::RequestDeleteCharacter()
     }
     InputEnable = false;
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
-    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
+    SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[SelectedHero].ID), MU_C16(InputText[0]));
 }

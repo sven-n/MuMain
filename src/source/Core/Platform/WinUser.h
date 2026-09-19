@@ -91,7 +91,7 @@ inline HWND     SetFocus(HWND hWnd)                                  { return hW
 inline BOOL     SetForegroundWindow(HWND)                            { return TRUE; }
 inline BOOL     SetWindowPos(HWND, HWND, int, int, int, int, UINT)   { return TRUE; }
 inline LONG_PTR SetWindowLongPtr(HWND, int, LONG_PTR)                { return 0; }
-inline BOOL     SetCursorPos(int, int)                              { return TRUE; }
+BOOL            SetCursorPos(int x, int y);
 inline BOOL     AdjustWindowRect(LPRECT, DWORD, BOOL)               { return TRUE; }
 inline BOOL     ShowWindow(HWND, int)                              { return TRUE; }
 inline LONG     ChangeDisplaySettings(DEVMODE*, DWORD)             { return DISP_CHANGE_SUCCESSFUL; }

@@ -21,7 +21,7 @@ class CCharInfoBalloonMng
 protected:
     static constexpr std::size_t kBalloonCount = 5;
     std::array<CCharInfoBalloon, kBalloonCount> m_charInfoBalloons{};
-    bool m_isInitialized{ false };
+    bool m_isInitialized{false};
 
 public:
     CCharInfoBalloonMng() = default;

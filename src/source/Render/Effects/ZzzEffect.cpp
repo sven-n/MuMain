@@ -21,6 +21,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Scenes/MainScene.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -8705,6 +8706,10 @@ void RenderEffects(bool bRenderBlendMesh)
         }
         else
         {
+            if (IsSkillEffectModelsDisabledDebug()) // DXP-23 diagnostic
+            {
+                continue;
+            }
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
 
@@ -9414,7 +9419,7 @@ void RenderEffects(bool bRenderBlendMesh)
                             vPos_SwordEffectEdge07,
                             vPos_SwordEffectEdge08,
                             vPos_SwordEffectEdge09;
-                        float	fLumi1, fLumi2;
+                        float	fLumi1;
                         int		arrBoneIdxs_SwordEffectRed01[] = { 2,	9,	1,	3,	10 };	// SWORD MainEffect01 BoneINDEX.
                         int		arrBoneIdxs_SwordEffectRed02[] = { 3,	10, 2,	10, 11 };	// SWORD MainEffect02 BoneINDEX.
                         int		arrBoneIdxs_SwordEffectEdge01[] = { 13, 13, 3,	4,	1 };	// SWORD EdgeEffect01 BoneINDEX.
@@ -9445,7 +9450,7 @@ void RenderEffects(bool bRenderBlendMesh)
                         int		iBoneIdx_SwordEffectEdge08 = arrBoneIdxs_SwordEffectEdge08[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
                         int		iBoneIdx_SwordEffectEdge09 = arrBoneIdxs_SwordEffectEdge09[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
 
-                        fLumi1 = 1.0f; fLumi2 = 1.0f;
+                        fLumi1 = 1.0f;
                         Vector(0.0f, 0.0f, 0.0f, vRelative);
 
                         Vector(0.0f, 0.0f, 0.0f, vLight);

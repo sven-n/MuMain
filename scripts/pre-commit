@@ -1,0 +1,19 @@
+#!/bin/bash
+# Pre-commit hook: block commits with unformatted C++ code.
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cpp|h|hpp)$')
+if [ -n "$STAGED" ]; then
+    if command -v clang-format &>/dev/null; then
+        UNFORMATTED=$(echo "$STAGED" | xargs clang-format --dry-run --Werror 2>&1)
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Staged C++ files have formatting issues."
+            echo "Fix with: clang-format -i <files>"
+            echo ""
+            echo "$UNFORMATTED"
+            exit 1
+        fi
+    else
+        echo "ERROR: clang-format not found. Install it to commit C++ files."
+        exit 1
+    fi
+fi

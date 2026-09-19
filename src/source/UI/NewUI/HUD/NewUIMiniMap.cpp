@@ -136,7 +136,6 @@ bool SEASON3B::CNewUIMiniMap::Render()
     RenderColor(0, 0, REFERENCE_WIDTH, 430, 0.85f, 1);
     DisableAlphaBlend();
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     auto Ty = (float)(((float)Hero->PositionX / 256.f) * m_Lenth[m_MiniPos].y);
     auto Tx = (float)(((float)Hero->PositionY / 256.f) * m_Lenth[m_MiniPos].x);
@@ -325,13 +324,10 @@ bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx, int my)
         {
             if (mx > m_Btn_Loc[i][0] && mx < (m_Btn_Loc[i][0] + m_Btn_Loc[i][2]) && my > m_Btn_Loc[i][1] && my < (m_Btn_Loc[i][1] + m_Btn_Loc[i][3]))
             {
-                SIZE Fontsize;
                 m_TooltipText = (std::wstring)m_Mini_Map_Data[i].Name;
                 g_pRenderText->SetFont(g_hFont);
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-
-                Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
-                Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
+                const SIZE Fontsize = g_pRenderText->MeasureText(
+                    m_TooltipText.c_str(), static_cast<int>(m_TooltipText.size()));
 
                 int x = m_Btn_Loc[i][0] + ((m_Btn_Loc[i][2] / 2) - (Fontsize.cx / 2));
                 int y = m_Btn_Loc[i][1] + m_Btn_Loc[i][3] + 2;

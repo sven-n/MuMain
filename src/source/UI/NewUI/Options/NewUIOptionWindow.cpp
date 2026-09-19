@@ -8,6 +8,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
 #include <algorithm>
 #include <cstring>
@@ -16,36 +17,67 @@
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
 extern unsigned int WindowWidth, WindowHeight;
-extern float g_fScreenRate_x, g_fScreenRate_y;
-extern int OpenglWindowWidth, OpenglWindowHeight;
 extern BOOL g_bUseWindowMode;
-extern HWND g_hWnd;
-extern bool g_bWndActive;
 void ReinitializeFonts();
-void UpdateResolutionDependentSystems();
-void UpdateCursorClip();
-DWORD GetDesktopBitsPerPel();
-#ifndef _WIN32
+std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions();
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
-#endif
 float ConvertX(float x);
 float ConvertY(float y);
 
 using namespace SEASON3B;
 
-static const struct { int width; int height; const wchar_t* label; } s_Resolutions[] = {
-    { 640, 480, L"640 x 480" },
-    { 800, 600, L"800 x 600" },
-    { 1024, 768, L"1024 x 768" },
-    { 1280, 720, L"1280 x 720" },
-    { 1280, 1024, L"1280 x 1024" },
-    { 1600, 900, L"1600 x 900" },
-    { 1600, 1200, L"1600 x 1200" },
-    { 1680, 1050, L"1680 x 1050" },
-    { 1920, 1080, L"1920 x 1080" },
-    { 2560, 1440, L"2560 x 1440" },
-};
-static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions[0]);
+std::vector<UI::Options::DisplayResolution>
+UI::Options::NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions)
+{
+    resolutions.erase(std::remove_if(resolutions.begin(), resolutions.end(), [](const DisplayResolution& resolution)
+                                     { return resolution.first <= 0 || resolution.second <= 0; }),
+                      resolutions.end());
+    std::sort(resolutions.begin(), resolutions.end());
+    resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
+    return resolutions;
+}
+
+int UI::Options::FindExactDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width,
+                                                 int height)
+{
+    const auto match = std::find(resolutions.begin(), resolutions.end(), DisplayResolution(width, height));
+    if (match == resolutions.end())
+    {
+        return -1;
+    }
+
+    return static_cast<int>(std::distance(resolutions.begin(), match));
+}
+
+int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width,
+                                                   int height)
+{
+    if (resolutions.empty())
+    {
+        return -1;
+    }
+
+    int bestIndex = 0;
+    const auto distanceSquared = [width, height](const DisplayResolution& resolution)
+    {
+        const long long deltaWidth = static_cast<long long>(resolution.first) - width;
+        const long long deltaHeight = static_cast<long long>(resolution.second) - height;
+        return deltaWidth * deltaWidth + deltaHeight * deltaHeight;
+    };
+    long long bestDistance = distanceSquared(resolutions.front());
+
+    for (size_t i = 1; i < resolutions.size(); ++i)
+    {
+        const long long distance = distanceSquared(resolutions[i]);
+        if (distance < bestDistance)
+        {
+            bestIndex = static_cast<int>(i);
+            bestDistance = distance;
+        }
+    }
+
+    return bestIndex;
+}
 
 // I18N locale codes (ASCII) paired with the language's display name in that
 // language. The set mirrors what ResxGen emits and what I18N::GetAvailableLocales()
@@ -67,21 +99,6 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "zh-TW", L"\u7e41\u9ad4\u4e2d\u6587" },                                      // 繁體中文
 };
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
-
-// Label pointer array for the resolution combo box. Built once on first use
-// from s_Resolutions so the combo can consume a plain `const wchar_t* const*`.
-static const wchar_t* const* GetResolutionLabels()
-{
-    static const wchar_t* labels[s_NumResolutions] = {};
-    static bool initialized = false;
-    if (!initialized)
-    {
-        for (int i = 0; i < s_NumResolutions; i++)
-            labels[i] = s_Resolutions[i].label;
-        initialized = true;
-    }
-    return labels;
-}
 
 static const wchar_t* const* GetLanguageLabels()
 {
@@ -187,7 +204,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
-    m_iResolutionIndex = FindCurrentResolutionIndex();
+    m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_iFontIndex = FindCurrentFontIndex();
@@ -217,13 +234,37 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
 
 void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
 {
+    m_resolutions = UI::Options::NormalizeDisplayResolutions(MuGetSupportedDisplayResolutions());
+    if (m_resolutions.empty())
+    {
+        const int fallbackWidth = WindowWidth > 0 ? static_cast<int>(WindowWidth) : CfgDefaults::CfgDefaultWindowWidth;
+        const int fallbackHeight =
+            WindowHeight > 0 ? static_cast<int>(WindowHeight) : CfgDefaults::CfgDefaultWindowHeight;
+        m_resolutions.emplace_back(fallbackWidth, fallbackHeight);
+    }
+
+    m_iResolutionIndex = FindCurrentResolutionIndex();
+    m_resolutionLabels.clear();
+    m_resolutionLabels.reserve(m_resolutions.size());
+    for (const auto& [width, height] : m_resolutions)
+    {
+        m_resolutionLabels.push_back(std::to_wstring(width) + L" x " + std::to_wstring(height));
+    }
+
+    m_resolutionLabelPointers.clear();
+    m_resolutionLabelPointers.reserve(m_resolutionLabels.size());
+    for (const std::wstring& label : m_resolutionLabels)
+    {
+        m_resolutionLabelPointers.push_back(label.c_str());
+    }
+
     m_ResolutionCombo.Setup(
         m_Pos.x + RES_COMBO_X_LOCAL,
         m_Pos.y + RES_COMBO_Y_LOCAL,
         RES_COMBO_WIDTH,
         RES_COMBO_HEIGHT,
-        GetResolutionLabels(),
-        s_NumResolutions,
+        m_resolutionLabelPointers.data(),
+        static_cast<int>(m_resolutions.size()),
         m_iResolutionIndex,
         RES_COMBO_MAX_VISIBLE);
 }
@@ -354,165 +395,8 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     bool oldWindowedMode = m_bWindowedMode;
     HandleCheckboxInputs();
 
-    // Apply windowed/fullscreen toggle. Saving to config alone isn't enough —
-    // we also have to swap the window style and display mode live so the user
-    // sees the switch without restarting.
     if (m_bWindowedMode != oldWindowedMode)
-    {
-        // Capture the size we INTEND to end up at. WM_SIZE fires multiple times
-        // during the style/display transition and can stomp WindowWidth/Height
-        // with stale outer-chrome values; we force-correct back to these at the
-        // end of the transition.
-        const unsigned int desiredW = WindowWidth;
-        const unsigned int desiredH = WindowHeight;
-
-        g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
-        GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
-        GameConfig::GetInstance().Save();
-
-        if (g_hWnd)
-        {
-            bool switched = false;
-            if (m_bWindowedMode)
-            {
-                // Fullscreen → windowed: restore default display mode + OS-framed style.
-                // Use the same restrictive style as the initial CreateWindow path
-                // (Winmain.cpp) and ApplyResolution() so window behaviour is identical
-                // regardless of which UI route the user took to enter windowed mode.
-                ChangeDisplaySettings(nullptr, 0);
-
-                DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU
-                            | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN
-                            | WS_VISIBLE;
-                SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
-
-                RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-                AdjustWindowRect(&windowRect, style, FALSE);
-                SetWindowPos(g_hWnd, HWND_NOTOPMOST, 100, 100,
-                             windowRect.right - windowRect.left,
-                             windowRect.bottom - windowRect.top,
-                             SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-                switched = true;
-            }
-            else
-            {
-                // Windowed → fullscreen: try to change display mode to current
-                // (WindowWidth × WindowHeight, desktop bpp). Windows can reject
-                // this when a previous display change is still settling, so use
-                // a drain-pump + retry loop, and first force-reset the display
-                // so we always start from a known clean desktop mode.
-                DEVMODE dmScreenSettings = {};
-                dmScreenSettings.dmSize        = sizeof(dmScreenSettings);
-                dmScreenSettings.dmPelsWidth   = WindowWidth;
-                dmScreenSettings.dmPelsHeight  = WindowHeight;
-                dmScreenSettings.dmBitsPerPel  = GetDesktopBitsPerPel();
-                dmScreenSettings.dmFields      = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-                auto pumpMessages = []()
-                {
-                    MSG msg;
-                    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-                    {
-                        TranslateMessage(&msg);
-                        DispatchMessage(&msg);
-                    }
-                };
-
-                // Clean slate: reset to desktop default, drain messages, then
-                // try the real change. This avoids "DISP_CHANGE_FAILED because
-                // a change is already in progress" after rapid toggles.
-                ChangeDisplaySettings(nullptr, 0);
-                pumpMessages();
-
-                LONG result = DISP_CHANGE_FAILED;
-                for (int attempt = 0; attempt < 3; attempt++)
-                {
-                    result = ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
-                    if (result == DISP_CHANGE_SUCCESSFUL) break;
-                    pumpMessages();
-                }
-
-                if (result == DISP_CHANGE_SUCCESSFUL)
-                {
-                    // Trust the requested mode. Mid-transition SM_CXSCREEN returns
-                    // stale desktop/chrome dimensions, and EnumDisplaySettings
-                    // CURRENT reads the persistent registry mode (CDS_FULLSCREEN
-                    // is temporary and doesn't update the registry) — both lied
-                    // to us in practice. If the monitor actually substitutes a
-                    // different mode, the user can pick a supported resolution
-                    // explicitly from the dropdown.
-                    DWORD style = WS_POPUP | WS_VISIBLE;
-                    SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
-                    SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0, (int)WindowWidth, (int)WindowHeight,
-                                 SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-                    switched = true;
-                }
-                else
-                {
-                    m_bWindowedMode   = true;
-                    g_bUseWindowMode  = TRUE;
-                    GameConfig::GetInstance().SetWindowMode(true);
-                    GameConfig::GetInstance().Save();
-                }
-            }
-
-            // Whether the switch succeeded or got rolled back, both branches went
-            // through ChangeDisplaySettings (and sometimes SetWindowPos), which
-            // queue WM_ACTIVATE / WM_DISPLAYCHANGE. If a stray WM_ACTIVATE(INACTIVE)
-            // lands and we don't re-activate, g_bWndActive stays false — IsPress()
-            // short-circuits on it, silently dropping every click on the checkbox
-            // until *any* other window op (e.g. a resolution resize) reactivates
-            // the window. So always drain + re-activate after an attempt, even
-            // when the mode switch itself didn't succeed.
-            MSG msg;
-            while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-            {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-            SetForegroundWindow(g_hWnd);
-            SetFocus(g_hWnd);
-            g_bWndActive = true;
-
-            // WM_SIZE fired during the transition can leave WindowWidth/Height
-            // at a stale outer-chrome value (seen as 1296×1063 when we asked
-            // for 1280×1024). Force them back to the requested size, resync
-            // scale factors, and re-issue SetWindowPos so the actual client
-            // rect matches. Only relevant when the mode switch succeeded and
-            // the final window should be at `desired*`.
-            if (switched && (WindowWidth != desiredW || WindowHeight != desiredH))
-            {
-                WindowWidth        = desiredW;
-                WindowHeight       = desiredH;
-                g_fScreenRate_x    = (float)WindowWidth  / (float)REFERENCE_WIDTH;
-                g_fScreenRate_y    = (float)WindowHeight / (float)REFERENCE_HEIGHT;
-                OpenglWindowWidth  = (int)WindowWidth;
-                OpenglWindowHeight = (int)WindowHeight;
-                if (m_bWindowedMode)
-                {
-                    RECT windowRect = { 0, 0, (LONG)desiredW, (LONG)desiredH };
-                    AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
-                    SetWindowPos(g_hWnd, HWND_TOP, 0, 0,
-                                 windowRect.right - windowRect.left,
-                                 windowRect.bottom - windowRect.top,
-                                 SWP_NOMOVE | SWP_NOZORDER);
-                }
-                else
-                {
-                    SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0, (int)desiredW, (int)desiredH,
-                                 SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-                }
-                ReinitializeFonts();
-                UpdateResolutionDependentSystems();
-            }
-
-            UpdateCursorClip();  // clip in fullscreen, release in windowed
-
-            // Clear the in-flight VK_LBUTTON press so the same click doesn't
-            // toggle again next frame. User must release and click again.
-            g_pNewKeyInput->SetKeyState(VK_LBUTTON, SEASON3B::CNewKeyInput::KEY_NONE);
-        }
-    }
+        ApplyWindowModeToggle();
 
     if (HandleVolumeSlider(m_iVolumeLevel, 104))
         OnSoundVolumeChanged();
@@ -654,7 +538,6 @@ bool SEASON3B::CNewUIOptionWindow::Update()
 bool SEASON3B::CNewUIOptionWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderContents();
     RenderButtons();
@@ -676,9 +559,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
 {
     // Resync state that may have been changed externally while the window was hidden.
     m_bSwallowClickHold = false;   // drop any stale combo click-swallow latch
-    m_iResolutionIndex = FindCurrentResolutionIndex();
-    m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
-    m_ResolutionCombo.Close();
+    InitResolutionCombo();
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_LanguageCombo.SetSelectedIndex(m_iLanguageIndex);
     m_LanguageCombo.Close();
@@ -964,12 +845,8 @@ bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()
 {
-    for (int i = 0; i < s_NumResolutions; ++i)
-    {
-        if (s_Resolutions[i].width == (int)WindowWidth && s_Resolutions[i].height == (int)WindowHeight)
-            return i;
-    }
-    return 8; // default to 1920x1080
+    return UI::Options::FindClosestDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
+                                                          static_cast<int>(WindowHeight));
 }
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
@@ -1026,75 +903,66 @@ void SEASON3B::CNewUIOptionWindow::ApplyFont()
 
 void SEASON3B::CNewUIOptionWindow::ApplyResolution()
 {
-    const unsigned int newWidth  = s_Resolutions[m_iResolutionIndex].width;
-    const unsigned int newHeight = s_Resolutions[m_iResolutionIndex].height;
+    if (m_iResolutionIndex < 0 || m_iResolutionIndex >= static_cast<int>(m_resolutions.size()))
+    {
+        return;
+    }
 
-#ifndef _WIN32
-    // SDL owns the window off Windows; the Win32 SetWindowPos/ChangeDisplaySettings
-    // path below is all g_hWnd-gated and never runs here. Resize through SDL,
-    // which updates WindowWidth/Height before we persist them. #462.
-    MuApplyWindowResolution(newWidth, newHeight, g_bUseWindowMode != FALSE);
+    const auto [newWidth, newHeight] = m_resolutions[m_iResolutionIndex];
+
+    // SDL owns the window on every platform, so resize through SDL. The old
+    // Windows path drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
+    // which SDL clamped straight back to the current size for a non-resizable
+    // window — the resolution only "took" when a windowed/fullscreen toggle
+    // reset the window style first (issue #462). MuApplyWindowResolution
+    // resizes via SDL regardless of the resizable flag and updates
+    // WindowWidth/Height synchronously through HandleWindowResize, so the
+    // Save() below records the size the user actually got.
+    MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight),
+                            g_bUseWindowMode != FALSE);
+
+    // SDL may have coerced the request (closest fullscreen mode, borderless
+    // desktop fallback): WindowWidth/Height now hold the size that actually
+    // resulted. Persist that, and snap the combo to it so the UI never claims
+    // a resolution the display did not adopt.
+    SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
-    return;
-#endif
+}
 
-    // Change display mode FIRST (for fullscreen) before recreating fonts and
-    // the GL text buffer. ReinitializeTextRenderer allocates a DIB sized off
-    // g_hDC/WindowWidth/g_fScreenRate, so it must run after the window and
-    // display already sit at the new dimensions — otherwise the text-buffer
-    // bitmap ends up at a stale size and rendered text vanishes until you
-    // bump the resolution again.
-    if (g_hWnd && !g_bUseWindowMode)
-    {
-        DEVMODE dmScreenSettings = {};
-        dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
-        dmScreenSettings.dmPelsWidth  = newWidth;
-        dmScreenSettings.dmPelsHeight = newHeight;
-        dmScreenSettings.dmBitsPerPel = GetDesktopBitsPerPel();
-        dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+// Point the resolution combo at the mode the window really has. If the actual
+// size is not a listed mode, keep the current selection - config still
+// records the real size.
+void SEASON3B::CNewUIOptionWindow::SyncResolutionComboToWindow()
+{
+    const int listed = UI::Options::FindExactDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
+                                                                    static_cast<int>(WindowHeight));
+    if (listed < 0)
+        return;
+    m_iResolutionIndex = listed;
+    m_ResolutionCombo.SetSelectedIndex(listed);
+}
 
-        if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-        {
-            // Monitor rejected this mode at 32bpp fullscreen — keep the old
-            // resolution and snap the combo selection back so the UI doesn't lie.
-            m_iResolutionIndex = FindCurrentResolutionIndex();
-            m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
-            return;
-        }
-    }
+// Windowed/fullscreen toggle. SDL owns the window, so switch modes through it
+// (MuApplyWindowResolution -> SDL_SetWindowFullscreen / SDL_SetWindowSize)
+// rather than driving the OS directly: the old Win32 ChangeDisplaySettings /
+// SetWindowLongPtr path fought SDL and left its state inconsistent with a
+// later resolution change. Keeps the current size and applies the new mode.
+void SEASON3B::CNewUIOptionWindow::ApplyWindowModeToggle()
+{
+    g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
+    GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
 
-    // Resize the window to the new dimensions.
-    if (g_hWnd && g_bUseWindowMode)
-    {
-        RECT windowRect = { 0, 0, (LONG)newWidth, (LONG)newHeight };
-        AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
-        SetWindowPos(g_hWnd, HWND_TOP, 0, 0,
-                     windowRect.right - windowRect.left,
-                     windowRect.bottom - windowRect.top,
-                     SWP_NOMOVE | SWP_NOZORDER);
-    }
-    else if (g_hWnd)
-    {
-        SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0,
-                     (int)newWidth, (int)newHeight,
-                     SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-    }
+    MuApplyWindowResolution(WindowWidth, WindowHeight, m_bWindowedMode);
 
-    // SetWindowPos above triggered WM_SIZE synchronously, which already set
-    // WindowWidth/Height/screen rates and called ReinitializeFonts() and
-    // UpdateResolutionDependentSystems(). Don't repeat that work here — just
-    // persist the new size in config.
+    // The mode switch may have coerced the size (closest fullscreen mode,
+    // borderless desktop fallback), so save AFTER the apply and persist the
+    // size that actually resulted along with the new mode.
+    SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
 
-    // Fullscreen SetWindowPos with SWP_FRAMECHANGED deactivated the window;
-    // re-assert focus and activation so subsequent clicks aren't dropped.
-    if (g_hWnd && !g_bUseWindowMode)
-    {
-        SetForegroundWindow(g_hWnd);
-        SetFocus(g_hWnd);
-        g_bWndActive = true;
-    }
-    UpdateCursorClip();  // rebind cursor to new client rect (or release in windowed)
+    // Consume the in-flight VK_LBUTTON press so the same click doesn't
+    // toggle again next frame; the user must release and click again.
+    g_pNewKeyInput->SetKeyState(VK_LBUTTON, SEASON3B::CNewKeyInput::KEY_NONE);
 }

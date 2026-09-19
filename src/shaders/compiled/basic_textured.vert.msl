@@ -1,0 +1,44 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct Transform
+{
+    float4x4 mvp;
+    float fogStart;
+    float fogEnd;
+    float2 fogPad;
+};
+
+struct main0_out
+{
+    float2 _entryPointOutput_uv [[user(locn0)]];
+    float4 _entryPointOutput_color [[user(locn1)]];
+    float _entryPointOutput_fogFactor [[user(locn2)]];
+    float4 gl_Position [[position]];
+    float gl_ClipDistance [[clip_distance]] [1];
+    float gl_ClipDistance_0 [[user(clip0)]];
+};
+
+struct main0_in
+{
+    float3 input_pos [[attribute(0)]];
+    float2 input_uv [[attribute(1)]];
+    float4 input_color [[attribute(2)]];
+};
+
+vertex main0_out main0(main0_in in [[stage_in]], constant Transform& _32 [[buffer(0)]])
+{
+    main0_out out = {};
+    float4 _137 = _32.mvp * float4(in.input_pos, 1.0);
+    float _156 = _32.fogEnd - _32.fogStart;
+    out.gl_Position = _137;
+    out._entryPointOutput_uv = in.input_uv;
+    out._entryPointOutput_color = in.input_color;
+    out._entryPointOutput_fogFactor = (_156 > 0.001000000047497451305389404296875) ? fast::clamp((_32.fogEnd - abs(_137.w)) / _156, 0.0, 1.0) : 1.0;
+    out.gl_ClipDistance[0] = _137.w - 1.0;
+    out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
+    return out;
+}
+

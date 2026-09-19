@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "UI/Scaling/UITransform.h"
+
  
 namespace SEASON3B
 {
@@ -25,8 +27,13 @@ namespace SEASON3B
     {
         HWND m_hRelatedWnd;
         bool m_bRender, m_bUpdate;
+        UI::Scaling::LayoutMode m_layoutMode;
     public:
-        CNewUIObj() : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true) {}
+        CNewUIObj()
+            : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true),
+              m_layoutMode(UI::Scaling::LayoutMode::Dialog)
+        {
+        }
         virtual ~CNewUIObj() {}
 
         void SetRelatedWnd(HWND hWnd = g_hWnd)
@@ -34,6 +41,8 @@ namespace SEASON3B
             m_hRelatedWnd = hWnd;
         }
         HWND GetRelatedWnd() const { return m_hRelatedWnd; }
+        void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
+        UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
 
         void Show(bool bShow)
         {

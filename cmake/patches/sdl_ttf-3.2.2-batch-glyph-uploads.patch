@@ -1,0 +1,113 @@
+diff --git a/src/SDL_gpu_textengine.c b/src/SDL_gpu_textengine.c
+index 9d3fe41..bbf673e 100644
+--- a/src/SDL_gpu_textengine.c
++++ b/src/SDL_gpu_textengine.c
+@@ -44,0 +45,8 @@ typedef struct GlyphSurface
++typedef struct GlyphUploadBatch
++{
++    SDL_GPUDevice *device;
++    SDL_GPUCommandBuffer *command_buffer;
++    SDL_GPUCopyPass *copy_pass;
++    int upload_count;
++} GlyphUploadBatch;
++
+@@ -66,0 +75 @@ typedef struct TTF_GPUTextEngineTextData
++    int uploaded_glyphs;
+@@ -321 +330 @@ static AtlasGlyph *FindUnusedGlyph(AtlasTexture *atlas, int width, int height)
+-static bool UpdateGPUTexture(SDL_GPUDevice *device, SDL_GPUTexture *texture,
++static bool UpdateGPUTexture(GlyphUploadBatch *batch, SDL_GPUTexture *texture,
+@@ -338 +347 @@ static bool UpdateGPUTexture(SDL_GPUDevice *device, SDL_GPUTexture *texture,
+-    SDL_GPUTransferBuffer *tbuf = SDL_CreateGPUTransferBuffer(device, &tbci);
++    SDL_GPUTransferBuffer *tbuf = SDL_CreateGPUTransferBuffer(batch->device, &tbci);
+@@ -344 +353,5 @@ static bool UpdateGPUTexture(SDL_GPUDevice *device, SDL_GPUTexture *texture,
+-    Uint8 *output = SDL_MapGPUTransferBuffer(device, tbuf, false);
++    Uint8 *output = SDL_MapGPUTransferBuffer(batch->device, tbuf, false);
++    if (!output) {
++        SDL_ReleaseGPUTransferBuffer(batch->device, tbuf);
++        return false;
++    }
+@@ -360,4 +373 @@ static bool UpdateGPUTexture(SDL_GPUDevice *device, SDL_GPUTexture *texture,
+-    SDL_UnmapGPUTransferBuffer(device, tbuf);
+-
+-    SDL_GPUCommandBuffer *cbuf = SDL_AcquireGPUCommandBuffer(device);
+-    SDL_GPUCopyPass *cpass = SDL_BeginGPUCopyPass(cbuf);
++    SDL_UnmapGPUTransferBuffer(batch->device, tbuf);
+@@ -380,4 +390,3 @@ static bool UpdateGPUTexture(SDL_GPUDevice *device, SDL_GPUTexture *texture,
+-    SDL_UploadToGPUTexture(cpass, &tex_src, &tex_dst, false);
+-    SDL_EndGPUCopyPass(cpass);
+-    SDL_ReleaseGPUTransferBuffer(device, tbuf);
+-    SDL_SubmitGPUCommandBuffer(cbuf);
++    SDL_UploadToGPUTexture(batch->copy_pass, &tex_src, &tex_dst, false);
++    SDL_ReleaseGPUTransferBuffer(batch->device, tbuf);
++    ++batch->upload_count;
+@@ -388 +397 @@ static bool UpdateGPUTexture(SDL_GPUDevice *device, SDL_GPUTexture *texture,
+-static bool UpdateGlyph(SDL_GPUDevice *device, AtlasGlyph *glyph, SDL_Surface *surface, TTF_ImageType image_type)
++static bool UpdateGlyph(GlyphUploadBatch *batch, AtlasGlyph *glyph, SDL_Surface *surface, TTF_ImageType image_type)
+@@ -393 +402,3 @@ static bool UpdateGlyph(SDL_GPUDevice *device, AtlasGlyph *glyph, SDL_Surface *s
+-    UpdateGPUTexture(device, glyph->atlas->texture, &glyph->rect, surface->pixels, surface->pitch);
++    if (!UpdateGPUTexture(batch, glyph->atlas->texture, &glyph->rect, surface->pixels, surface->pitch)) {
++        return false;
++    }
+@@ -406 +417 @@ static bool AddGlyphToFont(TTF_GPUTextEngineFontData *fontdata, TTF_Font *glyph_
+-static bool ResolveMissingGlyphs(TTF_GPUTextEngineData *enginedata, AtlasTexture *atlas, TTF_GPUTextEngineFontData *fontdata, GlyphSurface *surfaces, TTF_DrawOperation *ops, int num_ops, stbrp_rect *missing, int num_missing)
++static bool ResolveMissingGlyphs(TTF_GPUTextEngineData *enginedata, GlyphUploadBatch *batch, AtlasTexture *atlas, TTF_GPUTextEngineFontData *fontdata, GlyphSurface *surfaces, TTF_DrawOperation *ops, int num_ops, stbrp_rect *missing, int num_missing)
+@@ -418 +429 @@ static bool ResolveMissingGlyphs(TTF_GPUTextEngineData *enginedata, AtlasTexture
+-            if (!UpdateGlyph(enginedata->device, glyph, surface->surface, surface->image_type)) {
++            if (!UpdateGlyph(batch, glyph, surface->surface, surface->image_type)) {
+@@ -456 +467 @@ static bool ResolveMissingGlyphs(TTF_GPUTextEngineData *enginedata, AtlasTexture
+-        if (!UpdateGlyph(enginedata->device, glyph, surface->surface, surface->image_type)) {
++        if (!UpdateGlyph(batch, glyph, surface->surface, surface->image_type)) {
+@@ -490 +501 @@ static bool ResolveMissingGlyphs(TTF_GPUTextEngineData *enginedata, AtlasTexture
+-    return ResolveMissingGlyphs(enginedata, atlas->next, fontdata, surfaces, ops, num_ops, missing, num_missing);
++    return ResolveMissingGlyphs(enginedata, batch, atlas->next, fontdata, surfaces, ops, num_ops, missing, num_missing);
+@@ -493 +504 @@ static bool ResolveMissingGlyphs(TTF_GPUTextEngineData *enginedata, AtlasTexture
+-static bool CreateMissingGlyphs(TTF_GPUTextEngineData *enginedata, TTF_GPUTextEngineFontData *fontdata, TTF_DrawOperation *ops, int num_ops, int num_missing)
++static bool CreateMissingGlyphs(TTF_GPUTextEngineData *enginedata, TTF_GPUTextEngineFontData *fontdata, TTF_DrawOperation *ops, int num_ops, int num_missing, int *uploaded_glyphs)
+@@ -497,0 +509 @@ static bool CreateMissingGlyphs(TTF_GPUTextEngineData *enginedata, TTF_GPUTextEn
++    GlyphUploadBatch batch = { 0 };
+@@ -500,0 +513,3 @@ static bool CreateMissingGlyphs(TTF_GPUTextEngineData *enginedata, TTF_GPUTextEn
++    batch.device = enginedata->device;
++    *uploaded_glyphs = 0;
++
+@@ -565 +580,10 @@ static bool CreateMissingGlyphs(TTF_GPUTextEngineData *enginedata, TTF_GPUTextEn
+-    if (!ResolveMissingGlyphs(enginedata, enginedata->atlas, fontdata, surfaces, ops, num_ops, missing, num_missing)) {
++    batch.command_buffer = SDL_AcquireGPUCommandBuffer(batch.device);
++    if (!batch.command_buffer) {
++        goto done;
++    }
++    batch.copy_pass = SDL_BeginGPUCopyPass(batch.command_buffer);
++    if (!batch.copy_pass) {
++        goto done;
++    }
++
++    if (!ResolveMissingGlyphs(enginedata, &batch, enginedata->atlas, fontdata, surfaces, ops, num_ops, missing, num_missing)) {
+@@ -579,0 +604,10 @@ static bool CreateMissingGlyphs(TTF_GPUTextEngineData *enginedata, TTF_GPUTextEn
++    SDL_EndGPUCopyPass(batch.copy_pass);
++    batch.copy_pass = NULL;
++
++    SDL_GPUCommandBuffer *command_buffer = batch.command_buffer;
++    batch.command_buffer = NULL;
++    if (!SDL_SubmitGPUCommandBuffer(command_buffer)) {
++        goto done;
++    }
++
++    *uploaded_glyphs = batch.upload_count;
+@@ -582,0 +617,11 @@ done:
++    if (batch.copy_pass) {
++        SDL_EndGPUCopyPass(batch.copy_pass);
++    }
++    if (batch.command_buffer) {
++        if (!SDL_CancelGPUCommandBuffer(batch.command_buffer)) {
++            result = false;
++        }
++    }
++    if (!result && batch.upload_count > 0) {
++        SDL_ClearHashTable(fontdata->glyphs);
++    }
+@@ -786 +831 @@ static TTF_GPUTextEngineTextData *CreateTextData(TTF_GPUTextEngineData *engineda
+-        if (!CreateMissingGlyphs(enginedata, fontdata, ops, num_ops, num_missing)) {
++        if (!CreateMissingGlyphs(enginedata, fontdata, ops, num_ops, num_missing, &data->uploaded_glyphs)) {
+@@ -933,0 +979,3 @@ static bool SDLCALL CreateText(void *userdata, TTF_Text *text)
++    SDL_SetNumberProperty(TTF_GetTextProperties(text),
++                          "MuMain.SDL_ttf.gpu_text.uploaded_glyphs",
++                          data->uploaded_glyphs);

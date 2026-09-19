@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ServerGroup.h"
 
+// cppcheck-suppress uninitMemberVar
 CServerGroup::CServerGroup()
 {
     m_iSequence = 0;

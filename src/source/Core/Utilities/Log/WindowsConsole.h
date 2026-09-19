@@ -62,10 +62,13 @@ namespace leaf {
 
     class CConsoleWindow
     {
-        CTimer2	m_LimitTimer;
-        HWND	m_hWnd;
-        bool	m_bActiveCloseButton;
-        bool    m_started;
+        CTimer2 m_LimitTimer;
+        bool m_bActiveCloseButton = false;
+        bool m_started = false;
+        bool m_visible = false;
+        WORD m_textColor = COLOR_WHITE;
+        WORD m_backgroundColor = COLOR_BLACK;
+        std::wstring m_title;
 
     public:
         ~CConsoleWindow();
@@ -96,9 +99,6 @@ namespace leaf {
     protected:
         CConsoleWindow();
 
-        void SetWndHandle(HWND hWnd);
-        DWORD Get32ColorFromColorIndex(WORD wColorIndex);
-        static BOOL CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam);
     };
 }
 

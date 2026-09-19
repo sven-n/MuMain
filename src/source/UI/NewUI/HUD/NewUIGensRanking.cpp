@@ -99,7 +99,6 @@ void CNewUIGensRanking::SetPos(int x, int y)
 bool CNewUIGensRanking::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -132,10 +131,11 @@ void CNewUIGensRanking::RenderFrame()
 void CNewUIGensRanking::RenderInfoFrame(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth, int iTitleHeight)
 {
     EnableAlphaTest();
-    glColor4f(0.f, 0.f, 0.f, 0.6f);
-    RenderColor(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8), float(iTitleHeight));
-    RenderColor(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7), float(iHeight - iTitleHeight - 7));
-    EndRenderColor();
+    constexpr unsigned int InfoBackdropColor = 0x99000000u;
+    RenderColorQuadARGB(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8),
+        float(iTitleHeight), InfoBackdropColor);
+    RenderColorQuadARGB(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7),
+        float(iHeight - iTitleHeight - 7), InfoBackdropColor);
 
     RenderImage(IMAGE_GENSINFO_TOP_LEFT, iPosX, iPosY, 14, 14);
     RenderImage(IMAGE_GENSINFO_TOP_RIGHT, iPosX + iTitleWidth - 14, iPosY, 14, 14);

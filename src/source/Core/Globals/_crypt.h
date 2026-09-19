@@ -1,7 +1,6 @@
 #pragma once
 
-
-inline static const BYTE bBuxCode[3] = { 0xFC, 0xCF, 0xAB };
+inline static const BYTE bBuxCode[3] = {0xFC, 0xCF, 0xAB};
 
 inline static void BuxConvert(BYTE* Buffer, int Size)
 {

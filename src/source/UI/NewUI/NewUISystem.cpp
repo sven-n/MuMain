@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/Scaling/UITransform.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "World/MapInfra/MapManager.h"
@@ -82,6 +83,7 @@ CNewUISystem::CNewUISystem()
     m_pNewOptionWindow = nullptr;
     m_pNewHeroPositionInfo = nullptr;
     m_pNewHelpWindow = nullptr;
+    m_pNewChatCommandWindow = nullptr;
     m_pNewItemExplanationWindow = nullptr;
     m_pNewSetItemExplanation = nullptr;
     m_pNewQuickCommandWindow = nullptr;
@@ -160,7 +162,13 @@ bool CNewUISystem::Create()
 
 void CNewUISystem::Release()
 {
+    if (m_pNewUIMng == nullptr)
+    {
+        return;
+    }
+
     UnloadMainSceneInterface();
+    g_MessageBox->Release();
 
     SAFE_DELETE(m_pNewSlideWindow);
     SAFE_DELETE(m_pNewOptionWindow);
@@ -171,6 +179,18 @@ void CNewUISystem::Release()
     m_pNewUIMng->RemoveAllUIObjs();
 
     SAFE_DELETE(m_pNewUIMng);
+}
+
+bool CNewUISystem::CreateChatCommandWindow()
+{
+    m_pNewChatCommandWindow = new CNewUIChatCommandWindow;
+    if (m_pNewChatCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0))
+    {
+        return true;
+    }
+
+    SAFE_DELETE(m_pNewChatCommandWindow);
+    return false;
 }
 
 bool CNewUISystem::LoadMainSceneInterface()
@@ -343,6 +363,11 @@ bool CNewUISystem::LoadMainSceneInterface()
 
     m_pNewHeroPositionInfo = new CNewUIHeroPositionInfo;
     if (m_pNewHeroPositionInfo->Create(m_pNewUIMng, 0, 0) == false)
+    {
+        return false;
+    }
+
+    if (!CreateChatCommandWindow())
     {
         return false;
     }
@@ -535,6 +560,7 @@ void CNewUISystem::UnloadMainSceneInterface()
     }
 
     SAFE_DELETE(m_pNewHelpWindow);
+    SAFE_DELETE(m_pNewChatCommandWindow);
     SAFE_DELETE(m_pNewItemExplanationWindow);
     SAFE_DELETE(m_pNewSetItemExplanation);
     SAFE_DELETE(m_pNewQuickCommandWindow);
@@ -663,7 +689,10 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, true);
 
-        m_pNewFriendWindow->OpenMainWnd(640 - 250, 432 - 173);
+        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+        const int contentHeight =
+            static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+        m_pNewFriendWindow->OpenMainWnd(bounds.width - 250, contentHeight - 170);
     }
     else if (dwKey == INTERFACE_INVENTORY)
     {
@@ -902,6 +931,11 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         HideAllGroupA();
         m_pNewCommandWindow->OpenningProcess();
+    }
+    else if (dwKey == INTERFACE_COMMAND_LIST)
+    {
+        HideAllGroupA();
+        m_pNewChatCommandWindow->OpenningProcess();
     }
     else if (dwKey == INTERFACE_GUILDINFO)
     {
@@ -1386,6 +1420,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         m_pNewCommandWindow->ClosingProcess();
     }
+    else if (dwKey == INTERFACE_COMMAND_LIST)
+    {
+        m_pNewChatCommandWindow->ClosingProcess();
+    }
     else if (dwKey == INTERFACE_WINDOW_MENU)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, false);
@@ -1589,11 +1627,10 @@ void CNewUISystem::HideAllGroupA()
     Hide(INTERFACE_INVENTORY);
     Hide(INTERFACE_CHARACTER);
 
-    DWORD dwGroupA[] =
-    {
-        //SEASON3B::INTERFACE_INVENTORY,
-        //SEASON3B::INTERFACE_CHARACTER,
-        //SEASON3B::INTERFACE_WINDOW_MENU,
+    DWORD dwGroupA[] = {
+        // SEASON3B::INTERFACE_INVENTORY,
+        // SEASON3B::INTERFACE_CHARACTER,
+        // SEASON3B::INTERFACE_WINDOW_MENU,
         INTERFACE_MUHELPER,
         INTERFACE_MUHELPER_EXT,
         INTERFACE_MUHELPER_SKILL_LIST,
@@ -1609,13 +1646,14 @@ void CNewUISystem::HideAllGroupA()
         INTERFACE_SENATUS,
         INTERFACE_GUARDSMAN,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_DUELWATCH,
         INTERFACE_DOPPELGANGER_NPC,
-        //SEASON3B::INTERFACE_HELP,
-        //SEASON3B::INTERFACE_ITEM_EXPLANATION,
-        //SEASON3B::INTERFACE_SETITEM_EXPLANATION,
+        // SEASON3B::INTERFACE_HELP,
+        // SEASON3B::INTERFACE_ITEM_EXPLANATION,
+        // SEASON3B::INTERFACE_SETITEM_EXPLANATION,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_NPC_DIALOGUE,
@@ -1650,12 +1688,11 @@ void CNewUISystem::HideAllGroupB()
     Hide(INTERFACE_INVENTORY);
     Hide(INTERFACE_CHARACTER);
 
-    DWORD dwGroupB[] =
-    {
-        //SEASON3B::INTERFACE_FRIEND,
-        //SEASON3B::INTERFACE_INVENTORY,
-        //SEASON3B::INTERFACE_CHARACTER,
-        //SEASON3B::INTERFACE_WINDOW_MENU,
+    DWORD dwGroupB[] = {
+        // SEASON3B::INTERFACE_FRIEND,
+        // SEASON3B::INTERFACE_INVENTORY,
+        // SEASON3B::INTERFACE_CHARACTER,
+        // SEASON3B::INTERFACE_WINDOW_MENU,
 
         INTERFACE_MIXINVENTORY,
         INTERFACE_STORAGE,
@@ -1669,14 +1706,15 @@ void CNewUISystem::HideAllGroupB()
         INTERFACE_SENATUS,
         INTERFACE_GUARDSMAN,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_CURSEDTEMPLE_NPC,
         INTERFACE_DUELWATCH,
         INTERFACE_DOPPELGANGER_NPC,
-        //SEASON3B::INTERFACE_HELP,
-        //SEASON3B::INTERFACE_ITEM_EXPLANATION,
-        //SEASON3B::INTERFACE_SETITEM_EXPLANATION,
+        // SEASON3B::INTERFACE_HELP,
+        // SEASON3B::INTERFACE_ITEM_EXPLANATION,
+        // SEASON3B::INTERFACE_SETITEM_EXPLANATION,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_NPC_DIALOGUE,
@@ -1705,10 +1743,10 @@ void CNewUISystem::HideAllGroupB()
 }
 void CNewUISystem::HideGroupBeforeOpenInterface()
 {
-    DWORD dwGroupC[] =
-    {
+    DWORD dwGroupC[] = {
         INTERFACE_PARTY,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
@@ -1789,6 +1827,11 @@ void CNewUISystem::Disable(DWORD dwKey)
 
 bool CNewUISystem::CheckMouseUse()
 {
+    if (m_mouseInputCaptured)
+    {
+        return true;
+    }
+
     if (m_pNewUIMng)
     {
         if (m_pNewUIMng->GetActiveMouseUIObj())
@@ -1837,13 +1880,30 @@ bool CNewUISystem::Update()
         m_pNewItemMng->Update();
     }
 
+    bool result = false;
     if (m_pNewUIMng)
     {
+        if (!MouseLButton)
+        {
+            m_mouseInputCaptured = false;
+        }
+        else if (m_pNewUIMng->GetActiveMouseUIObj())
+        {
+            m_mouseInputCaptured = true;
+        }
+
         m_pNewUIMng->UpdateMouseEvent();
+
+        if (MouseLButton && m_pNewUIMng->GetActiveMouseUIObj())
+        {
+            m_mouseInputCaptured = true;
+        }
+
         m_pNewUIMng->UpdateKeyEvent();
-        return m_pNewUIMng->Update();
+        result = m_pNewUIMng->Update();
     }
-    return false;
+
+    return result;
 }
 
 bool CNewUISystem::Render()
@@ -2279,6 +2339,11 @@ CNewUIHeroPositionInfo* CNewUISystem::GetUI_NewHeroPositionInfo() const
 CNewUIHelpWindow* CNewUISystem::GetUI_NewHelpWindow() const
 {
     return m_pNewHelpWindow;
+}
+
+CNewUIChatCommandWindow* CNewUISystem::GetUI_NewChatCommandWindow() const
+{
+    return m_pNewChatCommandWindow;
 }
 
 CNewUIItemExplanationWindow* CNewUISystem::GetUI_NewItemExplanationWindow() const

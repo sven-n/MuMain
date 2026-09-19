@@ -68,9 +68,29 @@ public:
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
 
+    // Chat commands - the favourites and the named templates of the command
+    // window. They belong to the installation, not to a character.
+    // A template is stored as "name|command|value|value|...".
+    const std::vector<std::wstring>& GetChatCommandFavourites() const
+    {
+        return m_chatCommandFavourites;
+    }
+    void SetChatCommandFavourites(const std::vector<std::wstring>& favourites);
+
+    const std::vector<std::wstring>& GetChatCommandTemplates() const
+    {
+        return m_chatCommandTemplates;
+    }
+    void SetChatCommandTemplates(const std::vector<std::wstring>& templates);
+
     // Camera
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
+
+    // Render
+    bool GetSortParticleDraws() const { return m_sortParticleDraws; }
+    bool GetVSyncEnabled() const { return m_vsyncEnabled; }
+    void SetVSyncEnabled(bool enabled);
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -93,6 +113,9 @@ private:
     int  m_soundVolume;
     int  m_musicVolume;
 
+    std::vector<std::wstring> m_chatCommandFavourites;
+    std::vector<std::wstring> m_chatCommandTemplates;
+
     bool m_rememberMe;
     bool m_savePassword;
     std::wstring m_languageSelection;
@@ -106,6 +129,8 @@ private:
     std::wstring m_fontSelection;
 
     int m_zoom;
+    bool m_sortParticleDraws;
+    bool m_vsyncEnabled;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
@@ -113,6 +138,8 @@ private:
     bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue);
     void WriteBool(const wchar_t* section, const wchar_t* key, bool value);
 
+    std::vector<std::wstring> ReadStringList(const wchar_t* section, const wchar_t* keyPrefix);
+    void WriteStringList(const wchar_t* section, const wchar_t* keyPrefix, const std::vector<std::wstring>& values);
     std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
 

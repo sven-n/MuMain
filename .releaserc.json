@@ -1,0 +1,59 @@
+{
+  "branches": ["main"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    ["@semantic-release/commit-analyzer", {
+      "preset": "conventionalcommits",
+      "releaseRules": [
+        { "type": "feat", "release": "minor" },
+        { "type": "fix", "release": "patch" },
+        { "type": "perf", "release": "patch" },
+        { "type": "refactor", "release": "patch" },
+        { "type": "docs", "release": false },
+        { "type": "style", "release": false },
+        { "type": "test", "release": false },
+        { "type": "build", "release": false },
+        { "type": "ci", "release": false },
+        { "type": "chore", "release": false }
+      ]
+    }],
+    ["@semantic-release/release-notes-generator", {
+      "preset": "conventionalcommits",
+      "presetConfig": {
+        "types": [
+          { "type": "feat", "section": "Features" },
+          { "type": "fix", "section": "Bug Fixes" },
+          { "type": "perf", "section": "Performance" },
+          { "type": "refactor", "section": "Refactoring" }
+        ]
+      }
+    }],
+    ["@semantic-release/changelog", {
+      "changelogFile": "CHANGELOG.md"
+    }],
+    ["@semantic-release/github", {
+      "successCommentCondition": false,
+      "assets": [
+        {
+          "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
+          "name": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
+          "label": "MuMain (Windows native x64 Release, editor OFF; requires separate data release)"
+        },
+        {
+          "path": "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+          "name": "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+          "label": "MuMain (Linux native x64 Release, editor OFF; requires separate data release)"
+        },
+        {
+          "path": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+          "name": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+          "label": "MuMain (macOS native arm64 Release, editor OFF; requires separate data release)"
+        }
+      ]
+    }],
+    ["@semantic-release/git", {
+      "assets": ["CHANGELOG.md"],
+      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+    }]
+  ]
+}

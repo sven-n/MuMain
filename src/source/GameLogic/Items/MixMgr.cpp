@@ -13,6 +13,11 @@ using namespace SEASON3A;
 
 CMixRecipeMgr g_MixRecipeMgr;
 
+void CMixRecipeMgr::LoadData()
+{
+    OpenRecipeFile(L"Data\\Local\\Mix.bmd");
+}
+
 void CMixItem::Reset()
 {
     m_sType = 0;

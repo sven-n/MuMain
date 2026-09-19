@@ -70,9 +70,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
         float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
         EnableAlphaTest();
-        glColor4f(0.0f, 0.0f, 0.0f, GetBackAlpha());
-        RenderColor(fRenderPosX, fRenderPosY, (float)m_WndSize.cx, (float)m_WndSize.cy);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        const unsigned int backgroundAlpha = static_cast<unsigned int>(std::clamp(GetBackAlpha(), 0.f, 1.f) * 255.f);
+        RenderColorQuadARGB(fRenderPosX, fRenderPosY, (float)m_WndSize.cx, (float)m_WndSize.cy,
+            backgroundAlpha << 24);
         DisableAlphaBlend();
     }
     return true;
@@ -166,7 +166,10 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 
         if (bRenderMessage && !pMsgText->GetText().empty())
         {
-            POINT ptRenderPos = { (long)fRenderPosX + (long)WND_LEFT_RIGHT_EDGE, (long)fRenderPosY + (long)FONT_LEADING + ((long)SCROLL_MIDDLE_PART_HEIGHT * (long)s) };
+            POINT ptRenderPos = {
+                static_cast<LONG>(fRenderPosX + WND_LEFT_RIGHT_EDGE),
+                static_cast<LONG>(fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * s))
+            };
             if (!pMsgText->GetID().empty())
             {
                 if (m_bPointedMessage == true && m_iPointedMessageIndex == i)
@@ -197,18 +200,12 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
         float const fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
         EnableAlphaTest();
-        if (m_EventState == EVENT_RESIZING_BTN_DOWN)
-        {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        }
-        else
-        {
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY - (float)RESIZING_BTN_HEIGHT, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT);
+        const DWORD resizeButtonColor = m_EventState == EVENT_RESIZING_BTN_DOWN
+            ? RGBA(179, 179, 179, 255)
+            : RGBA(255, 255, 255, 255);
+        RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY - (float)RESIZING_BTN_HEIGHT,
+            RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT, 0.f, 0.f, resizeButtonColor);
         DisableAlphaBlend();
-
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         RenderImage(IMAGE_SCROLL_TOP, fRenderPosX + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE, fRenderPosY + WND_TOP_BOTTOM_EDGE, SCROLL_BAR_WIDTH, WND_TOP_BOTTOM_EDGE);
 
@@ -222,15 +219,11 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
             m_WndPos.y - WND_TOP_BOTTOM_EDGE - SCROLL_TOP_BOTTOM_PART_HEIGHT, SCROLL_BAR_WIDTH, SCROLL_TOP_BOTTOM_PART_HEIGHT);
 
         EnableAlphaTest();
-        if (m_EventState == EVENT_SCROLL_BTN_DOWN)
-        {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        }
-        else
-        {
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        RenderImage(IMAGE_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT);
+        const DWORD scrollButtonColor = m_EventState == EVENT_SCROLL_BTN_DOWN
+            ? RGBA(179, 179, 179, 255)
+            : RGBA(255, 255, 255, 255);
+        RenderImage(IMAGE_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH,
+            SCROLL_BTN_HEIGHT, 0.f, 0.f, scrollButtonColor);
         DisableAlphaBlend();
     }
 
@@ -325,7 +318,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
     if (strText.size() >= 20)
     {
         type_string	strText1, strText2;
-        SeparateText(strID, strText, strText1, strText2);
+        SeparateText(strID, strText, MsgType, strText1, strText2);
         if (!strText1.empty())
         {
             const auto pMsgText = new CMessageText;
@@ -898,23 +891,20 @@ float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
     return 8.0f;
 }
 
-void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
+void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
+                                                 MESSAGE_TYPE MsgType, OUT type_string& strText1,
+                                                 OUT type_string& strText2)
 {
-    
-
-    SIZE TextSize;
-    
-    float max_first_line_size = CLIENT_WIDTH * g_fScreenRate_x;
+    g_pRenderText->SetFont(MsgType == TYPE_GM_MESSAGE ? g_hFontBold : g_hFont);
+    int max_first_line_size = CLIENT_WIDTH;
     if (!strID.empty())
     {
         const type_string strIDPart = strID + L" : ";
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
-        max_first_line_size -= (TextSize.cx);
+        max_first_line_size -= g_pRenderText->MeasureText(
+            strIDPart.c_str(), static_cast<int>(strIDPart.length())).cx;
     }
 
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText.c_str(), strText.length(), &TextSize);
-    auto required_size = TextSize.cx;
+    int required_size = g_pRenderText->MeasureText(strText.c_str(), static_cast<int>(strText.length())).cx;
 
     if (required_size <= max_first_line_size)
     {
@@ -929,9 +919,13 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     while ((required_size > max_first_line_size) && (iLocToken > -1))
     {
         iLocToken = (bSpaceExist) ? strText.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strText.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
-        required_size = TextSize.cx;
+        if (iLocToken <= 0)
+        {
+            strText1.clear();
+            strText2 = strText;
+            return;
+        }
+        required_size = g_pRenderText->MeasureText(strText.c_str(), iLocToken).cx;
     }
 
     strText1 = strText.substr(0, iLocToken);
@@ -1119,24 +1113,23 @@ bool SEASON3B::CNewUISystemLogWindow::RenderMessages()
         fRenderPosY += FONT_LEADING;
     }
 
-    const auto rowHeight = static_cast<int>(FontHeight * 1.2 / g_fScreenRate_y);
+    g_pRenderText->SetFont(g_hFont);
+    const int rowHeight = std::max(1, static_cast<int>(g_pRenderText->MeasureText(L"Q", 1).cy * 1.2f));
 
     EnableAlphaTest();
     for (int i = iRenderStartLine; i <= GetCurrentRenderEndLine(); i++)
     {
         if (i < 0 && i >= static_cast<int>(m_vecAllMsgs.size())) break;
 
-        g_pRenderText->SetFont(g_hFont);
-
         auto const message = m_vecAllMsgs[i];
+        const auto backgroundAlpha = static_cast<BYTE>(255.f * m_fBackAlpha);
+        g_pRenderText->SetBgColor(0, 0, 0, backgroundAlpha);
         if (message->GetType() == TYPE_SYSTEM_MESSAGE)
         {
-            g_pRenderText->SetBgColor(0, 0, 0, 100);
             g_pRenderText->SetTextColor(100, 150, 255, 255);
         }
         else
         {
-            g_pRenderText->SetBgColor(0, 0, 0, 100);
             g_pRenderText->SetTextColor(255, 30, 0, 255);
         }
 

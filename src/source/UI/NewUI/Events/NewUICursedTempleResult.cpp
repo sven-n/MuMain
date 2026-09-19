@@ -191,18 +191,19 @@ void SEASON3B::CNewUICursedTempleResult::RenderResultPanel()
     if (m_WinState == 0)
         return;
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, m_ResultEffectAlph);
+    const BYTE resultAlpha = static_cast<BYTE>(std::clamp(m_ResultEffectAlph, 0.f, 1.f) * 255.f);
+    const DWORD resultColor = RGBA(255, 255, 255, resultAlpha);
 
     if (m_WinState == 1)
     {
-        RenderImage(IMAGE_CURSEDTEMPLERESULT_SUCCESS, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
+        RenderImage(IMAGE_CURSEDTEMPLERESULT_SUCCESS, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110,
+            351.f, 115.f, 0.f, 0.f, resultColor);
     }
     else
     {
-        RenderImage(IMAGE_CURSEDTEMPLERESULT_FAILURE, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
+        RenderImage(IMAGE_CURSEDTEMPLERESULT_FAILURE, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110,
+            351.f, 115.f, 0.f, 0.f, resultColor);
     }
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 }
 
 void SEASON3B::CNewUICursedTempleResult::RenderFrame()
@@ -320,7 +321,6 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
 bool SEASON3B::CNewUICursedTempleResult::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderResultPanel();

@@ -34,6 +34,7 @@ extern bool SelectFlag;
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3B;
 
@@ -468,7 +469,9 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         return false;
 
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    if (pPickedItem && IsPress(VK_LBUTTON) && CheckMouseIn(0, 0, GetScreenWidth(), 429))
+    if (pPickedItem && IsPress(VK_LBUTTON)
+        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
+                                                       g_fWindowMouseX, g_fWindowMouseY))
     {
         if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == true
             || g_pNewUISystem->IsVisible(INTERFACE_TRADE) == true
@@ -558,19 +561,8 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         g_csItemOption.SetViewOptionList(true);
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
-    {
-        if (IsPress(VK_RBUTTON))
-        {
-            ResetMouseRButton();
-            return false;
-        }
-
-        if (IsNone(VK_LBUTTON) == false)
-        {
-            return false;
-        }
-    }
+    if (WindowProcess())
+        return false;
 
     return true;
 }
@@ -702,7 +694,6 @@ bool CNewUIMyInventory::Update()
 bool CNewUIMyInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderInventoryDetails();
     RenderSetOption();
@@ -781,7 +772,6 @@ void CNewUIMyInventory::Render3D()
                 y = m_EquipmentSlots[i].y;
             }
 
-            glColor4f(1.f, 1.f, 1.f, 1.f);
             RenderItem3D(
                 m_EquipmentSlots[i].x + 1,
                 y,
@@ -1310,24 +1300,25 @@ void CNewUIMyInventory::RenderEquippedItem()
             if ((pEquipmentItemSlot->bPeriodItem == true) && (pEquipmentItemSlot->bExpiredPeriod == false))
                 continue;
 
+            unsigned int overlayColor;
             if (pEquipmentItemSlot->Durability <= 0)
-                glColor4f(1.f, 0.f, 0.f, 0.25f);
+                overlayColor = 0x40FF0000u;
             else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.2f))
-                glColor4f(1.f, 0.15f, 0.f, 0.25f);
+                overlayColor = 0x40FF2600u;
             else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.3f))
-                glColor4f(1.f, 0.5f, 0.f, 0.25f);
+                overlayColor = 0x40FF8000u;
             else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.5f))
-                glColor4f(1.f, 1.f, 0.f, 0.25f);
+                overlayColor = 0x40FFFF00u;
             else if (IsEquipable(i, pEquipmentItemSlot) == false)
-                glColor4f(1.f, 0.f, 0.f, 0.25f);
+                overlayColor = 0x40FF0000u;
             else
             {
                 continue;
             }
 
             EnableAlphaTest();
-            RenderColor(m_EquipmentSlots[i].x + 1, m_EquipmentSlots[i].y, m_EquipmentSlots[i].width - 4, m_EquipmentSlots[i].height - 4);
-            EndRenderColor();
+            RenderColorQuadARGB(m_EquipmentSlots[i].x + 1, m_EquipmentSlots[i].y,
+                m_EquipmentSlots[i].width - 4, m_EquipmentSlots[i].height - 4, overlayColor);
         }
     }
 
@@ -1338,11 +1329,10 @@ void CNewUIMyInventory::RenderEquippedItem()
         if (pItemObj && (pEquipmentItemSlot->Type != -1 || false == IsEquipable(m_iPointedSlot, pItemObj))
             && !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES)))
         {
-            glColor4f(0.9f, 0.1f, 0.1f, 0.4f);
             EnableAlphaTest();
-            RenderColor(m_EquipmentSlots[m_iPointedSlot].x + 1, m_EquipmentSlots[m_iPointedSlot].y,
-                m_EquipmentSlots[m_iPointedSlot].width - 4, m_EquipmentSlots[m_iPointedSlot].height - 4);
-            EndRenderColor();
+            RenderColorQuadARGB(m_EquipmentSlots[m_iPointedSlot].x + 1, m_EquipmentSlots[m_iPointedSlot].y,
+                m_EquipmentSlots[m_iPointedSlot].width - 4, m_EquipmentSlots[m_iPointedSlot].height - 4,
+                0x66E61A1Au);
         }
     }
 
@@ -1576,6 +1566,21 @@ bool CNewUIMyInventory::InventoryProcess() const
     }
 
     return m_ActionController.HandleInventoryActions(m_pNewInventoryCtrl);
+}
+
+bool CNewUIMyInventory::WindowProcess()
+{
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    {
+        return false;
+    }
+
+    if (IsPress(VK_RBUTTON))
+    {
+        ResetMouseRButton();
+    }
+
+    return true;
 }
 
 bool CNewUIMyInventory::BtnProcess()

@@ -1,21 +1,22 @@
 #ifndef __ZZZ_EFFECT_H__
 #define __ZZZ_EFFECT_H__
 
-extern OBJECT    Effects[];
-extern OBJECT    Sprites[];
-extern JOINT     Joints[];
+extern OBJECT Effects[];
+extern OBJECT Sprites[];
+extern JOINT Joints[];
 
-extern PARTICLE  Particles[];
-extern PARTICLE  Leaves[];
-extern PARTICLE  Points[];
-extern PARTICLE  Pointers[];
+extern PARTICLE Particles[];
+extern PARTICLE Leaves[];
+extern PARTICLE Points[];
+extern PARTICLE Pointers[];
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short = false, int SubType = 0);
 void MoveBlurs();
 void RenderBlurs();
 void ClearAllObjectBlurs();
 
-void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short = false, int SubType = 0, int iLimitLifeTime = -1);
+void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short = false, int SubType = 0,
+                      int iLimitLifeTime = -1);
 
 void MoveObjectBlurs();
 void RenderObjectBlurs();
@@ -23,15 +24,18 @@ void RemoveObjectBlurs(OBJECT* Owner, int SubType = 0);
 void CreateSpark(int Type, CHARACTER* tc, vec3_t Position, vec3_t Angle);
 void CreateBlood(OBJECT* o);
 
-int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation = 0.f, int SubType = 0);
+int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation = 0.f,
+                 int SubType = 0);
 void RenderSprites(BYTE byRenderOneMore = 0);
 void CheckSprites();
 
 void AnimationFlag();
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2);
 
-int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f, OBJECT* Owner = NULL);
-int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f, OBJECT* Owner = NULL);
+int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f,
+                   OBJECT* Owner = NULL);
+int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f,
+                             OBJECT* Owner = NULL);
 
 void RenderParticles(BYTE byRenderOneMore = 0);
 void MoveParticles();
@@ -39,7 +43,8 @@ bool DeleteParticle(int iType);
 
 void RenderLeaves();
 bool MoveLeaves();
-void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale = 15.f, bool bMove = true, bool bRepeatedly = false);
+void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale = 15.f, bool bMove = true,
+                 bool bRepeatedly = false);
 void RenderPoints(BYTE byRenderOneMore = 0);
 void MovePoints();
 
@@ -60,20 +65,25 @@ void CheckClientArrow(OBJECT* o);
 void RenderEffects(bool bRenderBlendMesh = false);
 void RenderAfterEffects(bool bRenderBlendMesh = false);
 void RenderEffectShadows();
-void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL, short PKKey = -1,
-    WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
-void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL, short PKKey = -1,
-    WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
+void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0,
+                            OBJECT* Target = NULL, short PKKey = -1, WORD SkillIndex = 0, WORD Skill = 0,
+                            WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
+void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL,
+                  short PKKey = -1, WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0, float Scale = 0.0f,
+                  short int sTargetIndex = -1);
 void MoveEffects();
 
-void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation = 0.f, float LightTop = 1.f, float TextureV = 0.f);
-void RenderCircle2D(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation = 0.f, float TextureV = 0.f, float TextureVScale = 0.f);
+void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height,
+                  float Rotation = 0.f, float LightTop = 1.f, float TextureV = 0.f);
+void RenderCircle2D(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height,
+                    float Rotation = 0.f, float TextureV = 0.f, float TextureVScale = 0.f);
 
 void CreateTeleportBegin(OBJECT* o);
 void CreateTeleportEnd(OBJECT* o);
 void CreateMagicShiny(CHARACTER* c, int Hand = 0);
 
-bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey = -1, WORD SkillSerialNum = 0);
+bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey = -1,
+                          WORD SkillSerialNum = 0);
 
 void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey);
 void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex = 0, WORD Skill = 1, WORD SKKey = 0);
@@ -119,6 +129,6 @@ void MoveParticle(OBJECT* o, vec3_t angle);
 
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 void CreateMyGensInfluenceGroundEffect();
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
+#endif // ASG_ADD_INFLUENCE_GROUND_EFFECT
 
-#endif// __ZZZ_EFFECT_H__
+#endif // __ZZZ_EFFECT_H__

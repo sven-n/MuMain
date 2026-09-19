@@ -44,10 +44,10 @@ namespace SEASON3B
 
         CNewUIButton m_BtnExit;
 
-        CNewUIButton m_BtnEnter;			// ÀÔÀå ¹öÆ°
-        CNewUIButton m_BtnSet;				// ÀÔÀå·á ¼³Á¤ ¹öÆ°
-        CNewUIButton m_BtnFeeUp;			// ÀÔÀå·á up
-        CNewUIButton m_BtnFeeDn;			// ÀÔÀå·á down
+        CNewUIButton m_BtnEnter;			// ì…ì¥ ë²„íŠ¼
+        CNewUIButton m_BtnSet;				// ì…ì¥ë£Œ ì„¤ì • ë²„íŠ¼
+        CNewUIButton m_BtnFeeUp;			// ì…ì¥ë£Œ up
+        CNewUIButton m_BtnFeeDn;			// ì…ì¥ë£Œ down
 
     public:
         CNewUIGatemanWindow();

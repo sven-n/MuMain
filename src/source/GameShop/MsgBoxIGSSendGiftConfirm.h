@@ -67,7 +67,8 @@ public:
     bool Update();
     bool Render();
 
-    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszID, wchar_t* pszMessage, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod);
+    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszID,
+                    wchar_t* pszMessage, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -91,11 +92,11 @@ private:
 
     int m_iMiddleCount;
 
-    int		m_iPackageSeq;
-    int		m_iDisplaySeq;
-    int		m_iPriceSeq;
-    DWORD	m_wItemCode;
-    int		m_iCashType;
+    int m_iPackageSeq;
+    int m_iDisplaySeq;
+    int m_iPriceSeq;
+    DWORD m_wItemCode;
+    int m_iCashType;
 
     wchar_t m_szID[MAX_USERNAME_SIZE + 1];
     wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
@@ -106,7 +107,7 @@ private:
 
     wchar_t m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 
-    int		m_iNumNoticeLine;
+    int m_iNumNoticeLine;
 };
 
 class CMsgBoxIGSSendGiftConfirmLayout : public TMsgBoxLayout<CMsgBoxIGSSendGiftConfirm>

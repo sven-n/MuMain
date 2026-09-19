@@ -3681,7 +3681,7 @@ public unsafe partial class ConnectionManager
     /// <param name="skillId">The skill id.</param>
     /// <param name="playerId">The player id.</param>
     /// <remarks>
-    /// Is sent by the client when: A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardy Enhance'.
+    /// Is sent by the client when: A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardry Enhance'.
     /// Causes reaction on server side: The effect is cancelled and an update is sent to the player and all surrounding players.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendMagicEffectCancelRequest")]
@@ -6715,6 +6715,37 @@ public unsafe partial class ConnectionManager
             {
                 var length = DuelChannelQuitRequestRef.Length;
                 var packet = new DuelChannelQuitRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="ChatCommandListRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports a user interface for chat commands requests the list of commands which are available to the player. It's usually sent after the character entered the game world.
+    /// Causes reaction on server side: The server sends an AvailableChatCommand message for each available chat command.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendChatCommandListRequest")]
+    public static void SendChatCommandListRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChatCommandListRequestRef.Length;
+                var packet = new ChatCommandListRequestRef(pipeWriter.GetSpan(length)[..length]);
                 return length;
             });
         }

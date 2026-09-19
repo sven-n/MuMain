@@ -10,6 +10,13 @@ Windows client from Linux/WSL instead, see [wsl.md](wsl.md).
 
 - Visual Studio C++ build tools (CMake + Ninja).
 - The **.NET 10 SDK**.
+- [vcpkg](https://github.com/microsoft/vcpkg), with `VCPKG_ROOT` set to its
+  installation directory. The presets select `x64-windows` or `x86-windows`
+  and chainload the repository architecture toolchain automatically.
+
+```powershell
+$env:VCPKG_ROOT = "C:\vcpkg"
+```
 
 ## Configure and build
 

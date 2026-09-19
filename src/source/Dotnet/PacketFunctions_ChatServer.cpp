@@ -20,30 +20,66 @@
 
 void PacketFunctions_ChatServer::SendAuthenticate(uint16_t roomId, const BYTE* token, uint32_t tokenByteLength)
 {
+    static const auto dotnet_SendAuthenticate = LoadManagedSymbol<::SendAuthenticate>("SendAuthenticate");
+    if (!dotnet_SendAuthenticate)
+    {
+        return;
+    }
+
     dotnet_SendAuthenticate(this->GetHandle(), roomId, token, tokenByteLength);
 }
 
-void PacketFunctions_ChatServer::SendChatRoomClientJoined(BYTE clientIndex, const wchar_t* name)
+void PacketFunctions_ChatServer::SendChatRoomClientJoined(BYTE clientIndex, const char16_t* name)
 {
+    static const auto dotnet_SendChatRoomClientJoined = LoadManagedSymbol<::SendChatRoomClientJoined>("SendChatRoomClientJoined");
+    if (!dotnet_SendChatRoomClientJoined)
+    {
+        return;
+    }
+
     dotnet_SendChatRoomClientJoined(this->GetHandle(), clientIndex, name);
 }
 
 void PacketFunctions_ChatServer::SendLeaveChatRoom()
 {
+    static const auto dotnet_SendLeaveChatRoom = LoadManagedSymbol<::SendLeaveChatRoom>("SendLeaveChatRoom");
+    if (!dotnet_SendLeaveChatRoom)
+    {
+        return;
+    }
+
     dotnet_SendLeaveChatRoom(this->GetHandle());
 }
 
-void PacketFunctions_ChatServer::SendChatRoomClientLeft(BYTE clientIndex, const wchar_t* name)
+void PacketFunctions_ChatServer::SendChatRoomClientLeft(BYTE clientIndex, const char16_t* name)
 {
+    static const auto dotnet_SendChatRoomClientLeft = LoadManagedSymbol<::SendChatRoomClientLeft>("SendChatRoomClientLeft");
+    if (!dotnet_SendChatRoomClientLeft)
+    {
+        return;
+    }
+
     dotnet_SendChatRoomClientLeft(this->GetHandle(), clientIndex, name);
 }
 
 void PacketFunctions_ChatServer::SendChatMessage(BYTE senderIndex, BYTE messageLength, const BYTE* message, uint32_t messageByteLength)
 {
+    static const auto dotnet_SendChatMessage = LoadManagedSymbol<::SendChatMessage>("SendChatMessage");
+    if (!dotnet_SendChatMessage)
+    {
+        return;
+    }
+
     dotnet_SendChatMessage(this->GetHandle(), senderIndex, messageLength, message, messageByteLength);
 }
 
 void PacketFunctions_ChatServer::SendKeepAlive()
 {
+    static const auto dotnet_SendKeepAlive = LoadManagedSymbol<::SendKeepAlive>("SendKeepAlive");
+    if (!dotnet_SendKeepAlive)
+    {
+        return;
+    }
+
     dotnet_SendKeepAlive(this->GetHandle());
 }

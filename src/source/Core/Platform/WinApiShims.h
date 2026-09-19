@@ -18,6 +18,15 @@
 #include <strings.h>  // strcasecmp
 #include <thread>     // Sleep
 #include <unistd.h>   // readlink
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+#endif
 #include "Core/Platform/WinCompat.h"  // DWORD, FILE handle types
 #include "Core/Platform/WinNls.h"     // MultiByteToWideChar / CP_UTF8
 #include "Core/Platform/PathResolve.h" // MuResolvePath
@@ -104,12 +113,22 @@ inline char* itoa(int value, char* buffer, int radix)
 inline char* _itoa(int value, char* buffer, int radix) { return itoa(value, buffer, radix); }
 
 // Path of the running executable (Win32 GetModuleFileNameW). The engine only
-// queries its own module (hModule == null), which maps to /proc/self/exe.
+// queries its own module (hModule == null).
 inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nSize)
 {
     if (!lpFilename || nSize == 0) return 0;
-    char path[4096];
+    char path[4096] = {};
+#ifdef __APPLE__
+    std::uint32_t pathSize = sizeof(path);
+    if (_NSGetExecutablePath(path, &pathSize) != 0)
+    {
+        lpFilename[0] = L'\0';
+        return 0;
+    }
+    const ssize_t n = static_cast<ssize_t>(std::strlen(path));
+#else
     const ssize_t n = readlink("/proc/self/exe", path, sizeof(path) - 1);
+#endif
     if (n <= 0) { lpFilename[0] = L'\0'; return 0; }
     // UTF-8 -> wide via the project's own converter (locale-independent, unlike
     // mbstowcs which fails on non-ASCII paths in the default "C" locale).

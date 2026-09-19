@@ -5,7 +5,7 @@
 namespace MUnique.Client.Library;
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -24,14 +24,39 @@ using Pipelines.Sockets.Unofficial;
 public unsafe partial class ConnectionManager
 {
     /// <summary>
+    /// Idle time, in seconds, before the OS starts sending TCP keep-alive probes.
+    /// </summary>
+    private const int KeepAliveIdleSeconds = 4;
+
+    /// <summary>
+    /// Interval, in seconds, between TCP keep-alive probes.
+    /// </summary>
+    private const int KeepAliveIntervalSeconds = 2;
+
+    /// <summary>
+    /// Number of unanswered keep-alive probes before the connection is dropped.
+    /// </summary>
+    private const int KeepAliveRetryCount = 3;
+
+    /// <summary>
     /// The currently active connections, with their handle as key.
     /// </summary>
-    private static readonly Dictionary<int, ConnectionWrapper> Connections = new();
+    private static readonly ConcurrentDictionary<int, ConnectionWrapper> Connections = new();
 
     /// <summary>
     /// The currently used maximum handle number.
     /// </summary>
     private static int _maxHandle;
+
+    /// <summary>
+    /// Registers the native logger used by managed diagnostics.
+    /// </summary>
+    /// <param name="callback">The native logging callback.</param>
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SetLogCallback")]
+    public static void SetLogCallback(delegate* unmanaged<byte, byte*, void> callback)
+    {
+        ManagedLog.SetCallback(callback);
+    }
 
     /// <summary>
     /// Connects the specified host and port.
@@ -60,6 +85,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Error establishing connection: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Connection failed: {ex}");
             return -1;
         }
     }
@@ -88,12 +114,14 @@ public unsafe partial class ConnectionManager
                 // the Disconnected event fires and the client can auto-reconnect,
                 // instead of silently swallowing the error and looking online.
                 Debug.WriteLine($"Error sending {count} bytes with handle {handle}: {ex}");
+                ManagedLog.Write(ManagedLog.Level.Error, $"NET: Send failed, handle={handle}, bytes={count}: {ex}");
                 connection.DisconnectAndDispose();
             }
         }
         else
         {
             Debug.WriteLine("Connection with handle {0} not found.", handle);
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Send skipped; connection handle={handle} not found");
         }
     }
 
@@ -137,31 +165,20 @@ public unsafe partial class ConnectionManager
 
         var handle = Interlocked.Increment(ref _maxHandle);
         var wrapper = new ConnectionWrapper(handle, connection, onPacketReceived, onDisconnected);
-        Connections.Add(handle, wrapper);
+        if (!Connections.TryAdd(handle, wrapper))
+        {
+            wrapper.Dispose();
+            throw new InvalidOperationException($"Connection handle {handle} already exists.");
+        }
 
         connection.Disconnected += () =>
         {
-            Connections.Remove(handle);
+            Connections.TryRemove(handle, out _);
             return ValueTask.CompletedTask;
         };
 
         return handle;
     }
-
-    /// <summary>
-    /// Idle time, in seconds, before the OS starts sending TCP keep-alive probes.
-    /// </summary>
-    private const int KeepAliveIdleSeconds = 4;
-
-    /// <summary>
-    /// Interval, in seconds, between TCP keep-alive probes.
-    /// </summary>
-    private const int KeepAliveIntervalSeconds = 2;
-
-    /// <summary>
-    /// Number of unanswered keep-alive probes before the connection is dropped.
-    /// </summary>
-    private const int KeepAliveRetryCount = 3;
 
     /// <summary>
     /// Enables aggressive TCP keep-alive so the OS detects dead or half-open
@@ -182,6 +199,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to enable SO_KEEPALIVE: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Failed to enable SO_KEEPALIVE: {ex}");
         }
 
         // Modern cross-platform options (.NET 5+). Set each independently so an
@@ -208,6 +226,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to configure keep-alive via IOControl: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Failed to configure keep-alive via IOControl: {ex}");
         }
     }
 
@@ -220,6 +239,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to set socket option {option}: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Failed to set socket option {option}: {ex}");
         }
     }
 }

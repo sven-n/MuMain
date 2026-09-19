@@ -11,13 +11,9 @@ PetActionRoundPtr PetActionRound::Make()
     return petActionRound;
 }
 
-PetActionRound::PetActionRound()
-{
-}
+PetActionRound::PetActionRound() {}
 
-PetActionRound::~PetActionRound()
-{
-}
+PetActionRound::~PetActionRound() {}
 
 bool PetActionRound::Release(OBJECT* obj, CHARACTER* Owner)
 {
@@ -34,7 +30,7 @@ bool PetActionRound::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double t
     //*/
     float fRadWidth = ((2 * Q_PI) / 5000.0f) * fmodf(tick, 5000);
     float fRadHeight = ((2 * Q_PI) / 1000.0f) * fmodf(tick, 1000);
-    vec3_t  TargetPosition;
+    vec3_t TargetPosition;
 
     VectorCopy(obj->Owner->Position, TargetPosition);
     VectorCopy(obj->Owner->HeadAngle, obj->HeadAngle);

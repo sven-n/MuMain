@@ -2,6 +2,9 @@
 .vs/
 .nuget/
 
+graphify-out
+
+
 src/source/Global Debug/
 src/Global Debug/
 src/Global Debug/Main
@@ -23,11 +26,14 @@ build-linux/
 **/cmake-build-release/
 **/CMakeFiles/
 /Win32/
+/out/
 
 # .NET build outputs
 **/bin/**
 !**/bin/Translations/
 !**/bin/Translations/**
+!src/bin/
+!src/bin/MuMainIcon.png
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
@@ -43,5 +49,30 @@ build-linux/
 **/imgui.ini
 
 **/*.log
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Local build outputs
+/out/
+/build_validation/
+/build-test-upstream-sync/
+src/graphify-out/
+
+# Local agent/tool state
+.claude/
+.paw/
+.remember/
+.superpowers/
+.worktrees/
+
+# Test caches
+.pytest_cache/
+
+# Interrupted editor/temp files
+.!*
+**/.!*
+
 # Local-only files
 docs/reviews/

@@ -29,7 +29,6 @@ extern int  InputLength[12];
 extern char InputTextHide[12];
 extern wchar_t MacroText[10][256];
 extern uint64_t  RemainingMacroCooldownTime;
-extern int  FontHeight;
 extern int  ItemHelp;
 extern bool DontMove;
 extern int  EditFlag;

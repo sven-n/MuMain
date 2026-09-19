@@ -23,9 +23,18 @@ public:
     ~CItemEqualType();
 
     void SetModelType(int _ModelIndex, int _Left, int _Right);
-    const int& GetModelType() const { return m_nModelType; }
-    const int& GetSubLeftType() const { return m_nSubLeftType; }
-    const int& GetSubRightType() const { return m_nSubRightType; }
+    const int& GetModelType() const
+    {
+        return m_nModelType;
+    }
+    const int& GetSubLeftType() const
+    {
+        return m_nSubLeftType;
+    }
+    const int& GetSubRightType() const
+    {
+        return m_nSubRightType;
+    }
 };
 
 class CDummyUnit
@@ -54,25 +63,27 @@ public:
     float GetAlpha();
     void CalDummyPosition(vec3_t vOutPos, float& fAni, bool bChange = false);
 };
-typedef std::map<int, CDummyUnit>	tm_DummyUnit;
+typedef std::map<int, CDummyUnit> tm_DummyUnit;
 
-typedef std::map<int, CItemEqualType>	tm_ItemEqualType;
-typedef std::list<int>	list_ItemType;
-typedef std::vector<WORD>	vec_DarkIndex;
-typedef std::vector<int>	vec_DarkTargetIndex;
+typedef std::map<int, CItemEqualType> tm_ItemEqualType;
+typedef std::list<int> list_ItemType;
+typedef std::vector<WORD> vec_DarkIndex;
+typedef std::vector<int> vec_DarkTargetIndex;
 
 class CMonkSystem
 {
 private:
-    enum {
+    enum
+    {
         DS_TARGET_NONE = NUMOFMON,
         MAX_REPEATEDLY = 4,
     };
-    struct DamageInfo {
+    struct DamageInfo
+    {
         int m_Damage;
         int m_DamageType;
         bool m_Double;
-        //int m_ShieldDamage;
+        // int m_ShieldDamage;
     };
 
     DamageInfo m_arrRepeatedly[MAX_REPEATEDLY];
@@ -130,13 +141,17 @@ public:
     bool IsRagefighterCommonWeapon(CLASS_TYPE _Class, int _Type);
     bool IsSwordformGloves(int _Type);
     void RenderPhoenixGloves(CHARACTER* _pCha, BYTE slot = 0);
-    void RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate = false, int _Select = 0);
+    void RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate = false,
+                               int _Select = 0);
     int ModifyTypeSwordformGloves(int _ModelType, int _LeftHand);
     int EqualItemModelType(int _Type);
     void LoadModelItem();
     void LoadModelItemTexture();
     void MoveBlurEffect(CHARACTER* pCha, OBJECT* pObj, BMD* pModel);
-    const int GetItemCnt() const { return m_nTotalCnt; }
+    const int GetItemCnt() const
+    {
+        return m_nTotalCnt;
+    }
     void SetSwordformGlovesItemType();
     bool IsSwordformGlovesItemType(int _Type);
     bool RageEquipmentWeapon(int _Index, short _ItemType);

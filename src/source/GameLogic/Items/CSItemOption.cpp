@@ -1050,8 +1050,6 @@ void CSItemOption::RenderOptionHelper(void)
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-    SIZE TextSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
     RenderTipTextList(sx, sy, TextNum, 0);
 }
 

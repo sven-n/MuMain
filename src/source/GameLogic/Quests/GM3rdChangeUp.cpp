@@ -18,15 +18,9 @@
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 
+SEASON3A::CGM3rdChangeUp::CGM3rdChangeUp() : m_nDarkElfAppearance(false) {}
 
-
-SEASON3A::CGM3rdChangeUp::CGM3rdChangeUp() : m_nDarkElfAppearance(false)
-{
-}
-
-SEASON3A::CGM3rdChangeUp::~CGM3rdChangeUp()
-{
-}
+SEASON3A::CGM3rdChangeUp::~CGM3rdChangeUp() {}
 
 SEASON3A::CGM3rdChangeUp& SEASON3A::CGM3rdChangeUp::Instance()
 {
@@ -82,8 +76,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveObject(OBJECT* pObject)
     case 3:
         Luminosity = (float)(rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
-        AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3,
-            PrimaryTerrainLight);
+        AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
         break;
     case 57:
@@ -91,9 +84,8 @@ bool SEASON3A::CGM3rdChangeUp::MoveObject(OBJECT* pObject)
         break;
     case 84:
     {
-        pObject->Position[2]
-            = RequestTerrainHeight(pObject->Position[0], pObject->Position[1])
-            + sinf(WorldTime * 0.0005f) * 150.f - 100.f;
+        pObject->Position[2] = RequestTerrainHeight(pObject->Position[0], pObject->Position[1]) +
+                               sinf(WorldTime * 0.0005f) * 150.f - 100.f;
     }
     break;
     case 78:
@@ -132,7 +124,8 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         }
         break;
     case 3:
-        if (rand_fps_check(3)) {
+        if (rand_fps_check(3))
+        {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 0, pObject->Scale);
         }
@@ -140,15 +133,17 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     case 5:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand_fps_check(2)) {
-            if ((int)((pObject->Timer+=FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
+        if (rand_fps_check(2))
+        {
+            if ((int)((pObject->Timer += FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
                 CreateParticle(BITMAP_ADV_SMOKE + 1, pObject->Position, pObject->Angle, Light);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 0);
             }
         }
-        if (rand_fps_check(2)) {
-            if ((int)(pObject->Timer+=FPS_ANIMATION_FACTOR) % 4 == 0)
+        if (rand_fps_check(2))
+        {
+            if ((int)(pObject->Timer += FPS_ANIMATION_FACTOR) % 4 == 0)
             {
                 CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 6);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 1);
@@ -161,11 +156,16 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(1.f, 1.f, 1.f, Light);
         Vector(0.2f, 0.2f, 0.2f, Light);
 
-        if (pObject->HiddenMesh != -2) {
-            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
-            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 2, pObject->Scale, pObject);
-            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale, pObject);
-            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 4, pObject->Scale, pObject);
+        if (pObject->HiddenMesh != -2)
+        {
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale,
+                                     pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 2, pObject->Scale,
+                                     pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale,
+                                     pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 4, pObject->Scale,
+                                     pObject);
         }
         pObject->HiddenMesh = -2;
     }
@@ -187,7 +187,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     case 85:
         if (rand_fps_check(2))
         {
-            if ((int)((pObject->Timer+=FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
+            if ((int)((pObject->Timer += FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
                 if (rand_fps_check(2))
                 {
@@ -201,7 +201,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(1.f, 0.4f, 0.4f, Light);
         if (rand_fps_check(2))
         {
-            if ((int)(pObject->Timer+=FPS_ANIMATION_FACTOR) % 4 == 0)
+            if ((int)(pObject->Timer += FPS_ANIMATION_FACTOR) % 4 == 0)
             {
                 CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 14, pObject->Scale, 0);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 2, pObject->Scale * 2);
@@ -244,7 +244,8 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         {
             for (int i = 0; i < 2; ++i)
             {
-                CreateEffectFpsChecked(BITMAP_FIRE_RED, pObject->Position, pObject->Angle, Light, 0, NULL, -1, 0, pObject->Scale);
+                CreateEffectFpsChecked(BITMAP_FIRE_RED, pObject->Position, pObject->Angle, Light, 0, NULL, -1, 0,
+                                       pObject->Scale);
             }
         }
     }
@@ -262,23 +263,27 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
         {
         case 79:
             b->StreamMesh = 0;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 10000 * 0.0001f);
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          -(int)WorldTime % 10000 * 0.0001f);
             b->StreamMesh = -1;
             return true;
         case 81:
         {
             float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f + 0.3f;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                          o->HiddenMesh);
         }
-        return true;
+            return true;
         case 82:
         case 83:
         {
             float fLumi = (sinf(WorldTime * 0.0005f)) * 10.f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                          o->HiddenMesh);
         }
-        return true;
+            return true;
         case 57:
         case 78:
         case 84:
@@ -297,9 +302,8 @@ void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case 57:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
         break;
     case 78:
         b->BodyLight[0] = 0.52f;
@@ -307,18 +311,18 @@ void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
         b->BodyLight[2] = 0.52f;
 
         b->StreamMesh = 0;
-        b->RenderMesh(
-            0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, -(int)WorldTime % 100000 * 0.00001f,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      -(int)WorldTime % 100000 * 0.00001f, o->BlendMeshTexCoordV);
         b->StreamMesh = -1;
         break;
     case 84:
         b->StreamMesh = 0;
         float fLumi = (sinf(WorldTime * 0.001f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, (int)WorldTime % 10000 * 0.0001f, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, (int)WorldTime % 10000 * 0.0001f, o->BlendMeshTexCoordV,
+                      o->HiddenMesh);
         b->StreamMesh = -1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
         break;
     }
 }
@@ -330,7 +334,9 @@ bool SEASON3A::CGM3rdChangeUp::CreateFireSnuff(PARTICLE* o)
         o->Type = BITMAP_FIRE_SNUFF;
         o->Scale = rand() % 50 / 100.f + 0.4f;
         vec3_t Position;
-        Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500), Hero->Object.Position[2] + (float)(rand() % 300 + 50), Position);
+        Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
+               Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+               Hero->Object.Position[2] + (float)(rand() % 300 + 50), Position);
 
         VectorCopy(Position, o->Position);
         VectorCopy(Position, o->StartPosition);
@@ -495,7 +501,8 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
         Vector(0.9f, 0.2f, 0.1f, Light);
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand_fps_check(10)) {
+            if (rand_fps_check(10))
+            {
                 CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
@@ -544,13 +551,13 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
                 }
             }
         }
-        else
-            if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
+        else if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
+        {
+            if (rand_fps_check(10))
             {
-                if (rand_fps_check(10)) {
-                    CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
-                }
+                CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
+        }
     }
     break;
     case MODEL_DARK_ELF:
@@ -583,8 +590,8 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 {
     vec3_t Angle, Position;
     float Matrix[3][4];
-    vec3_t  p, p2, EndPos;
-    vec3_t  TempAngle;
+    vec3_t p, p2, EndPos;
+    vec3_t TempAngle;
 
     switch (o->Type)
     {
@@ -592,7 +599,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
     {
         if ((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.2f, 1.f, 0.4f, Light);
 
             vec3_t StartPos, StartRelative;
@@ -603,8 +610,10 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
             VectorCopy(o->Angle, TempAngle);
-            for (int i = 0; i < 10; i++) {
-                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+            for (int i = 0; i < 10; i++)
+            {
+                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                             o->HeadAngle);
 
                 Vector(0.f, 250.f, 0.f, StartRelative);
                 Vector(0.f, 0.f, 0.f, EndRelative);
@@ -620,8 +629,8 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             {
                 CHARACTER* tc = &CharactersClient[c->TargetCharacter];
                 OBJECT* to = &tc->Object;
-                vec3_t Angle = { 0.f, 0.f, o->Angle[2] };
-                vec3_t Pos = { 0.f, 0.f, (to->BoundingBoxMax[2] / 1.f) };
+                vec3_t Angle = {0.f, 0.f, o->Angle[2]};
+                vec3_t Pos = {0.f, 0.f, (to->BoundingBoxMax[2] / 1.f)};
 
                 Vector(80.f, 0.f, 20.f, p);
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
@@ -638,7 +647,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
     break;
     case MODEL_SORAM:
     {
-        vec3_t  Light;
+        vec3_t Light;
         Vector(1.0f, 1.0f, 1.0f, Light);
 
         if (o->CurrentAction == MONSTER01_ATTACK2)
@@ -651,7 +660,8 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             VectorCopy(o->Angle, TempAngle);
             for (int i = 0; i < 10; ++i)
             {
-                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                             o->HeadAngle);
 
                 Vector(0.f, 100.f, -150.f, EndRelative);
                 b->TransformPosition(BoneTransform[16], EndRelative, EndPos, false);
@@ -680,7 +690,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
     {
         if ((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
 
             vec3_t StartPos, StartRelative;
@@ -694,8 +704,10 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
                 CreateEffectFpsChecked(MODEL_DARK_ELF_SKILL, o->Position, o->Angle, o->Light, 2, o);
 
             VectorCopy(o->Angle, TempAngle);
-            for (int i = 0; i < 10; i++) {
-                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+            for (int i = 0; i < 10; i++)
+            {
+                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                             o->HeadAngle);
 
                 Vector(0.f, 0.f, -60.f, StartRelative);
                 Vector(0.f, 0.f, -150.f, EndRelative);
@@ -729,7 +741,8 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
     {
     case MODEL_BALRAM:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, 5);
         return true;
     }
     break;
@@ -756,7 +769,8 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
                 o->BlendMesh = -1;
 
             o->BlendMeshTexCoordU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
         b->EndRender();
         o->Alpha = 1.0f;
@@ -767,18 +781,25 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->BeginRender(o->Alpha);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, 5);
         b->EndRender();
         return true;
     }
     break;
     case MODEL_DARK_ELF:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
     }
     return false;
@@ -799,21 +820,24 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_BALRAM_ATTACK1);
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_BALRAM_ATTACK2);
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_BALRAM_DIE);
             }
@@ -831,21 +855,24 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DEATHSPIRIT_ATTACK1);
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DEATHSPIRIT_ATTACK2);
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DEATHSPIRIT_DIE);
             }
@@ -878,7 +905,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         Vector(0.3f, 0.3f, 0.7f, Light);
         CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
     }
-    return true;
+        return true;
     case MODEL_SORAM:
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
@@ -887,21 +914,24 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_SORAM_ATTACK1);
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_SORAM_ATTACK2);
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_SORAM_DIE);
             }
@@ -918,35 +948,40 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DARKELF_ATTACK1);
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DARKELF_ATTACK2);
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK3)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DARKELF_SKILL1);
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK4)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DARKELF_SKILL2);
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->SubType == FALSE) {
+            if (o->SubType == FALSE)
+            {
                 o->SubType = TRUE;
                 PlayBuffer(SOUND_CRY1ST_DARKELF_DIE);
             }
@@ -959,7 +994,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         Vector(0.f, 0.f, 0.f, vRelativePos);
         Vector(0.f, 0.f, 0.f, vPos);
         Vector(0.6f, 0.6f, 0.9f, vLight);
-        int iBoneThunder[] = { 6, 15, 27, 17, 29, 3, 34, 44, 45, 40 };
+        int iBoneThunder[] = {6, 15, 27, 17, 29, 3, 34, 44, 45, 40};
         if (rand_fps_check(2))
         {
             for (int i = 0; i < 10; ++i)
@@ -972,7 +1007,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
             }
         }
     }
-    return true;
+        return true;
     }
     return false;
 }

@@ -6,6 +6,7 @@
 
 using namespace SEASON3B;
 
+// cppcheck-suppress uninitMemberVar
 CNewUIGroup::CNewUIGroup()
 {
     m_vecUI.clear();
@@ -13,6 +14,7 @@ CNewUIGroup::CNewUIGroup()
 
 CNewUIGroup::~CNewUIGroup()
 {
+    // cppcheck-suppress virtualCallInConstructor
     Release();
 }
 

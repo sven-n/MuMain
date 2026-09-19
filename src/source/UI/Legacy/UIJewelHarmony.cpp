@@ -5,56 +5,56 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "UIManager.h"
 #include "UIJewelHarmony.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
-
-#define HARMONYJEWELOPTION_DATA_FILE std::wstring(L"Data\\Local\\"+g_strSelectedML+L"\\JewelOfHarmonyOption_"+g_strSelectedML+L".bmd").c_str()
-#define NOTSMELTING_DATA_FILE std::wstring(L"Data\\Local\\"+g_strSelectedML+"L\\JewelOfHarmonySmelt_"+g_strSelectedML+L".bmd").c_str()
-
-
-
+#define HARMONYJEWELOPTION_DATA_FILE                                                                                   \
+    std::wstring(L"Data\\Local\\" + g_strSelectedML + L"\\JewelOfHarmonyOption_" + g_strSelectedML + L".bmd").c_str()
+#define NOTSMELTING_DATA_FILE                                                                                          \
+    std::wstring(L"Data\\Local\\" + g_strSelectedML + "L\\JewelOfHarmonySmelt_" + g_strSelectedML + L".bmd").c_str()
 
 namespace
 {
-    int GetTextLines(const wchar_t* inText, wchar_t* outText, int maxLine, int lineSize)
+int GetTextLines(const wchar_t* inText, wchar_t* outText, int maxLine, int lineSize)
+{
+    int iLine = 0;
+    const wchar_t* lpLineStart = inText;
+    wchar_t* lpDst = outText;
+    const wchar_t* lpSpace = NULL;
+    int iMbclen = 0;
+    for (const wchar_t* lpSeek = inText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
     {
-        int iLine = 0;
-        const wchar_t* lpLineStart = inText;
-        wchar_t* lpDst = outText;
-        const wchar_t* lpSpace = NULL;
-        int iMbclen = 0;
-        for (const wchar_t* lpSeek = inText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
+        // cppcheck-suppress dangerousTypeCast
+        iMbclen = _mbclen((unsigned char*)lpSeek);
+        if (iMbclen + (int)(lpSeek - lpLineStart) >= lineSize)
         {
-            iMbclen = _mbclen((unsigned char*)lpSeek);
-            if (iMbclen + (int)(lpSeek - lpLineStart) >= lineSize)
+            if (lpSpace && (int)(lpSeek - lpSpace) < std::min<int>(10, lineSize / 2))
             {
-                if (lpSpace && (int)(lpSeek - lpSpace) < std::min<int>(10, lineSize / 2))
-                {
-                    lpDst -= (lpSeek - lpSpace - 1);
-                    lpSeek = lpSpace + 1;
-                }
-
-                lpLineStart = lpSeek;
-                *lpDst = '\0';
-                if (iLine >= maxLine - 1)
-                {
-                    break;
-                }
-                ++iLine;
-                lpDst = outText + iLine * lineSize;
-                lpSpace = NULL;
+                lpDst -= (lpSeek - lpSpace - 1);
+                lpSeek = lpSpace + 1;
             }
 
-            memcpy(lpDst, lpSeek, iMbclen);
-            if (*lpSeek == ' ')
+            lpLineStart = lpSeek;
+            *lpDst = '\0';
+            if (iLine >= maxLine - 1)
             {
-                lpSpace = lpSeek;
+                break;
             }
+            ++iLine;
+            lpDst = outText + iLine * lineSize;
+            lpSpace = NULL;
         }
-        *lpDst = '\0';
 
-        return (iLine + 1);
+        memcpy(lpDst, lpSeek, iMbclen);
+        if (*lpSeek == ' ')
+        {
+            lpSpace = lpSeek;
+        }
     }
+    *lpDst = '\0';
+
+    return (iLine + 1);
 }
+} // namespace
 
 JewelHarmonyInfo* JewelHarmonyInfo::MakeInfo()
 {
@@ -72,28 +72,25 @@ JewelHarmonyInfo::JewelHarmonyInfo()
 
     if (!Result)
     {
+        mu::log::Get("ui")->error("JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd file not found.");
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 }
 
-JewelHarmonyInfo::~JewelHarmonyInfo()
-{
-}
+JewelHarmonyInfo::~JewelHarmonyInfo() {}
 
 const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filename)
 {
     constexpr size_t NAME_SIZE = 60;
     constexpr size_t LEVEL_COUNT = 14;
-    constexpr size_t ENTRY_SIZE =
-        sizeof(int) +                  // OptionType
-        NAME_SIZE +                    // Name
-        sizeof(int) +                  // Minlevel
-        LEVEL_COUNT * sizeof(int) +    // HarmonyJewelLevel
-        LEVEL_COUNT * sizeof(int);     // Zen
+    constexpr size_t ENTRY_SIZE = sizeof(int) +               // OptionType
+                                  NAME_SIZE +                 // Name
+                                  sizeof(int) +               // Minlevel
+                                  LEVEL_COUNT * sizeof(int) + // HarmonyJewelLevel
+                                  LEVEL_COUNT * sizeof(int);  // Zen
 
     FILE* fp = ::_wfopen(filename.c_str(), L"rb");
     if (fp != NULL)
@@ -108,7 +105,7 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
         ::fclose(fp);
 
         // Copy to the new HarmonyJewelOption array that uses wchar_t[] for the Name
-        for (int i = 0; i < nEntries; ++i) 
+        for (int i = 0; i < nEntries; ++i)
         {
             int type = i / MAXHARMONYJEWELOPTIONINDEX;
             int option = i % MAXHARMONYJEWELOPTIONINDEX;
@@ -127,14 +124,13 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
             m_OptionData[type][option].Minlevel = *reinterpret_cast<int*>(entry + sizeof(int) + NAME_SIZE);
 
             // Read HarmonyJewelLevel[14]
-            memcpy(m_OptionData[type][option].HarmonyJewelLevel,
-                entry + sizeof(int) + NAME_SIZE + sizeof(int),
-                LEVEL_COUNT * sizeof(int));
+            memcpy(m_OptionData[type][option].HarmonyJewelLevel, entry + sizeof(int) + NAME_SIZE + sizeof(int),
+                   LEVEL_COUNT * sizeof(int));
 
             // Read Zen[14]
             memcpy(m_OptionData[type][option].Zen,
-                entry + sizeof(int) + NAME_SIZE + sizeof(int) + LEVEL_COUNT * sizeof(int),
-                LEVEL_COUNT * sizeof(int));
+                   entry + sizeof(int) + NAME_SIZE + sizeof(int) + LEVEL_COUNT * sizeof(int),
+                   LEVEL_COUNT * sizeof(int));
         }
 
         return true;
@@ -220,11 +216,13 @@ void JewelHarmonyInfo::GetStrengthenCapability(StrengthenCapability* pitemSC, co
 
                         if (pitem->Jewel_Of_Harmony_Option == 3)
                         {
-                            pitemSC->SI_NB.SI_force = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_NB.SI_force =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 4)
                         {
-                            pitemSC->SI_NB.SI_activity = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_NB.SI_activity =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                     }
                     else if (type == SI_Staff)
@@ -233,11 +231,13 @@ void JewelHarmonyInfo::GetStrengthenCapability(StrengthenCapability* pitemSC, co
 
                         if (pitem->Jewel_Of_Harmony_Option == 2)
                         {
-                            pitemSC->SI_NB.SI_force = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_NB.SI_force =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 3)
                         {
-                            pitemSC->SI_NB.SI_activity = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_NB.SI_activity =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                     }
                 }
@@ -249,24 +249,30 @@ void JewelHarmonyInfo::GetStrengthenCapability(StrengthenCapability* pitemSC, co
 
                         if (pitem->Jewel_Of_Harmony_Option == 1)
                         {
-                            pitemSC->SI_SP.SI_minattackpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_minattackpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 2)
                         {
-                            pitemSC->SI_SP.SI_maxattackpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_maxattackpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 5)
                         {
-                            pitemSC->SI_SP.SI_minattackpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
-                            pitemSC->SI_SP.SI_maxattackpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_minattackpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_maxattackpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 7)
                         {
-                            pitemSC->SI_SP.SI_skillattackpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_skillattackpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 8)
                         {
-                            pitemSC->SI_SP.SI_attackpowerRate = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_attackpowerRate =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                     }
                     else if (type == SI_Staff)
@@ -275,15 +281,18 @@ void JewelHarmonyInfo::GetStrengthenCapability(StrengthenCapability* pitemSC, co
 
                         if (pitem->Jewel_Of_Harmony_Option == 1)
                         {
-                            pitemSC->SI_SP.SI_magicalpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_magicalpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 4)
                         {
-                            pitemSC->SI_SP.SI_skillattackpower = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_skillattackpower =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 7)
                         {
-                            pitemSC->SI_SP.SI_attackpowerRate = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SP.SI_attackpowerRate =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                     }
                 }
@@ -296,7 +305,8 @@ void JewelHarmonyInfo::GetStrengthenCapability(StrengthenCapability* pitemSC, co
 
                         if (pitem->Jewel_Of_Harmony_Option == 1)
                         {
-                            pitemSC->SI_SD.SI_defense = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SD.SI_defense =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 2)
                         {
@@ -308,7 +318,8 @@ void JewelHarmonyInfo::GetStrengthenCapability(StrengthenCapability* pitemSC, co
                         }
                         else if (pitem->Jewel_Of_Harmony_Option == 6)
                         {
-                            pitemSC->SI_SD.SI_defenseRate = harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
+                            pitemSC->SI_SD.SI_defenseRate =
+                                harmonyjewel.HarmonyJewelLevel[pitem->Jewel_Of_Harmony_OptionLevel];
                         }
                     }
                 }

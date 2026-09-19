@@ -61,6 +61,7 @@ public:
 protected:
     bool IsCanOpen(DWORD dwInterfaceFlag);
     bool CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtraData = 0);
+
 public:
     void Init();
     POINT RenderWindowBase(int nHeight, int nOriginY = -1);

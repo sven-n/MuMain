@@ -11,8 +11,10 @@ Windowed=1
 SoundVolume=5
 MusicVolume=5
 [CONNECTION SETTINGS]
-ServerIP=127.127.127.127
-ServerPort=44406
+ServerIP=localhost
+ServerPort=44405
 [UI]
 Locale=en
 Font=
+[Render]
+VSync=1

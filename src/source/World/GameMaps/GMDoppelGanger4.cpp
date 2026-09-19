@@ -1,6 +1,7 @@
 ﻿// GMDoppelGanger4.cpp: implementation of the CGMDoppelGanger4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -10,6 +11,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 
 
@@ -461,12 +463,12 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 96:
         b->StreamMesh = 0;
-        glAlphaFunc(GL_GREATER, 0.0f);
+        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
         b->RenderMesh(
             0, RENDER_TEXTURE, 1.0f, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
             -(int)WorldTime % 20000 * 0.00005f);
-        glAlphaFunc(GL_GREATER, 0.25f);
+        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
         b->StreamMesh = -1;
         return true;
     case 98:

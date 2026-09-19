@@ -7,12 +7,11 @@
 #include "UI/Widgets/GaugeBar.h"
 #include "Core/Input/Input.h"
 
-#define SLD_FIRST_SLIDE_DELAY_TIME	500
-#define SLD_SLIDE_DELAY_TIME		50
+#define SLD_FIRST_SLIDE_DELAY_TIME 500
+#define SLD_SLIDE_DELAY_TIME 50
 
-CSlider::CSlider() : m_pGaugeBar(NULL), m_psprBack(NULL)
-{
-}
+// cppcheck-suppress uninitMemberVar
+CSlider::CSlider() : m_pGaugeBar(NULL), m_psprBack(NULL) {}
 
 CSlider::~CSlider()
 {
@@ -30,7 +29,8 @@ void CSlider::Create(SImgInfo* piiThumb, SImgInfo* piiBack, SImgInfo* piiGauge, 
     if (piiGauge)
     {
         m_pGaugeBar = new CGaugeBar;
-        m_pGaugeBar->Create(piiGauge->nWidth, piiGauge->nHeight, piiGauge->nTexID, prcGauge, piiBack->nWidth, piiBack->nHeight, piiBack->nTexID);
+        m_pGaugeBar->Create(piiGauge->nWidth, piiGauge->nHeight, piiGauge->nTexID, prcGauge, piiBack->nWidth,
+                            piiBack->nHeight, piiBack->nTexID);
     }
     else if (-1 < piiBack->nTexID)
     {
@@ -136,7 +136,8 @@ void CSlider::LineDown()
     }
     else
     {
-        if (++m_nSlidePos == m_nSlideRange)	fThumbPos = float(m_ptPos.x + m_nThumbRange);
+        if (++m_nSlidePos == m_nSlideRange)
+            fThumbPos = float(m_ptPos.x + m_nThumbRange);
         else
             fThumbPos = float(m_ptPos.x) + (float)m_nThumbRange / m_nSlideRange * m_nSlidePos;
 
@@ -166,12 +167,14 @@ void CSlider::Update(double dDeltaTick)
     if (m_bVertical)
     {
         ::SetRect(&rcUpperThumb, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_btnThumb.GetYPos());
-        ::SetRect(&rcUnderThumb, m_ptPos.x, m_btnThumb.GetYPos() + m_btnThumb.GetHeight(), m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+        ::SetRect(&rcUnderThumb, m_ptPos.x, m_btnThumb.GetYPos() + m_btnThumb.GetHeight(), m_ptPos.x + m_Size.cx,
+                  m_ptPos.y + m_Size.cy);
     }
     else
     {
         ::SetRect(&rcUpperThumb, m_ptPos.x, m_ptPos.y, m_btnThumb.GetXPos(), m_ptPos.y + m_Size.cy);
-        ::SetRect(&rcUnderThumb, m_btnThumb.GetXPos() + m_btnThumb.GetWidth(), m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+        ::SetRect(&rcUnderThumb, m_btnThumb.GetXPos() + m_btnThumb.GetWidth(), m_ptPos.y, m_ptPos.x + m_Size.cx,
+                  m_ptPos.y + m_Size.cy);
     }
 
     POINT ptCursor = rInput.GetCursorPos();
@@ -257,7 +260,7 @@ void CSlider::Update(double dDeltaTick)
             m_btnThumb.SetPosition(m_btnThumb.GetXPos(), nThumbPos);
             //			m_btnThumb.SetAction(BTN_HIGHLIGHT_DOWN, BTN_HIGHLIGHT_DOWN);
 
-                    // m_nSlidePos ±¸ÇÏ±â.
+            // m_nSlidePos ï¿½ï¿½ï¿½Ï±ï¿½.
             float fPixelPerPos = (float)m_nThumbRange / m_nSlideRange;
             m_nSlidePos = int((float(m_btnThumb.GetYPos() - m_ptPos.y) + (fPixelPerPos / 2)) / fPixelPerPos);
         }
@@ -284,7 +287,7 @@ void CSlider::Update(double dDeltaTick)
             float fPixelPerPos = (float)m_nThumbRange / m_nSlideRange;
             m_nSlidePos = int((float(m_btnThumb.GetXPos() - m_ptPos.x) + (fPixelPerPos / 2)) / fPixelPerPos);
             m_pGaugeBar->SetValue(m_nSlidePos, m_nSlideRange);
-        }	// if (m_bVertical) else¹® ³¡.
+        } // if (m_bVertical) elseï¿½ï¿½ ï¿½ï¿½.
     }
 }
 
@@ -321,7 +324,7 @@ BOOL CSlider::CursorInObject()
 {
     if (m_btnThumb.IsShow())
     {
-        RECT rcSlider = { m_ptPos.x, m_ptPos.y,	m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy };
+        RECT rcSlider = {m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy};
         return ::PtInRect(&rcSlider, CInput::Instance().GetCursorPos());
     }
 

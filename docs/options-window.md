@@ -23,6 +23,20 @@ What was added on top of that:
   configured maximum.
 - **Resolution combo-box clicks no longer leak through** to the checkboxes
   behind the dropdown.
+- **Resolution changes go through SDL** (PR
+  [#530](https://github.com/sven-n/MuMain/pull/530)), which makes the live
+  apply actually work in windowed mode on Windows. Windowed resizes re-center
+  the window on the display. Fullscreen picks the closest real display mode
+  (or borderless desktop when nothing matches), and the combo and
+  `config.ini` record the mode that actually resulted, not the one requested.
+- **The resolution list comes from the current monitor.** Opening the options
+  window queries SDL for that display's fullscreen modes, collapses duplicate
+  refresh-rate entries to one width/height choice, and sorts the result.
+- **The UI reflows immediately after resolution changes.** Docked side menus
+  scale up to 2.25 times their reference size on large displays, while
+  centered dialogs remain capped at 2 times their reference size. Text grows
+  with the active layout up to the dock scale, shrinking only when needed to
+  fit an existing control.
 
 ## What it stores in `config.ini`
 
@@ -30,7 +44,9 @@ Settings are written next to the executable as `config.ini`. The options
 window writes to these sections:
 
 - `[Window]` - width, height, windowed flag.
-- `[Graphics]` - render levels, vsync, fps limit.
+- `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
+  update it; startup and fullscreen/resolution changes reapply it before the
+  next frame begins.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see

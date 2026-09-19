@@ -10,15 +10,15 @@
 #include "UI/Widgets/Win.h"
 #include "UI/Widgets/Button.h"
 
-#define	LMW_BTN_MENU		0
-#define	LMW_BTN_CREDIT		1
-#define	LMW_BTN_MAX			2
+#define LMW_BTN_MENU 0
+#define LMW_BTN_CREDIT 1
+#define LMW_BTN_MAX 2
 
 class CLoginMainWin : public CWin
 {
 protected:
-    CButton	m_aBtn[LMW_BTN_MAX];
-    CSprite	m_sprDeco;
+    CButton m_aBtn[LMW_BTN_MAX];
+    CSprite m_sprDeco;
 
 public:
     CLoginMainWin();

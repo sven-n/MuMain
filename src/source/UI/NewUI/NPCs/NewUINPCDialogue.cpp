@@ -228,8 +228,6 @@ bool CNewUINPCDialogue::Render()
 {
     ::EnableAlphaTest();
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
     RenderSelTextBlock();
     RenderText();
@@ -282,9 +280,9 @@ void CNewUINPCDialogue::RenderSelTextBlock()
     for (i = nStartSelText; i < m_nSelSelText - 1; ++i)
         nBlockPosY += ND_TEXT_GAP * m_anSelTextLine[i];
 
-    ::glColor4f(0.5f, 0.7f, 0.3f, 0.5f);
-    ::RenderColor(m_Pos.x + 11, nBlockPosY, 168.f, ND_TEXT_GAP * m_anSelTextLine[m_nSelSelText - 1]);
-    ::EndRenderColor();
+    constexpr unsigned int SelectionColor = 0x8080B34Du;
+    ::RenderColorQuadARGB(m_Pos.x + 11, nBlockPosY, 168.f,
+        ND_TEXT_GAP * m_anSelTextLine[m_nSelSelText - 1], SelectionColor);
 }
 
 void CNewUINPCDialogue::RenderText()

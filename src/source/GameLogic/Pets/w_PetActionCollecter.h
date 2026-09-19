@@ -14,7 +14,7 @@ typedef struct _RootingItem
 {
     int itemIndex;
     vec3_t position;
-}RootingItem;
+} RootingItem;
 
 SmartPointer(PetActionCollecter);
 class PetActionCollecter : public PetAction
@@ -30,12 +30,12 @@ public:
     virtual bool Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
     virtual bool Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
 
-    //test
+    // test
     void FindZen(OBJECT* obj);
     bool CompTimeControl(const DWORD& dwCompTime, DWORD& dwTime);
 
 public:
-    typedef std::list< RootingItem > ItemList;
+    typedef std::list<RootingItem> ItemList;
     enum ActionState
     {
         eAction_Stand = 0,

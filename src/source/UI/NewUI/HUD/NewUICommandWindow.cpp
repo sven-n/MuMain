@@ -89,6 +89,7 @@ void SEASON3B::CNewUICommandWindow::InitButtons()
     m_BtnCommand[COMMAND_RIVALOFF].ChangeText(&I18N::Game::SuspendHostilities);
     m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(&I18N::Game::AddFriend);
     m_BtnCommand[COMMAND_FOLLOW].ChangeText(&I18N::Game::Follow);
+    m_BtnCommand[COMMAND_SPECIAL].ChangeText(&I18N::Game::SpecialCommands);
     m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
 }
 
@@ -130,6 +131,16 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
     {
         if (m_BtnCommand[i].UpdateMouseEvent() == true)
         {
+            // The chat commands don't act on the selected character, they open
+            // their own list instead.
+            if (i == COMMAND_SPECIAL)
+            {
+                g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND);
+                g_pNewUISystem->Show(SEASON3B::INTERFACE_COMMAND_LIST);
+                PlayBuffer(SOUND_CLICK01);
+                return true;
+            }
+
             if (m_iCurSelectCommand != COMMAND_NONE)
                 SetBtnState(m_iCurSelectCommand, false);
 
@@ -191,7 +202,6 @@ bool SEASON3B::CNewUICommandWindow::Update()
 bool SEASON3B::CNewUICommandWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -247,8 +257,17 @@ void SEASON3B::CNewUICommandWindow::RenderBaseWindow()
 {
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), float(COMMAND_WINDOW_HEIGHT));
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_RIGHT, m_Pos.x + float(COMMAND_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f);
+    // Stretched, not drawn one to one: the window grew past the height of the
+    // side pieces when the twelfth button was added, and asking for more of
+    // them than they have samples past their end - which repeats their upper
+    // end as a seam next to the exit button. They are a plain vertical border,
+    // so stretching them doesn't show.
+    RenderImageStretch(IMAGE_COMMAND_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f,
+                       float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f, 0.f, 0.f, 21.f,
+                       float(COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT));
+    RenderImageStretch(IMAGE_COMMAND_BASE_WINDOW_RIGHT, m_Pos.x + float(COMMAND_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f,
+                       21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f, 0.f, 0.f, 21.f,
+                       float(COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT));
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(COMMAND_WINDOW_HEIGHT) - 45.f, float(COMMAND_WINDOW_WIDTH), 45.f);
 }
 
@@ -266,7 +285,7 @@ void SEASON3B::CNewUICommandWindow::SetPos(int x, int y)
 
 float SEASON3B::CNewUICommandWindow::GetLayerDepth()
 {
-    return 4.6f;
+    return LayerDepth;
 }
 
 void SEASON3B::CNewUICommandWindow::RunCommand()
@@ -466,7 +485,7 @@ bool SEASON3B::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
     if (pSelectedCha == nullptr)
         return false;
 
-    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(pSelectedCha->Key, pSelectedCha->ID);
+    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(pSelectedCha->Key, MU_C16(pSelectedCha->ID));
 
     return true;
 }
@@ -577,7 +596,7 @@ bool SEASON3B::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
 {
     if (g_pWindowMgr->IsServerEnable() == TRUE && pSelectedCha != nullptr)
     {
-        SocketClient->ToGameServer()->SendFriendAddRequest(pSelectedCha->ID);
+        SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(pSelectedCha->ID));
         return true;
     }
 
@@ -618,7 +637,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     }
     else if (!g_DuelMgr.IsDuelEnabled())
     {
-        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, pSelectedCha->ID);
+        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, MU_C16(pSelectedCha->ID));
         return 1;
     }
     else if (g_DuelMgr.IsDuelEnabled() && g_DuelMgr.IsDuelPlayer(pSelectedCha, DUEL_ENEMY))

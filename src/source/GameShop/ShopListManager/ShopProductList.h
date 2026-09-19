@@ -23,7 +23,7 @@ public:
     bool GetPriceSeqNext(CShopProduct& product);
 
 protected:
-    int	PriceSeqKey;
+    int PriceSeqKey;
     std::multimap<int, CShopProduct> m_Products;
     std::multimap<int, CShopProduct>::iterator m_ProductIter;
     std::multimap<int, CShopProduct>::iterator m_ProductSeqIter;

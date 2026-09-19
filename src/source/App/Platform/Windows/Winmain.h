@@ -83,11 +83,12 @@ extern void PlayMp3(const char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 
-extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
 extern void ReinitializeFonts();
 extern void UpdateResolutionDependentSystems();
+extern void MuSetVSyncPreference(bool enabled);
+extern void MuReapplyVSyncPreference();
 
 // Confines the mouse cursor to the window's client area when in fullscreen
 // and the window is active; releases clipping otherwise. Safe to call any

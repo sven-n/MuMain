@@ -16,6 +16,10 @@
 #include "Network/Server/WSclient.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Effects/ParticleDrawOrder.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "Scenes/MainScene.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f };
 vec3_t g_vParticleWindVelo = { 0.0f, 0.0f, 0.0f };
@@ -8892,15 +8896,90 @@ void MoveParticles()
     }
 }
 
+namespace
+{
+    bool ShouldRenderParticle(const PARTICLE* particle, BYTE pass)
+    {
+        if (!particle->Live) return false;
+        if (pass == 1) return particle->Position[2] <= 350.f;
+        if (pass == 2) return particle->Position[2] > 300.f;
+        return true;
+    }
+
+    bool DrawCaseOverridesBlend(int type)
+    {
+        switch (type)
+        {
+        case BITMAP_CLUD64:
+        case BITMAP_TWINTAIL_WATER:
+        case BITMAP_SMOKE:
+        case BITMAP_SMOKE + 1:
+        case BITMAP_SMOKE + 3:
+        case BITMAP_SMOKE + 4:
+        case BITMAP_ADV_SMOKE + 1:
+        case BITMAP_FIRE:
+        case BITMAP_FIRE + 2:
+        case BITMAP_FIRE + 3:
+        case BITMAP_LIGHT + 2:
+        case BITMAP_CLOUD:
+        case BITMAP_SPARK:
+        case BITMAP_SMOKELINE2:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    bool IsParticleReorderable(const PARTICLE* particle)
+    {
+        const bool changesDepth = (particle->Type == BITMAP_LIGHT && particle->SubType == 6)
+            || (particle->Type == BITMAP_EXPLOTION && particle->SubType == 5);
+        if (changesDepth || DrawCaseOverridesBlend(particle->Type)) return false;
+
+        const BITMAP_t* bitmap = Bitmaps.GetTexture(particle->TexType);
+        return bitmap != nullptr && bitmap->Components == 3;
+    }
+
+    std::size_t BuildParticleDrawOrder(BYTE pass, Render::Effects::DrawOrder::Entry* entries)
+    {
+        std::size_t count = 0;
+        for (int particleIndex = 0; particleIndex < MAX_PARTICLES; particleIndex++)
+        {
+            const PARTICLE* particle = &Particles[particleIndex];
+            if (!ShouldRenderParticle(particle, pass)) continue;
+
+            entries[count++] = { particleIndex, particle->TexType, IsParticleReorderable(particle) };
+        }
+        return count;
+    }
+}
+
 void RenderParticles(BYTE byRenderOneMore)
 {
     if (!g_pOption->GetRenderAllEffects())
     {
         return;
     }
-
-    for (int i = 0; i < MAX_PARTICLES; i++)
+    if (IsParticlesDisabledDebug()) // DXP-23 diagnostic
     {
+        return;
+    }
+
+    using Render::Effects::DrawOrder::Entry;
+    static Entry drawOrder[MAX_PARTICLES];
+    static Entry drawOrderScratch[MAX_PARTICLES];
+
+    const bool sortDraws = GameConfig::GetInstance().GetSortParticleDraws();
+    std::size_t drawCount = MAX_PARTICLES;
+    if (sortDraws)
+    {
+        drawCount = BuildParticleDrawOrder(byRenderOneMore, drawOrder);
+        Render::Effects::DrawOrder::GroupByTexture(drawOrder, drawCount, drawOrderScratch);
+    }
+
+    for (std::size_t drawIndex = 0; drawIndex < drawCount; drawIndex++)
+    {
+        const int i = sortDraws ? drawOrder[drawIndex].particleIndex : static_cast<int>(drawIndex);
         PARTICLE* o = &Particles[i];
         if (o->Live)
         {
@@ -9025,10 +9104,10 @@ void RenderParticles(BYTE byRenderOneMore)
             case BITMAP_ADV_SMOKE + 1:
                 if (o->SubType == 2)
                 {
-                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
+                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
                     EnableAlphaBlend3();
                     RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
                 }
                 else
                 {

@@ -1,4 +1,4 @@
-﻿// NewUIGoldBowmanLena.cpp: implementation of the NewUIGoldBowmanLena class.
+// NewUIGoldBowmanLena.cpp: implementation of the NewUIGoldBowmanLena class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -8,6 +8,7 @@
 
 #include "GameLogic/Items/MixMgr.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 
 namespace
 {
@@ -182,7 +183,6 @@ bool CNewUIGoldBowmanLena::Update()
 bool CNewUIGoldBowmanLena::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -256,19 +256,25 @@ float CNewUIGoldBowmanLena::GetLayerDepth()	// 3.4f
     return 3.4f;
 }
 
+// DXP-07d increment 4's shadow-compare diagnostic validated Render3D()'s proj/view closed form and
+// post-pop restore; DXP-08a deleted the diagnostic and the FFP matrix-stack calls it was validating
+// (see Render3D()'s own comments below). Identical shape to RenderDisplayItems(): EndBitmap() at
+// entry, restore mirror runs before BeginBitmap() at the end, hence its own pre-panel snapshot.
+static float s_PreGBLProj[16];
+static float s_PreGBLView[16];
+
 void CNewUIGoldBowmanLena::Render3D()
 {
     EndBitmap();
 
-    glMatrixMode(GL_PROJECTION);
-    SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
@@ -284,11 +290,10 @@ void CNewUIGoldBowmanLena::Render3D()
 
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
 
-    RestoreCameraPerspective();
     BeginBitmap();
 }

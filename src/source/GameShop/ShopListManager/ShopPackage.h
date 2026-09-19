@@ -32,55 +32,59 @@ public:
     CShopPackage();
     virtual ~CShopPackage();
 
-    bool	SetPackage(std::wstring strdata);
-    void	SetLeftCount(int nCount);
+    bool SetPackage(std::wstring strdata);
+    void SetLeftCount(int nCount);
 
-    int		GetProductCount();									// ��Ű�� ������ ��ǰ �� ��������
-    void	SetProductSeqFirst();								// ��Ű�� ������ ù��° ��ǰ ��ȣ�� ��ġ
-    bool	GetProductSeqFirst(int& ProductSeq);				// ��Ű�� ������ ù��° ��ǰ ��ȣ�� �������� ���� ��ǰ ��ȣ�� �̵�
-    bool	GetProductSeqNext(int& ProductSeq);					// ��ǰ ��ȣ �������� ���� ��ġ�� �̵�
+    int GetProductCount();                    // ��Ű�� ������ ��ǰ �� ��������
+    void SetProductSeqFirst();                // ��Ű�� ������ ù��° ��ǰ ��ȣ�� ��ġ
+    bool GetProductSeqFirst(int& ProductSeq); // ��Ű�� ������ ù��° ��ǰ ��ȣ�� �������� ���� ��ǰ ��ȣ�� �̵�
+    bool GetProductSeqNext(int& ProductSeq);  // ��ǰ ��ȣ �������� ���� ��ġ�� �̵�
 
-    int		GetPriceCount();									// ��Ű�� ������ ���� �� ��������
-    void	SetPriceSeqFirst();									// ��Ű�� ������ ù��° ���� ��ȣ�� ��ġ
-    bool	GetPriceSeqFirst(int& PriceSeq);					// ��Ű�� ������ ù��° ���� ��ȣ�� �������� ���� ���� ��ȣ�� �̵�
-    bool	GetPriceSeqNext(int& PriceSeq);						// ���� ��ȣ �������� ���� ��ġ�� �̵�
+    int GetPriceCount();                  // ��Ű�� ������ ���� �� ��������
+    void SetPriceSeqFirst();              // ��Ű�� ������ ù��° ���� ��ȣ�� ��ġ
+    bool GetPriceSeqFirst(int& PriceSeq); // ��Ű�� ������ ù��° ���� ��ȣ�� �������� ���� ���� ��ȣ�� �̵�
+    bool GetPriceSeqNext(int& PriceSeq);  // ���� ��ȣ �������� ���� ��ġ�� �̵�
 
 public:
-    int		ProductDisplaySeq;									//  1. ��Ű���� �����ִ� ī�װ��� ��ȣ
-    int		ViewOrder;											//  2. ���� ����
-    int		PackageProductSeq;									//  3. ��Ű�� ��ȣ
-    wchar_t	PackageProductName[SHOPLIST_LENGTH_PACKAGENAME];	//  4. ��Ű�� ��
-    int		PackageProductType;									//  5. ��Ű�� ���� (170:�Ϲ� ��ǰ, 171:�̺�Ʈ ��ǰ)
-    int		Price;												//  6. ����
-    wchar_t	Description[SHOPLIST_LENGTH_PACKAGEDESC];			//  7. �� ����
-    wchar_t	Caution[SHOPLIST_LENGTH_PACKAGECAUTION];			//  8. ���� ����
-    int		SalesFlag;											//  9. ���� ���� ����(���Ź�ư ���⿩��) (182:����, 183:�Ұ�)
-    int		GiftFlag;											// 10. ���� ���� ����(������ư ���⿩��) (184:����, 185:�Ұ�)
-    tm		StartDate;											// 11. �Ǹ� ������
-    tm		EndDate;											// 12. �Ǹ� ������
-    int		CapsuleFlag;										// 13. ĸ�� ��ǰ ���� (176:ĸ��, 177:�Ϲ�)
-    int		CapsuleCount;										// 14. ��Ű���� ���Ե� ��ǰ ����
-    wchar_t	ProductCashName[SHOPLIST_LENGTH_PACKAGECASHNAME];	// 15. ���� ĳ�� ��
-    wchar_t	PricUnitName[SHOPLIST_LENGTH_PACKAGEPRICEUNIT];		// 16. ���� ���� ǥ�� ��
-    int		DeleteFlag;											// 17. ���� ���� (180:����, 181:Ȱ��)
-    int		EventFlag;											// 18. �̺�Ʈ ��ǰ ���� (199:�̺�Ʈ ��ǰ, 200:�Ϲ� ��ǰ)
-    int		ProductAmount;										// 19. ���� ��ǰ ����
-    wchar_t	InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID];	// 21. ��Ű�� ������ �ڵ�
-    int		ProductCashSeq;										// 22. ���� ĳ�� ���� �ڵ�
-    int		PriceCount;											// 23. ���� ��ǰ ���� ��å ���� ���� (���� ��ǰ�� 1���� ��쿡�� PriceSeq�� ���� ���� �� �ִ�.)
-    bool	DeductMileageFlag;									// 25. ���ϸ����� ���� ��ǰ ���� (false : �Ϲ�, true : ���ϸ��� ���� ��ǰ)
-    int		CashType;											// 26. �۷ι� ���� : Wcoin(C), WCoin(P) ����
-    int		CashTypeFlag;										// 27. �۷ι� ���� : Wcoin(C), WCoin(P) ���� or �ڵ� ����(668: ���μ���, 669: �ڵ�����)
+    int ProductDisplaySeq;                                   //  1. ��Ű���� �����ִ� ī�װ��� ��ȣ
+    int ViewOrder;                                           //  2. ���� ����
+    int PackageProductSeq;                                   //  3. ��Ű�� ��ȣ
+    wchar_t PackageProductName[SHOPLIST_LENGTH_PACKAGENAME]; //  4. ��Ű�� ��
+    int PackageProductType;                                  //  5. ��Ű�� ���� (170:�Ϲ� ��ǰ, 171:�̺�Ʈ ��ǰ)
+    int Price;                                               //  6. ����
+    wchar_t Description[SHOPLIST_LENGTH_PACKAGEDESC];        //  7. �� ����
+    wchar_t Caution[SHOPLIST_LENGTH_PACKAGECAUTION];         //  8. ���� ����
+    // clang-format off
+    int SalesFlag; //  9. ���� ���� ����(���Ź�ư ���⿩��) (182:����,
+                   //  183:�Ұ�)
+    int GiftFlag;  // 10. ���� ���� ����(������ư ���⿩��)
+                   // (184:����, 185:�Ұ�)
+    tm StartDate;                                             // 11. �Ǹ� ������
+    tm EndDate;                                               // 12. �Ǹ� ������
+    // clang-format on
+    int CapsuleFlag;                                          // 13. ĸ�� ��ǰ ���� (176:ĸ��, 177:�Ϲ�)
+    int CapsuleCount;                                         // 14. ��Ű���� ���Ե� ��ǰ ����
+    wchar_t ProductCashName[SHOPLIST_LENGTH_PACKAGECASHNAME]; // 15. ���� ĳ�� ��
+    wchar_t PricUnitName[SHOPLIST_LENGTH_PACKAGEPRICEUNIT];   // 16. ���� ���� ǥ�� ��
+    int DeleteFlag;                                           // 17. ���� ���� (180:����, 181:Ȱ��)
+    int EventFlag;                                            // 18. �̺�Ʈ ��ǰ ���� (199:�̺�Ʈ ��ǰ, 200:�Ϲ� ��ǰ)
+    int ProductAmount;                                        // 19. ���� ��ǰ ����
+    wchar_t InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID]; // 21. ��Ű�� ������ �ڵ�
+    int ProductCashSeq;                                       // 22. ���� ĳ�� ���� �ڵ�
+    int PriceCount;         // 23. ���� ��ǰ ���� ��å ���� ���� (���� ��ǰ�� 1���� ��쿡�� PriceSeq�� ���� ���� �� �ִ�.)
+    bool DeductMileageFlag; // 25. ���ϸ����� ���� ��ǰ ���� (false : �Ϲ�, true : ���ϸ��� ���� ��ǰ)
+    int CashType;           // 26. �۷ι� ���� : Wcoin(C), WCoin(P) ����
+    int CashTypeFlag;       // 27. �۷ι� ���� : Wcoin(C), WCoin(P) ���� or �ڵ� ����(668: ���μ���, 669: �ڵ�����)
 
-    int		LeftCount;											// �ܿ� ����
+    int LeftCount; // �ܿ� ����
 
 private:
-    void	SetProductSeqList(std::wstring strdata);
-    void	SetPriceSeqList(std::wstring strdata);
+    void SetProductSeqList(std::wstring strdata);
+    void SetPriceSeqList(std::wstring strdata);
 
-    std::vector<int> ProductSeqList;							// 20. ��Ű���� ���Ե� ��ǰ ��ȣ ���
+    std::vector<int> ProductSeqList; // 20. ��Ű���� ���Ե� ��ǰ ��ȣ ���
     std::vector<int>::iterator ProductSeqIter;
 
-    std::vector<int> PriceSeqList;								// 24. ��Ű���� ���ԵǴ� ���� ��ȣ ��� (��ǰ�� 1���� ��쿡�� ���� ����.)
+    std::vector<int> PriceSeqList; // 24. ��Ű���� ���ԵǴ� ���� ��ȣ ��� (��ǰ�� 1���� ��쿡�� ���� ����.)
     std::vector<int>::iterator PriceSeqIter;
 };

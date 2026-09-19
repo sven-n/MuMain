@@ -6,17 +6,23 @@
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Quests/QuestMng.h"
 #include "Core/Time/Timer.h"
+#include <limits>
 #include <memory>
 #include <vector>
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#define UIMAX_TEXT_LINE			150
+#define UIMAX_TEXT_LINE 150
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b) { return (a << 24) + (b << 16) + (g << 8) + (r); }
+inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b)
+{
+    return (a << 24) + (b << 16) + (g << 8) + (r);
+}
 
-int CutStr(const wchar_t* pszText, wchar_t* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0);
-int CutText3(const wchar_t* pszText, wchar_t* pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0, const BOOL bReverseWrite = FALSE);
+int CutStr(const wchar_t* pszText, wchar_t* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine,
+           const int iOutStrLength, const int iFirstLineTab = 0);
+int CutText3(const wchar_t* pszText, wchar_t* pTextOut, const int TargetWidth, const int iMaxOutLine,
+             const int iOutStrLength, const int iFirstLineTab = 0, const BOOL bReverseWrite = FALSE);
 void CutText4(const wchar_t* pszSource, wchar_t* pszResult1, wchar_t* pszResult2, int iCutCount);
 
 void RenderCheckBox(int iPos_x, int iPos_y, BOOL bFlag);
@@ -30,8 +36,13 @@ BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType
 
 enum UISTATES
 {
-    UISTATE_NORMAL = 0, UISTATE_RESIZE, UISTATE_SCROLL, UISTATE_HIDE,
-    UISTATE_MOVE, UISTATE_READY, UISTATE_DISABLE
+    UISTATE_NORMAL = 0,
+    UISTATE_RESIZE,
+    UISTATE_SCROLL,
+    UISTATE_HIDE,
+    UISTATE_MOVE,
+    UISTATE_READY,
+    UISTATE_DISABLE
 };
 
 enum UIOPTIONS
@@ -46,110 +57,110 @@ enum UIOPTIONS
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    wchar_t	m_szID[MAX_USERNAME_SIZE + 1];
-    wchar_t	m_szText[MAX_TEXT_LENGTH + 1];
-    int		m_iType;
-    int		m_iColor;
-    UINT	m_uiEmptyLines;
+    BOOL m_bIsSelected;
+    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
+    wchar_t m_szText[MAX_TEXT_LENGTH + 1];
+    int m_iType;
+    int m_iColor;
+    UINT m_uiEmptyLines;
 } WHISPER_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    wchar_t	m_szID[MAX_USERNAME_SIZE + 1];
-    BYTE	m_Number;
-    BYTE	m_Server;
-    BYTE	m_GuildStatus;
+    BOOL m_bIsSelected;
+    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
+    BYTE m_Number;
+    BYTE m_Server;
+    BYTE m_GuildStatus;
 } GUILDLIST_TEXT;
 
 typedef struct
 {
-    BOOL    m_bIsSelected;
-    wchar_t	m_szPattern[MAX_ITEM_NAME + 1];
+    BOOL m_bIsSelected;
+    wchar_t m_szPattern[MAX_ITEM_NAME + 1];
 } FILTERLIST_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    DWORD	m_dwUIID;
-    wchar_t	m_szTitle[64];
-    int		m_iStatus;
+    BOOL m_bIsSelected;
+    DWORD m_dwUIID;
+    wchar_t m_szTitle[64];
+    int m_iStatus;
 } WINDOWLIST_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    DWORD	m_dwLetterID;
-    wchar_t	m_szID[MAX_USERNAME_SIZE + 1];
-    wchar_t	m_szText[MAX_TEXT_LENGTH + 1];
-    wchar_t	m_szDate[16];
-    wchar_t	m_szTime[16];
-    BOOL	m_bIsRead;
+    BOOL m_bIsSelected;
+    DWORD m_dwLetterID;
+    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
+    wchar_t m_szText[MAX_TEXT_LENGTH + 1];
+    wchar_t m_szDate[16];
+    wchar_t m_szTime[16];
+    BOOL m_bIsRead;
 } LETTERLIST_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    wchar_t	m_szText[MAX_LETTERTEXT_LENGTH + 1];
+    BOOL m_bIsSelected;
+    wchar_t m_szText[MAX_LETTERTEXT_LENGTH + 1];
 } LETTER_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    wchar_t	m_szContent[60];
+    BOOL m_bIsSelected;
+    wchar_t m_szContent[60];
 } GUILDLOG_TEXT;
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    BYTE	GuildMark[64];
-    wchar_t	szName[MAX_GUILDNAME + 1];
-    int		nMemberCount;
+    BOOL m_bIsSelected;
+    BYTE GuildMark[64];
+    wchar_t szName[MAX_GUILDNAME + 1];
+    int nMemberCount;
 } UNIONGUILD_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    wchar_t	szName[MAX_GUILDNAME + 1];
-    int		nCount;
-    BYTE	byIsGiveUp;
-    BYTE	bySeqNum;
+    BOOL m_bIsSelected;
+    wchar_t szName[MAX_GUILDNAME + 1];
+    int nCount;
+    BYTE byIsGiveUp;
+    BYTE bySeqNum;
 } BCDECLAREGUILD_TEXT;
 
 typedef struct tagMOVECOMMAND_TEXT
 {
-    BOOL	m_bIsSelected;
-    BOOL	m_bCanMove;
-    wchar_t	szMainMapName[32];		//. Main map name
-    wchar_t	szSubMapName[32];		//. Substitute map name
-    int		iReqLevel;				//. required level
-    int		iReqZen;				//. required zen
-    int		iGateNum;				//. Gate number
+    BOOL m_bIsSelected;
+    BOOL m_bCanMove;
+    wchar_t szMainMapName[32]; //. Main map name
+    wchar_t szSubMapName[32];  //. Substitute map name
+    int iReqLevel;             //. required level
+    int iReqZen;               //. required zen
+    int iGateNum;              //. Gate number
 } MOVECOMMAND_TEXT;
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    wchar_t	szName[MAX_GUILDNAME + 1];
-    BYTE	byJoinSide;
-    BYTE	byGuildInvolved;
-    int		iGuildScore;
+    BOOL m_bIsSelected;
+    wchar_t szName[MAX_GUILDNAME + 1];
+    BYTE byJoinSide;
+    BYTE byGuildInvolved;
+    int iGuildScore;
 } BCGUILD_TEXT;
 
 typedef struct _UNMIX_TEXT
 {
-    BOOL	m_bIsSelected;
-    int		m_iInvenIdx;
-    char	m_cLevel;
+    BOOL m_bIsSelected;
+    int m_iInvenIdx;
+    char m_cLevel;
 
     _UNMIX_TEXT() : m_bIsSelected(false), m_iInvenIdx(-1), m_cLevel(-1) {}
-}UNMIX_TEXT;
+} UNMIX_TEXT;
 
 typedef struct _SOCKETLIST_TEXT
 {
-    BOOL	m_bIsSelected;
-    int		m_iSocketIndex;
-    wchar_t	m_szText[64 + 1];
+    BOOL m_bIsSelected;
+    int m_iSocketIndex;
+    wchar_t m_szText[64 + 1];
 } SOCKETLIST_TEXT;
 
 enum UI_MESSAGE_ENUM
@@ -184,10 +195,14 @@ class CUIMessage
 {
 public:
     CUIMessage() {}
-    virtual ~CUIMessage() { m_MessageList.clear(); }
+    virtual ~CUIMessage()
+    {
+        m_MessageList.clear();
+    }
 
     void SendUIMessage(int iMessage, LONG_PTR iParam1, LONG_PTR iParam2);
     void GetUIMessage();
+
 protected:
     std::deque<UI_MESSAGE> m_MessageList;
     UI_MESSAGE m_WorkMessage;
@@ -199,32 +214,65 @@ public:
     CUIControl();
     virtual ~CUIControl() {}
 
-    DWORD GetUIID() { return m_dwUIID; }
-    void SetParentUIID(DWORD dwParentUIID) { m_dwParentUIID = dwParentUIID; }
-    DWORD GetParentUIID() { return m_dwParentUIID; }
+    DWORD GetUIID()
+    {
+        return m_dwUIID;
+    }
+    void SetParentUIID(DWORD dwParentUIID)
+    {
+        m_dwParentUIID = dwParentUIID;
+    }
+    DWORD GetParentUIID()
+    {
+        return m_dwParentUIID;
+    }
     virtual void SetState(int iState);
     int GetState();
-    void SetOption(int iOption) { m_iOptions = iOption; }
-    BOOL CheckOption(int iOption) { return m_iOptions & iOption; }
+    void SetOption(int iOption)
+    {
+        m_iOptions = iOption;
+    }
+    BOOL CheckOption(int iOption)
+    {
+        return m_iOptions & iOption;
+    }
 
     void SendUIMessageDirect(int iMessage, int iParam1, int iParam2);
 
     void SetPosition(int iPos_x, int iPos_y);
-    int GetPosition_x() { return m_iPos_x; }
-    int GetPosition_y() { return m_iPos_y; }
+    int GetPosition_x()
+    {
+        return m_iPos_x;
+    }
+    int GetPosition_y()
+    {
+        return m_iPos_y;
+    }
     virtual void SetSize(int iWidth, int iHeight);
-    int GetWidth() { return m_iWidth; }
-    int GetHeight() { return m_iHeight; }
+    int GetWidth()
+    {
+        return m_iWidth;
+    }
+    int GetHeight()
+    {
+        return m_iHeight;
+    }
     virtual void SetArrangeType(int iArrangeType = 0, int iRelativePos_x = 0, int iRelativePos_y = 0);
     virtual void SetResizeType(int iResizeType = 0, int iRelativeWidth = 0, int iRelativeHeight = 0);
     virtual void Render() {}
     virtual BOOL DoAction(BOOL bMessageOnly = FALSE);
 
 protected:
-    virtual void DoActionSub(BOOL bMessageOnly) {			}
-    virtual BOOL DoMouseAction() { return TRUE; }
+    virtual void DoActionSub(BOOL bMessageOnly) {}
+    virtual BOOL DoMouseAction()
+    {
+        return TRUE;
+    }
     virtual void DefaultHandleMessage();
-    virtual BOOL HandleMessage() { return FALSE; }
+    virtual BOOL HandleMessage()
+    {
+        return FALSE;
+    }
 
 protected:
     DWORD m_dwUIID;
@@ -257,10 +305,13 @@ protected:
     BOOL m_bMouseState;
 };
 
-enum UILISTBOX_SCROLL_TYPE { UILISTBOX_SCROLL_DOWNUP = 0, UILISTBOX_SCROLL_UPDOWN };
+enum UILISTBOX_SCROLL_TYPE
+{
+    UILISTBOX_SCROLL_DOWNUP = 0,
+    UILISTBOX_SCROLL_UPDOWN
+};
 
-template <class T>
-class CUITextListBox : public CUIControl
+template <class T> class CUITextListBox : public CUIControl
 {
 public:
     CUITextListBox();
@@ -272,23 +323,38 @@ public:
     virtual void Render();
     virtual void Scrolling(int iValue);
 
-    virtual int GetBoxSize() { return m_iNumRenderLine; }
-    virtual void SetBoxSize(int iLineNum) { m_iNumRenderLine = iLineNum; }
-    virtual void SetNumRenderLine(int iLine) { m_iNumRenderLine = iLine; }
+    virtual int GetBoxSize()
+    {
+        return m_iNumRenderLine;
+    }
+    virtual void SetBoxSize(int iLineNum)
+    {
+        m_iNumRenderLine = iLineNum;
+    }
+    virtual void SetNumRenderLine(int iLine)
+    {
+        m_iNumRenderLine = iLine;
+    }
     virtual void Resize(int iValue);
     virtual BOOL HandleMessage();
 
     virtual void ResetCheckedLine(BOOL bFlag = FALSE);
     virtual BOOL HaveCheckedLine();
     virtual int GetCheckedLines(std::deque<T*>* pSelectLineList);
-    virtual int GetLineNum() { return (m_bUseMultiline == TRUE ? m_RenderTextList.size() : m_TextList.size()); }
+    virtual int GetLineNum()
+    {
+        return (m_bUseMultiline == TRUE ? m_RenderTextList.size() : m_TextList.size());
+    }
 
     virtual void SLSetSelectLine(int iLineNum);
     virtual void SLSelectPrevLine(int iLineNum = 1);
     virtual void SLSelectNextLine(int iLineNum = 1);
     virtual typename std::deque<T>::iterator SLGetSelectLine();
 
-    virtual int SLGetSelectLineNum() { return m_iSelectLineNum; }
+    virtual int SLGetSelectLineNum()
+    {
+        return m_iSelectLineNum;
+    }
 
 protected:
     virtual BOOL DoMouseAction();
@@ -299,9 +365,12 @@ protected:
 
     virtual void RenderInterface() = 0;
     virtual BOOL RenderDataLine(int iLineNumber) = 0;
-    virtual void RenderCoveredInterface() { }
+    virtual void RenderCoveredInterface() {}
     virtual BOOL DoLineMouseAction(int iLineNumber) = 0;
-    virtual BOOL DoSubMouseAction() { return TRUE; }
+    virtual BOOL DoSubMouseAction()
+    {
+        return TRUE;
+    }
 
     virtual void CalcLineNum() {}
 
@@ -344,11 +413,16 @@ public:
     virtual ~CUIGuildListBox() {}
 
     virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server);
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE; }
+    virtual BOOL DoLineMouseAction(int iLineNumber)
+    {
+        return TRUE;
+    }
     virtual BOOL DoSubMouseAction();
+
 protected:
     BOOL m_bIsGuildMaster;
 };
@@ -361,11 +435,15 @@ public:
 
     virtual void Render();
     virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, int iType, int iColor);
+
 protected:
     virtual void AddTextToRenderList(const wchar_t* pszID, const wchar_t* pszText, int iType, int iColor);
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE; }
+    virtual BOOL DoLineMouseAction(int iLineNumber)
+    {
+        return TRUE;
+    }
     void CalcLineNum();
 };
 
@@ -377,13 +455,17 @@ public:
 
     virtual void Render();
     virtual void AddText(const wchar_t* pszText);
+
 protected:
     virtual void AddTextToRenderList(const wchar_t* pszText);
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE; }
+    virtual BOOL DoLineMouseAction(int iLineNumber)
+    {
+        return TRUE;
+    }
     void CalcLineNum();
-    virtual int	GetRenderLinePos_y(int iLineNumber);
+    virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
 class CUIChatPalListBox : public CUITextListBox<GUILDLIST_TEXT>
@@ -395,12 +477,29 @@ public:
     virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server);
     virtual void DeleteText(const wchar_t* pszID);
     virtual void SetNumRenderLine(int iLine);
-    GUILDLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-    std::deque<GUILDLIST_TEXT>& GetFriendList() { m_bForceEditList = TRUE; return m_TextList; }
-    void SetLayout(int iType) { m_iLayoutType = iType; }
+    GUILDLIST_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+    std::deque<GUILDLIST_TEXT>& GetFriendList()
+    {
+        m_bForceEditList = TRUE;
+        return m_TextList;
+    }
+    void SetLayout(int iType)
+    {
+        m_iLayoutType = iType;
+    }
     const wchar_t* GetNameByNumber(BYTE byNumber);
-    void SetColumnWidth(UINT uiColumnNum, int iWidth) { if (uiColumnNum < 4) m_iColumnWidth[uiColumnNum] = iWidth; }
-    int GetColumnWidth(UINT uiColumnNum) { return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0); }
+    void SetColumnWidth(UINT uiColumnNum, int iWidth)
+    {
+        if (uiColumnNum < 4)
+            m_iColumnWidth[uiColumnNum] = iWidth;
+    }
+    int GetColumnWidth(UINT uiColumnNum)
+    {
+        return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0);
+    }
     int GetColumnPos_x(UINT uiColumnNum)
     {
         int iResult = 0;
@@ -434,7 +533,11 @@ public:
     virtual void AddText(DWORD dwUIID, const wchar_t* pszTitle, int iStatus = 0);
     virtual void DeleteText(DWORD dwUIID);
     virtual void SetNumRenderLine(int iLine);
-    WINDOWLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    WINDOWLIST_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -448,14 +551,29 @@ public:
     CUILetterListBox();
     virtual ~CUILetterListBox() {}
 
-    virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, const wchar_t* pszDate, const wchar_t* pszTime, BOOL bIsRead);
+    virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, const wchar_t* pszDate, const wchar_t* pszTime,
+                         BOOL bIsRead);
     virtual void DeleteText(DWORD dwLetterID);
     virtual void SetNumRenderLine(int iLine);
-    LETTERLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-    std::deque<LETTERLIST_TEXT>& GetLetterList() { m_bForceEditList = TRUE; return m_TextList; }
+    LETTERLIST_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+    std::deque<LETTERLIST_TEXT>& GetLetterList()
+    {
+        m_bForceEditList = TRUE;
+        return m_TextList;
+    }
 
-    void SetColumnWidth(UINT uiColumnNum, int iWidth) { if (uiColumnNum < 4) m_iColumnWidth[uiColumnNum] = iWidth; }
-    int GetColumnWidth(UINT uiColumnNum) { return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0); }
+    void SetColumnWidth(UINT uiColumnNum, int iWidth)
+    {
+        if (uiColumnNum < 4)
+            m_iColumnWidth[uiColumnNum] = iWidth;
+    }
+    int GetColumnWidth(UINT uiColumnNum)
+    {
+        return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0);
+    }
     int GetColumnPos_x(UINT uiColumnNum)
     {
         int iResult = 0;
@@ -465,6 +583,7 @@ public:
         }
         return iResult;
     }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -485,7 +604,11 @@ public:
     virtual void AddText(int iSocketIndex, const wchar_t* pszText);
     virtual void DeleteText(int iSocketIndex);
     virtual void SetNumRenderLine(int iLine);
-    SOCKETLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    SOCKETLIST_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -502,7 +625,11 @@ public:
     virtual void AddText(const wchar_t* szContent);
     virtual void DeleteText(DWORD dwIndex);
     virtual void SetNumRenderLine(int nLine);
-    GUILDLOG_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    GUILDLOG_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -519,12 +646,17 @@ public:
     virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server, BYTE GuildStatus);
     virtual void DeleteText(DWORD dwUIID);
     virtual void SetNumRenderLine(int iLine);
-    GUILDLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    GUILDLIST_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber);
     virtual int GetRenderLinePos_y(int iLineNumber);
+
 protected:
     BOOL m_bIsGuildMaster;
 };
@@ -540,7 +672,11 @@ public:
     virtual void DeleteText(DWORD dwGuildIndex);
     virtual int GetTextCount();
     virtual void SetNumRenderLine(int iLine);
-    UNIONGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    UNIONGUILD_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -557,7 +693,11 @@ public:
     virtual void AddText(const wchar_t* pszPattern);
     virtual void DeleteText(const wchar_t* pszPattern);
     virtual void SetNumRenderLine(int iLine);
-    FILTERLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    FILTERLIST_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -571,12 +711,21 @@ public:
     CUIUnmixgemList();
     virtual ~CUIUnmixgemList() {}
     virtual void SetNumRenderLine(int iLine);
-    UNMIX_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    UNMIX_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
     virtual void AddText(int iIndex, BYTE cComType);
     void Sort();
 
-    inline bool IsNotified() { return m_bNotify; }
-    inline bool IsEmpty() { return m_TextList.empty(); }
+    inline bool IsNotified()
+    {
+        return m_bNotify;
+    }
+    inline bool IsEmpty()
+    {
+        return m_TextList.empty();
+    }
 
 protected:
     virtual void RenderInterface();
@@ -584,7 +733,7 @@ protected:
     virtual BOOL DoLineMouseAction(int iLineNumber);
     virtual int GetRenderLinePos_y(int iLineNumber);
 
-    bool	m_bNotify;
+    bool m_bNotify;
 };
 
 class CUIBCDeclareGuildListBox : public CUITextListBox<BCDECLAREGUILD_TEXT>
@@ -597,7 +746,10 @@ public:
     virtual void AddText(const wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUp, BYTE bySeqNum);
     virtual void DeleteText(DWORD dwGuildIndex);
     virtual void SetNumRenderLine(int iLine);
-    BCDECLAREGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    BCDECLAREGUILD_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
     void Sort();
 
 protected:
@@ -611,14 +763,18 @@ class CUIBCGuildListBox : public CUITextListBox<BCGUILD_TEXT>
 
 {
 public:
-    int		Select_Guild;
+    int Select_Guild;
     CUIBCGuildListBox();
     virtual ~CUIBCGuildListBox() {}
 
     virtual void AddText(const wchar_t* szGuildName, BYTE byJoinSide, BYTE byGuildInvolved, int iGuildScore);
     virtual void DeleteText(DWORD dwGuildIndex);
     virtual void SetNumRenderLine(int iLine);
-    BCGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+    BCGUILD_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -632,11 +788,15 @@ public:
     CUIMoveCommandListBox();
     virtual ~CUIMoveCommandListBox() {}
 
-    virtual void AddText(int iIndex, const wchar_t* szMapName, const wchar_t* szSubMapName, int iReqLevel, int iReqZen, int iGateNum);
-    //virtual void DeleteText(DWORD dwGuildIndex);
+    virtual void AddText(int iIndex, const wchar_t* szMapName, const wchar_t* szSubMapName, int iReqLevel, int iReqZen,
+                         int iGateNum);
+    // virtual void DeleteText(DWORD dwGuildIndex);
     virtual void SetNumRenderLine(int iLine);
-    MOVECOMMAND_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-    //void Sort();
+    MOVECOMMAND_TEXT* GetSelectedText()
+    {
+        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
+    }
+    // void Sort();
 
 protected:
     virtual void RenderInterface();
@@ -647,9 +807,9 @@ protected:
 
 struct SCurQuestItem
 {
-    BOOL	m_bIsSelected;
-    DWORD	m_dwIndex;
-    wchar_t	m_szText[64];
+    BOOL m_bIsSelected;
+    DWORD m_dwIndex;
+    wchar_t m_szText[64];
 };
 
 class CUICurQuestListBox : public CUITextListBox<SCurQuestItem>
@@ -675,14 +835,14 @@ protected:
 
 struct SQuestContents
 {
-    BOOL	m_bIsSelected;
-    HFONT	m_hFont;
-    DWORD	m_dwColor;
-    int		m_nSort;
-    wchar_t	m_szText[64];
-    REQUEST_REWARD_CLASSIFY	m_eRequestReward;
-    DWORD	m_dwType;
-    WORD	m_wIndex;
+    BOOL m_bIsSelected;
+    HFONT m_hFont;
+    DWORD m_dwColor;
+    int m_nSort;
+    wchar_t m_szText[64];
+    REQUEST_REWARD_CLASSIFY m_eRequestReward;
+    DWORD m_dwType;
+    WORD m_wIndex;
     ITEM* m_pItem;
 };
 
@@ -741,9 +901,6 @@ public:
     virtual bool Create(HDC hDC) = 0;
     virtual void Release() = 0;
 
-    virtual HDC GetFontDC() const = 0;
-    virtual BYTE* GetFontBuffer() const = 0;
-
     virtual DWORD GetTextColor() const = 0;
     virtual DWORD GetBgColor() const = 0;
 
@@ -753,47 +910,13 @@ public:
     virtual void SetBgColor(DWORD dwColor) = 0;
 
     virtual void SetFont(HFONT hFont) = 0;
+    virtual SIZE MeasureText(const wchar_t* pszText, int iLength) const = 0;
 
     virtual void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
-        int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL) = 0;
+                            int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL) = 0;
 };
 
-typedef std::multimap<int, RENDER_TEXT_DATA, std::less<int> > RTMap;
-
-class CUIRenderTextOriginal : public IUIRenderText
-{
-    HDC	m_hFontDC;
-    HBITMAP m_hBitmap;
-    BYTE* m_pFontBuffer;
-    DWORD m_dwTextColor, m_dwBackColor;
-    std::vector<BYTE> m_tightUploadBuffer;
-public:
-    CUIRenderTextOriginal();
-    virtual ~CUIRenderTextOriginal();
-
-    bool Create(HDC hDC);
-    void Release();
-
-    HDC GetFontDC() const;
-    BYTE* GetFontBuffer() const;
-
-    DWORD GetTextColor() const;
-    DWORD GetBgColor() const;
-
-    void SetTextColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha);
-    void SetTextColor(DWORD dwColor);
-    void SetBgColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha);
-    void SetBgColor(DWORD dwColor);
-
-    void SetFont(HFONT hFont);
-
-    void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
-        int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
-
-protected:
-    void WriteText(int iOffset, int iWidth, int iHeight);
-    void UploadText(int sx, int sy, int Width, int Height);
-};
+typedef std::multimap<int, RENDER_TEXT_DATA, std::less<int>> RTMap;
 
 class CUIRenderText
 {
@@ -809,8 +932,6 @@ public:
     bool Create(HDC hDC);
     void Release();
 
-    HDC GetFontDC() const;
-    BYTE* GetFontBuffer() const;
     DWORD GetTextColor() const;
     DWORD GetBgColor() const;
 
@@ -820,9 +941,10 @@ public:
     void SetBgColor(DWORD dwColor);
 
     void SetFont(HFONT hFont);
+    SIZE MeasureText(const wchar_t* pszText, int iLength) const;
 
     void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
-        int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
+                    int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
 };
 
 #define g_pRenderText CUIRenderText::GetInstance()
@@ -831,6 +953,29 @@ public:
 void SaveIMEStatus();
 void RestoreIMEStatus();
 void CheckTextInputBoxIME(int iMode);
+
+struct InputBoxConfig
+{
+    POINT pos = {std::numeric_limits<int>::min(), std::numeric_limits<int>::min()};
+    SIZE size = {0, 0};
+    int textLimit = MAX_TEXT_LENGTH;
+    DWORD options = UIOPTION_NULL;
+    bool password = false;
+    BYTE textAlpha = 255;
+    BYTE textR = 0;
+    BYTE textG = 0;
+    BYTE textB = 0;
+    BYTE backAlpha = 0;
+    BYTE backR = 0;
+    BYTE backG = 0;
+    BYTE backB = 0;
+    BYTE selectAlpha = 255;
+    BYTE selectR = 255;
+    BYTE selectG = 255;
+    BYTE selectB = 255;
+    HFONT font = nullptr;
+    int state = UISTATE_NORMAL;
+};
 
 class CUITextInputBox : public CUIControl
 {
@@ -846,48 +991,110 @@ public:
 
     virtual void SetState(int iState);
     virtual void SetFont(HFONT hFont);
-    virtual void SetMultiline(BOOL bUseFlag) { m_bUseMultiLine = bUseFlag; }
+    virtual void SetMultiline(BOOL bUseFlag)
+    {
+        m_bUseMultiLine = bUseFlag;
+    }
 
     virtual void SetTextLimit(int iLimit);
-    virtual void SetTextColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwTextColor = _ARGB(a, r, g, b); }
-    virtual void SetBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwBackColor = _ARGB(a, r, g, b); }
-    virtual void SetSelectBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwSelectBackColor = _ARGB(a, r, g, b); }
+    virtual void SetTextColor(BYTE a, BYTE r, BYTE g, BYTE b)
+    {
+        m_dwTextColor = _ARGB(a, r, g, b);
+    }
+    virtual void SetBackColor(BYTE a, BYTE r, BYTE g, BYTE b)
+    {
+        m_dwBackColor = _ARGB(a, r, g, b);
+    }
+    virtual void SetSelectBackColor(BYTE a, BYTE r, BYTE g, BYTE b)
+    {
+        m_dwSelectBackColor = _ARGB(a, r, g, b);
+    }
     virtual void SetText(const wchar_t* pszText);
     virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
+    virtual void Reset();
+    virtual void Configure(const InputBoxConfig& config);
+    virtual void SetIsPassword(bool isPassword)
+    {
+        m_bPasswordInput = isPassword ? TRUE : FALSE;
+    }
 
     // There is no Win32 EDIT child; GetHandle() returns a stable per-instance
     // token used only as a focus identity by the NewUI "related window" routing
     // (compared, never messaged). That lets the routing keep working: a focused
     // field's owning widget is the only one that receives key events, so game
     // hotkeys stay quiet while the player is typing.
-    HWND GetHandle() { return reinterpret_cast<HWND>(this); }
-    HWND GetParentHandle() { return m_hParentWnd; }
-    BOOL HaveFocus() { return s_pFocusedPortable == this; }
-    BOOL UseMultiline() { return m_bUseMultiLine; }
-    virtual void SetTabTarget(CUITextInputBox* pTabTarget) { m_pTabTarget = pTabTarget; }
-    CUITextInputBox* GetTabTarget() { return m_pTabTarget; }
+    HWND GetHandle()
+    {
+        return reinterpret_cast<HWND>(this);
+    }
+    HWND GetParentHandle()
+    {
+        return m_hParentWnd;
+    }
+    BOOL HaveFocus()
+    {
+        return s_pFocusedPortable == this;
+    }
+    BOOL UseMultiline()
+    {
+        return m_bUseMultiLine;
+    }
+    virtual void SetTabTarget(CUITextInputBox* pTabTarget)
+    {
+        m_pTabTarget = pTabTarget;
+    }
+    CUITextInputBox* GetTabTarget()
+    {
+        return m_pTabTarget;
+    }
 
-    virtual void Lock(BOOL bFlag) { m_bLock = bFlag; }
-    virtual BOOL IsLocked() { return m_bLock; }
-    BOOL IsPassword() { return m_bPasswordInput; }
+    virtual void Lock(BOOL bFlag)
+    {
+        m_bLock = bFlag;
+    }
+    virtual BOOL IsLocked()
+    {
+        return m_bLock;
+    }
+    BOOL IsPassword()
+    {
+        return m_bPasswordInput;
+    }
 
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
-    bool GetUseScrollbar() { return m_bUseScrollbarRender; }
-    void SetUseScrollbar(bool _scrollbar = TRUE) { m_bUseScrollbarRender = _scrollbar; }
-#endif //PBG_ADD_INGAMESHOPMSGBOX
+    bool GetUseScrollbar()
+    {
+        return m_bUseScrollbarRender;
+    }
+    void SetUseScrollbar(bool _scrollbar = TRUE)
+    {
+        m_bUseScrollbarRender = _scrollbar;
+    }
+#endif // PBG_ADD_INGAMESHOPMSGBOX
 
     // The single text field that currently owns keyboard input, or nullptr. The
     // SDL event loop routes text/edit keys to it and starts/stops SDL text input
     // based on whether one is focused (issue #447).
-    static CUITextInputBox* GetFocusedPortable() { return s_pFocusedPortable; }
+    static CUITextInputBox* GetFocusedPortable()
+    {
+        return s_pFocusedPortable;
+    }
+    static bool IsAnyInputBoxFocused()
+    {
+        return s_pFocusedPortable != nullptr && s_pFocusedPortable->m_iState != UISTATE_HIDE;
+    }
+    static bool IsFocusedForParent(DWORD parentUIID)
+    {
+        return IsAnyInputBoxFocused() && s_pFocusedPortable->GetParentUIID() == parentUIID;
+    }
 
     // Release keyboard focus from the focused portable field (counterpart to
     // GiveFocus()); the field stays visible. Defined in the .cpp.
     static void ReleaseFocus();
 
     // Input fed from the SDL event loop.
-    void OnTextInput(const wchar_t* pszText);            // committed characters
-    void OnTextEditing(const wchar_t* pszText);          // IME composition preview (uncommitted)
+    void OnTextInput(const wchar_t* pszText);                 // committed characters
+    void OnTextEditing(const wchar_t* pszText);               // IME composition preview (uncommitted)
     void OnEditKey(int iVirtualKey, bool bCtrl, bool bShift); // navigation/erase
     void SelectAll();
     std::wstring GetSelectedText() const;
@@ -902,11 +1109,15 @@ protected:
     virtual BOOL DoMouseAction();
 
     // Portable text field implementation (issue #447).
-    struct PortableLine { int start; int end; };  // [start,end) buffer indices; end excludes a wrapped space/newline
+    struct PortableLine
+    {
+        int start;
+        int end;
+    }; // [start,end) buffer indices; end excludes a wrapped space/newline
 
     void RenderPortable();
     BOOL DoPortableMouse();
-    std::wstring BuildDisplay() const;  // text with the password mask applied
+    std::wstring BuildDisplay() const; // text with the password mask applied
     // The render helpers take the string to draw, the caret index within it, and
     // the IME composition span [compStart, compEnd) to underline (compStart < 0
     // = none). With composition active the caret/scroll follow the preview text.
@@ -914,41 +1125,56 @@ protected:
     void RenderPortableMultiline(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd);
     void RenderPortableScrollbar(int iTotalLines, int iVisibleLines);
     void LayoutLines(const std::wstring& display, std::vector<PortableLine>& lines) const;
-    int  CaretToLine(const std::vector<PortableLine>& lines, int iCaret) const;
+    int CaretToLine(const std::vector<PortableLine>& lines, int iCaret) const;
     // Buffer index on a line whose rendered x (reference px) is nearest targetX.
-    int  IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const;
-    int  LineHeightPx() const;
-    int  VisibleLineCount(int iLineHeight) const;
+    int IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const;
+    int LineHeight() const;
+    int VisibleLineCount(int iLineHeight) const;
     void MoveCaret(int iNewCaret, bool bExtendSelection);
     void InsertChar(wchar_t ch);
-    bool HasSelection() const { return m_iSelAnchor != m_iCaret; }
-    int  SelectionStart() const { return m_iSelAnchor < m_iCaret ? m_iSelAnchor : m_iCaret; }
-    int  SelectionEnd() const { return m_iSelAnchor < m_iCaret ? m_iCaret : m_iSelAnchor; }
+    bool HasSelection() const
+    {
+        return m_iSelAnchor != m_iCaret;
+    }
+    int SelectionStart() const
+    {
+        return m_iSelAnchor < m_iCaret ? m_iSelAnchor : m_iCaret;
+    }
+    int SelectionEnd() const
+    {
+        return m_iSelAnchor < m_iCaret ? m_iCaret : m_iSelAnchor;
+    }
     // Width in reference pixels of the first iLength chars rendered in the font.
-    int  MeasureWidth(const wchar_t* pszText, int iLength) const;
-    HFONT CurrentFont() const;  // live handle for m_fontKind
+    int MeasureWidth(const wchar_t* pszText, int iLength) const;
+    HFONT CurrentFont() const; // live handle for m_fontKind
 
 public:
-    CTimer m_caretTimer = { };
+    CTimer m_caretTimer = {};
 
 protected:
     HWND m_hParentWnd;
 
     // Portable text field state (issue #447).
     std::wstring m_portableText;
-    std::wstring m_composition;  // IME preedit shown at the caret, not yet committed
-    int m_iCaretAreaX = 0;       // last rendered caret rect (reference px, screen space)
-    int m_iCaretAreaY = 0;       // for positioning the IME candidate window
+    std::wstring m_composition; // IME preedit shown at the caret, not yet committed
+    int m_iCaretAreaX = 0;      // last rendered caret rect (reference px, screen space)
+    int m_iCaretAreaY = 0;      // for positioning the IME candidate window
     int m_iCaretAreaH = 0;
-    int m_iCaret = 0;            // caret index in [0, length]
-    int m_iSelAnchor = 0;       // selection anchor; equals caret when no selection
-    int m_iFirstVisible = 0;    // first rendered character (single-line horizontal scroll)
-    int m_iScrollLine = 0;      // first visible wrapped line (multiline vertical scroll)
-    int m_iMaxLength = 0;       // text length limit (0 = unlimited)
+    int m_iCaret = 0;        // caret index in [0, length]
+    int m_iSelAnchor = 0;    // selection anchor; equals caret when no selection
+    int m_iFirstVisible = 0; // first rendered character (single-line horizontal scroll)
+    int m_iScrollLine = 0;   // first visible wrapped line (multiline vertical scroll)
+    int m_iMaxLength = 0;    // text length limit (0 = unlimited)
     // Which global font this box draws with. Stored by kind (not by HFONT)
-    // because ReinitializeFonts() deletes and recreates the handles on a
-    // resolution change; CurrentFont() re-resolves the live handle each frame.
-    enum class PortableFontKind { Default, Bold, Big, Fix };
+    // because ReinitializeFonts() deletes and recreates the handles after a
+    // font-family change; CurrentFont() re-resolves the live handle each frame.
+    enum class PortableFontKind
+    {
+        Default,
+        Bold,
+        Big,
+        Fix
+    };
     PortableFontKind m_fontKind = PortableFontKind::Default;
     static CUITextInputBox* s_pFocusedPortable;
 
@@ -973,14 +1199,20 @@ protected:
     float m_fScrollBarClickPos_y;
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
     bool m_bUseScrollbarRender;
-#endif //PBG_ADD_INGAMESHOPMSGBOX
+#endif // PBG_ADD_INGAMESHOPMSGBOX
 };
+
+extern CUITextInputBox* g_pSingleTextInputBox;
+extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 class CUIChatInputBox
 {
 public:
     CUIChatInputBox() {}
-    virtual ~CUIChatInputBox() { RemoveHistory(TRUE); }
+    virtual ~CUIChatInputBox()
+    {
+        RemoveHistory(TRUE);
+    }
 
     virtual void Init(HWND hWnd);
     void Reset();
@@ -990,13 +1222,28 @@ public:
     void ClearTexts();
     void SetText(BOOL bSetText, const wchar_t* pText, BOOL bSetBuddyText, const wchar_t* pBuddyText);
     void SetState(int iState);
-    int GetState() { return m_TextInputBox.GetState(); }
+    int GetState()
+    {
+        return m_TextInputBox.GetState();
+    }
     void SetFont(HFONT hFont);
-    void SetTextPosition(int iPos_x, int iPos_y) { m_TextInputBox.SetPosition(iPos_x, iPos_y); }
-    void SetBuddyPosition(int iPos_x, int iPos_y) { m_BuddyInputBox.SetPosition(iPos_x, iPos_y); }
-    BOOL HaveFocus() { return (m_TextInputBox.HaveFocus() || m_BuddyInputBox.HaveFocus()); }
+    void SetTextPosition(int iPos_x, int iPos_y)
+    {
+        m_TextInputBox.SetPosition(iPos_x, iPos_y);
+    }
+    void SetBuddyPosition(int iPos_x, int iPos_y)
+    {
+        m_BuddyInputBox.SetPosition(iPos_x, iPos_y);
+    }
+    BOOL HaveFocus()
+    {
+        return (m_TextInputBox.HaveFocus() || m_BuddyInputBox.HaveFocus());
+    }
     BOOL DoMouseAction();
-    void RestoreFocus() { m_bFocusLose = TRUE; }
+    void RestoreFocus()
+    {
+        m_bFocusLose = TRUE;
+    }
 
 protected:
     CUITextInputBox m_TextInputBox;
@@ -1007,6 +1254,7 @@ protected:
 public:
     virtual void AddHistory(const wchar_t* pszText);
     virtual void MoveHistory(int iDegree);
+
 private:
     void RemoveHistory(BOOL bClear);
     BOOL m_bHistoryMode;
@@ -1062,7 +1310,7 @@ struct SLIDE_QUEUE_DATA
     BOOL m_bLastData;
 };
 
-typedef std::multimap<DWORD, SLIDE_QUEUE_DATA, std::less<DWORD> > SLIDE_QUEUE;
+typedef std::multimap<DWORD, SLIDE_QUEUE_DATA, std::less<DWORD>> SLIDE_QUEUE;
 
 class CUISlideHelp : public CUIControl
 {
@@ -1074,9 +1322,12 @@ public:
     BOOL DoMouseAction();
     void Render(BOOL bForceFadeOut = FALSE);
     void SetScrollSpeed(float fSpeed);
-    BOOL AddSlideText(const wchar_t* pszNewText, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230));
+    BOOL AddSlideText(const wchar_t* pszNewText, DWORD dwTextColor = (255u << 24) + (200u << 16) + (220u << 8) + 230u);
 
-    int GetAlphaRate() { return m_iAlphaRate; }
+    int GetAlphaRate()
+    {
+        return m_iAlphaRate;
+    }
     BOOL HaveText();
 
     void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* pszText, int iType, float fSpeed, DWORD dwTextColor);
@@ -1087,7 +1338,7 @@ public:
 
     SLIDE_QUEUE m_SlideQueue;
     SLIDE_QUEUE::iterator m_SlideQueueIter;
-    std::list <DWORD> m_RemoveQueueList;
+    std::list<DWORD> m_RemoveQueueList;
 
 protected:
     void SlideMove();
@@ -1125,12 +1376,16 @@ public:
     void OpenSlideTextFile(const wchar_t* szFileName);
     void ClearSlideText();
     const wchar_t* GetSlideText(int iLevel);
-    void SetCreateDelay(int iDelay) { m_iCreateDelay = iDelay; }
+    void SetCreateDelay(int iDelay)
+    {
+        m_iCreateDelay = iDelay;
+    }
 
-    void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* pszText,
-        int iType, float fSpeed, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230));
+    void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* pszText, int iType, float fSpeed,
+                  DWORD dwTextColor = (255u << 24) + (200u << 16) + (220u << 8) + 230u);
     void ManageSlide();
     BOOL IsIdle();
+
 protected:
     CUISlideHelp m_HelpSlide;
     CUISlideHelp m_NoticeSlide;
@@ -1149,16 +1404,16 @@ extern DWORD g_dwMouseUseUIID;
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 typedef struct
 {
-    BOOL	m_bIsSelected;
+    BOOL m_bIsSelected;
 
-    int		m_iStorageSeq;
-    int		m_iStorageItemSeq;
-    int		m_iStorageGroupCode;
-    int		m_iProductSeq;
-    int		m_iPriceSeq;
-    int		m_iCashPoint;
-    int		m_iNum;
-    WORD	m_wItemCode;
+    int m_iStorageSeq;
+    int m_iStorageItemSeq;
+    int m_iStorageGroupCode;
+    int m_iProductSeq;
+    int m_iPriceSeq;
+    int m_iCashPoint;
+    int m_iNum;
+    WORD m_wItemCode;
 
     wchar_t m_szName[MAX_TEXT_LENGTH];
     wchar_t m_szNum[MAX_TEXT_LENGTH];
@@ -1166,7 +1421,7 @@ typedef struct
     wchar_t m_szSendUserName[MAX_USERNAME_SIZE + 1];
     wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
     wchar_t m_szType;
-}IGS_StorageItem;
+} IGS_StorageItem;
 
 class CUIInGameShopListBox : public CUITextListBox<IGS_StorageItem>
 {
@@ -1175,6 +1430,7 @@ class CUIInGameShopListBox : public CUITextListBox<IGS_StorageItem>
         LISTBOX_WIDTH = 146,
         LISTBOX_HEIGHT = 115,
     };
+
 public:
     CUIInGameShopListBox();
     virtual ~CUIInGameShopListBox() {}
@@ -1193,14 +1449,14 @@ protected:
     virtual int GetRenderLinePos_y(int nLine);
 };
 
-#define LINE_TEXTMAX	64
-#define INFO_LINEMAX	10
-#define INFO_LINE_CNTMAX	50
+#define LINE_TEXTMAX 64
+#define INFO_LINEMAX 10
+#define INFO_LINE_CNTMAX 50
 
 struct IGS_BuyList
 {
-    BOOL	m_bIsSelected;
-    wchar_t	m_pszItemExplanation[LINE_TEXTMAX];
+    BOOL m_bIsSelected;
+    wchar_t m_pszItemExplanation[LINE_TEXTMAX];
 };
 
 class CUIBuyingListBox : public CUITextListBox<IGS_BuyList>
@@ -1210,6 +1466,7 @@ class CUIBuyingListBox : public CUITextListBox<IGS_BuyList>
         LISTBOX_WIDTH = 175,
         LISTBOX_HEIGHT = 95,
     };
+
 public:
     CUIBuyingListBox();
     virtual ~CUIBuyingListBox() {}
@@ -1222,7 +1479,10 @@ public:
     }
 
     void SetLineColorRender(const bool _LineColor = true);
-    const bool& GetLineColorRender() const { return m_bRenderLineColor; }
+    const bool& GetLineColorRender() const
+    {
+        return m_bRenderLineColor;
+    }
 
 protected:
     virtual void RenderInterface();
@@ -1250,6 +1510,7 @@ class CRadioButton
         LBTN_UP,
         LBTN_DOWN,
     };
+
 public:
     CRadioButton();
     ~CRadioButton();
@@ -1259,12 +1520,19 @@ public:
     void SetRadioBtnRect(float _x = 0, float _y = 0, float _width = BTN_WIDTH, float _height = BTN_HEIGHT);
     bool IsRadioBtn(RECT _rt);
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv);
-    const bool& GetCheckBtn() const { return m_bCheckState; }
+    const bool& GetCheckBtn() const
+    {
+        return m_bCheckState;
+    }
     static int m_nIterIndex;
     int m_nRadioBtnEnable;
     void SetCheckState(bool _Value);
     void SetRadioBtnIsEnable(int _Value);
-    int GetRadioBtnIsEnable() { return m_nRadioBtnEnable; }
+    int GetRadioBtnIsEnable()
+    {
+        return m_nRadioBtnEnable;
+    }
+
 private:
     RECT m_rtCheckBtn;
     bool m_bCheckState;
@@ -1273,20 +1541,20 @@ private:
 
 struct IGS_PackBuyList
 {
-    BOOL	m_bIsSelected;
-    wchar_t	m_pszItemName[32];
-    wchar_t	m_nItemInfo[32];
+    BOOL m_bIsSelected;
+    wchar_t m_pszItemName[32];
+    wchar_t m_nItemInfo[32];
     CRadioButton m_CheckBtn;
 };
 
 typedef struct
 {
-    BOOL	m_bIsSelected;
-    int		m_iPackageSeq;
-    int		m_iDisplaySeq;
-    int		m_iPriceSeq;
-    WORD	m_wItemCode;
-    int		m_iCashType;
+    BOOL m_bIsSelected;
+    int m_iPackageSeq;
+    int m_iDisplaySeq;
+    int m_iPriceSeq;
+    WORD m_wItemCode;
+    int m_iCashType;
 
     wchar_t m_szItemName[MAX_TEXT_LENGTH];
     wchar_t m_szItemPrice[MAX_TEXT_LENGTH];
@@ -1294,7 +1562,7 @@ typedef struct
     wchar_t m_szAttribute[MAX_TEXT_LENGTH];
 
     CRadioButton m_RadioBtn;
-}IGS_SelectBuyItem;
+} IGS_SelectBuyItem;
 
 class CUIPackCheckBuyingListBox : public CUITextListBox<IGS_SelectBuyItem>
 {
@@ -1321,8 +1589,8 @@ protected:
     virtual int GetRenderLinePos_y(int nLine);
 
 private:
-    int	m_iCurrentLine;
+    int m_iCurrentLine;
 };
-#endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+#endif // PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 
-#endif	//__UICONTROL_H__
+#endif //__UICONTROL_H__

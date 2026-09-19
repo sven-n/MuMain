@@ -45,6 +45,20 @@
     <xsl:text>)</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:text>{
+    static const auto dotnet_Send</xsl:text>
+    <xsl:apply-templates select="pd:Name" />
+    <xsl:text> = LoadManagedSymbol&lt;::Send</xsl:text>
+    <xsl:apply-templates select="pd:Name" />
+    <xsl:text>&gt;("Send</xsl:text>
+    <xsl:apply-templates select="pd:Name" />
+    <xsl:text>");
+    if (!dotnet_Send</xsl:text>
+    <xsl:apply-templates select="pd:Name" />
+    <xsl:text>)
+    {
+        return;
+    }
+
     dotnet_Send</xsl:text>
     <xsl:apply-templates select="pd:Name" />
     <xsl:text>(this->GetHandle()</xsl:text>

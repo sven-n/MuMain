@@ -4,26 +4,22 @@
 #include "stdafx.h"
 #include "MoveCommandData.h"
 
-
-
 using namespace SEASON3B;
 
 #pragma pack(push, 1)
 typedef struct
 {
-    int		index;
-    char	szMainMapName[32];
-    char	szSubMapName[32];
-    int		iReqLevel;
-    int		m_iReqMaxLevel;
-    int		iReqZen;
-    int		iGateNum;
+    int index;
+    char szMainMapName[32];
+    char szSubMapName[32];
+    int iReqLevel;
+    int m_iReqMaxLevel;
+    int iReqZen;
+    int iGateNum;
 } MOVEREQINFO_FILE;
 #pragma pack(pop)
 
-CMoveCommandData::CMoveCommandData()
-{
-}
+CMoveCommandData::CMoveCommandData() {}
 
 CMoveCommandData::~CMoveCommandData()
 {
@@ -39,7 +35,8 @@ CMoveCommandData* CMoveCommandData::GetInstance()
 bool CMoveCommandData::Create(const std::wstring& filename)
 {
     FILE* fp = _wfopen(filename.c_str(), L"rb");
-    if (fp == NULL) return false;
+    if (fp == NULL)
+        return false;
 
     int count = 0;
     fread(&count, sizeof(int), 1, fp);
@@ -50,14 +47,17 @@ bool CMoveCommandData::Create(const std::wstring& filename)
         MOVEREQINFO_FILE moveReqInfo{};
         fread(&moveReqInfo, sizeof moveReqInfo, 1, fp);
 
+        // cppcheck-suppress dangerousTypeCast
         BuxConvert((BYTE*)&moveReqInfo, sizeof moveReqInfo);
         pMoveInfoData->_ReqInfo.index = moveReqInfo.index;
         pMoveInfoData->_ReqInfo.iGateNum = moveReqInfo.iGateNum;
         pMoveInfoData->_ReqInfo.iReqLevel = moveReqInfo.iReqLevel;
         pMoveInfoData->_ReqInfo.iReqZen = moveReqInfo.iReqZen;
         pMoveInfoData->_ReqInfo.m_iReqMaxLevel = moveReqInfo.m_iReqMaxLevel;
-        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szMainMapName, moveReqInfo.szMainMapName, sizeof moveReqInfo.szMainMapName);
-        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szSubMapName, moveReqInfo.szSubMapName, sizeof moveReqInfo.szSubMapName);
+        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szMainMapName, moveReqInfo.szMainMapName,
+                                        sizeof moveReqInfo.szMainMapName);
+        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szSubMapName, moveReqInfo.szSubMapName,
+                                        sizeof moveReqInfo.szSubMapName);
 
         m_listMoveInfoData.push_back(pMoveInfoData);
     }

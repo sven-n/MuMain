@@ -45,10 +45,10 @@ protected:
     bool	m_bFormerBtn2Dn;
 
 protected:
-    CInput();
+    CInput() = default;
 
 public:
-    virtual ~CInput();
+    virtual ~CInput() = default;
 
     static CInput& Instance();
     bool Create(HWND hWnd, long lScreenWidth, long lScreenHeight);
@@ -87,6 +87,14 @@ public:
 
     long GetScreenWidth() { return m_lScreenWidth; }
     long GetScreenHeight() { return m_lScreenHeight; }
+    void SetScreenSize(long screenWidth, long screenHeight)
+    {
+        if (screenWidth <= 0 || screenHeight <= 0)
+            return;
+
+        m_lScreenWidth = screenWidth;
+        m_lScreenHeight = screenHeight;
+    }
     void SetLeftHandMode(bool bLeftHand) { m_bLeftHand = bLeftHand; }
     bool IsLeftHandMode() { return m_bLeftHand; }
     void SetTextEditMode(bool bTextEditMode) { m_bTextEditMode = bTextEditMode; }

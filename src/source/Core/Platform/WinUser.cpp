@@ -135,6 +135,12 @@ BOOL ScreenToClient(HWND /*hWnd*/, LPPOINT lpPoint)
     return lpPoint ? TRUE : FALSE;
 }
 
+BOOL SetCursorPos(int x, int y)
+{
+    SDL_WarpMouseInWindow(nullptr, static_cast<float>(x), static_cast<float>(y));
+    return TRUE;
+}
+
 HWND GetActiveWindow()
 {
     return reinterpret_cast<HWND>(SDL_GetKeyboardFocus());  // null when unfocused

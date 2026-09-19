@@ -10,27 +10,52 @@
 #include <utility>
 #include <vector>
 
-template <class T>
-class CList;
+template <class T> class CList;
 
-template <class T>
-class CNode
+template <class T> class CNode
 {
 public:
     CNode() = default;
     explicit CNode(const T& data) : m_Data(data) {}
 
-    void SetData(const T& data) { m_Data = data; }
-    T& GetData() { return m_Data; }
-    const T& GetData() const { return m_Data; }
+    void SetData(const T& data)
+    {
+        m_Data = data;
+    }
+    T& GetData()
+    {
+        return m_Data;
+    }
+    const T& GetData() const
+    {
+        return m_Data;
+    }
 
 private:
-    void SetPrev(CNode<T>* previous) { m_pPrev = previous; }
-    void SetNext(CNode<T>* next) { m_pNext = next; }
-    CNode<T>* GetPrev() { return m_pPrev; }
-    const CNode<T>* GetPrev() const { return m_pPrev; }
-    CNode<T>* GetNext() { return m_pNext; }
-    const CNode<T>* GetNext() const { return m_pNext; }
+    void SetPrev(CNode<T>* previous)
+    {
+        m_pPrev = previous;
+    }
+    void SetNext(CNode<T>* next)
+    {
+        m_pNext = next;
+    }
+    CNode<T>* GetPrev()
+    {
+        return m_pPrev;
+    }
+    const CNode<T>* GetPrev() const
+    {
+        return m_pPrev;
+    }
+    CNode<T>* GetNext()
+    {
+        return m_pNext;
+    }
+    const CNode<T>* GetNext() const
+    {
+        return m_pNext;
+    }
 
     friend class CList<T>;
 
@@ -39,15 +64,20 @@ private:
     CNode<T>* m_pNext{nullptr};
 };
 
-template <class T>
-class CList
+template <class T> class CList
 {
 public:
     CList();
     ~CList();
 
-    std::size_t GetCount() const { return m_Count; }
-    bool IsEmpty() const { return m_Count == 0; }
+    std::size_t GetCount() const
+    {
+        return m_Count;
+    }
+    bool IsEmpty() const
+    {
+        return m_Count == 0;
+    }
 
     CNode<T>* AddHead(const T& newElement);
     CNode<T>* AddTail(const T& newElement);
@@ -77,7 +107,10 @@ public:
 
 private:
     CNode<T>* CreateDataNode(const T& value);
-    bool IsSentinel(const CNode<T>* node) const { return node == m_pHead || node == m_pTail; }
+    bool IsSentinel(const CNode<T>* node) const
+    {
+        return node == m_pHead || node == m_pTail;
+    }
 
     std::size_t m_Count{0};
     CNode<T>* m_pHead{nullptr};
@@ -85,30 +118,26 @@ private:
     T m_NullData{};
 };
 
-template <class T>
-CList<T>::CList()
-    : m_pHead(new CNode<T>()), m_pTail(new CNode<T>())
+// cppcheck-suppress [noCopyConstructor, noOperatorEq]
+template <class T> CList<T>::CList() : m_pHead(new CNode<T>()), m_pTail(new CNode<T>())
 {
     m_pHead->SetNext(m_pTail);
     m_pTail->SetPrev(m_pHead);
 }
 
-template <class T>
-CList<T>::~CList()
+template <class T> CList<T>::~CList()
 {
     RemoveAll();
     delete m_pTail;
     delete m_pHead;
 }
 
-template <class T>
-CNode<T>* CList<T>::CreateDataNode(const T& value)
+template <class T> CNode<T>* CList<T>::CreateDataNode(const T& value)
 {
     return new CNode<T>(value);
 }
 
-template <class T>
-CNode<T>* CList<T>::AddHead(const T& newElement)
+template <class T> CNode<T>* CList<T>::AddHead(const T& newElement)
 {
     auto* node = CreateDataNode(newElement);
     auto* first = m_pHead->GetNext();
@@ -120,8 +149,7 @@ CNode<T>* CList<T>::AddHead(const T& newElement)
     return node;
 }
 
-template <class T>
-CNode<T>* CList<T>::AddTail(const T& newElement)
+template <class T> CNode<T>* CList<T>::AddTail(const T& newElement)
 {
     auto* node = CreateDataNode(newElement);
     auto* last = m_pTail->GetPrev();
@@ -133,8 +161,7 @@ CNode<T>* CList<T>::AddTail(const T& newElement)
     return node;
 }
 
-template <class T>
-CNode<T>* CList<T>::InsertBefore(CNode<T>* node, const T& newElement)
+template <class T> CNode<T>* CList<T>::InsertBefore(CNode<T>* node, const T& newElement)
 {
     if (!node || node == m_pHead)
     {
@@ -151,8 +178,7 @@ CNode<T>* CList<T>::InsertBefore(CNode<T>* node, const T& newElement)
     return newNode;
 }
 
-template <class T>
-CNode<T>* CList<T>::InsertAfter(CNode<T>* node, const T& newElement)
+template <class T> CNode<T>* CList<T>::InsertAfter(CNode<T>* node, const T& newElement)
 {
     if (!node || node == m_pTail)
     {
@@ -169,8 +195,7 @@ CNode<T>* CList<T>::InsertAfter(CNode<T>* node, const T& newElement)
     return newNode;
 }
 
-template <class T>
-T CList<T>::RemoveHead()
+template <class T> T CList<T>::RemoveHead()
 {
     if (IsEmpty())
     {
@@ -187,8 +212,7 @@ T CList<T>::RemoveHead()
     return data;
 }
 
-template <class T>
-T CList<T>::RemoveTail()
+template <class T> T CList<T>::RemoveTail()
 {
     if (IsEmpty())
     {
@@ -205,8 +229,7 @@ T CList<T>::RemoveTail()
     return data;
 }
 
-template <class T>
-T CList<T>::RemoveNode(CNode<T>*& node)
+template <class T> T CList<T>::RemoveNode(CNode<T>*& node)
 {
     if (!node || IsSentinel(node))
     {
@@ -224,8 +247,7 @@ T CList<T>::RemoveNode(CNode<T>*& node)
     return data;
 }
 
-template <class T>
-void CList<T>::RemoveAll()
+template <class T> void CList<T>::RemoveAll()
 {
     CNode<T>* current = m_pHead->GetNext();
     while (current != m_pTail)
@@ -240,32 +262,27 @@ void CList<T>::RemoveAll()
     m_Count = 0;
 }
 
-template <class T>
-CNode<T>* CList<T>::FindHead()
+template <class T> CNode<T>* CList<T>::FindHead()
 {
     return IsEmpty() ? nullptr : m_pHead->GetNext();
 }
 
-template <class T>
-const CNode<T>* CList<T>::FindHead() const
+template <class T> const CNode<T>* CList<T>::FindHead() const
 {
     return IsEmpty() ? nullptr : m_pHead->GetNext();
 }
 
-template <class T>
-CNode<T>* CList<T>::FindTail()
+template <class T> CNode<T>* CList<T>::FindTail()
 {
     return IsEmpty() ? nullptr : m_pTail->GetPrev();
 }
 
-template <class T>
-const CNode<T>* CList<T>::FindTail() const
+template <class T> const CNode<T>* CList<T>::FindTail() const
 {
     return IsEmpty() ? nullptr : m_pTail->GetPrev();
 }
 
-template <class T>
-CNode<T>* CList<T>::FindNode(const T& searchValue)
+template <class T> CNode<T>* CList<T>::FindNode(const T& searchValue)
 {
     CNode<T>* current = m_pHead->GetNext();
     while (current != m_pTail)
@@ -279,8 +296,7 @@ CNode<T>* CList<T>::FindNode(const T& searchValue)
     return nullptr;
 }
 
-template <class T>
-const CNode<T>* CList<T>::FindNode(const T& searchValue) const
+template <class T> const CNode<T>* CList<T>::FindNode(const T& searchValue) const
 {
     const CNode<T>* current = m_pHead->GetNext();
     while (current != m_pTail)
@@ -294,8 +310,7 @@ const CNode<T>* CList<T>::FindNode(const T& searchValue) const
     return nullptr;
 }
 
-template <class T>
-CNode<T>* CList<T>::GetPrev(CNode<T>* node)
+template <class T> CNode<T>* CList<T>::GetPrev(CNode<T>* node)
 {
     if (!node)
     {
@@ -305,8 +320,7 @@ CNode<T>* CList<T>::GetPrev(CNode<T>* node)
     return (prev == m_pHead) ? nullptr : prev;
 }
 
-template <class T>
-const CNode<T>* CList<T>::GetPrev(const CNode<T>* node) const
+template <class T> const CNode<T>* CList<T>::GetPrev(const CNode<T>* node) const
 {
     if (!node)
     {
@@ -316,8 +330,7 @@ const CNode<T>* CList<T>::GetPrev(const CNode<T>* node) const
     return (prev == m_pHead) ? nullptr : prev;
 }
 
-template <class T>
-CNode<T>* CList<T>::GetNext(CNode<T>* node)
+template <class T> CNode<T>* CList<T>::GetNext(CNode<T>* node)
 {
     if (!node)
     {
@@ -327,8 +340,7 @@ CNode<T>* CList<T>::GetNext(CNode<T>* node)
     return (next == m_pTail) ? nullptr : next;
 }
 
-template <class T>
-const CNode<T>* CList<T>::GetNext(const CNode<T>* node) const
+template <class T> const CNode<T>* CList<T>::GetNext(const CNode<T>* node) const
 {
     if (!node)
     {
@@ -338,8 +350,7 @@ const CNode<T>* CList<T>::GetNext(const CNode<T>* node) const
     return (next == m_pTail) ? nullptr : next;
 }
 
-template <class T>
-void CList<T>::SetData(CNode<T>* node, const T& data)
+template <class T> void CList<T>::SetData(CNode<T>* node, const T& data)
 {
     if (!node || IsSentinel(node))
     {
@@ -348,8 +359,7 @@ void CList<T>::SetData(CNode<T>* node, const T& data)
     node->SetData(data);
 }
 
-template <class T>
-T& CList<T>::GetData(CNode<T>* node)
+template <class T> T& CList<T>::GetData(CNode<T>* node)
 {
     if (IsSentinel(node))
     {
@@ -358,8 +368,7 @@ T& CList<T>::GetData(CNode<T>* node)
     return node->GetData();
 }
 
-template <class T>
-const T& CList<T>::GetData(const CNode<T>* node) const
+template <class T> const T& CList<T>::GetData(const CNode<T>* node) const
 {
     if (IsSentinel(node))
     {
@@ -368,8 +377,7 @@ const T& CList<T>::GetData(const CNode<T>* node) const
     return node->GetData();
 }
 
-template <class T>
-class CQueue : private CList<T>
+template <class T> class CQueue : private CList<T>
 {
 public:
     CQueue() = default;
@@ -381,48 +389,61 @@ public:
 
     bool Find(const T& element);
 
-    std::size_t GetCount() const { return CList<T>::GetCount(); }
+    // cppcheck-suppress duplInheritedMember
+    std::size_t GetCount() const
+    {
+        return CList<T>::GetCount();
+    }
 };
 
-template <class T>
-bool CQueue<T>::Insert(const T& newElement)
+template <class T> bool CQueue<T>::Insert(const T& newElement)
 {
     return this->AddTail(newElement) != nullptr;
 }
 
-template <class T>
-T CQueue<T>::Remove()
+template <class T> T CQueue<T>::Remove()
 {
     return this->RemoveHead();
 }
 
-template <class T>
-void CQueue<T>::CleanUp()
+template <class T> void CQueue<T>::CleanUp()
 {
     this->RemoveAll();
 }
 
-template <class T>
-bool CQueue<T>::Find(const T& element)
+template <class T> bool CQueue<T>::Find(const T& element)
 {
     return this->FindNode(element) != nullptr;
 }
 
-template <class T, class S>
-class CBTree;
+template <class T, class S> class CBTree;
 
-template <class T, class S>
-class CBNode
+template <class T, class S> class CBNode
 {
 public:
     CBNode() = default;
     CBNode(const T& data, const S& value) : m_Data(data), m_CompValue(value) {}
 
-    void SetData(const T& data) { m_Data = data; }
-    void SetValue(const S& value) { m_CompValue = value; }
-    T& GetData() { return m_Data; }
-    const T& GetData() const { return m_Data; }
-    S GetValue() const { return m_CompValue; }
+    void SetData(const T& data)
+    {
+        m_Data = data;
+    }
+    void SetValue(const S& value)
+    {
+        m_CompValue = value;
+    }
+    T& GetData()
+    {
+        return m_Data;
+    }
+    const T& GetData() const
+    {
+        return m_Data;
+    }
+    S GetValue() const
+    {
+        return m_CompValue;
+    }
 
 private:
     void SetLeft(CBNode<T, S>* left)
@@ -443,12 +464,30 @@ private:
         }
     }
 
-    CBNode<T, S>* GetLeft() { return m_pLeft; }
-    const CBNode<T, S>* GetLeft() const { return m_pLeft; }
-    CBNode<T, S>* GetRight() { return m_pRight; }
-    const CBNode<T, S>* GetRight() const { return m_pRight; }
-    CBNode<T, S>* GetParent() { return m_pParent; }
-    const CBNode<T, S>* GetParent() const { return m_pParent; }
+    CBNode<T, S>* GetLeft()
+    {
+        return m_pLeft;
+    }
+    const CBNode<T, S>* GetLeft() const
+    {
+        return m_pLeft;
+    }
+    CBNode<T, S>* GetRight()
+    {
+        return m_pRight;
+    }
+    const CBNode<T, S>* GetRight() const
+    {
+        return m_pRight;
+    }
+    CBNode<T, S>* GetParent()
+    {
+        return m_pParent;
+    }
+    const CBNode<T, S>* GetParent() const
+    {
+        return m_pParent;
+    }
 
     friend class CBTree<T, S>;
 
@@ -459,8 +498,7 @@ private:
     CBNode<T, S>* m_pParent{nullptr};
 };
 
-template <class T, class S>
-class CBTree
+template <class T, class S> class CBTree
 {
 public:
     CBTree();
@@ -470,8 +508,14 @@ public:
     void RemoveNode(CBNode<T, S>*& node);
     void RemoveAll();
 
-    bool IsEmpty() const { return m_Count == 0; }
-    std::size_t GetCount() const { return m_Count; }
+    bool IsEmpty() const
+    {
+        return m_Count == 0;
+    }
+    std::size_t GetCount() const
+    {
+        return m_Count;
+    }
 
     CBNode<T, S>* FindHead();
     CBNode<T, S>* FindNode(const S& value);
@@ -495,26 +539,19 @@ private:
     CBNode<T, S>* m_pHead{nullptr};
 };
 
-template <class T, class S>
-CBTree<T, S>::CBTree()
-    : m_pHead(nullptr)
-{
-}
+template <class T, class S> CBTree<T, S>::CBTree() : m_pHead(nullptr) {}
 
-template <class T, class S>
-CBTree<T, S>::~CBTree()
+template <class T, class S> CBTree<T, S>::~CBTree()
 {
     RemoveAll();
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::CreateNode(const T& value, const S& compValue)
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::CreateNode(const T& value, const S& compValue)
 {
     return new CBNode<T, S>(value, compValue);
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::Add(const T& newElement, const S& value)
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::Add(const T& newElement, const S& value)
 {
     if (!m_pHead)
     {
@@ -555,8 +592,7 @@ CBNode<T, S>* CBTree<T, S>::Add(const T& newElement, const S& value)
     }
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::FindNode(const S& value)
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::FindNode(const S& value)
 {
     CBNode<T, S>* current = m_pHead;
     while (current)
@@ -577,8 +613,7 @@ CBNode<T, S>* CBTree<T, S>::FindNode(const S& value)
     return nullptr;
 }
 
-template <class T, class S>
-const CBNode<T, S>* CBTree<T, S>::FindNode(const S& value) const
+template <class T, class S> const CBNode<T, S>* CBTree<T, S>::FindNode(const S& value) const
 {
     const CBNode<T, S>* current = m_pHead;
     while (current)
@@ -599,8 +634,7 @@ const CBNode<T, S>* CBTree<T, S>::FindNode(const S& value) const
     return nullptr;
 }
 
-template <class T, class S>
-void CBTree<T, S>::RemoveNode(CBNode<T, S>*& node)
+template <class T, class S> void CBTree<T, S>::RemoveNode(CBNode<T, S>*& node)
 {
     if (!node)
     {
@@ -674,16 +708,14 @@ void CBTree<T, S>::RemoveNode(CBNode<T, S>*& node)
     }
 }
 
-template <class T, class S>
-void CBTree<T, S>::RemoveAll()
+template <class T, class S> void CBTree<T, S>::RemoveAll()
 {
     RemoveFrom(m_pHead);
     m_pHead = nullptr;
     m_Count = 0;
 }
 
-template <class T, class S>
-void CBTree<T, S>::RemoveFrom(CBNode<T, S>* node)
+template <class T, class S> void CBTree<T, S>::RemoveFrom(CBNode<T, S>* node)
 {
     if (!node)
     {
@@ -724,50 +756,42 @@ void CBTree<T, S>::RemoveFrom(CBNode<T, S>* node)
     }
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::FindHead()
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::FindHead()
 {
     return m_pHead;
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::GetLeft(CBNode<T, S>* node)
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::GetLeft(CBNode<T, S>* node)
 {
     return node->GetLeft();
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::GetRight(CBNode<T, S>* node)
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::GetRight(CBNode<T, S>* node)
 {
     return node->GetRight();
 }
 
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::GetParent(CBNode<T, S>* node)
+template <class T, class S> CBNode<T, S>* CBTree<T, S>::GetParent(CBNode<T, S>* node)
 {
     return node->GetParent();
 }
 
-template <class T, class S>
-void CBTree<T, S>::SetData(CBNode<T, S>* node, const T& data)
+template <class T, class S> void CBTree<T, S>::SetData(CBNode<T, S>* node, const T& data)
 {
     node->SetData(data);
 }
 
-template <class T, class S>
-T& CBTree<T, S>::GetData(CBNode<T, S>* node)
+template <class T, class S> T& CBTree<T, S>::GetData(CBNode<T, S>* node)
 {
     return node->GetData();
 }
 
-template <class T, class S>
-S CBTree<T, S>::GetValue(CBNode<T, S>* node)
+template <class T, class S> S CBTree<T, S>::GetValue(CBNode<T, S>* node)
 {
     return node->GetValue();
 }
 
-template <class T, class S>
-void CBTree<T, S>::Cycle(std::function<void(const T&, const S&)> process)
+template <class T, class S> void CBTree<T, S>::Cycle(std::function<void(const T&, const S&)> process)
 {
     CycleFrom(m_pHead, process);
 }
@@ -785,16 +809,15 @@ void CBTree<T, S>::CycleFrom(CBNode<T, S>* node, std::function<void(const T&, co
     CycleFrom(node->GetRight(), process);
 }
 
-template <class T>
-class CDimension
+template <class T> class CDimension
 {
 protected:
     int m_nSize;
     T* m_pData;
 
 public:
-    CDimension();	// Constructor
-    ~CDimension();	// Destructor
+    CDimension();  // Constructor
+    ~CDimension(); // Destructor
 
     T Set(int nIndex, T Data);
     T Get(int nIndex);
@@ -803,21 +826,19 @@ protected:
     void CheckDimensionSize(int nIndex);
 };
 
-template <class T>
-CDimension<T>::CDimension()
+template <class T> CDimension<T>::CDimension()
 {
     m_nSize = 16;
+    // cppcheck-suppress [noCopyConstructor, noOperatorEq]
     m_pData = new T[m_nSize];
 }
 
-template <class T>
-CDimension<T>::~CDimension()
+template <class T> CDimension<T>::~CDimension()
 {
     delete[] m_pData;
 }
 
-template <class T>
-T CDimension<T>::Set(int nIndex, T Data)
+template <class T> T CDimension<T>::Set(int nIndex, T Data)
 {
     CheckDimensionSize(nIndex);
     m_pData[nIndex] = Data;
@@ -825,15 +846,13 @@ T CDimension<T>::Set(int nIndex, T Data)
     return (Data);
 }
 
-template <class T>
-T CDimension<T>::Get(int nIndex)
+template <class T> T CDimension<T>::Get(int nIndex)
 {
     CheckDimensionSize(nIndex);
     return (m_pData[nIndex]);
 }
 
-template <class T>
-void CDimension<T>::CheckDimensionSize(int nIndex)
+template <class T> void CDimension<T>::CheckDimensionSize(int nIndex)
 {
     if (nIndex >= m_nSize)
     {

@@ -25,4 +25,4 @@ void DeleteBoids(void);
 void MoveFishs(void);
 void RenderFishs(void);
 
-#endif// __GOBOID_H__
+#endif // __GOBOID_H__

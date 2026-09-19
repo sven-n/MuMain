@@ -8,8 +8,8 @@ void SaveTextFile(wchar_t* FileName);
 
 extern wchar_t AbuseFilter[MAX_FILTERS][20];
 extern wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
-extern int  AbuseFilterNumber;
-extern int  AbuseNameFilterNumber;
+extern int AbuseFilterNumber;
+extern int AbuseNameFilterNumber;
 
 void OpenFilterFile(const wchar_t* FileName);
 void OpenNameFilterFile(const wchar_t* FileName);
@@ -29,8 +29,8 @@ extern void PrintItem(wchar_t* FileName);
 
 extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
 
-extern void  OpenMonsterScript(wchar_t* FileName);
-extern void  MonsterConvert(MONSTER* m, int Level);
+extern void OpenMonsterScript(wchar_t* FileName);
+extern void MonsterConvert(MONSTER* m, int Level);
 extern const wchar_t* getMonsterName(int type);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
@@ -49,27 +49,27 @@ bool IsRequireEquipItem(ITEM* pItem);
 class CHARACTER_MACHINE
 {
 public:
-    //input
+    // input
     CHARACTER_ATTRIBUTE Character;
-    ITEM				Equipment[MAX_EQUIPMENT];
-    DWORD				Gold;
-    int                 StorageGold;
-    MONSTER             Enemy;
-    //output
-    WORD    AttackDamageRight;
-    WORD    AttackDamageLeft;
-    WORD    CriticalDamage;
-    //final output
-    WORD    FinalAttackDamageRight;
-    WORD    FinalAttackDamageLeft;
-    WORD    FinalHitPoint;
-    WORD    FinalAttackRating;
-    WORD    FinalDefenseRating;
-    bool    FinalSuccessAttack;
-    bool    FinalSuccessDefense;
+    ITEM Equipment[MAX_EQUIPMENT];
+    DWORD Gold;
+    int StorageGold;
+    MONSTER Enemy;
+    // output
+    WORD AttackDamageRight;
+    WORD AttackDamageLeft;
+    WORD CriticalDamage;
+    // final output
+    WORD FinalAttackDamageRight;
+    WORD FinalAttackDamageLeft;
+    WORD FinalHitPoint;
+    WORD FinalAttackRating;
+    WORD FinalDefenseRating;
+    bool FinalSuccessAttack;
+    bool FinalSuccessDefense;
     // packet
-    BYTE	PacketSerial;
-    BYTE	InfinityArrowAdditionalMana;
+    BYTE PacketSerial;
+    BYTE InfinityArrowAdditionalMana;
 
     void Init();
     void InitAddValue();
@@ -91,7 +91,8 @@ public:
     void CalulateMasterLevelNextExperience();
     void CalculateAll();
     void CalculateBasicState();
-    void getAllAddStateOnlyExValues(int& iAddStrengthExValues, int& iAddDexterityExValues, int& iAddVitalityExValues, int& iAddEnergyExValues, int& iAddCharismaExValues);
+    void getAllAddStateOnlyExValues(int& iAddStrengthExValues, int& iAddDexterityExValues, int& iAddVitalityExValues,
+                                    int& iAddEnergyExValues, int& iAddCharismaExValues);
 };
 
 inline DWORD GenerateCheckSum2(const BYTE* pbyBuffer, DWORD dwSize, WORD wKey)

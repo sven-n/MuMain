@@ -7,7 +7,6 @@
 
 #include "Network/Server/WSclient.h"
 
-
 CUIGateKeeper::CUIGateKeeper()
 {
     m_bPublic = false;
@@ -19,9 +18,7 @@ CUIGateKeeper::CUIGateKeeper()
     m_iViewEntranceFee = m_nEntranceFee;
 }
 
-CUIGateKeeper::~CUIGateKeeper()
-{
-}
+CUIGateKeeper::~CUIGateKeeper() {}
 
 void CUIGateKeeper::SendPublicSetting()
 {

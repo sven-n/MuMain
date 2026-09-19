@@ -50,7 +50,10 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    POINT ptBtn = { m_Pos.x + (long)INVENTORY_WIDTH * (long)0.5f - (long)22.f, m_Pos.y + (long)380 };
+    POINT ptBtn = {
+        static_cast<LONG>(m_Pos.x + INVENTORY_WIDTH * 0.5f - 22.f),
+        static_cast<LONG>(m_Pos.y + 380),
+    };
 
     m_BtnMix.ChangeButtonImgState(true, IMAGE_MIXINVENTORY_MIXBTN, false);
     m_BtnMix.ChangeButtonInfo(m_Pos.x + INVENTORY_WIDTH * 0.5f - 22.f, m_Pos.y + 380, 44.f, 35.f);
@@ -266,7 +269,6 @@ bool CNewUIMixInventory::Update()
 bool CNewUIMixInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -1070,7 +1072,9 @@ void CNewUIMixInventory::RenderMixEffect()
         {
             for (int w = 0; w < iWidth; ++w)
             {
-                glColor3f((float)(rand() % 6 + 6) * 0.1f, (float)(rand() % 4 + 4) * 0.1f, 0.2f);
+                const BYTE red = static_cast<BYTE>((rand() % 6 + 6) * 0.1f * 255.f);
+                const BYTE green = static_cast<BYTE>((rand() % 4 + 4) * 0.1f * 255.f);
+                const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
                 float Scale = 5.f + (rand() % 10);
                 float x = m_pNewInventoryCtrl->GetPos().x +
@@ -1079,10 +1083,12 @@ void CNewUIMixInventory::RenderMixEffect()
                 float y = m_pNewInventoryCtrl->GetPos().y +
                     (m_pNewInventoryCtrl->GetItem(i)->y + h) * INVENTORY_SQUARE_WIDTH +
                     (rand() % INVENTORY_SQUARE_WIDTH);
-                RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0);
-                RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, Rotate);
-                RenderBitmapRotate(BITMAP_SHINY + 1, x, y, Scale * 3.f, Scale * 3.f, Rotate);
-                RenderBitmapRotate(BITMAP_LIGHT, x, y, Scale * 6.f, Scale * 6.f, 0);
+                RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
+                RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, Rotate, 0.f, 0.f, 1.f, 1.f, sparkleColor);
+                RenderBitmapRotate(BITMAP_SHINY + 1, x, y, Scale * 3.f, Scale * 3.f, Rotate,
+                    0.f, 0.f, 1.f, 1.f, sparkleColor);
+                RenderBitmapRotate(BITMAP_LIGHT, x, y, Scale * 6.f, Scale * 6.f, 0,
+                    0.f, 0.f, 1.f, 1.f, sparkleColor);
             }
         }
     }

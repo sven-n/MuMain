@@ -1,0 +1,743 @@
+name: CI
+
+on:
+  push:
+    branches: ['*']
+    paths-ignore:
+      - 'src/bin/Data/**'
+      - 'src/bin/fonts/**'
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache quality tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            /usr/bin/cppcheck
+            /usr/share/cppcheck
+          key: quality-tools-cppcheck-${{ runner.os }}-v2
+          restore-keys: quality-tools-cppcheck-${{ runner.os }}-
+
+      - name: Install quality tools
+        run: |
+          which cppcheck || { sudo apt-get update && sudo apt-get install -y cppcheck; }
+          pip install clang-format==21.1.8
+
+      - name: Detect changed C++ files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # On main push, diff against the previous commit
+            DIFF_BASE=HEAD~1
+          else
+            DIFF_BASE=origin/main
+          fi
+          CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
+            'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
+            | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+          echo "diff_base=$DIFF_BASE" >> "$GITHUB_OUTPUT"
+          if [ -z "$CHANGED" ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "No C++ files changed"
+          else
+            COUNT=$(echo "$CHANGED" | wc -l | tr -d ' ')
+            echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+            echo "$CHANGED" > /tmp/changed-cpp-files.txt
+            echo "$COUNT C++ files changed"
+          fi
+
+      - name: Check formatting
+        if: steps.changed.outputs.count != '0'
+        run: |
+          echo "Checking ${{ steps.changed.outputs.count }} files..."
+          base="${{ steps.changed.outputs.diff_base }}"
+          while IFS= read -r file; do
+            format_args=()
+            while read -r start count; do
+              if [ -z "$start" ]; then
+                continue
+              fi
+              if [ -z "$count" ]; then
+                count=1
+              fi
+              if [ "$count" -eq 0 ]; then
+                continue
+              fi
+              end=$((start + count - 1))
+              format_args+=(--lines="${start}:${end}")
+            done < <(
+              git diff --unified=0 --no-color "${base}...HEAD" -- "$file" \
+                | sed -nE 's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
+            )
+            if [ "${#format_args[@]}" -ne 0 ]; then
+              clang-format --dry-run --Werror "${format_args[@]}" "$file"
+            fi
+          done < /tmp/changed-cpp-files.txt
+
+      - name: Static analysis
+        if: steps.changed.outputs.count != '0'
+        run: |
+          echo "Linting ${{ steps.changed.outputs.count }} files..."
+          cat /tmp/changed-cpp-files.txt | xargs cppcheck \
+            -j$(nproc) \
+            --max-configs=1 \
+            --error-exitcode=1 \
+            --enable=warning,performance,portability \
+            --std=c++20 \
+            --language=c++ \
+            --suppress=missingInclude \
+            --suppress=unmatchedSuppression \
+            --suppress=unusedFunction \
+            --suppress=*:*/ThirdParty/* \
+            --suppress=useInitializationList \
+            --suppress=passedByValue \
+            --suppress=postfixOperator \
+            --suppress=returnByReference \
+            --suppress=uninitMemberVar \
+            --suppress=uninitMemberVarNoCtor \
+            --inline-suppr
+
+  build-windows:
+    name: Windows Native Build (x64, Release, editor OFF)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Activate Visual Studio developer environment
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: x64
+
+      - name: Assert MSVC developer environment
+        shell: pwsh
+        run: |
+          $compiler = (Get-Command cl.exe -ErrorAction Stop).Source
+          $linker = (Get-Command link.exe -ErrorAction Stop).Source
+          $compilerIdentity = (& $compiler /? 2>&1 | Out-String)
+          $linkerIdentity = (& $linker /? 2>&1 | Out-String)
+
+          Write-Host "cl.exe:   $compiler"
+          Write-Host "link.exe: $linker"
+
+          if ($compilerIdentity -notmatch 'Microsoft \(R\) C/C\+\+ Optimizing Compiler') {
+            throw "cl.exe is not the Microsoft C/C++ compiler."
+          }
+          if ($compilerIdentity -notmatch 'for x64') {
+            throw "cl.exe does not target x64."
+          }
+          if ($linkerIdentity -notmatch 'Microsoft \(R\) Incremental Linker') {
+            throw "link.exe is not the Microsoft linker."
+          }
+          exit 0
+
+      - name: Cache FetchContent and NuGet dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/windows-ci-x64-release/_deps
+            .nuget
+          key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: windows-x64-release-deps-
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:/vcpkg/installed
+            C:/vcpkg/packages
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-windows-x64-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset windows-x64
+          -B out/build/windows-ci-x64-release
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
+          -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
+          -DVCPKG_MANIFEST_MODE=ON
+          -DENABLE_EDITOR=OFF
+          -DMU_ENABLE_SHADER_COMPILATION=ON
+          -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
+          -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
+          -DDXC_EXE=C:/vcpkg/installed/x64-windows/tools/directx-dxc/dxc.exe
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+
+      - name: Assert configured MSVC compiler
+        shell: pwsh
+        run: |
+          $buildDirectory = "out/build/windows-ci-x64-release"
+          $compilerStates = @(
+            Get-ChildItem `
+              -Path "$buildDirectory/CMakeFiles/*/CMakeCXXCompiler.cmake" `
+              -File
+          )
+          if ($compilerStates.Count -ne 1) {
+            throw "Expected one top-level CMakeCXXCompiler.cmake; found $($compilerStates.Count)."
+          }
+
+          $compilerState = $compilerStates[0]
+          $state = Get-Content -LiteralPath $compilerState.FullName -Raw
+          if ($state -notmatch 'set\(CMAKE_CXX_COMPILER_ID "MSVC"\)') {
+            throw "CMake did not configure the MSVC C++ compiler."
+          }
+
+          $compilerMatch = [regex]::Match(
+            $state,
+            'set\(CMAKE_CXX_COMPILER "([^"]+)"\)'
+          )
+          if (-not $compilerMatch.Success) {
+            throw "CMake did not record the C++ compiler path."
+          }
+
+          $configuredCompiler = [IO.Path]::GetFullPath($compilerMatch.Groups[1].Value)
+          $activeCompiler = [IO.Path]::GetFullPath(
+            (Get-Command cl.exe -ErrorAction Stop).Source
+          )
+          Write-Host "CMake compiler ID: MSVC"
+          Write-Host "CMake C++ compiler: $configuredCompiler"
+          if (-not [StringComparer]::OrdinalIgnoreCase.Equals(
+            $configuredCompiler,
+            $activeCompiler
+          )) {
+            throw "CMake selected a compiler outside the active MSVC environment."
+          }
+
+      - name: Build
+        run: cmake --build out/build/windows-ci-x64-release --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/windows-ci-x64-release --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+      - name: Stage MSVC redistributable runtime
+        shell: pwsh
+        run: |
+          $runtimeDirectory = "out/build/windows-ci-x64-release/src/Release"
+          if (-not (Test-Path -LiteralPath $runtimeDirectory -PathType Container)) {
+            throw "Missing native runtime directory: $runtimeDirectory"
+          }
+          if ([string]::IsNullOrWhiteSpace($env:VCToolsRedistDir)) {
+            throw "VCToolsRedistDir is missing from the active MSVC developer environment."
+          }
+
+          $redistArchitectureDirectory = Join-Path $env:VCToolsRedistDir "x64"
+          $crtDirectories = @(
+            Get-ChildItem -LiteralPath $redistArchitectureDirectory -Directory -Filter "Microsoft.VC*.CRT"
+          )
+          if ($crtDirectories.Count -ne 1) {
+            throw "Expected one active Microsoft.VC*.CRT directory under $redistArchitectureDirectory; found $($crtDirectories.Count)."
+          }
+
+          $crtDlls = @(
+            Get-ChildItem -LiteralPath $crtDirectories[0].FullName -File -Filter "*.dll" |
+              Sort-Object Name
+          )
+          if ($crtDlls.Count -eq 0) {
+            throw "Active MSVC CRT directory contains no redistributable DLLs."
+          }
+          Copy-Item -LiteralPath $crtDlls.FullName -Destination $runtimeDirectory -Force
+
+      - name: Validate artifacts
+        shell: pwsh
+        run: |
+          $runtimeDirectory = "out/build/windows-ci-x64-release/src/Release"
+          $requiredFiles = @(
+            "$runtimeDirectory/Main.exe",
+            "$runtimeDirectory/MUnique.Client.Library.dll",
+            "$runtimeDirectory/config.ini"
+          )
+          foreach ($path in $requiredFiles) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "Missing required runtime file: $path"
+            }
+          }
+          if (-not (Test-Path -LiteralPath "$runtimeDirectory/shaders" -PathType Container)) {
+            throw "Missing required runtime directory: $runtimeDirectory/shaders"
+          }
+          foreach ($path in @("$runtimeDirectory/Data", "$runtimeDirectory/fonts")) {
+            if (Test-Path -LiteralPath $path) {
+              throw "Unexpected bundled game data: $path"
+            }
+          }
+
+          $dumpbin = (Get-Command dumpbin.exe -ErrorAction Stop).Source
+          $expectedMachinePattern = '^\s*8664 machine \(x64\)\s*$' # 8664 machine (x64)
+          if ([string]::IsNullOrWhiteSpace($env:WINDIR)) {
+            throw "WINDIR is required for target Windows OS DLL validation."
+          }
+          if ([Environment]::Is64BitProcess) {
+            $targetSystemDirectory = Join-Path $env:WINDIR "System32"
+          } else {
+            $targetSystemDirectory = Join-Path $env:WINDIR "Sysnative"
+          }
+          $windowsOsDlls = @(
+            "advapi32.dll"
+            "avrt.dll"
+            "bcrypt.dll"
+            "cfgmgr32.dll"
+            "combase.dll"
+            "comctl32.dll"
+            "comdlg32.dll"
+            "crypt32.dll"
+            "d3d12.dll"
+            "dbghelp.dll"
+            "dinput8.dll"
+            "dnsapi.dll"
+            "dwmapi.dll"
+            "dxcore.dll"
+            "dxgi.dll"
+            "dxguid.dll"
+            "gdi32.dll"
+            "glu32.dll"
+            "hid.dll"
+            "imagehlp.dll"
+            "imm32.dll"
+            "iphlpapi.dll"
+            "kernel32.dll"
+            "mf.dll"
+            "mfplat.dll"
+            "mfreadwrite.dll"
+            "mfsensorgroup.dll"
+            "msvcrt.dll"
+            "normaliz.dll"
+            "ntdll.dll"
+            "ole32.dll"
+            "oleaut32.dll"
+            "opengl32.dll"
+            "powrprof.dll"
+            "propsys.dll"
+            "rpcrt4.dll"
+            "sechost.dll"
+            "secur32.dll"
+            "setupapi.dll"
+            "shell32.dll"
+            "shcore.dll"
+            "shlwapi.dll"
+            "ucrtbase.dll"
+            "uiautomationcore.dll"
+            "urlmon.dll"
+            "user32.dll"
+            "usp10.dll"
+            "uuid.dll"
+            "version.dll"
+            "vfw32.dll"
+            "wininet.dll"
+            "winmm.dll"
+            "wintrust.dll"
+            "wldap32.dll"
+            "ws2_32.dll"
+            "wtsapi32.dll"
+          )
+          $windowsOsDllAllowlist = @{}
+          foreach ($windowsOsDll in $windowsOsDlls) {
+            $windowsOsDllAllowlist[$windowsOsDll] = $true
+          }
+
+          $rootRuntimeFiles = @{}
+          Get-ChildItem -LiteralPath $runtimeDirectory -Force -File |
+            ForEach-Object { $rootRuntimeFiles[$_.Name] = $_.FullName }
+          $runtimeBinaries = @(
+            Get-ChildItem -LiteralPath $runtimeDirectory -Force -File -Recurse |
+              Where-Object { $_.Extension -in @(".exe", ".dll") } |
+              Sort-Object FullName
+          )
+          if ($runtimeBinaries.Count -eq 0) {
+            throw "Runtime directory contains no PE files: $runtimeDirectory"
+          }
+
+          $missingImports = @()
+          foreach ($binary in $runtimeBinaries) {
+            $headers = @(& $dumpbin /headers $binary.FullName 2>&1)
+            if ($LASTEXITCODE -ne 0) {
+              throw "dumpbin /headers failed for $($binary.FullName) with exit code $LASTEXITCODE."
+            }
+            $machineMatches = @($headers | Select-String -Pattern $expectedMachinePattern)
+            if ($machineMatches.Count -ne 1) {
+              throw "Unexpected PE architecture for $($binary.FullName); expected x64."
+            }
+
+            $dependents = @(& $dumpbin /DEPENDENTS $binary.FullName 2>&1)
+            if ($LASTEXITCODE -ne 0) {
+              throw "dumpbin /DEPENDENTS failed for $($binary.FullName) with exit code $LASTEXITCODE."
+            }
+            $dependencySection = [regex]::Match(
+              ($dependents -join "`n"),
+              '(?ms)^[ \t]*Image has the following dependencies:[ \t]*\r?\n(?<body>.*?)(?=^[ \t]*Summary[ \t]*$)'
+            )
+            if (-not $dependencySection.Success) {
+              throw "Could not parse dumpbin dependency heading for $($binary.FullName)."
+            }
+            $imports = @(
+              [regex]::Matches(
+                $dependencySection.Groups["body"].Value,
+                '(?im)^[ \t]*(?<name>[^ \t\r\n]+\.dll)[ \t]*$'
+              ) |
+                ForEach-Object { $_.Groups["name"].Value } |
+                Sort-Object -Unique
+            )
+            foreach ($importName in $imports) {
+              $importFileName = [IO.Path]::GetFileName($importName)
+              if (
+                [IO.Path]::IsPathRooted($importName) -or
+                $importName.Contains('/') -or
+                $importName.Contains('\') -or
+                -not [StringComparer]::Ordinal.Equals($importFileName, $importName)
+              ) {
+                $missingImports += "$($binary.FullName): invalid import name: $importName"
+                continue
+              }
+              if ($importName -match '^(?:ucrtbased|(?:vcruntime|msvcp|concrt|vcomp)[0-9]+(?:_[a-z0-9_]+)?d)\.dll$') {
+                $missingImports += "$($binary.FullName): debug CRT import in Release runtime: $importName"
+                continue
+              }
+              if ($rootRuntimeFiles.ContainsKey($importName)) {
+                continue
+              }
+              if ($importName -match '^(?:vcruntime|msvcp|concrt|vcomp)[0-9]+(?:_[a-z0-9_]+)?\.dll$') {
+                $missingImports += "$($binary.FullName): VC runtime import must be staged root-local: $importName"
+                continue
+              }
+              if ($importName -like "api-ms-win-*" -or $importName -like "ext-ms-win-*") {
+                continue
+              }
+              if ($windowsOsDllAllowlist.ContainsKey($importName)) {
+                $systemDllPath = Join-Path $targetSystemDirectory $importName
+                if (Test-Path -LiteralPath $systemDllPath -PathType Leaf) {
+                  continue
+                }
+                $missingImports += "$($binary.FullName): allowlisted Windows OS DLL missing from target system directory: $importName"
+                continue
+              }
+              $missingImports += "$($binary.FullName): $importName"
+            }
+          }
+          $missingImports = @($missingImports | Sort-Object -Unique)
+          if ($missingImports.Count -ne 0) {
+            throw "Missing runtime imports:`n$($missingImports -join "`n")"
+          }
+
+          $expectedShaders = @(
+            "basic_colored.frag.dxil"
+            "basic_colored.frag.msl"
+            "basic_colored.frag.spv"
+            "basic_colored.vert.dxil"
+            "basic_colored.vert.msl"
+            "basic_colored.vert.spv"
+            "basic_textured.frag.dxil"
+            "basic_textured.frag.msl"
+            "basic_textured.frag.spv"
+            "basic_textured.vert.dxil"
+            "basic_textured.vert.msl"
+            "basic_textured.vert.spv"
+            "shadow_volume.vert.dxil"
+            "shadow_volume.vert.msl"
+            "shadow_volume.vert.spv"
+            "skinned_textured.vert.dxil"
+            "skinned_textured.vert.msl"
+            "skinned_textured.vert.spv"
+          )
+          $shaderDirectory = "$runtimeDirectory/shaders"
+          $actualShaders = @(
+            Get-ChildItem -LiteralPath $shaderDirectory -Force -File -Recurse |
+              ForEach-Object {
+                [IO.Path]::GetRelativePath($shaderDirectory, $_.FullName).Replace('\', '/')
+              } |
+              Sort-Object
+          )
+          $shaderDifference = @(
+            Compare-Object -ReferenceObject $expectedShaders -DifferenceObject $actualShaders
+          )
+          if ($shaderDifference.Count -ne 0) {
+            Write-Host ($shaderDifference | Format-Table -AutoSize | Out-String)
+            throw "Runtime shader manifest differs from the exact 18-file manifest."
+          }
+
+          Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
+
+      - name: Archive runtime
+        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
+
+      - name: Upload runtime artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-windows-native-x64-release-editor-off-no-data-main
+          path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz
+          if-no-files-found: error
+
+  build-linux:
+    name: Linux Native Build (x64, Release, editor OFF)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build gcc g++ \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols \
+            libasound2-dev libpulse-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
+            glslang-tools spirv-cross \
+            pkg-config
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/linux-ci/_deps
+            .nuget
+          key: linux-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: linux-x64-release-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset linux-x64
+          -B out/build/linux-ci
+          -DENABLE_EDITOR=OFF
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build out/build/linux-ci --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/linux-ci --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+      - name: Validate runtime
+        run: |
+          runtime_directory="out/build/linux-ci/src/Release"
+          for path in \
+            "$runtime_directory/Main" \
+            "$runtime_directory/MUnique.Client.Library.so" \
+            "$runtime_directory/config.ini" \
+            "$runtime_directory/shaders"
+          do
+            if [ ! -e "$path" ]; then
+              echo "Missing required runtime path: $path" >&2
+              exit 1
+            fi
+          done
+          for path in "$runtime_directory/Data" "$runtime_directory/fonts"; do
+            if [ -e "$path" ]; then
+              echo "Unexpected bundled game data: $path" >&2
+              exit 1
+            fi
+          done
+
+      - name: Archive runtime
+        if: github.event_name == 'push'
+        run: tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz -C out/build/linux-ci/src/Release .
+
+      - name: Upload runtime artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-linux-native-x64-release-editor-off-no-data-main
+          path: MuMain-linux-native-x64-release-editor-off-no-data.tar.gz
+          if-no-files-found: error
+
+  build-macos:
+    name: macOS Native Build (arm64, Release, editor OFF)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/macos-ci/_deps
+            .nuget
+          key: macos-arm64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: macos-arm64-release-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset macos-arm64
+          -B out/build/macos-ci
+          -DENABLE_EDITOR=OFF
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+          -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+
+      - name: Build
+        run: cmake --build out/build/macos-ci --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/macos-ci --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+      - name: Validate runtime
+        run: |
+          runtime_directory="out/build/macos-ci/src/Release/Main.app/Contents/MacOS"
+          for path in \
+            "$runtime_directory/Main" \
+            "$runtime_directory/MUnique.Client.Library.dylib" \
+            "$runtime_directory/config.ini" \
+            "$runtime_directory/shaders"
+          do
+            if [ ! -e "$path" ]; then
+              echo "Missing required runtime path: $path" >&2
+              exit 1
+            fi
+          done
+          for path in "$runtime_directory/Data" "$runtime_directory/fonts"; do
+            if [ -e "$path" ]; then
+              echo "Unexpected bundled game data: $path" >&2
+              exit 1
+            fi
+          done
+
+      - name: Archive runtime
+        if: github.event_name == 'push'
+        run: tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz -C out/build/macos-ci/src/Release Main.app
+
+      - name: Upload runtime artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-macos-native-arm64-release-editor-off-no-data-main
+          path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Semantic Release
+    needs: [quality, build-windows, build-linux, build-macos]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download Windows runtime archive
+        uses: actions/download-artifact@v4
+        with:
+          name: mu-client-windows-native-x64-release-editor-off-no-data-main
+          path: .
+
+      - name: Download Linux runtime archive
+        uses: actions/download-artifact@v4
+        with:
+          name: mu-client-linux-native-x64-release-editor-off-no-data-main
+          path: .
+
+      - name: Download macOS runtime archive
+        uses: actions/download-artifact@v4
+        with:
+          name: mu-client-macos-native-arm64-release-editor-off-no-data-main
+          path: .
+
+      - name: Resolve compatible data release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          data_tree=$(git rev-parse HEAD:src/bin/Data)
+          fonts_tree=$(git rev-parse HEAD:src/bin/fonts)
+          asset_id=$(printf '%s\n%s\n' "$data_tree" "$fonts_tree" | sha256sum | cut -c1-16)
+          data_tag="data-${asset_id}"
+          data_release_url=$(gh release view "$data_tag" --json url --jq .url)
+
+          {
+            echo "DATA_ASSET_ID=${asset_id}"
+            echo "DATA_RELEASE_URL=${data_release_url}"
+          } >> "$GITHUB_ENV"
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/git
+            conventional-changelog-conventionalcommits@8.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Link compatible data release
+        if: steps.semantic.outputs.new_release_published == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.semantic.outputs.new_release_git_tag }}
+        run: |
+          # ponytail: post-publish edit; use a generateNotes plugin if note updates become concurrent.
+          release_notes="${RUNNER_TEMP}/MuMain-release-notes.md"
+          gh release view "$RELEASE_TAG" --json body --jq .body > "$release_notes"
+          {
+            printf '\n## Compatible game data\n\n'
+            # shellcheck disable=SC2016
+            printf '[Download `MuMain-data-%s.tar.gz` and its checksum](%s).\n' "$DATA_ASSET_ID" "$DATA_RELEASE_URL"
+          } >> "$release_notes"
+          gh release edit "$RELEASE_TAG" --notes-file "$release_notes"

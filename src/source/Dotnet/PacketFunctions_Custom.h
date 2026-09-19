@@ -1,4 +1,4 @@
-﻿// <copyright file="PacketFunctions.h" company="MUnique">
+// <copyright file="PacketFunctions.h" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -24,9 +24,16 @@ class PacketFunctions_Base
 {
 private:
     int32_t _handle = -1;
+
 public:
-    void SetHandle(const int32_t handle) { _handle = handle; }
-    int32_t GetHandle() const { return _handle; }
+    void SetHandle(const int32_t handle)
+    {
+        _handle = handle;
+    }
+    int32_t GetHandle() const
+    {
+        return _handle;
+    }
 };
 
 #pragma pack(push, 1)
@@ -52,15 +59,19 @@ public:
     /// <param name="clientSerial">The client serial.</param>
     /// <remarks>
     /// Is sent by the client when: The player tries to log into the game.
-    /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
+    /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct,
+    /// the state of the player is proceeding to be logged in.
     /// </remarks>
-    void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion, const BYTE* clientSerial);
+    void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion,
+                   const BYTE* clientSerial);
 };
 
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
-class PacketFunctions_ConnectServer_Custom : public PacketFunctions_Base { };
+class PacketFunctions_ConnectServer_Custom : public PacketFunctions_Base
+{
+};
 
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
@@ -74,8 +85,9 @@ public:
     /// <param name="roomId">The room id.</param>
     /// <param name="token">The token to authenticate the client.</param>
     /// <remarks>
-    /// Is sent by the client when: This packet is sent by the client after it connected to the server, to authenticate itself.
-    /// Causes reaction on server side: The server will check the token. If it's correct, the client gets added to the requested chat room.
+    /// Is sent by the client when: This packet is sent by the client after it connected to the server, to authenticate
+    /// itself. Causes reaction on server side: The server will check the token. If it's correct, the client gets added
+    /// to the requested chat room.
     /// </remarks>
     void SendAuthenticateExt(uint16_t roomId, uint32_t token);
 
@@ -85,8 +97,8 @@ public:
     /// <param name="senderIndex">The sender index.</param>
     /// <param name="message">The message.</param>
     /// <remarks>
-    /// Is sent by the server when: This packet is sent by the server after another chat client sent a message to the current chat room.
-    /// Causes reaction on client side: The client will show the message.
+    /// Is sent by the server when: This packet is sent by the server after another chat client sent a message to the
+    /// current chat room. Causes reaction on client side: The client will show the message.
     /// </remarks>
     void SendChatMessageExt(BYTE senderIndex, const wchar_t* message);
 };

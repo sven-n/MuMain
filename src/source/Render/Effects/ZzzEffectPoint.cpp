@@ -15,7 +15,7 @@
 #include "Network/Server/WSclient.h"
 #include "UI/NewUI/NewUISystem.h"
 
-PARTICLE  Points[MAX_POINTS];
+PARTICLE Points[MAX_POINTS];
 
 int g_iLatestPoint = -1;
 
@@ -47,7 +47,6 @@ void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale, bool bMo
     }
 }
 
-
 void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
 {
     vec3_t p;
@@ -59,7 +58,7 @@ void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, flo
     VectorCopy(Color, Light[3]);
 
     char Text[32];
-    itoa(Num, Text, 10);
+    snprintf(Text, sizeof(Text), "%d", Num);
     p[0] -= strlen(Text) * 5.f;
     unsigned int Length = strlen(Text);
     p[0] -= Length * Scale * 0.125f;
@@ -68,7 +67,7 @@ void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, flo
     float sinTh = sinf((float)(ANGLE_TO_RAD * (g_Camera.Angle[2])));
     float cosTh = cosf((float)(ANGLE_TO_RAD * (g_Camera.Angle[2])));
 
-    for (unsigned int i = 0;i < Length;i++)
+    for (unsigned int i = 0; i < Length; i++)
     {
         float UV[4][2];
         float u = (float)(Text[i] - 48) * 16.f / 256.f;
@@ -98,15 +97,18 @@ void RenderPoints(BYTE byRenderOneMore)
         {
             if (byRenderOneMore == 1)
             {
-                if (o->Position[2] > 350.f) continue;
+                if (o->Position[2] > 350.f)
+                    continue;
             }
             else if (byRenderOneMore == 2)
             {
-                if (o->Position[2] <= 300.f) continue;
+                if (o->Position[2] <= 300.f)
+                    continue;
             }
             else if (o->bRepeatedly)
             {
-                if (o->Position[2] <= o->fRepeatedlyHeight) continue;
+                if (o->Position[2] <= o->fRepeatedlyHeight)
+                    continue;
             }
 
             if (o->Type > -1)
@@ -150,7 +152,7 @@ void MovePoints()
                     o->Live = false;
                 if (o->Type != -2)
                 {
-                    o->Scale -= 5.f * FPS_ANIMATION_FACTOR;//20.f;
+                    o->Scale -= 5.f * FPS_ANIMATION_FACTOR; // 20.f;
                     if (o->Scale < 15.f)
                         o->Scale = 15.f;
                 }

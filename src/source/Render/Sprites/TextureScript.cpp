@@ -55,6 +55,24 @@ bool TextureScriptParsing::parsingTScriptA(char* filename)
                     m_bBeScript = true;
                     break;
 
+                case 'D':
+                    if ((i + 1) < length && strTokenFile[i + 1] == 'C')
+                    {
+                        m_byShadowMesh = SHADOW_RENDER_COLOR;
+                        m_bBeScript = true;
+                        ++i;
+                        break;
+                    }
+                    if ((i + 1) < length && strTokenFile[i + 1] == 'T')
+                    {
+                        m_byShadowMesh = SHADOW_RENDER_TEXTURE;
+                        m_bBeScript = true;
+                        ++i;
+                        break;
+                    }
+                    m_bBeScript = false;
+                    return m_bBeScript;
+
                 default:
                     m_bBeScript = false;
 #ifdef PJH_ADD_PANDA_CHANGERING
@@ -71,4 +89,3 @@ bool TextureScriptParsing::parsingTScriptA(char* filename)
     }
     return m_bBeScript;
 }
-

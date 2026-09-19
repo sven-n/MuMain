@@ -4,12 +4,6 @@
 #include "stdafx.h"
 #include "LoadData.h"
 
-#include <codecvt>
-#include <locale>
-#ifdef _WIN32
-#include <shlwapi.h>
-#endif
-
 #include "Render/Sprites/GlobalBitmap.h"
 
 #include "Render/Models/ZzzBMD.h"
@@ -41,12 +35,17 @@ void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
 
     Success = Models[Type].Open2(Dir, Name);
 
-    if (Success == false && (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 || wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0))
+    if (Success == false)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls file does not exist.", Name);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name, Type);
+
+        if (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 || wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0)
+        {
+            wchar_t Text[256];
+            mu_swprintf(Text, L"%ls file does not exist.", Name);
+            MessageBox(g_hWnd, Text, NULL, MB_OK);
+            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        }
     }
 }
 
@@ -112,6 +111,7 @@ void CLoadData::OpenTexture(int Model, const wchar_t* SubFolder, int Wrap, int T
             {
                 wchar_t szErrorMsg[256] = { 0, };
                 mu_swprintf(szErrorMsg, L"OpenTexture Failed: %ls of %hs", szFullPath, pModel->Name);
+                g_ErrorReport.Write(L"%ls (Model=%d)\r\n", szErrorMsg, Model);
 #ifdef FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

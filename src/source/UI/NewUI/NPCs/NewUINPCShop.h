@@ -110,6 +110,7 @@ namespace SEASON3B
 
         bool InventoryProcess();
         bool BtnProcess();
+        bool WindowProcess();
 
         void RenderFrame();
         void RenderTexts();

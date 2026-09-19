@@ -16,8 +16,6 @@
 
 #include "Engine/AI/GOBoid.h"
 
-
-
 GMUnitedMarketPlacePtr GMUnitedMarketPlace::Make()
 {
     GMUnitedMarketPlacePtr empire(new GMUnitedMarketPlace);
@@ -25,28 +23,22 @@ GMUnitedMarketPlacePtr GMUnitedMarketPlace::Make()
     return empire;
 }
 
-GMUnitedMarketPlace::GMUnitedMarketPlace()
-{
-}
+GMUnitedMarketPlace::GMUnitedMarketPlace() {}
 
 GMUnitedMarketPlace::~GMUnitedMarketPlace()
 {
     Destroy();
 }
 
-void GMUnitedMarketPlace::Init()
-{
-}
+void GMUnitedMarketPlace::Init() {}
 
-void GMUnitedMarketPlace::Destroy()
-{
-}
+void GMUnitedMarketPlace::Destroy() {}
 
 bool GMUnitedMarketPlace::CreateObject(OBJECT* o)
 {
     switch (o->Type)
     {
-    case 67:	// 기대기 박스
+    case 67: // 기대기 박스
     {
         CreateOperate(o);
         Vector(100.f, 100.f, 160.f, o->BoundingBoxMax);
@@ -81,27 +73,30 @@ CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int
 
 bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 {
-    if (IsUnitedMarketPlace() == false) return false;
+    if (IsUnitedMarketPlace() == false)
+        return false;
 
     Alpha(o);
-    if (o->Alpha < 0.01f) return false;
+    if (o->Alpha < 0.01f)
+        return false;
 
     BMD* b = &Models[o->Type];
 
     switch (o->Type)
     {
-    case 8:	// chofountain01 폭포물 표면의 Animation 속도 처리 약간더 빠르게.
+    case 8: // chofountain01 폭포물 표면의 Animation 속도 처리 약간더 빠르게.
     {
         o->Velocity = 0.2f;
     }
-    return true;
-    case 30:	// 가로등
+        return true;
+    case 30: // 가로등
     {
         VectorCopy(o->Position, b->BodyOrigin);
         b->BodyScale = o->Scale;
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, true);
+        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                     false, true);
 
-        vec3_t	vLightPosition, vRelativePos;
+        vec3_t vLightPosition, vRelativePos;
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
         b->TransformPosition(BoneTransform[1], vRelativePos, vLightPosition, false);
 
@@ -111,14 +106,15 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 
         AddTerrainLight(vLightPosition[0], vLightPosition[1], vLightFire, 3, PrimaryTerrainLight);
     }
-    return true;
-    case 35:	// 벽가로등
+        return true;
+    case 35: // 벽가로등
     {
         VectorCopy(o->Position, b->BodyOrigin);
         b->BodyScale = o->Scale;
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, true);
+        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                     false, true);
 
-        vec3_t	vLightPosition, vRelativePos;
+        vec3_t vLightPosition, vRelativePos;
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
         b->TransformPosition(BoneTransform[2], vRelativePos, vLightPosition, false);
 
@@ -128,7 +124,7 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 
         AddTerrainLight(vLightPosition[0], vLightPosition[1], vLightFire, 1, PrimaryTerrainLight);
     }
-    return true;
+        return true;
     case 54:
     case 55:
     case 56:
@@ -137,7 +133,7 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
     {
         o->HiddenMesh = -2;
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -145,8 +141,10 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 
 bool GMUnitedMarketPlace::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-    if (o == NULL)	return false;
-    if (b == NULL)	return false;
+    if (o == NULL)
+        return false;
+    if (b == NULL)
+        return false;
 
     if (IsUnitedMarketPlace() == false)
     {
@@ -158,7 +156,7 @@ bool GMUnitedMarketPlace::MoveMonsterVisual(OBJECT* o, BMD* b)
     case MODEL_UNITEDMARKETPLACE_JULIA:
     {
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -202,7 +200,7 @@ bool GMUnitedMarketPlace::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void GMUnitedMarketPlace::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    vec3_t  Light;
+    vec3_t Light;
     vec3_t StartPos, StartRelative;
     vec3_t EndPos, EndRelative;
     Vector(1.0f, 1.0f, 1.0f, Light);
@@ -237,7 +235,8 @@ bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
 {
-    if (IsUnitedMarketPlace() == false) return false;
+    if (IsUnitedMarketPlace() == false)
+        return false;
 
     vec3_t p, Position, Light;
     Vector(0.f, 30.f, 0.f, Position);
@@ -250,7 +249,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         for (int i = 1; i <= 3; ++i)
         {
-            vec3_t	vLightPosition, vRelativePos;
+            vec3_t vLightPosition, vRelativePos;
             Vector(0.0f, 0.0f, 0.0f, vRelativePos);
             b->TransformPosition(BoneTransform[i], vRelativePos, vLightPosition, false);
 
@@ -258,13 +257,13 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
             vec3_t vLightFire;
             Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, vLightFire);
             CreateSprite(BITMAP_FLARE, vLightPosition, 1.5f * o->Scale, vLightFire, o);
-            //CreateSprite(BITMAP_LIGHT, vLightPosition, fLumi/2, vLightFire, o);
+            // CreateSprite(BITMAP_LIGHT, vLightPosition, fLumi/2, vLightFire, o);
         }
     }
-    return true;
+        return true;
     case 35:
     {
-        vec3_t	vLightPosition, vRelativePos;
+        vec3_t vLightPosition, vRelativePos;
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
         b->TransformPosition(BoneTransform[2], vRelativePos, vLightPosition, false);
 
@@ -273,18 +272,18 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(fLumi * 0.7f, fLumi * 0.7f, fLumi * 0.7f, vLightFire);
         CreateSprite(BITMAP_FLARE, vLightPosition, 1.5f * o->Scale, vLightFire, o);
     }
-    return true;
+        return true;
     case 54:
     {
         CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
     }
-    return true;
+        return true;
     case 55:
     {
         Vector(1.f, 1.f, 1.f, Light);
         CreateParticleFpsChecked(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 8, o->Scale);
     }
-    return true;
+        return true;
     case 56:
     {
         Vector(1.f, 1.f, 1.f, Light);
@@ -293,7 +292,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
         }
     }
-    return true;
+        return true;
     case 57:
     {
         vec3_t vLightFire;
@@ -316,7 +315,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
             break;
         }
     }
-    return true;
+        return true;
     case 58:
     {
         float fLumi;
@@ -325,7 +324,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(fLumi * 0.4f, fLumi * 0.4f, fLumi * 0.2f, vLightFire);
         CreateSprite(BITMAP_LIGHT, o->Position, 20.0f * o->Scale, vLightFire, o);
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -339,10 +338,11 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
         }
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -355,7 +355,7 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_UNITEDMARKETPLACE_CHRISTIN:
     {
     }
-    return true;
+        return true;
     case MODEL_UNITEDMARKETPLACE_RAUL:
     {
         vec3_t vRelativePos, vWorldPos, Light, vLightPosition;
@@ -373,7 +373,7 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         b->TransformPosition(o->BoneTransform[43], vRelativePos, vLightPosition, true);
         CreateSprite(BITMAP_FLARE_RED, vLightPosition, 0.24f, Light, o);
 
-        vec3_t	v3Angle;
+        vec3_t v3Angle;
         Vector(0.0f, 0.0f, 0.0f, v3Angle);
         Vector(0.f, 0.f, 0.f, vRelativePos);
         Vector(1.0f, 0.7f, 0.3f, Light);
@@ -399,7 +399,7 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         b->TransformPosition(o->BoneTransform[76], vRelativePos, vLightPosition, true);
         CreateSprite(BITMAP_FLARE, vLightPosition, 0.4f, Light, o);
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -407,7 +407,8 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-    if (IsUnitedMarketPlace() == false) return;
+    if (IsUnitedMarketPlace() == false)
+        return;
 
     switch (o->Type)
     {
@@ -418,21 +419,21 @@ void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
         b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
         float fFlow_u = sinf(WorldTime * 0.0007f) * 0.05f;
         float fFlow_v = sinf(WorldTime * 0.001f) * 0.05f;
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.3f, o->BlendMeshTexCoordU, -(int)WorldTime % 10000 * 0.001f);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.3f, o->BlendMeshTexCoordU,
+                      -(int)WorldTime % 10000 * 0.001f);
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, 0.3f, fFlow_u, fFlow_v);
     }
     break;
     case 30:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     break;
     }
 }
 
-void GMUnitedMarketPlace::RenderFrontSideVisual()
-{
-}
+void GMUnitedMarketPlace::RenderFrontSideVisual() {}
 
 bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
@@ -455,7 +456,7 @@ bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         // 				break;
         // 			}
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -515,7 +516,9 @@ bool GMUnitedMarketPlace::CreateRain(PARTICLE* o)
     }
 
     o->Type = BITMAP_RAIN;
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500), Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
+    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
+           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
     Vector(-30.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
     Vector(0.f, 0.f, -(float)(rand() % 24 + 20), Velocity);
@@ -523,7 +526,7 @@ bool GMUnitedMarketPlace::CreateRain(PARTICLE* o)
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
 
-    //o->Scale = o->Scale * 1.5f;
+    // o->Scale = o->Scale * 1.5f;
 
     return true;
 }
@@ -564,7 +567,8 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
         vec3_t Range;
         VectorSubtract(o->StartPosition, o->Position, Range);
         float Length = Range[0] * Range[0] + Range[1] * Range[1] + Range[2] * Range[2];
-        if (Length >= 200000.f) o->Live = false;
+        if (Length >= 200000.f)
+            o->Live = false;
     }
 
     return true;

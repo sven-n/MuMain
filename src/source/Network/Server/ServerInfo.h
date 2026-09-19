@@ -9,10 +9,10 @@ public:
     CServerInfo();
     virtual ~CServerInfo();
 
-    int			m_iSequence;
-    int			m_iIndex;
-    int			m_iConnectIndex;
-    int			m_iPercent;
-    BYTE		m_byNonPvP;
+    int m_iSequence;
+    int m_iIndex;
+    int m_iConnectIndex;
+    int m_iPercent;
+    BYTE m_byNonPvP;
     wchar_t m_bName[MAX_TEXT_LENGTH];
 };

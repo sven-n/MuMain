@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 # Fails (non-zero exit via FATAL_ERROR) if any source under the editor
 # directory was compiled into the client while ENABLE_EDITOR=OFF. Run by
 # CTest as:

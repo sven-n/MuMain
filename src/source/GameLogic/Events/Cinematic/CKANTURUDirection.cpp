@@ -22,9 +22,7 @@ CKanturuDirection::CKanturuDirection()
     Init();
 }
 
-CKanturuDirection::~CKanturuDirection()
-{
-}
+CKanturuDirection::~CKanturuDirection() {}
 
 void CKanturuDirection::Init()
 {
@@ -186,18 +184,23 @@ void CKanturuDirection::KanturuMayaDirection()
 
 void CKanturuDirection::Move1stDirection()
 {
-    if (g_Direction.DirectionCameraMove()) return;
+    if (g_Direction.DirectionCameraMove())
+        return;
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:        Direction1st0();        break;
-    case 1:        Direction1st1();        break;
+    case 0:
+        Direction1st0();
+        break;
+    case 1:
+        Direction1st1();
+        break;
     }
 }
 
 void CKanturuDirection::Direction1st0()
 {
-    ApplyDirectionTarget(DirectionTarget{ 196, 85, 0, 100.0f });
+    ApplyDirectionTarget(DirectionTarget{196, 85, 0, 100.0f});
 }
 
 void CKanturuDirection::Direction1st1()
@@ -229,19 +232,26 @@ void CKanturuDirection::Direction1st1()
 
 void CKanturuDirection::Move2ndDirection()
 {
-    if (g_Direction.DirectionCameraMove()) return;
+    if (g_Direction.DirectionCameraMove())
+        return;
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:        Direction2nd0();        break;
-    case 1:        Direction2nd1();        break;
-    case 2:        Direction2nd2();        break;
+    case 0:
+        Direction2nd0();
+        break;
+    case 1:
+        Direction2nd1();
+        break;
+    case 2:
+        Direction2nd2();
+        break;
     }
 }
 
 void CKanturuDirection::Direction2nd0()
 {
-    ApplyDirectionTarget(DirectionTarget{ 196, 85, 0, 100.0f });
+    ApplyDirectionTarget(DirectionTarget{196, 85, 0, 100.0f});
 }
 
 void CKanturuDirection::Direction2nd1()
@@ -312,28 +322,35 @@ void CKanturuDirection::KanturuNightmareDirection()
 
 void CKanturuDirection::Move3rdDirection()
 {
-    if (g_Direction.DirectionCameraMove()) return;
+    if (g_Direction.DirectionCameraMove())
+        return;
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:        Direction3rd0();        break;
-    case 1:        Direction3rd1();        break;
+    case 0:
+        Direction3rd0();
+        break;
+    case 1:
+        Direction3rd1();
+        break;
     }
 }
 
 void CKanturuDirection::Direction3rd0()
 {
-    ApplyDirectionTarget(DirectionTarget{ 80, 142, 0, 100.0f });
+    ApplyDirectionTarget(DirectionTarget{80, 142, 0, 100.0f});
 }
 
 void CKanturuDirection::Direction3rd1()
 {
     if (g_Direction.m_bAction)
     {
-        if (g_Direction.m_iCheckTime == 0) g_Direction.GetTimeCheck(1000);
+        if (g_Direction.m_iCheckTime == 0)
+            g_Direction.GetTimeCheck(1000);
         else if (g_Direction.m_iCheckTime == 1)
             g_Direction.SummonCreateMonster(MONSTER_NIGHTMARE, 79, 142, 0, true, true, 0.25f);
-        else if (g_Direction.m_iCheckTime == 2) g_Direction.GetTimeCheck(5000);
+        else if (g_Direction.m_iCheckTime == 2)
+            g_Direction.GetTimeCheck(5000);
         else if (g_Direction.m_iCheckTime == 3)
         {
             Init();
@@ -346,23 +363,26 @@ void CKanturuDirection::Direction3rd1()
 
 void CKanturuDirection::Move4thDirection()
 {
-    if (g_Direction.DirectionCameraMove()) return;
+    if (g_Direction.DirectionCameraMove())
+        return;
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:        Direction4th0();        break;
-    case 1:        Direction4th1();        break;
+    case 0:
+        Direction4th0();
+        break;
+    case 1:
+        Direction4th1();
+        break;
     }
 }
 
 void CKanturuDirection::Direction4th0()
 {
-    ApplyDirectionTarget(DirectionTarget{ 113, 232, 0, 300.0f });
+    ApplyDirectionTarget(DirectionTarget{113, 232, 0, 300.0f});
 }
 
-void CKanturuDirection::Direction4th1()
-{
-}
+void CKanturuDirection::Direction4th1() {}
 
 bool CKanturuDirection::IsKanturuWorldActive() const
 {

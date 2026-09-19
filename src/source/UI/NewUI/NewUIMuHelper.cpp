@@ -1173,7 +1173,6 @@ void CNewUIMuHelper::Show(bool bShow)
 bool CNewUIMuHelper::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     DWORD TextColor = g_pRenderText->GetTextColor();
 
@@ -1262,9 +1261,8 @@ bool CNewUIMuHelper::Render()
 void CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
 {
     EnableAlphaTest();
-    glColor4f(0.0, 0.0, 0.0, 0.4f);
-    RenderColor(x + 3.f, y + 2.f, width - 7.f, height - 7, 0.0, 0);
-    EndRenderColor();
+    constexpr unsigned int BackdropColor = 0x66000000u;
+    RenderColorQuadARGB(x + 3.f, y + 2.f, width - 7.f, height - 7, BackdropColor);
 
     RenderImage(IMAGE_TABLE_TOP_LEFT, x, y, 14.0, 14.0);
     RenderImage(IMAGE_TABLE_TOP_RIGHT, (x + width) - 14.f, y, 14.0, 14.0);
@@ -2471,7 +2469,6 @@ void CNewUIMuHelperExt::InitCheckBox()
 bool CNewUIMuHelperExt::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     DWORD TextColor = g_pRenderText->GetTextColor();
 
@@ -2579,10 +2576,9 @@ void CNewUIMuHelperExt::RenderBackPane(int x, int y, int width, int height, cons
     int headerWidth = 65;
 
     EnableAlphaTest();
-    glColor4f(0.0, 0.0, 0.0, 0.4f);
-    RenderColor(x + 3.f, y + 2.f, headerWidth - 7.f, 18.f, 0.0, 0);  // shade for top box
-    RenderColor(x + 3.f, y + 2.f + 18.f, width - 7.f, height - 7.f, 0.0, 0);  // shade for bottom box
-    EndRenderColor();
+    constexpr unsigned int BackdropColor = 0x66000000u;
+    RenderColorQuadARGB(x + 3.f, y + 2.f, headerWidth - 7.f, 18.f, BackdropColor);
+    RenderColorQuadARGB(x + 3.f, y + 2.f + 18.f, width - 7.f, height - 7.f, BackdropColor);
 
     // Top box (tab) without bottom line
     RenderImage(IMAGE_TABLE_TOP_LEFT, x, y, 14.0, 14.0);                                // Top-left corner of the tab

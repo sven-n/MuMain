@@ -15,13 +15,9 @@ using namespace SEASON3B;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CNewUISiegeWarSoldier::CNewUISiegeWarSoldier()
-{
-}
+CNewUISiegeWarSoldier::CNewUISiegeWarSoldier() {}
 
-CNewUISiegeWarSoldier::~CNewUISiegeWarSoldier()
-{
-}
+CNewUISiegeWarSoldier::~CNewUISiegeWarSoldier() {}
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
@@ -32,9 +28,7 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnCreate(int x, int y)
 
 //---------------------------------------------------------------------------------------------
 // OnRelease
-void SEASON3B::CNewUISiegeWarSoldier::OnRelease()
-{
-}
+void SEASON3B::CNewUISiegeWarSoldier::OnRelease() {}
 
 //---------------------------------------------------------------------------------------------
 // OnUpdate
@@ -48,7 +42,6 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnUpdate()
 bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -60,7 +53,6 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
     DisableAlphaBlend();
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     // 지도상의 명령 Icon
     RenderCmdIconInMiniMap();
@@ -72,9 +64,7 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
-void SEASON3B::CNewUISiegeWarSoldier::OnSetPos(int x, int y)
-{
-}
+void SEASON3B::CNewUISiegeWarSoldier::OnSetPos(int x, int y) {}
 
 //---------------------------------------------------------------------------------------------
 // RenderCharPosInMiniMap
@@ -87,25 +77,22 @@ void SEASON3B::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
-        if (c != NULL && c->Object.Live && c != Hero && (c->Object.Kind == KIND_PLAYER || c->Object.Kind == KIND_MONSTER || c->Object.Kind == KIND_NPC))
+        if (c != NULL && c->Object.Live && c != Hero &&
+            (c->Object.Kind == KIND_PLAYER || c->Object.Kind == KIND_MONSTER || c->Object.Kind == KIND_NPC))
         {
             OBJECT* o = &c->Object;
 
             if (g_isCharacterBuff(o, static_cast<eBuffState>(m_dwBuffState)))
             {
-                glColor4f(0.f, 1.f, 0.f, m_fMiniMapAlpha);
             }
             else
             {
-                glColor4f(0.8f, 0.f, 0.f, m_fMiniMapAlpha);
             }
             if (o->Kind == KIND_NPC)
             {
-                glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
             }
             else if (o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE)
             {
-                glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
             }
 
             fPosX = ((c->PositionX)) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
@@ -140,12 +127,8 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnBtnProcess()
 
 //---------------------------------------------------------------------------------------------
 // OnLoadImages
-void SEASON3B::CNewUISiegeWarSoldier::OnLoadImages()
-{
-}
+void SEASON3B::CNewUISiegeWarSoldier::OnLoadImages() {}
 
 //---------------------------------------------------------------------------------------------
 // OnUnloadImages
-void SEASON3B::CNewUISiegeWarSoldier::OnUnloadImages()
-{
-}
+void SEASON3B::CNewUISiegeWarSoldier::OnUnloadImages() {}

@@ -22,6 +22,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
@@ -32,6 +33,7 @@
 #include "World/MapInfra/PortalMgr.h"
 #include "Guild/GuildCache.h"
 #include "UI/Legacy/UIMapName.h"
+#include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
@@ -127,15 +129,14 @@ static void InitializeMainScene()
 {
     g_pMainFrame->ResetSkillHotKey();
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %ls", CharactersClient[SelectedHero].ID);
-    g_ErrorReport.Write(L"> Character selected <%d> \"%ls\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
+    MU_LOG_INFO(mu::log::Get("scenes"), "Character selected: slot {}", SelectedHero + 1);
 
     InitMainScene = true;
 
-    g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
+    MU_LOG_DEBUG(mu::log::Get("network"), "SendRequestJoinMapServer");
 
     CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
-    SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
+    SocketClient->ToGameServer()->SendSelectCharacter(MU_C16(CharactersClient[SelectedHero].ID));
 
     // Remember which character is in play so auto-reconnect can re-select it.
     ReconnectManager::Instance().CacheCharacter(CharactersClient[SelectedHero].ID);
@@ -219,7 +220,8 @@ static void UpdateUIAndInput()
     if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
-    if (MouseY >= (int)(REFERENCE_HEIGHT - 48))
+    if (UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
+                                                  g_fWindowMouseX, g_fWindowMouseY))
         MouseOnWindow = true;
 
     g_pPartyManager->Update();
@@ -283,9 +285,15 @@ static void UpdateGameEntities()
     MoveMounts();
     ThePetProcess().UpdatePets();
     MovePoints();
-    MoveEffects();
+    {
+        FRAME_PROFILE(MoveEffects);
+        MoveEffects();
+    }
     MoveJoints();
-    MoveParticles();
+    {
+        FRAME_PROFILE(MoveParticles);
+        MoveParticles();
+    }
     MovePointers();
 
     g_Direction.CheckDirection();
@@ -354,24 +362,16 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 {
     outByWaterMap = 0;
 
-    if (g_Camera.TopViewEnable == false)
-    {
-        // Use hardcoded value from original game (in 640×480 reference coordinates)
-        // This is then scaled by BeginOpengl() to actual window size
-        outHeight = REFERENCE_HEIGHT - 48;
-    }
-    else
-    {
-        outHeight = REFERENCE_HEIGHT;
-    }
-
-    outWidth = GetScreenWidth();
+    const auto viewport = UI::Scaling::WorldViewport(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    outWidth = viewport.width;
+    outHeight = viewport.height;
 
     // NOTE: Clear color is set by SceneManager::SetWorldClearColor() before this function is called
     // All background colors are now centralized in SceneManager.cpp
 
-    BeginOpengl(0, 0, outWidth, outHeight);
-    CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
+    BeginOpenglPhysical(viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
+                   static_cast<float>(viewport.height) / WindowHeight, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -384,6 +384,83 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+}
+
+// DXP-23 diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
+static bool g_bDisableEffectsDebug = false;
+
+void SetDisableEffects(bool disabled)
+{
+    g_bDisableEffectsDebug = disabled;
+}
+
+// DXP-23 diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
+static bool g_bDisableSpritesDebug = false;
+static bool g_bDisableParticlesDebug = false;
+static bool g_bDisableSkillEffectModelsDebug = false;
+static bool g_bDisableBoidsDebug = false;
+
+void SetDisableSprites(bool disabled)
+{
+    g_bDisableSpritesDebug = disabled;
+}
+void SetDisableParticles(bool disabled)
+{
+    g_bDisableParticlesDebug = disabled;
+}
+void SetDisableSkillEffectModels(bool disabled)
+{
+    g_bDisableSkillEffectModelsDebug = disabled;
+}
+void SetDisableBoids(bool disabled)
+{
+    g_bDisableBoidsDebug = disabled;
+}
+bool IsSpritesDisabledDebug()
+{
+    return g_bDisableSpritesDebug;
+}
+bool IsParticlesDisabledDebug()
+{
+    return g_bDisableParticlesDebug;
+}
+bool IsSkillEffectModelsDisabledDebug()
+{
+    return g_bDisableSkillEffectModelsDebug;
+}
+bool IsBoidsDisabledDebug()
+{
+    return g_bDisableBoidsDebug;
+}
+
+static bool g_bDisableWingShadowDebug = false;
+void SetDisableWingShadow(bool disabled)
+{
+    g_bDisableWingShadowDebug = disabled;
+}
+bool IsWingShadowDisabledDebug()
+{
+    return g_bDisableWingShadowDebug;
+}
+
+static bool g_bDisableJointsDebug = false;
+void SetDisableJoints(bool disabled)
+{
+    g_bDisableJointsDebug = disabled;
+}
+bool IsJointsDisabledDebug()
+{
+    return g_bDisableJointsDebug;
+}
+
+static bool g_bDisableWingExtraLayersDebug = false;
+void SetDisableWingExtraLayers(bool disabled)
+{
+    g_bDisableWingExtraLayersDebug = disabled;
+}
+bool IsWingExtraLayersDisabledDebug()
+{
+    return g_bDisableWingExtraLayersDebug;
 }
 
 /**
@@ -399,13 +476,13 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     // DevEditor render toggle checks
     bool renderTerrain = DevEditor_ShouldRenderTerrain();
     bool renderStatic = DevEditor_ShouldRenderStaticObjects();
-    bool renderEffects = DevEditor_ShouldRenderEffects();
+    bool renderEffects = DevEditor_ShouldRenderEffects() && !g_bDisableEffectsDebug;
     bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
     bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
 #else
     bool renderTerrain = true;
     bool renderStatic = true;
-    bool renderEffects = true;
+    bool renderEffects = !g_bDisableEffectsDebug;
     bool renderDroppedItems = true;
     bool renderWeatherEffects = true;
 #endif
@@ -461,7 +538,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     if (renderStatic)
         { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
 
-    RenderJoints(byWaterMap);
+    { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
 
     if (renderEffects)
     {
@@ -477,8 +554,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderLeaves();
     }
 
-    RenderSprites();
-    RenderParticles();
+    { FRAME_PROFILE(Sprites); RenderSprites(); }
+    { FRAME_PROFILE(Particles); RenderParticles(); }
 
     if (IsWaterTerrain() == false)
     {
@@ -494,25 +571,24 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         byWaterMap = 2;
 
         EndOpengl();
-        BeginOpengl(0, 0, width, height);
+        BeginOpenglPhysical(0, 0, width, height);
         RenderWaterTerrain();
-        RenderJoints(byWaterMap);
-        RenderEffects(true);
-        RenderBlurs();
+        { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
+        { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
         CheckSprites();
         BeginSprite();
 
         if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
             RenderLeaves();
 
-        RenderSprites(byWaterMap);
-        RenderParticles(byWaterMap);
+        { FRAME_PROFILE(Sprites); RenderSprites(byWaterMap); }
+        { FRAME_PROFILE(Particles); RenderParticles(byWaterMap); }
         RenderPoints(byWaterMap);
 
         EndSprite();
         EndOpengl();
 
-        BeginOpengl(0, 0, width, height);
+        BeginOpenglPhysical(0, 0, width, height);
     }
 
     if (gMapManager.InBattleCastle())
@@ -634,61 +710,12 @@ bool RenderMainScene()
         if (spectated)
             RenderFrustumWireframe(spectated->GetFrustum());
     }
-
-    // DEBUG: Render mouse ray as a visible line (magenta) from MousePosition to MouseTarget
-    {
-        GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-        GLboolean tex2d = glIsEnabled(GL_TEXTURE_2D);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_TEXTURE_2D);
-        glLineWidth(2.0f);
-        glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-        glBegin(GL_LINES);
-        glVertex3fv(MousePosition);
-        glVertex3fv(MouseTarget);
-        glEnd();
-
-        // Draw a small cross at MousePosition (green)
-        constexpr float S = 30.0f;
-        glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-        glBegin(GL_LINES);
-        glVertex3f(MousePosition[0] - S, MousePosition[1], MousePosition[2]);
-        glVertex3f(MousePosition[0] + S, MousePosition[1], MousePosition[2]);
-        glVertex3f(MousePosition[0], MousePosition[1] - S, MousePosition[2]);
-        glVertex3f(MousePosition[0], MousePosition[1] + S, MousePosition[2]);
-        glEnd();
-
-        glLineWidth(1.0f);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        if (depthTest) glEnable(GL_DEPTH_TEST);
-        if (tex2d) glEnable(GL_TEXTURE_2D);
-    }
-
-    // DEBUG: Log ray state on left click (debounced to one log per click)
-    {
-        extern bool MouseLButtonPush;
-        static bool wasPressed = false;
-        if (MouseLButtonPush && !wasPressed)
-        {
-            wasPressed = true;
-            extern int MouseX, MouseY;
-            CAMERA_LOG("[RAY] Click: Mouse=(%d,%d) Pos=(%.0f,%.0f,%.0f) Target=(%.0f,%.0f,%.0f) "
-                       "CamPos=(%.0f,%.0f,%.0f) PerspX=%.6f PerspY=%.6f CenterX=%d CenterY=%d FOV=%.1f ViewFar=%.0f",
-                       MouseX, MouseY,
-                       MousePosition[0], MousePosition[1], MousePosition[2],
-                       MouseTarget[0], MouseTarget[1], MouseTarget[2],
-                       g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
-                       g_Camera.PerspectiveX, g_Camera.PerspectiveY,
-                       g_Camera.ScreenCenterX, g_Camera.ScreenCenterY,
-                       g_Camera.FOV, g_Camera.ViewFar);
-        }
-        if (!MouseLButtonPush)
-            wasPressed = false;
-    }
 #endif
 
-    RenderMainSceneUI();
-
+    {
+        FRAME_PROFILE(UI);
+        RenderMainSceneUI();
+    }
 
     EndOpengl();
 

@@ -1,0 +1,71 @@
+name: Data Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/bin/Data/**
+      - src/bin/fonts/**
+      - .github/workflows/data-assets.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-assets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-data:
+    name: Publish data asset
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate and identify data
+        shell: bash
+        run: |
+          test -f src/bin/Data/Dec2.dat
+          test -f src/bin/fonts/DejaVuSans.ttf
+
+          data_tree=$(git rev-parse HEAD:src/bin/Data)
+          fonts_tree=$(git rev-parse HEAD:src/bin/fonts)
+          asset_id=$(printf '%s\n%s\n' "$data_tree" "$fonts_tree" | sha256sum | cut -c1-16)
+
+          {
+            echo "asset_id=${asset_id}"
+            echo "archive=MuMain-data-${asset_id}.tar.gz"
+            echo "tag=data-${asset_id}"
+          } >> "$GITHUB_ENV"
+
+      - name: Archive and checksum data
+        shell: bash
+        run: |
+          data_timestamp=$(git log -1 --format=%ct -- src/bin/Data src/bin/fonts)
+          tar -czf "$archive" \
+            --sort=name \
+            --mtime="@${data_timestamp}" \
+            --owner=0 \
+            --group=0 \
+            --numeric-owner \
+            -C src/bin Data fonts
+          sha256sum "$archive" > "${archive}.sha256"
+          sha256sum --check "${archive}.sha256"
+
+      - name: Publish data release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" \
+              --title "MuMain data ${asset_id}" \
+              --notes "Content-addressed Data/ and fonts/ for MuMain runtime releases." \
+              --latest=false
+          fi
+          gh release upload "$tag" "$archive" "${archive}.sha256" --clobber

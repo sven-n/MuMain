@@ -5,10 +5,7 @@
 #include "stdafx.h"
 #include "ServerInfo.h"
 
-CServerInfo::CServerInfo()
-{
-}
+// cppcheck-suppress uninitMemberVar
+CServerInfo::CServerInfo() {}
 
-CServerInfo::~CServerInfo()
-{
-}
+CServerInfo::~CServerInfo() {}

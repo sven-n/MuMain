@@ -42,11 +42,11 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         POINT						m_Pos;
 
-        wchar_t				m_szTime[256];		// ½Ã°£
-        int							m_iTime;			// ½Ã°£
-        int							m_iTimeState;		// ½Ã°£»óÅÂ( ±âº», ÀÓ¹Ú )
-        int							m_iMaxKillMonster;	// Á×¿©¾ßÇÏ´Â ¸ó½ºÅÍ¼ıÀÚ
-        int							m_iKilledMonster;	// ÇöÀç Á×ÀÎ ¸ó½ºÅÍ¼ıÀÚ
+        wchar_t				m_szTime[256];		// ì‹œê°„
+        int							m_iTime;			// ì‹œê°„
+        int							m_iTimeState;		// ì‹œê°„ìƒíƒœ( ê¸°ë³¸, ì„ë°• )
+        int							m_iMaxKillMonster;	// ì£½ì—¬ì•¼í•˜ëŠ” ëª¬ìŠ¤í„°ìˆ«ì
+        int							m_iKilledMonster;	// í˜„ì¬ ì£½ì¸ ëª¬ìŠ¤í„°ìˆ«ì
 
     public:
         CNewUIBloodCastle();

@@ -44,6 +44,11 @@ namespace
 
 namespace UI::Notices
 {
+    void CopyText(wchar_t (&destination)[NOTICE_TEXT_MAX], const wchar_t* source)
+    {
+        wcsncpy_s(destination, source, _TRUNCATE);
+    }
+
     void Clear()
     {
         memset(s_notices, 0, sizeof(s_notices));
@@ -51,25 +56,24 @@ namespace UI::Notices
 
     void Create(const wchar_t* text, int color)
     {
-        SIZE size;
         g_pRenderText->SetFont(g_hFontBold);
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), text, lstrlen(text), &size);
+        const SIZE size = g_pRenderText->MeasureText(text, lstrlen(text));
 
         Scroll();
         s_notices[s_count].Color = color;
         if (size.cx < NOTICE_TEXT_MAX)
         {
-            wcscpy(s_notices[s_count++].Text, text);
+            CopyText(s_notices[s_count++].Text, text);
         }
         else
         {
             wchar_t topText[NOTICE_TEXT_MAX] = { 0 };
             wchar_t bottomText[NOTICE_TEXT_MAX] = { 0 };
             CutText(text, topText, bottomText, NOTICE_TEXT_MAX);
-            wcscpy(s_notices[s_count++].Text, topText);
+            CopyText(s_notices[s_count++].Text, topText);
             Scroll();
             s_notices[s_count].Color = color;
-            wcscpy(s_notices[s_count++].Text, bottomText);
+            CopyText(s_notices[s_count++].Text, bottomText);
         }
         s_time = NOTICE_LIFETIME;
     }
@@ -95,7 +99,6 @@ namespace UI::Notices
 
         g_pRenderText->SetFont(g_hFontBold);
 
-        glColor3f(1.f, 1.f, 1.f);
         for (int i = 0; i < MAX_NOTICE; i++)
         {
             Notice* n = &s_notices[i];

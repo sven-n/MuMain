@@ -1,10 +1,11 @@
-﻿// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
+// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIRegistrationLuckyCoin.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "I18N/All.h"
 
 
@@ -48,7 +49,6 @@ namespace SEASON3B
     bool CNewUIRegistrationLuckyCoin::Render()
     {
         EnableAlphaTest();
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderFrame();
         RenderTexts();
         RenderButtons();
@@ -97,6 +97,18 @@ namespace SEASON3B
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
 
+    // DXP-07d increment 5, stage 1+2 (implemented together, on trust — see task doc/2026-08-01 note:
+    // this panel, like increment 4, is unreachable via normal play until the server implements the
+    // corresponding NPC/event, so no runtime soak was possible before this swap). Own copies of the
+    // compare/log helpers. Identical shape to increment 4 (CNewUIGoldBowmanLena::Render3D): EndBitmap()
+    // at entry, restore mirror runs BEFORE BeginBitmap() at the end (own pre-panel snapshot needed).
+    // The only per-item call is RenderItem3D() (line 138 below) — same shared path increments 0-4
+    // already proved carries no GL model transform; SetItemRotation() (lines 137/139) is a plain
+    // bool-field setter (m_ItemAngle), not a GL call, consumed later inside RenderObjectScreen's
+    // angle table — verified by reading NewUIRegistrationLuckyCoin.h.
+    static float s_PreLuckyCoinProj[16];
+    static float s_PreLuckyCoinView[16];
+
     void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
     {
         float x, y, width, height;
@@ -109,20 +121,19 @@ namespace SEASON3B
 
         EndBitmap();
 
-        glMatrixMode(GL_PROJECTION);
-        SaveCameraPerspective();
-    glPushMatrix();
-        glLoadIdentity();
-        glViewport2(0, 0, WindowWidth, WindowHeight);
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
         CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+        mu::GetRenderer().ClearDepthBuffer();
 
         SetItemRotation(true);
         RenderItem3D(x, y, width, height, m_CoinItem->Type, m_CoinItem->Level, 0, 0, true);
@@ -130,12 +141,11 @@ namespace SEASON3B
 
         UpdateMousePositionn();
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PopMatrix();
 
-    RestoreCameraPerspective();
         BeginBitmap();
     }
 

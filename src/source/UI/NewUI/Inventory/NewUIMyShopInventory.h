@@ -103,6 +103,7 @@ namespace SEASON3B
 
     private:
         bool MyShopInventoryProcess();
+        bool WindowProcess();
 
     private:
         void RenderFrame();

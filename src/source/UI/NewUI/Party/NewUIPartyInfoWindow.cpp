@@ -151,7 +151,6 @@ bool CNewUIPartyInfoWindow::Update()
 bool CNewUIPartyInfoWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
@@ -210,12 +209,12 @@ void CNewUIPartyInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int
 {
     EnableAlphaTest();
 
-    glColor4f(0.f, 0.f, 0.f, 0.9f);
-    RenderColor(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8), float(iTitleHeight));
-    glColor4f(0.f, 0.f, 0.f, 0.6f);
-    RenderColor(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7), float(iHeight - iTitleHeight - 7));
-
-    EndRenderColor();
+    constexpr unsigned int TitleBackdropColor = 0xE6000000u;
+    constexpr unsigned int ContentBackdropColor = 0x99000000u;
+    RenderColorQuadARGB(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8),
+        float(iTitleHeight), TitleBackdropColor);
+    RenderColorQuadARGB(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7),
+        float(iHeight - iTitleHeight - 7), ContentBackdropColor);
 
     RenderImage(IMAGE_PARTY_TABLE_TOP_LEFT, iPosX, iPosY, 14, 14);
     RenderImage(IMAGE_PARTY_TABLE_TOP_RIGHT, iPosX + iTitleWidth - 14, iPosY, 14, 14);

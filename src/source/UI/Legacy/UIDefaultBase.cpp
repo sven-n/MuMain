@@ -13,12 +13,8 @@
 
 using namespace SEASON3A;
 
-CUIDefaultBase::CUIDefaultBase(const string& uiname) : m_IsOpen(false), m_UIName(uiname)
-{
-}
+CUIDefaultBase::CUIDefaultBase(const string& uiname) : m_IsOpen(false), m_UIName(uiname) {}
 
-CUIDefaultBase::~CUIDefaultBase()
-{
-}
+CUIDefaultBase::~CUIDefaultBase() {}
 
-#endif //UIDEFAULTBASE
+#endif // UIDEFAULTBASE

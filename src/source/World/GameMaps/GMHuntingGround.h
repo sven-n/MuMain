@@ -3,17 +3,17 @@
 
 //. soyaviper
 
-namespace M31HuntingGround {		//. ∞¯º∫ ªÁ≥…≈Õ
+namespace M31HuntingGround {		//. Í≥µÏÑ± ÏÇ¨ÎÉ•ÌÑ∞
     bool IsInHuntingGround();
     bool IsInHuntingGroundSection2(const vec3_t Position);
 
-    //. ø¿∫Í¡ß∆Æ
+    //. Ïò§Î∏åÏ†ùÌä∏
     bool CreateHuntingGroundObject(OBJECT* pObject);
     bool MoveHuntingGroundObject(OBJECT* pObject);
     bool RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pModel);
     bool RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
 
-    //. ∏ÛΩ∫≈Õ
+    //. Î™¨Ïä§ÌÑ∞
     CHARACTER* CreateHuntingGroundMonster(int iType, int PosX, int PosY, int Key);
 
     bool MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pModel);
@@ -24,7 +24,7 @@ namespace M31HuntingGround {		//. ∞¯º∫ ªÁ≥…≈Õ
     bool AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
     bool SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject);
 
-    //. »≠∏È √≥∏Æ
+    //. ÌôîÎ©¥ Ï≤òÎ¶¨
     bool CreateMist(PARTICLE* pParticleObj);
 }
 

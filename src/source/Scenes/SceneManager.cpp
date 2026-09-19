@@ -9,6 +9,7 @@
 #include <numeric>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
 
 //=============================================================================
@@ -27,7 +28,10 @@ FrameTimingState g_frameTiming;
 #include "CharacterScene.h"
 #include "MainScene.h"
 #include "LoadingScene.h"
+#include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
@@ -68,6 +72,17 @@ extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
 
+namespace
+{
+    void ClearMousePressState()
+    {
+        MouseLButtonPush = false;
+        MouseRButtonPush = false;
+        MouseMButtonPush = false;
+        Core::Input::ClearLeftMouseButtonPressEdge();
+    }
+}
+
 static bool g_bShowDebugInfo =
 #ifdef _DEBUG
     true;
@@ -87,6 +102,12 @@ void SetShowFpsCounter(bool enabled)
 {
     g_bShowFpsCounter = enabled;
     if (enabled) g_bShowDebugInfo = false;
+}
+
+void SetShowGLStats(bool enabled)
+{
+    FrameProfiler::g_CountersEnabled = enabled;
+    mu::GetRenderer().SetStatsEnabled(enabled);
 }
 
 //=============================================================================
@@ -207,17 +228,74 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     wcscat(outMessage, lpszTemp);
 }
 
-/**
- * @brief Captures the current frame buffer and saves it as a JPEG screenshot.
- */
-static void CaptureScreenshot()
+static ScreenshotCaptureState g_screenshotCapture;
+
+static bool PrepareJpegPixels(mu::FramePixels& pixels)
 {
-    std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
+    const std::size_t rowBytes = static_cast<std::size_t>(pixels.width) * 3;
+    const std::size_t expectedBytes = rowBytes * pixels.height;
+    if (rowBytes == 0 || pixels.rgb.size() != expectedBytes)
+    {
+        return false;
+    }
+
+    for (std::uint32_t row = 0; row < pixels.height / 2; ++row)
+    {
+        auto top = pixels.rgb.begin() + static_cast<std::size_t>(row) * rowBytes;
+        auto bottom = pixels.rgb.begin() + static_cast<std::size_t>(pixels.height - row - 1) * rowBytes;
+        std::swap_ranges(top, top + rowBytes, bottom);
+    }
+    return true;
+}
+
+static void ConsumeScreenshot()
+{
+    if (!g_screenshotCapture.HasPending())
+    {
+        return;
+    }
+
+    mu::FramePixels pixels;
+    if (!mu::GetRenderer().ConsumeFramePixels(pixels))
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    if (!PrepareJpegPixels(pixels))
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    std::wstring fileName = g_screenshotCapture.FileName();
+    const bool saved = WriteJpeg(fileName.data(), static_cast<int>(pixels.width), static_cast<int>(pixels.height),
+                                 pixels.rgb.data(), 100);
+    if (saved)
+    {
+        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
 
     GrabScreen++;
     GrabScreen %= 10000;
+    g_screenshotCapture.Clear();
+}
+
+static void RequestScreenshot()
+{
+    wchar_t screenshotText[256];
+    GenerateScreenshotFilename(GrabFileName, screenshotText);
+
+    if (!g_screenshotCapture.Begin(GrabFileName, screenshotText))
+    {
+        return;
+    }
+
+    if (!mu::GetRenderer().RequestFramePixels())
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
 }
 
 /**
@@ -225,6 +303,8 @@ static void CaptureScreenshot()
  */
 static void HandleScreenshotCapture()
 {
+    ConsumeScreenshot();
+
     if (PressKey(VK_SNAPSHOT))
     {
         GrabEnable = !GrabEnable;
@@ -235,23 +315,7 @@ static void HandleScreenshotCapture()
         return;
     }
 
-    const bool addTimeStampToCapture = !Core::Input::IsKeyDown(VK_SHIFT);
-    wchar_t screenshotText[256];
-
-    GenerateScreenshotFilename(GrabFileName, screenshotText);
-
-    if (addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
-    CaptureScreenshot();
-
-    if (!addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
+    RequestScreenshot();
     GrabEnable = false;
 }
 
@@ -312,13 +376,13 @@ static void UpdateWaterAnimation()
 {
     constexpr int NumberOfWaterTextures = 32;
     const double timePerFrame = 1000 / REFERENCE_FPS;
-    auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
+    auto time_since_last_render = g_frameTiming.GetCurrentTickCount() - g_frameTiming.GetLastWaterChange();
     while (time_since_last_render > timePerFrame)
     {
         WaterTextureNumber++;
         WaterTextureNumber %= NumberOfWaterTextures;
         time_since_last_render -= timePerFrame;
-        g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
+        g_frameTiming.SetLastWaterChange(g_frameTiming.GetCurrentTickCount());
     }
 }
 
@@ -341,7 +405,7 @@ static void UpdateCoreSystems()
 static void SetClearAndFogColor(float r, float g, float b)
 {
     extern GLfloat FogColor[4];
-    glClearColor(r, g, b, 1.f);
+    mu::GetRenderer().SetClearColor(r, g, b, 1.f);
     FogColor[0] = r;
     FogColor[1] = g;
     FogColor[2] = b;
@@ -366,7 +430,7 @@ static void SetWorldClearColor()
     if (world == WD_0LORENCIA)
         rgb8(10, 20, 14);                              // Dark green
     else if (world == WD_2DEVIAS)
-        SetClearAndFogColor(0.75f, 0.85f, 1.0f);       // Light snowy blue
+        rgb8(0, 0, 10);                                // Dark navy abyss
     else if (world == WD_10HEAVEN)
         rgb8(3, 25, 44);                               // Blue
     else if (world == WD_73NEW_LOGIN_SCENE || world == WD_74NEW_CHARACTER_SCENE)
@@ -386,7 +450,7 @@ static void SetWorldClearColor()
     else
         SetClearAndFogColor(0.f, 0.f, 0.f);            // Black (default)
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearScreen();
 }
 
 /**
@@ -437,33 +501,28 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     float glBottom = (float)WindowHeight - gy - gh;
     float glTop = (float)WindowHeight - gy;
 
-    // Background
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    DisableTexture();
+    EnableAlphaBlend3();
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-    glBegin(GL_QUADS);
-    glVertex2f(gx, glBottom);
-    glVertex2f(gx + gw, glBottom);
-    glVertex2f(gx + gw, glTop);
-    glVertex2f(gx, glTop);
-    glEnd();
+    const auto RenderRect = [](float x, float bottom, float width, float height, std::uint32_t color)
+    {
+        const mu::Vertex2D vertices[4] = {
+            {x, bottom, 0.f, 0.f, color},
+            {x + width, bottom, 0.f, 0.f, color},
+            {x + width, bottom + height, 0.f, 0.f, color},
+            {x, bottom + height, 0.f, 0.f, color},
+        };
+        mu::GetRenderer().RenderQuad2D(vertices, 0u);
+    };
+    RenderRect(gx, glBottom, gw, gh, mu::PackABGR(0.f, 0.f, 0.f, 0.5f));
 
-    // Target line at 16.67ms (60fps)
     float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
     float lineY = glBottom + target60 * gh;
-    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
-    glBegin(GL_LINES);
-    glVertex2f(gx, lineY);
-    glVertex2f(gx + gw, lineY);
-    glEnd();
+    RenderRect(gx, lineY, gw, 1.f, mu::PackABGR(0.3f, 0.8f, 0.3f, 0.5f));
 
-    // Frame bars
     float barW = gw / FRAME_HISTORY_SIZE;
     int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
 
-    glBegin(GL_QUADS);
     for (int i = 0; i < s_frameCount; i++)
     {
         int idx = (oldest + i) % FRAME_HISTORY_SIZE;
@@ -472,22 +531,18 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
         float barH = norm * gh;
 
         // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+        std::uint32_t color;
         if (ms < THRESHOLD_60FPS_MS)
-            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.2f, 0.9f, 0.2f, 0.8f);
         else if (ms < THRESHOLD_40FPS_MS)
-            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.9f, 0.9f, 0.2f, 0.8f);
         else
-            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.9f, 0.2f, 0.2f, 0.8f);
 
         float bx = gx + i * barW;
-        glVertex2f(bx, glBottom);
-        glVertex2f(bx + barW, glBottom);
-        glVertex2f(bx + barW, glBottom + barH);
-        glVertex2f(bx, glBottom + barH);
+        RenderRect(bx, glBottom, barW, barH, color);
     }
-    glEnd();
-
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 /**
@@ -574,17 +629,181 @@ static void RenderDebugInfo()
     // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
     // major render passes in MainScene. Reset just below so next frame starts fresh.
     using FP = FrameProfiler::Pass;
-    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
-             FrameProfiler::AccumulatorMs(FP::Terrain),
-             FrameProfiler::AccumulatorMs(FP::Objects),
-             FrameProfiler::AccumulatorMs(FP::Characters),
-             FrameProfiler::AccumulatorMs(FP::Items),
-             FrameProfiler::AccumulatorMs(FP::Effects));
+    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f  Oth:%5.2f",
+                FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
+                FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
+                FrameProfiler::AccumulatorMs(FP::Effects),
+                FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost
+                                                          // only now (Present split out below, DXP-23)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
-    FrameProfiler::ResetFrame();
+
+    // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
+    // FRAME_PROFILE scope) -- this frame's own value, RenderCurrentScene() already ran above.
+    // Present = PlatformSwapBuffers() self-time, split out of Other so a large reading
+    // unambiguously points at GPU-stall wait rather than HUD render cost -- 1-frame-lagged like
+    // Oth above, since the swap itself only happens after this function returns.
+    mu_swprintf(szLine, L"UI:%6.2f  Present:%6.2f",
+             FrameProfiler::AccumulatorMs(FP::UI),
+             FrameProfiler::AccumulatorMs(FP::Present));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Move/update-phase cost of particle & effect simulation (UpdateGameEntities(), not the
+    // render-side Effects pass above) — added to gauge whether MoveEffects()/MoveParticles()
+    // are worth parallelizing on a worker thread pool (see feature-ffp-shader-port task memory).
+    mu_swprintf(szLine, L"MoveSim ms  MoveFx:%5.2f  MovePart:%5.2f",
+             FrameProfiler::AccumulatorMs(FP::MoveEffects),
+             FrameProfiler::AccumulatorMs(FP::MoveParticles));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // DXP-20 baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
+    // summed across every body transformed this frame (subset of the Objects/Chars/Items passes
+    // above, not additive with them). Judge the whole GPU-skinning task against this number.
+    mu_swprintf(szLine, L"Skinning ms  Transform:%5.2f", FrameProfiler::AccumulatorMs(FP::Skinning));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — splits the Characters
+    // pass above into "waiting on the animation thread pool" vs "everything else" (actual
+    // per-character RenderMesh calls), and shows whether this tick's animation ran on the
+    // worker thread pool or sequentially on the main thread (PARALLEL_ANIMATION_THRESHOLD = 20
+    // active characters, ZzzCharacter.cpp). Remove once the FPS investigation is resolved.
+    {
+        extern size_t g_LastActiveCharacterCount;
+        extern bool   g_LastAnimationWasParallel;
+        float charWaitMs = FrameProfiler::AccumulatorMs(FP::CharWait);
+        float charRenderMs = FrameProfiler::AccumulatorMs(FP::Characters) - charWaitMs;
+        mu_swprintf(szLine, L"CharDbg  Active:%3d  Parallel:%d  Wait:%5.2f  Render:%5.2f",
+            (int)g_LastActiveCharacterCount, (int)g_LastAnimationWasParallel, charWaitMs, charRenderMs);
+        g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    }
 
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+
+    // MainScene resets profiling after every overlay has read this frame.
+}
+
+/**
+ * @brief Renders the $glstats overlay: per-pass CPU and SDL GPU submission statistics.
+ * Independent of $details -- reads the same FrameProfiler accumulators but is gated by its own
+ * flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
+ */
+static void RenderGLStats()
+{
+    if (!FrameProfiler::g_CountersEnabled)
+    {
+        return;
+    }
+
+    BeginBitmap();
+
+    wchar_t szLine[160];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    const float x = DEBUG_TEXT_X + 260.0f;
+    int y = DEBUG_TEXT_Y_START;
+
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    static constexpr Pass kRows[] = {
+        Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
+        Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
+    };
+
+    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    for (Pass pass : kRows)
+    {
+        const double vertexKilobytes =
+            static_cast<double>(FrameProfiler::CounterValue(pass, Counter::VertexBytes)) / 1024.0;
+        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %3u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
+                    FrameProfiler::AccumulatorMs(pass), FrameProfiler::CounterValue(pass, Counter::DrawCalls),
+                    FrameProfiler::CounterValue(pass, Counter::MergedDraws),
+                    FrameProfiler::CounterValue(pass, Counter::Merged2DDraws), vertexKilobytes);
+        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+        y += DEBUG_TEXT_LINE_HEIGHT;
+    }
+
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    mu_swprintf(szLine, L"SDL GPU: %hs", mu::GetRenderer().GetGPUDriverName());
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u 2D:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
+                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.merged2DDrawCalls, stats.commandCount,
+                stats.vertexBytes / 1024);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"CPU frame:%5.2f replay:%5.2f submit:%5.2f ms", stats.frameMilliseconds,
+                stats.replayMilliseconds, stats.submitMilliseconds);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Textures upload:%u create:%u release:%u", stats.textureUploads, stats.textureCreates,
+                stats.textureReleases);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Bind Pipe:%u Samp:%u VU:%u FU:%u", stats.pipelineBinds, stats.samplerBinds,
+                stats.vertexUniformPushes, stats.fragmentUniformPushes);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"2D Merge:%u Glyph upload:%u", stats.merged2DDrawCalls,
+                FrameProfiler::CounterValue(Counter::GlyphUploads));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Skin GPU:%u CPU-ineligible:%u Failed:%u",
+                FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    const auto batchDraws = FrameProfiler::CounterValue(Counter::BatchDraws);
+    const auto batchVertices = FrameProfiler::CounterValue(Counter::BatchVertices);
+    const float verticesPerBatch =
+        batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.0f;
+    mu_swprintf(szLine, L"Batch Draw:%u Vtx:%u Vtx/Draw:%.1f", batchDraws, batchVertices, verticesPerBatch);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(
+        szLine, L"Break Tex:%u Blend:%u Depth:%u Prog:%u Uni:%u Mtx:%u Draw:%u Other:%u",
+        FrameProfiler::CounterValue(Counter::BatchBreakTexture), FrameProfiler::CounterValue(Counter::BatchBreakBlend),
+        FrameProfiler::CounterValue(Counter::BatchBreakDepth), FrameProfiler::CounterValue(Counter::BatchBreakProgram),
+        FrameProfiler::CounterValue(Counter::BatchBreakUniform), FrameProfiler::CounterValue(Counter::BatchBreakMatrix),
+        FrameProfiler::CounterValue(Counter::BatchBreakDraw), FrameProfiler::CounterValue(Counter::BatchBreakOther));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    static constexpr Pass kBatchRows[] = {Pass::Sprites, Pass::Particles, Pass::Joints, Pass::UI};
+    for (Pass pass : kBatchRows)
+    {
+        const auto passDraws = FrameProfiler::CounterValue(pass, Counter::BatchDraws);
+        if (passDraws == 0)
+        {
+            continue;
+        }
+
+        const auto passVertices = FrameProfiler::CounterValue(pass, Counter::BatchVertices);
+        mu_swprintf(szLine, L"  %-9hs Draw:%5u Vtx/Draw:%5.1f Tex:%u Blend:%u Draw:%u",
+                    FrameProfiler::kPassNames[static_cast<int>(pass)], passDraws,
+                    static_cast<float>(passVertices) / static_cast<float>(passDraws),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakTexture),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakBlend),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakDraw));
+        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+        y += DEBUG_TEXT_LINE_HEIGHT;
+    }
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
@@ -976,6 +1195,41 @@ static void ManageMainSceneAudio()
     ManageBackgroundMusic();
 }
 
+static void LogFrameTiming()
+{
+    static bool enabled = std::getenv("MU_RENDER_TIMING") != nullptr;
+    static unsigned frameCounter = 0;
+    constexpr unsigned kLogInterval = 60;
+    if (!enabled || ++frameCounter % kLogInterval != 0)
+        return;
+
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    const auto logger = mu::log::Get("render");
+    logger->info(
+        "[RENDER diag] requested={} submitted={} pipeline_binds={} sampler_binds={} vertex_uniform_pushes={} "
+        "fragment_uniform_pushes={} merged_2d={} glyph_uploads={} skin_gpu={} skin_cpu_ineligible={} skin_failed={}",
+        stats.requestedDrawCalls, stats.submittedDrawCalls, stats.pipelineBinds, stats.samplerBinds,
+        stats.vertexUniformPushes, stats.fragmentUniformPushes, stats.merged2DDrawCalls,
+        FrameProfiler::CounterValue(Counter::GlyphUploads),
+        FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+        FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+        FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    logger->info(
+        "[FRAME timing] terrain={:.2f}ms objects={:.2f}ms characters={:.2f}ms items={:.2f}ms "
+        "effects={:.2f}ms other={:.2f}ms sprites={:.2f}ms particles={:.2f}ms joints={:.2f}ms "
+        "skin_gpu={} skin_cpu_ineligible={} skin_failed={}",
+        FrameProfiler::AccumulatorMs(Pass::Terrain), FrameProfiler::AccumulatorMs(Pass::Objects),
+        FrameProfiler::AccumulatorMs(Pass::Characters), FrameProfiler::AccumulatorMs(Pass::Items),
+        FrameProfiler::AccumulatorMs(Pass::Effects), FrameProfiler::AccumulatorMs(Pass::Other),
+        FrameProfiler::AccumulatorMs(Pass::Sprites), FrameProfiler::AccumulatorMs(Pass::Particles),
+        FrameProfiler::AccumulatorMs(Pass::Joints),
+        FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+        FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+        FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+}
+
 /**
  * @brief Main scene rendering and update function.
  *
@@ -1013,9 +1267,17 @@ void MainScene(HDC hDC)
     try
     {
         Success = RenderCurrentScene(hDC);
-        RenderDebugInfo();
-        RenderFpsCounter();
-        UI::Reconnect::RenderDialog();
+
+        LogFrameTiming();
+        {
+            FRAME_PROFILE(Overlay);
+            RenderDebugInfo();
+            RenderGLStats();
+            RenderFpsCounter();
+            UI::Reconnect::RenderDialog();
+        }
+        FrameProfiler::ResetFrame();
+        FrameProfiler::ResetCounters();
 
         if (Success)
         {
@@ -1032,7 +1294,6 @@ void MainScene(HDC hDC)
                 EndBitmap();
             }
 #endif
-            PlatformSwapBuffers();
         }
 
         CheckServerConnection();
@@ -1040,10 +1301,9 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        // Log exception in MainScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        wchar_t errorMessage[256] = {};
+        mbstowcs(errorMessage, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", errorMessage);
     }
 }
 
@@ -1079,14 +1339,17 @@ void RenderScene(HDC hDC)
 
         if (g_iNoMouseTime > 31)
         {
-            KillGLWindow();
+            Destroy = true;
         }
     }
     catch (const std::exception& e)
     {
-        // Log exception in RenderScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        wchar_t errorMessage[256] = {};
+        mbstowcs(errorMessage, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", errorMessage);
     }
+
+    // SDL may deliver button-down and button-up in one event batch. Keep these
+    // one-shot flags alive until scene logic has consumed the rendered frame.
+    ClearMousePressState();
 }

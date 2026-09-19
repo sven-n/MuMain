@@ -6,7 +6,6 @@
 #include "UI/Legacy/UIControls.h"
 #include "Core/Utilities/UsefulDef.h"
 
-
 using namespace SEASON3B;
 
 const int iMAX_TEXT_LINE = 512;
@@ -46,12 +45,10 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
     m_iWidth = iWidth;
     m_iHeight = iHeight;
 
-    SIZE Fontsize;
     g_pRenderText->SetFont(g_hFont);
 
     std::wstring strTemp = L"A";
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &Fontsize);
+    const SIZE Fontsize = g_pRenderText->MeasureText(strTemp.c_str(), static_cast<int>(strTemp.size()));
 
     m_iTextHeight = Fontsize.cy;
     m_iTextLineHeight = m_iTextHeight + iLINE_INTERVAL;
@@ -62,9 +59,7 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
     m_iCurLine = 0;
 }
 
-void CNewUITextBox::Release()
-{
-}
+void CNewUITextBox::Release() {}
 
 float CNewUITextBox::GetLayerDepth()
 {
@@ -88,7 +83,6 @@ bool CNewUITextBox::Update()
 
 bool CNewUITextBox::Render()
 {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     for (int iIndex = 0; iIndex < m_iLimitLine; iIndex++)
     {
@@ -97,10 +91,10 @@ bool CNewUITextBox::Render()
         if (GetLineText(iLineIndex).empty() == false)
         {
             g_pRenderText->SetFont(g_hFont);
-            //g_pRenderText->SetBgColor( 0, 0, 0, 0 );
+            // g_pRenderText->SetBgColor( 0, 0, 0, 0 );
             g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->RenderText(m_ptPos.x, m_ptPos.y + iIndex * m_iTextLineHeight, GetLineText(iLineIndex).c_str(),
-                m_iWidth, 0, RT3_SORT_LEFT);
+            g_pRenderText->RenderText(m_ptPos.x, m_ptPos.y + iIndex * m_iTextLineHeight,
+                                      GetLineText(iLineIndex).c_str(), m_iWidth, 0, RT3_SORT_LEFT);
         }
     }
 
@@ -110,7 +104,7 @@ bool CNewUITextBox::Render()
 void CNewUITextBox::AddText(wchar_t* strText)
 {
     wchar_t strTemp[iMAX_TEXT_LINE][iMAX_TEXT_LINE];
-    ::memset(strTemp[0], 0, sizeof(char) * iMAX_TEXT_LINE * iMAX_TEXT_LINE);
+    ::memset(strTemp[0], 0, sizeof(wchar_t) * iMAX_TEXT_LINE * iMAX_TEXT_LINE);
 
     int iTextLine = ::DivideStringByPixel(&strTemp[0][0], iMAX_TEXT_LINE, iMAX_TEXT_LINE, strText, m_iWidth, true, '#');
 
@@ -122,7 +116,9 @@ void CNewUITextBox::AddText(wchar_t* strText)
 
 void CNewUITextBox::AddText(const wchar_t* strText)
 {
-    wchar_t strTempText[iMAX_TEXT_LINE] = { 0, };
+    wchar_t strTempText[iMAX_TEXT_LINE] = {
+        0,
+    };
     mu_swprintf(strTempText, strText);
 
     AddText(strTempText);
@@ -130,7 +126,7 @@ void CNewUITextBox::AddText(const wchar_t* strText)
 
 std::wstring CNewUITextBox::GetFullText()
 {
-   std::wstring strTemp;
+    std::wstring strTemp;
 
     auto vi = m_vecText.begin();
     for (; vi != m_vecText.end(); vi++)

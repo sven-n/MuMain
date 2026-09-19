@@ -30,7 +30,7 @@ public:
     /**
      * @brief Sets OpenGL viewport with Y-axis flip
      *
-     * Replaces glViewport2(). Takes pixel coordinates directly (not reference coords).
+     * Takes pixel coordinates directly rather than reference coordinates.
      *
      * @param x Viewport X offset (pixels)
      * @param y Viewport Y offset (pixels)

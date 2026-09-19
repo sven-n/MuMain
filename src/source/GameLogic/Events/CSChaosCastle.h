@@ -2,23 +2,23 @@
 //
 //  CSChaosCastle.h
 //
-//  ≥ª  øÎ : ƒ´ø¿Ω∫ ƒ≥ΩΩ ∞Ê±‚.
+//  ÎÇ¥  Ïö© : Ïπ¥Ïò§Ïä§ Ï∫êÏä¨ Í≤ΩÍ∏∞.
 //
-//  ≥Ø  ¬• : 2004/04/22
+//  ÎÇ†  Ïßú : 2004/04/22
 //
-//  ¿€º∫¿⁄ : ¡∂ ±‘ «œ.
+//  ÏûëÏÑ±Ïûê : Ï°∞ Í∑ú Ìïò.
 //
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CSCHAOS_CASTLE_H__
 #define __CSCHAOS_CASTLE_H__
 
-void    ClearChaosCastleHelper(CHARACTER* c);
-void    ChangeChaosCastleUnit(CHARACTER* c);
-bool    CreateChaosCastleObject(OBJECT* o);
-bool    MoveChaosCastleObjectSetting(int& objCount, int object);
-bool    MoveChaosCastleObject(OBJECT* o, int& object, int& visibleObject);
-bool    MoveChaosCastleAllObject(OBJECT* o);
-bool    RenderChaosCastleVisual(OBJECT* o, BMD* b);
-void    RenderTerrainVisual(int xi, int yi);
+void ClearChaosCastleHelper(CHARACTER* c);
+void ChangeChaosCastleUnit(CHARACTER* c);
+bool CreateChaosCastleObject(OBJECT* o);
+bool MoveChaosCastleObjectSetting(int& objCount, int object);
+bool MoveChaosCastleObject(OBJECT* o, int& object, int& visibleObject);
+bool MoveChaosCastleAllObject(OBJECT* o);
+bool RenderChaosCastleVisual(OBJECT* o, BMD* b);
+void RenderTerrainVisual(int xi, int yi);
 
-#endif// __CSCHAOS_CASTLE_H__
+#endif // __CSCHAOS_CASTLE_H__

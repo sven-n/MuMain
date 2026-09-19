@@ -60,14 +60,13 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
         TextBold[i] = src.isBold ? 1 : 0;
     }
 
-    SIZE TextSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+    g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+    const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
 
     if (iRenderPoint == STRP_NONE)
     {
         const int Height =
-            ((model.count - model.skipCount) * TextSize.cy + model.skipCount * TextSize.cy / 2)
-            / g_fScreenRate_y;
+            (model.count - model.skipCount) * TextSize.cy + model.skipCount * TextSize.cy / 2;
         sy -= Height;
     }
 

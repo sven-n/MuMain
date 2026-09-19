@@ -3,8 +3,6 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Core/Platform/WinCompat.h"
 
-extern HWND g_hWnd;
-
 namespace DataFileIO
 {
     std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outChecksum)
@@ -16,7 +14,7 @@ namespace DataFileIO
         size_t bytesRead = fread(buffer.get(), bufferSize, 1, fp);
         if (bytesRead != 1)
         {
-            ShowErrorAndExit(L"Failed to read data from file");
+            ReportError(L"Failed to read data from file");
             return nullptr;
         }
 
@@ -26,7 +24,7 @@ namespace DataFileIO
             bytesRead = fread(outChecksum, sizeof(DWORD), 1, fp);
             if (bytesRead != 1)
             {
-                ShowErrorAndExit(L"Failed to read checksum from file");
+                ReportError(L"Failed to read checksum from file");
                 return nullptr;
             }
         }
@@ -56,11 +54,9 @@ namespace DataFileIO
         }
     }
 
-    void ShowErrorAndExit(const wchar_t* message)
+    void ReportError(const wchar_t* message)
     {
-        g_ErrorReport.Write(message);
-        MessageBox(g_hWnd, message, L"Data File Error", MB_OK | MB_ICONERROR);
-        // Note: Application continues running - error handling left to caller
+        g_ErrorReport.Write(L"[DataFileIO] %ls\r\n", message);
     }
 
 #ifdef _EDITOR

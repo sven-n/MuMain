@@ -12,13 +12,9 @@ PetActionDemonPtr PetActionDemon::Make()
     return petAction;
 }
 
-PetActionDemon::PetActionDemon()
-{
-}
+PetActionDemon::PetActionDemon() {}
 
-PetActionDemon::~PetActionDemon()
-{
-}
+PetActionDemon::~PetActionDemon() {}
 
 bool PetActionDemon::Release(OBJECT* obj, CHARACTER* Owner)
 {
@@ -84,7 +80,7 @@ bool PetActionDemon::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double
     Vector(temp * 0.7f, temp * 0.5f, temp * 0.6f, Light);
     Vector(0.7f, 0.3f, 0.3f, Light2);
 
-    int itemp[] = { 8, 34, 51, 61, 56, 66, 52, 58, 44 };
+    int itemp[] = {8, 34, 51, 61, 56, 66, 52, 58, 44};
 
     for (int i = 0; i < 9; i++)
     {

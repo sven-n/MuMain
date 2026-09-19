@@ -197,6 +197,7 @@ namespace SEASON3B
         bool EquipmentWindowProcess();
         bool InventoryProcess() const;
         bool BtnProcess();
+        bool WindowProcess();
 
         void RenderItemToolTip(int iSlotIndex) const;
         bool CanOpenMyShopInterface();

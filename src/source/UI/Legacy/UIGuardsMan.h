@@ -24,16 +24,28 @@ protected:
         REG_STATUS_NONE = 0,
         REG_STATUS_REG = 1
     };
-    REG_STATUS	m_eRegStatus;
-    DWORD		m_dwRegMark;
+    REG_STATUS m_eRegStatus;
+    DWORD m_dwRegMark;
 
 public:
     bool IsSufficentDeclareLevel();
-    bool HasRegistered() { return (m_eRegStatus == REG_STATUS_REG); }
-    void SetRegStatus(BYTE byStatus) { m_eRegStatus = (REG_STATUS)byStatus; }
+    bool HasRegistered()
+    {
+        return (m_eRegStatus == REG_STATUS_REG);
+    }
+    void SetRegStatus(BYTE byStatus)
+    {
+        m_eRegStatus = (REG_STATUS)byStatus;
+    }
 
-    DWORD GetRegMarkCount() { return m_dwRegMark; }
-    void SetMarkCount(DWORD dwMarkCount) { m_dwRegMark = dwMarkCount; }
+    DWORD GetRegMarkCount()
+    {
+        return m_dwRegMark;
+    }
+    void SetMarkCount(DWORD dwMarkCount)
+    {
+        m_dwRegMark = dwMarkCount;
+    }
 
     DWORD GetMyMarkCount();
     int GetMyMarkSlotIndex();

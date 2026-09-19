@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIHotKey.h"
@@ -10,8 +11,10 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "UI/Scaling/UITransform.h"
 
 #include "Render/Effects/ZzzEffect.h"
+#include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMng.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
@@ -264,6 +267,17 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
+    else if (SEASON3B::IsPress('J') == true)
+    {
+        // Only servers which offer their chat commands have something to show.
+        if (GameLogic::Commands::Catalog().IsAvailable())
+        {
+            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_COMMAND_LIST);
+            PlayBuffer(SOUND_CLICK01);
+        }
+
+        return false;
+    }
     else if (SEASON3B::IsPress('M') == true)
     {
         g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MOVEMAP);
@@ -382,6 +396,11 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 
 bool SEASON3B::CNewUIHotKey::CanUpdateKeyEvent()
 {
+    if (CUITextInputBox::IsAnyInputBoxFocused())
+    {
+        return false;
+    }
+
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)
@@ -439,7 +458,8 @@ bool SEASON3B::CNewUIHotKey::AutoGetItem()
         CNewUIInventoryCtrl::GetPickedItem() == NULL
         && SEASON3B::IsPress(VK_SPACE)
         && g_pChatInputBox->HaveFocus() == false
-        && CheckMouseIn(0, 0, GetScreenWidth(), 429)
+        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
+                                                       g_fWindowMouseX, g_fWindowMouseY)
         )
     {
         for (int i = 0; i < MAX_ITEMS; ++i)

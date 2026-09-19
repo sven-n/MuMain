@@ -1,16 +1,16 @@
 #ifndef _GMCRYWOLF1ST_H_
 #define _GMCRYWOLF1ST_H_
 
-namespace M34CryWolf1st {		//. Å©¶óÀÌ¿ïÇÁ Á¡·ÉÁö
+namespace M34CryWolf1st {		//. í¬ë¼ì´ìš¸í”„ ì ë ¹ì§€
     bool IsCyrWolf1st();
 
-    //. ¿ÀºêÁ§Æ®
+    //. ì˜¤ë¸Œì íŠ¸
     bool CreateCryWolf1stObject(OBJECT* o);
     bool MoveCryWolf1stObject(OBJECT* o);
     bool RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b);
     bool RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
 
-    //. ¸ó½ºÅÍ
+    //. ëª¬ìŠ¤í„°
     CHARACTER* CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key);
 
     bool MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
@@ -22,7 +22,7 @@ namespace M34CryWolf1st {		//. Å©¶óÀÌ¿ïÇÁ Á¡·ÉÁö
     bool CreateMist(PARTICLE* pParticleObj);
     void RenderBaseSmoke(void);
 
-    //. Å©¶óÀÌ¿ïÇÁ ·¹ÀÌµå °ü·Ã MVP
+    //. í¬ë¼ì´ìš¸í”„ ë ˆì´ë“œ ê´€ë ¨ MVP
     void ChangeBackGroundMusic(int World);
     void RenderNoticesCryWolf();
     void CryWolfMVPInit();

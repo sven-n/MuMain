@@ -36,19 +36,33 @@ public unsafe partial class ConnectionManager
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Login send skipped; connection handle={handle} not found");
             return;
         }
 
         try
         {
-            var usernameStr = NativeInterop.PtrToWideString(@username);
-            var passwordStr = NativeInterop.PtrToWideString(@password);
+            var usernameStr = NativeInterop.PtrToWideString(@username)
+                ?? throw new ArgumentNullException(nameof(username));
+            var passwordStr = NativeInterop.PtrToWideString(@password)
+                ?? throw new ArgumentNullException(nameof(password));
+            ArgumentNullException.ThrowIfNull(@clientVersion);
+            ArgumentNullException.ThrowIfNull(@clientSerial);
 
-            // todo: check if username or password is too long
+            const int usernameLength = 10;
+            const int passwordLength = 20;
+            if (Encoding.UTF8.GetByteCount(usernameStr) > usernameLength
+                || Encoding.UTF8.GetByteCount(passwordStr) > passwordLength)
+            {
+                throw new ArgumentException("Login credentials exceed packet field length.");
+            }
+
             connection.CreateAndSend(pipeWriter =>
             {
-                Span<byte> usernameBytes = stackalloc byte[10];
-                Span<byte> passwordBytes = stackalloc byte[20];
+                Span<byte> usernameBytes = stackalloc byte[usernameLength];
+                Span<byte> passwordBytes = stackalloc byte[passwordLength];
+                usernameBytes.Clear();
+                passwordBytes.Clear();
                 Encoding.UTF8.GetBytes(usernameStr, usernameBytes);
                 Encoding.UTF8.GetBytes(passwordStr, passwordBytes);
                 Xor3Encryptor.Encrypt(usernameBytes);
@@ -64,10 +78,11 @@ public unsafe partial class ConnectionManager
 
                 return length;
             });
+            ManagedLog.Write(ManagedLog.Level.Info, $"NET: Login packet staged, handle={handle}, bytes={LoginLongPasswordRef.Length}");
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Login packet staging failed, handle={handle}: {ex}");
         }
     }
 }

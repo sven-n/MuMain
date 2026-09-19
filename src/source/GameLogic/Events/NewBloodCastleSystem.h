@@ -11,17 +11,18 @@
 
 namespace SEASON3B
 {
-    class CNewBloodCastleSystem : public CSBaseMatch
-    {
-    public:
-        CNewBloodCastleSystem();
-        virtual ~CNewBloodCastleSystem();
+class CNewBloodCastleSystem : public CSBaseMatch
+{
+public:
+    CNewBloodCastleSystem();
+    virtual ~CNewBloodCastleSystem();
 
-        virtual void    RenderMatchTimes(void);
-        virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
-        virtual void    SetMatchResult(const int iNumDevil, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
-        virtual void    RenderMatchResult(void);
-    };
+    virtual void RenderMatchTimes(void);
+    virtual void SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
+    virtual void SetMatchResult(const int iNumDevil, const int iMyRank, const MatchResult* pMatchResult,
+                                const int Success = false);
+    virtual void RenderMatchResult(void);
 };
+}; // namespace SEASON3B
 
 #endif // !defined(AFX_NEWBLOODCASTLESYSTEM_H__8A912BDC_03C6_4458_9704_46C6E4E7D915__INCLUDED_)

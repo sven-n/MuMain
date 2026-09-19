@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // 케릭터 관련 함수
 // 케릭터 랜더링, 움직임등을 처리
 //
@@ -6,6 +6,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <execution>
+#include <algorithm>
+#include <span>
 #include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
 #ifdef _WIN32
@@ -14,10 +17,13 @@
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/AnimationTaskPool.h"
 #include "Engine/Object/PlayerActionState.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -27,6 +33,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
@@ -6082,7 +6089,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
                 break;
             if (o->CurrentAction == 0 && o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
-                PlayBuffer(SOUND_NPC_BLACK_SMITH);
+                PlayBuffer(SOUND_NPC_BLACK_SMITH, o);
             o->BlendMesh = 4;
             o->BlendMeshLight = Luminosity;
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
@@ -6489,18 +6496,80 @@ void MoveCharactersClient()
     {
         MoveCharacterClient(&CharactersClient[i]);
     }
+    UpdateCharactersAnimationParallel(std::span<CHARACTER>(CharactersClient, MAX_CHARACTERS_CLIENT));
     MoveBlurs();
 }
 
-extern float  ParentMatrix[3][4];
+// TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — active-character count and
+// which animation path was taken this tick, read by the debug HUD (SceneManager.cpp).
+size_t g_LastActiveCharacterCount = 0;
+bool g_LastAnimationWasParallel = false;
+
+void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
+{
+    static thread_local std::vector<CHARACTER*> activeChars;
+    activeChars.clear();
+    activeChars.reserve(characters.size());
+
+    for (CHARACTER& c : characters)
+    {
+        c.Object.EnableBoneMatrix = false;
+        if (c.Object.Live && c.Object.Visible)
+        {
+            activeChars.push_back(&c);
+        }
+    }
+
+    g_LastActiveCharacterCount = activeChars.size();
+
+    if (activeChars.empty()) return;
+
+    extern bool g_bDisableAnimationTaskPool;
+    constexpr size_t PARALLEL_ANIMATION_THRESHOLD = 20;
+    g_LastAnimationWasParallel = (!g_bDisableAnimationTaskPool && activeChars.size() >= PARALLEL_ANIMATION_THRESHOLD);
+    if (g_LastAnimationWasParallel)
+    {
+        AnimationTaskPool::Instance().DispatchCharacters(activeChars);
+    }
+    else
+    {
+        for (CHARACTER* c : activeChars)
+        {
+            OBJECT* o = &c->Object;
+            BMD* model = &Models[o->Type];
+            if (!model || model->NumBones <= 0) continue;
+
+            model->Animation(
+                o->BoneTransform,
+                o->AnimationFrame,
+                o->PriorAnimationFrame,
+                o->PriorAction,
+                o->Angle,
+                o->HeadAngle,
+                false,
+                true,
+                nullptr,
+                o->CurrentAction
+            );
+            o->EnableBoneMatrix = true;
+        }
+    }
+}
+
+void WaitCharactersAnimation()
+{
+    FRAME_PROFILE(CharWait);
+    AnimationTaskPool::Instance().Wait();
+}
+
+extern thread_local float  ParentMatrix[3][4];
 
 void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
 {
     EnableAlphaTest();
     EnableCullFace();
-    glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_GUILD);
-    glPushMatrix();
+    mu::GetRenderer().PushMatrix();
 
     float Matrix[3][4];
     vec3_t Angle;
@@ -6528,10 +6597,10 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
     }
 
     R_ConcatTransforms(o->BoneTransform[26], Matrix, ParentMatrix);
-    glTranslatef(o->Position[0], o->Position[1], o->Position[2]);
+    mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
     RenderPlane3D(5.f, 7.f, ParentMatrix);
 
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
     DisableCullFace();
 }
 
@@ -6877,6 +6946,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Owner->RotationPosition(o->BoneTransform[f->LinkBone], p, Position);
         VectorAdd(c->Object.Position, Position, b->BodyOrigin);
         Vector(0.f, 0.f, 0.f, Object->Angle);
+        // For unlinked items (e.g. Wings), explicitly populate main-thread ParentMatrix
+        // with the character's link bone transform to prevent uninitialized thread_local garbage.
+        for (int r = 0; r < 3; ++r)
+            for (int c = 0; c < 4; ++c)
+                ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
     }
     if (Type == MODEL_BOSS_HEAD)
     {
@@ -6908,8 +6982,15 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
     VectorCopy(b->BodyOrigin, Object->Position);
 
+    // Save the caller's active bone transform pointer. Animation() and Transform() on the
+    // linked item's BMD will overwrite g_pActiveBoneTransform with BoneTransform (the local
+    // stack array used for this linked item). Restoring it afterwards prevents the caller's
+    // subsequent GPU skinning draws (characters, world objects) from reading stale/dangling data.
+    // This fixes Elf and Dark Lord rendering corruption in the character selection screen.
+    const float (*savedActiveBones)[3][4] = g_pActiveBoneTransform;
+
     vec3_t Temp;
-    b->Animation(BoneTransform, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true);
+    b->Animation(BoneTransform, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true, true, ParentMatrix);
     if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
     {
         float _KnightScale = 0.9f;
@@ -6928,6 +7009,15 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
     }
+
+    // Restore the caller's active bone transform — the linked item render above overwrote
+    // g_pActiveBoneTransform with the linked item's local BoneTransform stack array.
+    // Without this restore, world objects and terrain rendered afterward use the wrong (now
+    // dangling) bone pointer, causing GPU skinning corruption (visible as spikes / missing meshes).
+    // Goes through SetActiveBoneTransform() (not a raw assignment) so BoneUBO's upload-dedup
+    // cache also sees this as a change — the restored pointer may be the same address the
+    // linked item's stack-local BoneTransform just occupied, but with stale/different content.
+    SetActiveBoneTransform(savedActiveBones);
 
     if (Object->EnableShadow)
     {
@@ -8311,7 +8401,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         break;
     }
 
-    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE && !g_Direction.m_CKanturu.IsMayaScene())
+    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
+        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug()) // DXP-23 diagnostic
     {
         switch (Type)        // 날개인지 검사
         {
@@ -11320,6 +11411,8 @@ void RenderCharactersClient()
     s_bShowCharacterPickBoxes = DevEditor_ShouldShowCharacterPickBoxes();
 #endif
 
+    WaitCharactersAnimation();
+
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -11567,6 +11660,7 @@ void ReleaseCharacters(void)
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
 {
     OBJECT* o = &c->Object;
+    c->ClearDisplayName();
     c->PositionX = PositionX;
     c->PositionY = PositionY;
     c->TargetX = PositionX;
@@ -11809,7 +11903,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         delete[] o->BoneTransform;
         o->BoneTransform = NULL;
     }
-    o->BoneTransform = new vec34_t[Models[Type].NumBones];
+    o->BoneTransform = new vec34_t[MAX_BONES];
 
     for (int i = 0; i < 2; i++)
     {
@@ -15161,10 +15255,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
     if (gMapManager.InBloodCastle() == true)
     {
         bBindBack = false;
-        if (IsGMCharacter() == true)
-        {
-            return bBindBack;
-        }
+        // Note: Removed legacy 'if (IsGMCharacter()) return bBindBack;' early exit
+        // so GM characters display wings, pets, and quest items in Blood Castle.
     }
     if (gMapManager.InChaosCastle() == true)
     {
@@ -15270,7 +15362,9 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             iBackupType = iType;
         }
 
-        if (gMapManager.InBloodCastle() && c->EtcPart != 0)
+        // Blood Castle Archangel Quest Item Check: Bounded to 1..3 to prevent default iType=0
+        // from rendering Models[0] (Blood Castle stone wall map object) on character back.
+        if (gMapManager.InBloodCastle() && (c->EtcPart >= 1 && c->EtcPart <= 3))
         {
             PART_t* w = &c->Wing;
 
@@ -15291,7 +15385,10 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             case 3: iType = MODEL_DIVINE_CB_OF_ARCHANGEL; break;
             }
 
-            RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate);
+            if (iType != 0)
+            {
+                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate);
+            }
         }
 
         CreatePartsFactory(c);

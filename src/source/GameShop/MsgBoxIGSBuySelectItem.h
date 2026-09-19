@@ -88,19 +88,19 @@ private:
     void RenderListBox();
     void ReleaseListBox();
     void ListBoxDoAction();
-    void AddData(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iProductSeq, wchar_t* pszPriceUnit, int iCashType);
+    void AddData(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iProductSeq, wchar_t* pszPriceUnit,
+                 int iCashType);
 
 private:
-
     CNewUIMessageBoxButton m_BtnBuy;
     CNewUIMessageBoxButton m_BtnPresent;
     CNewUIMessageBoxButton m_BtnCancel;
     CUIPackCheckBuyingListBox m_SelectBuyListBox;
 
-    int		m_iPackageSeq;
-    int		m_iDisplaySeq;
-    WORD	m_wItemCode;
-    int		m_iDescriptionLine;
+    int m_iPackageSeq;
+    int m_iDisplaySeq;
+    WORD m_wItemCode;
+    int m_iDescriptionLine;
 
     wchar_t m_szPackageName[MAX_TEXT_LENGTH];
     wchar_t m_szPrice[MAX_TEXT_LENGTH];

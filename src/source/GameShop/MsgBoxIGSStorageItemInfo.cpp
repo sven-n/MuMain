@@ -85,7 +85,6 @@ bool CMsgBoxIGSStorageItemInfo::Update()
 bool CMsgBoxIGSStorageItemInfo::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderMsgBackColor(true);
     RenderFrame();
     RenderTexts();

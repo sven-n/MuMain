@@ -53,7 +53,7 @@ enum SKILL_TOOLTIP_RENDER_POINT
     STRP_BOOTOMRIGHT
 };
 
-// ¼¼À²Á¤º¸
+// ì„¸ìœ¨ì •ë³´
 
 extern int		g_nTaxRate;
 extern int		g_nChaosTaxRate;
@@ -77,7 +77,7 @@ extern int			GuildTotalScore;
 extern int AllRepairGold;
 
 //////////////////////////////////////////////////////////////////////////
-// text °ü·Ã
+// text ê´€ë ¨
 //////////////////////////////////////////////////////////////////////////
 extern wchar_t TextList[50][100];
 extern int TextListColor[50];
@@ -171,6 +171,11 @@ bool IsCorrectShopTitle(const wchar_t* szShopTitle);
 void CreateGuildMark(int nMarkIndex, bool blend = true);
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index);
 void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
+
+namespace UI::Items
+{
+bool ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, bool renderingPickedItem);
+}
 
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp = false);
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);

@@ -3,7 +3,7 @@
 // SceneCommon.h - Shared utilities used by multiple scenes
 
 #include "Core/Platform/WinCompat.h"
-#include "Engine/Object/ZzzInfomation.h"  // For MAX_CHARACTERS_PER_ACCOUNT
+#include "Core/Globals/_define.h"
 
 //=============================================================================
 // Character Selection State
@@ -82,12 +82,23 @@ public:
         // Note: initLoading is not reset on disconnect
     }
 
-    // Legacy accessors for backward compatibility
-    bool& GetInitLogIn() { return initLogIn; }
-    bool& GetInitLoading() { return initLoading; }
-    bool& GetInitCharacterScene() { return initCharacterScene; }
-    bool& GetInitMainScene() { return initMainScene; }
-    bool& GetEnableMainRender() { return enableMainRender; }
+    bool GetInitLogIn() const { return initLogIn; }
+    bool GetInitLoading() const { return initLoading; }
+    bool GetInitCharacterScene() const { return initCharacterScene; }
+    bool GetInitMainScene() const { return initMainScene; }
+    bool GetEnableMainRender() const { return enableMainRender; }
+
+    void SetInitLogIn(bool value) { initLogIn = value; }
+    void SetInitLoading(bool value) { initLoading = value; }
+    void SetInitCharacterScene(bool value) { initCharacterScene = value; }
+    void SetInitMainScene(bool value) { initMainScene = value; }
+    void SetEnableMainRender(bool value) { enableMainRender = value; }
+
+    bool& LegacyRefInitLogIn() { return initLogIn; }
+    bool& LegacyRefInitLoading() { return initLoading; }
+    bool& LegacyRefInitCharacterScene() { return initCharacterScene; }
+    bool& LegacyRefInitMainScene() { return initMainScene; }
+    bool& LegacyRefEnableMainRender() { return enableMainRender; }
 };
 
 // Global scene initialization state

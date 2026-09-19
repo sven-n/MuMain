@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="wood" cx="42%" cy="34%" r="70%">
+      <stop offset="0" stop-color="#8b4a2b"/>
+      <stop offset=".5" stop-color="#562819"/>
+      <stop offset="1" stop-color="#24100d"/>
+    </radialGradient>
+    <linearGradient id="woodEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d28a45"/>
+      <stop offset=".45" stop-color="#7f4023"/>
+      <stop offset="1" stop-color="#351712"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2d4bb"/>
+      <stop offset=".2" stop-color="#91867a"/>
+      <stop offset=".48" stop-color="#3d3b40"/>
+      <stop offset=".74" stop-color="#786253"/>
+      <stop offset="1" stop-color="#1b1a1e"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe69a"/>
+      <stop offset=".32" stop-color="#dca34a"/>
+      <stop offset=".65" stop-color="#79431f"/>
+      <stop offset="1" stop-color="#c27c34"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="11" result="b"/>
+      <feOffset dy="13" result="o"/>
+      <feColorMatrix in="o" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .65 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <g id="wheelSpike">
+      <path d="M512 -28 596 168 566 294H458L428 168Z" fill="url(#woodEdge)" stroke="#2a1010" stroke-width="24"/>
+      <path d="M512 22 556 178 534 253H490L468 178Z" fill="#b76435" opacity=".72"/>
+    </g>
+    <g id="blade">
+      <path d="M458 470 342 304 424 226 512 -22 600 226 682 304 566 470 538 416 512 300 486 416Z"
+            fill="url(#steel)" stroke="#21181a" stroke-width="30"/>
+      <path d="M479 424 397 314 456 247 512 48 568 247 627 314 545 424 526 385 512 322 498 385Z"
+            fill="none" stroke="#b17a4b" stroke-width="18" opacity=".82"/>
+      <path d="M490 238 512 18 534 238M391 308 454 278M633 308 570 278M421 359 477 331M603 359 547 331"
+            stroke="#181719" stroke-width="15" stroke-linecap="round" opacity=".82"/>
+      <path d="M512 -4V222" stroke="#e8d8b5" stroke-width="10" opacity=".62"/>
+    </g>
+  </defs>
+
+  <g filter="url(#shadow)" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Rear spiked carriage wheel / circular shield -->
+    <use href="#wheelSpike" transform="rotate(45 512 512)"/>
+    <use href="#wheelSpike" transform="rotate(135 512 512)"/>
+    <use href="#wheelSpike" transform="rotate(225 512 512)"/>
+    <use href="#wheelSpike" transform="rotate(315 512 512)"/>
+
+    <circle cx="512" cy="512" r="382" fill="none" stroke="#25100e" stroke-width="34"/>
+    <circle cx="512" cy="512" r="348" fill="none" stroke="url(#woodEdge)" stroke-width="56"/>
+    <circle cx="512" cy="512" r="312" fill="none" stroke="#2e1511" stroke-width="14"/>
+
+    <g stroke="#3a1a13" stroke-width="40">
+      <path d="M278 278 746 746"/>
+      <path d="M746 278 278 746"/>
+    </g>
+    <g stroke="#a45b31" stroke-width="13" opacity=".62">
+      <path d="M291 291 733 733"/>
+      <path d="M733 291 291 733"/>
+    </g>
+    <g fill="none" stroke="#d18a47" stroke-width="9" opacity=".34">
+      <path d="M246 360Q512 244 778 360"/>
+      <path d="M246 664Q512 780 778 664"/>
+    </g>
+    <g stroke="#24100e" stroke-width="12" opacity=".85">
+      <path d="M327 247 350 287M706 735 733 772M253 666 295 644M729 350 770 327"/>
+      <path d="M386 190 401 237M618 790 630 838M184 431 233 437M790 586 841 594"/>
+    </g>
+
+    <!-- Four-blade forged metal shuriken -->
+    <use href="#blade"/>
+    <use href="#blade" transform="rotate(90 512 512)"/>
+    <use href="#blade" transform="rotate(180 512 512)"/>
+    <use href="#blade" transform="rotate(270 512 512)"/>
+
+    <!-- Shuriken hub: same forged metal, not a separate badge -->
+    <circle cx="512" cy="512" r="174" fill="url(#steel)" stroke="#21181a" stroke-width="30"/>
+    <circle cx="512" cy="512" r="145" fill="#29252a" stroke="#96643b" stroke-width="11"/>
+    <circle cx="512" cy="512" r="130" fill="#19171b" stroke="#3b2d29" stroke-width="7"/>
+
+    <g fill="#9b6234" stroke="#211416" stroke-width="8">
+      <circle cx="512" cy="342" r="14"/><circle cx="682" cy="512" r="14"/>
+      <circle cx="512" cy="682" r="14"/><circle cx="342" cy="512" r="14"/>
+    </g>
+
+    <!-- Smaller MU stamp hammered into the metal hub -->
+    <g fill="none" stroke-linecap="square" stroke-linejoin="miter" transform="translate(-8 0)">
+      <path d="M387 554V470L437 516 487 470V554" stroke="#0c0909" stroke-width="48"/>
+      <path d="M387 554V470L437 516 487 470V554" stroke="url(#gold)" stroke-width="27"/>
+      <path d="M541 470V516Q541 557 594 557Q647 557 647 516V470" stroke="#0c0909" stroke-width="48"/>
+      <path d="M541 470V516Q541 557 594 557Q647 557 647 516V470" stroke="url(#gold)" stroke-width="27"/>
+    </g>
+    <g stroke="#2a1612" stroke-width="10" opacity=".75" transform="translate(-8 0)">
+      <path d="M402 485 420 501M461 501 479 485M558 485 576 477M613 545 631 537"/>
+    </g>
+  </g>
+</svg>

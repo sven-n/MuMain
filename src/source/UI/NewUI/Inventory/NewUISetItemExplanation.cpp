@@ -86,7 +86,6 @@ bool SEASON3B::CNewUISetItemExplanation::Update()
 bool SEASON3B::CNewUISetItemExplanation::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     g_csItemOption.RenderOptionHelper();
 
@@ -105,10 +104,6 @@ float SEASON3B::CNewUISetItemExplanation::GetKeyEventOrder()
     return 10.f;
 }
 
-void SEASON3B::CNewUISetItemExplanation::OpenningProcess()
-{
-}
+void SEASON3B::CNewUISetItemExplanation::OpenningProcess() {}
 
-void SEASON3B::CNewUISetItemExplanation::ClosingProcess()
-{
-}
+void SEASON3B::CNewUISetItemExplanation::ClosingProcess() {}

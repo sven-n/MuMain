@@ -23,5 +23,5 @@ void OpenMacro(const wchar_t* FileName);
 
 extern wchar_t AbuseFilter[][20];
 extern wchar_t AbuseNameFilter[][20];
-extern int  AbuseFilterNumber;
-extern int  AbuseNameFilterNumber;
+extern int AbuseFilterNumber;
+extern int AbuseNameFilterNumber;

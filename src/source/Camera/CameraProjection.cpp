@@ -2,6 +2,7 @@
 #include "CameraProjection.h"
 #include "CameraState.h"
 #include "CameraConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -18,7 +19,6 @@ static int s_ViewportHeight = 0;
 void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
                                           float zNear, float zFar)
 {
-    // Set up OpenGL perspective
     gluPerspective(fov, aspect, zNear, zFar);
 
     // Use actual viewport dimensions (set by SetViewport) for screen center and
@@ -43,16 +43,17 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
     s_ViewportWidth = width;
     s_ViewportHeight = height;
 
-    // Set OpenGL viewport (Y coordinate is flipped)
-    glViewport(x, WindowHeight - (y + height), width, height);
+    mu::GetRenderer().SetViewport(x, y, width, height);
+    mu::GetRenderer().SetScissor(x, y, width, height);
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
                                          vec3_t outTarget, bool bFixView)
 {
-    // Convert reference coordinates to actual pixels
-    sx = sx * WindowWidth / REFERENCE_WIDTH;
-    sy = sy * WindowHeight / REFERENCE_HEIGHT;
+    // Convert active logical coordinates to window pixels. World picking uses
+    // the screen-overlay transform; panel item previews use the panel transform.
+    sx = static_cast<int>(static_cast<float>(sx) * g_fScreenRate_x + g_fScreenOffset_x);
+    sy = static_cast<int>(static_cast<float>(sy) * g_fScreenRate_y + g_fScreenOffset_y);
 
     vec3_t p1, p2;
 
@@ -111,9 +112,9 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
         return false;
     }
 
-    // Read depth buffer
-    GLfloat depth;
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+    // Backends without depth readback leave the far-depth fallback unchanged.
+    GLfloat depth = 1.f;
+    mu::GetRenderer().ReadPixels(x, y, 1, 1, &depth);
 
     // Expected window-space depth from a standard gluPerspective projection:
     //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0
@@ -131,7 +132,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
 void CameraProjection::GetOpenGLMatrix(float outMatrix[3][4])
 {
     float openglMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, openglMatrix);
+    mu::GetRenderer().GetMatrix(GL_MODELVIEW_MATRIX, openglMatrix);
 
     // Convert from OpenGL 4×4 to our 3×4 format
     for (int i = 0; i < 3; i++)

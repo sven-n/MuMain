@@ -4,6 +4,9 @@
 #pragma once
 
 #include "Dotnet/Connection.h"
+#include "Dotnet/PacketFunctions_ChatServer.h"
+#include "Dotnet/PacketFunctions_ClientToServer.h"
+#include "Dotnet/PacketFunctions_ConnectServer.h"
 #include "Network/Server/CSMapServer.h"
 #include <span>
 #include <typeinfo>
@@ -3592,7 +3595,11 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 struct PacketInfo
 {
     std::unique_ptr<BYTE[]> ReceiveBuffer;
+    int32_t ConnectionHandle = 0;
     int32_t Size;
+    std::chrono::steady_clock::time_point EnqueuedAt;
+    bool Superseded = false;
+    bool SuppressOptionalPresentation = false;
 };
 void ProcessPacketCallback(const PacketInfo* Packet);
 

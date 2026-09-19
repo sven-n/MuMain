@@ -2,6 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <cstdlib>
+#include "Core/Utilities/Log/MuLogger.h"
 
 #include "muConsoleDebug.h"	// self
 
@@ -11,13 +13,14 @@
 #include <fcntl.h>
 #include <iostream>
 #include "Engine/Object/ZzzInterface.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
 #include "WindowsConsole.h"
 
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/MainScene.h"
+#include "UI/NewUI/NewUISystem.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -103,6 +106,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetShowDebugInfo(false);
         return true;
     }
+    else if (strCommand.compare(L"$glstats on") == 0)
+    {
+        SetShowGLStats(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$glstats off") == 0)
+    {
+        SetShowGLStats(false);
+        return true;
+    }
     else if (strCommand.compare(0, 4, L"$fps") == 0)
     {
         auto fps_str = strCommand.substr(5);
@@ -112,15 +125,118 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
-        EnableVSync();
-        SetTargetFps(-1); // unlimited
-        ResetFrameStats();
+        MuSetVSyncPreference(true);
         return true;
     }
     else if (strCommand.compare(L"$vsync off") == 0)
     {
-        DisableVSync();
-        ResetFrameStats();
+        MuSetVSyncPreference(false);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects off") == 0)
+    {
+        // DXP-23 diagnostic: force-disable both effect surfaces to test whether effects
+        // overdraw/volume contributes to the GPU-stall (Present) cost or the HUD blink -- owner
+        // observed the blink timing tracking nearby enemies' skill casts (beam knights/Tantalos).
+        // SetDisableEffects() covers RenderEffectShadows/RenderBoids/RenderEffects/RenderBlurs
+        // (includes g_SkillEffects' 3D effect objects). g_pOption->SetRenderAllEffects(false) is the
+        // pre-existing, more comprehensive switch already checked by RenderSprites/RenderParticles
+        // (which CreateSprite/CreateParticle -- called directly by SkillCast.cpp and pet-action
+        // code -- feed) plus ZzzEffectPoint/ZzzEffectFireLeave/GOBoid. Together these cover
+        // effectively every effect-rendering path in the tree.
+        SetDisableEffects(true);
+        if (g_pOption)
+            g_pOption->SetRenderAllEffects(false);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects on") == 0)
+    {
+        SetDisableEffects(false);
+        if (g_pOption)
+            g_pOption->SetRenderAllEffects(true);
+        return true;
+    }
+    // DXP-23 diagnostic, finer-grained bisection of the effect-rendering GPU cost `$effects off`
+    // already confirmed. Each isolates one of the distinct object systems that can be populated
+    // independently of the others (see MainScene.h doc comments for what each one covers).
+    else if (strCommand.compare(L"$effects sprites off") == 0)
+    {
+        SetDisableSprites(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects sprites on") == 0)
+    {
+        SetDisableSprites(false);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects particles off") == 0)
+    {
+        SetDisableParticles(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects particles on") == 0)
+    {
+        SetDisableParticles(false);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects skillmodels off") == 0)
+    {
+        SetDisableSkillEffectModels(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects skillmodels on") == 0)
+    {
+        SetDisableSkillEffectModels(false);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects boids off") == 0)
+    {
+        SetDisableBoids(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects boids on") == 0)
+    {
+        SetDisableBoids(false);
+        return true;
+    }
+    // DXP-23 diagnostic: owner found unequipping Wings of Ruin alone took FPS 120->180. This skips
+    // just the EXTRA b->RenderBodyShadow() call RenderLinkObject() (ZzzCharacter.cpp) makes for every
+    // visible wing/cape-wearing character, while leaving the wing model itself equipped and visible --
+    // isolates whether the shadow draw specifically is the cost, keep the wing on for this test.
+    else if (strCommand.compare(L"$effects wingshadow off") == 0)
+    {
+        SetDisableWingShadow(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects wingshadow on") == 0)
+    {
+        SetDisableWingShadow(false);
+        return true;
+    }
+    // DXP-23 diagnostic: RenderJoints() (beam/tail-trail effects -- Wing of Ruin's growing tail
+    // light, Beam Knight's lightning beam) was never gated by g_pOption->GetRenderAllEffects() at
+    // all, so $effects off never covered it. Isolates it directly.
+    else if (strCommand.compare(L"$effects joints off") == 0)
+    {
+        SetDisableJoints(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects joints on") == 0)
+    {
+        SetDisableJoints(false);
+        return true;
+    }
+    // DXP-23 diagnostic: MODEL_WING_OF_RUIN draws its mesh 3x per frame (base + 2 glow-layer passes,
+    // ZzzObject.cpp ~7001-7007). Skips the 2 extra passes to test if triple mesh-draw is the cost.
+    // Visibly changes the wing's look (removes glow layers) while active -- measurement tool only.
+    else if (strCommand.compare(L"$effects wingextralayers off") == 0)
+    {
+        SetDisableWingExtraLayers(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects wingextralayers on") == 0)
+    {
+        SetDisableWingExtraLayers(false);
         return true;
     }
     else if (strCommand.compare(0, 7, L"$winmsg") == 0)
@@ -235,21 +351,23 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 
 void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 {
-    // MCD_ERROR is always logged to MuError.log, regardless of CONSOLE_DEBUG.
-    // Other log levels remain debug-only so they don't spam production logs.
+    static const bool networkDiagnosticsEnabled = std::getenv("MU_NETWORK_DIAGNOSTICS") != nullptr;
+    if ((iType == MCD_SEND || iType == MCD_RECEIVE) && !networkDiagnosticsEnabled)
+        return;
+
+    wchar_t szBuffer[256] = L"";
+    va_list arguments;
+    va_start(arguments, pStr);
+    _vsnwprintf(szBuffer, std::size(szBuffer), pStr, arguments);
+    va_end(arguments);
+
+    char utf8Buffer[1024] = { 0 };
+    WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, utf8Buffer, sizeof(utf8Buffer), nullptr, nullptr);
+    const auto logger = mu::log::Get("core");
     if (iType == MCD_ERROR)
-    {
-        wchar_t szErrorBuffer[256] = L"";
-        va_list pArgsForFile;
-        va_start(pArgsForFile, pStr);
-        // C99 4-arg vswprintf -- explicit buffer size, bounded write. The
-        // 3-arg MS-extension form is unsafe (no size param, can overflow).
-        _vsnwprintf(szErrorBuffer,
-                  sizeof(szErrorBuffer) / sizeof(szErrorBuffer[0]),
-                  pStr, pArgsForFile);
-        va_end(pArgsForFile);
-        g_ErrorReport.Write(L"[MCD_ERROR] %ls\r\n", szErrorBuffer);
-    }
+        MU_LOG_ERROR(logger, "{}", utf8Buffer);
+    else
+        MU_LOG_DEBUG(logger, "{}", utf8Buffer);
 
 #ifdef CONSOLE_DEBUG
     if (m_bInit)
@@ -270,20 +388,11 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
             break;
         }
 
-        wchar_t szBuffer[256] = L"";
-        va_list	pArguments;
-
-        va_start(pArguments, pStr);
-        vswprintf(szBuffer, sizeof(szBuffer) / sizeof(wchar_t), pStr, pArguments);
-        va_end(pArguments);
-
         std::wcout << szBuffer << std::endl;
 
 #ifdef _EDITOR
         // Also log to ImGui console
-        char szUtf8Buffer[512];
-        WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, szUtf8Buffer, sizeof(szUtf8Buffer), NULL, NULL);
-        g_MuEditorConsoleUI.LogGame(szUtf8Buffer);
+        g_MuEditorConsoleUI.LogGame(utf8Buffer);
 #endif
     }
 #endif

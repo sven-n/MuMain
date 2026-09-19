@@ -1510,9 +1510,12 @@ void CMapManager::LoadWorld(int Map)
 
 void CMapManager::DeleteObjects()
 {
-    for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+    if (Models != nullptr)
     {
-        Models[i].Release();
+        for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+        {
+            Models[i].Release();
+        }
     }
 
     for (int i = 0; i < 16; i++)

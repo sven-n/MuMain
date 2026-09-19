@@ -7,6 +7,8 @@
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "Camera/CameraProjection.h"
+#include "Core/Platform/IPlatformAudio.h"
+#include "Render/Renderer/MuRenderer.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -26,11 +28,11 @@ int& SelectedHero = g_characterSelection.GetLegacyReference();
 SceneInitializationState g_sceneInit;
 
 // Legacy global references (for backward compatibility)
-bool& InitLogIn = g_sceneInit.GetInitLogIn();
-bool& InitLoading = g_sceneInit.GetInitLoading();
-bool& InitCharacterScene = g_sceneInit.GetInitCharacterScene();
-bool& InitMainScene = g_sceneInit.GetInitMainScene();
-bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
+bool& InitLogIn = g_sceneInit.LegacyRefInitLogIn();
+bool& InitLoading = g_sceneInit.LegacyRefInitLoading();
+bool& InitCharacterScene = g_sceneInit.LegacyRefInitCharacterScene();
+bool& InitMainScene = g_sceneInit.LegacyRefInitMainScene();
+bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 
 //=============================================================================
 // Scene Common Utilities
@@ -180,25 +182,26 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 
 void SetEffectVolumeLevel(int level)
 {
-    if (level > 9)
-        level = 9;
+    if (level > 10)
+        level = 10;
     if (level < 0)
         level = 0;
 
-    if (level == 0)
+    if (g_platformAudio != nullptr)
     {
-        SetMasterVolume(-10000);
-    }
-    else
-    {
-        long vol = -2000 * log10(10.f / float(level));
-        SetMasterVolume(vol);
+        g_platformAudio->SetSFXVolume(static_cast<float>(level) / 10.0f);
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Rendering Functions
 ///////////////////////////////////////////////////////////////////////////////
+
+// DXP-07d increment 1's shadow-compare diagnostic validated RenderInfomation3D()'s proj/view closed
+// form and post-pop GlobalUBO restore across multiple soaks; DXP-08a deleted the diagnostic and the
+// FFP matrix-stack calls it was validating (see RenderInfomation3D()'s own comments below).
+static float s_PreInfo3DProj[16];
+static float s_PreInfo3DView[16];
 
 void RenderInfomation3D()
 {
@@ -222,15 +225,14 @@ void RenderInfomation3D()
 
     if (Success)
     {
-        glMatrixMode(GL_PROJECTION);
-        SaveCameraPerspective();
-    glPushMatrix();
-        glLoadIdentity();
-        glViewport2(0, 0, WindowWidth, WindowHeight);
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
         CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
@@ -264,12 +266,11 @@ void RenderInfomation3D()
             break;
         }
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PopMatrix();
         UpdateMousePositionn();
-    RestoreCameraPerspective();
     }
 }
 

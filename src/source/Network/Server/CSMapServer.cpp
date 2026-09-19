@@ -27,8 +27,8 @@ constexpr std::chrono::milliseconds kReconnectDelay(20);
 
 std::uint32_t GetCurrentTickMilliseconds()
 {
-    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch());
+    const auto now =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
     return static_cast<std::uint32_t>(now.count());
 }
 } // namespace
@@ -90,10 +90,8 @@ void CSMServer::GetServerAddress(wchar_t* szAddress)
         return;
     }
 
-    CMultiLanguage::ConvertFromUtf8(
-        szAddress,
-        m_serverInfo.m_szMapSvrIpAddress.data(),
-        static_cast<int>(kIpAddressLength));
+    CMultiLanguage::ConvertFromUtf8(szAddress, m_serverInfo.m_szMapSvrIpAddress.data(),
+                                    static_cast<int>(kIpAddressLength));
 }
 
 extern BOOL g_bGameServerConnected;
@@ -112,11 +110,9 @@ void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 
     std::this_thread::sleep_for(kReconnectDelay);
 
-    std::array<wchar_t, kIpAddressLength> ipAddress {};
-    CMultiLanguage::ConvertFromUtf8(
-        ipAddress.data(),
-        m_serverInfo.m_szMapSvrIpAddress.data(),
-        static_cast<int>(kIpAddressLength));
+    std::array<wchar_t, kIpAddressLength> ipAddress{};
+    CMultiLanguage::ConvertFromUtf8(ipAddress.data(), m_serverInfo.m_szMapSvrIpAddress.data(),
+                                    static_cast<int>(kIpAddressLength));
 
     if (CreateSocket(ipAddress.data(), m_serverInfo.m_wMapSvrPort))
     {

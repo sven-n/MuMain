@@ -13,6 +13,19 @@ using namespace SEASON3B;
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/NewUI/HUD/Skills/SkillTooltip.h"
 
+namespace
+{
+BYTE ToColorByte(float value)
+{
+    return static_cast<BYTE>(std::clamp(value, 0.f, 1.f) * 255.f);
+}
+
+DWORD MakeRgba(float red, float green, float blue, float alpha)
+{
+    return RGBA(ToColorByte(red), ToColorByte(green), ToColorByte(blue), ToColorByte(alpha));
+}
+}
+
 SEASON3B::CNewUISiegeWarBase::CNewUISiegeWarBase()
 {
     m_iMiniMapScale = 1;
@@ -96,19 +109,23 @@ bool SEASON3B::CNewUISiegeWarBase::Update()
 bool SEASON3B::CNewUISiegeWarBase::Render()
 {
     wchar_t szText[256] = { 0, };
+    const BYTE miniMapAlpha = ToColorByte(m_fMiniMapAlpha);
+    const DWORD miniMapColor = RGBA(255, 255, 255, miniMapAlpha);
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
+    g_pRenderText->SetTextColor(255, 255, 255, miniMapAlpha);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    RenderBitmap(IMAGE_MINIMAP, (float)(m_MiniMapPos.x), (float)(m_MiniMapPos.y), 128.f, 128.f, m_fMiniMapTexU, m_fMiniMapTexV, 0.5f * m_iMiniMapScale, 0.5f * m_iMiniMapScale);
+    RenderBitmap(IMAGE_MINIMAP, (float)(m_MiniMapPos.x), (float)(m_MiniMapPos.y), 128.f, 128.f,
+        m_fMiniMapTexU, m_fMiniMapTexV, 0.5f * m_iMiniMapScale, 0.5f * m_iMiniMapScale,
+        true, true, m_fMiniMapAlpha);
 
-    RenderImage(IMAGE_MINIMAP_FRAME, m_MiniMapFramePos.x, m_MiniMapFramePos.y, MINIMAP_FRAME_WIDTH, MINIMAP_FRAME_HEIGHT);
-    RenderImage(IMAGE_TIME_FRAME, m_TimeUIPos.x, m_TimeUIPos.y, TIME_FRAME_WIDTH, TIME_FRAME_HEIGHT);
+    RenderImage(IMAGE_MINIMAP_FRAME, m_MiniMapFramePos.x, m_MiniMapFramePos.y, MINIMAP_FRAME_WIDTH,
+        MINIMAP_FRAME_HEIGHT, 0.f, 0.f, miniMapColor);
+    RenderImage(IMAGE_TIME_FRAME, m_TimeUIPos.x, m_TimeUIPos.y, TIME_FRAME_WIDTH, TIME_FRAME_HEIGHT,
+        0.f, 0.f, miniMapColor);
 
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
     if (battleCastle::IsBattleCastleStart())
     {
         g_pRenderText->SetFont(g_hFontBig);
@@ -146,18 +163,18 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
 
     OnRender();
 
-    glColor4f(1.f, 1.f, 0.f, m_fMiniMapAlpha);
-    RenderColor((float)(m_HeroPosInMiniMap.x), (float)(m_HeroPosInMiniMap.y), 3, 3);
+    const unsigned int heroMarkerColor = (static_cast<unsigned int>(miniMapAlpha) << 24) | 0x00FFFF00u;
+    RenderColorQuadARGB((float)(m_HeroPosInMiniMap.x), (float)(m_HeroPosInMiniMap.y), 3, 3,
+        heroMarkerColor);
 
     DisableAlphaBlend();
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     if (m_bRenderSkillUI == true)
     {
         RenderImage(IMAGE_BATTLESKILL_FRAME, m_SkillFramePos.x, m_SkillFramePos.y,
-            BATTLESKILL_FRAME_WIDTH, BATTLESKILL_FRAME_HEIGHT);
+            BATTLESKILL_FRAME_WIDTH, BATTLESKILL_FRAME_HEIGHT, 0.f, 0.f, miniMapColor);
 
         RenderSkillIcon();
 
@@ -422,18 +439,25 @@ void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
             if (Pos.x<m_MiniMapPos.x || Pos.x>m_MiniMapPos.x + 128 || Pos.y<m_MiniMapPos.y || Pos.y>m_MiniMapPos.y + 128)
                 continue;
 
+            DWORD commandColor;
+            BYTE pulseByte = 255;
             if (m_CmdBuffer[i].byLifeTime > 0)
             {
-                glColor4f(1.f, 1.f + sinf(m_CmdBuffer[i].byLifeTime * 0.2f), 1.f + sinf(m_CmdBuffer[i].byLifeTime * 0.2f), m_fMiniMapAlpha);
+                const float pulse = 1.f + sinf(m_CmdBuffer[i].byLifeTime * 0.2f);
+                pulseByte = ToColorByte(pulse);
+                commandColor = MakeRgba(1.f, pulse, pulse, m_fMiniMapAlpha);
                 m_CmdBuffer[i].byLifeTime--;
             }
             else
             {
-                glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
+                commandColor = MakeRgba(1.f, 1.f, 1.f, m_fMiniMapAlpha);
             }
+            g_pRenderText->SetTextColor(255, pulseByte, pulseByte, ToColorByte(m_fMiniMapAlpha));
             mu_swprintf(szText, L"%d", m_CmdBuffer[i].byTeam + 1);
             g_pRenderText->RenderText(Pos.x - 12, Pos.y - 5, szText);
-            RenderBitmap(IMAGE_COMMAND_ATTACK + m_CmdBuffer[i].byCmd, Pos.x - 7, Pos.y - 7, 11.f, 11.f, 0.f, 0.f, ((float)iWidth - 1.f) / (float)iBWidth, ((float)iHeight - 1.f) / 16.f);
+            RenderColorBitmap(IMAGE_COMMAND_ATTACK + m_CmdBuffer[i].byCmd, Pos.x - 7, Pos.y - 7,
+                11.f, 11.f, 0.f, 0.f, ((float)iWidth - 1.f) / (float)iBWidth,
+                ((float)iHeight - 1.f) / 16.f, commandColor);
         }
     }
 }
@@ -451,20 +475,19 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
     iSelectSkill = (*m_iterCurBattleSkill);
     iCurKillCount = Hero->GuildMasterKillCount;
 
-    if (Hero->GuildMasterKillCount < iUseSkillDestKill)
-    {
-        glColor4f(1.f, 0.5f, 0.5f, m_fMiniMapAlpha);
-    }
+    const DWORD skillColor = Hero->GuildMasterKillCount < iUseSkillDestKill
+        ? MakeRgba(1.f, 0.5f, 0.5f, m_fMiniMapAlpha)
+        : MakeRgba(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     int src_x, src_y;
     src_x = ((iSelectSkill - 57) % 8) * 20.f;
     src_y = ((iSelectSkill - 57) / 8) * 28.f;
 
-    RenderImage(IMAGE_SKILL_ICON, m_SkillIconPos.x + 1, m_SkillIconPos.y, (float)SKILL_ICON_WIDTH, (float)SKILL_ICON_HEIGHT, src_x, src_y);
-
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
+    RenderImage(IMAGE_SKILL_ICON, m_SkillIconPos.x + 1, m_SkillIconPos.y, (float)SKILL_ICON_WIDTH,
+        (float)SKILL_ICON_HEIGHT, src_x, src_y, skillColor);
 
     g_pRenderText->SetFont(g_hFontBig);
+    g_pRenderText->SetTextColor(255, 255, 255, ToColorByte(m_fMiniMapAlpha));
     mu_swprintf(szText, L"%d", iUseSkillDestKill);
     g_pRenderText->RenderText(m_UseSkillDestKillPos.x, m_UseSkillDestKillPos.y, szText);
     mu_swprintf(szText, L"%d", iCurKillCount);

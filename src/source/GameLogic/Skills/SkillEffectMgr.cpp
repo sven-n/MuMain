@@ -21,9 +21,7 @@ CSkillEffectMgr::CSkillEffectMgr()
     DeleteAllEffects();
 }
 
-CSkillEffectMgr::~CSkillEffectMgr()
-{
-}
+CSkillEffectMgr::~CSkillEffectMgr() {}
 
 OBJECT* CSkillEffectMgr::GetEffect(int iIndex)
 {
@@ -32,9 +30,9 @@ OBJECT* CSkillEffectMgr::GetEffect(int iIndex)
     return m_SkillEffects + iIndex;
 }
 
-BOOL CSkillEffectMgr::IsSkillEffect(int Type, vec3_t Position, vec3_t Angle,
-    vec3_t Light, int SubType, OBJECT* Owner, short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum,
-    float Scale, short int sTargetIndex)
+BOOL CSkillEffectMgr::IsSkillEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, OBJECT* Owner,
+                                    short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum, float Scale,
+                                    short int sTargetIndex)
 {
     if (Owner != &Hero->Object)
         return FALSE;
@@ -47,16 +45,20 @@ BOOL CSkillEffectMgr::IsSkillEffect(int Type, vec3_t Position, vec3_t Angle,
     case BITMAP_SWORD_FORCE:
         return TRUE;
     case MODEL_SKILL_INFERNO:
-        if (SubType < 2) return TRUE;
+        if (SubType < 2)
+            return TRUE;
         break;
     case MODEL_CIRCLE:
-        if (SubType == 0) return TRUE;
+        if (SubType == 0)
+            return TRUE;
         break;
     case BITMAP_FLAME:
-        if (SubType == 0) return TRUE;
+        if (SubType == 0)
+            return TRUE;
         break;
     case MODEL_STORM:
-        if (SubType == 0) return TRUE;
+        if (SubType == 0)
+            return TRUE;
         break;
 
         //     case MODEL_ARROW_DOUBLE:

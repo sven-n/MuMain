@@ -21,7 +21,7 @@
 extern int MouseX, MouseY;
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
 extern bool g_bWndActive;
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
+#endif // ASG_FIX_ACTIVATE_APP_INPUT
 
 bool SEASON3B::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, float fPriority)
 {
@@ -68,7 +68,8 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
     RenderBitmap(uiImageType, x, y, width, height, u, v, uw - u, vh - v);
 }
 
-void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, float uw, float vh, DWORD color)
+void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,
+                           float uw, float vh, DWORD color)
 {
     RenderColorBitmap(uiImageType, x, y, width, height, su, sv, uw, vh, color);
 }
@@ -101,7 +102,8 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
     RenderBitmap(uiImageType, x, y, width, height, u, v, uw, vh);
 }
 
-void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, DWORD color)
+void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,
+                           DWORD color)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];
 
@@ -144,9 +146,7 @@ SEASON3B::CNewKeyInput::CNewKeyInput()
     Init();
 }
 
-SEASON3B::CNewKeyInput::~CNewKeyInput()
-{
-}
+SEASON3B::CNewKeyInput::~CNewKeyInput() {}
 
 void SEASON3B::CNewKeyInput::Init()
 {
@@ -164,7 +164,7 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
         return;
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
+#endif // ASG_FIX_ACTIVATE_APP_INPUT
 
 #ifdef _EDITOR
     // EDITOR KEYBOARD BLOCKING:
@@ -217,10 +217,25 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
         }
     }
 
-    if (IsPress(VK_RETURN) && IsEnterPressed() == false) {
+    // Mouse press-edge flag: cleared per-frame in PollEvents(), NOT here.
+    // ScanAsyncKeyState runs BEFORE CInput::Update() in the frame — if we clear
+    // the edge flag here, CInput::Update() misses fast clicks where DOWN+UP
+    // arrive in the same PollEvents batch (MouseLButton=false, edge=false → lost).
+    // [Story 7-9-9, AC-5]
+
+#ifdef _EDITOR
+    // Editor input-blocker gate: MuInputBlockerCore sets g_bEnterPressed=true when
+    // it wants to allow Enter through the editor (otherwise it clears VK_RETURN
+    // itself). Without the editor, no code ever sets g_bEnterPressed=true, so this
+    // block would unconditionally clear every Enter press before chat-open logic
+    // could observe it — the bug that prevented Enter from opening the chat window
+    // on non-editor SDL3 builds. Keep the gate inside the editor guard.
+    if (IsPress(VK_RETURN) && IsEnterPressed() == false)
+    {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;
     }
     SetEnterPressed(false);
+#endif
 }
 
 bool SEASON3B::CNewKeyInput::IsNone(int iVirtKey)
@@ -228,7 +243,7 @@ bool SEASON3B::CNewKeyInput::IsNone(int iVirtKey)
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
         return false;
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
+#endif // ASG_FIX_ACTIVATE_APP_INPUT
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_NONE) ? true : false;
 }
 
@@ -237,7 +252,7 @@ bool SEASON3B::CNewKeyInput::IsRelease(int iVirtKey)
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
         return false;
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
+#endif // ASG_FIX_ACTIVATE_APP_INPUT
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_RELEASE) ? true : false;
 }
 
@@ -246,7 +261,7 @@ bool SEASON3B::CNewKeyInput::IsPress(int iVirtKey)
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
         return false;
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
+#endif // ASG_FIX_ACTIVATE_APP_INPUT
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_PRESS) ? true : false;
 }
 
@@ -255,7 +270,7 @@ bool SEASON3B::CNewKeyInput::IsRepeat(int iVirtKey)
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
         return false;
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
+#endif // ASG_FIX_ACTIVATE_APP_INPUT
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_REPEAT) ? true : false;
 }
 

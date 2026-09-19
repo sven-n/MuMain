@@ -39,7 +39,7 @@ public:
     void Init();
     void Destroy();
 
-public: //Weather
+public: // Weather
     void SetWeather(int weather);
 
 private:
