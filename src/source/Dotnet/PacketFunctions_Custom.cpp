@@ -73,6 +73,23 @@ void PacketFunctions_ClientToServer_Custom::SendAddMasterSkillPointMultiple(uint
     dotnet_SendAddMasterSkillPointMultiple(this->GetHandle(), skillId, amount);
 }
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendResetConfirmationFn)(int32_t, BYTE, BYTE);
+
+void PacketFunctions_ClientToServer_Custom::SendResetConfirmation(BYTE resetTypeIndex, bool accepted)
+{
+    static SendResetConfirmationFn dotnet_SendResetConfirmation = nullptr;
+    if (!dotnet_SendResetConfirmation)
+    {
+        dotnet_SendResetConfirmation = LoadManagedSymbol<SendResetConfirmationFn>("ConnectionManager_SendResetConfirmation");
+        if (!dotnet_SendResetConfirmation)
+        {
+            return;
+        }
+    }
+
+    dotnet_SendResetConfirmation(this->GetHandle(), resetTypeIndex, accepted ? 1 : 0);
+}
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExtFn)(int32_t, uint16_t, uint32_t);
 
 void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)
