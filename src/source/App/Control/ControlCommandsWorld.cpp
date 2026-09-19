@@ -787,6 +787,17 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
                            "inventory slot " + std::to_string(fromSlot) + " is empty");
     }
 
+    // The target is an equipment slot or another inventory slot; anything
+    // beyond that would be truncated by the cast below into a different,
+    // valid slot, and the answer would name the slot the caller asked for.
+    if (toSlot < 0 || toSlot >= MAX_MY_INVENTORY_EX_INDEX)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "target slot " + std::to_string(toSlot) +
+                               " is outside the equipment and inventory range (0-" +
+                               std::to_string(MAX_MY_INVENTORY_EX_INDEX - 1) + ")");
+    }
+
     SocketClient->ToGameServer()->SendItemMoveRequestExtended(ItemStorageKind::Inventory, static_cast<BYTE>(fromSlot),
                                                               ItemStorageKind::Inventory, static_cast<BYTE>(toSlot));
 
