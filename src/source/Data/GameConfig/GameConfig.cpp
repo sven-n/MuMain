@@ -84,6 +84,8 @@ void GameConfig::Load()
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
     m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
 
+    m_enforceSkillRequirements = ReadBool(CfgSectionGameplay, CfgKeyEnforceSkillRequirements, CfgDefaultEnforceSkillRequirements);
+
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
     // central registry of valid keys to keep in sync.
@@ -127,6 +129,10 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+
+    // Written back so the key is visible in config.ini for whoever runs the
+    // server; it's only ever changed by editing the file.
+    WriteBool(CfgSectionGameplay, CfgKeyEnforceSkillRequirements, m_enforceSkillRequirements);
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)

@@ -7493,6 +7493,48 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     pMsgBox->AddMsg(I18N::Game::YouHaveReceivedAnOfferToJoinAGuild);
 }
 
+// The server announces a character reset with its costs and rewards (0xF3, 0xE0) and only performs it
+// after the answer of this dialog. The message arrives as one utf-8 string whose lines are separated by
+// line feeds, so that the server decides what the player reads, in his language.
+void ReceiveResetConfirmationRequest(const BYTE* ReceiveBuffer, int Size)
+{
+    if (Size <= 5)
+    {
+        return;
+    }
+
+    SEASON3B::g_byPendingResetTypeIndex = ReceiveBuffer[4];
+
+    const int messageLength = Size - 5;
+    std::vector<char> message(static_cast<size_t>(messageLength) + 1, '\0');
+    memcpy(message.data(), &ReceiveBuffer[5], static_cast<size_t>(messageLength));
+
+    std::vector<wchar_t> wideMessage(message.size(), L'\0');
+    CMultiLanguage::ConvertFromUtf8(wideMessage.data(), message.data(), messageLength);
+
+    SEASON3B::CNewUICommonMessageBox* pMsgBox;
+    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CResetConfirmMsgBoxLayout), &pMsgBox);
+
+    std::wstring text(wideMessage.data());
+    size_t lineStart = 0;
+    while (lineStart <= text.size())
+    {
+        const size_t lineEnd = text.find(L'\n', lineStart);
+        const std::wstring line = text.substr(lineStart, lineEnd == std::wstring::npos ? std::wstring::npos : lineEnd - lineStart);
+        if (!line.empty())
+        {
+            pMsgBox->AddMsg(line.c_str());
+        }
+
+        if (lineEnd == std::wstring::npos)
+        {
+            break;
+        }
+
+        lineStart = lineEnd + 1;
+    }
+}
+
 void ReceiveGuildResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
@@ -13691,6 +13733,10 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         case 0x53:
             Receive_Master_SetSkillList((PMSG_MASTER_SKILL_LIST_SEND*)ReceiveBuffer);
             break;
+        case 0xE0:
+            // Not part of the original protocol: the confirmation of a character reset.
+            ReceiveResetConfirmationRequest(ReceiveBuffer, Size);
+            break;
         }
         break;
     }
@@ -15127,6 +15173,14 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
 {
     if (o && o == &Hero->Object)
     {
+        // Whenever the server tells us how long the buff runs, register it here, so that every
+        // buff item shows its remaining time - not only the ones listed in the switch below,
+        // which otherwise fall back to the fixed (mostly 30 minute) time of ItemAddOption.bmd.
+        if (bufftime > 0)
+        {
+            g_RegisterBuffTime(buff, bufftime);
+        }
+
         switch (buff)
         {
         case eBuff_Hellowin1:
@@ -15310,6 +15364,10 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
 {
     if (o && o == &Hero->Object)
     {
+        // Counterpart of the generic registration in InsertBuffLogicalEffect: the timer of a
+        // buff which isn't listed below has to be dropped as well.
+        g_UnRegisterBuffTime(buff);
+
         switch (buff)
         {
         case eBuff_Hellowin1:

@@ -10,6 +10,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
     inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
     inline constexpr wchar_t CfgSectionRender[] = L"Render";
+    inline constexpr wchar_t CfgSectionGameplay[] = L"Gameplay";
 }
 
 namespace CfgKeys
@@ -46,6 +47,9 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+
+    // Gameplay
+    inline constexpr wchar_t CfgKeyEnforceSkillRequirements[] = L"EnforceSkillRequirements";
 }
 
 namespace CfgDefaults
@@ -82,4 +86,12 @@ namespace CfgDefaults
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    // Whether a skill's Skill.bmd requirements (level, strength, dexterity,
+    // energy, leadership) gate its use on the client. Off by default, because
+    // the server doesn't enforce them either: a skill which is in the
+    // character's skill list has already been learned, and a reset puts the
+    // level and the stats back to their starting values. Set to 1 to get the
+    // original behaviour back, for a server which does enforce them.
+    inline constexpr bool CfgDefaultEnforceSkillRequirements = false;
 }

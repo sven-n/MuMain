@@ -1225,6 +1225,18 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                             }
                                         }
 
+                                        // The pet unicorn takes the jewel of bless for an upgrade
+                                        // and the jewel of life for a repair.
+                                        if (iType == ITEM_PET_UNICORN)
+                                        {
+                                            if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS &&
+                                                 pTargetItem->Level < 6) ||
+                                                (pPickItem->Type == ITEM_JEWEL_OF_LIFE && iDurability != 255))
+                                            {
+                                                bSuccess = true;
+                                            }
+                                        }
+
                                         if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR &&
                                             iDurability != 255)
                                         {

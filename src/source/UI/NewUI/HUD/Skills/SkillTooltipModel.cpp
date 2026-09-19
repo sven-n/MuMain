@@ -7,6 +7,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"   // PartyNumber, STRP_*
+#include "Data/GameConfig/GameConfig.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Legacy/UIJewelHarmony.h"     // StrengthenCapability
 #include "UI/Legacy/UIManager.h"          // g_pUIJewelHarmonyinfo
@@ -469,8 +470,12 @@ void EmitRequirements(Model& m, const BuildOptions& options, int skillType)
     int reqEnergy = 0;
     gSkillManager.GetSkillInformation_Energy(skillType, &reqEnergy);
 
+    // Leaving the current values at -1 keeps the requirement lines white and
+    // drops the "lacking N" lines - which is what we want when the
+    // requirements don't gate the skill anyway ([Gameplay]
+    // EnforceSkillRequirements in config.ini, off by default).
     int curLevel = -1, curStr = -1, curDex = -1, curEnergy = -1, curCha = -1;
-    if (options.includeCharacterSpecific)
+    if (options.includeCharacterSpecific && GameConfig::GetInstance().GetEnforceSkillRequirements())
     {
         curLevel = CharacterAttribute->Level;
         curStr = CharacterAttribute->Strength + CharacterAttribute->AddStrength;

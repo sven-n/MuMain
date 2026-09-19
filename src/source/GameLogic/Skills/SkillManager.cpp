@@ -6,6 +6,7 @@
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Data/GameConfig/GameConfig.h"
 
 CSkillManager gSkillManager;
 extern bool CheckAttack();
@@ -256,6 +257,34 @@ void CSkillManager::InitializeSkillAttributeRequirementsCache()
     RebuildSkillAttributeRequirementsCache();
 }
 
+DemendConditionInfo CSkillManager::BuildHeroConditionInfo() const
+{
+    DemendConditionInfo heroCharacterInfo;
+    heroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
+    heroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
+    heroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
+    heroCharacterInfo.SkillVitality = CharacterMachine->Character.Vitality + CharacterMachine->Character.AddVitality;
+    heroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
+    heroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
+
+    return heroCharacterInfo;
+}
+
+DemendConditionInfo CSkillManager::BuildSkillConditionInfo(ActionSkillType baseSkill)
+{
+    DemendConditionInfo skillRequirements;
+    skillRequirements.SkillLevel = SkillAttribute[baseSkill].Level;
+    skillRequirements.SkillStrength = SkillAttribute[baseSkill].Strength;
+    skillRequirements.SkillDexterity = SkillAttribute[baseSkill].Dexterity;
+    skillRequirements.SkillVitality = 0;
+    int reqEnergy = 0;
+    GetSkillInformation_Energy(baseSkill, &reqEnergy);
+    skillRequirements.SkillEnergy = static_cast<WORD>(reqEnergy);
+    skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
+
+    return skillRequirements;
+}
+
 void CSkillManager::RebuildSkillAttributeRequirementsCache()
 {
     if (!m_bSkillAttributeRequirementsCacheDirty)
@@ -265,13 +294,12 @@ void CSkillManager::RebuildSkillAttributeRequirementsCache()
 
     const bool isGuardian = gMapManager.IsEmpireGuardian();
 
-    DemendConditionInfo heroCharacterInfo;
-    heroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
-    heroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
-    heroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
-    heroCharacterInfo.SkillVitality = CharacterMachine->Character.Vitality + CharacterMachine->Character.AddVitality;
-    heroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
-    heroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
+    // [Gameplay] EnforceSkillRequirements in config.ini. When it's off (the
+    // default), a skill the character owns stays usable no matter what the
+    // stats are, matching a server which doesn't check the requirements either
+    // - a reset would otherwise take every learned skill away.
+    const bool enforceRequirements = GameConfig::GetInstance().GetEnforceSkillRequirements();
+    const DemendConditionInfo heroCharacterInfo = BuildHeroConditionInfo();
 
     for (int skillType = 0; skillType < MAX_SKILLS; ++skillType)
     {
@@ -282,17 +310,13 @@ void CSkillManager::RebuildSkillAttributeRequirementsCache()
             continue;
         }
 
-        DemendConditionInfo skillRequirements;
-        skillRequirements.SkillLevel = SkillAttribute[baseSkill].Level;
-        skillRequirements.SkillStrength = SkillAttribute[baseSkill].Strength;
-        skillRequirements.SkillDexterity = SkillAttribute[baseSkill].Dexterity;
-        skillRequirements.SkillVitality = 0;
-        int reqEnergy = 0;
-        GetSkillInformation_Energy(baseSkill, &reqEnergy);
-        skillRequirements.SkillEnergy = static_cast<WORD>(reqEnergy);
-        skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
+        if (!enforceRequirements)
+        {
+            m_aSkillAttributeRequirementsMet[skillType] = true;
+            continue;
+        }
 
-        m_aSkillAttributeRequirementsMet[skillType] = (skillRequirements <= heroCharacterInfo);
+        m_aSkillAttributeRequirementsMet[skillType] = (BuildSkillConditionInfo(baseSkill) <= heroCharacterInfo);
     }
 
     m_bSkillAttributeRequirementsCacheDirty = false;

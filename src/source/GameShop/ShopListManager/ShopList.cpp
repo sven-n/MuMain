@@ -39,7 +39,7 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    const auto narrowPath = mu_narrow_path(szFilePath);
+    const auto narrowPath = mu_open_path(szFilePath);
     ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
@@ -106,7 +106,7 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    const auto narrowPath = mu_narrow_path(szFilePath);
+    const auto narrowPath = mu_open_path(szFilePath);
     ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
@@ -158,7 +158,7 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    const auto narrowPath = mu_narrow_path(szFilePath);
+    const auto narrowPath = mu_open_path(szFilePath);
     ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
@@ -222,7 +222,7 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 {
     std::ifstream ifs;
 
-    ifs.open(mu_narrow_path(szFilePath), std::ifstream::in);
+    ifs.open(mu_open_path(szFilePath), std::ifstream::in);
 
     if (!ifs.is_open())
     {
@@ -235,17 +235,22 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 
     ifs.close();
 
+    // char is signed here, so the byte-order marks have to be compared as
+    // unsigned bytes. The decompiled code compared them as char, which made
+    // the UTF-8 branch below unreachable.
+    const auto* bytes = reinterpret_cast<const unsigned char*>(buff);
+
     if (strlen(buff) < 3)
     {
         return FE_ANSI;
     }
 
-    if (buff[0] == 0xEF && buff[1] == 0xBB && buff[2] == 0xBF)
+    if (bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
     {
         return FE_UTF8;
     }
 
-    if (buff[0] == 0xFF && buff[1] == 0xFE)
+    if (bytes[0] == 0xFF && bytes[1] == 0xFE)
     {
         return FE_UNICODE;
     }
@@ -282,23 +287,36 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
         return result;
     }
 
-    // FE_ANSI -> CP_ACP, FE_UTF8 -> CP_UTF8. Convert the narrow bytes to UTF-16
-    // properly. The old decompiled code reinterpret-cast the narrow ASCII bytes
-    // as wchar_t* ("todo: check if that's correct"), which turned a row like
-    // "10@Item@200@..." into a single garbage token with no wide '@'
-    // delimiters. CStringToken then yielded 1 field instead of 7, so every row
-    // decoded to Root=0 -> zero category zones -> no tabs and an empty grid.
-    const UINT codePage = (encode == FE_UTF8) ? CP_UTF8 : CP_ACP;
-
-    int cchWideChar = MultiByteToWideChar(codePage, 0, buffer, -1, 0, 0);
+    // Convert the narrow bytes to UTF-16 properly. The old decompiled code
+    // reinterpret-cast the narrow ASCII bytes as wchar_t* ("todo: check if
+    // that's correct"), which turned a row like "10@Item@200@..." into a single
+    // garbage token with no wide '@' delimiters. CStringToken then yielded 1
+    // field instead of 7, so every row decoded to Root=0 -> zero category zones
+    // -> no tabs and an empty grid.
+    //
+    // The shop scripts we ship are UTF-8, so a file without a byte-order mark
+    // is decoded as UTF-8 too. Reading it as CP_ACP would turn every localized
+    // name into mojibake on a Windows build with a non-UTF-8 code page.
+    int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, buffer, -1, 0, 0);
     if (cchWideChar <= 0)
     {
         return result; // empty string on conversion failure
     }
 
     std::vector<wchar_t> wide(static_cast<std::size_t>(cchWideChar));
-    if (MultiByteToWideChar(codePage, 0, buffer, -1, wide.data(), cchWideChar) > 0)
-        result = wide.data();
+    if (MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wide.data(), cchWideChar) <= 0)
+    {
+        return result;
+    }
+
+    result = wide.data();
+
+    // A byte-order mark decodes to U+FEFF and would end up inside the first
+    // field of the first row, where _wtoi would read it as 0.
+    if (!result.empty() && result.front() == L'\xFEFF')
+    {
+        result.erase(result.begin());
+    }
 
     return result;
 }

@@ -37,12 +37,15 @@ namespace SEASON3B
             IMAGE_CHAINFO_BTN_QUEST,
             IMAGE_CHAINFO_BTN_PET,
             IMAGE_CHAINFO_BTN_MASTERLEVEL,
+            IMAGE_CHAINFO_BTN_SUGGEST,
         };
 
         enum
         {
             CHAINFO_WINDOW_WIDTH = 190,
-            CHAINFO_WINDOW_HEIGHT = 429,
+            // 429 in the original layout; 8px taller to host the stat-point
+            // suggestion bar between the last stat row and the button strip.
+            CHAINFO_WINDOW_HEIGHT = 437,
             HEIGHT_STRENGTH = 120,
             HEIGHT_DEXTERITY = 175,
             HEIGHT_VITALITY = 240,
@@ -54,6 +57,18 @@ namespace SEASON3B
             STAT_VITALITY,
             STAT_ENERGY,
             STAT_CHARISMA,
+            HEIGHT_SUGGEST_BAR = 374,
+            HEIGHT_BOTTOM_BTN = 400,
+            SUGGEST_PRESET_MAX = 4,
+        };
+
+        // One stat-point build recommendation: a weight per stat. The weights
+        // are relative, not absolute - the free points are split between the
+        // stats proportionally to them.
+        struct SUGGEST_PRESET
+        {
+            const wchar_t* const* s_pNameSlot;
+            int s_aWeight[BTN_STAT_COUNT];
         };
 
     private:
@@ -65,6 +80,13 @@ namespace SEASON3B
         CNewUIButton m_BtnQuest;
         CNewUIButton m_BtnPet;
         CNewUIButton m_BtnMasterLevel;
+        CNewUIButton m_BtnSuggestPreset;
+        CNewUIButton m_BtnSuggestApply;
+
+        // 0 = suggestion off, otherwise 1-based index into the class preset table.
+        int m_iSuggestPreset;
+        CLASS_TYPE m_eSuggestPresetClass;
+        int m_aSuggestPoint[BTN_STAT_COUNT];
 
     public:
         CNewUICharacterInfoWindow();
@@ -91,5 +113,13 @@ namespace SEASON3B
         void RenderTableTexts();
         void RenderAttribute();
         void RenderButtons();
+        void RenderSuggestion();
+
+        int GetStatCount() const;
+        const SUGGEST_PRESET* GetPresetTable(int& iCount) const;
+        void ResetSuggestion();
+        void CycleSuggestPreset();
+        void CalcSuggestion();
+        void ApplySuggestedPoints();
     };
 }

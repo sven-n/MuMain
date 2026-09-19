@@ -269,6 +269,20 @@ namespace SEASON3B
         static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
+    // The reset type the pending confirmation is about; it's sent back with the answer, so the server
+    // resets with the very type the player saw in the dialog.
+    extern BYTE g_byPendingResetTypeIndex;
+
+    // The confirmation of a character reset. The server announces the reset with its costs and rewards
+    // and waits for this answer before it touches the character.
+    class CResetConfirmMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    {
+    public:
+        bool SetLayout();
+        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    };
+
     class CGuildFireMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
     {
     public:

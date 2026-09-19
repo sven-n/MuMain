@@ -17,6 +17,8 @@
 
 #include <coreclr_delegates.h>
 
+#include "PacketFunctions_CommonEnums.h"
+
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
@@ -64,6 +66,40 @@ public:
     /// </remarks>
     void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion,
                    const BYTE* clientSerial);
+
+    /// <summary>
+    /// Sends a stat point increase request for several points at once to this connection.
+    /// </summary>
+    /// <param name="statType">The stat to increase.</param>
+    /// <param name="amount">The number of points to add to that stat.</param>
+    /// <remarks>
+    /// Not part of the original protocol (0xF3, 0xE0): the original client sends one packet per point, which makes
+    /// spending a big pool of level-up-points slow. The server caps the amount at the available points.
+    /// </remarks>
+    void SendIncreaseCharacterStatPointMultiple(CharacterStatAttribute statType, uint16_t amount);
+
+    /// <summary>
+    /// Sends a master skill point add request for several points at once to this connection.
+    /// </summary>
+    /// <param name="skillId">The master skill to raise.</param>
+    /// <param name="amount">The number of points to add to that skill.</param>
+    /// <remarks>
+    /// Not part of the original protocol (0xF3, 0xE1): the original client sends one packet per point, which makes
+    /// filling a master skill tree slow. The server adds points until the amount is reached, the skill is at its
+    /// maximum level, or the character runs out of master level up points.
+    /// </remarks>
+    void SendAddMasterSkillPointMultiple(uint16_t skillId, BYTE amount);
+
+    /// <summary>
+    /// Sends the answer of the reset confirmation dialog to this connection.
+    /// </summary>
+    /// <param name="resetTypeIndex">The reset type index of the corresponding confirmation request.</param>
+    /// <param name="accepted">Whether the player accepted the reset.</param>
+    /// <remarks>
+    /// Not part of the original protocol (0xF3, 0xE2): the server announces a reset with a 0xF3, 0xE0 message
+    /// and only performs it after this answer arrived.
+    /// </remarks>
+    void SendResetConfirmation(BYTE resetTypeIndex, bool accepted);
 };
 
 /// <summary>
