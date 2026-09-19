@@ -22,10 +22,10 @@ $env:VCPKG_ROOT = "C:\vcpkg"
 
 ```powershell
 # Configure (pick one)
-cmake --preset windows-x64                # 64-bit
-cmake --preset windows-x64-mueditor       # 64-bit + editor
-cmake --preset windows-x86                # 32-bit
-cmake --preset windows-x86-mueditor       # 32-bit + editor
+cmake --preset windows-x64                # 64-bit player build
+cmake --preset windows-x64-mueditor       # 64-bit + editor + control socket
+cmake --preset windows-x86                # 32-bit player build
+cmake --preset windows-x86-mueditor       # 32-bit + editor + control socket
 
 # Build (pick the matching Debug/Release build preset)
 cmake --build --preset windows-x64-mueditor-debug
@@ -33,7 +33,12 @@ cmake --build --preset windows-x64-mueditor-release
 ```
 
 The configure presets are listed in `CMakePresets.json`; each has
-`-debug`/`-release` build presets.
+`-debug`/`-release` build presets. The plain presets are the player
+configuration (`ENABLE_EDITOR=OFF`, `ENABLE_CONTROL_SOCKET=OFF`); the
+`-mueditor` presets are the developer configuration with both on. The
+developer control socket (`docs/control-socket.md`) is only ever compiled
+when `ENABLE_CONTROL_SOCKET=ON`; add `-DENABLE_CONTROL_SOCKET=ON` to a plain
+preset to get it without the editor.
 
 ## Run
 

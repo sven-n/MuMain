@@ -71,6 +71,15 @@ public:
     }
     void ReloadRmlTheme() override;
 
+    // The message code currently on screen, or -1 when the window is hidden.
+    // Automation reads it because several results — a refused login above all —
+    // reach the player only as a message box.
+    [[nodiscard]] int PendingMessageCode() const;
+
+    // Confirms the message the way the OK button does, so the game's own state
+    // restoration runs.
+    void DismissMessage();
+
 protected:
     void BuildRmlUi();
     void SetCtrlPosition();

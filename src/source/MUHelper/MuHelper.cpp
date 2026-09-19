@@ -1,4 +1,8 @@
 #include "stdafx.h"
+#include "GameLogic/Automation/Attack.h"
+#include "GameLogic/Automation/Movement.h"
+#include "GameLogic/Automation/Pickup.h"
+#include "GameLogic/Automation/Skill.h"
 #include "GameLogic/Combat/SkillExecution.h"
 
 #include <thread>
@@ -855,38 +859,6 @@ namespace MUHelper
         return 1;
     }
 
-    // True while the hero is mid swing; gating helper actions on it makes the
-    // bot's cadence follow AttackSpeed instead of the fixed helper timer, the
-    // same way the manual click path gates in MoveHero (ZzzInterface.cpp).
-    static bool IsHeroSwingInProgress()
-    {
-        const int iAction = Hero->Object.CurrentAction;
-
-        // Outside the swing enum range entirely -> not a swing.
-        if (!Engine::Object::IsAttackAction(iAction))
-            return false;
-
-        // Several non-swing *stance* animations (mounted idle/walk/run, two-hand-
-        // sword stance, ride-horse, rage-fenrir) share the [PLAYER_ATTACK_FIST ..
-        // PLAYER_RIDE_SKILL] enum range that IsAttackAction() spans. MoveHero
-        // (ZzzInterface.cpp) OR-excludes exactly these four ranges when deciding
-        // whether the hero may move; mirror that here. Otherwise a Fenrir-mounted
-        // idle character (CurrentAction == PLAYER_FENRIR_STAND, inside the range)
-        // reads as a perpetual swing, IsHeroSwingInProgress() never clears, and
-        // SimulateSkill()/SimulateAttack() never fire -- the auto-helper is dead
-        // for the whole session while Horn of Fenrir (or any mount) is equipped.
-        if ((iAction >= PLAYER_STOP_TWO_HAND_SWORD_TWO && iAction <= PLAYER_RUN_TWO_HAND_SWORD_TWO)
-            || (iAction >= PLAYER_DARKLORD_STAND && iAction <= PLAYER_RUN_RIDE_HORSE)
-            || (iAction >= PLAYER_FENRIR_RUN && iAction <= PLAYER_FENRIR_WALK_ONE_LEFT)
-            || (iAction >= PLAYER_RAGE_FENRIR_WALK && iAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT))
-            return false;
-
-        // Genuine attack/skill swing -> Fenrir attack/skill actions sit below
-        // PLAYER_FENRIR_RUN, so they stay gated and cadence still tracks
-        // AttackSpeed when mounted.
-        return true;
-    }
-
     int CMuHelper::SimulateAttack(ActionSkillType iSkill)
     {
         return SimulateSkill(iSkill, true, m_iCurrentTarget);
@@ -894,222 +866,35 @@ namespace MUHelper
 
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
-        // Let the current swing finish before issuing another action, so the
-        // cadence tracks AttackSpeed instead of the fixed helper timer.
-        if (IsHeroSwingInProgress())
-        {
-            return 0;
-        }
+        using GameLogic::Automation::SkillResult;
 
-        g_MovementSkill.m_iSkill = iSkill;
-        g_MovementSkill.m_bMagic = true;
+        // Players are allowed here, and must be: the helper casts its buffs and
+        // heals on party members and on the hero itself. Only the plain attack
+        // is monster-only, as it always was. A target that is not attackable is
+        // still refused by the primitive when it is dead.
+        const SkillResult result =
+            GameLogic::Automation::CastSkill(iSkill, bTargetRequired, iTarget, true, m_iHuntingDistance);
 
-        const float fSkillDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
-        const bool bSelfPositionSkill = IsSelfPositionSkill(iSkill);
-
-        if (bTargetRequired)
-        {
-            if (bSelfPositionSkill)
-            {
-                TargetX = Hero->PositionX;
-                TargetY = Hero->PositionY;
-
-                g_MovementSkill.m_iTarget = -1;
-
-                // Check if current target is still valid (exists and alive)
-                if (iTarget != -1)
-                {
-                    const int iCharIndex = FindCharacterIndex(iTarget);
-                    if (iCharIndex != MAX_CHARACTERS_CLIENT)
-                    {
-                        CHARACTER* pCurrentTarget = &CharactersClient[iCharIndex];
-                        if (pCurrentTarget->Dead > 0 || !IsMonster(pCurrentTarget))
-                        {
-                            DeleteTarget(iTarget);
-                            return 0;
-                        }
-                    }
-                    else
-                    {
-                        DeleteTarget(iTarget);
-                        return 0;
-                    }
-                }
-            }
-            else
-            {
-                if (iTarget == -1)
-                {
-                    return 0;
-                }
-
-                const int iCharIndex = FindCharacterIndex(iTarget);
-                if (iCharIndex == MAX_CHARACTERS_CLIENT)
-                {
-                    DeleteTarget(iTarget);
-                    return 0;
-                }
-
-                SelectedCharacter = iCharIndex;
-
-                CHARACTER* pTarget = &CharactersClient[iCharIndex];
-                if (pTarget->Dead > 0)
-                {
-                    DeleteTarget(iTarget);
-                    return 0;
-                }
-
-                g_MovementSkill.m_iTarget = iCharIndex;
-
-                TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
-
-                PATH_t tempPath;
-                bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath, m_iHuntingDistance + fSkillDistance);
-                
-                // Target not reachable, ignore it
-                if (!bHasPath)
-                {
-                    DeleteTarget(iTarget);
-                    return 0;
-                }
-
-                const bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
-                if (bTargetNear && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
-                {
-                    DeleteTarget(iTarget);
-                    return 0;
-                }
-
-                // Target is not yet in range, move closer.
-                if (!bTargetNear)
-                {
-                    Hero->Path.Lock.lock();
-
-                    // Limit movement to 2 steps at a time
-                    int pathNum = std::min<int>(tempPath.PathNum, 2);
-                    for (int i = 0; i < pathNum; i++)
-                    {
-                        Hero->Path.PathX[i] = tempPath.PathX[i];
-                        Hero->Path.PathY[i] = tempPath.PathY[i];
-                    }
-                    Hero->Path.PathNum = pathNum;
-                    Hero->Path.CurrentPath = 0;
-                    Hero->Path.CurrentPathFloat = 0;
-
-                    Hero->Path.Lock.unlock();
-
-                    SendMove(Hero, &Hero->Object);
-                    return 0;
-                }
-            }
-        }
-        else
-        {
-            TargetX = Hero->PositionX;
-            TargetY = Hero->PositionY;
-        }
-
-        int iSkillResult = GameLogic::Combat::ExecuteSkill(Hero, iSkill, fSkillDistance);
-        if (iSkillResult == -1 && iTarget != -1)
+        if (iTarget != -1 && GameLogic::Automation::ShouldForgetTarget(result))
         {
             DeleteTarget(iTarget);
         }
 
-        return (int)(iSkillResult == 1);
+        return result == SkillResult::Cast ? 1 : 0;
     }
 
     int CMuHelper::SimulateBasicAttack(int iTarget)
     {
-        if (iTarget == -1)
-        {
-            return 0;
-        }
+        using GameLogic::Automation::AttackResult;
 
-        // Let the current swing finish before attacking again, so the cadence
-        // tracks AttackSpeed instead of the fixed helper timer.
-        if (IsHeroSwingInProgress())
-        {
-            return 0;
-        }
+        const AttackResult result = GameLogic::Automation::AttackObject(iTarget, false, m_iHuntingDistance);
 
-        const int iCharIndex = FindCharacterIndex(iTarget);
-        if (iCharIndex == MAX_CHARACTERS_CLIENT)
+        if (GameLogic::Automation::ShouldForgetTarget(result))
         {
             DeleteTarget(iTarget);
-            return 0;
         }
 
-        CHARACTER* pTarget = &CharactersClient[iCharIndex];
-        if (pTarget->Dead > 0 || !IsMonster(pTarget))
-        {
-            DeleteTarget(iTarget);
-            return 0;
-        }
-
-        constexpr float BASIC_RANGE_DEFAULT = 1.8f;
-        constexpr float BASIC_RANGE_SPEAR = 2.2f;
-        constexpr float BASIC_RANGE_BOW = 6.0f;
-
-        float fRange = BASIC_RANGE_DEFAULT;
-        const int iWeaponRight = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-        if (iWeaponRight >= ITEM_SPEAR && iWeaponRight < ITEM_SPEAR + MAX_ITEM_INDEX)
-        {
-            fRange = BASIC_RANGE_SPEAR;
-        }
-        if (gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE)
-        {
-            fRange = BASIC_RANGE_BOW;
-        }
-
-        SelectedCharacter = iCharIndex;
-        TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
-        TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
-
-        PATH_t tempPath;
-        const bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath, m_iHuntingDistance + fRange);
-        if (!bHasPath)
-        {
-            DeleteTarget(iTarget);
-            return 0;
-        }
-
-        const bool bTargetNear = CheckTile(Hero, &Hero->Object, fRange);
-        if (bTargetNear && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
-        {
-            DeleteTarget(iTarget);
-            return 0;
-        }
-
-        // Target is not yet in range, move closer.
-        if (!bTargetNear)
-        {
-            Hero->Path.Lock.lock();
-            const int pathNum = std::min<int>(tempPath.PathNum, 2);
-            for (int i = 0; i < pathNum; i++)
-            {
-                Hero->Path.PathX[i] = tempPath.PathX[i];
-                Hero->Path.PathY[i] = tempPath.PathY[i];
-            }
-            Hero->Path.PathNum = pathNum;
-            Hero->Path.CurrentPath = 0;
-            Hero->Path.CurrentPathFloat = 0;
-            Hero->Path.Lock.unlock();
-
-            SendMove(Hero, &Hero->Object);
-            return 0;
-        }
-
-        if (gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE && !CheckArrow())
-        {
-            return 0;
-        }
-
-        Hero->MovementType = MOVEMENT_ATTACK;
-        ActionTarget = iCharIndex;
-        Attacking = 1;
-        Action(Hero, &Hero->Object, true);
-        return 1;
+        return result == AttackResult::Attacked ? 1 : 0;
     }
 
     int CMuHelper::Regroup()
@@ -1131,20 +916,10 @@ namespace MUHelper
 
     int CMuHelper::SimulateMove(POINT posMove)
     {
-        Hero->MovementType = MOVEMENT_MOVE;
-        TargetX = (int)posMove.x;
-        TargetY = (int)posMove.y;
+        const GameLogic::Automation::MoveResult result =
+            GameLogic::Automation::WalkTo(static_cast<int>(posMove.x), static_cast<int>(posMove.y));
 
-        if (!CheckTile(Hero, &Hero->Object, 1.5f))
-        {
-            if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
-            {
-                SendMove(Hero, &Hero->Object);
-            }
-            return 0;
-        }
-
-        return 1;
+        return result == GameLogic::Automation::MoveResult::Arrived ? 1 : 0;
     }
 
     bool CMuHelper::HasAssignedBuffSkill()
@@ -1180,18 +955,9 @@ namespace MUHelper
         return AT_SKILL_UNDEFINED;
     }
 
-    // Matches AttackWizard() behavior in ZzzInterface.cpp for these skill IDs.
     bool CMuHelper::IsSelfPositionSkill(ActionSkillType iSkill)
     {
-        return (
-            iSkill == AT_SKILL_NOVA_BEGIN ||
-            iSkill == AT_SKILL_NOVA ||
-            iSkill == AT_SKILL_HELL_FIRE ||
-            iSkill == AT_SKILL_HELL_FIRE_STR ||
-            iSkill == AT_SKILL_INFERNO ||
-            iSkill == AT_SKILL_INFERNO_STR ||
-            iSkill == AT_SKILL_INFERNO_STR_MG
-        );
+        return GameLogic::Automation::IsSelfPositionSkill(iSkill);
     }
 
     ActionSkillType CMuHelper::GetDrainLifeSkill()
@@ -1225,38 +991,25 @@ namespace MUHelper
             }
         }
 
-        ITEM_t* pDrop = &Items[m_iCurrentItem];
+        using GameLogic::Automation::PickupResult;
+        const PickupResult result = GameLogic::Automation::PickUpItem(m_iCurrentItem, m_iObtainingDistance);
 
-        if (!pDrop->Object.Live)
+        switch (result)
         {
+        case PickupResult::Requested:
+            // The request is out; stop tracking the drop, as before.
             DeleteItem(m_iCurrentItem);
             return 1;
-        }
-
-        TargetX = (int)(Items[m_iCurrentItem].Object.Position[0] / TERRAIN_SCALE);
-        TargetY = (int)(Items[m_iCurrentItem].Object.Position[1] / TERRAIN_SCALE);
-
-        int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { TargetX, TargetY });
-        if (iDistance <= m_iObtainingDistance)
-        {
-            if (!CheckTile(Hero, &Hero->Object, 2.0f))
-            {
-                if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
-                {
-                    SendMove(Hero, &Hero->Object);
-                }
-
-                return 0;
-            }
-            else
-            {
-                if (SendGetItem == -1)
-                {
-                    SendGetItem = m_iCurrentItem;
-                    SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
-                    DeleteItem(m_iCurrentItem);
-                }
-            }
+        case PickupResult::Gone:
+            DeleteItem(m_iCurrentItem);
+            return 1;
+        case PickupResult::Approaching:
+        case PickupResult::NoPath:
+            // Walking towards it: the helper's other work waits a frame.
+            return 0;
+        case PickupResult::TooFar:
+        case PickupResult::Busy:
+            return 1;
         }
 
         return 1;

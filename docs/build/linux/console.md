@@ -52,7 +52,39 @@ cmake --build build-linux -j"$(nproc)"
 
 This builds the engine, the `linux-x64` `MUnique.Client.Library.so`, and copies
 the assets and the library next to the executable. Drop `-DENABLE_EDITOR=ON`
-(or set it `OFF`) for a player build.
+(or set it `OFF`) for a player build. Add `-DENABLE_CONTROL_SOCKET=ON` when
+test scripts need to drive the client (see `docs/control-socket.md`); it is
+`OFF` by default and must stay off in anything handed to players.
+
+### Using the presets
+
+`CMakePresets.json` carries the same two configurations, with a
+`Ninja Multi-Config` generator and `CMAKE_EXPORT_COMPILE_COMMANDS=ON`:
+
+```bash
+# Configure (pick one)
+cmake --preset linux-x64                  # player build: ENABLE_EDITOR=OFF, ENABLE_CONTROL_SOCKET=OFF
+cmake --preset linux-x64-mueditor         # developer build: ENABLE_EDITOR=ON, ENABLE_CONTROL_SOCKET=ON
+
+# Build (pick the matching Debug/Release build preset)
+cmake --build --preset linux-x64-mueditor-debug
+cmake --build --preset linux-x64-mueditor-release
+```
+
+Each preset builds into `out/build/<preset-name>/`, so the two configurations
+never share a build tree. The plain preset is the player configuration: it
+contains neither the editor nor the control socket, and the `control_socket_leak`
+test in its test suite proves the latter. To get the socket without the editor,
+configure by hand: `cmake --preset linux-x64 -DENABLE_CONTROL_SOCKET=ON`.
+
+Because `src/MuEditor/` is only added to the target when `ENABLE_EDITOR=ON`, the
+`linux-x64` compile database contains no editor translation units and clangd
+cannot index them. Configuring `linux-x64-mueditor` once produces an
+`out/build/linux-x64-mueditor/compile_commands.json` that covers both the client
+and the editor (and the control socket, which is also only compiled when
+enabled); point your editor's clangd at it with
+`--compile-commands-dir=out/build/linux-x64-mueditor`. Configuring is enough for
+indexing — you do not have to build that tree.
 
 ## Run
 
