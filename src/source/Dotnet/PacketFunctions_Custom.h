@@ -89,6 +89,17 @@ public:
     /// maximum level, or the character runs out of master level up points.
     /// </remarks>
     void SendAddMasterSkillPointMultiple(uint16_t skillId, BYTE amount);
+
+    /// <summary>
+    /// Sends the answer of the reset confirmation dialog to this connection.
+    /// </summary>
+    /// <param name="resetTypeIndex">The reset type index of the corresponding confirmation request.</param>
+    /// <param name="accepted">Whether the player accepted the reset.</param>
+    /// <remarks>
+    /// Not part of the original protocol (0xF3, 0xE2): the server announces a reset with a 0xF3, 0xE0 message
+    /// and only performs it after this answer arrived.
+    /// </remarks>
+    void SendResetConfirmation(BYTE resetTypeIndex, bool accepted);
 };
 
 /// <summary>
