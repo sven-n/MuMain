@@ -31,7 +31,14 @@ that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
 
 A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
 auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
-`FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. It drives still-legacy
+`FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. The ramp between the
+640×480 reference (1.0×) and each ceiling is **linear** — `ViewportFitScale()` is
+`clamp(min(w/640, h/480), 1, ceiling)`, the same formula the original client used — so at
+`UIScalePercent=100` a migrated window lands on exactly the pixels the legacy one did at every
+resolution, which is what makes screenshot comparison against the original meaningful. (A
+quadratic damping of that ramp existed briefly; it was removed because it broke that parity at
+every intermediate resolution — 1.25× instead of 1.5× at 1280×720 — and the user dial below is
+the right lever for "too big at my resolution".) It drives still-legacy
 `CWin`/`mu::ui::window::CObject` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
 (`MainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
 that one window uses this system instead of `dp`). Two axes exist, and both systems now respect

@@ -117,7 +117,7 @@ void TitleSceneUI::CreateSceneUI()
             // Pushed as real px, not dp -- dp only matches this scene's still-native background
             // sprites' own fScaleX/fScaleY (800x600-reference, independent per axis, unclamped)
             // scaling at exactly the 640x480 reference size (RmlUi's dp unit is a different,
-            // uniform/clamped/damped formula against a 640x480 reference -- confirmed live: the
+            // uniform/clamped formula against a 640x480 reference -- confirmed live: the
             // gauge only lined up at 640x480 before this, misplaced everywhere else). Recomputing
             // the identical fScaleX/fScaleY math CGaugeBar::Create()/SetPosition() used keeps this
             // pixel-exact with the sprites at any resolution, same reasoning login_main.rcss's own
