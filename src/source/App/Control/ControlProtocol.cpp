@@ -323,8 +323,11 @@ std::string EncodeResult(std::string_view encodedId, std::string_view resultObje
         response["id"] = json::parse(encodedId, nullptr, false);
     }
 
+    // The protocol promises an object here, so a payload that parses to a
+    // scalar or an array is replaced rather than put on the wire: a caller
+    // reading `result.<field>` would otherwise get something it cannot index.
     json result = resultObject.empty() ? json::object() : json::parse(resultObject, nullptr, false);
-    if (result.is_discarded())
+    if (!result.is_object())
     {
         result = json::object();
     }

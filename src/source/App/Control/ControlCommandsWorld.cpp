@@ -233,14 +233,11 @@ public:
 
         // Pace the walk packets like a player's clicks; the server treats a
         // burst of them as a speed hack.
-        const auto now = std::chrono::steady_clock::now();
-        if (m_walking && now - m_lastWalkAt < WalkRepeatInterval)
+        if (!StepIsDue(m_lastWalkAt, WalkRepeatInterval))
         {
             return Status::Running;
         }
 
-        m_lastWalkAt = now;
-        m_walking = true;
         const Automation::MoveResult result = Automation::WalkTo(m_tileX, m_tileY);
         if (result == Automation::MoveResult::NoPath)
         {
