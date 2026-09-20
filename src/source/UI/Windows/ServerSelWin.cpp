@@ -491,7 +491,11 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
         return false;
 
     // Same two steps the click path takes: mark the group, rebuild its server
-    // buttons, then connect to the chosen server.
+    // buttons, then connect to the chosen server. The group has to be marked
+    // before the server can be looked up, so a failure after this point puts
+    // the previous selection back rather than leaving the screen on a group
+    // the caller never reached.
+    const int iPreviousBtnIndex = m_iSelectServerBtnIndex;
     if (m_iSelectServerBtnIndex != -1)
         m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
 
@@ -499,12 +503,16 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
     UpdateDisplay();
 
-    if (m_pSelectServerGroup == NULL)
-        return false;
-
-    CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
+    CServerInfo* pServerInfo = (m_pSelectServerGroup != NULL) ? m_pSelectServerGroup->GetServerInfo(serverIndex) : NULL;
     if (pServerInfo == NULL || pServerInfo->m_iPercent >= 100)
+    {
+        m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
+        m_iSelectServerBtnIndex = iPreviousBtnIndex;
+        if (m_iSelectServerBtnIndex != -1)
+            m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
+        UpdateDisplay();
         return false;
+    }
 
     return ConnectToServer(pServerInfo);
 }
