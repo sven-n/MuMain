@@ -31,6 +31,14 @@ public:
     static constexpr std::size_t MaxAcceptsPerFrame = 4;
     static constexpr std::size_t MaxRequestsPerFrame = 16;
 
+    // Connections held at once. Developer tooling talks to this socket with
+    // a handful of drivers at most; the bound is what keeps a caller that
+    // leaks connections from accumulating inboxes (up to 4 MiB each) and
+    // from lengthening the two per-frame walks over the list. A connection
+    // arriving at the bound is accepted and closed at once, so the peer
+    // learns instead of waiting in the backlog.
+    static constexpr std::size_t MaxConnections = 16;
+
     [[nodiscard]] static ControlServer& Instance();
 
     // Starts listening when the environment variable is set. Returns false

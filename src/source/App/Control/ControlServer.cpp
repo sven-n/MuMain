@@ -118,6 +118,16 @@ void ControlServer::AcceptNewConnections()
             return;
         }
 
+        if (m_connections.size() >= MaxConnections)
+        {
+            // Refused rather than queued: the caller is told now, and the
+            // list this server walks twice a frame stays bounded.
+            mu::log::Get(LogChannel)
+                ->warn("control socket refused a connection: {} are already open", m_connections.size());
+            socket->Close();
+            return;
+        }
+
         ++m_nextConnectionId;
         m_connections.push_back({m_nextConnectionId, std::move(socket)});
     }
@@ -132,7 +142,14 @@ void ControlServer::ServeRequests()
             continue;
         }
 
-        connection.socket->ReadAvailable();
+        if (!connection.socket->ReadAvailable())
+        {
+            // Closed under us: the peer hung up, the recv failed, or the
+            // input caps dropped it for flooding. Whatever is still in the
+            // inbox has nobody left to answer to, and running it would
+            // move the character for a connection that is already gone.
+            continue;
+        }
 
         // The budget is per connection: a chatty driver must not starve a
         // second connection sitting on `events --follow`, whose unread bytes
