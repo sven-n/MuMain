@@ -16,8 +16,10 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <thread>

@@ -260,8 +260,22 @@ bool SomethingIsListening(const std::string& path)
     std::memcpy(address.sun_path, path.c_str(), path.size());
     const bool connected =
         ::connect(probe, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) != SOCKET_ERROR;
+    const int failure = connected ? 0 : WSAGetLastError();
     closesocket(probe);
-    return connected;
+
+    if (connected)
+    {
+        return true;
+    }
+
+    // Only a refusal says the file is stale. A full accept backlog answers
+    // EAGAIN and a socket we may not talk to answers EACCES or EPERM: those
+    // are live sockets, and unlinking one would take it from its owner.
+#ifdef _WIN32
+    return failure != WSAECONNREFUSED && failure != WSAENOENT;
+#else
+    return failure != ECONNREFUSED && failure != ENOENT;
+#endif
 }
 } // namespace
 
