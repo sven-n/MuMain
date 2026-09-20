@@ -45,9 +45,11 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
     CHECK(ResultName(MoveResult::Arrived) == "arrived");
     CHECK(ResultName(PickupResult::Requested) == "requested");
 
-    // Every result of every vocabulary has a name; none is empty. A new
-    // enumerator that falls through its switch is what this catches, so all
-    // three are walked, not just the attack one.
+    // A new enumerator that falls through its switch is what this catches,
+    // so every result of the three vocabularies reachable from here is
+    // walked, not just the attack one. SkillResult is not among them:
+    // Skill.h needs ActionSkillType from the client's global headers, which
+    // a standalone test translation unit cannot include.
     const AttackResult attacks[] = {AttackResult::Attacked, AttackResult::Approaching, AttackResult::Busy,
                                     AttackResult::NoTarget, AttackResult::NotInView,   AttackResult::NotAttackable,
                                     AttackResult::NoPath,   AttackResult::Blocked,     AttackResult::NoArrows};
@@ -68,6 +70,7 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
     {
         CHECK_FALSE(ResultName(result).empty());
     }
+
 }
 
 TEST_CASE("Automation forgets a target only when it is hopeless [core][automation]")

@@ -244,7 +244,10 @@ TEST_CASE("Local socket splits and preserves partial lines [core][local-socket]"
     std::string line;
     REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
     CHECK(line == "first");
-    REQUIRE(connection->TakeLine(line));
+    // The payload is one send(), but a stream may still deliver it in
+    // pieces: wait for the second line rather than assume it is already
+    // buffered, and only then assert that the tail is not a line yet.
+    REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
     CHECK(line == "second");
     CHECK_FALSE(connection->TakeLine(line));
 
