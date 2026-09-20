@@ -29,6 +29,14 @@ RingState& Ring()
     return state;
 }
 
+// Counted whether or not recording is enabled: it is a fact about the
+// session, not an event in the ring.
+std::uint64_t& TeleportCounter()
+{
+    static std::uint64_t teleports = 0;
+    return teleports;
+}
+
 App::Control::Events::ObjectResolver& Resolver()
 {
     static App::Control::Events::ObjectResolver resolver;
@@ -151,6 +159,16 @@ std::vector<Record> Since(std::uint64_t seq)
                      return true;
                  });
     return selected;
+}
+
+std::uint64_t TeleportCount()
+{
+    return TeleportCounter();
+}
+
+void NoteTeleport()
+{
+    ++TeleportCounter();
 }
 
 void Reset()

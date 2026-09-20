@@ -2323,6 +2323,8 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", Data->Flag);
 
+    App::Control::Events::RecordTeleportPacket();
+
     return (TRUE);
 }
 

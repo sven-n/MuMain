@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <chrono>
 #include <cmath>
 #include <exception>
@@ -524,12 +525,6 @@ private:
     std::chrono::steady_clock::time_point m_lastStep{};
 };
 
-// A same-map warp does not go through the map-change handshake, so it is
-// recognised by the jump it makes: the destination is a fixed gate, far
-// enough from anywhere a character stands for this not to be confused with
-// a step.
-constexpr int WarpJumpTiles = 4;
-
 // warp: the warp list entry, answered once the character has been moved.
 class WarpAct : public Act
 {
@@ -557,28 +552,29 @@ public:
     {
         if (!m_sent)
         {
-            m_fromMap = gMapManager.WorldActive;
-            m_fromX = Hero != nullptr ? Hero->PositionX : -1;
-            m_fromY = Hero != nullptr ? Hero->PositionY : -1;
+            m_teleportsBefore = App::Control::Events::TeleportCount();
             SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(),
                                                                  static_cast<uint16_t>(m_mapIndex));
             m_sent = true;
             return Status::Running;
         }
 
-        // Waiting for the map index to *change* never finishes for a warp to
-        // the map the character is standing on — which is an ordinary thing
-        // to do, it is how you get back to a town's spawn point, and the
-        // server honours it. The warp-list index in the request is not a
-        // world index, so it cannot stand in for the destination either.
-        // What is waited for is therefore the character being moved: a
-        // different map, or the jump to the gate on the same one.
         if (SceneFlag != MAIN_SCENE)
         {
             return Status::Running;
         }
 
-        if (gMapManager.WorldActive == m_fromMap && !HasJumped())
+        // What a landed warp looks like from here is the teleport packet:
+        // the server answers every warp — to another map or to a gate on
+        // this one — by putting the character down with it, and the handler
+        // has already written the new map and position by the time this
+        // runs. Inferring it instead from a jump in position both misses a
+        // character already standing on the gate and fires on an ordinary
+        // walk, and inferring it from the world load behind the packet
+        // fails on a client that is not rendering: that load is counted in
+        // rendered frames, so at one frame a second it outlasts the whole
+        // deadline.
+        if (App::Control::Events::TeleportCount() == m_teleportsBefore)
         {
             return Status::Running;
         }
@@ -591,19 +587,10 @@ public:
     }
 
 private:
-    // Whether the character has been put down somewhere else on this map.
-    [[nodiscard]] bool HasJumped() const
-    {
-        return Hero != nullptr && (std::abs(Hero->PositionX - m_fromX) > WarpJumpTiles ||
-                                   std::abs(Hero->PositionY - m_fromY) > WarpJumpTiles);
-    }
-
     int m_mapIndex;
     std::string m_name;
     bool m_sent = false;
-    int m_fromMap = -1;
-    int m_fromX = -1;
-    int m_fromY = -1;
+    std::uint64_t m_teleportsBefore = 0;
 };
 
 // teleport: the game master's own move command, answered when the
@@ -637,6 +624,8 @@ public:
     {
         if (!m_sent)
         {
+            m_fromMap = gMapManager.WorldActive;
+            m_teleportsBefore = App::Control::Events::TeleportCount();
             SendChat(m_command);
             m_sentAt = std::chrono::steady_clock::now();
             m_sent = true;
@@ -651,7 +640,16 @@ public:
         if (Hero == nullptr || gMapManager.WorldActive != m_map || std::abs(Hero->PositionX - m_tileX) > ArrivalTiles ||
             std::abs(Hero->PositionY - m_tileY) > ArrivalTiles)
         {
-            if (std::chrono::steady_clock::now() - m_sentAt < TeleportRefusalWindow)
+            // The refusal window catches "the server ignored the command",
+            // which is only distinguishable while nothing has happened at
+            // all: once the teleport packet has arrived, or the map has
+            // changed, the move is under way and the deadline governs — that
+            // is the timer meant for "this is taking too long". A cross-map
+            // teleport loads a world, which on a cold map, or on a client
+            // that is barely rendering, takes longer than the window.
+            const bool nothingHappened =
+                App::Control::Events::TeleportCount() == m_teleportsBefore && gMapManager.WorldActive == m_fromMap;
+            if (!nothingHappened || std::chrono::steady_clock::now() - m_sentAt < TeleportRefusalWindow)
             {
                 return Status::Running;
             }
@@ -674,6 +672,8 @@ private:
     int m_tileX;
     int m_tileY;
     bool m_sent = false;
+    int m_fromMap = -1;
+    std::uint64_t m_teleportsBefore = 0;
     std::chrono::steady_clock::time_point m_sentAt{};
 };
 } // namespace

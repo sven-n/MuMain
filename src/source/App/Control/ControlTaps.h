@@ -47,6 +47,10 @@ void RecordDropVanished(int itemSlot, const char* reason);
 // The map the character is on, after a warp or a map-change packet.
 void RecordMapChange();
 
+// The teleport packet itself, by which the server answers a warp and every
+// other map change. Counted so `warp` can recognise its own landing.
+void RecordTeleportPacket();
+
 // Objects entering and leaving the client's view.
 void RecordViewEnterKey(int key);
 void RecordViewLeaveKey(int key);
@@ -73,6 +77,7 @@ inline void RecordChatLine(const wchar_t*, const wchar_t*, const char*) {}
 inline void RecordDropAppeared(int) {}
 inline void RecordDropVanished(int, const char*) {}
 inline void RecordMapChange() {}
+inline void RecordTeleportPacket() {}
 inline void RecordViewEnterKey(int) {}
 inline void RecordViewLeaveKey(int) {}
 inline void RecordPartyChange(const char*, const wchar_t*) {}

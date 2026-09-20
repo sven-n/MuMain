@@ -75,6 +75,15 @@ void ForEachSince(std::uint64_t seq, const std::function<bool(const Record&)>& v
 // overwritten are gone; the caller sees a gap in the sequence numbers, never
 // a duplicate.
 [[nodiscard]] std::vector<Record> Since(std::uint64_t seq);
+// How many teleport packets the client has processed — the server's
+// answer to a warp or a map change, which puts the character down on this
+// map or another. A command that waits for a warp to land counts these
+// rather than the world load behind them: the load is counted in rendered
+// frames, and a client that is not rendering (an occluded window, a
+// scripted session) takes far longer over it than the request may wait.
+[[nodiscard]] std::uint64_t TeleportCount();
+void NoteTeleport();
+
 // Drops every retained event and resets the sequence. For tests and for a
 // fresh session; the client never calls it while a follower is attached.
 void Reset();

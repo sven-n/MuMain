@@ -169,6 +169,11 @@ void RecordMapChange()
               Hero != nullptr ? Hero->PositionY : -1);
 }
 
+void RecordTeleportPacket()
+{
+    NoteTeleport();
+}
+
 void RecordViewEnterKey(int key)
 {
     RecordViewEnter(key);
