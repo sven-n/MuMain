@@ -121,7 +121,12 @@ void ApplyButtonDown()
     if (g_injection.button == Core::Input::Synthetic::MouseButton::Left)
     {
         MouseLButtonPop = false;
-        MouseLButtonPush = !MouseLButton;
+        if (!MouseLButton)
+        {
+            // Set, never cleared: a physical press recorded in the same frame
+            // must keep its edge (Winmain.cpp:994 does the same).
+            MouseLButtonPush = true;
+        }
         MouseLButton = true;
         Core::Input::RecordLeftMouseButtonPressEdge();
         return;

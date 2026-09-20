@@ -268,6 +268,11 @@ bool SomethingIsListening(const std::string& path)
         return false;
     }
 
+    // Non-blocking: a listener whose accept backlog is full makes a blocking
+    // connect() wait for it, which would stall start-up on the very case this
+    // probe is meant to detect.
+    (void)SetNonBlocking(probe);
+
     sockaddr_un address{};
     address.sun_family = AF_UNIX;
     std::memcpy(address.sun_path, path.c_str(), path.size());
@@ -281,16 +286,24 @@ bool SomethingIsListening(const std::string& path)
         return true;
     }
 
-    // Only a refusal says the file is stale. A full accept backlog answers
-    // EAGAIN and a socket we may not talk to answers EACCES or EPERM: those
-    // are live sockets, and unlinking one would take it from its owner.
+    // Only a refusal says the file is stale. A connect still in flight, a
+    // full accept backlog and a socket we may not talk to (EACCES, EPERM)
+    // are all live sockets, and unlinking one would take it from its owner.
 #ifdef _WIN32
+    if (failure == WSAEWOULDBLOCK || failure == WSAEINPROGRESS)
+    {
+        return true;
+    }
     // Windows' AF_UNIX answers a path with no listener through more than one
     // code depending on the build, so all of them count as stale; anything
     // else is read as a live socket, because taking a path from its owner is
     // the worse mistake of the two.
     return failure != WSAECONNREFUSED && failure != WSAENOENT && failure != WSAEINVAL && failure != WSAEFAULT;
 #else
+    if (failure == EINPROGRESS || failure == EAGAIN || failure == EWOULDBLOCK)
+    {
+        return true;
+    }
     return failure != ECONNREFUSED && failure != ENOENT;
 #endif
 }

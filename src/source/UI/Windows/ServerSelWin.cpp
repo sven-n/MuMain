@@ -476,8 +476,7 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
         if (bWanted)
         {
             pChosenGroup = pServerGroup;
-            if (groupName != NULL && groupName[0] != L'\0')
-                break;
+            break;
         }
     }
 

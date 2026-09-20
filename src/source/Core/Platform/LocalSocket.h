@@ -118,9 +118,10 @@ public:
     // Removes a socket file, whether or not anything is listening on it.
     static void Unlink(const std::string& path);
 
-    // Binds and listens. Any existing file at the path is removed first, so
-    // a crashed client's socket does not block start-up. On failure the
-    // reason is in `error` and nothing is left behind.
+    // Binds and listens. A stale file left by a crashed client is removed
+    // first; a path another client is still listening on is refused instead,
+    // so two clients cannot end up sharing one name. On failure the reason is
+    // in `error` and nothing is left behind.
     [[nodiscard]] bool Listen(const std::string& path, std::string& error);
 
     [[nodiscard]] bool IsListening() const

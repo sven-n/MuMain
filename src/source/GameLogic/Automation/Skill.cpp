@@ -150,9 +150,10 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
     {
         TargetX = Hero->PositionX;
         TargetY = Hero->PositionY;
-        // Both aiming paths set this; without it here an untargeted skill
+        // Both aiming paths set these; without them here an untargeted skill
         // would be cast at whatever the previous targeted one aimed at.
         g_MovementSkill.m_iTarget = -1;
+        SelectedCharacter = -1;
     }
     else if (IsSelfPositionSkill(skill))
     {

@@ -150,15 +150,7 @@ int ResolveTargetKey(const Request& request)
     int id = 0;
     if (request.GetInt("target", id))
     {
-        for (int index = 0; index < MAX_CHARACTERS_CLIENT; ++index)
-        {
-            const CHARACTER& character = CharactersClient[index];
-            if (character.Object.Live && character.Key == id)
-            {
-                return character.Key;
-            }
-        }
-        return -1;
+        return FindCharacterIndex(id) < MAX_CHARACTERS_CLIENT ? id : -1;
     }
 
     std::string name;

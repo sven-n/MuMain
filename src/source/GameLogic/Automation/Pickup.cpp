@@ -56,6 +56,7 @@ PickupResult PickUpItem(int itemIndex, int maximumDistance)
             return PickupResult::NoPath;
         }
 
+        Hero->MovementType = MOVEMENT_MOVE;
         SendMove(Hero, &Hero->Object);
         return PickupResult::Approaching;
     }

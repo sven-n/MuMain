@@ -136,8 +136,14 @@ void Dispatcher::AbandonConnection(std::size_t connection)
 {
     if (m_act && m_actConnection == connection)
     {
-        // Nobody is left to answer; drop the act rather than keep the slot.
+        // Nobody is left to answer, so no `interrupted` line is queued — but
+        // the event stream still says the act ended, and the slot's
+        // bookkeeping is cleared with it.
+        const std::string_view name = m_act->Name();
         m_act.reset();
+        m_actConnection = 0;
+        m_actStartedAt = {};
+        Events::RecordError(std::string(name), ErrorCodeName(ErrorCode::Interrupted), "the caller went away");
     }
 
     std::erase_if(m_watchers, [connection](const Watcher& watcher) { return watcher.connection == connection; });
@@ -200,8 +206,10 @@ void Dispatcher::Handle(const Request& request, std::size_t connection)
         m_actConnection = connection;
         m_actStartedAt = std::chrono::steady_clock::now();
 
-        // An act may still answer at once (already at the target tile).
-        Tick();
+        // An act may still answer at once (already at the target tile). Only
+        // the act: the frame's own Tick() advances the watchers, and running
+        // them here too would give this frame two of their steps.
+        TickAct();
         return;
     }
 

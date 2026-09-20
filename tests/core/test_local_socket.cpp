@@ -427,7 +427,9 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     CHECK(taken == lines);
 
     // A peer that never terminates its line is still cut off.
-    const std::string blob(Core::Platform::LocalSocketConnection::MaxPendingInputBytes + 1, 'x');
+    // Comfortably past the cap: crossing it on the last byte of the payload
+    // would depend on that byte having arrived before ReadAvailable() runs.
+    const std::string blob(Core::Platform::LocalSocketConnection::MaxPendingInputBytes + (64 * 1024), 'x');
     CHECK_FALSE(BufferInto(client, *connection, blob));
     CHECK_FALSE(connection->IsOpen());
 

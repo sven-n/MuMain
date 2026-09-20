@@ -360,6 +360,11 @@ static bool BeginScreenshotCapture(const std::wstring& fileName, const std::wstr
 
     g_screenshotConsumeAttempts = 0;
 
+    // A previous capture may have given up waiting for its pixels; they can
+    // still arrive, and this capture must not report the earlier frame.
+    mu::FramePixels stale;
+    (void)mu::GetRenderer().ConsumeFramePixels(stale);
+
     if (!mu::GetRenderer().RequestFramePixels())
     {
         g_screenshotCapture.Clear();

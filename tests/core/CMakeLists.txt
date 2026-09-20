@@ -92,14 +92,18 @@ mu_add_test(
         test_automation_ranges.cpp
 )
 
-mu_add_test(
-    NAME test_synthetic_input
-    SOURCES
-        test_synthetic_input.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS
-        MuClient
-)
+# The injected input paths in Winmain exist only in builds with the control
+# socket, like the transport above.
+if(ENABLE_CONTROL_SOCKET)
+    mu_add_test(
+        NAME test_synthetic_input
+        SOURCES
+            test_synthetic_input.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
 
 mu_add_test(
     NAME test_frame_profiler
