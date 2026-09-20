@@ -593,7 +593,11 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", pszUsername);
 
     LogIn = 1;
-    wcscpy(LogInID, pszUsername);
+    // The destination is a fixed-size global. The click path arrives here with
+    // a string the input box already bounded, but this entry point is public:
+    // anything longer is truncated rather than written past the end.
+    wcsncpy(LogInID, pszUsername, MAX_USERNAME_SIZE);
+    LogInID[MAX_USERNAME_SIZE] = L'\0';
     CurrentProtocolState = REQUEST_LOG_IN;
 
     SocketClient->ToGameServer()->SendLogin(pszUsername, pszPassword, Version, Serial);

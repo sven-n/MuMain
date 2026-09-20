@@ -104,13 +104,15 @@ bool LocalSocketConnection::ReadAvailable()
     }
 
     char chunk[ReadChunkBytes];
-    while (true)
+    std::size_t taken = 0;
+    while (taken < MaxBytesPerRead)
     {
         const auto received = ::recv(m_handle, chunk, static_cast<int>(sizeof(chunk)), 0);
         if (received > 0)
         {
-            m_inbox.append(chunk, static_cast<std::size_t>(received));
-            if (PendingLineBytes() > MaxPendingInputBytes)
+            taken += static_cast<std::size_t>(received);
+            Buffer(chunk, static_cast<std::size_t>(received));
+            if (PendingLineBytes() > MaxPendingInputBytes || m_inbox.size() > MaxTotalInputBytes)
             {
                 Close();
                 return false;
@@ -133,12 +135,23 @@ bool LocalSocketConnection::ReadAvailable()
         Close();
         return false;
     }
+
+    return true;
 }
 
-std::size_t LocalSocketConnection::PendingLineBytes() const
+void LocalSocketConnection::Buffer(const char* data, std::size_t size)
 {
-    const std::size_t lastTerminator = m_inbox.find_last_of(LineTerminator);
-    return lastTerminator == std::string::npos ? m_inbox.size() : m_inbox.size() - lastTerminator - 1;
+    const std::string_view chunk(data, size);
+    const std::size_t lastTerminator = chunk.find_last_of(LineTerminator);
+    if (lastTerminator == std::string_view::npos)
+    {
+        m_pendingLineBytes += size;
+    }
+    else
+    {
+        m_pendingLineBytes = size - lastTerminator - 1;
+    }
+    m_inbox.append(chunk);
 }
 
 bool LocalSocketConnection::TakeLine(std::string& line)

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <limits>
 #include <utility>
 
 namespace
@@ -255,6 +256,15 @@ bool Request::GetInt(std::string_view key, int& out) const
 {
     double number = 0.0;
     if (!GetDouble(key, number))
+    {
+        return false;
+    }
+    // Every integer argument of the protocol comes through here, and the
+    // bounds checks behind it all assume a sane value. A number that no `int`
+    // can hold is not one: converting it would be undefined behaviour, so it
+    // is reported as a missing argument and answered with `bad_request`.
+    if (!(number >= static_cast<double>(std::numeric_limits<int>::min()) &&
+          number <= static_cast<double>(std::numeric_limits<int>::max())))
     {
         return false;
     }

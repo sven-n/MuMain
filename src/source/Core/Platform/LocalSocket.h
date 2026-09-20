@@ -22,11 +22,21 @@ namespace Core::Platform
 class LocalSocketConnection
 {
 public:
-    // Bytes read from the socket per ReadAvailable() pass.
+    // Bytes read from the socket per recv() call.
     static constexpr std::size_t ReadChunkBytes = 4096;
+    // Bytes taken from the socket in one ReadAvailable() pass. A local peer
+    // can write faster than the frame loop reads, and the loop below only
+    // stops when the socket runs dry, so the work of one pass is bounded and
+    // the rest waits for the next frame.
+    static constexpr std::size_t MaxBytesPerRead = std::size_t{256} * 1024;
     // A single request line longer than this is treated as abuse and closes
     // the connection instead of growing the buffer without bound.
     static constexpr std::size_t MaxPendingInputBytes = std::size_t{256} * 1024;
+    // Ceiling on everything buffered, complete lines included. Generous
+    // enough that an honest pipelined batch never meets it, while a peer
+    // that writes faster than its requests are served still hits a wall
+    // instead of growing the buffer for as long as it keeps writing.
+    static constexpr std::size_t MaxTotalInputBytes = std::size_t{4} * 1024 * 1024;
 
     explicit LocalSocketConnection(SOCKET handle);
     ~LocalSocketConnection();
@@ -62,14 +72,23 @@ public:
     void Close();
 
 private:
-    // Bytes of the unterminated tail of the inbox: what a peer has sent since
-    // its last newline. Complete lines are excluded — they are bounded by the
-    // rate the owner drains them at, and a pipelined batch of valid commands
-    // is not abuse.
-    [[nodiscard]] std::size_t PendingLineBytes() const;
+    // Buffers a chunk just read from the socket, keeping the size of the
+    // unterminated tail up to date: what the peer has sent since its last
+    // newline. Counted as it arrives rather than searched for afterwards, so
+    // filling the buffer costs what it appends and not a scan per chunk.
+    void Buffer(const char* data, std::size_t size);
+
+    // Bytes of the unterminated tail of the inbox. Complete lines are
+    // counted separately: a pipelined batch of valid commands is not a
+    // request line that never ends.
+    [[nodiscard]] std::size_t PendingLineBytes() const
+    {
+        return m_pendingLineBytes;
+    }
 
     SOCKET m_handle;
     std::string m_inbox;
+    std::size_t m_pendingLineBytes = 0;
     std::string m_outbox;
 };
 
