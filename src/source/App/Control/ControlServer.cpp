@@ -170,13 +170,16 @@ void ControlServer::ServeRequests()
         std::string line;
         while (served < MaxRequestsPerFrame && connection.socket->TakeLine(line))
         {
+            // Counted before the line is judged: a peer writing nothing but
+            // blank lines would otherwise drain its whole inbox in one
+            // frame, which is the stall this budget exists to prevent.
+            ++served;
             const Request request = Request::Parse(line);
             if (request.IsEmpty())
             {
                 continue;
             }
 
-            ++served;
             m_dispatcher.Handle(request, connection.id);
         }
     }

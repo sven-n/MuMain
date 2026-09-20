@@ -496,8 +496,14 @@ std::string WaitFor(const Request& request, std::unique_ptr<Act>& act)
                                std::to_string(static_cast<int>(MaxWaitForSeconds)));
     }
 
+    // A malformed `match` is refused rather than dropped: watching for an
+    // event with no filter at all is not what the caller asked for, and it
+    // answers on the first event of that name.
     std::map<std::string, std::string> match;
-    (void)request.GetStringMap("match", match);
+    if (request.Has("match") && !request.GetStringMap("match", match))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`match` is an object of field names to values");
+    }
 
     act = std::make_unique<WaitForAct>(std::move(wanted), std::move(match),
                                        static_cast<std::uint64_t>(std::max(since, 0)),
@@ -575,7 +581,10 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     }
 
     std::string buttonName = "left";
-    (void)request.GetString("button", buttonName);
+    if (request.Has("button") && !request.GetString("button", buttonName))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`button` is `left` or `right`");
+    }
     const std::optional<Core::Input::Synthetic::MouseButton> button =
         Core::Input::Synthetic::MouseButtonFromName(buttonName);
     if (!button)
