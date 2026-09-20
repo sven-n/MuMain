@@ -126,7 +126,6 @@ bool Dispatcher::InterruptAct(std::string_view reason)
     }
 
     std::unique_ptr<Act> interrupted = std::move(m_act);
-    m_act.reset();
 
     Queue(m_actConnection,
           EncodeError(interrupted->EncodedId(), ErrorCode::Interrupted, reason, interrupted->ProgressObject()));
@@ -293,7 +292,6 @@ void Dispatcher::TickAct()
     }
 
     std::unique_ptr<Act> expired = std::move(m_act);
-    m_act.reset();
     Queue(m_actConnection,
           EncodeError(expired->EncodedId(), ErrorCode::Timeout,
                       "`" + std::string(expired->Name()) + "` did not finish in time", expired->ProgressObject()));
