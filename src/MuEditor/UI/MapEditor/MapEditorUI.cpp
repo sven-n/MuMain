@@ -375,16 +375,16 @@ void CMapEditorUI::RenderTextureTab()
             ImGui::SameLine();
 
         ImGui::PushID(slot);
-        const GLuint tex = Bitmaps[BITMAP_MAPTILE + slot].TextureNumber;
+        SDL_GPUTexture* const tex = Bitmaps[BITMAP_MAPTILE + slot].sdlTexture;
         const bool selected = (SelectMapping == slot);
 
         if (selected)
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 1.0f, 1.0f));
 
         bool clicked = false;
-        if (tex != 0)
+        if (tex != nullptr)
         {
-            clicked = ImGui::ImageButton("t", (ImTextureID)tex,
+            clicked = ImGui::ImageButton("t", (ImTextureID)(intptr_t)tex,
                                          ImVec2(TILE_THUMB_SIZE, TILE_THUMB_SIZE));
         }
         else

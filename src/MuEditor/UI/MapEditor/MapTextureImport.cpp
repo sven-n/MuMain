@@ -13,7 +13,6 @@
 #include <cstdio>
 #include <cwctype>
 #include <filesystem>
-#include <fstream>
 #include <vector>
 
 #include <windows.h>
@@ -71,13 +70,31 @@ namespace
         return -1;
     }
 
+    // MSVC's STL has a non-standard std::ifstream/ofstream(std::wstring, ...)
+    // extension; libstdc++ (GCC/MinGW) has no such overload, so this must use
+    // the wide-path FILE* API (_wfopen) that the rest of the Map Editor's file
+    // I/O already uses, rather than iostreams, to build with both compilers.
     std::vector<unsigned char> ReadFile(const std::wstring& path)
     {
-        std::ifstream f(path, std::ios::binary);
-        if (!f)
+        FILE* fp = _wfopen(path.c_str(), L"rb");
+        if (fp == nullptr)
             return {};
-        return std::vector<unsigned char>((std::istreambuf_iterator<char>(f)),
-                                          std::istreambuf_iterator<char>());
+
+        fseek(fp, 0, SEEK_END);
+        const long size = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        if (size <= 0)
+        {
+            fclose(fp);
+            return {};
+        }
+
+        std::vector<unsigned char> data(static_cast<size_t>(size));
+        const size_t read = fread(data.data(), 1, data.size(), fp);
+        fclose(fp);
+        if (read != data.size())
+            return {};
+        return data;
     }
 
     // Produces the ExtTile OZJ file for the target slot from a .jpg/.jpeg (wrapped
@@ -90,27 +107,29 @@ namespace
         if (src.empty())
             return false;
 
-        std::ofstream out(destOzj, std::ios::binary);
-        if (!out)
+        FILE* out = _wfopen(destOzj.c_str(), L"wb");
+        if (out == nullptr)
             return false;
 
+        bool ok;
         if (ext == L".ozj")
         {
-            out.write(reinterpret_cast<const char*>(src.data()), src.size());
+            ok = fwrite(src.data(), 1, src.size(), out) == src.size();
         }
         else if (ext == L".jpg" || ext == L".jpeg")
         {
             // Wrap the raw JPEG in an OZJ container: 24 zero header bytes (the
             // loader only special-cases a "MUHD" stamp) + the JPEG payload.
             const char header[OZJ_HEADER_BYTES] = { 0 };
-            out.write(header, OZJ_HEADER_BYTES);
-            out.write(reinterpret_cast<const char*>(src.data()), src.size());
+            ok = fwrite(header, 1, OZJ_HEADER_BYTES, out) == OZJ_HEADER_BYTES;
+            ok = ok && fwrite(src.data(), 1, src.size(), out) == src.size();
         }
         else
         {
-            return false;
+            ok = false;
         }
-        return out.good();
+        fclose(out);
+        return ok;
     }
 }
 

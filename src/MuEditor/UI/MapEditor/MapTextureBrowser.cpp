@@ -300,7 +300,7 @@ void CMapTextureBrowser::Render(int defaultWorld)
         ImGui::PushID(idx);
         bool clicked = false;
         if (p.loaded)
-            clicked = ImGui::ImageButton("t", (ImTextureID)Bitmaps[p.slot].TextureNumber,
+            clicked = ImGui::ImageButton("t", (ImTextureID)(intptr_t)Bitmaps[p.slot].sdlTexture,
                                          ImVec2(THUMB_SIZE, THUMB_SIZE));
         else if (p.attempted)
             clicked = ImGui::Button("fail", ImVec2(THUMB_SIZE, THUMB_SIZE));
