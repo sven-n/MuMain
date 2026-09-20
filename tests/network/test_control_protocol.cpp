@@ -173,7 +173,11 @@ TEST_CASE("Control protocol maps every login failure macro to a reason [network]
     {
         CAPTURE(code);
         CHECK(App::Control::IsLoginFailureCode(code));
+        // Not just non-empty: an unknown code also gets a reason (the
+        // fallback below), so the test would pass for a code that fell out
+        // of the table.
         CHECK_FALSE(App::Control::LoginFailureReason(code).empty());
+        CHECK(App::Control::LoginFailureReason(code) != App::Control::LoginFailureReason(RECEIVE_LOG_IN_SUCCESS));
     }
 
     // The password failure is the one the spec's wrong-password scenario shows.

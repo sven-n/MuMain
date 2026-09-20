@@ -56,13 +56,17 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
                                     AttackResult::SafeZone};
     for (const AttackResult result : attacks)
     {
+        // Not just non-empty: every switch here ends in `return "unknown"`,
+        // so an enumerator that falls through would still have a name.
         CHECK_FALSE(ResultName(result).empty());
+        CHECK(ResultName(result) != "unknown");
     }
 
     const MoveResult moves[] = {MoveResult::Walking, MoveResult::Arrived, MoveResult::NoPath};
     for (const MoveResult result : moves)
     {
         CHECK_FALSE(ResultName(result).empty());
+        CHECK(ResultName(result) != "unknown");
     }
 
     const PickupResult pickups[] = {PickupResult::Requested, PickupResult::Approaching, PickupResult::TooFar,
@@ -70,6 +74,7 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
     for (const PickupResult result : pickups)
     {
         CHECK_FALSE(ResultName(result).empty());
+        CHECK(ResultName(result) != "unknown");
     }
 
 }
