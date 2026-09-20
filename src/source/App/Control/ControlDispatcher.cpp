@@ -3,6 +3,7 @@
 
 #include "App/Control/ControlCommands.h"
 #include "App/Control/ControlEvents.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 
 #include <chrono>
@@ -84,7 +85,11 @@ bool Dispatcher::SceneAllows(SceneRequirement requirement)
     case SceneRequirement::Any:
         return true;
     case SceneRequirement::World:
-        return SceneFlag == MAIN_SCENE;
+        // The character, not just the scene: MAIN_SCENE is set for the whole
+        // join round-trip before the join-map packet creates `Hero`
+        // (WSclient.cpp:1155), and everything a world command does reads it.
+        // One check here covers the handlers and every tick of an act.
+        return SceneFlag == MAIN_SCENE && Hero != nullptr;
     case SceneRequirement::PreGame:
         return SceneFlag != MAIN_SCENE;
     }

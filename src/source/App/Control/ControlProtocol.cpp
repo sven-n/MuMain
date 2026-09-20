@@ -1,5 +1,7 @@
 #include "App/Control/ControlProtocol.h"
 
+#include <cmath>
+
 #include "Network/Server/WSclient.h"
 
 #include "json.hpp"
@@ -299,6 +301,14 @@ bool Request::GetInt(std::string_view key, int& out) const
     {
         return false;
     }
+    // And it must be one: truncating 2.9 to 2 is the silent leniency the
+    // range check above exists to avoid, one digit further along.
+    double whole = 0.0;
+    if (std::modf(number, &whole) != 0.0)
+    {
+        return false;
+    }
+
     out = static_cast<int>(number);
     return true;
 }
