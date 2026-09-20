@@ -887,6 +887,13 @@ namespace MUHelper
     {
         using GameLogic::Automation::AttackResult;
 
+        // No target is not a failed attack: without this the helper asks the
+        // automation for object -1 and then forgets a target it never had.
+        if (iTarget == -1)
+        {
+            return 0;
+        }
+
         const AttackResult result = GameLogic::Automation::AttackObject(iTarget, false, m_iHuntingDistance);
 
         if (GameLogic::Automation::ShouldForgetTarget(result))
