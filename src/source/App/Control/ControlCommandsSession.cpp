@@ -240,14 +240,18 @@ private:
         }
 
         // ReceiveJoinServer sets this once the game server accepted the
-        // connection and the login window is up. Anything past it is just as
-        // ready: a `login` issued after one that failed finds the state on
-        // that failure's code, and waiting for the exact value would spin
-        // until the deadline instead of submitting the new credentials.
-        // The stage above this one has already sent anything at or past
-        // RECEIVE_CHARACTERS_LIST back to leaving the session.
-        if (CurrentProtocolState < RECEIVE_JOIN_SERVER_SUCCESS)
+        // connection and the login window is up, and it is the one state in
+        // which CLoginWin::SubmitCredentials does anything (LoginWin.cpp:399)
+        // — submitting in any other silently returns and the act would then
+        // wait out its deadline. A state left behind by an earlier failed
+        // login is answered as that failure instead of waited on.
+        if (CurrentProtocolState != RECEIVE_JOIN_SERVER_SUCCESS)
         {
+            if (App::Control::IsLoginFailureCode(CurrentProtocolState))
+            {
+                return Fail(response, ErrorCode::LoginFailed,
+                            std::string(App::Control::LoginFailureReason(CurrentProtocolState)));
+            }
             return Status::Running;
         }
 

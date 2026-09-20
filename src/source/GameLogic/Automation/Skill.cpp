@@ -59,7 +59,10 @@ static SkillResult AimAtSelf(int targetKey, bool allowPlayers)
 {
     TargetX = Hero->PositionX;
     TargetY = Hero->PositionY;
+    // A cast at the caster's own tile selects nobody, so the previous cast's
+    // target is cleared here as well as in the untargeted branch.
     g_MovementSkill.m_iTarget = -1;
+    SelectedCharacter = -1;
 
     if (targetKey == -1)
     {

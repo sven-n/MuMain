@@ -278,8 +278,11 @@ bool Request::GetInt(std::string_view key, int& out) const
     // bounds checks behind it all assume a sane value. A number that no `int`
     // can hold is not one: converting it would be undefined behaviour, so it
     // is reported as a missing argument and answered with `bad_request`.
+    // The upper bound is strict because int's maximum is not representable
+    // as a double: static_cast<double>(INT_MAX) rounds up to 2147483648.0,
+    // and comparing `<=` against that would let 2^31 itself through.
     if (!(number >= static_cast<double>(std::numeric_limits<int>::min()) &&
-          number <= static_cast<double>(std::numeric_limits<int>::max())))
+          number < static_cast<double>(std::numeric_limits<int>::max()) + 1.0))
     {
         return false;
     }

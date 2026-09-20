@@ -253,6 +253,55 @@ void LocalSocketListener::Unlink(const std::string& path)
 
 namespace
 {
+// Whether a failed connect means something is still there. Windows' AF_UNIX
+// answers a path with no listener through more than one code depending on the
+// build, so all of them count as stale.
+bool ProbeFailureIsLive(int failure)
+{
+#ifdef _WIN32
+    return failure != WSAECONNREFUSED && failure != WSAENOENT && failure != WSAEINVAL && failure != WSAEFAULT;
+#else
+    return failure != ECONNREFUSED && failure != ENOENT;
+#endif
+}
+
+// How long the probe below waits for a connect it could not answer at once.
+constexpr int ProbeSettleMilliseconds = 100;
+
+// Whether a connect that returned "in flight" ends up accepted. Without this
+// the probe would have to guess, and guessing "alive" makes a stale file stop
+// the client from starting.
+bool ProbeSettled(SOCKET probe)
+{
+    // select() rather than poll(): the same call exists in Winsock, and one
+    // descriptor is all this waits on.
+    fd_set writable;
+    FD_ZERO(&writable);
+    FD_SET(probe, &writable);
+    timeval wait{};
+    wait.tv_sec = 0;
+    wait.tv_usec = ProbeSettleMilliseconds * 1000;
+    if (::select(static_cast<int>(probe) + 1, nullptr, &writable, nullptr, &wait) <= 0)
+    {
+        // Still undecided after the wait: a listener that never answers is
+        // one we must not take the path from.
+        return true;
+    }
+
+    int error = 0;
+#ifdef _WIN32
+    int size = static_cast<int>(sizeof(error));
+#else
+    socklen_t size = sizeof(error);
+#endif
+    if (::getsockopt(probe, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &size) != 0)
+    {
+        return true;
+    }
+
+    return error == 0 || ProbeFailureIsLive(error);
+}
+
 // Whether a socket file is a live listener rather than one left behind: the
 // only portable answer is to knock on it.
 bool SomethingIsListening(const std::string& path)
@@ -268,10 +317,16 @@ bool SomethingIsListening(const std::string& path)
         return false;
     }
 
-    // Non-blocking: a listener whose accept backlog is full makes a blocking
-    // connect() wait for it, which would stall start-up on the very case this
-    // probe is meant to detect.
-    (void)SetNonBlocking(probe);
+    // Non-blocking, because a listener whose accept backlog is full makes a
+    // blocking connect() wait for it and that would stall start-up on the
+    // very case this probe detects. If the mode cannot be changed the probe
+    // is abandoned rather than run blocking: not detecting a second client is
+    // better than refusing to start.
+    if (!SetNonBlocking(probe))
+    {
+        closesocket(probe);
+        return false;
+    }
 
     sockaddr_un address{};
     address.sun_family = AF_UNIX;
@@ -279,33 +334,17 @@ bool SomethingIsListening(const std::string& path)
     const bool connected =
         ::connect(probe, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) != SOCKET_ERROR;
     const int failure = connected ? 0 : WSAGetLastError();
+
+    // Only a refusal says the file is stale. A full accept backlog and a
+    // socket we may not talk to (EACCES, EPERM) are live sockets, and
+    // unlinking one would take it from its owner; a connect still in flight
+    // is waited on rather than assumed either way.
+    const bool listening = connected ? true
+                           : (failure == EINPROGRESS || failure == EAGAIN || failure == EWOULDBLOCK)
+                               ? ProbeSettled(probe)
+                               : ProbeFailureIsLive(failure);
     closesocket(probe);
-
-    if (connected)
-    {
-        return true;
-    }
-
-    // Only a refusal says the file is stale. A connect still in flight, a
-    // full accept backlog and a socket we may not talk to (EACCES, EPERM)
-    // are all live sockets, and unlinking one would take it from its owner.
-#ifdef _WIN32
-    if (failure == WSAEWOULDBLOCK || failure == WSAEINPROGRESS)
-    {
-        return true;
-    }
-    // Windows' AF_UNIX answers a path with no listener through more than one
-    // code depending on the build, so all of them count as stale; anything
-    // else is read as a live socket, because taking a path from its owner is
-    // the worse mistake of the two.
-    return failure != WSAECONNREFUSED && failure != WSAENOENT && failure != WSAEINVAL && failure != WSAEFAULT;
-#else
-    if (failure == EINPROGRESS || failure == EAGAIN || failure == EWOULDBLOCK)
-    {
-        return true;
-    }
-    return failure != ECONNREFUSED && failure != ENOENT;
-#endif
+    return listening;
 }
 } // namespace
 

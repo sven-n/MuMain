@@ -242,7 +242,7 @@ json NearbyArray()
     for (int index = 0; index < MAX_ITEMS; ++index)
     {
         const ITEM_t& drop = Items[index];
-        if (!drop.Object.Live)
+        if (drop.Item.Type < 0 || !drop.Object.Live)
         {
             continue;
         }
