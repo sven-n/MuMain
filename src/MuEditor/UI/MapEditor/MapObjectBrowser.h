@@ -6,8 +6,8 @@
 #include <vector>
 
 // "O. Browse": pick an object model from any map's Object folder and import it
-// onto the current map (see Editor::ObjectImport). List-based (no 3D thumbnails
-// yet); shows model file names grouped by source map with a name filter.
+// onto the current map (see Editor::ObjectImport). Shows model file names,
+// grouped by source map with a name filter, as a thumbnail grid.
 class CMapObjectBrowser
 {
 public:
@@ -33,6 +33,11 @@ private:
     int              m_selected = -1;      // index into m_files
     char             m_filter[64] = { 0 }; // name filter
     std::string      m_status;             // last import result
+
+    // Index into m_files currently occupying CObjectThumbnail's single shared
+    // scratch slot (-1 = none). Models[] only has one scratch slot (see
+    // MapObjectImport::LoadForPreview), so only one request can be in flight.
+    int              m_scratchOwner = -1;
 };
 
 #define g_MapObjectBrowser CMapObjectBrowser::GetInstance()

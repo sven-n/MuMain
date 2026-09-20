@@ -28,32 +28,28 @@ namespace
 
     struct RGB { float r, g, b; bool valid; };
 
-    // Average colour of a tile texture, read straight from its GL texture. Core GL,
-    // so no extension loading needed. Returns invalid if the slot isn't loaded.
+    // Average colour of a tile texture. BITMAP_t keeps the original decoded CPU-side
+    // pixel buffer alive for the tile's whole lifetime (it's what UploadTextureSDLGpu
+    // uploaded from), so this reads that directly instead of reading the GPU texture
+    // back - no renderer/GL dependency at all, works identically on every backend.
+    // Returns invalid if the slot isn't loaded.
     RGB AverageTileColor(int slot)
     {
         RGB out{ 0, 0, 0, false };
         BITMAP_t& b = Bitmaps[BITMAP_MAPTILE + slot];
-        if (b.TextureNumber == 0)
+        const int w = static_cast<int>(b.Width);
+        const int h = static_cast<int>(b.Height);
+        const int comps = (b.Components > 0) ? b.Components : 3;
+        if (b.Buffer == nullptr || w < 1 || h < 1)
             return out;
-
-        glBindTexture(GL_TEXTURE_2D, b.TextureNumber);
-        GLint tw = 0, th = 0;
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &tw);
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &th);
-        if (tw < 1 || th < 1)
-            return out;
-
-        std::vector<BYTE> buf(static_cast<size_t>(tw) * th * 4);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf.data());
 
         double sr = 0, sg = 0, sb = 0;
-        const size_t px = static_cast<size_t>(tw) * th;
+        const size_t px = static_cast<size_t>(w) * h;
         for (size_t i = 0; i < px; ++i)
         {
-            sr += buf[i * 4 + 0];
-            sg += buf[i * 4 + 1];
-            sb += buf[i * 4 + 2];
+            sr += b.Buffer[i * comps + 0];
+            sg += b.Buffer[i * comps + 1];
+            sb += b.Buffer[i * comps + 2];
         }
         out.r = static_cast<float>(sr / px);
         out.g = static_cast<float>(sg / px);
@@ -94,7 +90,6 @@ bool GenerateFromTiles(int world, std::string& outMsg)
     RGB slotColor[kTileSlots];
     for (int i = 0; i < kTileSlots; ++i)
         slotColor[i] = AverageTileColor(i);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     auto colorOf = [&](int idx, float& r, float& g, float& b)
     {

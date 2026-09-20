@@ -4,9 +4,13 @@
 
 #include "ObjectThumbnail.h"
 
-#include "Render/Models/ZzzBMD.h"   // BMD / Models[] / BoneTransform / RENDER_TEXTURE / OBB_t
+#include "Render/Models/ZzzBMD.h"        // BMD / Models[] / BoneTransform / RENDER_TEXTURE / OBB_t
+#include "Render/Renderer/MuRenderer.h"  // mu::GetRenderer()
+#include "UI/Console/MuEditorConsoleUI.h"
 
+#include <algorithm>
 #include <cmath>
+#include <cstdio>
 
 // Global bone scale the model Transform/Animation multiply by; the game sets it
 // per object (Calc_RenderObject). Must be 1 for an un-scaled preview.
@@ -14,45 +18,6 @@ extern float BoneScale;
 
 namespace
 {
-    // The FBO entry points are OpenGL extensions. The engine never used them, so
-    // glew isn't linked - load them directly from the GL driver instead. The GL
-    // enum tokens still come from glew.h (included via stdafx).
-    typedef void (APIENTRY* PFN_GenFB)(GLsizei, GLuint*);
-    typedef void (APIENTRY* PFN_BindFB)(GLenum, GLuint);
-    typedef void (APIENTRY* PFN_FBTex2D)(GLenum, GLenum, GLenum, GLuint, GLint);
-    typedef void (APIENTRY* PFN_GenRB)(GLsizei, GLuint*);
-    typedef void (APIENTRY* PFN_BindRB)(GLenum, GLuint);
-    typedef void (APIENTRY* PFN_RBStorage)(GLenum, GLenum, GLsizei, GLsizei);
-    typedef void (APIENTRY* PFN_FBRB)(GLenum, GLenum, GLenum, GLuint);
-
-    PFN_GenFB     s_GenFramebuffers = nullptr;
-    PFN_BindFB    s_BindFramebuffer = nullptr;
-    PFN_FBTex2D   s_FramebufferTexture2D = nullptr;
-    PFN_GenRB     s_GenRenderbuffers = nullptr;
-    PFN_BindRB    s_BindRenderbuffer = nullptr;
-    PFN_RBStorage s_RenderbufferStorage = nullptr;
-    PFN_FBRB      s_FramebufferRenderbuffer = nullptr;
-    bool s_fboLoaded = false;
-    bool s_fboOk = false;
-
-    bool LoadFboFunctions()
-    {
-        if (s_fboLoaded)
-            return s_fboOk;
-        s_fboLoaded = true;
-        s_GenFramebuffers        = (PFN_GenFB)wglGetProcAddress("glGenFramebuffers");
-        s_BindFramebuffer        = (PFN_BindFB)wglGetProcAddress("glBindFramebuffer");
-        s_FramebufferTexture2D   = (PFN_FBTex2D)wglGetProcAddress("glFramebufferTexture2D");
-        s_GenRenderbuffers       = (PFN_GenRB)wglGetProcAddress("glGenRenderbuffers");
-        s_BindRenderbuffer       = (PFN_BindRB)wglGetProcAddress("glBindRenderbuffer");
-        s_RenderbufferStorage    = (PFN_RBStorage)wglGetProcAddress("glRenderbufferStorage");
-        s_FramebufferRenderbuffer= (PFN_FBRB)wglGetProcAddress("glFramebufferRenderbuffer");
-        s_fboOk = s_GenFramebuffers && s_BindFramebuffer && s_FramebufferTexture2D &&
-                  s_GenRenderbuffers && s_BindRenderbuffer && s_RenderbufferStorage &&
-                  s_FramebufferRenderbuffer;
-        return s_fboOk;
-    }
-
     void Normalize3(float v[3])
     {
         const float len = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -71,18 +36,15 @@ namespace
         return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
     }
 
-    // Loads a perspective projection (column-major) into the current matrix.
-    void LoadPerspective(float fovYDeg, float aspect, float znear, float zfar)
+    // Guarantees EndOffscreenCapture() runs even if something in between throws or
+    // an early return gets added later - otherwise the capture stays "open" forever
+    // and BeginOffscreenCapture() refuses every future call, silently breaking
+    // every thumbnail after this one for the rest of the process.
+    class ScopedOffscreenCapture
     {
-        const float f = 1.0f / std::tan(fovYDeg * 0.5f * 3.14159265f / 180.0f);
-        float m[16] = { 0 };
-        m[0]  = f / aspect;
-        m[5]  = f;
-        m[10] = (zfar + znear) / (znear - zfar);
-        m[11] = -1.0f;
-        m[14] = (2.0f * zfar * znear) / (znear - zfar);
-        glLoadMatrixf(m);
-    }
+    public:
+        ~ScopedOffscreenCapture() { mu::GetRenderer().EndOffscreenCapture(); }
+    };
 
     // Loads a look-at view (column-major) into the current matrix.
     void LoadLookAt(const float eye[3], const float center[3], const float up[3])
@@ -97,7 +59,7 @@ namespace
         m[1] = up2[0];  m[5] = up2[1];  m[9]  = up2[2];   m[13] = -Dot3(up2, eye);
         m[2] = -fwd[0]; m[6] = -fwd[1]; m[10] = -fwd[2];  m[14] =  Dot3(fwd, eye);
         m[3] = 0.0f;    m[7] = 0.0f;    m[11] = 0.0f;     m[15] = 1.0f;
-        glLoadMatrixf(m);
+        mu::GetRenderer().LoadMatrix(m);
     }
 }
 
@@ -115,34 +77,17 @@ void CObjectThumbnail::BeginFrame()
 void CObjectThumbnail::FreeTexture(unsigned int tex)
 {
     if (tex != 0)
-        glDeleteTextures(1, &tex);
+        mu::GetRenderer().ReleaseTexture(tex);
 }
 
 void CObjectThumbnail::Invalidate()
 {
     for (auto& kv : m_cache)
         if (kv.second != 0)
-            glDeleteTextures(1, &kv.second);
+            mu::GetRenderer().ReleaseTexture(kv.second);
     m_cache.clear();
-}
-
-bool CObjectThumbnail::EnsureTargets()
-{
-    if (m_init)
-        return true;
-    if (!LoadFboFunctions())
-        return false;  // driver lacks FBO support (very unlikely)
-
-    s_GenFramebuffers(1, &m_fbo);
-    s_GenRenderbuffers(1, &m_depth);
-    s_BindRenderbuffer(GL_RENDERBUFFER, m_depth);
-    s_RenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, THUMB_SIZE, THUMB_SIZE);
-    s_BindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    s_FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
-    s_BindRenderbuffer(GL_RENDERBUFFER, 0);
-    s_BindFramebuffer(GL_FRAMEBUFFER, 0);
-    m_init = true;
-    return true;
+    m_failCount.clear();
+    m_pendingTypes.clear();
 }
 
 unsigned int CObjectThumbnail::Get(int type)
@@ -152,47 +97,120 @@ unsigned int CObjectThumbnail::Get(int type)
         return it->second;
     if (m_budget <= 0)
         return 0;  // try again next frame
-    --m_budget;
-    const unsigned int tex = RenderSlotToTexture(type);
-    m_cache[type] = tex;
-    return tex;
+    if (std::find(m_pendingTypes.begin(), m_pendingTypes.end(), type) == m_pendingTypes.end())
+    {
+        m_pendingTypes.push_back(type);
+        --m_budget;
+    }
+    return 0;  // result appears once ProcessPendingRequests() has run
 }
 
-unsigned int CObjectThumbnail::RenderSlotToTexture(int type)
+bool CObjectThumbnail::RequestSlotPreview(int slot)
+{
+    if (m_scratchPending)
+        return false;  // previous request not delivered yet - caller must wait
+    m_scratchSlot = slot;
+    m_scratchPending = true;
+    m_scratchHasResult = false;
+    return true;
+}
+
+unsigned int CObjectThumbnail::PollSlotPreview()
+{
+    if (m_scratchPending || !m_scratchHasResult)
+        return 0;
+    m_scratchHasResult = false;
+    return m_scratchResult;
+}
+
+void CObjectThumbnail::ProcessPendingRequests()
+{
+    // No active frame right now (window minimized/occluded/not focused - e.g.
+    // the user alt-tabbed away) - BeginOffscreenCapture() can't succeed for
+    // ANY request regardless of the model, so don't even try: leave everything
+    // queued for next time instead of spending retry budget on a "failure"
+    // that has nothing to do with the model itself and will stop happening
+    // the moment the window is active again.
+    if (!mu::GetRenderer().IsFrameActive())
+        return;
+
+    for (const int type : m_pendingTypes)
+    {
+        const unsigned int tex = RenderNow(type);
+        if (tex != 0)
+        {
+            m_cache[type] = tex;
+            m_failCount.erase(type);
+        }
+        else if (++m_failCount[type] >= MAX_TRANSIENT_RETRIES)
+        {
+            // Given up - cache the failure so Get() stops retrying it.
+            m_cache[type] = 0;
+            m_failCount.erase(type);
+        }
+        // else: leave uncached - Get() will queue another attempt later.
+    }
+    m_pendingTypes.clear();
+
+    if (m_scratchPending)
+    {
+        const unsigned int tex = RenderNow(m_scratchSlot);
+        if (tex != 0)
+        {
+            m_scratchResult = tex;
+            m_scratchHasResult = true;
+            m_scratchPending = false;
+            m_scratchFailCount = 0;
+        }
+        else if (++m_scratchFailCount >= MAX_TRANSIENT_RETRIES)
+        {
+            m_scratchResult = 0;
+            m_scratchHasResult = true;
+            m_scratchPending = false;
+            m_scratchFailCount = 0;
+        }
+        // else: leave m_scratchPending set - retries the same slot next frame.
+    }
+}
+
+unsigned int CObjectThumbnail::RenderNow(int type)
 {
     if (type < 0)
         return 0;
     BMD* b = &Models[type];
     if (b->NumMeshs <= 0 || b->Meshs == nullptr)
+    {
+        char msg[96];
+        snprintf(msg, sizeof(msg), "[MapEditor] Thumbnail skip: type %d not loaded (NumMeshs=%d, Meshs=%p)",
+                 type, b->NumMeshs, static_cast<void*>(b->Meshs));
+        g_MuEditorConsoleUI.LogEditor(msg);
         return 0;
-    if (!EnsureTargets())
+    }
+
+    // Renders into its own dedicated texture via the renderer's offscreen capture -
+    // draw calls issued before EndOffscreenCapture() never reach the main frame, so
+    // this can't interfere with (or be interfered with by) normal game rendering.
+    const std::uint32_t tex = mu::GetRenderer().BeginOffscreenCapture(0u, THUMB_SIZE, THUMB_SIZE);
+    if (tex == 0u)
+    {
+        char msg[96];
+        snprintf(msg, sizeof(msg), "[MapEditor] Thumbnail FAILED: type %d BeginOffscreenCapture returned 0", type);
+        g_MuEditorConsoleUI.LogEditor(msg);
         return 0;
+    }
+    const ScopedOffscreenCapture endCaptureOnReturn; // EndOffscreenCapture() on every exit path below
 
-    // Persistent color texture for this model.
-    GLuint tex = 0;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, THUMB_SIZE, THUMB_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Save GL state we touch.
-    GLint prevFBO = 0; glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
-    GLint vp[4];       glGetIntegerv(GL_VIEWPORT, vp);
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glMatrixMode(GL_PROJECTION); glPushMatrix();
     glMatrixMode(GL_MODELVIEW);  glPushMatrix();
 
-    s_BindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    s_FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-
-    glViewport(0, 0, THUMB_SIZE, THUMB_SIZE);
-    glClearColor(0.10f, 0.10f, 0.12f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
+    // Foliage/tree models rely on alpha-blended or alpha-cutout leaf textures to
+    // render solid - with blending off, translucent leaf clusters either vanish or
+    // render as sparse fragments instead of a filled canopy.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -221,7 +239,12 @@ unsigned int CObjectThumbnail::RenderSlotToTexture(int type)
     const float sx = bbMax[0] - bbMin[0];
     const float sy = bbMax[1] - bbMin[1];
     const float sz = bbMax[2] - bbMin[2];
-    float radius = 0.5f * std::fmax(sx, std::fmax(sy, sz));
+    // Half the box's diagonal, not half its largest single axis: a box that's
+    // wide AND tall (not just cube-shaped) needs the full diagonal to guarantee
+    // every corner stays inside the frame from an arbitrary viewing angle: using
+    // only the largest axis put the camera too close, so non-cubic objects (most
+    // of them) stuck out past the thumbnail's edges.
+    float radius = 0.5f * std::sqrt(sx * sx + sy * sy + sz * sz);
     if (!(radius > 1.0f) || radius > 100000.0f)
     {
         // Degenerate/invalid box: assume a typical MU object size.
@@ -242,7 +265,7 @@ unsigned int CObjectThumbnail::RenderSlotToTexture(int type)
     const float znear = std::fmax(2.0f, dist * 0.05f);
     const float zfar  = dist + radius * 8.0f + 4000.0f;
     glMatrixMode(GL_PROJECTION); glLoadIdentity();
-    LoadPerspective(fovDeg, 1.0f, znear, zfar);
+    gluPerspective(fovDeg, 1.0f, znear, zfar);
     glMatrixMode(GL_MODELVIEW); glLoadIdentity();
     LoadLookAt(eye, center, up);
 
@@ -251,10 +274,6 @@ unsigned int CObjectThumbnail::RenderSlotToTexture(int type)
     // Restore.
     glMatrixMode(GL_PROJECTION); glPopMatrix();
     glMatrixMode(GL_MODELVIEW);  glPopMatrix();
-    glPopAttrib();
-    s_BindFramebuffer(GL_FRAMEBUFFER, (GLuint)prevFBO);
-    glViewport(vp[0], vp[1], vp[2], vp[3]);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     return tex;
 }

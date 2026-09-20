@@ -4,6 +4,10 @@
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Renderer/RenderUtils.h"   // mu::PackABGR
+#ifdef _EDITOR
+#include "UI/MapEditor/ObjectThumbnail.h"
+#endif
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -3252,6 +3256,11 @@ void RenderObjectVisual(OBJECT* o)
 // the existing debug bounding-box wireframe (RenderBoundingBox) instead of a
 // second box-drawing implementation.
 OBJECT* g_MapEditorSelectedObject = nullptr;
+
+// Set every frame while Select & edit mode is enabled: the object currently under
+// the cursor (before any click), so it can be outlined too - lets you see what a
+// click would pick, distinct from what's already selected.
+OBJECT* g_MapEditorHoveredObject = nullptr;
 #endif
 
 void RenderObjects()
@@ -3260,6 +3269,11 @@ void RenderObjects()
     s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
     s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
     s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+
+    // Object-thumbnail requests are queued during CMuEditorCore::Update()
+    // (ImGui widget code, which runs before BeginFrame()) and can only be
+    // rendered here, inside BeginFrame()/EndFrame() - see ObjectThumbnail.h.
+    g_ObjectThumbnail.ProcessPendingRequests();
 #endif
 
     float   range = 0.f;
@@ -3435,7 +3449,20 @@ void RenderObjects()
 #ifdef _EDITOR
                             if (o->Visible == true && o == g_MapEditorSelectedObject)
                             {
-                                RenderBoundingBox(o);
+                                // Bright flat yellow (same color all three tiers, no
+                                // pseudo-3D shading) so the outline is unmistakable
+                                // against any background - the dim debug default above
+                                // is deliberately subtle and easy to miss by comparison.
+                                static const std::uint32_t kSelectedColor = mu::PackABGR(1.0f, 0.9f, 0.1f, 1.0f);
+                                RenderBoundingBox(o, kSelectedColor, kSelectedColor, kSelectedColor);
+                            }
+                            else if (o->Visible == true && o == g_MapEditorHoveredObject)
+                            {
+                                // Distinct color from the selected outline so you can
+                                // tell "what a click would pick" apart from "what's
+                                // already selected" at a glance.
+                                static const std::uint32_t kHoverColor = mu::PackABGR(0.2f, 0.9f, 1.0f, 1.0f);
+                                RenderBoundingBox(o, kHoverColor, kHoverColor, kHoverColor);
                             }
 #endif // _EDITOR
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
@@ -10811,7 +10838,7 @@ bool isPartyMemberBuff(int partyindex)
 }
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-void RenderBoundingBox(OBJECT* pObj)
+void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor, std::uint32_t midColor, std::uint32_t lightColor)
 {
     EnableAlphaBlend();
     mu::GetRenderer().PushMatrix();
@@ -10843,9 +10870,6 @@ void RenderBoundingBox(OBJECT* pObj)
         return {position[0], position[1], position[2], 0.f, 0.f, 1.f, 0.f, 0.f, color};
     };
 
-    constexpr std::uint32_t darkColor = 0xFF333333u;
-    constexpr std::uint32_t midColor = 0xFF999999u;
-    constexpr std::uint32_t lightColor = 0xFF666666u;
     const mu::Vertex3D lineVertices[] = {
         MakeVertex(TransformVertices[7], darkColor), MakeVertex(TransformVertices[6], darkColor),
         MakeVertex(TransformVertices[4], darkColor), MakeVertex(TransformVertices[5], darkColor),

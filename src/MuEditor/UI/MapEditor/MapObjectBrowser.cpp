@@ -7,6 +7,7 @@
 #include "ObjectThumbnail.h"
 
 #include "Core/Utilities/StringUtils.h"
+#include "Render/Renderer/MuRenderer.h"    // mu::GetRenderer().GetTexturePointer
 
 #include "imgui.h"
 
@@ -14,6 +15,8 @@
 #include <cctype>
 #include <cwctype>
 #include <filesystem>
+
+struct SDL_GPUTexture;
 
 namespace fs = std::filesystem;
 
@@ -75,6 +78,11 @@ void CMapObjectBrowser::LoadFileList(int sourceWorld)
         if (t != THUMB_FAILED)
             CObjectThumbnail::FreeTexture(t);
     m_thumbs.clear();
+
+    // Indices into the old m_files no longer mean anything; any request still
+    // in flight for one of them is abandoned (its result, once delivered, is
+    // simply never polled).
+    m_scratchOwner = -1;
 
     m_sourceWorld = sourceWorld;
     m_files = Editor::ObjectImport::ListModelFiles(sourceWorld);
@@ -176,13 +184,43 @@ void CMapObjectBrowser::Render(int currentWorld, int* outImportedType)
         }
 
         // Render this preview if not done yet (budget-limited). Failures are
-        // marked so they aren't retried every frame.
+        // marked so they aren't retried every frame. The scratch slot is
+        // shared by every candidate (see MapObjectImport::LoadForPreview), so
+        // only one request may be in flight at a time - see m_scratchOwner.
         if (m_thumbs[i] == 0 && budget > 0)
         {
-            const int slot = Editor::ObjectImport::LoadForPreview(m_sourceWorld, m_files[i]);
-            unsigned int tex = (slot >= 0) ? g_ObjectThumbnail.RenderSlotToTexture(slot) : 0;
-            m_thumbs[i] = (tex != 0) ? tex : THUMB_FAILED;
-            --budget;
+            if (m_scratchOwner == i)
+            {
+                // Already own the scratch slot - poll without reloading,
+                // which would stomp the model this render is using.
+                const unsigned int tex = g_ObjectThumbnail.PollSlotPreview();
+                if (!g_ObjectThumbnail.IsScratchBusy())
+                {
+                    m_thumbs[i] = (tex != 0) ? tex : THUMB_FAILED;
+                    m_scratchOwner = -1;
+                    --budget;
+                }
+            }
+            else if (m_scratchOwner == -1 && !g_ObjectThumbnail.IsScratchBusy() &&
+                     !mu::GetRenderer().HasPendingOffscreenCaptures())
+            {
+                // The busy check alone only proves CObjectThumbnail has delivered
+                // a result; it doesn't prove the renderer has actually replayed
+                // that capture's draw commands yet (replay is deferred to
+                // EndFrame(), after this Update() has already run). Reloading the
+                // scratch slot's model here would release the texture a
+                // still-queued replay is about to sample - see
+                // HasPendingOffscreenCaptures()'s doc comment.
+                const int slot = Editor::ObjectImport::LoadForPreview(m_sourceWorld, m_files[i]);
+                if (slot < 0)
+                    m_thumbs[i] = THUMB_FAILED;
+                else if (g_ObjectThumbnail.RequestSlotPreview(slot))
+                    m_scratchOwner = i;
+                --budget;
+            }
+            // else: the scratch slot is busy with a different entry (or an
+            // abandoned request from before a source-world switch), or a
+            // previous capture hasn't been replayed by the renderer yet - wait.
         }
 
         if (col % columns != 0)
@@ -195,9 +233,11 @@ void CMapObjectBrowser::Render(int currentWorld, int* outImportedType)
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 1.0f, 1.0f));
 
         bool clicked = false;
-        if (m_thumbs[i] != 0 && m_thumbs[i] != THUMB_FAILED)
-            clicked = ImGui::ImageButton("t", (ImTextureID)m_thumbs[i], ImVec2(thumb, thumb),
-                                         ImVec2(0, 1), ImVec2(1, 0));  // flip V
+        SDL_GPUTexture* const thumbTexPtr = (m_thumbs[i] != 0 && m_thumbs[i] != THUMB_FAILED)
+            ? static_cast<SDL_GPUTexture*>(mu::GetRenderer().GetTexturePointer(m_thumbs[i]))
+            : nullptr;
+        if (thumbTexPtr != nullptr)
+            clicked = ImGui::ImageButton("t", (ImTextureID)(intptr_t)thumbTexPtr, ImVec2(thumb, thumb));
         else if (m_thumbs[i] == THUMB_FAILED)
             clicked = ImGui::Button("n/a", ImVec2(thumb, thumb));   // no preview available
         else

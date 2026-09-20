@@ -98,5 +98,10 @@ bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);
 bool isPartyMemberBuff(int partyindex);
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-void RenderBoundingBox(OBJECT* pObj);
+// Colors default to the original dim debug shading (kept for the g_bRenderBoundingBox
+// toggle); callers that want a visible highlight (e.g. Map Editor selection/hover)
+// pass their own - typically the same bright color for all three so the box reads
+// as one flat outline instead of the subtle pseudo-3D shading the debug default gives.
+void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u, std::uint32_t midColor = 0xFF999999u,
+                       std::uint32_t lightColor = 0xFF666666u);
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX

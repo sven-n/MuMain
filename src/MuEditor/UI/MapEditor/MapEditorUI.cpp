@@ -23,6 +23,7 @@
 #include "Core/Globals/_define.h"          // EDIT_MAPPING / EDIT_NONE
 #include "Core/Globals/_TextureIndex.h"    // BITMAP_MAPTILE
 #include "Render/Sprites/GlobalBitmap.h"   // Bitmaps[]
+#include "Render/Renderer/MuRenderer.h"    // mu::GetRenderer().GetTexturePointer
 #include "Render/Terrain/ZzzLodTerrain.h"  // CurrentLayer
 #include "World/MapInfra/MapManager.h"     // gMapManager.WorldActive
 #include "Core/MuEditorCore.h"             // hover flag for input blocking
@@ -58,6 +59,8 @@ extern int  g_MapEditorBrushMaxX, g_MapEditorBrushMaxY;
 // Outlines the selected object in the 3D view (ZzzObject.cpp), reusing the
 // engine's existing debug bounding-box wireframe renderer.
 extern OBJECT* g_MapEditorSelectedObject;
+// Object under the cursor in Select & edit mode, before any click (ZzzObject.cpp).
+extern OBJECT* g_MapEditorHoveredObject;
 
 // Terrain height sculpt (ZzzLodTerrain.cpp).
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer);
@@ -200,6 +203,7 @@ void CMapEditorUI::Render(bool* p_open)
         g_bMapEditorAttrOverlay = false;     // no panel -> no overlay
         g_bMapEditorBrushHighlight = false;  // no panel -> no brush cursor
         g_MapEditorSelectedObject = nullptr; // no panel -> no selection outline
+        g_MapEditorHoveredObject = nullptr;  // no panel -> no hover outline
         RestoreGameMode();
         return;
     }
@@ -228,6 +232,11 @@ void CMapEditorUI::Render(bool* p_open)
     m_desiredEditFlag = EDIT_NONE;
     g_bMapEditorAttrOverlay = false;
     g_bMapEditorBrushHighlight = false;
+    // Unlike the selection outline (which follows m_pSelected across tabs on
+    // purpose), hover only makes sense while the Objects tab's Select mode is
+    // actively driving it this frame - reset so switching tabs doesn't leave a
+    // stale hover outline on screen.
+    g_MapEditorHoveredObject = nullptr;
 
     if (ImGui::BeginTabBar("MapEditorTabs"))
     {
@@ -618,11 +627,12 @@ void CMapEditorUI::RenderObjectsTab()
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 1.0f, 1.0f));
 
                 const unsigned int tex = g_ObjectThumbnail.Get(m.type);
+                SDL_GPUTexture* const texPtr = (tex != 0)
+                    ? static_cast<SDL_GPUTexture*>(mu::GetRenderer().GetTexturePointer(tex))
+                    : nullptr;
                 bool clicked = false;
-                if (tex != 0)
-                    // Flip V: FBO textures are bottom-up vs ImGui's top-down.
-                    clicked = ImGui::ImageButton("t", (ImTextureID)tex, ImVec2(thumb, thumb),
-                                                 ImVec2(0, 1), ImVec2(1, 0));
+                if (texPtr != nullptr)
+                    clicked = ImGui::ImageButton("t", (ImTextureID)(intptr_t)texPtr, ImVec2(thumb, thumb));
                 else  // still rendering this frame - show a placeholder button
                     clicked = ImGui::Button("...", ImVec2(thumb, thumb));
 
@@ -1221,6 +1231,10 @@ void CMapEditorUI::UndoObjects()
 void CMapEditorUI::PlaceObjects(int world)
 {
     (void)world;
+    // Place mode never picks a hover target (HandleObjectSelect owns that, and
+    // isn't called while this mode is active) - clear any stale hover left over
+    // from Select mode so its outline doesn't linger after switching modes.
+    g_MapEditorHoveredObject = nullptr;
     if (!m_bObjEditEnabled || m_selectedModelType < 0)
     {
         m_objWasDown = false;
@@ -1251,8 +1265,13 @@ void CMapEditorUI::HandleObjectSelect()
     {
         m_objWasDown = false;
         m_objDragging = false;
+        g_MapEditorHoveredObject = nullptr;
         return;
     }
+
+    // Hover preview: show what a click would pick, every frame, before any click -
+    // same picking query the press-edge below uses, just without side effects.
+    g_MapEditorHoveredObject = g_MuEditorCore.IsHoveringUI() ? nullptr : Editor::ObjectPlace::PickUnderCursor();
 
     const bool down = m_PaintLDown;
 
