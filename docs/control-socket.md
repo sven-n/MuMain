@@ -80,7 +80,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `warp` (`gate`) | use a warp-list entry by name |
 | `teleport` (`x`, `y`, `map`) | the game master's own move command; `map` is an index, the current map when omitted |
 | `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
-| `skill` (`skill`, `target`) | cast a skill the character owns |
+| `skill` (`skill`, `target`) | cast a skill the character owns — with `target` it is aimed at that object, without one it is cast where the character stands |
 | `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
 | `say` (`text`), `whisper` (`name`, `text`) | chat, including `/` commands |

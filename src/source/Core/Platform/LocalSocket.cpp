@@ -523,6 +523,14 @@ bool LocalSocketListener::Listen(const std::string& path, std::string& error)
 
     m_handle = handle;
     m_path = path;
+#ifndef _WIN32
+    struct stat boundFile{};
+    if (::stat(path.c_str(), &boundFile) == 0)
+    {
+        m_pathDevice = static_cast<std::uint64_t>(boundFile.st_dev);
+        m_pathInode = static_cast<std::uint64_t>(boundFile.st_ino);
+    }
+#endif
     return true;
 }
 
@@ -558,8 +566,23 @@ void LocalSocketListener::Close()
 
     if (!m_path.empty())
     {
+#ifndef _WIN32
+        // Only the file this listener bound: if a second client has taken
+        // the path in the meantime, unlinking would take its socket away.
+        struct stat current{};
+        const bool ours = ::stat(m_path.c_str(), &current) == 0 &&
+                          static_cast<std::uint64_t>(current.st_dev) == m_pathDevice &&
+                          static_cast<std::uint64_t>(current.st_ino) == m_pathInode;
+        if (ours)
+        {
+            Unlink(m_path);
+        }
+#else
         Unlink(m_path);
+#endif
         m_path.clear();
+        m_pathDevice = 0;
+        m_pathInode = 0;
     }
 }
 } // namespace Core::Platform

@@ -869,6 +869,10 @@ std::string Skill(const Request& request, std::unique_ptr<Act>& act)
                            "the character does not have skill " + std::to_string(skillNumber));
     }
 
+    // `target` is what chooses between the two forms of the command: with
+    // one, the skill is aimed at that object; without one, it is cast where
+    // the character stands. Which skills accept which form is the server's
+    // rule, not a table this client holds.
     const int targetKey = ResolveTargetKey(request);
     const bool targetRequired = request.Has("target");
     if (targetRequired && targetKey < 0)

@@ -156,5 +156,9 @@ public:
 private:
     SOCKET m_handle = INVALID_SOCKET;
     std::string m_path;
+    // Identity of the socket file this listener bound, so closing removes
+    // that file and not whatever has taken the path since.
+    std::uint64_t m_pathDevice = 0;
+    std::uint64_t m_pathInode = 0;
 };
 } // namespace Core::Platform

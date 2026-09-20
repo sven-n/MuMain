@@ -222,6 +222,15 @@ std::string& MutableBuildIdentifier()
     return identifier;
 }
 
+// Absolute path for a caller-given one, so the answer names a file the
+// caller can open regardless of the client's working directory.
+std::filesystem::path ResolveScreenshotPath(const std::string& requested)
+{
+    std::error_code failure;
+    const std::filesystem::path absolute = std::filesystem::absolute(requested, failure);
+    return failure ? std::filesystem::path(requested) : absolute;
+}
+
 // Capture in flight. Shared with the completion callback so an act that is
 // interrupted or times out cannot be written to after it is gone.
 struct ScreenshotState
@@ -269,7 +278,10 @@ public:
         }
 
         const ScreenshotOutcome& outcome = m_state->outcome;
-        const std::string path = Core::Text::ToUtf8(outcome.path.c_str());
+        // Absolute either way: a generated name is relative to the client's
+        // working directory, which the caller does not know.
+        const std::string path =
+            Core::Text::ToUtf8(ResolveScreenshotPath(Core::Text::ToUtf8(outcome.path.c_str())).wstring().c_str());
         if (!outcome.saved)
         {
             response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed,
@@ -353,14 +365,6 @@ private:
     std::uint64_t m_generation;
 };
 
-// Absolute path for a caller-given one, so the answer names a file the
-// caller can open regardless of the client's working directory.
-std::filesystem::path ResolveScreenshotPath(const std::string& requested)
-{
-    std::error_code failure;
-    const std::filesystem::path absolute = std::filesystem::absolute(requested, failure);
-    return failure ? std::filesystem::path(requested) : absolute;
-}
 } // namespace
 
 namespace App::Control::Commands
