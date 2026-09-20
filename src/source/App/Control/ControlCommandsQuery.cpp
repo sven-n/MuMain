@@ -421,7 +421,7 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
 std::string Nearby(const Request& request, std::unique_ptr<Act>&)
 {
     json result;
-    result["nearby"] = json::parse(NearbyArray(), nullptr, false);
+    result["nearby"] = NearbyArray();
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

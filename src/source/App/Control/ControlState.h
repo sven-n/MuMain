@@ -4,6 +4,8 @@
 // `state`, `nearby` and the event recorders share one description of the world.
 #pragma once
 
+#include "json.hpp"
+
 #include <string>
 
 namespace App::Control
@@ -12,7 +14,7 @@ namespace App::Control
 // character standing in the world.
 [[nodiscard]] std::string WorldStateObject();
 
-// Encoded JSON array of the objects the client currently knows: players,
-// monsters, NPCs and dropped items.
-[[nodiscard]] std::string NearbyArray();
+// JSON array of the objects the client currently knows: players, monsters,
+// NPCs and dropped items.
+[[nodiscard]] nlohmann::json NearbyArray();
 } // namespace App::Control

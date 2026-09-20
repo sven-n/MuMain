@@ -209,12 +209,12 @@ std::string WorldStateObject()
     state["skills"] = SkillArray();
     state["buffs"] = BuffArray();
     state["party"] = PartyArray();
-    state["nearby"] = json::parse(NearbyArray(), nullptr, false);
+    state["nearby"] = NearbyArray();
 
     return state.dump();
 }
 
-std::string NearbyArray()
+json NearbyArray()
 {
     json nearby = json::array();
 
@@ -258,6 +258,6 @@ std::string NearbyArray()
         nearby.push_back(std::move(described));
     }
 
-    return nearby.dump();
+    return nearby;
 }
 } // namespace App::Control
