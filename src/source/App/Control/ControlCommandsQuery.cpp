@@ -443,7 +443,12 @@ std::string EventsSince(const Request& request, std::unique_ptr<Act>& act)
     }
 
     bool follow = false;
-    if (request.GetBool("follow", follow) && follow)
+    if (request.Has("follow") && !request.GetBool("follow", follow))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`follow` is true or false");
+    }
+
+    if (follow)
     {
         act = std::make_unique<EventStreamAct>(static_cast<std::uint64_t>(std::max(since, 0)));
         return {};
