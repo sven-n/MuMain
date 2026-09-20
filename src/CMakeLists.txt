@@ -150,6 +150,11 @@ add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
 if(MSVC)
   target_compile_options(MuClient PRIVATE /utf-8 /we4828)
+  # Release normally ships with no debug info at all, so a WER/minidump crash
+  # from a Release build can't be symbolized. /Z7 embeds debug info directly
+  # in each .obj (unlike /Zi, it needs no shared .pdb write-lock, so it's safe
+  # under Ninja's parallel compilation) without touching optimization.
+  target_compile_options(MuClient PRIVATE $<$<CONFIG:Release>:/Z7>)
 endif()
 target_compile_definitions(MuClient PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
@@ -237,6 +242,17 @@ else()
 endif()
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
+
+if (MSVC)
+  # Pairs with MuClient's /Z7 above: link the embedded debug info into
+  # Main.pdb so a Release crash dump can be symbolized (see there for why).
+  # /MAP also emits a plain-text RVA-to-function listing, much faster to grep
+  # for a WER crash offset than pulling symbols out of the PDB.
+  target_link_options(Main PRIVATE
+    $<$<CONFIG:Release>:/DEBUG>
+    $<$<CONFIG:Release>:/MAP:$<TARGET_FILE_DIR:Main>/Main.map>
+  )
+endif()
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
