@@ -59,6 +59,11 @@ void ControlServer::Stop()
     }
 
     m_connections.clear();
+    // The next session starts from nothing known: without this, re-entering
+    // the scene and map the last one ended on emits no `scene` or `map`
+    // event and a follower never learns where the character is.
+    m_lastScene.clear();
+    m_lastMap = -1;
     m_listener.Close();
     Events::SetEnabled(false);
     Events::SetObjectResolver(nullptr);
