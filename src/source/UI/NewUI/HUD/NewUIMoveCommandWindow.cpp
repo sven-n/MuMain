@@ -680,21 +680,33 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
     return bInOtherServer;
 }
 
-int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
+CMoveCommandData::MOVEINFODATA* CNewUIMoveCommandWindow::FindMoveInfo(const wchar_t* pszMapName)
 {
     if (pszMapName == NULL)
-        return -1;
+        return NULL;
 
-    int iMapIndex = -1;
-    std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
-    for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); li++)
+    for (auto* moveInfo : m_listMoveInfoData)
     {
-        if (wcsicmp((*li)->_ReqInfo.szMainMapName, pszMapName) == 0 || wcsicmp((*li)->_ReqInfo.szSubMapName, pszMapName) == 0)
+        if (wcsicmp(moveInfo->_ReqInfo.szMainMapName, pszMapName) == 0 ||
+            wcsicmp(moveInfo->_ReqInfo.szSubMapName, pszMapName) == 0)
         {
-            iMapIndex = (*li)->_ReqInfo.index;
-            break;
+            return moveInfo;
         }
     }
 
-    return iMapIndex;
+    return NULL;
+}
+
+bool CNewUIMoveCommandWindow::CanMoveToMap(const wchar_t* pszMapName)
+{
+    SettingCanMoveMap();
+
+    const CMoveCommandData::MOVEINFODATA* moveInfo = FindMoveInfo(pszMapName);
+    return moveInfo != NULL && moveInfo->_bCanMove;
+}
+
+int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
+{
+    const CMoveCommandData::MOVEINFODATA* moveInfo = FindMoveInfo(pszMapName);
+    return moveInfo != NULL ? moveInfo->_ReqInfo.index : -1;
 }

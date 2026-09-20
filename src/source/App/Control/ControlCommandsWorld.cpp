@@ -708,6 +708,17 @@ std::string Warp(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::WarpRefused, "no warp list entry named `" + name + "`");
     }
 
+    // The click path refuses an entry the character does not qualify for
+    // without sending anything. Sending it anyway costs the caller the whole
+    // warp deadline for a request the server silently declines, so the same
+    // requirements are tested here: level, zen, wings for Icarus, the Uniria
+    // rule for Atlans, the ring ban.
+    if (!g_pMoveCommandWindow->CanMoveToMap(wide.c_str()))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WarpRefused,
+                           "the character does not meet the requirements for `" + name + "`");
+    }
+
     act = std::make_unique<WarpAct>(mapIndex, name);
     return {};
 }
