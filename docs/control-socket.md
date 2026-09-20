@@ -131,7 +131,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 | `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind}`, `damage`, `shield_damage`, `critical`, `missed` |
 | `killed` | `victim`, `killer` |
 | `stat` | `stat` (`life`, `mana`, `sd`, `ag`, `experience`, `level`), `value`, `max` |
-| `chat` | `sender`, `text`, `kind` |
+| `chat` | `sender`, `text`, `kind` (`public`, `whisper`, `party`, `guild`, `union`, `gens`, `gm`) |
 | `drop` / `drop_gone` | `id` (the id `pickup` takes), `item`, `position` / `reason` |
 | `map` | `map`, `map_name`, `position` |
 | `scene` | `scene` |

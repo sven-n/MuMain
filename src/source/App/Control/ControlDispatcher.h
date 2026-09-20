@@ -114,6 +114,11 @@ struct OutgoingResponse
 class Dispatcher
 {
 public:
+    // Readers registered at once. Four per connection at the transport's
+    // sixteen connections is far past any real driver, and the bound is what
+    // keeps a mistaken one from growing the list without end.
+    static constexpr std::size_t MaxWatchers = 64;
+
     // Runs one request. Any response it produces is queued for the given
     // connection, including the `interrupted` answer an ousted act gets.
     void Handle(const Request& request, std::size_t connection);

@@ -36,7 +36,7 @@ void RecordLevelUp(int level);
 // Life/mana/shield/ability of the controlled character, as they stand now.
 void RecordHeroStats();
 
-// Chat lines, by kind: public, whisper, party, guild, system.
+// Chat lines, by kind: public, whisper, party, guild, union, gens, gm.
 void RecordChatLine(const wchar_t* sender, const wchar_t* text, const char* kind);
 
 // Drops appearing and vanishing. `itemSlot` is the client's slot in the

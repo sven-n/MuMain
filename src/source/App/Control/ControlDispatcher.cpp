@@ -191,7 +191,17 @@ void Dispatcher::Handle(const Request& request, std::size_t connection)
 
     if (act && !act->IsAct())
     {
-        // Observers run alongside whatever the character is doing.
+        // Observers run alongside whatever the character is doing — but not
+        // without end: every other queue here is bounded, and a driver that
+        // registers a reader per frame would otherwise grow this one until
+        // the client dies of it.
+        if (m_watchers.size() >= MaxWatchers)
+        {
+            Queue(connection, EncodeError(request.EncodedId(), ErrorCode::Busy,
+                                          "too many readers are registered; close one before opening another"));
+            return;
+        }
+
         act->SetEncodedId(request.EncodedId());
         m_watchers.push_back({std::move(act), connection, std::chrono::steady_clock::now()});
         TickWatchers();

@@ -464,7 +464,11 @@ std::string Login(const Request& request, std::unique_ptr<Act>& act)
     }
 
     std::string serverGroup;
-    (void)request.GetString("server", serverGroup);
+    if (request.Has("server") && !request.GetString("server", serverGroup))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`server` is the name of a server group; omit it for the first one");
+    }
 
     act = std::make_unique<LoginAct>(account, password, Core::Text::FromUtf8(serverGroup));
     return {};
