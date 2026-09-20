@@ -76,6 +76,9 @@ json DescribeObject(int key)
     if (key >= 0 && Resolver())
     {
         description = Resolver()(key);
+        // The key that was asked about, whatever the resolver filled in: a
+        // reader matches these against the ids it was given.
+        description.id = key;
     }
 
     json described;

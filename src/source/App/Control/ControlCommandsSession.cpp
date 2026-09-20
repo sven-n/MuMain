@@ -81,9 +81,6 @@ json CharacterList()
     return characters;
 }
 
-// Login failures reach the client only as a message box (design.md, D5):
-// read its code, dismiss it so the login screen is usable again, and turn
-// it into an error response.
 // Account names are matched case-insensitively, as the server matches them:
 // a `login TEST1` while `test1` is signed in is the same session, not a
 // different account that has to be logged out first.
@@ -93,6 +90,9 @@ bool SameAccount(std::string_view left, std::string_view right)
                       [](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
 }
 
+// Login failures reach the client only as a message box (design.md, D5):
+// read its code, dismiss it so the login screen is usable again, and turn
+// it into an error response.
 bool TakeLoginFailure(std::string& reason)
 {
     CMsgWin& messageWindow = CUIMng::Instance().m_MsgWin;

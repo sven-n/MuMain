@@ -87,6 +87,13 @@ std::pair<int, int> DropTile(int itemSlot)
     }
 
     const OBJECT& object = Items[itemSlot].Object;
+    if (object.Position[0] < 0.0f || object.Position[1] < 0.0f)
+    {
+        // Truncation towards zero would turn a position off the map into
+        // tile 0, which reads as a real place; the header's "no tile" answer
+        // is what this is.
+        return {-1, -1};
+    }
     return {static_cast<int>(object.Position[0] / TERRAIN_SCALE), static_cast<int>(object.Position[1] / TERRAIN_SCALE)};
 }
 } // namespace App::Control

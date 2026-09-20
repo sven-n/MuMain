@@ -50,9 +50,10 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
     // walked, not just the attack one. SkillResult is not among them:
     // Skill.h needs ActionSkillType from the client's global headers, which
     // a standalone test translation unit cannot include.
-    const AttackResult attacks[] = {AttackResult::Attacked, AttackResult::Approaching, AttackResult::Busy,
-                                    AttackResult::NoTarget, AttackResult::NotInView,   AttackResult::NotAttackable,
-                                    AttackResult::NoPath,   AttackResult::Blocked,     AttackResult::NoArrows};
+    const AttackResult attacks[] = {AttackResult::Attacked, AttackResult::Approaching,  AttackResult::Busy,
+                                    AttackResult::NoTarget, AttackResult::NotInView,    AttackResult::NotAttackable,
+                                    AttackResult::NoPath,   AttackResult::Blocked,      AttackResult::NoArrows,
+                                    AttackResult::SafeZone};
     for (const AttackResult result : attacks)
     {
         CHECK_FALSE(ResultName(result).empty());
