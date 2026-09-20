@@ -24,6 +24,16 @@ bool SetNonBlocking(SOCKET handle)
     return ioctlsocket(handle, FIONBIO, &nonBlocking) != SOCKET_ERROR;
 }
 
+// Whether a non-blocking connect has not finished yet, rather than failed.
+bool ConnectPending(int error)
+{
+#ifdef _WIN32
+    return error == WSAEWOULDBLOCK || error == WSAEINPROGRESS;
+#else
+    return error == EINPROGRESS || error == EAGAIN || error == EWOULDBLOCK;
+#endif
+}
+
 bool WouldBlock(int error)
 {
 #ifdef _WIN32
@@ -339,10 +349,9 @@ bool SomethingIsListening(const std::string& path)
     // socket we may not talk to (EACCES, EPERM) are live sockets, and
     // unlinking one would take it from its owner; a connect still in flight
     // is waited on rather than assumed either way.
-    const bool listening = connected ? true
-                           : (failure == EINPROGRESS || failure == EAGAIN || failure == EWOULDBLOCK)
-                               ? ProbeSettled(probe)
-                               : ProbeFailureIsLive(failure);
+    const bool listening = connected                 ? true
+                           : ConnectPending(failure) ? ProbeSettled(probe)
+                                                     : ProbeFailureIsLive(failure);
     closesocket(probe);
     return listening;
 }

@@ -57,29 +57,30 @@ static void ApproachAlong(const PATH_t& path)
 // named target, if any, is still worth casting at.
 static SkillResult AimAtSelf(int targetKey, bool allowPlayers)
 {
+    // Everything a named target could be refused for is answered before the
+    // aim is written: a rejected cast must leave the character's current
+    // selection and destination alone.
+    if (targetKey != -1)
+    {
+        const int targetIndex = FindCharacterIndex(targetKey);
+        if (targetIndex == MAX_CHARACTERS_CLIENT)
+        {
+            return SkillResult::NotInView;
+        }
+
+        CHARACTER* target = &CharactersClient[targetIndex];
+        if (target->Dead > 0 || (!allowPlayers && !IsMonster(target)))
+        {
+            return SkillResult::NotAttackable;
+        }
+    }
+
     TargetX = Hero->PositionX;
     TargetY = Hero->PositionY;
     // A cast at the caster's own tile selects nobody, so the previous cast's
     // target is cleared here as well as in the untargeted branch.
     g_MovementSkill.m_iTarget = -1;
     SelectedCharacter = -1;
-
-    if (targetKey == -1)
-    {
-        return SkillResult::NotReady;
-    }
-
-    const int targetIndex = FindCharacterIndex(targetKey);
-    if (targetIndex == MAX_CHARACTERS_CLIENT)
-    {
-        return SkillResult::NotInView;
-    }
-
-    CHARACTER* target = &CharactersClient[targetIndex];
-    if (target->Dead > 0 || (!allowPlayers && !IsMonster(target)))
-    {
-        return SkillResult::NotAttackable;
-    }
 
     return SkillResult::NotReady;
 }
