@@ -437,7 +437,10 @@ std::string Nearby(const Request& request, std::unique_ptr<Act>&)
 std::string EventsSince(const Request& request, std::unique_ptr<Act>& act)
 {
     int since = 0;
-    (void)request.GetInt("since", since);
+    if (request.Has("since") && (!request.GetInt("since", since) || since < 0))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`since` is a sequence number, 0 or more");
+    }
 
     bool follow = false;
     if (request.GetBool("follow", follow) && follow)
@@ -466,10 +469,13 @@ std::string WaitFor(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`wait-for` needs an event name");
     }
 
-    int since = 0;
-    if (!request.GetInt("since", since))
+    // Omitted means "from now"; given, it is read as strictly as every
+    // other argument, because silently watching from the latest sequence
+    // drops exactly the events the caller asked to replay.
+    int since = static_cast<int>(Events::LastSequence());
+    if (request.Has("since") && (!request.GetInt("since", since) || since < 0))
     {
-        since = static_cast<int>(Events::LastSequence());
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`since` is a sequence number, 0 or more");
     }
 
     // `timeout` takes the same treatment as every integer argument: out of
