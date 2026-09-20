@@ -2,7 +2,7 @@
 // the weapon -> range table and the result vocabulary the auto-helper and the
 // control socket share. Driving a character needs the world; these do not.
 //
-// Run: ctest --test-dir <build directory> --build-config Release -R "Automation"
+// Run: ctest --test-dir <build directory> --build-config Release -R test_automation_ranges
 
 #include "doctest.h"
 
@@ -37,7 +37,7 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
     CHECK(ResultName(AttackResult::NoPath) == "no_path");
     CHECK(ResultName(AttackResult::NotInView) == "not_in_view");
     CHECK(ResultName(MoveResult::NoPath) == "no_path");
-    CHECK(ResultName(PickupResult::Gone) == "not_in_view");
+    CHECK(ResultName(PickupResult::Gone) == "gone");
     CHECK(ResultName(PickupResult::NoPath) == "no_path");
 
     CHECK(ResultName(AttackResult::NotAttackable) == "not_attackable");

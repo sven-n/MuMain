@@ -106,7 +106,10 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
 
     const float range = EquippedAttackRange();
 
-    SelectedCharacter = targetIndex;
+    // The target tile is what the path finder and the wall test read, so it
+    // is set first; the client's own selection follows only once those have
+    // accepted the target, so a refused attack does not leave the UI
+    // pointing at something it will not hit.
     TargetX = (int)(target->Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(target->Object.Position[1] / TERRAIN_SCALE);
 
@@ -122,6 +125,8 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
     {
         return AttackResult::Blocked;
     }
+
+    SelectedCharacter = targetIndex;
 
     if (!inRange)
     {

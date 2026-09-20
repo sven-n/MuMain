@@ -40,7 +40,7 @@ inline constexpr float PickupReach = 2.0f;
     case PickupResult::TooFar:
         return "too_far";
     case PickupResult::Gone:
-        return "not_in_view";
+        return "gone";
     case PickupResult::NoPath:
         return "no_path";
     case PickupResult::Busy:
