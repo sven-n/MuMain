@@ -699,7 +699,29 @@ CMoveCommandData::MOVEINFODATA* CNewUIMoveCommandWindow::FindMoveInfo(const wcha
 
 bool CNewUIMoveCommandWindow::CanMoveToMap(const wchar_t* pszMapName)
 {
+    // SettingCanMoveMap recomputes the requirements and clears the list's
+    // selection with them; this is a query, so what the player had selected
+    // is put back afterwards.
+    const CMoveCommandData::MOVEINFODATA* selected = NULL;
+    for (const auto* moveInfo : m_listMoveInfoData)
+    {
+        if (moveInfo->_bSelected)
+        {
+            selected = moveInfo;
+            break;
+        }
+    }
+
     SettingCanMoveMap();
+
+    for (auto* moveInfo : m_listMoveInfoData)
+    {
+        if (moveInfo == selected)
+        {
+            moveInfo->_bSelected = true;
+            break;
+        }
+    }
 
     const CMoveCommandData::MOVEINFODATA* moveInfo = FindMoveInfo(pszMapName);
     return moveInfo != NULL && moveInfo->_bCanMove;

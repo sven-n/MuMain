@@ -8,6 +8,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Object/ZzzObject.h"
 #include "GameLogic/Automation/Attack.h"
 #include "GameLogic/Automation/Movement.h"
@@ -575,6 +576,13 @@ public:
         if (!m_sent)
         {
             m_teleportsBefore = App::Control::Events::TeleportCount();
+            // The click path saves the options when the destination lives on
+            // another server (NewUIMoveCommandWindow.cpp:414): the session
+            // ends there, and what is not saved now is lost.
+            if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, m_mapIndex))
+            {
+                SaveOptions();
+            }
             SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(),
                                                                  static_cast<uint16_t>(m_mapIndex));
             m_sent = true;
@@ -911,8 +919,20 @@ std::string UseItem(const Request& request, std::unique_ptr<Act>&)
                            "inventory slot " + std::to_string(slot) + " is empty");
     }
 
-    SocketClient->ToGameServer()->SendConsumeItemRequest(static_cast<BYTE>(slot), static_cast<BYTE>(0xFF),
-                                                         FruitUsage::AddPoints);
+    // Through the client's own path, so the vault/trade refusal and the
+    // in-flight latch apply: two `use` commands in consecutive frames must
+    // not send two consume requests for the same potion.
+    if (!IsCanUseItem())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::NotAllowed,
+                           "items cannot be used while the vault or a trade is open");
+    }
+    if (EnableUse > 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "the previous use has not been answered yet");
+    }
+
+    SendRequestUse(slot, 0xFF, true);
 
     json result;
     result["slot"] = slot;
@@ -947,8 +967,14 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
                                std::to_string(MAX_MY_INVENTORY_EX_INDEX - 1) + ")");
     }
 
-    SocketClient->ToGameServer()->SendItemMoveRequestExtended(ItemStorageKind::Inventory, static_cast<BYTE>(fromSlot),
-                                                              ItemStorageKind::Inventory, static_cast<BYTE>(toSlot));
+    // Through the client's own move request: it raises the `EquipmentItem`
+    // latch the inventory windows read, so a move started here is a move in
+    // flight everywhere, and a second one is refused rather than sent.
+    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, fromSlot, const_cast<ITEM*>(item), STORAGE_TYPE::INVENTORY,
+                                  toSlot))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another item move has not been answered yet");
+    }
 
     json result;
     result["slot"] = fromSlot;

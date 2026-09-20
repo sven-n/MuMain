@@ -5,11 +5,13 @@
 #include "App/Platform/Windows/Winmain.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/ServerListManager.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "MUHelper/MuHelper.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/CharacterScene.h"
 #include "Scenes/SceneCore.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/NewUI/NewUISystem.h"
 
 #include "json.hpp"
 
@@ -422,6 +424,22 @@ public:
     {
         if (!m_sent)
         {
+            // What the client's own "back to character select" does
+            // (NewUICustomMessageBox.cpp:2397-2409): save what the session
+            // changed, refuse while the chaos machine is open — it eats the
+            // items in it — and stop the helper before leaving.
+            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+            {
+                response = App::Control::EncodeError(EncodedId(), ErrorCode::NotAllowed,
+                                                     "close the chaos machine window first", ProgressObject());
+                return Status::Finished;
+            }
+
+            SaveOptions();
+            SaveMacro(L"Data\\Macro.txt");
+            MUHelper::g_MuHelper.TriggerStop();
+            g_pNewUIMng->ResetActiveUIObj();
+
             LogOut = true;
             SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToCharacterSelection);
             m_sent = true;

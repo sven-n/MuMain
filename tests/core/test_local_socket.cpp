@@ -371,11 +371,29 @@ TEST_CASE("Local socket refuses a path another listener is serving [core][local-
     CHECK(error.find("already listening") != std::string::npos);
     CHECK_FALSE(second.IsListening());
 
-    // The first listener still serves.
+    // The first listener still serves — and serves *this* connection, not
+    // the refused listener's probe: the accepted peer has to answer with
+    // the line this test sends, which a probe never would.
     CHECK(first.IsListening());
     const SOCKET client = ConnectTo(path);
     REQUIRE(client != INVALID_SOCKET);
-    CHECK(AcceptWithin(first, std::chrono::milliseconds(500)) != nullptr);
+    const std::string probe = "{\"cmd\":\"ping\"}\n";
+    REQUIRE(SendAll(client, probe) == static_cast<int>(probe.size()));
+
+    std::string line;
+    std::unique_ptr<Core::Platform::LocalSocketConnection> served;
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        auto accepted = AcceptWithin(first, std::chrono::milliseconds(100));
+        if (accepted != nullptr && ReadLineWithin(*accepted, line, std::chrono::milliseconds(200)))
+        {
+            served = std::move(accepted);
+            break;
+        }
+    }
+    REQUIRE(served != nullptr);
+    CHECK(line == "{\"cmd\":\"ping\"}");
     closesocket(client);
 
     // Once it is gone the path is free again, stale file and all.

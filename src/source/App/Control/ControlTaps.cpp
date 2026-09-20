@@ -200,6 +200,19 @@ void RecordViewEnterKey(int key)
 
 void RecordViewLeaveKey(int key)
 {
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    // Only what the client still knows: the delete packet arrives for keys
+    // that were never in view, and for keys a teleport has already reported
+    // as gone.
+    if (FindCharacterIndex(key) == MAX_CHARACTERS_CLIENT)
+    {
+        return;
+    }
+
     RecordViewLeave(key);
 }
 
