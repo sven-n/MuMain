@@ -577,11 +577,15 @@ std::string Quit(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "close the chaos machine window first");
     }
 
-    SaveOptions();
-    SaveMacro(L"Data\\Macro.txt");
-    MUHelper::g_MuHelper.TriggerStop();
+    // The save sends the key configuration to the server, so it belongs
+    // inside the same test as the goodbye: `quit` is answered on every
+    // scene, including those where there is no connection at all.
     if (SocketClient != nullptr && g_bGameServerConnected)
     {
+        SaveOptions();
+        SaveMacro(L"Data\\Macro.txt");
+        MUHelper::g_MuHelper.TriggerStop();
+
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(LogOutType::CloseGame);
     }

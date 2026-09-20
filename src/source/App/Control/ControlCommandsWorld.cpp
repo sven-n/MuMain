@@ -971,12 +971,37 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
                                std::to_string(MAX_MY_INVENTORY_EX_INDEX - 1) + ")");
     }
 
-    // Through the client's own move request: it raises the `EquipmentItem`
-    // latch the inventory windows read, so a move started here is a move in
-    // flight everywhere, and a second one is refused rather than sent.
-    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, fromSlot, const_cast<ITEM*>(item), STORAGE_TYPE::INVENTORY,
-                                  toSlot))
+    // The move the client itself performs: the item is lifted out of its
+    // slot into the picked-item state first, because that is what the reply
+    // handler completes the move from (NewUIInventoryCtrl.cpp:950-957,
+    // NewUIInventoryActionController.cpp:133, WSclient.cpp:6312). Sending
+    // the request without it leaves the source slot holding a copy of an
+    // item the server has already moved.
+    SEASON3B::CNewUIInventoryCtrl* inventory = g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+    ITEM* moving = g_pMyInventory != nullptr ? g_pMyInventory->FindItem(fromSlot) : nullptr;
+    if (inventory == nullptr || moving == nullptr)
     {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the inventory is not available");
+    }
+
+    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() != nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "an item is already being moved");
+    }
+
+    if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the item could not be picked up");
+    }
+    inventory->RemoveItem(moving);
+
+    SEASON3B::CNewUIPickedItem* picked = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+    if (picked == nullptr || !SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, fromSlot, picked->GetItem(),
+                                                       STORAGE_TYPE::INVENTORY, toSlot))
+    {
+        // Nothing was sent: put the item back where it was rather than
+        // leave it in the player's hand.
+        SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "another item move has not been answered yet");
     }
 
