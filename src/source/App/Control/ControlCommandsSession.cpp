@@ -12,11 +12,14 @@
 
 #include "json.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
+#include <cstddef>
 #include <memory>
 #include <optional>
-#include <cstddef>
 #include <string>
+#include <string_view>
 #include <utility>
 
 extern int LoadingWorld;
@@ -81,6 +84,15 @@ json CharacterList()
 // Login failures reach the client only as a message box (design.md, D5):
 // read its code, dismiss it so the login screen is usable again, and turn
 // it into an error response.
+// Account names are matched case-insensitively, as the server matches them:
+// a `login TEST1` while `test1` is signed in is the same session, not a
+// different account that has to be logged out first.
+bool SameAccount(std::string_view left, std::string_view right)
+{
+    return std::equal(left.begin(), left.end(), right.begin(), right.end(),
+                      [](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
+}
+
 bool TakeLoginFailure(std::string& reason)
 {
     CMsgWin& messageWindow = CUIMng::Instance().m_MsgWin;
@@ -175,7 +187,7 @@ private:
     {
         if (!m_leaving)
         {
-            if (Core::Text::ToUtf8(LogInID) == m_account)
+            if (SameAccount(Core::Text::ToUtf8(LogInID), m_account))
             {
                 // The account asked for is the one already logged in.
                 return Answer(response);
@@ -251,6 +263,12 @@ private:
             {
                 return Fail(response, ErrorCode::LoginFailed,
                             std::string(App::Control::LoginFailureReason(CurrentProtocolState)));
+            }
+            if (CurrentProtocolState == RECEIVE_JOIN_SERVER_FAIL_VERSION)
+            {
+                // The game server refused the join itself; no login window
+                // will open, so waiting for one is waiting for the deadline.
+                return Fail(response, ErrorCode::LoginFailed, "the server rejected the client version");
             }
             return Status::Running;
         }

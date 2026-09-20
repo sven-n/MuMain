@@ -105,11 +105,6 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
         return SkillResult::NotAttackable;
     }
 
-    // Selected only once the target is one the client may actually cast at:
-    // a refused cast must not leave the UI pointing at a corpse.
-    SelectedCharacter = targetIndex;
-    g_MovementSkill.m_iTarget = targetIndex;
-
     TargetX = (int)(target->Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(target->Object.Position[1] / TERRAIN_SCALE);
 
@@ -130,6 +125,13 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
     {
         return SkillResult::NoPath;
     }
+
+    // Selected once the target is one the client may actually cast at and
+    // the cast or the walk towards it is going to happen: a refused cast
+    // must not leave the UI pointing at a corpse, a wall, or a tile no walk
+    // reaches.
+    SelectedCharacter = targetIndex;
+    g_MovementSkill.m_iTarget = targetIndex;
 
     if (!inRange)
     {

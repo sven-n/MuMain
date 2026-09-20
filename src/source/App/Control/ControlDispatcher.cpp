@@ -139,11 +139,13 @@ void Dispatcher::AbandonConnection(std::size_t connection)
         // Nobody is left to answer, so no `interrupted` line is queued — but
         // the event stream still says the act ended, and the slot's
         // bookkeeping is cleared with it.
-        const std::string_view name = m_act->Name();
+        // Copied, not viewed: an act whose Name() returns a member string
+        // would leave the view dangling the moment the act is destroyed.
+        const std::string name(m_act->Name());
         m_act.reset();
         m_actConnection = 0;
         m_actStartedAt = {};
-        Events::RecordError(std::string(name), ErrorCodeName(ErrorCode::Interrupted), "the caller went away");
+        Events::RecordError(name, ErrorCodeName(ErrorCode::Interrupted), "the caller went away");
     }
 
     std::erase_if(m_watchers, [connection](const Watcher& watcher) { return watcher.connection == connection; });

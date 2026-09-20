@@ -453,7 +453,10 @@ private:
 class PickupAct : public Act
 {
 public:
-    explicit PickupAct(int itemSlot) : m_itemSlot(itemSlot) {}
+    // The server's key for the drop, kept beside the slot: a drop that
+    // vanishes frees its slot for the next one, and the act must not walk to
+    // a different item that happens to land in it.
+    PickupAct(int itemSlot, short dropKey) : m_itemSlot(itemSlot), m_dropKey(dropKey) {}
 
     [[nodiscard]] std::string_view Name() const override
     {
@@ -474,6 +477,12 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
+        if (!Items[m_itemSlot].Object.Live || Items[m_itemSlot].Key != m_dropKey)
+        {
+            response = EncodeError(EncodedId(), ErrorCode::NotInView, "the drop is gone", ProgressObject());
+            return Status::Finished;
+        }
+
         if (WalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
@@ -512,6 +521,7 @@ public:
 
 private:
     int m_itemSlot;
+    short m_dropKey;
     std::chrono::steady_clock::time_point m_lastStep{};
 };
 
@@ -840,7 +850,7 @@ std::string Pickup(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::NotInView, "no such drop in view");
     }
 
-    act = std::make_unique<PickupAct>(slot);
+    act = std::make_unique<PickupAct>(slot, Items[slot].Key);
     return {};
 }
 

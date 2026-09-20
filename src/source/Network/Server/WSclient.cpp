@@ -1845,6 +1845,15 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText);
         Text[MAX_CHAT_SIZE] = L'\0';
 
+        // The prefix the branches below consume is what says which channel
+        // this line belongs to; it is read before they shift it away.
+        const char* chatKind = Text[0] == L'~'                        ? "party"
+                               : (Text[0] == L'@' && Text[1] == L'@') ? "union"
+                               : Text[0] == L'@'                      ? "guild"
+                               : Text[0] == L'$'                      ? "gens"
+                               : Text[0] == L'#'                      ? "gm"
+                                                                      : "public";
+
         if (Text[0] == L'~')
         {
             for (int i = 0; i < messageSize - 1; i++)
@@ -1930,7 +1939,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             }
         }
 
-        App::Control::Events::RecordChatLine(ID, Text, "public");
+        App::Control::Events::RecordChatLine(ID, Text, chatKind);
     }
 }
 
