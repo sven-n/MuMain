@@ -6,6 +6,7 @@
 #include <afunix.h>
 #include <io.h>
 #else
+#include <poll.h>
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -141,7 +142,15 @@ bool LocalSocketConnection::ReadAvailable()
 
         if (received == 0)
         {
-            // Orderly shutdown by the peer.
+            // Orderly shutdown by the peer. Whatever it managed to send
+            // before closing is still a request: a one-shot script writes
+            // its line and shuts its end down in the same breath, and
+            // dropping the line here is dropping the only thing it asked.
+            m_peerClosed = true;
+            if (HasLine())
+            {
+                return true;
+            }
             Close();
             return false;
         }
@@ -156,6 +165,11 @@ bool LocalSocketConnection::ReadAvailable()
     }
 
     return true;
+}
+
+bool LocalSocketConnection::HasLine() const
+{
+    return m_inbox.find(LineTerminator) != std::string::npos;
 }
 
 void LocalSocketConnection::Buffer(const char* data, std::size_t size)
@@ -292,15 +306,25 @@ constexpr int ProbeSettleMilliseconds = 100;
 // the client from starting.
 bool ProbeSettled(SOCKET probe)
 {
-    // select() rather than poll(): the same call exists in Winsock, and one
-    // descriptor is all this waits on.
+#ifdef _WIN32
+    // Winsock's fd_set holds handles, not indices, so one of them is one.
     fd_set writable;
     FD_ZERO(&writable);
     FD_SET(probe, &writable);
     timeval wait{};
     wait.tv_sec = 0;
     wait.tv_usec = ProbeSettleMilliseconds * 1000;
-    if (::select(static_cast<int>(probe) + 1, nullptr, &writable, nullptr, &wait) <= 0)
+    const int ready = ::select(0, nullptr, &writable, nullptr, &wait);
+#else
+    // poll(), not select(): a descriptor at or past FD_SETSIZE cannot be put
+    // into an fd_set at all, and a client with many files open would write
+    // past it.
+    pollfd waiting{};
+    waiting.fd = probe;
+    waiting.events = POLLOUT;
+    const int ready = ::poll(&waiting, 1, ProbeSettleMilliseconds);
+#endif
+    if (ready <= 0)
     {
         // Still undecided after the wait: a listener that never answers is
         // one we must not take the path from.
@@ -333,7 +357,10 @@ bool SomethingIsListening(const std::string& path)
     const SOCKET probe = ::socket(AF_UNIX, SOCK_STREAM, 0);
     if (probe == INVALID_SOCKET)
     {
-        return false;
+        // Could not ask — out of descriptors, most likely. That is not an
+        // answer of "nothing is listening", and acting on it would unlink a
+        // running client's socket.
+        return true;
     }
 
     // Non-blocking, because a listener whose accept backlog is full makes a
@@ -344,7 +371,7 @@ bool SomethingIsListening(const std::string& path)
     if (!SetNonBlocking(probe))
     {
         closesocket(probe);
-        return false;
+        return true;
     }
 
     sockaddr_un address{};
@@ -397,6 +424,19 @@ bool LocalSocketListener::Listen(const std::string& path, std::string& error)
     // would do silently: the first client keeps its socket open and never
     // hears from anyone again. A connection that is accepted says somebody
     // is there.
+#ifndef _WIN32
+    // Only a socket is ever ours to remove: a connect to a regular file
+    // answers ECONNREFUSED as well, and a mistyped MU_CONTROL_SOCKET must
+    // not delete the file it points at.
+    struct stat entry{};
+    if (::stat(path.c_str(), &entry) == 0 && !S_ISSOCK(entry.st_mode))
+    {
+        error = path + " exists and is not a socket";
+        closesocket(handle);
+        return false;
+    }
+#endif
+
     if (SomethingIsListening(path))
     {
         error = "another client is already listening on " + path;

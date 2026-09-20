@@ -75,6 +75,9 @@ private:
     void AcceptNewConnections();
     void ServeRequests();
     void DeliverResponses();
+    // Lets go of a peer that closed its end once its last answer is out.
+    void CloseFinishedPeers();
+
     void DropClosedConnections();
 
     Core::Platform::LocalSocketListener m_listener;

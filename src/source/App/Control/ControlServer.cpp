@@ -88,6 +88,7 @@ void ControlServer::Poll()
     ServeRequests();
     m_dispatcher.Tick();
     DeliverResponses();
+    CloseFinishedPeers();
     DropClosedConnections();
 }
 
@@ -181,6 +182,21 @@ void ControlServer::ServeRequests()
             }
 
             m_dispatcher.Handle(request, connection.id);
+        }
+    }
+}
+
+void ControlServer::CloseFinishedPeers()
+{
+    for (Connection& connection : m_connections)
+    {
+        // A peer that shut its end down is answered and then let go: it can
+        // send nothing more, and holding the slot open would keep one of the
+        // sixteen connections for a script that has already left.
+        if (connection.socket->IsOpen() && connection.socket->PeerClosed() && !connection.socket->HasLine() &&
+            !connection.socket->HasPendingOutput())
+        {
+            connection.socket->Close();
         }
     }
 }

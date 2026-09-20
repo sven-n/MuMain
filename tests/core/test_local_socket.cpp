@@ -266,11 +266,16 @@ TEST_CASE("Local socket file is owner-only and replaces a stale file [core][loca
     const auto directory = MakeSocketDirectory();
     const std::string path = (directory / "stale.sock").string();
 
-    // A file left behind by a crashed client.
+    // A socket file left behind by a crashed client: bound by a socket that
+    // then went away without unlinking it, which is what a crash leaves.
     {
-        FILE* stale = std::fopen(path.c_str(), "wb");
-        REQUIRE(stale != nullptr);
-        std::fclose(stale);
+        const SOCKET stale = ::socket(AF_UNIX, SOCK_STREAM, 0);
+        REQUIRE(stale != INVALID_SOCKET);
+        sockaddr_un address{};
+        address.sun_family = AF_UNIX;
+        std::memcpy(address.sun_path, path.c_str(), path.size());
+        REQUIRE(::bind(stale, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) == 0);
+        closesocket(stale);
     }
     REQUIRE(SocketFileExists(path));
 
@@ -294,6 +299,28 @@ TEST_CASE("Local socket file is owner-only and replaces a stale file [core][loca
 
     listener.Close();
     CHECK_FALSE(SocketFileExists(path));
+
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket leaves a path that is not a socket alone [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "notasocket").string();
+
+    {
+        FILE* file = std::fopen(path.c_str(), "wb");
+        REQUIRE(file != nullptr);
+        std::fputs("not a socket", file);
+        std::fclose(file);
+    }
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    CHECK_FALSE(listener.Listen(path, error));
+    CHECK(error.find("not a socket") != std::string::npos);
+    // The file is still there: a mistyped path costs a refusal, not the file.
+    CHECK(SocketFileExists(path));
 
     std::filesystem::remove_all(directory);
 }

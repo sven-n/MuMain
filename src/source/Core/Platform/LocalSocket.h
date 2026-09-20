@@ -56,9 +56,22 @@ public:
     }
 
     // Moves whatever the socket has ready into the line buffer. Returns
-    // false when the peer closed the connection or the socket failed; the
-    // connection is closed in that case.
+    // false when the socket failed or nothing is left to serve; the
+    // connection is closed in that case. A peer that closed its end while
+    // complete lines are still buffered keeps the connection alive for
+    // exactly as long as answering them takes — `write(); shutdown()` is how
+    // a one-shot script (`socat`, `nc -N`) asks its question.
     bool ReadAvailable();
+
+    // Whether the peer has closed its end. Its buffered lines are still
+    // served; nothing new will arrive.
+    [[nodiscard]] bool PeerClosed() const
+    {
+        return m_peerClosed;
+    }
+
+    // Whether a complete line is waiting to be taken.
+    [[nodiscard]] bool HasLine() const;
 
     // Pops one complete line (without its terminator) from the line buffer.
     [[nodiscard]] bool TakeLine(std::string& line);
@@ -93,6 +106,7 @@ private:
     }
 
     SOCKET m_handle;
+    bool m_peerClosed = false;
     std::string m_inbox;
     std::size_t m_pendingLineBytes = 0;
     std::string m_outbox;
