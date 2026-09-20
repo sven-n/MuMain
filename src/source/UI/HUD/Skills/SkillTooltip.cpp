@@ -8,6 +8,8 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "UI/Widgets/UIControls.h"         // g_pRenderText macro
 
+#include "Core/Utilities/StringUtils.h"
+
 namespace UI::Skills::Tooltip
 {
 
@@ -77,6 +79,28 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
     }
 
     RenderTipTextList(sx, sy, model.count, 0, RT3_SORT_CENTER, iRenderPoint);
+}
+
+std::vector<UI::RmlBridge::Tooltip::Line> ToRmlBridgeLines(const Model& model)
+{
+    std::vector<UI::RmlBridge::Tooltip::Line> lines;
+    lines.reserve(static_cast<size_t>(model.count));
+    for (int i = 0; i < model.count; ++i)
+    {
+        const Line& src = model.lines[i];
+        UI::RmlBridge::Tooltip::Line line;
+        line.text = StringUtils::WideToNarrow(src.text);
+        line.bold = src.isBold;
+        switch (src.color)
+        {
+        case LineColor::Blue: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
+        case LineColor::Red: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
+        case LineColor::DarkRed: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
+        case LineColor::White: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
+        }
+        lines.push_back(std::move(line));
+    }
+    return lines;
 }
 
 }  // namespace UI::Skills::Tooltip

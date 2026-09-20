@@ -350,9 +350,11 @@ gets the same treatment, not just login's. `login_main.rcss`/`char_sel_main.rcss
 - Gameplay-status colors (HP/MP/AG/SD/EXP bar fills' own gradient stops around the new
   `resource-*` base tokens, the cooldown-wipe's legacy-faithful ARGB value, the poisoned-HP green
   swap) — game data / a distinct rare-state color, not a decorative choice.
-- The skill/item-option tooltip's `tt-blue`/`tt-red`/`tt-darkred`/`tt-yellow`/`tt-green`/`tt-purple`
-  line colors — carry real game-data meaning from `UI::Skills::Tooltip::LineColor` and
-  `ItemOptionTooltipModel.h`.
+- The shared tooltip's `tt-blue`/`tt-red`/`tt-darkred`/`tt-yellow`/`tt-green`/`tt-purple` line
+  colors (`tooltip.rcss`, both themes — now one shared file, not scattered per-window copies; see
+  `component-catalog.md`'s "Tooltip" section) — carry real game-data meaning from
+  `UI::RmlBridge::Tooltip::LineColor`, itself the union of every prior mechanism's palette including
+  `UI::Skills::Tooltip::LineColor` and the old `ItemOptionTooltipModel.h`.
 - `my_inventory.rcss`'s `.option-label`/`.option-label.active` Set/Socket colors — semantic
   option-category colors matching `legacy`, not theme chrome.
 - Any HUD gameplay-overlay window (`main_frame`, `mu_helper_bar`, `buff_strip`) never gets

@@ -198,6 +198,62 @@ paired with a new generic persistence mechanism (`GameConfig::GetWindowPosition`
 reuse with one call each way — see `STATUS.md`'s "Known gaps" entry for the full mechanism and
 what's still unaudited (behavior across a resolution/UI-scale/theme change post-drag).
 
+## Tooltip
+
+`UI::RmlBridge::Tooltip` (`UI/RmlBridge/RmlTooltip.h`/`.cpp`, `tooltip.rml` +
+`themes/{legacy,modern}/tooltip.rcss`) — the single shared tooltip primitive, replacing what this
+entry used to describe as four non-unified mechanisms (stale as of this update). One always-on-top
+RmlUi document in the main context (explicit `z-index: 9999` — the actual z-order fix; a document
+with the default `z-index: auto`, every other document in this codebase, paints in plain DOM/show
+order, so a native tooltip queued through the legacy 3D-camera effect system could always be
+painted over by RmlUi's own main-context pass), with a `Show(Config, Owner)`/`Hide(Owner)`
+free-function API callable from native code exactly as easily as an RmlUi hover callback — the
+reason a still-fully-native window doesn't need its own RmlUi document just to show a tooltip.
+`LineColor` is the union of every prior mechanism's palette (10 foreground + 4
+background-highlight colors), and `Line::Kind{Text, HalfSpacer, FullSpacer}` replaces the old
+"sniff the first character of a native text buffer" spacer convention with an explicit field.
+`Config` also carries per-line `TextAlign{Left, Center}`, `centerHorizontally` (whether the anchor
+is the panel's left edge or horizontal center), an `AnchorPoint{BelowLeft, AboveLeft}` grow
+direction, and a real measure-then-clamp pass so a tooltip near any screen edge stays fully
+on-screen (every prior mechanism clamped horizontally at best, some not at all). `Owner` is an
+opaque per-caller token so one caller's per-frame `Hide()` can't clobber a different caller's
+`Show()` from earlier the same frame — see the header's own comment for the real bug this shape
+fixed.
+
+Migrated onto it: the item/pet tooltip (`RenderItemInfo()`/`RenderRepairInfo()`,
+`Engine/Object/ZzzInventory.cpp`), the generic button tooltip (`CTooltip`,
+`UI/Widgets/Window/Tooltip.h`/`.cpp` — `CButton`'s existing `ChangeToolTipText()` forwarding is
+unchanged, only what happens internally moved), the skill-hotkey tooltip (`MainFrameWindow.cpp` —
+`g_pSkillList`'s own hover slot), the inventory Set/Socket option tooltip (`MyInventory.cpp` — its
+old embedded RmlUi implementation was deleted outright, not left running as a second mechanism),
+and two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`).
+
+`UI::Skills::Tooltip::Render()`/`BuildModelForSlot()`/`ToRmlBridgeLines()`
+(`UI/HUD/Skills/SkillTooltip.h`/`.cpp`) is the shared skill/pet-command tooltip *content* builder —
+deliberately not in `SkillTooltipModel.h`, which is also shared with the standalone MuEditor (ImGui)
+tool and has no RmlUi dependency to pull in. `ToRmlBridgeLines()` converts a resolved `Model` into
+`UI::RmlBridge::Tooltip::Line`s (the `LineColor` switch every caller used to hand-roll); three
+callers now build a `Config` from it directly instead of calling `Render()`'s native
+`RenderTipTextList()` draw: `MainFrameWindow.cpp`'s skill-hotkey tooltip, and (this round)
+`SiegeWarBase.cpp`'s guild-skill tooltip (Siege War). `Render()` itself is kept for one remaining
+caller, but that caller is dead code, not a migration gap: `WindowMuHelper.cpp`'s
+`CMuHelperSkillList::RenderSkillInfo()` (the MU Helper bot config window — distinct from the
+already-migrated `CMuHelperBar`) is only ever invoked through an `if (m_bRenderSkillInfo && ...)`
+guard whose fields are never set to anything but their constructor defaults anywhere in the file —
+confirmed unreachable, not merely unmigrated. Left as-is (not deleted, not wired up) per explicit
+decision; revisit only if this window's skill-hover tooltip is ever actually wanted as a live
+feature.
+
+**Deliberately not on this primitive**: `CBuffStrip`/`CMuHelperBar`'s own hover tooltip is still a
+separate, CSS-only `:hover` mechanism (plain text, no per-line color) — deferred because it lives
+in a `dp`-based coordinate system, unlike every other caller's reference-pixel one; see
+`tracked-deferrals.md`'s pilots-to-revisit table. `HelpWindow.cpp`/`ItemExplanationWindow.cpp` also
+stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
+is open rather than on hover, so they don't fit this primitive's owner-token model (the newest
+`Show()` always wins, which assumes a momentary, naturally mutually-exclusive hover tooltip) — a
+second, non-competing primitive for them was scoped and rejected as not worth duplicating most of
+this primitive's positioning/clamping logic for two low-traffic windows.
+
 ## Does not exist as a reusable primitive yet
 
 Recorded here so a future session doesn't assume otherwise — each of these is still ad hoc,
@@ -221,17 +277,6 @@ per-window, or entirely unbuilt:
   component another window could reference. `title_scene.rml`'s loading bar uses RmlUi's own
   built-in `<progress>` element instead (`SetValue()`/`SetMax()` from C++, no model binding) — a
   real, proven raw-element option for a future gauge, but still not an abstracted shared component.
-- **Tooltip** — actively **four non-unified mechanisms** exist side by side (flagged in
-  `newui-tier-adapter.md`'s pilots-to-revisit table): the skill-hotkey tooltip
-  (`UI::Skills::Tooltip`, `SkillTooltipModel.h`), `CMyInventory`'s Set/Socket option tooltip
-  (`UI::Inventory::Tooltip`, `ItemOptionTooltipModel.h` — added Stage 3, H7), `CBuffStrip`'s
-  plain-text tooltip (a deliberate scope cut from the original's per-line-colored rich tooltip),
-  and whatever the still-fully-legacy windows use. The first two already share the same shape
-  (a fixed-buffer `Model`/`Line{text, color, isBold}` built with no drawing by a `BuildModel`-style
-  function, consumed either by the legacy `TextList`/`RenderTipTextList` path or bound into RmlUi)
-  — only the `color` enum's members differ (skill: White/Blue/Red/DarkRed; item-option:
-  White/Blue/Yellow/Green/Purple), making them the natural starting point if/when this list is
-  consolidated. Not bundled here — check this entry before adding a *fifth*.
 - **ScrollContainer, Notification, HUDContainer** — none of the currently migrated windows have
   needed one yet, so none exist. `CMainFrameWindow`'s still-legacy skill grid/pet-command row is
   the closest thing to a "grid" concept in the codebase, and it hasn't been abstracted either (see

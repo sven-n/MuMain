@@ -887,22 +887,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         if (UI::Skills::Tooltip::BuildModelForSlot(g_pSkillList->GetTooltipSkillIndex(), tooltipModel))
         {
             UI::RmlBridge::Tooltip::Config config;
-            config.lines.reserve(static_cast<size_t>(tooltipModel.count));
-            for (int i = 0; i < tooltipModel.count; ++i)
-            {
-                const UI::Skills::Tooltip::Line& src = tooltipModel.lines[i];
-                UI::RmlBridge::Tooltip::Line line;
-                line.text = StringUtils::WideToNarrow(src.text);
-                line.bold = src.isBold;
-                switch (src.color)
-                {
-                case UI::Skills::Tooltip::LineColor::Blue: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
-                case UI::Skills::Tooltip::LineColor::Red: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
-                case UI::Skills::Tooltip::LineColor::DarkRed: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
-                case UI::Skills::Tooltip::LineColor::White: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
-                }
-                config.lines.push_back(std::move(line));
-            }
+            config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
             // GetTooltipAnchorX/Y() are #bars-relative reference-pixel coordinates (same convention
             // as skill_grid_cells' cell.left/top), meaningful only through BottomHudCenterTransform
             // (same one #bars's own scale/offset above uses) -- NOT through the ambient

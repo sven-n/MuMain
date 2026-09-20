@@ -11,6 +11,8 @@ using namespace mu::ui::window;
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/HUD/Skills/SkillTooltip.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
 
 namespace
 {
@@ -494,7 +496,27 @@ void mu::ui::window::CSiegeWarBase::RenderSkillIcon()
 
     if (m_bRenderToolTip == true)
     {
-        UI::Skills::Tooltip::Render(m_SkillTooltipPos.x, m_SkillTooltipPos.y, FindHotKey(Hero->GuildSkill), Hero->GuildSkill, STRP_BOTTOMCENTER);
+        UI::Skills::Tooltip::Model tooltipModel;
+        if (UI::Skills::Tooltip::BuildModelForSlot(FindHotKey(Hero->GuildSkill), tooltipModel))
+        {
+            UI::RmlBridge::Tooltip::Config config;
+            config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
+            const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+            config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(m_SkillTooltipPos.x));
+            config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(m_SkillTooltipPos.y));
+            // STRP_BOTTOMCENTER's old native meaning: grow upward from sy (see RenderTipTextList()).
+            config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
+            config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
+            UI::RmlBridge::Tooltip::Show(config);
+        }
+        else
+        {
+            UI::RmlBridge::Tooltip::Hide();
+        }
+    }
+    else
+    {
+        UI::RmlBridge::Tooltip::Hide();
     }
 }
 

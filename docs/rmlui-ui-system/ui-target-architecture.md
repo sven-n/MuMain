@@ -284,9 +284,15 @@ useful detail; full history in git log):
    understanding" above) — just documenting `CInput`'s login/char-select-only scope (Rule 5).
 4. Tooltip primitive extracted: `mu::ui::window::CTooltip` (`UI/Widgets/Window/Tooltip.h`/`.cpp`),
    owns no position of its own, takes the anchor rect fresh each `Render()`. `CButton` forwards its
-   existing `ChangeToolTipText()` API into one as a member; every call site unchanged. Consolidating
-   the other ~3 tooltip mechanisms into this one is separate, unscoped follow-up (`component-catalog.md`'s
-   "does not exist yet" Tooltip entry).
+   existing `ChangeToolTipText()` API into one as a member; every call site unchanged.
+   **Superseded, not just extended**: the "separate, unscoped follow-up" this item used to promise
+   is done. `UI::RmlBridge::Tooltip` (`UI/RmlBridge/RmlTooltip.h`/`.cpp`) is now the single shared
+   tooltip primitive — `CTooltip::Render()` itself routes through it internally rather than drawing
+   natively, alongside the item/pet tooltip, the skill-hotkey tooltip, the inventory Set/Socket
+   option tooltip, and two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`).
+   `CBuffStrip`/`CMuHelperBar`'s own CSS-only hover tooltip stays a separate mechanism on purpose
+   (see `component-catalog.md`'s "Tooltip" section for the current, non-stale state and what's
+   deliberately still out of scope).
 5. `WindowGeometry` (Section C) built and adopted — 73 `mu::ui::window::CheckMouseIn()` call sites
    across 57 files switched to it. Deliberately untouched: the legacy `CUIControl`/`CWin` family's
    differently-shaped `::CheckMouseIn(x, y, w, h, CoordType)`, and inline per-tab/per-row/per-icon
