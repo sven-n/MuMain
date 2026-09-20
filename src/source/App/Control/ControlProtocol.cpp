@@ -76,6 +76,21 @@ constexpr std::array<LoginFailureEntry, 19> LoginFailures = {{
     {RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL, "this channel requires a paid subscription"},
 }};
 
+// The entry for a message code, or nullptr: the one scan behind both
+// public queries, so the reason and the "is this a login failure" test
+// cannot drift apart.
+const LoginFailureEntry* FindLoginFailure(int messageCode)
+{
+    for (const LoginFailureEntry& entry : LoginFailures)
+    {
+        if (entry.messageCode == messageCode)
+        {
+            return &entry;
+        }
+    }
+    return nullptr;
+}
+
 App::Control::Value FromJson(const json& value)
 {
     if (value.is_boolean())
@@ -344,25 +359,12 @@ std::string EncodeError(std::string_view encodedId, ErrorCode code, std::string_
 
 std::string_view LoginFailureReason(int messageCode)
 {
-    for (const auto& entry : LoginFailures)
-    {
-        if (entry.messageCode == messageCode)
-        {
-            return entry.reason;
-        }
-    }
-    return "server refused the login";
+    const LoginFailureEntry* failure = FindLoginFailure(messageCode);
+    return failure != nullptr ? failure->reason : std::string_view("server refused the login");
 }
 
 bool IsLoginFailureCode(int messageCode)
 {
-    for (const auto& entry : LoginFailures)
-    {
-        if (entry.messageCode == messageCode)
-        {
-            return true;
-        }
-    }
-    return false;
+    return FindLoginFailure(messageCode) != nullptr;
 }
 } // namespace App::Control
