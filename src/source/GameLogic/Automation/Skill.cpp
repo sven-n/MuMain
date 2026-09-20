@@ -140,9 +140,6 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
         return SkillResult::Busy;
     }
 
-    g_MovementSkill.m_iSkill = skill;
-    g_MovementSkill.m_bMagic = true;
-
     const float skillDistance = gSkillManager.GetSkillDistance(skill, Hero);
 
     if (!targetRequired)
@@ -169,6 +166,12 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
             return aimed;
         }
     }
+
+    // The globals the execution reads are set only once the aim held: a
+    // refused aim must leave the movement-skill state as it was rather than
+    // switch it to a skill that was never cast.
+    g_MovementSkill.m_iSkill = skill;
+    g_MovementSkill.m_bMagic = true;
 
     const int executed = GameLogic::Combat::ExecuteSkill(Hero, skill, skillDistance);
     if (executed == SkillExecutionRefused)
