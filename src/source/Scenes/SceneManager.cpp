@@ -382,6 +382,17 @@ static void RequestScreenshot()
     (void)BeginScreenshotCapture(GrabFileName, screenshotText);
 }
 
+void CancelScriptedScreenshot()
+{
+    if (!g_screenshotCapture.HasPending())
+    {
+        return;
+    }
+
+    g_screenshotCapture.Clear();
+    g_screenshotCompletion = nullptr;
+}
+
 bool RequestScriptedScreenshot(const std::wstring& path, ScreenshotCompletion onComplete)
 {
     if (g_screenshotCapture.HasPending())

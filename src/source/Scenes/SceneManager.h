@@ -138,6 +138,11 @@ using ScreenshotCompletion = std::function<void(const ScreenshotOutcome&)>;
 // capture is already pending or the renderer refused the readback.
 bool RequestScriptedScreenshot(const std::wstring& path, ScreenshotCompletion onComplete);
 
+// Drops a scripted capture that nobody is waiting for any more: its caller
+// went away, its act was never registered, or it was interrupted. The
+// completion is forgotten without being called.
+void CancelScriptedScreenshot();
+
 // FPS management (legacy - use g_frameTiming instead)
 void SetTargetFps(double targetFps);
 double GetTargetFps();

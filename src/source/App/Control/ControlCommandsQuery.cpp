@@ -235,6 +235,18 @@ class ScreenshotAct : public Act
 public:
     explicit ScreenshotAct(std::shared_ptr<ScreenshotState> state) : m_state(std::move(state)) {}
 
+    // Destroyed before its capture finished — the reader table was full, the
+    // caller went away, the deadline passed: the capture is dropped rather
+    // than left in flight, where it would block the next one and report into
+    // state nobody reads.
+    ~ScreenshotAct() override
+    {
+        if (!m_state->finished)
+        {
+            CancelScriptedScreenshot();
+        }
+    }
+
     [[nodiscard]] std::string_view Name() const override
     {
         return "screenshot";

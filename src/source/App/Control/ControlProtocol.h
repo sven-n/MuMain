@@ -51,6 +51,10 @@ public:
     enum class Kind : std::uint8_t
     {
         Null,
+        // A shape no argument of the protocol takes (an array). Kept apart
+        // from Null so `Has()` still sees the field and its command answers
+        // `bad_request` instead of running with a default.
+        Unsupported,
         Bool,
         Number,
         String,
@@ -58,6 +62,7 @@ public:
     };
 
     Value() = default;
+    [[nodiscard]] static Value OfUnsupportedKind();
     explicit Value(bool value);
     explicit Value(double value);
     explicit Value(std::string value);

@@ -333,9 +333,11 @@ public:
         case Automation::AttackResult::NotAttackable:
         {
             // A target that died under the last swing is a finished
-            // attack, not a refused one.
+            // attack, not a refused one — but only if this command ever
+            // swung at it: a target that was already a corpse when the
+            // request arrived was not killed by it.
             const int index = FindCharacterIndex(m_targetKey);
-            if (index != MAX_CHARACTERS_CLIENT && CharactersClient[index].Dead > 0)
+            if (m_issued > 0 && index != MAX_CHARACTERS_CLIENT && CharactersClient[index].Dead > 0)
             {
                 json killed;
                 killed["attacks"] = m_issued;

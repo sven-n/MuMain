@@ -114,15 +114,28 @@ App::Control::Value FromJson(const json& value)
         }
         return App::Control::Value(std::move(entries));
     }
-    // Arrays and null carry no request field the command set reads; they
-    // arrive as a null value rather than an error, so an unknown extra
-    // field never fails a valid command.
+    if (value.is_array())
+    {
+        // No argument takes an array, and a caller that sends one means
+        // something by it: the command answers `bad_request` rather than
+        // running with the default the field would otherwise keep.
+        return App::Control::Value::OfUnsupportedKind();
+    }
+    // An explicit null reads as "not supplied", which is what a caller that
+    // fills a template with an empty field means by it.
     return App::Control::Value();
 }
 } // namespace
 
 namespace App::Control
 {
+Value Value::OfUnsupportedKind()
+{
+    Value value;
+    value.m_kind = Kind::Unsupported;
+    return value;
+}
+
 Value::Value(bool value) : m_kind(Kind::Bool), m_bool(value) {}
 
 Value::Value(double value) : m_kind(Kind::Number), m_number(value) {}
