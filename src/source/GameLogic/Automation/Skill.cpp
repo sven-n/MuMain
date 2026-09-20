@@ -91,14 +91,15 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
         return SkillResult::NotInView;
     }
 
-    SelectedCharacter = targetIndex;
-
     CHARACTER* target = &CharactersClient[targetIndex];
     if (target->Dead > 0 || (!allowPlayers && !IsMonster(target)))
     {
         return SkillResult::NotAttackable;
     }
 
+    // Selected only once the target is one the client may actually cast at:
+    // a refused cast must not leave the UI pointing at a corpse.
+    SelectedCharacter = targetIndex;
     g_MovementSkill.m_iTarget = targetIndex;
 
     TargetX = (int)(target->Object.Position[0] / TERRAIN_SCALE);
@@ -143,6 +144,9 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
     {
         TargetX = Hero->PositionX;
         TargetY = Hero->PositionY;
+        // Both aiming paths set this; without it here an untargeted skill
+        // would be cast at whatever the previous targeted one aimed at.
+        g_MovementSkill.m_iTarget = -1;
     }
     else if (IsSelfPositionSkill(skill))
     {
