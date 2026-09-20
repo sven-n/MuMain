@@ -4,7 +4,10 @@
 // consults the held key, a click writes the same mouse globals the event
 // loop fills from real SDL events — so every handler reacts exactly as it
 // does to a human. Nothing here touches the window system: no pointer
-// movement, no focus change, no synthetic OS events.
+// movement, no focus change, no synthetic OS events — which also bounds
+// what a click reaches: the current UI layer and the world read these
+// globals, while the older widget layer hit-tests through CInput, from the
+// operating system's cursor, which nothing here moves.
 //
 // Sequencing follows rendered frames: `BeginFrame()` runs once per rendered
 // frame (before the key-state scan) and advances one injection through

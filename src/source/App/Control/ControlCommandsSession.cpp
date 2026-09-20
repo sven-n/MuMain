@@ -263,17 +263,11 @@ private:
         // login is answered as that failure instead of waited on.
         if (CurrentProtocolState != RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            if (App::Control::IsLoginFailureCode(CurrentProtocolState))
-            {
-                return Fail(response, ErrorCode::LoginFailed,
-                            std::string(App::Control::LoginFailureReason(CurrentProtocolState)));
-            }
-            if (CurrentProtocolState == RECEIVE_JOIN_SERVER_FAIL_VERSION)
-            {
-                // The game server refused the join itself; no login window
-                // will open, so waiting for one is waiting for the deadline.
-                return Fail(response, ErrorCode::LoginFailed, "the server rejected the client version");
-            }
+            // Every login failure arrives as a message box, which the stage
+            // below reads; the protocol state itself is put back to
+            // RECEIVE_JOIN_SERVER_SUCCESS by the box's OK handler
+            // (MsgWin.cpp:495), so waiting here is waiting for the window
+            // that accepts credentials.
             return Status::Running;
         }
 

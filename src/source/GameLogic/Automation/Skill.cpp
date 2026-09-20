@@ -77,10 +77,9 @@ static SkillResult AimAtSelf(int targetKey, bool allowPlayers)
 
     TargetX = Hero->PositionX;
     TargetY = Hero->PositionY;
-    // A cast at the caster's own tile selects nobody, so the previous cast's
-    // target is cleared here as well as in the untargeted branch.
+    // The aim only, as in the untargeted branch: the player's selection is
+    // not this function's to clear.
     g_MovementSkill.m_iTarget = -1;
-    SelectedCharacter = -1;
 
     return SkillResult::NotReady;
 }
@@ -156,10 +155,11 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
     {
         TargetX = Hero->PositionX;
         TargetY = Hero->PositionY;
-        // Both aiming paths set these; without them here an untargeted skill
-        // would be cast at whatever the previous targeted one aimed at.
+        // The aim, and only the aim: without this an untargeted skill would
+        // be cast at whatever the previous targeted one aimed at.
+        // `SelectedCharacter` is the player's own selection and the helper
+        // path this was extracted from never touched it here.
         g_MovementSkill.m_iTarget = -1;
-        SelectedCharacter = -1;
     }
     else if (IsSelfPositionSkill(skill))
     {

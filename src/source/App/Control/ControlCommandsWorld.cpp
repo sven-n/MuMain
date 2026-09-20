@@ -740,9 +740,7 @@ std::string Warp(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`warp` needs a gate name");
     }
 
-    // The world scene is active for the whole join round-trip before the
-    // character exists (MainScene.cpp:138 → WSclient.cpp:1155), and the
-    // requirement check below reads it. Same guard `teleport` carries.
+    // As the engine's own hero-dependent code writes it (DefaultCamera.cpp:111).
     if (Hero == nullptr)
     {
         return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
@@ -779,17 +777,15 @@ std::string Teleport(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`teleport` needs `x` and `y`");
     }
 
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+    }
+
     if (!IsTileOnMap(tileX, tileY))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`x` and `y` are tiles on the map, 0 to " + std::to_string(TERRAIN_SIZE - 1));
-    }
-
-    // The command names the character, which exists a few frames after the
-    // world scene does.
-    if (Hero == nullptr)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
     }
 
     // The map is taken as a number, not a name: the act has to recognise the
@@ -1062,9 +1058,26 @@ std::string Party(const Request& request, std::unique_ptr<Act>&)
 
     if (action == "leave")
     {
-        // Leaving is kicking yourself: the member list starts with the
-        // character itself, as the party window shows it.
-        SocketClient->ToGameServer()->SendPartyPlayerKickRequest(static_cast<BYTE>(0));
+        // Leaving is kicking yourself, and the request carries the
+        // server-assigned member number — not the row the character sits in.
+        // The window finds its own row by name for the same reason
+        // (NewUIPartyInfoWindow.cpp:97, 284): index 0 is the party master.
+        int own = -1;
+        for (int member = 0; member < ::PartyNumber; ++member)
+        {
+            if (wcscmp(::Party[member].Name, Hero->ID) == 0)
+            {
+                own = member;
+                break;
+            }
+        }
+
+        if (own < 0)
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the character is not in a party");
+        }
+
+        SocketClient->ToGameServer()->SendPartyPlayerKickRequest(static_cast<BYTE>(::Party[own].Number));
         return EncodeResult(request.EncodedId(), result.dump());
     }
 

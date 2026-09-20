@@ -110,7 +110,11 @@ synthetic OS events — so a scripted session can open the system menu, the
 inventory or start the MU Helper from its HUD button while the human keeps
 working elsewhere. Coordinates for `click-ui` are the pixels of the client
 area, the same space a `screenshot` image is in, so a script can capture,
-locate and click. Key names are case-insensitive: the letters, the digits,
+locate and click. What a click reaches is what reads those variables: the
+current UI layer and the world. The older widget layer hit-tests through
+`CInput`, which reads the operating system's cursor, and a click injected
+below the readers never moves that — those windows are out of scope for
+`click-ui`, and a key is the way to drive them. Key names are case-insensitive: the letters, the digits,
 `esc`, `enter`, `tab`, `space`, `backspace`, `home`, `end`, `insert`,
 `delete`, `pageup`, `pagedown`, `up`, `down`, `left`, `right`, `printscreen`
 and `f1`–`f12`; anything else answers `bad_request`. Both answer once the
