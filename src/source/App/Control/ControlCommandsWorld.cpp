@@ -118,8 +118,10 @@ bool StepIsDue(std::chrono::steady_clock::time_point& last, std::chrono::millise
     return true;
 }
 
-// Longest chat line the client sends.
-constexpr std::size_t ChatTextLength = 128;
+// Longest chat line the client sends: the wire field is char[MAX_CHAT_SIZE]
+// (WSclient.h:485) and the chat box stops one short of it, so anything
+// longer would be cut off on its way out rather than sent.
+constexpr std::size_t ChatTextLength = MAX_CHAT_SIZE;
 // Longest character name the whisper packet carries, terminator included.
 constexpr std::size_t CharacterNameLength = 11;
 
@@ -179,6 +181,14 @@ void SendChat(const std::string& text)
 {
     const std::wstring wide = Core::Text::FromUtf8(text);
     SocketClient->ToGameServer()->SendPublicChatMessage(MU_C16(Hero->ID), MU_C16(wide.c_str()));
+}
+
+// Whether a tile pair addresses a square of the map at all. The path
+// finder's index folds an out-of-range x into the next row, so the
+// commands that take tiles refuse one before it gets that far.
+bool IsTileOnMap(int tileX, int tileY)
+{
+    return tileX >= 0 && tileX < TERRAIN_SIZE && tileY >= 0 && tileY < TERRAIN_SIZE;
 }
 
 // move: walk to a tile, re-planning each frame like a held mouse button.
@@ -707,6 +717,15 @@ std::string Move(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`move` needs `x` and `y`");
     }
 
+    // The path finder indexes tiles as x + y * TERRAIN_SIZE and only checks
+    // the combined index, so an x past the edge folds into the next row and
+    // walks somewhere the caller did not ask for.
+    if (!IsTileOnMap(tileX, tileY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are tiles on the map, 0 to " + std::to_string(TERRAIN_SIZE - 1));
+    }
+
     act = std::make_unique<MoveAct>(tileX, tileY);
     return {};
 }
@@ -748,6 +767,12 @@ std::string Teleport(const Request& request, std::unique_ptr<Act>& act)
     if (!request.GetInt("x", tileX) || !request.GetInt("y", tileY))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`teleport` needs `x` and `y`");
+    }
+
+    if (!IsTileOnMap(tileX, tileY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are tiles on the map, 0 to " + std::to_string(TERRAIN_SIZE - 1));
     }
 
     // The command names the character, which exists a few frames after the

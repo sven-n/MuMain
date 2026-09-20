@@ -472,7 +472,11 @@ std::string SelectCharacter(const Request& request, std::unique_ptr<Act>& act)
         // The spec counts slots as the list shows them, from 1. Checked
         // before the conversion: `slot` carries anything an int holds, and
         // decrementing its minimum first would be signed overflow.
-        if (slot < 1 || slot > Scenes::CharacterSlotCount())
+        // Against the table's size, not the number of characters in it:
+        // CharacterList() numbers slots by their table index, so a list with
+        // a gap in it would otherwise refuse a slot it just advertised. The
+        // emptiness of the slot is what the check below answers.
+        if (slot < 1 || slot > MAX_CHARACTERS_PER_ACCOUNT)
         {
             json details;
             details["characters"] = CharacterList();

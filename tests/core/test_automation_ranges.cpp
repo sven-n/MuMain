@@ -2,7 +2,7 @@
 // the weapon -> range table and the result vocabulary the auto-helper and the
 // control socket share. Driving a character needs the world; these do not.
 //
-// Run: ctest --test-dir <build directory> --build-config Release -R test_automation_ranges
+// Run: ctest --test-dir <build directory> --build-config Release -R "\[core\]\[automation\]"
 
 #include "doctest.h"
 

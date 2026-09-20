@@ -5,7 +5,7 @@
 // directory; the "client" is a plain blocking socket created by the test, so
 // nothing here needs a window, a renderer or the game's globals.
 //
-// Run: ctest --test-dir <build directory> --build-config Release -R local_socket
+// Run: ctest --test-dir <build directory> --build-config Release -R "\[core\]\[local-socket\]"
 
 #include "doctest.h"
 
