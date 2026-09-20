@@ -568,9 +568,17 @@ std::string Logout(const Request& request, std::unique_ptr<Act>& act)
 
 std::string Quit(const Request& request, std::unique_ptr<Act>&)
 {
-    // Same two steps the exit dialog takes (NewUICustomMessageBox.cpp:2343):
-    // stop the helper and tell the server the session is over, so the
-    // account is free again at once instead of after the server's timeout.
+    // The exit handler's own steps (NewUICustomMessageBox.cpp:2334-2345):
+    // save what the session changed, refuse while the chaos machine holds
+    // items, stop the helper, and tell the server — so the account is free
+    // at once instead of after its timeout.
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "close the chaos machine window first");
+    }
+
+    SaveOptions();
+    SaveMacro(L"Data\\Macro.txt");
     MUHelper::g_MuHelper.TriggerStop();
     if (SocketClient != nullptr && g_bGameServerConnected)
     {

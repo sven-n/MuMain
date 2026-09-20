@@ -444,10 +444,28 @@ bool LocalSocketListener::Listen(const std::string& path, std::string& error)
     // would do silently: the first client keeps its socket open and never
     // hears from anyone again. A connection that is accepted says somebody
     // is there.
-#ifndef _WIN32
     // Only a socket is ever ours to remove: a connect to a regular file
     // answers ECONNREFUSED as well, and a mistyped MU_CONTROL_SOCKET must
     // not delete the file it points at.
+#ifdef _WIN32
+    // Windows has no S_ISSOCK, and its AF_UNIX socket files are not plain
+    // regular files: they carry a reparse point and no content. A directory
+    // or a file with bytes in it is therefore something else, and is left
+    // alone; an empty file is indistinguishable and treated as a stale
+    // socket, which is what it is in practice.
+    WIN32_FILE_ATTRIBUTE_DATA attributes{};
+    if (GetFileAttributesExA(path.c_str(), GetFileExInfoStandard, &attributes) != 0)
+    {
+        const bool directory = (attributes.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+        const bool hasContent = attributes.nFileSizeHigh != 0 || attributes.nFileSizeLow != 0;
+        if (directory || hasContent)
+        {
+            error = path + " exists and is not a socket";
+            closesocket(handle);
+            return false;
+        }
+    }
+#else
     struct stat entry{};
     if (::stat(path.c_str(), &entry) == 0 && !S_ISSOCK(entry.st_mode))
     {

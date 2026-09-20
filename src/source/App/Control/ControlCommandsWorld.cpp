@@ -1090,6 +1090,11 @@ std::string Party(const Request& request, std::unique_ptr<Act>&)
         // server-assigned member number — not the row the character sits in.
         // The window finds its own row by name for the same reason
         // (NewUIPartyInfoWindow.cpp:97, 284): index 0 is the party master.
+        if (Hero == nullptr)
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+        }
+
         int own = -1;
         for (int member = 0; member < ::PartyNumber; ++member)
         {
