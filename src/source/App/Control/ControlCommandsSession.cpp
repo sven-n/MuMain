@@ -103,7 +103,12 @@ bool TakeLoginFailure(std::string& reason)
     }
 
     reason = App::Control::LoginFailureReason(code);
-    messageWindow.DismissMessage();
+    if (!messageWindow.DismissMessage())
+    {
+        // The box is one whose confirmation would close the client, so it
+        // stays on screen; the caller still gets the reason.
+        reason += " (the client cannot continue from this one)";
+    }
     return true;
 }
 

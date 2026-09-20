@@ -453,12 +453,18 @@ int CMsgWin::PendingMessageCode() const
     return const_cast<CMsgWin*>(this)->IsShow() ? m_nMsgCode : -1;
 }
 
-void CMsgWin::DismissMessage()
+bool CMsgWin::DismissMessage()
 {
     if (!IsShow())
-        return;
+        return false;
+
+    // These two end the process in ManageOKClick; confirming them on a
+    // caller's behalf would close the client under it.
+    if (m_nMsgCode == RECEIVE_LOG_IN_FAIL_VERSION || m_nMsgCode == MESSAGE_SERVER_LOST)
+        return false;
 
     ManageOKClick();
+    return true;
 }
 
 void CMsgWin::ManageOKClick()

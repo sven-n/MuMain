@@ -46,15 +46,6 @@ PickupResult PickUpItem(int itemIndex, int maximumDistance)
         return PickupResult::TooFar;
     }
 
-    // One pickup at a time: the server answers with the item, and SendGetItem
-    // is what remembers which request is outstanding. Answered before the
-    // walk, so a second call cannot redirect the character while the first
-    // request is still out.
-    if (SendGetItem != -1)
-    {
-        return PickupResult::Busy;
-    }
-
     TargetX = dropX;
     TargetY = dropY;
 
@@ -68,6 +59,16 @@ PickupResult PickUpItem(int itemIndex, int maximumDistance)
         Hero->MovementType = MOVEMENT_MOVE;
         SendMove(Hero, &Hero->Object);
         return PickupResult::Approaching;
+    }
+
+    // One pickup at a time: the server answers with the item, and
+    // SendGetItem is what remembers which request is outstanding. Gated
+    // here and not before the walk, as the helper this was extracted from
+    // gated it: approaching the next drop while an answer is outstanding is
+    // what keeps the helper moving.
+    if (SendGetItem != -1)
+    {
+        return PickupResult::Busy;
     }
 
     SendGetItem = itemIndex;
