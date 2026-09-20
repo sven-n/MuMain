@@ -2,6 +2,7 @@
 #include "App/Control/ControlTaps.h"
 
 #include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -11,6 +12,8 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <cstring>
+#include <string>
+#include <utility>
 
 namespace
 {
@@ -18,9 +21,6 @@ namespace
 // damage presentation reads it.
 constexpr int CriticalDamageType = 2;
 constexpr int ExcellentDamageType = 3;
-
-// Longest item name the tables hold.
-constexpr std::size_t ItemNameLength = 128;
 
 int KeyOfIndex(int characterIndex)
 {
@@ -31,22 +31,6 @@ int KeyOfIndex(int characterIndex)
     return CharactersClient[characterIndex].Key;
 }
 
-const wchar_t* DropName(int itemSlot, wchar_t (&buffer)[ItemNameLength])
-{
-    if (itemSlot < 0 || itemSlot >= MAX_ITEMS)
-    {
-        return L"";
-    }
-
-    const ITEM& item = Items[itemSlot].Item;
-    if (item.Type < 0)
-    {
-        return L"";
-    }
-
-    GetItemName(item.Type, item.Level, buffer);
-    return buffer;
-}
 } // namespace
 
 namespace App::Control::Events
@@ -139,12 +123,11 @@ void RecordDropAppeared(int itemSlot)
         return;
     }
 
-    wchar_t buffer[ItemNameLength] = {};
-    const ITEM_t& drop = Items[itemSlot];
     // The slot is the id `pickup` takes; the drop's own key is not what the
     // pickup packet carries.
-    RecordDrop(itemSlot, DropName(itemSlot, buffer), static_cast<int>(drop.Object.Position[0] / TERRAIN_SCALE),
-               static_cast<int>(drop.Object.Position[1] / TERRAIN_SCALE));
+    const std::wstring name = App::Control::DropName(itemSlot);
+    const std::pair<int, int> tile = App::Control::DropTile(itemSlot);
+    RecordDrop(itemSlot, name.c_str(), tile.first, tile.second);
 }
 
 void RecordDropVanished(int itemSlot, const char* reason)

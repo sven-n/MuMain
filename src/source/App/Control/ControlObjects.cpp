@@ -3,6 +3,8 @@
 
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzObject.h"
 
 namespace
 {
@@ -49,5 +51,42 @@ Events::ObjectDescription DescribeGameObject(int key)
     description.y = character.PositionY;
     description.known = true;
     return description;
+}
+
+std::wstring ItemDisplayName(int itemType, int itemLevel)
+{
+    // The empty marker is -1; type 0 is a real item (the Dark Knight's
+    // starting Kris), so it must not be treated as an empty slot.
+    if (itemType < 0)
+    {
+        return {};
+    }
+
+    // Longest name the item tables hold, plus room for the terminator.
+    wchar_t name[128] = {};
+    GetItemName(itemType, itemLevel, name);
+    return name;
+}
+
+std::wstring DropName(int itemSlot)
+{
+    if (itemSlot < 0 || itemSlot >= MAX_ITEMS)
+    {
+        return {};
+    }
+
+    const ITEM& item = Items[itemSlot].Item;
+    return ItemDisplayName(item.Type, item.Level);
+}
+
+std::pair<int, int> DropTile(int itemSlot)
+{
+    if (itemSlot < 0 || itemSlot >= MAX_ITEMS)
+    {
+        return {-1, -1};
+    }
+
+    const OBJECT& object = Items[itemSlot].Object;
+    return {static_cast<int>(object.Position[0] / TERRAIN_SCALE), static_cast<int>(object.Position[1] / TERRAIN_SCALE)};
 }
 } // namespace App::Control

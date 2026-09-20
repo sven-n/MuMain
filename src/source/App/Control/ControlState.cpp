@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "App/Control/ControlState.h"
 
+#include "App/Control/ControlObjects.h"
+
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -22,19 +24,9 @@ namespace
 {
 using nlohmann::json;
 
-// Longest name the item tables hold, plus room for the terminator.
-constexpr std::size_t ItemNameLength = 128;
-
 std::string ItemName(const ITEM& item)
 {
-    if (item.Type < 0)
-    {
-        return {};
-    }
-
-    wchar_t name[ItemNameLength] = {};
-    GetItemName(item.Type, item.Level, name);
-    return Core::Text::ToUtf8(name);
+    return Core::Text::ToUtf8(App::Control::ItemDisplayName(item.Type, item.Level).c_str());
 }
 
 json DescribeItem(const ITEM& item, int slot)
@@ -261,8 +253,8 @@ json NearbyArray()
         described["id"] = index;
         described["kind"] = "item";
         described["name"] = ItemName(drop.Item);
-        described["position"] = json::array({static_cast<int>(drop.Object.Position[0] / TERRAIN_SCALE),
-                                             static_cast<int>(drop.Object.Position[1] / TERRAIN_SCALE)});
+        const std::pair<int, int> tile = App::Control::DropTile(index);
+        described["position"] = json::array({tile.first, tile.second});
         nearby.push_back(std::move(described));
     }
 
