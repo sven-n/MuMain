@@ -75,8 +75,11 @@ enum class SkillResult : std::uint8_t
 [[nodiscard]] bool IsSelfPositionSkill(ActionSkillType skill);
 
 // Casts the skill, walking into its range first when a target is required.
-// `targetKey` is ignored for self-positioned skills and when
-// `targetRequired` is false. `huntingDistance` bounds how far the path
+// A self-positioned skill is always aimed at the caster's own tile, but a
+// `targetKey` given with one is still checked: the cast is refused when
+// that object has left view or is not attackable, so a scenario that names
+// a target is told rather than casting into an empty tile. `targetKey` is
+// ignored entirely when `targetRequired` is false. `huntingDistance` bounds how far the path
 // finder may search beyond the skill's range.
 SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey, bool allowPlayers,
                       int huntingDistance);
