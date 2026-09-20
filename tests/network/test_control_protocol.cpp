@@ -9,6 +9,7 @@
 #include "App/Control/ControlProtocol.h"
 #include "Network/Server/WSclient.h"
 
+#include <cctype>
 #include <string>
 #include <vector>
 

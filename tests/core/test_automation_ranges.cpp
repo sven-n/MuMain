@@ -45,11 +45,26 @@ TEST_CASE("Automation results map to the control vocabulary [core][automation]")
     CHECK(ResultName(MoveResult::Arrived) == "arrived");
     CHECK(ResultName(PickupResult::Requested) == "requested");
 
-    // Every result has a name; none is empty.
+    // Every result of every vocabulary has a name; none is empty. A new
+    // enumerator that falls through its switch is what this catches, so all
+    // three are walked, not just the attack one.
     const AttackResult attacks[] = {AttackResult::Attacked, AttackResult::Approaching, AttackResult::Busy,
                                     AttackResult::NoTarget, AttackResult::NotInView,   AttackResult::NotAttackable,
                                     AttackResult::NoPath,   AttackResult::Blocked,     AttackResult::NoArrows};
     for (const AttackResult result : attacks)
+    {
+        CHECK_FALSE(ResultName(result).empty());
+    }
+
+    const MoveResult moves[] = {MoveResult::Walking, MoveResult::Arrived, MoveResult::NoPath};
+    for (const MoveResult result : moves)
+    {
+        CHECK_FALSE(ResultName(result).empty());
+    }
+
+    const PickupResult pickups[] = {PickupResult::Requested, PickupResult::Approaching, PickupResult::TooFar,
+                                    PickupResult::Gone,      PickupResult::NoPath,      PickupResult::Busy};
+    for (const PickupResult result : pickups)
     {
         CHECK_FALSE(ResultName(result).empty());
     }

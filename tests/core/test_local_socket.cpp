@@ -205,11 +205,18 @@ TEST_CASE("Local socket serves a line round-trip [core][local-socket]")
     REQUIRE(connection->Write(R"({"ok":true})"
                               "\n"));
 
-    char received[64] = {};
-    const int count = ::recv(client, received, static_cast<int>(sizeof(received) - 1), 0);
-    REQUIRE(count > 0);
-    CHECK(std::string(received, static_cast<std::size_t>(count)) == R"({"ok":true})"
-                                                                    "\n");
+    // A stream, not a message queue: read until the terminator rather than
+    // assuming one recv() carries the whole line.
+    std::string received;
+    while (received.find('\n') == std::string::npos)
+    {
+        char chunk[64] = {};
+        const int count = ::recv(client, chunk, static_cast<int>(sizeof(chunk)), 0);
+        REQUIRE(count > 0);
+        received.append(chunk, static_cast<std::size_t>(count));
+    }
+    CHECK(received == R"({"ok":true})"
+                      "\n");
 
     closesocket(client);
     listener.Close();
