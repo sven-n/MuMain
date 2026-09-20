@@ -93,6 +93,12 @@ maxima, map number and name, position, alive flag, safe-zone flag, current
 target, the skills the character owns, equipment, inventory, buffs, party and
 `nearby`.
 
+Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
+monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
+percentage of full health (`100` is untouched) and is `null` when the server
+has not told the client that object's health — a threshold test has to allow
+for the null rather than read it as zero.
+
 ### Synthetic input
 
 `hotkey` and `click-ui` inject a key or a click *below* the game's own input

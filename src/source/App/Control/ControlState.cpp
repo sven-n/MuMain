@@ -15,6 +15,7 @@
 
 #include "json.hpp"
 
+#include <cmath>
 #include <utility>
 
 namespace
@@ -233,9 +234,16 @@ json NearbyArray()
         described["position"] = json::array({character.PositionX, character.PositionY});
         described["alive"] = character.Dead <= 0;
         described["level"] = character.Level;
-        // The client only knows other characters' health as the percentage
-        // its own UI shows for a target or a party member.
-        described["hp_percent"] = character.HealthStatus;
+        // The client only knows another object's health as the fraction the
+        // server sends in 1/250ths (`HealthStatus`), and as -1 while it has
+        // not been told at all. Report it as a percentage, because that is
+        // what the field is called, and as null when it is unknown: a number
+        // there would compare below every threshold a scenario writes.
+        // Recovered from the packet's own 1/250th before scaling, so the
+        // number reads as the server meant it (95.2, not 95.20000457763672,
+        // which is what the `float` division left behind).
+        const double healthPercent = std::round(character.HealthStatus * 250.0f) * 100.0 / 250.0;
+        described["hp_percent"] = character.HealthStatus < 0.0f ? json(nullptr) : json(healthPercent);
         nearby.push_back(std::move(described));
     }
 
