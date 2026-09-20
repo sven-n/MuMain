@@ -68,8 +68,14 @@ void SetEnabled(bool enabled);
 [[nodiscard]] bool IsEnabled();
 
 [[nodiscard]] std::uint64_t LastSequence();
-// Events newer than `seq`, oldest first. Events already overwritten are
-// gone; the caller sees a gap in the sequence numbers, never a duplicate.
+// Visits the events newer than `seq`, oldest first, stopping when `visit`
+// returns false. Nothing is copied or allocated, which matters for the
+// readers that run on every frame: a `wait-for` usually walks the ring to
+// find nothing.
+void ForEachSince(std::uint64_t seq, const std::function<bool(const Record&)>& visit);
+// The same selection as a vector, for a caller that keeps it. Events already
+// overwritten are gone; the caller sees a gap in the sequence numbers, never
+// a duplicate.
 [[nodiscard]] std::vector<Record> Since(std::uint64_t seq);
 // Drops every retained event and resets the sequence. For tests and for a
 // fresh session; the client never calls it while a follower is attached.

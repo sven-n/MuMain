@@ -105,10 +105,16 @@ public:
     {
         if (m_delivered == m_pending.size())
         {
-            // Scanning the ring costs its whole capacity, so take everything
+            // Visiting the ring costs its whole capacity, so take everything
             // that is new in one pass and hand it out from there; the ring is
             // only visited again once this batch has been delivered.
-            m_pending = App::Control::Events::Since(m_since);
+            m_pending.clear();
+            App::Control::Events::ForEachSince(m_since,
+                                               [this](const App::Control::Events::Record& record)
+                                               {
+                                                   m_pending.push_back(record);
+                                                   return true;
+                                               });
             m_delivered = 0;
             if (m_pending.empty())
             {
@@ -165,27 +171,33 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        for (const App::Control::Events::Record& record : App::Control::Events::Since(m_since))
-        {
-            m_since = record.seq;
-            if (record.name != m_wanted)
-            {
-                continue;
-            }
+        // A `wait-for` is pending for seconds at a time and usually finds
+        // nothing, so it visits the ring rather than copying it: no
+        // allocation per frame, and it stops at its match.
+        bool matched = false;
+        App::Control::Events::ForEachSince(m_since,
+                                           [this, &matched, &response](const App::Control::Events::Record& record)
+                                           {
+                                               m_since = record.seq;
+                                               if (record.name != m_wanted)
+                                               {
+                                                   return true;
+                                               }
 
-            const json event = EventObject(record);
-            if (!EventMatches(event, m_match))
-            {
-                continue;
-            }
+                                               const json event = EventObject(record);
+                                               if (!EventMatches(event, m_match))
+                                               {
+                                                   return true;
+                                               }
 
-            json result;
-            result["event"] = event;
-            response = App::Control::EncodeResult(EncodedId(), result.dump());
-            return Status::Finished;
-        }
+                                               json result;
+                                               result["event"] = event;
+                                               response = App::Control::EncodeResult(EncodedId(), result.dump());
+                                               matched = true;
+                                               return false;
+                                           });
 
-        return Status::Running;
+        return matched ? Status::Finished : Status::Running;
     }
 
 private:

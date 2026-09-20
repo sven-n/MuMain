@@ -142,22 +142,34 @@ std::uint64_t LastSequence()
     return Ring().lastSequence;
 }
 
-std::vector<Record> Since(std::uint64_t seq)
+void ForEachSince(std::uint64_t seq, const std::function<bool(const Record&)>& visit)
 {
     const RingState& ring = Ring();
-
-    std::vector<Record> selected;
-    selected.reserve(ring.count);
 
     const std::size_t oldest = (ring.next + RingCapacity - ring.count) % RingCapacity;
     for (std::size_t offset = 0; offset < ring.count; ++offset)
     {
         const Record& record = ring.entries[(oldest + offset) % RingCapacity];
-        if (record.seq > seq)
+        if (record.seq <= seq)
         {
-            selected.push_back(record);
+            continue;
+        }
+        if (!visit(record))
+        {
+            return;
         }
     }
+}
+
+std::vector<Record> Since(std::uint64_t seq)
+{
+    std::vector<Record> selected;
+    ForEachSince(seq,
+                 [&selected](const Record& record)
+                 {
+                     selected.push_back(record);
+                     return true;
+                 });
     return selected;
 }
 
