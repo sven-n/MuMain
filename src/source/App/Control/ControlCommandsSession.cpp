@@ -28,6 +28,10 @@
 extern int LoadingWorld;
 extern bool LogOut;
 
+// Whether the game server connection is up; the client's own exit path
+// tests it before saying goodbye (Winmain.cpp:145).
+extern "C++" BOOL g_bGameServerConnected;
+
 namespace
 {
 using App::Control::Act;
@@ -244,8 +248,11 @@ private:
         }
 
         // A client that has just started is still asking the connect
-        // server for its list; wait for it rather than refusing.
-        if (g_ServerListManager->GetServerGroupSize() < 1)
+        // server for its list; wait for it rather than refusing. The same
+        // wait covers a `login` that left a session first: that tears the
+        // game-server connection down and reopens the connect-server one,
+        // and selecting a server before it is back sends into nothing.
+        if (g_ServerListManager->GetServerGroupSize() < 1 || SceneFlag == MAIN_SCENE || g_bGameServerConnected)
         {
             return Status::Running;
         }
@@ -467,8 +474,6 @@ private:
 
 // Whether the game server connection is up; the client's own exit path
 // tests it before saying goodbye (Winmain.cpp:145).
-extern "C++" BOOL g_bGameServerConnected;
-
 namespace App::Control::Commands
 {
 std::string Login(const Request& request, std::unique_ptr<Act>& act)
@@ -519,8 +524,13 @@ std::string SelectCharacter(const Request& request, std::unique_ptr<Act>& act)
 
     int slot = -1;
     std::string name;
-    if (request.GetInt("slot", slot))
+    if (request.Has("slot"))
     {
+        if (!request.GetInt("slot", slot))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`slot` is a whole number from 1");
+        }
+
         // The spec counts slots as the list shows them, from 1. Checked
         // before the conversion: `slot` carries anything an int holds, and
         // decrementing its minimum first would be signed overflow.

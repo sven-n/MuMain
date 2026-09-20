@@ -149,20 +149,41 @@ void StopWalking()
     Hero->Path.Lock.unlock();
 }
 
-// Server-assigned id of the object a command names, by id or by character
-// name. -1 when the client does not know it.
-int ResolveTargetKey(const Request& request)
+// What a `target` field turned out to be. A malformed one is a different
+// answer from one the client simply does not see, and the commands say so.
+enum class TargetLookup : std::uint8_t
 {
+    Missing,
+    Malformed,
+    NotInView,
+    Found,
+};
+
+// Server-assigned id of the object a command names, by id or by character
+// name.
+TargetLookup ResolveTarget(const Request& request, int& key)
+{
+    key = -1;
+    if (!request.Has("target"))
+    {
+        return TargetLookup::Missing;
+    }
+
     int id = 0;
     if (request.GetInt("target", id))
     {
-        return FindCharacterIndex(id) < MAX_CHARACTERS_CLIENT ? id : -1;
+        if (FindCharacterIndex(id) >= MAX_CHARACTERS_CLIENT)
+        {
+            return TargetLookup::NotInView;
+        }
+        key = id;
+        return TargetLookup::Found;
     }
 
     std::string name;
     if (!request.GetString("target", name) || name.empty())
     {
-        return -1;
+        return TargetLookup::Malformed;
     }
 
     const std::wstring wanted = Core::Text::FromUtf8(name);
@@ -171,10 +192,33 @@ int ResolveTargetKey(const Request& request)
         const CHARACTER& character = CharactersClient[index];
         if (character.Object.Live && wcscmp(character.ID, wanted.c_str()) == 0)
         {
-            return character.Key;
+            key = character.Key;
+            return TargetLookup::Found;
         }
     }
-    return -1;
+    return TargetLookup::NotInView;
+}
+
+// The error a lookup that did not find an object deserves, or an empty
+// string when it did. `required` says whether the command needs one.
+std::string TargetError(const Request& request, TargetLookup lookup, std::string_view command, bool required)
+{
+    switch (lookup)
+    {
+    case TargetLookup::Found:
+        return {};
+    case TargetLookup::Missing:
+        return required ? App::Control::EncodeError(request.EncodedId(), App::Control::ErrorCode::BadRequest,
+                                                    "`" + std::string(command) + "` needs a `target`")
+                        : std::string{};
+    case TargetLookup::Malformed:
+        return App::Control::EncodeError(request.EncodedId(), App::Control::ErrorCode::BadRequest,
+                                         "`target` is an object id or a character name");
+    case TargetLookup::NotInView:
+        break;
+    }
+    return App::Control::EncodeError(request.EncodedId(), App::Control::ErrorCode::NotInView,
+                                     "the client does not see that object");
 }
 
 // Sends one chat line the way the chat box does.
@@ -552,6 +596,13 @@ private:
 class WarpAct : public Act
 {
 public:
+    // A warp across servers leaves the world scene as its own work: the
+    // dispatcher's scene guard must not end it for doing so.
+    [[nodiscard]] bool ChangesScene() const override
+    {
+        return true;
+    }
+
     WarpAct(int mapIndex, std::string name) : m_mapIndex(mapIndex), m_name(std::move(name)) {}
 
     [[nodiscard]] std::string_view Name() const override
@@ -831,10 +882,11 @@ std::string Teleport(const Request& request, std::unique_ptr<Act>& act)
 
 std::string Attack(const Request& request, std::unique_ptr<Act>& act)
 {
-    const int targetKey = ResolveTargetKey(request);
-    if (targetKey < 0)
+    int targetKey = -1;
+    const std::string targetFailure = TargetError(request, ResolveTarget(request, targetKey), "attack", true);
+    if (!targetFailure.empty())
     {
-        return EncodeError(request.EncodedId(), ErrorCode::NotInView, "the client does not see that object");
+        return targetFailure;
     }
 
     int times = 1;
@@ -873,12 +925,14 @@ std::string Skill(const Request& request, std::unique_ptr<Act>& act)
     // one, the skill is aimed at that object; without one, it is cast where
     // the character stands. Which skills accept which form is the server's
     // rule, not a table this client holds.
-    const int targetKey = ResolveTargetKey(request);
-    const bool targetRequired = request.Has("target");
-    if (targetRequired && targetKey < 0)
+    int targetKey = -1;
+    const TargetLookup lookup = ResolveTarget(request, targetKey);
+    const std::string targetFailure = TargetError(request, lookup, "skill", false);
+    if (!targetFailure.empty())
     {
-        return EncodeError(request.EncodedId(), ErrorCode::NotInView, "the client does not see that object");
+        return targetFailure;
     }
+    const bool targetRequired = lookup == TargetLookup::Found;
 
     act = std::make_unique<SkillAct>(skill, targetRequired, targetKey);
     return {};
@@ -977,8 +1031,23 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // NewUIInventoryActionController.cpp:133, WSclient.cpp:6312). Sending
     // the request without it leaves the source slot holding a copy of an
     // item the server has already moved.
-    SEASON3B::CNewUIInventoryCtrl* inventory = g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr;
-    ITEM* moving = g_pMyInventory != nullptr ? g_pMyInventory->FindItem(fromSlot) : nullptr;
+    // The extension slots live in their own control, and the main inventory
+    // does not know them: the item is taken from whichever holds the slot.
+    const bool inExtension = !IsMainInventorySlot(fromSlot);
+    SEASON3B::CNewUIInventoryCtrl* inventory = nullptr;
+    ITEM* moving = nullptr;
+    if (inExtension)
+    {
+        inventory =
+            g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(fromSlot) : nullptr;
+        moving = g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->FindItem(fromSlot) : nullptr;
+    }
+    else
+    {
+        inventory = g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+        moving = g_pMyInventory != nullptr ? g_pMyInventory->FindItem(fromSlot) : nullptr;
+    }
+
     if (inventory == nullptr || moving == nullptr)
     {
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the inventory is not available");
@@ -987,6 +1056,12 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() != nullptr)
     {
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "an item is already being moved");
+    }
+
+    // The same lock the player's own pick honours (NewUIInventoryCtrl.cpp:947).
+    if (inventory->IsLocked())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "the inventory is locked");
     }
 
     if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
@@ -1082,10 +1157,11 @@ std::string Party(const Request& request, std::unique_ptr<Act>&)
 
     if (action == "invite")
     {
-        const int targetKey = ResolveTargetKey(request);
-        if (targetKey < 0)
+        int targetKey = -1;
+        const std::string targetFailure = TargetError(request, ResolveTarget(request, targetKey), "party invite", true);
+        if (!targetFailure.empty())
         {
-            return EncodeError(request.EncodedId(), ErrorCode::NotInView, "the client does not see that player");
+            return targetFailure;
         }
 
         SocketClient->ToGameServer()->SendPartyInviteRequest(static_cast<uint16_t>(targetKey));
