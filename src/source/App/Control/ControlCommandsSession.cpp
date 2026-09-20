@@ -36,8 +36,6 @@ constexpr std::chrono::milliseconds LoginDeadline{60000};
 constexpr std::chrono::milliseconds SelectCharacterDeadline{60000};
 constexpr std::chrono::milliseconds LogoutDeadline{30000};
 
-// Seeded test accounts use the account name as the password; the spec makes
-// that the default so `login test1` is enough.
 // Longest credential the client's own fields accept, in wide characters.
 // A caller is told when it exceeds them rather than having its account
 // silently truncated to something that will not log in.
@@ -46,6 +44,8 @@ bool CredentialFits(const std::string& text, std::size_t limit)
     return Core::Text::FromUtf8(text).size() <= limit;
 }
 
+// Seeded test accounts use the account name as the password; the spec makes
+// that the default so `login test1` is enough.
 std::string PasswordOr(const Request& request, const std::string& account)
 {
     std::string password;
@@ -240,8 +240,13 @@ private:
         }
 
         // ReceiveJoinServer sets this once the game server accepted the
-        // connection and the login window is up.
-        if (CurrentProtocolState != RECEIVE_JOIN_SERVER_SUCCESS)
+        // connection and the login window is up. Anything past it is just as
+        // ready: a `login` issued after one that failed finds the state on
+        // that failure's code, and waiting for the exact value would spin
+        // until the deadline instead of submitting the new credentials.
+        // The stage above this one has already sent anything at or past
+        // RECEIVE_CHARACTERS_LIST back to leaving the session.
+        if (CurrentProtocolState < RECEIVE_JOIN_SERVER_SUCCESS)
         {
             return Status::Running;
         }
@@ -260,7 +265,11 @@ private:
             return Fail(response, ErrorCode::LoginFailed, reason);
         }
 
-        if (CurrentProtocolState != RECEIVE_CHARACTERS_LIST)
+        // At or past the list: the only state beyond it is entering the
+        // world, and answering with the list the client holds is right
+        // either way. Waiting for the exact value would hang if the client
+        // moved on between two polls.
+        if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
         {
             return Status::Running;
         }
