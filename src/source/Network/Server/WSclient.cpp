@@ -966,6 +966,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
+        App::Control::Events::RecordDisconnected("the session went back to the character list");
         StopMusic();
         AllStopSound();
 

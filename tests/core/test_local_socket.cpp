@@ -273,6 +273,7 @@ TEST_CASE("Local socket file is owner-only and replaces a stale file [core][loca
         REQUIRE(stale != INVALID_SOCKET);
         sockaddr_un address{};
         address.sun_family = AF_UNIX;
+        REQUIRE(path.size() < sizeof(address.sun_path));
         std::memcpy(address.sun_path, path.c_str(), path.size());
         REQUIRE(::bind(stale, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) == 0);
         closesocket(stale);

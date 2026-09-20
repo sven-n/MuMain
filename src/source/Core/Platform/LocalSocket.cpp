@@ -396,6 +396,18 @@ bool SomethingIsListening(const std::string& path)
     const bool listening = connected                 ? true
                            : ConnectPending(failure) ? ProbeSettled(probe)
                                                      : ProbeFailureIsLive(failure);
+
+    if (listening)
+    {
+        // The knock was answered, so a live client has this connection in
+        // its accept queue: shut it down rather than leave it a peer that
+        // never speaks.
+#ifdef _WIN32
+        ::shutdown(probe, SD_BOTH);
+#else
+        ::shutdown(probe, SHUT_RDWR);
+#endif
+    }
     closesocket(probe);
     return listening;
 }

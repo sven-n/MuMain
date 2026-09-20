@@ -5,6 +5,7 @@
 #include "App/Platform/Windows/Winmain.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/ServerListManager.h"
+#include "MUHelper/MuHelper.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/CharacterScene.h"
 #include "Scenes/SceneCore.h"
@@ -446,6 +447,10 @@ private:
 };
 } // namespace
 
+// Whether the game server connection is up; the client's own exit path
+// tests it before saying goodbye (Winmain.cpp:145).
+extern "C++" BOOL g_bGameServerConnected;
+
 namespace App::Control::Commands
 {
 std::string Login(const Request& request, std::unique_ptr<Act>& act)
@@ -545,6 +550,16 @@ std::string Logout(const Request& request, std::unique_ptr<Act>& act)
 
 std::string Quit(const Request& request, std::unique_ptr<Act>&)
 {
+    // Same two steps the exit dialog takes (NewUICustomMessageBox.cpp:2343):
+    // stop the helper and tell the server the session is over, so the
+    // account is free again at once instead of after the server's timeout.
+    MUHelper::g_MuHelper.TriggerStop();
+    if (SocketClient != nullptr && g_bGameServerConnected)
+    {
+        LogOut = true;
+        SocketClient->ToGameServer()->SendLogOut(LogOutType::CloseGame);
+    }
+
     // The main loop leaves on the next frame and ShutdownRuntime unlinks
     // the socket, so the caller gets its answer before the client goes.
     Destroy = true;
