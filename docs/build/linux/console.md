@@ -54,6 +54,8 @@ This builds the engine, the `linux-x64` `MUnique.Client.Library.so`, and copies
 the assets and the library next to the executable. Drop `-DENABLE_EDITOR=ON`
 (or set it `OFF`) for a player build.
 
+If the packaged runtime has no global library path for SDL's video backends or the Vulkan loader (the client stops with `SDL video init failed` and an SDL error such as `wayland not available`), configure with `-DMU_LINK_SDL_PLATFORM_BACKENDS=ON`: SDL then links those libraries at build time and `Main` records their `RUNPATH`.
+
 ## Run
 
 ```bash
