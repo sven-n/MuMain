@@ -22,8 +22,11 @@
 
 #include "json.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cmath>
+#include <exception>
 #include <memory>
 #include <optional>
 #include <string>
@@ -70,6 +73,27 @@ constexpr std::chrono::milliseconds WalkRepeatInterval{300};
 // picking up all walk into range first, and a step per frame is what the
 // server reads as a speed hack.
 constexpr std::chrono::milliseconds PrimitiveInterval{250};
+
+// A map index written as text, for the callers that send `map` as a string.
+// Digits only: a map name cannot be resolved back to an index here.
+bool ParseMapIndex(const std::string& text, int& map)
+{
+    if (text.empty() ||
+        !std::all_of(text.begin(), text.end(), [](unsigned char character) { return std::isdigit(character) != 0; }))
+    {
+        return false;
+    }
+
+    try
+    {
+        map = std::stoi(text);
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+    return true;
+}
 
 // True while the character is still walking a planned path. Re-issuing a
 // move before it ends restarts the walk from the current tile, so an act
@@ -500,7 +524,13 @@ private:
     std::chrono::steady_clock::time_point m_lastStep{};
 };
 
-// warp: the warp list entry, answered when the map has changed.
+// A same-map warp does not go through the map-change handshake, so it is
+// recognised by the jump it makes: the destination is a fixed gate, far
+// enough from anywhere a character stands for this not to be confused with
+// a step.
+constexpr int WarpJumpTiles = 4;
+
+// warp: the warp list entry, answered once the character has been moved.
 class WarpAct : public Act
 {
 public:
@@ -528,13 +558,27 @@ public:
         if (!m_sent)
         {
             m_fromMap = gMapManager.WorldActive;
+            m_fromX = Hero != nullptr ? Hero->PositionX : -1;
+            m_fromY = Hero != nullptr ? Hero->PositionY : -1;
             SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(),
                                                                  static_cast<uint16_t>(m_mapIndex));
             m_sent = true;
             return Status::Running;
         }
 
-        if (SceneFlag != MAIN_SCENE || gMapManager.WorldActive == m_fromMap)
+        // Waiting for the map index to *change* never finishes for a warp to
+        // the map the character is standing on — which is an ordinary thing
+        // to do, it is how you get back to a town's spawn point, and the
+        // server honours it. The warp-list index in the request is not a
+        // world index, so it cannot stand in for the destination either.
+        // What is waited for is therefore the character being moved: a
+        // different map, or the jump to the gate on the same one.
+        if (SceneFlag != MAIN_SCENE)
+        {
+            return Status::Running;
+        }
+
+        if (gMapManager.WorldActive == m_fromMap && !HasJumped())
         {
             return Status::Running;
         }
@@ -547,10 +591,19 @@ public:
     }
 
 private:
+    // Whether the character has been put down somewhere else on this map.
+    [[nodiscard]] bool HasJumped() const
+    {
+        return Hero != nullptr && (std::abs(Hero->PositionX - m_fromX) > WarpJumpTiles ||
+                                   std::abs(Hero->PositionY - m_fromY) > WarpJumpTiles);
+    }
+
     int m_mapIndex;
     std::string m_name;
     bool m_sent = false;
     int m_fromMap = -1;
+    int m_fromX = -1;
+    int m_fromY = -1;
 };
 
 // teleport: the game master's own move command, answered when the
@@ -558,8 +611,8 @@ private:
 class TeleportAct : public Act
 {
 public:
-    TeleportAct(std::string command, int tileX, int tileY)
-        : m_command(std::move(command)), m_tileX(tileX), m_tileY(tileY)
+    TeleportAct(std::string command, int map, int tileX, int tileY)
+        : m_command(std::move(command)), m_map(map), m_tileX(tileX), m_tileY(tileY)
     {
     }
 
@@ -590,7 +643,12 @@ public:
             return Status::Running;
         }
 
-        if (Hero == nullptr || std::abs(Hero->PositionX - m_tileX) > ArrivalTiles ||
+        // The map is part of arrival, not only the tile: map coordinates
+        // overlap across maps, so a character standing near the requested
+        // tile on the map it is leaving would otherwise satisfy this on the
+        // first tick — before the server could have answered at all — and the
+        // result would then report the old map it never left.
+        if (Hero == nullptr || gMapManager.WorldActive != m_map || std::abs(Hero->PositionX - m_tileX) > ArrivalTiles ||
             std::abs(Hero->PositionY - m_tileY) > ArrivalTiles)
         {
             if (std::chrono::steady_clock::now() - m_sentAt < TeleportRefusalWindow)
@@ -612,6 +670,7 @@ public:
 
 private:
     std::string m_command;
+    int m_map;
     int m_tileX;
     int m_tileY;
     bool m_sent = false;
@@ -662,17 +721,30 @@ std::string Teleport(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`teleport` needs `x` and `y`");
     }
 
-    std::string map;
-    if (!request.GetString("map", map) || map.empty())
+    // The map is taken as a number, not a name: the act has to recognise the
+    // destination to know the character arrived, and the client has no
+    // mapping from a map's (localised) name back to its index. Omitted means
+    // the map the character is on.
+    int map = gMapManager.WorldActive;
+    std::string mapText;
+    if (request.GetString("map", mapText) && !mapText.empty())
     {
-        map = std::to_string(gMapManager.WorldActive);
+        if (!ParseMapIndex(mapText, map))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                               "`teleport` takes the map as a number, not `" + mapText + "`");
+        }
+    }
+    else if (request.GetInt("map", map) && map < 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`teleport` needs a map index of 0 or more");
     }
 
     // The server's own game-master command: /move <character> <map> <x> <y>.
-    const std::string command =
-        "/move " + Core::Text::ToUtf8(Hero->ID) + " " + map + " " + std::to_string(tileX) + " " + std::to_string(tileY);
+    const std::string command = "/move " + Core::Text::ToUtf8(Hero->ID) + " " + std::to_string(map) + " " +
+                                std::to_string(tileX) + " " + std::to_string(tileY);
 
-    act = std::make_unique<TeleportAct>(command, tileX, tileY);
+    act = std::make_unique<TeleportAct>(command, map, tileX, tileY);
     return {};
 }
 

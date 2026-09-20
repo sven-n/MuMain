@@ -78,7 +78,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `logout`, `quit` | back to the character list; close the client |
 | `move` (`x`, `y`) | walk there with the client's own path finder |
 | `warp` (`gate`) | use a warp-list entry by name |
-| `teleport` (`x`, `y`, `map`) | the game master's own move command |
+| `teleport` (`x`, `y`, `map`) | the game master's own move command; `map` is an index, the current map when omitted |
 | `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
 | `skill` (`skill`, `target`) | cast a skill the character owns |
 | `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
