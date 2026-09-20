@@ -58,6 +58,13 @@ void ControlServer::Stop()
         return;
     }
 
+    // The dispatcher keeps per-connection state (a follower, the act a
+    // connection owns); dropping the sockets alone would leave it queuing
+    // answers for ids that no longer exist.
+    for (const Connection& connection : m_connections)
+    {
+        m_dispatcher.AbandonConnection(connection.id);
+    }
     m_connections.clear();
     // The next session starts from nothing known: without this, re-entering
     // the scene and map the last one ended on emits no `scene` or `map`
