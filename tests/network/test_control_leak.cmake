@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.25)
 # Fails (non-zero exit via FATAL_ERROR) if any control socket source was
 # compiled into the client while ENABLE_CONTROL_SOCKET=OFF. Run by CTest as:
 #   cmake -DSOURCES_FILE=<file> -DCONTROL_DIR=<dir> -DTRANSPORT_FILE=<file>
-#         -P test_control_leak.cmake
+#         -DINJECTOR_FILE=<file> -P test_control_leak.cmake
 # SOURCES_FILE is produced by file(GENERATE) and holds one source path per
 # line: the resolved SOURCES list of the target that owns the client code.
 # CONTROL_DIR is the absolute path of src/source/App/Control; TRANSPORT_FILE
-# the absolute path of the local-socket transport that only the control
-# socket uses.
+# the local-socket transport and INJECTOR_FILE the synthetic-input source,
+# both of which exist only for the control socket.
 
-foreach(var SOURCES_FILE CONTROL_DIR TRANSPORT_FILE)
+foreach(var SOURCES_FILE CONTROL_DIR TRANSPORT_FILE INJECTOR_FILE)
     if(NOT DEFINED ${var})
         message(FATAL_ERROR "${var} must be passed with -D${var}=<path>")
     endif()
@@ -30,6 +30,11 @@ foreach(src IN LISTS sources)
     endif()
     cmake_path(COMPARE "${src}" EQUAL "${TRANSPORT_FILE}" is_transport)
     if(is_transport)
+        list(APPEND leaked "${src}")
+        continue()
+    endif()
+    cmake_path(COMPARE "${src}" EQUAL "${INJECTOR_FILE}" is_injector)
+    if(is_injector)
         list(APPEND leaked "${src}")
     endif()
 endforeach()

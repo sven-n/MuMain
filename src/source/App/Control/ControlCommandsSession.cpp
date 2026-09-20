@@ -49,14 +49,21 @@ bool CredentialFits(const std::string& text, std::size_t limit)
 
 // Seeded test accounts use the account name as the password; the spec makes
 // that the default so `login test1` is enough.
-std::string PasswordOr(const Request& request, const std::string& account)
+// Empty when the field is present but not a string: the caller meant a
+// password and must be told, not quietly logged in with the account name.
+std::optional<std::string> PasswordOr(const Request& request, const std::string& account)
 {
-    std::string password;
-    if (request.GetString("password", password) && !password.empty())
+    if (!request.Has("password"))
     {
-        return password;
+        return account;
     }
-    return account;
+
+    std::string password;
+    if (!request.GetString("password", password) || password.empty())
+    {
+        return std::nullopt;
+    }
+    return password;
 }
 
 // The character list as `login` and `select-char` report it.
@@ -455,7 +462,14 @@ std::string Login(const Request& request, std::unique_ptr<Act>& act)
                            "the account is longer than " + std::to_string(MAX_USERNAME_SIZE) + " characters");
     }
 
-    const std::string password = PasswordOr(request, account);
+    const std::optional<std::string> given = PasswordOr(request, account);
+    if (!given.has_value())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`password` is a non-empty string; omit it to use the account name");
+    }
+
+    const std::string& password = *given;
     if (!CredentialFits(password, MAX_PASSWORD_SIZE))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,

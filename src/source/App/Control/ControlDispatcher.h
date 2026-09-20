@@ -142,6 +142,11 @@ public:
     }
     [[nodiscard]] std::string_view ActName() const;
 
+    // Whether anything is still owed to that connection: the act in flight
+    // belongs to it, or a reader registered on it is still running. A peer
+    // that closed its write end is kept until this turns false.
+    [[nodiscard]] bool OwesAnswer(std::size_t connection) const;
+
     // Takes everything queued for sending.
     [[nodiscard]] std::vector<OutgoingResponse> TakeResponses();
 

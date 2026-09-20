@@ -43,6 +43,7 @@ else()
             "-DSOURCES_FILE=${CMAKE_CURRENT_BINARY_DIR}/muclient_sources.txt"
             "-DCONTROL_DIR=${PROJECT_SOURCE_DIR}/src/source/App/Control"
             "-DTRANSPORT_FILE=${PROJECT_SOURCE_DIR}/src/source/Core/Platform/LocalSocket.cpp"
+            "-DINJECTOR_FILE=${PROJECT_SOURCE_DIR}/src/source/Core/Input/SyntheticInput.cpp"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/test_control_leak.cmake")
 endif()
 

@@ -5,6 +5,7 @@
 #include "App/Control/ControlEvents.h"
 #include "Scenes/SceneCore.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <optional>
@@ -89,6 +90,17 @@ bool Dispatcher::SceneAllows(SceneRequirement requirement)
         return SceneFlag != MAIN_SCENE;
     }
     return false;
+}
+
+bool Dispatcher::OwesAnswer(std::size_t connection) const
+{
+    if (m_act && m_actConnection == connection)
+    {
+        return true;
+    }
+
+    return std::any_of(m_watchers.begin(), m_watchers.end(),
+                       [connection](const Watcher& watcher) { return watcher.connection == connection; });
 }
 
 std::string_view Dispatcher::ActName() const

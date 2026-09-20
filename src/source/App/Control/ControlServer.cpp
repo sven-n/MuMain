@@ -192,9 +192,11 @@ void ControlServer::CloseFinishedPeers()
     {
         // A peer that shut its end down is answered and then let go: it can
         // send nothing more, and holding the slot open would keep one of the
-        // sixteen connections for a script that has already left.
+        // sixteen connections for a script that has already left. An act it
+        // started still owes it an answer, and a one-shot `move` is as much
+        // a question as a `ping`.
         if (connection.socket->IsOpen() && connection.socket->PeerClosed() && !connection.socket->HasLine() &&
-            !connection.socket->HasPendingOutput())
+            !connection.socket->HasPendingOutput() && !m_dispatcher.OwesAnswer(connection.id))
         {
             connection.socket->Close();
         }

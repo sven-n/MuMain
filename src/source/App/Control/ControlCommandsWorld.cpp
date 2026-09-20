@@ -55,7 +55,9 @@ constexpr std::chrono::milliseconds AttackDeadline{60000};
 constexpr std::chrono::milliseconds SkillDeadline{15000};
 constexpr std::chrono::milliseconds PickupDeadline{30000};
 constexpr std::chrono::milliseconds WarpDeadline{30000};
-constexpr std::chrono::milliseconds TeleportDeadline{10000};
+// As long as `warp`: a teleport to another map is the same relocation and
+// the same world load, and the load is paced by rendered frames.
+constexpr std::chrono::milliseconds TeleportDeadline{30000};
 // A refused game-master move is silent on the wire: when the character has
 // not arrived within this window, the server did not allow it.
 constexpr std::chrono::milliseconds TeleportRefusalWindow{3000};

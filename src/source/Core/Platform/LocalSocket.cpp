@@ -118,6 +118,14 @@ void LocalSocketConnection::Close()
 
 bool LocalSocketConnection::ReadAvailable()
 {
+    if (m_peerClosed)
+    {
+        // Nothing more will arrive, and reading again would only rediscover
+        // the shutdown; what is buffered is still served, and the server
+        // closes the connection once it owes the peer nothing.
+        return IsOpen();
+    }
+
     if (m_handle == INVALID_SOCKET)
     {
         return false;
