@@ -797,7 +797,7 @@ std::string Attack(const Request& request, std::unique_ptr<Act>& act)
                            "`interval` is a whole number of milliseconds, 0 or more");
     }
 
-    act = std::make_unique<AttackAct>(targetKey, times, std::chrono::milliseconds(std::max(interval, 0)));
+    act = std::make_unique<AttackAct>(targetKey, times, std::chrono::milliseconds(interval));
     return {};
 }
 

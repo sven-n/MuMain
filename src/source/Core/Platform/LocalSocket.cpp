@@ -181,14 +181,20 @@ bool LocalSocketConnection::Write(std::string_view payload)
     }
 
     m_outbox.append(payload);
+    if (!Flush())
+    {
+        return false;
+    }
+
+    // Judged on what the kernel would not take: a large line is fine as long
+    // as it goes out, and only a peer that has stopped reading leaves this
+    // much behind. Dropping it is the same answer the inbox caps give.
     if (m_outbox.size() > MaxPendingOutputBytes)
     {
-        // The peer has stopped reading and the kernel buffer is full: drop
-        // it rather than grow without limit. Same rule as the inbox.
         Close();
         return false;
     }
-    return Flush();
+    return true;
 }
 
 bool LocalSocketConnection::Flush()
