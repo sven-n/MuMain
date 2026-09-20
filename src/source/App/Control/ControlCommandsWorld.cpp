@@ -990,7 +990,10 @@ std::string UseItem(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "the previous use has not been answered yet");
     }
 
-    SendRequestUse(slot, 0xFF, true);
+    // Target 0, as every in-client consume passes (NewUIMainFrameWindow.cpp:1050):
+    // a real slot there means "apply this jewel to that item", which is a
+    // different request.
+    SendRequestUse(slot, 0, true);
 
     json result;
     result["slot"] = slot;
@@ -1062,6 +1065,24 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     if (inventory->IsLocked())
     {
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "the inventory is locked");
+    }
+
+    if (toSlot == fromSlot)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the item is already in that slot");
+    }
+
+    // What the client's own move tests before it sends: the destination has
+    // to be able to hold this item (NewUIInventoryActionController.cpp:123).
+    // Tested before the item is lifted out, so a refused move leaves the
+    // inventory untouched.
+    SEASON3B::CNewUIInventoryCtrl* destination =
+        IsMainInventorySlot(toSlot) || toSlot < MAX_EQUIPMENT_INDEX
+            ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
+            : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
+    if (destination == nullptr || !destination->CanMove(toSlot, moving))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
     }
 
     if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
