@@ -196,6 +196,10 @@ void AdvanceClick()
     switch (g_injection.stage)
     {
     case Stage::Pressed:
+        // Reasserted every frame the click is held: SDL events are pumped
+        // between frames, so a real pointer movement would otherwise drag
+        // the injected click with it for a frame.
+        ApplyPointerPosition();
         g_injection.stage = Stage::Held;
         return;
     case Stage::Held:

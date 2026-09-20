@@ -26,6 +26,7 @@ enum class MouseButton : std::uint8_t
     Right,
 };
 
+#ifdef MU_ENABLE_CONTROL_SOCKET
 // Win32 virtual-key code for a key name (`esc`, `home`, `f1`, `a`, `7`, …),
 // case-insensitive; empty when the name is unknown.
 [[nodiscard]] std::optional<int> VirtualKeyFromName(std::string_view name);
@@ -67,4 +68,18 @@ void BeginFrame();
 // `CurrentGeneration()` first: whoever calls this drops whatever is in
 // flight, which may belong to another command.
 void Reset();
+#else
+// Without the control socket there is nothing to inject: the two calls the
+// rest of the client makes (the frame advance and the held-key test) compile
+// to nothing, exactly as the control taps do, so no call site needs a
+// conditional and the injector itself is not built into a player client.
+[[nodiscard]] inline bool IsKeyHeld(int)
+{
+    return false;
+}
+
+inline void BeginFrame() {}
+
+inline void Reset() {}
+#endif
 } // namespace Core::Input::Synthetic
