@@ -15,6 +15,7 @@
 #include <chrono>
 #include <memory>
 #include <optional>
+#include <cstddef>
 #include <string>
 #include <utility>
 
@@ -37,6 +38,14 @@ constexpr std::chrono::milliseconds LogoutDeadline{30000};
 
 // Seeded test accounts use the account name as the password; the spec makes
 // that the default so `login test1` is enough.
+// Longest credential the client's own fields accept, in wide characters.
+// A caller is told when it exceeds them rather than having its account
+// silently truncated to something that will not log in.
+bool CredentialFits(const std::string& text, std::size_t limit)
+{
+    return Core::Text::FromUtf8(text).size() <= limit;
+}
+
 std::string PasswordOr(const Request& request, const std::string& account)
 {
     std::string password;
@@ -398,10 +407,23 @@ std::string Login(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`login` needs an account");
     }
 
+    if (!CredentialFits(account, MAX_USERNAME_SIZE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "the account is longer than " + std::to_string(MAX_USERNAME_SIZE) + " characters");
+    }
+
+    const std::string password = PasswordOr(request, account);
+    if (!CredentialFits(password, MAX_PASSWORD_SIZE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "the password is longer than " + std::to_string(MAX_PASSWORD_SIZE) + " characters");
+    }
+
     std::string serverGroup;
     (void)request.GetString("server", serverGroup);
 
-    act = std::make_unique<LoginAct>(account, PasswordOr(request, account), Core::Text::FromUtf8(serverGroup));
+    act = std::make_unique<LoginAct>(account, password, Core::Text::FromUtf8(serverGroup));
     return {};
 }
 
