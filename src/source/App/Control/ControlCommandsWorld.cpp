@@ -955,12 +955,12 @@ std::string Whisper(const Request& request, std::unique_ptr<Act>&)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the chat line is too long");
     }
-    if (Core::Text::FromUtf8(name).size() >= CharacterNameLength)
+    const std::wstring wideName = Core::Text::FromUtf8(name);
+    if (wideName.size() >= CharacterNameLength)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the character name is too long");
     }
 
-    const std::wstring wideName = Core::Text::FromUtf8(name);
     const std::wstring wideText = Core::Text::FromUtf8(text);
     SocketClient->ToGameServer()->SendWhisperMessage(MU_C16(wideName.c_str()), MU_C16(wideText.c_str()));
 
