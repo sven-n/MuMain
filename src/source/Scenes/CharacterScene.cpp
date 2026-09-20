@@ -93,17 +93,6 @@ static bool HasCharacter(int slot)
     return CharactersClient[slot].ID[0] != L'\0';
 }
 
-int CharacterSlotCount()
-{
-    int count = 0;
-    for (int slot = 0; slot < MAX_CHARACTERS_PER_ACCOUNT; ++slot)
-    {
-        if (HasCharacter(slot))
-            ++count;
-    }
-    return count;
-}
-
 const wchar_t* CharacterNameInSlot(int slot)
 {
     return HasCharacter(slot) ? CharactersClient[slot].ID : L"";

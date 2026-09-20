@@ -136,12 +136,6 @@ public:
     // Returns false when nothing was running.
     bool InterruptAct(std::string_view reason);
 
-    [[nodiscard]] bool HasActInFlight() const
-    {
-        return m_act != nullptr;
-    }
-    [[nodiscard]] std::string_view ActName() const;
-
     // Whether anything is still owed to that connection: the act in flight
     // belongs to it, or a reader registered on it is still running. A peer
     // that closed its write end is kept until this turns false.
@@ -150,7 +144,6 @@ public:
     // Takes everything queued for sending.
     [[nodiscard]] std::vector<OutgoingResponse> TakeResponses();
 
-    [[nodiscard]] static const std::vector<CommandEntry>& Commands();
     [[nodiscard]] static const CommandEntry* FindCommand(std::string_view name);
 
     // Whether the client's current scene satisfies the requirement.

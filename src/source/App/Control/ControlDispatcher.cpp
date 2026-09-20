@@ -61,10 +61,6 @@ const std::vector<CommandEntry>& CommandTable()
 
 namespace App::Control
 {
-const std::vector<CommandEntry>& Dispatcher::Commands()
-{
-    return CommandTable();
-}
 
 const CommandEntry* Dispatcher::FindCommand(std::string_view name)
 {
@@ -101,11 +97,6 @@ bool Dispatcher::OwesAnswer(std::size_t connection) const
 
     return std::any_of(m_watchers.begin(), m_watchers.end(),
                        [connection](const Watcher& watcher) { return watcher.connection == connection; });
-}
-
-std::string_view Dispatcher::ActName() const
-{
-    return m_act ? m_act->Name() : std::string_view{};
 }
 
 void Dispatcher::Queue(std::size_t connection, std::string line)

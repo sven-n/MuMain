@@ -55,10 +55,6 @@ public:
     {
         return m_listener.IsListening();
     }
-    [[nodiscard]] const std::string& SocketPath() const
-    {
-        return m_listener.Path();
-    }
 
 private:
     struct Connection

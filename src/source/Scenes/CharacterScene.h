@@ -14,12 +14,9 @@ void StartGame();
 
 namespace Scenes
 {
-// How many characters the account has. Not a bound for the slot
-// functions below: the server places each character at its own index, so a
-// deleted character leaves a hole and the occupied slots are not the first
-// `CharacterSlotCount()` ones. Enumerate with `CharacterNameInSlot` over
-// every slot instead.
-[[nodiscard]] int CharacterSlotCount();
+// The server places each character at its own index, so a deleted character
+// leaves a hole: enumerate with `CharacterNameInSlot` over every slot rather
+// than over a count.
 // Slot of the character with that name, or -1. Case-sensitive, as the
 // server spells names.
 [[nodiscard]] int FindCharacterSlot(const wchar_t* name);

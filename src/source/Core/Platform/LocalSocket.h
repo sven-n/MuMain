@@ -11,6 +11,7 @@
 #include "Core/Platform/WinSock.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
