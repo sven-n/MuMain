@@ -9,6 +9,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
+#include "UI/Scaling/UITransform.h"
 #include "Audio/AudioPlayer.h"
 #include <algorithm>
 #include <cstring>
@@ -182,33 +183,40 @@ namespace
     constexpr int FONT_LABEL_Y_LOCAL = 244;
     constexpr int FONT_COMBO_X_LOCAL = 22;
     constexpr int FONT_COMBO_Y_LOCAL = 257;
-    constexpr int FONT_COMBO_WIDTH   = 148;
-    constexpr int FONT_COMBO_HEIGHT  = 16;
+    constexpr int FONT_COMBO_WIDTH = 148;
+    constexpr int FONT_COMBO_HEIGHT = 16;
     constexpr int FONT_COMBO_MAX_VISIBLE = 5;
-}
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+    constexpr int CLASSIC_BOTTOM_HUD_CHECKBOX_Y_LOCAL = 395;
+    constexpr int CLASSIC_BOTTOM_HUD_LABEL_Y_LOCAL = 400;
+    constexpr int OPTION_CLOSE_Y_LOCAL = 427;
+    constexpr int OPTION_WINDOW_HEIGHT = 458;
+    constexpr int OPTION_FRAME_SLAT_COUNT = 35;
+    } // namespace
 
-SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
-{
-    m_pNewUIMng = NULL;
-    m_Pos.x = 0;
-    m_Pos.y = 0;
+    //////////////////////////////////////////////////////////////////////
+    // Construction/Destruction
+    //////////////////////////////////////////////////////////////////////
 
-    m_bAutoAttack = true;
-    m_bWhisperSound = false;
-    m_bSlideHelp = true;
-    m_iVolumeLevel = GameConfig::GetInstance().GetSoundVolume();
-    m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
-    m_iRenderLevel = 4;
-    m_bRenderAllEffects = true;
-    m_iResolutionIndex = 0;
-    m_bWindowedMode = (g_bUseWindowMode == TRUE);
-    m_iLanguageIndex = FindCurrentLanguageIndex();
-    m_iFontIndex = FindCurrentFontIndex();
-}
+    SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
+    {
+        m_pNewUIMng = NULL;
+        m_Pos.x = 0;
+        m_Pos.y = 0;
+
+        m_bAutoAttack = true;
+        m_bWhisperSound = false;
+        m_bSlideHelp = true;
+        m_iVolumeLevel = GameConfig::GetInstance().GetSoundVolume();
+        m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
+        m_iRenderLevel = 4;
+        m_bRenderAllEffects = true;
+        m_iResolutionIndex = 0;
+        m_bWindowedMode = (g_bUseWindowMode == TRUE);
+        m_bBottomHudClassic = GameConfig::GetInstance().GetBottomHudClassic();
+        m_iLanguageIndex = FindCurrentLanguageIndex();
+        m_iFontIndex = FindCurrentFontIndex();
+    }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
 {
@@ -299,7 +307,7 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 388, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + OPTION_CLOSE_Y_LOCAL, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -392,12 +400,14 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         return false;
     }
 
-    bool oldWindowedMode = m_bWindowedMode;
+    const bool oldWindowedMode = m_bWindowedMode;
+    const bool oldBottomHudClassic = m_bBottomHudClassic;
     HandleCheckboxInputs();
 
     if (m_bWindowedMode != oldWindowedMode)
         ApplyWindowModeToggle();
-
+    if (m_bBottomHudClassic != oldBottomHudClassic)
+        ApplyBottomHudClassic();
     if (HandleVolumeSlider(m_iVolumeLevel, 104))
         OnSoundVolumeChanged();
 
@@ -408,7 +418,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 419))
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, OPTION_WINDOW_HEIGHT))
         return false;
 
     return true;
@@ -418,11 +428,9 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
 {
     struct Checkbox { int yLocal; bool* target; };
     const Checkbox boxes[] = {
-        {  43, &m_bAutoAttack        },
-        {  65, &m_bWhisperSound      },
-        { 155, &m_bSlideHelp         },
-        { 238, &m_bRenderAllEffects  },
-        { 356, &m_bWindowedMode      },
+        {43, &m_bAutoAttack},    {65, &m_bWhisperSound},
+        {155, &m_bSlideHelp},    {238, &m_bRenderAllEffects},
+        {356, &m_bWindowedMode}, {CLASSIC_BOTTOM_HUD_CHECKBOX_Y_LOCAL, &m_bBottomHudClassic},
     };
 
     constexpr int CHECKBOX_X_LOCAL = 150;
@@ -567,6 +575,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_FontCombo.SetSelectedIndex(m_iFontIndex);
     m_FontCombo.Close();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_bBottomHudClassic = GameConfig::GetInstance().GetBottomHudClassic();
 }
 
 void SEASON3B::CNewUIOptionWindow::ClosingProcess()
@@ -616,9 +625,8 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     x = m_Pos.x;
     y = m_Pos.y;
     // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
-    // slat count is tuned so the frame reaches the Close button (Y 388) plus the
-    // bottom border, after the Font/Language/Resolution/Windowed rows.
-    constexpr int SLAT_COUNT = 30;
+    // slat count reaches the Close button after the UI settings rows.
+    constexpr int SLAT_COUNT = OPTION_FRAME_SLAT_COUNT;
     constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
     RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
     RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
@@ -695,6 +703,10 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
+
+    y += 39.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f); // Classic Bottom HUD
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + CLASSIC_BOTTOM_HUD_LABEL_Y_LOCAL, I18N::Game::ClassicBottomHUD);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -770,6 +782,16 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     else
     {
         RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 15.f);
+    }
+
+    if (m_bBottomHudClassic)
+    {
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + CLASSIC_BOTTOM_HUD_CHECKBOX_Y_LOCAL, 15, 15, 0, 0);
+    }
+    else
+    {
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + CLASSIC_BOTTOM_HUD_CHECKBOX_Y_LOCAL, 15, 15, 0,
+                    15.f);
     }
 
     // Combo boxes drawn last so their expanded dropdowns sit on top of
@@ -965,4 +987,11 @@ void SEASON3B::CNewUIOptionWindow::ApplyWindowModeToggle()
     // Consume the in-flight VK_LBUTTON press so the same click doesn't
     // toggle again next frame; the user must release and click again.
     g_pNewKeyInput->SetKeyState(VK_LBUTTON, SEASON3B::CNewKeyInput::KEY_NONE);
+}
+
+void SEASON3B::CNewUIOptionWindow::ApplyBottomHudClassic()
+{
+    UI::Scaling::SetBottomHudClassic(m_bBottomHudClassic);
+    GameConfig::GetInstance().SetBottomHudClassic(m_bBottomHudClassic);
+    GameConfig::GetInstance().Save();
 }

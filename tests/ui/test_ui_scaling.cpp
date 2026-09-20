@@ -615,6 +615,30 @@ TEST_CASE("bottom HUD regional transforms round trip window positions [ui][scali
     CHECK(UI::Scaling::LogicalY(center, UI::Scaling::PositionY(center, 450.0f)) == doctest::Approx(450.0f));
 }
 
+TEST_CASE("classic bottom HUD centers the whole bar and keeps the rail its width [ui][scaling]")
+{
+    CHECK_FALSE(CfgDefaults::CfgDefaultBottomHudClassic);
+    CHECK_FALSE(UI::Scaling::IsBottomHudClassic());
+    UI::Scaling::SetBottomHudClassic(true);
+    const auto left = UI::Scaling::BottomHudLeftTransform(1920, 1080);
+    const auto center = UI::Scaling::BottomHudCenterTransform(1920, 1080);
+    const auto right = UI::Scaling::BottomHudRightTransform(1920, 1080);
+    const auto experience = UI::Scaling::BottomHudExperienceTransform(1920, 1080);
+    UI::Scaling::SetBottomHudClassic(false);
+    CHECK_FALSE(UI::Scaling::IsBottomHudClassic());
+
+    CHECK(left.scaleX == doctest::Approx(2.0f));
+    CHECK(left.offsetX == doctest::Approx(320.0f));
+    CHECK(center.offsetX == doctest::Approx(left.offsetX));
+    CHECK(right.offsetX == doctest::Approx(left.offsetX));
+    CHECK(UI::Scaling::PositionX(left, 0.0f) == doctest::Approx(320.0f));
+    CHECK(UI::Scaling::PositionX(right, 640.0f) == doctest::Approx(1600.0f));
+    CHECK(UI::Scaling::PositionX(center, 320.0f) == doctest::Approx(960.0f));
+    CHECK(experience.scaleX == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::PositionX(experience, 640.0f) == doctest::Approx(1600.0f));
+    CHECK(UI::Scaling::PositionY(experience, 480.0f) == doctest::Approx(1080.0f));
+}
+
 TEST_CASE("experience transform spans the window with HUD vertical scale [ui][scaling]")
 {
     const auto experience = UI::Scaling::BottomHudExperienceTransform(1920, 1200);

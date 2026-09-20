@@ -67,6 +67,11 @@ public:
     // UI font family name (GDI face name). Empty = platform default.
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
+    bool GetBottomHudClassic() const
+    {
+        return m_bottomHudClassic;
+    }
+    void SetBottomHudClassic(bool classic);
 
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
@@ -127,6 +132,7 @@ private:
 
     std::wstring m_uiLocale;
     std::wstring m_fontSelection;
+    bool m_bottomHudClassic;
 
     int m_zoom;
     bool m_sortParticleDraws;
