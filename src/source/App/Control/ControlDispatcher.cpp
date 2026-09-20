@@ -302,17 +302,9 @@ void Dispatcher::TickAct()
         return;
     }
 
-    std::string response;
-    if (m_act->Tick(response) == Act::Status::Finished)
-    {
-        Queue(m_actConnection, std::move(response));
-        m_act.reset();
-        return;
-    }
-
-    // What this catches is the session ending *under* an act — a
-    // server-initiated disconnect, or a logout from elsewhere — which would
-    // otherwise leave it driving a character the client no longer has. The
+    // Before the step, not after: the session ending *under* an act — a
+    // server-initiated disconnect, or a logout from elsewhere — leaves the
+    // globals it reads released, and one more step is one too many. The
     // session acts move between scenes as their work, so they are exempt.
     if (!m_act->ChangesScene() && !SceneAllows(m_actScene))
     {
@@ -320,6 +312,14 @@ void Dispatcher::TickAct()
         Queue(m_actConnection, EncodeError(stranded->EncodedId(), ErrorCode::WrongScene,
                                            "`" + std::string(stranded->Name()) + "` lost the scene it needed",
                                            stranded->ProgressObject()));
+        return;
+    }
+
+    std::string response;
+    if (m_act->Tick(response) == Act::Status::Finished)
+    {
+        Queue(m_actConnection, std::move(response));
+        m_act.reset();
         return;
     }
 

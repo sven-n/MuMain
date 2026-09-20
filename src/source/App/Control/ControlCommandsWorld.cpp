@@ -738,6 +738,14 @@ std::string Warp(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`warp` needs a gate name");
     }
 
+    // The world scene is active for the whole join round-trip before the
+    // character exists (MainScene.cpp:138 → WSclient.cpp:1155), and the
+    // requirement check below reads it. Same guard `teleport` carries.
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+    }
+
     const std::wstring wide = Core::Text::FromUtf8(name);
     const int mapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(wide.c_str());
     if (mapIndex < 0)
