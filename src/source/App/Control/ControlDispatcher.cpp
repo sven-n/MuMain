@@ -205,6 +205,7 @@ void Dispatcher::Handle(const Request& request, std::size_t connection)
 
         act->SetEncodedId(request.EncodedId());
         m_act = std::move(act);
+        m_actScene = entry->scene;
         m_actConnection = connection;
         m_actStartedAt = std::chrono::steady_clock::now();
 
@@ -296,6 +297,19 @@ void Dispatcher::TickAct()
     {
         Queue(m_actConnection, std::move(response));
         m_act.reset();
+        return;
+    }
+
+    // What this catches is the session ending *under* an act — a
+    // server-initiated disconnect, or a logout from elsewhere — which would
+    // otherwise leave it driving a character the client no longer has. The
+    // session acts move between scenes as their work, so they are exempt.
+    if (!m_act->ChangesScene() && !SceneAllows(m_actScene))
+    {
+        std::unique_ptr<Act> stranded = std::move(m_act);
+        Queue(m_actConnection, EncodeError(stranded->EncodedId(), ErrorCode::WrongScene,
+                                           "`" + std::string(stranded->Name()) + "` lost the scene it needed",
+                                           stranded->ProgressObject()));
         return;
     }
 

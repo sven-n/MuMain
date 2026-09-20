@@ -120,6 +120,10 @@ public:
     {
         return "login";
     }
+    [[nodiscard]] bool ChangesScene() const override
+    {
+        return true;
+    }
     [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return LoginDeadline;
@@ -329,6 +333,10 @@ public:
     {
         return "select-char";
     }
+    [[nodiscard]] bool ChangesScene() const override
+    {
+        return true;
+    }
     [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return SelectCharacterDeadline;
@@ -386,6 +394,10 @@ public:
     [[nodiscard]] std::string_view Name() const override
     {
         return "logout";
+    }
+    [[nodiscard]] bool ChangesScene() const override
+    {
+        return true;
     }
     [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {

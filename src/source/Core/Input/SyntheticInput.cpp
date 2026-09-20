@@ -132,7 +132,10 @@ void ApplyButtonDown()
         return;
     }
     MouseRButtonPop = false;
-    MouseRButtonPush = !MouseRButton;
+    if (!MouseRButton)
+    {
+        MouseRButtonPush = true;
+    }
     MouseRButton = true;
 }
 
@@ -140,13 +143,22 @@ void ApplyButtonUp()
 {
     if (g_injection.button == Core::Input::Synthetic::MouseButton::Left)
     {
-        MouseLButtonPop = MouseLButton;
+        // Set, never cleared, like the press edge above (Winmain.cpp:1023):
+        // assigning would take back a release another path recorded in this
+        // same frame.
+        if (MouseLButton)
+        {
+            MouseLButtonPop = true;
+        }
         MouseLButton = false;
         g_iMousePopPosition_x = MouseX;
         g_iMousePopPosition_y = MouseY;
         return;
     }
-    MouseRButtonPop = MouseRButton;
+    if (MouseRButton)
+    {
+        MouseRButtonPop = true;
+    }
     MouseRButton = false;
 }
 

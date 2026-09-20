@@ -60,6 +60,15 @@ public:
     // encoded line to send to the caller.
     [[nodiscard]] virtual Status Tick(std::string& response) = 0;
 
+    // Whether the act's own work moves the client between scenes (`login`,
+    // `select-char`, `logout`). The dispatcher ends any other act when the
+    // scene its command required goes away; these ones are the reason it
+    // went away, so they run to their own answer.
+    [[nodiscard]] virtual bool ChangesScene() const
+    {
+        return false;
+    }
+
     // How far the act got, as an encoded JSON object. Reported when the act
     // is interrupted or times out.
     [[nodiscard]] virtual std::string ProgressObject() const
@@ -152,6 +161,10 @@ private:
     void TickWatchers();
 
     std::unique_ptr<Act> m_act;
+    // The scene its command required: an act runs across frames, and a
+    // disconnect or a return to the login screen must end it rather than let
+    // it keep driving a character that is no longer there.
+    SceneRequirement m_actScene = SceneRequirement::Any;
     std::size_t m_actConnection = 0;
     std::chrono::steady_clock::time_point m_actStartedAt;
     std::vector<Watcher> m_watchers;
