@@ -624,6 +624,16 @@ public:
     {
         if (!m_sent)
         {
+            // The handler checked the hero, but an act ticks in later frames:
+            // a logout or a map change between the two leaves `SendChat`
+            // reading a character that is gone.
+            if (Hero == nullptr)
+            {
+                response = App::Control::EncodeError(EncodedId(), ErrorCode::WrongScene,
+                                                     "the character left the world before the command was sent");
+                return Status::Finished;
+            }
+
             m_fromMap = gMapManager.WorldActive;
             m_teleportsBefore = App::Control::Events::TeleportCount();
             SendChat(m_command);

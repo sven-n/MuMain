@@ -515,7 +515,11 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
 {
     std::string requestedPath;
     std::wstring targetPath;
-    if (request.GetString("out", requestedPath) && !requestedPath.empty())
+    if (request.Has("out") && !request.GetString("out", requestedPath))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`out` is a path");
+    }
+    if (!requestedPath.empty())
     {
         targetPath = ResolveScreenshotPath(requestedPath).wstring();
     }

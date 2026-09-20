@@ -225,10 +225,16 @@ void Dispatcher::TickWatchers()
         // the frame's budget so a backlog drains faster than one line per
         // rendered frame.
         std::size_t emitted = 0;
-        while (status == Act::Status::Emitted && emitted < MaxStreamedLinesPerFrame)
+        while (status == Act::Status::Emitted)
         {
             Queue(watcher->connection, std::move(response));
-            ++emitted;
+            if (++emitted == MaxStreamedLinesPerFrame)
+            {
+                // The budget is spent: asking for another line here would
+                // produce one this frame cannot send, so the reader is left
+                // where it is and continues next frame.
+                break;
+            }
             response.clear();
             status = watcher->command->Tick(response);
         }
@@ -241,7 +247,6 @@ void Dispatcher::TickWatchers()
         if (status == Act::Status::Emitted)
         {
             // The budget ran out with more to come; the rest follow next frame.
-            Queue(watcher->connection, std::move(response));
             ++watcher;
             continue;
         }
