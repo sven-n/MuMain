@@ -45,6 +45,12 @@ enum class MouseButton : std::uint8_t
 // answers once this turns true again.
 [[nodiscard]] bool IsIdle();
 
+// Identifies the injection most recently accepted: every `PressKey` or
+// `Click` that returns true gets a value of its own. A command reads it when
+// its injection is scheduled and compares later, so it can tell its own
+// injection from the next caller's.
+[[nodiscard]] std::uint64_t CurrentGeneration();
+
 // Whether the injected key is currently held; `IsKeyDown` ORs this in.
 [[nodiscard]] bool IsKeyHeld(int virtualKey);
 
@@ -54,6 +60,8 @@ void BeginFrame();
 
 // Forgets the in-flight injection, releasing a button it had already pressed.
 // Called when the command that scheduled one gives up on it — a timeout, an
-// interrupt, or a caller that disconnected — and by the tests.
+// interrupt, or a caller that disconnected — and by the tests. Compare
+// `CurrentGeneration()` first: whoever calls this drops whatever is in
+// flight, which may belong to another command.
 void Reset();
 } // namespace Core::Input::Synthetic

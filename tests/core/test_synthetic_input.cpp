@@ -10,6 +10,8 @@
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/WinCompat.h"
 
+#include <cstdint>
+
 extern int MouseX;
 extern int MouseY;
 extern float g_fWindowMouseX;
@@ -173,4 +175,31 @@ TEST_CASE("Abandoning an injection releases what it pressed [core][synthetic-inp
 
     // And a fresh injection is accepted right away.
     CHECK(Click(10.0f, 10.0f, MouseButton::Right));
+}
+
+TEST_CASE("Every accepted injection is numbered [core][synthetic-input]")
+{
+    ResetInjector guard;
+
+    const std::uint64_t idle = CurrentGeneration();
+    CHECK(CurrentGeneration() == idle);
+
+    CHECK(PressKey(VK_HOME));
+    const std::uint64_t first = CurrentGeneration();
+    CHECK(first != idle);
+
+    // A refused injection is not one: the number belongs to the press in
+    // flight, so its owner still recognises it.
+    CHECK_FALSE(PressKey('I'));
+    CHECK(CurrentGeneration() == first);
+
+    BeginFrame();
+    BeginFrame();
+    BeginFrame();
+    CHECK(IsIdle());
+    // Finishing does not hand the injector to anyone else either.
+    CHECK(CurrentGeneration() == first);
+
+    CHECK(Click(1.0f, 1.0f, MouseButton::Left));
+    CHECK(CurrentGeneration() != first);
 }

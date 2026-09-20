@@ -268,17 +268,21 @@ class SyntheticInputAct : public Act
 {
 public:
     SyntheticInputAct(std::string_view name, std::string encodedResult)
-        : m_name(name), m_encodedResult(std::move(encodedResult))
+        : m_name(name), m_encodedResult(std::move(encodedResult)),
+          m_generation(Core::Input::Synthetic::CurrentGeneration())
     {
     }
 
     // Timed out, interrupted, or its caller went away: forget the injection
     // instead of letting it reach the game after its command was answered.
-    // A finished injection is already gone, so this only bites on the paths
-    // that abandon one.
+    // Only its own: several of these run at once, so the injector may already
+    // be carrying the next caller's press.
     ~SyntheticInputAct() override
     {
-        Core::Input::Synthetic::Reset();
+        if (IsStillMine())
+        {
+            Core::Input::Synthetic::Reset();
+        }
     }
 
     [[nodiscard]] std::string_view Name() const override
@@ -300,7 +304,10 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        if (!Core::Input::Synthetic::IsIdle())
+        // Once the injector has moved on to another caller's injection, this
+        // one is over: waiting for the injector to be idle would report on a
+        // press that is not ours.
+        if (IsStillMine() && !Core::Input::Synthetic::IsIdle())
         {
             return Status::Running;
         }
@@ -309,8 +316,14 @@ public:
     }
 
 private:
+    [[nodiscard]] bool IsStillMine() const
+    {
+        return Core::Input::Synthetic::CurrentGeneration() == m_generation;
+    }
+
     std::string_view m_name;
     std::string m_encodedResult;
+    std::uint64_t m_generation;
 };
 
 // Absolute path for a caller-given one, so the answer names a file the

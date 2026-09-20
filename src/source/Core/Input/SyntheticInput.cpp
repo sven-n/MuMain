@@ -63,6 +63,10 @@ struct Injection
 
 Injection g_injection;
 
+// Numbers the injections, so a command can recognise its own. Never reused:
+// an act compares the value it was given when its injection was accepted.
+std::uint64_t g_generation = 0;
+
 struct NamedKey
 {
     std::string_view name;
@@ -245,6 +249,7 @@ bool PressKey(int virtualKey)
         return false;
     }
     g_injection = {};
+    ++g_generation;
     g_injection.kind = Kind::Key;
     g_injection.virtualKey = virtualKey;
     return true;
@@ -257,6 +262,7 @@ bool Click(float windowX, float windowY, MouseButton button)
         return false;
     }
     g_injection = {};
+    ++g_generation;
     g_injection.kind = Kind::Click;
     g_injection.windowX = windowX;
     g_injection.windowY = windowY;
@@ -267,6 +273,11 @@ bool Click(float windowX, float windowY, MouseButton button)
 bool IsIdle()
 {
     return g_injection.kind == Kind::None;
+}
+
+std::uint64_t CurrentGeneration()
+{
+    return g_generation;
 }
 
 bool IsKeyHeld(int virtualKey)
