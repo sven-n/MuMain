@@ -61,8 +61,6 @@ struct Record
     std::string fields;
 };
 
-using Subscriber = std::function<void(const Record&)>;
-
 // Recording is off until the control server enables it.
 void SetEnabled(bool enabled);
 [[nodiscard]] bool IsEnabled();
@@ -80,11 +78,6 @@ void ForEachSince(std::uint64_t seq, const std::function<bool(const Record&)>& v
 // Drops every retained event and resets the sequence. For tests and for a
 // fresh session; the client never calls it while a follower is attached.
 void Reset();
-
-// Live delivery for `events --follow`. The token unsubscribes.
-[[nodiscard]] std::size_t Subscribe(Subscriber subscriber);
-void Unsubscribe(std::size_t token);
-[[nodiscard]] std::size_t SubscriberCount();
 
 void RecordHit(Direction direction, int attackerKey, int targetKey, int damage, int shieldDamage, bool critical,
                bool missed);

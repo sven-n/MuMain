@@ -231,26 +231,3 @@ TEST_CASE("Control events name each recorder's fields [network][control-events]"
     CHECK(FieldsOf(recorded[8])["error"] == "no_path");
 }
 
-TEST_CASE("Control events reach a live follower [network][control-events]")
-{
-    const RingFixture fixture;
-
-    std::vector<std::string> delivered;
-    const std::size_t token =
-        Events::Subscribe([&delivered](const Events::Record& record) { delivered.push_back(record.name); });
-    CHECK(Events::SubscriberCount() == 1);
-
-    Events::RecordScene("world");
-    Events::RecordStat("life", 90, 100);
-    REQUIRE(delivered.size() == 2);
-    CHECK(delivered[0] == "scene");
-    CHECK(delivered[1] == "stat");
-
-    Events::Unsubscribe(token);
-    CHECK(Events::SubscriberCount() == 0);
-
-    Events::RecordScene("login");
-    CHECK(delivered.size() == 2);
-    // The unfollowed event is still in the ring for a later `events --since`.
-    CHECK(Events::Since(2).size() == 1);
-}

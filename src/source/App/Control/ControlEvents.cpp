@@ -23,12 +23,6 @@ struct RingState
     bool enabled = false;
 };
 
-struct SubscriberEntry
-{
-    std::size_t token = 0;
-    App::Control::Events::Subscriber callback;
-};
-
 RingState& Ring()
 {
     static RingState state;
@@ -39,12 +33,6 @@ App::Control::Events::ObjectResolver& Resolver()
 {
     static App::Control::Events::ObjectResolver resolver;
     return resolver;
-}
-
-std::vector<SubscriberEntry>& Subscribers()
-{
-    static std::vector<SubscriberEntry> subscribers;
-    return subscribers;
 }
 
 std::string UtcTimestamp()
@@ -109,14 +97,6 @@ void Push(std::string_view name, const json& fields)
     {
         ++ring.count;
     }
-
-    for (const SubscriberEntry& subscriber : Subscribers())
-    {
-        if (subscriber.callback)
-        {
-            subscriber.callback(record);
-        }
-    }
 }
 } // namespace
 
@@ -180,33 +160,6 @@ void Reset()
     ring.next = 0;
     ring.count = 0;
     ring.lastSequence = 0;
-}
-
-std::size_t Subscribe(Subscriber subscriber)
-{
-    static std::size_t nextToken = 0;
-
-    ++nextToken;
-    Subscribers().push_back({nextToken, std::move(subscriber)});
-    return nextToken;
-}
-
-void Unsubscribe(std::size_t token)
-{
-    std::vector<SubscriberEntry>& subscribers = Subscribers();
-    for (auto entry = subscribers.begin(); entry != subscribers.end(); ++entry)
-    {
-        if (entry->token == token)
-        {
-            subscribers.erase(entry);
-            return;
-        }
-    }
-}
-
-std::size_t SubscriberCount()
-{
-    return Subscribers().size();
 }
 
 void RecordHit(Direction direction, int attackerKey, int targetKey, int damage, int shieldDamage, bool critical,
