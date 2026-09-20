@@ -238,6 +238,33 @@ void LocalSocketListener::Unlink(const std::string& path)
 #endif
 }
 
+namespace
+{
+// Whether a socket file is a live listener rather than one left behind: the
+// only portable answer is to knock on it.
+bool SomethingIsListening(const std::string& path)
+{
+    if (path.size() > Core::Platform::LocalSocketListener::MaxPathLength())
+    {
+        return false;
+    }
+
+    const SOCKET probe = ::socket(AF_UNIX, SOCK_STREAM, 0);
+    if (probe == INVALID_SOCKET)
+    {
+        return false;
+    }
+
+    sockaddr_un address{};
+    address.sun_family = AF_UNIX;
+    std::memcpy(address.sun_path, path.c_str(), path.size());
+    const bool connected =
+        ::connect(probe, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) != SOCKET_ERROR;
+    closesocket(probe);
+    return connected;
+}
+} // namespace
+
 bool LocalSocketListener::Listen(const std::string& path, std::string& error)
 {
     Close();
@@ -264,7 +291,18 @@ bool LocalSocketListener::Listen(const std::string& path, std::string& error)
     }
 
     // A file left behind by a crashed client would make bind() fail with
-    // EADDRINUSE even though nothing is listening on it.
+    // EADDRINUSE even though nothing is listening on it — but a path a live
+    // client is serving must not be taken from it, which unlinking blindly
+    // would do silently: the first client keeps its socket open and never
+    // hears from anyone again. A connection that is accepted says somebody
+    // is there.
+    if (SomethingIsListening(path))
+    {
+        error = "another client is already listening on " + path;
+        closesocket(handle);
+        return false;
+    }
+
     Unlink(path);
 
     sockaddr_un address{};

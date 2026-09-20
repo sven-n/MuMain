@@ -156,10 +156,16 @@ bool ReadLineWithin(Core::Platform::LocalSocketConnection& connection, std::stri
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     while (std::chrono::steady_clock::now() < deadline)
     {
-        connection.ReadAvailable();
+        const bool open = connection.ReadAvailable();
         if (connection.TakeLine(line))
         {
             return true;
+        }
+        if (!open)
+        {
+            // The peer is gone: waiting out the timeout would report "no
+            // line yet" for a connection that can never produce one.
+            return false;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
@@ -303,10 +309,40 @@ TEST_CASE("Local socket rejects an impossible path and unlinks on demand [core][
     const std::string path = (directory / "unlink.sock").string();
     REQUIRE(listener.Listen(path, error));
     REQUIRE(SocketFileExists(path));
+    listener.Close();
     Core::Platform::LocalSocketListener::Unlink(path);
     CHECK_FALSE(SocketFileExists(path));
+    std::filesystem::remove_all(directory);
+}
 
-    listener.Close();
+TEST_CASE("Local socket refuses a path another listener is serving [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "taken.sock").string();
+
+    Core::Platform::LocalSocketListener first;
+    std::string error;
+    REQUIRE(first.Listen(path, error));
+
+    // A second client of the same name must not unlink the live socket and
+    // bind its own: the first would keep an open socket nobody can reach.
+    Core::Platform::LocalSocketListener second;
+    CHECK_FALSE(second.Listen(path, error));
+    CHECK(error.find("already listening") != std::string::npos);
+    CHECK_FALSE(second.IsListening());
+
+    // The first listener still serves.
+    CHECK(first.IsListening());
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    CHECK(AcceptWithin(first, std::chrono::milliseconds(500)) != nullptr);
+    closesocket(client);
+
+    // Once it is gone the path is free again, stale file and all.
+    first.Close();
+    Core::Platform::LocalSocketListener third;
+    CHECK(third.Listen(path, error));
+    third.Close();
     std::filesystem::remove_all(directory);
 }
 
