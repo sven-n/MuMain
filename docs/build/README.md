@@ -73,6 +73,8 @@ These apply to every setup; the per-setup guides only cover what differs.
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
 
+For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.
+
 ### The network library
 
 The client talks to the server through OpenMU's `MUnique.Client.Library`, a C#

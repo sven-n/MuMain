@@ -75,6 +75,14 @@ acceleration:
 MESA_LOADER_DRIVER_OVERRIDE=d3d12 ./Main
 ```
 
+## Reporting a Wayland problem
+
+From the repository root, run `scripts/wayland-diag.sh --timeout 60 --`.
+It writes a sanitized `summary.txt` under `diag/`; paste that into the report
+and attach only relevant raw-log excerpts. A pre-existing `MuError.log` is
+copied into the bundle as `MuError.log.previous` before the fresh run. `--tar`
+creates a local archive and does not upload it.
+
 ## Tests
 
 ```bash
