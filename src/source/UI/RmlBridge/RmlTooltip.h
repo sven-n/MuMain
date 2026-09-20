@@ -105,6 +105,15 @@ namespace UI::RmlBridge::Tooltip
         // the tooltip's real measured width (Show() doesn't know it up front, unlike the old native
         // path's synchronous GDI measurement), not a caller-side estimate.
         bool centerHorizontally = false;
+
+        // Per-line TEXT alignment WITHIN the panel's own width -- independent of centerHorizontally
+        // above (that only controls where the whole panel sits relative to anchorX). The old native
+        // RenderTipTextList()'s default `iSort` was RT3_SORT_CENTER, and CTooltip::Render()'s own
+        // RenderTextWithColors() call always passed RT3_SORT_CENTER too -- both item/pet and generic
+        // button tooltips need Center to match; the skill-hotkey tooltip's own pre-existing RmlUi
+        // CSS never set text-align (so it was already effectively Left), hence the differing default.
+        enum class TextAlign { Left, Center };
+        TextAlign textAlign = TextAlign::Left;
     };
 
     // Show()'s edge-clamping always wins over `anchor`/`centerHorizontally`'s preferred direction:

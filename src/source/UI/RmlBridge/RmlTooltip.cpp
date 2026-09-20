@@ -48,6 +48,7 @@ namespace UI::RmlBridge::Tooltip
             std::vector<TooltipLineEntry> lines;
             float posX = 0.0f;
             float posY = 0.0f;
+            bool centerText = false;
         };
 
         RmlModelBinder<TooltipRmlModel> s_RmlBinder;
@@ -110,6 +111,7 @@ namespace UI::RmlBridge::Tooltip
                     c.Bind("lines", &model.lines);
                     c.Bind("pos_x", &model.posX);
                     c.Bind("pos_y", &model.posY);
+                    c.Bind("center_text", &model.centerText);
                 });
 
             if (modelCreated)
@@ -143,6 +145,7 @@ namespace UI::RmlBridge::Tooltip
         model.lines.reserve(config.lines.size());
         for (const Line& line : config.lines)
             model.lines.push_back(ToLineEntry(line));
+        model.centerText = (config.textAlign == Config::TextAlign::Center);
 
         // First pass: a reasonable guess so layout has something sane to measure. Growing upward
         // needs the real height to place the bottom edge at anchorY, which isn't known yet -- use
@@ -152,6 +155,7 @@ namespace UI::RmlBridge::Tooltip
         s_RmlBinder.MarkDirty("lines");
         s_RmlBinder.MarkDirty("pos_x");
         s_RmlBinder.MarkDirty("pos_y");
+        s_RmlBinder.MarkDirty("center_text");
 
         s_pRmlDoc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
 
@@ -244,8 +248,14 @@ namespace UI::RmlBridge::Tooltip
         // See Owner's own comment (RmlTooltip.h) -- only actually hide if this caller (or an
         // ownerless caller) is the one the tooltip is currently showing for, so a not-hovered
         // caller's own per-frame Hide() can't clobber a different caller's legitimate Show() from
-        // earlier the same frame.
-        if (owner != nullptr && s_CurrentOwner != nullptr && owner != s_CurrentOwner)
+        // earlier the same frame. Bug fixed here: the old condition also required
+        // `s_CurrentOwner != nullptr` before protecting anything, so a NON-null-owner Hide() (e.g.
+        // MainFrameWindow's own `Hide(g_pSkillList)`, called every frame no skill hotkey is
+        // hovered) always fell through to hiding unconditionally whenever the current owner
+        // happened to be nullptr (any ownerless caller, e.g. MyInventory's Set/Socket tooltip) --
+        // it's the CALLER's own owner that must be nullptr (or match) to win, not the current
+        // owner's.
+        if (owner != nullptr && owner != s_CurrentOwner)
             return;
         s_pRmlDoc->Hide();
         s_CurrentOwner = nullptr;

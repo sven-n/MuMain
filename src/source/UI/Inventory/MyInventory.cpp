@@ -139,17 +139,6 @@ void CMyInventory::BuildRmlUi()
                 c.Bind("set_option_active", &model.setOptionActive);
                 c.Bind("socket_option_active", &model.socketOptionActive);
 
-                c.Bind("item_option_tooltip_visible", &model.itemOptionTooltipVisible);
-                auto tooltipLine = c.RegisterStruct<ItemOptionTooltipLineEntry>();
-                tooltipLine.RegisterMember("text", &ItemOptionTooltipLineEntry::text);
-                tooltipLine.RegisterMember("color_blue", &ItemOptionTooltipLineEntry::colorBlue);
-                tooltipLine.RegisterMember("color_yellow", &ItemOptionTooltipLineEntry::colorYellow);
-                tooltipLine.RegisterMember("color_green", &ItemOptionTooltipLineEntry::colorGreen);
-                tooltipLine.RegisterMember("color_purple", &ItemOptionTooltipLineEntry::colorPurple);
-                tooltipLine.RegisterMember("bold", &ItemOptionTooltipLineEntry::bold);
-                c.RegisterArray<std::vector<ItemOptionTooltipLineEntry>>();
-                c.Bind("item_option_tooltip_lines", &model.itemOptionTooltipLines);
-
                 c.BindEventCallback("my_inventory_set_option_hover",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
@@ -968,7 +957,8 @@ void CMyInventory::SyncRmlModel()
 
     // Shared tooltip -- only one of setOptionHovered/socketOptionHovered is ever true at a time.
     // BuildXxxTooltipModel() reuses the same content resolution as the old native-drawing code,
-    // minus the drawing.
+    // minus the drawing; the destination is now UI::RmlBridge::Tooltip's own shared document, not
+    // a per-window RML block, consolidated onto it the same way the item/skill tooltips were.
     auto& model = m_RmlBinder.GetModel();
     bool tooltipBuilt = false;
     UI::Inventory::Tooltip::Model tooltipModel;
@@ -979,26 +969,60 @@ void CMyInventory::SyncRmlModel()
 
     if (tooltipBuilt)
     {
-        model.itemOptionTooltipLines.clear();
+        UI::RmlBridge::Tooltip::Config config;
+        config.lines.reserve(static_cast<size_t>(tooltipModel.count));
         for (int i = 0; i < tooltipModel.count; ++i)
         {
             const UI::Inventory::Tooltip::Line& src = tooltipModel.lines[i];
-            ItemOptionTooltipLineEntry line;
+            UI::RmlBridge::Tooltip::Line line;
+            // BuildSetOptionTooltipModel()/BuildSocketOptionTooltipModel() reuse the old native
+            // TextList convention of sniffing a leading '\n' (half-height spacer) or a lone ' '
+            // (full-height spacer) rather than an explicit field -- same detection as
+            // ZzzInventory.cpp's own BuildTooltipLinesFromTextList(). Left as literal text here
+            // once (before this was noticed) rendered as a raw embedded newline character inside a
+            // `white-space: nowrap` .tt-line, which broke RmlUi's own text layout for the whole
+            // panel badly enough that nothing in it rendered.
+            if (src.text[0] == L'\n')
+            {
+                line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
+                config.lines.push_back(std::move(line));
+                continue;
+            }
+            if (src.text[0] == L' ' && src.text[1] == L'\0')
+            {
+                line.kind = UI::RmlBridge::Tooltip::Line::Kind::FullSpacer;
+                config.lines.push_back(std::move(line));
+                continue;
+            }
             line.text = StringUtils::WideToNarrow(src.text);
-            line.colorBlue = (src.color == UI::Inventory::Tooltip::LineColor::Blue);
-            line.colorYellow = (src.color == UI::Inventory::Tooltip::LineColor::Yellow);
-            line.colorGreen = (src.color == UI::Inventory::Tooltip::LineColor::Green);
-            line.colorPurple = (src.color == UI::Inventory::Tooltip::LineColor::Purple);
             line.bold = src.isBold;
-            model.itemOptionTooltipLines.push_back(line);
+            switch (src.color)
+            {
+            case UI::Inventory::Tooltip::LineColor::Blue: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
+            case UI::Inventory::Tooltip::LineColor::Yellow: line.color = UI::RmlBridge::Tooltip::LineColor::Yellow; break;
+            case UI::Inventory::Tooltip::LineColor::Green: line.color = UI::RmlBridge::Tooltip::LineColor::Green; break;
+            case UI::Inventory::Tooltip::LineColor::Purple: line.color = UI::RmlBridge::Tooltip::LineColor::Purple; break;
+            case UI::Inventory::Tooltip::LineColor::White: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
+            }
+            config.lines.push_back(std::move(line));
         }
-        model.itemOptionTooltipVisible = true;
-        m_RmlBinder.MarkDirty("item_option_tooltip_lines");
-        m_RmlBinder.MarkDirty("item_option_tooltip_visible");
+        // (95, 40) is the same reference-pixel point relative to #panel the old CSS
+        // (#item_option_tooltip's `left:25px` for a 140px-wide box, `top:40px`) resolved to --
+        // 95 was its horizontal center, 40 its top edge. Converted through the ambient transform
+        // like every other MyInventory-relative anchor (see SyncRootTransform()).
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(m_Pos.x + 95));
+        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(m_Pos.y + 40));
+        config.centerHorizontally = true;
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
+        // Ownerless (like the item-slot tooltip elsewhere in this class): hovering a Set/Socket
+        // label and hovering an equipment slot are mutually exclusive by mouse position, so there's
+        // no real simultaneous competitor for the shared tooltip here.
+        UI::RmlBridge::Tooltip::Show(config);
     }
     else
     {
-        syncBool(&MyInventoryRmlModel::itemOptionTooltipVisible, "item_option_tooltip_visible", false);
+        UI::RmlBridge::Tooltip::Hide();
     }
 }
 

@@ -9,7 +9,7 @@
      line divs below, in order, with no other sibling before them -- RmlTooltip.cpp's
      width-measurement pass indexes panel->GetChild(i) against config.lines[i] directly. -->
 <body data-model="tooltip" data-style-left="pos_x + 'px'" data-style-top="pos_y + 'px'">
-	<div id="tooltip_panel">
+	<div id="tooltip_panel" data-class-tt-centered="center_text">
 		<div class="tt-line" data-for="line : lines"
 		     data-class-tt-blue="line.color_blue" data-class-tt-gray="line.color_gray"
 		     data-class-tt-red="line.color_red" data-class-tt-yellow="line.color_yellow"

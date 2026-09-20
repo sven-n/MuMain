@@ -86,18 +86,6 @@ namespace mu::ui::window
         bool m_bMyShopOpen;
         bool m_bMyShopLocked = false;
 
-        // One shared hover tooltip for the Set Option and Socket Option header labels (mutually
-        // exclusive). Converted from UI::Inventory::Tooltip::Model; see SyncRmlModel().
-        struct ItemOptionTooltipLineEntry
-        {
-            Rml::String text;
-            bool colorBlue = false;
-            bool colorYellow = false;
-            bool colorGreen = false;
-            bool colorPurple = false;
-            bool bold = false;
-        };
-
         // Window frame/title/gold/buttons are RmlUi. The paperdoll and inventory grid stay native
         // since their icons are live 3D model renders (RenderItem3D()/Render3D()).
         struct MyInventoryRmlModel
@@ -121,16 +109,14 @@ namespace mu::ui::window
             Rml::String exitTooltip;
             Rml::String expandTooltip;
 
-            // Set/Socket option header labels + shared hover tooltip.
+            // Set/Socket option header labels. The shared hover tooltip itself is
+            // UI::RmlBridge::Tooltip, not part of this model -- see SyncRmlModel().
             Rml::String setOptionLabel;
             Rml::String socketOptionLabel;
             bool setOptionActive = false;    // IsAncientSetEquipped() -- label color
             bool socketOptionActive = false; // IsSocketSetOptionEnabled() -- label color
             bool setOptionHovered = false;
             bool socketOptionHovered = false;
-
-            bool itemOptionTooltipVisible = false;
-            std::vector<ItemOptionTooltipLineEntry> itemOptionTooltipLines;
         };
         RmlModelBinder<MyInventoryRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

@@ -88,35 +88,3 @@
 .option-label.active { color: #ffcc1a; }
 .option-label-set { left: 0; }
 .option-label-socket { left: 95px; }
-
-/* Shared tooltip for both labels above -- uses a precomputed static `left` instead of
-   `transform: translateX(-50%)`, since that resolves against a stale/zero box for a
-   `display:none`-until-shown element. tt-line colors match legacy: they carry meaning
-   (option category), not theme styling. */
-#item_option_tooltip {
-	position: absolute;
-	left: 25px;
-	top: 40px;
-	width: 140px;
-	text-align: center;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	border-radius: token(radius-sm)px;
-	padding: 4px 6px;
-	font-family: "token(font-body)";
-	font-size: 10px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tt-line {
-	display: block;
-	color: #ffffff;
-	white-space: normal;
-	min-height: 1.2em;
-	line-height: 1.2em;
-}
-.tt-line.tt-blue { color: #80b3ff; }
-.tt-line.tt-yellow { color: #ffcc1a; }
-.tt-line.tt-green { color: #1aff80; }
-.tt-line.tt-purple { color: #ff1aff; }
-.tt-line.bold { font-weight: bold; }

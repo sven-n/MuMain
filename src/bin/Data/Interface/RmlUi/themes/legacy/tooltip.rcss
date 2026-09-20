@@ -34,6 +34,12 @@ body {
 }
 .tt-line.bold { font-weight: bold; }
 
+/* config.textAlign == Center (RmlTooltip.h) -- matches RenderTipTextList()'s own default
+   RT3_SORT_CENTER (item/pet tooltips) and CTooltip::Render()'s own RT3_SORT_CENTER (button
+   tooltip). Targeted at .tt-line directly rather than relying on inherited text-align from
+   #tooltip_panel. */
+#tooltip_panel.tt-centered .tt-line { text-align: center; }
+
 /* Foreground colors -- exact RGB values from RenderTipTextList()'s own TEXT_COLOR_* switch
    (ZzzInventory.cpp), so this can't visually drift from what every native tooltip already used. */
 .tt-line.tt-blue { color: #80b3ff; }

@@ -867,6 +867,7 @@ static std::uint8_t g_tabBar = 0;
         config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
         config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
         config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
         UI::RmlBridge::Tooltip::Show(config);
         return true;
     }

@@ -120,34 +120,3 @@
 .option-label.active { color: #ffcc1a; }
 .option-label-set { left: 0; }
 .option-label-socket { left: 95px; }
-
-/* Shared tooltip for both labels, anchored at the same (95px, 40px) point both native call sites
-   used. No translateX(-50%) centering -- it resolves against the element's stale/zero box while
-   display:none (see main_frame.rcss's .tooltip comment); a precomputed static `left` sidesteps
-   it. */
-#item_option_tooltip {
-	position: absolute;
-	left: 25px;
-	top: 40px;
-	width: 140px;
-	text-align: center;
-	background-color: rgba(0, 0, 0, 200);
-	border-radius: 3px;
-	padding: 4px 6px;
-	font-family: "Liberation Sans";
-	font-size: 10px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tt-line {
-	display: block;
-	color: #ffffff;
-	white-space: normal;
-	min-height: 1.2em;
-	line-height: 1.2em;
-}
-.tt-line.tt-blue { color: #80b3ff; }
-.tt-line.tt-yellow { color: #ffcc1a; }
-.tt-line.tt-green { color: #1aff80; }
-.tt-line.tt-purple { color: #ff1aff; }
-.tt-line.bold { font-weight: bold; }

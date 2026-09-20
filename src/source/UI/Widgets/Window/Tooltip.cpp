@@ -92,6 +92,7 @@ void mu::ui::window::CTooltip::Render(int x, int y, int width, int height, int o
     config.centerHorizontally = true;
     config.anchor = m_anchorAbove ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
                                    : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft;
+    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // original RenderTextWithColors() call always passed RT3_SORT_CENTER.
     config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>((m_anchorAbove ? y : (y + height + 2)) + offsetY));
 
     UI::RmlBridge::Tooltip::Show(config, this);
