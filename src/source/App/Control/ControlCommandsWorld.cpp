@@ -178,6 +178,8 @@ int ResolveTargetKey(const Request& request)
 }
 
 // Sends one chat line the way the chat box does.
+// The caller must have checked `Hero`: the scene gate only says the world
+// is on screen, and the character exists a few frames later.
 void SendChat(const std::string& text)
 {
     const std::wstring wide = Core::Text::FromUtf8(text);
@@ -223,10 +225,8 @@ public:
         }
 
         // Let the planned path play out before planning the next one:
-        // re-planning every frame would restart the walk mid-step. The
-        // engine leaves PathNum alone when it arrives, so the end of a
-        // path is CurrentPath reaching its last entry.
-        if (Hero->Path.PathNum > 0 && Hero->Path.CurrentPath < Hero->Path.PathNum - 1)
+        // re-planning every frame would restart the walk mid-step.
+        if (WalkInProgress())
         {
             return Status::Running;
         }
@@ -732,6 +732,13 @@ std::string Teleport(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`teleport` needs `x` and `y`");
     }
 
+    // The command names the character, which exists a few frames after the
+    // world scene does.
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+    }
+
     // The map is taken as a number, not a name: the act has to recognise the
     // destination to know the character arrived, and the client has no
     // mapping from a map's (localised) name back to its index. Omitted means
@@ -902,6 +909,13 @@ std::string Say(const Request& request, std::unique_ptr<Act>&)
     if (text.size() >= ChatTextLength)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the chat line is too long");
+    }
+
+    // The world is on screen a few frames before the character exists, and
+    // the chat packet carries its name.
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
     }
 
     SendChat(text);
