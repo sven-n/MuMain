@@ -12,11 +12,20 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "UI/Scaling/UITransform.h"
 
-namespace 
+namespace
 {
     _MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
     _MASTER_SKILL_TOOLTIP m_stMasterSkillTooltip[MAX_MASTER_SKILL_DATA];
+
+    // Distinct Tooltip::Owner tokens -- RenderIcon()'s RenderToolTip() (skill hover) always runs
+    // before RenderText() (XP hover) within the same Render() call, and only one of the two can be
+    // hovered at once; separate owners stop whichever call's unconditional Hide() runs second from
+    // clobbering the other's Show() from earlier the same frame.
+    const int kSkillTooltipOwner = 0;
+    const int kXpTooltipOwner = 0;
 }
 
 
@@ -520,7 +529,19 @@ void mu::ui::window::CMasterLevel::RenderText() const
         TextBold[0] = 0;
         TextListColor[0] = 0;
         mu_swprintf(TextList[0], L"%I64d / %I64d", Master_Level_Data.lMasterLevel_Experince, Master_Level_Data.lNext_MasterLevel_Experince);
-        RenderTipTextList(466, 26, 1, 0, 3, 0, 1);
+
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        UI::RmlBridge::Tooltip::Config config;
+        config.lines = BuildTooltipLinesFromTextList(1);
+        config.anchorX = UI::Scaling::PositionX(activeTransform, 466.0f);
+        config.anchorY = UI::Scaling::PositionY(activeTransform, 26.0f);
+        config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
+        UI::RmlBridge::Tooltip::Show(config, &kXpTooltipOwner);
+    }
+    else
+    {
+        UI::RmlBridge::Tooltip::Hide(&kXpTooltipOwner);
     }
 
     g_pRenderText->SetTextColor(255, 255, 255, 0xFFu);
@@ -659,6 +680,8 @@ void mu::ui::window::CMasterLevel::RenderIcon()
 
 void mu::ui::window::CMasterLevel::RenderToolTip()
 {
+    bool anyHovered = false;
+
     for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
     {
         const BYTE group = it->second.Group;
@@ -687,8 +710,11 @@ void mu::ui::window::CMasterLevel::RenderToolTip()
 
         if (mtit == this->map_masterSkillToolTip.end())
         {
+            UI::RmlBridge::Tooltip::Hide(&kSkillTooltipOwner);
             return;
         }
+
+        anyHovered = true;
 
         auto skillInfo = CharacterAttribute->MasterSkillInfo[Skill];
         const auto skillLevel = skillInfo.GetSkillLevel();
@@ -793,16 +819,21 @@ void mu::ui::window::CMasterLevel::RenderToolTip()
             }
         }
 
-        if (CalcY > 300)
-        {
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        UI::RmlBridge::Tooltip::Config config;
+        config.lines = BuildTooltipLinesFromTextList(lineCount);
+        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(CalcX + 8));
+        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(CalcY + 33));
+        config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
+        config.anchor = (CalcY > 300) ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
+                                       : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft; // matches the old STRP_BOTTOMCENTER flip near the bottom of the screen.
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
+        UI::RmlBridge::Tooltip::Show(config, &kSkillTooltipOwner);
+    }
 
-            RenderTipTextList(CalcX + 8, CalcY + 33, lineCount, 0, 3, STRP_BOTTOMCENTER, 1);
-        }
-        else
-        {
-            RenderTipTextList(CalcX + 8, CalcY + 33, lineCount, 0, 3, 0, 1);
-        }
-
+    if (!anyHovered)
+    {
+        UI::RmlBridge::Tooltip::Hide(&kSkillTooltipOwner);
     }
 }
 

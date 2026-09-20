@@ -415,15 +415,12 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
     DisableAlphaBlend();
 }
 
-// Converts the TextList/TextListColor/TextBold globals (as RenderItemInfo()/RenderRepairInfo()
-// already populate them) into UI::RmlBridge::Tooltip's own Line list -- the item tooltip's actual
-// per-item-type text/color logic stays exactly as-is (it's item-domain logic, not a rendering
-// technology choice); only what happens with the finished buffer changes, from a direct
-// RenderTipTextList() native draw to this conversion feeding the shared RmlUi tooltip instead.
-// RenderHelpLine()/RenderHelpCategory() (this file, above) also draw through RenderTipTextList()
-// but build a persistent multi-cell table, not a single hover tooltip -- they don't go through
-// this conversion and keep calling RenderTipTextList() directly.
-static std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltipLinesFromTextList(int textNum)
+// Declared in ZzzInventory.h -- shared by every other hover-tooltip call site still building its
+// content the legacy TextList way (MasterLevel.cpp, CursedTempleSystem.cpp), not just this file's
+// own RenderItemInfo()/RenderRepairInfo(). RenderHelpLine()/RenderHelpCategory() (this file, above)
+// also draw through RenderTipTextList() but build a persistent multi-cell table, not a single hover
+// tooltip -- they don't go through this conversion and keep calling RenderTipTextList() directly.
+std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltipLinesFromTextList(int textNum)
 {
     std::vector<UI::RmlBridge::Tooltip::Line> lines;
     lines.reserve(static_cast<size_t>(textNum));

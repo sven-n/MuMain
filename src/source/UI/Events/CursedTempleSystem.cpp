@@ -23,6 +23,7 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/Scaling/UITransform.h"
 
 extern int TextNum;
 extern wchar_t TextList[50][100];
@@ -42,6 +43,10 @@ namespace
     const int	AXIS_X = 0;
     const int	AXIS_Y = 1;
     const float PROGRESSTIME = 10000.0f;
+
+    // RenderSkill()'s three hover tooltips are the only Tooltip::Show() callers in this file and
+    // their hover regions are disjoint, so one shared owner token is enough.
+    const int kSkillHoverTooltipOwner = 0;
 
     //#ifdef _DEBUG
     const float posX[7] =
@@ -727,6 +732,23 @@ bool mu::ui::window::CCursedTempleSystem::Update()
     return true;
 }
 
+namespace
+{
+    // Shared by RenderSkill()'s three hover tooltips below -- each builds TextList/TextListColor
+    // the legacy way first, then hands off here instead of calling RenderTipTextList() directly.
+    void ShowSkillHoverTooltip(float sx, float sy, int textNum)
+    {
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        UI::RmlBridge::Tooltip::Config config;
+        config.lines = BuildTooltipLinesFromTextList(textNum);
+        config.anchorX = UI::Scaling::PositionX(activeTransform, sx);
+        config.anchorY = UI::Scaling::PositionY(activeTransform, sy);
+        config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER, RenderTipTextList()'s own default.
+        UI::RmlBridge::Tooltip::Show(config, &kSkillHoverTooltipOwner);
+    }
+}
+
 void mu::ui::window::CCursedTempleSystem::RenderSkill()
 {
     EnableAlphaTest();
@@ -769,9 +791,12 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
     m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeAlpha(m_Alph);
     m_Button[CURSEDTEMPLERESULT_SKILLDOWN].Render();
 
+    bool anyTooltipHovered = false;
+
     x = 512.f + 28; y = 258.f - 55.f; Width = 18; Height = 24;
     if (CheckMouseIn(x, y, Width, Height))
     {
+        anyTooltipHovered = true;
         TextNum = 0;
         ZeroMemory(TextListColor, 20 * sizeof(int));
         for (int i = 0; i < 30; i++)
@@ -792,12 +817,14 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
         mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
-        RenderTipTextList(x, y - 20, TextNum, 0);
+        ShowSkillHoverTooltip(x, y - 20, TextNum);
     }
 
     x = 512.f + 28 + 55; y = 258.f - 55.f; Width = 18; Height = 24;
     if (CheckMouseIn(x, y, Width, Height))
     {
+        anyTooltipHovered = true;
+
         TextNum = 0;
         ZeroMemory(TextListColor, 20 * sizeof(int));
         for (int i = 0; i < 30; i++)
@@ -809,12 +836,14 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
-        RenderTipTextList(x, y - 20, TextNum, 0);
+        ShowSkillHoverTooltip(x, y - 20, TextNum);
     }
 
     x = 512.f + 28 + 77; y = 258.f - 55.f; Width = 18; Height = 24;
     if (CheckMouseIn(x, y, Width, Height))
     {
+        anyTooltipHovered = true;
+
         TextNum = 0;
         ZeroMemory(TextListColor, 20 * sizeof(int));
         for (int i = 0; i < 30; i++)
@@ -826,7 +855,12 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
-        RenderTipTextList(x, y - 20, TextNum, 0);
+        ShowSkillHoverTooltip(x, y - 20, TextNum);
+    }
+
+    if (!anyTooltipHovered)
+    {
+        UI::RmlBridge::Tooltip::Hide(&kSkillHoverTooltipOwner);
     }
 
     DisableAlphaBlend();
