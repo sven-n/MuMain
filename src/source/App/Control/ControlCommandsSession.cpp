@@ -469,7 +469,15 @@ std::string SelectCharacter(const Request& request, std::unique_ptr<Act>& act)
     std::string name;
     if (request.GetInt("slot", slot))
     {
-        // The spec counts slots as the list shows them, from 1.
+        // The spec counts slots as the list shows them, from 1. Checked
+        // before the conversion: `slot` carries anything an int holds, and
+        // decrementing its minimum first would be signed overflow.
+        if (slot < 1 || slot > Scenes::CharacterSlotCount())
+        {
+            json details;
+            details["characters"] = CharacterList();
+            return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "no character in that slot", details.dump());
+        }
         slot -= 1;
     }
     else if (request.GetString("name", name) && !name.empty())

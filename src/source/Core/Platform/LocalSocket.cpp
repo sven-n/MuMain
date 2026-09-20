@@ -18,6 +18,15 @@ namespace
 constexpr unsigned int SocketFileMode = 0600;
 constexpr char LineTerminator = '\n';
 
+// send() flags: on Linux a write to a peer that has closed raises SIGPIPE,
+// whose default action would end the game process; MSG_NOSIGNAL asks for the
+// error return instead. Winsock has neither the signal nor the flag.
+#ifdef _WIN32
+constexpr int SendFlags = 0;
+#else
+constexpr int SendFlags = MSG_NOSIGNAL;
+#endif
+
 bool SetNonBlocking(SOCKET handle)
 {
     u_long nonBlocking = 1;
@@ -216,7 +225,7 @@ bool LocalSocketConnection::Flush()
 
     while (!m_outbox.empty())
     {
-        const auto sent = ::send(m_handle, m_outbox.data(), static_cast<int>(m_outbox.size()), 0);
+        const auto sent = ::send(m_handle, m_outbox.data(), static_cast<int>(m_outbox.size()), SendFlags);
         if (sent > 0)
         {
             m_outbox.erase(0, static_cast<std::size_t>(sent));

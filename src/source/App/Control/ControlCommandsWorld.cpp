@@ -2,6 +2,7 @@
 #include "App/Control/ControlCommands.h"
 
 #include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -453,10 +454,15 @@ private:
 class PickupAct : public Act
 {
 public:
-    // The server's key for the drop, kept beside the slot: a drop that
-    // vanishes frees its slot for the next one, and the act must not walk to
-    // a different item that happens to land in it.
-    PickupAct(int itemSlot, short dropKey) : m_itemSlot(itemSlot), m_dropKey(dropKey) {}
+    // What the drop was when the caller named it, kept beside the slot: a
+    // drop that vanishes frees its slot for the next one, and the act must
+    // not walk to a different item that happens to land in it. The client
+    // gives dropped items no key of their own, so the identity is what does
+    // not change while a drop lies there — its type and its tile.
+    PickupAct(int itemSlot, int itemType, std::pair<int, int> tile)
+        : m_itemSlot(itemSlot), m_itemType(itemType), m_tile(tile)
+    {
+    }
 
     [[nodiscard]] std::string_view Name() const override
     {
@@ -477,7 +483,8 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        if (!Items[m_itemSlot].Object.Live || Items[m_itemSlot].Key != m_dropKey)
+        if (!Items[m_itemSlot].Object.Live || Items[m_itemSlot].Item.Type != m_itemType ||
+            App::Control::DropTile(m_itemSlot) != m_tile)
         {
             response = EncodeError(EncodedId(), ErrorCode::NotInView, "the drop is gone", ProgressObject());
             return Status::Finished;
@@ -521,7 +528,8 @@ public:
 
 private:
     int m_itemSlot;
-    short m_dropKey;
+    int m_itemType;
+    std::pair<int, int> m_tile;
     std::chrono::steady_clock::time_point m_lastStep{};
 };
 
@@ -850,7 +858,7 @@ std::string Pickup(const Request& request, std::unique_ptr<Act>& act)
         return EncodeError(request.EncodedId(), ErrorCode::NotInView, "no such drop in view");
     }
 
-    act = std::make_unique<PickupAct>(slot, Items[slot].Key);
+    act = std::make_unique<PickupAct>(slot, Items[slot].Item.Type, App::Control::DropTile(slot));
     return {};
 }
 
