@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -40,6 +41,14 @@ constexpr std::chrono::milliseconds ScreenshotDeadline{5000};
 
 // `wait-for` without a timeout of its own.
 constexpr double DefaultWaitForSeconds = 30.0;
+// Longest wait a caller may ask for. An hour is far past any scenario step,
+// and a bound is what keeps the conversion below defined: a deadline is
+// milliseconds in a `long long`, and a double that no such count can hold
+// converts to nothing meaningful.
+constexpr double MaxWaitForSeconds = 3600.0;
+// The widest window pixel a click may name. Far past any resolution, and
+// small enough that the cast to `float` is exact.
+constexpr double MaxWindowPixel = 100000.0;
 
 // An injected key or click spans three rendered frames; the allowance
 // covers a client that renders slowly without letting a caller hang.
@@ -463,8 +472,18 @@ std::string WaitFor(const Request& request, std::unique_ptr<Act>& act)
         since = static_cast<int>(Events::LastSequence());
     }
 
+    // `timeout` takes the same treatment as every integer argument: out of
+    // range or not a number at all is a `bad_request`, not a silent default.
+    // A negative one would expire before the watcher's first idle tick, and
+    // an enormous one has no defined conversion to a millisecond count.
     double timeoutSeconds = DefaultWaitForSeconds;
-    (void)request.GetDouble("timeout", timeoutSeconds);
+    if (request.Has("timeout") && (!request.GetDouble("timeout", timeoutSeconds) ||
+                                   !(timeoutSeconds > 0.0 && timeoutSeconds <= MaxWaitForSeconds)))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`timeout` is a positive number of seconds, at most " +
+                               std::to_string(static_cast<int>(MaxWaitForSeconds)));
+    }
 
     std::map<std::string, std::string> match;
     (void)request.GetStringMap("match", match);
@@ -532,6 +551,16 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     if (!request.GetDouble("x", windowX) || !request.GetDouble("y", windowY))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`click-ui` needs `x` and `y` window pixels");
+    }
+
+    // Bounded for the same reason `Request::GetInt` bounds its own reads:
+    // the coordinates are cast to `float` below, and a double outside the
+    // range of one has no defined conversion.
+    if (!(std::abs(windowX) <= MaxWindowPixel && std::abs(windowY) <= MaxWindowPixel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are window pixels, at most " +
+                               std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
     }
 
     std::string buttonName = "left";
