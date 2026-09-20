@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "Core/Globals/_types.h"  // vec3_t
+
 class OBJECT;
 
 // Map Editor object placement helpers.
@@ -29,6 +31,11 @@ namespace Editor::ObjectPlace
     // (degrees, Z rotation) and scale. When `snap` is set, the position is
     // snapped to the tile centre. Returns false if creation failed.
     bool Place(int type, float x, float y, float yawDeg, float scale, bool snap);
+
+    // The (x,y,z) Place() would actually use for the same (x,y,snap) - tile-centre
+    // snapping and terrain-height lookup, without creating anything. Shared by
+    // Place() and the placement preview so they can never drift apart.
+    void ComputePlacementPosition(float x, float y, bool snap, vec3_t outPos);
 
     // Saves all live objects back to Data\World{world}\EncTerrain{world}.obj
     // (encrypted by the engine SaveObjects). Returns false on write failure.

@@ -61,6 +61,13 @@ extern int  g_MapEditorBrushMaxX, g_MapEditorBrushMaxY;
 extern OBJECT* g_MapEditorSelectedObject;
 // Object under the cursor in Select & edit mode, before any click (ZzzObject.cpp).
 extern OBJECT* g_MapEditorHoveredObject;
+// Place-new-mode placement preview (ZzzObject.cpp) - kept in sync every frame
+// by PlaceObjects() below, drawn by RenderPlacementPreview().
+extern bool  g_MapEditorPlacementPreviewActive;
+extern int   g_MapEditorPlacementPreviewType;
+extern vec3_t g_MapEditorPlacementPreviewPos;
+extern float g_MapEditorPlacementPreviewYaw;
+extern float g_MapEditorPlacementPreviewScale;
 
 // Terrain height sculpt (ZzzLodTerrain.cpp).
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer);
@@ -204,6 +211,7 @@ void CMapEditorUI::Render(bool* p_open)
         g_bMapEditorBrushHighlight = false;  // no panel -> no brush cursor
         g_MapEditorSelectedObject = nullptr; // no panel -> no selection outline
         g_MapEditorHoveredObject = nullptr;  // no panel -> no hover outline
+        g_MapEditorPlacementPreviewActive = false; // no panel -> no placement preview
         RestoreGameMode();
         return;
     }
@@ -235,8 +243,10 @@ void CMapEditorUI::Render(bool* p_open)
     // Unlike the selection outline (which follows m_pSelected across tabs on
     // purpose), hover only makes sense while the Objects tab's Select mode is
     // actively driving it this frame - reset so switching tabs doesn't leave a
-    // stale hover outline on screen.
+    // stale hover outline on screen. Same reasoning for the placement preview:
+    // only PlaceObjects() (Objects tab, Place new mode) should keep it alive.
     g_MapEditorHoveredObject = nullptr;
+    g_MapEditorPlacementPreviewActive = false;
 
     if (ImGui::BeginTabBar("MapEditorTabs"))
     {
@@ -1238,10 +1248,24 @@ void CMapEditorUI::PlaceObjects(int world)
     if (!m_bObjEditEnabled || m_selectedModelType < 0)
     {
         m_objWasDown = false;
+        g_MapEditorPlacementPreviewActive = false;
         return;
     }
 
     const bool down = m_PaintLDown;   // captured left button (game click suppressed)
+
+    // Placement preview: show the selected model, translucent, at the exact
+    // spot a click would place it - every frame, before any click, so hovering
+    // the ground previews the placement instead of guessing blind.
+    g_MapEditorPlacementPreviewActive = SelectFlag && !g_MuEditorCore.IsHoveringUI();
+    if (g_MapEditorPlacementPreviewActive)
+    {
+        Editor::ObjectPlace::ComputePlacementPosition(CollisionPosition[0], CollisionPosition[1], m_bObjSnap,
+                                                       g_MapEditorPlacementPreviewPos);
+        g_MapEditorPlacementPreviewType = m_selectedModelType;
+        g_MapEditorPlacementPreviewYaw = m_objYaw;
+        g_MapEditorPlacementPreviewScale = m_objScale;
+    }
 
     // Place one object on the press edge, only when the cursor is over terrain
     // (SelectFlag) and not over the editor UI.

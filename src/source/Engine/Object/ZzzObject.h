@@ -105,3 +105,18 @@ bool isPartyMemberBuff(int partyindex);
 void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u, std::uint32_t midColor = 0xFF999999u,
                        std::uint32_t lightColor = 0xFF666666u);
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
+
+#ifdef _EDITOR
+// Map Editor selection/hover highlight: draws pObj's own mesh pushed outward
+// along its vertex normals with reversed winding ("inflated hull"), so only
+// the sliver that pokes out past the object's real (separately drawn)
+// silhouette survives the renderer's back-face culling - a thin, mesh-shaped
+// outline rather than a bounding-box cube. See definition for details.
+void RenderObjectOutline(OBJECT* pObj, std::uint32_t color);
+
+// Map Editor Place-new-mode preview: draws the model that would be placed on
+// a click, translucent, at g_MapEditorPlacementPreviewPos - see the globals'
+// doc comments (ZzzObject.cpp) for how they're kept in sync with
+// Editor::ObjectPlace::Place()'s own placement math.
+void RenderPlacementPreview();
+#endif // _EDITOR

@@ -45,7 +45,7 @@ std::vector<ModelEntry> EnumerateModels(int /*world*/)
     return out;
 }
 
-bool Place(int type, float x, float y, float yawDeg, float scale, bool snap)
+void ComputePlacementPosition(float x, float y, bool snap, vec3_t outPos)
 {
     float px = x;
     float py = y;
@@ -54,9 +54,16 @@ bool Place(int type, float x, float y, float yawDeg, float scale, bool snap)
         px = ((int)(x / TERRAIN_SCALE) + 0.5f) * TERRAIN_SCALE;
         py = ((int)(y / TERRAIN_SCALE) + 0.5f) * TERRAIN_SCALE;
     }
+    outPos[0] = px;
+    outPos[1] = py;
+    outPos[2] = RequestTerrainHeight(px, py);
+}
 
-    vec3_t position = { px, py, RequestTerrainHeight(px, py) };
-    vec3_t angle    = { 0.0f, 0.0f, yawDeg };
+bool Place(int type, float x, float y, float yawDeg, float scale, bool snap)
+{
+    vec3_t position;
+    ComputePlacementPosition(x, y, snap, position);
+    vec3_t angle = { 0.0f, 0.0f, yawDeg };
     OBJECT* o = CreateObject(type, position, angle, scale);
     return o != nullptr;
 }

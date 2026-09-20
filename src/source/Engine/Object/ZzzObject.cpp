@@ -3261,6 +3261,16 @@ OBJECT* g_MapEditorSelectedObject = nullptr;
 // the cursor (before any click), so it can be outlined too - lets you see what a
 // click would pick, distinct from what's already selected.
 OBJECT* g_MapEditorHoveredObject = nullptr;
+
+// Set every frame while Place new mode is enabled and the cursor is over
+// terrain: the model that would be placed on a click, at the exact position
+// Editor::ObjectPlace::Place() would use (see ComputePlacementPosition()), so
+// RenderPlacementPreview() can draw it translucent before any click happens.
+bool g_MapEditorPlacementPreviewActive = false;
+int g_MapEditorPlacementPreviewType = -1;
+vec3_t g_MapEditorPlacementPreviewPos = {0.0f, 0.0f, 0.0f};
+float g_MapEditorPlacementPreviewYaw = 0.0f;
+float g_MapEditorPlacementPreviewScale = 1.0f;
 #endif
 
 void RenderObjects()
@@ -3446,6 +3456,12 @@ void RenderObjects()
                             {
                                 RenderBoundingBox(o);
                             }
+#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
+                            // Selection/hover outline is a Map Editor feature, not a debug-only
+                            // diagnostic - it must not be gated behind CSK_DEBUG_RENDER_BOUNDINGBOX,
+                            // which (see Winmain.h) is only ever defined in Debug builds. It was
+                            // nested inside that gate for a while, which meant it silently compiled
+                            // out of every Release build with no visible sign anything was wrong.
 #ifdef _EDITOR
                             if (o->Visible == true && o == g_MapEditorSelectedObject)
                             {
@@ -3454,7 +3470,7 @@ void RenderObjects()
                                 // against any background - the dim debug default above
                                 // is deliberately subtle and easy to miss by comparison.
                                 static const std::uint32_t kSelectedColor = mu::PackABGR(1.0f, 0.9f, 0.1f, 1.0f);
-                                RenderBoundingBox(o, kSelectedColor, kSelectedColor, kSelectedColor);
+                                RenderObjectOutline(o, kSelectedColor);
                             }
                             else if (o->Visible == true && o == g_MapEditorHoveredObject)
                             {
@@ -3462,10 +3478,9 @@ void RenderObjects()
                                 // tell "what a click would pick" apart from "what's
                                 // already selected" at a glance.
                                 static const std::uint32_t kHoverColor = mu::PackABGR(0.2f, 0.9f, 1.0f, 1.0f);
-                                RenderBoundingBox(o, kHoverColor, kHoverColor, kHoverColor);
+                                RenderObjectOutline(o, kHoverColor);
                             }
 #endif // _EDITOR
-#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
                         }
 
                         if (o->Next == NULL) break;
@@ -3476,6 +3491,13 @@ void RenderObjects()
             }
         }
     }
+
+#ifdef _EDITOR
+    // Drawn once per frame (not per-object - it isn't tied to a real OBJECT
+    // yet), after every real object so it doesn't get occluded by anything
+    // still to come in this loop.
+    RenderPlacementPreview();
+#endif
 }
 
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate, int Select, int ExtraMon)
@@ -10889,3 +10911,130 @@ void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor, std::uint32_t midC
     mu::GetRenderer().PopMatrix();
 }
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
+
+#ifdef _EDITOR
+// "Inflated hull" outline: draws pObj's own mesh pushed outward along each
+// vertex's normal, with each polygon's vertex order reversed. The renderer's
+// world-geometry pipeline always culls back faces (front_face is fixed CCW;
+// there is no cull-front-only mode - see SetCullFace()/SetFrontFace() in
+// MuRenderer.h), so reversing the winding here is what makes ONLY the
+// "inside" of this larger shell survive culling. Drawn after the object's
+// own normal render (same as this function's caller), depth testing then
+// hides that inner surface wherever the real, unexpanded mesh is nearer to
+// the camera - leaving only the sliver that pokes out past the real
+// silhouette, i.e. a thin outline shaped like the actual model instead of a
+// bounding-box cube.
+void RenderObjectOutline(OBJECT* pObj, std::uint32_t color)
+{
+    if (pObj == nullptr || pObj->Type < 0)
+        return;
+    BMD* b = &Models[pObj->Type];
+    if (b->NumMeshs <= 0 || b->Meshs == nullptr)
+        return;
+
+    // VertexTransform/NormalTransform are shared, mesh-slot-keyed scratch
+    // buffers - any other object using the same model type could have
+    // overwritten them since pObj's own render call earlier this frame, so
+    // recompute pObj's current pose fresh right before reading them.
+    b->BodyScale = pObj->Scale;
+    b->CurrentAction = pObj->CurrentAction;
+    VectorCopy(pObj->Position, b->BodyOrigin);
+    vec3_t bbMin, bbMax;
+    OBB_t obb;
+    b->Animation(BoneTransform, pObj->AnimationFrame, pObj->PriorAnimationFrame, pObj->PriorAction, pObj->Angle,
+                pObj->HeadAngle, false, false);
+    b->Transform(BoneTransform, bbMin, bbMax, &obb, true);
+    // Transform() only eagerly fills VertexTransform/NormalTransform for every
+    // mesh when EditFlag == EDIT_OBJECT; otherwise it stashes the skin request
+    // and defers to these (idempotent, safe-to-call-unconditionally per their
+    // own doc comments) - call them directly so the outline has real data
+    // regardless of the current edit-flag state.
+    b->EnsureCpuVertices();
+    b->EnsureCpuNormals();
+
+    constexpr float kOutlineThickness = 3.0f; // world units
+
+    static std::vector<mu::Vertex3D> s_scratch;
+    s_scratch.clear();
+
+    for (int m = 0; m < b->NumMeshs; ++m)
+    {
+        const Mesh_t& mesh = b->Meshs[m];
+        for (int t = 0; t < mesh.NumTriangles; ++t)
+        {
+            const Triangle_t& tri = mesh.Triangles[t];
+            // Reversed iteration order (Polygon-1 down to 0) flips winding
+            // relative to the normal draw, which iterates 0 up to Polygon-1.
+            for (int k = tri.Polygon - 1; k >= 0; --k)
+            {
+                const int vi = tri.VertexIndex[k];
+                const int ni = tri.NormalIndex[k];
+                if (vi < 0 || vi >= mesh.NumVertices || ni < 0 || ni >= mesh.NumNormals)
+                    continue;
+                const float* pos = VertexTransform[m][vi];
+                const float* nrm = NormalTransform[m][ni];
+                s_scratch.push_back(mu::Vertex3D{pos[0] + nrm[0] * kOutlineThickness,
+                                                 pos[1] + nrm[1] * kOutlineThickness,
+                                                 pos[2] + nrm[2] * kOutlineThickness, 0.f, 0.f, 0.f, 0.f, 0.f, color});
+            }
+        }
+    }
+
+    if (s_scratch.empty())
+        return;
+
+    mu::GetRenderer().SetCullFace(true);
+    mu::GetRenderer().SetDepthTest(true);
+    mu::GetRenderer().DisableBlend();
+    mu::GetRenderer().RenderTriangles(s_scratch, 0u);
+}
+
+extern bool g_MapEditorPlacementPreviewActive;
+extern int g_MapEditorPlacementPreviewType;
+extern vec3_t g_MapEditorPlacementPreviewPos;
+extern float g_MapEditorPlacementPreviewYaw;
+extern float g_MapEditorPlacementPreviewScale;
+
+// Draws the currently-selected palette model, translucent, at the position a
+// click would place it - see the globals' doc comments in this file for how
+// CMapEditorUI::PlaceObjects() keeps them in sync every frame.
+void RenderPlacementPreview()
+{
+    if (!g_MapEditorPlacementPreviewActive || g_MapEditorPlacementPreviewType < 0)
+        return;
+    BMD* b = &Models[g_MapEditorPlacementPreviewType];
+    if (b->NumMeshs <= 0 || b->Meshs == nullptr)
+        return;
+
+    // Unlit, full-bright, same as the palette thumbnails - there's no real
+    // OBJECT yet to derive proper scene lighting from, and a flat readout of
+    // the model's own texture is enough to preview shape/placement.
+    b->BodyScale = g_MapEditorPlacementPreviewScale;
+    VectorCopy(g_MapEditorPlacementPreviewPos, b->BodyOrigin);
+    b->BodyHeight = 0.0f;
+    b->CurrentAction = 0;
+    b->LightEnable = false;
+    b->ContrastEnable = false;
+    b->BodyLight[0] = b->BodyLight[1] = b->BodyLight[2] = 1.0f;
+
+    BoneScale = 1.0f;
+    vec3_t angle = {0.0f, 0.0f, g_MapEditorPlacementPreviewYaw};
+    vec3_t head  = {0.0f, 0.0f, 0.0f};
+    b->Animation(BoneTransform, 0.0f, 0.0f, 0, angle, head, false, false);
+    // Animation() alone isn't enough: RenderBody()'s mesh skinning reads
+    // VertexTransform/NormalTransform, which are only materialized from
+    // Transform()'s stashed bone-matrix/translate/scale state (see
+    // RenderObjectOutline() above, which needs the same two-step sequence).
+    // Without this the preview renders with whatever transform state the
+    // last object drawn this frame left behind - garbled/stretched geometry.
+    vec3_t bbMin, bbMax;
+    OBB_t obb;
+    b->Transform(BoneTransform, bbMin, bbMax, &obb, true);
+    b->EnsureCpuVertices();
+    b->EnsureCpuNormals();
+
+    EnableAlphaBlend();
+    constexpr float kPreviewAlpha = 0.55f;
+    b->RenderBody(RENDER_TEXTURE, kPreviewAlpha, -1, 1.0f, 0.0f, 0.0f);
+}
+#endif // _EDITOR
