@@ -1982,7 +1982,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // SDL owns the window; SDL_gpu owns the rendering device.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
     {
-        g_ErrorReport.Write(L"> SDL video init failed.\r\n");
+        const char* requestedVideoDriver = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
+        const std::wstring requestedDriver = requestedVideoDriver != nullptr && requestedVideoDriver[0] != '\0'
+                                                 ? Utf8ToWide(requestedVideoDriver)
+                                                 : L"auto";
+        const std::wstring videoInitError = Utf8ToWide(SDL_GetError());
+        g_ErrorReport.Write(L"> SDL video init failed. Requested driver: %ls. SDL error: %ls\r\n",
+                            requestedDriver.c_str(), videoInitError.c_str());
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
