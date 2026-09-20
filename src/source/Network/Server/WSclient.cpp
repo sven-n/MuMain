@@ -2215,6 +2215,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
+        // Before the view is emptied, not after: the events name the objects
+        // that are about to disappear, and their slots are reused.
+        App::Control::Events::RecordViewCleared("the character teleported");
         ClearItems();
         ClearCharacters(HeroKey);
         RemoveAllShopTitleExceptHero();

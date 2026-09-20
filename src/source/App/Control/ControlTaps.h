@@ -51,6 +51,12 @@ void RecordMapChange();
 // other map change. Counted so `warp` can recognise its own landing.
 void RecordTeleportPacket();
 
+// Everything the client knows about its surroundings is about to be thrown
+// away (a teleport, a map change): reports each drop as gone and each object
+// as left, so a reader waiting on one is answered and no stale id survives
+// into the reused slots.
+void RecordViewCleared(const char* reason);
+
 // Objects entering and leaving the client's view.
 void RecordViewEnterKey(int key);
 void RecordViewLeaveKey(int key);
@@ -78,6 +84,7 @@ inline void RecordDropAppeared(int) {}
 inline void RecordDropVanished(int, const char*) {}
 inline void RecordMapChange() {}
 inline void RecordTeleportPacket() {}
+inline void RecordViewCleared(const char*) {}
 inline void RecordViewEnterKey(int) {}
 inline void RecordViewLeaveKey(int) {}
 inline void RecordPartyChange(const char*, const wchar_t*) {}

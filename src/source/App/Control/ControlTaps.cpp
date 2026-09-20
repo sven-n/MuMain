@@ -2,6 +2,7 @@
 #include "App/Control/ControlTaps.h"
 
 #include "App/Control/ControlEvents.h"
+#include "GameLogic/Automation/Attack.h"
 #include "App/Control/ControlObjects.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -45,11 +46,16 @@ void RecordAttackDamage(int attackerIndex, int targetKey, int damage, int shield
     const int attackerKey = KeyOfIndex(attackerIndex);
     const bool heroWasHit = targetKey == HeroKey;
 
-    // The damage packet names only the target: the client infers the
-    // attacker from the action packet that preceded it (`AttackPlayer`) or,
-    // for the character's own swing, from the target it is acting on.
+    // The damage packet names only the target, so the attacker comes from
+    // the action packet that preceded it (`AttackPlayer`), and otherwise
+    // from the target this character is acting on — but only while its own
+    // swing is playing. `ActionTarget` alone is sticky: it outlives the
+    // swing that set it, and a third party hitting the same monster would
+    // then be reported as this character's blow.
+    const bool swinging = GameLogic::Automation::IsSwingInProgress();
     const bool heroAttacked =
-        !heroWasHit && (attackerKey == HeroKey || (ActionTarget >= 0 && ActionTarget == FindCharacterIndex(targetKey)));
+        !heroWasHit &&
+        (attackerKey == HeroKey || (swinging && ActionTarget >= 0 && ActionTarget == FindCharacterIndex(targetKey)));
 
     if (!heroAttacked && !heroWasHit)
     {
@@ -86,7 +92,10 @@ void RecordExperienceGain(std::uint64_t experience, int damage)
         return;
     }
 
-    RecordStat("experience", static_cast<long long>(experience), -1);
+    // `experience_gained` rather than `experience`: `state` reports the
+    // character's cumulative experience under that name, and two different
+    // numbers must not arrive under one name.
+    RecordStat("experience_gained", static_cast<long long>(experience), -1);
     if (damage > 0)
     {
         RecordStat("damage_dealt", damage, -1);
@@ -138,6 +147,33 @@ void RecordDropVanished(int itemSlot, const char* reason)
     }
 
     RecordDropGone(itemSlot, reason != nullptr ? reason : "gone");
+}
+
+void RecordViewCleared(const char* reason)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    const char* why = reason != nullptr ? reason : "the view was cleared";
+
+    for (int slot = 0; slot < MAX_ITEMS; ++slot)
+    {
+        if (Items[slot].Object.Live && Items[slot].Item.Type >= 0)
+        {
+            RecordDropGone(slot, why);
+        }
+    }
+
+    for (int index = 0; index < MAX_CHARACTERS_CLIENT; ++index)
+    {
+        const CHARACTER& character = CharactersClient[index];
+        if (character.Object.Live && character.Key != HeroKey)
+        {
+            RecordViewLeave(character.Key);
+        }
+    }
 }
 
 void RecordMapChange()
