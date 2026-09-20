@@ -327,6 +327,11 @@ void MuReapplyVSyncPreference()
     g_hasPendingVSyncPreference = true;
 }
 
+void MuApplyBottomHudLayoutPreference()
+{
+    UI::Scaling::SetBottomHudClassic(GameConfig::GetInstance().GetBottomHudClassic());
+}
+
 BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
 {
     auto iFind = (int)'\\';
@@ -1895,6 +1900,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     // Load game settings from INI file first
     GameConfig::GetInstance().Load();
+    MuApplyBottomHudLayoutPreference();
 
     // Check if animation task pool should be enabled (disabled by default)
     {

@@ -1433,6 +1433,9 @@
   <data name="Windowed mode" xml:space="preserve">
     <value>Windowed mode</value>
   </data>
+  <data name="Classic bottom HUD" xml:space="preserve">
+    <value>Classic bottom HUD</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Close</value>
     <comment>legacy_id=388,1002</comment>
