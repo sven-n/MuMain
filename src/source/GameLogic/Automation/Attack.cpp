@@ -113,17 +113,22 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
     TargetX = (int)(target->Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(target->Object.Position[1] / TERRAIN_SCALE);
 
-    PATH_t path;
-    if (!PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &path,
-                      static_cast<float>(huntingDistance) + range))
-    {
-        return AttackResult::NoPath;
-    }
-
+    // Range first, then a path only when one is needed — the order the
+    // engine's own attack loop uses (ZzzInterface.cpp:1282, 1349). The other
+    // way round refuses a target that is standing in range but that no walk
+    // reaches: across a fence or a stretch of water, where the point of
+    // having range is that the walk is not needed.
     const bool inRange = CheckTile(Hero, &Hero->Object, range);
     if (inRange && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
     {
         return AttackResult::Blocked;
+    }
+
+    PATH_t path;
+    if (!inRange && !PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &path,
+                                  static_cast<float>(huntingDistance) + range))
+    {
+        return AttackResult::NoPath;
     }
 
     SelectedCharacter = targetIndex;
