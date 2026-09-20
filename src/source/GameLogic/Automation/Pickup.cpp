@@ -36,13 +36,18 @@ PickupResult PickUpItem(int itemIndex, int maximumDistance)
         return PickupResult::Gone;
     }
 
-    TargetX = (int)(drop->Object.Position[0] / TERRAIN_SCALE);
-    TargetY = (int)(drop->Object.Position[1] / TERRAIN_SCALE);
+    const int dropX = (int)(drop->Object.Position[0] / TERRAIN_SCALE);
+    const int dropY = (int)(drop->Object.Position[1] / TERRAIN_SCALE);
 
-    if (TileDistance(Hero->PositionX, Hero->PositionY, TargetX, TargetY) > maximumDistance)
+    if (TileDistance(Hero->PositionX, Hero->PositionY, dropX, dropY) > maximumDistance)
     {
+        // Answered before the client's own move target is touched: a refused
+        // pickup must not redirect a walk that is already under way.
         return PickupResult::TooFar;
     }
+
+    TargetX = dropX;
+    TargetY = dropY;
 
     if (!CheckTile(Hero, &Hero->Object, PickupReach))
     {

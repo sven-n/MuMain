@@ -66,6 +66,10 @@ static void ApproachAlong(const PATH_t& path)
     Hero->Path.CurrentPathFloat = 0;
     Hero->Path.Lock.unlock();
 
+    // A walk the engine can recognise: without this the character keeps the
+    // movement mode of whatever it was doing before (MOVEMENT_ATTACK after a
+    // swing), which is not what a walk towards a target is.
+    Hero->MovementType = MOVEMENT_MOVE;
     SendMove(Hero, &Hero->Object);
 }
 

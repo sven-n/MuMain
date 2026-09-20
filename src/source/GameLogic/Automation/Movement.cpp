@@ -13,7 +13,10 @@ namespace GameLogic::Automation
 {
 MoveResult WalkTo(int tileX, int tileY)
 {
-    Hero->MovementType = MOVEMENT_MOVE;
+    // The arrival test and the path finder both read the target globals, so
+    // they are set first; the movement mode follows only when a walk is
+    // actually starting, so a refused call leaves the character's current
+    // behaviour alone.
     TargetX = tileX;
     TargetY = tileY;
 
@@ -27,6 +30,7 @@ MoveResult WalkTo(int tileX, int tileY)
         return MoveResult::NoPath;
     }
 
+    Hero->MovementType = MOVEMENT_MOVE;
     SendMove(Hero, &Hero->Object);
     return MoveResult::Walking;
 }
