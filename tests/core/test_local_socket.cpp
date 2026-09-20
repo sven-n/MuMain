@@ -387,3 +387,36 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     listener.Close();
     std::filesystem::remove_all(directory);
 }
+
+TEST_CASE("Local socket stops a peer that outruns the drain rate [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "flood.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+
+    // Complete lines are not exempt from every bound: a peer that keeps
+    // writing valid commands without any of them being served still meets the
+    // ceiling on the buffer as a whole, rather than growing it indefinitely.
+    const std::string command = "{\"cmd\":\"ping\"}\n";
+    std::string batch;
+    batch.reserve(Core::Platform::LocalSocketConnection::MaxTotalInputBytes + command.size() * 64);
+    while (batch.size() <= Core::Platform::LocalSocketConnection::MaxTotalInputBytes)
+    {
+        batch += command;
+    }
+
+    CHECK_FALSE(BufferInto(client, *connection, batch));
+    CHECK_FALSE(connection->IsOpen());
+
+    closesocket(client);
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}
