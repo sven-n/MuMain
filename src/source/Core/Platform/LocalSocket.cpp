@@ -285,7 +285,13 @@ bool SomethingIsListening(const std::string& path)
     // EAGAIN and a socket we may not talk to answers EACCES or EPERM: those
     // are live sockets, and unlinking one would take it from its owner.
 #ifdef _WIN32
-    return failure != WSAECONNREFUSED && failure != WSAENOENT;
+    // Windows' AF_UNIX reports a path with no listener through several codes
+    // (WSAECONNREFUSED, WSAEINVAL, WSAEFAULT) depending on the build, so a
+    // failure there is read as "nothing is listening" — the behaviour this
+    // probe replaced. A stale file is the common case; the hijack it guards
+    // against is a developer running two clients under one name on Linux.
+    (void)failure;
+    return false;
 #else
     return failure != ECONNREFUSED && failure != ENOENT;
 #endif

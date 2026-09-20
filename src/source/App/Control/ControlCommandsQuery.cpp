@@ -222,12 +222,6 @@ std::string& MutableBuildIdentifier()
     return identifier;
 }
 
-std::string NotImplemented(const Request& request, std::string_view what)
-{
-    return App::Control::EncodeError(request.EncodedId(), ErrorCode::Failed,
-                                     std::string(what) + " is not implemented yet");
-}
-
 // Capture in flight. Shared with the completion callback so an act that is
 // interrupted or times out cannot be written to after it is gone.
 struct ScreenshotState
@@ -515,9 +509,9 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
 {
     std::string requestedPath;
     std::wstring targetPath;
-    if (request.Has("out") && !request.GetString("out", requestedPath))
+    if (request.Has("out") && (!request.GetString("out", requestedPath) || requestedPath.empty()))
     {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`out` is a path");
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`out` is a path; omit it to name the capture");
     }
     if (!requestedPath.empty())
     {

@@ -350,8 +350,10 @@ std::string EncodeError(std::string_view encodedId, ErrorCode code, std::string_
 
     if (!detailsObject.empty())
     {
+        // As in EncodeResult: `result` is an object or it is not sent, so a
+        // caller reading `result.<field>` never meets a scalar or an array.
         json details = json::parse(detailsObject, nullptr, false);
-        if (!details.is_discarded() && !details.empty())
+        if (details.is_object() && !details.empty())
         {
             response["result"] = std::move(details);
         }

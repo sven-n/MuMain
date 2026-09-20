@@ -119,6 +119,8 @@ bool StepIsDue(std::chrono::steady_clock::time_point& last, std::chrono::millise
 
 // Longest chat line the client sends.
 constexpr std::size_t ChatTextLength = 128;
+// Longest character name the whisper packet carries, terminator included.
+constexpr std::size_t CharacterNameLength = 11;
 
 json PositionObject()
 {
@@ -945,6 +947,17 @@ std::string Whisper(const Request& request, std::unique_ptr<Act>&)
     if (!request.GetString("name", name) || !request.GetString("text", text) || name.empty() || text.empty())
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`whisper` needs a name and a text");
+    }
+
+    // The same bound `say` applies: the chat packet's text field is what
+    // overflows, and a whisper goes through it too.
+    if (text.size() >= ChatTextLength)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the chat line is too long");
+    }
+    if (Core::Text::FromUtf8(name).size() >= CharacterNameLength)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the character name is too long");
     }
 
     const std::wstring wideName = Core::Text::FromUtf8(name);
