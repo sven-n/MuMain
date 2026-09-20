@@ -10,6 +10,7 @@
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
@@ -925,6 +926,7 @@ void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
     if (mu::ui::window::CManager* newUIMng = g_pNewUIMng)
         newUIMng->ReloadAllRmlThemes();
     UI::Login::ReloadRmlTheme();
+    UI::RmlBridge::Tooltip::ReloadRmlTheme();
 }
 
 void mu::ui::window::COptionWindow::RmlUIScaleChanged(int index)

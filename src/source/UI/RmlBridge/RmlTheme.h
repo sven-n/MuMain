@@ -72,13 +72,16 @@ namespace UI::RmlBridge
     // be read or the document failed to parse (logged via g_ErrorReport either way).
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath);
 
-    // LoadThemedDocument() against RmlUiRuntime::Instance().GetBackgroundContext(), then Show()s it
-    // immediately -- a background-context document doesn't follow its owning window's own
-    // Show()/Hide() lifecycle the way the main-context document does (it's driven entirely by
-    // RmlUiRuntime::RenderBackgroundLayer() being called or not, see MyInventory.h's
-    // MyInventoryBgRmlModel comment), so unlike a typical LoadThemedDocument() caller this one
-    // shows eagerly at Create() time rather than waiting for the window to actually open. Returns
-    // nullptr (silently) if the background context doesn't exist yet.
+    // LoadThemedDocument() against RmlUiRuntime::Instance().GetBackgroundContext(). Starts hidden,
+    // same as LoadThemedDocument() itself -- the caller's own SyncRmlModel() shows/hides it against
+    // IsVisible(), same as its root_x/root_y/root_scale sync (MyInventory.h's MyInventoryBgRmlModel
+    // comment). Used to Show() eagerly here instead, since these documents are driven by
+    // RmlUiRuntime::RenderBackgroundLayer() rather than their owner's own Show()/Hide() -- but every
+    // one of these is created once at boot (LoadMainSceneInterface()), before CSystem::Update() ever
+    // runs its first correcting SyncRmlModel() (gated to SceneFlag == MAIN_SCENE), so the eager
+    // Show() left it visible at its model's zero-initialized default (unscaled, top-left) for the
+    // first few MAIN_SCENE frames of a client's very first login. Returns nullptr (silently) if the
+    // background context doesn't exist yet.
     Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath);
 
     // Same as CreateBackgroundDocument(const char*) but against an explicit context instead of

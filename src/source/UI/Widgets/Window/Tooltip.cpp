@@ -3,6 +3,9 @@
 #include "UI/Widgets/Window/Tooltip.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Widgets/UIControls.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 
 mu::ui::window::CTooltip::~CTooltip()
@@ -62,31 +65,34 @@ void mu::ui::window::CTooltip::Render(int x, int y, int width, int height, int o
 {
     if (m_text.empty())
     {
+        UI::RmlBridge::Tooltip::Hide(this);
         return;
     }
     if (!CheckMouseIn(x, y, width, height))
     {
+        UI::RmlBridge::Tooltip::Hide(this);
         return;
     }
 
-    g_pRenderText->SetFont(m_font);
-    const SIZE fontSize = g_pRenderText->MeasureText(m_text.c_str(), static_cast<int>(m_text.size()));
+    // m_font/m_textColor are unused here -- zero of this class's 38 real call sites across the
+    // codebase ever call SetTextColor()/SetFont() with anything but the class's own defaults, so
+    // the shared tooltip's own unified white/themed styling already reproduces every actual use.
+    // Both setters are kept for API compatibility, not because anything currently reads them.
+    // x/y/width/height/offsetX/offsetY are reference-pixel, in the caller's own ambient scope --
+    // same convention as CharacterInfoWindow's root_x/root_y conversion. Tooltip::Show() takes
+    // already-converted real screen pixels (see RmlTooltip.h's own comment for why), so convert here.
+    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
 
-    int tipX = x + ((width / 2) - (fontSize.cx / 2));
-    int tipY = y + height + 2;
+    UI::RmlBridge::Tooltip::Config config;
+    UI::RmlBridge::Tooltip::Line line;
+    line.text = StringUtils::WideToNarrow(m_text.c_str());
+    config.lines.push_back(std::move(line));
 
-    // Clamp so the tooltip's right edge never runs past the reference-resolution screen width.
-    const int rightEdge = tipX + fontSize.cx + 6;
-    if (rightEdge > REFERENCE_WIDTH)
-    {
-        tipX -= (rightEdge - REFERENCE_WIDTH);
-    }
+    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(x + width / 2 + offsetX));
+    config.centerHorizontally = true;
+    config.anchor = m_anchorAbove ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
+                                   : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft;
+    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>((m_anchorAbove ? y : (y + height + 2)) + offsetY));
 
-    if (m_anchorAbove)
-    {
-        tipY = y - (fontSize.cy + 2);
-    }
-
-    RenderTextWithColors(m_text.c_str(), tipX + offsetX, tipY + offsetY, fontSize.cx + 6, 0, m_font,
-                         m_textColor, RGBA(0, 0, 0, 180), RT3_SORT_CENTER);
+    UI::RmlBridge::Tooltip::Show(config, this);
 }

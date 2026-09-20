@@ -1,0 +1,25 @@
+<rml>
+<head>
+	<title>Tooltip</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="tooltip.rcss"/>
+</head>
+<!-- The one shared tooltip document every window uses (native or RmlUi) -- see RmlTooltip.h's own
+     comment for the full mechanism. #tooltip_panel's children must be exactly the data-for-generated
+     line divs below, in order, with no other sibling before them -- RmlTooltip.cpp's
+     width-measurement pass indexes panel->GetChild(i) against config.lines[i] directly. -->
+<body data-model="tooltip" data-style-left="pos_x + 'px'" data-style-top="pos_y + 'px'">
+	<div id="tooltip_panel">
+		<div class="tt-line" data-for="line : lines"
+		     data-class-tt-blue="line.color_blue" data-class-tt-gray="line.color_gray"
+		     data-class-tt-red="line.color_red" data-class-tt-yellow="line.color_yellow"
+		     data-class-tt-green="line.color_green" data-class-tt-purple="line.color_purple"
+		     data-class-tt-redpurple="line.color_redpurple" data-class-tt-violet="line.color_violet"
+		     data-class-tt-orange="line.color_orange" data-class-tt-hl-darkred="line.highlight_darkred"
+		     data-class-tt-hl-darkblue="line.highlight_darkblue" data-class-tt-hl-darkyellow="line.highlight_darkyellow"
+		     data-class-tt-hl-greenblue="line.highlight_greenblue" data-class-bold="line.bold"
+		     data-class-tt-half-spacer="line.is_half_spacer" data-class-tt-full-spacer="line.is_full_spacer"
+		>{{line.text}}</div>
+	</div>
+</body>
+</rml>

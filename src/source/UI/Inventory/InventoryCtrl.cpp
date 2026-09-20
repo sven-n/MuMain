@@ -11,6 +11,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -1502,6 +1503,7 @@ void mu::ui::window::CInventoryCtrl::DeleteItemToolTip()
         g_pNewItemMng->DeleteItem(m_pToolTipItem);
         m_pToolTipItem = nullptr;
     }
+    UI::RmlBridge::Tooltip::Hide();
 }
 
 void mu::ui::window::CInventoryCtrl::SetRepairMode(bool bRepair)

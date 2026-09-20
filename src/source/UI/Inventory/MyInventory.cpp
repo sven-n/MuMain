@@ -40,6 +40,7 @@ extern bool SelectFlag;
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Inventory/ItemOptionTooltipModel.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
@@ -240,8 +241,8 @@ void CMyInventory::BuildRmlUi()
                 });
             if (bgModelCreated)
             {
-                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
-                // visible, so there's no "wrong scene" case to guard against here.
+                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
+                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
                 m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/my_inventory_bg.rml");
             }
         }
@@ -877,6 +878,11 @@ bool CMyInventory::Update()
                 m_iPointedSlot = i;
                 break;
             }
+        }
+
+        if (m_iPointedSlot == -1)
+        {
+            UI::RmlBridge::Tooltip::Hide();
         }
     }
 

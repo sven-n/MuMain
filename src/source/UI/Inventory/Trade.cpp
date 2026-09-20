@@ -186,8 +186,8 @@ void CTrade::BuildRmlUi()
                 });
             if (bgModelCreated)
             {
-                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
-                // visible, so there's no "wrong scene" case to guard against here.
+                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
+                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
                 m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/trade_bg.rml");
             }
         }

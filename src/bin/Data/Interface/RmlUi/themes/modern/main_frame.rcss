@@ -379,11 +379,11 @@
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
-/* Expanded grid + pet-command row + shared tooltip. Same 78px local-origin shift as
-   #skill_slots above -- cell/tooltip left/top values are raw, un-rebased reference-space values
-   from the same source the still-legacy icon draw uses, so this offset keeps the RmlUi overlay
-   pixel-aligned with it. Containers stay non-interactive; only .skill-cell opts back in. */
-#skill_grid, #pet_skill_row, #skill_tooltip {
+/* Expanded grid + pet-command row. Same 78px local-origin shift as #skill_slots above -- cell
+   left/top values are raw, un-rebased reference-space values from the same source the still-legacy
+   icon draw uses, so this offset keeps the RmlUi overlay pixel-aligned with it. Containers stay
+   non-interactive; only .skill-cell opts back in. */
+#skill_grid, #pet_skill_row {
 	position: absolute;
 	left: 78px;
 	top: 0;
@@ -417,35 +417,3 @@
 	pointer-events: none;
 }
 
-/* Shared skill tooltip, positioned via C++-pushed left/top then flipped to grow upward via
-   translateY(-100%), reproducing the legacy renderer's auto-flip without precomputing height in
-   C++. Explicit width given -- an absolutely-positioned multi-line box undersizes without one in
-   this build. */
-#skill_tooltip {
-	transform: translateY(-100%);
-	width: 220px;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	border-radius: token(radius-sm)px;
-	padding: 4px 6px;
-	font-family: "token(font-body)";
-	font-size: 10px;
-	z-index: 2;
-}
-/* display:block is required, not optional -- RmlUi's default `display` for any element
-   (including <div>) is `inline`, unlike a browser's user-agent stylesheet. Without it these
-   lines render as one run-on paragraph instead of stacked lines. min-height/line-height also
-   guarantee a blank spacer line still reserves vertical space even though it renders nothing. */
-.tt-line {
-	display: block;
-	color: #ffffff;
-	white-space: normal;
-	min-height: 1.2em;
-	line-height: 1.2em;
-	font-family: "token(font-body)";
-}
-/* #80b3ff -- legacy engine's TEXT_COLOR_BLUE, semantic (option category) not theme aesthetic. */
-.tt-line.tt-blue { color: #80b3ff; }
-.tt-line.tt-red { color: #ff6060; }
-.tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
-.tt-line.bold { font-weight: bold; }

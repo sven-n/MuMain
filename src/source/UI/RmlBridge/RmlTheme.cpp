@@ -257,9 +257,8 @@ namespace UI::RmlBridge
         if (!context)
             return nullptr;
 
-        Rml::ElementDocument* doc = LoadThemedDocument(context, documentPath);
-        if (doc)
-            doc->Show();
-        return doc;
+        // Starts hidden -- see this function's own header comment (RmlTheme.h) for why an eager
+        // Show() here used to cause a real first-login-only flicker.
+        return LoadThemedDocument(context, documentPath);
     }
 }

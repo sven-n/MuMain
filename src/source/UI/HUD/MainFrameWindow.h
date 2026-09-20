@@ -91,19 +91,6 @@ namespace mu::ui::window
         float cooldownFraction = 0.f;  // 0 = ready; shrinks toward 0 as the skill's delay counts down
     };
 
-    // Mirrors UI::Skills::Tooltip::Line (SkillTooltipModel.h) field-for-field, but with a bindable
-    // Rml::String instead of Line's fixed wchar_t[] buffer.
-    struct SkillTooltipLineEntry
-    {
-        Rml::String text;
-        // Discrete bool-per-color flags (matches this file's data-class-* convention). White is
-        // the implicit default when no flag is set.
-        bool colorBlue = false;
-        bool colorRed = false;
-        bool colorDarkRed = false;
-        bool bold = false;
-    };
-
     class CSkillList : public CObject
     {
         enum
@@ -417,13 +404,6 @@ namespace mu::ui::window
             bool skillGridOpen = false;
             std::vector<SkillCellEntry> skillGridCells;
             std::vector<SkillCellEntry> petSkillCells;
-
-            // One shared tooltip element reused across hotkey row, current-skill slot, grid, and
-            // pet row. left/top are in #bars's local space; main_frame.rcss anchors the tooltip's
-            // bottom edge via translateY(-100%) so it grows upward regardless of line count.
-            bool skillTooltipVisible = false;
-            float skillTooltipLeft = 0.f, skillTooltipTop = 0.f;
-            std::vector<SkillTooltipLineEntry> skillTooltipLines;
 
             // Item hotkey chrome (#item_slots): hover border + stack-count for the 4 Q/W/E/R
             // slots. The 3D-rendered potion icon itself is untouched (permanent native content).

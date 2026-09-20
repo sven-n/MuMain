@@ -21,6 +21,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
@@ -274,6 +275,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
                 if (mu::ui::window::CManager* newUIMng = g_pNewUIMng)
                     newUIMng->ReloadAllRmlThemes();
                 UI::Login::ReloadRmlTheme();
+                UI::RmlBridge::Tooltip::ReloadRmlTheme();
             }
         }
         return true;

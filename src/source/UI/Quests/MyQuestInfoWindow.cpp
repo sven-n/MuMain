@@ -16,6 +16,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -244,6 +245,15 @@ bool mu::ui::window::CMyQuestInfoWindow::UpdateKeyEvent()
 bool mu::ui::window::CMyQuestInfoWindow::Update()
 {
     SyncRmlModel();
+
+    // Mirrors Render()'s own condition for drawing the reward-item info popup: whenever it
+    // wouldn't be (re)shown this frame -- tab switched away from TAB_QUEST, selection cleared,
+    // or the window itself hidden -- make sure the persistent tooltip document doesn't linger.
+    if (IsVisible() && !(m_eTabBtnIndex == TAB_QUEST && m_pSelectedRewardItem))
+    {
+        UI::RmlBridge::Tooltip::Hide();
+    }
+
     return true;
 }
 
@@ -253,10 +263,10 @@ bool mu::ui::window::CMyQuestInfoWindow::Render()
     // popup is still a native per-frame call here (see m_pSelectedRewardItem).
     if (m_eTabBtnIndex == TAB_QUEST && m_pSelectedRewardItem)
     {
-        const auto transform = UI::Scaling::GetActiveTransform();
-        const int nX = static_cast<int>((m_Pos.x + 95) * transform.scaleX + transform.offsetX);
-        const int nY = static_cast<int>((m_Pos.y + 230) * transform.scaleY + transform.offsetY);
-        ::RenderItemInfo(nX, nY, m_pSelectedRewardItem, false, 0, true);
+        // Reference-pixel, not screen pixel -- RenderItemInfo() converts internally via the
+        // ambient transform (same convention every other caller uses, see ZzzInventory.cpp).
+        // Pre-converting here too used to double-apply the transform.
+        ::RenderItemInfo(m_Pos.x + 95, m_Pos.y + 230, m_pSelectedRewardItem, false, 0, true);
     }
 
     return true;

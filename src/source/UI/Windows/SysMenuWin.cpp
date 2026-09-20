@@ -101,6 +101,11 @@ void CSysMenuWin::Release()
     // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
+
+    // Base-class visibility reset (same fix as CServerMsgWin::Release()/CMsgWin::Release()) -- ESC
+    // right before entering the game leaves this open at the exact transition instant otherwise,
+    // stranding IsVisible() at true for whatever later code checks it during MAIN_SCENE.
+    mu::ui::window::CObject::Show(false);
 }
 
 void CSysMenuWin::Show(bool bShow)

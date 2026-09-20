@@ -164,10 +164,10 @@
 	cursor: pointer;
 }
 
-/* Expanded grid + pet-command row + shared tooltip -- zero shift; left/top values come straight
-   from CSkillList::RebuildGridSnapshot()/QueueTooltip(). Containers stay non-interactive; only
-   .skill-cell opts back into pointer-events. */
-#skill_grid, #pet_skill_row, #skill_tooltip {
+/* Expanded grid + pet-command row -- zero shift; left/top values come straight from
+   CSkillList::RebuildGridSnapshot(). Containers stay non-interactive; only .skill-cell opts back
+   into pointer-events. */
+#skill_grid, #pet_skill_row {
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -196,33 +196,6 @@
 	background-color: rgba(255, 128, 128, 128);
 	pointer-events: none;
 }
-
-/* Shared skill tooltip, positioned via C++-pushed left/top and flipped to grow upward via
-   translateY(-100%); flat black styling instead of modern's bordered-panel look. */
-#skill_tooltip {
-	transform: translateY(-100%);
-	width: 220px;
-	background-color: rgba(0, 0, 0, 200);
-	border-radius: 3px;
-	padding: 4px 6px;
-	font-family: "Liberation Sans";
-	font-size: 10px;
-	z-index: 2;
-}
-/* display:block required -- RmlUi's default `display` is inline, not block, even for a <div>. */
-.tt-line {
-	display: block;
-	color: #ffffff;
-	white-space: normal;
-	min-height: 1.2em;
-	line-height: 1.2em;
-}
-/* #80b3ff is the legacy engine's TEXT_COLOR_BLUE (ZzzInventory.cpp) -- shared with CMyInventory's
-   item-option tooltip since it's semantic (option category), not theme aesthetic. */
-.tt-line.tt-blue { color: #80b3ff; }
-.tt-line.tt-red { color: #ff6060; }
-.tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
-.tt-line.bold { font-weight: bold; }
 
 /* Bottom-right, matching the retired RenderNumber(x+20,y+20,...) subscript position
    (MainFrameWindow.cpp) -- plain text instead of the legacy digit-sprite atlas. */

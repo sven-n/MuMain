@@ -126,13 +126,6 @@
 				<div class="cooldown-wipe" data-style-height="cell.cooldown_fraction * 100 + '%'"></div>
 			</div>
 		</div>
-
-		<!-- Shared skill tooltip -- see themes/modern/main_frame.rml's identical block. -->
-		<div id="skill_tooltip" data-class-hidden="!skill_tooltip_visible" data-style-left="skill_tooltip_left + 'px'" data-style-top="skill_tooltip_top + 'px'">
-			<div class="tt-line" data-for="line : skill_tooltip_lines"
-			     data-class-tt-blue="line.color_blue" data-class-tt-red="line.color_red"
-			     data-class-tt-darkred="line.color_dark_red" data-class-bold="line.bold">{{line.text}}</div>
-		</div>
 	</div>
 </body>
 </rml>

@@ -25,6 +25,7 @@
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 #include <vector>
 
 extern BYTE m_CrywolfState;
@@ -5679,6 +5680,17 @@ void CUIQuestContentsListBox::RenderCoveredInterface()
     if (QUEST_REQUEST_ITEM == m_TextListIter->m_dwType
         || QUEST_REWARD_ITEM == m_TextListIter->m_dwType)
     {
+        // DoLineMouseAction() only *sets* the selected line while the mouse is over it -- it never
+        // clears it back when the mouse leaves, so the selection is sticky across frames. Under the
+        // old native draw that didn't matter (nothing kept drawing once the mouse moved on), but the
+        // new persistent tooltip document would otherwise stay stuck at the last-hovered row
+        // forever. Re-verify the mouse is still actually over that row before (re)showing it.
+        if (!::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(SLGetSelectLineNum()) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
+        {
+            UI::RmlBridge::Tooltip::Hide();
+            return;
+        }
+
         int nX = m_iPos_x + GetWidth() / 2;
         int nY = GetRenderLinePos_y(SLGetSelectLineNum());
         ::RenderItemInfo(nX, nY, m_TextListIter->m_pItem, false, 0, true);

@@ -120,6 +120,14 @@ void CMsgWin::Release()
     // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
+
+    // Base-class visibility reset, NOT the full CMsgWin::Show(false) override (same reasoning as
+    // CServerMsgWin::Release()/CCharMakeWin::Release()) -- without this, a message box open at the
+    // exact instant of the character-select -> main-scene transition leaves IsVisible() stuck true,
+    // so Winmain.cpp's post-RmlUi callback keeps calling RenderTextOnTop() (and CManager's own
+    // sweep keeps calling Update()/Render()) against this already-released window every MAIN_SCENE
+    // frame afterward -- a stray flicker at the message box's last position.
+    mu::ui::window::CObject::Show(false);
 }
 
 void CMsgWin::SetPosition(int nXCoord, int nYCoord)
