@@ -90,6 +90,10 @@ SOCKET ConnectTo(const std::string& path)
 
     sockaddr_un address{};
     address.sun_family = AF_UNIX;
+    // sun_path is 108 bytes on Linux and 104 with afunix.h: a longer path
+    // would be copied past the end of the address, and the test would be
+    // reporting a corrupted stack rather than the socket's behaviour.
+    REQUIRE(path.size() < sizeof(address.sun_path));
     std::memcpy(address.sun_path, path.c_str(), path.size());
     if (::connect(handle, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) != 0)
     {
@@ -246,7 +250,6 @@ TEST_CASE("Local socket file is owner-only and replaces a stale file [core][loca
 
     // A file left behind by a crashed client.
     {
-        std::filesystem::permissions(directory, std::filesystem::perms::owner_all);
         FILE* stale = std::fopen(path.c_str(), "wb");
         REQUIRE(stale != nullptr);
         std::fclose(stale);
