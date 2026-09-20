@@ -756,7 +756,8 @@ std::string UseItem(const Request& request, std::unique_ptr<Act>&)
     }
 
     const ITEM* item = FindInventoryItemBySlot(slot);
-    if (item == nullptr || item->Type <= 0)
+    // `-1` is the client's empty marker; type 0 is a real item.
+    if (item == nullptr || item->Type < 0)
     {
         return EncodeError(request.EncodedId(), ErrorCode::EmptySlot,
                            "inventory slot " + std::to_string(slot) + " is empty");
@@ -781,7 +782,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     }
 
     const ITEM* item = FindInventoryItemBySlot(fromSlot);
-    if (item == nullptr || item->Type <= 0)
+    if (item == nullptr || item->Type < 0)
     {
         return EncodeError(request.EncodedId(), ErrorCode::EmptySlot,
                            "inventory slot " + std::to_string(fromSlot) + " is empty");

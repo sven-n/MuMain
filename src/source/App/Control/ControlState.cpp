@@ -74,7 +74,9 @@ json EquipmentArray()
     for (int slot = 0; slot < MAX_EQUIPMENT; ++slot)
     {
         const ITEM& item = CharacterMachine->Equipment[slot];
-        if (item.Type <= 0)
+        // The empty marker is -1; type 0 is a real item (ITEM_KRIS, the Dark
+        // Knight's starting weapon), so it must not be skipped here.
+        if (item.Type < 0)
         {
             continue;
         }
@@ -89,7 +91,7 @@ json InventoryArray()
     for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
     {
         const ITEM* item = FindInventoryItemBySlot(slot);
-        if (item == nullptr || item->Type <= 0)
+        if (item == nullptr || item->Type < 0)
         {
             continue;
         }
