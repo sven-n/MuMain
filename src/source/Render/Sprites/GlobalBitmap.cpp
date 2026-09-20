@@ -536,12 +536,10 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     {
 #ifdef _DEBUG
         static unsigned int uiCnt2 = 0;
-        int iBuff;
-        iBuff = 0;
 
         wchar_t szDebugOutput[256];
 
-        iBuff = iBuff + mu_swprintf(iBuff + szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
+        mu_swprintf_s(szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
         OutputDebugString(szDebugOutput);
 #endif
     }
