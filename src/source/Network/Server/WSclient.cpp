@@ -6087,9 +6087,14 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
     {
         auto Data2 = (LPPDELETE_CHARACTER)(ReceiveBuffer + Offset);
         int Key = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
-        if (Key < 0 || Key >= MAX_ITEMS)
+        const bool KeyInRange = Key >= 0 && Key < MAX_ITEMS;
+        if (!KeyInRange)
             Key = 0;
-        App::Control::Events::RecordDropVanished(Key, "gone");
+        // Only a real slot is reported: the clamp above turns anything else
+        // into slot 0, and announcing that as vanished would tell a
+        // scripted caller a drop it is tracking is gone.
+        if (KeyInRange)
+            App::Control::Events::RecordDropVanished(Key, "gone");
 
         Items[Key].Object.Live = false;
         Offset += sizeof(PDELETE_CHARACTER);
