@@ -260,7 +260,6 @@ public:
 private:
     int m_tileX;
     int m_tileY;
-    bool m_walking = false;
     std::chrono::steady_clock::time_point m_lastWalkAt{};
 };
 
@@ -760,8 +759,12 @@ std::string Teleport(const Request& request, std::unique_ptr<Act>& act)
                                "`teleport` takes the map as a number, not `" + mapText + "`");
         }
     }
-    else if (request.GetInt("map", map) && map < 0)
+    else if (request.Has("map") && (!request.GetInt("map", map) || map < 0))
     {
+        // A `map` that is not a number this client can hold must not fall
+        // back to the map the character is standing on: the command would
+        // then teleport somewhere the caller never asked for and report it
+        // as a success.
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`teleport` needs a map index of 0 or more");
     }
 
@@ -782,14 +785,17 @@ std::string Attack(const Request& request, std::unique_ptr<Act>& act)
     }
 
     int times = 1;
-    (void)request.GetInt("times", times);
-    if (times < 1)
+    if (request.Has("times") && (!request.GetInt("times", times) || times < 1))
     {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`times` must be at least 1");
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`times` is a whole number, at least 1");
     }
 
     int interval = 0;
-    (void)request.GetInt("interval", interval);
+    if (request.Has("interval") && (!request.GetInt("interval", interval) || interval < 0))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`interval` is a whole number of milliseconds, 0 or more");
+    }
 
     act = std::make_unique<AttackAct>(targetKey, times, std::chrono::milliseconds(std::max(interval, 0)));
     return {};

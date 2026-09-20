@@ -172,7 +172,9 @@ logout) plus the scene and map watcher in `App/Control/ControlServer.cpp`.
 When one of those functions is rewritten:
 
 1. `rg -c 'App::Control::Events::' src/source/Network/Server/WSclient.cpp` —
-   the count is 19; a lower one means a tap was dropped.
+   the count is 20; a lower one means a tap was dropped. Compare it against
+   `git show upstream/main:…` when the number itself is in doubt: the count
+   is a smoke test, the list above is the contract.
 2. Re-run the live checks that cover the dropped tap (a fight records `hit`,
    `killed` and `stat`; a pickup records `drop` and `drop_gone`).
 

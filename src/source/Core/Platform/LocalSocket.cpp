@@ -181,6 +181,13 @@ bool LocalSocketConnection::Write(std::string_view payload)
     }
 
     m_outbox.append(payload);
+    if (m_outbox.size() > MaxPendingOutputBytes)
+    {
+        // The peer has stopped reading and the kernel buffer is full: drop
+        // it rather than grow without limit. Same rule as the inbox.
+        Close();
+        return false;
+    }
     return Flush();
 }
 

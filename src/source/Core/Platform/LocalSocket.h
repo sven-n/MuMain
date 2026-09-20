@@ -38,6 +38,12 @@ public:
     // instead of growing the buffer for as long as it keeps writing.
     static constexpr std::size_t MaxTotalInputBytes = std::size_t{4} * 1024 * 1024;
 
+    // And the same for what is waiting to go out. A follower that stops
+    // reading (a stopped process, a full pipe) leaves every event queued
+    // here; without a ceiling the client grows a send buffer until it dies
+    // of it, for a peer that is no longer listening.
+    static constexpr std::size_t MaxPendingOutputBytes = std::size_t{4} * 1024 * 1024;
+
     explicit LocalSocketConnection(SOCKET handle);
     ~LocalSocketConnection();
 
