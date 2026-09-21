@@ -279,6 +279,14 @@ private:
             return Status::Running;
         }
 
+        // Nothing can be selected without a connection to the connect
+        // server: the request would go nowhere. A login that had to leave a
+        // session first waits here until the client has reconnected.
+        if (SocketClient == nullptr)
+        {
+            return Status::Running;
+        }
+
         // A group the caller named that the list does not hold will never
         // appear: that is an answer, not something to wait for.
         if (!m_serverGroup.empty() && !ServerGroupExists(m_serverGroup))
