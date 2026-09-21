@@ -54,6 +54,8 @@ This builds the engine, the `linux-x64` `MUnique.Client.Library.so`, and copies
 the assets and the library next to the executable. Drop `-DENABLE_EDITOR=ON`
 (or set it `OFF`) for a player build.
 
+If the packaged runtime has no global library path for SDL's video backends or the Vulkan loader (the client stops with `SDL video init failed` and an SDL error such as `wayland not available`), configure with `-DMU_LINK_SDL_PLATFORM_BACKENDS=ON`: SDL then links those libraries at build time and `Main` records their `RUNPATH`.
+
 ## Run
 
 ```bash
@@ -74,6 +76,14 @@ acceleration:
 ```bash
 MESA_LOADER_DRIVER_OVERRIDE=d3d12 ./Main
 ```
+
+## Reporting a Wayland problem
+
+From the repository root, run `scripts/wayland-diag.sh --timeout 60 --`.
+It writes a sanitized `summary.txt` under `diag/`; paste that into the report
+and attach only relevant raw-log excerpts. A pre-existing `MuError.log` is
+copied into the bundle as `MuError.log.previous` before the fresh run. `--tar`
+creates a local archive and does not upload it.
 
 ## Tests
 

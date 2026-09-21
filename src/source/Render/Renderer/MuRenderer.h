@@ -363,6 +363,42 @@ public:
         return false;
     }
 
+#ifdef _EDITOR
+    // -----------------------------------------------------------------------
+    // Editor-only: isolated offscreen render captures for UI preview thumbnails
+    // (e.g. the Map Editor's object-model preview grid). Draw calls issued
+    // between BeginOffscreenCapture()/EndOffscreenCapture() render into a
+    // dedicated texture instead of the main frame and never appear on screen.
+    // Not available in non-editor builds - exists solely for editor preview UI,
+    // never on the normal gameplay rendering path.
+    // -----------------------------------------------------------------------
+
+    // `textureId` may be an existing id (reused/resized as needed) or 0 to
+    // allocate a new one. Returns the texture id, or 0 on failure. Calls don't
+    // nest - only one capture may be open at a time.
+    [[nodiscard]] virtual std::uint32_t BeginOffscreenCapture(std::uint32_t /*textureId*/, std::uint32_t /*width*/,
+                                                              std::uint32_t /*height*/)
+    {
+        return 0u;
+    }
+    // Closes the capture opened by BeginOffscreenCapture.
+    virtual void EndOffscreenCapture() {}
+
+    // Real GPU texture pointer for a texture id (from CreateTexture or
+    // BeginOffscreenCapture), for handing to ImGui as ImTextureID. Returns
+    // nullptr if the id isn't registered.
+    [[nodiscard]] virtual void* GetTexturePointer(std::uint32_t /*textureId*/) const { return nullptr; }
+
+    // True if one or more completed BeginOffscreenCapture()/EndOffscreenCapture()
+    // draw-command ranges are still waiting to be replayed into their capture
+    // texture (replay happens once per EndFrame(), after this frame's ImGui/game
+    // code has already returned). A caller that's about to release/reload a
+    // resource a just-recorded capture might still be sampling (e.g. reusing a
+    // scratch model slot for a different file) must wait for this to go false
+    // first, or the eventual replay reads a freed texture/sampler.
+    [[nodiscard]] virtual bool HasPendingOffscreenCaptures() const { return false; }
+#endif // _EDITOR
+
     // -----------------------------------------------------------------------
     // Story 7-9-6: GL state migration — replaces raw OpenGL calls.
     // Default implementations are no-ops; SDL_gpu backend overrides them.
