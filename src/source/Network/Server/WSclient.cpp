@@ -1171,6 +1171,11 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     LockInputStatus = false;
     Input::IME::CheckStatus(true, 0);
 
+    // The other way a character lands somewhere: a warp to a map on another
+    // map server arrives here instead of through the teleport packet, and a
+    // scripted `warp` waits for exactly this signal.
+    App::Control::Events::RecordTeleportPacket();
+
     LoadingWorld = 30;
     MouseUpdateTime = 0;
     MouseUpdateTimeMax = 6;

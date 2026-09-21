@@ -146,6 +146,11 @@ bool ServerGroupExists(const std::wstring& name)
 // spend the login's whole deadline on a selection that cannot succeed.
 constexpr std::chrono::milliseconds SelectServerRetryWindow{5000};
 
+// How long a join that the server never answered waits before the selection
+// is made again: the request may have been sent into a connection that was
+// still being re-established.
+constexpr std::chrono::milliseconds JoinRetryWindow{8000};
+
 // login: server list -> server -> credentials -> character list.
 class LoginAct : public Act
 {
@@ -304,6 +309,7 @@ private:
         }
 
         m_stage = Stage::JoiningServer;
+        m_joiningSince = std::chrono::steady_clock::now();
         return Status::Running;
     }
 
@@ -323,6 +329,19 @@ private:
         // login is answered as that failure instead of waited on.
         if (CurrentProtocolState != RECEIVE_JOIN_SERVER_SUCCESS)
         {
+            // A selection whose request went nowhere — the connect-server
+            // connection was still coming back when it was sent — produces
+            // no state change at all: after a while, select again rather
+            // than wait out the login's deadline.
+            if (m_joiningSince != std::chrono::steady_clock::time_point{} &&
+                std::chrono::steady_clock::now() - m_joiningSince > JoinRetryWindow)
+            {
+                m_stage = Stage::SelectingServer;
+                m_selectingSince = {};
+                m_joiningSince = {};
+                return Status::Running;
+            }
+
             // Every login failure arrives as a message box, which the stage
             // below reads; the protocol state itself is put back to
             // RECEIVE_JOIN_SERVER_SUCCESS by the box's OK handler
@@ -376,6 +395,7 @@ private:
     Stage m_stage = Stage::SelectingServer;
     bool m_leaving = false;
     std::chrono::steady_clock::time_point m_selectingSince{};
+    std::chrono::steady_clock::time_point m_joiningSince{};
 };
 
 // select-char: enter the world with one character and wait for its map.
