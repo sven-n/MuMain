@@ -1,0 +1,86 @@
+/* Modern theme for CNPCDialogue -- #panel/shell-edge/groove/header-rail fill come from
+   docked_panel_frame.rcss, shared with character_info/my_quest_info/pet_info/party_info/
+   quest_progress -- see that file's own header comment. L/R pagination arrows reuse legacy's own
+   sprites (theme-local duplication), same reasoning quest_progress.rcss's modern fork already uses
+   for this exact asset -- dialogue-specific navigation with no generic modern equivalent. */
+@spritesheet nd-btn-l-sheet { src: "../../../Quest_bt_L.tga"; nd-btn-l: 0px 0px 17px 18px; }
+@spritesheet nd-btn-r-sheet { src: "../../../Quest_bt_R.tga"; nd-btn-r: 0px 0px 17px 18px; }
+@spritesheet nd-contribute-sheet { src: "../../../Gens_point.tga"; nd-contribute-img: 0px 0px 168px 18px; }
+
+/* No explicit display -- see the legacy theme's own .nd-contribute comment for why (base.rcss's
+   .hidden must win the cascade uncontested). */
+.nd-contribute {
+	position: absolute;
+	left: 11px;
+	top: 27px;
+	width: 168px;
+	height: 18px;
+	text-align: center;
+	color: token(text-primary);
+	font-size: 12px;
+	line-height: 18px;
+	decorator: image(nd-contribute-img);
+}
+
+.nd-npc-lines {
+	position: absolute;
+	left: 13px;
+	top: 59px;
+	width: 164px;
+}
+.nd-line {
+	display: block;
+	color: token(text-primary);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.nd-divider {
+	position: absolute;
+	left: 0;
+	top: 181px;
+	width: 190px;
+	height: 21px;
+	border-top: 1dp token(border-frame);
+}
+
+.nd-btn-l, .nd-btn-r {
+	position: absolute;
+	width: 17px;
+	height: 18px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.nd-btn-l { left: 131px; decorator: image(nd-btn-l); }
+.nd-btn-r { left: 153px; decorator: image(nd-btn-r); }
+.nd-btn-npc { top: 165px; }
+.nd-btn-ans { top: 372px; }
+.nd-btn-l:hover, .nd-btn-r:hover { filter: brightness(1.25); }
+.nd-btn-l.locked, .nd-btn-r.locked { filter: brightness(0.6); }
+
+.nd-answers {
+	position: absolute;
+	left: 13px;
+	top: 207px;
+	width: 164px;
+}
+.nd-answer-row {
+	display: block;
+	color: token(text-primary);
+	font-size: 12px;
+	white-space: pre-line;
+	cursor: pointer;
+	pointer-events: auto;
+	margin-bottom: 2px;
+}
+.nd-answer-row:hover { background-color: token(surface-panel); color: token(accent-gold-hover); }
+
+/* .modern-icon-btn-px sets top:392px but leaves left unset (every window supplies its own) -- same
+   13px left quest_progress.rcss's own .qp-btn-exit uses, matching the legacy #btn_exit box exactly. */
+.nd-btn-exit { left: 13px; }
+
+/* Tooltip: shared shape from docked_panel_frame.rcss, position/offset are per-window -- same
+   coordinates as quest_progress.rcss's own #btn_exit (13,392,36,29 legacy box), reused here as-is. */
+.tooltip { top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

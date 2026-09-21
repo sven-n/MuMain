@@ -89,8 +89,10 @@ four independent pieces still keeping this file alive:
    - `CMixInventory` (`UI/Inventory/MixInventory.h`) — `CUISocketListBox`, `CUIUnmixgemList`
    - `CInGameShop` (`GameShop/InGameShop.h`) — `CUIInGameShopListBox`, `CUIBuyingListBox`,
      `CUIPackCheckBuyingListBox`
-   - `QuestProgress.h`/`QuestProgressByEtc.h` — `CUICurQuestListBox`/`CUIQuestContentsListBox`
-     (the same two `CMyQuestInfoWindow` already ported off; natural next targets, same pattern)
+   - ~~`QuestProgress.h`/`QuestProgressByEtc.h` — `CUIQuestContentsListBox`~~ **Done** (this
+     session): both windows ported to RmlUi wholesale (not just the list), sharing a
+     `UI::Quests::RewardModel` reward-row builder with `CMyQuestInfoWindow`'s own port off the same
+     class — see `migration-ledger.md`'s own rows for the full story.
    - Guild/chat/letter/socket variants (`CUIGuildListBox`, `CUISimpleChatListBox`,
      `CUIChatPalListBox`, `CUIWindowListBox`, `CUILetterListBox`/`CUILetterTextListBox`,
      `CUIGuildNoticeListBox`, `CUIUnionGuildListBox`, `CUIExtraItemListBox`,

@@ -8,32 +8,27 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Quests/MyQuestInfoWindow.h"
-#include "UI/NPCs/NPCShop.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Quests/NPCQuestRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 
+namespace Rml { class ElementDocument; }
+
+// RmlUi-based (npc_quest.rml/.rcss) except the live quest-condition item preview, which stays a
+// native per-frame 3D draw (Render3D()/RenderItem3D()) -- genuine 3D content, the same class of
+// permanent hybrid boundary CQuestProgress's own m_pSelectedRewardItem/::RenderItemInfo() already
+// established, just for multiple always-visible rows instead of one on-hover popup.
+//
+// Split into two RmlUi documents, unlike every 2D-only sibling this session: the frame chrome
+// (npc_quest_bg.rml, m_pRmlBgDoc) renders via RmlUiRuntime::GetBackgroundContext() so it paints
+// BEFORE the native 3D preview each frame, while the actual content (npc_quest.rml, m_pRmlDoc) stays
+// on the main context, which always renders last (on top of the 3D preview, as intended). Same
+// mechanism CNPCShop/CMyInventory already use for their own live-3D icon grids.
 namespace mu::ui::window
 {
     class CNPCQuest : public CObject, public I3DRenderObj
     {
-    public:
-        enum IMAGE_LIST
-        {
-            // 기본창
-            IMAGE_NPCQUEST_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_NPCQUEST_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
-            IMAGE_NPCQUEST_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_NPCQUEST_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_NPCQUEST_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
-
-            IMAGE_NPCQUEST_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_NPCQUEST_ZEN = CNPCShop::IMAGE_NPCSHOP_REPAIR_MONEY,
-            IMAGE_NPCQUEST_BTN_COMPLETE = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_NPCQUEST_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-        };
-
     private:
         enum
         {
@@ -45,8 +40,25 @@ namespace mu::ui::window
         C3DRenderMng* m_pNewUI3DRenderMng;
         POINT					m_Pos;
 
-        CButton			m_btnComplete;
-        CButton			m_btnClose;
+        // Mirrors the native Lock()/UnLock() state RenderItemMobText()'s return value drove every
+        // frame -- computed fresh in SyncRmlModel(), read by RmlClickComplete() the same way
+        // ProcessBtns() used to read the button's own current Lock() state.
+        bool m_bCompleteEnabled = false;
+
+        RmlModelBinder<NPCQuestRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame chrome must render behind the live-3D quest-item preview, but RmlUi's main
+        // context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead, same mechanism
+        // CNPCShop's own NPCShopBgRmlModel already established. Root-transform passthrough only --
+        // all the actual chrome is static markup/CSS in npc_quest_bg.rml.
+        struct NPCQuestBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<NPCQuestBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
     public:
         CNPCQuest();
@@ -56,6 +68,7 @@ namespace mu::ui::window
         void Release();
 
         void SetPos(int x, int y);
+        void Show(bool bShow) override;
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -70,17 +83,24 @@ namespace mu::ui::window
         void ProcessOpening();
         bool ProcessClosing();
 
+        void ReloadRmlTheme() override;
+
+        // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
+        void RmlClickClose();
+        void RmlClickAnswer(int nAnswerIndex);
+        void RmlClickComplete();
+
     private:
-        void LoadImages();
-        void UnloadImages();
+        void BuildRmlUi();
+        void SyncRmlModel();
 
-        bool UpdateSelTextMouseEvent();
-        void RenderBackImage();
-        void RenderText();
-        bool RenderItemMobText();
+        // Condition-evaluation half of the old RenderItemMobText() -- keeps
+        // FindQuestItemsInInven()/GetKillMobCount() comparison logic (and its exact color/completion
+        // mapping) byte-for-byte, just populates rows instead of drawing them. Returns the same
+        // completion bool the native code used to gate the Complete button's Lock()/color state.
+        bool BuildConditionRows(std::vector<NPCQuestConditionRow>& outRows);
+
         void RenderItem3D();
-
-        bool ProcessBtns();
     };
 }
 

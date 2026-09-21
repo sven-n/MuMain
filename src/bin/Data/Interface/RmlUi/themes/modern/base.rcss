@@ -847,7 +847,9 @@ body {
 .modern-icon-btn-px.hidden { display: none; }
 .modern-icon-btn-px.locked { pointer-events: none; filter: brightness(0.6); }
 .modern-icon-btn-glyph-px {
-	color: inherit;
+	/* No explicit color -- RmlUi inherits it from .modern-icon-btn-px by default already; this
+	   build's CSS parser doesn't recognize the literal `inherit` keyword (logs a syntax-error
+	   warning and drops the declaration, same net effect but noisy). */
 	font-weight: bold;
 	font-family: "DejaVu Sans";
 	pointer-events: none;

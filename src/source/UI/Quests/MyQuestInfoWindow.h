@@ -9,6 +9,7 @@
 #include "GameLogic/Quests/QuestMng.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
+#include "UI/Quests/QuestRewardModel.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -163,15 +164,11 @@ namespace mu::ui::window
         DWORD m_dwSelectedQuestIndex = 0;
         std::vector<DWORD> m_QuestIndices; // last SetCurQuestList() data, kept for SyncRmlModel()
 
-        // Raw content-row data for click handling, alongside the model's display-only ContentEntry list.
-        struct ContentRowData
-        {
-            Rml::String text;
-            DWORD dwColor = 0;
-            DWORD dwType = 0;
-            ITEM* pItem = nullptr;
-        };
-        std::vector<ContentRowData> m_ContentRows;
+        // Raw content-row data for click handling, alongside the model's display-only ContentEntry
+        // list. UI::Quests::RewardModel::RowData (not a private struct here) since
+        // SetSelQuestRequestReward() below builds these via the shared reward-row helper, same one
+        // CQuestProgress/CQuestProgressByEtc use for their own reward list.
+        std::vector<UI::Quests::RewardModel::RowData> m_ContentRows;
 
         // Selected reward-item's info popup -- still native-rendered every frame (::RenderItemInfo())
         // rather than ported to RmlUi. Anchored near the panel, not at the exact row Y.

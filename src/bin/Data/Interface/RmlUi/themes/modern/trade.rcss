@@ -112,7 +112,8 @@
 		0 0 0 2px rgba(220, 40, 40, 220);
 }
 .confirm-glyph {
-	color: inherit;
+	/* No explicit color -- see base.rcss's .modern-icon-btn-glyph-px comment: RmlUi inherits it by
+	   default already, and this build's parser doesn't recognize the literal `inherit` keyword. */
 	font-weight: bold;
 	font-size: 11px;
 	font-family: "DejaVu Sans";

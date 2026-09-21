@@ -1,0 +1,185 @@
+/* Legacy theme for CQuestProgress/CQuestProgressByEtc -- shared by both windows' own documents
+   (quest_progress.rml/quest_progress_etc.rml, see either file's header comment for why two .rml
+   files link one .rcss). #panel/frame sprites/exit button/tooltip shape come from
+   docked_panel_frame.rcss (linked before this file), same family as character_info/my_quest_info/
+   pet_info/party_info. Coordinates below are plain reference px, not dp.
+
+   `#panel.qp-etc` overrides mark the handful of values that genuinely differ between the two
+   windows (confirmed by reading both native classes in full): CQuestProgressByEtc's NPC-line/
+   button top offsets sit 3-7px higher, and its answers list starts right where CQuestProgress's own
+   player-name/player-words preamble would otherwise occupy, since that preamble doesn't exist in
+   quest_progress_etc.rml at all. Everything else here is byte-identical between the two windows. */
+.frame-top { decorator: image(docked-bg-top-a); }
+
+@spritesheet qp-btn-l-sheet { src: "../../../Quest_bt_L.tga"; qp-btn-l: 0px 0px 17px 18px; }
+@spritesheet qp-btn-r-sheet { src: "../../../Quest_bt_R.tga"; qp-btn-r: 0px 0px 17px 18px; }
+@spritesheet qp-btn-complete-sheet {
+	src: "../../../newui_btn_empty.tga";
+	qp-btn-complete-idle:  0px  0px 108px 29px;
+	qp-btn-complete-hover: 0px 29px 108px 29px;
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: #e6e6e6;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.qp-subject {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 27px;
+	width: 190px;
+	text-align: center;
+	color: #24f2fc;
+	font-size: 12px;
+}
+
+.qp-npc-name {
+	display: block;
+	position: absolute;
+	left: 13px;
+	top: 51px;
+	color: #ffff0a;
+	font-size: 12px;
+}
+
+.qp-npc-lines {
+	position: absolute;
+	left: 13px;
+	top: 66px;
+	width: 164px;
+}
+#panel.qp-etc .qp-npc-lines { top: 59px; }
+.qp-line {
+	display: block;
+	color: #ffe6d2;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+/* Native 188x21 sprite at fixed size -- its own element rather than a stretched decorator, same
+   reasoning my_quest_info.rcss's own .quest-divider comment gives. */
+@spritesheet qp-line-sheet { src: "../../../newui_myquest_Line.tga"; qp-line-img: 0px 0px 188px 21px; }
+.qp-divider {
+	position: absolute;
+	left: 1px;
+	top: 181px;
+	width: 188px;
+	height: 21px;
+	decorator: image(qp-line-img);
+}
+
+.qp-btn-l, .qp-btn-r {
+	position: absolute;
+	top: 168px;
+	width: 17px;
+	height: 18px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#panel.qp-etc .qp-btn-l, #panel.qp-etc .qp-btn-r { top: 165px; }
+.qp-btn-l { left: 131px; decorator: image(qp-btn-l); }
+.qp-btn-r { left: 153px; decorator: image(qp-btn-r); }
+.qp-btn-l:hover, .qp-btn-r:hover { filter: brightness(1.25); }
+/* No pointer-events:none -- the RmlClickPrevPage()/RmlClickNextPage() handlers already guard on
+   prev_enabled/next_enabled, so a locked click is a safe no-op; dimming alone is enough (same
+   convention my_quest_info.rcss's own .quest-btn.locked comment documents). */
+.qp-btn-l.locked, .qp-btn-r.locked { filter: brightness(0.6); }
+
+/* Player-name label -- CQuestProgress's own document only (quest_progress_etc.rml has no such
+   element at all). Shown for active_view 0 and 1, hidden only in reward view (2).
+   No explicit display here -- base.rcss's .hidden{display:none} (toggled by this element's own
+   data-class-hidden="active_view == 2") must win the cascade uncontested, same convention every
+   data-class-hidden target in my_quest_info.rcss already follows (an explicit display:block here,
+   linked after base.rcss, would otherwise always beat it regardless of active_view). */
+.qp-player-name {
+	position: absolute;
+	left: 13px;
+	top: 207px;
+	color: #ffb90a;
+	font-size: 12px;
+}
+
+.qp-answers {
+	position: absolute;
+	left: 13px;
+	top: 222px;
+	width: 164px;
+}
+#panel.qp-etc .qp-answers { top: 207px; }
+.qp-player-words {
+	display: block;
+	color: #ffe6d2;
+	font-size: 12px;
+	margin-bottom: 15px;
+}
+.qp-answer-row {
+	display: block;
+	color: #ffe6d2;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	margin-bottom: 2px;
+}
+.qp-answer-row:hover { background-color: rgba(128, 128, 179, 77); }
+
+.qp-reward {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 190px;
+	height: 429px;
+}
+.qp-reward-list {
+	position: absolute;
+	left: 9px;
+	top: 205px;
+	width: 174px;
+	height: 150px;
+	overflow: auto hidden;
+}
+.qp-reward-row {
+	display: block;
+	width: 100%;
+	text-align: center;
+	padding: 1px 4px;
+	font-size: 12px;
+	color: #ffffff;
+}
+.qp-reward-row.bold { font-weight: bold; }
+.qp-reward-row.clickable { cursor: pointer; pointer-events: auto; }
+.qp-reward-row.clickable:hover { color: #ffee88; }
+
+.qp-btn-complete {
+	position: absolute;
+	left: 41px;
+	top: 362px;
+	width: 108px;
+	height: 29px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 29px;
+	color: #ffe6d2;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(qp-btn-complete-idle);
+}
+.qp-btn-complete:hover { decorator: image(qp-btn-complete-hover); }
+.qp-btn-complete.disabled {
+	color: #aaaaaa;
+	pointer-events: none;
+	cursor: default;
+	filter: brightness(0.6);
+}
+
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
+   label span is redundant (same convention my_quest_info.rcss's own .btn-exit-label uses). */
+.btn-exit-label { display: none; }

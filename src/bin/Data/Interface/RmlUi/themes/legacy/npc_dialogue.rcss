@@ -1,0 +1,107 @@
+/* Legacy theme for CNPCDialogue -- #panel/frame sprites/exit button/tooltip shape come from
+   docked_panel_frame.rcss (linked before this file), same family as character_info/my_quest_info/
+   pet_info/party_info/quest_progress. Coordinates below are plain reference px, not dp.
+
+   L/R pager sprites duplicate quest_progress.rcss's own qp-btn-l/r defs (same Quest_bt_L/R.tga
+   asset, reused by both windows) rather than cross-linking that unrelated stylesheet -- this
+   window's layout (dual pagination, contribute banner, quest-list-mode text) isn't a "near-identical
+   sibling" the way CQuestProgress/CQuestProgressByEtc are to each other, so it gets its own files
+   (same "duplicate a small shared sprite def" choice quest_progress.rcss's own modern fork already
+   made for this exact asset). */
+.frame-top { decorator: image(docked-bg-top-a); }
+
+@spritesheet nd-btn-l-sheet { src: "../../../Quest_bt_L.tga"; nd-btn-l: 0px 0px 17px 18px; }
+@spritesheet nd-btn-r-sheet { src: "../../../Quest_bt_R.tga"; nd-btn-r: 0px 0px 17px 18px; }
+@spritesheet nd-line-sheet  { src: "../../../newui_myquest_Line.tga"; nd-line-img: 0px 0px 188px 21px; }
+@spritesheet nd-contribute-sheet { src: "../../../Gens_point.tga"; nd-contribute-img: 0px 0px 168px 18px; }
+
+/* NPC name doubles as this window's title -- dynamic (g_QuestMng.GetNPCName()), unlike the other
+   docked windows' own static #title text. */
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: #96fff0;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+/* Gens contribute-point banner (NPC 543/544 only) -- see RenderContributePoint()'s own gate,
+   preserved verbatim in SyncRmlModel(). No explicit display here -- base.rcss's
+   .hidden{display:none} (toggled by this element's own data-class-hidden="!show_contribute") must
+   win the cascade uncontested, same convention every data-class-hidden target in
+   my_quest_info.rcss already follows. */
+.nd-contribute {
+	position: absolute;
+	left: 11px;
+	top: 27px;
+	width: 168px;
+	height: 18px;
+	text-align: center;
+	color: #ffe6d2;
+	font-size: 12px;
+	line-height: 18px;
+	decorator: image(nd-contribute-img);
+}
+
+.nd-npc-lines {
+	position: absolute;
+	left: 13px;
+	top: 59px;
+	width: 164px;
+}
+.nd-line {
+	display: block;
+	color: #ffe6d2;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.nd-divider {
+	position: absolute;
+	left: 1px;
+	top: 181px;
+	width: 188px;
+	height: 21px;
+	decorator: image(nd-line-img);
+}
+
+.nd-btn-l, .nd-btn-r {
+	position: absolute;
+	width: 17px;
+	height: 18px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.nd-btn-l { left: 131px; decorator: image(nd-btn-l); }
+.nd-btn-r { left: 153px; decorator: image(nd-btn-r); }
+.nd-btn-npc { top: 165px; }
+.nd-btn-ans { top: 372px; }
+.nd-btn-l:hover, .nd-btn-r:hover { filter: brightness(1.25); }
+/* No pointer-events:none -- the RmlClickNpc/AnsPrev/NextPage() handlers already guard on
+   npc_prev_enabled/npc_next_enabled/ans_prev_enabled/ans_next_enabled, so a locked click is a safe
+   no-op (same convention quest_progress.rcss's own .qp-btn-l.locked comment documents). */
+.nd-btn-l.locked, .nd-btn-r.locked { filter: brightness(0.6); }
+
+.nd-answers {
+	position: absolute;
+	left: 13px;
+	top: 207px;
+	width: 164px;
+}
+.nd-answer-row {
+	display: block;
+	color: #ffe6d2;
+	font-size: 12px;
+	white-space: pre-line;
+	cursor: pointer;
+	pointer-events: auto;
+	margin-bottom: 2px;
+}
+.nd-answer-row:hover { background-color: rgba(128, 128, 179, 77); }
+
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
+   label span is redundant (same convention quest_progress.rcss's own .btn-exit-label uses). */
+.btn-exit-label { display: none; }

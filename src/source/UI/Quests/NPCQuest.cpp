@@ -12,6 +12,15 @@
 
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
+#include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 extern bool bCheckNPC;
 extern int g_iNumLineMessageBoxCustom;
@@ -50,24 +59,132 @@ bool CNPCQuest::Create(CManager* pNewUIMng,
 
     SetPos(x, y);
 
-    LoadImages();
-
-    m_btnComplete.ChangeText(&I18N::Game::ProceedWithQuest);
-    m_btnComplete.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_COMPLETE, true);
-    m_btnComplete.ChangeButtonInfo(x + 41, y + 355, 108, 29);
-
-    m_btnClose.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_CLOSE);
-    m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(&I18N::Game::Close388, true);
+    if (RmlUiRuntime::Instance().IsCreated())
+        BuildRmlUi();
 
     Show(false);
 
     return true;
 }
 
+void CNPCQuest::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_quest",
+        [this](Rml::DataModelConstructor& c, NPCQuestRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+
+            c.Bind("npc_name", &model.npcName);
+            c.Bind("quest_title", &model.questTitle);
+            c.Bind("show_quest_title", &model.showQuestTitle);
+
+            c.Bind("show_conditions", &model.showConditions);
+            auto conditionRow = c.RegisterStruct<NPCQuestConditionRow>();
+            conditionRow.RegisterMember("text", &NPCQuestConditionRow::text);
+            conditionRow.RegisterMember("color", &NPCQuestConditionRow::color);
+            c.RegisterArray<std::vector<NPCQuestConditionRow>>();
+            c.Bind("conditions", &model.conditions);
+            c.Bind("complete_enabled", &model.completeEnabled);
+
+            c.Bind("show_cost", &model.showCost);
+            c.Bind("cost_amount", &model.costAmount);
+            c.Bind("cost_color", &model.costColor);
+
+            auto textLine = c.RegisterStruct<NPCQuestTextLine>();
+            textLine.RegisterMember("text", &NPCQuestTextLine::text);
+            c.RegisterArray<std::vector<NPCQuestTextLine>>();
+            c.Bind("message_lines", &model.messageLines);
+
+            auto answer = c.RegisterStruct<NPCQuestAnswerEntry>();
+            answer.RegisterMember("text", &NPCQuestAnswerEntry::text);
+            answer.RegisterMember("index", &NPCQuestAnswerEntry::index);
+            c.RegisterArray<std::vector<NPCQuestAnswerEntry>>();
+            c.Bind("answers", &model.answers);
+
+            c.Bind("dialogue_top", &model.dialogueTop);
+
+            c.Bind("complete_label", &model.completeLabel);
+            c.Bind("cost_label", &model.costLabel);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+
+            c.BindEventCallback("npcquest_click_close",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+            c.BindEventCallback("npcquest_select_answer",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                {
+                    if (arguments.size() == 1)
+                        RmlClickAnswer(arguments[0].Get<int>(-1));
+                });
+            c.BindEventCallback("npcquest_complete",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickComplete(); });
+        });
+
+    if (modelCreated)
+    {
+        m_RmlBinder.GetModel().completeLabel = StringUtils::WideToNarrow(I18N::Game::ProceedWithQuest);
+        m_RmlBinder.GetModel().costLabel = StringUtils::WideToNarrow(I18N::Game::Cost);
+        m_RmlBinder.GetModel().exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
+    }
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+        "Data/Interface/RmlUi/npc_quest.rml");
+
+    // Frame background panel uses the background context -- see NPCQuestBgRmlModel (NPCQuest.h).
+    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    {
+        const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "npc_quest_bg",
+            [](Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+            });
+        if (bgModelCreated)
+        {
+            m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/npc_quest_bg.rml");
+        }
+    }
+}
+
+void CNPCQuest::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    if (m_pRmlBgDoc)
+    {
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            m_BgRmlBinder.Destroy(bgContext);
+            bgContext->UnloadDocument(m_pRmlBgDoc);
+        }
+        m_pRmlBgDoc = nullptr;
+    }
+
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() self-corrects visibility for both docs.
+}
+
 void CNPCQuest::Release()
 {
-    UnloadImages();
+    if (m_pRmlDoc)
+    {
+        m_pRmlDoc->Close();
+        m_pRmlDoc = nullptr;
+    }
+
+    if (m_pRmlBgDoc)
+    {
+        m_pRmlBgDoc->Close();
+        m_pRmlBgDoc = nullptr;
+    }
 
     if (m_pNewUI3DRenderMng)
     {
@@ -88,70 +205,26 @@ void CNPCQuest::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
+void CNPCQuest::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+    if (m_pRmlDoc)
+    {
+        if (bShow) m_pRmlDoc->Show();
+        else m_pRmlDoc->Hide();
+    }
+}
+
 bool CNPCQuest::UpdateMouseEvent()
 {
-    if (ProcessBtns())
-        return false;
-
-    if (UpdateSelTextMouseEvent())
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCQUEST))
         return false;
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPCQUEST_WIDTH, NPCQUEST_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;
-}
-
-bool CNPCQuest::UpdateSelTextMouseEvent()
-{
-    BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
-    BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
-
-    bool bErrorMessage = false;
-    int iButtonPush = -1;
-    int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
-    int yPos = m_Pos.y + 66 + (NUM_LINE_CMB - iTotalLine) * 18 / 2;
-
-    yPos += 18 * g_iNumLineMessageBoxCustom;
-
-    if (byCurQuestState != QUEST_ING)
-    {
-        yPos = m_Pos.y + 250;
-    }
-
-    if (mu::ui::window::IsRelease(VK_LBUTTON))
-    {
-        if (MouseY >= 0 && (MouseY - yPos) < (18 * g_iNumAnswer)
-            && abs(m_Pos.x + NPCQUEST_WIDTH / 2 - MouseX) <= (NPCQUEST_WIDTH / 2))
-        {
-            iButtonPush = (MouseY - yPos) / 18;
-
-            if (iButtonPush >= 0)
-            {
-                const auto& entry = GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript);
-                if (iButtonPush >= entry.numAnswer) return false;
-
-                int nAnswer = entry.answers[iButtonPush].returnCode;
-
-                if (1 == nAnswer)
-                    bErrorMessage = g_csQuest.ProcessNextProgress();
-                else if (2 == nAnswer)
-                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
-                else if (3 == nAnswer)
-                    SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(byCurQuestIndex, LegacyQuestState::Active);
-
-                ::PlayBuffer(SOUND_INTERFACE01);
-
-                int nNextDialogIndex = entry.answers[iButtonPush].link;
-                if (0 < nNextDialogIndex && !bErrorMessage)
-                    g_csQuest.ShowDialogText(nNextDialogIndex);
-
-                return false;
-            }
-        }
-    }
-
-    return false;
 }
 
 bool CNPCQuest::UpdateKeyEvent()
@@ -172,215 +245,16 @@ bool CNPCQuest::UpdateKeyEvent()
 
 bool CNPCQuest::Update()
 {
+    SyncRmlModel();
     return true;
 }
 
 bool CNPCQuest::Render()
 {
-    ::EnableAlphaTest();
-
-
-    RenderBackImage();
-
-    BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
-    BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
-
-    if (QUEST_ING == byCurQuestState)
-    {
-        RenderImage(IMAGE_NPCQUEST_LINE, m_Pos.x + 1, m_Pos.y + 325, 188.f, 21.f);
-
-        if (RenderItemMobText())
-        {
-            m_btnComplete.UnLock();
-            m_btnComplete.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_btnComplete.ChangeTextColor(RGBA(255, 230, 210, 255));
-        }
-        else
-        {
-            m_btnComplete.Lock();
-            m_btnComplete.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_btnComplete.ChangeTextColor(RGBA(170, 170, 170, 255));
-        }
-
-        m_btnComplete.Render();
-    }
-    else if (QUEST_NO == byCurQuestState)
-    {
-        // �ʿ� ��.
-        RenderImage(IMAGE_NPCQUEST_ZEN, m_Pos.x + 11, m_Pos.y + 361, 170.f, 24.f);
-
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetBgColor(0);
-
-        g_pRenderText->SetTextColor(255, 220, 150, 255);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 368, I18N::Game::Cost);
-
-        wchar_t szTemp[128];
-        g_pRenderText->SetTextColor(::getGoldColor(g_csQuest.GetNeedZen()));
-        ::ConvertGold(g_csQuest.GetNeedZen(), szTemp);
-        g_pRenderText->RenderText(m_Pos.x + 170, m_Pos.y + 368, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-    }
-
-    RenderText();
-
-    m_btnClose.Render();
-
-    ::DisableAlphaBlend();
-
+    // RmlUi's #panel owns all chrome/text/list rendering now; only the live quest-condition item
+    // preview is still a native per-frame call, via Render3D() (I3DRenderObj's own separate draw
+    // pass, unchanged interface).
     return true;
-}
-
-void CNPCQuest::RenderBackImage()
-{
-    RenderImage(IMAGE_NPCQUEST_BACK,
-        m_Pos.x, m_Pos.y, float(NPCQUEST_WIDTH), float(NPCQUEST_HEIGHT));
-    RenderImage(IMAGE_NPCQUEST_TOP,
-        m_Pos.x, m_Pos.y, float(NPCQUEST_WIDTH), 64.f);
-    RenderImage(IMAGE_NPCQUEST_LEFT,
-        m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_NPCQUEST_RIGHT,
-        m_Pos.x + NPCQUEST_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_NPCQUEST_BOTTOM,
-        m_Pos.x, m_Pos.y + NPCQUEST_HEIGHT - 45, float(NPCQUEST_WIDTH), 45.f);
-
-    RenderImage(IMAGE_NPCQUEST_LINE, m_Pos.x + 1, m_Pos.y + 220, 188.f, 21.f);
-}
-
-void CNPCQuest::RenderText()
-{
-    BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
-    BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-
-    g_pRenderText->SetTextColor(150, 255, 240, 255);
-    //const auto name = new wchar_t[MAX_MONSTER_NAME];
-    const wchar_t* name = nullptr;
-
-    if ((Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
-        || Hero->Class == CLASS_RAGEFIGHTER)
-        && bCheckNPC)
-    {
-        name = g_csQuest.GetNPCName(2);
-    }
-    else
-    {
-        name = g_csQuest.GetNPCName(byCurQuestIndex);
-    }
-
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 16, name, NPCQUEST_WIDTH, 0, RT3_SORT_CENTER);
-    g_pRenderText->SetTextColor(200, 220, 255, 255);
-    if ((Hero->Class != CLASS_DARK_LORD && Hero->Class != CLASS_DARK
-        && Hero->Class != CLASS_RAGEFIGHTER)
-        || !bCheckNPC)
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 29,
-            g_csQuest.getQuestTitle(), NPCQUEST_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(255, 230, 210, 255);
-    int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
-    int xPos = m_Pos.x + NPCQUEST_WIDTH / 2;
-    int yPos = m_Pos.y + 66 + (NUM_LINE_CMB - iTotalLine) * 18 / 2;
-    for (int j = 0; j < g_iNumLineMessageBoxCustom; ++j)
-    {
-        g_pRenderText->RenderText(xPos, yPos, g_lpszMessageBoxCustom[j], 0, 0,
-            RT3_WRITE_CENTER);
-        yPos += 18;
-    }
-
-    if (byCurQuestState != QUEST_ING)
-        yPos = m_Pos.y + 250;
-
-    int iButtonOn = (MouseY - yPos) / 18;
-
-    g_pRenderText->SetFont(g_hFontBold);
-
-    for (int j = 0; j < g_iNumAnswer; ++j)
-    {
-        if (iButtonOn == j && abs(m_Pos.x + NPCQUEST_WIDTH / 2 - MouseX) <= NPCQUEST_WIDTH / 2)
-            g_pRenderText->SetTextColor(255, 0, 0, 255);
-        else
-            g_pRenderText->SetTextColor(223, 191, 103, 255);
-
-        for (int k = 0; k < NUM_LINE_DA && g_lpszDialogAnswer[j][k][0]; ++k)
-        {
-            g_pRenderText->RenderText(xPos, yPos, g_lpszDialogAnswer[j][k],
-                0, 0, RT3_WRITE_CENTER);
-            yPos += 18;
-        }
-    }
-}
-
-bool CNPCQuest::RenderItemMobText()
-{
-    bool bCompletion = true;
-
-    wchar_t szTemp[128];
-    int nPosY = m_Pos.y + 244;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-
-    QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();
-    int nClass = gCharacterManager.GetBaseClass(Hero->Class);
-
-    for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
-    {
-        if (!pQuest->QuestAct[i].byRequestClass[nClass])
-            continue;
-
-        switch (pQuest->QuestAct[i].byQuestType)
-        {
-        case QUEST_ITEM:
-        {
-            int nItemType = (pQuest->QuestAct[i].wItemType * MAX_ITEM_INDEX)
-                + pQuest->QuestAct[i].byItemSubType;
-            int nItemNum = pQuest->QuestAct[i].byItemNum;
-            int nItemLevel = pQuest->QuestAct[i].byItemLevel;
-
-            if (!g_csQuest.FindQuestItemsInInven(nItemType, nItemNum, nItemLevel))
-                g_pRenderText->SetTextColor(223, 191, 103, 255);
-            else
-            {
-                g_pRenderText->SetTextColor(255, 30, 30, 255);
-                bCompletion = false;
-            }
-
-            wchar_t szItemName[128];
-            GetItemName(nItemType, nItemLevel, szItemName);
-            mu_swprintf(szTemp, L"%ls x %d", szItemName, nItemNum);
-            g_pRenderText->RenderText(m_Pos.x + 60, nPosY, szTemp);
-        }
-        break;
-
-        case QUEST_MONSTER:
-        {
-            int nKillMobCount
-                = g_csQuest.GetKillMobCount(int(pQuest->QuestAct[i].wItemType));
-
-            if (int(pQuest->QuestAct[i].byItemNum) <= nKillMobCount)
-            {
-                g_pRenderText->SetTextColor(223, 191, 103, 255);
-                nKillMobCount = int(pQuest->QuestAct[i].byItemNum);
-            }
-            else
-            {
-                g_pRenderText->SetTextColor(255, 30, 30, 255);
-                bCompletion = false;
-            }
-
-            auto name = getMonsterName(int(pQuest->QuestAct[i].wItemType));
-            mu_swprintf(szTemp, L"%ls x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
-
-            g_pRenderText->RenderText(m_Pos.x + 50, nPosY, szTemp);
-        }
-        break;
-        }
-
-        nPosY += 32;
-    }
-
-    return bCompletion;
 }
 
 void CNPCQuest::RenderItem3D()
@@ -432,34 +306,6 @@ float CNPCQuest::GetLayerDepth()
     return 3.1f;
 }
 
-void CNPCQuest::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCQUEST_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCQUEST_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_NPCQUEST_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_NPCQUEST_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_NPCQUEST_BOTTOM, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_NPCQUEST_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_NPCQUEST_ZEN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_NPCQUEST_BTN_COMPLETE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_NPCQUEST_BTN_CLOSE, GL_LINEAR);
-}
-
-void CNPCQuest::UnloadImages()
-{
-    DeleteBitmap(IMAGE_NPCQUEST_BTN_CLOSE);
-    DeleteBitmap(IMAGE_NPCQUEST_BTN_COMPLETE);
-    DeleteBitmap(IMAGE_NPCQUEST_ZEN);
-    DeleteBitmap(IMAGE_NPCQUEST_LINE);
-
-    DeleteBitmap(IMAGE_NPCQUEST_BOTTOM);
-    DeleteBitmap(IMAGE_NPCQUEST_RIGHT);
-    DeleteBitmap(IMAGE_NPCQUEST_LEFT);
-    DeleteBitmap(IMAGE_NPCQUEST_TOP);
-    DeleteBitmap(IMAGE_NPCQUEST_BACK);
-}
-
 void CNPCQuest::ProcessOpening()
 {
     g_csQuest.ShowQuestNpcWindow();
@@ -471,25 +317,226 @@ bool CNPCQuest::ProcessClosing()
     return true;
 }
 
-bool CNPCQuest::ProcessBtns()
+bool CNPCQuest::BuildConditionRows(std::vector<NPCQuestConditionRow>& outRows)
 {
-    if (m_btnClose.UpdateMouseEvent())
+    bool bCompletion = true;
+    outRows.clear();
+
+    QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();
+    int nClass = gCharacterManager.GetBaseClass(Hero->Class);
+
+    for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
-        return true;
-    }
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCQUEST))
-        return true;
-    else if (g_csQuest.BeQuestItem())
-    {
-        if (m_btnComplete.UpdateMouseEvent())
+        if (!pQuest->QuestAct[i].byRequestClass[nClass])
+            continue;
+
+        wchar_t szTemp[128];
+        Rml::String color;
+
+        switch (pQuest->QuestAct[i].byQuestType)
         {
-            SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(g_csQuest.GetCurrQuestIndex(), LegacyQuestState::Active);
-            PlayBuffer(SOUND_INTERFACE01);
-            return true;
+        case QUEST_ITEM:
+        {
+            int nItemType = (pQuest->QuestAct[i].wItemType * MAX_ITEM_INDEX)
+                + pQuest->QuestAct[i].byItemSubType;
+            int nItemNum = pQuest->QuestAct[i].byItemNum;
+            int nItemLevel = pQuest->QuestAct[i].byItemLevel;
+
+            // Same color/completion mapping RenderItemMobText() always used -- not reinterpreted here.
+            if (!g_csQuest.FindQuestItemsInInven(nItemType, nItemNum, nItemLevel))
+                color = "rgba(223,191,103,255)";
+            else
+            {
+                color = "rgba(255,30,30,255)";
+                bCompletion = false;
+            }
+
+            wchar_t szItemName[128];
+            GetItemName(nItemType, nItemLevel, szItemName);
+            mu_swprintf(szTemp, L"%ls x %d", szItemName, nItemNum);
+
+            outRows.push_back({ StringUtils::WideToNarrow(szTemp), color });
+        }
+        break;
+
+        case QUEST_MONSTER:
+        {
+            int nKillMobCount = g_csQuest.GetKillMobCount(int(pQuest->QuestAct[i].wItemType));
+
+            if (int(pQuest->QuestAct[i].byItemNum) <= nKillMobCount)
+            {
+                color = "rgba(223,191,103,255)";
+                nKillMobCount = int(pQuest->QuestAct[i].byItemNum);
+            }
+            else
+            {
+                color = "rgba(255,30,30,255)";
+                bCompletion = false;
+            }
+
+            auto name = getMonsterName(int(pQuest->QuestAct[i].wItemType));
+            mu_swprintf(szTemp, L"%ls x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
+
+            outRows.push_back({ StringUtils::WideToNarrow(szTemp), color });
+        }
+        break;
+
+        default:
+            break; // no other quest-act type is ever produced in practice; nothing to add.
         }
     }
 
-    return false;
+    return bCompletion;
+}
+
+void CNPCQuest::RmlClickClose()
+{
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
+}
+
+void CNPCQuest::RmlClickAnswer(int nAnswerIndex)
+{
+    const auto& entry = GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript);
+    if (nAnswerIndex < 0 || nAnswerIndex >= entry.numAnswer)
+        return;
+
+    BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
+    int nAnswer = entry.answers[nAnswerIndex].returnCode;
+
+    bool bErrorMessage = false;
+    if (1 == nAnswer)
+        bErrorMessage = g_csQuest.ProcessNextProgress();
+    else if (2 == nAnswer)
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
+    else if (3 == nAnswer)
+        SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(byCurQuestIndex, LegacyQuestState::Active);
+
+    ::PlayBuffer(SOUND_INTERFACE01);
+
+    int nNextDialogIndex = entry.answers[nAnswerIndex].link;
+    if (0 < nNextDialogIndex && !bErrorMessage)
+        g_csQuest.ShowDialogText(nNextDialogIndex);
+}
+
+void CNPCQuest::RmlClickComplete()
+{
+    if (!g_csQuest.BeQuestItem() || !m_bCompleteEnabled)
+        return;
+
+    SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(g_csQuest.GetCurrQuestIndex(), LegacyQuestState::Active);
+    ::PlayBuffer(SOUND_INTERFACE01);
+}
+
+void CNPCQuest::SyncRmlModel()
+{
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc)
+        return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    const auto transform = UI::Scaling::GetActiveTransform();
+    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
+    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
+    if (model.rootX != rootX || model.rootY != rootY || model.rootScale != transform.scaleX)
+    {
+        model.rootX = rootX;
+        model.rootY = rootY;
+        model.rootScale = transform.scaleX;
+        m_RmlBinder.MarkDirty("root_x");
+        m_RmlBinder.MarkDirty("root_y");
+        m_RmlBinder.MarkDirty("root_scale");
+    }
+
+    const BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
+    const BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
+
+    const bool bDarkNpcCheck = (Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
+        || Hero->Class == CLASS_RAGEFIGHTER) && bCheckNPC;
+
+    model.npcName = StringUtils::WideToNarrow(bDarkNpcCheck ? g_csQuest.GetNPCName(2) : g_csQuest.GetNPCName(byCurQuestIndex));
+    m_RmlBinder.MarkDirty("npc_name");
+
+    model.showQuestTitle = !bDarkNpcCheck;
+    m_RmlBinder.MarkDirty("show_quest_title");
+    if (model.showQuestTitle)
+    {
+        model.questTitle = StringUtils::WideToNarrow(g_csQuest.getQuestTitle());
+        m_RmlBinder.MarkDirty("quest_title");
+    }
+
+    model.showConditions = (QUEST_ING == byCurQuestState);
+    m_RmlBinder.MarkDirty("show_conditions");
+    if (model.showConditions)
+    {
+        std::vector<NPCQuestConditionRow> rows;
+        m_bCompleteEnabled = BuildConditionRows(rows);
+        model.conditions = std::move(rows);
+        model.completeEnabled = m_bCompleteEnabled;
+        m_RmlBinder.MarkDirty("conditions");
+        m_RmlBinder.MarkDirty("complete_enabled");
+    }
+    else
+    {
+        m_bCompleteEnabled = false;
+    }
+
+    model.showCost = (QUEST_NO == byCurQuestState);
+    m_RmlBinder.MarkDirty("show_cost");
+    if (model.showCost)
+    {
+        // getGoldColor() returns an SDL_ttf-packed DWORD (A<<24 | B<<16 | G<<8 | R -- see
+        // PackColorDWORD()), not the ARGB layout UI::Quests::RewardModel::ToEntry() unpacks -- these
+        // are two different packed-color conventions in this codebase, not interchangeable.
+        wchar_t szTemp[128];
+        ::ConvertGold(g_csQuest.GetNeedZen(), szTemp);
+        model.costAmount = StringUtils::WideToNarrow(szTemp);
+
+        const DWORD dwColor = ::getGoldColor(g_csQuest.GetNeedZen());
+        const BYTE r = dwColor & 0xFF;
+        const BYTE g = (dwColor >> 8) & 0xFF;
+        const BYTE b = (dwColor >> 16) & 0xFF;
+        const BYTE a = (dwColor >> 24) & 0xFF;
+        char szColor[48];
+        ::sprintf_s(szColor, "rgba(%d,%d,%d,%d)", r, g, b, a);
+        model.costColor = szColor;
+
+        m_RmlBinder.MarkDirty("cost_amount");
+        m_RmlBinder.MarkDirty("cost_color");
+    }
+
+    model.messageLines.clear();
+    for (int i = 0; i < g_iNumLineMessageBoxCustom; ++i)
+        model.messageLines.push_back({ StringUtils::WideToNarrow(g_lpszMessageBoxCustom[i]) });
+    m_RmlBinder.MarkDirty("message_lines");
+
+    model.answers.clear();
+    for (int j = 0; j < g_iNumAnswer; ++j)
+    {
+        if (0 == g_lpszDialogAnswer[j][0][0])
+            break;
+        model.answers.push_back({ StringUtils::WideToNarrow(g_lpszDialogAnswer[j][0]), j });
+    }
+    m_RmlBinder.MarkDirty("answers");
+
+    // Same vertical-centering formula RenderText() used natively; the QUEST_ING branch depends on
+    // how many message+answer lines are present this instance (a real per-instance value), the other
+    // branch is a fixed lower anchor (room for the cost banner above it).
+    if (QUEST_ING == byCurQuestState)
+    {
+        const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
+        model.dialogueTop = 66.f + (NUM_LINE_CMB - iTotalLine) * 18.f / 2.f;
+    }
+    else
+    {
+        model.dialogueTop = 250.f;
+    }
+    m_RmlBinder.MarkDirty("dialogue_top");
 }

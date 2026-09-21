@@ -1,0 +1,148 @@
+/* Shared by both CNPCQuest documents this session's split introduced: the foreground
+   (npc_quest.rml, content only) and the background (npc_quest_bg.rml, shell-edge/groove/
+   header-rail fill/joint/accent only -- see that file's own header comment for why this window
+   needs the split every other sibling doesn't). docked_panel_frame.rcss (linked before this file by
+   both documents) supplies those shared modern classes plus #btn_exit/.tooltip -- the shell-edge/
+   groove/header-rail classes only ever match in the background document (the foreground's own root
+   is #content_root, styled below, precisely because an opaque header rail there would paint over
+   the live-3D item preview). Divider/Zen-banner sprites reuse legacy's own assets (theme-local
+   duplication), same reasoning every sibling this session uses -- window-specific art with no
+   generic modern equivalent. */
+@spritesheet nq-line-sheet { src: "../../../newui_myquest_Line.tga"; nq-line-img: 0px 0px 188px 21px; }
+@spritesheet nq-zen-sheet { src: "../../../newui_item_money2.tga"; nq-zen-img: 0px 0px 170px 24px; }
+
+/* Foreground-only positioning anchor -- deliberately unpainted (see this file's own header
+   comment). Same width/height/font-family #panel itself uses, just no decorator -- font-family
+   matters here even though nothing here is painted: docked_panel_frame.rcss's own #panel rule is
+   where every OTHER sibling this session gets its inherited font-family from, and #content_root
+   isn't that selector, so every text element under it would otherwise have no resolvable font at
+   all (invisible text, unlike non-text decorators, which don't need one). */
+#content_root {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* Bare, unwrapped title -- the background doc's own header rail supplies the paint underneath;
+   this just lands the text in the same spot the wrapped .modern-header-title-px would have. */
+#title {
+	position: absolute;
+	left: 0;
+	top: 14px;
+	width: 190px;
+	text-align: center;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.nq-quest-title {
+	position: absolute;
+	left: 0;
+	top: 29px;
+	width: 190px;
+	text-align: center;
+	color: token(accent-steel-hover);
+	font-size: 12px;
+}
+
+.nq-divider {
+	position: absolute;
+	left: 0;
+	top: 325px;
+	width: 190px;
+	height: 21px;
+	border-top: 1dp token(border-frame);
+}
+
+.nq-conditions {
+	position: absolute;
+	left: 52px;
+	top: 244px;
+	width: 128px;
+}
+.nq-condition-row {
+	display: block;
+	height: 32px;
+	line-height: 32px;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+/* Complete reuses base.rcss's shared .btn/.btn-ok primary-action pair -- a real generic confirm
+   action, same reasoning quest_progress.rcss's own Complete button uses. .btn's own width/height/
+   line-height/font-size are dp (independent of this panel's own fixed pixel grid, which every other
+   element here -- including this button's own left/top -- matches in plain px); pin them explicitly
+   to the legacy sprite's own 108x29 box instead, applying the exact lesson from this session's own
+   oversized-Complete-button bugfix in quest_progress.rcss, not repeating it. */
+.nq-btn-complete {
+	position: absolute;
+	left: 41px;
+	top: 355px;
+	width: 108px;
+	height: 29px;
+	line-height: 29px;
+	font-size: 12px;
+}
+
+.nq-cost {
+	position: absolute;
+	left: 11px;
+	top: 361px;
+	width: 170px;
+	height: 24px;
+	decorator: image(nq-zen-img);
+}
+.nq-cost-label {
+	display: block;
+	position: absolute;
+	left: 20px;
+	top: 7px;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+}
+.nq-cost-amount {
+	display: block;
+	position: absolute;
+	left: 20px;
+	top: 7px;
+	width: 150px;
+	text-align: right;
+	font-size: 12px;
+}
+
+.nq-dialogue {
+	position: absolute;
+	left: 0;
+	width: 190px;
+	text-align: center;
+}
+.nq-message-line {
+	display: block;
+	color: token(text-primary);
+	font-size: 12px;
+}
+.nq-answer-row {
+	display: block;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Same native "hovered answer turns red" text-color swap the legacy theme preserves -- see that
+   file's own comment. */
+.nq-answer-row:hover { color: #ff4040; }
+
+/* .modern-icon-btn-px sets top:392px but leaves left unset (every window supplies its own) -- same
+   13px left every sibling this session uses, matching the legacy #btn_exit box exactly. */
+.nq-btn-exit { left: 13px; }
+
+/* Tooltip: shared shape from docked_panel_frame.rcss, position/offset are per-window. */
+.tooltip { top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

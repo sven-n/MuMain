@@ -4,17 +4,22 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
-#include "UI/Quests/MyQuestInfoWindow.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/Quests/QuestProgressRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 #include "GameLogic/Quests/QuestMng.h"
-#include "UI/Widgets/UIControls.h"
+#include "Core/Globals/_TextureIndex.h" // BITMAP_INTERFACE_QUEST_PROGRESS_BEGIN
+
+namespace Rml { class ElementDocument; }
 
 #define QP_NPC_LINE_MAX		35
 #define QP_PLAYER_LINE_MAX	9
 #define QP_WORDS_ROW_MAX	64
 
+// RmlUi-based (quest_progress.rml/.rcss, shared with CQuestProgressByEtc's own
+// quest_progress_etc.rml, see quest_progress.rcss's own header comment), except the selected
+// reward item's info popup, which stays a native per-frame draw -- same permanent hybrid boundary
+// CMyQuestInfoWindow's own m_pSelectedRewardItem already established.
 namespace mu::ui::window
 {
     class CQuestProgress : public CObject
@@ -22,39 +27,19 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            // 기본창
-            IMAGE_QP_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_QP_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
-            IMAGE_QP_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_QP_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_QP_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
-            IMAGE_QP_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_QP_BTN_L = BITMAP_INTERFACE_QUEST_PROGRESS_BEGIN,		// Quest_bt_L.tga	(17,36)
-            IMAGE_QP_BTN_R = BITMAP_INTERFACE_QUEST_PROGRESS_BEGIN + 1,		// Quest_bt_R.tga	(17,36)
-            IMAGE_QP_BTN_COMPLETE = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_QP_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            // Kept only because QuestProgressByEtc.h and NPCDialogue.h alias these two slot IDs
+            // onto their own L/R pagination buttons -- CQuestProgress itself no longer loads or
+            // renders through them (RmlUi decorators now), same "kept for sibling aliasing"
+            // reasoning CMyQuestInfoWindow's own IMAGE_LIST enum documents.
+            IMAGE_QP_BTN_L = BITMAP_INTERFACE_QUEST_PROGRESS_BEGIN,
+            IMAGE_QP_BTN_R = BITMAP_INTERFACE_QUEST_PROGRESS_BEGIN + 1,
         };
 
-    private:
         enum
         {
             QP_WIDTH = 190,
             QP_HEIGHT = 429,
         };
-
-        CManager* m_pNewUIMng;
-        POINT				m_Pos;
-
-        CButton		m_btnProgressL;
-        CButton		m_btnProgressR;
-        CButton		m_btnComplete;
-        CButton		m_btnClose;
-
-        DWORD	m_dwCurQuestIndex;
-
-        wchar_t	m_aszNPCWords[QP_NPC_LINE_MAX][QP_WORDS_ROW_MAX];
-        int		m_nSelNPCPage;
-        int		m_nMaxNPCPage;
 
         enum LOWER_VIEW_MODE
         {
@@ -62,16 +47,6 @@ namespace mu::ui::window
             PLAYER_WORDS_MODE,
             REQUEST_REWARD_MODE
         };
-        LOWER_VIEW_MODE	m_eLowerView;
-
-        wchar_t	m_aszPlayerWords[QP_PLAYER_LINE_MAX][QP_WORDS_ROW_MAX];
-        int		m_anAnswerLine[QM_MAX_ANSWER];
-        QuestProceedAction		m_nSelAnswer;
-
-        CUIQuestContentsListBox	m_RequestRewardListBox;
-        bool	m_bRequestComplete;
-
-        bool	m_bCanClick;
 
     public:
         CQuestProgress();
@@ -79,6 +54,8 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
         void SetPos(int x, int y);
+        void Show(bool bShow) override;
+
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
@@ -90,16 +67,47 @@ namespace mu::ui::window
         void SetContents(DWORD dwQuestIndex);
         void EnableCompleteBtn(bool bEnable);
 
+        void ReloadRmlTheme() override;
+
+        // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
+        void RmlClickClose();
+        void RmlClickPrevPage();
+        void RmlClickNextPage();
+        void RmlClickSelectAnswer(int nAnswerIndex);
+        void RmlClickSelectReward(int nRewardIndex);
+        void RmlClickComplete();
+
     private:
-        void LoadImages();
-        void UnloadImages();
-        bool UpdateSelTextMouseEvent();
-        void RenderBackImage();
-        void RenderSelTextBlock();
-        void RenderText();
-        bool ProcessBtns();
+        void BuildRmlUi();
+        void SyncRmlModel();
+
         void SetCurNPCWords();
-        void SetCurPlayerWords();
         void SetCurRequestReward();
+
+    private:
+        CManager* m_pNewUIMng;
+        POINT m_Pos;
+
+        DWORD m_dwCurQuestIndex = 0;
+
+        wchar_t m_aszNPCWords[QP_NPC_LINE_MAX][QP_WORDS_ROW_MAX] = {};
+        int m_nSelNPCPage = 0;
+        int m_nMaxNPCPage = 0;
+
+        LOWER_VIEW_MODE m_eLowerView = NON_PLAYER_WORDS_MODE;
+
+        bool m_bRequestComplete = false;
+        bool m_bCanClick = false;
+
+        // Raw reward-row data for click handling, alongside the model's display-only Entry list --
+        // same split CMyQuestInfoWindow's own m_ContentRows/RewardModel::Entry uses.
+        std::vector<UI::Quests::RewardModel::RowData> m_RewardRows;
+
+        // Selected reward-item's info popup -- still native-rendered every frame (::RenderItemInfo())
+        // rather than ported to RmlUi. See CMyQuestInfoWindow's own m_pSelectedRewardItem.
+        ITEM* m_pSelectedRewardItem = nullptr;
+
+        RmlModelBinder<QuestProgressRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
     };
 }

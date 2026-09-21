@@ -1,0 +1,167 @@
+/* Shared by both CNPCQuest documents this session's split introduced: the foreground
+   (npc_quest.rml, content only) and the background (npc_quest_bg.rml, frame chrome only -- see
+   that file's own header comment for why this window needs the split every other sibling doesn't).
+   docked_panel_frame.rcss (linked before this file by both documents) supplies #panel/.frame-piece/
+   #btn_exit/.tooltip -- #panel/.frame-piece only ever match in the background document (the
+   foreground's own root is #content_root, styled below, precisely because an opaque #panel there
+   would paint over the live-3D item preview). Coordinates below are plain reference px, not dp.
+
+   Divider/Complete-button sprites duplicate assets other sibling windows this session already use
+   (newui_myquest_Line.tga, newui_btn_empty.tga -- the same texture quest_progress.rcss's own
+   qp-btn-complete-idle/hover spritesheet uses) rather than cross-linking those unrelated
+   stylesheets -- same "duplicate a small shared sprite def" choice made for every sibling this
+   session. */
+.frame-top { decorator: image(docked-bg-top-a); }
+
+/* Foreground-only positioning anchor -- deliberately unpainted (see this file's own header
+   comment). Same width/height/font-family #panel itself uses, just no decorator -- font-family
+   matters here even though nothing here is painted: docked_panel_frame.rcss's own #panel rule is
+   where every OTHER sibling this session gets its inherited font-family from, and #content_root
+   isn't that selector, so every text element under it would otherwise have no resolvable font at
+   all (invisible text, unlike non-text decorators, which don't need one). */
+#content_root {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+@spritesheet nq-line-sheet { src: "../../../newui_myquest_Line.tga"; nq-line-img: 0px 0px 188px 21px; }
+@spritesheet nq-btn-complete-sheet {
+	src: "../../../newui_btn_empty.tga";
+	nq-btn-complete-idle:  0px  0px 108px 29px;
+	nq-btn-complete-hover: 0px 29px 108px 29px;
+}
+@spritesheet nq-zen-sheet { src: "../../../newui_item_money2.tga"; nq-zen-img: 0px 0px 170px 24px; }
+
+/* NPC name doubles as this window's title -- dynamic (g_csQuest.GetNPCName()), same convention
+   npc_dialogue.rcss's own #title uses. */
+#title {
+	position: absolute;
+	left: 0;
+	top: 16px;
+	width: 190px;
+	text-align: center;
+	color: #96fff0;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+/* Suppressed for Dark Lord/Dark/RageFighter-class NPCs (bCheckNPC gate) -- see SyncRmlModel()'s own
+   comment. No explicit display here -- base.rcss's .hidden must win the cascade uncontested (this
+   session's own overlap bugfix established why an explicit display:block here would always beat
+   it, regardless of show_quest_title). */
+.nq-quest-title {
+	position: absolute;
+	left: 0;
+	top: 29px;
+	width: 190px;
+	text-align: center;
+	color: #c8dcff;
+	font-size: 12px;
+}
+
+.nq-divider {
+	position: absolute;
+	left: 1px;
+	top: 325px;
+	width: 188px;
+	height: 21px;
+	decorator: image(nq-line-img);
+}
+
+/* No explicit display -- same reasoning as .nq-quest-title above. */
+.nq-conditions {
+	position: absolute;
+	left: 52px;
+	top: 244px;
+	width: 128px;
+}
+.nq-condition-row {
+	display: block;
+	height: 32px;
+	line-height: 32px;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.nq-btn-complete {
+	position: absolute;
+	left: 41px;
+	top: 355px;
+	width: 108px;
+	height: 29px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 29px;
+	color: #ffe6d2;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(nq-btn-complete-idle);
+}
+.nq-btn-complete:hover { decorator: image(nq-btn-complete-hover); }
+.nq-btn-complete.disabled {
+	color: #aaaaaa;
+	pointer-events: none;
+	cursor: default;
+	filter: brightness(0.6);
+}
+
+/* No explicit display -- same reasoning as .nq-quest-title above. */
+.nq-cost {
+	position: absolute;
+	left: 11px;
+	top: 361px;
+	width: 170px;
+	height: 24px;
+	decorator: image(nq-zen-img);
+}
+.nq-cost-label {
+	display: block;
+	position: absolute;
+	left: 20px;
+	top: 7px;
+	color: #ffdc96;
+	font-weight: bold;
+	font-size: 12px;
+}
+.nq-cost-amount {
+	display: block;
+	position: absolute;
+	left: 20px;
+	top: 7px;
+	width: 150px;
+	text-align: right;
+	font-size: 12px;
+}
+
+.nq-dialogue {
+	position: absolute;
+	left: 0;
+	width: 190px;
+	text-align: center;
+}
+.nq-message-line {
+	display: block;
+	color: #ffe6d2;
+	font-size: 12px;
+}
+.nq-answer-row {
+	display: block;
+	color: #dfbf67;
+	font-weight: bold;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Native highlighted the hovered answer by swapping its text color to red, not a background
+   highlight -- preserved exactly, not replaced with the translucent-quad style other sibling
+   answer lists use, since that's genuinely how this window's own RenderText() colored it. */
+.nq-answer-row:hover { color: #ff0000; }
+
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
+   label span is redundant (same convention every sibling this session uses). */
+.btn-exit-label { display: none; }

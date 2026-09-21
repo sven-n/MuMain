@@ -1,0 +1,51 @@
+<rml>
+<head>
+	<title>NPC Quest</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="npc_quest.rcss"/>
+</head>
+<!-- CNPCQuest's own foreground document -- the legacy g_csQuest/CSQuest quest system's generic
+     NPC-dialogue-with-quest-affordances screen (a separate, older system from CQuestMng, which
+     CNPCDialogue/CQuestProgress use). Two mutually exclusive upper panels (conditions checklist with
+     a live-3D item preview, or a Zen-cost banner) plus a shared dialogue/answers block below them.
+
+     No frame chrome here at all -- unlike every other sibling this session, this window's live-3D
+     quest-item preview (Render3D()/RenderItem3D()) paints in the same frame as this document but
+     BEFORE it (RmlUi's main context always renders last), so an opaque #panel here would paint over
+     the icons. The chrome instead lives in npc_quest_bg.rml, loaded into
+     RmlUiRuntime::GetBackgroundContext() (rendered explicitly before the 3D pass) -- same split
+     CNPCShop/CMyInventory already use for the same reason. #content_root is a plain, unpainted
+     positioning anchor only; every element below is styled with its own absolute position in
+     npc_quest.rcss, matching where npc_quest_bg.rml's own frame graphics actually sit. -->
+<body>
+	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{npc_name}}</span>
+		<div class="nq-quest-title" data-class-hidden="!show_quest_title">{{quest_title}}</div>
+
+		<div class="nq-divider" data-class-hidden="!show_conditions"></div>
+		<div class="nq-conditions" data-class-hidden="!show_conditions">
+			<div class="nq-condition-row" data-for="c : conditions" data-style-color="c.color">{{c.text}}</div>
+		</div>
+		<div id="btn_complete" class="nq-btn-complete" data-class-hidden="!show_conditions"
+		     data-class-disabled="!complete_enabled" data-event-click="npcquest_complete">{{complete_label}}</div>
+
+		<div class="nq-cost" data-class-hidden="!show_cost">
+			<span class="nq-cost-label">{{cost_label}}</span>
+			<span class="nq-cost-amount" data-style-color="cost_color">{{cost_amount}}</span>
+		</div>
+
+		<div class="nq-dialogue" data-style-top="dialogue_top + 'px'">
+			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
+			<div class="nq-answer-row" data-for="a : answers"
+			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+		</div>
+
+		<div id="btn_exit" data-event-click="npcquest_click_close">
+			<span class="btn-exit-label">×</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

@@ -4,7 +4,12 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Quests/QuestProgress.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/NPCs/NPCDialogueRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "GameLogic/Quests/QuestMng.h"
+
+namespace Rml { class ElementDocument; }
 
 #define ND_NPC_LINE_MAX				35
 #define ND_WORDS_ROW_MAX			64
@@ -12,29 +17,12 @@
 #define ND_SEL_TEXT_LINE_MAX		((ND_QUEST_INDEX_MAX_COUNT+1)*2)
 #define ND_SEL_TEXT_PAGE_LIMIT		4
 
+// RmlUi-based (npc_dialogue.rml/.rcss) -- no native draws or hybrid item popup left at all, unlike
+// CQuestProgress's own m_pSelectedRewardItem boundary: this window has no reward list.
 namespace mu::ui::window
 {
     class CNPCDialogue : public CObject
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_ND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_ND_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
-            IMAGE_ND_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_ND_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_ND_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
-
-            IMAGE_ND_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_ND_BTN_L = CQuestProgress::IMAGE_QP_BTN_L,				// Quest_bt_L.tga	(17,36)
-            IMAGE_ND_BTN_R = CQuestProgress::IMAGE_QP_BTN_R,				// Quest_bt_R.tga	(17,36)
-            IMAGE_ND_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-
-#ifdef ASG_ADD_GENS_SYSTEM
-            IMAGE_ND_CONTRIBUTE_BG = BITMAP_INTERFACE_NPC_DIALOGUE_BEGIN,
-#endif	// ASG_ADD_GENS_SYSTEM
-        };
-
     private:
         enum
         {
@@ -44,12 +32,6 @@ namespace mu::ui::window
 
         CManager* m_pNewUIMng;
         POINT				m_Pos;
-
-        CButton		m_btnProgressL;
-        CButton		m_btnProgressR;
-        CButton		m_btnSelTextL;
-        CButton		m_btnSelTextR;
-        CButton		m_btnClose;
 
         wchar_t	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];
         int		m_nSelNPCPage;
@@ -78,6 +60,9 @@ namespace mu::ui::window
         bool	m_bCanClick;
         DWORD	m_dwContributePoint;
 
+        RmlModelBinder<NPCDialogueRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
     public:
         CNPCDialogue();
         virtual ~CNPCDialogue();
@@ -86,6 +71,7 @@ namespace mu::ui::window
         void Release();
 
         void SetPos(int x, int y);
+        void Show(bool bShow) override;
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -109,19 +95,19 @@ namespace mu::ui::window
         void ProcessGensRewardReceive(BYTE byResult);
 #endif //PBG_ADD_GENSRANKING
 
+        void ReloadRmlTheme() override;
+
+        // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
+        void RmlClickClose();
+        void RmlClickNpcPrevPage();
+        void RmlClickNpcNextPage();
+        void RmlClickAnsPrevPage();
+        void RmlClickAnsNextPage();
+        void RmlClickSelectAnswer(int nIndex);
+
     private:
-        void LoadImages();
-        void UnloadImages();
-
-        bool UpdateSelTextMouseEvent();
-        void RenderBackImage();
-        void RenderSelTextBlock();
-        void RenderText();
-#ifdef ASG_ADD_GENS_SYSTEM
-        void RenderContributePoint();
-#endif	// ASG_ADD_GENS_SYSTEM
-
-        bool ProcessBtns();
+        void BuildRmlUi();
+        void SyncRmlModel();
 
         void SetCurNPCWords(int nQuestListCount = 0);
         void SetCurSelTexts();

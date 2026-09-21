@@ -10,19 +10,52 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+
+#include <string>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
 #define ND_NPC_MAX_LINE_PER_PAGE		7
 #define ND_SEL_TEXT_MAX_LINE_PER_PAGE	11
-#define ND_TEXT_GAP						15
 
 CNPCDialogue::CNPCDialogue()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_dwContributePoint = 0;
+
+    // Update()/SyncRmlModel() runs every frame regardless of visibility (same as CQuestProgress's
+    // own pattern), so these must be safely zeroed before the first SetContents()/
+    // ProcessQuestListReceive() call, not left as uninitialized array members the way the native
+    // Render()-gated-by-visibility version could get away with.
+    memset(m_aszNPCWords, 0, sizeof m_aszNPCWords);
+    m_nSelNPCPage = 0;
+    m_nMaxNPCPage = 0;
+
+    memset(m_aszSelTexts, 0, sizeof m_aszSelTexts);
+    m_nSelTextCount = 0;
+    memset(m_anSelTextLine, 0, sizeof m_anSelTextLine);
+    m_nSelSelText = 0;
+    m_nSelSelTextPage = 0;
+    m_nMaxSelTextPage = 0;
+    memset(m_anSelTextLinePerPage, 0, sizeof m_anSelTextLinePerPage);
+    memset(m_anSelTextCountPerPage, 0, sizeof m_anSelTextCountPerPage);
+
+    m_eLowerView = NON_SEL_TEXTS_MODE;
+    m_bQuestListMode = false;
+    m_dwCurDlgIndex = 0;
+    memset(m_adwQuestIndex, 0, sizeof m_adwQuestIndex);
+
+    m_bCanClick = false;
 }
 
 CNPCDialogue::~CNPCDialogue()
@@ -39,21 +72,9 @@ bool CNPCDialogue::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPC_DIALOGUE, this);
 
     SetPos(x, y);
-    LoadImages();
 
-    m_btnProgressL.ChangeButtonImgState(true, IMAGE_ND_BTN_L);
-    m_btnProgressL.ChangeButtonInfo(x + 131, y + 165, 17, 18);
-    m_btnProgressR.ChangeButtonImgState(true, IMAGE_ND_BTN_R);
-    m_btnProgressR.ChangeButtonInfo(x + 153, y + 165, 17, 18);
-
-    m_btnSelTextL.ChangeButtonImgState(true, IMAGE_ND_BTN_L);
-    m_btnSelTextL.ChangeButtonInfo(x + 131, y + 372, 17, 18);
-    m_btnSelTextR.ChangeButtonImgState(true, IMAGE_ND_BTN_R);
-    m_btnSelTextR.ChangeButtonInfo(x + 153, y + 372, 17, 18);
-
-    m_btnClose.ChangeButtonImgState(true, IMAGE_ND_BTN_CLOSE);
-    m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(&I18N::Game::Close388, true);
+    if (RmlUiRuntime::Instance().IsCreated())
+        BuildRmlUi();
 
     m_nSelTextCount = 0;
     m_bQuestListMode = false;
@@ -63,9 +84,88 @@ bool CNPCDialogue::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
+void CNPCDialogue::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_dialogue",
+        [this](Rml::DataModelConstructor& c, NPCDialogueRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+
+            c.Bind("npc_name", &model.npcName);
+
+            auto textLine = c.RegisterStruct<NPCDialogueTextLine>();
+            textLine.RegisterMember("text", &NPCDialogueTextLine::text);
+            c.RegisterArray<std::vector<NPCDialogueTextLine>>();
+            c.Bind("npc_lines", &model.npcLines);
+
+            c.Bind("npc_prev_enabled", &model.npcPrevEnabled);
+            c.Bind("npc_next_enabled", &model.npcNextEnabled);
+
+            auto answer = c.RegisterStruct<NPCDialogueAnswerEntry>();
+            answer.RegisterMember("text", &NPCDialogueAnswerEntry::text);
+            answer.RegisterMember("index", &NPCDialogueAnswerEntry::index);
+            c.RegisterArray<std::vector<NPCDialogueAnswerEntry>>();
+            c.Bind("answers", &model.answers);
+
+            c.Bind("ans_prev_enabled", &model.ansPrevEnabled);
+            c.Bind("ans_next_enabled", &model.ansNextEnabled);
+            c.Bind("show_answers", &model.showAnswers);
+
+            c.Bind("show_contribute", &model.showContribute);
+            c.Bind("contribute_text", &model.contributeText);
+
+            c.Bind("exit_tooltip", &model.exitTooltip);
+
+            c.BindEventCallback("npcdialogue_click_close",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+            c.BindEventCallback("npcdialogue_npc_prev_page",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNpcPrevPage(); });
+            c.BindEventCallback("npcdialogue_npc_next_page",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNpcNextPage(); });
+            c.BindEventCallback("npcdialogue_ans_prev_page",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickAnsPrevPage(); });
+            c.BindEventCallback("npcdialogue_ans_next_page",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickAnsNextPage(); });
+            c.BindEventCallback("npcdialogue_select_answer",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                {
+                    if (arguments.size() == 1)
+                        RmlClickSelectAnswer(arguments[0].Get<int>(-1));
+                });
+        });
+
+    if (modelCreated)
+    {
+        m_RmlBinder.GetModel().exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
+    }
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+        "Data/Interface/RmlUi/npc_dialogue.rml");
+}
+
+void CNPCDialogue::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() self-corrects visibility/live model state.
+}
+
 void CNPCDialogue::Release()
 {
-    UnloadImages();
+    if (m_pRmlDoc)
+    {
+        m_pRmlDoc->Close();
+        m_pRmlDoc = nullptr;
+    }
 
     if (m_pNewUIMng)
     {
@@ -78,133 +178,28 @@ void CNPCDialogue::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+}
 
-    m_btnProgressL.SetPos(x + 131, y + 165);
-    m_btnProgressR.SetPos(x + 153, y + 165);
-    m_btnSelTextL.SetPos(x + 131, y + 372);
-    m_btnSelTextR.SetPos(x + 153, y + 372);
-    m_btnClose.SetPos(x + 13, y + 392);
+void CNPCDialogue::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+    if (m_pRmlDoc)
+    {
+        if (bShow) m_pRmlDoc->Show();
+        else m_pRmlDoc->Hide();
+    }
 }
 
 bool CNPCDialogue::UpdateMouseEvent()
 {
-    if (ProcessBtns())
-        return false;
-
-    if (UpdateSelTextMouseEvent())
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPC_DIALOGUE))
         return false;
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, ND_WIDTH, ND_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;
-}
-
-bool CNPCDialogue::ProcessBtns()
-{
-    if (m_btnClose.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPC_DIALOGUE);
-        return true;
-    }
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPC_DIALOGUE))
-        return true;
-    else if (m_btnProgressR.UpdateMouseEvent())
-    {
-        m_nSelNPCPage = MIN(++m_nSelNPCPage, m_nMaxNPCPage);
-        if (m_nSelNPCPage == m_nMaxNPCPage)
-        {
-            if (NON_SEL_TEXTS_MODE == m_eLowerView)
-                m_eLowerView = SEL_TEXTS_MODE;
-        }
-
-        ::PlayBuffer(SOUND_CLICK01);
-
-        if (m_nSelNPCPage == m_nMaxNPCPage && NON_SEL_TEXTS_MODE != m_eLowerView)
-            m_btnProgressR.Lock();
-        if (0 != m_nMaxNPCPage)
-            m_btnProgressL.UnLock();
-
-        return true;
-    }
-    else if (m_btnProgressL.UpdateMouseEvent())
-    {
-        m_nSelNPCPage = MAX(--m_nSelNPCPage, 0);
-        ::PlayBuffer(SOUND_CLICK01);
-
-        if (0 == m_nSelNPCPage)
-            m_btnProgressL.Lock();
-        m_btnProgressR.UnLock();
-
-        return true;
-    }
-    else if (m_btnSelTextR.UpdateMouseEvent())
-    {
-        m_nSelSelTextPage = MIN(++m_nSelSelTextPage, m_nMaxSelTextPage);
-        ::PlayBuffer(SOUND_CLICK01);
-
-        if (m_nSelSelTextPage == m_nMaxSelTextPage)
-            m_btnSelTextR.Lock();
-        if (0 != m_nMaxSelTextPage)
-            m_btnSelTextL.UnLock();
-
-        return true;
-    }
-    else if (m_btnSelTextL.UpdateMouseEvent())
-    {
-        m_nSelSelTextPage = MAX(--m_nSelSelTextPage, 0);
-        ::PlayBuffer(SOUND_CLICK01);
-
-        if (0 == m_nSelSelTextPage)
-            m_btnSelTextL.Lock();
-        m_btnSelTextR.UnLock();
-
-        return true;
-    }
-
-    return false;
-}
-
-bool CNPCDialogue::UpdateSelTextMouseEvent()
-{
-    if (SEL_TEXTS_MODE != m_eLowerView || !m_bCanClick)
-        return false;
-
-    m_nSelSelText = 0;
-    if (MouseX < m_Pos.x + 11 || MouseX > m_Pos.x + 179)
-        return false;
-
-    int i;
-
-    int nStartSelText = 0;
-    for (i = 0; i < m_nSelSelTextPage; ++i)
-        nStartSelText += m_anSelTextCountPerPage[i];
-
-    int nEndSelText = nStartSelText + m_anSelTextCountPerPage[m_nSelSelTextPage];
-
-    int nTopY;
-    int nBottomY = m_Pos.y + 203;
-    for (i = nStartSelText; i < nEndSelText; ++i)
-    {
-        nTopY = nBottomY;
-        nBottomY += m_anSelTextLine[i] * ND_TEXT_GAP;
-
-        if (nTopY <= MouseY && MouseY < nBottomY)
-        {
-            m_nSelSelText = i + 1;
-            if (mu::ui::window::IsRelease(VK_LBUTTON))
-            {
-                m_bCanClick = false;
-                ProcessSelTextResult();
-                ::PlayBuffer(SOUND_CLICK01);
-                return true;
-            }
-            break;
-        }
-    }
-
-    return false;
 }
 
 bool CNPCDialogue::UpdateKeyEvent()
@@ -223,112 +218,14 @@ bool CNPCDialogue::UpdateKeyEvent()
 
 bool CNPCDialogue::Update()
 {
+    SyncRmlModel();
     return true;
 }
 
 bool CNPCDialogue::Render()
 {
-    ::EnableAlphaTest();
-
-    RenderBackImage();
-    RenderSelTextBlock();
-    RenderText();
-    RenderContributePoint();
-
-    if (!m_btnProgressL.IsLock())
-        m_btnProgressL.Render();
-    if (!m_btnProgressR.IsLock())
-        m_btnProgressR.Render();
-
-    if (!m_btnSelTextL.IsLock())
-        m_btnSelTextL.Render();
-    if (!m_btnSelTextR.IsLock())
-        m_btnSelTextR.Render();
-
-    m_btnClose.Render();
-
-    ::DisableAlphaBlend();
-
+    // RmlUi's #panel owns all chrome/text/list rendering now; nothing left to draw natively.
     return true;
-}
-
-void CNPCDialogue::RenderBackImage()
-{
-    RenderImage(IMAGE_ND_BACK, m_Pos.x, m_Pos.y, float(ND_WIDTH), float(ND_HEIGHT));
-    RenderImage(IMAGE_ND_TOP, m_Pos.x, m_Pos.y, float(ND_WIDTH), 64.f);
-    RenderImage(IMAGE_ND_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_ND_RIGHT, m_Pos.x + ND_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_ND_BOTTOM, m_Pos.x, m_Pos.y + ND_HEIGHT - 45, float(ND_WIDTH), 45.f);
-
-    RenderImage(IMAGE_ND_LINE, m_Pos.x + 1, m_Pos.y + 181, 188.f, 21.f);
-}
-
-void CNPCDialogue::RenderSelTextBlock()
-{
-    if (SEL_TEXTS_MODE != m_eLowerView)
-        return;
-
-    if (0 == m_nSelSelText)
-        return;
-
-    int i;
-
-    int nStartSelText = 0;
-    for (i = 0; i < m_nSelSelTextPage; ++i)
-        nStartSelText += m_anSelTextCountPerPage[i];
-
-    int nBlockPosY = m_Pos.y + 203;
-
-    for (i = nStartSelText; i < m_nSelSelText - 1; ++i)
-        nBlockPosY += ND_TEXT_GAP * m_anSelTextLine[i];
-
-    constexpr unsigned int SelectionColor = 0x8080B34Du;
-    ::RenderColorQuadARGB(m_Pos.x + 11, nBlockPosY, 168.f,
-        ND_TEXT_GAP * m_anSelTextLine[m_nSelSelText - 1], SelectionColor);
-}
-
-void CNPCDialogue::RenderText()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-
-    g_pRenderText->SetTextColor(150, 255, 240, 255);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, g_QuestMng.GetNPCName(), ND_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 230, 210, 255);
-    int i;
-    for (i = 0; i < ND_NPC_MAX_LINE_PER_PAGE; ++i)
-        g_pRenderText->RenderText(m_Pos.x + 13, m_Pos.y + 59 + (ND_TEXT_GAP * i),
-            m_aszNPCWords[i + ND_NPC_MAX_LINE_PER_PAGE * m_nSelNPCPage],
-            0, 0, RT3_SORT_LEFT);
-
-    if (SEL_TEXTS_MODE == m_eLowerView)
-    {
-        g_pRenderText->SetTextColor(255, 230, 210, 255);
-
-        int nStartSelTextLine = 0;
-        for (i = 0; i < m_nSelSelTextPage; ++i)
-            nStartSelTextLine += m_anSelTextLinePerPage[i];
-
-        for (i = 0; i < m_anSelTextLinePerPage[m_nSelSelTextPage]; ++i)
-            g_pRenderText->RenderText(m_Pos.x + 13, m_Pos.y + 207 + (ND_TEXT_GAP * i),
-                m_aszSelTexts[nStartSelTextLine + i], 0, 0, RT3_SORT_LEFT);
-    }
-}
-
-void CNPCDialogue::RenderContributePoint()
-{
-    if ((543 == g_QuestMng.GetNPCIndex() && 1 == Hero->m_byGensInfluence)
-        || (544 == g_QuestMng.GetNPCIndex() && 2 == Hero->m_byGensInfluence))
-    {
-        RenderImage(IMAGE_ND_CONTRIBUTE_BG, m_Pos.x + 11, m_Pos.y + 27, 168.f, 18.f);
-
-        wchar_t szContribute[32];
-        ::wprintf(szContribute, I18N::Game::GainContributionU, m_dwContributePoint);
-        g_pRenderText->SetTextColor(255, 230, 210, 255);
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 30, szContribute, ND_WIDTH, 0, RT3_SORT_CENTER);
-    }
 }
 
 bool CNPCDialogue::IsVisible() const
@@ -339,36 +236,6 @@ bool CNPCDialogue::IsVisible() const
 float CNPCDialogue::GetLayerDepth()
 {
     return 3.1f;
-}
-
-void CNPCDialogue::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ND_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_ND_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_ND_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_ND_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_ND_BOTTOM, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_ND_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\Quest_bt_L.tga", IMAGE_ND_BTN_L, GL_LINEAR);
-    LoadBitmap(L"Interface\\Quest_bt_R.tga", IMAGE_ND_BTN_R, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_ND_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap(L"Interface\\Gens_point.tga", IMAGE_ND_CONTRIBUTE_BG, GL_LINEAR);
-}
-
-void CNPCDialogue::UnloadImages()
-{
-    DeleteBitmap(IMAGE_ND_CONTRIBUTE_BG);
-    DeleteBitmap(IMAGE_ND_BTN_CLOSE);
-    DeleteBitmap(IMAGE_ND_BTN_R);
-    DeleteBitmap(IMAGE_ND_BTN_L);
-    DeleteBitmap(IMAGE_ND_LINE);
-
-    DeleteBitmap(IMAGE_ND_BOTTOM);
-    DeleteBitmap(IMAGE_ND_RIGHT);
-    DeleteBitmap(IMAGE_ND_LEFT);
-    DeleteBitmap(IMAGE_ND_TOP);
-    DeleteBitmap(IMAGE_ND_BACK);
 }
 
 void CNPCDialogue::ProcessOpening()
@@ -394,8 +261,6 @@ void CNPCDialogue::SetContents(DWORD dwDlgIndex)
     SetCurNPCWords();
     SetCurSelTexts();
     m_bCanClick = true;
-    m_btnProgressL.Lock();
-    m_btnSelTextL.Lock();
     m_nSelSelText = 0;
 }
 
@@ -417,16 +282,7 @@ void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
         return;
 
     m_nMaxNPCPage = (nLine - 1) / ND_NPC_MAX_LINE_PER_PAGE;
-    if (1 <= m_nMaxNPCPage)
-    {
-        m_eLowerView = NON_SEL_TEXTS_MODE;
-        m_btnProgressR.UnLock();
-    }
-    else
-    {
-        m_eLowerView = SEL_TEXTS_MODE;
-        m_btnProgressR.Lock();
-    }
+    m_eLowerView = (1 <= m_nMaxNPCPage) ? NON_SEL_TEXTS_MODE : SEL_TEXTS_MODE;
 
     m_nSelNPCPage = 0;
 }
@@ -486,11 +342,6 @@ void CNPCDialogue::CalculateSelTextMaxPage(int nSelTextCount)
             m_anSelTextLinePerPage[m_nMaxSelTextPage] += m_anSelTextLine[i];
         }
     }
-
-    if (1 <= m_nMaxSelTextPage)
-        m_btnSelTextR.UnLock();
-    else
-        m_btnSelTextR.Lock();
 }
 
 void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
@@ -610,8 +461,6 @@ void CNPCDialogue::ProcessQuestListReceive(DWORD* adwSrcQuestIndex, int nIndexCo
     SetCurNPCWords(nIndexCount);
     SetQuestListText(adwSrcQuestIndex, nIndexCount);
     m_bCanClick = true;
-    m_btnProgressL.Lock();
-    m_btnSelTextL.Lock();
     m_nSelSelText = 0;
 }
 
@@ -724,4 +573,173 @@ void CNPCDialogue::ProcessGensRewardReceive(BYTE byResult)
         SetContents(25);
         break;
     }
+}
+
+void CNPCDialogue::RmlClickClose()
+{
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPC_DIALOGUE);
+}
+
+void CNPCDialogue::RmlClickNpcPrevPage()
+{
+    if (m_nSelNPCPage <= 0)
+        return; // already at the first page -- native L button was already locked here.
+
+    --m_nSelNPCPage;
+    ::PlayBuffer(SOUND_CLICK01);
+}
+
+void CNPCDialogue::RmlClickNpcNextPage()
+{
+    if (m_nSelNPCPage < m_nMaxNPCPage)
+    {
+        ++m_nSelNPCPage;
+        if (m_nSelNPCPage == m_nMaxNPCPage && m_eLowerView == NON_SEL_TEXTS_MODE)
+        {
+            // Last NPC page reached for the first time -- reveal the sel-text list, matching the
+            // native "R" button's double duty (old ProcessBtns()'s own comment).
+            m_eLowerView = SEL_TEXTS_MODE;
+        }
+    }
+    else
+    {
+        return; // last page already reached -- native R button was already locked here.
+    }
+
+    ::PlayBuffer(SOUND_CLICK01);
+}
+
+void CNPCDialogue::RmlClickAnsPrevPage()
+{
+    if (m_nSelSelTextPage <= 0)
+        return;
+
+    --m_nSelSelTextPage;
+    ::PlayBuffer(SOUND_CLICK01);
+}
+
+void CNPCDialogue::RmlClickAnsNextPage()
+{
+    if (m_nSelSelTextPage >= m_nMaxSelTextPage)
+        return;
+
+    ++m_nSelSelTextPage;
+    ::PlayBuffer(SOUND_CLICK01);
+}
+
+void CNPCDialogue::RmlClickSelectAnswer(int nIndex)
+{
+    if (m_eLowerView != SEL_TEXTS_MODE || !m_bCanClick)
+        return;
+    if (nIndex < 0 || nIndex >= m_nSelTextCount)
+        return;
+
+    // ProcessSelTextResult() reads the 1-based m_nSelSelText -- kept exactly as the native hit-test
+    // populated it, so that function needed no changes at all for this port.
+    m_nSelSelText = nIndex + 1;
+    m_bCanClick = false;
+    ProcessSelTextResult();
+    ::PlayBuffer(SOUND_CLICK01);
+}
+
+void CNPCDialogue::SyncRmlModel()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    const auto transform = UI::Scaling::GetActiveTransform();
+    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
+    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
+    if (model.rootX != rootX || model.rootY != rootY || model.rootScale != transform.scaleX)
+    {
+        model.rootX = rootX;
+        model.rootY = rootY;
+        model.rootScale = transform.scaleX;
+        m_RmlBinder.MarkDirty("root_x");
+        m_RmlBinder.MarkDirty("root_y");
+        m_RmlBinder.MarkDirty("root_scale");
+    }
+
+    model.npcName = StringUtils::WideToNarrow(g_QuestMng.GetNPCName());
+    m_RmlBinder.MarkDirty("npc_name");
+
+    // Current page's up-to-7 lines, already wrapped by SetCurNPCWords()'s DivideStringByPixel() call
+    // -- bound as literal non-wrapping lines (see NPCDialogueRmlModel.h's own npcLines comment).
+    model.npcLines.clear();
+    for (int i = 0; i < ND_NPC_MAX_LINE_PER_PAGE; ++i)
+    {
+        const wchar_t* line = m_aszNPCWords[i + ND_NPC_MAX_LINE_PER_PAGE * m_nSelNPCPage];
+        if (line[0] == L'\0')
+            break;
+        model.npcLines.push_back({ StringUtils::WideToNarrow(line) });
+    }
+    m_RmlBinder.MarkDirty("npc_lines");
+
+    model.npcPrevEnabled = (m_nSelNPCPage > 0);
+    model.npcNextEnabled = (m_nSelNPCPage < m_nMaxNPCPage);
+    m_RmlBinder.MarkDirty("npc_prev_enabled");
+    m_RmlBinder.MarkDirty("npc_next_enabled");
+
+    model.showAnswers = (m_eLowerView == SEL_TEXTS_MODE);
+    m_RmlBinder.MarkDirty("show_answers");
+
+    if (m_eLowerView == SEL_TEXTS_MODE)
+    {
+        // Same two-level slice RenderText()/UpdateSelTextMouseEvent() used natively: entries (the
+        // clickable unit) per page from m_anSelTextCountPerPage, physical lines per entry from
+        // m_anSelTextLine -- joined here since one Entry now shows a whole logical entry, not one
+        // physical line at a time.
+        int nStartSelText = 0;
+        for (int p = 0; p < m_nSelSelTextPage; ++p)
+            nStartSelText += m_anSelTextCountPerPage[p];
+        int nStartLine = 0;
+        for (int p = 0; p < m_nSelSelTextPage; ++p)
+            nStartLine += m_anSelTextLinePerPage[p];
+
+        model.answers.clear();
+        int nLineCursor = nStartLine;
+        for (int i = 0; i < m_anSelTextCountPerPage[m_nSelSelTextPage]; ++i)
+        {
+            const int entryIndex = nStartSelText + i;
+            std::wstring joined;
+            for (int l = 0; l < m_anSelTextLine[entryIndex]; ++l)
+            {
+                if (l > 0)
+                    joined += L'\n';
+                joined += m_aszSelTexts[nLineCursor + l];
+            }
+            nLineCursor += m_anSelTextLine[entryIndex];
+            model.answers.push_back({ StringUtils::WideToNarrow(joined.c_str()), entryIndex });
+        }
+    }
+    else
+    {
+        model.answers.clear();
+    }
+    m_RmlBinder.MarkDirty("answers");
+
+    model.ansPrevEnabled = (m_nSelSelTextPage > 0);
+    model.ansNextEnabled = (m_nSelSelTextPage < m_nMaxSelTextPage);
+    m_RmlBinder.MarkDirty("ans_prev_enabled");
+    m_RmlBinder.MarkDirty("ans_next_enabled");
+
+    // Same gate RenderContributePoint() used natively.
+    const bool showContribute = (543 == g_QuestMng.GetNPCIndex() && 1 == Hero->m_byGensInfluence)
+        || (544 == g_QuestMng.GetNPCIndex() && 2 == Hero->m_byGensInfluence);
+    model.showContribute = showContribute;
+    m_RmlBinder.MarkDirty("show_contribute");
+
+    if (showContribute)
+    {
+        wchar_t szContribute[32];
+        ::wprintf(szContribute, I18N::Game::GainContributionU, m_dwContributePoint);
+        model.contributeText = StringUtils::WideToNarrow(szContribute);
+    }
+    else
+    {
+        model.contributeText.clear();
+    }
+    m_RmlBinder.MarkDirty("contribute_text");
 }

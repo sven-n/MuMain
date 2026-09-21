@@ -1,0 +1,24 @@
+<rml>
+<head>
+	<title>NPC Quest Background</title>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="npc_quest.rcss"/>
+</head>
+<!-- Background-context document -- paints the outer frame (and the header rail's own fill/joint/
+     accent, but NOT its title text, which stays in the foreground doc -- see ../../npc_quest.rml's
+     own header comment) behind CNPCQuest's still-native live-3D quest-item preview. Reuses
+     docked_panel_frame.rcss's shared modern classes directly, same family as
+     character_info/my_quest_info/pet_info/party_info/quest_progress/npc_dialogue. -->
+<body>
+	<div id="panel" data-model="npc_quest_bg" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="docked-rail-accent"></div>
+		</div>
+	</div>
+</body>
+</rml>

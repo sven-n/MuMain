@@ -19,10 +19,11 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            // Kept solely because CastleWindow.h's IMAGE_CASTLEWINDOW_MONEY and NPCQuest.h's
-            // IMAGE_NPCQUEST_ZEN alias this numeric bitmap slot for their own (still-native,
-            // unrelated) LoadBitmap() calls -- not used by this window's own rendering anymore,
-            // now that its money strip is RmlUi (see NPCShopRmlModel).
+            // Kept solely because CastleWindow.h's IMAGE_CASTLEWINDOW_MONEY aliases this numeric
+            // bitmap slot for its own (still-native, unrelated) LoadBitmap() call -- not used by
+            // this window's own rendering anymore, now that its money strip is RmlUi (see
+            // NPCShopRmlModel). CNPCQuest used to alias it too (IMAGE_NPCQUEST_ZEN), but that whole
+            // enum was retired when CNPCQuest itself moved to RmlUi.
             IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
         };
 

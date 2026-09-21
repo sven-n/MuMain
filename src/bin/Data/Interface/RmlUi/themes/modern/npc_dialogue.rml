@@ -1,0 +1,56 @@
+<rml>
+<head>
+	<title>NPC Dialogue</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="npc_dialogue.rcss"/>
+</head>
+<!-- Modern theme's own copy of CNPCDialogue's frame -- per-theme file since the header-rail chrome
+     is modern-specific structure, not just style (same split my_quest_info.rml/quest_progress.rml's
+     own modern forks use). #panel/shell-edge/groove/header-rail paint come from
+     docked_panel_frame.rcss, shared with character_info/my_quest_info/pet_info/party_info/
+     quest_progress. Keep ids/data-model/event-callback names in sync with ../../npc_dialogue.rml. -->
+<body>
+	<div id="panel" data-model="npc_dialogue" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="modern-header-text-px">
+				<div id="title" class="modern-header-title-px">{{npc_name}}</div>
+			</div>
+			<div class="docked-rail-accent"></div>
+		</div>
+
+		<div class="nd-contribute" data-class-hidden="!show_contribute">{{contribute_text}}</div>
+
+		<div class="nd-npc-lines">
+			<span class="nd-line" data-for="l : npc_lines">{{l.text}}</span>
+		</div>
+
+		<div id="btn_npc_prev" class="nd-btn-l nd-btn-npc" data-class-locked="!npc_prev_enabled"
+		     data-event-click="npcdialogue_npc_prev_page"></div>
+		<div id="btn_npc_next" class="nd-btn-r nd-btn-npc" data-class-locked="!npc_next_enabled"
+		     data-event-click="npcdialogue_npc_next_page"></div>
+
+		<div class="nd-divider"></div>
+
+		<div class="nd-answers" data-class-hidden="!show_answers">
+			<div class="nd-answer-row" data-for="a : answers"
+			     data-event-click="npcdialogue_select_answer(a.index)">{{a.text}}</div>
+		</div>
+
+		<div id="btn_ans_prev" class="nd-btn-l nd-btn-ans" data-class-locked="!ans_prev_enabled"
+		     data-event-click="npcdialogue_ans_prev_page"></div>
+		<div id="btn_ans_next" class="nd-btn-r nd-btn-ans" data-class-locked="!ans_next_enabled"
+		     data-event-click="npcdialogue_ans_next_page"></div>
+
+		<div id="btn_exit" class="modern-icon-btn-px nd-btn-exit" data-event-click="npcdialogue_click_close">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

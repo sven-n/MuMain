@@ -1,0 +1,56 @@
+<rml>
+<head>
+	<title>NPC Dialogue</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="npc_dialogue.rcss"/>
+</head>
+<!-- CNPCDialogue's own document -- the first window a quest-giving NPC opens (server packets
+     ReceiveQuestByNPCEPList/ReceiveQuestByEtcEPList/generic NPC talk); only after picking a quest
+     step from its sel-text list does the server push the PMSG_QUEST_STEP_INFO that opens the
+     already-ported CQuestProgress/CQuestProgressByEtc. Two independently paginated lists share this
+     one document: npc_lines (top) and answers (bottom, sourced from either GetNPCDlgAnswer() or
+     quest-list-mode's quest subjects -- see NPCDialogueRmlModel.h's own comment). #panel/frame
+     sprites/exit button/tooltip shape come from docked_panel_frame.rcss, same family as
+     character_info/my_quest_info/pet_info/party_info/quest_progress. -->
+<body>
+	<div id="panel" data-model="npc_dialogue" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span id="title">{{npc_name}}</span>
+		<div class="nd-contribute" data-class-hidden="!show_contribute">{{contribute_text}}</div>
+
+		<div class="nd-npc-lines">
+			<span class="nd-line" data-for="l : npc_lines">{{l.text}}</span>
+		</div>
+
+		<div id="btn_npc_prev" class="nd-btn-l nd-btn-npc" data-class-locked="!npc_prev_enabled"
+		     data-event-click="npcdialogue_npc_prev_page"></div>
+		<div id="btn_npc_next" class="nd-btn-r nd-btn-npc" data-class-locked="!npc_next_enabled"
+		     data-event-click="npcdialogue_npc_next_page"></div>
+
+		<div class="nd-divider"></div>
+
+		<div class="nd-answers" data-class-hidden="!show_answers">
+			<div class="nd-answer-row" data-for="a : answers"
+			     data-event-click="npcdialogue_select_answer(a.index)">{{a.text}}</div>
+		</div>
+
+		<!-- Rendered/clickable regardless of show_answers, matching the native Render() call which
+		     always drew these two buttons -- only the answer text itself was gated by m_eLowerView. -->
+		<div id="btn_ans_prev" class="nd-btn-l nd-btn-ans" data-class-locked="!ans_prev_enabled"
+		     data-event-click="npcdialogue_ans_prev_page"></div>
+		<div id="btn_ans_next" class="nd-btn-r nd-btn-ans" data-class-locked="!ans_next_enabled"
+		     data-event-click="npcdialogue_ans_next_page"></div>
+
+		<div id="btn_exit" data-event-click="npcdialogue_click_close">
+			<span class="btn-exit-label">×</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>
