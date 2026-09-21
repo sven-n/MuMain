@@ -1641,7 +1641,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (M38Kanturu2nd::Is_Kanturu2nd())
 					{
 						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
+						{
+							// Talking to another NPC replaces the gate dialog: release
+							// the server dialog BEFORE the new Talk request so packet
+							// order stays Close(old) then Talk(new). A Close sent later
+							// (e.g. from the new dialog's Show path) would clear the
+							// just-opened dialog instead.
+							if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC))
+							{
+								g_pKanturu2ndEnterNpc->ClosingProcess();
+							}
 							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+						}
 					}
 					else if (gMapManager.IsCursedTemple())
 					{

@@ -79,6 +79,7 @@ namespace SEASON3B
         void SetButtonInfo();
 
         bool BtnProcess();
+        void RejectEnterRequest(BYTE btPopup);
 
         void RenderFrame();
         void RenderButtons();

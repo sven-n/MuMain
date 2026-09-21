@@ -448,6 +448,12 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
+void SEASON3B::CNewUIKanturu2ndEnterNpc::RejectEnterRequest(BYTE btPopup)
+{
+    CreateMessageBox(btPopup);
+    ClosingProcess();
+}
+
 bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 {
     if (m_BtnRefresh.IsLock() == true)
@@ -492,16 +498,14 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 
             if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
             {
-                CreateMessageBox(POPUP_UNIRIA);
-                ClosingProcess();
+                RejectEnterRequest(POPUP_UNIRIA);
                 return true;
             }
 
             if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type)
                 || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
             {
-                CreateMessageBox(POPUP_CHANGERING);
-                ClosingProcess();
+                RejectEnterRequest(POPUP_CHANGERING);
                 return true;
             }
 
@@ -515,8 +519,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
                 || (pItemWing->Type >= ITEM_CAPE_OF_FIGHTER && pItemWing->Type <= ITEM_CAPE_OF_OVERRULE)
                 || (pItemWing->Type == ITEM_WING + 135)))
             {
-                CreateMessageBox(POPUP_NOT_HELPER);
-                ClosingProcess();
+                RejectEnterRequest(POPUP_NOT_HELPER);
                 return true;
             }
 
@@ -527,8 +530,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
             }
             else
             {
-                CreateMessageBox(POPUP_NOT_MUNSTONE);
-                ClosingProcess();
+                RejectEnterRequest(POPUP_NOT_MUNSTONE);
                 return true;
             }
         }
