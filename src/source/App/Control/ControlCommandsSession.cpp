@@ -141,6 +141,11 @@ bool ServerGroupExists(const std::wstring& name)
     return false;
 }
 
+// How long a server selection that fails is retried before it is answered:
+// long enough for the connect server's list to arrive, short enough not to
+// spend the login's whole deadline on a selection that cannot succeed.
+constexpr std::chrono::milliseconds SelectServerRetryWindow{5000};
+
 // login: server list -> server -> credentials -> character list.
 class LoginAct : public Act
 {
@@ -279,10 +284,23 @@ private:
         CUIMng& uiManager = CUIMng::Instance();
         if (!uiManager.m_ServerSelWin.SelectServer(m_serverGroup.c_str(), m_serverIndex))
         {
-            // Everything else is a "not yet": the list may still be filling
-            // in, and the connection this login had to tear down first may
-            // still be coming back. The act's deadline ends the wait.
-            return Status::Running;
+            // Everything else may be a "not yet": the list may still be
+            // filling in, and the connection this login had to tear down
+            // first may still be coming back. Retried for a few seconds and
+            // then answered — a selection that cannot succeed (a group the
+            // display could not place, a server the group does not hold)
+            // would otherwise sit out the whole login deadline.
+            if (m_selectingSince == std::chrono::steady_clock::time_point{})
+            {
+                m_selectingSince = std::chrono::steady_clock::now();
+            }
+            if (std::chrono::steady_clock::now() - m_selectingSince < SelectServerRetryWindow)
+            {
+                return Status::Running;
+            }
+            return Fail(response, ErrorCode::NotConnected,
+                        m_serverGroup.empty() ? "the server list holds no server this client may join"
+                                              : "that server group holds no server this client may join");
         }
 
         m_stage = Stage::JoiningServer;
@@ -357,6 +375,7 @@ private:
     int m_serverIndex = 0;
     Stage m_stage = Stage::SelectingServer;
     bool m_leaving = false;
+    std::chrono::steady_clock::time_point m_selectingSince{};
 };
 
 // select-char: enter the world with one character and wait for its map.
