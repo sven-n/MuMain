@@ -1072,17 +1072,28 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the item is already in that slot");
     }
 
-    // What the client's own move tests before it sends: the destination has
-    // to be able to hold this item (NewUIInventoryActionController.cpp:123).
-    // Tested before the item is lifted out, so a refused move leaves the
-    // inventory untouched.
-    SEASON3B::CNewUIInventoryCtrl* destination =
-        IsMainInventorySlot(toSlot) || toSlot < MAX_EQUIPMENT_INDEX
-            ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
-            : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
-    if (destination == nullptr || !destination->CanMove(toSlot, moving))
+    // What the client's own move tests before it sends, and tested before
+    // the item is lifted out, so a refused move leaves the inventory
+    // untouched. An equipment slot is a different question from an
+    // inventory square: it asks whether the item may be worn there
+    // (`IsEquipable`), not whether a rectangle is free.
+    if (toSlot < MAX_EQUIPMENT_INDEX)
     {
-        return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
+        if (g_pMyInventory == nullptr || !g_pMyInventory->IsEquipable(toSlot, moving))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item cannot be equipped in that slot");
+        }
+    }
+    else
+    {
+        SEASON3B::CNewUIInventoryCtrl* destination =
+            IsMainInventorySlot(toSlot)
+                ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
+                : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
+        if (destination == nullptr || !destination->CanMove(toSlot, moving))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
+        }
     }
 
     if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
@@ -1095,9 +1106,15 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     if (picked == nullptr || !SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, fromSlot, picked->GetItem(),
                                                        STORAGE_TYPE::INVENTORY, toSlot))
     {
-        // Nothing was sent: put the item back where it was rather than
-        // leave it in the player's hand.
-        SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+        // Nothing was sent, so the item goes back into its slot directly:
+        // BackupPickedItem does nothing while `EquipmentItem` is set, which
+        // is the very condition that makes the send fail.
+        ITEM* held = picked != nullptr ? picked->GetItem() : nullptr;
+        if (held != nullptr)
+        {
+            inventory->AddItem(held->x, held->y, held);
+        }
+        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "another item move has not been answered yet");
     }
 

@@ -458,9 +458,11 @@ bool CMsgWin::DismissMessage()
     if (!IsShow())
         return false;
 
-    // These two end the process in ManageOKClick; confirming them on a
-    // caller's behalf would close the client under it.
-    if (m_nMsgCode == RECEIVE_LOG_IN_FAIL_VERSION || m_nMsgCode == MESSAGE_SERVER_LOST)
+    // Confirming these on a caller's behalf would end the process or delete
+    // a character: the two exits, and the two steps of the delete-character
+    // confirmation, which a second dismissal would carry through.
+    if (m_nMsgCode == RECEIVE_LOG_IN_FAIL_VERSION || m_nMsgCode == MESSAGE_SERVER_LOST ||
+        m_nMsgCode == MESSAGE_DELETE_CHARACTER_CONFIRM || m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
         return false;
 
     ManageOKClick();

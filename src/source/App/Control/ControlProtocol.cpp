@@ -186,6 +186,11 @@ std::string_view ErrorCodeName(ErrorCode code)
 
 const std::vector<std::string>& CommandNames()
 {
+    // The parser's vocabulary. It deliberately does not read the
+    // dispatcher's table: this file is free of the client's globals so that
+    // it can be tested on its own, and including the dispatcher would drag
+    // the whole client into that test. The dispatcher checks itself against
+    // this list instead (ControlDispatcher.cpp, CommandTable).
     static const std::vector<std::string> names = {
         "ping",   "scene", "state",   "nearby", "events",   "wait-for", "screenshot", "login",  "select-char",
         "logout", "quit",  "move",    "warp",   "teleport", "attack",   "skill",      "pickup", "use",

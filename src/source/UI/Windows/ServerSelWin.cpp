@@ -502,7 +502,15 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
     UpdateDisplay();
 
-    CServerInfo* pServerInfo = (m_pSelectServerGroup != NULL) ? m_pSelectServerGroup->GetServerInfo(serverIndex) : NULL;
+    // UpdateDisplay re-derives m_pSelectServerGroup from the button index,
+    // which is only the same group while the buttons and the list agree;
+    // the group this call chose is the one it must connect to.
+    if (m_pSelectServerGroup != pChosenGroup)
+    {
+        m_pSelectServerGroup = pChosenGroup;
+    }
+
+    CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
     if (pServerInfo == NULL || pServerInfo->m_iPercent >= 100)
     {
         m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);

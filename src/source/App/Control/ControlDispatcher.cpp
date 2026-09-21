@@ -6,6 +6,7 @@
 #include "Scenes/SceneCore.h"
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <optional>
@@ -55,6 +56,21 @@ const std::vector<CommandEntry>& CommandTable()
         {"party", SceneRequirement::World, &Commands::Party},
         {"halt", SceneRequirement::Any, &Commands::Halt},
     };
+
+    // The parser keeps its own list of command names — it is free of the
+    // client's globals so that it can be tested alone — and the two must
+    // agree: a command here that the parser rejects would never reach its
+    // handler. Checked once, where both lists are in scope.
+    static const bool vocabularyAgrees = []
+    {
+        for (const CommandEntry& entry : table)
+        {
+            assert(App::Control::IsKnownCommand(entry.name));
+        }
+        return true;
+    }();
+    (void)vocabularyAgrees;
+
     return table;
 }
 } // namespace
