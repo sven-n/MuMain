@@ -64,10 +64,10 @@ void ApplyOwnerOnlyMode(SOCKET handle, const std::string& path)
     // The umask guard around bind() already created the file with the right
     // mode; these calls make it explicit for the odd umask/filesystem, and
     // fchmod on a socket descriptor is not portable enough to rely on alone.
-    if (::fchmod(handle, SocketFileMode) != 0)
-    {
-        ::chmod(path.c_str(), SocketFileMode);
-    }
+    // Both, not one or the other: Linux refuses fchmod on a socket, and a
+    // filesystem that refuses chmod still has the mode bind() created.
+    (void)::fchmod(handle, SocketFileMode);
+    (void)::chmod(path.c_str(), SocketFileMode);
 #endif
 }
 
@@ -145,6 +145,15 @@ bool LocalSocketConnection::ReadAvailable()
                 Close();
                 return false;
             }
+
+            // Backpressure rather than a closed connection: a batch larger
+            // than the frame budget serves stays in the kernel's buffer
+            // until the lines already taken have been served, so an honest
+            // pipelining driver is paced, not dropped.
+            if (m_inbox.size() >= ReadPauseBytes)
+            {
+                return true;
+            }
             continue;
         }
 
@@ -154,13 +163,11 @@ bool LocalSocketConnection::ReadAvailable()
             // before closing is still a request: a one-shot script writes
             // its line and shuts its end down in the same breath, and
             // dropping the line here is dropping the only thing it asked.
+            // Recorded, not acted on: the server closes the connection
+            // when it owes this peer nothing — an act it started may still
+            // be running, and its answer still has to go out.
             m_peerClosed = true;
-            if (HasLine())
-            {
-                return true;
-            }
-            Close();
-            return false;
+            return true;
         }
 
         if (WouldBlock(WSAGetLastError()))
@@ -488,6 +495,11 @@ bool LocalSocketListener::Listen(const std::string& path, std::string& error)
     address.sun_family = AF_UNIX;
     std::memcpy(address.sun_path, path.c_str(), path.size());
 
+    // The mode is set twice over: the umask bracket makes bind() create the
+    // file 0600 in the first place — fchmod on a socket is not permitted on
+    // Linux and the chmod below cannot run before the file exists — and
+    // ApplyOwnerOnlyMode then states it explicitly. The bracket is
+    // process-global, so it is held across one syscall and no more.
 #ifndef _WIN32
     const mode_t previousMask = ::umask(~SocketFileMode & 0777);
 #endif
@@ -529,6 +541,7 @@ bool LocalSocketListener::Listen(const std::string& path, std::string& error)
     {
         m_pathDevice = static_cast<std::uint64_t>(boundFile.st_dev);
         m_pathInode = static_cast<std::uint64_t>(boundFile.st_ino);
+        m_pathIdentified = true;
     }
 #endif
     return true;
@@ -570,9 +583,11 @@ void LocalSocketListener::Close()
         // Only the file this listener bound: if a second client has taken
         // the path in the meantime, unlinking would take its socket away.
         struct stat current{};
-        const bool ours = ::stat(m_path.c_str(), &current) == 0 &&
-                          static_cast<std::uint64_t>(current.st_dev) == m_pathDevice &&
-                          static_cast<std::uint64_t>(current.st_ino) == m_pathInode;
+        // Without an identity to compare against, the old behaviour: the
+        // path was ours to bind, so it is ours to remove.
+        const bool ours = !m_pathIdentified || (::stat(m_path.c_str(), &current) == 0 &&
+                                                static_cast<std::uint64_t>(current.st_dev) == m_pathDevice &&
+                                                static_cast<std::uint64_t>(current.st_ino) == m_pathInode);
         if (ours)
         {
             Unlink(m_path);
@@ -583,6 +598,7 @@ void LocalSocketListener::Close()
         m_path.clear();
         m_pathDevice = 0;
         m_pathInode = 0;
+        m_pathIdentified = false;
     }
 }
 } // namespace Core::Platform

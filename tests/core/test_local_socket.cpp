@@ -326,6 +326,28 @@ TEST_CASE("Local socket leaves a path that is not a socket alone [core][local-so
     std::filesystem::remove_all(directory);
 }
 
+TEST_CASE("Local socket leaves a path that is not a socket alone [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "notasocket").string();
+
+    {
+        FILE* file = std::fopen(path.c_str(), "wb");
+        REQUIRE(file != nullptr);
+        std::fputs("not a socket", file);
+        std::fclose(file);
+    }
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    CHECK_FALSE(listener.Listen(path, error));
+    CHECK(error.find("not a socket") != std::string::npos);
+    // Still there: a mistyped path costs a refusal, not the file.
+    CHECK(SocketFileExists(path));
+
+    std::filesystem::remove_all(directory);
+}
+
 TEST_CASE("Local socket rejects an impossible path and unlinks on demand [core][local-socket]")
 {
     const auto directory = MakeSocketDirectory();
@@ -424,12 +446,20 @@ TEST_CASE("Local socket reports a closed peer [core][local-socket]")
 
     closesocket(client);
 
+    // The shutdown is reported, not acted on: whoever owns the connection
+    // decides when to let go, because an act the peer started may still owe
+    // it an answer.
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
-    while (connection->IsOpen() && std::chrono::steady_clock::now() < deadline)
+    while (!connection->PeerClosed() && std::chrono::steady_clock::now() < deadline)
     {
         connection->ReadAvailable();
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
+    CHECK(connection->PeerClosed());
+    CHECK_FALSE(connection->HasLine());
+    CHECK(connection->IsOpen());
+
+    connection->Close();
     CHECK_FALSE(connection->IsOpen());
 
     listener.Close();
@@ -487,7 +517,7 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     std::filesystem::remove_all(directory);
 }
 
-TEST_CASE("Local socket stops a peer that outruns the drain rate [core][local-socket]")
+TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-socket]")
 {
     const auto directory = MakeSocketDirectory();
     const std::string path = (directory / "flood.sock").string();
@@ -501,19 +531,47 @@ TEST_CASE("Local socket stops a peer that outruns the drain rate [core][local-so
     auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
     REQUIRE(connection != nullptr);
 
-    // Complete lines are not exempt from every bound: a peer that keeps
-    // writing valid commands without any of them being served still meets the
-    // ceiling on the buffer as a whole, rather than growing it indefinitely.
+    // Valid commands arriving faster than they are served are not abuse:
+    // reading pauses once more than a frame's worth is waiting, so the
+    // buffer stays bounded and the rest of the batch waits in the kernel
+    // instead of the connection being dropped for it.
     const std::string command = "{\"cmd\":\"ping\"}\n";
     std::string batch;
-    batch.reserve(Core::Platform::LocalSocketConnection::MaxTotalInputBytes + command.size() * 64);
-    while (batch.size() <= Core::Platform::LocalSocketConnection::MaxTotalInputBytes)
+    while (batch.size() <= Core::Platform::LocalSocketConnection::ReadPauseBytes * 2)
     {
         batch += command;
     }
 
-    CHECK_FALSE(BufferInto(client, *connection, batch));
-    CHECK_FALSE(connection->IsOpen());
+    // Written in chunks with the reader and a consumer interleaved, the way
+    // the frame loop does it: the writer is never blocked out and nothing
+    // is dropped, while the buffer stays at the pause mark.
+    constexpr std::size_t ChunkBytes = 16 * 1024;
+    std::size_t offset = 0;
+    std::size_t taken = 0;
+    std::string line;
+    while (offset < batch.size())
+    {
+        const std::size_t size = std::min(ChunkBytes, batch.size() - offset);
+        const int sent = SendAll(client, batch.substr(offset, size));
+        REQUIRE(sent > 0);
+        offset += static_cast<std::size_t>(sent);
+
+        REQUIRE(connection->ReadAvailable());
+        REQUIRE(connection->IsOpen());
+        while (connection->TakeLine(line))
+        {
+            ++taken;
+        }
+    }
+
+    // Everything sent arrived, in order, and the connection is still open:
+    // a fast writer is paced rather than dropped.
+    CHECK(taken == batch.size() / command.size());
+    CHECK(connection->IsOpen());
+
+    // Draining makes room, and the connection is still there to read more.
+    REQUIRE(connection->ReadAvailable());
+    CHECK(connection->IsOpen());
 
     closesocket(client);
     listener.Close();

@@ -45,6 +45,12 @@ public:
     // of it, for a peer that is no longer listening.
     static constexpr std::size_t MaxPendingOutputBytes = std::size_t{4} * 1024 * 1024;
 
+    // Reading pauses once this much is waiting to be served. The frame
+    // serves a bounded number of lines, so a driver that writes faster than
+    // that is paced by the kernel's own buffer instead of filling this one
+    // until the total cap closes it.
+    static constexpr std::size_t ReadPauseBytes = std::size_t{256} * 1024;
+
     explicit LocalSocketConnection(SOCKET handle);
     ~LocalSocketConnection();
 
@@ -161,5 +167,6 @@ private:
     // that file and not whatever has taken the path since.
     std::uint64_t m_pathDevice = 0;
     std::uint64_t m_pathInode = 0;
+    bool m_pathIdentified = false;
 };
 } // namespace Core::Platform
