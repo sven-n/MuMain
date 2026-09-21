@@ -126,6 +126,21 @@ bool TakeLoginFailure(std::string& reason)
     return true;
 }
 
+// Whether the connect server's list holds a group of that name.
+bool ServerGroupExists(const std::wstring& name)
+{
+    CServerGroup* group = nullptr;
+    g_ServerListManager->SetFirst();
+    while (g_ServerListManager->GetNext(group))
+    {
+        if (group != nullptr && wcscmp(group->m_szName, name.c_str()) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 // login: server list -> server -> credentials -> character list.
 class LoginAct : public Act
 {
@@ -248,21 +263,26 @@ private:
         }
 
         // A client that has just started is still asking the connect
-        // server for its list; wait for it rather than refusing. The same
-        // wait covers a `login` that left a session first: that tears the
-        // game-server connection down and reopens the connect-server one,
-        // and selecting a server before it is back sends into nothing.
-        if (g_ServerListManager->GetServerGroupSize() < 1 || SceneFlag == MAIN_SCENE || g_bGameServerConnected)
+        // server for its list; wait for it rather than refusing.
+        if (g_ServerListManager->GetServerGroupSize() < 1)
         {
             return Status::Running;
+        }
+
+        // A group the caller named that the list does not hold will never
+        // appear: that is an answer, not something to wait for.
+        if (!m_serverGroup.empty() && !ServerGroupExists(m_serverGroup))
+        {
+            return Fail(response, ErrorCode::NotConnected, "no server group named as asked for");
         }
 
         CUIMng& uiManager = CUIMng::Instance();
         if (!uiManager.m_ServerSelWin.SelectServer(m_serverGroup.c_str(), m_serverIndex))
         {
-            return Fail(response, ErrorCode::NotConnected,
-                        m_serverGroup.empty() ? "the server list holds no server this client may join"
-                                              : "no server group named as asked for");
+            // Everything else is a "not yet": the list may still be filling
+            // in, and the connection this login had to tear down first may
+            // still be coming back. The act's deadline ends the wait.
+            return Status::Running;
         }
 
         m_stage = Stage::JoiningServer;

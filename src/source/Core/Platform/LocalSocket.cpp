@@ -135,6 +135,16 @@ bool LocalSocketConnection::ReadAvailable()
     std::size_t taken = 0;
     while (taken < MaxBytesPerRead)
     {
+        // Complete lines only: what is waiting to be served is what the
+        // pause is about, while an unterminated tail can never be served and
+        // must keep meeting its own cap below. Tested before the read, so a
+        // connection at the mark takes nothing more until it has been
+        // drained.
+        if (m_inbox.size() - PendingLineBytes() >= ReadPauseBytes)
+        {
+            return true;
+        }
+
         const auto received = ::recv(m_handle, chunk, static_cast<int>(sizeof(chunk)), 0);
         if (received > 0)
         {
@@ -144,15 +154,6 @@ bool LocalSocketConnection::ReadAvailable()
             {
                 Close();
                 return false;
-            }
-
-            // Backpressure rather than a closed connection: a batch larger
-            // than the frame budget serves stays in the kernel's buffer
-            // until the lines already taken have been served, so an honest
-            // pipelining driver is paced, not dropped.
-            if (m_inbox.size() >= ReadPauseBytes)
-            {
-                return true;
             }
             continue;
         }

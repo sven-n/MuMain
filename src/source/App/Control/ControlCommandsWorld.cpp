@@ -1084,17 +1084,9 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
             return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item cannot be equipped in that slot");
         }
     }
-    else
-    {
-        SEASON3B::CNewUIInventoryCtrl* destination =
-            IsMainInventorySlot(toSlot)
-                ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
-                : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
-        if (destination == nullptr || !destination->CanMove(toSlot, moving))
-        {
-            return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
-        }
-    }
+    // An inventory destination is asked after the item is lifted, below:
+    // while it still occupies its own squares, a move that overlaps them
+    // would be refused for colliding with itself.
 
     if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
     {
@@ -1103,16 +1095,38 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     inventory->RemoveItem(moving);
 
     SEASON3B::CNewUIPickedItem* picked = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-    if (picked == nullptr || !SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, fromSlot, picked->GetItem(),
-                                                       STORAGE_TYPE::INVENTORY, toSlot))
+    ITEM* lifted = picked != nullptr ? picked->GetItem() : nullptr;
+
+    // Asked now, not before: the item has left its own squares, so a move
+    // that overlaps them is not refused for colliding with itself — the
+    // order the client's own move uses (NewUIInventoryCtrl.cpp:950,
+    // NewUIInventoryActionController.cpp:123).
+    if (toSlot >= MAX_EQUIPMENT_INDEX)
+    {
+        SEASON3B::CNewUIInventoryCtrl* destination =
+            IsMainInventorySlot(toSlot)
+                ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
+                : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
+        if (destination == nullptr || lifted == nullptr || !destination->CanMove(toSlot, lifted))
+        {
+            if (lifted != nullptr)
+            {
+                inventory->AddItem(lifted->x, lifted->y, lifted);
+            }
+            SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+            return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
+        }
+    }
+
+    if (lifted == nullptr ||
+        !SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, fromSlot, lifted, STORAGE_TYPE::INVENTORY, toSlot))
     {
         // Nothing was sent, so the item goes back into its slot directly:
         // BackupPickedItem does nothing while `EquipmentItem` is set, which
         // is the very condition that makes the send fail.
-        ITEM* held = picked != nullptr ? picked->GetItem() : nullptr;
-        if (held != nullptr)
+        if (lifted != nullptr)
         {
-            inventory->AddItem(held->x, held->y, held);
+            inventory->AddItem(lifted->x, lifted->y, lifted);
         }
         SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "another item move has not been answered yet");

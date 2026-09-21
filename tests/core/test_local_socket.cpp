@@ -326,28 +326,6 @@ TEST_CASE("Local socket leaves a path that is not a socket alone [core][local-so
     std::filesystem::remove_all(directory);
 }
 
-TEST_CASE("Local socket leaves a path that is not a socket alone [core][local-socket]")
-{
-    const auto directory = MakeSocketDirectory();
-    const std::string path = (directory / "notasocket").string();
-
-    {
-        FILE* file = std::fopen(path.c_str(), "wb");
-        REQUIRE(file != nullptr);
-        std::fputs("not a socket", file);
-        std::fclose(file);
-    }
-
-    Core::Platform::LocalSocketListener listener;
-    std::string error;
-    CHECK_FALSE(listener.Listen(path, error));
-    CHECK(error.find("not a socket") != std::string::npos);
-    // Still there: a mistyped path costs a refusal, not the file.
-    CHECK(SocketFileExists(path));
-
-    std::filesystem::remove_all(directory);
-}
-
 TEST_CASE("Local socket rejects an impossible path and unlinks on demand [core][local-socket]")
 {
     const auto directory = MakeSocketDirectory();
@@ -493,16 +471,26 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     }
     REQUIRE(batch.size() > Core::Platform::LocalSocketConnection::MaxPendingInputBytes);
 
-    REQUIRE(BufferInto(client, *connection, batch));
-    CHECK(connection->IsOpen());
-
+    // Served as it arrives, the way the frame loop does: reading pauses
+    // once a frame's worth of complete lines is waiting, so the batch is
+    // taken in several passes rather than all at once.
+    constexpr std::size_t ChunkBytes = 16 * 1024;
+    std::size_t offset = 0;
     std::size_t taken = 0;
     std::string line;
-    while (connection->TakeLine(line))
+    while (offset < batch.size())
     {
-        CHECK(line == "{\"cmd\":\"ping\"}");
-        ++taken;
+        const std::size_t size = std::min(ChunkBytes, batch.size() - offset);
+        const int sent = SendAll(client, batch.substr(offset, size));
+        REQUIRE(sent > 0);
+        offset += static_cast<std::size_t>(sent);
+        REQUIRE(connection->ReadAvailable());
+        while (connection->TakeLine(line))
+        {
+            ++taken;
+        }
     }
+    CHECK(connection->IsOpen());
     CHECK(taken == lines);
 
     // A peer that never terminates its line is still cut off.

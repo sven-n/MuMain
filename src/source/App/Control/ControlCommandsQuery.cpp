@@ -226,9 +226,13 @@ std::string& MutableBuildIdentifier()
 // caller can open regardless of the client's working directory.
 std::filesystem::path ResolveScreenshotPath(const std::string& requested)
 {
+    // Through the wide form: a std::string given to std::filesystem::path is
+    // decoded with the process code page on Windows, which is not UTF-8 for
+    // this client, and a path with non-ASCII characters would come out wrong.
+    const std::filesystem::path given(Core::Text::FromUtf8(requested));
     std::error_code failure;
-    const std::filesystem::path absolute = std::filesystem::absolute(requested, failure);
-    return failure ? std::filesystem::path(requested) : absolute;
+    const std::filesystem::path absolute = std::filesystem::absolute(given, failure);
+    return failure ? given : absolute;
 }
 
 // Capture in flight. Shared with the completion callback so an act that is
