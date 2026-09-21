@@ -27,6 +27,7 @@ build-linux/
 **/CMakeFiles/
 /Win32/
 /out/
+/diag/
 
 # .NET build outputs
 **/bin/**
