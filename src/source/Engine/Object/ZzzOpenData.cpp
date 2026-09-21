@@ -4706,7 +4706,7 @@ void SaveWorld(int World)
     mu_swprintf(FileName, L"Data2\\%ls\\TerrainLight.jpg", WorldName);
     SaveTerrainLight(FileName);
     mu_swprintf(FileName, L"Data2\\%ls\\TerrainHeight.bmp", WorldName);
-    SaveTerrainHeight(FileName);
+    (void)SaveTerrainHeight(FileName);
     mu_swprintf(FileName, L"Data\\%ls\\Terrain.map", WorldName);
     SaveTerrainMapping(FileName, World);
     mu_swprintf(FileName, L"Data\\%ls\\Terrain.att", WorldName);

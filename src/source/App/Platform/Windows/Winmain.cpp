@@ -1385,6 +1385,13 @@ MSG MainLoop()
             case SDL_EVENT_QUIT:
                 Destroy = true;
                 break;
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                // Titlebar X / Alt+F4. Close on this event directly instead of relying
+                // solely on the SDL_EVENT_QUIT SDL derives from it - depending on that
+                // indirection left the first close press with no visible effect, only
+                // closing the window on a second press (#535).
+                Destroy = true;
+                break;
             case SDL_EVENT_MOUSE_MOTION:
                 // Always forwarded and always still applied to legacy position tracking --
                 // motion isn't an "action" to arbitrate, and legacy hit-testing (CManager
@@ -1858,8 +1865,22 @@ static void ShutdownRuntime(std::thread& cpuUsageRecorder)
 #endif
 
     // Complete the final submitted frame before UI and bitmap owners release
-    // textures referenced by it. This keeps Metal teardown deterministic.
+    // textures referenced by it. This keeps Metal teardown deterministic. Do
+    // this while the window is still visible: the compositor can stop
+    // servicing a hidden/occluded window's swapchain, leaving this wait
+    // stuck on a present fence that only signals once something (e.g. a
+    // focus change) forces the compositor to redraw (#535).
     mu::WaitForSDLGpuIdle();
+
+    // Hide the window before the teardown below, which pumps no messages and
+    // can take a noticeable moment (asset/UI release, ...). Left visible, the
+    // OS flags it as unresponsive and closing needs a second click to force
+    // the resulting ghost window away (#535).
+    if (g_sdlWindow != nullptr)
+    {
+        SDL_HideWindow(g_sdlWindow);
+    }
+
     UnregisterBundledFonts();
     DestroyWindow();
     ShutdownRendererWindow();
@@ -2041,7 +2062,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // SDL owns the window; SDL_gpu owns the rendering device.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
     {
-        g_ErrorReport.Write(L"> SDL video init failed.\r\n");
+        const char* requestedVideoDriver = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
+        const std::wstring requestedDriver = requestedVideoDriver != nullptr && requestedVideoDriver[0] != '\0'
+                                                 ? Utf8ToWide(requestedVideoDriver)
+                                                 : L"auto";
+        const std::wstring videoInitError = Utf8ToWide(SDL_GetError());
+        g_ErrorReport.Write(L"> SDL video init failed. Requested driver: %ls. SDL error: %ls\r\n",
+                            requestedDriver.c_str(), videoInitError.c_str());
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }

@@ -19,6 +19,26 @@ set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 set(SDL_INSTALL OFF CACHE BOOL "" FORCE)
+option(MU_LINK_SDL_PLATFORM_BACKENDS
+  "Linux: make SDL link its video backend libraries and the Vulkan loader at build time instead of loading them at run time" OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  # By default SDL dlopen()s libX11, libwayland-client, libdecor and libdrm/libgbm at run time,
+  # which needs them on a global library path. A packaged runtime may not have one; with the
+  # option ON they become DT_NEEDED entries with a recorded RUNPATH instead. Both branches FORCE
+  # the cache so toggling the option in an existing build directory is symmetric.
+  if(MU_LINK_SDL_PLATFORM_BACKENDS)
+    set(SDL_X11_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_WAYLAND_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_WAYLAND_LIBDECOR_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_KMSDRM_SHARED OFF CACHE BOOL "" FORCE)
+  else()
+    set(SDL_X11_SHARED ON CACHE BOOL "" FORCE)
+    set(SDL_WAYLAND_SHARED ON CACHE BOOL "" FORCE)
+    set(SDL_WAYLAND_LIBDECOR_SHARED ON CACHE BOOL "" FORCE)
+    set(SDL_KMSDRM_SHARED ON CACHE BOOL "" FORCE)
+  endif()
+endif()
+
 add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
 set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
@@ -198,10 +218,20 @@ add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
 if(MSVC)
   target_compile_options(MuClient PRIVATE /utf-8 /we4828)
+  # Release normally ships with no debug info at all, so a WER/minidump crash
+  # from a Release build can't be symbolized. /Z7 embeds debug info directly
+  # in each .obj (unlike /Zi, it needs no shared .pdb write-lock, so it's safe
+  # under Ninja's parallel compilation) without touching optimization.
+  target_compile_options(MuClient PRIVATE $<$<CONFIG:Release>:/Z7>)
 endif()
 target_compile_definitions(MuClient PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
+  # SDL also dlopen()s libvulkan.so.1; the same option makes it a DT_NEEDED entry of Main
+  # (linked below) so the loader resolves through the RUNPATH.
+  find_package(Vulkan REQUIRED)
+endif()
 target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
@@ -297,6 +327,20 @@ else()
 endif()
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
+  target_link_libraries(Main PRIVATE Vulkan::Vulkan)
+endif()
+
+if (MSVC)
+  # Pairs with MuClient's /Z7 above: link the embedded debug info into
+  # Main.pdb so a Release crash dump can be symbolized (see there for why).
+  # /MAP also emits a plain-text RVA-to-function listing, much faster to grep
+  # for a WER crash offset than pulling symbols out of the PDB.
+  target_link_options(Main PRIVATE
+    $<$<CONFIG:Release>:/DEBUG>
+    $<$<CONFIG:Release>:/MAP:$<TARGET_FILE_DIR:Main>/Main.map>
+  )
+endif()
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")

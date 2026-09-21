@@ -28,7 +28,7 @@ inline BYTE TERRAIN_ATTRIBUTE(float x, float y)
 }
 
 bool OpenTerrainHeight(wchar_t* name);
-void SaveTerrainHeight(wchar_t* name);
+bool SaveTerrainHeight(wchar_t* name);
 bool OpenTerrainHeightNew(const wchar_t* strFilename);
 
 void PrefixTerrainHeight();
