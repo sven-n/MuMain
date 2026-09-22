@@ -1,0 +1,3 @@
+# Statues01 — ACCEPT offline
+
+2026-09-22. Sourced5a59c62 → integration2065d4e5. Six monuments/graves30placements and accepted unchanged fountain compatibility. Reviewed seven-model batch, sarcophagus matching/wire/reduced, texture/validation reports. Original silhouettes/reliefs preserved; carved stone palette matches town walls and priorTomb03. Four modest panel refinements DIFFERENT; head/angel/fountain EQUIVALENTgeometry, sixheadcap UVrepairs separately documented. Every authored/final vertex checked on intendedbone. Tomb01 measuredlegacyfloatdrift0.00263977 documented within0.005, allsourceanchors/printedbounds retained. Sevenrig/actions pass; all12ownedgamefiles+312protectedsourcerecords pass. No clientverification.

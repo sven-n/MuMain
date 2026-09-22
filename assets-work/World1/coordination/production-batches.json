@@ -544,5 +544,21 @@
       "src/bin/Data/Object1/Tent01.bmd",
       "src/bin/Data/Object1/Tree07.bmd"
     ]
+  },
+  "coordinator / normal bindings": {
+    "models": [
+      "Grass02",
+      "Tree12",
+      "Tree13"
+    ],
+    "branch": "codex/lorencia-normal-bindings",
+    "worktree": "MuMain-lorencia-normal-bindings",
+    "owned_textures": [],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tree_01.OZJ",
+      "src/bin/Data/Object1/tree_04.OZT",
+      "src/bin/Data/Object1/tree_05.OZT",
+      "src/bin/Data/Object1/tree_08.OZT"
+    ]
   }
 }

@@ -521,5 +521,38 @@
       "HouseWall02": "8094616d",
       "HouseEtc02": "f1fbb29c"
     }
+  },
+  {
+    "name": "Statues01",
+    "models": [
+      "StoneStatue01",
+      "StoneStatue02",
+      "StoneStatue03",
+      "SteelStatue01",
+      "Tomb01",
+      "Tomb02",
+      "Waterspout01"
+    ],
+    "owner": "reviewer / monuments",
+    "source_commits": [
+      "d5a59c62"
+    ],
+    "integration_commits": [
+      "2065d4e5"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/StoneStatue01.bmd": "assets-work/World1/Statues01/StoneStatue01/exports/StoneStatue01.bmd",
+      "src/bin/Data/Object1/stone_statue02.OZJ": "assets-work/World1/Statues01/StoneStatue01/exports/stone_statue02.OZJ",
+      "src/bin/Data/Object1/StoneStatue02.bmd": "assets-work/World1/Statues01/StoneStatue02/exports/StoneStatue02.bmd",
+      "src/bin/Data/Object1/stone_statue01.OZJ": "assets-work/World1/Statues01/StoneStatue02/exports/stone_statue01.OZJ",
+      "src/bin/Data/Object1/StoneStatue03.bmd": "assets-work/World1/Statues01/StoneStatue03/exports/StoneStatue03.bmd",
+      "src/bin/Data/Object1/angel_stone_statue.OZJ": "assets-work/World1/Statues01/StoneStatue03/exports/angel_stone_statue.OZJ",
+      "src/bin/Data/Object1/tombstone_big.OZJ": "assets-work/World1/Statues01/SteelStatue01/exports/tombstone_big.OZJ",
+      "src/bin/Data/Object1/SteelStatue01.bmd": "assets-work/World1/Statues01/SteelStatue01/exports/SteelStatue01.bmd",
+      "src/bin/Data/Object1/Tomb01.bmd": "assets-work/World1/Statues01/Tomb01/exports/Tomb01.bmd",
+      "src/bin/Data/Object1/grave_02.OZJ": "assets-work/World1/Statues01/Tomb01/exports/grave_02.OZJ",
+      "src/bin/Data/Object1/Tomb02.bmd": "assets-work/World1/Statues01/Tomb02/exports/Tomb02.bmd",
+      "src/bin/Data/Object1/grave_01.OZJ": "assets-work/World1/Statues01/Tomb02/exports/grave_01.OZJ"
+    }
   }
 ]
