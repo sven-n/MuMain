@@ -679,21 +679,55 @@ BOOL CMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, cons
     return bInOtherServer;
 }
 
-int CMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
+CMoveCommandData::MOVEINFODATA* CMoveCommandWindow::FindMoveInfo(const wchar_t* pszMapName)
 {
     if (pszMapName == NULL)
-        return -1;
+        return NULL;
 
-    int iMapIndex = -1;
-    std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
-    for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); li++)
+    for (auto* moveInfo : m_listMoveInfoData)
     {
-        if (wcsicmp((*li)->_ReqInfo.szMainMapName, pszMapName) == 0 || wcsicmp((*li)->_ReqInfo.szSubMapName, pszMapName) == 0)
+        if (wcsicmp(moveInfo->_ReqInfo.szMainMapName, pszMapName) == 0 ||
+            wcsicmp(moveInfo->_ReqInfo.szSubMapName, pszMapName) == 0)
         {
-            iMapIndex = (*li)->_ReqInfo.index;
+            return moveInfo;
+        }
+    }
+
+    return NULL;
+}
+
+bool CMoveCommandWindow::CanMoveToMap(const wchar_t* pszMapName)
+{
+    // SettingCanMoveMap recomputes the requirements and clears the list's
+    // selection with them; this is a query, so what the player had selected
+    // is put back afterwards.
+    const CMoveCommandData::MOVEINFODATA* selected = NULL;
+    for (const auto* moveInfo : m_listMoveInfoData)
+    {
+        if (moveInfo->_bSelected)
+        {
+            selected = moveInfo;
             break;
         }
     }
 
-    return iMapIndex;
+    SettingCanMoveMap();
+
+    for (auto* moveInfo : m_listMoveInfoData)
+    {
+        if (moveInfo == selected)
+        {
+            moveInfo->_bSelected = true;
+            break;
+        }
+    }
+
+    const CMoveCommandData::MOVEINFODATA* moveInfo = FindMoveInfo(pszMapName);
+    return moveInfo != NULL && moveInfo->_bCanMove;
+}
+
+int CMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
+{
+    const CMoveCommandData::MOVEINFODATA* moveInfo = FindMoveInfo(pszMapName);
+    return moveInfo != NULL ? moveInfo->_ReqInfo.index : -1;
 }

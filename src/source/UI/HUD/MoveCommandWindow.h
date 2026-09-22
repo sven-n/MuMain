@@ -178,8 +178,16 @@ namespace mu::ui::window
 
         BOOL IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const;
         int GetMapIndexFromMovereq(const wchar_t* pszMapName);
+        // Whether the character currently meets a warp list entry's own
+        // requirements - level, zen, the wings for Icarus, the Uniria rule
+        // for Atlans. The list's requirements are recomputed first, exactly
+        // as the click path does before reading the flag.
+        bool CanMoveToMap(const wchar_t* pszMapName);
 
     private:
+        // The warp list entry a name belongs to, main or sub name, case
+        // insensitively - the one lookup behind both public queries.
+        SEASON3B::CMoveCommandData::MOVEINFODATA* FindMoveInfo(const wchar_t* pszMapName);
         void SetStrifeMap();
         void SettingCanMoveMap();
         void RefreshDataAndLayout();

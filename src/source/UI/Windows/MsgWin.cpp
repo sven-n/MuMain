@@ -486,6 +486,27 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
     Show(true);
 }
 
+int CMsgWin::PendingMessageCode() const
+{
+    return IsVisible() ? m_nMsgCode : -1;
+}
+
+bool CMsgWin::DismissMessage()
+{
+    if (!IsVisible())
+        return false;
+
+    // Confirming these on a caller's behalf would end the process or delete
+    // a character: the two exits, and the two steps of the delete-character
+    // confirmation, which a second dismissal would carry through.
+    if (m_nMsgCode == RECEIVE_LOG_IN_FAIL_VERSION || m_nMsgCode == MESSAGE_SERVER_LOST ||
+        m_nMsgCode == MESSAGE_DELETE_CHARACTER_CONFIRM || m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
+        return false;
+
+    ManageOKClick();
+    return true;
+}
+
 void CMsgWin::ManageOKClick()
 {
     Show(false);

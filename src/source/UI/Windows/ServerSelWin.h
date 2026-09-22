@@ -11,6 +11,7 @@
 namespace Rml { class ElementDocument; }
 
 class CServerGroup;
+class CServerInfo;
 
 // Pure RmlUi 2D UI: RmlUi owns all of this window's rendering and click handling. Two
 // always-visible columns laid out by server_select.rcss's flexbox rules -- server groups on the
@@ -34,6 +35,12 @@ public:
     void RmlClickSelectGroup(int nBtnPos);
     void RmlClickSelectServer(int nServerIndex);
 
+    // Selects a server group and one of its servers without a click, doing
+    // exactly what the two RmlUi click callbacks do. `groupName` empty or null
+    // picks the first group in the list. Returns false when the list holds no
+    // such group or server, or when the server is full.
+    bool SelectServer(const wchar_t* groupName, int serverIndex);
+
     // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
@@ -52,6 +59,11 @@ private:
     void SelectGroup(int nBtnPos);
     void BuildRmlUi();
     void SyncRmlModel();
+
+    // Shared by RmlClickSelectServer() and SelectServer(). Returns false (and
+    // leaves the window open) without connecting when pServerInfo is null or
+    // the server is full/busy -- the caller decides what busy means to it.
+    bool ConnectToServer(CServerInfo* pServerInfo);
 
     struct GroupEntry
     {

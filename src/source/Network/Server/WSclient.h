@@ -83,6 +83,8 @@
 #define PACKET_ATTACK       0x11
 
 extern int CurrentProtocolState;
+// Account the last login request was sent for.
+extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 
 inline uint64_t ntoh64(uint64_t value)
 {

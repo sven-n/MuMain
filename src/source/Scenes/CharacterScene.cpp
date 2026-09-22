@@ -86,6 +86,54 @@ void StartGame()
     }
 }
 
+namespace Scenes
+{
+// A slot holds a character when the list filled its name in.
+static bool HasCharacter(int slot)
+{
+    if (slot < 0 || slot >= MAX_CHARACTERS_PER_ACCOUNT)
+        return false;
+
+    return CharactersClient[slot].ID[0] != L'\0';
+}
+
+const wchar_t* CharacterNameInSlot(int slot)
+{
+    return HasCharacter(slot) ? CharactersClient[slot].ID : L"";
+}
+
+int CharacterLevelInSlot(int slot)
+{
+    return HasCharacter(slot) ? CharactersClient[slot].Level : 0;
+}
+
+int FindCharacterSlot(const wchar_t* name)
+{
+    if (name == nullptr || name[0] == L'\0')
+        return -1;
+
+    for (int slot = 0; slot < MAX_CHARACTERS_PER_ACCOUNT; ++slot)
+    {
+        if (HasCharacter(slot) && wcscmp(CharactersClient[slot].ID, name) == 0)
+            return slot;
+    }
+    return -1;
+}
+
+bool StartGameWithSlot(int slot)
+{
+    if (!HasCharacter(slot))
+        return false;
+
+    // What the double click and the debug /c option do: pick the character
+    // and let StartGame() take it from there.
+    SelectedCharacter = slot;
+    SelectedHero = slot;
+    ::StartGame();
+    return true;
+}
+} // namespace Scenes
+
 void CreateCharacterScene()
 {
     g_pNewUIMng->ResetActiveUIObj();

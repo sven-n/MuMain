@@ -258,18 +258,80 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
 
     if (pServerInfo->m_iPercent < 100)
     {
-        Show(false);
-
-        SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-        g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-
-        g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
+        ConnectToServer(pServerInfo);
     }
     else if (pServerInfo->m_iPercent < 128)
     {
         CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
     }
+}
+
+bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
+{
+    if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr)
+        return false;
+
+    Show(false);
+
+    SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
+    g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+
+    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
+
+    return true;
+}
+
+bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
+{
+    CServerGroup* pChosenGroup = nullptr;
+    CServerGroup* pServerGroup = nullptr;
+
+    g_ServerListManager->SetFirst();
+    while (g_ServerListManager->GetNext(pServerGroup))
+    {
+        const bool bWanted = (groupName == nullptr || groupName[0] == L'\0')
+                                 ? (pChosenGroup == nullptr)
+                                 : (wcscmp(pServerGroup->m_szName, groupName) == 0);
+        if (bWanted)
+        {
+            pChosenGroup = pServerGroup;
+            break;
+        }
+    }
+
+    if (pChosenGroup == nullptr)
+        return false;
+
+    // A group the display never placed (never sent this session) has no
+    // button position to select.
+    const int iBtnPos = pChosenGroup->m_iBtnPos;
+    if (iBtnPos < 0)
+        return false;
+
+    // Same two steps the click path takes: mark the group, rebuild the
+    // server list against it, then connect to the chosen server. The group
+    // has to be marked before the server can be looked up, so a failure
+    // after this point puts the previous selection back rather than leaving
+    // the screen on a group the caller never reached.
+    const int iPreviousBtnIndex = m_iSelectServerBtnIndex;
+    m_iSelectServerBtnIndex = iBtnPos;
+    UpdateDisplay();
+
+    // UpdateDisplay() re-derives m_pSelectServerGroup from the button index,
+    // which only agrees with pChosenGroup while the list and the index agree
+    // -- the group this call chose is the one it must connect to regardless.
+    m_pSelectServerGroup = pChosenGroup;
+
+    CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
+    if (pServerInfo == nullptr || pServerInfo->m_iPercent >= 100)
+    {
+        m_iSelectServerBtnIndex = iPreviousBtnIndex;
+        UpdateDisplay();
+        return false;
+    }
+
+    return ConnectToServer(pServerInfo);
 }
 
 bool CServerSelWin::UpdateMouseEvent()
