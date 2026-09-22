@@ -1,0 +1,42 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -57.61,
+      -54.83,
+      -6.95
+    ],
+    [
+      62.04,
+      55.02,
+      55.95
+    ]
+  ],
+  "bounds_after": [
+    [
+      -57.61,
+      -54.83,
+      -6.95
+    ],
+    [
+      62.04,
+      55.02,
+      55.95
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "fire_01.jpg",
+    "fire_02.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "fire_01.OZJ": "1b5f30547a9edd7877005a40c09946294c5772ac2b5953d3ffa92161c9a98294",
+    "Bonfire01.bmd": "a5a5ea2bc310df59f6bca0245cb7b427c42491473c328f8f584d9ce07aca9373",
+    "fire_02.OZJ": "e84366780b0047b3ad4232b114703835b4bff3728aa5ff9872cfd8fa170c9086"
+  }
+}

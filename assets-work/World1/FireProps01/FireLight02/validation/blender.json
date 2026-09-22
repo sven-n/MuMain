@@ -1,0 +1,40 @@
+{
+  "bounds_before": [
+    [
+      -19.629669189453125,
+      -43.746612548828125,
+      0.7550960183143616
+    ],
+    [
+      19.326934814453125,
+      2.243285894393921,
+      78.216796875
+    ]
+  ],
+  "bounds_after": [
+    [
+      -19.629669189453125,
+      -43.746612548828125,
+      0.7550960183143616
+    ],
+    [
+      19.326934814453125,
+      2.243285894393921,
+      78.216796875
+    ]
+  ],
+  "triangles": 34,
+  "edits": [],
+  "bone_order": [
+    "Box07",
+    "Bone01"
+  ],
+  "action_meta": {
+    "FireLight02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "retained_geometry": true,
+  "note": "Gateway opening, fire offsets and effect mesh geometry/UVs retained"
+}

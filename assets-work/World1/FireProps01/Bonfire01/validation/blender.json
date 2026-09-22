@@ -1,0 +1,42 @@
+{
+  "bounds_before": [
+    [
+      -57.606201171875,
+      -54.8291015625,
+      -6.945098876953125
+    ],
+    [
+      62.04010009765625,
+      55.015899658203125,
+      55.954498291015625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -57.606201171875,
+      -54.8291015625,
+      -6.945098876953125
+    ],
+    [
+      62.04010009765625,
+      55.015899658203125,
+      55.954498291015625
+    ]
+  ],
+  "triangles": 110,
+  "edits": [],
+  "bone_order": [
+    "Bone01",
+    "Bone_fire",
+    "Cylinder03",
+    "Cylinder04"
+  ],
+  "action_meta": {
+    "Bonfire01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "retained_geometry": true,
+  "note": "Gateway opening, fire offsets and effect mesh geometry/UVs retained"
+}

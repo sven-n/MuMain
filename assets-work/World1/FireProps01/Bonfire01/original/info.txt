@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/original/Bonfire01.bmd
+  name field: Data2\Object1\Fire.smd  version: 10
+  meshes: 2  bones: 4  actions: 1  triangles: 110
+  bounds (bind pose): min -57.61 -54.83 -6.95  max 62.04 55.02 55.95  size 119.65 109.85 62.90
+  mesh 0: triangles=72 vertices=48 normals=48 uvs=60 texture=fire_01.jpg
+  mesh 1: triangles=38 vertices=43 normals=43 uvs=43 texture=fire_02.jpg
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone_fire" parent=0
+  bone 2: "Cylinder03" parent=0
+  bone 3: "Cylinder04" parent=0
+  action 0: keys=1 lock=0

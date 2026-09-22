@@ -1,0 +1,54 @@
+3834-        case MODEL_DUNGEON_GATE:
+3835-            CreateFire(0, o, -150.f, -150.f, 140.f);
+3836-            CreateFire(0, o, 150.f, -150.f, 140.f);
+3837-            break;
+3838:        case MODEL_FIRE_LIGHT01:
+3839-            CreateFire(0, o, 0.f, 0.f, 200.f);
+3840-            break;
+3841:        case MODEL_FIRE_LIGHT01 + 1:
+3842-            CreateFire(0, o, 0.f, -30.f, 60.f);
+3843-            break;
+3844-        case MODEL_STREET_LIGHT:
+3845-            Luminosity = (float)(rand() % 2 + 6) * 0.1f;
+3846-            Vector(Luminosity, Luminosity * 0.8f, Luminosity * 0.6f, Light);
+3847-            AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
+3848-            break;
+3849:        case MODEL_BONFIRE:
+3850-            CreateFire(0, o, 0.f, 0.f, 60.f);
+3851-            o->BlendMeshLight = (float)(rand() % 6 + 4) * 0.1f;
+3852-            //CreateBonfire(o->Position,o->Angle);
+3853-            break;
+3854-            /*	case MODEL_FIREPLACE01:
+3855-            CreateFire(0,o,0.f,0.f,60.f);
+3856-            //CreateBonfire(o->Position,o->Angle);
+3857-            break;
+3858-            case MODEL_DOOR_WOOD01:
+3859-            case MODEL_DOOR_STEEL01:
+3860-            {
+3861-            vec3_t Range;
+3862-            VectorSubtract(Hero->Object.Position,o->Position,Range);
+3863-            float Distance = Range[0]*Range[0]+Range[1]*Range[1];
+3864-            if(Distance <= 120.f*120.f)
+3865-            {
+--
+4628-            break;
+4629-        case MODEL_WATERSPOUT:
+4630-            o->BlendMesh = 3;
+4631-            break;
+4632:        case MODEL_BONFIRE:
+4633-            o->BlendMesh = 1;
+4634-            break;
+4635-        case MODEL_CARRIAGE01:
+4636-            o->BlendMesh = 2;
+4637-            break;
+4638-        case MODEL_TREE01:
+4639-        case MODEL_TREE01 + 1:
+4640-            //case MODEL_TREE01+10:
+4641-            Vector(-150.f, -150.f, 0.f, o->BoundingBoxMin);
+4642-            Vector(150.f, 150.f, 500.f, o->BoundingBoxMax);
+4643-            o->Velocity = 1.f / o->Scale * 0.4f;
+4644-            //o->AlphaEnable = true;
+4645-            break;
+4646-        case MODEL_STREET_LIGHT:
+4647-            o->BlendMesh = 1;
+4648-            o->Velocity = 0.3f;

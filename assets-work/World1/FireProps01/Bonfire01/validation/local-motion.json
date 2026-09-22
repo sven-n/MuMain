@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "nodes": "Bone names, order, parents identical",
+  "samples": [
+    {
+      "file": "Bonfire01.smd",
+      "frames": 1,
+      "bone_samples": 4,
+      "max_local_position_component": 1.0000000000287557e-06,
+      "max_rotation_matrix_component": 4.6932779212971454e-07
+    },
+    {
+      "file": "Bonfire01_a00.smd",
+      "frames": 1,
+      "bone_samples": 4,
+      "max_local_position_component": 1.0000000000287557e-06,
+      "max_rotation_matrix_component": 4.6932779212971454e-07
+    }
+  ],
+  "position_tolerance": 0.0001,
+  "rotation_matrix_tolerance": 1e-05,
+  "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+  "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+}

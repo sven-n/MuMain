@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/original/Bonfire01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/original/Bonfire01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/original/Bonfire01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/original/Bonfire01.smd: bones=4 frames=1 triangles=110 materials=2
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/original/Bonfire01_a00.smd: bones=4 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/new/Bonfire01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/new/Bonfire01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/new/Bonfire01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/new/Bonfire01.smd: bones=4 frames=1 triangles=110 materials=2
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/new/Bonfire01_a00.smd: bones=4 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/Bonfire01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

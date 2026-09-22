@@ -1,0 +1,9 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/FireLight01/exports/FireLight01.bmd
+  name field: FireLight01.smd  version: 12
+  meshes: 3  bones: 1  actions: 1  triangles: 80
+  bounds (bind pose): min -28.57 -28.47 -0.41  max 28.61 28.71 175.23  size 57.18 57.18 175.64
+  mesh 0: triangles=20 vertices=20 normals=60 uvs=13 texture=light.tga
+  mesh 1: triangles=54 vertices=36 normals=65 uvs=39 texture=light2.jpg
+  mesh 2: triangles=6 vertices=7 normals=18 uvs=7 texture=light3.jpg
+  bone 0: "Cylinder02" parent=-1
+  action 0: keys=1 lock=0

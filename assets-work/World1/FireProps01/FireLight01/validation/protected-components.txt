@@ -1,0 +1,9 @@
+light.tga
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 20 vs 20
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+light3.jpg
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 6 vs 6
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT

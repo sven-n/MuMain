@@ -1,0 +1,14 @@
+tile_02.jpg
+meshes 1 vs 1, bones 2 vs 2, actions 1 vs 1, triangles 24 vs 24
+unmatched triangles: 0  max corner distance: 0.0050  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+fire_light_01.tga
+meshes 1 vs 1, bones 2 vs 2, actions 1 vs 1, triangles 8 vs 8
+unmatched triangles: 0  max corner distance: 0.0050  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+copra_gate.jpg
+meshes 1 vs 1, bones 2 vs 2, actions 1 vs 1, triangles 2 vs 2
+unmatched triangles: 0  max corner distance: 0.0050  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
