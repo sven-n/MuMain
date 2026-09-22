@@ -127,7 +127,10 @@ the game addresses bones by index) and `mu_action_meta` (game action index and l
 animation clip; Blender 4.4+ keeps the clips as slots of one action). New bones or clips are
 appended after the recorded ones. For a model built from scratch, name the clips with a
 leading number (`00_stand`, `01_walk`) to fix their order, and pass `--lock` for clips whose
-root motion must stay in place.
+root motion must stay in place. The export joins every mesh object in the scene except the
+Source Tools bone-shape helper, objects in collections named `REF_*` and objects with a
+`mu_reference` property, so originals kept for comparison belong in a `REF_ORIGINAL`
+collection.
 
 ## 4. Typical workflows
 
