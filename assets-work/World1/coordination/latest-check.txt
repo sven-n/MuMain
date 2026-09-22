@@ -1,6 +1,6 @@
 {
   "result": "PASS: offline integration; no client claim",
-  "integration_head": "95b5cc2ff894e58e5c8f6b28f15ea14895c4614a",
+  "integration_head": "d67ae0c7387d944fd3fccd306eef0fd768c1fff9",
   "baseline": "ac0f6dd8",
   "changed_game_files": {
     "src/bin/Data/Object1/Furniture03.bmd": {
@@ -22,18 +22,52 @@
       "sha256": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4",
       "export": "assets-work/World1/TavernProps/Furniture03/exports/desk_big.OZJ",
       "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/Grass01.bmd": {
+      "sha256": "d77daca6778078e17097831edf0a704d4e197db59892cbc4f1387c6f99eb7f32",
+      "export": "assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/Grass02.bmd": {
+      "sha256": "34198c5f3415e7c395e7e4ddb839f605f86cadde41811a936331a0cb55b90e77",
+      "export": "assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/Grass05.bmd": {
+      "sha256": "d38099917cb6fa26fd603882fe74b919ebf97a2fd2840e4d5a5c09d25f0962e3",
+      "export": "assets-work/World1/Groundcover01/Grass05/exports/Grass05.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/Grass06.bmd": {
+      "sha256": "c656def11e72fe698f4ed99167b47db04eed37bc1e606983368fb99c1335d4c5",
+      "export": "assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/tree_08.OZT": {
+      "sha256": "a1d60fa0bb30b7ceddbd52a7c74771929f3902052c460d6b015dbfdf34b47d78",
+      "export": "assets-work/World1/Groundcover01/textures/final/tree_08.OZT",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/tree_09.OZT": {
+      "sha256": "cb9cf4565ffda802131cde6b53e64a66550c2949efbf3b123f2f73a00aa65349",
+      "export": "assets-work/World1/Groundcover01/textures/final/tree_09.OZT",
+      "batch": "Groundcover01"
     }
   },
-  "protected_file_count": 320,
+  "protected_file_count": 314,
   "world1_files_unchanged": true,
   "original_archive_hashes": {
     "Furniture03": "4a03abcf52f60261cfba44952f9b0651b86ffedfdd7ed14ba7fdd71a1f4c8985",
     "Furniture04": "c4874cf98f4c3163c70b9514033571a2ff6653d6bf15df98c8382267c2c5fedc",
-    "Furniture05": "0f176df870aa4c5f2780a9248f55281db37c7afd9714dc90ca9db59026a9a994"
+    "Furniture05": "0f176df870aa4c5f2780a9248f55281db37c7afd9714dc90ca9db59026a9a994",
+    "Grass01": "f6e9e43fbc9750d97e7d3d29361a491ed9f83a3193705f58a11e69ea4088d42f",
+    "Grass02": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea",
+    "Grass05": "f16ec91515672de50a9033e5668f790736644825120ae03e5888e6547ae8e45b",
+    "Grass06": "52513bac5515332dcb078dfe8de91c1512dca1b44d5487314c8fb0954fc6e988"
   },
   "combined_models": 115,
   "missing_textures": [],
-  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\n",
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
   "client_verified": false,
   "runtime_modified": false
 }

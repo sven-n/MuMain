@@ -22,5 +22,32 @@
       "src/bin/Data/Object1/Furniture05.bmd": "assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd",
       "src/bin/Data/Object1/desk_big.OZJ": "assets-work/World1/TavernProps/Furniture03/exports/desk_big.OZJ"
     }
+  },
+  {
+    "name": "Groundcover01",
+    "models": [
+      "Grass01",
+      "Grass02",
+      "Grass05",
+      "Grass06"
+    ],
+    "owner": "groundcover subagent",
+    "source_commits": [
+      "85cef70e",
+      "06091da4"
+    ],
+    "integration_commits": [
+      "ea56fc66",
+      "d67ae0c7"
+    ],
+    "notes_path": "Groundcover01/README.md",
+    "game_files": {
+      "src/bin/Data/Object1/Grass01.bmd": "assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd",
+      "src/bin/Data/Object1/Grass02.bmd": "assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd",
+      "src/bin/Data/Object1/Grass05.bmd": "assets-work/World1/Groundcover01/Grass05/exports/Grass05.bmd",
+      "src/bin/Data/Object1/Grass06.bmd": "assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd",
+      "src/bin/Data/Object1/tree_08.OZT": "assets-work/World1/Groundcover01/textures/final/tree_08.OZT",
+      "src/bin/Data/Object1/tree_09.OZT": "assets-work/World1/Groundcover01/textures/final/tree_09.OZT"
+    }
   }
 ]

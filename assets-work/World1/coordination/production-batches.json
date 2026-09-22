@@ -28,5 +28,15 @@
     ],
     "branch": "codex/lorencia-fences",
     "worktree": "MuMain-lorencia-fences"
+  },
+  "groundcover / trees": {
+    "models": [
+      "Tree01",
+      "Tree02",
+      "Tree11",
+      "Tree06"
+    ],
+    "branch": "codex/lorencia-trees",
+    "worktree": "MuMain-lorencia-trees"
   }
 }
