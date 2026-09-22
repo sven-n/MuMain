@@ -1,0 +1,17 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-normal-bindings/assets-work/World1/NormalBindings01/Tree13/exports/Tree13.bmd
+  name field: Data2\Object1\treea_11.smd  version: 10
+  meshes: 2  bones: 10  actions: 1  triangles: 393
+  bounds (bind pose): min -203.43 -203.05 0.39  max 248.12 194.01 472.28  size 451.56 397.07 471.89
+  mesh 0: triangles=120 vertices=240 normals=60 uvs=4 texture=tree_05.tga
+  mesh 1: triangles=273 vertices=185 normals=205 uvs=227 texture=tree_01.jpg
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Bone04" parent=2
+  bone 4: "Bone05" parent=3
+  bone 5: "Bone06" parent=4
+  bone 6: "Bone07" parent=3
+  bone 7: "Bone08" parent=6
+  bone 8: "Box08" parent=0
+  bone 9: "Cylinder07" parent=0
+  action 0: keys=31 lock=0

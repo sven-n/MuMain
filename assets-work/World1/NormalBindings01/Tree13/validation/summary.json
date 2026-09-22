@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "geometry": "EQUIVALENT",
+  "rig_actions": "Byte-identical original BMD, reference SMD and complete action SMD",
+  "raw_binding_contract": "Original BMD bytes retain normal-node indices and triangle/normal sharing exactly",
+  "previous_official_export_evidence": "assets-work/World1/Flowering01/Tree13/validation",
+  "original_and_final_sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf",
+  "textures_unchanged": true,
+  "client_verified": false
+}
