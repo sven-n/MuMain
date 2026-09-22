@@ -113,7 +113,8 @@ def verify_originals():
 
 def verify_scope():
     branch = subprocess.check_output(["git", "branch", "--show-current"], cwd=ROOT, text=True).strip()
-    require(branch == "art/ui-pilot", f"Refusing installation outside art/ui-pilot: {branch}")
+    expected_branch = LAYOUT.get("work_branch", "art/ui-pilot")
+    require(branch == expected_branch, f"Refusing installation outside {expected_branch}: {branch}")
     require(not (ROOT / "src/bin/Data").is_symlink(), "Source Data must not be a runtime symlink")
     for relative in selected_paths():
         target = ROOT / "src/bin/Data" / relative

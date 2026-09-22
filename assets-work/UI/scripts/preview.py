@@ -25,9 +25,15 @@ BUTTONS = LAYOUT["buttons"]["icons"]
 DARK = (18, 22, 29)
 LIGHT = (218, 216, 205)
 ACCENT = (196, 173, 115)
+CLASSIC_LAYOUT = False
 
 
 def texture(relative, after=False):
+    if after == "previous":
+        previous = WORK / "previous" / Path(relative).with_suffix(".jpg")
+        if previous.exists():
+            return Image.open(previous).convert("RGBA")
+        after = False
     export = WORK / "exports" / relative
     if after and export.exists():
         return Image.open(io.BytesIO(export.read_bytes()[24:])).convert("RGBA")
@@ -65,6 +71,9 @@ def transformed(rect, zone, canvas):
     offset_x = {"left": 0, "center": width / 2 - 320 * scale,
                 "right": width - 640 * scale, "experience": 0}[zone]
     scale_x = width / 640 if zone == "experience" else scale
+    if CLASSIC_LAYOUT:
+        offset_x = width / 2 - 320 * scale
+        scale_x = scale
     return tuple(round(value) for value in (x * scale_x + offset_x,
                  y * scale + height - 480 * scale, w * scale_x, h * scale))
 
@@ -117,7 +126,10 @@ def hud(size, after, state=0, background=DARK, gauges=True):
     return canvas
 
 
-def full_mockups():
+def full_mockups(classic=False):
+    global CLASSIC_LAYOUT
+    CLASSIC_LAYOUT = classic
+    mode = "classic" if classic else "anchored"
     for after in (False, True):
         name = "after" if after else "before"
         canvas = hud((1920, 1080), after)
@@ -127,11 +139,35 @@ def full_mockups():
                   font=FONT, fill="white")
         draw.text((56, 136), "Neutral canvas; no client scene captured. Skill/item models and dynamic text omitted. Gauges illustrated half full.",
                   font=FONT, fill="#a9b2bd")
-        draw.text((56, 170), "Five-file pilot: right panel trim + Character / Inventory / Friends / Menu. Other HUD textures are untouched originals.",
+        draw.text((56, 170), f"Revision 2 / {mode} layout / right panel + Character / Inventory / Friends / Menu. Other HUD textures unchanged.",
                   font=FONT, fill="#a9b2bd")
-        draw.text((56, 895), "HUD scale 2x; separate anchored bands below. Experience strip scale 3x horizontally, 2x vertically.",
+        layout_note = ("Classic option: continuous centered HUD at 2x scale, including experience strip." if classic else
+                       "Default: HUD scale 2x; separate anchored bands. Experience strip scale 3x horizontally, 2x vertically.")
+        draw.text((56, 895), layout_note,
                   font=FONT, fill=ACCENT)
-        canvas.save(OUTPUT / f"offline-1920x1080-{name}.png")
+        suffix = "-classic" if classic else ""
+        canvas.save(OUTPUT / f"offline-1920x1080-{name}{suffix}.png")
+    CLASSIC_LAYOUT = False
+
+
+def revision_comparison():
+    canvas = Image.new("RGB", (1120, 730), DARK)
+    draw = ImageDraw.Draw(canvas)
+    draw.text((28, 24), "HUD REVISION / actual 1080p control size", font=TITLE, fill=ACCENT)
+    draw.text((28, 70), "OFFLINE MOCKUP / decoded game exports / 2x engine scale / unchanged 30x41 source cells", font=FONT, fill="white")
+    for column, (version, title) in enumerate((("previous", "FIRST PASS"), (True, "REVISED"))):
+        x = 28 + column * 550
+        draw.text((x, 120), title, font=TITLE, fill="white")
+        for state, label in enumerate(STATE_NAMES):
+            y = 195 + state * 118
+            draw.text((x, y - 25), label, font=SMALL, fill=ACCENT)
+            for index, entry in enumerate(BUTTONS):
+                tile = texture(f"Interface/partCharge1/{entry['file']}", version)
+                tile = sample(tile, (0, state * 41, 30, 41), (60, 82))
+                canvas.paste(tile, (x + index * 90, y))
+    draw.text((28, 696), "Same positions and four states. Complete new button faces, restrained steel framing, readable filled symbols.",
+              font=FONT, fill="white")
+    canvas.save(OUTPUT / "offline-revision-comparison-1080p.png")
 
 
 def native_comparison():
@@ -200,10 +236,12 @@ def background_sheet():
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     full_mockups()
+    full_mockups(classic=True)
+    revision_comparison()
     native_comparison()
     state_sheet()
     background_sheet()
-    print("Created five labeled offline preview PNGs from decoded exports.")
+    print("Created eight labeled offline preview PNGs from decoded exports.")
 
 
 if __name__ == "__main__":

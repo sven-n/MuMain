@@ -47,8 +47,9 @@ XP `(0.001953125,0.6484375,0.99609375,0.140625)`.
 
 `NewUIMainFrameWindow.cpp:275–307` draws these panel slices. `NewUICommon.cpp:77–119`
 performs the half-texel inset. `NewUIButton.cpp:283–315,449–464` uses `state*height`
-as the source Y. The atlas repeats the same outer border and top brass rail in
-each 41-pixel cell. The panel XP trough repeats short divisions within y=41…51;
+as the source Y. Each atlas repeats its border geometry in every 41-pixel cell;
+the revision repaints those borders without moving their cells. The original
+panel XP trough repeats short divisions within y=41…51;
 it is stretched as a whole, not a nine-slice or a tiled texture. There are no
 new regions or gutters. Loader padding is not part of the JPEG payload.
 
@@ -73,11 +74,13 @@ Unchanged dependencies used for the offline full-HUD context:
   render-number atlas and engine text renderer provide counters/tooltips.
 - Runtime skill icons and 3D item hotkeys are independently drawn over the frame.
 
-Panel-local AG destination is (36,2), 16×39; mana is (53,3), 45×39. The green
-skill well's border at x=0…35, dynamic gauge rectangles, black button backing, XP
-trough, outer edges and x=104 split guards are retained from the original in the
-master. The skill well interior is repainted as subdued green worn stone; it is
-still an empty background for the runtime skill icon.
+Panel-local AG destination is (36,2), 16×39; mana is (53,3), 45×39. The revision
+retains the complete backing rectangle x=36…103, y=0…41 and the first/last panel
+columns in the master. The unchanged opaque gauge fills contain ornament that
+must match this backing. The emerald skill well, remaining metal frame, button
+backing and XP trough are repainted within the same source rectangles. The skill
+well is still an empty background for the runtime skill icon. All four button
+faces are repainted across their complete 30×41 cells; control geometry is fixed.
 No values, numbers, labels or tooltip text are baked into replacement textures.
 
 ## Alpha and loading
@@ -85,7 +88,7 @@ No values, numbers, labels or tooltip text are baked into replacement textures.
 `Render/Sprites/GlobalBitmap.cpp:775–889` skips the 24-byte OZJ prefix, decodes RGB,
 pads to powers of two, then explicitly sets alpha=255 (`:115–127`). Black is
 opaque, not transparent. All five originals and replacements are fully opaque.
-Filters are linear, address modes clamp to edge. The same source edges, half-texel
+Filters are linear, address modes clamp to edge. The same source rectangles, half-texel
 insets and padding sizes remain in use. The expected NPOT warning from
 `mu_texture.py check` is a pre-existing condition, not a rejection or an export
 change. Do not resize these files to satisfy the generic power-of-two guideline.
@@ -105,3 +108,10 @@ The XP strip is x-scaled by 3 and y-scaled by 2 at y=1060. The gaps between the
 left/center/right HUD bands are real consequences of these transforms; previews
 must not stretch the 640-pixel frame across them. HiDPI contentScale=2 would
 produce different geometry and requires separate client review.
+
+The revision also reconstructs main `7a88d829`'s optional classic layout. That
+mode uses centered X offset=320 and scale=2 for all bands, including XP, at
+1920×1080/contentScale=1. The right panel begins (1296,978), and controls begin
+(1358,978), (1418,978), (1478,978), (1538,978). The continuous HUD spans x=320…1600.
+Both existing layout modes have labeled offline before/after previews; no engine
+setting or transform is changed by the art revision.

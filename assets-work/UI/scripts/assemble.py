@@ -28,10 +28,23 @@ EXPORTS = WORK / "exports/Interface/partCharge1"
 LAYOUT = json.loads((SOURCE / "layout.json").read_text())
 CELL_WIDTH, CELL_HEIGHT = LAYOUT["buttons"]["cell"]
 # Use the same geometry for all states: hue/light changes never shift the icon.
-STATE_BRIGHTNESS = (0.94, 1.23, 0.65, 1.02)
-STATE_WARMTH = ((1.0, 1.0, 1.0), (1.08, 1.02, 0.88),
-                (1.0, 0.99, 0.97), (1.13, 1.04, 0.86))
+STATE_BRIGHTNESS = (1.0, 1.15, 0.68, 1.03)
+STATE_WARMTH = ((1.0, 1.0, 1.0), (1.09, 1.03, 0.88),
+                (1.0, 1.0, 1.0), (1.12, 1.04, 0.88))
+SOURCE_COLOR_STRENGTH = 0.9
+SELECTED_ICON_BRIGHTNESS = 0.9
+SELECTED_RULE = (148, 119, 58)
+SELECTED_HOVER_RULE = (208, 172, 88)
+SELECTED_RULE_Y = 38
+SELECTED_RULE_X = (5, 25)
 JPEG_QUALITY = 100
+
+
+def load_painting(path):
+    """Working paintings may contain alpha; the original OZJ contract is opaque."""
+    image = Image.open(path).convert("RGBA")
+    black = Image.new("RGBA", image.size, (0, 0, 0, 255))
+    return Image.alpha_composite(black, image).convert("RGB")
 
 
 def png_bytes(image):
@@ -76,23 +89,28 @@ def save_asset(stem, original, painting, mask):
 
 def assemble_panel():
     original = Image.open(ORIGINAL / "newui_menu03.jpg").convert("RGB")
-    generated = Image.open(SOURCE / "panel-generated.png").convert("RGB")
+    generated = load_painting(SOURCE / "panel-generated.png")
     # The square generation canvas is an editing aid; only this band is sampled.
     generated = generated.resize((1024, 1024), Image.Resampling.LANCZOS)
     crop = LAYOUT["panel"]["generation_crop_normalized_1024"]
     painting = generated.crop(crop).resize(original.size, Image.Resampling.LANCZOS)
-    painting = ImageEnhance.Color(painting).enhance(0.65)
-    painting = ImageEnhance.Brightness(painting).enhance(0.84)
+    painting = ImageEnhance.Color(painting).enhance(SOURCE_COLOR_STRENGTH)
     mask = np.full((original.height, original.width), 255, dtype=np.uint8)
     for x0, y0, x1, y1 in LAYOUT["panel"]["protected_rectangles_xyxy"]:
         mask[y0:y1, x0:x1] = 0
     save_asset("newui_menu03", original, painting, Image.fromarray(mask))
 
 
-def button_state(normal, state):
+def button_state(normal, state, glyph_box):
     pixels = np.asarray(normal, dtype=np.float32)
     pixels *= STATE_BRIGHTNESS[state]
     pixels *= np.asarray(STATE_WARMTH[state], dtype=np.float32)
+    if state == 2:
+        x0, y0, x1, y1 = glyph_box
+        pixels[y0:y1, x0:x1] = np.asarray(normal)[y0:y1, x0:x1] * SELECTED_ICON_BRIGHTNESS
+    if state in (2, 3):
+        x0, x1 = SELECTED_RULE_X
+        pixels[SELECTED_RULE_Y, x0:x1] = SELECTED_RULE if state == 2 else SELECTED_HOVER_RULE
     return Image.fromarray(np.clip(np.rint(pixels), 0, 255).astype(np.uint8))
 
 
@@ -100,13 +118,13 @@ def assemble_button(index, entry):
     stem = Path(entry["file"]).stem
     original = Image.open(ORIGINAL / f"{stem}.jpg").convert("RGB")
     painting = Image.new("RGB", original.size)
-    generated = Image.open(SOURCE / f"button{index}-generated.png").convert("RGB")
+    generated = load_painting(SOURCE / f"button{index}-generated.png")
     normal = generated.resize((CELL_WIDTH, CELL_HEIGHT), Image.Resampling.LANCZOS)
-    normal = ImageEnhance.Color(normal).enhance(0.55)
+    normal = ImageEnhance.Color(normal).enhance(SOURCE_COLOR_STRENGTH)
     mask = np.zeros((original.height, original.width), dtype=np.uint8)
     x0, y0, x1, y1 = LAYOUT["buttons"]["edit_rectangle_xyxy"]
     for state, offset in enumerate(LAYOUT["buttons"]["state_y"]):
-        painting.paste(button_state(normal, state), (0, offset))
+        painting.paste(button_state(normal, state, entry["glyph_box"]), (0, offset))
         mask[offset + y0:offset + y1, x0:x1] = 255
     save_asset(stem, original, painting, Image.fromarray(mask))
 
