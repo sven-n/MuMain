@@ -1,0 +1,1152 @@
+[
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Beer01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Beer01.bmd\n  name field: Beer01.smd  version: 12\n  meshes: 1  bones: 5  actions: 1  triangles: 784\n  bounds (bind pose): min -50.13 -29.63 -0.34  max 41.06 28.85 61.46  size 91.19 58.48 61.80\n  mesh 0: triangles=784 vertices=432 normals=303 uvs=399 texture=plate2.jpg\n  bone 0: \"Cylinder09\" parent=-1\n  bone 1: \"Cylinder11\" parent=-1\n  bone 2: \"Cylinder08\" parent=-1\n  bone 3: \"Sphere05\" parent=-1\n  bone 4: \"Cylinder31\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Beer02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Beer02.bmd\n  name field: Data2\\Object1\\house_in_beer_02.s  version: 10\n  meshes: 5  bones: 6  actions: 1  triangles: 232\n  bounds (bind pose): min -43.76 -28.36 -0.80  max 44.47 23.53 61.47  size 88.24 51.88 62.27\n  mesh 0: triangles=4 vertices=8 normals=2 uvs=4 texture=pot3.tga\n  mesh 1: triangles=96 vertices=52 normals=52 uvs=30 texture=apple.jpg\n  mesh 2: triangles=36 vertices=20 normals=20 uvs=30 texture=bottle.tga\n  mesh 3: triangles=60 vertices=38 normals=25 uvs=28 texture=plate.jpg\n  mesh 4: triangles=36 vertices=25 normals=31 uvs=29 texture=winecup.jpg\n  bone 0: \"ytut\" parent=-1\n  bone 1: \"Cylinder32\" parent=-1\n  bone 2: \"Cylinder33\" parent=-1\n  bone 3: \"Cylinder34\" parent=-1\n  bone 4: \"Cylinder35\" parent=-1\n  bone 5: \"ytut01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Beer03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Beer03.bmd\n  name field: Data2\\Object1\\house_in_beer_03.s  version: 10\n  meshes: 2  bones: 3  actions: 1  triangles: 108\n  bounds (bind pose): min -24.01 -13.66 -0.36  max 23.71 16.90 61.47  size 47.72 30.56 61.83\n  mesh 0: triangles=72 vertices=40 normals=20 uvs=30 texture=bottle.tga\n  mesh 1: triangles=36 vertices=25 normals=31 uvs=29 texture=winecup.jpg\n  bone 0: \"Cylinder36\" parent=-1\n  bone 1: \"Cylinder37\" parent=-1\n  bone 2: \"Cylinder38\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Bird01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Bird01.bmd\n  name field: Data2\\Object1\\Animal\\bird.smd  version: 10\n  meshes: 1  bones: 20  actions: 2  triangles: 98\n  bounds (bind pose): min -34.65 -17.07 -9.53  max 33.04 27.82 16.39  size 67.69 44.89 25.92\n  mesh 0: triangles=98 vertices=53 normals=52 uvs=58 texture=bird.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=0\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=0\n  bone 6: \"Bone07\" parent=5\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Bone13\" parent=7\n  bone 9: \"Bone09\" parent=0\n  bone 10: \"Bone10\" parent=9\n  bone 11: \"Bone11\" parent=10\n  bone 12: \"Bone12\" parent=11\n  bone 13: \"bird\" parent=0\n  bone 14: \"Dummy14\" parent=-1 dummy\n  bone 15: \"Dummy15\" parent=-1 dummy\n  bone 16: \"Dummy16\" parent=-1 dummy\n  bone 17: \"Dummy17\" parent=-1 dummy\n  bone 18: \"Dummy18\" parent=-1 dummy\n  bone 19: \"Dummy19\" parent=-1 dummy\n  action 0: keys=6 lock=0\n  action 1: keys=6 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Bonfire01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Bonfire01.bmd\n  name field: Data2\\Object1\\Fire.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 110\n  bounds (bind pose): min -57.61 -54.83 -6.95  max 62.04 55.02 55.95  size 119.65 109.85 62.90\n  mesh 0: triangles=72 vertices=48 normals=48 uvs=60 texture=fire_01.jpg\n  mesh 1: triangles=38 vertices=43 normals=43 uvs=43 texture=fire_02.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone_fire\" parent=0\n  bone 2: \"Cylinder03\" parent=0\n  bone 3: \"Cylinder04\" parent=0\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Bridge01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Bridge01.bmd\n  name field: Data2\\Object1\\bridge_01.smd  version: 10\n  meshes: 2  bones: 2  actions: 1  triangles: 196\n  bounds (bind pose): min -49.21 -399.40 -158.00  max 83.97 400.28 99.39  size 133.18 799.68 257.39\n  mesh 0: triangles=194 vertices=146 normals=65 uvs=121 texture=bridge_01.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=bridge_shadow01.tga\n  bone 0: \"Box02\" parent=-1\n  bone 1: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/BridgeStone01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/BridgeStone01.bmd\n  name field: Data2\\Object1\\bridge_02.smd  version: 10\n  meshes: 4  bones: 2  actions: 1  triangles: 74\n  bounds (bind pose): min -0.18 -199.96 -159.82  max 83.34 200.14 9.80  size 83.53 400.10 169.62\n  mesh 0: triangles=12 vertices=20 normals=2 uvs=5 texture=tree_04.jpg\n  mesh 1: triangles=52 vertices=51 normals=42 uvs=27 texture=tile_ston06.jpg\n  mesh 2: triangles=8 vertices=12 normals=4 uvs=6 texture=tile_wood02.jpg\n  mesh 3: triangles=2 vertices=4 normals=1 uvs=4 texture=bridge_shadow01.tga\n  bone 0: \"464\" parent=-1\n  bone 1: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Butterfly01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Butterfly01.bmd\n  name field: Data2\\Object1\\Animal\\butterfly.s  version: 10\n  meshes: 1  bones: 7  actions: 1  triangles: 28\n  bounds (bind pose): min -14.15 -11.20 -0.00  max 13.79 11.36 7.56  size 27.94 22.56 7.56\n  mesh 0: triangles=28 vertices=20 normals=17 uvs=15 texture=Butterfly.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=0\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=4\n  bone 6: \"Box02\" parent=0\n  action 0: keys=3 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Candle01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Candle01.bmd\n  name field: Candle01.smd  version: 12\n  meshes: 2  bones: 9  actions: 1  triangles: 1018\n  bounds (bind pose): min -19.32 -11.26 0.01  max 19.35 11.21 87.07  size 38.67 22.47 87.06\n  mesh 0: triangles=1012 vertices=535 normals=468 uvs=307 texture=candle.jpg\n  mesh 1: triangles=6 vertices=15 normals=5 uvs=15 texture=candle2.jpg\n  bone 0: \"Cylinder05\" parent=-1\n  bone 1: \"Bone01\" parent=-1\n  bone 2: \"Bone02\" parent=1\n  bone 3: \"Bone03\" parent=2\n  bone 4: \"Bone04\" parent=1\n  bone 5: \"Bone05\" parent=4\n  bone 6: \"Bone06\" parent=1\n  bone 7: \"Bone07\" parent=6\n  bone 8: \"Mesh03\" parent=1\n  action 0: keys=7 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Cannon01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Cannon01.bmd\n  name field: Data2\\Object1\\gun_01.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 181\n  bounds (bind pose): min -64.29 -78.26 -0.99  max 68.04 57.38 132.44  size 132.33 135.64 133.43\n  mesh 0: triangles=181 vertices=125 normals=50 uvs=140 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Cannon02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Cannon02.bmd\n  name field: Data2\\Object1\\gun_02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 155\n  bounds (bind pose): min -67.44 -78.26 -0.99  max 68.04 57.38 132.44  size 135.48 135.64 133.43\n  mesh 0: triangles=155 vertices=109 normals=46 uvs=140 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Cannon03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Cannon03.bmd\n  name field: Data2\\Object1\\gun_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 75\n  bounds (bind pose): min -36.70 -78.26 -0.99  max 35.95 57.38 132.44  size 72.65 135.64 133.43\n  mesh 0: triangles=75 vertices=54 normals=26 uvs=77 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage01.bmd\n  name field: Data2\\Object1\\horse_drawn.smd  version: 10\n  meshes: 3  bones: 14  actions: 1  triangles: 280\n  bounds (bind pose): min -114.62 -94.23 -14.50  max 244.57 92.68 201.91  size 359.18 186.91 216.41\n  mesh 0: triangles=270 vertices=231 normals=96 uvs=218 texture=horse_drawn_01.jpg\n  mesh 1: triangles=8 vertices=8 normals=5 uvs=8 texture=horse_drawn_02.tga\n  mesh 2: triangles=2 vertices=4 normals=1 uvs=4 texture=horse_drawn_03.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Box02\" parent=0\n  bone 5: \"Dummy05\" parent=-1 dummy\n  bone 6: \"Bone06\" parent=-1\n  bone 7: \"Bone07\" parent=6\n  bone 8: \"Bone08\" parent=7\n  bone 9: \"Box03\" parent=6\n  bone 10: \"Bone05\" parent=-1\n  bone 11: \"Bone09\" parent=10\n  bone 12: \"Tube01\" parent=10\n  bone 13: \"Bone_point\" parent=10\n  action 0: keys=21 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage02.bmd\n  name field: Data2\\Object1\\carriage_01.smd  version: 10\n  meshes: 1  bones: 2  actions: 1  triangles: 258\n  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.28  size 179.08 437.11 183.45\n  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage03.bmd\n  name field: Data2\\Object1\\carriage_02.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 346\n  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45\n  mesh 0: triangles=72 vertices=48 normals=24 uvs=28 texture=tub.jpg\n  mesh 1: triangles=274 vertices=209 normals=131 uvs=176 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder03\" parent=-1\n  bone 2: \"Mesh01\" parent=-1\n  bone 3: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Carriage04.bmd\n  name field: Data2\\Object1\\carriage_03.smd  version: 10\n  meshes: 2  bones: 5  actions: 1  triangles: 390\n  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08\n  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg\n  mesh 1: triangles=132 vertices=96 normals=32 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  bone 2: \"Cylinder05\" parent=-1\n  bone 3: \"Cylinder12\" parent=-1\n  bone 4: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Curtain01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Curtain01.bmd\n  name field: Data2\\Object1\\badge_01.smd  version: 10\n  meshes: 2  bones: 7  actions: 1  triangles: 68\n  bounds (bind pose): min -96.63 -16.92 -0.86  max 96.55 9.52 323.17  size 193.18 26.44 324.03\n  mesh 0: triangles=60 vertices=35 normals=40 uvs=51 texture=badge_01.jpg\n  mesh 1: triangles=8 vertices=10 normals=6 uvs=10 texture=badge_02.tga\n  bone 0: \"bone_01\" parent=-1\n  bone 1: \"bone_02\" parent=0\n  bone 2: \"bone_03\" parent=1\n  bone 3: \"bone_04\" parent=2\n  bone 4: \"bone_05\" parent=3\n  bone 5: \"bone_06\" parent=4\n  bone 6: \"Box16\" parent=0\n  action 0: keys=26 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/DoungeonGate01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/DoungeonGate01.bmd\n  name field: Data2\\Object1\\dungeon_gate_01.sm  version: 10\n  meshes: 1  bones: 7  actions: 1  triangles: 333\n  bounds (bind pose): min -199.60 -233.49 -7.97  max 200.50 227.89 315.79  size 400.10 461.38 323.76\n  mesh 0: triangles=333 vertices=210 normals=203 uvs=163 texture=copra_gate.jpg\n  bone 0: \"Sphere01\" parent=-1\n  bone 1: \"fire_point\" parent=-1\n  bone 2: \"Box14\" parent=1\n  bone 3: \"Object01\" parent=1\n  bone 4: \"fire_point01\" parent=-1\n  bone 5: \"Box15\" parent=4\n  bone 6: \"Object02\" parent=4\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence01.bmd\n  name field: Data2\\Object1\\fence.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 36\n  bounds (bind pose): min -88.82 -9.03 -0.33  max 88.93 11.98 100.83  size 177.76 21.01 101.17\n  mesh 0: triangles=36 vertices=34 normals=21 uvs=22 texture=tile_wood02.jpg\n  bone 0: \"Box07\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence02.bmd\n  name field: Data2\\Object1\\joint_01.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 16\n  bounds (bind pose): min -49.69 -56.01 0.00  max 56.54 50.63 22.69  size 106.22 106.65 22.69\n  mesh 0: triangles=16 vertices=12 normals=7 uvs=24 texture=joint.jpg\n  bone 0: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence03.bmd\n  name field: Data2\\Object1\\joint_02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 10\n  bounds (bind pose): min -100.42 -6.81 0.00  max 99.68 19.70 22.69  size 200.10 26.51 22.69\n  mesh 0: triangles=10 vertices=8 normals=5 uvs=12 texture=joint.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fence04.bmd\n  name field: Data2\\Object1\\joint_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 10\n  bounds (bind pose): min -49.82 -6.81 0.00  max 50.22 19.70 22.69  size 100.03 26.51 22.69\n  mesh 0: triangles=10 vertices=8 normals=5 uvs=12 texture=joint.jpg\n  bone 0: \"Object02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/FireLight01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/FireLight01.bmd\n  name field: Data2\\Object1\\fire_light.smd  version: 10\n  meshes: 3  bones: 1  actions: 1  triangles: 48\n  bounds (bind pose): min -28.57 -28.47 -0.41  max 28.61 28.71 175.23  size 57.18 57.18 175.64\n  mesh 0: triangles=20 vertices=20 normals=20 uvs=13 texture=light.tga\n  mesh 1: triangles=22 vertices=20 normals=16 uvs=17 texture=light2.jpg\n  mesh 2: triangles=6 vertices=7 normals=7 uvs=7 texture=light3.jpg\n  bone 0: \"Cylinder02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/FireLight02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/FireLight02.bmd\n  name field: Data2\\Object1\\Fire_Light_01.smd  version: 10\n  meshes: 3  bones: 2  actions: 1  triangles: 34\n  bounds (bind pose): min -19.63 -43.75 0.76  max 19.33 2.24 78.22  size 38.96 45.99 77.46\n  mesh 0: triangles=24 vertices=21 normals=20 uvs=15 texture=tile_02.jpg\n  mesh 1: triangles=8 vertices=8 normals=4 uvs=4 texture=fire_light_01.tga\n  mesh 2: triangles=2 vertices=4 normals=1 uvs=4 texture=copra_gate.jpg\n  bone 0: \"Box07\" parent=-1\n  bone 1: \"Bone01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fish01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Fish01.bmd\n  name field: Data2\\Object1\\Animal\\fish.smd  version: 10\n  meshes: 1  bones: 29  actions: 2  triangles: 68\n  bounds (bind pose): min -10.80 -38.84 -3.48  max 9.53 34.66 35.28  size 20.32 73.50 38.76\n  mesh 0: triangles=68 vertices=40 normals=40 uvs=40 texture=fish.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=0\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=0\n  bone 6: \"Bone07\" parent=5\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Bone09\" parent=7\n  bone 9: \"Bone10\" parent=8\n  bone 10: \"Bone11\" parent=0\n  bone 11: \"Bone12\" parent=10\n  bone 12: \"Bone13\" parent=0\n  bone 13: \"Bone14\" parent=12\n  bone 14: \"Bone15\" parent=0\n  bone 15: \"Bone16\" parent=14\n  bone 16: \"Bone17\" parent=0\n  bone 17: \"Bone18\" parent=16\n  bone 18: \"Cylinder01\" parent=0\n  bone 19: \"Dummy19\" parent=-1 dummy\n  bone 20: \"Dummy20\" parent=-1 dummy\n  bone 21: \"Dummy21\" parent=-1 dummy\n  bone 22: \"Dummy22\" parent=-1 dummy\n  bone 23: \"Dummy23\" parent=-1 dummy\n  bone 24: \"Dummy24\" parent=-1 dummy\n  bone 25: \"Dummy25\" parent=-1 dummy\n  bone 26: \"Dummy26\" parent=-1 dummy\n  bone 27: \"Dummy27\" parent=-1 dummy\n  bone 28: \"Dummy28\" parent=-1 dummy\n  action 0: keys=6 lock=0\n  action 1: keys=6 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture01.bmd\n  name field: Data2\\Object1\\house_in_01.smd  version: 10\n  meshes: 4  bones: 6  actions: 1  triangles: 272\n  bounds (bind pose): min -80.22 -23.37 0.00  max 79.96 23.06 210.08  size 160.18 46.43 210.07\n  mesh 0: triangles=78 vertices=46 normals=52 uvs=52 texture=pot.jpg\n  mesh 1: triangles=54 vertices=31 normals=37 uvs=36 texture=pot2.jpg\n  mesh 2: triangles=32 vertices=32 normals=5 uvs=39 texture=bookshelf.jpg\n  mesh 3: triangles=108 vertices=60 normals=40 uvs=30 texture=bottle.tga\n  bone 0: \"Cylinder07\" parent=-1\n  bone 1: \"Cylinder06\" parent=-1\n  bone 2: \"Box12\" parent=-1\n  bone 3: \"Cylinder26\" parent=-1\n  bone 4: \"Cylinder29\" parent=-1\n  bone 5: \"Cylinder30\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture02.bmd\n  name field: Data2\\Object1\\house_in_02.smd  version: 10\n  meshes: 2  bones: 13  actions: 1  triangles: 464\n  bounds (bind pose): min -80.46 -23.38 0.00  max 79.72 23.05 228.92  size 160.18 46.43 228.92\n  mesh 0: triangles=432 vertices=240 normals=140 uvs=30 texture=bottle.tga\n  mesh 1: triangles=32 vertices=32 normals=5 uvs=39 texture=bookshelf.jpg\n  bone 0: \"Cylinder04\" parent=-1\n  bone 1: \"Box03\" parent=-1\n  bone 2: \"Cylinder12\" parent=-1\n  bone 3: \"Cylinder13\" parent=-1\n  bone 4: \"Cylinder15\" parent=-1\n  bone 5: \"Cylinder16\" parent=-1\n  bone 6: \"Cylinder17\" parent=-1\n  bone 7: \"Cylinder18\" parent=-1\n  bone 8: \"Cylinder19\" parent=-1\n  bone 9: \"Cylinder21\" parent=-1\n  bone 10: \"Cylinder22\" parent=-1\n  bone 11: \"Cylinder23\" parent=-1\n  bone 12: \"Cylinder24\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture03.bmd\n  name field: Furniture03.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 680\n  bounds (bind pose): min -101.68 -51.50 0.00  max 101.78 51.39 86.58  size 203.47 102.89 86.58\n  mesh 0: triangles=680 vertices=376 normals=273 uvs=199 texture=desk_big.jpg\n  bone 0: \"Box09\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture04.bmd\n  name field: Furniture04.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 324\n  bounds (bind pose): min -106.61 -99.69 0.00  max 97.08 -0.40 86.33  size 203.69 99.29 86.33\n  mesh 0: triangles=324 vertices=172 normals=201 uvs=200 texture=desk_big.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture05.bmd\n  name field: Furniture05.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 412\n  bounds (bind pose): min -101.78 -34.81 0.00  max 101.69 35.18 105.38  size 203.47 69.99 105.38\n  mesh 0: triangles=412 vertices=228 normals=113 uvs=130 texture=desk_big.jpg\n  bone 0: \"Box13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture06.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture06.bmd\n  name field: Data2\\Object1\\house_in_06.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 54\n  bounds (bind pose): min -20.84 -25.63 -0.04  max 21.48 28.72 110.86  size 42.31 54.34 110.90\n  mesh 0: triangles=52 vertices=48 normals=5 uvs=56 texture=bookshelf.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=chair2.tga\n  bone 0: \"Box11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture07.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Furniture07.bmd\n  name field: Data2\\Object1\\house_in_07.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 42\n  bounds (bind pose): min -25.64 -20.88 0.00  max 17.74 21.46 51.41  size 43.38 42.33 51.41\n  mesh 0: triangles=42 vertices=37 normals=37 uvs=39 texture=bookshelf.jpg\n  bone 0: \"Cylinder02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass01.bmd\n  name field: Data2\\Object1\\grass_01.smd  version: 10\n  meshes: 1  bones: 5  actions: 1  triangles: 120\n  bounds (bind pose): min -235.29 -193.60 -0.54  max 247.67 215.51 28.38  size 482.96 409.11 28.92\n  mesh 0: triangles=120 vertices=160 normals=128 uvs=4 texture=tree_08.tga\n  bone 0: \"QuadPatch01\" parent=-1\n  bone 1: \"QuadPatch02\" parent=-1\n  bone 2: \"QuadPatch03\" parent=-1\n  bone 3: \"QuadPatch04\" parent=-1\n  bone 4: \"QuadPatch05\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass02.bmd\n  name field: Data2\\Object1\\grass_02.smd  version: 10\n  meshes: 1  bones: 5  actions: 1  triangles: 120\n  bounds (bind pose): min -253.83 -269.85 -0.54  max 252.41 215.51 28.38  size 506.23 485.36 28.92\n  mesh 0: triangles=120 vertices=160 normals=128 uvs=4 texture=tree_08.tga\n  bone 0: \"QuadPatch01\" parent=-1\n  bone 1: \"QuadPatch02\" parent=-1\n  bone 2: \"QuadPatch03\" parent=-1\n  bone 3: \"QuadPatch04\" parent=-1\n  bone 4: \"QuadPatch05\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass03.bmd\n  name field: Data2\\Object1\\grass_03.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 128\n  bounds (bind pose): min -178.46 -159.31 -3.08  max 136.39 122.73 131.26  size 314.86 282.04 134.34\n  mesh 0: triangles=96 vertices=112 normals=112 uvs=7 texture=tree_01.tga\n  mesh 1: triangles=32 vertices=64 normals=48 uvs=4 texture=tree_02.tga\n  bone 0: \"Sphere04\" parent=-1\n  bone 1: \"Sphere05\" parent=-1\n  bone 2: \"Sphere06\" parent=-1\n  bone 3: \"Sphere07\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass04.bmd\n  name field: Data2\\Object1\\grass_04.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 128\n  bounds (bind pose): min -216.27 -78.82 -2.90  max 165.65 88.88 115.98  size 381.92 167.70 118.88\n  mesh 0: triangles=96 vertices=112 normals=112 uvs=7 texture=tree_01.tga\n  mesh 1: triangles=32 vertices=64 normals=48 uvs=4 texture=tree_02.tga\n  bone 0: \"Sphere04\" parent=-1\n  bone 1: \"Sphere05\" parent=-1\n  bone 2: \"Sphere06\" parent=-1\n  bone 3: \"Sphere07\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass05.bmd\n  name field: Data2\\Object1\\grass_05.smd  version: 10\n  meshes: 1  bones: 4  actions: 1  triangles: 112\n  bounds (bind pose): min -167.84 -135.89 -1.08  max 154.57 138.67 86.23  size 322.41 274.56 87.30\n  mesh 0: triangles=112 vertices=144 normals=139 uvs=18 texture=tree_09.tga\n  bone 0: \"Box01\" parent=-1\n  bone 1: \"Box02\" parent=-1\n  bone 2: \"Box03\" parent=-1\n  bone 3: \"Box04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass06.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass06.bmd\n  name field: Data2\\Object1\\grass_06.smd  version: 10\n  meshes: 1  bones: 4  actions: 1  triangles: 112\n  bounds (bind pose): min -161.84 -51.36 0.11  max 102.59 58.30 60.74  size 264.43 109.66 60.63\n  mesh 0: triangles=112 vertices=144 normals=139 uvs=18 texture=tree_09.tga\n  bone 0: \"Box01\" parent=-1\n  bone 1: \"Box02\" parent=-1\n  bone 2: \"Box03\" parent=-1\n  bone 3: \"Box04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass07.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass07.bmd\n  name field: Data2\\Object1\\mushroom_01.smd  version: 10\n  meshes: 1  bones: 7  actions: 1  triangles: 126\n  bounds (bind pose): min -59.39 -44.41 -0.40  max 56.12 58.59 29.01  size 115.51 103.00 29.42\n  mesh 0: triangles=126 vertices=133 normals=133 uvs=28 texture=mushroom.jpg\n  bone 0: \"Sphere01\" parent=-1\n  bone 1: \"Sphere05\" parent=-1\n  bone 2: \"Sphere06\" parent=-1\n  bone 3: \"Sphere07\" parent=-1\n  bone 4: \"Sphere08\" parent=-1\n  bone 5: \"Sphere09\" parent=-1\n  bone 6: \"Sphere10\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass08.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Grass08.bmd\n  name field: Data2\\Object1\\mushroom_02.smd  version: 10\n  meshes: 1  bones: 3  actions: 1  triangles: 54\n  bounds (bind pose): min -47.68 -8.23 -0.40  max 26.67 18.41 22.88  size 74.36 26.63 23.29\n  mesh 0: triangles=54 vertices=57 normals=57 uvs=21 texture=mushroom.jpg\n  bone 0: \"Sphere05\" parent=-1\n  bone 1: \"Sphere09\" parent=-1\n  bone 2: \"Sphere10\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Hanging01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Hanging01.bmd\n  name field: Data2\\Object1\\execution_ground_0  version: 10\n  meshes: 1  bones: 4  actions: 1  triangles: 162\n  bounds (bind pose): min -100.94 -98.34 -0.34  max 200.18 111.74 423.89  size 301.13 210.07 424.23\n  mesh 0: triangles=162 vertices=146 normals=27 uvs=171 texture=horse_drawn_01.jpg\n  bone 0: \"Box08\" parent=-1\n  bone 1: \"Box09\" parent=0\n  bone 2: \"Box10\" parent=1\n  bone 3: \"Box03\" parent=0\n  action 0: keys=25 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House01.bmd\n  name field: Data2\\Object1\\house_stone_01.smd  version: 10\n  meshes: 4  bones: 2  actions: 1  triangles: 176\n  bounds (bind pose): min -222.34 -301.18 -0.62  max 213.05 302.26 314.60  size 435.39 603.45 315.22\n  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_ston05.jpg\n  mesh 1: triangles=65 vertices=42 normals=17 uvs=57 texture=tile_ston04.jpg\n  mesh 2: triangles=5 vertices=7 normals=1 uvs=7 texture=tile_house01.jpg\n  mesh 3: triangles=104 vertices=80 normals=18 uvs=46 texture=tile_ston06.jpg\n  bone 0: \"Box28\" parent=-1\n  bone 1: \"Bone01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House02.bmd\n  name field: Data2\\Object1\\house_stone_02.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 173\n  bounds (bind pose): min -114.89 -64.12 -0.16  max 89.39 72.78 188.55  size 204.28 136.90 188.71\n  mesh 0: triangles=26 vertices=16 normals=11 uvs=25 texture=drum.jpg\n  mesh 1: triangles=147 vertices=99 normals=80 uvs=35 texture=steel.jpg\n  bone 0: \"Box02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House03.bmd\n  name field: Data2\\Object1\\house_smith.smd  version: 10\n  meshes: 5  bones: 7  actions: 1  triangles: 289\n  bounds (bind pose): min -330.60 -463.45 -1.37  max 302.32 450.87 381.38  size 632.92 914.32 382.76\n  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_ston05.jpg\n  mesh 1: triangles=77 vertices=49 normals=15 uvs=72 texture=tile_ston04.jpg\n  mesh 2: triangles=192 vertices=144 normals=21 uvs=58 texture=tile_ston06.jpg\n  mesh 3: triangles=12 vertices=15 normals=15 uvs=9 texture=tile_ston07.tga\n  mesh 4: triangles=6 vertices=12 normals=3 uvs=4 texture=light_02.jpg\n  bone 0: \"Box08\" parent=-1\n  bone 1: \"Box29\" parent=-1\n  bone 2: \"Mesh01\" parent=-1\n  bone 3: \"Mesh02\" parent=-1\n  bone 4: \"Bone01\" parent=-1\n  bone 5: \"Bone02\" parent=-1\n  bone 6: \"Bone03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House04.bmd\n  name field: Data2\\Object1\\house_science.smd  version: 10\n  meshes: 9  bones: 9  actions: 1  triangles: 342\n  bounds (bind pose): min -250.01 -240.25 -0.81  max 252.67 199.92 413.93  size 502.68 440.17 414.75\n  mesh 0: triangles=100 vertices=68 normals=93 uvs=56 texture=tile_02.jpg\n  mesh 1: triangles=117 vertices=117 normals=71 uvs=77 texture=tile_wood01.jpg\n  mesh 2: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_house01.jpg\n  mesh 3: triangles=48 vertices=35 normals=25 uvs=46 texture=tile_ston04.jpg\n  mesh 4: triangles=31 vertices=27 normals=28 uvs=47 texture=tile_wood03.jpg\n  mesh 5: triangles=16 vertices=16 normals=14 uvs=27 texture=tile_wood02.jpg\n  mesh 6: triangles=4 vertices=8 normals=5 uvs=8 texture=tile_windows01.jpg\n  mesh 7: triangles=12 vertices=13 normals=13 uvs=13 texture=bridge_01.jpg\n  mesh 8: triangles=12 vertices=13 normals=13 uvs=13 texture=tile_space01.jpg\n  bone 0: \"Mesh02\" parent=-1\n  bone 1: \"Box02\" parent=-1\n  bone 2: \"boness_01\" parent=-1\n  bone 3: \"boness_02\" parent=2\n  bone 4: \"Object02\" parent=2\n  bone 5: \"boness_03\" parent=-1\n  bone 6: \"boness_04\" parent=5\n  bone 7: \"Object01\" parent=5\n  bone 8: \"Object03\" parent=5\n  action 0: keys=40 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/House05.bmd\n  name field: Data2\\Object1\\house_mill.smd  version: 10\n  meshes: 3  bones: 10  actions: 1  triangles: 276\n  bounds (bind pose): min -200.18 -275.53 -147.38  max 293.51 601.86 359.64  size 493.68 877.39 507.01\n  mesh 0: triangles=228 vertices=168 normals=149 uvs=174 texture=tile_wood02.jpg\n  mesh 1: triangles=20 vertices=20 normals=4 uvs=22 texture=tile_wood01.jpg\n  mesh 2: triangles=28 vertices=24 normals=24 uvs=24 texture=ston02.jpg\n  bone 0: \"ki12\" parent=-1\n  bone 1: \"Box02\" parent=-1\n  bone 2: \"Box03\" parent=1\n  bone 3: \"Box04\" parent=2\n  bone 4: \"Box05\" parent=3\n  bone 5: \"Box06\" parent=4\n  bone 6: \"Box01\" parent=1\n  bone 7: \"Box08\" parent=-1\n  bone 8: \"Box07\" parent=7\n  bone 9: \"Mesh01\" parent=7\n  action 0: keys=30 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseEtc01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseEtc01.bmd\n  name field: Data2\\Object1\\c_wall07.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 34\n  bounds (bind pose): min -50.15 -92.81 0.00  max 49.73 49.80 137.02  size 99.88 142.61 137.02\n  mesh 0: triangles=8 vertices=8 normals=4 uvs=6 texture=c_wall04.jpg\n  mesh 1: triangles=26 vertices=16 normals=19 uvs=16 texture=c_wall06.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseEtc02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseEtc02.bmd\n  name field: Data2\\Object1\\house.smd  version: 10\n  meshes: 8  bones: 3  actions: 1  triangles: 226\n  bounds (bind pose): min -302.53 -299.57 -0.15  max 297.88 408.20 332.48  size 600.41 707.77 332.63\n  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_wood02.jpg\n  mesh 1: triangles=46 vertices=32 normals=14 uvs=41 texture=tile_ston04.jpg\n  mesh 2: triangles=25 vertices=23 normals=17 uvs=25 texture=c_wall04.jpg\n  mesh 3: triangles=16 vertices=12 normals=8 uvs=13 texture=tile_wood03.jpg\n  mesh 4: triangles=5 vertices=7 normals=1 uvs=7 texture=tile_house01.jpg\n  mesh 5: triangles=8 vertices=10 normals=4 uvs=12 texture=tile_ston01.jpg\n  mesh 6: triangles=94 vertices=109 normals=7 uvs=92 texture=horse_drawn_01.jpg\n  mesh 7: triangles=30 vertices=24 normals=6 uvs=12 texture=tile_ston06.jpg\n  bone 0: \"ihix01\" parent=-1\n  bone 1: \"Box03\" parent=-1\n  bone 2: \"Mesh03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseEtc03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseEtc03.bmd\n  name field: Data2\\Object1\\cage.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 16\n  bounds (bind pose): min -99.78 -99.55 3.10  max 100.22 100.26 246.61  size 200.00 199.81 243.52\n  mesh 0: triangles=12 vertices=8 normals=6 uvs=12 texture=steel_barred_a.tga\n  mesh 1: triangles=4 vertices=6 normals=1 uvs=4 texture=steel_barred_door.tga\n  bone 0: \"Box03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall01.bmd\n  name field: Data2\\Object1\\house_joint_01.smd  version: 10\n  meshes: 3  bones: 1  actions: 1  triangles: 36\n  bounds (bind pose): min -100.06 -50.90 0.28  max 100.03 49.55 264.48  size 200.09 100.45 264.20\n  mesh 0: triangles=8 vertices=8 normals=4 uvs=12 texture=tile_wood01.jpg\n  mesh 1: triangles=20 vertices=16 normals=5 uvs=24 texture=tile_wood02.jpg\n  mesh 2: triangles=8 vertices=8 normals=4 uvs=12 texture=tile_ston04.jpg\n  bone 0: \"Object02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall02.bmd\n  name field: Data2\\Object1\\house_joint_02.smd  version: 10\n  meshes: 5  bones: 3  actions: 1  triangles: 70\n  bounds (bind pose): min -100.95 -110.97 0.28  max 101.14 49.55 264.48  size 202.10 160.52 264.20\n  mesh 0: triangles=10 vertices=8 normals=5 uvs=12 texture=tile_ston06.jpg\n  mesh 1: triangles=26 vertices=16 normals=5 uvs=28 texture=tile_wood01.jpg\n  mesh 2: triangles=20 vertices=16 normals=5 uvs=24 texture=tile_wood02.jpg\n  mesh 3: triangles=8 vertices=8 normals=4 uvs=12 texture=tile_ston04.jpg\n  mesh 4: triangles=6 vertices=12 normals=3 uvs=4 texture=light_02.jpg\n  bone 0: \"sdfeew\" parent=-1\n  bone 1: \"Object01\" parent=-1\n  bone 2: \"Object03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall03.bmd\n  name field: Data2\\Object1\\house_joint_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 20\n  bounds (bind pose): min -101.28 -0.72 -0.53  max 100.81 42.67 264.48  size 202.10 43.39 265.00\n  mesh 0: triangles=20 vertices=16 normals=5 uvs=12 texture=tile_wood02.jpg\n  bone 0: \"joint_02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall04.bmd\n  name field: Data2\\Object1\\house_joint_04.smd  version: 10\n  meshes: 3  bones: 1  actions: 1  triangles: 56\n  bounds (bind pose): min -54.81 -50.90 0.28  max 246.23 249.87 264.48  size 301.04 300.77 264.20\n  mesh 0: triangles=12 vertices=12 normals=6 uvs=22 texture=tile_wood01.jpg\n  mesh 1: triangles=32 vertices=25 normals=11 uvs=56 texture=tile_wood02.jpg\n  mesh 2: triangles=12 vertices=11 normals=5 uvs=20 texture=tile_ston04.jpg\n  bone 0: \"joint_01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall05.bmd\n  name field: Data2\\Object1\\house_joint_05.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 30\n  bounds (bind pose): min -259.78 -259.68 -45.47  max 200.30 200.29 44.57  size 460.08 459.97 90.04\n  mesh 0: triangles=26 vertices=26 normals=5 uvs=31 texture=tile_wood02.jpg\n  mesh 1: triangles=4 vertices=6 normals=2 uvs=8 texture=tile_wood03.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall06.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/HouseWall06.bmd\n  name field: Data2\\Object1\\house_joint_06.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 28\n  bounds (bind pose): min -200.20 -259.68 -45.47  max 200.20 200.29 44.57  size 400.40 459.97 90.04\n  mesh 0: triangles=26 vertices=26 normals=5 uvs=27 texture=tile_wood02.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_wood03.jpg\n  bone 0: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Light01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Light01.bmd\n  name field: Data2\\Object1\\effect.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 12\n  bounds (bind pose): min -26.56 -26.28 1.21  max 24.66 24.95 52.44  size 51.22 51.22 51.22\n  mesh 0: triangles=12 vertices=8 normals=6 uvs=4 texture=ston03.jpg\n  bone 0: \"Box09\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Light02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Light02.bmd\n  name field: Data2\\Object1\\effect.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 12\n  bounds (bind pose): min -26.56 -26.28 1.21  max 24.66 24.95 52.44  size 51.22 51.22 51.22\n  mesh 0: triangles=12 vertices=8 normals=6 uvs=4 texture=ston03.jpg\n  bone 0: \"Box09\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Light03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Light03.bmd\n  name field: Data2\\Object1\\effect.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 12\n  bounds (bind pose): min -26.56 -26.28 1.21  max 24.66 24.95 52.44  size 51.22 51.22 51.22\n  mesh 0: triangles=12 vertices=8 normals=6 uvs=4 texture=ston03.jpg\n  bone 0: \"Box09\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/MerchantAnimal01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/MerchantAnimal01.bmd\n  name field: Data2\\Object1\\monster_a.smd  version: 10\n  meshes: 2  bones: 59  actions: 2  triangles: 628\n  bounds (bind pose): min -108.55 -268.52 0.26  max 119.08 153.96 334.70  size 227.63 422.48 334.43\n  mesh 0: triangles=540 vertices=317 normals=388 uvs=271 texture=merchant_moster_a01.jpg\n  mesh 1: triangles=88 vertices=85 normals=101 uvs=50 texture=merchant_moster_a02.tga\n  bone 0: \"Bip01\" parent=-1\n  bone 1: \"Bip01 Footsteps\" parent=0\n  bone 2: \"Bip01 Pelvis\" parent=0\n  bone 3: \"Bip01 Spine\" parent=2\n  bone 4: \"Bip01 Spine1\" parent=3\n  bone 5: \"Bip01 Neck\" parent=4\n  bone 6: \"Bip01 Neck1\" parent=5\n  bone 7: \"Bip01 Head\" parent=6\n  bone 8: \"BipDummy04\" parent=7\n  bone 9: \"Box19\" parent=8\n  bone 10: \"Box18\" parent=9\n  bone 11: \"Dummy11\" parent=-1 dummy\n  bone 12: \"Bip01 L Clavicle\" parent=5\n  bone 13: \"Bip01 L UpperArm\" parent=12\n  bone 14: \"Bip01 L Forearm\" parent=13\n  bone 15: \"Bip01 L Hand\" parent=14\n  bone 16: \"Bip01 L Finger0\" parent=15\n  bone 17: \"Bip01 L Finger01\" parent=16\n  bone 18: \"Bip01 L Finger02\" parent=17\n  bone 19: \"Dummy19\" parent=-1 dummy\n  bone 20: \"Bip01 R Clavicle\" parent=5\n  bone 21: \"Bip01 R UpperArm\" parent=20\n  bone 22: \"Bip01 R Forearm\" parent=21\n  bone 23: \"Bip01 R Hand\" parent=22\n  bone 24: \"Bip01 R Finger0\" parent=23\n  bone 25: \"Bip01 R Finger01\" parent=24\n  bone 26: \"Bip01 R Finger02\" parent=25\n  bone 27: \"Dummy27\" parent=-1 dummy\n  bone 28: \"Bip01 L Thigh\" parent=3\n  bone 29: \"Bip01 L Calf\" parent=28\n  bone 30: \"Bip01 L Foot\" parent=29\n  bone 31: \"Bip01 L Toe0\" parent=30\n  bone 32: \"Dummy32\" parent=-1 dummy\n  bone 33: \"Bip01 R Thigh\" parent=3\n  bone 34: \"Bip01 R Calf\" parent=33\n  bone 35: \"Bip01 R Foot\" parent=34\n  bone 36: \"Bip01 R Toe0\" parent=35\n  bone 37: \"Dummy37\" parent=-1 dummy\n  bone 38: \"Bip01 Tail\" parent=3\n  bone 39: \"Bip01 Tail1\" parent=38\n  bone 40: \"Dummy40\" parent=-1 dummy\n  bone 41: \"Box01\" parent=2\n  bone 42: \"Box02\" parent=-1\n  bone 43: \"Box16\" parent=42\n  bone 44: \"Box15\" parent=43\n  bone 45: \"Box17\" parent=44\n  bone 46: \"Box03\" parent=42\n  bone 47: \"Box05\" parent=46\n  bone 48: \"Box04\" parent=47\n  bone 49: \"Box14\" parent=42\n  bone 50: \"Box12\" parent=49\n  bone 51: \"Box13\" parent=50\n  bone 52: \"Box06\" parent=42\n  bone 53: \"Box08\" parent=52\n  bone 54: \"Box07\" parent=53\n  bone 55: \"Box09\" parent=42\n  bone 56: \"Box11\" parent=55\n  bone 57: \"Box10\" parent=56\n  bone 58: \"Object02\" parent=42\n  action 0: keys=30 lock=0\n  action 1: keys=30 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/MerchantAnimal02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/MerchantAnimal02.bmd\n  name field: Data2\\Object1\\monster_b.smd  version: 10\n  meshes: 1  bones: 34  actions: 2  triangles: 484\n  bounds (bind pose): min -86.94 -115.01 -0.07  max 86.49 74.42 185.95  size 173.43 189.43 186.02\n  mesh 0: triangles=484 vertices=261 normals=218 uvs=198 texture=merchant_moster_b01.jpg\n  bone 0: \"Bip01\" parent=-1\n  bone 1: \"Bip01 Footsteps\" parent=0\n  bone 2: \"Bip01 Pelvis\" parent=0\n  bone 3: \"Bip01 Spine\" parent=2\n  bone 4: \"Bip01 Spine1\" parent=3\n  bone 5: \"Bip01 Neck\" parent=4\n  bone 6: \"Bip01 Neck1\" parent=5\n  bone 7: \"Bip01 Head\" parent=6\n  bone 8: \"Dummy08\" parent=-1 dummy\n  bone 9: \"Bip01 L Clavicle\" parent=5\n  bone 10: \"Bip01 L UpperArm\" parent=9\n  bone 11: \"Bip01 L Forearm\" parent=10\n  bone 12: \"Bip01 L Hand\" parent=11\n  bone 13: \"Bip01 R Clavicle\" parent=5\n  bone 14: \"Bip01 R UpperArm\" parent=13\n  bone 15: \"Bip01 R Forearm\" parent=14\n  bone 16: \"Bip01 R Hand\" parent=15\n  bone 17: \"Bip01 L Thigh\" parent=3\n  bone 18: \"Bip01 L Calf\" parent=17\n  bone 19: \"Bip01 L Foot\" parent=18\n  bone 20: \"Bip01 L Toe0\" parent=19\n  bone 21: \"Dummy21\" parent=-1 dummy\n  bone 22: \"Bip01 R Thigh\" parent=3\n  bone 23: \"Bip01 R Calf\" parent=22\n  bone 24: \"Bip01 R Foot\" parent=23\n  bone 25: \"Bip01 R Toe0\" parent=24\n  bone 26: \"Dummy26\" parent=-1 dummy\n  bone 27: \"Bip01 Tail\" parent=3\n  bone 28: \"Bip01 Tail1\" parent=27\n  bone 29: \"Dummy29\" parent=-1 dummy\n  bone 30: \"Box02\" parent=3\n  bone 31: \"Box03\" parent=30\n  bone 32: \"Sphere01\" parent=2\n  bone 33: \"Box01\" parent=2\n  action 0: keys=20 lock=0\n  action 1: keys=20 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/PoseBox01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/PoseBox01.bmd\n  name field: Data2\\Object1\\pose_box.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 7\n  bounds (bind pose): min -50.00 -50.00 0.00  max 50.00 50.00 200.00  size 100.00 100.00 200.00\n  mesh 0: triangles=7 vertices=6 normals=4 uvs=4 texture=ston03.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Ship01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Ship01.bmd\n  name field: Data2\\Object1\\ship.smd  version: 10\n  meshes: 10  bones: 10  actions: 1  triangles: 754\n  bounds (bind pose): min -581.94 -1166.51 -100.15  max 553.46 669.28 937.93  size 1135.40 1835.79 1038.08\n  mesh 0: triangles=284 vertices=263 normals=239 uvs=309 texture=TileGround03.jpg\n  mesh 1: triangles=34 vertices=38 normals=38 uvs=22 texture=ship01.jpg\n  mesh 2: triangles=62 vertices=76 normals=65 uvs=74 texture=ship03.jpg\n  mesh 3: triangles=58 vertices=68 normals=72 uvs=66 texture=ship04.jpg\n  mesh 4: triangles=188 vertices=152 normals=155 uvs=77 texture=ship07.jpg\n  mesh 5: triangles=8 vertices=10 normals=10 uvs=6 texture=ship05.tga\n  mesh 6: triangles=24 vertices=48 normals=38 uvs=23 texture=ship07.tga\n  mesh 7: triangles=24 vertices=48 normals=38 uvs=9 texture=ship06.tga\n  mesh 8: triangles=12 vertices=14 normals=14 uvs=7 texture=ship06.jpg\n  mesh 9: triangles=60 vertices=36 normals=35 uvs=36 texture=ship05.jpg\n  bone 0: \"Box01\" parent=-1\n  bone 1: \"Box02\" parent=0\n  bone 2: \"Box03\" parent=1\n  bone 3: \"Box05\" parent=2\n  bone 4: \"Box04\" parent=1\n  bone 5: \"Box06\" parent=4\n  bone 6: \"ship\" parent=0\n  bone 7: \"Cylinder01\" parent=0\n  bone 8: \"Bone01\" parent=-1\n  bone 9: \"Bone02\" parent=-1\n  action 0: keys=30 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Sign01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Sign01.bmd\n  name field: Data2\\Object1\\signboard_up.smd  version: 10\n  meshes: 3  bones: 4  actions: 1  triangles: 30\n  bounds (bind pose): min -118.88 -4.64 0.05  max 0.92 7.93 81.77  size 119.80 12.57 81.72\n  mesh 0: triangles=24 vertices=20 normals=17 uvs=30 texture=notice.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=signboard.tga\n  mesh 2: triangles=4 vertices=8 normals=1 uvs=4 texture=doorknob.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Cylinder01\" parent=0\n  action 0: keys=21 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Sign02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Sign02.bmd\n  name field: Data2\\Object1\\signboard_down.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 30\n  bounds (bind pose): min -48.56 -5.94 -0.67  max 50.79 9.47 134.44  size 99.35 15.41 135.11\n  mesh 0: triangles=30 vertices=24 normals=6 uvs=32 texture=notice.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stair01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stair01.bmd\n  name field: Data2\\Object1\\stairs.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 78\n  bounds (bind pose): min -42.28 -4.67 0.00  max 42.04 4.70 330.00  size 84.32 9.38 330.00\n  mesh 0: triangles=78 vertices=70 normals=12 uvs=18 texture=tile_wood01.jpg\n  bone 0: \"Box02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelDoor01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelDoor01.bmd\n  name field: Data2\\Object1\\steel_barred_door.  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 58\n  bounds (bind pose): min -1.55 -6.62 0.45  max 152.90 6.70 356.48  size 154.45 13.32 356.02\n  mesh 0: triangles=56 vertices=52 normals=22 uvs=40 texture=steel_barred_b.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_door.tga\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelStatue01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelStatue01.bmd\n  name field: Data2\\Object1\\steel_barred_door_  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 66\n  bounds (bind pose): min -65.92 -65.01 -0.04  max 65.87 66.77 321.58  size 131.79 131.79 321.62\n  mesh 0: triangles=66 vertices=48 normals=17 uvs=82 texture=tombstone_big.jpg\n  bone 0: \"Box02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelWall01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelWall01.bmd\n  name field: Data2\\Object1\\steel_barred_02.sm  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 52\n  bounds (bind pose): min -49.99 -50.01 0.00  max 3.44 3.54 247.03  size 53.43 53.55 247.03\n  mesh 0: triangles=48 vertices=38 normals=38 uvs=34 texture=steel_barred_b.jpg\n  mesh 1: triangles=4 vertices=6 normals=3 uvs=6 texture=steel_barred_a.tga\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelWall02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelWall02.bmd\n  name field: Data2\\Object1\\steel_barred_03.sm  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 72\n  bounds (bind pose): min -199.68 -3.23 0.00  max 200.48 3.21 220.07  size 400.16 6.44 220.07\n  mesh 0: triangles=64 vertices=64 normals=8 uvs=12 texture=steel_barred_b.jpg\n  mesh 1: triangles=8 vertices=16 normals=1 uvs=4 texture=steel_barred_a.tga\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Box05\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  bone 3: \"Box07\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelWall03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/SteelWall03.bmd\n  name field: Data2\\Object1\\steel_barred_01.sm  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 18\n  bounds (bind pose): min -49.88 -3.23 0.00  max 50.12 3.21 220.07  size 100.00 6.44 220.07\n  mesh 0: triangles=16 vertices=16 normals=8 uvs=12 texture=steel_barred_b.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_a.tga\n  bone 0: \"Box04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone01.bmd\n  name field: Data2\\Object1\\Ston_01.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 166\n  bounds (bind pose): min -209.21 -158.55 -19.62  max 202.95 127.83 185.30  size 412.16 286.37 204.92\n  mesh 0: triangles=140 vertices=87 normals=82 uvs=87 texture=ston01.jpg\n  mesh 1: triangles=26 vertices=52 normals=36 uvs=4 texture=ston02.tga\n  bone 0: \"ston01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone02.bmd\n  name field: Data2\\Object1\\Ston_02.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 159\n  bounds (bind pose): min -149.27 -148.93 -20.04  max 105.96 128.99 258.27  size 255.23 277.92 278.31\n  mesh 0: triangles=125 vertices=83 normals=78 uvs=83 texture=ston01.jpg\n  mesh 1: triangles=34 vertices=68 normals=51 uvs=4 texture=ston02.tga\n  bone 0: \"ston02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone03.bmd\n  name field: Data2\\Object1\\Ston_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 80\n  bounds (bind pose): min -128.79 -73.92 -69.81  max 102.02 103.59 124.83  size 230.81 177.51 194.64\n  mesh 0: triangles=80 vertices=42 normals=42 uvs=42 texture=ston01.jpg\n  bone 0: \"GeoSphere01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone04.bmd\n  name field: Data2\\Object1\\Ston04.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 45\n  bounds (bind pose): min -49.81 -61.88 -3.64  max 65.26 39.98 26.49  size 115.07 101.86 30.13\n  mesh 0: triangles=45 vertices=33 normals=33 uvs=11 texture=ston01.jpg\n  bone 0: \"GeoSphere01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Stone05.bmd\n  name field: Data2\\Object1\\Ston05.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 120\n  bounds (bind pose): min -55.99 -61.88 -3.23  max 42.21 49.67 26.49  size 98.21 111.54 29.71\n  mesh 0: triangles=120 vertices=88 normals=88 uvs=11 texture=ston01.jpg\n  bone 0: \"GeoSphere01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall01.bmd\n  name field: Data2\\Object1\\c_wall01.smd  version: 10\n  meshes: 5  bones: 1  actions: 1  triangles: 318\n  bounds (bind pose): min -300.06 -134.96 0.00  max 299.92 100.67 623.57  size 599.98 235.63 623.57\n  mesh 0: triangles=56 vertices=48 normals=25 uvs=38 texture=c_wall04.jpg\n  mesh 1: triangles=32 vertices=40 normals=22 uvs=16 texture=c_wall05.jpg\n  mesh 2: triangles=20 vertices=24 normals=6 uvs=10 texture=c_wall06.jpg\n  mesh 3: triangles=82 vertices=61 normals=10 uvs=33 texture=tile_02.jpg\n  mesh 4: triangles=128 vertices=88 normals=44 uvs=44 texture=bridge_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall02.bmd\n  name field: Data2\\Object1\\c_wall02.smd  version: 10\n  meshes: 3  bones: 1  actions: 1  triangles: 44\n  bounds (bind pose): min -50.01 -147.40 -174.17  max 49.99 49.92 334.09  size 100.00 197.32 508.27\n  mesh 0: triangles=10 vertices=16 normals=16 uvs=11 texture=c_wall06.jpg\n  mesh 1: triangles=22 vertices=18 normals=27 uvs=18 texture=c_wall05.jpg\n  mesh 2: triangles=12 vertices=16 normals=18 uvs=8 texture=c_wall04.jpg\n  bone 0: \"Box01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall03.bmd\n  name field: Data2\\Object1\\c_wall03.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 52\n  bounds (bind pose): min -149.51 -109.98 -103.47  max 150.49 49.92 291.27  size 300.00 159.90 394.74\n  mesh 0: triangles=38 vertices=26 normals=41 uvs=45 texture=c_wall04.jpg\n  mesh 1: triangles=14 vertices=12 normals=12 uvs=12 texture=c_wall06.jpg\n  bone 0: \"Box02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneMuWall04.bmd\n  name field: Data2\\Object1\\c_wall05.smd  version: 10\n  meshes: 3  bones: 3  actions: 1  triangles: 285\n  bounds (bind pose): min -149.51 -109.98 -103.47  max 150.49 169.39 299.24  size 300.00 279.37 402.71\n  mesh 0: triangles=38 vertices=26 normals=41 uvs=45 texture=c_wall04.jpg\n  mesh 1: triangles=14 vertices=12 normals=12 uvs=12 texture=c_wall06.jpg\n  mesh 2: triangles=233 vertices=195 normals=50 uvs=177 texture=horse_drawn_01.jpg\n  bone 0: \"Box02\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneStatue01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneStatue01.bmd\n  name field: Data2\\Object1\\stone_statue01.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 92\n  bounds (bind pose): min -54.56 -54.34 0.00  max 54.62 56.47 399.99  size 109.19 110.81 399.99\n  mesh 0: triangles=92 vertices=61 normals=46 uvs=74 texture=stone_statue02.jpg\n  bone 0: \"Box11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneStatue02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneStatue02.bmd\n  name field: Data2\\Object1\\stone_statue02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 107\n  bounds (bind pose): min -134.30 -139.45 0.60  max 134.95 106.07 485.88  size 269.25 245.52 485.28\n  mesh 0: triangles=107 vertices=60 normals=60 uvs=69 texture=stone_statue01.jpg\n  bone 0: \"Cylinder02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneStatue03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneStatue03.bmd\n  name field: Data2\\Object1\\Angel_Stone.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 248\n  bounds (bind pose): min -72.77 -53.36 -0.08  max 74.61 39.88 264.77  size 147.37 93.24 264.85\n  mesh 0: triangles=20 vertices=20 normals=20 uvs=20 texture=tombstone_big.jpg\n  mesh 1: triangles=228 vertices=123 normals=123 uvs=145 texture=angel_stone_statue.jpg\n  bone 0: \"Box03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall01.bmd\n  name field: Data2\\Object1\\wall_01.smd  version: 10\n  meshes: 4  bones: 1  actions: 1  triangles: 318\n  bounds (bind pose): min -298.04 -84.12 0.78  max 297.44 88.56 623.57  size 595.48 172.68 622.79\n  mesh 0: triangles=88 vertices=64 normals=13 uvs=80 texture=tile_01.jpg\n  mesh 1: triangles=20 vertices=16 normals=5 uvs=20 texture=tile_03.jpg\n  mesh 2: triangles=82 vertices=61 normals=10 uvs=33 texture=tile_02.jpg\n  mesh 3: triangles=128 vertices=88 normals=44 uvs=44 texture=bridge_01.jpg\n  bone 0: \"gate\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall02.bmd\n  name field: Data2\\Object1\\wall_02.smd  version: 10\n  meshes: 4  bones: 1  actions: 1  triangles: 318\n  bounds (bind pose): min -298.04 -84.12 -1.53  max 297.44 88.56 421.60  size 595.48 172.68 423.12\n  mesh 0: triangles=88 vertices=64 normals=13 uvs=80 texture=tile_01.jpg\n  mesh 1: triangles=20 vertices=16 normals=5 uvs=20 texture=tile_03.jpg\n  mesh 2: triangles=82 vertices=61 normals=10 uvs=33 texture=tile_02.jpg\n  mesh 3: triangles=128 vertices=88 normals=44 uvs=44 texture=bridge_01.jpg\n  bone 0: \"gate\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall03.bmd\n  name field: Data2\\Object1\\wall_03.smd  version: 10\n  meshes: 3  bones: 4  actions: 1  triangles: 293\n  bounds (bind pose): min -199.33 -43.04 -2.10  max 198.83 180.50 299.24  size 398.15 223.54 301.34\n  mesh 0: triangles=50 vertices=40 normals=8 uvs=55 texture=tile_01.jpg\n  mesh 1: triangles=233 vertices=195 normals=50 uvs=177 texture=horse_drawn_01.jpg\n  mesh 2: triangles=10 vertices=8 normals=9 uvs=12 texture=tile_03.jpg\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  bone 3: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall04.bmd\n  name field: Data2\\Object1\\c_wall06.smd  version: 10\n  meshes: 2  bones: 8  actions: 1  triangles: 36\n  bounds (bind pose): min -3.84 -21.56 -0.08  max 98.57 13.02 179.99  size 102.41 34.57 180.07\n  mesh 0: triangles=28 vertices=17 normals=21 uvs=25 texture=badge_01.jpg\n  mesh 1: triangles=8 vertices=10 normals=11 uvs=10 texture=badge_03.tga\n  bone 0: \"bonee01\" parent=-1\n  bone 1: \"bonee02\" parent=0\n  bone 2: \"bonee03\" parent=1\n  bone 3: \"bonee04\" parent=2\n  bone 4: \"bonee05\" parent=3\n  bone 5: \"bonee06\" parent=4\n  bone 6: \"Box24\" parent=0\n  bone 7: \"Object04\" parent=0\n  action 0: keys=25 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall05.bmd\n  name field: Data2\\Object1\\wall_05.smd  version: 10\n  meshes: 2  bones: 2  actions: 1  triangles: 60\n  bounds (bind pose): min -199.33 -43.04 -1.61  max 198.83 41.85 236.54  size 398.15 84.89 238.15\n  mesh 0: triangles=50 vertices=40 normals=8 uvs=55 texture=tile_01.jpg\n  mesh 1: triangles=10 vertices=8 normals=9 uvs=12 texture=tile_03.jpg\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall06.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StoneWall06.bmd\n  name field: Data2\\Object1\\wall_06.smd  version: 10\n  meshes: 3  bones: 9  actions: 1  triangles: 56\n  bounds (bind pose): min -50.73 -49.66 -79.37  max 49.75 88.94 448.76  size 100.47 138.61 528.13\n  mesh 0: triangles=28 vertices=17 normals=20 uvs=25 texture=badge_01.jpg\n  mesh 1: triangles=8 vertices=10 normals=11 uvs=10 texture=badge_03.tga\n  mesh 2: triangles=20 vertices=12 normals=10 uvs=22 texture=tile_01.jpg\n  bone 0: \"bonee01\" parent=-1\n  bone 1: \"bonee02\" parent=0\n  bone 2: \"bonee03\" parent=1\n  bone 3: \"bonee04\" parent=2\n  bone 4: \"bonee05\" parent=3\n  bone 5: \"bonee06\" parent=4\n  bone 6: \"Box24\" parent=0\n  bone 7: \"Object04\" parent=0\n  bone 8: \"Object05\" parent=-1\n  action 0: keys=25 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Straw01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Straw01.bmd\n  name field: Data2\\Object1\\rice_01.smd  version: 10\n  meshes: 1  bones: 3  actions: 1  triangles: 132\n  bounds (bind pose): min -68.86 -100.91 1.94  max 69.15 105.19 141.75  size 138.01 206.10 139.80\n  mesh 0: triangles=132 vertices=96 normals=32 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder05\" parent=-1\n  bone 1: \"Cylinder12\" parent=-1\n  bone 2: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Straw02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Straw02.bmd\n  name field: Data2\\Object1\\rice_02.smd  version: 10\n  meshes: 1  bones: 8  actions: 1  triangles: 352\n  bounds (bind pose): min -115.39 -210.70 -6.52  max 139.96 221.64 199.44  size 255.36 432.34 205.96\n  mesh 0: triangles=352 vertices=256 normals=192 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder05\" parent=-1\n  bone 1: \"Cylinder12\" parent=-1\n  bone 2: \"Cylinder13\" parent=-1\n  bone 3: \"Cylinder14\" parent=-1\n  bone 4: \"Cylinder15\" parent=-1\n  bone 5: \"Cylinder16\" parent=-1\n  bone 6: \"Cylinder17\" parent=-1\n  bone 7: \"Cylinder18\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StreetLight01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/StreetLight01.bmd\n  name field: Data2\\Object1\\StreetLight.smd  version: 10\n  meshes: 2  bones: 11  actions: 1  triangles: 84\n  bounds (bind pose): min -12.11 -73.27 0.34  max 12.63 6.81 258.32  size 24.74 80.09 257.98\n  mesh 0: triangles=48 vertices=40 normals=26 uvs=57 texture=streetlight.jpg\n  mesh 1: triangles=36 vertices=24 normals=24 uvs=28 texture=streetlight_brightness2.jpg\n  bone 0: \"Dummy00\" parent=-1 dummy\n  bone 1: \"Dummy01\" parent=-1 dummy\n  bone 2: \"Dummy02\" parent=-1 dummy\n  bone 3: \"Mesh02\" parent=-1\n  bone 4: \"Cylinder02\" parent=-1\n  bone 5: \"Bone01\" parent=-1\n  bone 6: \"Bone02\" parent=5\n  bone 7: \"Bone03\" parent=6\n  bone 8: \"Bone04\" parent=7\n  bone 9: \"Bone05\" parent=8\n  bone 10: \"Mesh01\" parent=5\n  action 0: keys=21 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tent01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tent01.bmd\n  name field: Data2\\Object1\\tent_01.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 66\n  bounds (bind pose): min -154.20 -201.18 -1.37  max 156.02 200.29 330.41  size 310.22 401.47 331.78\n  mesh 0: triangles=26 vertices=18 normals=18 uvs=18 texture=tile_house01.jpg\n  mesh 1: triangles=40 vertices=32 normals=5 uvs=12 texture=tile_ston06.jpg\n  bone 0: \"boness01\" parent=-1\n  bone 1: \"boness02\" parent=0\n  bone 2: \"boness\" parent=1\n  bone 3: \"Mesh01\" parent=0\n  action 0: keys=36 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tomb01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tomb01.bmd\n  name field: Data2\\Object1\\Tomb_arc.smd  version: 10\n  meshes: 1  bones: 2  actions: 1  triangles: 44\n  bounds (bind pose): min -117.53 -140.51 -0.08  max 62.39 121.84 78.10  size 179.93 262.35 78.19\n  mesh 0: triangles=44 vertices=28 normals=21 uvs=52 texture=grave_02.jpg\n  bone 0: \"Box01\" parent=-1\n  bone 1: \"Cylinder02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tomb02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tomb02.bmd\n  name field: Data2\\Object1\\Tomb_cross.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 40\n  bounds (bind pose): min -71.53 -119.48 -0.04  max 69.06 122.99 49.19  size 140.59 242.47 49.23\n  mesh 0: triangles=40 vertices=28 normals=10 uvs=56 texture=grave_01.jpg\n  bone 0: \"Mesh01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tomb03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tomb03.bmd\n  name field: Tomb03.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 200\n  bounds (bind pose): min -44.99 -9.93 0.05  max 44.77 9.71 117.30  size 89.76 19.64 117.25\n  mesh 0: triangles=200 vertices=102 normals=126 uvs=104 texture=tombstone.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/TreasureChest01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/TreasureChest01.bmd\n  name field: TreasureChest01.smd  version: 12\n  meshes: 1  bones: 4  actions: 1  triangles: 1174\n  bounds (bind pose): min -57.73 -34.37 0.05  max 56.83 29.96 84.09  size 114.57 64.32 84.04\n  mesh 0: triangles=1174 vertices=666 normals=317 uvs=327 texture=treasure_chest.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Box12\" parent=0\n  action 0: keys=7 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/TreasureDrum01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/TreasureDrum01.bmd\n  name field: Data2\\Object1\\Drum.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 60\n  bounds (bind pose): min -40.57 -40.22 0.00  max 40.70 41.05 102.98  size 81.27 81.27 102.98\n  mesh 0: triangles=60 vertices=32 normals=34 uvs=52 texture=drum.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree01.bmd\n  name field: Data2\\Object1\\treesmall.smd  version: 10\n  meshes: 2  bones: 16  actions: 1  triangles: 412\n  bounds (bind pose): min -407.63 -328.57 0.13  max 344.26 279.47 825.10  size 751.89 608.03 824.97\n  mesh 0: triangles=268 vertices=145 normals=145 uvs=203 texture=tree.jpg\n  mesh 1: triangles=144 vertices=288 normals=99 uvs=4 texture=Tree_a.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=1\n  bone 5: \"Bone06\" parent=4\n  bone 6: \"Bone07\" parent=1\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"notice_3\" parent=1\n  bone 9: \"notice_10\" parent=1\n  bone 10: \"notice_6\" parent=1\n  bone 11: \"tree01\" parent=0\n  bone 12: \"Box35\" parent=0\n  bone 13: \"Dummy13\" parent=-1 dummy\n  bone 14: \"Dummy14\" parent=-1 dummy\n  bone 15: \"Dummy15\" parent=-1 dummy\n  action 0: keys=31 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree02.bmd\n  name field: Data2\\Object1\\treebig.smd  version: 10\n  meshes: 2  bones: 24  actions: 1  triangles: 770\n  bounds (bind pose): min -375.50 -399.63 -5.23  max 469.63 340.30 893.52  size 845.12 739.93 898.74\n  mesh 0: triangles=606 vertices=338 normals=338 uvs=444 texture=tree.jpg\n  mesh 1: triangles=164 vertices=328 normals=232 uvs=4 texture=Tree_a.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=1\n  bone 6: \"Bone07\" parent=5\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Bone09\" parent=1\n  bone 9: \"Bone10\" parent=8\n  bone 10: \"Bone11\" parent=9\n  bone 11: \"Bone12\" parent=1\n  bone 12: \"stop\" parent=11\n  bone 13: \"Bone14\" parent=12\n  bone 14: \"Bone15\" parent=13\n  bone 15: \"notice_7\" parent=0\n  bone 16: \"notice_5\" parent=0\n  bone 17: \"notice_12\" parent=0\n  bone 18: \"tree_big\" parent=0\n  bone 19: \"Box17\" parent=0\n  bone 20: \"Dummy20\" parent=-1 dummy\n  bone 21: \"Dummy21\" parent=-1 dummy\n  bone 22: \"Dummy22\" parent=-1 dummy\n  bone 23: \"Dummy23\" parent=-1 dummy\n  action 0: keys=31 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree03.bmd\n  name field: Data2\\Object1\\treea_01.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 273\n  bounds (bind pose): min -257.26 -243.68 -1.89  max 248.24 261.08 536.01  size 505.50 504.76 537.90\n  mesh 0: triangles=273 vertices=185 normals=203 uvs=149 texture=tree_03.jpg\n  bone 0: \"Cylinder05\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree04.bmd\n  name field: Data2\\Object1\\treea_02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 273\n  bounds (bind pose): min -103.02 -278.20 -5.63  max 298.21 251.98 494.72  size 401.23 530.18 500.36\n  mesh 0: triangles=273 vertices=185 normals=221 uvs=149 texture=tree_03.jpg\n  bone 0: \"Cylinder06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree05.bmd\n  name field: Data2\\Object1\\treea_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 85\n  bounds (bind pose): min -12.69 -28.83 -2.29  max 77.84 28.75 352.81  size 90.53 57.57 355.10\n  mesh 0: triangles=85 vertices=58 normals=71 uvs=48 texture=tree_03.jpg\n  bone 0: \"Cylinder08\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree06.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree06.bmd\n  name field: Data2\\Object1\\treea_04.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 89\n  bounds (bind pose): min -87.12 -59.40 -2.36  max 77.69 54.40 806.59  size 164.81 113.80 808.94\n  mesh 0: triangles=89 vertices=93 normals=93 uvs=31 texture=tree_02.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree07.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree07.bmd\n  name field: Data2\\Object1\\treea_05.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 90\n  bounds (bind pose): min -70.45 -73.18 -1.29  max 72.04 82.17 69.24  size 142.49 155.35 70.52\n  mesh 0: triangles=84 vertices=58 normals=58 uvs=61 texture=tree_03.jpg\n  mesh 1: triangles=6 vertices=8 normals=1 uvs=8 texture=tree_04.jpg\n  bone 0: \"Cylinder02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree08.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree08.bmd\n  name field: Data2\\Object1\\treea_06.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 176\n  bounds (bind pose): min -125.59 -313.86 -2.86  max 41.31 281.90 84.69  size 166.90 595.76 87.55\n  mesh 0: triangles=176 vertices=96 normals=128 uvs=119 texture=tree_01.jpg\n  bone 0: \"Tube01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree09.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree09.bmd\n  name field: Data2\\Object1\\treea_07.smd  version: 10\n  meshes: 1  bones: 5  actions: 1  triangles: 240\n  bounds (bind pose): min -123.82 -129.51 0.56  max 156.32 111.42 192.24  size 280.14 240.93 191.68\n  mesh 0: triangles=240 vertices=180 normals=180 uvs=28 texture=tree_07.tga\n  bone 0: \"Cylinder04\" parent=-1\n  bone 1: \"Cylinder05\" parent=-1\n  bone 2: \"Cylinder06\" parent=-1\n  bone 3: \"Cylinder07\" parent=-1\n  bone 4: \"Cylinder08\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree10.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree10.bmd\n  name field: Data2\\Object1\\treea_08.smd  version: 10\n  meshes: 1  bones: 10  actions: 1  triangles: 480\n  bounds (bind pose): min -199.56 -175.26 0.44  max 134.86 178.79 159.08  size 334.42 354.05 158.64\n  mesh 0: triangles=480 vertices=360 normals=180 uvs=28 texture=tree_07.tga\n  bone 0: \"Cylinder04\" parent=-1\n  bone 1: \"Cylinder05\" parent=-1\n  bone 2: \"Cylinder06\" parent=-1\n  bone 3: \"Cylinder07\" parent=-1\n  bone 4: \"Cylinder08\" parent=-1\n  bone 5: \"Cylinder09\" parent=-1\n  bone 6: \"Cylinder10\" parent=-1\n  bone 7: \"Cylinder11\" parent=-1\n  bone 8: \"Cylinder12\" parent=-1\n  bone 9: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree11.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree11.bmd\n  name field: Data2\\Object1\\treea_09.smd  version: 10\n  meshes: 2  bones: 10  actions: 1  triangles: 169\n  bounds (bind pose): min -178.11 -170.89 -0.05  max 195.18 187.60 560.52  size 373.29 358.49 560.58\n  mesh 0: triangles=144 vertices=102 normals=102 uvs=17 texture=tree_06.tga\n  mesh 1: triangles=25 vertices=16 normals=16 uvs=20 texture=tree_03.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=2\n  bone 5: \"Bone06\" parent=4\n  bone 6: \"Bone07\" parent=2\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Bone09\" parent=7\n  bone 9: \"Sphere02\" parent=0\n  action 0: keys=31 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree12.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree12.bmd\n  name field: Data2\\Object1\\treea_10.smd  version: 10\n  meshes: 2  bones: 9  actions: 1  triangles: 393\n  bounds (bind pose): min -187.71 -196.27 0.19  max 236.19 229.76 490.08  size 423.90 426.02 489.89\n  mesh 0: triangles=273 vertices=185 normals=203 uvs=227 texture=tree_01.jpg\n  mesh 1: triangles=120 vertices=240 normals=60 uvs=4 texture=tree_04.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=2\n  bone 6: \"Bone07\" parent=5\n  bone 7: \"Cylinder01\" parent=0\n  bone 8: \"Box07\" parent=0\n  action 0: keys=31 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree13.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Tree13.bmd\n  name field: Data2\\Object1\\treea_11.smd  version: 10\n  meshes: 2  bones: 10  actions: 1  triangles: 393\n  bounds (bind pose): min -203.43 -203.05 0.39  max 248.12 194.01 472.28  size 451.56 397.07 471.89\n  mesh 0: triangles=120 vertices=240 normals=60 uvs=4 texture=tree_05.tga\n  mesh 1: triangles=273 vertices=185 normals=205 uvs=227 texture=tree_01.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=4\n  bone 6: \"Bone07\" parent=3\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Box08\" parent=0\n  bone 9: \"Cylinder07\" parent=0\n  action 0: keys=31 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Waterspout01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Waterspout01.bmd\n  name field: Data2\\Object1\\waterspout.smd  version: 10\n  meshes: 4  bones: 11  actions: 1  triangles: 639\n  bounds (bind pose): min -199.06 -199.74 -0.14  max 199.23 198.55 311.20  size 398.30 398.30 311.34\n  mesh 0: triangles=72 vertices=60 normals=36 uvs=29 texture=stone_statue02.jpg\n  mesh 1: triangles=417 vertices=232 normals=209 uvs=224 texture=reagon_waterspout.jpg\n  mesh 2: triangles=60 vertices=36 normals=36 uvs=39 texture=ston01.jpg\n  mesh 3: triangles=90 vertices=66 normals=66 uvs=66 texture=ston02.jpg\n  bone 0: \"OilTank01\" parent=-1\n  bone 1: \"Box04\" parent=-1\n  bone 2: \"Box01\" parent=1\n  bone 3: \"Box02\" parent=2\n  bone 4: \"Box03\" parent=3\n  bone 5: \"QuadPatch01\" parent=1\n  bone 6: \"Box05\" parent=-1\n  bone 7: \"Box06\" parent=6\n  bone 8: \"Box07\" parent=7\n  bone 9: \"Box08\" parent=8\n  bone 10: \"QuadPatch02\" parent=6\n  action 0: keys=21 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well01.bmd\n  name field: Data2\\Object1\\jar_01.smd  version: 10\n  meshes: 4  bones: 7  actions: 1  triangles: 405\n  bounds (bind pose): min -154.76 -125.85 -0.07  max 121.57 93.46 270.82  size 276.33 219.31 270.89\n  mesh 0: triangles=72 vertices=48 normals=24 uvs=28 texture=tub.jpg\n  mesh 1: triangles=16 vertices=24 normals=2 uvs=6 texture=horse_drawn_01.jpg\n  mesh 2: triangles=123 vertices=89 normals=72 uvs=101 texture=well.jpg\n  mesh 3: triangles=194 vertices=120 normals=133 uvs=116 texture=jar_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder04\" parent=-1\n  bone 2: \"Cylinder07\" parent=-1\n  bone 3: \"Cylinder08\" parent=-1\n  bone 4: \"Cylinder09\" parent=-1\n  bone 5: \"Cylinder10\" parent=-1\n  bone 6: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well02.bmd\n  name field: Data2\\Object1\\jar_02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 123\n  bounds (bind pose): min -79.28 -93.46 0.00  max 78.00 93.46 270.82  size 157.27 186.92 270.82\n  mesh 0: triangles=123 vertices=89 normals=72 uvs=101 texture=well.jpg\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well03.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well03.bmd\n  name field: Data2\\Object1\\jar_03.smd  version: 10\n  meshes: 1  bones: 4  actions: 1  triangles: 194\n  bounds (bind pose): min -51.57 -48.73 -0.07  max 63.52 53.38 100.97  size 115.08 102.11 101.04\n  mesh 0: triangles=194 vertices=120 normals=133 uvs=116 texture=jar_01.jpg\n  bone 0: \"Cylinder07\" parent=-1\n  bone 1: \"Cylinder08\" parent=-1\n  bone 2: \"Cylinder09\" parent=-1\n  bone 3: \"Cylinder10\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well04.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/src/bin/Data/Object1/Well04.bmd\n  name field: Data2\\Object1\\jar_04.smd  version: 10\n  meshes: 1  bones: 8  actions: 1  triangles: 388\n  bounds (bind pose): min -43.64 -134.58 -1.26  max 58.29 126.73 99.26  size 101.93 261.31 100.52\n  mesh 0: triangles=388 vertices=240 normals=251 uvs=116 texture=jar_01.jpg\n  bone 0: \"Cylinder07\" parent=-1\n  bone 1: \"Cylinder08\" parent=-1\n  bone 2: \"Cylinder09\" parent=-1\n  bone 3: \"Cylinder10\" parent=-1\n  bone 4: \"Cylinder11\" parent=-1\n  bone 5: \"Cylinder12\" parent=-1\n  bone 6: \"Cylinder13\" parent=-1\n  bone 7: \"Cylinder14\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  }
+]

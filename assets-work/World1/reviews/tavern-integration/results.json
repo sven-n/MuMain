@@ -1,0 +1,293 @@
+{
+  "reviewed_commits": [
+    "fe69aa12",
+    "45c82ea0"
+  ],
+  "scope": "offline only",
+  "assets": {
+    "Furniture03": {
+      "triangles": 680,
+      "bounds_before_after": [
+        [
+          [
+            -101.684799,
+            -51.504002,
+            0.0
+          ],
+          [
+            101.784798,
+            51.387402,
+            86.580902
+          ]
+        ],
+        [
+          [
+            -101.684799,
+            -51.504002,
+            0.0
+          ],
+          [
+            101.784798,
+            51.387402,
+            86.580902
+          ]
+        ]
+      ],
+      "all_vertices_bind_root_0": true,
+      "all_uvs_in_unit_square": true,
+      "minimum_uv_triangle_area": 3.069188849999991e-05,
+      "minimum_winding_normal_dot": 1.2990375,
+      "connection_points": {
+        "applicable": false
+      },
+      "nodes_bind_pose": "identical nodes and numeric bind poses",
+      "actions": [
+        "Furniture03_a00.smd"
+      ],
+      "action_smds": "identical numeric frame poses, including negative-zero normalization",
+      "action_texture_metadata": [
+        "action 0 file=Furniture03_a00.smd keys=1 lock=0",
+        "texture 0 desk_big.jpg original=desk_big.jpg"
+      ],
+      "client_verified": false,
+      "full_model_compare": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 42 vs 680\nunmatched triangles: 42  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "skeleton_compare": "meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "export_sha256": {
+        "Furniture03.bmd": "6c427d73a9937d9e3b7d287b0f3f74b7f2014b0a423bd666590e26e9886e4d94",
+        "desk_big.OZJ": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4"
+      }
+    },
+    "Furniture04": {
+      "triangles": 324,
+      "bounds_before_after": [
+        [
+          [
+            -106.607697,
+            -99.685699,
+            0.0
+          ],
+          [
+            97.078102,
+            -0.396301,
+            86.327499
+          ]
+        ],
+        [
+          [
+            -106.607697,
+            -99.685699,
+            0.0
+          ],
+          [
+            97.078102,
+            -0.396301,
+            86.327499
+          ]
+        ]
+      ],
+      "all_vertices_bind_root_0": true,
+      "all_uvs_in_unit_square": true,
+      "minimum_uv_triangle_area": 5.439873999999967e-05,
+      "minimum_winding_normal_dot": 0.9358738856644,
+      "connection_points": {
+        "applicable": true,
+        "axis": 1,
+        "planes": [
+          -0.396301
+        ],
+        "unique_original_anchors": [
+          [
+            -106.607697,
+            -0.396301,
+            77.709396
+          ],
+          [
+            -106.607697,
+            -0.396301,
+            86.327499
+          ],
+          [
+            97.078102,
+            -0.396301,
+            77.709396
+          ],
+          [
+            97.078102,
+            -0.396301,
+            86.327499
+          ]
+        ],
+        "maximum_coordinate_deviation": 0.0
+      },
+      "nodes_bind_pose": "identical nodes and numeric bind poses",
+      "actions": [
+        "Furniture04_a00.smd"
+      ],
+      "action_smds": "identical numeric frame poses, including negative-zero normalization",
+      "action_texture_metadata": [
+        "action 0 file=Furniture04_a00.smd keys=1 lock=0",
+        "texture 0 desk_big.jpg original=desk_big.jpg"
+      ],
+      "client_verified": false,
+      "full_model_compare": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 38 vs 324\nunmatched triangles: 38  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "skeleton_compare": "meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "export_sha256": {
+        "Furniture04.bmd": "d1afed82e4ca519a11fe752a73a79a20a9624d788007344e7cbc9ec85bc49a4c",
+        "desk_big.OZJ": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4"
+      }
+    },
+    "Furniture05": {
+      "triangles": 412,
+      "bounds_before_after": [
+        [
+          [
+            -101.784302,
+            -34.814301,
+            0.0
+          ],
+          [
+            101.685303,
+            35.179798,
+            105.375504
+          ]
+        ],
+        [
+          [
+            -101.784302,
+            -34.814301,
+            0.0
+          ],
+          [
+            101.685303,
+            35.179798,
+            105.375504
+          ]
+        ]
+      ],
+      "all_vertices_bind_root_0": true,
+      "all_uvs_in_unit_square": true,
+      "minimum_uv_triangle_area": 3.0475967999999848e-05,
+      "minimum_winding_normal_dot": 1.2990374999999985,
+      "connection_points": {
+        "applicable": true,
+        "axis": 0,
+        "planes": [
+          101.685303,
+          -101.784302
+        ],
+        "unique_original_anchors": [
+          [
+            -101.784302,
+            -34.814301,
+            94.663597
+          ],
+          [
+            -101.784302,
+            -34.814301,
+            105.375504
+          ],
+          [
+            -101.784302,
+            -8.5842,
+            1.064201
+          ],
+          [
+            -101.784302,
+            -8.5842,
+            95.136497
+          ],
+          [
+            -101.784302,
+            6.7758,
+            1.064201
+          ],
+          [
+            -101.784302,
+            6.7758,
+            95.136497
+          ],
+          [
+            -101.784302,
+            35.179798,
+            94.663597
+          ],
+          [
+            -101.784302,
+            35.179798,
+            105.375504
+          ],
+          [
+            101.685303,
+            -34.814301,
+            94.663597
+          ],
+          [
+            101.685303,
+            -34.814301,
+            105.375504
+          ],
+          [
+            101.685303,
+            -8.5842,
+            1.064201
+          ],
+          [
+            101.685303,
+            -8.5842,
+            95.136497
+          ],
+          [
+            101.685303,
+            6.7758,
+            1.064201
+          ],
+          [
+            101.685303,
+            6.7758,
+            95.136497
+          ],
+          [
+            101.685303,
+            35.179798,
+            94.663597
+          ],
+          [
+            101.685303,
+            35.179798,
+            105.375504
+          ]
+        ],
+        "maximum_coordinate_deviation": 0.0
+      },
+      "nodes_bind_pose": "identical nodes and numeric bind poses",
+      "actions": [
+        "Furniture05_a00.smd"
+      ],
+      "action_smds": "identical numeric frame poses, including negative-zero normalization",
+      "action_texture_metadata": [
+        "action 0 file=Furniture05_a00.smd keys=1 lock=0",
+        "texture 0 desk_big.jpg original=desk_big.jpg"
+      ],
+      "client_verified": false,
+      "full_model_compare": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 34 vs 412\nunmatched triangles: 31  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "skeleton_compare": "meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "export_sha256": {
+        "Furniture05.bmd": "d1fb904efbb81091c7ef5841d6f4e3416da3a8dc5b382bd3e20bf15f528631d3",
+        "desk_big.OZJ": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4"
+      }
+    }
+  },
+  "dependencies": {
+    "model_count": 115,
+    "desk_big.jpg": [
+      "Furniture03.bmd",
+      "Furniture04.bmd",
+      "Furniture05.bmd"
+    ]
+  },
+  "placement_counts": {
+    "Furniture03": 5,
+    "Furniture04": 3,
+    "Furniture05": 3
+  }
+}

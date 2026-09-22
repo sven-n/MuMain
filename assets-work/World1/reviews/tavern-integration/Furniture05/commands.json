@@ -1,0 +1,145 @@
+[
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "bmd2smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/original/Furniture05.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05.actions.txt\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05.smd"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05.smd: bones=1 frames=1 triangles=34 materials=1\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05_a00.smd",
+      "--animation"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "smd2bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/skeleton.smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/skeleton.bmd",
+      "--manifest",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/Furniture05.actions.txt"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/skeleton.bmd (1 action(s))\n",
+    "stderr": "warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)\n"
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "bmd2smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05.actions.txt\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05.smd"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05.smd: bones=1 frames=1 triangles=412 materials=1\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05_a00.smd",
+      "--animation"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "smd2bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/skeleton.smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/skeleton.bmd",
+      "--manifest",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/Furniture05.actions.txt"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/skeleton.bmd (1 action(s))\n",
+    "stderr": "warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)\n"
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "compare",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/original/Furniture05.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd"
+    ],
+    "exit_code": 2,
+    "stdout": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 34 vs 412\nunmatched triangles: 31  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/original/Furniture05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/original/Furniture05.bmd\n  name field: Data2\\Object1\\house_in_05.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 34\n  bounds (bind pose): min -101.78 -34.81 0.00  max 101.69 35.18 105.38  size 203.47 69.99 105.38\n  mesh 0: triangles=34 vertices=32 normals=7 uvs=28 texture=desk_big.jpg\n  bone 0: \"Box13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd\n  name field: Furniture05.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 412\n  bounds (bind pose): min -101.78 -34.81 0.00  max 101.69 35.18 105.38  size 203.47 69.99 105.38\n  mesh 0: triangles=412 vertices=228 normals=113 uvs=130 texture=desk_big.jpg\n  bone 0: \"Box13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "compare",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/original/skeleton.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/assets-work/World1/reviews/tavern-integration/Furniture05/replacement/skeleton.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-review/tools/mu_texture.py",
+      "check",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/exports/desk_big.OZJ"
+    ],
+    "exit_code": 0,
+    "stdout": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/exports/desk_big.OZJ\n",
+    "stderr": ""
+  }
+]

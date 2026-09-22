@@ -1,0 +1,230 @@
+00:00.841  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture03/original/source.blend"
+00:00.848  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture03/source.blend"
+00:00.895  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/original/source.blend"
+00:00.905  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/source.blend"
+00:00.941  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/original/source.blend"
+00:00.950  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/source.blend"
+{
+  "Furniture03": {
+    "status": "PASS",
+    "ref_original_numeric_geometry_uv_weights_transform": "identical",
+    "original_snapshot_sha256": "042de6292d8d3796a72c98c9d2b3c8804c9359fca56f50610f59bb1005c74c03",
+    "reference_and_high_poly_excluded": true,
+    "packed_images": {
+      "desk_big.jpg": {
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "14f2eaced592aa9e6714a31b12bba06c454bd47502c3fc5d3ab54d454c7d10e1"
+      },
+      "desk_big.jpg.001": {
+        "size": [
+          1024,
+          1024
+        ],
+        "sha256": "42c64ea22e61bee77ec1a9c1ce9b538be88ce68dec85d3465e244e8ecb26fae2"
+      }
+    },
+    "rig_and_metadata": [
+      {
+        "bones": [
+          [
+            "Box09",
+            null
+          ]
+        ],
+        "mu_bone_order": [
+          "Box09"
+        ],
+        "mu_action_meta": {
+          "Furniture03_a00": {
+            "index": 0,
+            "lock": false
+          }
+        },
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "active_mesh_objects": 18,
+    "materials": [
+      "desk_big.jpg"
+    ],
+    "uv_layers_per_mesh": 1,
+    "bone_influences_per_vertex": 1
+  },
+  "Furniture04": {
+    "status": "PASS",
+    "ref_original_numeric_geometry_uv_weights_transform": "identical",
+    "original_snapshot_sha256": "e17efa891c53e3a4ac8b0b6df00aeabce63136f18ccefd725973c9821ea396df",
+    "reference_and_high_poly_excluded": true,
+    "packed_images": {
+      "desk_big.jpg": {
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "14f2eaced592aa9e6714a31b12bba06c454bd47502c3fc5d3ab54d454c7d10e1"
+      },
+      "desk_big.jpg.001": {
+        "size": [
+          1024,
+          1024
+        ],
+        "sha256": "42c64ea22e61bee77ec1a9c1ce9b538be88ce68dec85d3465e244e8ecb26fae2"
+      }
+    },
+    "rig_and_metadata": [
+      {
+        "bones": [
+          [
+            "Box01",
+            null
+          ]
+        ],
+        "mu_bone_order": [
+          "Box01"
+        ],
+        "mu_action_meta": {
+          "Furniture04_a00": {
+            "index": 0,
+            "lock": false
+          }
+        },
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "active_mesh_objects": 5,
+    "materials": [
+      "desk_big.jpg"
+    ],
+    "uv_layers_per_mesh": 1,
+    "bone_influences_per_vertex": 1
+  },
+  "Furniture05": {
+    "status": "PASS",
+    "ref_original_numeric_geometry_uv_weights_transform": "identical",
+    "original_snapshot_sha256": "6066513b9d55d1eb29a2762c6ac383eb43e588b98747e36f211407b925089a98",
+    "reference_and_high_poly_excluded": true,
+    "packed_images": {
+      "desk_big.jpg": {
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "14f2eaced592aa9e6714a31b12bba06c454bd47502c3fc5d3ab54d454c7d10e1"
+      },
+      "desk_big.jpg.001": {
+        "size": [
+          1024,
+          1024
+        ],
+        "sha256": "42c64ea22e61bee77ec1a9c1ce9b538be88ce68dec85d3465e244e8ecb26fae2"
+      }
+    },
+    "rig_and_metadata": [
+      {
+        "bones": [
+          [
+            "Box13",
+            null
+          ]
+        ],
+        "mu_bone_order": [
+          "Box13"
+        ],
+        "mu_action_meta": {
+          "Furniture05_a00": {
+            "index": 0,
+            "lock": false
+          }
+        },
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "active_mesh_objects": 17,
+    "materials": [
+      "desk_big.jpg"
+    ],
+    "uv_layers_per_mesh": 1,
+    "bone_influences_per_vertex": 1
+  }
+}
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
