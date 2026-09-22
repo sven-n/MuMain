@@ -102,3 +102,14 @@ out/build/macos-arm64/tools/bmdconv/Release/bmdconv compare src/bin/Data/Item/Sw
 | Build fails on a standard header | stale libc++ folder, see section 3 |
 | Model does not load in game | `bmdconv info` on the file; `bmdconv validate` on its SMD; texture names vs files |
 | Texture looks padded or flipped | `mu_texture.py check` (power of two, TGA origin) |
+
+## Lorencia rebuild integration — 2026-09-22
+
+The ongoing static environment pass is coordinated on `art/lorencia-rebuild` in
+`/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. Use the
+[asset board](../../assets-work/World1/coordination/asset-board.md) and
+[consolidated handoff](../../assets-work/World1/coordination/notes.md) before claiming any
+World1/Object1 asset. They record exact dependency ownership and acceptance; other artists
+work only in their isolated assigned worktrees. Completed terrain, Beer01 and earlier props
+remain protected. Validation and preview evidence are offline; this task has not installed
+runtime assets or verified them in the client. No push or merge to main is authorized.

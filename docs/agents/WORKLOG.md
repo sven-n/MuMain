@@ -183,3 +183,32 @@ UI, Beer01/plate2, terrain/placement or shared-runtime changes; no client launch
 In a stable coordinated client session, check load logs, runtime lighting/filtering/culling,
 table silhouettes and the paired-half-table/counter seams at recorded placements; capture
 matched 1920×1080 before/after views. All supplied previews are labeled offline Blender.
+
+## 2026-09-22 - Lorencia rebuild coordination and first integrations (ASTRA / Codex)
+**Goal:** Rebuild the placed static environment in independent worktrees while preserving
+completed terrain/Beer01 and all gameplay-bound data.
+
+**Done:** Created `art/lorencia-rebuild` in the sibling `MuMain-lorencia-rebuild` worktree
+from reviewed World1 pilot `ac0f6dd8`. Inspected all task/worktree ownership and existing
+handoffs, mapped 115 BMDs/105 texture dependencies with exact World1 placements, and imported
+and visually identified all 106 in-scope assets. Added coordinator-only
+[`asset-board.md`](../../assets-work/World1/coordination/asset-board.md), immutable baseline
+inspection scenes, six review sheets, dependency map and integration ledger. Independent
+review accepted prior Furniture03/04/05; integrated their original and production commits.
+Parallel subagents completed Grass01/02/05/06 surface paintings and Fence01–04 remodels;
+coordinator reviewed actual export images and integrated each validated batch sequentially.
+Trees, tall scrub, barrel/crate/lantern and the next shared rock group are assigned separately.
+
+**Verified:** Tavern joins and original rig/actions independently pass; groundcover full-model
+comparisons are EQUIVALENT; fences intentionally DIFFERENT for geometry with EQUIVALENT
+rig/actions. Coordinator rechecked installed groundcover BMDs. Independent cross-review
+accepted fence visuals and actual-placement joining sheets. Combined model scan resolves all
+textures, installed hashes match exports and untouched original archives match pilot history.
+Fifteen game files differ from the integration baseline; all other 309 World1/Object1 files,
+including all terrain/light/placement/alpha data and completed pilot assets, are unchanged.
+No runtime installation, client launch, engine/CMake/UI edit, push or main merge.
+
+**Open / next:** Production continues through the board. These are offline acceptances only;
+no asset was observed in client by this task. All client loading, shading/filtering, motion,
+placement and matched 1920×1080 capture checks remain pending. Consolidated handoff:
+[`coordination/notes.md`](../../assets-work/World1/coordination/notes.md).
