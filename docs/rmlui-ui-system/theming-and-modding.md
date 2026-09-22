@@ -121,17 +121,22 @@ current session: `$theme modern`, `$theme legacy`, or any modder-supplied folder
 Mechanically: it validates `themes/<name>/base.rcss` exists (`UI::RmlBridge::ThemeExists()`) —
 an unknown name is rejected with no state change, not left to fail silently per-window — then
 calls `UI::RmlBridge::SetActiveThemeName()` to update the live cache and
-`mu::ui::window::CManager::ReloadAllRmlThemes()` to sweep every currently-registered window.
-Each themed window implements this by overriding `IObject::ReloadRmlTheme()`
-(`UI/Core/WindowObject.h`) — a no-op default, so the sweep is safe to call on every window in the
-registry, not just the themed ones — to tear down its `Rml::ElementDocument`/`DataModel`(s) via
-the new `RmlModelBinder<T>::Destroy()` and `Context::UnloadDocument()`, then rebuild them against
-whatever theme is now active, the same `BuildRmlUi()` helper `Create()` itself calls. A window
-that was never opened needs no explicit rebuild — it simply picks up the new theme the first time
-it *is* opened, since `LoadThemedDocument()` always reads the live cache.
-`UI::Login::ReloadRmlTheme()` (`RememberPasswordPrompt.h`) is the one exception called explicitly
-rather than through the registry sweep — that dialog is a free-function module, not a `CObject`,
-so it isn't in `CManager`'s registry.
+`UI::RmlBridge::ReloadAllThemedDocuments()` to invoke every registered theme-reload callback.
+Every themed window/module registers one callback via `UI::RmlBridge::RegisterForThemeReload(owner,
+callback)` right next to the code that already creates its first document (typically
+`Create()`'s guarded `BuildRmlUi()` call) — a tier-agnostic registry keyed by an opaque owner
+pointer (`this` for a window, a private static token's address for a free-function module), not a
+`CManager`-tier sweep. A window unregisters (`UnregisterForThemeReload(this)`) at the exact point,
+if any, it already unhooks from its `CManager` (`RemoveUIObj(this)` in `Release()`) — a handful of
+app/scene-lifetime singleton windows never unhook from `CManager` at all, so they never unregister
+here either, matching that same lifetime. Each callback tears down its `Rml::ElementDocument`/
+`DataModel`(s) via `RmlModelBinder<T>::Destroy()` and `Context::UnloadDocument()`, then rebuilds
+them against whatever theme is now active, the same `BuildRmlUi()` helper `Create()` itself calls.
+A window that was never opened needs no explicit rebuild — it simply picks up the new theme the
+first time it *is* opened, since `LoadThemedDocument()` always reads the live cache.
+`UI::Login::ReloadRmlTheme()` (`RememberPasswordPrompt.h`) and `UI::RmlBridge::Tooltip::ReloadRmlTheme()`
+are no longer special cases — both free-function modules register with the same registry as every
+`CObject`-tier window, just keyed by a private static token instead of `this` since neither has one.
 
 **Session-only**: this does not write to `config.ini` — `GameConfig::SetRmlTheme()` only updates
 the in-memory value, so a relaunch still picks up whatever `config.ini` says. Use it for quickly
@@ -273,13 +278,12 @@ coordinate into `dp`.
   — but a hybrid window's on-screen *position* still isn't theme-controlled (see
   [Coordinates, scaling, and positioning](#coordinates-scaling-and-positioning--what-a-theme-actually-controls)
   above).
-- **Eleven windows are routed through `LoadThemedDocument()` today**: `CLoginWin`,
-  `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`,
-  `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`, `CBuffStrip`, and `CMainFrameWindow`. All eleven
-  also implement `ReloadRmlTheme()` (previous section), so `$theme` covers every themed window that
-  exists today. Extending a new window to support theming is the same established pattern for both
-  halves, not new design work — this list will keep growing and isn't worth maintaining
-  exhaustively; grep `LoadThemedDocument(` for the live count.
+- **Many windows are routed through `LoadThemedDocument()` today** (33 window classes plus the 2
+  free-function modules named above, as of this writing — this list only grows, so don't trust a
+  hardcoded count; grep `RegisterForThemeReload(` for the live figure). All of them register with
+  the theme-reload registry (previous section), so `$theme` covers every themed window that exists
+  today. Extending a new window to support theming is the same established pattern for both
+  halves, not new design work.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Fixed
   2026-09-04: `MainFrameWindow.cpp`'s background-fill and skill-highlight logic used to key
   on `GetActiveThemeName() == "modern"`; both now key on `UI::RmlBridge::ThemeProvidesOwnIconChrome()`,

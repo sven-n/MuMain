@@ -69,7 +69,7 @@ public:
 	void Release();
 	void Show(bool bShow) override;
 
-	void ReloadRmlTheme() override;
+	void ReloadRmlTheme();
 
 	// Set by the RmlUi close button's click binding; polled and cleared in Update().
 	void RmlClickClose() { m_bRmlCloseClicked = true; }

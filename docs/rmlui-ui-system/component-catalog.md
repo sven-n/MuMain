@@ -107,17 +107,29 @@ future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" 
 per-theme RML/RCSS override mechanism itself, not a separate component but part of this same
 theming layer.
 
-**Every window that creates a themed document must override `ReloadRmlTheme()` — this is not
-optional and the compiler won't catch skipping it.** `IObject::ReloadRmlTheme()`
-(`UI/Core/WindowObject.h`) defaults to a no-op; `CManager::ReloadAllRmlThemes()` already sweeps
-every registered window and calls it, but a window that doesn't override it silently keeps
-rendering the theme that was active when it first opened, indefinitely. 16 windows across the
-docked-window and inventory families shipped with exactly this gap before being fixed (2026-09-20).
-The pattern (same for all of them): factor the RmlUi setup already in `Create()` — model binder
-registration + `LoadThemedDocument()`/`CreateBackgroundDocument()` — into a private `BuildRmlUi()`,
-call it from `Create()`, then implement `ReloadRmlTheme()` as: if `m_pRmlDoc` is null, return
-(never opened yet); otherwise destroy the model binder, `UnloadDocument()` the old document, null
-the pointer (same for `m_pRmlBgDoc`/its binder if the window has one, via
+**Every window that creates a themed document must call
+`UI::RmlBridge::RegisterForThemeReload(this, [this]{ ReloadRmlTheme(); })` right next to its first
+`BuildRmlUi()` call (typically inside `Create()`'s guard), and unregister
+(`UI::RmlBridge::UnregisterForThemeReload(this)`) at the exact point, if any, it already calls
+`RemoveUIObj(this)` in `Release()`.** This replaced an earlier virtual-override mechanism
+(`IObject::ReloadRmlTheme()` + `CManager::ReloadAllRmlThemes()`'s sweep) that required every window
+to remember an override the compiler couldn't enforce — 16 windows across the docked-window and
+inventory families shipped with exactly that gap before being fixed (2026-09-20), which is what
+motivated the registry. Stated honestly: a window can still forget to call
+`RegisterForThemeReload()`, the same way it could forget to call `BuildRmlUi()` — what the registry
+actually fixes is that a theme switch used to require sweeping multiple independent `CManager`
+instances plus separate free-function calls from every trigger site (now down to one call,
+`UI::RmlBridge::ReloadAllThemedDocuments()`, from a `RegisterForThemeReload`-owning theme-switch
+callsite), not that per-window opt-in itself became mandatory. A handful of app/scene-lifetime
+singleton windows (e.g. `CLoginWin`, `CGenericConfirmDialog`) never unhook from `CManager` at all —
+those must never unregister either, so their registration simply outlives every `Release()` call,
+mirroring their existing `CManager` lifetime.
+
+The `ReloadRmlTheme()` method itself is unchanged in shape: factor the RmlUi setup already in
+`Create()` — model binder registration + `LoadThemedDocument()`/`CreateBackgroundDocument()` — into
+a private `BuildRmlUi()`, call it from `Create()`, then implement `ReloadRmlTheme()` as: if
+`m_pRmlDoc` is null, return (never opened yet); otherwise destroy the model binder, `UnloadDocument()`
+the old document, null the pointer (same for `m_pRmlBgDoc`/its binder if the window has one, via
 `RmlUiRuntime::Instance().GetBackgroundContext()`), then call `BuildRmlUi()` again. A window with a
 per-frame `SyncRmlModel()`-style poll (most of them) needs nothing further — the next frame
 self-corrects visibility/live data. A window without one (`CServerSelWin` is the one exception

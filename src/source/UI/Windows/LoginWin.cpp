@@ -155,7 +155,10 @@ void CLoginWin::Create()
     // Guarded on m_pRmlDoc: Create() re-runs on every resolution change, but the RmlUi
     // document/model are set up once and only repositioned afterward (see SetPosition()).
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN, this);
     Show(false);

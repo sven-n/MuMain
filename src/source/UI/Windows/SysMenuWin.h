@@ -42,7 +42,7 @@ public:
     {
         return 40.0f;
     }
-    void ReloadRmlTheme() override;
+    void ReloadRmlTheme();
 
 protected:
     void ExitGame();

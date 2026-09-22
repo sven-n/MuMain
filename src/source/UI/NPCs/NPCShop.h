@@ -135,7 +135,7 @@ namespace mu::ui::window
         void SetSellingItem(bool bFlag);
         bool IsSellingItem();
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
     private:
         void Init();

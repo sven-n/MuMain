@@ -253,10 +253,10 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     // Runtime RmlUi theme hot-swap, e.g. "$theme modern"/"$theme legacy" -- see
     // UI::RmlBridge::SetActiveThemeName()'s own comment (RmlTheme.h) for why this alone doesn't
     // make the switch visible on its own: every currently-open themed window's document/model
-    // must also be rebuilt, which is what the CManager::ReloadAllRmlThemes() sweep plus
-    // RememberPasswordPrompt's own explicit call (it's not a CObject, so the sweep can't reach
-    // it -- see UI::Login::ReloadRmlTheme()'s own comment) accomplish below. Session-only:
-    // doesn't persist to config.ini, so a relaunch still picks up whatever's saved there.
+    // must also be rebuilt, which is what UI::RmlBridge::ReloadAllThemedDocuments() accomplishes
+    // below (every themed window/module registered itself via RegisterForThemeReload() at its own
+    // first-document-creation point). Session-only: doesn't persist to config.ini, so a relaunch
+    // still picks up whatever's saved there.
     else if (strCommand.compare(0, 6, L"$theme") == 0)
     {
         if (strCommand.size() > 7)
@@ -267,15 +267,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
             {
                 GameConfig::GetInstance().SetRmlTheme(themeNameW);
                 UI::RmlBridge::SetActiveThemeName(themeName);
-                CSceneUICoordinator::Instance().GetNewStyleMng().ReloadAllRmlThemes();
-                // The MAIN_SCENE HUD (CMainFrameWindow/CMuHelperBar/CBuffStrip) registers with
-                // CSystem's OWN CManager (WindowSystem.cpp's m_pNewUIMng), not
-                // CSceneUICoordinator's -- a second, independent registry the sweep above cannot
-                // reach. Null before CSystem::Create() has run (e.g. still at the login screen).
-                if (mu::ui::window::CManager* newUIMng = g_pNewUIMng)
-                    newUIMng->ReloadAllRmlThemes();
-                UI::Login::ReloadRmlTheme();
-                UI::RmlBridge::Tooltip::ReloadRmlTheme();
+                UI::RmlBridge::ReloadAllThemedDocuments();
             }
         }
         return true;

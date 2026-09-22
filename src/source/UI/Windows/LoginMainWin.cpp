@@ -60,7 +60,10 @@ void CLoginMainWin::Create()
 
     // Guarded so the document is loaded once, ever, and only repositioned/resized afterward.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN_MAIN, this);
     Show(false);

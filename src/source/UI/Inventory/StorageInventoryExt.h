@@ -68,7 +68,7 @@ namespace mu::ui::window
         bool Update() override;
         bool Render() override;
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         float GetLayerDepth() override;	//. 2.2f
 

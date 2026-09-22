@@ -68,7 +68,10 @@ void CCharInfoBalloonMng::Create()
     // RmlUi migration -- guarded the same way every other migrated window's Create() is
     // (re-entrant on resolution change), so the document/model/array size are set up once, ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_INFO_BALLOON, this);
 }

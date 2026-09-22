@@ -33,7 +33,7 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         void ClosingProcess();
 

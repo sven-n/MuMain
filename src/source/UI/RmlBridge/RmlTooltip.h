@@ -147,10 +147,9 @@ namespace UI::RmlBridge::Tooltip
     // either is nullptr). No-op if it was never built, already hidden, or owned by someone else.
     void Hide(Owner owner = nullptr);
 
-    // Rebuilds the shared document against the now-active theme. Not a CObject/IObject, so
-    // CManager::ReloadAllRmlThemes()'s sweep can't reach this -- call sites that switch the active
-    // theme (the `$theme` chat command, the Options window's theme picker) must call this
-    // explicitly, the same way they already call UI::Login::ReloadRmlTheme() for
+    // Rebuilds the shared document against the now-active theme. Not a CObject/IObject and has no
+    // `this` of its own, so it registers itself with UI::RmlBridge's theme-reload registry (keyed
+    // by a private static token) instead, the same way UI::Login::ReloadRmlTheme() does for
     // RememberPasswordPrompt (also not a CObject).
     void ReloadRmlTheme();
 }

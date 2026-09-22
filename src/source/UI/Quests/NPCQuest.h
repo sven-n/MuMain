@@ -83,7 +83,7 @@ namespace mu::ui::window
         void ProcessOpening();
         bool ProcessClosing();
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
         void RmlClickClose();

@@ -95,7 +95,7 @@ namespace mu::ui::window
         void ProcessGensRewardReceive(BYTE byResult);
 #endif //PBG_ADD_GENSRANKING
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
         void RmlClickClose();

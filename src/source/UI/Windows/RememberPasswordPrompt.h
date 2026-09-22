@@ -23,7 +23,8 @@ namespace UI::Login
     // Uses polling rather than RmlUi Keydown routing since this dialog has no focused element.
     void Tick();
 
-    // Rebuilds this dialog's RmlUi document/model for the active theme. This module has no
-    // CObject/CManager registration, so `$theme` must call this explicitly. No-op if never opened.
+    // Rebuilds this dialog's RmlUi document/model for the active theme. This module has no `this`
+    // of its own, so it registers itself with UI::RmlBridge's theme-reload registry (keyed by a
+    // private static token) instead of a CObject/CManager registration. No-op if never opened.
     void ReloadRmlTheme();
 }

@@ -119,6 +119,7 @@ bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, in
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -249,6 +250,8 @@ void mu::ui::window::CCharacterInfoWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    UI::RmlBridge::UnregisterForThemeReload(this);
 }
 
 void mu::ui::window::CCharacterInfoWindow::SetPos(int x, int y)

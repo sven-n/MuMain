@@ -57,7 +57,7 @@ namespace mu::ui::window
         void SetContents(DWORD dwQuestIndex);
         void EnableCompleteBtn(bool bEnable);
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
         void RmlClickClose();

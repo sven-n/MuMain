@@ -274,7 +274,7 @@ namespace mu::ui::window
 
         bool IsVisible() const;
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         float GetLayerDepth();		// 10.2f
         float GetKeyEventOrder();	// 7.f

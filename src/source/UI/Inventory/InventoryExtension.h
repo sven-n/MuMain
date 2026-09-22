@@ -85,7 +85,7 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 2.5f
         ITEM* FindItem(int iIndex) const;

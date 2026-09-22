@@ -179,7 +179,7 @@ namespace mu::ui::window
 
         bool IsVisible() const;
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         void OpenningProcess();
         void ClosingProcess();

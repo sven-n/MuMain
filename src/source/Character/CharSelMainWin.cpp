@@ -134,7 +134,10 @@ void CCharSelMainWin::Create()
     // briefly did, after rebasing onto upstream's own Create() ordering) left every RmlUi element
     // at its unstyled default position on the window's very first Create() call.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_SEL_MAIN, this);
 

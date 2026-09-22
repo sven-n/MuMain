@@ -43,7 +43,7 @@ namespace mu::ui::window
         // Same MAIN_SCENE-only Update() gate and fix as CMuHelperBar::SyncDocVisibility() (MuHelperBar.h).
         void SyncDocVisibility(bool sceneAllowsShow);
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
     private:
         void BuildRmlUi();

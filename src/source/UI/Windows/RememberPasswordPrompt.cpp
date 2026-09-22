@@ -30,6 +30,10 @@ namespace
     Rml::ElementDocument* g_pDoc = nullptr;
     UI::Login::RememberPasswordChoice g_Choice = UI::Login::RememberPasswordChoice::None;
 
+    // Stable identity token for UI::RmlBridge's theme-reload registry -- this module has no `this`
+    // of its own, so its own address stands in.
+    char s_ThemeReloadOwner = 0;
+
     void Resolve(UI::Login::RememberPasswordChoice choice)
     {
         g_Choice = choice;
@@ -60,6 +64,8 @@ namespace
 
         if (modelCreated)
             g_pDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/remember_password_prompt.rml");
+        if (g_pDoc)
+            UI::RmlBridge::RegisterForThemeReload(&s_ThemeReloadOwner, &UI::Login::ReloadRmlTheme);
 
         // Centering is handled by #panel's own `.center-both` RCSS class, not pushed from here.
     }

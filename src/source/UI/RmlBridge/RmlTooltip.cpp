@@ -55,6 +55,10 @@ namespace UI::RmlBridge::Tooltip
         Rml::ElementDocument* s_pRmlDoc = nullptr;
         Owner s_CurrentOwner = nullptr;
 
+        // Stable identity token for UI::RmlBridge's theme-reload registry -- this module has no
+        // `this` of its own, so its own address stands in.
+        char s_ThemeReloadOwner = 0;
+
         TooltipLineEntry ToLineEntry(const Line& line)
         {
             TooltipLineEntry entry;
@@ -117,6 +121,8 @@ namespace UI::RmlBridge::Tooltip
             if (modelCreated)
                 s_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
                     "Data/Interface/RmlUi/tooltip.rml");
+            if (s_pRmlDoc)
+                UI::RmlBridge::RegisterForThemeReload(&s_ThemeReloadOwner, &ReloadRmlTheme);
         }
     }
 

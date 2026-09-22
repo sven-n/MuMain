@@ -112,7 +112,6 @@ public:
     {
         return 45.0f;
     }
-    void ReloadRmlTheme() override;
 
 protected:
     void RequestCreateCharacter();
@@ -123,6 +122,7 @@ protected:
 
 private:
     void BuildRmlUi();
+    void ReloadRmlTheme();
 
     struct JobButtonEntry
     {

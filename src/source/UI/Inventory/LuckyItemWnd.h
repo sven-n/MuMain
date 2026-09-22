@@ -112,7 +112,7 @@ namespace mu::ui::window
         bool	UpdateKeyEvent();
         bool	Update();
         bool	Render();
-        void	ReloadRmlTheme() override;
+        void	ReloadRmlTheme();
         float	GetLayerDepth();	//. 3.4f
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }

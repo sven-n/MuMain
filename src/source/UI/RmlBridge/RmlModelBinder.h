@@ -63,9 +63,9 @@ public:
 
     // Undoes Create(): removes the named model from `context` and resets this binder to its
     // pre-Create() state so Create() can be called again (e.g. rebuilding against a new RmlUi
-    // theme -- see IObject::ReloadRmlTheme()). No-op if Create() was never called or already
-    // undone. `context` must be the same context Create() was given; RmlUi's data models are
-    // owned per-Context, not globally.
+    // theme -- see UI::RmlBridge::RegisterForThemeReload()). No-op if Create() was never called or
+    // already undone. `context` must be the same context Create() was given; RmlUi's data models
+    // are owned per-Context, not globally.
     void Destroy(Rml::Context* context)
     {
         if (m_ModelName.empty()) return;

@@ -72,8 +72,9 @@ namespace mu::ui::window
         void Show(bool bShow) override;
         // Rebuilds m_pRmlDoc against whichever theme is now active -- needed because this window's
         // own UI-Theme dropdown (Interface/UI tab) can switch the active theme from inside itself;
-        // CManager::ReloadAllRmlThemes() sweeps every registered window through this same override.
-        void ReloadRmlTheme() override;
+        // registered with UI::RmlBridge::RegisterForThemeReload() in Create(), same as every other
+        // themed window.
+        void ReloadRmlTheme();
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -374,9 +375,9 @@ namespace mu::ui::window
         // hand-edited config.ini -- shows up on the next open).
         int m_iUIScaleIndex;
         // A theme switch destroys and rebuilds every registered RmlUi document (including this
-        // window's own, via CManager::ReloadAllRmlThemes()) -- doing that synchronously inside
-        // RmlThemeChanged() would tear down m_pRmlDoc while still unwinding through RmlUi's own
-        // event-dispatch call stack for the very "change" event that triggered it. Deferred
+        // window's own, via UI::RmlBridge::ReloadAllThemedDocuments()) -- doing that synchronously
+        // inside RmlThemeChanged() would tear down m_pRmlDoc while still unwinding through RmlUi's
+        // own event-dispatch call stack for the very "change" event that triggered it. Deferred
         // instead: RmlThemeChanged() only records the request; ApplyPendingThemeSwitch() (called
         // from Update(), outside any RmlUi event) performs it on the next tick.
         bool m_bPendingThemeSwitch = false;

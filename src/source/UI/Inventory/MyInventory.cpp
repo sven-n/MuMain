@@ -102,6 +102,7 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
     SetEquipmentSlotInfo();
 
     BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
     return true;
@@ -284,6 +285,7 @@ void CMyInventory::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = nullptr;
     }
 

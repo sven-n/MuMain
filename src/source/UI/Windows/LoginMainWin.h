@@ -63,7 +63,7 @@ public:
     {
         return 15.0f;
     }
-    void ReloadRmlTheme() override;
+    void ReloadRmlTheme();
 
 private:
     void OpenSysMenu();

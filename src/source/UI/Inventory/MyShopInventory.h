@@ -84,7 +84,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
         void ClosingProcess();
         float GetLayerDepth();	//. 3.2f
 

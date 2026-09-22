@@ -62,6 +62,7 @@ bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInventoryWarningColor);
 
     BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -154,6 +155,7 @@ void CMixInventory::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
     if (g_pNewUI3DRenderMng)

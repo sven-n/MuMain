@@ -78,7 +78,7 @@ namespace mu::ui::window
         bool Render();
         float GetLayerDepth();	//. 5.1f
         void OpenningProcess();
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
         void RmlClickIncreaseStat(int stat);

@@ -99,7 +99,7 @@ namespace mu::ui::window
         // value, not low -- CManager::CompareKeyEventOrder sorts descending (highest runs first),
         // the opposite of what "first priority" suggests. 100.0f, matching that sibling exactly.
         float GetKeyEventOrder() override { return 100.0f; }
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
     private:
         void BuildRmlUi();

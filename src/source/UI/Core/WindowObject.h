@@ -21,10 +21,6 @@ namespace mu::ui::window
 
         virtual bool IsVisible() const = 0;
         virtual bool IsEnabled() const = 0;
-
-        // No-op default; RmlUi-themed windows override to rebuild their document against the
-        // now-active theme when the theme switches.
-        virtual void ReloadRmlTheme() {}
     };
 
     class CObject : public IObject

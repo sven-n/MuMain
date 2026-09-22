@@ -178,7 +178,7 @@ namespace mu::ui::window
         // the codebase today (highest existing tier is 10.0f, shared by CWindowMenu/
         // CMessageBoxMng/COptionWindow/etc.).
         float GetKeyEventOrder() override { return 100.0f; }
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         // I3DRenderObj. Window3DRenderMng.cpp's shared render loop dynamic_casts each registered
         // object to CObject first and uses its own GetLayoutMode() when that succeeds -- true

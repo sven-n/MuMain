@@ -28,7 +28,7 @@ public:
     void UpdateDisplay();
     void Show(bool bShow) override;
 
-    void ReloadRmlTheme() override;
+    void ReloadRmlTheme();
 
     // Bound to the RmlUi document's data-event-click callbacks; acts immediately.
     void RmlClickSelectGroup(int nBtnPos);

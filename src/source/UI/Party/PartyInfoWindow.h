@@ -85,7 +85,7 @@ namespace mu::ui::window
         void RmlClickExit();
         void RmlClickKickMember(int index);
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
     private:
         void LoadImages();

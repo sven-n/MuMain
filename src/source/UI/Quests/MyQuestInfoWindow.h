@@ -93,7 +93,7 @@ namespace mu::ui::window
         void RmlClickGiveUp();
         void RmlClickExit();
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
     private:
         // Populates the shared IMAGE_LIST texture slots sibling windows alias onto (see IMAGE_LIST above).

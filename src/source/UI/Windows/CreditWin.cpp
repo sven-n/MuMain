@@ -102,6 +102,7 @@ void CCreditWin::Create()
 	if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
 	{
 		BuildRmlUi();
+		UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 	}
 
 	// AddUIObj() is idempotent, so this is safe to call again on every recreate.

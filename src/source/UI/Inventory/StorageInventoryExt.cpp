@@ -63,6 +63,7 @@ bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
     SetItemAutoMove(false);
 
     BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -146,6 +147,7 @@ void CStorageInventoryExt::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = nullptr;
     }
 }

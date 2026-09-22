@@ -46,7 +46,7 @@ namespace mu::ui::window
         // from CSystem::SyncMainSceneHudVisibility(), so leaving MAIN_SCENE still hides the doc.
         void SyncDocVisibility(bool sceneAllowsShow);
 
-        void ReloadRmlTheme() override;
+        void ReloadRmlTheme();
 
         // Vestigial -- Update() reads Hero's position directly, never through this setter.
         void SetCurHeroPosition(int x, int y) {}

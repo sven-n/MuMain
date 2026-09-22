@@ -79,10 +79,10 @@ public:
     {
         return 10.0f;
     }
-    void ReloadRmlTheme() override;
 
 private:
     void BuildRmlUi();
+    void ReloadRmlTheme();
 
     struct BalloonEntry
     {

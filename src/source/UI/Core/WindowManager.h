@@ -73,10 +73,6 @@ namespace mu::ui::window
         void ShowAllInterfaces(bool bShow = true);
         void EnableAllInterfaces(bool bEnable = true);
 
-        // Calls IObject::ReloadRmlTheme() on every registered window; safe to call unconditionally
-        // after the active theme changes since non-RmlUi windows no-op it.
-        void ReloadAllRmlThemes();
-
 #ifdef PBG_MOD_STAMINA_UI
         int GetShowUICnt();
 #endif //PBG_MOD_STAMINA_UI

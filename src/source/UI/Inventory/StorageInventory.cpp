@@ -199,6 +199,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
     InitBackupItemInfo();
 
     BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -405,6 +406,7 @@ void CStorageInventory::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = nullptr;
     }
 }

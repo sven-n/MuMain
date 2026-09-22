@@ -69,7 +69,7 @@ public:
     {
         return 50.0f;
     }
-    void ReloadRmlTheme() override;
+    void ReloadRmlTheme();
 
 protected:
     void BuildRmlUi();

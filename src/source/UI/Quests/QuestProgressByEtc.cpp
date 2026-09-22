@@ -49,7 +49,10 @@ bool CQuestProgressByEtc::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     if (RmlUiRuntime::Instance().IsCreated())
+    {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
 
     Show(false);
 
@@ -153,6 +156,7 @@ void CQuestProgressByEtc::Release()
 
     if (m_pNewUIMng)
     {
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }

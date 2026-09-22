@@ -243,7 +243,10 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng, int x, int y)
     InitFontCombo();
 
     if (RmlUiRuntime::Instance().IsCreated())
+    {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
 
     Show(false);
     return true;
@@ -491,6 +494,7 @@ void mu::ui::window::COptionWindow::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 }
@@ -515,8 +519,8 @@ void mu::ui::window::COptionWindow::ReloadRmlTheme()
 {
     // Same shape CGenericMenuDialog::ReloadRmlTheme() already establishes -- needed here because
     // this window's own UI Theme dropdown (Interface/UI tab) can trigger a theme switch from
-    // inside itself, and CManager::ReloadAllRmlThemes() sweeps every registered window through
-    // this override, this one included.
+    // inside itself, and UI::RmlBridge::ReloadAllThemedDocuments() calls this registered callback
+    // the same as every other themed window's, this one included.
     if (!m_pRmlDoc)
         return;
 
@@ -922,11 +926,7 @@ void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
     GameConfig::GetInstance().SetRmlTheme(StringUtils::NarrowToWide(themeName));
     GameConfig::GetInstance().Save();
     UI::RmlBridge::SetActiveThemeName(themeName);
-    CSceneUICoordinator::Instance().GetNewStyleMng().ReloadAllRmlThemes();
-    if (mu::ui::window::CManager* newUIMng = g_pNewUIMng)
-        newUIMng->ReloadAllRmlThemes();
-    UI::Login::ReloadRmlTheme();
-    UI::RmlBridge::Tooltip::ReloadRmlTheme();
+    UI::RmlBridge::ReloadAllThemedDocuments();
 }
 
 void mu::ui::window::COptionWindow::RmlUIScaleChanged(int index)

@@ -89,7 +89,7 @@ public:
     // mu::ui::window::IObject
     bool Render() override;
     // Rebuilds this window's RmlUi document/model for the active theme. No-op if never opened.
-    void ReloadRmlTheme() override;
+    void ReloadRmlTheme();
     // Claims clicks within its own bounding box only -- not modal, world/credits/system-menu stay
     // reachable around it. Depth 20.0f is below the full-screen-claiming overlays (CSysMenuWin/
     // CMsgWin/CCreditWin), so no explicit modal check is needed here.

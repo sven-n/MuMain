@@ -69,6 +69,7 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -196,6 +197,7 @@ void mu::ui::window::CMyQuestInfoWindow::Release()
 
     if (m_pNewUIMng)
     {
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
