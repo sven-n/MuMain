@@ -49,6 +49,8 @@ state of the development machine, the asset tooling and the open work are record
 - [`docs/agents/ASSET_REGENERATION_PLAN.md`](docs/agents/ASSET_REGENERATION_PLAN.md) - rules
   and phases for producing new assets in Blender.
 - [`docs/asset-pipeline.md`](docs/asset-pipeline.md) - asset formats and the conversion tools.
+- [`ASTRA.md`](ASTRA.md) - role brief for the Blender artist agent (art direction, engine
+  contract, asset workflow).
 
 ## Out of scope for AI changes
 
