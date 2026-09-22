@@ -1,0 +1,10 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/original/Hanging01.bmd
+  name field: Data2\Object1\execution_ground_0  version: 10
+  meshes: 1  bones: 4  actions: 1  triangles: 162
+  bounds (bind pose): min -100.94 -98.34 -0.34  max 200.18 111.74 423.89  size 301.13 210.07 424.23
+  mesh 0: triangles=162 vertices=146 normals=27 uvs=171 texture=horse_drawn_01.jpg
+  bone 0: "Box08" parent=-1
+  bone 1: "Box09" parent=0
+  bone 2: "Box10" parent=1
+  bone 3: "Box03" parent=0
+  action 0: keys=25 lock=0

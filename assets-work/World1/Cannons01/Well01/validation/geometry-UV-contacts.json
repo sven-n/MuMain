@@ -1,0 +1,303 @@
+{
+  "status": "PASS",
+  "authored_bindings": {
+    "status": "PASS",
+    "source_vertices": 552,
+    "all_exported_corners_match_authored_bone_and_position": true,
+    "maximum_coordinate_deviation": 4.995117208750344e-07,
+    "tolerance": 0.005
+  },
+  "surface": {
+    "minimum_uv_triangle_area": 0.0,
+    "minimum_geometry_triangle_area": 6.880868631267018,
+    "minimum_winding_normal_dot": 0.35650225718172984,
+    "zero_area_triangles": 0,
+    "collapsed_uv_triangles": 24,
+    "winding_disagreements": 0
+  },
+  "original_surface": {
+    "minimum_uv_triangle_area": 0.0,
+    "minimum_geometry_triangle_area": 6.880868631267018,
+    "minimum_winding_normal_dot": 0.35650225718172984,
+    "zero_area_triangles": 0,
+    "collapsed_uv_triangles": 24,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -127.191704,
+          -87.824501,
+          0.1847
+        ],
+        [
+          -70.804497,
+          -38.991699,
+          111.4179
+        ]
+      ],
+      "after": [
+        [
+          -127.191704,
+          -87.824501,
+          0.1847
+        ],
+        [
+          -70.804497,
+          -38.991699,
+          111.4179
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 6,
+      "before": [
+        [
+          -144.891815,
+          3.098198,
+          0.1847
+        ],
+        [
+          -88.504509,
+          51.931,
+          111.4179
+        ]
+      ],
+      "after": [
+        [
+          -144.891815,
+          3.098198,
+          0.1847
+        ],
+        [
+          -88.504509,
+          51.931,
+          111.4179
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "jar_01.jpg",
+      "bone_index": 2,
+      "before": [
+        [
+          -12.5986,
+          -125.850998,
+          -0.0681
+        ],
+        [
+          48.0765,
+          -82.486603,
+          100.971497
+        ]
+      ],
+      "after": [
+        [
+          -12.5986,
+          -125.850998,
+          -0.0681
+        ],
+        [
+          48.0765,
+          -82.486603,
+          100.971497
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "jar_01.jpg",
+      "bone_index": 3,
+      "before": [
+        [
+          -111.043999,
+          -83.1735,
+          107.748497
+        ],
+        [
+          -76.093102,
+          -46.424,
+          177.908005
+        ]
+      ],
+      "after": [
+        [
+          -111.043999,
+          -83.1735,
+          107.748497
+        ],
+        [
+          -76.093102,
+          -46.424,
+          177.908005
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "jar_01.jpg",
+      "bone_index": 4,
+      "before": [
+        [
+          48.871101,
+          -115.151199,
+          1.2432
+        ],
+        [
+          102.485703,
+          -58.777401,
+          46.946499
+        ]
+      ],
+      "after": [
+        [
+          48.871101,
+          -115.151199,
+          1.2432
+        ],
+        [
+          102.485703,
+          -58.777401,
+          46.946499
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "jar_01.jpg",
+      "bone_index": 5,
+      "before": [
+        [
+          80.506638,
+          -61.173321,
+          -0.0681
+        ],
+        [
+          121.568771,
+          -30.026112,
+          72.904999
+        ]
+      ],
+      "after": [
+        [
+          80.506638,
+          -61.173321,
+          -0.0681
+        ],
+        [
+          121.568771,
+          -30.026112,
+          72.904999
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tub.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -137.059387,
+          -96.370193,
+          0.1847
+        ],
+        [
+          -60.936699,
+          -30.445999,
+          111.4179
+        ]
+      ],
+      "after": [
+        [
+          -137.059387,
+          -96.370193,
+          0.1847
+        ],
+        [
+          -60.936699,
+          -30.445999,
+          111.4179
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tub.jpg",
+      "bone_index": 6,
+      "before": [
+        [
+          -154.759521,
+          -5.447495,
+          0.1847
+        ],
+        [
+          -78.636803,
+          60.4767,
+          111.4179
+        ]
+      ],
+      "after": [
+        [
+          -154.759521,
+          -5.447495,
+          0.1847
+        ],
+        [
+          -78.636803,
+          60.4767,
+          111.4179
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "well.jpg",
+      "bone_index": 1,
+      "before": [
+        [
+          -79.2771,
+          -93.456902,
+          0.0
+        ],
+        [
+          77.996696,
+          93.463203,
+          270.818787
+        ]
+      ],
+      "after": [
+        [
+          -79.2771,
+          -93.456902,
+          0.0
+        ],
+        [
+          77.996696,
+          93.463203,
+          270.818787
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "retained_surfaces": {
+    "status": "PASS",
+    "original_retained_corners": 2745,
+    "max_position_difference": 4.995117208750344e-07,
+    "UV_tolerance": 2e-06,
+    "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+  },
+  "material_order": [
+    "tub.jpg",
+    "horse_drawn_01.jpg",
+    "well.jpg",
+    "jar_01.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

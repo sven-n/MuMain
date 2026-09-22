@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd
+  name field: Carriage02.smd  version: 12
+  meshes: 1  bones: 2  actions: 1  triangles: 450
+  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.28  size 179.08 437.11 183.45
+  mesh 0: triangles=450 vertices=285 normals=287 uvs=246 texture=horse_drawn_01.jpg
+  bone 0: "Cylinder03" parent=-1
+  bone 1: "Mesh01" parent=-1
+  action 0: keys=1 lock=0

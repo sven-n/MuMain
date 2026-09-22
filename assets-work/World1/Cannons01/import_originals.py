@@ -1,0 +1,26 @@
+"""Import the six immutable originals with official tools into packed Blender projects."""
+from pathlib import Path
+import os
+import subprocess
+
+import sys
+sys.dont_write_bytecode = True
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from config import ASSETS, ROOT, REPOSITORY, BLENDER, CONVERTER
+
+
+def main():
+    for name in ASSETS:
+        folder = ROOT / name / 'original'
+        command = [BLENDER, '-b', '--python-exit-code', '1', '--python-expr', 'import sys; sys.dont_write_bytecode = True', '--python', str(REPOSITORY / 'tools/blender/mu_bmd_import.py'), '--',
+                   '--bmd', str(folder / f'{name}.bmd'), '--out', str(folder / 'source.blend'),
+                   '--textures', str(ROOT / 'textures/original'), '--bmdconv', CONVERTER]
+        result = subprocess.run(command, cwd=REPOSITORY, capture_output=True, text=True)
+        (folder / 'import.log').write_text(result.stdout + result.stderr)
+        if result.returncode:
+            raise RuntimeError(result.stdout + result.stderr)
+        print(name, 'imported', flush=True)
+
+
+if __name__ == '__main__':
+    main()

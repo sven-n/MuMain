@@ -1,0 +1,73 @@
+"""Prove originals survive in packed working sources and inspect editable high-poly copies."""
+
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+import bpy
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import ASSETS, ROOT
+
+
+def fingerprint(objects):
+    records = []
+    for obj in sorted(objects, key=lambda o: o.name):
+        records.append(dict(name=obj.name, vertices=[list(v.co) for v in obj.data.vertices],
+            polygons=[list(p.vertices) for p in obj.data.polygons],
+            uv=[[list(uv.uv) for uv in layer.data] for layer in obj.data.uv_layers],
+            matrix=[list(row) for row in obj.matrix_world],
+            groups=[[(obj.vertex_groups[g.group].name, g.weight) for g in v.groups] for v in obj.data.vertices]))
+    return hashlib.sha256(json.dumps(records, sort_keys=True).encode()).hexdigest()
+
+
+def audit(name):
+    root = ROOT / name
+    bpy.ops.wm.open_mainfile(filepath=str(root / 'original/source.blend'))
+    old = [o for o in bpy.context.scene.objects if o.type == 'MESH' and not o.get('mu_helper')]
+    original_hash = fingerprint(old)
+    bpy.ops.wm.open_mainfile(filepath=str(root / 'source.blend'))
+    reference = bpy.data.collections['REF_ORIGINAL']
+    assert fingerprint(list(reference.objects)) == original_hash
+    assert reference.hide_render and reference.hide_viewport
+    high = bpy.data.collections['REF_HIGH_POLY']
+    assert high.objects and high.hide_render and high.hide_viewport
+    assert all(o.get('mu_reference') for o in list(reference.objects) + list(high.objects))
+    images = {im.name: hashlib.sha256(im.packed_file.data).hexdigest()
+              for im in bpy.data.images if im.source == 'FILE' and im.packed_file}
+    assert len(images) == len([im for im in bpy.data.images if im.source == 'FILE'])
+    assert len(images) >= 2
+    exported=[o for o in bpy.context.scene.objects if o.type=='MESH' and not o.get('mu_helper') and not o.get('mu_reference')]
+    authored=[]
+    for obj in exported:
+        for vertex in obj.data.vertices:
+            assert len(vertex.groups)==1 and vertex.groups[0].weight==1
+            bone=obj.vertex_groups[vertex.groups[0].group].name
+            rig=obj.parent
+            authored.append(dict(bone=list(rig['mu_bone_order']).index(bone),position=list(obj.matrix_world@vertex.co)))
+    (root/'validation/authored-vertices.json').write_text(json.dumps(authored)+'\n')
+    omitted=set()
+    if name.startswith('Cannon'):
+        components=json.loads((root/'original/components.json').read_text())
+        for index in ({4}|({7,8,9} if name!='Cannon03' else set())):omitted.update(components[index]['faces'])
+    retained=[]
+    for obj in reference.objects:
+        for polygon in obj.data.polygons:
+            if polygon.index in omitted:continue
+            for loop in polygon.loop_indices:
+                vertex=obj.data.vertices[obj.data.loops[loop].vertex_index]
+                bone=obj.vertex_groups[vertex.groups[0].group].name
+                retained.append(dict(material=obj.data.materials[polygon.material_index].name.removeprefix('REF_'),bone=list(obj.parent['mu_bone_order']).index(bone),position=list(obj.matrix_world@vertex.co),uv=list(obj.data.uv_layers[0].data[loop].uv)))
+    (root/'validation/retained-corners.json').write_text(json.dumps(retained)+'\n')
+    report = dict(status='PASS', original_geometry_uv_skinning_transform_sha256=original_hash,
+        ref_original='byte-identical numeric mesh snapshot to preserved import', packed_images=images,
+        high_poly='excluded editable authored meshes with 3-segment fine-bevel modifiers',
+        no_external_images_required=True)
+    (root / 'validation/source-audit.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(name, 'source audit PASS')
+
+
+for prop in (sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else ASSETS):
+    audit(prop)

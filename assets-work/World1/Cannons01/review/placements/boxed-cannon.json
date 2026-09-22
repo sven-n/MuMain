@@ -1,0 +1,45 @@
+{
+  "evidence": "OFFLINE Blender; not client",
+  "models": [
+    {
+      "model": "Cannon01",
+      "placement": {
+        "position": [
+          14438.181640625,
+          11182.673828125,
+          195.0000457763672
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -720.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          144.38181640625,
+          111.82673828125
+        ]
+      }
+    }
+  ],
+  "world_origin_subtracted": [
+    14438.181640625,
+    11182.673828125,
+    195.0000457763672
+  ],
+  "world_transform": "Translation @ EulerXYZ(rotation degrees) @ uniform scale; original records unchanged",
+  "camera_bounds": [
+    [
+      -64.28988647460938,
+      -78.2578125,
+      -0.9878000020980835
+    ],
+    [
+      68.04067993164062,
+      57.37969207763672,
+      132.44119262695312
+    ]
+  ],
+  "terrain": "Terrain and surrounding architecture omitted",
+  "light": "Carriage01 mesh2 uses render-only additive approximation"
+}

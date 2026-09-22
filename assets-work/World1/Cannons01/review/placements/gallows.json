@@ -1,0 +1,45 @@
+{
+  "evidence": "OFFLINE Blender; not client",
+  "models": [
+    {
+      "model": "Hanging01",
+      "placement": {
+        "position": [
+          15206.5087890625,
+          11303.7880859375,
+          70.00003051757812
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -360.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          152.065087890625,
+          113.037880859375
+        ]
+      }
+    }
+  ],
+  "world_origin_subtracted": [
+    15206.5087890625,
+    11303.7880859375,
+    70.00003051757812
+  ],
+  "world_transform": "Translation @ EulerXYZ(rotation degrees) @ uniform scale; original records unchanged",
+  "camera_bounds": [
+    [
+      -100.94442749023438,
+      -98.33828735351562,
+      -0.3396281599998474
+    ],
+    [
+      200.18504333496094,
+      111.73629760742188,
+      423.8855895996094
+    ]
+  ],
+  "terrain": "Terrain and surrounding architecture omitted",
+  "light": "Carriage01 mesh2 uses render-only additive approximation"
+}

@@ -1,0 +1,147 @@
+{
+  "Cannon01.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "c7d0e2b9d3a9d9764c5f6f2c4d9c5496c64d141ec5eae69a02ac36580162d1a0",
+    "archive": "Cannon01/original/Cannon01.bmd"
+  },
+  "Cannon02.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "aec342ce42aca9db7fa009cd148ef673a485fb3e5fda259ff9b7997d234d9f81",
+    "archive": "Cannon02/original/Cannon02.bmd"
+  },
+  "Cannon03.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "725df6fe11dcc6c54338be8b3ee426dc90d92e5d76c841b57f7b15822b8116aa",
+    "archive": "Cannon03/original/Cannon03.bmd"
+  },
+  "Hanging01.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "2edfebee6a7be95b8e68bbc92ec35edbe1e8db63b37f0700daba3a05fcc71c71",
+    "archive": "Hanging01/original/Hanging01.bmd"
+  },
+  "Carriage01.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622",
+    "archive": "Carriage01/original/Carriage01.bmd"
+  },
+  "Carriage02.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+    "archive": "Carriage02/original/Carriage02.bmd"
+  },
+  "Carriage03.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296",
+    "archive": "Carriage03/original/Carriage03.bmd"
+  },
+  "Carriage04.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "77e81ed05d87ebf6938770b91428b77131fae9bda967f36d587525c323f14ab2",
+    "archive": "Carriage04/original/Carriage04.bmd"
+  },
+  "HouseEtc02.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa",
+    "archive": "HouseEtc02/original/HouseEtc02.bmd"
+  },
+  "StoneMuWall04.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471",
+    "archive": "StoneMuWall04/original/StoneMuWall04.bmd"
+  },
+  "StoneWall03.bmd": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+    "archive": "StoneWall03/original/StoneWall03.bmd"
+  },
+  "Well01.bmd": {
+    "source_revision": "46daddf2",
+    "sha256": "c753f37c049f5716deb7db64186083fed58920b925da133abea7303a851977a3",
+    "archive": "Well01/original/Well01.bmd"
+  },
+  "horse_drawn_01.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6",
+    "archive": "textures/original/horse_drawn_01.OZJ"
+  },
+  "horse_drawn_02.OZT": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079",
+    "archive": "textures/original/horse_drawn_02.OZT"
+  },
+  "horse_drawn_03.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5",
+    "archive": "textures/original/horse_drawn_03.OZJ"
+  },
+  "tub.OZJ": {
+    "source_revision": "46daddf2",
+    "sha256": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+    "archive": "textures/original/tub.OZJ"
+  },
+  "grass_01.OZT": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15",
+    "archive": "textures/original/grass_01.OZT"
+  },
+  "tile_wood02.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+    "archive": "textures/original/tile_wood02.OZJ"
+  },
+  "tile_ston04.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "archive": "textures/original/tile_ston04.OZJ"
+  },
+  "c_wall04.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "archive": "textures/original/c_wall04.OZJ"
+  },
+  "tile_wood03.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+    "archive": "textures/original/tile_wood03.OZJ"
+  },
+  "tile_house01.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "archive": "textures/original/tile_house01.OZJ"
+  },
+  "tile_ston01.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+    "archive": "textures/original/tile_ston01.OZJ"
+  },
+  "tile_ston06.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "archive": "textures/original/tile_ston06.OZJ"
+  },
+  "c_wall06.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
+    "archive": "textures/original/c_wall06.OZJ"
+  },
+  "tile_01.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+    "archive": "textures/original/tile_01.OZJ"
+  },
+  "tile_03.OZJ": {
+    "source_revision": "0bb845121f92e451a5d61afff38a4abf948a637a",
+    "sha256": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+    "archive": "textures/original/tile_03.OZJ"
+  },
+  "well.OZJ": {
+    "source_revision": "46daddf2",
+    "sha256": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e",
+    "archive": "textures/original/well.OZJ"
+  },
+  "jar_01.OZJ": {
+    "source_revision": "46daddf2",
+    "sha256": "d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5",
+    "archive": "textures/original/jar_01.OZJ"
+  }
+}

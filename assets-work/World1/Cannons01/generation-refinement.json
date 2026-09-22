@@ -1,0 +1,7 @@
+{
+  "tool": "built-in imagegen",
+  "prompt": "Edit target: the attached fixed-layout medieval game texture atlas. Preserve all painted region positions, exact outlines, dimensions, wheel/spokes, panels, iron strips, leather, chain, ember, cannonball patch, and overall 1:1 layout without moving, scaling, adding, or deleting any island. Make ONE technical correction: replace ALL pale beige/cream/stone-colored atlas background and gutters, including the light spaces around and between the wheel spokes and all narrow island borders, with a very dark desaturated walnut-brown texture (#2b251d average), seamless restrained wood/soot grain. There must be NO cream/pale background pixels or light gaps anywhere. Some legacy model UVs sample these gutters; they must read as dark aged wood shadow. Keep all existing wood and iron painted artwork unchanged; background-only correction. Opaque RGB atlas, no alpha, no labels, flat top-down texture image, not a scene.",
+  "edit_target": "textures/raw/horse_drawn_01.png",
+  "output": "textures/raw/horse_drawn_01-gutters.png",
+  "purpose": "Eliminate pale gutter samples observed on original UVs in gallows/cart compatibility renders"
+}

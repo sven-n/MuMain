@@ -1,0 +1,3 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/exports/tile_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/exports/horse_drawn_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/exports/tile_03.OZJ

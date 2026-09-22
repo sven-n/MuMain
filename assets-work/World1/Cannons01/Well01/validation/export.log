@@ -1,0 +1,52 @@
+00:00.466  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/source.blend"
+skipping reference object 'Well01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_3' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Well01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_akx8c8x2/Well01_mu_export.smd
+- Exported 7 bones
+- Exported 1 frames
+- Exported 915 polys
+- Exported 4 materials
+   tub.jpg
+   jar_01.jpg
+   horse_drawn_01.jpg
+   well.jpg
+- SMD export took 0.015347957611083984 
+
+
+Blender Source Tools: exporting Well01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_akx8c8x2/anims/Well01_a00.smd
+- Exported 7 bones
+- Exported 1 frames
+- SMD export took 0.0008168220520019531 
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_akx8c8x2/Well01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/exports/Well01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_akx8c8x2/anims/Well01_a00.smd --name Well01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/exports/Well01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/exports/Well01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/exports/Well01.bmd
+  name field: Well01.smd  version: 12
+  meshes: 4  bones: 7  actions: 1  triangles: 915
+  bounds (bind pose): min -154.76 -125.85 -0.07  max 121.57 93.46 270.82  size 276.33 219.31 270.89
+  mesh 0: triangles=72 vertices=48 normals=44 uvs=28 texture=tub.jpg
+  mesh 1: triangles=16 vertices=24 normals=2 uvs=6 texture=horse_drawn_01.jpg
+  mesh 2: triangles=123 vertices=89 normals=78 uvs=101 texture=well.jpg
+  mesh 3: triangles=704 vertices=391 normals=694 uvs=378 texture=jar_01.jpg
+  bone 0: "Cylinder01" parent=-1
+  bone 1: "Cylinder04" parent=-1
+  bone 2: "Cylinder07" parent=-1
+  bone 3: "Cylinder08" parent=-1
+  bone 4: "Cylinder09" parent=-1
+  bone 5: "Cylinder10" parent=-1
+  bone 6: "Cylinder11" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

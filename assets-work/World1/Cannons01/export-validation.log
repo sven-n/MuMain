@@ -1,0 +1,48 @@
+Cannon01 meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 181 vs 707
+unmatched triangles: 82  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Cannon02 meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 155 vs 681
+unmatched triangles: 82  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Cannon03 meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 75 vs 367
+unmatched triangles: 28  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Hanging01 meshes 1 vs 1, bones 4 vs 4, actions 1 vs 1, triangles 162 vs 338
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Carriage01 meshes 3 vs 3, bones 14 vs 14, actions 1 vs 1, triangles 472 vs 472
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+Carriage02 meshes 1 vs 1, bones 2 vs 2, actions 1 vs 1, triangles 450 vs 450
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+Carriage03 meshes 2 vs 2, bones 4 vs 4, actions 1 vs 1, triangles 538 vs 538
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+Carriage04 meshes 2 vs 2, bones 5 vs 5, actions 1 vs 1, triangles 882 vs 882
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+HouseEtc02 meshes 8 vs 8, bones 3 vs 3, actions 1 vs 1, triangles 250 vs 250
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+StoneMuWall04 meshes 3 vs 3, bones 3 vs 3, actions 1 vs 1, triangles 317 vs 317
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+StoneWall03 meshes 3 vs 3, bones 4 vs 4, actions 1 vs 1, triangles 333 vs 333
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+Well01 meshes 4 vs 4, bones 7 vs 7, actions 1 vs 1, triangles 915 vs 915
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+

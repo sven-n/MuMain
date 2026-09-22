@@ -1,0 +1,44 @@
+00:00.475  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/source.blend"
+skipping reference object 'Hanging01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Beam_Iron_Face_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Beam_Iron_Face_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Platform_Joint_-88' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Platform_Joint_82' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Hanging01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_71ylygu9/Hanging01_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 338 polys
+- Exported 1 materials
+   horse_drawn_01.jpg
+- SMD export took 0.006159782409667969 
+
+
+Blender Source Tools: exporting Hanging01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_71ylygu9/anims/Hanging01_a00.smd
+- Exported 4 bones
+- Exported 25 frames
+- SMD export took 0.003699064254760742 
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_71ylygu9/Hanging01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_71ylygu9/anims/Hanging01_a00.smd --name Hanging01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd
+  name field: Hanging01.smd  version: 12
+  meshes: 1  bones: 4  actions: 1  triangles: 338
+  bounds (bind pose): min -100.94 -98.34 -0.34  max 200.18 111.74 423.89  size 301.13 210.07 424.23
+  mesh 0: triangles=338 vertices=242 normals=221 uvs=255 texture=horse_drawn_01.jpg
+  bone 0: "Box08" parent=-1
+  bone 1: "Box09" parent=0
+  bone 2: "Box10" parent=1
+  bone 3: "Box03" parent=0
+  action 0: keys=25 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

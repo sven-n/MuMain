@@ -1,0 +1,841 @@
+00:00.477  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/original/source.blend"
+00:01.790  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/before.png'
+00:03.044  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/reverse-before.png'
+00:04.236  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/terrain-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/exports/Cannon01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zy_ttmt6
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zy_ttmt6/Cannon01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zy_ttmt6/Cannon01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zy_ttmt6/Cannon01.actions.txt
+
+SMD IMPORTER: now working on Cannon01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 707 polys
+SMD Cannon01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Cannon01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Cannon01_skeleton"
+- Imported 1 frames of animation
+SMD Cannon01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:05.574  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/after.png'
+00:06.842  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/reverse-after.png'
+00:08.048  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/exports/Cannon01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kso1_4hf
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kso1_4hf/Cannon01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kso1_4hf/Cannon01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kso1_4hf/Cannon01.actions.txt
+
+SMD IMPORTER: now working on Cannon01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 707 polys
+SMD Cannon01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Cannon01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Cannon01_skeleton"
+- Imported 1 frames of animation
+SMD Cannon01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:09.242  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/review/wireframe.png'
+00:09.243  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/original/source.blend"
+00:10.454  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/before.png'
+00:11.687  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/reverse-before.png'
+00:12.879  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/exports/Cannon02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2pisi5rr
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2pisi5rr/Cannon02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2pisi5rr/Cannon02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2pisi5rr/Cannon02.actions.txt
+
+SMD IMPORTER: now working on Cannon02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 681 polys
+SMD Cannon02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Cannon02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Cannon02_skeleton"
+- Imported 1 frames of animation
+SMD Cannon02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:14.142  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/after.png'
+00:15.382  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/reverse-after.png'
+00:16.596  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/exports/Cannon02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jey0xkyi
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jey0xkyi/Cannon02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jey0xkyi/Cannon02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jey0xkyi/Cannon02.actions.txt
+
+SMD IMPORTER: now working on Cannon02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 681 polys
+SMD Cannon02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Cannon02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Cannon02_skeleton"
+- Imported 1 frames of animation
+SMD Cannon02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:17.767  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/review/wireframe.png'
+00:17.769  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/original/source.blend"
+00:18.935  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/before.png'
+00:20.097  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/reverse-before.png'
+00:21.300  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/exports/Cannon03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hdootvbu
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hdootvbu/Cannon03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hdootvbu/Cannon03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hdootvbu/Cannon03.actions.txt
+
+SMD IMPORTER: now working on Cannon03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 367 polys
+SMD Cannon03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Cannon03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Cannon03_skeleton"
+- Imported 1 frames of animation
+SMD Cannon03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:22.501  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/after.png'
+00:23.685  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/reverse-after.png'
+00:24.874  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/exports/Cannon03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jao9nl9m
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jao9nl9m/Cannon03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jao9nl9m/Cannon03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jao9nl9m/Cannon03.actions.txt
+
+SMD IMPORTER: now working on Cannon03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 367 polys
+SMD Cannon03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Cannon03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Cannon03_skeleton"
+- Imported 1 frames of animation
+SMD Cannon03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:26.025  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/review/wireframe.png'
+00:26.028  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/original/source.blend"
+00:27.164  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/before.png'
+00:28.285  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/reverse-before.png'
+00:29.421  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/action-before-12.png'
+00:30.550  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/action-before-24.png'
+00:31.784  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8f0n95ig
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8f0n95ig/Hanging01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8f0n95ig/Hanging01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8f0n95ig/Hanging01.actions.txt
+
+SMD IMPORTER: now working on Hanging01
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 338 polys
+SMD Hanging01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Hanging01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Hanging01_skeleton"
+- Imported 25 frames of animation
+SMD Hanging01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:32.970  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/after.png'
+00:34.113  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/reverse-after.png'
+00:35.256  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/action-after-12.png'
+00:36.394  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/action-after-24.png'
+00:37.612  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jdy7gcl6
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jdy7gcl6/Hanging01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jdy7gcl6/Hanging01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jdy7gcl6/Hanging01.actions.txt
+
+SMD IMPORTER: now working on Hanging01
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 338 polys
+SMD Hanging01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Hanging01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Hanging01_skeleton"
+- Imported 25 frames of animation
+SMD Hanging01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:38.763  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/review/wireframe.png'
+00:38.765  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/render_review.py:29: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if not mat.name.startswith('horse_drawn_03.jpg') or not mat.use_nodes:
+00:39.990  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/before.png'
+00:41.154  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/reverse-before.png'
+00:42.362  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/action-before-10.png'
+00:43.555  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/action-before-20.png'
+00:44.837  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Hanging01/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/exports/Carriage01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_yt1r9y2u
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_yt1r9y2u/Carriage01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_yt1r9y2u/Carriage01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_yt1r9y2u/Carriage01.actions.txt
+
+SMD IMPORTER: now working on Carriage01
+- This is a mesh
+- Imported 14 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: horse_drawn_02.tga
+- New material: horse_drawn_03.jpg
+- Imported 472 polys
+SMD Carriage01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 14 bones against armature "Carriage01_skeleton"
+- Imported 21 frames of animation
+SMD Carriage01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:46.113  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/after.png'
+00:47.265  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/reverse-after.png'
+00:48.478  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/action-after-10.png'
+00:49.699  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/action-after-20.png'
+00:50.973  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/validation/reimported.blend: 1 mesh object(s), 14 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/exports/Carriage01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_64wbs628
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_64wbs628/Carriage01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_64wbs628/Carriage01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_64wbs628/Carriage01.actions.txt
+
+SMD IMPORTER: now working on Carriage01
+- This is a mesh
+- Imported 14 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: horse_drawn_02.tga
+- New material: horse_drawn_03.jpg
+- Imported 472 polys
+SMD Carriage01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 14 bones against armature "Carriage01_skeleton"
+- Imported 21 frames of animation
+SMD Carriage01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:52.133  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/review/wireframe.png'
+00:52.135  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/original/source.blend"
+00:53.298  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/before.png'
+00:54.448  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/reverse-before.png'
+00:55.672  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage01/validation/reimported.blend: 1 mesh object(s), 14 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bx52xouh
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bx52xouh/Carriage02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bx52xouh/Carriage02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bx52xouh/Carriage02.actions.txt
+
+SMD IMPORTER: now working on Carriage02
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 450 polys
+SMD Carriage02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "Carriage02_skeleton"
+- Imported 1 frames of animation
+SMD Carriage02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:56.866  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/after.png'
+00:58.010  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/reverse-after.png'
+00:59.244  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zmuwmiyz
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zmuwmiyz/Carriage02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zmuwmiyz/Carriage02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zmuwmiyz/Carriage02.actions.txt
+
+SMD IMPORTER: now working on Carriage02
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 450 polys
+SMD Carriage02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "Carriage02_skeleton"
+- Imported 1 frames of animation
+SMD Carriage02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:00.391  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/review/wireframe.png'
+01:00.395  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/original/source.blend"
+01:01.576  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/before.png'
+01:02.715  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/reverse-before.png'
+01:03.964  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/exports/Carriage03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e8b8ysbt
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e8b8ysbt/Carriage03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e8b8ysbt/Carriage03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e8b8ysbt/Carriage03.actions.txt
+
+SMD IMPORTER: now working on Carriage03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tub.jpg
+- New material: horse_drawn_01.jpg
+- Imported 538 polys
+SMD Carriage03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Carriage03_skeleton"
+- Imported 1 frames of animation
+SMD Carriage03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:05.165  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/after.png'
+01:06.333  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/reverse-after.png'
+01:07.609  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/exports/Carriage03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0sznf3cm
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0sznf3cm/Carriage03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0sznf3cm/Carriage03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0sznf3cm/Carriage03.actions.txt
+
+SMD IMPORTER: now working on Carriage03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tub.jpg
+- New material: horse_drawn_01.jpg
+- Imported 538 polys
+SMD Carriage03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Carriage03_skeleton"
+- Imported 1 frames of animation
+SMD Carriage03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:08.754  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/review/wireframe.png'
+01:08.759  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/original/source.blend"
+01:09.968  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/before.png'
+01:11.128  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/reverse-before.png'
+01:12.405  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/exports/Carriage04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mavat64a
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mavat64a/Carriage04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mavat64a/Carriage04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mavat64a/Carriage04.actions.txt
+
+SMD IMPORTER: now working on Carriage04
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: grass_01.tga
+- Imported 882 polys
+SMD Carriage04 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Carriage04_skeleton"
+- Imported 1 frames of animation
+SMD Carriage04_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:13.680  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/after.png'
+01:14.843  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/reverse-after.png'
+01:16.143  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/exports/Carriage04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z1acifxh
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z1acifxh/Carriage04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z1acifxh/Carriage04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z1acifxh/Carriage04.actions.txt
+
+SMD IMPORTER: now working on Carriage04
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: grass_01.tga
+- Imported 882 polys
+SMD Carriage04 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Carriage04_skeleton"
+- Imported 1 frames of animation
+SMD Carriage04_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:17.358  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/review/wireframe.png'
+01:17.359  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/original/source.blend"
+01:18.627  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/before.png'
+01:19.901  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/reverse-before.png'
+01:21.247  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage04/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/exports/HouseEtc02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1f89u_k
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1f89u_k/HouseEtc02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1f89u_k/HouseEtc02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1f89u_k/HouseEtc02.actions.txt
+
+SMD IMPORTER: now working on HouseEtc02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: c_wall04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_ston06.jpg
+- Imported 250 polys
+SMD HouseEtc02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseEtc02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseEtc02_skeleton"
+- Imported 1 frames of animation
+SMD HouseEtc02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:22.536  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/after.png'
+01:23.795  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/reverse-after.png'
+01:25.115  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 8 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 8 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/exports/HouseEtc02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ws1teffn
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ws1teffn/HouseEtc02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ws1teffn/HouseEtc02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ws1teffn/HouseEtc02.actions.txt
+
+SMD IMPORTER: now working on HouseEtc02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: c_wall04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_ston06.jpg
+- Imported 250 polys
+SMD HouseEtc02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseEtc02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseEtc02_skeleton"
+- Imported 1 frames of animation
+SMD HouseEtc02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:26.291  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/review/wireframe.png'
+01:26.292  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/original/source.blend"
+01:27.514  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/before.png'
+01:28.723  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/reverse-before.png'
+01:29.993  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 8 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/HouseEtc02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 8 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/exports/StoneMuWall04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z3p9khdu
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z3p9khdu/StoneMuWall04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z3p9khdu/StoneMuWall04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z3p9khdu/StoneMuWall04.actions.txt
+
+SMD IMPORTER: now working on StoneMuWall04
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: c_wall04.jpg
+- New material: c_wall06.jpg
+- New material: horse_drawn_01.jpg
+- Imported 317 polys
+SMD StoneMuWall04 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneMuWall04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "StoneMuWall04_skeleton"
+- Imported 1 frames of animation
+SMD StoneMuWall04_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:31.259  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/after.png'
+01:32.496  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/reverse-after.png'
+01:33.747  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/exports/StoneMuWall04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_7gybeg8h
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_7gybeg8h/StoneMuWall04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_7gybeg8h/StoneMuWall04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_7gybeg8h/StoneMuWall04.actions.txt
+
+SMD IMPORTER: now working on StoneMuWall04
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: c_wall04.jpg
+- New material: c_wall06.jpg
+- New material: horse_drawn_01.jpg
+- Imported 317 polys
+SMD StoneMuWall04 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneMuWall04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "StoneMuWall04_skeleton"
+- Imported 1 frames of animation
+SMD StoneMuWall04_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:34.903  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/review/wireframe.png'
+01:34.908  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/original/source.blend"
+01:36.134  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/before.png'
+01:37.375  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/reverse-before.png'
+01:38.627  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneMuWall04/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/exports/StoneWall03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g3resyss
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g3resyss/StoneWall03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g3resyss/StoneWall03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g3resyss/StoneWall03.actions.txt
+
+SMD IMPORTER: now working on StoneWall03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_03.jpg
+- Imported 333 polys
+SMD StoneWall03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "StoneWall03_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:39.912  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/after.png'
+01:41.137  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/reverse-after.png'
+01:42.394  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/exports/StoneWall03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x95wlr_p
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x95wlr_p/StoneWall03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x95wlr_p/StoneWall03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x95wlr_p/StoneWall03.actions.txt
+
+SMD IMPORTER: now working on StoneWall03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_03.jpg
+- Imported 333 polys
+SMD StoneWall03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "StoneWall03_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:43.570  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/review/wireframe.png'
+01:43.574  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/original/source.blend"
+01:44.847  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/before.png'
+01:46.121  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/reverse-before.png'
+01:47.377  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/exports/Well01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fh5b9i_e
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fh5b9i_e/Well01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fh5b9i_e/Well01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fh5b9i_e/Well01.actions.txt
+
+SMD IMPORTER: now working on Well01
+- This is a mesh
+- Imported 7 new bones
+- Imported 1 frames of animation
+- New material: tub.jpg
+- New material: horse_drawn_01.jpg
+- New material: well.jpg
+- New material: jar_01.jpg
+- Imported 915 polys
+SMD Well01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Well01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 7 bones against armature "Well01_skeleton"
+- Imported 1 frames of animation
+SMD Well01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:48.711  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/after.png'
+01:49.970  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/reverse-after.png'
+01:51.224  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/validation/reimported.blend: 1 mesh object(s), 7 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/exports/Well01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4cyzoyvt
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4cyzoyvt/Well01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4cyzoyvt/Well01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4cyzoyvt/Well01.actions.txt
+
+SMD IMPORTER: now working on Well01
+- This is a mesh
+- Imported 7 new bones
+- Imported 1 frames of animation
+- New material: tub.jpg
+- New material: horse_drawn_01.jpg
+- New material: well.jpg
+- New material: jar_01.jpg
+- Imported 915 polys
+SMD Well01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Well01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 7 bones against armature "Well01_skeleton"
+- Imported 1 frames of animation
+SMD Well01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:52.427  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Well01/validation/reimported.blend: 1 mesh object(s), 7 bones, 1 animation clips, 4 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

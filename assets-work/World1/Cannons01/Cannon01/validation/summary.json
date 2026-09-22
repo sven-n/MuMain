@@ -1,0 +1,41 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Intentional geometry rebuild, full compare DIFFERENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -64.29,
+      -78.26,
+      -0.99
+    ],
+    [
+      68.04,
+      57.38,
+      132.44
+    ]
+  ],
+  "bounds_after": [
+    [
+      -64.29,
+      -78.26,
+      -0.99
+    ],
+    [
+      68.04,
+      57.38,
+      132.44
+    ]
+  ],
+  "materials": [
+    "horse_drawn_01.jpg"
+  ],
+  "meshes": 1,
+  "exports": {
+    "Cannon01.bmd": "7d285fd5d3647cc75bf25742623f04421c589e69140137652f5bd1d14225abf0",
+    "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+  }
+}

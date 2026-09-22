@@ -1,0 +1,45 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -199.33,
+      -43.04,
+      -2.1
+    ],
+    [
+      198.83,
+      180.5,
+      299.24
+    ]
+  ],
+  "bounds_after": [
+    [
+      -199.33,
+      -43.04,
+      -2.1
+    ],
+    [
+      198.83,
+      180.5,
+      299.24
+    ]
+  ],
+  "materials": [
+    "tile_01.jpg",
+    "horse_drawn_01.jpg",
+    "tile_03.jpg"
+  ],
+  "meshes": 3,
+  "exports": {
+    "StoneWall03.bmd": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+    "tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+    "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+    "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+  }
+}
