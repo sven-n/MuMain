@@ -137,3 +137,20 @@ Check real client loading/logs, candle additive blending/flicker, lighting, game
 object contacts/orientation and matched screenshots once stability is addressed separately.
 Useful review tiles: Candle01 `(126.58,128.25)`, chest `(185.17,140.06)`, Tomb03 `(130.50,215.00)`.
 The delivered renders are Blender evidence, not client screenshots or visual acceptance.
+
+## 2026-09-22 - Publish the World1 pilot for review (ASTRA / Codex)
+**Goal:** Commit, push and open a PR for the completed art branch.
+
+**Done:** Confirmed the asset work was already committed and the art worktree clean. Pushed
+`art/world1-pilot` to origin and opened [PR #5](https://github.com/vaskodagamo/MuMain/pull/5)
+against `main`, covering the complete branch: 17 terrain repaints and Beer01, Candle01,
+TreasureChest01 and Tomb03, including sources, paintings, previews and validation evidence.
+Recorded this publication in a separate documentation commit.
+
+**Verified:** Refreshed origin/main, reviewed the branch scope (26 replaced game files,
+World1/Object1 plus asset-work/handoff files), and passed `git diff --check`. The PR records
+previously completed offline validation and explicitly labels all preview images as Blender
+renders. No asset changes or new engine build were made during publication.
+
+**Open / next:** PR review and the previously deferred client loading, lighting/blending,
+placement and screenshot checks. Client verification is still pending; no merge requested.
