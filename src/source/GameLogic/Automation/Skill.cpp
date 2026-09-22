@@ -107,6 +107,17 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
     TargetX = (int)(target->Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(target->Object.Position[1] / TERRAIN_SCALE);
 
+    // CheckWall reads the global SelectedCharacter on every step of its walk
+    // (ZzzInterface.cpp) to exempt gate models from the terrain-wall test —
+    // gates stand on no-move tiles, so without the exemption they can never
+    // be cast at. The selection therefore has to be this target *before* the
+    // checks, as the helper path this was extracted from did; it is put back
+    // on the refusal paths so a refused cast still leaves the UI alone.
+    // g_MovementSkill.m_iTarget stays below: nothing in the checks reads it,
+    // and the movement-skill globals are switched only once the aim holds.
+    const int previousSelection = SelectedCharacter;
+    SelectedCharacter = targetIndex;
+
     // Range first, then a path only when one is needed — the order the
     // engine's own attack loop uses (ZzzInterface.cpp:1282, 1349). The other
     // way round refuses a target that is standing in range but that no walk
@@ -115,6 +126,7 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
     const bool inRange = CheckTile(Hero, &Hero->Object, skillDistance);
     if (inRange && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
     {
+        SelectedCharacter = previousSelection;
         return SkillResult::Blocked;
     }
 
@@ -122,14 +134,13 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
     if (!inRange && !PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &path,
                                   static_cast<float>(huntingDistance) + skillDistance))
     {
+        SelectedCharacter = previousSelection;
         return SkillResult::NoPath;
     }
 
-    // Selected once the target is one the client may actually cast at and
-    // the cast or the walk towards it is going to happen: a refused cast
-    // must not leave the UI pointing at a corpse, a wall, or a tile no walk
-    // reaches.
-    SelectedCharacter = targetIndex;
+    // The aim held, so the movement-skill target follows it: a refused cast
+    // must not leave the movement-skill state pointing at a corpse, a wall,
+    // or a tile no walk reaches.
     g_MovementSkill.m_iTarget = targetIndex;
 
     if (!inRange)
