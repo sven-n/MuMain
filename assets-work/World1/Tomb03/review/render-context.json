@@ -1,0 +1,13 @@
+{
+  "kind": "OFFLINE BLENDER RENDERS; NOT CLIENT SCREENSHOTS",
+  "after": "Re-imported exported BMD",
+  "closeup": "Identical orthographic camera and diffuse lighting for before/after",
+  "scale": {
+    "world_view_width": 900,
+    "pixels": 900,
+    "terrain_tile_units": 100,
+    "proxy_height": 190,
+    "caveat": "Assumed gameplay scale, not a measured client camera or actual placement"
+  },
+  "flame_preview": "Approximation of existing additive mesh; client result remains unverified"
+}

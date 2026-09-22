@@ -1,0 +1,5 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "date": "2026-09-22",
+  "prompt": "Use case: stylized-concept. Create a square flat diffuse/emissive sprite texture for the original MU Online three-candle stand. One single small upright candle flame, centered exactly horizontally, sharp slender tapering tip near top edge at y=2%, teardrop body centered near y=64%, bottom of luminous flame at y=86%. Flame maximum width only 40% of the canvas. Warm golden yellow and ivory core, restrained amber orange rim, painterly clean taper. Entire background pure solid black RGB 0,0,0 including all four edges and corners: additive blend texture, no alpha needed. No candle, wick, object, text, logo, smoke, halo, particles or decorative details. Keep large simple color shapes legible when reduced to a 128x128 legacy game texture. Just one vertical flame on black; no photographic noise or lens effects."
+}

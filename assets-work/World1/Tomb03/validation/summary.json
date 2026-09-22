@@ -1,0 +1,40 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -44.99,
+      -9.93,
+      0.05
+    ],
+    [
+      44.77,
+      9.71,
+      117.3
+    ]
+  ],
+  "bounds_after": [
+    [
+      -44.99,
+      -9.93,
+      0.05
+    ],
+    [
+      44.77,
+      9.71,
+      117.3
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "tombstone.jpg"
+  ],
+  "export_sha256": {
+    "Tomb03.bmd": "05df32a3fbf115cc11678b431246bd86bd6457e8c85cc1856b5099e5a4b74a1d",
+    "tombstone.OZJ": "5ffcd05b9045e6637295cc353c21dc4ae39e6e3cd12befa0702f216ed9a011a1"
+  }
+}

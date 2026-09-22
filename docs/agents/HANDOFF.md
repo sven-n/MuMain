@@ -29,6 +29,7 @@ in [`../asset-pipeline.md`](../asset-pipeline.md). The artist agent's own brief 
 | `bmdconv` (model converter BMD <-> SMD, compare, validate) | Works, tested (`tests/tools`). |
 | `tools/mu_texture.py` | Works, byte-identical round trips on shipped textures. |
 | Blender scripts (`tools/blender/`) | Import and export through Blender Source Tools; verified round trip on `Monster01.bmd` (geometry, bone order, 7 actions equivalent). |
+| Lorencia asset pilot | 17 ground textures, Beer01 and three more static props (Candle01, TreasureChest01, Tomb03) exported/validated offline on `art/world1-pilot`; client acceptance pending. See [`assets-work/World1/notes.md`](../../assets-work/World1/notes.md). |
 | Game data in `src/bin/Data` | Complete except: no `Sound/`, no `Music/`, most of `Object74/` missing, a few effect/skill models missing. |
 | UI art pilot (`art/ui-pilot`) | Five right-HUD textures repainted and offline validated in an isolated worktree; source Data installed there only. Native/1080p mockups, originals and editable sources: [`assets-work/UI/notes.md`](../../assets-work/UI/notes.md). Client verification pending; shared runtime untouched. |
 
@@ -84,7 +85,7 @@ out/build/macos-arm64/tools/bmdconv/Release/bmdconv compare src/bin/Data/Item/Sw
 
 ## 6. Open work, in priority order
 
-1. **Phase 1 of the asset plan**: texture pass for World1 and the starting character parts.
+1. **Asset plan**: Lorencia terrain, Beer01 and three additional static props are installed and validated offline. Client acceptance/screenshots remain pending under explicit offline authorization; investigate stability separately. Continue starting-character textures and further selected Object1 work after reading the [World1 handoff](../../assets-work/World1/notes.md). The art branch currently resides in `/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain`; the shared primary checkout was switched to main externally.
 2. **Editor on macOS**: replace `GetOpenFileNameW` in `MapTextureImport.cpp`,
    `MapMinimapCapture.cpp`, `MapAttributeSave.cpp` (`src/MuEditor/UI/MapEditor/`) with
    `SDL_ShowOpenFileDialog`, then verify the Map/Item/Skill editors run under Metal.

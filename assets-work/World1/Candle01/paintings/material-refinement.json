@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "date": "2026-09-22",
+  "input": "diffuse-initial.png",
+  "output": "diffuse-master.png",
+  "prompt": "Refine this exact 2x2 flat diffuse texture atlas. Preserve the upper-right wax and lower-left charcoal iron quadrants exactly. Change ONLY the upper-left bronze and lower-right engraved bronze quadrants: make their midtones brighter aged golden bronze with calm broad warm ochre surfaces, restrained small dark patina recesses and selected pale burnished edge highlights. Bronze must read as bronze, not brown wood, under matte diffuse game lighting. Keep the existing engraved gothic motifs but reduce mottling and noisy contrast. Exact quadrant boundaries, square flat 2D atlas, no text, no labels, no objects or perspective. Material change only."
+}

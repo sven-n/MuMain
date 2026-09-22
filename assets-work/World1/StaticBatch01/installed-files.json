@@ -1,0 +1,35 @@
+{
+  "status": "Installed; offline verified; client acceptance pending",
+  "client_verified": false,
+  "protected_files_per_data_folder": 317,
+  "files": [
+    {
+      "file": "Object1/Candle01.bmd",
+      "sha256": "d754131aa39b7a77cb5118b683c23e793c4a8829ab713436723b04c7508d98d5"
+    },
+    {
+      "file": "Object1/candle.OZJ",
+      "sha256": "8a3247f2b3f0491d74f4f14ed4b54157b0060b8bb2f53a8f61ecf5c9c5626567"
+    },
+    {
+      "file": "Object1/candle2.OZJ",
+      "sha256": "269019e39be5b7603ee388b80776a19ff4adba889da0dcf6d77d769bea58b1ec"
+    },
+    {
+      "file": "Object1/TreasureChest01.bmd",
+      "sha256": "0bace282136cde57a955216bfb69402abf02d33b343662d7ccf58891f98d79fe"
+    },
+    {
+      "file": "Object1/treasure_chest.OZJ",
+      "sha256": "0d5350d962d3dd6ff26d37b286f63fd14ae456476adb398f47e0161082590c2a"
+    },
+    {
+      "file": "Object1/Tomb03.bmd",
+      "sha256": "05df32a3fbf115cc11678b431246bd86bd6457e8c85cc1856b5099e5a4b74a1d"
+    },
+    {
+      "file": "Object1/tombstone.OZJ",
+      "sha256": "5ffcd05b9045e6637295cc353c21dc4ae39e6e3cd12befa0702f216ed9a011a1"
+    }
+  ]
+}

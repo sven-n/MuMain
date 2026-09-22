@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/exports/Beer01.bmd
+  name field: Beer01.smd  version: 12
+  meshes: 1  bones: 5  actions: 1  triangles: 784
+  bounds (bind pose): min -50.13 -29.63 -0.34  max 41.06 28.85 61.46  size 91.19 58.48 61.80
+  mesh 0: triangles=784 vertices=432 normals=303 uvs=399 texture=plate2.jpg
+  bone 0: "Cylinder09" parent=-1
+  bone 1: "Cylinder11" parent=-1
+  bone 2: "Cylinder08" parent=-1
+  bone 3: "Sphere05" parent=-1
+  bone 4: "Cylinder31" parent=-1
+  action 0: keys=1 lock=0

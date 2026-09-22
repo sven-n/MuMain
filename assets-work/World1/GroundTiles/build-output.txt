@@ -1,0 +1,7 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/GroundTiles/build_source.py:50: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes = True
+Info: Saved as "source.blend"
+{"textures": ["TileGrass01", "TileGrass02", "TileGround01", "TileGround01x", "TileGround02", "TileGround03", "TileMgrass", "TileMstone", "TileRock01", "TileRock02", "TileRock03", "TileRock04", "TileRock05", "TileRock06", "TileRock07", "TileWater01", "TileWood01"], "size": 512, "seam_band": 24}
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,5 @@
+# bmdconv action manifest for TreasureChest01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd TreasureChest01.smd <output.bmd> --manifest TreasureChest01.actions.txt
+model Data2\Object1\Treasure_Chest.smd
+action 0 file=TreasureChest01_a00.smd keys=7 lock=0
+texture 0 treasure_chest.jpg original=treasure_chest.jpg

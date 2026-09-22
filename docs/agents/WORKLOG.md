@@ -68,6 +68,92 @@ bone deviation 0.0002 units over all 7 actions, bone order and lock flags restor
 **Open / next:** first real asset pass per the plan (Phase 1 textures, World1). Port the three
 Map Editor file dialogs to SDL so the editor builds on macOS. Add sound/music data.
 
+## 2026-09-22 - World1 pilot, offline art and validation (ASTRA / Codex)
+**Goal:** Establish the Lorencia terrain benchmark and exercise one static prop through the
+Blender/BMD pipeline on `art/world1-pilot`, branched from main at `9a8b2027`.
+
+**Done:** Inventoried and unwrapped all 32 World1 texture containers. Repainted all 17 base
+filenames explicitly listed in the brief (14 loaded terrain slots plus three legacy variants)
+at 512×512. Rebuilt Beer01 as the tavern still life it actually contains, after user
+confirmation: bottle, mug, bowls, grapes and vine. Exported 784 triangles with an exclusive
+512×512 plate2 atlas, retaining all five bones and the original one-frame action. Preserved
+original geometry, packed Blender sources, higher-resolution source geometry, raw paintings,
+scripts, comparison renders and validation reports under
+[`assets-work/World1/`](../../assets-work/World1/notes.md). Installed the 19 exported files in
+source and runtime Data folders. No engine/CMake files or filenames changed.
+
+**Verified:** All 18 replacement texture containers pass mu_texture checks; decoded terrain
+JPEG edge mismatch averages at most 0.424/255 (maximum single-channel delta 5/255). Reviewed
+3×3 repeats offline. Reference and action SMDs pass bmdconv validation. Full-model compare
+reports DIFFERENT for the intended geometry change (216 → 784 triangles; 5 → 1 meshes),
+with zero bone-motion deviation. Isolated original/replacement skeletons and actual actions
+compare EQUIVALENT. Bind sizes: 91.20×58.57×61.80 → 91.19×58.48×61.80 units. All 35 protected
+World1 files, including TerrainLight and alpha strips, match their baseline hashes. All 19
+installed file hashes match the exports in both source and runtime.
+
+**Open / next:** **Not verified in client.** The unchanged client repeatedly crashed in
+server selection/Lorencia, including Metal command-buffer assertions, before the three
+1920×1080 baseline captures were completed. The user explicitly authorized offline
+continuation and deferred client verification. Resolve stability separately, obtain baseline
+town/grass/rock screenshots, compare replacements at matching views and inspect Beer01 near
+Lorencia `(127.4,128.4)`. The delivered Blender comparison is labeled offline. The visual
+benchmark and end-to-end proof remain pending client acceptance.
+
+
+## 2026-09-22 - Three Lorencia static props, offline continuation (ASTRA / Codex)
+**Goal:** Continue `art/world1-pilot` with three visually identified props, preserving engine
+contracts and completed terrain/Beer01. Client stability explicitly outside scope.
+
+**Done:** Inventoried all 115 Object1 BMDs, imported/rendered eight candidates and decoded
+World1 placements read-only. Selected Candle01 (three-candle stand, 6 placements),
+TreasureChest01 (arched timber chest, 3 placements), and Tomb03 (upright grave marker,
+5 placements). Rebuilt them at 1,018 / 1,174 / 200 triangles from 116 / 66 / 30. Repainted
+exclusive candle, treasure_chest and tombstone atlases at 512×512, plus candle2 at 128×128.
+Retained all original game filenames and mesh slots. Preserved originals, packed Blender
+sources with REF_ORIGINAL and excluded higher-resolution sources, paintings/prompts,
+exports, raw validation data and labeled offline before/after, wireframe, action and scale
+reviews under [`assets-work/World1/`](../../assets-work/World1/notes.md).
+
+**Verified:** Reference/action SMDs and all four textures pass engine/loader validation.
+All three isolated skeleton/action comparisons EQUIVALENT; names, order, parents, action
+order, lock=0 and 7/7/1 frame counts unchanged. Local translations/rotations checked over
+all keys (largest component differences 0.000015 units / 0.0000003072 radians modulo 2π).
+Candle's six original flame triangles and UVs separately verified; original BlendMesh=1
+material order retained. Intentional full-model comparisons DIFFERENT. Bind sizes remain
+38.67×22.47×87.06, 114.57×64.32×84.04 and 89.76×19.64×117.25 units; chest keyhole adds only
+0.0036 units of front projection. Packed sources reopened, final BMDs re-imported for review.
+Seven replacements installed with matching hashes in the art source and existing runtime;
+317 other World1/Object1 files remain unchanged in each, including all World1 terrain,
+TerrainLight/alpha strips and Beer01. No engine/CMake edits.
+
+**Workspace coordination:** Another process switched the shared primary checkout to main
+during validation. The installation guard refused the changed baseline before writing.
+Continued on the existing art/world1-pilot branch in the isolated worktree
+`/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain`; no commits or replacement
+files written to main. The existing runtime is still the primary checkout's macOS app.
+
+**Open / next:** **Not verified in client.** User-authorized offline continuation remains.
+Check real client loading/logs, candle additive blending/flicker, lighting, gameplay zoom,
+object contacts/orientation and matched screenshots once stability is addressed separately.
+Useful review tiles: Candle01 `(126.58,128.25)`, chest `(185.17,140.06)`, Tomb03 `(130.50,215.00)`.
+The delivered renders are Blender evidence, not client screenshots or visual acceptance.
+
+## 2026-09-22 - Publish the World1 pilot for review (ASTRA / Codex)
+**Goal:** Commit, push and open a PR for the completed art branch.
+
+**Done:** Confirmed the asset work was already committed and the art worktree clean. Pushed
+`art/world1-pilot` to origin and opened [PR #5](https://github.com/vaskodagamo/MuMain/pull/5)
+against `main`, covering the complete branch: 17 terrain repaints and Beer01, Candle01,
+TreasureChest01 and Tomb03, including sources, paintings, previews and validation evidence.
+Recorded this publication in a separate documentation commit.
+
+**Verified:** Refreshed origin/main, reviewed the branch scope (26 replaced game files,
+World1/Object1 plus asset-work/handoff files), and passed `git diff --check`. The PR records
+previously completed offline validation and explicitly labels all preview images as Blender
+renders. No asset changes or new engine build were made during publication.
+
+**Open / next:** PR review and the previously deferred client loading, lighting/blending,
+placement and screenshot checks. Client verification is still pending; no merge requested.
 ## 2026-09-22 - Right HUD material benchmark, offline pilot (ASTRA / Codex)
 **Goal:** Establish a dark medieval UI art benchmark while preserving the existing
 asset layout, filenames, dimensions, state alignment and engine behavior.

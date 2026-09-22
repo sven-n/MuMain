@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/original/Beer01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/original/Beer01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/original/Beer01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/original/Beer01.smd: bones=5 frames=1 triangles=216 materials=5
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/original/Beer01_a00.smd: bones=5 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/new/Beer01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/new/Beer01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/new/Beer01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/new/Beer01.smd: bones=5 frames=1 triangles=784 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/new/Beer01_a00.smd: bones=5 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

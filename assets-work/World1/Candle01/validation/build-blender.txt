@@ -1,0 +1,7 @@
+00:01.007  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/original/source.blend"
+00:03.255  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/review/after.png'
+{"status": "PASS: Blender checks; engine comparison required", "triangles": 1018, "meshes_after_texture_merge": 2, "bounds_before": [[-19.321300506591797, -11.260199546813965, 0.00570000009611249], [19.348600387573242, 11.21150016784668, 87.06829833984375]], "bounds_after": [[-19.321300506591797, -11.260199546813965, 0.00570000009611249], [19.348600387573242, 11.21150016784668, 87.06829833984375]], "bone_order": ["Cylinder05", "Bone01", "Bone02", "Bone03", "Bone04", "Bone05", "Bone06", "Bone07", "Mesh03"], "action_meta": {"Candle01_a00": {"index": 0, "lock": false}}, "textures": {"candle.jpg": [512, 512], "candle2.jpg": [128, 128]}, "skinning": "exactly one valid full-weight bone per vertex", "geometry": "triangles, finite positions/UVs, nonzero face area, identity transforms", "uv": "one set; new UVs within [0,1]; unchanged candle flame UVs retain legacy repeat to 1.0074"}
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
