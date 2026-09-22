@@ -3328,12 +3328,61 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     return true;
 }
 
+namespace
+{
+// The file keeps the larger legacy triangle record: BMD::Open2 reads sizeof(Triangle_t) bytes
+// out of every sizeof(Triangle_t2) bytes, so the light-map fields are written as zeros.
+Triangle_t2 ToTriangleRecord(const Triangle_t& triangle)
+{
+    Triangle_t2 record{};
+    record.Polygon = triangle.Polygon;
+    memcpy(record.VertexIndex, triangle.VertexIndex, sizeof(record.VertexIndex));
+    memcpy(record.NormalIndex, triangle.NormalIndex, sizeof(record.NormalIndex));
+    memcpy(record.TexCoordIndex, triangle.TexCoordIndex, sizeof(record.TexCoordIndex));
+    return record;
+}
+
+// Exact byte count of the serialized (pre-encryption) model, mirroring the writes in
+// BMD::Save2 so the buffer never has to guess (the old fixed 1 MB overflowed on Player.bmd).
+size_t ComputeSerializedSize(const BMD& model)
+{
+    constexpr size_t nameSize = 32;
+    size_t size = nameSize + 3 * sizeof(short);
+    for (int i = 0; i < model.NumMeshs; i++)
+    {
+        const Mesh_t& m = model.Meshs[i];
+        size += 5 * sizeof(short);
+        size += static_cast<size_t>(m.NumVertices) * sizeof(Vertex_t);
+        size += static_cast<size_t>(m.NumNormals) * sizeof(Normal_t);
+        size += static_cast<size_t>(m.NumTexCoords) * sizeof(TexCoord_t);
+        size += static_cast<size_t>(m.NumTriangles) * sizeof(Triangle_t2);
+        size += nameSize;
+    }
+    for (int i = 0; i < model.NumActions; i++)
+    {
+        const Action_t& a = model.Actions[i];
+        size += sizeof(short) + sizeof(bool);
+        if (a.LockPositions)
+            size += static_cast<size_t>(a.NumAnimationKeys) * sizeof(vec3_t);
+    }
+    for (int i = 0; i < model.NumBones; i++)
+    {
+        const Bone_t& b = model.Bones[i];
+        size += sizeof(char);
+        if (b.Dummy)
+            continue;
+        size += nameSize + sizeof(short);
+        for (int j = 0; j < model.NumActions; j++)
+            size += 2 * static_cast<size_t>(model.Actions[j].NumAnimationKeys) * sizeof(vec3_t);
+    }
+    return size;
+}
+} // namespace
 
 bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
 {
-    wchar_t ModelName[64];
-    wcscpy(ModelName, DirName);
-    wcscat(ModelName, ModelFileName);
+    wchar_t ModelName[260] = {};
+    _snwprintf(ModelName, std::size(ModelName), L"%ls%ls", DirName, ModelFileName);
     FILE* fp = _wfopen(ModelName, L"wb");
     if (fp == nullptr) return false;
     putc('B', fp);
@@ -3342,8 +3391,8 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
     Version = 12;
     fwrite(&Version, 1, 1, fp);
 
-    auto* pbyBuffer = new BYTE[1024 * 1024];
-    BYTE* pbyCur = pbyBuffer;
+    std::vector<BYTE> buffer(ComputeSerializedSize(*this));
+    BYTE* pbyCur = buffer.data();
     memcpy(pbyCur, Name, 32); pbyCur += 32;
     memcpy(pbyCur, &NumMeshs, 2); pbyCur += 2;
     memcpy(pbyCur, &NumBones, 2); pbyCur += 2;
@@ -3363,7 +3412,9 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
         memcpy(pbyCur, m->TexCoords, m->NumTexCoords * sizeof(TexCoord_t)); pbyCur += m->NumTexCoords * sizeof(TexCoord_t);
         for (int j = 0; j < m->NumTriangles; j++)
         {
-            memcpy(pbyCur, &m->Triangles[j], sizeof(Triangle_t2)); pbyCur += sizeof(Triangle_t2);
+            const Triangle_t2 record = ToTriangleRecord(m->Triangles[j]);
+            memcpy(pbyCur, &record, sizeof(record));
+            pbyCur += sizeof(record);
         }
         memcpy(pbyCur, Textures[i].FileName, 32); pbyCur += 32;
     }
@@ -3393,17 +3444,16 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
             }
         }
     }
-    auto lSize = (long)(pbyCur - pbyBuffer);
+    const auto lSize = static_cast<std::int32_t>(pbyCur - buffer.data());
+    assert(static_cast<size_t>(lSize) == buffer.size() && "ComputeSerializedSize must match Save2");
     // The on-disk size field is 32-bit; writing a `long` would emit 8 bytes on
     // LP64 (Linux x64) and corrupt the file.
-    auto lEncSize = (std::int32_t)MapFileEncrypt(nullptr, pbyBuffer, lSize);
-    auto* pbyEnc = new BYTE[lEncSize];
-    MapFileEncrypt(pbyEnc, pbyBuffer, lSize);
+    std::vector<BYTE> encrypted(static_cast<size_t>(lSize));
+    const auto lEncSize = static_cast<std::int32_t>(MapFileEncrypt(nullptr, buffer.data(), lSize));
+    MapFileEncrypt(encrypted.data(), buffer.data(), lSize);
     fwrite(&lEncSize, sizeof(std::int32_t), 1, fp);
-    fwrite(pbyEnc, lEncSize, 1, fp);
+    fwrite(encrypted.data(), lEncSize, 1, fp);
     fclose(fp);
-    delete[] pbyBuffer;
-    delete[] pbyEnc;
     return true;
 }
 

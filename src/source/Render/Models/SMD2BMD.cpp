@@ -76,7 +76,9 @@ void FixupSMD()
 
     for (int i = 0; i < tg->TriangleNum; i++)
     {
-        int MeshNum = 0;
+        // -1 means "no mesh uses this texture yet"; 0 is a valid mesh index, so using it as
+        // the sentinel created a new mesh for every triangle that shared the first texture.
+        int MeshNum = -1;
         for (int k = 0; k < mg->MeshNum; k++)
         {
             if (strcmp(tg->TextureName[i], mg->Texture[k].FileName) == 0)
@@ -86,7 +88,7 @@ void FixupSMD()
             }
         }
 
-        if (MeshNum == 0)
+        if (MeshNum == -1)
         {
             MeshNum = mg->MeshNum;
             mg->Mesh[MeshNum].Texture = mg->MeshNum;
@@ -302,15 +304,21 @@ void SMD2BMDAnimation(int ID, bool LockPosition)
     a->NumAnimationKeys = SkeletonGroup.TimeNum;
     a->PlaySpeed = 0.3f;
 
-    a->Positions = new vec3_t[a->NumAnimationKeys];
-    Bone_t* b = &bmd->Bones[0];
-    for (i = 0; i < a->NumAnimationKeys; i++)
+    // Root-motion deltas are only stored, released and read for locked actions
+    // (see BMD::Open2 / BMD::Release), so only locked actions get the array.
+    a->Positions = nullptr;
+    if (LockPosition)
     {
-        BoneMatrix_t* bm = &b->BoneMatrixes[bmd->NumActions];
-        j = i + 1;
-        if (j > a->NumAnimationKeys - 1)
-            j = a->NumAnimationKeys - 1;
-        VectorSubtract(bm->Position[j], bm->Position[i], a->Positions[i]);
+        a->Positions = new vec3_t[a->NumAnimationKeys];
+        Bone_t* b = &bmd->Bones[0];
+        for (i = 0; i < a->NumAnimationKeys; i++)
+        {
+            BoneMatrix_t* bm = &b->BoneMatrixes[bmd->NumActions];
+            j = i + 1;
+            if (j > a->NumAnimationKeys - 1)
+                j = a->NumAnimationKeys - 1;
+            VectorSubtract(bm->Position[j], bm->Position[i], a->Positions[i]);
+        }
     }
 
     bmd->NumActions++;

@@ -1,5 +1,5 @@
 #define NODE_MAX 200
-#define TIME_MAX 100
+#define TIME_MAX 256 // keyframes per animation; shipped models reach 105 (see tools/bmdconv)
 #define TRIANGLE_MAX 15000
 #define VERTEX_MAX 10000
 
