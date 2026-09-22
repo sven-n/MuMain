@@ -30,6 +30,7 @@ in [`../asset-pipeline.md`](../asset-pipeline.md). The artist agent's own brief 
 | `tools/mu_texture.py` | Works, byte-identical round trips on shipped textures. |
 | Blender scripts (`tools/blender/`) | Import and export through Blender Source Tools; verified round trip on `Monster01.bmd` (geometry, bone order, 7 actions equivalent). |
 | Game data in `src/bin/Data` | Complete except: no `Sound/`, no `Music/`, most of `Object74/` missing, a few effect/skill models missing. |
+| UI art pilot (`art/ui-pilot`) | Five right-HUD textures repainted and offline validated in an isolated worktree; source Data installed there only. Native/1080p mockups, originals and editable sources: [`assets-work/UI/notes.md`](../../assets-work/UI/notes.md). Client verification pending; shared runtime untouched. |
 
 ## 3. Development machine (owner's Mac)
 

@@ -68,6 +68,37 @@ bone deviation 0.0002 units over all 7 actions, bone order and lock flags restor
 **Open / next:** first real asset pass per the plan (Phase 1 textures, World1). Port the three
 Map Editor file dialogs to SDL so the editor builds on macOS. Add sound/music data.
 
+## 2026-09-22 - Right HUD material benchmark, offline pilot (ASTRA / Codex)
+**Goal:** Establish a dark medieval UI art benchmark while preserving the existing
+asset layout, filenames, dimensions, state alignment and engine behavior.
+
+**Done:** Created `art/ui-pilot` from `main` (`9a8b2027`) in the separate
+`../MuMain-ui-pilot` worktree. Inventoried 760 Interface images, retained all
+untouched payloads and produced 26 labeled contact sheets. Traced active HUD
+loads, slices, UVs, scaling, state remapping and alpha behavior read-only. Used
+the imagegen skill/built-in tool for five paintings; assembled native-size
+OpenRaster sources, PNG masters, JPEG payloads and OZJ exports. Repainted
+`Interface/partCharge1/newui_menu03.OZJ` (exposed trim and empty green well) and
+`newui_menu_Bt01.OZJ` through `newui_menu_Bt04.OZJ` (Character, Inventory, Friends,
+Menu). Installed only those validated source Data files in this worktree.
+Prompts, scripts, inventory, exact mappings and review notes are under
+[`assets-work/UI/`](../../assets-work/UI/notes.md).
+
+**Verified:** `assemble.py`, `preview.py`, `validate.py --install`; every exported
+file checked with `tools/mu_texture.py check`. Exit 0, no rejections; the five
+non-power-of-two warnings exactly match the shipped originals (256×51 panel,
+30×164 buttons). No resize or atlas change. Protected PNG master pixels are
+identical; JPEG maximum per-channel error is 4/255. All 760 original payload
+hashes match. Reviewed all four control states at native size and in enlarged
+crops, light/dark opacity, and 1920×1080 offline before/after mockups using the
+actual HUD geometry. Source Data/export bytes match. No engine, CMake, World1,
+Object1 or shared runtime changes; no client stability work.
+
+**Open / next:** Client verification remains pending under the owner's offline
+authorization: load errors, actual hover/selected/alert behavior, dynamic text
+and skill/gauge overlays, HiDPI, resizing and gameplay readability. The mockups
+are explicitly labeled offline reconstructions. Cash-shop and remaining HUD
+art are unchanged dependencies, outside this five-file pilot.
 ## 2026-09-22 - macOS client crashes: miniaudio use-after-free on missing audio files (Claude Fable 5.1)
 **Goal:** Find and fix the recurring crashes of the macOS client (ten crash reports on this day:
 IOGPU assertion and blit-encoder assertion in `EndFrame()`, `objc_release` of `0x1` on the Metal
