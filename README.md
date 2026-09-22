@@ -322,6 +322,11 @@ context.
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
 - [Build guide](docs/build/README.md) - platform-specific build notes.
+- [Asset pipeline](docs/asset-pipeline.md) - asset folders and formats, the `bmdconv`
+  model converter, the texture wrapper and the Blender import/export scripts.
+- [Agent handoff](docs/agents/HANDOFF.md) - state of this fork for AI assistants and new
+  contributors, with the [work log](docs/agents/WORKLOG.md) and the
+  [asset regeneration plan](docs/agents/ASSET_REGENERATION_PLAN.md).
 - [Translation system](docs/translation-system.md) - how the .resx ->
   generated C++ accessors pipeline works, how to add a string or a locale,
   runtime locale switching, and observer hooks for cached UI strings.

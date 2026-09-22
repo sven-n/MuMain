@@ -36,6 +36,16 @@ Linux/WSL with MinGW-w64.
 | Rider | [windows/rider.md](windows/rider.md) |
 | VS Code | [windows/vscode.md](windows/vscode.md) |
 
+### macOS (native)
+
+A native Apple Silicon build produces a playable client as an app bundle: the
+engine plus the `osx-arm64` network library, rendered through SDL GPU/Metal.
+The in-game editor does not build on macOS yet (see the guide).
+
+| Setup | Guide |
+|-------|-------|
+| Terminal / command line | [macos/console.md](macos/console.md) |
+
 ### Planned
 
 `android/` and `iOS/` are placeholders for future ports; the engine is not yet
@@ -48,6 +58,7 @@ buildable for them. See the per-platform notes when that work lands.
 | Linux | x64 | on / off | `MUnique.Client.Library.so` (linux-x64 AOT) | Full client |
 | Windows | x64 | on / off | `MUnique.Client.Library.dll` (win-x64 AOT) | Full client |
 | Windows | x86 | on / off | `MUnique.Client.Library.dll` (win-x86 AOT) | Full client |
+| macOS | arm64 | off | `MUnique.Client.Library.dylib` (osx-arm64 AOT) | Full client; editor build not ported yet |
 | Linux | x86 | - | none | Not supported (see below) |
 
 Actions validate Windows native x64 Release, Linux x64 Release, and macOS arm64
@@ -72,6 +83,7 @@ These apply to every setup; the per-setup guides only cover what differs.
 | `ENABLE_EDITOR` | `ON` / `OFF` | Builds the in-app ImGui editor (admin tooling). When `OFF`, nothing under `src/MuEditor/` is compiled in - enforced by the `editor_leak` test. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
+| `MU_BUILD_ASSET_TOOLS` | `ON` / `OFF` | Builds `bmdconv`, the BMD <-> SMD model converter under `tools/bmdconv/` (see [the asset pipeline](../asset-pipeline.md)). Defaults to `ON`. |
 | `MU_LINK_SDL_PLATFORM_BACKENDS` | `ON` / `OFF` | Linux only: makes SDL link its video-backend libraries (X11, Wayland, libdecor, KMS/DRM) and the Vulkan loader at build time instead of loading them at run time, so a packaged runtime resolves them through the recorded `RUNPATH` without a global library path. Defaults to `OFF`. |
 
 For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.

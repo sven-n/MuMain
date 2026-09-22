@@ -36,6 +36,20 @@ Quick references:
 - Match the style of existing commit messages in `git log`.
 - Reference the related issue in the PR description when applicable.
 
+## Fork-specific handoff
+
+This fork's goal (an own client with regenerated graphics against an OpenMU server), the
+state of the development machine, the asset tooling and the open work are recorded under
+[`docs/agents/`](docs/agents/):
+
+- [`docs/agents/HANDOFF.md`](docs/agents/HANDOFF.md) - start here: what works, where things
+  are, open work.
+- [`docs/agents/WORKLOG.md`](docs/agents/WORKLOG.md) - session log. **Append an entry at
+  the end of every session** (goal, done, verified, open).
+- [`docs/agents/ASSET_REGENERATION_PLAN.md`](docs/agents/ASSET_REGENERATION_PLAN.md) - rules
+  and phases for producing new assets in Blender.
+- [`docs/asset-pipeline.md`](docs/asset-pipeline.md) - asset formats and the conversion tools.
+
 ## Out of scope for AI changes
 
 Don't perform large retroactive cleanups of existing code to fit the rules unless
