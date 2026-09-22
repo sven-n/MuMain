@@ -274,5 +274,35 @@
       "src/bin/Data/Object1/steel_barred_a.OZT": "assets-work/World1/Ironwork01/textures/steel_barred_a.OZT",
       "src/bin/Data/Object1/steel_barred_door.OZT": "assets-work/World1/Ironwork01/textures/steel_barred_door.OZT"
     }
+  },
+  {
+    "name": "Masonry01",
+    "models": [
+      "HouseEtc01",
+      "StoneMuWall01",
+      "StoneMuWall02",
+      "StoneMuWall03",
+      "StoneMuWall04",
+      "HouseEtc02"
+    ],
+    "owner": "fences / masonry subagent",
+    "source_commits": [
+      "5180fd6d"
+    ],
+    "integration_commits": [
+      "f1fbb29c"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/HouseEtc01.bmd": "assets-work/World1/Masonry01/HouseEtc01/exports/HouseEtc01.bmd",
+      "src/bin/Data/Object1/StoneMuWall01.bmd": "assets-work/World1/Masonry01/StoneMuWall01/exports/StoneMuWall01.bmd",
+      "src/bin/Data/Object1/StoneMuWall02.bmd": "assets-work/World1/Masonry01/StoneMuWall02/exports/StoneMuWall02.bmd",
+      "src/bin/Data/Object1/StoneMuWall03.bmd": "assets-work/World1/Masonry01/StoneMuWall03/exports/StoneMuWall03.bmd",
+      "src/bin/Data/Object1/StoneMuWall04.bmd": "assets-work/World1/Masonry01/StoneMuWall04/exports/StoneMuWall04.bmd",
+      "src/bin/Data/Object1/HouseEtc02.bmd": "assets-work/World1/Masonry01/HouseEtc02/exports/HouseEtc02.bmd",
+      "src/bin/Data/Object1/c_wall04.OZJ": "assets-work/World1/Masonry01/HouseEtc01/exports/c_wall04.OZJ",
+      "src/bin/Data/Object1/c_wall05.OZJ": "assets-work/World1/Masonry01/StoneMuWall01/exports/c_wall05.OZJ",
+      "src/bin/Data/Object1/c_wall06.OZJ": "assets-work/World1/Masonry01/HouseEtc01/exports/c_wall06.OZJ",
+      "src/bin/Data/Object1/tile_ston01.OZJ": "assets-work/World1/Masonry01/HouseEtc02/exports/tile_ston01.OZJ"
+    }
   }
 ]

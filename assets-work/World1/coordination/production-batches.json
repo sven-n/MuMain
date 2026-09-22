@@ -242,5 +242,64 @@
       "src/bin/Data/Object1/chair2.OZT"
     ],
     "frozen_textures": []
+  },
+  "fences / architecture": {
+    "models": [
+      "House01",
+      "House03",
+      "House04",
+      "Tent01",
+      "HouseWall02"
+    ],
+    "compatibility_models": [
+      "HouseEtc02"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/HouseEtc02.bmd"
+    ],
+    "branch": "codex/lorencia-architecture",
+    "worktree": "MuMain-lorencia-architecture",
+    "owned_textures": [
+      "src/bin/Data/Object1/tile_house01.OZJ",
+      "src/bin/Data/Object1/tile_ston05.OZJ",
+      "src/bin/Data/Object1/tile_windows01.OZJ",
+      "src/bin/Data/Object1/tile_space01.OZJ",
+      "src/bin/Data/Object1/tile_ston07.OZT",
+      "src/bin/Data/Object1/light_02.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/bridge_01.OZJ",
+      "src/bin/Data/Object1/c_wall04.OZJ",
+      "src/bin/Data/Object1/horse_drawn_01.OZJ",
+      "src/bin/Data/Object1/tile_02.OZJ",
+      "src/bin/Data/Object1/tile_ston01.OZJ",
+      "src/bin/Data/Object1/tile_ston04.OZJ",
+      "src/bin/Data/Object1/tile_ston06.OZJ",
+      "src/bin/Data/Object1/tile_wood01.OZJ",
+      "src/bin/Data/Object1/tile_wood02.OZJ",
+      "src/bin/Data/Object1/tile_wood03.OZJ"
+    ]
+  },
+  "reviewer / stone walls": {
+    "models": [
+      "StoneWall01",
+      "StoneWall02",
+      "StoneWall03",
+      "StoneWall05",
+      "StoneWall06"
+    ],
+    "branch": "codex/lorencia-stone-walls",
+    "worktree": "MuMain-lorencia-stone-walls",
+    "owned_textures": [
+      "src/bin/Data/Object1/tile_01.OZJ",
+      "src/bin/Data/Object1/tile_03.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/badge_01.OZJ",
+      "src/bin/Data/Object1/badge_03.OZT",
+      "src/bin/Data/Object1/bridge_01.OZJ",
+      "src/bin/Data/Object1/horse_drawn_01.OZJ",
+      "src/bin/Data/Object1/tile_02.OZJ"
+    ]
   }
 }
