@@ -4,8 +4,8 @@ Language=Eng
 EncryptedUsername=
 EncryptedPassword=
 [Window]
-Width=1024
-Height=768
+Width=1920
+Height=1080
 Windowed=1
 [Audio]
 SoundVolume=5

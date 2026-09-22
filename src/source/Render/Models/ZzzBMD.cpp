@@ -3094,6 +3094,37 @@ private:
     size_t ptr;
 };
 
+// Bone indices come straight from the file and index the per-model bone tables
+// (BoneTransform, BoundingMin/Max). A vertex or normal outside the model's bones
+// would read and write past those tables, so it is attached to the root bone.
+// Shipped data contains such records on unreferenced vertices (Skill/CW_Bow_Skill.bmd).
+static void ClampBoneIndicesToModel(Mesh_t& mesh, int numBones, const wchar_t* modelPath)
+{
+    int invalidCount = 0;
+    for (int i = 0; i < mesh.NumVertices; ++i)
+    {
+        short& node = mesh.Vertices[i].Node;
+        if (node < 0 || node >= numBones)
+        {
+            node = 0;
+            ++invalidCount;
+        }
+    }
+    for (int i = 0; i < mesh.NumNormals; ++i)
+    {
+        short& node = mesh.Normals[i].Node;
+        if (node < 0 || node >= numBones)
+        {
+            node = 0;
+            ++invalidCount;
+        }
+    }
+    if (invalidCount > 0)
+    {
+        g_ErrorReport.Write(L"%ls: %d vertex/normal bone indices outside the %d bones, attached to bone 0\r\n",
+                            modelPath, invalidCount, numBones);
+    }
+}
 
 bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
@@ -3238,6 +3269,7 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         memcpy(m.Vertices, data + ptr, m.NumVertices * sizeof(Vertex_t));  ptr += m.NumVertices * sizeof(Vertex_t);
         memcpy(m.Normals, data + ptr, m.NumNormals * sizeof(Normal_t));   ptr += m.NumNormals * sizeof(Normal_t);
         memcpy(m.TexCoords, data + ptr, m.NumTexCoords * sizeof(TexCoord_t)); ptr += m.NumTexCoords * sizeof(TexCoord_t);
+        ClampBoneIndicesToModel(m, NumBones, ModelPath);
 
         for (int j = 0; j < m.NumTriangles; ++j)
         {

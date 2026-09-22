@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 
+# Applies PATCH_FILE to SOURCE_DIR with `git apply`, or accepts it as already
+# applied. Used as a FetchContent PATCH_COMMAND, which re-runs on reconfigure.
+
 if(NOT DEFINED SOURCE_DIR OR NOT IS_DIRECTORY "${SOURCE_DIR}")
     message(FATAL_ERROR "SOURCE_DIR must name an existing directory")
 endif()
@@ -12,39 +15,42 @@ get_filename_component(PATCH_FILE "${PATCH_FILE}" ABSOLUTE)
 
 find_package(Git REQUIRED)
 
-execute_process(
-    COMMAND "${GIT_EXECUTABLE}" apply --unidiff-zero --check "${PATCH_FILE}"
-    WORKING_DIRECTORY "${SOURCE_DIR}"
-    RESULT_VARIABLE forward_result
-    OUTPUT_VARIABLE forward_output
-    ERROR_VARIABLE forward_error
-)
-if(forward_result EQUAL 0)
+# A dependency unpacked from a tarball has no repository of its own. When the
+# build directory lives inside this repository, git would otherwise discover the
+# outer repository, resolve the patch paths against its root and silently skip
+# them. Stopping repository discovery at the parent directory makes git apply the
+# patch relative to SOURCE_DIR, while a dependency that is its own clone is
+# still detected.
+get_filename_component(source_parent "${SOURCE_DIR}" DIRECTORY)
+
+function(run_git_apply out_result out_output)
     execute_process(
-        COMMAND "${GIT_EXECUTABLE}" apply --unidiff-zero "${PATCH_FILE}"
+        COMMAND "${CMAKE_COMMAND}" -E env "GIT_CEILING_DIRECTORIES=${source_parent}"
+                "${GIT_EXECUTABLE}" apply --unidiff-zero ${ARGN} "${PATCH_FILE}"
         WORKING_DIRECTORY "${SOURCE_DIR}"
-        RESULT_VARIABLE apply_result
-        OUTPUT_VARIABLE apply_output
-        ERROR_VARIABLE apply_error
+        RESULT_VARIABLE result
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE error
     )
+    set(${out_result} "${result}" PARENT_SCOPE)
+    set(${out_output} "${output}${error}" PARENT_SCOPE)
+endfunction()
+
+run_git_apply(forward_result forward_output --check)
+if(forward_result EQUAL 0)
+    run_git_apply(apply_result apply_output)
     if(NOT apply_result EQUAL 0)
-        message(FATAL_ERROR "git apply failed:\n${apply_output}${apply_error}")
+        message(FATAL_ERROR "git apply failed:\n${apply_output}")
     endif()
     return()
 endif()
 
-execute_process(
-    COMMAND "${GIT_EXECUTABLE}" apply --unidiff-zero --reverse --check "${PATCH_FILE}"
-    WORKING_DIRECTORY "${SOURCE_DIR}"
-    RESULT_VARIABLE reverse_result
-    OUTPUT_VARIABLE reverse_output
-    ERROR_VARIABLE reverse_error
-)
+run_git_apply(reverse_result reverse_output --reverse --check)
 if(reverse_result EQUAL 0)
     return()
 endif()
 
 message(FATAL_ERROR
     "patch cannot be applied or recognized as already applied\n"
-    "forward check:\n${forward_output}${forward_error}\n"
-    "reverse check:\n${reverse_output}${reverse_error}")
+    "forward check:\n${forward_output}\n"
+    "reverse check:\n${reverse_output}")

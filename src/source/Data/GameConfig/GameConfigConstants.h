@@ -36,8 +36,8 @@ namespace CfgKeys
 
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
-    inline constexpr wchar_t CfgKeyFont[]     = L"Font";
-
+    inline constexpr wchar_t CfgKeyFont[] = L"Font";
+    inline constexpr wchar_t CfgKeyBottomHudClassic[] = L"BottomHudClassic";
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 
@@ -50,8 +50,8 @@ namespace CfgKeys
 
 namespace CfgDefaults
 {
-    inline constexpr int  CfgDefaultWindowWidth  = 1024;
-    inline constexpr int  CfgDefaultWindowHeight = 768;
+    inline constexpr int  CfgDefaultWindowWidth  = 1920;
+    inline constexpr int  CfgDefaultWindowHeight = 1080;
     inline constexpr bool CfgDefaultWindowed     = true;
 
     inline constexpr int  CfgDefaultSoundVolume = 5;
@@ -75,6 +75,8 @@ namespace CfgDefaults
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
     // the user picks a font. Any value is passed through as the GDI face name.
     inline constexpr wchar_t CfgDefaultFont[] = L"";
+    // Keep the responsive three-band layout unless the player opts in.
+    inline constexpr bool CfgDefaultBottomHudClassic = false;
 
     // Legacy config compatibility only. SDL GPU ignores this key and default.
     inline constexpr bool CfgDefaultCoreProfile = true;

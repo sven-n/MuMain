@@ -118,13 +118,8 @@ void MiniAudioBackend::Shutdown()
         m_soundObjects[buf] = nullptr;
     }
 
-    // Release music stream
-    if (m_musicLoaded)
-    {
-        ma_sound_uninit(&m_musicSound);
-        m_musicLoaded = false;
-        m_currentMusicName.clear();
-    }
+    ReleaseMusicStream();
+    m_unavailableMusicName.clear();
 
     ma_engine_uninit(&m_engine);
     m_initialized = false;
@@ -534,14 +529,13 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
         return;
     }
 
-    // Stop and release previous music stream
-    if (m_musicLoaded)
+    // A track that failed to open is only retried on an enforced play.
+    if (!enforce && normalizedName == m_unavailableMusicName)
     {
-        ma_sound_stop(&m_musicSound);
-        ma_sound_uninit(&m_musicSound);
-        m_musicLoaded = false;
-        m_currentMusicName.clear();
+        return;
     }
+
+    ReleaseMusicStream();
 
     // Start new stream — MA_SOUND_FLAG_STREAM keeps it off the decode buffer.
     // MA_SOUND_FLAG_ASYNC is intentionally NOT used: async init causes ma_sound_is_playing()
@@ -559,6 +553,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     {
         mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})", name,
                                      static_cast<int>(result));
+        m_unavailableMusicName = normalizedName;
         return;
     }
 
@@ -569,6 +564,20 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 
     m_musicLoaded = true;
     m_currentMusicName = normalizedName;
+    m_unavailableMusicName.clear();
+}
+
+void MiniAudioBackend::ReleaseMusicStream()
+{
+    if (!m_musicLoaded)
+    {
+        return;
+    }
+
+    ma_sound_stop(&m_musicSound);
+    ma_sound_uninit(&m_musicSound);
+    m_musicLoaded = false;
+    m_currentMusicName.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -615,15 +624,14 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
         }
     }
 
-    ma_sound_stop(&m_musicSound);
-
     if (enforce)
     {
         // Hard stop: release stream resources to avoid file handle / decoder leaks.
-        ma_sound_uninit(&m_musicSound);
-        m_musicLoaded = false;
-        m_currentMusicName.clear();
+        ReleaseMusicStream();
+        return;
     }
+
+    ma_sound_stop(&m_musicSound);
 }
 
 // ---------------------------------------------------------------------------

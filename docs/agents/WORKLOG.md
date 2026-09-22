@@ -154,6 +154,95 @@ renders. No asset changes or new engine build were made during publication.
 
 **Open / next:** PR review and the previously deferred client loading, lighting/blending,
 placement and screenshot checks. Client verification is still pending; no merge requested.
+## 2026-09-22 - Right HUD material benchmark, offline pilot (ASTRA / Codex)
+**Goal:** Establish a dark medieval UI art benchmark while preserving the existing
+asset layout, filenames, dimensions, state alignment and engine behavior.
+
+**Done:** Created `art/ui-pilot` from `main` (`9a8b2027`) in the separate
+`../MuMain-ui-pilot` worktree. Inventoried 760 Interface images, retained all
+untouched payloads and produced 26 labeled contact sheets. Traced active HUD
+loads, slices, UVs, scaling, state remapping and alpha behavior read-only. Used
+the imagegen skill/built-in tool for five paintings; assembled native-size
+OpenRaster sources, PNG masters, JPEG payloads and OZJ exports. Repainted
+`Interface/partCharge1/newui_menu03.OZJ` (exposed trim and empty green well) and
+`newui_menu_Bt01.OZJ` through `newui_menu_Bt04.OZJ` (Character, Inventory, Friends,
+Menu). Installed only those validated source Data files in this worktree.
+Prompts, scripts, inventory, exact mappings and review notes are under
+[`assets-work/UI/`](../../assets-work/UI/notes.md).
+
+**Verified:** `assemble.py`, `preview.py`, `validate.py --install`; every exported
+file checked with `tools/mu_texture.py check`. Exit 0, no rejections; the five
+non-power-of-two warnings exactly match the shipped originals (256×51 panel,
+30×164 buttons). No resize or atlas change. Protected PNG master pixels are
+identical; JPEG maximum per-channel error is 4/255. All 760 original payload
+hashes match. Reviewed all four control states at native size and in enlarged
+crops, light/dark opacity, and 1920×1080 offline before/after mockups using the
+actual HUD geometry. Source Data/export bytes match. No engine, CMake, World1,
+Object1 or shared runtime changes; no client stability work.
+
+**Open / next:** Client verification remains pending under the owner's offline
+authorization: load errors, actual hover/selected/alert behavior, dynamic text
+and skill/gauge overlays, HiDPI, resizing and gameplay readability. The mockups
+are explicitly labeled offline reconstructions. Cash-shop and remaining HUD
+art are unchanged dependencies, outside this five-file pilot.
+## 2026-09-22 - macOS client crashes: miniaudio use-after-free on missing audio files (Claude Fable 5.1)
+**Goal:** Find and fix the recurring crashes of the macOS client (ten crash reports on this day:
+IOGPU assertion and blit-encoder assertion in `EndFrame()`, `objc_release` of `0x1` on the Metal
+completion queue, CFPrefs walking `0x1` from `IMKClient`, NSXPC and AudioComponent crashes).
+
+**Done:**
+- Read the ten `.ips` reports: every crash site is an Apple framework object holding a pointer
+  that is `0x1` or `0x9` (a `0` or `0x8` incremented by one), on different threads and scenes,
+  as early as 12 s after launch. That is heap corruption in the client, not a renderer bug. The
+  SDL GPU code in `EndFrame()` and the buffer growth helpers are sound: SDL releases buffers
+  and textures deferred, by reference count, once the command buffers that use them complete.
+- Built the client with `-fsanitize=address` in a second build directory
+  (`out/build/macos-arm64-asan`, config `RelWithDebInfo` with `-O1 -g` so asserts stay on;
+  add `-fsanitize-recover=address` and run with `ASAN_OPTIONS=halt_on_error=0` to collect
+  every finding in one run). Findings, in the order they appeared:
+  1. miniaudio 0.11.25 `ma_resource_manager_data_buffer_node_acquire()` reads the node after
+     freeing it when a sound file cannot be opened (every `LoadSound` at startup, no `Data/Sound`).
+  2. miniaudio's data-stream load job increments `pDataStream->executionPointer` *after*
+     signalling the waiting caller. When the file cannot be opened, the caller frees the stream
+     on wake-up, so the job thread writes `+1` into freed memory. The login scene and Lorencia's
+     safe zone call `PlayMp3()` every frame and the same-track guard never engages on failure,
+     so with no `Data/Music` this ran ~75 times per second (38 000 log lines per session). This
+     is the mechanism behind the `0x1` / `0x9` pointers.
+  3. `BMD::CreateBoundingBox()` indexes the global `BoundingMin/Max` tables with the vertex bone
+     index; `Data/Skill/CW_Bow_Skill.bmd` carries `-8888` on an unreferenced vertex and normal,
+     so every launch read and wrote far outside those tables.
+  4. `ReceiveOption()` reads the 4-byte `QWERLevel` field one byte past the 32-byte option
+     packet OpenMU sends (the client struct is 34 bytes). Read only; left as a follow-up.
+- Fixes: `cmake/patches/miniaudio-0.11.25-resource-manager-use-after-free.patch` (applied by
+  the existing `ApplyGitPatch.cmake` step; that script now stops git's repository discovery at
+  the dependency directory, because a tarball dependency inside the build tree was silently
+  skipped before), `MiniAudioBackend` remembers a track that failed to open and skips it until
+  a different or enforced request (one log line per track instead of one per frame),
+  `BMD::Open2()` clamps out-of-range bone indices to bone 0 and reports the model.
+- Docs: macOS guide (missing music behaviour), `HANDOFF.md` (state, symptom table, the stale
+  libc++ folder is gone), unit test for the failed-track guard.
+
+**Verified:**
+- `ctest` 215/215 (Release), including the new audio test.
+- Sanitizer build, before the fixes: report within 2 s of launch (finding 1); after the
+  miniaudio patch: finding 3; after all fixes, 200 s run in which the owner logged in and
+  played in the main scene: only finding 4, clean exit.
+- Release build with `MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1`: 4 min 25 s alive (login,
+  character select, main scene), no validation error, no crash report, clean shutdown on
+  SIGTERM. Before the fixes the same build died within 16 s to 3 min of the main scene.
+- Do not launch the client from a sandboxed tool shell (window server, audio and GPU access);
+  the Bash tool needs its sandbox disabled for the run, and `MTL_DEBUG_LAYER_WARNING_MODE=nslog`
+  writes gigabytes per minute (sampler descriptor dumps), so keep warnings off.
+
+**Open / next:**
+- Follow-up chip: size-check the option packet in `ReceiveOption()` before reading `QWERLevel`.
+- miniaudio's other resource-manager jobs (`load_data_buffer_node`, `load_data_buffer`,
+  `free_data_buffer_node`) touch their object after signalling as well; the client never
+  exercises them (sound effects decode synchronously). Report upstream together with the patch.
+- SDL 3.4.8 `METAL_INTERNAL_AcquireSwapchainTexture()` does not check `nextDrawable` for nil;
+  upstream main is the same. Revisit only if a render-pass crash appears without heap corruption.
+- `[UI] EnableAnimationTaskPool=1` (worker threads for character animation) was not tested.
+
 ## 2026-09-22 - Lorencia tavern furniture batch (ASTRA / Codex)
 **Goal:** Rebuild three additional Lorencia tavern props in an isolated worktree, respecting
 parallel asset ownership and the original engine contract.
@@ -184,6 +273,54 @@ In a stable coordinated client session, check load logs, runtime lighting/filter
 table silhouettes and the paired-half-table/counter seams at recorded placements; capture
 matched 1920×1080 before/after views. All supplied previews are labeled offline Blender.
 
+## 2026-09-22 - Publish the tavern furniture batch (ASTRA / Codex)
+**Goal:** Commit, push and create a PR for the completed tavern furniture work.
+
+**Done:** Pushed `art/lorencia-tavern-props` and opened
+[PR #6](https://github.com/vaskodagamo/MuMain/pull/6) against `main`. Merged the latest
+main (`300911ed`) first, preserving every work-log entry when resolving the sole conflict.
+Updated the installer to protect other artists' committed Data against HEAD after a main
+merge while retaining original-backup and claimed-export hash checks. The PR includes
+an offline preview, exact four-file game scope, validation evidence and pending client checks.
+
+**Verified:** Installer preflight passes with all four exports matching recorded hashes and
+320 protected files matching committed HEAD. The PR game diff contains only Furniture03,
+Furniture04, Furniture05 and desk_big.OZJ; `git diff origin/main...HEAD --check` passes.
+No assets were regenerated, runtime files written, client session launched or engine build
+performed during publication. Prior offline validation remains applicable.
+
+**Open / next:** PR review and previously deferred client acceptance. The PR is not merged.
+
+## 2026-09-22 - Modern UI revision after visual feedback (ASTRA / Codex)
+**Goal:** Make the five-file right-HUD pilot visibly cleaner and more readable after
+the first pass failed the user's visual expectations.
+
+**Done:** Created isolated `MuMain-ui-modern` / `art/ui-modern-pilot` from main
+`7a88d829`; the earlier pilot PR #4 was already merged. Generated five new painted
+sources with the built-in imagegen tool and repainted complete button faces with
+dark metal, bold pale symbols and a gold selected-state underline. The user selected
+the clean, restrained dark-fantasy direction. Repainted the emerald skill well and
+XP trough while retaining the AG/mana backing required by unchanged opaque gauge
+fills. Kept filenames, dimensions, atlas boundaries and all interaction geometry.
+Retained first-pass payloads/prompts for comparison, updated editable sources and
+reproduction scripts, and produced eight offline previews including actual 1080p
+control sizes and both existing HUD layout modes. Installed only the same five
+validated OZJs into this worktree's source Data. Details:
+[`assets-work/UI/notes.md`](../../assets-work/UI/notes.md).
+
+**Verified:** `mu_texture.py check` exits 0 for every export with only the same five
+pre-existing NPOT warnings. Verified 760 original payload hashes, unchanged opaque
+RGB dimensions, wrappers, protected panel pixels, state ordering and JPEG error
+at most 4/255 per channel. Reassembly reproduced all ten master/export hashes;
+all five editable ORA composites match their masters. Inspected native, all-state,
+1080p and light/dark previews. No engine, CMake, World1, Object1 or shared-runtime
+changes; no client launch or engine build.
+
+**Open / next:** Client loading, GPU filtering, localized text, skill/counter
+overlays, input/alert states, gameplay readability and HiDPI checks remain pending.
+The rest of the HUD is outside this five-file benchmark. All previews are labeled
+offline mockups, not client screenshots.
+
 ## 2026-09-22 - Lorencia rebuild coordination and first integrations (ASTRA / Codex)
 **Goal:** Rebuild the placed static environment in independent worktrees while preserving
 completed terrain/Beer01 and all gameplay-bound data.
@@ -212,7 +349,6 @@ No runtime installation, client launch, engine/CMake/UI edit, push or main merge
 no asset was observed in client by this task. All client loading, shading/filtering, motion,
 placement and matched 1920×1080 capture checks remain pending. Consolidated handoff:
 [`coordination/notes.md`](../../assets-work/World1/coordination/notes.md).
-
 
 ## 2026-09-22 - Lorencia static inventory completed offline (ASTRA / Codex)
 **Goal:** Complete the coherent dark-medieval Lorencia static art pass through the actual

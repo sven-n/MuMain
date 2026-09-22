@@ -95,7 +95,8 @@ cd out/build/macos-arm64/src/Release/Main.app/Contents/MacOS
 
 The client writes its log to `MuError.log` in that directory. The repository's
 `Data/` contains no `Sound/` or `Music/` files, so expect audio load errors
-there and a silent client until you add them.
+there and a silent client until you add them. A missing music track is reported
+once per scene that requests it and then skipped; the client keeps running.
 
 Set the server in `config.ini` (`[CONNECTION SETTINGS]` `ServerIP` /
 `ServerPort`). An [OpenMU](https://github.com/MUnique/OpenMU) server listens for

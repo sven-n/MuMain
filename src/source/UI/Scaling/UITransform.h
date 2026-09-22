@@ -69,6 +69,8 @@ namespace UI::Scaling
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
+    void SetBottomHudClassic(bool classic);
+    bool IsBottomHudClassic();
     Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
     Transform BottomHudCenterTransform(int windowWidth, int windowHeight);
     Transform BottomHudRightTransform(int windowWidth, int windowHeight);

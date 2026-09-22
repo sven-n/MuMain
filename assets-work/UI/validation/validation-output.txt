@@ -1,0 +1,147 @@
+{
+  "status": "OFFLINE PASS; CLIENT VERIFICATION PENDING",
+  "original_payloads_verified": 760,
+  "installed_in_this_worktree": true,
+  "shared_runtime_touched": false,
+  "files": [
+    {
+      "file": "Interface/partCharge1/newui_menu03.OZJ",
+      "status": "PASS (baseline NPOT warning preserved)",
+      "size": [
+        256,
+        51
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "wrapper_roundtrip": "byte-identical",
+      "sha256": "8dc843702ba3aaf9c26fabe398b65c8ded02948165ea6ad834754051e58a5703",
+      "protected_pixels": 2958,
+      "protected_master_delta": 0,
+      "jpeg_max_channel_error": 4,
+      "jpeg_mean_channel_error": 0.19544015522875818,
+      "changed_master_pixels": 5007,
+      "warnings": [
+        "256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/partCharge1/newui_menu_Bt01.OZJ",
+      "status": "PASS (baseline NPOT warning preserved)",
+      "size": [
+        30,
+        164
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "wrapper_roundtrip": "byte-identical",
+      "sha256": "2001e9a509e5b525e1e5bac512c34ac6ed9ab1e90e7f5be116b3cddc515fd709",
+      "protected_pixels": 0,
+      "protected_master_delta": 0,
+      "jpeg_max_channel_error": 4,
+      "jpeg_mean_channel_error": 0.46151761517615175,
+      "changed_master_pixels": 4896,
+      "warnings": [
+        "30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ],
+      "state_mean_rgb": [
+        41.505,
+        46.699,
+        34.541,
+        44.659
+      ]
+    },
+    {
+      "file": "Interface/partCharge1/newui_menu_Bt02.OZJ",
+      "status": "PASS (baseline NPOT warning preserved)",
+      "size": [
+        30,
+        164
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "wrapper_roundtrip": "byte-identical",
+      "sha256": "235f7463d7d4527718b0fc9b7db0d9354d5d76bea3bce54fa5a591a16f322d63",
+      "protected_pixels": 0,
+      "protected_master_delta": 0,
+      "jpeg_max_channel_error": 4,
+      "jpeg_mean_channel_error": 0.45907859078590785,
+      "changed_master_pixels": 4915,
+      "warnings": [
+        "30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ],
+      "state_mean_rgb": [
+        54.121,
+        61.275,
+        46.91,
+        58.079
+      ]
+    },
+    {
+      "file": "Interface/partCharge1/newui_menu_Bt03.OZJ",
+      "status": "PASS (baseline NPOT warning preserved)",
+      "size": [
+        30,
+        164
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "wrapper_roundtrip": "byte-identical",
+      "sha256": "ca54dddd4e84305b7c0b5804b12b79fccbbf1783eadee6bbfdf87d6752643dae",
+      "protected_pixels": 0,
+      "protected_master_delta": 0,
+      "jpeg_max_channel_error": 4,
+      "jpeg_mean_channel_error": 0.453929539295393,
+      "changed_master_pixels": 4901,
+      "warnings": [
+        "30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ],
+      "state_mean_rgb": [
+        61.718,
+        69.351,
+        53.256,
+        65.833
+      ]
+    },
+    {
+      "file": "Interface/partCharge1/newui_menu_Bt04.OZJ",
+      "status": "PASS (baseline NPOT warning preserved)",
+      "size": [
+        30,
+        164
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "wrapper_roundtrip": "byte-identical",
+      "sha256": "15948ddace9c151624019063c2c729775c109baa3b9fa34bd3ee281786bbcc02",
+      "protected_pixels": 0,
+      "protected_master_delta": 0,
+      "jpeg_max_channel_error": 3,
+      "jpeg_mean_channel_error": 0.44613821138211385,
+      "changed_master_pixels": 4901,
+      "warnings": [
+        "30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ],
+      "state_mean_rgb": [
+        36.924,
+        41.021,
+        32.14,
+        40.493
+      ]
+    }
+  ],
+  "limitations": [
+    "No client capture; no GPU execution in this check.",
+    "NPOT warnings match shipped originals; no dimension change.",
+    "JPEG is lossy: protected pixels are exact in masters, within measured error in exports."
+  ]
+}

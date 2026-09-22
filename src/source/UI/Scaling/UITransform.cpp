@@ -55,6 +55,13 @@ UI::Scaling::Transform BottomHudTransform(int windowWidth, int windowHeight, flo
     return {scale, scale, offsetX, static_cast<float>(windowHeight) - kReferenceHeight * scale, scale};
 }
 
+UI::Scaling::Transform BottomHudClassicTransform(int windowWidth, int windowHeight)
+{
+    const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
+    const float offsetX = (static_cast<float>(windowWidth) - kReferenceWidth * scale) * 0.5f;
+    return BottomHudTransform(windowWidth, windowHeight, offsetX);
+}
+
 bool ContainsLogicalRect(const UI::Scaling::Transform& transform, float windowX, float windowY, float left,
                          float top, float right, float bottom)
 {
@@ -82,11 +89,14 @@ float CappedUniformScale(int windowWidth, int windowHeight, float maximumScale)
 UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
 {
     const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumDockScale);
-    const float offsetY = static_cast<float>(RoundedBottomHudTop(windowWidth, windowHeight))
-                          - UI::Scaling::DockLogicalBottom * scale;
+    const float offsetY =
+        static_cast<float>(RoundedBottomHudTop(windowWidth, windowHeight)) - UI::Scaling::DockLogicalBottom * scale;
     return {scale, scale, 0.0f, offsetY, scale};
 }
-}
+
+bool g_bottomHudClassic = false;
+
+} // namespace
 
 UI::Scaling::Transform UI::Scaling::ScreenOverlayTransform(int windowWidth, int windowHeight)
 {
@@ -133,13 +143,27 @@ float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
                       kMaximumHudScale * contentScale);
 }
 
+void UI::Scaling::SetBottomHudClassic(bool classic)
+{
+    g_bottomHudClassic = classic;
+}
+
+bool UI::Scaling::IsBottomHudClassic()
+{
+    return g_bottomHudClassic;
+}
+
 UI::Scaling::Transform UI::Scaling::BottomHudLeftTransform(int windowWidth, int windowHeight)
 {
+    if (g_bottomHudClassic)
+        return BottomHudClassicTransform(windowWidth, windowHeight);
     return BottomHudTransform(windowWidth, windowHeight, 0.0f);
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudCenterTransform(int windowWidth, int windowHeight)
 {
+    if (g_bottomHudClassic)
+        return BottomHudClassicTransform(windowWidth, windowHeight);
     const float scale = BottomHudScale(windowWidth, windowHeight);
     return BottomHudTransform(windowWidth, windowHeight,
                               static_cast<float>(windowWidth) * 0.5f - 320.0f * scale);
@@ -147,6 +171,8 @@ UI::Scaling::Transform UI::Scaling::BottomHudCenterTransform(int windowWidth, in
 
 UI::Scaling::Transform UI::Scaling::BottomHudRightTransform(int windowWidth, int windowHeight)
 {
+    if (g_bottomHudClassic)
+        return BottomHudClassicTransform(windowWidth, windowHeight);
     const float scale = BottomHudScale(windowWidth, windowHeight);
     return BottomHudTransform(windowWidth, windowHeight,
                               static_cast<float>(windowWidth) - kReferenceWidth * scale);
@@ -154,6 +180,8 @@ UI::Scaling::Transform UI::Scaling::BottomHudRightTransform(int windowWidth, int
 
 UI::Scaling::Transform UI::Scaling::BottomHudExperienceTransform(int windowWidth, int windowHeight)
 {
+    if (g_bottomHudClassic)
+        return BottomHudClassicTransform(windowWidth, windowHeight);
     Transform transform = BottomHudLeftTransform(windowWidth, windowHeight);
     transform.scaleX = static_cast<float>(windowWidth) / kReferenceWidth;
     return transform;

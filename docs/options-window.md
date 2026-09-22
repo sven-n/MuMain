@@ -37,13 +37,17 @@ What was added on top of that:
   centered dialogs remain capped at 2 times their reference size. Text grows
   with the active layout up to the dock scale, shrinking only when needed to
   fit an existing control.
+- **Classic bottom HUD** is an opt-in UI setting. It keeps the original 640-wide
+  bar uniformly scaled and centered on wide windows; leave it off to use the
+  responsive three-band layout. The change applies immediately.
 
 ## What it stores in `config.ini`
 
 Settings are written next to the executable as `config.ini`. The options
 window writes to these sections:
 
-- `[Window]` - width, height, windowed flag.
+- `[Window]` - width, height, windowed flag. A fresh install starts windowed at
+  1920x1080; the options window or the ini changes it from there.
 - `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
   update it; startup and fullscreen/resolution changes reapply it before the
   next frame begins.
@@ -52,6 +56,8 @@ window writes to these sections:
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see
   "Remembering login credentials" below.
 - `[ConnectionSettings]`
+- `[UI]` - locale, font, and `BottomHudClassic` (`0` by default; `1` enables the
+  classic centered bottom bar).
 - `[Camera]` - orbital wheel-zoom radius (`Zoom`). **New in this PR**, the
   only key the camera rework added.
 
