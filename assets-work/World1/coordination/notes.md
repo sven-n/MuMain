@@ -14,6 +14,8 @@ All 106 in-scope baseline BMDs and their actual action files pass `bmdconv valid
 
 All 106 in-scope models were imported through the official importer and visually inspected, including previously completed pilot assets. The six `inventory-sheet-XX.jpg` images show this integration baseline; they are not client screenshots. `inspection/<model>/` retains packed baseline imports, geometry reports and labeled render filenames. Nine fauna/creature/hidden-marker models remain excluded and unchanged. Precise semantic identities are in `identities.json`; production workers refine details after inspecting bone/mesh data.
 
+All 105 baseline texture containers and decoded artwork are preserved in `texture-baseline/`, with three `texture-sheet-XX.jpg` contact sheets. Baseline inspection reproduction uses these archived textures and BMDs, never subsequently installed replacements. The baseline inventory builder refuses to overwrite an existing dependency map.
+
 ## Production and boundaries
 
 Groundcover01, Fences01 and Scrub01 are accepted and integrated; Trees01, TimberProps01 and Rocks01 are isolated subagent batches; see the board for exact owners/claims. Shared architecture textures stay frozen where geometry ownership is split. No worker may change shared documents, runtime Data or operate the client. Coordinator alone integrates validated commits sequentially.

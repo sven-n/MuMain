@@ -23,7 +23,8 @@ def inspect(name, record):
     output.mkdir(parents=True, exist_ok=True)
     if (output / 'baseline-offline.png').exists():
         return
-    sys.argv = ['blender', '--', '--bmd', str(ROOT / record['path']), '--bmdconv', CONVERTER,
+    archived = HERE / 'baseline-validation' / name / (name + '.bmd')
+    sys.argv = ['blender', '--', '--bmd', str(archived), '--textures', str(HERE / 'texture-baseline'), '--bmdconv', CONVERTER,
                 '--out', str(output / 'import.blend')]
     mu_bmd_import.main()
     bpy.context.scene.frame_set(0)

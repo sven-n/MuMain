@@ -103,6 +103,8 @@ def source_references():
 
 
 def main():
+    if (OUTPUT / 'dependency-map.json').exists():
+        raise SystemExit('Immutable dependency baseline already exists; use validate_integration.py for current state.')
     models, users = inventory_models()
     result = {'baseline': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
               'models': models, 'texture_consumers': users,
