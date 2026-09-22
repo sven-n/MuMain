@@ -1,5 +1,5 @@
 {
-  "result": "REVIEW",
+  "result": "PASS",
   "normal_direction_tolerance": 0.0001,
   "models": [
     {
@@ -13,6 +13,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -26,6 +28,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -39,6 +43,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -52,20 +58,9 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
-    },
-    {
-      "model": "Grass02",
-      "frames_including_bind": 2,
-      "meshes": [
-        {
-          "material": "tree_08.tga",
-          "shared_normal_cases": 1,
-          "max_direction_delta": 0.17935516233517815,
-          "result": "REVIEW"
-        }
-      ],
-      "result": "REVIEW"
     },
     {
       "model": "Grass05",
@@ -78,6 +73,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -91,6 +88,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -104,6 +103,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -117,6 +118,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -130,6 +133,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -143,6 +148,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -156,6 +163,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -169,6 +178,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -188,6 +199,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -207,6 +220,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -226,6 +241,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -245,6 +262,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -264,6 +283,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -277,6 +298,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -296,6 +319,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -309,6 +334,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -328,6 +355,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -347,6 +376,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -366,6 +397,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -379,6 +412,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -392,6 +427,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -405,6 +442,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -418,45 +457,9 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
-    },
-    {
-      "model": "Tree12",
-      "frames_including_bind": 32,
-      "meshes": [
-        {
-          "material": "tree_01.jpg",
-          "shared_normal_cases": 8,
-          "max_direction_delta": 0.20359748047473794,
-          "result": "REVIEW"
-        },
-        {
-          "material": "tree_04.tga",
-          "shared_normal_cases": 2,
-          "max_direction_delta": 0.026862648701109833,
-          "result": "REVIEW"
-        }
-      ],
-      "result": "REVIEW"
-    },
-    {
-      "model": "Tree13",
-      "frames_including_bind": 32,
-      "meshes": [
-        {
-          "material": "tree_05.tga",
-          "shared_normal_cases": 8,
-          "max_direction_delta": 0.026856731650297384,
-          "result": "REVIEW"
-        },
-        {
-          "material": "tree_01.jpg",
-          "shared_normal_cases": 3,
-          "max_direction_delta": 0.04042476181983313,
-          "result": "REVIEW"
-        }
-      ],
-      "result": "REVIEW"
     },
     {
       "model": "Grass07",
@@ -469,6 +472,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -482,6 +487,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -495,6 +502,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -508,6 +517,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -521,6 +532,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -540,6 +553,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -559,6 +574,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -578,6 +595,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -597,6 +616,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -616,6 +637,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -635,6 +658,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -654,6 +679,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -691,6 +718,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -716,6 +745,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -735,6 +766,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -760,6 +793,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -815,6 +850,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -846,6 +883,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -877,6 +916,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -902,6 +943,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -921,6 +964,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -946,6 +991,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -971,6 +1018,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -996,6 +1045,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1015,6 +1066,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1028,6 +1081,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1065,6 +1120,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1084,6 +1141,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1115,6 +1174,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1134,6 +1195,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1153,6 +1216,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1166,6 +1231,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1197,6 +1264,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1234,6 +1303,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1295,6 +1366,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1314,6 +1387,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1351,6 +1426,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1376,6 +1453,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1389,6 +1468,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1408,6 +1489,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1427,6 +1510,8 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
     },
     {
@@ -1494,6 +1579,413 @@
           "result": "PASS"
         }
       ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "House05",
+      "frames_including_bind": 31,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ston02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall06",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stair01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "stone_statue02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "stone_statue01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tombstone_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "angel_stone_statue.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "SteelStatue01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tombstone_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grave_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grave_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage01",
+      "frames_including_bind": 22,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tub.jpg",
+          "shared_normal_cases": 1,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "grass_01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Straw01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grass_01.tga",
+          "shared_normal_cases": 4,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Straw02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grass_01.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_08.tga",
+          "shared_normal_cases": 32,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": true,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree12",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree_01.jpg",
+          "shared_normal_cases": 8,
+          "max_direction_delta": 0.2035985819916798,
+          "result": "REVIEW"
+        },
+        {
+          "material": "tree_04.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0.02686452504741342,
+          "result": "REVIEW"
+        }
+      ],
+      "original_bytes_preserved": true,
+      "acceptance_basis": "Exact original BMD retains pre-existing normal behavior",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree13",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree_05.tga",
+          "shared_normal_cases": 9,
+          "max_direction_delta": 0.02685668706991248,
+          "result": "REVIEW"
+        },
+        {
+          "material": "tree_01.jpg",
+          "shared_normal_cases": 3,
+          "max_direction_delta": 0.04042539971505058,
+          "result": "REVIEW"
+        }
+      ],
+      "original_bytes_preserved": true,
+      "acceptance_basis": "Exact original BMD retains pre-existing normal behavior",
       "result": "PASS"
     }
   ],

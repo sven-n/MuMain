@@ -43,6 +43,19 @@ def check_exports(ledger):
     return result
 
 
+
+def check_retained(ledger):
+    baseline = json.loads((HERE / 'protected-baseline.json').read_text())
+    result = {}
+    for batch in ledger:
+        for game, exported in batch.get('retained_game_files', {}).items():
+            actual = sha256(ROOT / game)
+            if actual != baseline[game] or actual != sha256(ROOT / exported):
+                raise ValueError(f'Retained original BMD changed: {game}')
+            result[game] = {'sha256': actual, 'export': exported, 'batch': batch['name']}
+    return result
+
+
 def check_originals(ledger):
     result = {}
     for batch in ledger:
@@ -95,12 +108,13 @@ def main():
     ledger = json.loads((HERE / 'integration-ledger.json').read_text())
     changed, protected = check_scope(ledger)
     exports = check_exports(ledger)
+    retained = check_retained(ledger)
     originals = check_originals(ledger)
     info = check_dependencies(ledger)
     texture_report = check_textures(changed)
     report = {'result': 'PASS: offline integration; no client claim',
               'integration_head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-              'baseline': BASELINE, 'changed_game_files': exports, 'protected_file_count': len(protected),
+              'baseline': BASELINE, 'changed_game_files': exports, 'retained_game_files': retained, 'protected_file_count': len(protected),
               'world1_files_unchanged': all(p.startswith('src/bin/Data/Object1/') for p in changed),
               'original_archive_hashes': originals, 'combined_models': len(info), 'missing_textures': [], 'texture_loader_checks': texture_report,
               'client_verified': False, 'runtime_modified': False}

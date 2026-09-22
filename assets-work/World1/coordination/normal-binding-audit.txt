@@ -1,4 +1,1 @@
-REVIEW 72 models
-{'model': 'Grass02', 'frames_including_bind': 2, 'meshes': [{'material': 'tree_08.tga', 'shared_normal_cases': 1, 'max_direction_delta': 0.17935516233517815, 'result': 'REVIEW'}], 'result': 'REVIEW'}
-{'model': 'Tree12', 'frames_including_bind': 32, 'meshes': [{'material': 'tree_01.jpg', 'shared_normal_cases': 8, 'max_direction_delta': 0.20359748047473794, 'result': 'REVIEW'}, {'material': 'tree_04.tga', 'shared_normal_cases': 2, 'max_direction_delta': 0.026862648701109833, 'result': 'REVIEW'}], 'result': 'REVIEW'}
-{'model': 'Tree13', 'frames_including_bind': 32, 'meshes': [{'material': 'tree_05.tga', 'shared_normal_cases': 8, 'max_direction_delta': 0.026856731650297384, 'result': 'REVIEW'}, {'material': 'tree_01.jpg', 'shared_normal_cases': 3, 'max_direction_delta': 0.04042476181983313, 'result': 'REVIEW'}], 'result': 'REVIEW'}
+PASS 90 models

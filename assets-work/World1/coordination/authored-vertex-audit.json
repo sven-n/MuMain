@@ -615,6 +615,224 @@
         "Box01"
       ],
       "result": "PASS"
+    },
+    {
+      "model": "House05",
+      "source": "assets-work/World1/Architecture02/House05",
+      "authored_vertices": 232,
+      "reimport_vertices": 232,
+      "authored_to_export_max": 0.0004505869001150131,
+      "export_to_authored_max": 0.0004505869001150131,
+      "bone_names": [
+        "Box02",
+        "Box03",
+        "Box04",
+        "Box05",
+        "Box08",
+        "ki12"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall01",
+      "source": "assets-work/World1/Architecture02/HouseWall01",
+      "authored_vertices": 40,
+      "reimport_vertices": 40,
+      "authored_to_export_max": 7.68876816437114e-06,
+      "export_to_authored_max": 7.68876816437114e-06,
+      "bone_names": [
+        "Object02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall04",
+      "source": "assets-work/World1/Architecture02/HouseWall04",
+      "authored_vertices": 64,
+      "reimport_vertices": 64,
+      "authored_to_export_max": 3.932099843950709e-06,
+      "export_to_authored_max": 3.932099843950709e-06,
+      "bone_names": [
+        "joint_01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall05",
+      "source": "assets-work/World1/Architecture02/HouseWall05",
+      "authored_vertices": 39,
+      "reimport_vertices": 39,
+      "authored_to_export_max": 3.814697265625e-06,
+      "export_to_authored_max": 3.814697265625e-06,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall06",
+      "source": "assets-work/World1/Architecture02/HouseWall06",
+      "authored_vertices": 38,
+      "reimport_vertices": 38,
+      "authored_to_export_max": 3.075507265748456e-05,
+      "export_to_authored_max": 3.075507265748456e-05,
+      "bone_names": [
+        "Object01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stair01",
+      "source": "assets-work/World1/Architecture02/Stair01",
+      "authored_vertices": 122,
+      "reimport_vertices": 122,
+      "authored_to_export_max": 6.536159844472422e-07,
+      "export_to_authored_max": 6.536159844472422e-07,
+      "bone_names": [
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue01",
+      "source": "assets-work/World1/Statues01/StoneStatue01",
+      "authored_vertices": 65,
+      "reimport_vertices": 65,
+      "authored_to_export_max": 2.980232238769531e-07,
+      "export_to_authored_max": 2.980232238769531e-07,
+      "bone_names": [
+        "Box11"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "SteelStatue01",
+      "source": "assets-work/World1/Statues01/SteelStatue01",
+      "authored_vertices": 64,
+      "reimport_vertices": 64,
+      "authored_to_export_max": 0,
+      "export_to_authored_max": 0,
+      "bone_names": [
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb01",
+      "source": "assets-work/World1/Statues01/Tomb01",
+      "authored_vertices": 44,
+      "reimport_vertices": 44,
+      "authored_to_export_max": 0.0031925621442496777,
+      "export_to_authored_max": 0.0031925621442496777,
+      "bone_names": [
+        "Box01",
+        "Cylinder02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb02",
+      "source": "assets-work/World1/Statues01/Tomb02",
+      "authored_vertices": 44,
+      "reimport_vertices": 44,
+      "authored_to_export_max": 7.855216244934127e-05,
+      "export_to_authored_max": 7.855216244934127e-05,
+      "bone_names": [
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage01",
+      "source": "assets-work/World1/CartHay01/Carriage01",
+      "authored_vertices": 343,
+      "reimport_vertices": 335,
+      "authored_to_export_max": 1.5843626897549257e-05,
+      "export_to_authored_max": 1.5843626897549257e-05,
+      "bone_names": [
+        "Bone01",
+        "Bone03",
+        "Bone05",
+        "Bone07"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage02",
+      "source": "assets-work/World1/CartHay01/Carriage02",
+      "authored_vertices": 285,
+      "reimport_vertices": 285,
+      "authored_to_export_max": 0.00045546909677796066,
+      "export_to_authored_max": 0.00045546909677796066,
+      "bone_names": [
+        "Cylinder03",
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage03",
+      "source": "assets-work/World1/CartHay01/Carriage03",
+      "authored_vertices": 357,
+      "reimport_vertices": 333,
+      "authored_to_export_max": 0.001712799072265625,
+      "export_to_authored_max": 0.001712799072265625,
+      "bone_names": [
+        "Cylinder01",
+        "Cylinder03",
+        "Cylinder11",
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage04",
+      "source": "assets-work/World1/CartHay01/Carriage04",
+      "authored_vertices": 507,
+      "reimport_vertices": 507,
+      "authored_to_export_max": 0.0007006466621533036,
+      "export_to_authored_max": 0.0007006466621533036,
+      "bone_names": [
+        "Cylinder03",
+        "Cylinder05",
+        "Cylinder12",
+        "Cylinder13",
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Straw01",
+      "source": "assets-work/World1/CartHay01/Straw01",
+      "authored_vertices": 222,
+      "reimport_vertices": 222,
+      "authored_to_export_max": 7.76234628574457e-06,
+      "export_to_authored_max": 7.76234628574457e-06,
+      "bone_names": [
+        "Cylinder05",
+        "Cylinder12",
+        "Cylinder13"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Straw02",
+      "source": "assets-work/World1/CartHay01/Straw02",
+      "authored_vertices": 592,
+      "reimport_vertices": 592,
+      "authored_to_export_max": 0.0016549983993172646,
+      "export_to_authored_max": 0.0016549983993172646,
+      "bone_names": [
+        "Cylinder05",
+        "Cylinder12",
+        "Cylinder13",
+        "Cylinder14",
+        "Cylinder15",
+        "Cylinder16",
+        "Cylinder17",
+        "Cylinder18"
+      ],
+      "result": "PASS"
     }
   ]
 }

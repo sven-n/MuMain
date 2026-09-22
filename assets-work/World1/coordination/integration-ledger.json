@@ -43,11 +43,17 @@
     "notes_path": "Groundcover01/README.md",
     "game_files": {
       "src/bin/Data/Object1/Grass01.bmd": "assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd",
-      "src/bin/Data/Object1/Grass02.bmd": "assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd",
       "src/bin/Data/Object1/Grass05.bmd": "assets-work/World1/Groundcover01/Grass05/exports/Grass05.bmd",
       "src/bin/Data/Object1/Grass06.bmd": "assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd",
       "src/bin/Data/Object1/tree_08.OZT": "assets-work/World1/Groundcover01/textures/final/tree_08.OZT",
       "src/bin/Data/Object1/tree_09.OZT": "assets-work/World1/Groundcover01/textures/final/tree_09.OZT"
+    },
+    "superseded_game_files": {
+      "src/bin/Data/Object1/Grass02.bmd": {
+        "export": "assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd",
+        "superseded_by": "NormalBindings01",
+        "reason": "Original raw BMD bindings retained for this material-only model"
+      }
     }
   },
   {
@@ -193,11 +199,21 @@
     "notes_path": "Flowering01/README.md",
     "game_files": {
       "src/bin/Data/Object1/Tree08.bmd": "assets-work/World1/Flowering01/Tree08/exports/Tree08.bmd",
-      "src/bin/Data/Object1/Tree12.bmd": "assets-work/World1/Flowering01/Tree12/exports/Tree12.bmd",
-      "src/bin/Data/Object1/Tree13.bmd": "assets-work/World1/Flowering01/Tree13/exports/Tree13.bmd",
       "src/bin/Data/Object1/tree_01.OZJ": "assets-work/World1/Flowering01/textures/final/tree_01.OZJ",
       "src/bin/Data/Object1/tree_04.OZT": "assets-work/World1/Flowering01/textures/final/tree_04.OZT",
       "src/bin/Data/Object1/tree_05.OZT": "assets-work/World1/Flowering01/textures/final/tree_05.OZT"
+    },
+    "superseded_game_files": {
+      "src/bin/Data/Object1/Tree12.bmd": {
+        "export": "assets-work/World1/Flowering01/Tree12/exports/Tree12.bmd",
+        "superseded_by": "NormalBindings01",
+        "reason": "Original raw BMD bindings retained for this material-only model"
+      },
+      "src/bin/Data/Object1/Tree13.bmd": {
+        "export": "assets-work/World1/Flowering01/Tree13/exports/Tree13.bmd",
+        "superseded_by": "NormalBindings01",
+        "reason": "Original raw BMD bindings retained for this material-only model"
+      }
     }
   },
   {
@@ -582,6 +598,29 @@
       "src/bin/Data/Object1/horse_drawn_02.OZT": "assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_02.OZT",
       "src/bin/Data/Object1/horse_drawn_03.OZJ": "assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_03.OZJ",
       "src/bin/Data/Object1/grass_01.OZT": "assets-work/World1/CartHay01/Carriage04/exports/grass_01.OZT"
+    }
+  },
+  {
+    "name": "NormalBindings01",
+    "models": [
+      "Grass02",
+      "Tree12",
+      "Tree13"
+    ],
+    "owner": "coordinator / normal bindings",
+    "source_commits": [
+      "f6998b30",
+      "3c504580"
+    ],
+    "integration_commits": [
+      "68b72139",
+      "b30174c2"
+    ],
+    "game_files": {},
+    "retained_game_files": {
+      "src/bin/Data/Object1/Grass02.bmd": "assets-work/World1/NormalBindings01/Grass02/exports/Grass02.bmd",
+      "src/bin/Data/Object1/Tree12.bmd": "assets-work/World1/NormalBindings01/Tree12/exports/Tree12.bmd",
+      "src/bin/Data/Object1/Tree13.bmd": "assets-work/World1/NormalBindings01/Tree13/exports/Tree13.bmd"
     }
   }
 ]

@@ -1,6 +1,6 @@
 {
   "result": "PASS: offline integration; no client claim",
-  "integration_head": "8e6f9ef0bb21e246a1fbd01dfd7ccb713c69865a",
+  "integration_head": "b30174c2eb262cf9f19faeef5adc8996ea576f63",
   "baseline": "ac0f6dd8",
   "changed_game_files": {
     "src/bin/Data/Object1/Furniture03.bmd": {
@@ -26,11 +26,6 @@
     "src/bin/Data/Object1/Grass01.bmd": {
       "sha256": "d77daca6778078e17097831edf0a704d4e197db59892cbc4f1387c6f99eb7f32",
       "export": "assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd",
-      "batch": "Groundcover01"
-    },
-    "src/bin/Data/Object1/Grass02.bmd": {
-      "sha256": "34198c5f3415e7c395e7e4ddb839f605f86cadde41811a936331a0cb55b90e77",
-      "export": "assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd",
       "batch": "Groundcover01"
     },
     "src/bin/Data/Object1/Grass05.bmd": {
@@ -226,16 +221,6 @@
     "src/bin/Data/Object1/Tree08.bmd": {
       "sha256": "d15208a04f46e4c339df97afa8c4c159700d16bd8909a2817cdde3d1a51ec0e4",
       "export": "assets-work/World1/Flowering01/Tree08/exports/Tree08.bmd",
-      "batch": "Flowering01"
-    },
-    "src/bin/Data/Object1/Tree12.bmd": {
-      "sha256": "a2cff768f9c11031d6b77c100207f203257919f4d6fb101542b92c808c96504b",
-      "export": "assets-work/World1/Flowering01/Tree12/exports/Tree12.bmd",
-      "batch": "Flowering01"
-    },
-    "src/bin/Data/Object1/Tree13.bmd": {
-      "sha256": "864296c6842008676f3106ddd62711801a512a98fc1cdb3d63d7fca524ffa4f4",
-      "export": "assets-work/World1/Flowering01/Tree13/exports/Tree13.bmd",
       "batch": "Flowering01"
     },
     "src/bin/Data/Object1/tree_01.OZJ": {
@@ -829,7 +814,24 @@
       "batch": "CartHay01"
     }
   },
-  "protected_file_count": 159,
+  "retained_game_files": {
+    "src/bin/Data/Object1/Grass02.bmd": {
+      "sha256": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea",
+      "export": "assets-work/World1/NormalBindings01/Grass02/exports/Grass02.bmd",
+      "batch": "NormalBindings01"
+    },
+    "src/bin/Data/Object1/Tree12.bmd": {
+      "sha256": "f2c6dbc600ebb76c5af82198699ffe83bfb532ba5db0a6f805efb4425545f502",
+      "export": "assets-work/World1/NormalBindings01/Tree12/exports/Tree12.bmd",
+      "batch": "NormalBindings01"
+    },
+    "src/bin/Data/Object1/Tree13.bmd": {
+      "sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf",
+      "export": "assets-work/World1/NormalBindings01/Tree13/exports/Tree13.bmd",
+      "batch": "NormalBindings01"
+    }
+  },
+  "protected_file_count": 162,
   "world1_files_unchanged": true,
   "original_archive_hashes": {
     "TavernProps/Furniture03": {
@@ -1223,6 +1225,18 @@
     "CartHay01/Straw02": {
       "revision": "ac0f6dd8",
       "sha256": "81329b7b2da10e40af21cb40d6f46333168be9f5f13e7eafcd8f2c097b784ed0"
+    },
+    "NormalBindings01/Grass02": {
+      "revision": "ac0f6dd8",
+      "sha256": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea"
+    },
+    "NormalBindings01/Tree12": {
+      "revision": "ac0f6dd8",
+      "sha256": "f2c6dbc600ebb76c5af82198699ffe83bfb532ba5db0a6f805efb4425545f502"
+    },
+    "NormalBindings01/Tree13": {
+      "revision": "ac0f6dd8",
+      "sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf"
     }
   },
   "combined_models": 115,

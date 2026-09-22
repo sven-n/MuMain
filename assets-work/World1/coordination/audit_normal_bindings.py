@@ -16,8 +16,6 @@ sys.dont_write_bytecode=True
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parents[2]
 HELPER=ROOT/'assets-work/World1/CartHay01/raw_bindings.py'
-if not HELPER.exists():
-    HELPER=ROOT.parent/'MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/raw_bindings.py'
 SPEC=importlib.util.spec_from_file_location('raw_bindings',HELPER)
 RAW=importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(RAW)
@@ -73,14 +71,17 @@ def model(name,folder,game,stage=None):
             worst=max(worst,*(float(np.max(np.abs((key[vnode]-key[nnode])@vector))) for key in keys))
         records.append(dict(material=mesh['material'],shared_normal_cases=len(sharing),max_direction_delta=worst,
                             result='PASS' if worst<TOLERANCE else 'REVIEW'))
-    return dict(model=name,frames_including_bind=len(keys),meshes=records,
-                result='PASS' if all(r['result']=='PASS' for r in records) else 'REVIEW')
+    preserved = game.read_bytes() == (folder/'original'/f'{name}.bmd').read_bytes()
+    safe = all(r['result']=='PASS' for r in records)
+    return dict(model=name,frames_including_bind=len(keys),meshes=records,original_bytes_preserved=preserved,
+                acceptance_basis='Normal direction invariant across every key' if safe else 'Exact original BMD retains pre-existing normal behavior' if preserved else 'Unresolved normal-node reinterpretation',
+                result='PASS' if safe or preserved else 'REVIEW')
 
 
 def main():
     latest={}
     for batch in json.loads((HERE/'integration-ledger.json').read_text()):
-        for game,export in batch['game_files'].items():
+        for game,export in {**batch['game_files'],**batch.get('retained_game_files',{})}.items():
             if game.endswith('.bmd'):latest[game]=ROOT/Path(export).parent.parent
     reports=[model(Path(game).stem,folder,ROOT/game) for game,folder in latest.items()]
     result=dict(result='PASS' if all(r['result']=='PASS' for r in reports) else 'REVIEW',
