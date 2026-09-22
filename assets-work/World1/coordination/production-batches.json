@@ -424,11 +424,17 @@
     "worktree": "MuMain-lorencia-wells",
     "owned_textures": [
       "src/bin/Data/Object1/well.OZJ",
-      "src/bin/Data/Object1/jar_01.OZJ"
+      "src/bin/Data/Object1/jar_01.OZJ",
+      "src/bin/Data/Object1/tub.OZJ"
     ],
     "frozen_textures": [
-      "src/bin/Data/Object1/tub.OZJ",
       "src/bin/Data/Object1/horse_drawn_01.OZJ"
+    ],
+    "compatibility_models": [
+      "Carriage03"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/Carriage03.bmd"
     ]
   },
   "reviewer / monuments": {
