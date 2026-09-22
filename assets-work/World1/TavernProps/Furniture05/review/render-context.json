@@ -1,0 +1,26 @@
+{
+  "status": "OFFLINE BLENDER; NOT CLIENT EVIDENCE",
+  "after_source": "reimported exported BMD/OZJ",
+  "camera_bounds": [
+    [
+      -101.7843017578125,
+      -34.814300537109375,
+      0.0
+    ],
+    [
+      101.685302734375,
+      35.1797981262207,
+      105.37550354003906
+    ]
+  ],
+  "projection": "orthographic",
+  "direction": [
+    1.45,
+    -2.2,
+    1.45
+  ],
+  "scale_factor": 1.45,
+  "lighting": "diffuse-only Cycles; Standard transform; 24 samples",
+  "camera_and_lighting_matched": true,
+  "arrangements": "exact original positions/rotations/scales"
+}

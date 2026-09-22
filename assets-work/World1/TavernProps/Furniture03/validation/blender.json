@@ -1,0 +1,48 @@
+{
+  "status": "PASS: Blender checks; engine validation required",
+  "triangles": 680,
+  "meshes_after_merge": 1,
+  "bounds_before": [
+    [
+      -101.68479919433594,
+      -51.50400161743164,
+      0.0
+    ],
+    [
+      101.78479766845703,
+      51.38740158081055,
+      86.58090209960938
+    ]
+  ],
+  "bounds_after": [
+    [
+      -101.68479919433594,
+      -51.50400161743164,
+      0.0
+    ],
+    [
+      101.78479766845703,
+      51.38740158081055,
+      86.58090209960938
+    ]
+  ],
+  "bone_order": [
+    "Box09"
+  ],
+  "action_meta": {
+    "Furniture03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "skinning": "one unchanged full-weight bone per vertex",
+  "geometry": "finite; manifold parts; nondegenerate triangles",
+  "uv": "one set; atlas islands inset from region borders; all coordinates within [0,1]",
+  "textures": {
+    "desk_big.jpg": [
+      1024,
+      1024
+    ]
+  },
+  "client_verified": false
+}

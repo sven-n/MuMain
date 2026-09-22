@@ -1,0 +1,99 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "triangles": 412,
+  "bounds_before": [
+    [
+      -101.78,
+      -34.81,
+      0.0
+    ],
+    [
+      101.69,
+      35.18,
+      105.38
+    ]
+  ],
+  "bounds_after": [
+    [
+      -101.78,
+      -34.81,
+      0.0
+    ],
+    [
+      101.69,
+      35.18,
+      105.38
+    ]
+  ],
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "full_compare": "DIFFERENT: intentional geometry remodel",
+  "local_motion": {
+    "status": "PASS",
+    "tolerance": 0.0001,
+    "samples": [
+      {
+        "file": "Furniture05.smd",
+        "frames": 1,
+        "nodes": "0 \"Box13\" -1",
+        "max_translation": 0,
+        "max_rotation_radians": 0
+      },
+      {
+        "file": "Furniture05_a00.smd",
+        "frames": 1,
+        "nodes": "0 \"Box13\" -1",
+        "max_translation": 0,
+        "max_rotation_radians": 0
+      }
+    ]
+  },
+  "connection_points": {
+    "status": "PASS",
+    "original_anchor_corners": 54,
+    "max_component_deviation": 0.0,
+    "note": "All original joining-edge corners survive in the exported BMD."
+  },
+  "precise_bounds": {
+    "status": "PASS",
+    "before": [
+      [
+        -101.784302,
+        -34.814301,
+        0.0
+      ],
+      [
+        101.685303,
+        35.179798,
+        105.375504
+      ]
+    ],
+    "after": [
+      [
+        -101.784302,
+        -34.814301,
+        0.0
+      ],
+      [
+        101.685303,
+        35.179798,
+        105.375504
+      ]
+    ],
+    "max_component_deviation": 0.0
+  },
+  "exported_corners": {
+    "status": "PASS",
+    "zero_uv_area_faces": 0,
+    "winding_normal_disagreements": 0,
+    "minimum_uv_area": 3.0475967999999848e-05,
+    "minimum_normal_dot": 0.9999993736232198
+  },
+  "export_sha256": {
+    "Furniture05.bmd": "d1fb904efbb81091c7ef5841d6f4e3416da3a8dc5b382bd3e20bf15f528631d3",
+    "desk_big.OZJ": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4"
+  }
+}

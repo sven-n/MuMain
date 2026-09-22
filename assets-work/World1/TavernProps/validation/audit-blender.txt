@@ -1,0 +1,12 @@
+00:00.531  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture03/original/source.blend"
+00:00.538  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture03/source.blend"
+00:00.554  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/original/source.blend"
+00:00.560  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/source.blend"
+00:00.575  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/original/source.blend"
+00:00.580  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture05/source.blend"
+Furniture03 source audit PASS
+Furniture04 source audit PASS
+Furniture05 source audit PASS
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
