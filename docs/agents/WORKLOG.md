@@ -212,3 +212,48 @@ No runtime installation, client launch, engine/CMake/UI edit, push or main merge
 no asset was observed in client by this task. All client loading, shading/filtering, motion,
 placement and matched 1920×1080 capture checks remain pending. Consolidated handoff:
 [`coordination/notes.md`](../../assets-work/World1/coordination/notes.md).
+
+
+## 2026-09-22 - Lorencia static inventory completed offline (ASTRA / Codex)
+**Goal:** Complete the coherent dark-medieval Lorencia static art pass through the actual
+World1/Object1 inventory, with independent worktrees, exclusive texture ownership and
+sequential reviewed integration.
+
+**Done:** All 106 in-scope static models are accepted offline on `art/lorencia-rebuild` in
+`/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. This includes
+four preserved pilot models and 102 accepted integrations (including prior tavern work),
+covering furniture/tableware, buildings and modular walls, gates/fences, vegetation/rocks,
+lamps/fire props, notices/banners, cart/hay sets, monuments/graves, boat, wells/pottery,
+bridges, cannons and gallows. The three worker agents (groundcover, fences, reviewer) and
+coordinator used isolated branches/worktrees with explicit BMD/container ownership; shared
+materials were reviewed across all consumers. Final production integration `973ab58d`
+completes Cannons01; every source/integration/review commit and exact asset owner is recorded
+in the consolidated ledger and board. All production sources, REF_ORIGINAL, originals,
+editable paintings, imagegen masters/prompts, reproduction scripts and offline evidence
+are retained under assets-work/World1. Six final combined sheets show all 106 actual
+integrated model/material combinations with per-model SHA-256 provenance.
+
+**Verified:** Combined validation passes for all 115 inventory BMDs and complete texture
+resolution. Exactly 183 source-game files differ from reviewed pilot ac0f6dd8: 98 Object1
+BMDs and 85 Object1 texture containers; all 141 other baseline World1/Object1 files are
+byte-identical. Original archives and source/export hashes match. Rig names/order/parents,
+actions, mesh-material ordering, original anchors and modular openings are preserved.
+Remodeled full compares correctly report DIFFERENT; rig/action equivalence is proved
+separately. The coordinator's bidirectional named-bone vertex audit passes all 72 remodeled
+models; raw normal-node checks pass 101 changed/retained BMDs across bind and all keys.
+Grass02/Tree12/Tree13 retain exact original BMD bytes with new paintings after converter
+normal-sharing review; pre-existing Tree12/13 behavior is preserved, not declared repaired.
+Independent review accepted the batch packages and cross-batch completeness; two final
+cannon visual issues (bright atlas gutters and dark muzzle rims) were corrected before
+acceptance. Protected completed terrain/Beer01/other pilot files remain unchanged.
+No engine/CMake, UI, characters, monsters, equipment, other maps, terrain placement/height/
+walk/lighting/alpha data, shared runtime, push or main-merge changes were performed.
+
+**Open / next:** No production asset remains blocked or unfinished within the 106-model
+static scope. Nine fauna/hidden-marker models are excluded and unchanged. **Client verified:
+none in this task.** Existing client instability and the user's explicit offline authorization
+leave loading, shading/filtering/alpha, engine effects, motion, collision/interaction and
+1920×1080 before/after captures pending. Do these serially in a stable client session; all
+current images are labeled offline Blender evidence. Consolidated handoff, complete owners/
+commits, exact changed paths and review gallery:
+[coordination/notes.md](../../assets-work/World1/coordination/notes.md).

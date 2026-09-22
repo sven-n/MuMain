@@ -83,7 +83,7 @@ out/build/macos-arm64/tools/bmdconv/Release/bmdconv compare src/bin/Data/Item/Sw
 
 ## 6. Open work, in priority order
 
-1. **Asset plan**: Lorencia terrain, Beer01 and three additional static props are installed and validated offline. Client acceptance/screenshots remain pending under explicit offline authorization; investigate stability separately. Continue starting-character textures and further selected Object1 work after reading the [World1 handoff](../../assets-work/World1/notes.md). The art branch currently resides in `/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain`; the shared primary checkout was switched to main externally.
+1. **Lorencia static art**: All 106 in-scope static models are accepted offline on `art/lorencia-rebuild`, including the four preserved pilot props; the 17 terrain paintings remain unchanged. Read the [consolidated handoff](../../assets-work/World1/coordination/notes.md) and [asset board](../../assets-work/World1/coordination/asset-board.md) before claiming Object1 work. Production is complete for this inventory. Client acceptance and genuine 1920×1080 before/after captures remain pending under explicit offline authorization; investigate stability separately. Use the isolated `MuMain-lorencia-rebuild` worktree, not another task's checkout.
 2. **Editor on macOS**: replace `GetOpenFileNameW` in `MapTextureImport.cpp`,
    `MapMinimapCapture.cpp`, `MapAttributeSave.cpp` (`src/MuEditor/UI/MapEditor/`) with
    `SDL_ShowOpenFileDialog`, then verify the Map/Item/Skill editors run under Metal.
@@ -105,11 +105,18 @@ out/build/macos-arm64/tools/bmdconv/Release/bmdconv compare src/bin/Data/Item/Sw
 
 ## Lorencia rebuild integration — 2026-09-22
 
-The ongoing static environment pass is coordinated on `art/lorencia-rebuild` in
+The completed offline static environment pass is integrated on `art/lorencia-rebuild` in
 `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. Use the
 [asset board](../../assets-work/World1/coordination/asset-board.md) and
 [consolidated handoff](../../assets-work/World1/coordination/notes.md) before claiming any
-World1/Object1 asset. They record exact dependency ownership and acceptance; other artists
-work only in their isolated assigned worktrees. Completed terrain, Beer01 and earlier props
-remain protected. Validation and preview evidence are offline; this task has not installed
-runtime assets or verified them in the client. No push or merge to main is authorized.
+World1/Object1 asset. All 106 static models are covered, including four preserved pilot props;
+nine fauna/hidden-marker models remain excluded. The final production integration is
+`973ab58d`; subsequent review/evidence/handoff commits are recorded in the ledger.
+The [exact game-file manifest](../../assets-work/World1/coordination/changed-game-files.md)
+lists 98 BMDs and 85 texture containers changed relative to reviewed pilot `ac0f6dd8`.
+All 141 other World1/Object1 files remain byte-identical. Completed terrain, TerrainLight,
+alpha strips, placement/height/walk data, Beer01 and earlier props remain protected.
+The [combined gallery](../../assets-work/World1/coordination/final-review.md) uses actual
+integrated models/materials and retains per-model provenance hashes. All validation and
+preview evidence is offline: this task has not installed runtime assets or verified them
+in the client. No engine/CMake/UI changes, push or merge to main were performed.

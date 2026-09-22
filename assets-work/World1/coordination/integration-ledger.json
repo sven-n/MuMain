@@ -717,5 +717,48 @@
       "Tent01": "6b025039",
       "Tree07": "6b025039"
     }
+  },
+  {
+    "name": "Cannons01",
+    "models": [
+      "Cannon01",
+      "Cannon02",
+      "Cannon03",
+      "Hanging01",
+      "Carriage01",
+      "Carriage02",
+      "Carriage03",
+      "Carriage04",
+      "HouseEtc02",
+      "StoneMuWall04",
+      "StoneWall03",
+      "Well01"
+    ],
+    "owner": "groundcover / cannons and shared wood",
+    "source_commits": [
+      "ab832f5d",
+      "cf3cd113"
+    ],
+    "integration_commits": [
+      "973ab58d",
+      "49e6afa2"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Cannon01.bmd": "assets-work/World1/Cannons01/Cannon01/exports/Cannon01.bmd",
+      "src/bin/Data/Object1/Cannon02.bmd": "assets-work/World1/Cannons01/Cannon02/exports/Cannon02.bmd",
+      "src/bin/Data/Object1/Cannon03.bmd": "assets-work/World1/Cannons01/Cannon03/exports/Cannon03.bmd",
+      "src/bin/Data/Object1/Hanging01.bmd": "assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd",
+      "src/bin/Data/Object1/horse_drawn_01.OZJ": "assets-work/World1/Cannons01/Carriage01/exports/horse_drawn_01.OZJ"
+    },
+    "original_revisions": {
+      "Carriage01": "0bb84512",
+      "Carriage02": "0bb84512",
+      "Carriage03": "0bb84512",
+      "Carriage04": "0bb84512",
+      "HouseEtc02": "0bb84512",
+      "StoneMuWall04": "0bb84512",
+      "StoneWall03": "0bb84512",
+      "Well01": "46daddf2"
+    }
   }
 ]

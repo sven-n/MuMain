@@ -1,8 +1,8 @@
 # Lorencia rebuild consolidated handoff — 2026-09-22
 
-**102/106 in-scope static assets accepted offline**, representing the actual World1 inventory; the complete static inventory has 2,786 placements. Four completed pilot models are preserved, and later batches cover the remaining models. The 17 completed terrain paintings remain unchanged. Client acceptance is pending for this entire pass.
+**106/106 in-scope static assets accepted offline**, representing the actual World1 inventory; the complete static inventory has 2,786 placements. Four completed pilot models are preserved, and later batches cover the remaining models. The 17 completed terrain paintings remain unchanged. Client acceptance is pending for this entire pass.
 
-Integration branch: **art/lorencia-rebuild**. Worktree: `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. Reviewed baseline: `ac0f6dd8` (contains `2e2ed427`, `b232470c`, `8d22a912` and completed static pilot). Art/review revision when this handoff was generated: `95386cd82270de9b125d31c289d4de6285b59756`. The final documentation commit may follow it. No push or merge to main.
+Integration branch: **art/lorencia-rebuild**. Worktree: `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. Reviewed baseline: `ac0f6dd8` (contains `2e2ed427`, `b232470c`, `8d22a912` and completed static pilot). Art/review revision when this handoff was generated: `edf0c7a6a0df94af92dacac7dbca21fa81486406`. The final documentation commit may follow it. No push or merge to main.
 
 ## Accepted batches and owners
 
@@ -36,20 +36,22 @@ The model column lists newly covered models once. Batch notes also list all read
 | [NormalBindings01](../NormalBindings01/notes.md) | coordinator / normal bindings | Binding-preservation correction; no additional models | `f6998b30`, `3c504580` | `68b72139`, `b30174c2` |
 | [Wells01](../Wells01/notes.md) | coordinator / wells | Well01, Well02, Well03, Well04 | `46daddf2`, `0599ac0a` | `8e24f6fb`, `08d2c469` |
 | [Architecture03](../Architecture03/notes.md) | fences / architecture final | HouseWall03, Bridge01, BridgeStone01 | `e8fef936`, `29cffdb4` | `3ce1f68b`, `95386cd8` |
+| [Cannons01](../Cannons01/notes.md) | groundcover / cannons and shared wood | Cannon01, Cannon02, Cannon03, Hanging01 | `ab832f5d`, `cf3cd113` | `973ab58d`, `49e6afa2` |
 
 ## Exact game changes and protected data
 
-**178 game files differ from the reviewed pilot: 94 BMDs and 84 texture containers**, all under `src/bin/Data/Object1/`. See the [complete path list](changed-game-files.txt) and [path/export/SHA-256 manifest](changed-game-files.md). No game files were renamed or added outside the authorized directory.
+**183 game files differ from the reviewed pilot: 98 BMDs and 85 texture containers**, all under `src/bin/Data/Object1/`. See the [complete path list](changed-game-files.txt) and [path/export/SHA-256 manifest](changed-game-files.md). No game files were renamed or added outside the authorized directory.
 
-All other **146** files in the 324-file World1/Object1 baseline remain byte-identical, including all World1 terrain paintings, placement, height, walk data, baked lighting, TerrainLight and alpha strips. Beer01/plate2 and the other pilot props remain unchanged. The bridge shadow strip is also unchanged. Nine excluded fauna/hidden-marker models remain untouched: Bird01, Butterfly01, Fish01, Light01, Light02, Light03, MerchantAnimal01, MerchantAnimal02, PoseBox01.
+All other **141** files in the 324-file World1/Object1 baseline remain byte-identical, including all World1 terrain paintings, placement, height, walk data, baked lighting, TerrainLight and alpha strips. Beer01/plate2 and the other pilot props remain unchanged. The bridge shadow strip is also unchanged. Nine excluded fauna/hidden-marker models remain untouched: Bird01, Butterfly01, Fish01, Light01, Light02, Light03, MerchantAnimal01, MerchantAnimal02, PoseBox01.
 
 The [dependency map](dependency-map.json) resolves all 115 BMDs and 105 original texture containers, including exact JPG/OZJ versus TGA/OZT distinctions. Shared-material changes were reviewed on every actual consumer. Latest combined checks report no missing textures, no ownership overlap, preserved mesh-material order and bone/action metadata, matching source/export hashes and exact untouched original archives.
 
 ## Evidence and practical limits
 
 - [Combined integration validation](combined-validation.json): PASS: offline integration; no client claim; all 115 models resolve.
-- [Authored vertex audit](authored-vertex-audit.json): PASS for 68 remodeled models. Every authored and final-reimport vertex is matched in both directions only within its intended named bone; measured errors are retained.
-- [Raw normal-node audit](normal-binding-audit.json): PASS for 97 current changed/retained BMDs, across bind and every animation key. See [readable report](normal-binding-audit.txt).
+- [Independent final integration review](../Statues01/independent-review/FinalIntegration.md) records the complete source, scope, converter and combined-gallery acceptance.
+- [Authored vertex audit](authored-vertex-audit.json): PASS for 72 remodeled models. Every authored and final-reimport vertex is matched in both directions only within its intended named bone; measured errors are retained.
+- [Raw normal-node audit](normal-binding-audit.json): PASS for 101 current changed/retained BMDs, across bind and every animation key. See [readable report](normal-binding-audit.txt).
 - [Final combined gallery](final-review.md): six labeled sheets of all 106 actual integrated BMD/material combinations. Each `final-inspection/<model>/provenance.json` records exact game-file hashes; the gallery is an offline diffuse preview, not engine shading or client evidence.
 - Per-asset sources, `REF_ORIGINAL`, untouched originals, full converter comparisons, before/after bind bounds, triangle counts, texture dimensions, UV/alpha checks, rig/action proofs, matching-camera renders, wireframes and reduced-scale previews remain in the batch directories linked above. Image-generation prompts, generated masters, editable paintings and reproduction scripts are retained.
 - Original inventory validation/imports and all 105 original containers remain under `baseline-validation/`, `inspection/` and `texture-baseline/`. `inventory-sheet-01.jpg` through `inventory-sheet-06.jpg` show the original integration baseline.
@@ -60,7 +62,7 @@ Modular connections, openings, footprints and original anchor vertices are prese
 
 ## Remaining work
 
-Production still pending: Cannon01, Cannon02, Cannon03, Hanging01. No unresolved validator rejection remains in accepted batches. Excluded models are out of scope, not unfinished static production.
+Production still pending: **none within the 106-model static scope**. No unresolved validator rejection remains in accepted batches. Excluded models are out of scope, not unfinished static production.
 
 **Actually verified in client: none.** The user authorized offline production after repeated client crashes. This task did not launch the client or install into shared runtime Data. In a stable serial client session, verify loading, lighting/filtering/alpha, animated poses, mesh-index additive/scroll effects, collision/interaction alignment, modular seams and gameplay readability, then capture genuine matching 1920×1080 before/after views. Blender additive/scroll/fade previews remain approximations.
 

@@ -923,6 +923,55 @@
         "Box01"
       ],
       "result": "PASS"
+    },
+    {
+      "model": "Cannon01",
+      "source": "assets-work/World1/Cannons01/Cannon01",
+      "authored_vertices": 382,
+      "reimport_vertices": 382,
+      "authored_to_export_max": 1.629639336897526e-05,
+      "export_to_authored_max": 1.629639336897526e-05,
+      "bone_names": [
+        "Box06"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon02",
+      "source": "assets-work/World1/Cannons01/Cannon02",
+      "authored_vertices": 366,
+      "reimport_vertices": 366,
+      "authored_to_export_max": 1.3885707630834077e-05,
+      "export_to_authored_max": 1.3885707630834077e-05,
+      "bone_names": [
+        "Box06"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon03",
+      "source": "assets-work/World1/Cannons01/Cannon03",
+      "authored_vertices": 200,
+      "reimport_vertices": 200,
+      "authored_to_export_max": 1.0501248652872164e-05,
+      "export_to_authored_max": 1.0501248652872164e-05,
+      "bone_names": [
+        "Box06"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Hanging01",
+      "source": "assets-work/World1/Cannons01/Hanging01",
+      "authored_vertices": 242,
+      "reimport_vertices": 242,
+      "authored_to_export_max": 3.0517578125e-05,
+      "export_to_authored_max": 3.0517578125e-05,
+      "bone_names": [
+        "Box08",
+        "Box09"
+      ],
+      "result": "PASS"
     }
   ]
 }

@@ -4,7 +4,7 @@
     "src/bin/Data/Object1/StoneMuWall04.bmd": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471",
     "src/bin/Data/Object1/c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
     "src/bin/Data/Object1/c_wall06.OZJ": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
-    "src/bin/Data/Object1/horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+    "src/bin/Data/Object1/horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
   },
   "client_verified": false,
   "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",

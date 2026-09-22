@@ -3,6 +3,9 @@ src/bin/Data/Object1/Beer03.bmd
 src/bin/Data/Object1/Bonfire01.bmd
 src/bin/Data/Object1/Bridge01.bmd
 src/bin/Data/Object1/BridgeStone01.bmd
+src/bin/Data/Object1/Cannon01.bmd
+src/bin/Data/Object1/Cannon02.bmd
+src/bin/Data/Object1/Cannon03.bmd
 src/bin/Data/Object1/Carriage01.bmd
 src/bin/Data/Object1/Carriage02.bmd
 src/bin/Data/Object1/Carriage03.bmd
@@ -29,6 +32,7 @@ src/bin/Data/Object1/Grass05.bmd
 src/bin/Data/Object1/Grass06.bmd
 src/bin/Data/Object1/Grass07.bmd
 src/bin/Data/Object1/Grass08.bmd
+src/bin/Data/Object1/Hanging01.bmd
 src/bin/Data/Object1/House01.bmd
 src/bin/Data/Object1/House02.bmd
 src/bin/Data/Object1/House03.bmd
@@ -115,6 +119,7 @@ src/bin/Data/Object1/fire_light_01.OZT
 src/bin/Data/Object1/grass_01.OZT
 src/bin/Data/Object1/grave_01.OZJ
 src/bin/Data/Object1/grave_02.OZJ
+src/bin/Data/Object1/horse_drawn_01.OZJ
 src/bin/Data/Object1/horse_drawn_02.OZT
 src/bin/Data/Object1/horse_drawn_03.OZJ
 src/bin/Data/Object1/jar_01.OZJ

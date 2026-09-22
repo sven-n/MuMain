@@ -1,12 +1,12 @@
 {
   "model": "Cannon02",
   "game_files": {
-    "src/bin/Data/Object1/Cannon02.bmd": "aec342ce42aca9db7fa009cd148ef673a485fb3e5fda259ff9b7997d234d9f81",
-    "src/bin/Data/Object1/horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+    "src/bin/Data/Object1/Cannon02.bmd": "1eccefa4bceeb9dccf921e4f98358e289f454106d9d450820c75350043e6c4bf",
+    "src/bin/Data/Object1/horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
   },
   "client_verified": false,
   "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
-  "triangles": 155,
+  "triangles": 681,
   "bind_bounds": [
     [
       -67.43620300292969,

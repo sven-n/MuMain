@@ -87,6 +87,12 @@ def main():
     result=dict(result='PASS' if all(r['result']=='PASS' for r in reports) else 'REVIEW',
                 normal_direction_tolerance=TOLERANCE,models=reports,client_verified=False)
     (HERE/'normal-binding-audit.json').write_text(json.dumps(result,indent=2)+'\n')
+    preserved = [r['model'] for r in reports if r['acceptance_basis'].startswith('Exact original')]
+    (HERE/'normal-binding-audit.txt').write_text(
+        f"{result['result']} {len(reports)} models\n"
+        f"Bind and every animation key; direction tolerance {TOLERANCE}.\n"
+        'Exact original BMD behavior retained for legacy sharing: ' + ', '.join(preserved) + '\n'
+        'Full per-model/material measurements: normal-binding-audit.json. Client verification: none.\n')
     print(result['result'],len(reports),'models')
     for record in reports:
         if record['result']!='PASS':print(record)

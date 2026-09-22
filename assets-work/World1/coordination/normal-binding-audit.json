@@ -2134,6 +2134,66 @@
       "original_bytes_preserved": false,
       "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
+    },
+    {
+      "model": "Cannon01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Hanging01",
+      "frames_including_bind": 26,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
     }
   ],
   "client_verified": false

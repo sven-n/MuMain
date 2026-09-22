@@ -64,6 +64,7 @@ The [dependency map](dependency-map.json) resolves all 115 BMDs and 105 original
 ## Evidence and practical limits
 
 - [Combined integration validation](combined-validation.json): {validation['result']}; all 115 models resolve.
+- [Independent final integration review](../Statues01/independent-review/FinalIntegration.md) records the complete source, scope, converter and combined-gallery acceptance.
 - [Authored vertex audit](authored-vertex-audit.json): {vertices['result']} for {len(vertices['models'])} remodeled models. Every authored and final-reimport vertex is matched in both directions only within its intended named bone; measured errors are retained.
 - [Raw normal-node audit](normal-binding-audit.json): {normal['result']} for {len(normal['models'])} current changed/retained BMDs, across bind and every animation key. See [readable report](normal-binding-audit.txt).
 - [Final combined gallery](final-review.md): six labeled sheets of all 106 actual integrated BMD/material combinations. Each `final-inspection/<model>/provenance.json` records exact game-file hashes; the gallery is an offline diffuse preview, not engine shading or client evidence.

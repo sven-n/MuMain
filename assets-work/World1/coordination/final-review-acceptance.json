@@ -1,0 +1,12 @@
+{
+  "result": "ACCEPT offline",
+  "source_review_commit": "2f185d84f01f35e09260c164dc1a74c31a605efc",
+  "integration_review_commit": "edf0c7a6a0df94af92dacac7dbca21fa81486406",
+  "game_revision": "973ab58db8c5bd57237b063711c41f89223a824e",
+  "accepted_models": 106,
+  "packed_sources_inspected": 142,
+  "fresh_model_action_validations": 212,
+  "changed_game_files": 183,
+  "client_verified": false,
+  "review": "assets-work/World1/Statues01/independent-review/FinalIntegration.md"
+}

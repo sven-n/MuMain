@@ -9,6 +9,9 @@ Compared with reviewed pilot ac0f6dd8. All paths are relative to the integration
 | `src/bin/Data/Object1/Bonfire01.bmd` | FireProps01 | `assets-work/World1/FireProps01/Bonfire01/exports/Bonfire01.bmd` | `a5a5ea2bc310df59f6bca0245cb7b427c42491473c328f8f584d9ce07aca9373` |
 | `src/bin/Data/Object1/Bridge01.bmd` | Architecture03 | `assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd` | `877e47a0fb1277d333c0b0a6c72469cafa78ace838d2c3bc782a79d9210bc71d` |
 | `src/bin/Data/Object1/BridgeStone01.bmd` | Architecture03 | `assets-work/World1/Architecture03/BridgeStone01/exports/BridgeStone01.bmd` | `d3fa1a44db54c9575824cc557275a7d2a2d59c2bc579ab4eb9cf0105c2c7451c` |
+| `src/bin/Data/Object1/Cannon01.bmd` | Cannons01 | `assets-work/World1/Cannons01/Cannon01/exports/Cannon01.bmd` | `7d285fd5d3647cc75bf25742623f04421c589e69140137652f5bd1d14225abf0` |
+| `src/bin/Data/Object1/Cannon02.bmd` | Cannons01 | `assets-work/World1/Cannons01/Cannon02/exports/Cannon02.bmd` | `1eccefa4bceeb9dccf921e4f98358e289f454106d9d450820c75350043e6c4bf` |
+| `src/bin/Data/Object1/Cannon03.bmd` | Cannons01 | `assets-work/World1/Cannons01/Cannon03/exports/Cannon03.bmd` | `c5688d3022e2dca8cc6390b47c788d5e970f7fa6b0b060e46063f758fab6669c` |
 | `src/bin/Data/Object1/Carriage01.bmd` | CartHay01 | `assets-work/World1/CartHay01/Carriage01/exports/Carriage01.bmd` | `6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622` |
 | `src/bin/Data/Object1/Carriage02.bmd` | CartHay01 | `assets-work/World1/CartHay01/Carriage02/exports/Carriage02.bmd` | `ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e` |
 | `src/bin/Data/Object1/Carriage03.bmd` | CartHay01 | `assets-work/World1/CartHay01/Carriage03/exports/Carriage03.bmd` | `47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296` |
@@ -35,6 +38,7 @@ Compared with reviewed pilot ac0f6dd8. All paths are relative to the integration
 | `src/bin/Data/Object1/Grass06.bmd` | Groundcover01 | `assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd` | `c656def11e72fe698f4ed99167b47db04eed37bc1e606983368fb99c1335d4c5` |
 | `src/bin/Data/Object1/Grass07.bmd` | Mushrooms01 | `assets-work/World1/Mushrooms01/Grass07/exports/Grass07.bmd` | `e1e81ece76155e14c6e3c9e6d5df2e0673d6db3616eae802085b6da18dfae810` |
 | `src/bin/Data/Object1/Grass08.bmd` | Mushrooms01 | `assets-work/World1/Mushrooms01/Grass08/exports/Grass08.bmd` | `afef512a07acb5dad3255b4dc0c065a0f93f57000ef8bab7abfd588248ea6c3c` |
+| `src/bin/Data/Object1/Hanging01.bmd` | Cannons01 | `assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd` | `6f150a12d38358a26ee5ec5ac245c0df8f869295f6fca3a30d809e611640784c` |
 | `src/bin/Data/Object1/House01.bmd` | Architecture01 | `assets-work/World1/Architecture01/House01/exports/House01.bmd` | `498f0224e6c7f0f32d228b8a7ffbeb051e9796f7749ffb1e340149a632da737e` |
 | `src/bin/Data/Object1/House02.bmd` | TimberProps01 | `assets-work/World1/TimberProps01/House02/exports/House02.bmd` | `f5f28ce013478d5369a1815ac8388c0b4e4597e3410c8832e2b2a5b57c8e1916` |
 | `src/bin/Data/Object1/House03.bmd` | Architecture01 | `assets-work/World1/Architecture01/House03/exports/House03.bmd` | `a8015a4a6155d5dc2cef379bebb6c054ec6a31c428329163a1a696424ea1b7f7` |
@@ -121,6 +125,7 @@ Compared with reviewed pilot ac0f6dd8. All paths are relative to the integration
 | `src/bin/Data/Object1/grass_01.OZT` | CartHay01 | `assets-work/World1/CartHay01/Carriage04/exports/grass_01.OZT` | `1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15` |
 | `src/bin/Data/Object1/grave_01.OZJ` | Statues01 | `assets-work/World1/Statues01/Tomb02/exports/grave_01.OZJ` | `3faeb80e3bd7378aee6b1fe9e531bdc4a32eef8083757d5e0b7858b7496c0735` |
 | `src/bin/Data/Object1/grave_02.OZJ` | Statues01 | `assets-work/World1/Statues01/Tomb01/exports/grave_02.OZJ` | `31aff047b31909fd90a51d7900a4ce980a7bafa8bff44b2b84a7821daff37b00` |
+| `src/bin/Data/Object1/horse_drawn_01.OZJ` | Cannons01 | `assets-work/World1/Cannons01/Carriage01/exports/horse_drawn_01.OZJ` | `fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e` |
 | `src/bin/Data/Object1/horse_drawn_02.OZT` | CartHay01 | `assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_02.OZT` | `f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079` |
 | `src/bin/Data/Object1/horse_drawn_03.OZJ` | CartHay01 | `assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_03.OZJ` | `e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5` |
 | `src/bin/Data/Object1/jar_01.OZJ` | Wells01 | `assets-work/World1/Wells01/textures/final/jar_01.OZJ` | `d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5` |
