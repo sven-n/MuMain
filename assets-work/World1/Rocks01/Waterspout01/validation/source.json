@@ -1,0 +1,67 @@
+{
+  "original_reference_unchanged": true,
+  "geometry_unchanged": true,
+  "ridge_refinement": [],
+  "numeric_snapshot_sha256": "25558bd5875b4ae37af0e3643199f7a46d7502e54b27f07abd80a202fa55a7e8",
+  "triangles": 639,
+  "bone_order": [
+    "OilTank01",
+    "Box04",
+    "Box01",
+    "Box02",
+    "Box03",
+    "QuadPatch01",
+    "Box05",
+    "Box06",
+    "Box07",
+    "Box08",
+    "QuadPatch02"
+  ],
+  "action_meta": {
+    "Waterspout01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "material_order": [
+    "stone_statue02.jpg",
+    "reagon_waterspout.jpg",
+    "ston01.jpg",
+    "ston02.jpg"
+  ],
+  "packed_images": {
+    "reagon_waterspout.jpg": [
+      128,
+      128
+    ],
+    "reagon_waterspout.jpg.001": [
+      128,
+      128
+    ],
+    "ston01.jpg": [
+      128,
+      128
+    ],
+    "ston01.jpg.001": [
+      512,
+      512
+    ],
+    "ston02.jpg": [
+      128,
+      128
+    ],
+    "ston02.jpg.001": [
+      128,
+      128
+    ],
+    "stone_statue02.jpg": [
+      64,
+      128
+    ],
+    "stone_statue02.jpg.001": [
+      64,
+      128
+    ]
+  },
+  "client_verified": false
+}

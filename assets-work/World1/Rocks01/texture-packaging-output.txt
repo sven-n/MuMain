@@ -1,0 +1,10 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/textures/ston01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/textures/ston01.OZJ
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/textures/ston02.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/textures/ston02.OZT
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/scripts/package_textures.py:56: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  fringe = [rgb for rgb, value in zip(color.getdata(), alpha.getdata()) if value < 255]
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/scripts/package_textures.py:62: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  'alpha_mean_original': sum(original.getchannel('A').getdata()) / (original.width * original.height),
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/scripts/package_textures.py:63: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  'alpha_mean_final': sum(alpha.getdata()) / (DIMENSION * DIMENSION)}

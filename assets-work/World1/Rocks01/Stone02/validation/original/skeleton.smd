@@ -1,0 +1,11 @@
+version 1
+nodes
+0 "ston02" -1
+end
+skeleton
+time 0
+0 19.150909 -11.221741 2.552612 0.000000 -0.270526 -0.907571
+end
+triangles
+
+end

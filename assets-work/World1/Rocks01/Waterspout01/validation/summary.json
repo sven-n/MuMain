@@ -1,0 +1,117 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      639,
+      639
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -199.061005,
+          -199.743622,
+          -0.1378
+        ],
+        [
+          199.234314,
+          198.551697,
+          311.204803
+        ]
+      ],
+      [
+        [
+          -199.061005,
+          -199.743622,
+          -0.1378
+        ],
+        [
+          199.234314,
+          198.551697,
+          311.204803
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.0,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true,
+    "surface_checks_before_after": [
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 12
+      },
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 12
+      }
+    ]
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=Waterspout01_a00.smd keys=21 lock=0",
+      "texture 0 stone_statue02.jpg original=stone_statue02.jpg",
+      "texture 1 reagon_waterspout.jpg original=reagon_waterspout.jpg",
+      "texture 2 ston01.jpg original=ston01.jpg",
+      "texture 3 ston02.jpg original=ston02.jpg"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "Waterspout01.smd",
+        "nodes_exact": "0 \"OilTank01\" -1\n1 \"Box04\" -1\n2 \"Box01\" 1\n3 \"Box02\" 2\n4 \"Box03\" 3\n5 \"QuadPatch01\" 1\n6 \"Box05\" -1\n7 \"Box06\" 6\n8 \"Box07\" 7\n9 \"Box08\" 8\n10 \"QuadPatch02\" 6",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "Waterspout01_a00.smd",
+        "nodes_exact": "0 \"OilTank01\" -1\n1 \"Box04\" -1\n2 \"Box01\" 1\n3 \"Box02\" 2\n4 \"Box03\" 3\n5 \"QuadPatch01\" 1\n6 \"Box05\" -1\n7 \"Box06\" 6\n8 \"Box07\" 7\n9 \"Box08\" 8\n10 \"QuadPatch02\" 6",
+        "frames_exact": [
+          "time 0",
+          "time 1",
+          "time 2",
+          "time 3",
+          "time 4",
+          "time 5",
+          "time 6",
+          "time 7",
+          "time 8",
+          "time 9",
+          "time 10",
+          "time 11",
+          "time 12",
+          "time 13",
+          "time 14",
+          "time 15",
+          "time 16",
+          "time 17",
+          "time 18",
+          "time 19",
+          "time 20"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "EQUIVALENT",
+  "mesh_texture_order": [
+    "stone_statue02.jpg",
+    "reagon_waterspout.jpg",
+    "ston01.jpg",
+    "ston02.jpg"
+  ],
+  "export_sha256": {
+    "Waterspout01.bmd": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83",
+    "reagon_waterspout.OZJ": "0da0208475dd23f3838e39615ff562ddec46a5f094c198b7c1e481443135b67d",
+    "ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784",
+    "ston02.OZJ": "09d1dbbbc7672fe05d82a89a115bee1ec538e615b3f39e93b9e244e7cd61d151",
+    "stone_statue02.OZJ": "bfa268df5e3789e2f30ec6f58de4cf48a2e7e5921f87579152ad7959e1f7a0cf"
+  }
+}

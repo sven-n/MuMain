@@ -1,0 +1,91 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      166,
+      518
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -209.205597,
+          -158.547699,
+          -19.622295
+        ],
+        [
+          202.953201,
+          127.827011,
+          185.3004
+        ]
+      ],
+      [
+        [
+          -209.205505,
+          -158.547958,
+          -19.622295
+        ],
+        [
+          202.953156,
+          127.827209,
+          185.300385
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.0002589999999997872,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true,
+    "surface_checks_before_after": [
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      },
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      }
+    ]
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=Stone01_a00.smd keys=1 lock=0",
+      "texture 0 ston01.jpg original=ston01.jpg",
+      "texture 1 ston02.tga original=ston02.tga"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "Stone01.smd",
+        "nodes_exact": "0 \"ston01\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "Stone01_a00.smd",
+        "nodes_exact": "0 \"ston01\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "DIFFERENT",
+  "mesh_texture_order": [
+    "ston01.jpg",
+    "ston02.tga"
+  ],
+  "export_sha256": {
+    "ston02.OZT": "9cc2f1dfa531853fc48ff7dc6bd25ef1757b74db6890f7436039db7611d6a1dd",
+    "Stone01.bmd": "1eb05f2514a831f8268e63c64b17b9b04903eb9860c5b21ea963b526f754507e",
+    "ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784"
+  }
+}

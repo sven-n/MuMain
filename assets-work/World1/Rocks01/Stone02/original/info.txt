@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/Stone02.bmd
+  name field: Data2\Object1\Ston_02.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 159
+  bounds (bind pose): min -149.27 -148.93 -20.04  max 105.96 128.99 258.27  size 255.23 277.92 278.31
+  mesh 0: triangles=125 vertices=83 normals=78 uvs=83 texture=ston01.jpg
+  mesh 1: triangles=34 vertices=68 normals=51 uvs=4 texture=ston02.tga
+  bone 0: "ston02" parent=-1
+  action 0: keys=1 lock=0

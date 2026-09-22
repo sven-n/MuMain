@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "7aaa62a405c026952f0ba9f094d832702457a62f14394b43e9178b3cbc37a7b1",
+  "source_bounds_exact": [
+    [
+      -209.20559692382812,
+      -158.54769897460938,
+      -19.622295379638672
+    ],
+    [
+      202.9532012939453,
+      127.82701110839844,
+      185.30039978027344
+    ]
+  ],
+  "editable_high_poly_excluded": true,
+  "rig_unchanged": {
+    "bones": [
+      [
+        "ston01",
+        null
+      ]
+    ],
+    "bone_order": [
+      "ston01"
+    ],
+    "actions": {
+      "Stone01_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "ston01.jpg": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a32b49b17a7ac9403a421667775833ea87ec294e8c7a7e9bcf3a5e71caa2a575"
+    },
+    "ston01.jpg.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "c3bf39d1bb86118af8d8d7c86f3d3b00b6c2753315cffb06492850b2ddf41050"
+    },
+    "ston02.tga": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "b91c2e3858476eb6d1a5d4570ba64627a869860598821fe453245d6192423d32"
+    },
+    "ston02.tga.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "5c9db9128b17c520a2966d83916b2282e13c67e3a6b94aa7289d738718f80fde"
+    }
+  },
+  "no_external_images_required": true
+}

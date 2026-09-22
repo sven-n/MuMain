@@ -1,0 +1,78 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "6c9d54af7680d37f4bcee4570ccb8bdae89d24b5bdf24eee0db367d6d7147d24",
+  "source_bounds_exact": [
+    [
+      -49.80580139160156,
+      -61.87779998779297,
+      -3.6417009830474854
+    ],
+    [
+      65.26069641113281,
+      39.982696533203125,
+      26.48509979248047
+    ]
+  ],
+  "editable_high_poly_excluded": true,
+  "rig_unchanged": {
+    "bones": [
+      [
+        "GeoSphere01",
+        null
+      ]
+    ],
+    "bone_order": [
+      "GeoSphere01"
+    ],
+    "actions": {
+      "Stone04_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "ston01.jpg": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a32b49b17a7ac9403a421667775833ea87ec294e8c7a7e9bcf3a5e71caa2a575"
+    },
+    "ston01.jpg.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "c3bf39d1bb86118af8d8d7c86f3d3b00b6c2753315cffb06492850b2ddf41050"
+    }
+  },
+  "no_external_images_required": true
+}

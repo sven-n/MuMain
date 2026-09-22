@@ -1,0 +1,182 @@
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/original/Stone01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gk3_d5ht
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gk3_d5ht/Stone01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gk3_d5ht/Stone01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gk3_d5ht/Stone01.actions.txt
+
+SMD IMPORTER: now working on Stone01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: ston01.jpg
+- New material: ston02.tga
+- Imported 166 polys
+SMD Stone01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stone01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stone01_skeleton"
+- Imported 1 frames of animation
+SMD Stone01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "source.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/original/source.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/Stone02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h0k4jxrz
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h0k4jxrz/Stone02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h0k4jxrz/Stone02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h0k4jxrz/Stone02.actions.txt
+
+SMD IMPORTER: now working on Stone02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: ston01.jpg
+- New material: ston02.tga
+- Imported 159 polys
+SMD Stone02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stone02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stone02_skeleton"
+- Imported 1 frames of animation
+SMD Stone02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "source.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/source.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/original/Stone03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6d02axfy
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6d02axfy/Stone03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6d02axfy/Stone03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6d02axfy/Stone03.actions.txt
+
+SMD IMPORTER: now working on Stone03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: ston01.jpg
+- Imported 80 polys
+SMD Stone03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stone03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stone03_skeleton"
+- Imported 1 frames of animation
+SMD Stone03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "source.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/original/source.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/original/Stone04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ivt4radw
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ivt4radw/Stone04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ivt4radw/Stone04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ivt4radw/Stone04.actions.txt
+
+SMD IMPORTER: now working on Stone04
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: ston01.jpg
+- Imported 45 polys
+SMD Stone04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stone04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stone04_skeleton"
+- Imported 1 frames of animation
+SMD Stone04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "source.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/original/source.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/original/Stone05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxsv0pmf
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxsv0pmf/Stone05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxsv0pmf/Stone05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxsv0pmf/Stone05.actions.txt
+
+SMD IMPORTER: now working on Stone05
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: ston01.jpg
+- Imported 120 polys
+SMD Stone05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stone05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stone05_skeleton"
+- Imported 1 frames of animation
+SMD Stone05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "source.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/original/source.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/original/Waterspout01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ac0uvw4g
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ac0uvw4g/Waterspout01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ac0uvw4g/Waterspout01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ac0uvw4g/Waterspout01.actions.txt
+
+SMD IMPORTER: now working on Waterspout01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: stone_statue02.jpg
+- New material: reagon_waterspout.jpg
+- New material: ston01.jpg
+- New material: ston02.jpg
+- Imported 639 polys
+SMD Waterspout01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Waterspout01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "Waterspout01_skeleton"
+- Imported 21 frames of animation
+SMD Waterspout01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "source.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/original/source.blend: 1 mesh object(s), 11 bones, 1 animation clips, 4 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

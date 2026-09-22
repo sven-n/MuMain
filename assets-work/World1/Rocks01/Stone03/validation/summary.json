@@ -1,0 +1,88 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      80,
+      186
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -128.785614,
+          -73.919304,
+          -69.808998
+        ],
+        [
+          102.019997,
+          103.592506,
+          124.828323
+        ]
+      ],
+      [
+        [
+          -128.785629,
+          -73.919228,
+          -69.808533
+        ],
+        [
+          102.019974,
+          103.593681,
+          124.828018
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.0011750000000034788,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true,
+    "surface_checks_before_after": [
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      },
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      }
+    ]
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=Stone03_a00.smd keys=1 lock=0",
+      "texture 0 ston01.jpg original=ston01.jpg"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "Stone03.smd",
+        "nodes_exact": "0 \"GeoSphere01\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "Stone03_a00.smd",
+        "nodes_exact": "0 \"GeoSphere01\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "DIFFERENT",
+  "mesh_texture_order": [
+    "ston01.jpg"
+  ],
+  "export_sha256": {
+    "Stone03.bmd": "045807cd21abd6d7c783b8b75bbc0744befa195e8666f4850a2887809cc5387b",
+    "ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784"
+  }
+}

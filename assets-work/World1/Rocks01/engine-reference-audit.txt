@@ -1,0 +1,35 @@
+Read-only source audit: src/source/Engine/Object/ZzzObject.cpp
+Source sha256: 4f03600b0f10b4001b3d0276b53f341befb8877eb2bf57291ad3890c8562502f
+
+994:             else if (gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_WATERSPOUT)
+995:             {
+996:                 b->BeginRender(o->Alpha);
+997:                 b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
+998:                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
+999:                 b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
+1000:                 b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+1001:                 b->EndRender();
+1002:             }
+1003:             else if (gMapManager.WorldActive == WD_4LOSTTOWER && (o->Type == 23 || o->Type == 19 || o->Type == 20 || o->Type == 3 || o->Type == 4))
+1004:             {
+
+2752:         case MODEL_WATERSPOUT:
+2753:             o->BlendMeshLight = 1.f;
+2754:             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
+2755:             if (rand_fps_check(2))
+2756:             {
+2757:                 Vector((float)(rand() % 32 - 16), -20.f, (float)(rand() % 32 - 16), p);
+2758:                 b->TransformPosition(BoneTransform[1], p, Position);
+2759:                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
+2760:                 Vector((float)(rand() % 32 - 16), -80.f, (float)(rand() % 32 - 16), p);
+2761:                 b->TransformPosition(BoneTransform[4], p, Position);
+2762:                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
+2763:             }
+2764:             break;
+2765:         case MODEL_MERCHANT_ANIMAL01:
+2766:             Scale = Luminosity * 5.f;
+
+4629:         case MODEL_WATERSPOUT:
+4630:             o->BlendMesh = 3;
+4631:             break;
+4632:         case MODEL_BONFIRE:

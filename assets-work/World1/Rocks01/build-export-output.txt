@@ -1,0 +1,234 @@
+00:01.031  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/scripts/build_and_export.py:19: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes = True
+Info: Saved as "source.blend"
+skipping reference object 'Stone01' (REF_ collection or mu_reference)
+skipping reference object 'Painted_Stone01_EditableChamfers' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Stone01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0hk40iyd/Stone01_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 518 polys
+- Exported 2 materials
+   ston02.tga
+   ston01.jpg
+- SMD export took 0.010369062423706055
+
+
+Blender Source Tools: exporting Stone01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0hk40iyd/anims/Stone01_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0013439655303955078
+
+2 files exported in 0.0 seconds
+00:01.213  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0hk40iyd/Stone01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/exports/Stone01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0hk40iyd/anims/Stone01_a00.smd --name Stone01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/exports/Stone01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/exports/Stone01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone01/exports/Stone01.bmd
+  name field: Stone01.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 518
+  bounds (bind pose): min -209.21 -158.55 -19.62  max 202.95 127.83 185.30  size 412.16 286.38 204.92
+  mesh 0: triangles=492 vertices=268 normals=268 uvs=452 texture=ston01.jpg
+  mesh 1: triangles=26 vertices=52 normals=49 uvs=4 texture=ston02.tga
+  bone 0: "ston01" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Stone02' (REF_ collection or mu_reference)
+skipping reference object 'Painted_Stone02_EditableChamfers' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Stone02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_m236kcaf/Stone02_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 503 polys
+- Exported 2 materials
+   ston02.tga
+   ston01.jpg
+- SMD export took 0.010332107543945312
+
+
+Blender Source Tools: exporting Stone02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_m236kcaf/anims/Stone02_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0006918907165527344
+
+2 files exported in 0.0 seconds
+00:01.316  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_m236kcaf/Stone02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_m236kcaf/anims/Stone02_a00.smd --name Stone02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd
+  name field: Stone02.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 503
+  bounds (bind pose): min -149.27 -148.93 -20.04  max 105.96 128.99 258.27  size 255.23 277.92 278.31
+  mesh 0: triangles=469 vertices=263 normals=263 uvs=429 texture=ston01.jpg
+  mesh 1: triangles=34 vertices=68 normals=68 uvs=4 texture=ston02.tga
+  bone 0: "ston02" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Stone03' (REF_ collection or mu_reference)
+skipping reference object 'Painted_Stone03_EditableChamfers' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Stone03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_e2btnjb7/Stone03_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 186 polys
+- Exported 1 materials
+   ston01.jpg
+- SMD export took 0.00494694709777832
+
+
+Blender Source Tools: exporting Stone03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_e2btnjb7/anims/Stone03_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0006871223449707031
+
+2 files exported in 0.0 seconds
+00:01.389  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_e2btnjb7/Stone03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/exports/Stone03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_e2btnjb7/anims/Stone03_a00.smd --name Stone03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/exports/Stone03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/exports/Stone03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone03/exports/Stone03.bmd
+  name field: Stone03.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 186
+  bounds (bind pose): min -128.79 -73.92 -69.81  max 102.02 103.59 124.83  size 230.81 177.51 194.64
+  mesh 0: triangles=186 vertices=95 normals=95 uvs=171 texture=ston01.jpg
+  bone 0: "GeoSphere01" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Stone04' (REF_ collection or mu_reference)
+skipping reference object 'Painted_Stone04_EditableChamfers' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Stone04_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_8chg4llt/Stone04_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 137 polys
+- Exported 1 materials
+   ston01.jpg
+- SMD export took 0.0030028820037841797
+
+
+Blender Source Tools: exporting Stone04_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_8chg4llt/anims/Stone04_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0005199909210205078
+
+2 files exported in 0.0 seconds
+00:01.459  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_8chg4llt/Stone04_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/exports/Stone04.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_8chg4llt/anims/Stone04_a00.smd --name Stone04.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/exports/Stone04.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/exports/Stone04.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone04/exports/Stone04.bmd
+  name field: Stone04.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 137
+  bounds (bind pose): min -49.81 -61.88 -3.64  max 65.26 39.98 26.49  size 115.07 101.86 30.13
+  mesh 0: triangles=137 vertices=83 normals=83 uvs=151 texture=ston01.jpg
+  bone 0: "GeoSphere01" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Stone05' (REF_ collection or mu_reference)
+skipping reference object 'Painted_Stone05_EditableChamfers' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Stone05_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30pxdgf4/Stone05_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 417 polys
+- Exported 1 materials
+   ston01.jpg
+- SMD export took 0.007858991622924805
+
+
+Blender Source Tools: exporting Stone05_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30pxdgf4/anims/Stone05_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0006678104400634766
+
+2 files exported in 0.0 seconds
+00:01.542  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30pxdgf4/Stone05_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30pxdgf4/anims/Stone05_a00.smd --name Stone05.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd
+  name field: Stone05.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 417
+  bounds (bind pose): min -55.99 -61.88 -3.23  max 42.21 49.67 26.49  size 98.21 111.54 29.71
+  mesh 0: triangles=417 vertices=250 normals=250 uvs=446 texture=ston01.jpg
+  bone 0: "GeoSphere01" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Waterspout01' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Waterspout01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30tx6_e3/Waterspout01_mu_export.smd
+- Exported 11 bones
+- Exported 1 frames
+- Exported 639 polys
+- Exported 4 materials
+   ston01.jpg
+   stone_statue02.jpg
+   ston02.jpg
+   reagon_waterspout.jpg
+- SMD export took 0.012701988220214844
+
+
+Blender Source Tools: exporting Waterspout01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30tx6_e3/anims/Waterspout01_a00.smd
+- Exported 11 bones
+- Exported 21 frames
+- SMD export took 0.007242918014526367
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30tx6_e3/Waterspout01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/exports/Waterspout01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_30tx6_e3/anims/Waterspout01_a00.smd --name Waterspout01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/exports/Waterspout01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/exports/Waterspout01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/exports/Waterspout01.bmd
+  name field: Waterspout01.smd  version: 12
+  meshes: 4  bones: 11  actions: 1  triangles: 639
+  bounds (bind pose): min -199.06 -199.74 -0.14  max 199.23 198.55 311.20  size 398.30 398.30 311.34
+  mesh 0: triangles=72 vertices=60 normals=70 uvs=29 texture=stone_statue02.jpg
+  mesh 1: triangles=417 vertices=232 normals=229 uvs=224 texture=reagon_waterspout.jpg
+  mesh 2: triangles=60 vertices=36 normals=36 uvs=39 texture=ston01.jpg
+  mesh 3: triangles=90 vertices=66 normals=66 uvs=66 texture=ston02.jpg
+  bone 0: "OilTank01" parent=-1
+  bone 1: "Box04" parent=-1
+  bone 2: "Box01" parent=1
+  bone 3: "Box02" parent=2
+  bone 4: "Box03" parent=3
+  bone 5: "QuadPatch01" parent=1
+  bone 6: "Box05" parent=-1
+  bone 7: "Box06" parent=6
+  bone 8: "Box07" parent=7
+  bone 9: "Box08" parent=8
+  bone 10: "QuadPatch02" parent=6
+  action 0: keys=21 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

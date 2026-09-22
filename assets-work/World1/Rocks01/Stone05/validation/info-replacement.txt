@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd
+  name field: Stone05.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 417
+  bounds (bind pose): min -55.99 -61.88 -3.23  max 42.21 49.67 26.49  size 98.21 111.54 29.71
+  mesh 0: triangles=417 vertices=250 normals=250 uvs=446 texture=ston01.jpg
+  bone 0: "GeoSphere01" parent=-1
+  action 0: keys=1 lock=0

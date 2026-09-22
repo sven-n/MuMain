@@ -1,0 +1,6 @@
+00:00.568  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/original/source.blend"
+00:00.575  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Waterspout01/validation/reimported.blend"
+PASS: active action changes pose; original/final matrices exact at rendered frames
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

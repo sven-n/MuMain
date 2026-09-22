@@ -1,0 +1,91 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      159,
+      503
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -149.272293,
+          -148.929703,
+          -20.044003
+        ],
+        [
+          105.956596,
+          128.994293,
+          258.267883
+        ]
+      ],
+      [
+        [
+          -149.272415,
+          -148.928513,
+          -20.044003
+        ],
+        [
+          105.956757,
+          128.994522,
+          258.267853
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.0011899999999798183,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true,
+    "surface_checks_before_after": [
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      },
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      }
+    ]
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=Stone02_a00.smd keys=1 lock=0",
+      "texture 0 ston01.jpg original=ston01.jpg",
+      "texture 1 ston02.tga original=ston02.tga"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "Stone02.smd",
+        "nodes_exact": "0 \"ston02\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 1.0000000010279564e-06,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "Stone02_a00.smd",
+        "nodes_exact": "0 \"ston02\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 1.0000000010279564e-06,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "DIFFERENT",
+  "mesh_texture_order": [
+    "ston01.jpg",
+    "ston02.tga"
+  ],
+  "export_sha256": {
+    "ston02.OZT": "9cc2f1dfa531853fc48ff7dc6bd25ef1757b74db6890f7436039db7611d6a1dd",
+    "Stone02.bmd": "036ceeccd14624e5dd93faf5e2500db8c5643e8f9bf0bc5aed75f7861b41d2e1",
+    "ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784"
+  }
+}

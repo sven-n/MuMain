@@ -1,0 +1,11 @@
+version 1
+nodes
+0 "GeoSphere01" -1
+end
+skeleton
+time 0
+0 -4.631836 -3.205297 -46.975769 0.148353 -0.000000 0.026180
+end
+triangles
+
+end

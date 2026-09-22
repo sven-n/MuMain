@@ -1,0 +1,170 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "9a1428636775ca13f50914f95935f34cccdb9148d49968ac112befb3dab10c08",
+  "source_bounds_exact": [
+    [
+      -199.06100463867188,
+      -199.74362182617188,
+      -0.13779999315738678
+    ],
+    [
+      199.23431396484375,
+      198.55169677734375,
+      311.2048034667969
+    ]
+  ],
+  "editable_high_poly_excluded": false,
+  "rig_unchanged": {
+    "bones": [
+      [
+        "OilTank01",
+        null
+      ],
+      [
+        "Box04",
+        null
+      ],
+      [
+        "Box01",
+        "Box04"
+      ],
+      [
+        "Box02",
+        "Box01"
+      ],
+      [
+        "Box03",
+        "Box02"
+      ],
+      [
+        "QuadPatch01",
+        "Box04"
+      ],
+      [
+        "Box05",
+        null
+      ],
+      [
+        "Box06",
+        "Box05"
+      ],
+      [
+        "Box07",
+        "Box06"
+      ],
+      [
+        "Box08",
+        "Box07"
+      ],
+      [
+        "QuadPatch02",
+        "Box05"
+      ]
+    ],
+    "bone_order": [
+      "OilTank01",
+      "Box04",
+      "Box01",
+      "Box02",
+      "Box03",
+      "QuadPatch01",
+      "Box05",
+      "Box06",
+      "Box07",
+      "Box08",
+      "QuadPatch02"
+    ],
+    "actions": {
+      "Waterspout01_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "reagon_waterspout.jpg": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "92cba647cee6ec8cb296cf206633d17b028d4adf23f9b56ab87c25eab8e7f382"
+    },
+    "reagon_waterspout.jpg.001": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "92cba647cee6ec8cb296cf206633d17b028d4adf23f9b56ab87c25eab8e7f382"
+    },
+    "ston01.jpg": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a32b49b17a7ac9403a421667775833ea87ec294e8c7a7e9bcf3a5e71caa2a575"
+    },
+    "ston01.jpg.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "c3bf39d1bb86118af8d8d7c86f3d3b00b6c2753315cffb06492850b2ddf41050"
+    },
+    "ston02.jpg": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "7fa6e11ac87d845119f4ef07702e518560a21ce7f75233608ab31d160ab53fda"
+    },
+    "ston02.jpg.001": {
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "7fa6e11ac87d845119f4ef07702e518560a21ce7f75233608ab31d160ab53fda"
+    },
+    "stone_statue02.jpg": {
+      "size": [
+        64,
+        128
+      ],
+      "sha256": "f567fbb72885a6d053907e985414b78b4211e148b623ae4a20345044b3b90fef"
+    },
+    "stone_statue02.jpg.001": {
+      "size": [
+        64,
+        128
+      ],
+      "sha256": "f567fbb72885a6d053907e985414b78b4211e148b623ae4a20345044b3b90fef"
+    }
+  },
+  "no_external_images_required": true
+}
