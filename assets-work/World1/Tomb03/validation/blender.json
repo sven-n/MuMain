@@ -1,0 +1,47 @@
+{
+  "status": "PASS: Blender checks; engine comparison required",
+  "triangles": 200,
+  "meshes_after_texture_merge": 1,
+  "bounds_before": [
+    [
+      -44.991302490234375,
+      -9.927603721618652,
+      0.04690000042319298
+    ],
+    [
+      44.76789855957031,
+      9.707403182983398,
+      117.30068969726562
+    ]
+  ],
+  "bounds_after": [
+    [
+      -44.991302490234375,
+      -9.927603721618652,
+      0.04690000042319298
+    ],
+    [
+      44.76789855957031,
+      9.707403182983398,
+      117.30068969726562
+    ]
+  ],
+  "bone_order": [
+    "Cylinder01"
+  ],
+  "action_meta": {
+    "Tomb03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tombstone.jpg": [
+      512,
+      512
+    ]
+  },
+  "skinning": "exactly one valid full-weight bone per vertex",
+  "geometry": "triangles, finite positions/UVs, nonzero face area, identity transforms",
+  "uv": "one set; new UVs within [0,1]; unchanged candle flame UVs retain legacy repeat to 1.0074"
+}

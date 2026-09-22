@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "tombstone.jpg",
+    "tombstone.jpg.001"
+  ],
+  "reference_objects": 1,
+  "high_poly_sources": 1,
+  "export_objects": 1,
+  "original_rig_reused": true,
+  "external_image_files_required": false,
+  "reference_exclusion": "REF_* collections + mu_reference"
+}

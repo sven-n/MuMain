@@ -1,0 +1,7 @@
+model /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Tomb03/exports/Tomb03.bmd
+  name field: Tomb03.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 200
+  bounds (bind pose): min -44.99 -9.93 0.05  max 44.77 9.71 117.30  size 89.76 19.64 117.25
+  mesh 0: triangles=200 vertices=102 normals=126 uvs=104 texture=tombstone.jpg
+  bone 0: "Cylinder01" parent=-1
+  action 0: keys=1 lock=0
