@@ -1,0 +1,93 @@
+{
+  "status": "PASS",
+  "triangles": 250,
+  "textures": {
+    "tile_wood02.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_wood03.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_ston04.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_ston06.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_house01.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "horse_drawn_01.jpg": {
+      "dimensions": [
+        256,
+        256
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_ston01.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall04.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -1.3555,
+      2.3555
+    ],
+    [
+      -0.7937,
+      1.7937
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -1.3555,
+      2.3555
+    ],
+    [
+      -0.7937,
+      1.7937
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

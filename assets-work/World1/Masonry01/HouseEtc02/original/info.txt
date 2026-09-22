@@ -1,0 +1,16 @@
+model src/bin/Data/Object1/HouseEtc02.bmd
+  name field: Data2\Object1\house.smd  version: 10
+  meshes: 8  bones: 3  actions: 1  triangles: 226
+  bounds (bind pose): min -302.53 -299.57 -0.15  max 297.88 408.20 332.48  size 600.41 707.77 332.63
+  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_wood02.jpg
+  mesh 1: triangles=46 vertices=32 normals=14 uvs=41 texture=tile_ston04.jpg
+  mesh 2: triangles=25 vertices=23 normals=17 uvs=25 texture=c_wall04.jpg
+  mesh 3: triangles=16 vertices=12 normals=8 uvs=13 texture=tile_wood03.jpg
+  mesh 4: triangles=5 vertices=7 normals=1 uvs=7 texture=tile_house01.jpg
+  mesh 5: triangles=8 vertices=10 normals=4 uvs=12 texture=tile_ston01.jpg
+  mesh 6: triangles=94 vertices=109 normals=7 uvs=92 texture=horse_drawn_01.jpg
+  mesh 7: triangles=30 vertices=24 normals=6 uvs=12 texture=tile_ston06.jpg
+  bone 0: "ihix01" parent=-1
+  bone 1: "Box03" parent=-1
+  bone 2: "Mesh03" parent=-1
+  action 0: keys=1 lock=0

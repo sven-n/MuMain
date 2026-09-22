@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "triangles": 50,
+  "textures": {
+    "c_wall06.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall04.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      0.0005,
+      0.9995
+    ],
+    [
+      0.0005,
+      0.9995
+    ]
+  ],
+  "original_uv_range": [
+    [
+      0.0005,
+      0.9995
+    ],
+    [
+      0.0005,
+      0.9995
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

@@ -1,0 +1,208 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 76,
+  "original_triangles": 44,
+  "bounds_before": [
+    [
+      -50.01470184326172,
+      -147.3950958251953,
+      -174.17349243164062
+    ],
+    [
+      49.98529815673828,
+      49.924598693847656,
+      334.0929870605469
+    ]
+  ],
+  "bounds_after": [
+    [
+      -50.01470184326172,
+      -147.3950958251953,
+      -174.17349243164062
+    ],
+    [
+      49.98529815673828,
+      49.924598693847656,
+      334.0929870605469
+    ]
+  ],
+  "original_vertices_retained": 26,
+  "bone_order": [
+    "Box01"
+  ],
+  "action_meta": {
+    "StoneMuWall02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "c_wall06.jpg": [
+      512,
+      512
+    ],
+    "c_wall05.jpg": [
+      512,
+      512
+    ],
+    "c_wall04.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "c_wall06.jpg",
+    "c_wall05.jpg",
+    "c_wall04.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "All opaque RGB; original material slots retained",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        36,
+        37
+      ],
+      "boundary_vertices": [
+        0,
+        12,
+        11,
+        24
+      ],
+      "inset_fraction": 0.016849174587296626,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          -50.01470184326172,
+          -50.075401306152344,
+          281.2908020019531
+        ],
+        [
+          -50.01470184326172,
+          -50.075401306152344,
+          0.0
+        ],
+        [
+          -41.70220184326172,
+          -68.68260192871094,
+          22.634300231933594
+        ],
+        [
+          -17.87190055847168,
+          -68.68250274658203,
+          259.8973083496094
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        38,
+        39
+      ],
+      "boundary_vertices": [
+        24,
+        11,
+        14,
+        17
+      ],
+      "inset_fraction": 0.019236233733287863,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          -17.87190055847168,
+          -68.68250274658203,
+          259.8973083496094
+        ],
+        [
+          -41.70220184326172,
+          -68.68260192871094,
+          22.634300231933594
+        ],
+        [
+          -10.94629955291748,
+          -133.41940307617188,
+          56.155601501464844
+        ],
+        [
+          -6.804500102996826,
+          -84.04930114746094,
+          259.8973083496094
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        40,
+        41
+      ],
+      "boundary_vertices": [
+        7,
+        10,
+        1,
+        25
+      ],
+      "inset_fraction": 0.01684917484275728,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          41.67279815673828,
+          -68.68260192871094,
+          22.634300231933594
+        ],
+        [
+          49.98529815673828,
+          -50.075401306152344,
+          0.0
+        ],
+        [
+          49.98529815673828,
+          -50.075401306152344,
+          281.2908020019531
+        ],
+        [
+          17.84239959716797,
+          -68.68260192871094,
+          259.8973083496094
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        42,
+        43
+      ],
+      "boundary_vertices": [
+        8,
+        7,
+        25,
+        16
+      ],
+      "inset_fraction": 0.019236238084581584,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          10.916799545288086,
+          -133.41940307617188,
+          56.155601501464844
+        ],
+        [
+          41.67279815673828,
+          -68.68260192871094,
+          22.634300231933594
+        ],
+        [
+          17.84239959716797,
+          -68.68260192871094,
+          259.8973083496094
+        ],
+        [
+          6.775100231170654,
+          -84.04930114746094,
+          259.8973083496094
+        ]
+      ]
+    }
+  ],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

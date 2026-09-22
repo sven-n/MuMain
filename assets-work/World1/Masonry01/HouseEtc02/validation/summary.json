@@ -1,0 +1,54 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -302.53,
+      -299.57,
+      -0.15
+    ],
+    [
+      297.88,
+      408.2,
+      332.48
+    ]
+  ],
+  "bounds_after": [
+    [
+      -302.53,
+      -299.57,
+      -0.15
+    ],
+    [
+      297.88,
+      408.2,
+      332.48
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "tile_wood02.jpg",
+    "tile_ston04.jpg",
+    "c_wall04.jpg",
+    "tile_wood03.jpg",
+    "tile_house01.jpg",
+    "tile_ston01.jpg",
+    "horse_drawn_01.jpg",
+    "tile_ston06.jpg"
+  ],
+  "export_sha256": {
+    "HouseEtc02.bmd": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa",
+    "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6",
+    "tile_house01.OZJ": "efdf9cf6b54ccf4b9d3d805cf0e7ecdc398aa1fb3c7e77d21778a55790fff683",
+    "tile_ston01.OZJ": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+    "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+    "tile_wood03.OZJ": "aa7ab051d5598e159f196ac20f52654f8c1d81c57f220cb6b50a5e62a7112195"
+  }
+}

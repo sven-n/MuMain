@@ -1,0 +1,42 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -50.15,
+      -92.81,
+      0.0
+    ],
+    [
+      49.73,
+      49.8,
+      137.02
+    ]
+  ],
+  "bounds_after": [
+    [
+      -50.15,
+      -92.81,
+      0.0
+    ],
+    [
+      49.73,
+      49.8,
+      137.02
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "c_wall04.jpg",
+    "c_wall06.jpg"
+  ],
+  "export_sha256": {
+    "HouseEtc01.bmd": "646273f66d753761d78bfc04c33ad9ba73adf4b87e69a2c376a8c530e8fff22c",
+    "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "c_wall06.OZJ": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4"
+  }
+}

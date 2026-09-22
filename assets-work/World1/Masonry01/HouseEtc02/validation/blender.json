@@ -1,0 +1,199 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 250,
+  "original_triangles": 226,
+  "bounds_before": [
+    [
+      -302.5321960449219,
+      -299.5708923339844,
+      -0.15119999647140503
+    ],
+    [
+      297.87640380859375,
+      408.2007141113281,
+      332.47711181640625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -302.5321960449219,
+      -299.5708923339844,
+      -0.15119999647140503
+    ],
+    [
+      297.87640380859375,
+      408.2007141113281,
+      332.47711181640625
+    ]
+  ],
+  "original_vertices_retained": 201,
+  "bone_order": [
+    "ihix01",
+    "Box03",
+    "Mesh03"
+  ],
+  "action_meta": {
+    "HouseEtc02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_wood02.jpg": [
+      128,
+      128
+    ],
+    "tile_ston04.jpg": [
+      128,
+      128
+    ],
+    "c_wall04.jpg": [
+      512,
+      512
+    ],
+    "tile_wood03.jpg": [
+      128,
+      128
+    ],
+    "tile_house01.jpg": [
+      128,
+      128
+    ],
+    "tile_ston01.jpg": [
+      512,
+      512
+    ],
+    "horse_drawn_01.jpg": [
+      256,
+      256
+    ],
+    "tile_ston06.jpg": [
+      128,
+      128
+    ]
+  },
+  "material_order": [
+    "tile_wood02.jpg",
+    "tile_ston04.jpg",
+    "c_wall04.jpg",
+    "tile_wood03.jpg",
+    "tile_house01.jpg",
+    "tile_ston01.jpg",
+    "horse_drawn_01.jpg",
+    "tile_ston06.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "All opaque RGB; original material slots retained",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        50,
+        51
+      ],
+      "boundary_vertices": [
+        19,
+        18,
+        39,
+        38
+      ],
+      "inset_fraction": 0.009764094334759136,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          144.61749267578125,
+          248.99960327148438,
+          157.55360412597656
+        ],
+        [
+          -244.12710571289062,
+          248.99960327148438,
+          157.55360412597656
+        ],
+        [
+          -244.12710571289062,
+          248.99960327148438,
+          286.7914123535156
+        ],
+        [
+          144.61749267578125,
+          248.99960327148438,
+          286.7914123535156
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        52,
+        53
+      ],
+      "boundary_vertices": [
+        18,
+        21,
+        40,
+        39
+      ],
+      "inset_fraction": 0.0077828924520212265,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          -244.12710571289062,
+          248.99960327148438,
+          157.55360412597656
+        ],
+        [
+          -244.12710571289062,
+          -248.43370056152344,
+          157.55360412597656
+        ],
+        [
+          -244.12710571289062,
+          -248.43370056152344,
+          286.7914123535156
+        ],
+        [
+          -244.12710571289062,
+          248.99960327148438,
+          286.7914123535156
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        54,
+        55
+      ],
+      "boundary_vertices": [
+        21,
+        20,
+        41,
+        40
+      ],
+      "inset_fraction": 0.009764094334759136,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          -244.12710571289062,
+          -248.43370056152344,
+          157.55360412597656
+        ],
+        [
+          144.61749267578125,
+          -248.43370056152344,
+          157.55360412597656
+        ],
+        [
+          144.61749267578125,
+          -248.43370056152344,
+          286.7914123535156
+        ],
+        [
+          -244.12710571289062,
+          -248.43370056152344,
+          286.7914123535156
+        ]
+      ]
+    }
+  ],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

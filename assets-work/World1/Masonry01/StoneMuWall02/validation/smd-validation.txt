@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/original/StoneMuWall02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/original/StoneMuWall02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/original/StoneMuWall02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/original/StoneMuWall02.smd: bones=1 frames=1 triangles=44 materials=3
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/original/StoneMuWall02_a00.smd: bones=1 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/new/StoneMuWall02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/new/StoneMuWall02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/new/StoneMuWall02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/new/StoneMuWall02.smd: bones=1 frames=1 triangles=76 materials=3
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/new/StoneMuWall02_a00.smd: bones=1 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/StoneMuWall02/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

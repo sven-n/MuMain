@@ -1,0 +1,50 @@
+[
+  {
+    "name": "c_wall04",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "c_wall04-master.png",
+    "prompt": "c_wall04-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; no transparency added"
+  },
+  {
+    "name": "c_wall05",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "c_wall05-master.png",
+    "prompt": "c_wall05-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; no transparency added"
+  },
+  {
+    "name": "c_wall06",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "c_wall06-master.png",
+    "prompt": "c_wall06-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; no transparency added"
+  },
+  {
+    "name": "tile_ston01",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_ston01-master.png",
+    "prompt": "tile_ston01-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; no transparency added"
+  }
+]

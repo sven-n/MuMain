@@ -1,0 +1,7 @@
+# bmdconv action manifest for StoneMuWall02.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd StoneMuWall02.smd <output.bmd> --manifest StoneMuWall02.actions.txt
+model StoneMuWall02.smd
+action 0 file=StoneMuWall02_a00.smd keys=1 lock=0
+texture 0 c_wall06.jpg original=c_wall06.jpg
+texture 1 c_wall05.jpg original=c_wall05.jpg
+texture 2 c_wall04.jpg original=c_wall04.jpg

@@ -1,0 +1,215 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    13400.0,
+    10700.0,
+    164.99996948242188
+  ],
+  "objects": [
+    {
+      "name": "HouseEtc01",
+      "placement_index": 44,
+      "position": [
+        14328.1689453125,
+        10816.515625,
+        269.9999694824219
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1890.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        143.281689453125,
+        108.16515625
+      ]
+    },
+    {
+      "name": "HouseEtc01",
+      "placement_index": 45,
+      "position": [
+        14322.36328125,
+        11138.43359375,
+        265.0000305175781
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -630.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        143.2236328125,
+        111.3843359375
+      ]
+    },
+    {
+      "name": "StoneMuWall01",
+      "placement_index": 1,
+      "position": [
+        13400.0,
+        10700.0,
+        164.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        134.0,
+        107.0
+      ]
+    },
+    {
+      "name": "StoneMuWall02",
+      "placement_index": 14,
+      "position": [
+        13750.0,
+        10650.0,
+        164.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        137.5,
+        106.5
+      ]
+    },
+    {
+      "name": "StoneMuWall02",
+      "placement_index": 15,
+      "position": [
+        13050.0,
+        10650.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        130.5,
+        106.5
+      ]
+    },
+    {
+      "name": "StoneMuWall03",
+      "placement_index": 4,
+      "position": [
+        12550.0,
+        10650.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        360.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        125.5,
+        106.5
+      ]
+    },
+    {
+      "name": "StoneMuWall03",
+      "placement_index": 17,
+      "position": [
+        13950.0,
+        10650.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        139.5,
+        106.5
+      ]
+    },
+    {
+      "name": "StoneMuWall03",
+      "placement_index": 18,
+      "position": [
+        14250.0,
+        10650.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        142.5,
+        106.5
+      ]
+    },
+    {
+      "name": "StoneMuWall03",
+      "placement_index": 19,
+      "position": [
+        12850.0,
+        10650.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        128.5,
+        106.5
+      ]
+    },
+    {
+      "name": "HouseEtc02",
+      "placement_index": 0,
+      "position": [
+        14200.0,
+        11000.0,
+        164.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1800.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        142.0,
+        110.0
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -999.5059204101562,
+      -197.3950958251953,
+      -174.17349243164062
+    ],
+    [
+      1097.876708984375,
+      708.2008056640625,
+      623.5741577148438
+    ]
+  ]
+}
