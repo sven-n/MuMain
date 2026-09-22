@@ -1,0 +1,105 @@
+{
+  "evidence": "OFFLINE Blender; not client",
+  "models": [
+    {
+      "model": "Cannon02",
+      "placement": {
+        "position": [
+          12926.37109375,
+          14652.4423828125,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          129.2637109375,
+          146.524423828125
+        ]
+      }
+    },
+    {
+      "model": "Cannon03",
+      "placement": {
+        "position": [
+          12700.0,
+          14650.0,
+          165.00003051757812
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          127.0,
+          146.5
+        ]
+      }
+    },
+    {
+      "model": "Cannon03",
+      "placement": {
+        "position": [
+          12600.0,
+          14650.0,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          126.0,
+          146.5
+        ]
+      }
+    },
+    {
+      "model": "Cannon03",
+      "placement": {
+        "position": [
+          12800.0,
+          14650.0,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          128.0,
+          146.5
+        ]
+      }
+    }
+  ],
+  "world_origin_subtracted": [
+    12926.37109375,
+    14652.4423828125,
+    165.00001525878906
+  ],
+  "world_transform": "Translation @ EulerXYZ(rotation degrees) @ uniform scale; original records unchanged",
+  "camera_bounds": [
+    [
+      -362.32568359375,
+      -59.82209014892578,
+      -0.9878000020980835
+    ],
+    [
+      67.43621826171875,
+      78.2578125,
+      132.4412078857422
+    ]
+  ],
+  "terrain": "Terrain and surrounding architecture omitted",
+  "light": "Carriage01 mesh2 uses render-only additive approximation"
+}

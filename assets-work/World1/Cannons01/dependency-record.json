@@ -1,0 +1,652 @@
+{
+  "Cannon01": {
+    "path": "src/bin/Data/Object1/Cannon01.bmd",
+    "type": 91,
+    "placements": [
+      {
+        "position": [
+          14438.181640625,
+          11182.673828125,
+          195.0000457763672
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -720.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          144.38181640625,
+          111.82673828125
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Cannon01.bmd\n  name field: Data2\\Object1\\gun_01.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 181\n  bounds (bind pose): min -64.29 -78.26 -0.99  max 68.04 57.38 132.44  size 132.33 135.64 133.43\n  mesh 0: triangles=181 vertices=125 normals=50 uvs=140 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Cannon02": {
+    "path": "src/bin/Data/Object1/Cannon02.bmd",
+    "type": 92,
+    "placements": [
+      {
+        "position": [
+          850.0,
+          15050.0,
+          140.24411010742188
+        ],
+        "rotation": [
+          -5.0,
+          0.0,
+          2310.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          8.5,
+          150.5
+        ]
+      },
+      {
+        "position": [
+          12926.37109375,
+          14652.4423828125,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          129.2637109375,
+          146.524423828125
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Cannon02.bmd\n  name field: Data2\\Object1\\gun_02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 155\n  bounds (bind pose): min -67.44 -78.26 -0.99  max 68.04 57.38 132.44  size 135.48 135.64 133.43\n  mesh 0: triangles=155 vertices=109 normals=46 uvs=140 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Cannon03": {
+    "path": "src/bin/Data/Object1/Cannon03.bmd",
+    "type": 93,
+    "placements": [
+      {
+        "position": [
+          12700.0,
+          14650.0,
+          165.00003051757812
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          127.0,
+          146.5
+        ]
+      },
+      {
+        "position": [
+          12600.0,
+          14650.0,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          126.0,
+          146.5
+        ]
+      },
+      {
+        "position": [
+          12800.0,
+          14650.0,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          128.0,
+          146.5
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Cannon03.bmd\n  name field: Data2\\Object1\\gun_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 75\n  bounds (bind pose): min -36.70 -78.26 -0.99  max 35.95 57.38 132.44  size 72.65 135.64 133.43\n  mesh 0: triangles=75 vertices=54 normals=26 uvs=77 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Hanging01": {
+    "path": "src/bin/Data/Object1/Hanging01.bmd",
+    "type": 110,
+    "placements": [
+      {
+        "position": [
+          15206.5087890625,
+          11303.7880859375,
+          70.00003051757812
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -360.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          152.065087890625,
+          113.037880859375
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Hanging01.bmd\n  name field: Data2\\Object1\\execution_ground_0  version: 10\n  meshes: 1  bones: 4  actions: 1  triangles: 162\n  bounds (bind pose): min -100.94 -98.34 -0.34  max 200.18 111.74 423.89  size 301.13 210.07 424.23\n  mesh 0: triangles=162 vertices=146 normals=27 uvs=171 texture=horse_drawn_01.jpg\n  bone 0: \"Box08\" parent=-1\n  bone 1: \"Box09\" parent=0\n  bone 2: \"Box10\" parent=1\n  bone 3: \"Box03\" parent=0\n  action 0: keys=25 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage01": {
+    "path": "src/bin/Data/Object1/Carriage01.bmd",
+    "type": 98,
+    "placements": [
+      {
+        "position": [
+          7399.314453125,
+          10326.396484375,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -330.0
+        ],
+        "scale": 1.1999998092651367,
+        "tile": [
+          73.99314453125,
+          103.26396484375
+        ]
+      },
+      {
+        "position": [
+          12350.0,
+          14650.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -660.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          123.5,
+          146.5
+        ]
+      },
+      {
+        "position": [
+          19500.0,
+          21450.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          420.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          195.0,
+          214.5
+        ]
+      },
+      {
+        "position": [
+          21300.0,
+          8200.0,
+          182.12835693359375
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          60.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          213.0,
+          82.0
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "horse_drawn_02.tga": [
+        "src/bin/Data/Object1/horse_drawn_02.OZT"
+      ],
+      "horse_drawn_03.jpg": [
+        "src/bin/Data/Object1/horse_drawn_03.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage01.bmd\n  name field: Data2\\Object1\\horse_drawn.smd  version: 10\n  meshes: 3  bones: 14  actions: 1  triangles: 280\n  bounds (bind pose): min -114.62 -94.23 -14.50  max 244.57 92.68 201.91  size 359.18 186.91 216.41\n  mesh 0: triangles=270 vertices=231 normals=96 uvs=218 texture=horse_drawn_01.jpg\n  mesh 1: triangles=8 vertices=8 normals=5 uvs=8 texture=horse_drawn_02.tga\n  mesh 2: triangles=2 vertices=4 normals=1 uvs=4 texture=horse_drawn_03.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Box02\" parent=0\n  bone 5: \"Dummy05\" parent=-1 dummy\n  bone 6: \"Bone06\" parent=-1\n  bone 7: \"Bone07\" parent=6\n  bone 8: \"Bone08\" parent=7\n  bone 9: \"Box03\" parent=6\n  bone 10: \"Bone05\" parent=-1\n  bone 11: \"Bone09\" parent=10\n  bone 12: \"Tube01\" parent=10\n  bone 13: \"Bone_point\" parent=10\n  action 0: keys=21 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage02": {
+    "path": "src/bin/Data/Object1/Carriage02.bmd",
+    "type": 99,
+    "placements": [
+      {
+        "position": [
+          7200.0,
+          10000.0,
+          165.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -720.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          72.0,
+          100.0
+        ]
+      },
+      {
+        "position": [
+          10583.5009765625,
+          6736.84033203125,
+          165.0001220703125
+        ],
+        "rotation": [
+          360.0,
+          0.0,
+          90.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          105.835009765625,
+          67.3684033203125
+        ]
+      },
+      {
+        "position": [
+          12290.529296875,
+          6982.15771484375,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          360.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          122.90529296875,
+          69.8215771484375
+        ]
+      },
+      {
+        "position": [
+          14666.75,
+          14661.8076171875,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          2160.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          146.6675,
+          146.618076171875
+        ]
+      },
+      {
+        "position": [
+          17400.0,
+          3800.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -630.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          174.0,
+          38.0
+        ]
+      },
+      {
+        "position": [
+          20900.0,
+          14300.0,
+          165.0000457763672
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          870.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          209.0,
+          143.0
+        ]
+      },
+      {
+        "position": [
+          22650.0,
+          24550.0,
+          175.31459045410156
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          690.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          226.5,
+          245.5
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage02.bmd\n  name field: Data2\\Object1\\carriage_01.smd  version: 10\n  meshes: 1  bones: 2  actions: 1  triangles: 258\n  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.28  size 179.08 437.11 183.45\n  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage03": {
+    "path": "src/bin/Data/Object1/Carriage03.bmd",
+    "type": 100,
+    "placements": [],
+    "textures": {
+      "tub.jpg": [
+        "src/bin/Data/Object1/tub.OZJ"
+      ],
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage03.bmd\n  name field: Data2\\Object1\\carriage_02.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 346\n  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45\n  mesh 0: triangles=72 vertices=48 normals=24 uvs=28 texture=tub.jpg\n  mesh 1: triangles=274 vertices=209 normals=131 uvs=176 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder03\" parent=-1\n  bone 2: \"Mesh01\" parent=-1\n  bone 3: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage04": {
+    "path": "src/bin/Data/Object1/Carriage04.bmd",
+    "type": 101,
+    "placements": [
+      {
+        "position": [
+          12800.0,
+          13900.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          990.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          128.0,
+          139.0
+        ]
+      },
+      {
+        "position": [
+          17950.0,
+          4650.0,
+          165.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -780.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          179.5,
+          46.5
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "grass_01.tga": [
+        "src/bin/Data/Object1/grass_01.OZT"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage04.bmd\n  name field: Data2\\Object1\\carriage_03.smd  version: 10\n  meshes: 2  bones: 5  actions: 1  triangles: 390\n  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08\n  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg\n  mesh 1: triangles=132 vertices=96 normals=32 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  bone 2: \"Cylinder05\" parent=-1\n  bone 3: \"Cylinder12\" parent=-1\n  bone 4: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "HouseEtc02": {
+    "path": "src/bin/Data/Object1/HouseEtc02.bmd",
+    "type": 128,
+    "placements": [
+      {
+        "position": [
+          14200.0,
+          11000.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          1800.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          142.0,
+          110.0
+        ]
+      }
+    ],
+    "textures": {
+      "tile_wood02.jpg": [
+        "src/bin/Data/Object1/tile_wood02.OZJ"
+      ],
+      "tile_ston04.jpg": [
+        "src/bin/Data/Object1/tile_ston04.OZJ"
+      ],
+      "c_wall04.jpg": [
+        "src/bin/Data/Object1/c_wall04.OZJ"
+      ],
+      "tile_wood03.jpg": [
+        "src/bin/Data/Object1/tile_wood03.OZJ"
+      ],
+      "tile_house01.jpg": [
+        "src/bin/Data/Object1/tile_house01.OZJ"
+      ],
+      "tile_ston01.jpg": [
+        "src/bin/Data/Object1/tile_ston01.OZJ"
+      ],
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "tile_ston06.jpg": [
+        "src/bin/Data/Object1/tile_ston06.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/HouseEtc02.bmd\n  name field: Data2\\Object1\\house.smd  version: 10\n  meshes: 8  bones: 3  actions: 1  triangles: 226\n  bounds (bind pose): min -302.53 -299.57 -0.15  max 297.88 408.20 332.48  size 600.41 707.77 332.63\n  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_wood02.jpg\n  mesh 1: triangles=46 vertices=32 normals=14 uvs=41 texture=tile_ston04.jpg\n  mesh 2: triangles=25 vertices=23 normals=17 uvs=25 texture=c_wall04.jpg\n  mesh 3: triangles=16 vertices=12 normals=8 uvs=13 texture=tile_wood03.jpg\n  mesh 4: triangles=5 vertices=7 normals=1 uvs=7 texture=tile_house01.jpg\n  mesh 5: triangles=8 vertices=10 normals=4 uvs=12 texture=tile_ston01.jpg\n  mesh 6: triangles=94 vertices=109 normals=7 uvs=92 texture=horse_drawn_01.jpg\n  mesh 7: triangles=30 vertices=24 normals=6 uvs=12 texture=tile_ston06.jpg\n  bone 0: \"ihix01\" parent=-1\n  bone 1: \"Box03\" parent=-1\n  bone 2: \"Mesh03\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "StoneMuWall04": {
+    "path": "src/bin/Data/Object1/StoneMuWall04.bmd",
+    "type": 78,
+    "placements": [
+      {
+        "position": [
+          11250.0,
+          12250.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          990.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          112.5,
+          122.5
+        ]
+      },
+      {
+        "position": [
+          15550.0,
+          12250.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          1170.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          155.5,
+          122.5
+        ]
+      },
+      {
+        "position": [
+          15550.0,
+          13350.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          1170.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          155.5,
+          133.5
+        ]
+      }
+    ],
+    "textures": {
+      "c_wall04.jpg": [
+        "src/bin/Data/Object1/c_wall04.OZJ"
+      ],
+      "c_wall06.jpg": [
+        "src/bin/Data/Object1/c_wall06.OZJ"
+      ],
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/StoneMuWall04.bmd\n  name field: Data2\\Object1\\c_wall05.smd  version: 10\n  meshes: 3  bones: 3  actions: 1  triangles: 285\n  bounds (bind pose): min -149.51 -109.98 -103.47  max 150.49 169.39 299.24  size 300.00 279.37 402.71\n  mesh 0: triangles=38 vertices=26 normals=41 uvs=45 texture=c_wall04.jpg\n  mesh 1: triangles=14 vertices=12 normals=12 uvs=12 texture=c_wall06.jpg\n  mesh 2: triangles=233 vertices=195 normals=50 uvs=177 texture=horse_drawn_01.jpg\n  bone 0: \"Box02\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "StoneWall03": {
+    "path": "src/bin/Data/Object1/StoneWall03.bmd",
+    "type": 71,
+    "placements": [
+      {
+        "position": [
+          17354.60546875,
+          2700.505126953125,
+          -13.400390625
+        ],
+        "rotation": [
+          -50.0,
+          0.0,
+          -390.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          173.5460546875,
+          27.00505126953125
+        ]
+      },
+      {
+        "position": [
+          17897.953125,
+          2539.4326171875,
+          119.47312927246094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -360.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          178.97953125,
+          25.394326171875
+        ]
+      }
+    ],
+    "textures": {
+      "tile_01.jpg": [
+        "src/bin/Data/Object1/tile_01.OZJ"
+      ],
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "tile_03.jpg": [
+        "src/bin/Data/Object1/tile_03.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/StoneWall03.bmd\n  name field: Data2\\Object1\\wall_03.smd  version: 10\n  meshes: 3  bones: 4  actions: 1  triangles: 293\n  bounds (bind pose): min -199.33 -43.04 -2.10  max 198.83 180.50 299.24  size 398.15 223.54 301.34\n  mesh 0: triangles=50 vertices=40 normals=8 uvs=55 texture=tile_01.jpg\n  mesh 1: triangles=233 vertices=195 normals=50 uvs=177 texture=horse_drawn_01.jpg\n  mesh 2: triangles=10 vertices=8 normals=9 uvs=12 texture=tile_03.jpg\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  bone 3: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Well01": {
+    "path": "src/bin/Data/Object1/Well01.bmd",
+    "type": 106,
+    "placements": [],
+    "textures": {
+      "tub.jpg": [
+        "src/bin/Data/Object1/tub.OZJ"
+      ],
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "well.jpg": [
+        "src/bin/Data/Object1/well.OZJ"
+      ],
+      "jar_01.jpg": [
+        "src/bin/Data/Object1/jar_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Well01.bmd\n  name field: Data2\\Object1\\jar_01.smd  version: 10\n  meshes: 4  bones: 7  actions: 1  triangles: 405\n  bounds (bind pose): min -154.76 -125.85 -0.07  max 121.57 93.46 270.82  size 276.33 219.31 270.89\n  mesh 0: triangles=72 vertices=48 normals=24 uvs=28 texture=tub.jpg\n  mesh 1: triangles=16 vertices=24 normals=2 uvs=6 texture=horse_drawn_01.jpg\n  mesh 2: triangles=123 vertices=89 normals=72 uvs=101 texture=well.jpg\n  mesh 3: triangles=194 vertices=120 normals=133 uvs=116 texture=jar_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder04\" parent=-1\n  bone 2: \"Cylinder07\" parent=-1\n  bone 3: \"Cylinder08\" parent=-1\n  bone 4: \"Cylinder09\" parent=-1\n  bone 5: \"Cylinder10\" parent=-1\n  bone 6: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  }
+}

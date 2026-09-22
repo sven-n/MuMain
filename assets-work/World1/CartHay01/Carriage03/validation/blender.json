@@ -1,0 +1,54 @@
+{
+  "triangles": 538,
+  "bounds_before": [
+    [
+      -160.09339904785156,
+      -216.332275390625,
+      -1.1697009801864624
+    ],
+    [
+      88.22059631347656,
+      220.7781982421875,
+      182.28419494628906
+    ]
+  ],
+  "bounds_after": [
+    [
+      -160.09339904785156,
+      -216.332275390625,
+      -1.1697009801864624
+    ],
+    [
+      88.22059631347656,
+      220.7781982421875,
+      182.28419494628906
+    ]
+  ],
+  "material_order": [
+    "tub.jpg",
+    "horse_drawn_01.jpg"
+  ],
+  "bone_order": [
+    "Cylinder01",
+    "Cylinder03",
+    "Mesh01",
+    "Cylinder11"
+  ],
+  "action_meta": {
+    "Carriage03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tub.jpg": [
+      128,
+      64
+    ],
+    "horse_drawn_01.jpg": [
+      256,
+      256
+    ]
+  },
+  "geometry": "Rounded closed tied-straw bundles and iron axle sleeves; original cart surfaces, wheel contacts, lamp/effect geometry and UVs retained"
+}

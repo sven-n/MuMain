@@ -1,0 +1,149 @@
+{
+  "path": "src/bin/Data/Object1/Tree08.bmd",
+  "type": 7,
+  "placements": [
+    {
+      "position": [
+        2850.0,
+        5550.0,
+        152.6271209716797
+      ],
+      "rotation": [
+        -5.0,
+        0.0,
+        3120.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        28.5,
+        55.5
+      ]
+    },
+    {
+      "position": [
+        2644.89697265625,
+        14430.84765625,
+        88.31249237060547
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        2310.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        26.4489697265625,
+        144.3084765625
+      ]
+    },
+    {
+      "position": [
+        3500.0,
+        5650.0,
+        171.4534454345703
+      ],
+      "rotation": [
+        105.0,
+        0.0,
+        1200.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        35.0,
+        56.5
+      ]
+    },
+    {
+      "position": [
+        17250.2890625,
+        11934.44140625,
+        164.99998474121094
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        540.0
+      ],
+      "scale": 0.820000171661377,
+      "tile": [
+        172.502890625,
+        119.3444140625
+      ]
+    },
+    {
+      "position": [
+        16950.0,
+        18850.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        810.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        169.5,
+        188.5
+      ]
+    },
+    {
+      "position": [
+        20500.0,
+        21650.0,
+        139.0144805908203
+      ],
+      "rotation": [
+        -25.0,
+        0.0,
+        540.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        205.0,
+        216.5
+      ]
+    },
+    {
+      "position": [
+        20579.9296875,
+        20840.5703125,
+        165.0006103515625
+      ],
+      "rotation": [
+        -10.0,
+        0.0,
+        720.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        205.799296875,
+        208.405703125
+      ]
+    },
+    {
+      "position": [
+        21950.0,
+        17450.0,
+        169.49996948242188
+      ],
+      "rotation": [
+        -5.0,
+        0.0,
+        -510.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        219.5,
+        174.5
+      ]
+    }
+  ],
+  "textures": {
+    "tree_01.jpg": [
+      "src/bin/Data/Object1/tree_01.OZJ"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Tree08.bmd\n  name field: Data2\\Object1\\treea_06.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 176\n  bounds (bind pose): min -125.59 -313.86 -2.86  max 41.31 281.90 84.69  size 166.90 595.76 87.55\n  mesh 0: triangles=176 vertices=96 normals=128 uvs=119 texture=tree_01.jpg\n  bone 0: \"Tube01\" parent=-1\n  action 0: keys=1 lock=0\n",
+  "scope_exclusion": null
+}

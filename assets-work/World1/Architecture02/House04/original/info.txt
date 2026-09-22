@@ -1,0 +1,23 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/original/House04.bmd
+  name field: House04.smd  version: 12
+  meshes: 9  bones: 9  actions: 1  triangles: 358
+  bounds (bind pose): min -250.01 -240.25 -0.81  max 252.67 199.92 413.93  size 502.68 440.17 414.75
+  mesh 0: triangles=100 vertices=68 normals=93 uvs=56 texture=tile_02.jpg
+  mesh 1: triangles=117 vertices=117 normals=71 uvs=77 texture=tile_wood01.jpg
+  mesh 2: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_house01.jpg
+  mesh 3: triangles=48 vertices=35 normals=25 uvs=46 texture=tile_ston04.jpg
+  mesh 4: triangles=31 vertices=27 normals=28 uvs=47 texture=tile_wood03.jpg
+  mesh 5: triangles=16 vertices=16 normals=14 uvs=27 texture=tile_wood02.jpg
+  mesh 6: triangles=20 vertices=16 normals=24 uvs=16 texture=tile_windows01.jpg
+  mesh 7: triangles=12 vertices=13 normals=13 uvs=13 texture=bridge_01.jpg
+  mesh 8: triangles=12 vertices=13 normals=13 uvs=13 texture=tile_space01.jpg
+  bone 0: "Mesh02" parent=-1
+  bone 1: "Box02" parent=-1
+  bone 2: "boness_01" parent=-1
+  bone 3: "boness_02" parent=2
+  bone 4: "Object02" parent=2
+  bone 5: "boness_03" parent=-1
+  bone 6: "boness_04" parent=5
+  bone 7: "Object01" parent=5
+  bone 8: "Object03" parent=5
+  action 0: keys=40 lock=0

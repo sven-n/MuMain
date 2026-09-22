@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-masonry/assets-work/World1/Masonry01/HouseEtc01/exports/HouseEtc01.bmd
+  name field: HouseEtc01.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 50
+  bounds (bind pose): min -50.15 -92.81 0.00  max 49.73 49.80 137.02  size 99.88 142.61 137.02
+  mesh 0: triangles=24 vertices=16 normals=19 uvs=14 texture=c_wall04.jpg
+  mesh 1: triangles=26 vertices=16 normals=25 uvs=16 texture=c_wall06.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0

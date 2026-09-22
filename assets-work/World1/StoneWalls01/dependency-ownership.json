@@ -1,0 +1,15 @@
+{
+  "tile_01": [
+    "StoneWall01",
+    "StoneWall02",
+    "StoneWall03",
+    "StoneWall05",
+    "StoneWall06"
+  ],
+  "tile_03": [
+    "StoneWall01",
+    "StoneWall02",
+    "StoneWall03",
+    "StoneWall05"
+  ]
+}

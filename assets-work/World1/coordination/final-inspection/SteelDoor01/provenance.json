@@ -1,0 +1,23 @@
+{
+  "model": "SteelDoor01",
+  "game_files": {
+    "src/bin/Data/Object1/SteelDoor01.bmd": "86822c7626b45ff15e1fcd554e55e0baa7443c55f8584faf29e81e96b8b104e6",
+    "src/bin/Data/Object1/steel_barred_b.OZJ": "18fb54247b0dc08f4dfe2daab5f9f4edfde880513d0ed597e449e58efafd8087",
+    "src/bin/Data/Object1/steel_barred_door.OZT": "36f41caa9871ef74ddd8cbe51798ba258ab77cd1db87d90da23d4cf876bdf741"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 218,
+  "bind_bounds": [
+    [
+      -1.5502010583877563,
+      -6.617187976837158,
+      0.4530940055847168
+    ],
+    [
+      152.8957061767578,
+      6.704893112182617,
+      356.47650146484375
+    ]
+  ]
+}

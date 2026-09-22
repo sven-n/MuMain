@@ -1,0 +1,40 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -49.82,
+      -6.81,
+      0.0
+    ],
+    [
+      50.22,
+      19.7,
+      22.69
+    ]
+  ],
+  "bounds_after": [
+    [
+      -49.82,
+      -6.81,
+      0.0
+    ],
+    [
+      50.22,
+      19.7,
+      22.69
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "joint.jpg"
+  ],
+  "export_sha256": {
+    "Fence04.bmd": "45717fae749fb663b25a6431bd25fc81379200419c5c4cc08a409736da31ce9f",
+    "joint.OZJ": "ab1b30fc23a5d937dd33434f4014d0c036d56e6c4f74583e0c4c7b795631fb15"
+  }
+}

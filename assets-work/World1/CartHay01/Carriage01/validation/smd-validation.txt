@@ -1,0 +1,29 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/original/Carriage01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/original/Carriage01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/original/Carriage01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/original/Carriage01.smd: bones=14 frames=1 triangles=280 materials=3
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/original/Carriage01_a00.smd: bones=14 frames=21 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+warning: Carriage01_a00.smd: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/new/Carriage01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/new/Carriage01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/new/Carriage01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/new/Carriage01.smd: bones=14 frames=1 triangles=472 materials=3
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/new/Carriage01_a00.smd: bones=14 frames=21 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+warning: Carriage01_a00.smd: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin

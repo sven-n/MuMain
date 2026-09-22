@@ -1,0 +1,50 @@
+{
+  "steel_barred_b": {
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "alpha": "opaque",
+    "original_size": [
+      32,
+      32
+    ]
+  },
+  "steel_barred_a": {
+    "size": [
+      256,
+      512
+    ],
+    "mode": "RGBA",
+    "original_size": [
+      64,
+      128
+    ],
+    "alpha": "Exact original alpha resized with bilinear filtering; no new cutouts",
+    "all_channels_unpremultiplied": true,
+    "transparent_rgb_black_pixels": 3,
+    "transparent_rgb_white_pixels": 0,
+    "fringe_color_source": "Continuous forged iron painting across entire canvas, including hidden pixels",
+    "alpha_mean_original": 35.841064453125,
+    "alpha_mean_final": 35.84486389160156
+  },
+  "steel_barred_door": {
+    "size": [
+      256,
+      512
+    ],
+    "mode": "RGBA",
+    "original_size": [
+      64,
+      128
+    ],
+    "alpha": "Exact original alpha resized with bilinear filtering; no new cutouts",
+    "all_channels_unpremultiplied": true,
+    "transparent_rgb_black_pixels": 36,
+    "transparent_rgb_white_pixels": 0,
+    "fringe_color_source": "Continuous forged iron painting across entire canvas, including hidden pixels",
+    "alpha_mean_original": 141.3662109375,
+    "alpha_mean_final": 141.39865112304688
+  }
+}

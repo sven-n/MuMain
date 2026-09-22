@@ -1,0 +1,9 @@
+model src/bin/Data/Object1/StoneMuWall02.bmd
+  name field: Data2\Object1\c_wall02.smd  version: 10
+  meshes: 3  bones: 1  actions: 1  triangles: 44
+  bounds (bind pose): min -50.01 -147.40 -174.17  max 49.99 49.92 334.09  size 100.00 197.32 508.27
+  mesh 0: triangles=10 vertices=16 normals=16 uvs=11 texture=c_wall06.jpg
+  mesh 1: triangles=22 vertices=18 normals=27 uvs=18 texture=c_wall05.jpg
+  mesh 2: triangles=12 vertices=16 normals=18 uvs=8 texture=c_wall04.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0

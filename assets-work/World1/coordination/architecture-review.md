@@ -1,0 +1,3 @@
+# Architecture01 coordinator review
+
+Accepted offline 2026-09-22 following batch/actual house-pair/town-wall assembly and House04/Tent01 action image review, technical handoff and eleven changed-path ownership check. Five models21placements plus readonly accepted annex. Coherent limestone, wood, cloth and carved details. Geometry DIFFERENT for remodels; rig/action EQUIVALENT with original local transforms restored exactly through supported converter manifest packaging. Original roof/opening/modular corners and effect slots4/8/4 remain. Six textures reviewed across all consumers. No client evidence.

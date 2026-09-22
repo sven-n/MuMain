@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/src/bin/Data/Object1/StoneStatue03.bmd
+  name field: Data2\Object1\Angel_Stone.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 248
+  bounds (bind pose): min -72.77 -53.36 -0.08  max 74.61 39.88 264.77  size 147.37 93.24 264.85
+  mesh 0: triangles=20 vertices=20 normals=20 uvs=20 texture=tombstone_big.jpg
+  mesh 1: triangles=228 vertices=123 normals=123 uvs=145 texture=angel_stone_statue.jpg
+  bone 0: "Box03" parent=-1
+  action 0: keys=1 lock=0

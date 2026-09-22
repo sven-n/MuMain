@@ -1,0 +1,48 @@
+READ-ONLY ENGINE CONTRACT AUDIT; no engine source changes
+Fountain mesh3 remains water; V scroll and particle transforms at bone1/bone4 preserved.
+
+src/source/World/MapInfra/MapManager.cpp
+1033:             gLoadData.AccessModel(MODEL_STONE01 + i, L"Data\\Object1\\", L"Stone", i + 1);
+1034:
+1035:         for (i = 0; i < 3; i++)
+1036:             gLoadData.AccessModel(MODEL_STONE_STATUE01 + i, L"Data\\Object1\\", L"StoneStatue", i + 1);
+1037:         gLoadData.AccessModel(MODEL_STEEL_STATUE, L"Data\\Object1\\", L"SteelStatue", 1);
+1038:         for (i = 0; i < 3; i++)
+1039:             gLoadData.AccessModel(MODEL_TOMB01 + i, L"Data\\Object1\\", L"Tomb", i + 1);
+1040:         for (i = 0; i < 2; i++)
+1041:             gLoadData.AccessModel(MODEL_FIRE_LIGHT01 + i, L"Data\\Object1\\", L"FireLight", i + 1);
+1042:         gLoadData.AccessModel(MODEL_BONFIRE, L"Data\\Object1\\", L"Bonfire", 1);
+
+src/source/Engine/Object/ZzzObject.cpp
+2749:     case WD_0LORENCIA:
+2750:         switch (o->Type)
+2751:         {
+2752:         case MODEL_WATERSPOUT:
+2753:             o->BlendMeshLight = 1.f;
+2754:             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
+2755:             if (rand_fps_check(2))
+2756:             {
+2757:                 Vector((float)(rand() % 32 - 16), -20.f, (float)(rand() % 32 - 16), p);
+2758:                 b->TransformPosition(BoneTransform[1], p, Position);
+2759:                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
+2760:                 Vector((float)(rand() % 32 - 16), -80.f, (float)(rand() % 32 - 16), p);
+2761:                 b->TransformPosition(BoneTransform[4], p, Position);
+2762:                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
+2763:             }
+2764:             break;
+2765:         case MODEL_MERCHANT_ANIMAL01:
+2766:             Scale = Luminosity * 5.f;
+2767:             Vector(Luminosity * 0.6f, Luminosity * 0.3f, Luminosity * 0.1f, Light);
+
+src/source/Engine/Object/ZzzObject.cpp
+4625:             break;
+4626:         case MODEL_HOUSE_WALL01 + 1:
+4627:             o->BlendMesh = 4;
+4628:             break;
+4629:         case MODEL_WATERSPOUT:
+4630:             o->BlendMesh = 3;
+4631:             break;
+4632:         case MODEL_BONFIRE:
+4633:             o->BlendMesh = 1;
+4634:             break;
+4635:         case MODEL_CARRIAGE01:

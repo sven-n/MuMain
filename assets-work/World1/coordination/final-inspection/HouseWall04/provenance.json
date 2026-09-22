@@ -1,0 +1,24 @@
+{
+  "model": "HouseWall04",
+  "game_files": {
+    "src/bin/Data/Object1/HouseWall04.bmd": "8511bc422fc0606174a39eb931266979fb1f5e2a72f1cdb8e95f4b15535ec4a6",
+    "src/bin/Data/Object1/tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "src/bin/Data/Object1/tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda",
+    "src/bin/Data/Object1/tile_ston04.OZJ": "a1a75b6fbf236d8747cb2e27555d871253cff7d2e48304226f0b68dbc83fa2f9"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 88,
+  "bind_bounds": [
+    [
+      -54.8092041015625,
+      -50.90120315551758,
+      0.28070101141929626
+    ],
+    [
+      246.2310028076172,
+      249.86549377441406,
+      264.47900390625
+    ]
+  ]
+}

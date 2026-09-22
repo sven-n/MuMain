@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "position_tolerance": 0.001,
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 6.20000000000065e-05,
+  "unchanged_triangle_count": 68,
+  "retained_triangles_by_texture": {
+    "badge_01.jpg": 60,
+    "badge_02.tga": 8
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0.00021999999999999998,
+  "max_retained_normal_direction_degrees": 0.012605068136363994,
+  "frozen_container_sha256": {},
+  "panel_face_pairs": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit notice panel pairs retain position, bone and UV. Ornamental bracket, suspension rings, poles and animated cloth retain their original geometry and UVs.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Wooden notice panel centers are recessed by 0.25 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

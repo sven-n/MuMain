@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/src/bin/Data/Object1/StoneStatue02.bmd
+  name field: Data2\Object1\stone_statue02.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 107
+  bounds (bind pose): min -134.30 -139.45 0.60  max 134.95 106.07 485.88  size 269.25 245.52 485.28
+  mesh 0: triangles=107 vertices=60 normals=60 uvs=69 texture=stone_statue01.jpg
+  bone 0: "Cylinder02" parent=-1
+  action 0: keys=1 lock=0

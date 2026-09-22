@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/src/bin/Data/Object1/SteelStatue01.bmd
+  name field: Data2\Object1\steel_barred_door_  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 66
+  bounds (bind pose): min -65.92 -65.01 -0.04  max 65.87 66.77 321.58  size 131.79 131.79 321.62
+  mesh 0: triangles=66 vertices=48 normals=17 uvs=82 texture=tombstone_big.jpg
+  bone 0: "Box02" parent=-1
+  action 0: keys=1 lock=0

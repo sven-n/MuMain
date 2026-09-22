@@ -1,0 +1,119 @@
+[
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "bmd2smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/original/SteelDoor01.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01.actions.txt\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01.smd"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01.smd: bones=1 frames=1 triangles=58 materials=2\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01_a00.smd",
+      "--animation"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/original/SteelDoor01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/original/SteelDoor01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/original/SteelDoor01.bmd\n  name field: Data2\\Object1\\steel_barred_door.  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 58\n  bounds (bind pose): min -1.55 -6.62 0.45  max 152.90 6.70 356.48  size 154.45 13.32 356.02\n  mesh 0: triangles=56 vertices=52 normals=22 uvs=40 texture=steel_barred_b.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_door.tga\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "bmd2smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01.actions.txt\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01.smd"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01.smd: bones=1 frames=1 triangles=218 materials=2\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01_a00.smd",
+      "--animation"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/replacement/SteelDoor01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd\n  name field: SteelDoor01.smd  version: 12\n  meshes: 2  bones: 1  actions: 1  triangles: 218\n  bounds (bind pose): min -1.55 -6.62 0.45  max 152.90 6.70 356.48  size 154.45 13.32 356.02\n  mesh 0: triangles=216 vertices=132 normals=176 uvs=244 texture=steel_barred_b.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_door.tga\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "compare",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/original/SteelDoor01.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd"
+    ],
+    "exit_code": 2,
+    "stdout": "meshes 2 vs 2, bones 1 vs 1, actions 1 vs 1, triangles 58 vs 218\nunmatched triangles: 40  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/tools/mu_texture.py",
+      "check",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/steel_barred_b.OZJ"
+    ],
+    "exit_code": 0,
+    "stdout": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/steel_barred_b.OZJ\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/tools/mu_texture.py",
+      "check",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/steel_barred_door.OZT"
+    ],
+    "exit_code": 0,
+    "stdout": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/steel_barred_door.OZT\n",
+    "stderr": ""
+  }
+]

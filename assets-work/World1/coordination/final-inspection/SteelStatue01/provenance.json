@@ -1,0 +1,22 @@
+{
+  "model": "SteelStatue01",
+  "game_files": {
+    "src/bin/Data/Object1/SteelStatue01.bmd": "47cf79132fab1d62873120638485e62f48cb7aa31814771872c8700486ac8536",
+    "src/bin/Data/Object1/tombstone_big.OZJ": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 98,
+  "bind_bounds": [
+    [
+      -65.9175033569336,
+      -65.01490020751953,
+      -0.03959999978542328
+    ],
+    [
+      65.87000274658203,
+      66.77259826660156,
+      321.581298828125
+    ]
+  ]
+}

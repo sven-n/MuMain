@@ -1,0 +1,10 @@
+{
+  "kind": "OFFLINE BLENDER; NOT CLIENT EVIDENCE",
+  "samples": [
+    0,
+    10,
+    20
+  ],
+  "camera": "Identical original-bound orthographic camera before/after",
+  "after": "Actual installed-shape BMD reimported with final textures"
+}

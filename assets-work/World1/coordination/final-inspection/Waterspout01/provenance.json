@@ -1,0 +1,25 @@
+{
+  "model": "Waterspout01",
+  "game_files": {
+    "src/bin/Data/Object1/Waterspout01.bmd": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83",
+    "src/bin/Data/Object1/stone_statue02.OZJ": "e1d4f7b95afae6c9936eb117a71592e94322b041efafa887bcdf6d731e4a630b",
+    "src/bin/Data/Object1/reagon_waterspout.OZJ": "0da0208475dd23f3838e39615ff562ddec46a5f094c198b7c1e481443135b67d",
+    "src/bin/Data/Object1/ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784",
+    "src/bin/Data/Object1/ston02.OZJ": "09d1dbbbc7672fe05d82a89a115bee1ec538e615b3f39e93b9e244e7cd61d151"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 639,
+  "bind_bounds": [
+    [
+      -199.06100463867188,
+      -199.74362182617188,
+      -0.13779999315738678
+    ],
+    [
+      199.23431396484375,
+      198.55169677734375,
+      311.2048034667969
+    ]
+  ]
+}

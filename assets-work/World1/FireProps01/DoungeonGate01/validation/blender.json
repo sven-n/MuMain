@@ -1,0 +1,45 @@
+{
+  "bounds_before": [
+    [
+      -199.59620666503906,
+      -233.48680114746094,
+      -7.966900825500488
+    ],
+    [
+      200.50489807128906,
+      227.8905792236328,
+      315.7945861816406
+    ]
+  ],
+  "bounds_after": [
+    [
+      -199.59620666503906,
+      -233.48680114746094,
+      -7.966900825500488
+    ],
+    [
+      200.50489807128906,
+      227.8905792236328,
+      315.7945861816406
+    ]
+  ],
+  "triangles": 333,
+  "edits": [],
+  "bone_order": [
+    "Sphere01",
+    "fire_point",
+    "Box14",
+    "Object01",
+    "fire_point01",
+    "Box15",
+    "Object02"
+  ],
+  "action_meta": {
+    "DoungeonGate01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "retained_geometry": true,
+  "note": "Gateway opening, fire offsets and effect mesh geometry/UVs retained"
+}

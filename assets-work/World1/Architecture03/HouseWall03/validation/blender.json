@@ -1,0 +1,127 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 36,
+  "original_triangles": 20,
+  "bounds_before": [
+    [
+      -101.28359985351562,
+      -0.7200999855995178,
+      -0.5256040096282959
+    ],
+    [
+      100.8115234375,
+      42.665199279785156,
+      264.47900390625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -101.28359985351562,
+      -0.7200999855995178,
+      -0.5256040096282959
+    ],
+    [
+      100.8115234375,
+      42.665199279785156,
+      264.47900390625
+    ]
+  ],
+  "original_vertices_retained": 16,
+  "bone_order": [
+    "joint_02"
+  ],
+  "action_meta": {
+    "HouseWall03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_wood02.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "tile_wood02.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        2,
+        3
+      ],
+      "boundary_vertices": [
+        4,
+        5,
+        1,
+        0
+      ],
+      "inset_fraction": 0.019642809043475675,
+      "recess_depth": 0.55,
+      "original_perimeter": [
+        [
+          100.8115234375,
+          42.665199279785156,
+          239.4683074951172
+        ],
+        [
+          -101.28359985351562,
+          42.665199279785156,
+          239.4683074951172
+        ],
+        [
+          -101.28359985351562,
+          42.665199279785156,
+          264.47900390625
+        ],
+        [
+          100.8115234375,
+          42.665199279785156,
+          264.47900390625
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        6,
+        7
+      ],
+      "boundary_vertices": [
+        6,
+        7,
+        3,
+        2
+      ],
+      "inset_fraction": 0.01964281048905163,
+      "recess_depth": 0.55,
+      "original_perimeter": [
+        [
+          -101.28359985351562,
+          8.820301055908203,
+          239.4683074951172
+        ],
+        [
+          100.8115234375,
+          8.820301055908203,
+          239.4683074951172
+        ],
+        [
+          100.8115234375,
+          8.820301055908203,
+          264.4789123535156
+        ],
+        [
+          -101.28359985351562,
+          8.820301055908203,
+          264.47900390625
+        ]
+      ]
+    }
+  ],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": false
+}

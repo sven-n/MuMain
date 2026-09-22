@@ -1,0 +1,6 @@
+Stone01 rig/protected component preservation PASS
+Stone02 rig/protected component preservation PASS
+Stone03 rig/protected component preservation PASS
+Stone04 rig/protected component preservation PASS
+Stone05 rig/protected component preservation PASS
+Waterspout01 rig/protected component preservation PASS

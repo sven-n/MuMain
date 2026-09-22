@@ -1,0 +1,37 @@
+00:00.577  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/source.blend"
+skipping reference object 'HouseWall03' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_HouseWall03_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting HouseWall03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7j7gg68x/HouseWall03_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 36 polys
+- Exported 1 materials
+   tile_wood02.jpg
+- SMD export took 0.0011789798736572266
+
+
+Blender Source Tools: exporting HouseWall03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7j7gg68x/anims/HouseWall03_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0007801055908203125
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7j7gg68x/HouseWall03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/exports/HouseWall03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7j7gg68x/anims/HouseWall03_a00.smd --name HouseWall03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/exports/HouseWall03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/exports/HouseWall03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/exports/HouseWall03.bmd
+  name field: HouseWall03.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 36
+  bounds (bind pose): min -101.28 -0.72 -0.53  max 100.81 42.67 264.48  size 202.10 43.39 265.00
+  mesh 0: triangles=36 vertices=24 normals=23 uvs=16 texture=tile_wood02.jpg
+  bone 0: "joint_02" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

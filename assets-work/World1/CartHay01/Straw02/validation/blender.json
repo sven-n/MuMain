@@ -1,0 +1,53 @@
+{
+  "triangles": 1152,
+  "bounds_before": [
+    [
+      -115.39498901367188,
+      -210.69979858398438,
+      -6.521399021148682
+    ],
+    [
+      139.96279907226562,
+      221.6376953125,
+      199.44009399414062
+    ]
+  ],
+  "bounds_after": [
+    [
+      -115.39498901367188,
+      -210.69979858398438,
+      -6.521399021148682
+    ],
+    [
+      139.96279907226562,
+      221.6376953125,
+      199.44009399414062
+    ]
+  ],
+  "material_order": [
+    "grass_01.tga"
+  ],
+  "bone_order": [
+    "Cylinder05",
+    "Cylinder12",
+    "Cylinder13",
+    "Cylinder14",
+    "Cylinder15",
+    "Cylinder16",
+    "Cylinder17",
+    "Cylinder18"
+  ],
+  "action_meta": {
+    "Straw02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "grass_01.tga": [
+      512,
+      512
+    ]
+  },
+  "geometry": "Rounded closed tied-straw bundles and iron axle sleeves; original cart surfaces, wheel contacts, lamp/effect geometry and UVs retained"
+}

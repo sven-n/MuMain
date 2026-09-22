@@ -1,0 +1,12 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/original/Carriage04.bmd
+  name field: Data2\Object1\carriage_03.smd  version: 10
+  meshes: 2  bones: 5  actions: 1  triangles: 390
+  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08
+  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg
+  mesh 1: triangles=132 vertices=96 normals=32 uvs=22 texture=grass_01.tga
+  bone 0: "Cylinder03" parent=-1
+  bone 1: "Mesh01" parent=-1
+  bone 2: "Cylinder05" parent=-1
+  bone 3: "Cylinder12" parent=-1
+  bone 4: "Cylinder13" parent=-1
+  action 0: keys=1 lock=0

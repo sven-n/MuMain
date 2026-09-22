@@ -1,0 +1,31 @@
+00:00.590  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/original/source.blend"
+00:00.596  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/source.blend"
+00:00.602  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/reimported.blend"
+00:00.611  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/original/source.blend"
+00:00.617  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/source.blend"
+00:00.622  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/validation/reimported.blend"
+00:00.631  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/original/source.blend"
+00:00.636  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/source.blend"
+00:00.643  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/validation/reimported.blend"
+00:00.663  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/original/source.blend"
+00:00.668  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/source.blend"
+00:00.673  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/validation/reimported.blend"
+00:00.682  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/original/source.blend"
+00:00.687  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/source.blend"
+00:00.692  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/validation/reimported.blend"
+00:00.700  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/original/source.blend"
+00:00.704  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/source.blend"
+00:00.710  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/validation/reimported.blend"
+00:00.722  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/original/source.blend"
+00:00.736  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/source.blend"
+00:00.744  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/validation/reimported.blend"
+StoneStatue01 PASS 2.980232238769531e-07 2.980232238769531e-07
+StoneStatue02 PASS 0.0 0.0
+StoneStatue03 PASS 0.0 0.0
+SteelStatue01 PASS 0.0 0.0
+Tomb01 PASS 0.0026397705078125 0.0026397705078125
+Tomb02 PASS 0.0001068115234375 0.0001068115234375
+Waterspout01 PASS 0.0 0.0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

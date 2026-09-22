@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 414,
+  "retained_triangles_by_texture": {
+    "tile_01.jpg": 184,
+    "tile_03.jpg": 20,
+    "tile_02.jpg": 82,
+    "bridge_01.jpg": 128
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0,
+  "max_retained_normal_direction_degrees": 0,
+  "frozen_container_sha256": {
+    "tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+    "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27"
+  },
+  "panel_face_pairs": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit non-effect panel pairs retain position, bone and UV. Modular end faces, roof edges, ladder contacts, complete waterwheel, scrolling water and accepted compatibility geometry remain unchanged.",
+  "normals": "Protected original corner normals restored after the official Blender mesh export through the supported bmdconv SMD/manifest path; engine conversion can normalize/quantize slightly. Measured differences are retained.",
+  "note": "Selected panel centers are recessed by 0.18\u20130.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

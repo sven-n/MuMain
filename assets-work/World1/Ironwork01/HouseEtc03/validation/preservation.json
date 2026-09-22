@@ -1,0 +1,23 @@
+{
+  "rig": {
+    "component": "skeleton",
+    "texture": null,
+    "triangles": 0,
+    "compare": "EQUIVALENT",
+    "bindings_and_uvs": "all original corners matched"
+  },
+  "steel_barred_a": {
+    "component": "steel_barred_a",
+    "texture": "steel_barred_a.tga",
+    "triangles": 12,
+    "compare": "EQUIVALENT",
+    "bindings_and_uvs": "all original corners matched"
+  },
+  "steel_barred_door": {
+    "component": "steel_barred_door",
+    "texture": "steel_barred_door.tga",
+    "triangles": 4,
+    "compare": "EQUIVALENT",
+    "bindings_and_uvs": "all original corners matched"
+  }
+}

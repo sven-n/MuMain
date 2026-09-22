@@ -1,0 +1,8 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/copra_gate.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/fire_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/fire_02.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/fire_light_01.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/light.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/light2.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/light3.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fire-props/assets-work/World1/FireProps01/textures/final/tile_02.OZJ

@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/original/HouseWall03.bmd
+  name field: Data2\Object1\house_joint_03.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 20
+  bounds (bind pose): min -101.28 -0.72 -0.53  max 100.81 42.67 264.48  size 202.10 43.39 265.00
+  mesh 0: triangles=20 vertices=16 normals=5 uvs=12 texture=tile_wood02.jpg
+  bone 0: "joint_02" parent=-1
+  action 0: keys=1 lock=0

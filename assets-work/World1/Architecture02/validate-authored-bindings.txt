@@ -1,0 +1,15 @@
+00:00.478  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/source.blend"
+00:00.496  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/source.blend"
+00:00.504  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/source.blend"
+00:00.514  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/source.blend"
+00:00.523  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/source.blend"
+00:00.532  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/source.blend"
+House05 authored binding PASS 60 triangles; ['ki12'] maximum drift 0.0004122138671789344
+HouseWall01 authored binding PASS 20 triangles; ['Object02'] maximum drift 7.4536132785851805e-06
+HouseWall04 authored binding PASS 40 triangles; ['joint_01'] maximum drift 4.098876953406716e-06
+HouseWall05 authored binding PASS 30 triangles; ['Box01'] maximum drift 4.173339842594714e-06
+HouseWall06 authored binding PASS 30 triangles; ['Object01'] maximum drift 3.006640625358159e-05
+Stair01 authored binding PASS 130 triangles; ['Box02'] maximum drift 4.6582030677200237e-07
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

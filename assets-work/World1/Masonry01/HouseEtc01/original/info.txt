@@ -1,0 +1,8 @@
+model src/bin/Data/Object1/HouseEtc01.bmd
+  name field: Data2\Object1\c_wall07.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 34
+  bounds (bind pose): min -50.15 -92.81 0.00  max 49.73 49.80 137.02  size 99.88 142.61 137.02
+  mesh 0: triangles=8 vertices=8 normals=4 uvs=6 texture=c_wall04.jpg
+  mesh 1: triangles=26 vertices=16 normals=19 uvs=16 texture=c_wall06.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0

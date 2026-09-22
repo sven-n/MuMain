@@ -1,0 +1,12 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/StoneWall03/original/StoneWall03.bmd
+  name field: StoneWall03.smd  version: 12
+  meshes: 3  bones: 4  actions: 1  triangles: 333
+  bounds (bind pose): min -199.33 -43.04 -2.10  max 198.83 180.50 299.24  size 398.15 223.54 301.34
+  mesh 0: triangles=90 vertices=60 normals=42 uvs=75 texture=tile_01.jpg
+  mesh 1: triangles=233 vertices=195 normals=127 uvs=177 texture=horse_drawn_01.jpg
+  mesh 2: triangles=10 vertices=8 normals=11 uvs=12 texture=tile_03.jpg
+  bone 0: "Box04" parent=-1
+  bone 1: "Box23" parent=-1
+  bone 2: "Box06" parent=-1
+  bone 3: "Object01" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,2 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-normal-bindings/assets-work/World1/NormalBindings01/Grass02/validation/original/Grass02_a00.smd: bones=5 frames=1 triangles=0 materials=0
+OK

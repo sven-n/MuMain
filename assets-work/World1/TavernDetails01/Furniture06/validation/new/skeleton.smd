@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Box11" -1
+end
+skeleton
+time 0
+0 -11.501329 3.231138 19.913132 0.000000 -0.000000 0.000000
+end
+triangles
+end

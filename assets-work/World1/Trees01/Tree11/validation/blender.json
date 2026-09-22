@@ -1,0 +1,68 @@
+{
+  "triangles": 169,
+  "mesh_count": 2,
+  "bounds_before": [
+    [
+      -178.10780334472656,
+      -170.89210510253906,
+      -0.05339999869465828
+    ],
+    [
+      195.18179321289062,
+      187.59739685058594,
+      560.522705078125
+    ]
+  ],
+  "bounds_after": [
+    [
+      -178.10780334472656,
+      -170.89210510253906,
+      -0.05339999869465828
+    ],
+    [
+      195.18179321289062,
+      187.59739685058594,
+      560.522705078125
+    ]
+  ],
+  "geometry": "Original trunk/crown geometry retained; surface artwork rebuilt",
+  "textures": {
+    "tree_06.tga": [
+      512,
+      512
+    ],
+    "tree_03.jpg": [
+      128,
+      64
+    ]
+  },
+  "material_order": [
+    "tree_06.tga",
+    "tree_03.jpg"
+  ],
+  "bone_order": [
+    "Bone01",
+    "Bone02",
+    "Bone03",
+    "Bone04",
+    "Bone05",
+    "Bone06",
+    "Bone07",
+    "Bone08",
+    "Bone09",
+    "Sphere02"
+  ],
+  "action_meta": {
+    "Tree11_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "legacy_uv_limits": [
+    [
+      -0.20980000495910645,
+      7.21019983291626
+    ]
+  ],
+  "checks": "Finite positions/UVs, one UV set, nondegenerate triangles, one valid rigid bone per vertex"
+}

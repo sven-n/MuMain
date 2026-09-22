@@ -1,0 +1,3 @@
+meshes 5 vs 5, bones 3 vs 3, actions 1 vs 1, triangles 70 vs 110
+unmatched triangles: 10  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT

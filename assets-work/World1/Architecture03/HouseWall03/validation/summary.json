@@ -1,0 +1,41 @@
+{
+  "bounds_before": [
+    [
+      -101.28,
+      -0.72,
+      -0.53
+    ],
+    [
+      100.81,
+      42.67,
+      264.48
+    ]
+  ],
+  "bounds_after": [
+    [
+      -101.28,
+      -0.72,
+      -0.53
+    ],
+    [
+      100.81,
+      42.67,
+      264.48
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "textures": [
+    "tile_wood02.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": false,
+  "export_sha256": {
+    "HouseWall03.bmd": "4cceec4106eae52c353329a7c55c725118cd18982736c42c543a4ed76c72266f",
+    "tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda"
+  }
+}

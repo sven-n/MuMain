@@ -1,0 +1,29 @@
+[
+  {
+    "mesh": "House04",
+    "bounds": [
+      [
+        -250.01089477539062,
+        -240.25079345703125,
+        -0.8140000104904175
+      ],
+      [
+        252.6663055419922,
+        199.92037963867188,
+        413.9349060058594
+      ]
+    ],
+    "triangles": 342,
+    "materials": [
+      "tile_02.jpg",
+      "tile_wood01.jpg",
+      "tile_house01.jpg",
+      "tile_ston04.jpg",
+      "tile_wood03.jpg",
+      "tile_wood02.jpg",
+      "tile_windows01.jpg",
+      "bridge_01.jpg",
+      "tile_space01.jpg"
+    ]
+  }
+]

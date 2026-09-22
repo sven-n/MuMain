@@ -1,0 +1,14 @@
+{
+  "tub.jpg": [
+    "src/bin/Data/Object1/tub.OZJ"
+  ],
+  "horse_drawn_01.jpg": [
+    "src/bin/Data/Object1/horse_drawn_01.OZJ"
+  ],
+  "well.jpg": [
+    "src/bin/Data/Object1/well.OZJ"
+  ],
+  "jar_01.jpg": [
+    "src/bin/Data/Object1/jar_01.OZJ"
+  ]
+}

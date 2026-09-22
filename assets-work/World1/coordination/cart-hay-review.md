@@ -1,0 +1,3 @@
+# CartHay01 — ACCEPT offline
+
+2026-09-22. Source93ca193e → integration8e6f9ef0. Six models/23placements. Reviewed matched cart/light/casks/loaded-hay/crossed-hay sheets and full notes/validation. Closed rounded bundles and readable cut-fiber caps preserve each pile footprint/arrangement. Cart contacts/axles/seat retained, hub sleeves fitwithinbounds. Six remodeled fullcompares DIFFERENT, allrig/actions equivalentincl21keysanddummy. Strong authoredvertex/bone tests, perpartbounds, alpha/UV/winding checks pass. RawCarriage01normalsharing correctedwithinasset and remainingnormalsharing provenharmlessallkeys. Ninegamepaths only;315other sourcefiles unchanged. No clientverification.

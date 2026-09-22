@@ -1,0 +1,140 @@
+READ-ONLY ENGINE CONTRACT AUDIT; no source changes
+RGBA cutout previews approximate >0.25 test and retain scalar alpha above cutoff.
+Sign01/sign02 velocity is 0.3; original actions preserved.
+
+src/source/World/MapInfra/MapManager.cpp
+1055:         for (i = 0; i < 3; i++)
+1056:             gLoadData.AccessModel(MODEL_CANNON01 + i, L"Data\\Object1\\", L"Cannon", i + 1);
+1057:         gLoadData.AccessModel(MODEL_BRIDGE, L"Data\\Object1\\", L"Bridge", 1);
+1058:         for (i = 0; i < 4; i++)
+1059:             gLoadData.AccessModel(MODEL_FENCE01 + i, L"Data\\Object1\\", L"Fence", i + 1);
+1060:         gLoadData.AccessModel(MODEL_BRIDGE_STONE, L"Data\\Object1\\", L"BridgeStone", 1);
+1061:
+1062:         gLoadData.AccessModel(MODEL_STREET_LIGHT, L"Data\\Object1\\", L"StreetLight", 1);
+1063:         gLoadData.AccessModel(MODEL_CURTAIN, L"Data\\Object1\\", L"Curtain", 1);
+1064:         for (i = 0; i < 4; i++)
+1065:             gLoadData.AccessModel(MODEL_CARRIAGE01 + i, L"Data\\Object1\\", L"Carriage", i + 1);
+1066:         for (i = 0; i < 2; i++)
+1067:             gLoadData.AccessModel(MODEL_STRAW01 + i, L"Data\\Object1\\", L"Straw", i + 1);
+1068:         for (i = 0; i < 2; i++)
+1069:             gLoadData.AccessModel(MODEL_SIGN01 + i, L"Data\\Object1\\", L"Sign", i + 1);
+1070:         for (i = 0; i < 2; i++)
+1071:             gLoadData.AccessModel(MODEL_MERCHANT_ANIMAL01 + i, L"Data\\Object1\\", L"MerchantAnimal", i + 1);
+1072:         gLoadData.AccessModel(MODEL_WATERSPOUT, L"Data\\Object1\\", L"Waterspout", 1);
+1073:         for (i = 0; i < 4; i++)
+1074:             gLoadData.AccessModel(MODEL_WELL01 + i, L"Data\\Object1\\", L"Well", i + 1);
+1075:         gLoadData.AccessModel(MODEL_HANGING, L"Data\\Object1\\", L"Hanging", 1);
+1076:
+
+src/source/Engine/Object/ZzzObject.cpp
+3870:             o->Direction[2] = -o->Direction[2] * 0.2f;
+3871:             break;
+3872:         }*/
+3873:         case MODEL_CANDLE:
+3874:             Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+3875:             Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
+3876:             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
+3877:             break;
+3878:             /*case MODEL_GOLD01:
+3879:             Vector(0.f,-15.f,25.f,p);
+3880:             CreateShiny(o,p);
+3881:             break;*/
+3882:         case MODEL_SIGN01 + 1:
+3883:             Vector(50.f, -10.f, 120.f, p);
+3884:             //CreateShiny(o,p);
+3885:             break;
+3886:             /*case MODEL_STONE_WALL01+3:
+3887:             o->Live = false;
+3888:             break;*/
+3889:         }
+3890:         break;
+
+src/source/Engine/Object/ZzzObject.cpp
+4645:             break;
+4646:         case MODEL_STREET_LIGHT:
+4647:             o->BlendMesh = 1;
+4648:             o->Velocity = 0.3f;
+4649:             break;
+4650:         case MODEL_CANDLE:
+4651:             o->BlendMesh = 1;
+4652:             o->Velocity = 0.3f;
+4653:             break;
+4654:         case MODEL_TREASURE_CHEST:
+4655:             o->Velocity = 0.f;
+4656:             break;
+4657:         case MODEL_SIGN01:
+4658:         case MODEL_SIGN01 + 1:
+4659:             o->Velocity = 0.3f;
+4660:             //CreateNpc(o);
+4661:             break;
+4662:         case MODEL_POSE_BOX:
+4663:             CreateOperate(o);
+4664:             Vector(40.f, 40.f, 160.f, o->BoundingBoxMax);
+4665:             o->HiddenMesh = -2;
+4666:             break;
+4667:         case MODEL_TREE01 + 6:
+4668:         case MODEL_FURNITURE01 + 5:
+
+src/source/Render/Models/ZzzBMD.cpp
+1505:         enableLight = false;
+1506:     }
+1507:     else if ((renderFlags & RENDER_TEXTURE) == RENDER_TEXTURE)
+1508:     {
+1509:         finalRenderFlags = RENDER_TEXTURE;
+1510:         BindTexture(textureIndex);
+1511:         if ((renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT)
+1512:         {
+1513:             EnableAlphaBlend();
+1514:         }
+1515:         else if ((renderFlags & RENDER_DARK) == RENDER_DARK)
+1516:         {
+1517:             EnableAlphaBlendMinus();
+1518:         }
+1519:         else if (alpha < 0.99f || texture->Components == 4)
+1520:         {
+1521:             EnableAlphaTest();
+1522:         }
+1523:         else
+1524:         {
+1525:             DisableAlphaBlend();
+1526:         }
+1527:
+
+src/source/Render/Textures/ZzzOpenglUtil.cpp
+348: void EnableAlphaTest(bool DepthMask)
+349: {
+350:     if (AlphaBlendType != 2)
+351:     {
+352:         AlphaBlendType = 2;
+353:         mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
+354:     }
+355:     DisableCullFace();
+356:     if (DepthMask)
+357:         EnableDepthMask();
+358:     if (!AlphaTestEnable)
+359:     {
+360:         AlphaTestEnable = true;
+361:         mu::GetRenderer().SetAlphaTest(true);
+362:     }
+363:     if (!TextureEnable)
+364:     {
+365:         TextureEnable = true;
+366:         mu::GetRenderer().SetTexture2D(true);
+367:     }
+
+src/source/Render/Textures/ZzzOpenglUtil.cpp
+627:     mu::GetRenderer().SetDepthTest(true);
+628:     mu::GetRenderer().SetCullFace(true);
+629:     mu::GetRenderer().SetDepthMask(true);
+630:
+631:     AlphaTestEnable = false;
+632:     TextureEnable = true;
+633:     DepthTestEnable = true;
+634:     CullFaceEnable = true;
+635:     DepthMaskEnable = true;
+636:     mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
+637:     mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
+638:     if (FogEnable)
+639:     {
+640:         // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
+641:         // stays at consistent percentages when zooming. The actual GL far clip

@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/src/bin/Data/Object1/Tomb01.bmd
+  name field: Data2\Object1\Tomb_arc.smd  version: 10
+  meshes: 1  bones: 2  actions: 1  triangles: 44
+  bounds (bind pose): min -117.53 -140.51 -0.08  max 62.39 121.84 78.10  size 179.93 262.35 78.19
+  mesh 0: triangles=44 vertices=28 normals=21 uvs=52 texture=grave_02.jpg
+  bone 0: "Box01" parent=-1
+  bone 1: "Cylinder02" parent=-1
+  action 0: keys=1 lock=0

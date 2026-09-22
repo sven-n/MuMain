@@ -1,0 +1,3 @@
+# Architecture02 — ACCEPT offline
+
+2026-09-22. Source0c8cee9d. Six new27-placement models and three unchanged shared-material consumers. Reviewed nine-model batch, matching mill study, town roof/interior and west-corner actual-placement assemblies. Original ashlar and green-shingle roles retained, subtle panel refinement leaves module contacts/openings unchanged. All six full compares DIFFERENT; every local/hierarchical key and posed bound retained. Authored panel vertex/bone/UV audit and raw normal-node ownership pass, including moving watermill. Protected originalcorners max0.000016; eightgamepaths only. No client verification.

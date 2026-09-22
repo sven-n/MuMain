@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/original/SteelWall01.bmd
+  name field: Data2\Object1\steel_barred_02.sm  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 52
+  bounds (bind pose): min -49.99 -50.01 0.00  max 3.44 3.54 247.03  size 53.43 53.55 247.03
+  mesh 0: triangles=48 vertices=38 normals=38 uvs=34 texture=steel_barred_b.jpg
+  mesh 1: triangles=4 vertices=6 normals=3 uvs=6 texture=steel_barred_a.tga
+  bone 0: "Cylinder04" parent=-1
+  action 0: keys=1 lock=0

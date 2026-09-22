@@ -1,0 +1,18 @@
+{
+  "baseline_bounds": [
+    [
+      -57.606201171875,
+      -54.8291015625,
+      -6.945098876953125
+    ],
+    [
+      62.04010009765625,
+      55.015899658203125,
+      55.954498291015625
+    ]
+  ],
+  "camera": "Matching orthographic; direction (1.35,-2,1.3)",
+  "scale_proxy_height": 190,
+  "client_screenshot": false,
+  "effect_shader": "Bonfire BlendMesh1 additive approximation; procedural runtime particles absent"
+}

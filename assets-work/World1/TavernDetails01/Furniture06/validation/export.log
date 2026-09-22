@@ -1,0 +1,50 @@
+00:00.494  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture06/source.blend"
+skipping reference object 'Furniture06' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ChairTimber_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ChairTimber_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ChairTimber_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ChairTimber_3' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ExactOriginalSeat' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ChairTimber_5' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SideApron_-15.9' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LowerStretcher_-15.9' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SideApron_16.4' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LowerStretcher_16.4' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontApron' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Box11_Cutout' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Furniture06_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_z63yq5_q/Furniture06_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 132 polys
+- Exported 2 materials
+   chair2.tga
+   bookshelf.jpg
+- SMD export took 0.0026450157165527344
+
+
+Blender Source Tools: exporting Furniture06_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_z63yq5_q/anims/Furniture06_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0007328987121582031
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_z63yq5_q/Furniture06_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture06/exports/Furniture06.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_z63yq5_q/anims/Furniture06_a00.smd --name Furniture06.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture06/exports/Furniture06.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture06/exports/Furniture06.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture06/exports/Furniture06.bmd
+  name field: Furniture06.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 132
+  bounds (bind pose): min -20.84 -25.63 -0.04  max 21.48 28.72 110.86  size 42.31 54.34 110.90
+  mesh 0: triangles=130 vertices=88 normals=6 uvs=10 texture=bookshelf.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=chair2.tga
+  bone 0: "Box11" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

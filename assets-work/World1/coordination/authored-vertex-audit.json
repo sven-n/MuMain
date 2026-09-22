@@ -1,0 +1,977 @@
+{
+  "result": "PASS",
+  "tolerance": 0.01,
+  "space": "Blender bind/world coordinates, matched only within identical bone names",
+  "tested": "Both directions, every authored vertex and every final-reimport vertex of remodeled models",
+  "client_verified": false,
+  "models": [
+    {
+      "model": "Furniture03",
+      "source": "assets-work/World1/TavernProps/Furniture03",
+      "authored_vertices": 376,
+      "reimport_vertices": 376,
+      "authored_to_export_max": 4.2649612623790745e-06,
+      "export_to_authored_max": 4.2649612623790745e-06,
+      "bone_names": [
+        "Box09"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture04",
+      "source": "assets-work/World1/TavernProps/Furniture04",
+      "authored_vertices": 172,
+      "reimport_vertices": 172,
+      "authored_to_export_max": 1.9073486328125e-06,
+      "export_to_authored_max": 1.9073486328125e-06,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture05",
+      "source": "assets-work/World1/TavernProps/Furniture05",
+      "authored_vertices": 240,
+      "reimport_vertices": 228,
+      "authored_to_export_max": 3.814697265625e-06,
+      "export_to_authored_max": 3.814697265625e-06,
+      "bone_names": [
+        "Box13"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Fence01",
+      "source": "assets-work/World1/Fences01/Fence01",
+      "authored_vertices": 66,
+      "reimport_vertices": 66,
+      "authored_to_export_max": 0.0017495960928499699,
+      "export_to_authored_max": 0.0017495960928499699,
+      "bone_names": [
+        "Box07"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Fence02",
+      "source": "assets-work/World1/Fences01/Fence02",
+      "authored_vertices": 64,
+      "reimport_vertices": 60,
+      "authored_to_export_max": 7.864199687901419e-06,
+      "export_to_authored_max": 7.864199687901419e-06,
+      "bone_names": [
+        "Object01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Fence03",
+      "source": "assets-work/World1/Fences01/Fence03",
+      "authored_vertices": 64,
+      "reimport_vertices": 64,
+      "authored_to_export_max": 7.62939453125e-06,
+      "export_to_authored_max": 7.62939453125e-06,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Fence04",
+      "source": "assets-work/World1/Fences01/Fence04",
+      "authored_vertices": 32,
+      "reimport_vertices": 32,
+      "authored_to_export_max": 1.4820476508248248e-06,
+      "export_to_authored_max": 1.4820476508248248e-06,
+      "bone_names": [
+        "Object02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "House02",
+      "source": "assets-work/World1/TimberProps01/House02",
+      "authored_vertices": 1025,
+      "reimport_vertices": 679,
+      "authored_to_export_max": 3.9321635085798334e-06,
+      "export_to_authored_max": 3.9321635085798334e-06,
+      "bone_names": [
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "TreasureDrum01",
+      "source": "assets-work/World1/TimberProps01/TreasureDrum01",
+      "authored_vertices": 850,
+      "reimport_vertices": 786,
+      "authored_to_export_max": 1.9660499219753547e-06,
+      "export_to_authored_max": 1.9660499219753547e-06,
+      "bone_names": [
+        "Cylinder03"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StreetLight01",
+      "source": "assets-work/World1/TimberProps01/StreetLight01",
+      "authored_vertices": 429,
+      "reimport_vertices": 345,
+      "authored_to_export_max": 0.0017472077161073685,
+      "export_to_authored_max": 0.0017472077161073685,
+      "bone_names": [
+        "Bone02",
+        "Mesh02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stone01",
+      "source": "assets-work/World1/Rocks01/Stone01",
+      "authored_vertices": 320,
+      "reimport_vertices": 320,
+      "authored_to_export_max": 0.0006927326321601868,
+      "export_to_authored_max": 0.0006927326321601868,
+      "bone_names": [
+        "ston01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stone02",
+      "source": "assets-work/World1/Rocks01/Stone02",
+      "authored_vertices": 331,
+      "reimport_vertices": 331,
+      "authored_to_export_max": 0.002238964196294546,
+      "export_to_authored_max": 0.002238964196294546,
+      "bone_names": [
+        "ston02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stone03",
+      "source": "assets-work/World1/Rocks01/Stone03",
+      "authored_vertices": 95,
+      "reimport_vertices": 95,
+      "authored_to_export_max": 0.0017882632091641426,
+      "export_to_authored_max": 0.0017882632091641426,
+      "bone_names": [
+        "GeoSphere01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stone04",
+      "source": "assets-work/World1/Rocks01/Stone04",
+      "authored_vertices": 83,
+      "reimport_vertices": 83,
+      "authored_to_export_max": 4.008921678178012e-06,
+      "export_to_authored_max": 4.008921678178012e-06,
+      "bone_names": [
+        "GeoSphere01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stone05",
+      "source": "assets-work/World1/Rocks01/Stone05",
+      "authored_vertices": 250,
+      "reimport_vertices": 250,
+      "authored_to_export_max": 4.498472662817221e-06,
+      "export_to_authored_max": 4.498472662817221e-06,
+      "bone_names": [
+        "GeoSphere01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Grass07",
+      "source": "assets-work/World1/Mushrooms01/Grass07",
+      "authored_vertices": 595,
+      "reimport_vertices": 595,
+      "authored_to_export_max": 3.814697265625e-05,
+      "export_to_authored_max": 3.814697265625e-05,
+      "bone_names": [
+        "Sphere01",
+        "Sphere05",
+        "Sphere06",
+        "Sphere07",
+        "Sphere08",
+        "Sphere09",
+        "Sphere10"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Grass08",
+      "source": "assets-work/World1/Mushrooms01/Grass08",
+      "authored_vertices": 255,
+      "reimport_vertices": 255,
+      "authored_to_export_max": 1.0800782547448762e-05,
+      "export_to_authored_max": 1.0800782547448762e-05,
+      "bone_names": [
+        "Sphere05",
+        "Sphere09",
+        "Sphere10"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "SteelWall01",
+      "source": "assets-work/World1/Ironwork01/SteelWall01",
+      "authored_vertices": 60,
+      "reimport_vertices": 60,
+      "authored_to_export_max": 5.522684659808874e-06,
+      "export_to_authored_max": 5.522684659808874e-06,
+      "bone_names": [
+        "Cylinder04"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "SteelWall02",
+      "source": "assets-work/World1/Ironwork01/SteelWall02",
+      "authored_vertices": 208,
+      "reimport_vertices": 208,
+      "authored_to_export_max": 0.0003955520805902779,
+      "export_to_authored_max": 0.0003955520805902779,
+      "bone_names": [
+        "Box04",
+        "Box05",
+        "Box06",
+        "Box07"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "SteelWall03",
+      "source": "assets-work/World1/Ironwork01/SteelWall03",
+      "authored_vertices": 52,
+      "reimport_vertices": 52,
+      "authored_to_export_max": 0.0005782346706837416,
+      "export_to_authored_max": 0.0005782346706837416,
+      "bone_names": [
+        "Box04"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "SteelDoor01",
+      "source": "assets-work/World1/Ironwork01/SteelDoor01",
+      "authored_vertices": 136,
+      "reimport_vertices": 136,
+      "authored_to_export_max": 0.00018800050020217896,
+      "export_to_authored_max": 0.00018800050020217896,
+      "bone_names": [
+        "Cylinder04"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseEtc01",
+      "source": "assets-work/World1/Masonry01/HouseEtc01",
+      "authored_vertices": 28,
+      "reimport_vertices": 28,
+      "authored_to_export_max": 9.5367431640625e-07,
+      "export_to_authored_max": 9.5367431640625e-07,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall01",
+      "source": "assets-work/World1/Masonry01/StoneMuWall01",
+      "authored_vertices": 269,
+      "reimport_vertices": 269,
+      "authored_to_export_max": 3.228635614505038e-05,
+      "export_to_authored_max": 3.228635614505038e-05,
+      "bone_names": [
+        "Cylinder01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall02",
+      "source": "assets-work/World1/Masonry01/StoneMuWall02",
+      "authored_vertices": 42,
+      "reimport_vertices": 42,
+      "authored_to_export_max": 4.76837158203125e-07,
+      "export_to_authored_max": 4.76837158203125e-07,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall03",
+      "source": "assets-work/World1/Masonry01/StoneMuWall03",
+      "authored_vertices": 46,
+      "reimport_vertices": 46,
+      "authored_to_export_max": 4.76837158203125e-07,
+      "export_to_authored_max": 4.76837158203125e-07,
+      "bone_names": [
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall04",
+      "source": "assets-work/World1/Masonry01/StoneMuWall04",
+      "authored_vertices": 241,
+      "reimport_vertices": 241,
+      "authored_to_export_max": 4.76837158203125e-07,
+      "export_to_authored_max": 4.76837158203125e-07,
+      "bone_names": [
+        "Box02",
+        "Box06",
+        "Box23"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseEtc02",
+      "source": "assets-work/World1/Masonry01/HouseEtc02",
+      "authored_vertices": 213,
+      "reimport_vertices": 213,
+      "authored_to_export_max": 1.52587890625e-05,
+      "export_to_authored_max": 1.52587890625e-05,
+      "bone_names": [
+        "Box03",
+        "Mesh03",
+        "ihix01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall01",
+      "source": "assets-work/World1/StoneWalls01/StoneWall01",
+      "authored_vertices": 277,
+      "reimport_vertices": 277,
+      "authored_to_export_max": 1.9073486328125e-05,
+      "export_to_authored_max": 1.9073486328125e-05,
+      "bone_names": [
+        "gate"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall02",
+      "source": "assets-work/World1/StoneWalls01/StoneWall02",
+      "authored_vertices": 277,
+      "reimport_vertices": 277,
+      "authored_to_export_max": 1.9073486328125e-05,
+      "export_to_authored_max": 1.9073486328125e-05,
+      "bone_names": [
+        "gate"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall03",
+      "source": "assets-work/World1/StoneWalls01/StoneWall03",
+      "authored_vertices": 263,
+      "reimport_vertices": 263,
+      "authored_to_export_max": 2.15791860682657e-05,
+      "export_to_authored_max": 2.15791860682657e-05,
+      "bone_names": [
+        "Box04",
+        "Box06",
+        "Box23",
+        "Object01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall05",
+      "source": "assets-work/World1/StoneWalls01/StoneWall05",
+      "authored_vertices": 68,
+      "reimport_vertices": 68,
+      "authored_to_export_max": 2.15791860682657e-05,
+      "export_to_authored_max": 2.15791860682657e-05,
+      "bone_names": [
+        "Box04",
+        "Object01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall06",
+      "source": "assets-work/World1/StoneWalls01/StoneWall06",
+      "authored_vertices": 55,
+      "reimport_vertices": 55,
+      "authored_to_export_max": 0.00036853752681054175,
+      "export_to_authored_max": 0.00036853752681054175,
+      "bone_names": [
+        "Object05",
+        "bonee01",
+        "bonee02",
+        "bonee03",
+        "bonee04",
+        "bonee05"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "FireLight01",
+      "source": "assets-work/World1/FireProps01/FireLight01",
+      "authored_vertices": 53,
+      "reimport_vertices": 53,
+      "authored_to_export_max": 2.384185791015625e-07,
+      "export_to_authored_max": 2.384185791015625e-07,
+      "bone_names": [
+        "Cylinder02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Beer02",
+      "source": "assets-work/World1/TavernDetails01/Beer02",
+      "authored_vertices": 496,
+      "reimport_vertices": 496,
+      "authored_to_export_max": 0.00015376815281342715,
+      "export_to_authored_max": 0.00015376815281342715,
+      "bone_names": [
+        "Cylinder32",
+        "Cylinder33",
+        "Cylinder34",
+        "Cylinder35",
+        "ytut",
+        "ytut01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Beer03",
+      "source": "assets-work/World1/TavernDetails01/Beer03",
+      "authored_vertices": 266,
+      "reimport_vertices": 266,
+      "authored_to_export_max": 2.085583400912583e-05,
+      "export_to_authored_max": 2.085583400912583e-05,
+      "bone_names": [
+        "Cylinder36",
+        "Cylinder37",
+        "Cylinder38"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture01",
+      "source": "assets-work/World1/TavernDetails01/Furniture01",
+      "authored_vertices": 390,
+      "reimport_vertices": 390,
+      "authored_to_export_max": 1.3887753993913066e-05,
+      "export_to_authored_max": 1.3887753993913066e-05,
+      "bone_names": [
+        "Box12",
+        "Cylinder06",
+        "Cylinder07",
+        "Cylinder26",
+        "Cylinder29",
+        "Cylinder30"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture02",
+      "source": "assets-work/World1/TavernDetails01/Furniture02",
+      "authored_vertices": 680,
+      "reimport_vertices": 680,
+      "authored_to_export_max": 1.5325696949730627e-05,
+      "export_to_authored_max": 1.5325696949730627e-05,
+      "bone_names": [
+        "Box03",
+        "Cylinder04",
+        "Cylinder12",
+        "Cylinder13",
+        "Cylinder15",
+        "Cylinder16",
+        "Cylinder17",
+        "Cylinder18",
+        "Cylinder19",
+        "Cylinder21",
+        "Cylinder22",
+        "Cylinder23",
+        "Cylinder24"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture06",
+      "source": "assets-work/World1/TavernDetails01/Furniture06",
+      "authored_vertices": 92,
+      "reimport_vertices": 92,
+      "authored_to_export_max": 0,
+      "export_to_authored_max": 0,
+      "bone_names": [
+        "Box11"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture07",
+      "source": "assets-work/World1/TavernDetails01/Furniture07",
+      "authored_vertices": 103,
+      "reimport_vertices": 97,
+      "authored_to_export_max": 1.2839233249906101e-06,
+      "export_to_authored_max": 1.2839233249906101e-06,
+      "bone_names": [
+        "Cylinder02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "House01",
+      "source": "assets-work/World1/Architecture01/House01",
+      "authored_vertices": 139,
+      "reimport_vertices": 139,
+      "authored_to_export_max": 0,
+      "export_to_authored_max": 0,
+      "bone_names": [
+        "Box28"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "House03",
+      "source": "assets-work/World1/Architecture01/House03",
+      "authored_vertices": 232,
+      "reimport_vertices": 232,
+      "authored_to_export_max": 1.52587890625e-05,
+      "export_to_authored_max": 1.52587890625e-05,
+      "bone_names": [
+        "Box08",
+        "Box29",
+        "Mesh01",
+        "Mesh02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "House04",
+      "source": "assets-work/World1/Architecture01/House04",
+      "authored_vertices": 268,
+      "reimport_vertices": 271,
+      "authored_to_export_max": 3.4119690099032596e-05,
+      "export_to_authored_max": 3.4119690099032596e-05,
+      "bone_names": [
+        "Box02",
+        "Mesh02",
+        "boness_01",
+        "boness_03"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Tent01",
+      "source": "assets-work/World1/Architecture01/Tent01",
+      "authored_vertices": 82,
+      "reimport_vertices": 82,
+      "authored_to_export_max": 7.271766662597656e-06,
+      "export_to_authored_max": 7.271766662597656e-06,
+      "bone_names": [
+        "boness01",
+        "boness02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall02",
+      "source": "assets-work/World1/Architecture01/HouseWall02",
+      "authored_vertices": 80,
+      "reimport_vertices": 80,
+      "authored_to_export_max": 2.395157571299933e-05,
+      "export_to_authored_max": 2.395157571299933e-05,
+      "bone_names": [
+        "Object01",
+        "Object03",
+        "sdfeew"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Sign01",
+      "source": "assets-work/World1/SignsBanners01/Sign01",
+      "authored_vertices": 40,
+      "reimport_vertices": 40,
+      "authored_to_export_max": 7.748603820800781e-07,
+      "export_to_authored_max": 7.748603820800781e-07,
+      "bone_names": [
+        "Bone01",
+        "Bone02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Sign02",
+      "source": "assets-work/World1/SignsBanners01/Sign02",
+      "authored_vertices": 32,
+      "reimport_vertices": 32,
+      "authored_to_export_max": 3.814697265625e-06,
+      "export_to_authored_max": 3.814697265625e-06,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "House05",
+      "source": "assets-work/World1/Architecture02/House05",
+      "authored_vertices": 232,
+      "reimport_vertices": 232,
+      "authored_to_export_max": 0.0004505869001150131,
+      "export_to_authored_max": 0.0004505869001150131,
+      "bone_names": [
+        "Box02",
+        "Box03",
+        "Box04",
+        "Box05",
+        "Box08",
+        "ki12"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall01",
+      "source": "assets-work/World1/Architecture02/HouseWall01",
+      "authored_vertices": 40,
+      "reimport_vertices": 40,
+      "authored_to_export_max": 7.68876816437114e-06,
+      "export_to_authored_max": 7.68876816437114e-06,
+      "bone_names": [
+        "Object02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall04",
+      "source": "assets-work/World1/Architecture02/HouseWall04",
+      "authored_vertices": 64,
+      "reimport_vertices": 64,
+      "authored_to_export_max": 3.932099843950709e-06,
+      "export_to_authored_max": 3.932099843950709e-06,
+      "bone_names": [
+        "joint_01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall05",
+      "source": "assets-work/World1/Architecture02/HouseWall05",
+      "authored_vertices": 39,
+      "reimport_vertices": 39,
+      "authored_to_export_max": 3.814697265625e-06,
+      "export_to_authored_max": 3.814697265625e-06,
+      "bone_names": [
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall06",
+      "source": "assets-work/World1/Architecture02/HouseWall06",
+      "authored_vertices": 38,
+      "reimport_vertices": 38,
+      "authored_to_export_max": 3.075507265748456e-05,
+      "export_to_authored_max": 3.075507265748456e-05,
+      "bone_names": [
+        "Object01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Stair01",
+      "source": "assets-work/World1/Architecture02/Stair01",
+      "authored_vertices": 122,
+      "reimport_vertices": 122,
+      "authored_to_export_max": 6.536159844472422e-07,
+      "export_to_authored_max": 6.536159844472422e-07,
+      "bone_names": [
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue01",
+      "source": "assets-work/World1/Statues01/StoneStatue01",
+      "authored_vertices": 65,
+      "reimport_vertices": 65,
+      "authored_to_export_max": 2.980232238769531e-07,
+      "export_to_authored_max": 2.980232238769531e-07,
+      "bone_names": [
+        "Box11"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "SteelStatue01",
+      "source": "assets-work/World1/Statues01/SteelStatue01",
+      "authored_vertices": 64,
+      "reimport_vertices": 64,
+      "authored_to_export_max": 0,
+      "export_to_authored_max": 0,
+      "bone_names": [
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb01",
+      "source": "assets-work/World1/Statues01/Tomb01",
+      "authored_vertices": 44,
+      "reimport_vertices": 44,
+      "authored_to_export_max": 0.0031925621442496777,
+      "export_to_authored_max": 0.0031925621442496777,
+      "bone_names": [
+        "Box01",
+        "Cylinder02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb02",
+      "source": "assets-work/World1/Statues01/Tomb02",
+      "authored_vertices": 44,
+      "reimport_vertices": 44,
+      "authored_to_export_max": 7.855216244934127e-05,
+      "export_to_authored_max": 7.855216244934127e-05,
+      "bone_names": [
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage01",
+      "source": "assets-work/World1/CartHay01/Carriage01",
+      "authored_vertices": 343,
+      "reimport_vertices": 335,
+      "authored_to_export_max": 1.5843626897549257e-05,
+      "export_to_authored_max": 1.5843626897549257e-05,
+      "bone_names": [
+        "Bone01",
+        "Bone03",
+        "Bone05",
+        "Bone07"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage02",
+      "source": "assets-work/World1/CartHay01/Carriage02",
+      "authored_vertices": 285,
+      "reimport_vertices": 285,
+      "authored_to_export_max": 0.00045546909677796066,
+      "export_to_authored_max": 0.00045546909677796066,
+      "bone_names": [
+        "Cylinder03",
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage03",
+      "source": "assets-work/World1/CartHay01/Carriage03",
+      "authored_vertices": 357,
+      "reimport_vertices": 333,
+      "authored_to_export_max": 0.001712799072265625,
+      "export_to_authored_max": 0.001712799072265625,
+      "bone_names": [
+        "Cylinder01",
+        "Cylinder03",
+        "Cylinder11",
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage04",
+      "source": "assets-work/World1/CartHay01/Carriage04",
+      "authored_vertices": 507,
+      "reimport_vertices": 507,
+      "authored_to_export_max": 0.0007006466621533036,
+      "export_to_authored_max": 0.0007006466621533036,
+      "bone_names": [
+        "Cylinder03",
+        "Cylinder05",
+        "Cylinder12",
+        "Cylinder13",
+        "Mesh01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Straw01",
+      "source": "assets-work/World1/CartHay01/Straw01",
+      "authored_vertices": 222,
+      "reimport_vertices": 222,
+      "authored_to_export_max": 7.76234628574457e-06,
+      "export_to_authored_max": 7.76234628574457e-06,
+      "bone_names": [
+        "Cylinder05",
+        "Cylinder12",
+        "Cylinder13"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Straw02",
+      "source": "assets-work/World1/CartHay01/Straw02",
+      "authored_vertices": 592,
+      "reimport_vertices": 592,
+      "authored_to_export_max": 0.0016549983993172646,
+      "export_to_authored_max": 0.0016549983993172646,
+      "bone_names": [
+        "Cylinder05",
+        "Cylinder12",
+        "Cylinder13",
+        "Cylinder14",
+        "Cylinder15",
+        "Cylinder16",
+        "Cylinder17",
+        "Cylinder18"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Well01",
+      "source": "assets-work/World1/Wells01/Well01",
+      "authored_vertices": 528,
+      "reimport_vertices": 528,
+      "authored_to_export_max": 8.190502558136359e-05,
+      "export_to_authored_max": 8.190502558136359e-05,
+      "bone_names": [
+        "Cylinder01",
+        "Cylinder04",
+        "Cylinder07",
+        "Cylinder08",
+        "Cylinder09",
+        "Cylinder10",
+        "Cylinder11"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Well03",
+      "source": "assets-work/World1/Wells01/Well03",
+      "authored_vertices": 391,
+      "reimport_vertices": 391,
+      "authored_to_export_max": 0.00012870010687038302,
+      "export_to_authored_max": 0.00012870010687038302,
+      "bone_names": [
+        "Cylinder07",
+        "Cylinder08",
+        "Cylinder09",
+        "Cylinder10"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Well04",
+      "source": "assets-work/World1/Wells01/Well04",
+      "authored_vertices": 782,
+      "reimport_vertices": 782,
+      "authored_to_export_max": 7.827104127500206e-05,
+      "export_to_authored_max": 7.827104127500206e-05,
+      "bone_names": [
+        "Cylinder07",
+        "Cylinder08",
+        "Cylinder09",
+        "Cylinder10",
+        "Cylinder11",
+        "Cylinder12",
+        "Cylinder13",
+        "Cylinder14"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall03",
+      "source": "assets-work/World1/Architecture03/HouseWall03",
+      "authored_vertices": 24,
+      "reimport_vertices": 24,
+      "authored_to_export_max": 7.68876816437114e-06,
+      "export_to_authored_max": 7.68876816437114e-06,
+      "bone_names": [
+        "joint_02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Bridge01",
+      "source": "assets-work/World1/Architecture03/Bridge01",
+      "authored_vertices": 190,
+      "reimport_vertices": 190,
+      "authored_to_export_max": 1.52587890625e-05,
+      "export_to_authored_max": 1.52587890625e-05,
+      "bone_names": [
+        "Box01",
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "BridgeStone01",
+      "source": "assets-work/World1/Architecture03/BridgeStone01",
+      "authored_vertices": 85,
+      "reimport_vertices": 85,
+      "authored_to_export_max": 0.0010012835264205933,
+      "export_to_authored_max": 0.0010012835264205933,
+      "bone_names": [
+        "464",
+        "Box01"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon01",
+      "source": "assets-work/World1/Cannons01/Cannon01",
+      "authored_vertices": 382,
+      "reimport_vertices": 382,
+      "authored_to_export_max": 1.629639336897526e-05,
+      "export_to_authored_max": 1.629639336897526e-05,
+      "bone_names": [
+        "Box06"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon02",
+      "source": "assets-work/World1/Cannons01/Cannon02",
+      "authored_vertices": 366,
+      "reimport_vertices": 366,
+      "authored_to_export_max": 1.3885707630834077e-05,
+      "export_to_authored_max": 1.3885707630834077e-05,
+      "bone_names": [
+        "Box06"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon03",
+      "source": "assets-work/World1/Cannons01/Cannon03",
+      "authored_vertices": 200,
+      "reimport_vertices": 200,
+      "authored_to_export_max": 1.0501248652872164e-05,
+      "export_to_authored_max": 1.0501248652872164e-05,
+      "bone_names": [
+        "Box06"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Hanging01",
+      "source": "assets-work/World1/Cannons01/Hanging01",
+      "authored_vertices": 242,
+      "reimport_vertices": 242,
+      "authored_to_export_max": 3.0517578125e-05,
+      "export_to_authored_max": 3.0517578125e-05,
+      "bone_names": [
+        "Box08",
+        "Box09"
+      ],
+      "result": "PASS"
+    }
+  ]
+}

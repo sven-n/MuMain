@@ -1,0 +1,47 @@
+00:00.587  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/source.blend"
+skipping reference object 'Tree11' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Tree11_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_4ydcx2m7/Tree11_mu_export.smd
+- Exported 10 bones
+- Exported 1 frames
+- Exported 169 polys
+- Exported 2 materials
+   tree_06.tga
+   tree_03.jpg
+- SMD export took 0.0036551952362060547
+
+
+Blender Source Tools: exporting Tree11_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_4ydcx2m7/anims/Tree11_a00.smd
+- Exported 10 bones
+- Exported 31 frames
+- SMD export took 0.008003950119018555
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_4ydcx2m7/Tree11_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/exports/Tree11.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_4ydcx2m7/anims/Tree11_a00.smd --name Tree11.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/exports/Tree11.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/exports/Tree11.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/exports/Tree11.bmd
+  name field: Tree11.smd  version: 12
+  meshes: 2  bones: 10  actions: 1  triangles: 169
+  bounds (bind pose): min -178.11 -170.89 -0.05  max 195.18 187.60 560.52  size 373.29 358.49 560.58
+  mesh 0: triangles=144 vertices=102 normals=102 uvs=17 texture=tree_06.tga
+  mesh 1: triangles=25 vertices=16 normals=16 uvs=20 texture=tree_03.jpg
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Bone04" parent=2
+  bone 4: "Bone05" parent=2
+  bone 5: "Bone06" parent=4
+  bone 6: "Bone07" parent=2
+  bone 7: "Bone08" parent=6
+  bone 8: "Bone09" parent=7
+  bone 9: "Sphere02" parent=0
+  action 0: keys=31 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

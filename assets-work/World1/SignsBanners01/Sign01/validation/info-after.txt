@@ -1,0 +1,12 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/exports/Sign01.bmd
+  name field: Sign01.smd  version: 12
+  meshes: 3  bones: 4  actions: 1  triangles: 46
+  bounds (bind pose): min -118.88 -4.64 0.05  max 0.92 7.93 81.77  size 119.80 12.57 81.72
+  mesh 0: triangles=40 vertices=28 normals=34 uvs=38 texture=notice.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=signboard.tga
+  mesh 2: triangles=4 vertices=8 normals=1 uvs=4 texture=doorknob.tga
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Cylinder01" parent=0
+  action 0: keys=21 lock=0

@@ -1,0 +1,9 @@
+# bmdconv action manifest for House03.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd House03.smd <output.bmd> --manifest House03.actions.txt
+model Data2\Object1\house_smith.smd
+action 0 file=House03_a00.smd keys=1 lock=0
+texture 0 tile_ston05.jpg original=tile_ston05.jpg
+texture 1 tile_ston04.jpg original=tile_ston04.jpg
+texture 2 tile_ston06.jpg original=tile_ston06.jpg
+texture 3 tile_ston07.tga original=tile_ston07.tga
+texture 4 light_02.jpg original=light_02.jpg

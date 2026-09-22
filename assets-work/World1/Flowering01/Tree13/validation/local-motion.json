@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "nodes": "Bone names, order, parents identical",
+  "samples": [
+    {
+      "file": "Tree13.smd",
+      "frames": 1,
+      "bone_samples": 10,
+      "max_local_position_component": 1.6000000002236447e-05,
+      "max_rotation_matrix_component": 0
+    },
+    {
+      "file": "Tree13_a00.smd",
+      "frames": 31,
+      "bone_samples": 310,
+      "max_local_position_component": 7.700000000454565e-05,
+      "max_rotation_matrix_component": 0
+    }
+  ],
+  "position_tolerance": 0.001,
+  "rotation_matrix_tolerance": 1e-05,
+  "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+  "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+}

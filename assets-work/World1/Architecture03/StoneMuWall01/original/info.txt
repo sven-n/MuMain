@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneMuWall01/original/StoneMuWall01.bmd
+  name field: StoneMuWall01.smd  version: 12
+  meshes: 5  bones: 1  actions: 1  triangles: 398
+  bounds (bind pose): min -300.06 -134.96 0.00  max 299.92 100.67 623.57  size 599.98 235.63 623.57
+  mesh 0: triangles=136 vertices=88 normals=130 uvs=58 texture=c_wall04.jpg
+  mesh 1: triangles=32 vertices=40 normals=45 uvs=16 texture=c_wall05.jpg
+  mesh 2: triangles=20 vertices=24 normals=9 uvs=10 texture=c_wall06.jpg
+  mesh 3: triangles=82 vertices=61 normals=19 uvs=33 texture=tile_02.jpg
+  mesh 4: triangles=128 vertices=88 normals=84 uvs=44 texture=bridge_01.jpg
+  bone 0: "Cylinder01" parent=-1
+  action 0: keys=1 lock=0

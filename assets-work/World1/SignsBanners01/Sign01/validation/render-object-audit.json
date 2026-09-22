@@ -1,0 +1,116 @@
+{
+  "before": [
+    {
+      "name": "Sign01",
+      "type": "MESH",
+      "helper": false,
+      "hide_render": false,
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        {
+          "name": "notice.jpg",
+          "textures": [
+            "//../../../../../../../../../../var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_srneiw19/textures/notice.jpg"
+          ]
+        },
+        {
+          "name": "signboard.tga",
+          "textures": [
+            "//../../../../../../../../../../var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_srneiw19/textures/signboard.tga"
+          ]
+        },
+        {
+          "name": "doorknob.tga",
+          "textures": [
+            "//../../../../../../../../../../var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_srneiw19/textures/doorknob.tga"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sign01_skeleton",
+      "type": "ARMATURE",
+      "helper": false,
+      "hide_render": false,
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "smd_bone_vis",
+      "type": "MESH",
+      "helper": true,
+      "hide_render": false,
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    }
+  ],
+  "after": [
+    {
+      "name": "Sign01",
+      "type": "MESH",
+      "helper": false,
+      "hide_render": false,
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        {
+          "name": "notice.jpg",
+          "textures": [
+            "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/textures/notice.jpg"
+          ]
+        },
+        {
+          "name": "signboard.tga",
+          "textures": [
+            "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/textures/signboard.tga"
+          ]
+        },
+        {
+          "name": "doorknob.tga",
+          "textures": [
+            "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/textures/doorknob.tga"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sign01_skeleton",
+      "type": "ARMATURE",
+      "helper": false,
+      "hide_render": false,
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "smd_bone_vis",
+      "type": "MESH",
+      "helper": true,
+      "hide_render": false,
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    }
+  ]
+}

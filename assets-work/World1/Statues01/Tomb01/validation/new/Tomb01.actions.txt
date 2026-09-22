@@ -1,0 +1,5 @@
+# bmdconv action manifest for Tomb01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Tomb01.smd <output.bmd> --manifest Tomb01.actions.txt
+model Tomb01.smd
+action 0 file=Tomb01_a00.smd keys=1 lock=0
+texture 0 grave_02.jpg original=grave_02.jpg

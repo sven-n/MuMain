@@ -1,0 +1,15 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/original/smd/StoneWall01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/original/smd/StoneWall01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/original/smd/StoneWall01.actions.txt
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/original/smd/StoneWall02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/original/smd/StoneWall02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/original/smd/StoneWall02.actions.txt
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/original/smd/StoneWall03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/original/smd/StoneWall03_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/original/smd/StoneWall03.actions.txt
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/original/smd/StoneWall05.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/original/smd/StoneWall05_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/original/smd/StoneWall05.actions.txt
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/original/smd/StoneWall06.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/original/smd/StoneWall06_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/original/smd/StoneWall06.actions.txt

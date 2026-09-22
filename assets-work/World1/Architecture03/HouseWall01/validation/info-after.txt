@@ -1,0 +1,9 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall01/exports/HouseWall01.bmd
+  name field: HouseWall01.smd  version: 12
+  meshes: 3  bones: 1  actions: 1  triangles: 52
+  bounds (bind pose): min -100.06 -50.90 0.28  max 100.03 49.55 264.48  size 200.09 100.45 264.20
+  mesh 0: triangles=24 vertices=16 normals=20 uvs=20 texture=tile_wood01.jpg
+  mesh 1: triangles=20 vertices=16 normals=5 uvs=24 texture=tile_wood02.jpg
+  mesh 2: triangles=8 vertices=8 normals=4 uvs=12 texture=tile_ston04.jpg
+  bone 0: "Object02" parent=-1
+  action 0: keys=1 lock=0

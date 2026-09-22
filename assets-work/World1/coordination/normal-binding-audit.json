@@ -1,0 +1,2200 @@
+{
+  "result": "PASS",
+  "normal_direction_tolerance": 0.0001,
+  "models": [
+    {
+      "model": "Furniture03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "desk_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "desk_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "desk_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_08.tga",
+          "shared_normal_cases": 14,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_09.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass06",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_09.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Fence01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Fence02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "joint.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Fence03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "joint.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Fence04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "joint.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree09",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_07.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree10",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_07.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tree_02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tree_02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree01",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "Tree_a.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree02",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "Tree_a.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree11",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree_06.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tree_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree06",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "House02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "drum.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "steel.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "TreasureDrum01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "drum.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StreetLight01",
+      "frames_including_bind": 22,
+      "meshes": [
+        {
+          "material": "streetlight.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "streetlight_brightness2.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stone01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "ston01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ston02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stone02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "ston01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ston02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stone03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "ston01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stone04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "ston01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stone05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "ston01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree08",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass07",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "mushroom.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass08",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "mushroom.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree07",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tree_04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "SteelWall01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "steel_barred_b.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "steel_barred_a.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "SteelWall02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "steel_barred_b.jpg",
+          "shared_normal_cases": 97,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "steel_barred_a.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "SteelWall03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "steel_barred_b.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "steel_barred_a.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "SteelDoor01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "steel_barred_b.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "steel_barred_door.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseEtc03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "steel_barred_a.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "steel_barred_door.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseEtc01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "c_wall04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "c_wall04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall05.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "c_wall06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall05.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "c_wall04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneMuWall04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "c_wall04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 5,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseEtc02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "c_wall04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_house01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 5,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall06",
+      "frames_including_bind": 26,
+      "meshes": [
+        {
+          "material": "badge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "badge_03.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "FireLight01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "light.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "light2.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "light3.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "FireLight02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "fire_light_01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "copra_gate.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Bonfire01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "fire_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "fire_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "DoungeonGate01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "copra_gate.jpg",
+          "shared_normal_cases": 20,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Beer02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "pot3.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "apple.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bottle.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "plate.jpg",
+          "shared_normal_cases": 9,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "winecup.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Beer03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "bottle.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "winecup.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "pot.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "pot2.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bookshelf.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bottle.tga",
+          "shared_normal_cases": 3,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "bottle.tga",
+          "shared_normal_cases": 48,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bookshelf.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture06",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "bookshelf.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "chair2.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Furniture07",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "bookshelf.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "House01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_ston05.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_house01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "House03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_ston05.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston07.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "light_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "House04",
+      "frames_including_bind": 41,
+      "meshes": [
+        {
+          "material": "tile_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_house01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_windows01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_space01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tent01",
+      "frames_including_bind": 37,
+      "meshes": [
+        {
+          "material": "tile_house01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "light_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Sign01",
+      "frames_including_bind": 22,
+      "meshes": [
+        {
+          "material": "notice.jpg",
+          "shared_normal_cases": 1,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "signboard.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "doorknob.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Sign02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "notice.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Curtain01",
+      "frames_including_bind": 27,
+      "meshes": [
+        {
+          "material": "badge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "badge_02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneWall04",
+      "frames_including_bind": 26,
+      "meshes": [
+        {
+          "material": "badge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "badge_03.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Ship01",
+      "frames_including_bind": 31,
+      "meshes": [
+        {
+          "material": "TileGround03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship07.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship05.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship07.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship06.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ship05.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "House05",
+      "frames_including_bind": 31,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "ston02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall05",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall06",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Stair01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "stone_statue02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "stone_statue01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "StoneStatue03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tombstone_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "angel_stone_statue.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "SteelStatue01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tombstone_big.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grave_02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tomb02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grave_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage01",
+      "frames_including_bind": 22,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_02.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_03.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tub.jpg",
+          "shared_normal_cases": 1,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Carriage04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "grass_01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Straw01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grass_01.tga",
+          "shared_normal_cases": 4,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Straw02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "grass_01.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Grass02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_08.tga",
+          "shared_normal_cases": 32,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": true,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree12",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree_01.jpg",
+          "shared_normal_cases": 8,
+          "max_direction_delta": 0.2035985819916798,
+          "result": "REVIEW"
+        },
+        {
+          "material": "tree_04.tga",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0.02686452504741342,
+          "result": "REVIEW"
+        }
+      ],
+      "original_bytes_preserved": true,
+      "acceptance_basis": "Exact original BMD retains pre-existing normal behavior",
+      "result": "PASS"
+    },
+    {
+      "model": "Tree13",
+      "frames_including_bind": 32,
+      "meshes": [
+        {
+          "material": "tree_05.tga",
+          "shared_normal_cases": 9,
+          "max_direction_delta": 0.02685668706991248,
+          "result": "REVIEW"
+        },
+        {
+          "material": "tree_01.jpg",
+          "shared_normal_cases": 3,
+          "max_direction_delta": 0.04042539971505058,
+          "result": "REVIEW"
+        }
+      ],
+      "original_bytes_preserved": true,
+      "acceptance_basis": "Exact original BMD retains pre-existing normal behavior",
+      "result": "PASS"
+    },
+    {
+      "model": "Well01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tub.jpg",
+          "shared_normal_cases": 42,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "well.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "jar_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Well02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "well.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Well03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "jar_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Well04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "jar_01.jpg",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "HouseWall03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Bridge01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "bridge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_shadow01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "BridgeStone01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_shadow01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Cannon03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Hanging01",
+      "frames_including_bind": 26,
+      "meshes": [
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    }
+  ],
+  "client_verified": false
+}

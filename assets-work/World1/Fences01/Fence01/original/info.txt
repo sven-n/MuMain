@@ -1,0 +1,7 @@
+model src/bin/Data/Object1/Fence01.bmd
+  name field: Data2\Object1\fence.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 36
+  bounds (bind pose): min -88.82 -9.03 -0.33  max 88.93 11.98 100.83  size 177.76 21.01 101.17
+  mesh 0: triangles=36 vertices=34 normals=21 uvs=22 texture=tile_wood02.jpg
+  bone 0: "Box07" parent=-1
+  action 0: keys=1 lock=0

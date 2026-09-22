@@ -1,0 +1,60 @@
+{
+  "status": "PASS: authored geometry; engine validation separately required",
+  "triangles": 572,
+  "bounds_before": [
+    [
+      -12.10568618774414,
+      -73.27314758300781,
+      0.3388980031013489
+    ],
+    [
+      12.633095741271973,
+      6.812636852264404,
+      258.31719970703125
+    ]
+  ],
+  "bounds_after": [
+    [
+      -12.10568618774414,
+      -73.27314758300781,
+      0.3388980031013489
+    ],
+    [
+      12.633095741271973,
+      6.812579154968262,
+      258.317138671875
+    ]
+  ],
+  "bone_order": [
+    "Dummy00",
+    "Dummy01",
+    "Dummy02",
+    "Mesh02",
+    "Cylinder02",
+    "Bone01",
+    "Bone02",
+    "Bone03",
+    "Bone04",
+    "Bone05",
+    "Mesh01"
+  ],
+  "action_meta": {
+    "StreetLight01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "streetlight.jpg": [
+      512,
+      512
+    ],
+    "streetlight_brightness2.jpg": [
+      128,
+      128
+    ]
+  },
+  "skinning": "Exactly one valid non-dummy full-weight bone per vertex",
+  "uv": "One UVMap set, finite; new UVs [0,1]; original lantern glow repeat to -0.0936 retained",
+  "materials": "Original order and texture filenames; one diffuse image per mesh; no alpha or flags added"
+}

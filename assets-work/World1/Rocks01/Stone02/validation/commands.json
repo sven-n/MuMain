@@ -1,0 +1,119 @@
+[
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "bmd2smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/Stone02.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02.actions.txt\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02.smd"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02.smd: bones=1 frames=1 triangles=159 materials=2\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02_a00.smd",
+      "--animation"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/original/Stone02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/Stone02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/Stone02.bmd\n  name field: Data2\\Object1\\Ston_02.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 159\n  bounds (bind pose): min -149.27 -148.93 -20.04  max 105.96 128.99 258.27  size 255.23 277.92 278.31\n  mesh 0: triangles=125 vertices=83 normals=78 uvs=83 texture=ston01.jpg\n  mesh 1: triangles=34 vertices=68 normals=51 uvs=4 texture=ston02.tga\n  bone 0: \"ston02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "bmd2smd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement"
+    ],
+    "exit_code": 0,
+    "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02.actions.txt\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02.smd"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02.smd: bones=1 frames=1 triangles=503 materials=2\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "validate",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02_a00.smd",
+      "--animation"
+    ],
+    "exit_code": 0,
+    "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/validation/replacement/Stone02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "info",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd"
+    ],
+    "exit_code": 0,
+    "stdout": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd\n  name field: Stone02.smd  version: 12\n  meshes: 2  bones: 1  actions: 1  triangles: 503\n  bounds (bind pose): min -149.27 -148.93 -20.04  max 105.96 128.99 258.27  size 255.23 277.92 278.31\n  mesh 0: triangles=469 vertices=263 normals=263 uvs=429 texture=ston01.jpg\n  mesh 1: triangles=34 vertices=68 normals=68 uvs=4 texture=ston02.tga\n  bone 0: \"ston02\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+      "compare",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/original/Stone02.bmd",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd"
+    ],
+    "exit_code": 2,
+    "stdout": "meshes 2 vs 2, bones 1 vs 1, actions 1 vs 1, triangles 159 vs 503\nunmatched triangles: 123  max corner distance: 0.0022  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/tools/mu_texture.py",
+      "check",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/ston01.OZJ"
+    ],
+    "exit_code": 0,
+    "stdout": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/ston01.OZJ\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/Users/webproduktion3/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/tools/mu_texture.py",
+      "check",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/ston02.OZT"
+    ],
+    "exit_code": 0,
+    "stdout": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rocks/assets-work/World1/Rocks01/Stone02/exports/ston02.OZT\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,42 @@
+{
+  "original_reference_unchanged": true,
+  "geometry_unchanged": false,
+  "ridge_refinement": [
+    {
+      "selected_convex_ridges": 27,
+      "protected_extreme_vertices": 6,
+      "width_game_units": 0.46026599121093753,
+      "segments_export": 1,
+      "segments_editable_high_poly": 3,
+      "selection": "Only ston01 convex manifold ridges above 25 degrees; no grass or bounds-extreme edges",
+      "collapsed_new_bevel_uvs_repaired": 0,
+      "rock_faces_box_projected": 137,
+      "uv_projection": "Dominant face axis, uniform world density; grass UVs untouched"
+    }
+  ],
+  "numeric_snapshot_sha256": "665d873cc151af0810cc070163d1f8bb060ac250db301bae566968373f53f175",
+  "triangles": 137,
+  "bone_order": [
+    "GeoSphere01"
+  ],
+  "action_meta": {
+    "Stone04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "material_order": [
+    "ston01.jpg"
+  ],
+  "packed_images": {
+    "ston01.jpg": [
+      128,
+      128
+    ],
+    "ston01.jpg.001": [
+      512,
+      512
+    ]
+  },
+  "client_verified": false
+}

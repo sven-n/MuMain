@@ -1,0 +1,44 @@
+{
+  "original_reference_unchanged": true,
+  "geometry_unchanged": true,
+  "ridge_refinement": [
+    {
+      "bars_refined": 0,
+      "geometry": "Original alpha planes retained exactly"
+    }
+  ],
+  "numeric_snapshot_sha256": "156d7c12e9a9379aa27274c00989a07b43a059ddc9d37d139ab129b47fca6134",
+  "triangles": 16,
+  "bone_order": [
+    "Box03"
+  ],
+  "action_meta": {
+    "HouseEtc03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "material_order": [
+    "steel_barred_a.tga",
+    "steel_barred_door.tga"
+  ],
+  "packed_images": {
+    "steel_barred_a.tga": [
+      64,
+      128
+    ],
+    "steel_barred_a.tga.001": [
+      256,
+      512
+    ],
+    "steel_barred_door.tga": [
+      64,
+      128
+    ],
+    "steel_barred_door.tga.001": [
+      256,
+      512
+    ]
+  },
+  "client_verified": false
+}

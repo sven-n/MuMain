@@ -1,0 +1,850 @@
+{
+  "models": {
+    "SteelWall01": {
+      "path": "src/bin/Data/Object1/SteelWall01.bmd",
+      "type": 65,
+      "placements": [
+        {
+          "position": [
+            12850.0,
+            20800.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            -5.0,
+            0.0,
+            -900.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.5,
+            208.0
+          ]
+        },
+        {
+          "position": [
+            14900.0,
+            20800.0,
+            164.99996948242188
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -810.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            149.0,
+            208.0
+          ]
+        }
+      ],
+      "textures": {
+        "steel_barred_b.jpg": [
+          "src/bin/Data/Object1/steel_barred_b.OZJ"
+        ],
+        "steel_barred_a.tga": [
+          "src/bin/Data/Object1/steel_barred_a.OZT"
+        ]
+      },
+      "info": "model src/bin/Data/Object1/SteelWall01.bmd\n  name field: Data2\\Object1\\steel_barred_02.sm  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 52\n  bounds (bind pose): min -49.99 -50.01 0.00  max 3.44 3.54 247.03  size 53.43 53.55 247.03\n  mesh 0: triangles=48 vertices=38 normals=38 uvs=34 texture=steel_barred_b.jpg\n  mesh 1: triangles=4 vertices=6 normals=3 uvs=6 texture=steel_barred_a.tga\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "scope_exclusion": null
+    },
+    "SteelWall02": {
+      "path": "src/bin/Data/Object1/SteelWall02.bmd",
+      "type": 66,
+      "placements": [
+        {
+          "position": [
+            12200.0,
+            10900.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            810.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            122.0,
+            109.0
+          ]
+        },
+        {
+          "position": [
+            12000.0,
+            11600.0,
+            165.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            900.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            120.0,
+            116.0
+          ]
+        },
+        {
+          "position": [
+            11600.0,
+            11600.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            900.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            116.0,
+            116.0
+          ]
+        },
+        {
+          "position": [
+            12800.0,
+            21050.0,
+            165.00001525878906
+          ],
+          "rotation": [
+            -5.0,
+            0.0,
+            -90.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.0,
+            210.5
+          ]
+        },
+        {
+          "position": [
+            12800.0,
+            21450.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            -5.0,
+            0.0,
+            270.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.0,
+            214.5
+          ]
+        },
+        {
+          "position": [
+            12800.0,
+            21850.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            5.0,
+            0.0,
+            450.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.0,
+            218.5
+          ]
+        },
+        {
+          "position": [
+            12800.0,
+            22250.0,
+            164.99996948242188
+          ],
+          "rotation": [
+            5.0,
+            0.0,
+            450.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.0,
+            222.5
+          ]
+        },
+        {
+          "position": [
+            12800.0,
+            22650.0,
+            164.99996948242188
+          ],
+          "rotation": [
+            5.0,
+            0.0,
+            450.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.0,
+            226.5
+          ]
+        },
+        {
+          "position": [
+            14000.0,
+            14100.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            720.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            140.0,
+            141.0
+          ]
+        },
+        {
+          "position": [
+            13800.0,
+            14300.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2070.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            138.0,
+            143.0
+          ]
+        },
+        {
+          "position": [
+            14400.0,
+            14100.0,
+            165.00001525878906
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2160.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            144.0,
+            141.0
+          ]
+        },
+        {
+          "position": [
+            13800.0,
+            14700.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2070.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            138.0,
+            147.0
+          ]
+        },
+        {
+          "position": [
+            13108.0703125,
+            20798.896484375,
+            165.0000457763672
+          ],
+          "rotation": [
+            -5.0,
+            0.0,
+            -180.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            131.080703125,
+            207.98896484375
+          ]
+        },
+        {
+          "position": [
+            13500.0,
+            20800.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            -5.0,
+            0.0,
+            -180.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            135.0,
+            208.0
+          ]
+        },
+        {
+          "position": [
+            13468.322265625,
+            22839.986328125,
+            139.7505645751953
+          ],
+          "rotation": [
+            -5.0,
+            0.0,
+            -540.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            134.68322265625,
+            228.39986328125
+          ]
+        },
+        {
+          "position": [
+            15200.0,
+            14100.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            1080.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            152.0,
+            141.0
+          ]
+        },
+        {
+          "position": [
+            14650.0,
+            20800.0,
+            165.00001525878906
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            146.5,
+            208.0
+          ]
+        },
+        {
+          "position": [
+            14770.5439453125,
+            22206.72265625,
+            170.00001525878906
+          ],
+          "rotation": [
+            20.0,
+            0.0,
+            300.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            147.705439453125,
+            222.0672265625
+          ]
+        },
+        {
+          "position": [
+            14900.0,
+            21050.0,
+            165.00001525878906
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            450.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            149.0,
+            210.5
+          ]
+        },
+        {
+          "position": [
+            14900.0,
+            21450.0,
+            165.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            450.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            149.0,
+            214.5
+          ]
+        },
+        {
+          "position": [
+            14950.1796875,
+            21997.169921875,
+            70.00004577636719
+          ],
+          "rotation": [
+            -30.0,
+            0.0,
+            390.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            149.501796875,
+            219.97169921875
+          ]
+        }
+      ],
+      "textures": {
+        "steel_barred_b.jpg": [
+          "src/bin/Data/Object1/steel_barred_b.OZJ"
+        ],
+        "steel_barred_a.tga": [
+          "src/bin/Data/Object1/steel_barred_a.OZT"
+        ]
+      },
+      "info": "model src/bin/Data/Object1/SteelWall02.bmd\n  name field: Data2\\Object1\\steel_barred_03.sm  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 72\n  bounds (bind pose): min -199.68 -3.23 0.00  max 200.48 3.21 220.07  size 400.16 6.44 220.07\n  mesh 0: triangles=64 vertices=64 normals=8 uvs=12 texture=steel_barred_b.jpg\n  mesh 1: triangles=8 vertices=16 normals=1 uvs=4 texture=steel_barred_a.tga\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Box05\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  bone 3: \"Box07\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "scope_exclusion": null
+    },
+    "SteelWall03": {
+      "path": "src/bin/Data/Object1/SteelWall03.bmd",
+      "type": 67,
+      "placements": [
+        {
+          "position": [
+            12200.0,
+            11150.0,
+            165.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            990.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            122.0,
+            111.5
+          ]
+        },
+        {
+          "position": [
+            11350.0,
+            11600.0,
+            165.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            1080.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            113.5,
+            116.0
+          ]
+        },
+        {
+          "position": [
+            12200.0,
+            11450.0,
+            165.00001525878906
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            990.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            122.0,
+            114.5
+          ]
+        },
+        {
+          "position": [
+            12200.0,
+            11550.0,
+            165.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            990.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            122.0,
+            115.5
+          ]
+        },
+        {
+          "position": [
+            15450.0,
+            14100.0,
+            165.00001525878906
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            900.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            154.5,
+            141.0
+          ]
+        }
+      ],
+      "textures": {
+        "steel_barred_b.jpg": [
+          "src/bin/Data/Object1/steel_barred_b.OZJ"
+        ],
+        "steel_barred_a.tga": [
+          "src/bin/Data/Object1/steel_barred_a.OZT"
+        ]
+      },
+      "info": "model src/bin/Data/Object1/SteelWall03.bmd\n  name field: Data2\\Object1\\steel_barred_01.sm  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 18\n  bounds (bind pose): min -49.88 -3.23 0.00  max 50.12 3.21 220.07  size 100.00 6.44 220.07\n  mesh 0: triangles=16 vertices=16 normals=8 uvs=12 texture=steel_barred_b.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_a.tga\n  bone 0: \"Box04\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "scope_exclusion": null
+    },
+    "SteelDoor01": {
+      "path": "src/bin/Data/Object1/SteelDoor01.bmd",
+      "type": 68,
+      "placements": [
+        {
+          "position": [
+            12200.0,
+            11200.0,
+            165.0000457763672
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            1260.0
+          ],
+          "scale": 0.6800003051757812,
+          "tile": [
+            122.0,
+            112.0
+          ]
+        },
+        {
+          "position": [
+            12200.0,
+            11400.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            1260.0
+          ],
+          "scale": 0.6600003242492676,
+          "tile": [
+            122.0,
+            114.0
+          ]
+        },
+        {
+          "position": [
+            13800.0361328125,
+            20782.212890625,
+            164.9999542236328
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            90.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            138.000361328125,
+            207.82212890625
+          ]
+        },
+        {
+          "position": [
+            14300.0,
+            20800.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            90.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            143.0,
+            208.0
+          ]
+        },
+        {
+          "position": [
+            14300.0,
+            22800.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            90.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            143.0,
+            228.0
+          ]
+        },
+        {
+          "position": [
+            13800.0,
+            22800.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            90.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            138.0,
+            228.0
+          ]
+        },
+        {
+          "position": [
+            15000.0,
+            14100.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            810.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            150.0,
+            141.0
+          ]
+        },
+        {
+          "position": [
+            14600.0,
+            14100.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            810.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            146.0,
+            141.0
+          ]
+        }
+      ],
+      "textures": {
+        "steel_barred_b.jpg": [
+          "src/bin/Data/Object1/steel_barred_b.OZJ"
+        ],
+        "steel_barred_door.tga": [
+          "src/bin/Data/Object1/steel_barred_door.OZT"
+        ]
+      },
+      "info": "model src/bin/Data/Object1/SteelDoor01.bmd\n  name field: Data2\\Object1\\steel_barred_door.  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 58\n  bounds (bind pose): min -1.55 -6.62 0.45  max 152.90 6.70 356.48  size 154.45 13.32 356.02\n  mesh 0: triangles=56 vertices=52 normals=22 uvs=40 texture=steel_barred_b.jpg\n  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_door.tga\n  bone 0: \"Cylinder04\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "scope_exclusion": null
+    },
+    "HouseEtc03": {
+      "path": "src/bin/Data/Object1/HouseEtc03.bmd",
+      "type": 129,
+      "placements": [
+        {
+          "position": [
+            2800.0,
+            7700.0,
+            171.1863555908203
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2850.0
+          ],
+          "scale": 0.8600001335144043,
+          "tile": [
+            28.0,
+            77.0
+          ]
+        },
+        {
+          "position": [
+            2600.0,
+            9300.0,
+            164.99996948242188
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            3330.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            26.0,
+            93.0
+          ]
+        },
+        {
+          "position": [
+            3489.043212890625,
+            8992.29296875,
+            172.95675659179688
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2880.0
+          ],
+          "scale": 0.7000002861022949,
+          "tile": [
+            34.89043212890625,
+            89.9229296875
+          ]
+        },
+        {
+          "position": [
+            3460.84912109375,
+            8981.7158203125,
+            341.78631591796875
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2670.0
+          ],
+          "scale": 0.6600003242492676,
+          "tile": [
+            34.6084912109375,
+            89.817158203125
+          ]
+        },
+        {
+          "position": [
+            11700.0,
+            11000.0,
+            164.99998474121094
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            1890.0
+          ],
+          "scale": 0.5600004196166992,
+          "tile": [
+            117.0,
+            110.0
+          ]
+        },
+        {
+          "position": [
+            11850.0,
+            10900.0,
+            165.00003051757812
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2280.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            118.5,
+            109.0
+          ]
+        },
+        {
+          "position": [
+            11400.0,
+            14100.0,
+            164.99996948242188
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            1890.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            114.0,
+            141.0
+          ]
+        },
+        {
+          "position": [
+            12819.54296875,
+            11814.6845703125,
+            165.00001525878906
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            2250.0
+          ],
+          "scale": 1.0,
+          "tile": [
+            128.1954296875,
+            118.146845703125
+          ]
+        }
+      ],
+      "textures": {
+        "steel_barred_a.tga": [
+          "src/bin/Data/Object1/steel_barred_a.OZT"
+        ],
+        "steel_barred_door.tga": [
+          "src/bin/Data/Object1/steel_barred_door.OZT"
+        ]
+      },
+      "info": "model src/bin/Data/Object1/HouseEtc03.bmd\n  name field: Data2\\Object1\\cage.smd  version: 10\n  meshes: 2  bones: 1  actions: 1  triangles: 16\n  bounds (bind pose): min -99.78 -99.55 3.10  max 100.22 100.26 246.61  size 200.00 199.81 243.52\n  mesh 0: triangles=12 vertices=8 normals=6 uvs=12 texture=steel_barred_a.tga\n  mesh 1: triangles=4 vertices=6 normals=1 uvs=4 texture=steel_barred_door.tga\n  bone 0: \"Box03\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "scope_exclusion": null
+    }
+  },
+  "texture_consumers": {
+    "src/bin/Data/Object1/steel_barred_a.OZT": [
+      "HouseEtc03",
+      "SteelWall01",
+      "SteelWall02",
+      "SteelWall03"
+    ],
+    "src/bin/Data/Object1/steel_barred_b.OZJ": [
+      "SteelDoor01",
+      "SteelWall01",
+      "SteelWall02",
+      "SteelWall03"
+    ],
+    "src/bin/Data/Object1/steel_barred_door.OZT": [
+      "HouseEtc03",
+      "SteelDoor01"
+    ]
+  }
+}

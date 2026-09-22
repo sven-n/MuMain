@@ -1,0 +1,28 @@
+House02
+meshes 2 vs 2, bones 1 vs 1, actions 1 vs 1, triangles 173 vs 1215
+unmatched triangles: 95  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/drum.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/steel.OZJ
+
+TreasureDrum01
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 60 vs 1456
+unmatched triangles: 60  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/drum.OZJ
+
+StreetLight01
+meshes 2 vs 2, bones 11 vs 11, actions 1 vs 1, triangles 84 vs 572
+unmatched triangles: 63  max corner distance: 0.0000  max bone distance: 0.0001  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 11 vs 11, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0001  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/streetlight.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/streetlight_brightness2.OZJ

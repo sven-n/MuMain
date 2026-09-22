@@ -1,0 +1,10 @@
+The inherited helper initially matched texture stems and falsely included Tree12 (tree_04.tga / tree_04.OZT) in the tree_04.jpg / tree_04.OZJ family. Corrected helper matches complete texture names/extensions. Tree12 and its separate OZT are untouched; final ownership validation passes.
+
+Original diagnostic:
+Traceback (most recent call last):
+  File "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/validate_final.py", line 71, in <module>
+    main()
+  File "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/validate_final.py", line 27, in main
+    assert set(consumers).issubset(NAMES)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

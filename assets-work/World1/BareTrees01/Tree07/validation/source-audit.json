@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "saved_packed_source": true,
+  "REF_ORIGINAL": true,
+  "triangles": 90,
+  "rigid_bindings": "One full-weight original real bone per vertex",
+  "materials": [
+    "tree_03.jpg",
+    "tree_04.jpg"
+  ],
+  "bone_order": [
+    "Cylinder02"
+  ],
+  "UVs": "Finite; original projection compared separately after official export"
+}

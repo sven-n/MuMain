@@ -1,0 +1,45 @@
+{
+  "triangles": 333,
+  "bounds_before": [
+    [
+      -199.32679748535156,
+      -43.0364990234375,
+      -2.1010000705718994
+    ],
+    [
+      198.82650756835938,
+      180.50369262695312,
+      299.2403869628906
+    ]
+  ],
+  "bounds_after": [
+    [
+      -199.32679748535156,
+      -43.0364990234375,
+      -2.1010000705718994
+    ],
+    [
+      198.82650756835938,
+      180.50369262695312,
+      299.2403869628906
+    ]
+  ],
+  "material_order": [
+    "tile_01.jpg",
+    "horse_drawn_01.jpg",
+    "tile_03.jpg"
+  ],
+  "bone_order": [
+    "Box04",
+    "Box23",
+    "Box06",
+    "Object01"
+  ],
+  "action_meta": {
+    "StoneWall03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "geometry": "Readonly original geometry and BMD bytes retained; shared texture compatibility"
+}

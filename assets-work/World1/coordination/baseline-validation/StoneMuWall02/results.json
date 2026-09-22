@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02.actions.txt\n"
+  },
+  {
+    "command": "validate StoneMuWall02.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02.smd: bones=1 frames=1 triangles=44 materials=3\nOK\n"
+  },
+  {
+    "command": "validate StoneMuWall02_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

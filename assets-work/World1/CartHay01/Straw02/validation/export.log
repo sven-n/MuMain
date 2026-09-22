@@ -1,0 +1,51 @@
+00:00.497  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/source.blend"
+skipping reference object 'Straw02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder05_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder12_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder13_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder14_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder15_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder16_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder17_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder18_TiedStraw' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Straw02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a9jyscj1/Straw02_mu_export.smd
+- Exported 8 bones
+- Exported 1 frames
+- Exported 1152 polys
+- Exported 1 materials
+   grass_01.tga
+- SMD export took 0.01995396614074707
+
+
+Blender Source Tools: exporting Straw02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a9jyscj1/anims/Straw02_a00.smd
+- Exported 8 bones
+- Exported 1 frames
+- SMD export took 0.0008132457733154297
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a9jyscj1/Straw02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a9jyscj1/anims/Straw02_a00.smd --name Straw02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd
+  name field: Straw02.smd  version: 12
+  meshes: 1  bones: 8  actions: 1  triangles: 1152
+  bounds (bind pose): min -115.40 -210.70 -6.52  max 139.96 221.64 199.44  size 255.36 432.34 205.96
+  mesh 0: triangles=1152 vertices=592 normals=583 uvs=91 texture=grass_01.tga
+  bone 0: "Cylinder05" parent=-1
+  bone 1: "Cylinder12" parent=-1
+  bone 2: "Cylinder13" parent=-1
+  bone 3: "Cylinder14" parent=-1
+  bone 4: "Cylinder15" parent=-1
+  bone 5: "Cylinder16" parent=-1
+  bone 6: "Cylinder17" parent=-1
+  bone 7: "Cylinder18" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

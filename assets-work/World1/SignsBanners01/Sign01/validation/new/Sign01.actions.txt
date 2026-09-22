@@ -1,0 +1,7 @@
+# bmdconv action manifest for Sign01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Sign01.smd <output.bmd> --manifest Sign01.actions.txt
+model Sign01.smd
+action 0 file=Sign01_a00.smd keys=21 lock=0
+texture 0 notice.jpg original=notice.jpg
+texture 1 signboard.tga original=signboard.tga
+texture 2 doorknob.tga original=doorknob.tga

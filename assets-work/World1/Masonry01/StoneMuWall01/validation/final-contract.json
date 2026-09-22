@@ -1,0 +1,69 @@
+{
+  "status": "PASS",
+  "triangles": 398,
+  "textures": {
+    "bridge_01.jpg": {
+      "dimensions": [
+        256,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_02.jpg": {
+      "dimensions": [
+        64,
+        64
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall06.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall05.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall04.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -5.7736,
+      6.7736
+    ],
+    [
+      -0.0055,
+      1.9259
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -5.7736,
+      6.7736
+    ],
+    [
+      -0.0055,
+      1.9259
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

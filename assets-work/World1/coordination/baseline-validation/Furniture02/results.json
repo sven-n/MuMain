@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02.actions.txt\n"
+  },
+  {
+    "command": "validate Furniture02.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02.smd: bones=13 frames=1 triangles=464 materials=2\nOK\n"
+  },
+  {
+    "command": "validate Furniture02_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02_a00.smd: bones=13 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

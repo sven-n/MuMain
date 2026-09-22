@@ -1,0 +1,40 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -40.57,
+      -40.22,
+      0.0
+    ],
+    [
+      40.7,
+      41.05,
+      102.98
+    ]
+  ],
+  "bounds_after": [
+    [
+      -40.57,
+      -40.22,
+      0.0
+    ],
+    [
+      40.7,
+      41.05,
+      102.98
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "drum.jpg"
+  ],
+  "export_sha256": {
+    "TreasureDrum01.bmd": "445adb6a928a667d36857af9cb1b459f2012b67e876540da1f962d3fd865c4c0",
+    "drum.OZJ": "1d48c6672bd96e3d689bf1b874eb40e9ec0de198c19439f335e41cbedb5f488f"
+  }
+}

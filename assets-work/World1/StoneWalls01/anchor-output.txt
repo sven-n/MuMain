@@ -1,0 +1,5 @@
+StoneWall01 PASS: 294 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall02 PASS: 294 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall03 PASS: 283 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall05 PASS: 50 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall06 PASS: 48 unchanged triangles; 0.00036599999998543353 maximum original-vertex drift

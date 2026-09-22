@@ -1,0 +1,10 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/src/bin/Data/Object1/Beer03.bmd
+  name field: Data2\Object1\house_in_beer_03.s  version: 10
+  meshes: 2  bones: 3  actions: 1  triangles: 108
+  bounds (bind pose): min -24.01 -13.66 -0.36  max 23.71 16.90 61.47  size 47.72 30.56 61.83
+  mesh 0: triangles=72 vertices=40 normals=20 uvs=30 texture=bottle.tga
+  mesh 1: triangles=36 vertices=25 normals=31 uvs=29 texture=winecup.jpg
+  bone 0: "Cylinder36" parent=-1
+  bone 1: "Cylinder37" parent=-1
+  bone 2: "Cylinder38" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,58 @@
+00:00.503  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/source.blend"
+skipping reference object 'Beer02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ytut_Cutout' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ytut_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder32_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder33_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder34_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder34_Handle' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder35_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ytut01_Cutout' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ytut01_Body' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Beer02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_jhfc2b_0/Beer02_mu_export.smd
+- Exported 6 bones
+- Exported 1 frames
+- Exported 952 polys
+- Exported 5 materials
+   pot3.tga
+   winecup.jpg
+   bottle.tga
+   plate.jpg
+   apple.jpg
+- SMD export took 0.016470909118652344
+
+
+Blender Source Tools: exporting Beer02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_jhfc2b_0/anims/Beer02_a00.smd
+- Exported 6 bones
+- Exported 1 frames
+- SMD export took 0.0008349418640136719
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_jhfc2b_0/Beer02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/exports/Beer02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_jhfc2b_0/anims/Beer02_a00.smd --name Beer02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/exports/Beer02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/exports/Beer02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/exports/Beer02.bmd
+  name field: Beer02.smd  version: 12
+  meshes: 5  bones: 6  actions: 1  triangles: 952
+  bounds (bind pose): min -43.76 -28.36 -0.80  max 44.47 23.53 61.47  size 88.24 51.88 62.27
+  mesh 0: triangles=4 vertices=8 normals=4 uvs=4 texture=pot3.tga
+  mesh 1: triangles=288 vertices=148 normals=148 uvs=102 texture=apple.jpg
+  mesh 2: triangles=144 vertices=74 normals=74 uvs=102 texture=bottle.tga
+  mesh 3: triangles=288 vertices=148 normals=139 uvs=102 texture=plate.jpg
+  mesh 4: triangles=228 vertices=118 normals=118 uvs=153 texture=winecup.jpg
+  bone 0: "ytut" parent=-1
+  bone 1: "Cylinder32" parent=-1
+  bone 2: "Cylinder33" parent=-1
+  bone 3: "Cylinder34" parent=-1
+  bone 4: "Cylinder35" parent=-1
+  bone 5: "ytut01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

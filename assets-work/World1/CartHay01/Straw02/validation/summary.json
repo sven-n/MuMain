@@ -1,0 +1,41 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Intentional straw profile/hub rebuild; full geometry comparison DIFFERENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -115.39,
+      -210.7,
+      -6.52
+    ],
+    [
+      139.96,
+      221.64,
+      199.44
+    ]
+  ],
+  "bounds_after": [
+    [
+      -115.4,
+      -210.7,
+      -6.52
+    ],
+    [
+      139.96,
+      221.64,
+      199.44
+    ]
+  ],
+  "materials": [
+    "grass_01.tga"
+  ],
+  "meshes": 1,
+  "exports": {
+    "Straw02.bmd": "caa5e3da90369c5467fc91e5baaf69b48b76c00bd35848f0661573262c923a67",
+    "grass_01.OZT": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15"
+  }
+}

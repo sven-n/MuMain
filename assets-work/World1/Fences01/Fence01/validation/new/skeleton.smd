@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Box07" -1
+end
+skeleton
+time 0
+0 127.553452 39.615520 211.876968 1.570796 -0.785398 -1.570796
+end
+triangles
+end

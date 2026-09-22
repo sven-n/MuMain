@@ -1,0 +1,26 @@
+{
+  "model": "StoneMuWall01",
+  "game_files": {
+    "src/bin/Data/Object1/StoneMuWall01.bmd": "3e5a80be0b0e045b02874daeb804388e27962152c2f9db4ae652d7803d59b7b6",
+    "src/bin/Data/Object1/c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "src/bin/Data/Object1/c_wall05.OZJ": "e2890842d739f4fa2010e2a90d4af1e368a97bf2028d26c4e15dac0030e05083",
+    "src/bin/Data/Object1/c_wall06.OZJ": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
+    "src/bin/Data/Object1/tile_02.OZJ": "428d88339fd1c04b6d153e33a1ed5a4a03d753130271e11fbf62f68564dfadcf",
+    "src/bin/Data/Object1/bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 398,
+  "bind_bounds": [
+    [
+      -300.063720703125,
+      -134.9591064453125,
+      0.0
+    ],
+    [
+      299.9200134277344,
+      100.67420196533203,
+      623.57421875
+    ]
+  ]
+}

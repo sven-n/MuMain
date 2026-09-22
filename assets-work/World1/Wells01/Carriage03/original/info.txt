@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Carriage03/original/Carriage03.bmd
+  name field: Carriage03.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 538
+  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45
+  mesh 0: triangles=72 vertices=48 normals=92 uvs=28 texture=tub.jpg
+  mesh 1: triangles=466 vertices=309 normals=320 uvs=252 texture=horse_drawn_01.jpg
+  bone 0: "Cylinder01" parent=-1
+  bone 1: "Cylinder03" parent=-1
+  bone 2: "Mesh01" parent=-1
+  bone 3: "Cylinder11" parent=-1
+  action 0: keys=1 lock=0

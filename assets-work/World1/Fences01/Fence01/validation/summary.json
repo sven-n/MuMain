@@ -1,0 +1,40 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -88.82,
+      -9.03,
+      -0.33
+    ],
+    [
+      88.93,
+      11.98,
+      100.83
+    ]
+  ],
+  "bounds_after": [
+    [
+      -88.82,
+      -9.03,
+      -0.33
+    ],
+    [
+      88.93,
+      11.98,
+      100.83
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "tile_wood02.jpg"
+  ],
+  "export_sha256": {
+    "Fence01.bmd": "594570345d8a5f665ad86718c03b491744835179cc1e4e56589387b1bd8b7d34",
+    "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f"
+  }
+}

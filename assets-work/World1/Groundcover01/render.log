@@ -1,0 +1,259 @@
+00:01.575  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/original/source.blend"
+00:03.987  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/review/before.png'
+00:07.175  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/review/terrain-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_adw86u7k
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_adw86u7k/Grass01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_adw86u7k/Grass01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_adw86u7k/Grass01.actions.txt
+
+SMD IMPORTER: now working on Grass01
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: tree_08.tga
+- Imported 120 polys
+SMD Grass01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Grass01_skeleton"
+- Imported 1 frames of animation
+SMD Grass01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:09.976  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/review/after.png'
+00:13.906  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4wn64qam
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4wn64qam/Grass01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4wn64qam/Grass01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_4wn64qam/Grass01.actions.txt
+
+SMD IMPORTER: now working on Grass01
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: tree_08.tga
+- Imported 120 polys
+SMD Grass01 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Grass01_skeleton"
+- Imported 1 frames of animation
+SMD Grass01_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:16.455  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/review/wireframe.png'
+00:16.458  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/original/source.blend"
+00:19.160  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/review/before.png'
+00:22.897  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass01/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_vysi7jxk
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_vysi7jxk/Grass02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_vysi7jxk/Grass02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_vysi7jxk/Grass02.actions.txt
+
+SMD IMPORTER: now working on Grass02
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: tree_08.tga
+- Imported 120 polys
+SMD Grass02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Grass02_skeleton"
+- Imported 1 frames of animation
+SMD Grass02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:26.303  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/review/after.png'
+00:29.718  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qcqd4kpu
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qcqd4kpu/Grass02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qcqd4kpu/Grass02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qcqd4kpu/Grass02.actions.txt
+
+SMD IMPORTER: now working on Grass02
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: tree_08.tga
+- Imported 120 polys
+SMD Grass02 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Grass02_skeleton"
+- Imported 1 frames of animation
+SMD Grass02_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:32.350  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/review/wireframe.png'
+00:32.362  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/original/source.blend"
+00:35.110  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/review/before.png'
+00:38.671  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/exports/Grass05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cadhdrt2
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cadhdrt2/Grass05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cadhdrt2/Grass05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cadhdrt2/Grass05.actions.txt
+
+SMD IMPORTER: now working on Grass05
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tree_09.tga
+- Imported 112 polys
+SMD Grass05 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Grass05_skeleton"
+- Imported 1 frames of animation
+SMD Grass05_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:41.300  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/review/after.png'
+00:45.464  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/exports/Grass05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8bw3mhwn
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8bw3mhwn/Grass05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8bw3mhwn/Grass05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8bw3mhwn/Grass05.actions.txt
+
+SMD IMPORTER: now working on Grass05
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tree_09.tga
+- Imported 112 polys
+SMD Grass05 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Grass05_skeleton"
+- Imported 1 frames of animation
+SMD Grass05_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:49.456  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/review/wireframe.png'
+00:49.459  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/original/source.blend"
+00:54.462  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/review/before.png'
+00:59.059  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass05/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gbyi9cqo
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gbyi9cqo/Grass06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gbyi9cqo/Grass06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_gbyi9cqo/Grass06.actions.txt
+
+SMD IMPORTER: now working on Grass06
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tree_09.tga
+- Imported 112 polys
+SMD Grass06 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Grass06_skeleton"
+- Imported 1 frames of animation
+SMD Grass06_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:02.904  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/review/after.png'
+01:06.889  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y2a5cf3j
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y2a5cf3j/Grass06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y2a5cf3j/Grass06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y2a5cf3j/Grass06.actions.txt
+
+SMD IMPORTER: now working on Grass06
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tree_09.tga
+- Imported 112 polys
+SMD Grass06 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Grass06_skeleton"
+- Imported 1 frames of animation
+SMD Grass06_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+01:08.697  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass06/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 1 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

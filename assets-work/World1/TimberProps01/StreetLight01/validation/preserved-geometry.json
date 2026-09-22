@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "material": "streetlight_brightness2.jpg",
+  "triangles": 36,
+  "positions_uv_and_one_bone_assignment_preserved": true,
+  "max_corner_distance": 7.999999994012796e-06,
+  "position_tolerance": 0.002,
+  "uv_tolerance": 1.1e-06,
+  "normals": "Recalculated by Blender export; normal equality is not claimed",
+  "renderer": "StreetLight01 keeps original BlendMesh=1 material slot and 36 glow triangles"
+}

@@ -1,0 +1,65 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 36,
+  "original_triangles": 36,
+  "bounds_before": [
+    [
+      -3.8440001010894775,
+      -21.555797576904297,
+      -0.08319900184869766
+    ],
+    [
+      98.5679931640625,
+      13.018501281738281,
+      179.98910522460938
+    ]
+  ],
+  "bounds_after": [
+    [
+      -3.8440001010894775,
+      -21.555797576904297,
+      -0.08319900184869766
+    ],
+    [
+      98.5679931640625,
+      13.018501281738281,
+      179.98910522460938
+    ]
+  ],
+  "original_vertices_retained": 27,
+  "bone_order": [
+    "bonee01",
+    "bonee02",
+    "bonee03",
+    "bonee04",
+    "bonee05",
+    "bonee06",
+    "Box24",
+    "Object04"
+  ],
+  "action_meta": {
+    "StoneWall04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "badge_01.jpg": [
+      64,
+      512
+    ],
+    "badge_03.tga": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "badge_01.jpg",
+    "badge_03.tga"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque notice and pole atlases; original scalar masks retained for four alpha textures",
+  "panel_recesses": [],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

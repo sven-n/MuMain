@@ -1,0 +1,44 @@
+00:00.510  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/source.blend"
+skipping reference object 'StoneWall03' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_StoneWall03_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting StoneWall03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sohdloao/StoneWall03_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 333 polys
+- Exported 3 materials
+   horse_drawn_01.jpg
+   tile_01.jpg
+   tile_03.jpg
+- SMD export took 0.006562948226928711
+
+
+Blender Source Tools: exporting StoneWall03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sohdloao/anims/StoneWall03_a00.smd
+- Exported 4 bones
+- Exported 1 frames
+- SMD export took 0.0007700920104980469
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sohdloao/StoneWall03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sohdloao/anims/StoneWall03_a00.smd --name StoneWall03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd
+  name field: StoneWall03.smd  version: 12
+  meshes: 3  bones: 4  actions: 1  triangles: 333
+  bounds (bind pose): min -199.33 -43.04 -2.10  max 198.83 180.50 299.24  size 398.15 223.54 301.34
+  mesh 0: triangles=90 vertices=60 normals=42 uvs=75 texture=tile_01.jpg
+  mesh 1: triangles=233 vertices=195 normals=127 uvs=177 texture=horse_drawn_01.jpg
+  mesh 2: triangles=10 vertices=8 normals=11 uvs=12 texture=tile_03.jpg
+  bone 0: "Box04" parent=-1
+  bone 1: "Box23" parent=-1
+  bone 2: "Box06" parent=-1
+  bone 3: "Object01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

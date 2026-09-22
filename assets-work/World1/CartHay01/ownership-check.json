@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "owned_game_files": [
+    "src/bin/Data/Object1/Carriage01.bmd",
+    "src/bin/Data/Object1/Carriage02.bmd",
+    "src/bin/Data/Object1/Carriage03.bmd",
+    "src/bin/Data/Object1/Carriage04.bmd",
+    "src/bin/Data/Object1/Straw01.bmd",
+    "src/bin/Data/Object1/Straw02.bmd",
+    "src/bin/Data/Object1/horse_drawn_02.OZT",
+    "src/bin/Data/Object1/horse_drawn_03.OZJ",
+    "src/bin/Data/Object1/grass_01.OZT"
+  ],
+  "protected_file_count": 315
+}

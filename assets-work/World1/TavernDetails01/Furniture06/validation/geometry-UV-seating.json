@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "surface": {
+    "minimum_uv_triangle_area": 0.10579884999999999,
+    "minimum_geometry_triangle_area": 5.9999999999999964,
+    "minimum_winding_normal_dot": 1.0,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "bookshelf.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -20.836599,
+          -25.627199,
+          -0.0427
+        ],
+        [
+          21.4774,
+          28.7176,
+          110.8563
+        ]
+      ],
+      "after": [
+        [
+          -20.836599,
+          -25.627199,
+          -0.0427
+        ],
+        [
+          21.4774,
+          28.7176,
+          110.8563
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "chair2.tga",
+      "bone_index": 0,
+      "before": [
+        [
+          -12.951,
+          25.495899,
+          60.648701
+        ],
+        [
+          13.5296,
+          25.495899,
+          96.085297
+        ]
+      ],
+      "after": [
+        [
+          -12.951,
+          25.495899,
+          60.648701
+        ],
+        [
+          13.5296,
+          25.495899,
+          96.085297
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "alpha_cards": {
+    "status": "PASS",
+    "original_card_geometry_UV_rigid_bone_retained": true,
+    "max_position_difference": 0
+  },
+  "seating": {
+    "status": "PASS",
+    "seat_height": 49.784698486328125,
+    "original_seat_triangles": 2,
+    "exact_surface_triangle_max_deviation": 0,
+    "original_foot_corners": 48,
+    "max_foot_corner_deviation": 0.0,
+    "engine_hook": "CreateOperate preserved; no source or collision edit"
+  },
+  "material_order": [
+    "bookshelf.jpg",
+    "chair2.tga"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

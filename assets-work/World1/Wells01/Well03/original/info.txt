@@ -1,0 +1,10 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/original/Well03.bmd
+  name field: Data2\Object1\jar_03.smd  version: 10
+  meshes: 1  bones: 4  actions: 1  triangles: 194
+  bounds (bind pose): min -51.57 -48.73 -0.07  max 63.52 53.38 100.97  size 115.08 102.11 101.04
+  mesh 0: triangles=194 vertices=120 normals=133 uvs=116 texture=jar_01.jpg
+  bone 0: "Cylinder07" parent=-1
+  bone 1: "Cylinder08" parent=-1
+  bone 2: "Cylinder09" parent=-1
+  bone 3: "Cylinder10" parent=-1
+  action 0: keys=1 lock=0

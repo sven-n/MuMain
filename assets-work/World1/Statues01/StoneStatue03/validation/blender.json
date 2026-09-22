@@ -1,0 +1,60 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 248,
+  "original_triangles": 248,
+  "bounds_before": [
+    [
+      -72.76699829101562,
+      -53.358001708984375,
+      -0.08420000225305557
+    ],
+    [
+      74.60669708251953,
+      39.88209915161133,
+      264.7676086425781
+    ]
+  ],
+  "bounds_after": [
+    [
+      -72.76699829101562,
+      -53.358001708984375,
+      -0.08420000225305557
+    ],
+    [
+      74.60669708251953,
+      39.88209915161133,
+      264.7676086425781
+    ]
+  ],
+  "original_vertices_retained": 127,
+  "bone_order": [
+    "Box03"
+  ],
+  "action_meta": {
+    "StoneStatue03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tombstone_big.jpg": [
+      512,
+      512
+    ],
+    "angel_stone_statue.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "tombstone_big.jpg",
+    "angel_stone_statue.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained except six reprojected head cap triangles; new panel coordinates interpolated",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque RGB stone atlases; frozen fountain water remains opaque texture for original BlendMesh3",
+  "uv_reprojected_faces": [],
+  "uv_reprojection": null,
+  "panel_recesses": [],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

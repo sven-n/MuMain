@@ -1,0 +1,44 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=25 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -50.73,
+      -49.66,
+      -79.37
+    ],
+    [
+      49.75,
+      88.94,
+      448.76
+    ]
+  ],
+  "bounds_after": [
+    [
+      -50.73,
+      -49.66,
+      -79.37
+    ],
+    [
+      49.75,
+      88.94,
+      448.76
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "badge_01.jpg",
+    "badge_03.tga",
+    "tile_01.jpg"
+  ],
+  "export_sha256": {
+    "StoneWall06.bmd": "5763998af97cdb7cfe595476cda2592558458f0f8046ce0204580301e0f80a62",
+    "badge_01.OZJ": "c320a30bb1df3444a314ecb2ef6102d9b79d9ea88201e2618d97f729d96723e3",
+    "badge_03.OZT": "212525201745f7a7b74a9ca3537d88aadd4e070ccebebb9074ed63015e6b4069",
+    "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27"
+  }
+}

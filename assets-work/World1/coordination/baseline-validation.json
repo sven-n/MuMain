@@ -1,0 +1,2126 @@
+{
+  "baseline": "ac0f6dd8",
+  "client_verified": false,
+  "models": {
+    "Beer01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer01/smd/Beer01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer01/smd/Beer01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer01/smd/Beer01.actions.txt\n"
+        },
+        {
+          "command": "validate Beer01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer01/smd/Beer01.smd: bones=5 frames=1 triangles=784 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Beer01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer01/smd/Beer01_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Beer02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer02/smd/Beer02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer02/smd/Beer02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer02/smd/Beer02.actions.txt\n"
+        },
+        {
+          "command": "validate Beer02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer02/smd/Beer02.smd: bones=6 frames=1 triangles=232 materials=5\nOK\n"
+        },
+        {
+          "command": "validate Beer02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer02/smd/Beer02_a00.smd: bones=6 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Beer03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03.actions.txt\n"
+        },
+        {
+          "command": "validate Beer03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03.smd: bones=3 frames=1 triangles=108 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Beer03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Bonfire01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bonfire01/smd/Bonfire01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bonfire01/smd/Bonfire01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bonfire01/smd/Bonfire01.actions.txt\n"
+        },
+        {
+          "command": "validate Bonfire01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bonfire01/smd/Bonfire01.smd: bones=4 frames=1 triangles=110 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Bonfire01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bonfire01/smd/Bonfire01_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Bridge01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01.actions.txt\n"
+        },
+        {
+          "command": "validate Bridge01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01.smd: bones=2 frames=1 triangles=196 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Bridge01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "BridgeStone01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/BridgeStone01/smd/BridgeStone01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/BridgeStone01/smd/BridgeStone01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/BridgeStone01/smd/BridgeStone01.actions.txt\n"
+        },
+        {
+          "command": "validate BridgeStone01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/BridgeStone01/smd/BridgeStone01.smd: bones=2 frames=1 triangles=74 materials=4\nOK\n"
+        },
+        {
+          "command": "validate BridgeStone01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/BridgeStone01/smd/BridgeStone01_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Candle01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Candle01/smd/Candle01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Candle01/smd/Candle01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Candle01/smd/Candle01.actions.txt\n"
+        },
+        {
+          "command": "validate Candle01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Candle01/smd/Candle01.smd: bones=9 frames=1 triangles=1018 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Candle01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Candle01/smd/Candle01_a00.smd: bones=9 frames=7 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Cannon01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon01/smd/Cannon01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon01/smd/Cannon01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon01/smd/Cannon01.actions.txt\n"
+        },
+        {
+          "command": "validate Cannon01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon01/smd/Cannon01.smd: bones=1 frames=1 triangles=181 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Cannon01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon01/smd/Cannon01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Cannon02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon02/smd/Cannon02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon02/smd/Cannon02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon02/smd/Cannon02.actions.txt\n"
+        },
+        {
+          "command": "validate Cannon02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon02/smd/Cannon02.smd: bones=1 frames=1 triangles=155 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Cannon02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon02/smd/Cannon02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Cannon03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon03/smd/Cannon03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon03/smd/Cannon03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon03/smd/Cannon03.actions.txt\n"
+        },
+        {
+          "command": "validate Cannon03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon03/smd/Cannon03.smd: bones=1 frames=1 triangles=75 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Cannon03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Cannon03/smd/Cannon03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Carriage01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01.actions.txt\n"
+        },
+        {
+          "command": "validate Carriage01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01.smd: bones=14 frames=1 triangles=280 materials=3\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        },
+        {
+          "command": "validate Carriage01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01_a00.smd: bones=14 frames=21 triangles=0 materials=0\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        }
+      ]
+    },
+    "Carriage02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02.actions.txt\n"
+        },
+        {
+          "command": "validate Carriage02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02.smd: bones=2 frames=1 triangles=258 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Carriage02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Carriage03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage03/smd/Carriage03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage03/smd/Carriage03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage03/smd/Carriage03.actions.txt\n"
+        },
+        {
+          "command": "validate Carriage03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage03/smd/Carriage03.smd: bones=4 frames=1 triangles=346 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Carriage03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage03/smd/Carriage03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Carriage04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage04/smd/Carriage04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage04/smd/Carriage04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage04/smd/Carriage04.actions.txt\n"
+        },
+        {
+          "command": "validate Carriage04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage04/smd/Carriage04.smd: bones=5 frames=1 triangles=390 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Carriage04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage04/smd/Carriage04_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Curtain01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Curtain01/smd/Curtain01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Curtain01/smd/Curtain01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Curtain01/smd/Curtain01.actions.txt\n"
+        },
+        {
+          "command": "validate Curtain01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Curtain01/smd/Curtain01.smd: bones=7 frames=1 triangles=68 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Curtain01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Curtain01/smd/Curtain01_a00.smd: bones=7 frames=26 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "DoungeonGate01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/DoungeonGate01/smd/DoungeonGate01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/DoungeonGate01/smd/DoungeonGate01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/DoungeonGate01/smd/DoungeonGate01.actions.txt\n"
+        },
+        {
+          "command": "validate DoungeonGate01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/DoungeonGate01/smd/DoungeonGate01.smd: bones=7 frames=1 triangles=333 materials=1\nOK\n"
+        },
+        {
+          "command": "validate DoungeonGate01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/DoungeonGate01/smd/DoungeonGate01_a00.smd: bones=7 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Fence01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence01/smd/Fence01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence01/smd/Fence01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence01/smd/Fence01.actions.txt\n"
+        },
+        {
+          "command": "validate Fence01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence01/smd/Fence01.smd: bones=1 frames=1 triangles=36 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Fence01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence01/smd/Fence01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Fence02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence02/smd/Fence02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence02/smd/Fence02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence02/smd/Fence02.actions.txt\n"
+        },
+        {
+          "command": "validate Fence02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence02/smd/Fence02.smd: bones=1 frames=1 triangles=16 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Fence02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence02/smd/Fence02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Fence03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence03/smd/Fence03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence03/smd/Fence03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence03/smd/Fence03.actions.txt\n"
+        },
+        {
+          "command": "validate Fence03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence03/smd/Fence03.smd: bones=1 frames=1 triangles=10 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Fence03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence03/smd/Fence03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Fence04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence04/smd/Fence04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence04/smd/Fence04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence04/smd/Fence04.actions.txt\n"
+        },
+        {
+          "command": "validate Fence04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence04/smd/Fence04.smd: bones=1 frames=1 triangles=10 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Fence04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Fence04/smd/Fence04_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "FireLight01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight01/smd/FireLight01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight01/smd/FireLight01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight01/smd/FireLight01.actions.txt\n"
+        },
+        {
+          "command": "validate FireLight01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight01/smd/FireLight01.smd: bones=1 frames=1 triangles=48 materials=3\nOK\n"
+        },
+        {
+          "command": "validate FireLight01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight01/smd/FireLight01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "FireLight02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight02/smd/FireLight02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight02/smd/FireLight02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight02/smd/FireLight02.actions.txt\n"
+        },
+        {
+          "command": "validate FireLight02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight02/smd/FireLight02.smd: bones=2 frames=1 triangles=34 materials=3\nOK\n"
+        },
+        {
+          "command": "validate FireLight02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/FireLight02/smd/FireLight02_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture01/smd/Furniture01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture01/smd/Furniture01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture01/smd/Furniture01.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture01/smd/Furniture01.smd: bones=6 frames=1 triangles=272 materials=4\nOK\n"
+        },
+        {
+          "command": "validate Furniture01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture01/smd/Furniture01_a00.smd: bones=6 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02.smd: bones=13 frames=1 triangles=464 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Furniture02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture02/smd/Furniture02_a00.smd: bones=13 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture03/smd/Furniture03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture03/smd/Furniture03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture03/smd/Furniture03.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture03/smd/Furniture03.smd: bones=1 frames=1 triangles=42 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Furniture03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture03/smd/Furniture03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture04/smd/Furniture04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture04/smd/Furniture04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture04/smd/Furniture04.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture04/smd/Furniture04.smd: bones=1 frames=1 triangles=38 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Furniture04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture04/smd/Furniture04_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture05/smd/Furniture05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture05/smd/Furniture05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture05/smd/Furniture05.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture05/smd/Furniture05.smd: bones=1 frames=1 triangles=34 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Furniture05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture05/smd/Furniture05_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture06": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture06/smd/Furniture06.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture06/smd/Furniture06_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture06/smd/Furniture06.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture06.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture06/smd/Furniture06.smd: bones=1 frames=1 triangles=54 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Furniture06_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture06/smd/Furniture06_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Furniture07": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture07/smd/Furniture07.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture07/smd/Furniture07_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture07/smd/Furniture07.actions.txt\n"
+        },
+        {
+          "command": "validate Furniture07.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture07/smd/Furniture07.smd: bones=1 frames=1 triangles=42 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Furniture07_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Furniture07/smd/Furniture07_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass01/smd/Grass01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass01/smd/Grass01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass01/smd/Grass01.actions.txt\n"
+        },
+        {
+          "command": "validate Grass01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass01/smd/Grass01.smd: bones=5 frames=1 triangles=120 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Grass01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass01/smd/Grass01_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass02/smd/Grass02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass02/smd/Grass02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass02/smd/Grass02.actions.txt\n"
+        },
+        {
+          "command": "validate Grass02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass02/smd/Grass02.smd: bones=5 frames=1 triangles=120 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Grass02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass02/smd/Grass02_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass03/smd/Grass03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass03/smd/Grass03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass03/smd/Grass03.actions.txt\n"
+        },
+        {
+          "command": "validate Grass03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass03/smd/Grass03.smd: bones=4 frames=1 triangles=128 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Grass03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass03/smd/Grass03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass04/smd/Grass04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass04/smd/Grass04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass04/smd/Grass04.actions.txt\n"
+        },
+        {
+          "command": "validate Grass04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass04/smd/Grass04.smd: bones=4 frames=1 triangles=128 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Grass04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass04/smd/Grass04_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass05/smd/Grass05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass05/smd/Grass05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass05/smd/Grass05.actions.txt\n"
+        },
+        {
+          "command": "validate Grass05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass05/smd/Grass05.smd: bones=4 frames=1 triangles=112 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Grass05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass05/smd/Grass05_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass06": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass06/smd/Grass06.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass06/smd/Grass06_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass06/smd/Grass06.actions.txt\n"
+        },
+        {
+          "command": "validate Grass06.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass06/smd/Grass06.smd: bones=4 frames=1 triangles=112 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Grass06_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass06/smd/Grass06_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass07": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass07/smd/Grass07.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass07/smd/Grass07_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass07/smd/Grass07.actions.txt\n"
+        },
+        {
+          "command": "validate Grass07.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass07/smd/Grass07.smd: bones=7 frames=1 triangles=126 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Grass07_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass07/smd/Grass07_a00.smd: bones=7 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Grass08": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass08/smd/Grass08.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass08/smd/Grass08_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass08/smd/Grass08.actions.txt\n"
+        },
+        {
+          "command": "validate Grass08.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass08/smd/Grass08.smd: bones=3 frames=1 triangles=54 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Grass08_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Grass08/smd/Grass08_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Hanging01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01.actions.txt\n"
+        },
+        {
+          "command": "validate Hanging01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01.smd: bones=4 frames=1 triangles=162 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Hanging01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01_a00.smd: bones=4 frames=25 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "House01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House01/smd/House01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House01/smd/House01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House01/smd/House01.actions.txt\n"
+        },
+        {
+          "command": "validate House01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House01/smd/House01.smd: bones=2 frames=1 triangles=176 materials=4\nOK\n"
+        },
+        {
+          "command": "validate House01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House01/smd/House01_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "House02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House02/smd/House02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House02/smd/House02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House02/smd/House02.actions.txt\n"
+        },
+        {
+          "command": "validate House02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House02/smd/House02.smd: bones=1 frames=1 triangles=173 materials=2\nOK\n"
+        },
+        {
+          "command": "validate House02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House02/smd/House02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "House03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House03/smd/House03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House03/smd/House03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House03/smd/House03.actions.txt\n"
+        },
+        {
+          "command": "validate House03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House03/smd/House03.smd: bones=7 frames=1 triangles=289 materials=5\nOK\n"
+        },
+        {
+          "command": "validate House03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House03/smd/House03_a00.smd: bones=7 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "House04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House04/smd/House04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House04/smd/House04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House04/smd/House04.actions.txt\n"
+        },
+        {
+          "command": "validate House04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House04/smd/House04.smd: bones=9 frames=1 triangles=342 materials=9\nOK\n"
+        },
+        {
+          "command": "validate House04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House04/smd/House04_a00.smd: bones=9 frames=40 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "House05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House05/smd/House05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House05/smd/House05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House05/smd/House05.actions.txt\n"
+        },
+        {
+          "command": "validate House05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House05/smd/House05.smd: bones=10 frames=1 triangles=276 materials=3\nOK\n"
+        },
+        {
+          "command": "validate House05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/House05/smd/House05_a00.smd: bones=10 frames=30 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseEtc01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc01/smd/HouseEtc01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc01/smd/HouseEtc01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc01/smd/HouseEtc01.actions.txt\n"
+        },
+        {
+          "command": "validate HouseEtc01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc01/smd/HouseEtc01.smd: bones=1 frames=1 triangles=34 materials=2\nOK\n"
+        },
+        {
+          "command": "validate HouseEtc01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc01/smd/HouseEtc01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseEtc02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02.actions.txt\n"
+        },
+        {
+          "command": "validate HouseEtc02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02.smd: bones=3 frames=1 triangles=226 materials=8\nOK\n"
+        },
+        {
+          "command": "validate HouseEtc02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseEtc03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc03/smd/HouseEtc03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc03/smd/HouseEtc03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc03/smd/HouseEtc03.actions.txt\n"
+        },
+        {
+          "command": "validate HouseEtc03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc03/smd/HouseEtc03.smd: bones=1 frames=1 triangles=16 materials=2\nOK\n"
+        },
+        {
+          "command": "validate HouseEtc03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc03/smd/HouseEtc03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseWall01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall01/smd/HouseWall01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall01/smd/HouseWall01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall01/smd/HouseWall01.actions.txt\n"
+        },
+        {
+          "command": "validate HouseWall01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall01/smd/HouseWall01.smd: bones=1 frames=1 triangles=36 materials=3\nOK\n"
+        },
+        {
+          "command": "validate HouseWall01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall01/smd/HouseWall01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseWall02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall02/smd/HouseWall02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall02/smd/HouseWall02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall02/smd/HouseWall02.actions.txt\n"
+        },
+        {
+          "command": "validate HouseWall02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall02/smd/HouseWall02.smd: bones=3 frames=1 triangles=70 materials=5\nOK\n"
+        },
+        {
+          "command": "validate HouseWall02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall02/smd/HouseWall02_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseWall03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall03/smd/HouseWall03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall03/smd/HouseWall03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall03/smd/HouseWall03.actions.txt\n"
+        },
+        {
+          "command": "validate HouseWall03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall03/smd/HouseWall03.smd: bones=1 frames=1 triangles=20 materials=1\nOK\n"
+        },
+        {
+          "command": "validate HouseWall03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall03/smd/HouseWall03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseWall04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04.actions.txt\n"
+        },
+        {
+          "command": "validate HouseWall04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04.smd: bones=1 frames=1 triangles=56 materials=3\nOK\n"
+        },
+        {
+          "command": "validate HouseWall04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseWall05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall05/smd/HouseWall05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall05/smd/HouseWall05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall05/smd/HouseWall05.actions.txt\n"
+        },
+        {
+          "command": "validate HouseWall05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall05/smd/HouseWall05.smd: bones=1 frames=1 triangles=30 materials=2\nOK\n"
+        },
+        {
+          "command": "validate HouseWall05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall05/smd/HouseWall05_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "HouseWall06": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall06/smd/HouseWall06.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall06/smd/HouseWall06_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall06/smd/HouseWall06.actions.txt\n"
+        },
+        {
+          "command": "validate HouseWall06.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall06/smd/HouseWall06.smd: bones=1 frames=1 triangles=28 materials=2\nOK\n"
+        },
+        {
+          "command": "validate HouseWall06_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall06/smd/HouseWall06_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Ship01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Ship01/smd/Ship01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Ship01/smd/Ship01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Ship01/smd/Ship01.actions.txt\n"
+        },
+        {
+          "command": "validate Ship01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Ship01/smd/Ship01.smd: bones=10 frames=1 triangles=754 materials=10\nOK\n"
+        },
+        {
+          "command": "validate Ship01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Ship01/smd/Ship01_a00.smd: bones=10 frames=30 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Sign01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign01/smd/Sign01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign01/smd/Sign01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign01/smd/Sign01.actions.txt\n"
+        },
+        {
+          "command": "validate Sign01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign01/smd/Sign01.smd: bones=4 frames=1 triangles=30 materials=3\nOK\n"
+        },
+        {
+          "command": "validate Sign01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign01/smd/Sign01_a00.smd: bones=4 frames=21 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Sign02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign02/smd/Sign02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign02/smd/Sign02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign02/smd/Sign02.actions.txt\n"
+        },
+        {
+          "command": "validate Sign02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign02/smd/Sign02.smd: bones=1 frames=1 triangles=30 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Sign02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Sign02/smd/Sign02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Stair01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stair01/smd/Stair01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stair01/smd/Stair01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stair01/smd/Stair01.actions.txt\n"
+        },
+        {
+          "command": "validate Stair01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stair01/smd/Stair01.smd: bones=1 frames=1 triangles=78 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Stair01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stair01/smd/Stair01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "SteelDoor01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelDoor01/smd/SteelDoor01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelDoor01/smd/SteelDoor01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelDoor01/smd/SteelDoor01.actions.txt\n"
+        },
+        {
+          "command": "validate SteelDoor01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelDoor01/smd/SteelDoor01.smd: bones=1 frames=1 triangles=58 materials=2\nOK\n"
+        },
+        {
+          "command": "validate SteelDoor01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelDoor01/smd/SteelDoor01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "SteelStatue01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelStatue01/smd/SteelStatue01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelStatue01/smd/SteelStatue01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelStatue01/smd/SteelStatue01.actions.txt\n"
+        },
+        {
+          "command": "validate SteelStatue01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelStatue01/smd/SteelStatue01.smd: bones=1 frames=1 triangles=66 materials=1\nOK\n"
+        },
+        {
+          "command": "validate SteelStatue01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelStatue01/smd/SteelStatue01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "SteelWall01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall01/smd/SteelWall01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall01/smd/SteelWall01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall01/smd/SteelWall01.actions.txt\n"
+        },
+        {
+          "command": "validate SteelWall01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall01/smd/SteelWall01.smd: bones=1 frames=1 triangles=52 materials=2\nOK\n"
+        },
+        {
+          "command": "validate SteelWall01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall01/smd/SteelWall01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "SteelWall02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall02/smd/SteelWall02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall02/smd/SteelWall02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall02/smd/SteelWall02.actions.txt\n"
+        },
+        {
+          "command": "validate SteelWall02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall02/smd/SteelWall02.smd: bones=4 frames=1 triangles=72 materials=2\nOK\n"
+        },
+        {
+          "command": "validate SteelWall02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall02/smd/SteelWall02_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "SteelWall03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall03/smd/SteelWall03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall03/smd/SteelWall03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall03/smd/SteelWall03.actions.txt\n"
+        },
+        {
+          "command": "validate SteelWall03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall03/smd/SteelWall03.smd: bones=1 frames=1 triangles=18 materials=2\nOK\n"
+        },
+        {
+          "command": "validate SteelWall03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/SteelWall03/smd/SteelWall03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Stone01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone01/smd/Stone01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone01/smd/Stone01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone01/smd/Stone01.actions.txt\n"
+        },
+        {
+          "command": "validate Stone01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone01/smd/Stone01.smd: bones=1 frames=1 triangles=166 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Stone01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone01/smd/Stone01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Stone02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone02/smd/Stone02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone02/smd/Stone02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone02/smd/Stone02.actions.txt\n"
+        },
+        {
+          "command": "validate Stone02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone02/smd/Stone02.smd: bones=1 frames=1 triangles=159 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Stone02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone02/smd/Stone02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Stone03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone03/smd/Stone03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone03/smd/Stone03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone03/smd/Stone03.actions.txt\n"
+        },
+        {
+          "command": "validate Stone03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone03/smd/Stone03.smd: bones=1 frames=1 triangles=80 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Stone03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone03/smd/Stone03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Stone04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone04/smd/Stone04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone04/smd/Stone04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone04/smd/Stone04.actions.txt\n"
+        },
+        {
+          "command": "validate Stone04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone04/smd/Stone04.smd: bones=1 frames=1 triangles=45 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Stone04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone04/smd/Stone04_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Stone05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone05/smd/Stone05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone05/smd/Stone05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone05/smd/Stone05.actions.txt\n"
+        },
+        {
+          "command": "validate Stone05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone05/smd/Stone05.smd: bones=1 frames=1 triangles=120 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Stone05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Stone05/smd/Stone05_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneMuWall01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall01/smd/StoneMuWall01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall01/smd/StoneMuWall01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall01/smd/StoneMuWall01.actions.txt\n"
+        },
+        {
+          "command": "validate StoneMuWall01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall01/smd/StoneMuWall01.smd: bones=1 frames=1 triangles=318 materials=5\nOK\n"
+        },
+        {
+          "command": "validate StoneMuWall01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall01/smd/StoneMuWall01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneMuWall02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02.actions.txt\n"
+        },
+        {
+          "command": "validate StoneMuWall02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02.smd: bones=1 frames=1 triangles=44 materials=3\nOK\n"
+        },
+        {
+          "command": "validate StoneMuWall02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall02/smd/StoneMuWall02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneMuWall03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall03/smd/StoneMuWall03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall03/smd/StoneMuWall03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall03/smd/StoneMuWall03.actions.txt\n"
+        },
+        {
+          "command": "validate StoneMuWall03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall03/smd/StoneMuWall03.smd: bones=1 frames=1 triangles=52 materials=2\nOK\n"
+        },
+        {
+          "command": "validate StoneMuWall03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall03/smd/StoneMuWall03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneMuWall04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall04/smd/StoneMuWall04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall04/smd/StoneMuWall04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall04/smd/StoneMuWall04.actions.txt\n"
+        },
+        {
+          "command": "validate StoneMuWall04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall04/smd/StoneMuWall04.smd: bones=3 frames=1 triangles=285 materials=3\nOK\n"
+        },
+        {
+          "command": "validate StoneMuWall04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneMuWall04/smd/StoneMuWall04_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneStatue01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue01/smd/StoneStatue01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue01/smd/StoneStatue01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue01/smd/StoneStatue01.actions.txt\n"
+        },
+        {
+          "command": "validate StoneStatue01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue01/smd/StoneStatue01.smd: bones=1 frames=1 triangles=92 materials=1\nOK\n"
+        },
+        {
+          "command": "validate StoneStatue01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue01/smd/StoneStatue01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneStatue02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue02/smd/StoneStatue02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue02/smd/StoneStatue02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue02/smd/StoneStatue02.actions.txt\n"
+        },
+        {
+          "command": "validate StoneStatue02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue02/smd/StoneStatue02.smd: bones=1 frames=1 triangles=107 materials=1\nOK\n"
+        },
+        {
+          "command": "validate StoneStatue02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue02/smd/StoneStatue02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneStatue03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue03/smd/StoneStatue03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue03/smd/StoneStatue03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue03/smd/StoneStatue03.actions.txt\n"
+        },
+        {
+          "command": "validate StoneStatue03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue03/smd/StoneStatue03.smd: bones=1 frames=1 triangles=248 materials=2\nOK\n"
+        },
+        {
+          "command": "validate StoneStatue03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneStatue03/smd/StoneStatue03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneWall01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall01/smd/StoneWall01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall01/smd/StoneWall01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall01/smd/StoneWall01.actions.txt\n"
+        },
+        {
+          "command": "validate StoneWall01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall01/smd/StoneWall01.smd: bones=1 frames=1 triangles=318 materials=4\nOK\n"
+        },
+        {
+          "command": "validate StoneWall01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall01/smd/StoneWall01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneWall02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall02/smd/StoneWall02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall02/smd/StoneWall02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall02/smd/StoneWall02.actions.txt\n"
+        },
+        {
+          "command": "validate StoneWall02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall02/smd/StoneWall02.smd: bones=1 frames=1 triangles=318 materials=4\nOK\n"
+        },
+        {
+          "command": "validate StoneWall02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall02/smd/StoneWall02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneWall03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall03/smd/StoneWall03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall03/smd/StoneWall03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall03/smd/StoneWall03.actions.txt\n"
+        },
+        {
+          "command": "validate StoneWall03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall03/smd/StoneWall03.smd: bones=4 frames=1 triangles=293 materials=3\nOK\n"
+        },
+        {
+          "command": "validate StoneWall03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall03/smd/StoneWall03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneWall04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall04/smd/StoneWall04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall04/smd/StoneWall04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall04/smd/StoneWall04.actions.txt\n"
+        },
+        {
+          "command": "validate StoneWall04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall04/smd/StoneWall04.smd: bones=8 frames=1 triangles=36 materials=2\nOK\n"
+        },
+        {
+          "command": "validate StoneWall04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall04/smd/StoneWall04_a00.smd: bones=8 frames=25 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneWall05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall05/smd/StoneWall05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall05/smd/StoneWall05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall05/smd/StoneWall05.actions.txt\n"
+        },
+        {
+          "command": "validate StoneWall05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall05/smd/StoneWall05.smd: bones=2 frames=1 triangles=60 materials=2\nOK\n"
+        },
+        {
+          "command": "validate StoneWall05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall05/smd/StoneWall05_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StoneWall06": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall06/smd/StoneWall06.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall06/smd/StoneWall06_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall06/smd/StoneWall06.actions.txt\n"
+        },
+        {
+          "command": "validate StoneWall06.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall06/smd/StoneWall06.smd: bones=9 frames=1 triangles=56 materials=3\nOK\n"
+        },
+        {
+          "command": "validate StoneWall06_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StoneWall06/smd/StoneWall06_a00.smd: bones=9 frames=25 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Straw01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw01/smd/Straw01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw01/smd/Straw01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw01/smd/Straw01.actions.txt\n"
+        },
+        {
+          "command": "validate Straw01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw01/smd/Straw01.smd: bones=3 frames=1 triangles=132 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Straw01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw01/smd/Straw01_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Straw02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw02/smd/Straw02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw02/smd/Straw02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw02/smd/Straw02.actions.txt\n"
+        },
+        {
+          "command": "validate Straw02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw02/smd/Straw02.smd: bones=8 frames=1 triangles=352 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Straw02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Straw02/smd/Straw02_a00.smd: bones=8 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "StreetLight01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StreetLight01/smd/StreetLight01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StreetLight01/smd/StreetLight01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StreetLight01/smd/StreetLight01.actions.txt\n"
+        },
+        {
+          "command": "validate StreetLight01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StreetLight01/smd/StreetLight01.smd: bones=11 frames=1 triangles=84 materials=2\nOK\nwarning: line 3: bone 'Dummy00' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 4: bone 'Dummy01' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 5: bone 'Dummy02' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        },
+        {
+          "command": "validate StreetLight01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/StreetLight01/smd/StreetLight01_a00.smd: bones=11 frames=21 triangles=0 materials=0\nOK\nwarning: line 3: bone 'Dummy00' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 4: bone 'Dummy01' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 5: bone 'Dummy02' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        }
+      ]
+    },
+    "Tent01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tent01/smd/Tent01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tent01/smd/Tent01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tent01/smd/Tent01.actions.txt\n"
+        },
+        {
+          "command": "validate Tent01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tent01/smd/Tent01.smd: bones=4 frames=1 triangles=66 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Tent01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tent01/smd/Tent01_a00.smd: bones=4 frames=36 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tomb01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb01/smd/Tomb01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb01/smd/Tomb01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb01/smd/Tomb01.actions.txt\n"
+        },
+        {
+          "command": "validate Tomb01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb01/smd/Tomb01.smd: bones=2 frames=1 triangles=44 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tomb01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb01/smd/Tomb01_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tomb02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb02/smd/Tomb02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb02/smd/Tomb02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb02/smd/Tomb02.actions.txt\n"
+        },
+        {
+          "command": "validate Tomb02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb02/smd/Tomb02.smd: bones=1 frames=1 triangles=40 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tomb02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb02/smd/Tomb02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tomb03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb03/smd/Tomb03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb03/smd/Tomb03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb03/smd/Tomb03.actions.txt\n"
+        },
+        {
+          "command": "validate Tomb03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb03/smd/Tomb03.smd: bones=1 frames=1 triangles=200 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tomb03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tomb03/smd/Tomb03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "TreasureChest01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureChest01/smd/TreasureChest01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureChest01/smd/TreasureChest01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureChest01/smd/TreasureChest01.actions.txt\n"
+        },
+        {
+          "command": "validate TreasureChest01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureChest01/smd/TreasureChest01.smd: bones=4 frames=1 triangles=1174 materials=1\nOK\n"
+        },
+        {
+          "command": "validate TreasureChest01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureChest01/smd/TreasureChest01_a00.smd: bones=4 frames=7 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "TreasureDrum01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureDrum01/smd/TreasureDrum01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureDrum01/smd/TreasureDrum01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureDrum01/smd/TreasureDrum01.actions.txt\n"
+        },
+        {
+          "command": "validate TreasureDrum01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureDrum01/smd/TreasureDrum01.smd: bones=1 frames=1 triangles=60 materials=1\nOK\n"
+        },
+        {
+          "command": "validate TreasureDrum01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/TreasureDrum01/smd/TreasureDrum01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01.actions.txt\n"
+        },
+        {
+          "command": "validate Tree01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01.smd: bones=16 frames=1 triangles=412 materials=2\nOK\nwarning: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        },
+        {
+          "command": "validate Tree01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01_a00.smd: bones=16 frames=31 triangles=0 materials=0\nOK\nwarning: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        }
+      ]
+    },
+    "Tree02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02.actions.txt\n"
+        },
+        {
+          "command": "validate Tree02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02.smd: bones=24 frames=1 triangles=770 materials=2\nOK\nwarning: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        },
+        {
+          "command": "validate Tree02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02_a00.smd: bones=24 frames=31 triangles=0 materials=0\nOK\nwarning: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+        }
+      ]
+    },
+    "Tree03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree03/smd/Tree03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree03/smd/Tree03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree03/smd/Tree03.actions.txt\n"
+        },
+        {
+          "command": "validate Tree03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree03/smd/Tree03.smd: bones=1 frames=1 triangles=273 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree03/smd/Tree03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree04/smd/Tree04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree04/smd/Tree04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree04/smd/Tree04.actions.txt\n"
+        },
+        {
+          "command": "validate Tree04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree04/smd/Tree04.smd: bones=1 frames=1 triangles=273 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree04/smd/Tree04_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree05": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree05/smd/Tree05.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree05/smd/Tree05_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree05/smd/Tree05.actions.txt\n"
+        },
+        {
+          "command": "validate Tree05.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree05/smd/Tree05.smd: bones=1 frames=1 triangles=85 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree05_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree05/smd/Tree05_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree06": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree06/smd/Tree06.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree06/smd/Tree06_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree06/smd/Tree06.actions.txt\n"
+        },
+        {
+          "command": "validate Tree06.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree06/smd/Tree06.smd: bones=1 frames=1 triangles=89 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree06_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree06/smd/Tree06_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree07": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree07/smd/Tree07.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree07/smd/Tree07_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree07/smd/Tree07.actions.txt\n"
+        },
+        {
+          "command": "validate Tree07.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree07/smd/Tree07.smd: bones=1 frames=1 triangles=90 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Tree07_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree07/smd/Tree07_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree08": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree08/smd/Tree08.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree08/smd/Tree08_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree08/smd/Tree08.actions.txt\n"
+        },
+        {
+          "command": "validate Tree08.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree08/smd/Tree08.smd: bones=1 frames=1 triangles=176 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree08_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree08/smd/Tree08_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree09": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree09/smd/Tree09.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree09/smd/Tree09_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree09/smd/Tree09.actions.txt\n"
+        },
+        {
+          "command": "validate Tree09.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree09/smd/Tree09.smd: bones=5 frames=1 triangles=240 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree09_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree09/smd/Tree09_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree10": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree10/smd/Tree10.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree10/smd/Tree10_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree10/smd/Tree10.actions.txt\n"
+        },
+        {
+          "command": "validate Tree10.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree10/smd/Tree10.smd: bones=10 frames=1 triangles=480 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Tree10_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree10/smd/Tree10_a00.smd: bones=10 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree11": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree11/smd/Tree11.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree11/smd/Tree11_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree11/smd/Tree11.actions.txt\n"
+        },
+        {
+          "command": "validate Tree11.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree11/smd/Tree11.smd: bones=10 frames=1 triangles=169 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Tree11_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree11/smd/Tree11_a00.smd: bones=10 frames=31 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree12": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree12/smd/Tree12.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree12/smd/Tree12_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree12/smd/Tree12.actions.txt\n"
+        },
+        {
+          "command": "validate Tree12.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree12/smd/Tree12.smd: bones=9 frames=1 triangles=393 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Tree12_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree12/smd/Tree12_a00.smd: bones=9 frames=31 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Tree13": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree13/smd/Tree13.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree13/smd/Tree13_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree13/smd/Tree13.actions.txt\n"
+        },
+        {
+          "command": "validate Tree13.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree13/smd/Tree13.smd: bones=10 frames=1 triangles=393 materials=2\nOK\n"
+        },
+        {
+          "command": "validate Tree13_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree13/smd/Tree13_a00.smd: bones=10 frames=31 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Waterspout01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01.actions.txt\n"
+        },
+        {
+          "command": "validate Waterspout01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01.smd: bones=11 frames=1 triangles=639 materials=4\nOK\n"
+        },
+        {
+          "command": "validate Waterspout01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01_a00.smd: bones=11 frames=21 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Well01": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well01/smd/Well01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well01/smd/Well01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well01/smd/Well01.actions.txt\n"
+        },
+        {
+          "command": "validate Well01.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well01/smd/Well01.smd: bones=7 frames=1 triangles=405 materials=4\nOK\n"
+        },
+        {
+          "command": "validate Well01_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well01/smd/Well01_a00.smd: bones=7 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Well02": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well02/smd/Well02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well02/smd/Well02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well02/smd/Well02.actions.txt\n"
+        },
+        {
+          "command": "validate Well02.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well02/smd/Well02.smd: bones=1 frames=1 triangles=123 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Well02_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well02/smd/Well02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Well03": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well03/smd/Well03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well03/smd/Well03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well03/smd/Well03.actions.txt\n"
+        },
+        {
+          "command": "validate Well03.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well03/smd/Well03.smd: bones=4 frames=1 triangles=194 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Well03_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well03/smd/Well03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    },
+    "Well04": {
+      "status": "PASS",
+      "commands": [
+        {
+          "command": "bmd2smd",
+          "exit_code": 0,
+          "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well04/smd/Well04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well04/smd/Well04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well04/smd/Well04.actions.txt\n"
+        },
+        {
+          "command": "validate Well04.smd",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well04/smd/Well04.smd: bones=8 frames=1 triangles=388 materials=1\nOK\n"
+        },
+        {
+          "command": "validate Well04_a00.smd --animation",
+          "exit_code": 0,
+          "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Well04/smd/Well04_a00.smd: bones=8 frames=1 triangles=0 materials=0\nOK\n"
+        }
+      ]
+    }
+  }
+}

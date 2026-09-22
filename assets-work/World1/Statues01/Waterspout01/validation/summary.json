@@ -1,0 +1,46 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -199.06,
+      -199.74,
+      -0.14
+    ],
+    [
+      199.23,
+      198.55,
+      311.2
+    ]
+  ],
+  "bounds_after": [
+    [
+      -199.06,
+      -199.74,
+      -0.14
+    ],
+    [
+      199.23,
+      198.55,
+      311.2
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=21 lock=0"
+  ],
+  "material_order": [
+    "stone_statue02.jpg",
+    "reagon_waterspout.jpg",
+    "ston01.jpg",
+    "ston02.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "Waterspout01.bmd": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83",
+    "reagon_waterspout.OZJ": "0da0208475dd23f3838e39615ff562ddec46a5f094c198b7c1e481443135b67d",
+    "ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784",
+    "ston02.OZJ": "09d1dbbbc7672fe05d82a89a115bee1ec538e615b3f39e93b9e244e7cd61d151",
+    "stone_statue02.OZJ": "e1d4f7b95afae6c9936eb117a71592e94322b041efafa887bcdf6d731e4a630b"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "path": "src/bin/Data/Object1/Furniture02.bmd",
+  "type": 141,
+  "placements": [
+    {
+      "position": [
+        7550.0,
+        15400.0,
+        172.6375274658203
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        75.5,
+        154.0
+      ]
+    },
+    {
+      "position": [
+        12200.0,
+        13650.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        900.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        122.0,
+        136.5
+      ]
+    },
+    {
+      "position": [
+        12525.068359375,
+        13652.1171875,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        900.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        125.25068359375,
+        136.521171875
+      ]
+    }
+  ],
+  "textures": {
+    "bottle.tga": [
+      "src/bin/Data/Object1/bottle.ozt"
+    ],
+    "bookshelf.jpg": [
+      "src/bin/Data/Object1/bookshelf.OZJ"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Furniture02.bmd\n  name field: Data2\\Object1\\house_in_02.smd  version: 10\n  meshes: 2  bones: 13  actions: 1  triangles: 464\n  bounds (bind pose): min -80.46 -23.38 0.00  max 79.72 23.05 228.92  size 160.18 46.43 228.92\n  mesh 0: triangles=432 vertices=240 normals=140 uvs=30 texture=bottle.tga\n  mesh 1: triangles=32 vertices=32 normals=5 uvs=39 texture=bookshelf.jpg\n  bone 0: \"Cylinder04\" parent=-1\n  bone 1: \"Box03\" parent=-1\n  bone 2: \"Cylinder12\" parent=-1\n  bone 3: \"Cylinder13\" parent=-1\n  bone 4: \"Cylinder15\" parent=-1\n  bone 5: \"Cylinder16\" parent=-1\n  bone 6: \"Cylinder17\" parent=-1\n  bone 7: \"Cylinder18\" parent=-1\n  bone 8: \"Cylinder19\" parent=-1\n  bone 9: \"Cylinder21\" parent=-1\n  bone 10: \"Cylinder22\" parent=-1\n  bone 11: \"Cylinder23\" parent=-1\n  bone 12: \"Cylinder24\" parent=-1\n  action 0: keys=1 lock=0\n",
+  "scope_exclusion": null
+}

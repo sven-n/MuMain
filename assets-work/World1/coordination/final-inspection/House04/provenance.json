@@ -1,0 +1,30 @@
+{
+  "model": "House04",
+  "game_files": {
+    "src/bin/Data/Object1/House04.bmd": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa",
+    "src/bin/Data/Object1/tile_02.OZJ": "428d88339fd1c04b6d153e33a1ed5a4a03d753130271e11fbf62f68564dfadcf",
+    "src/bin/Data/Object1/tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "src/bin/Data/Object1/tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "src/bin/Data/Object1/tile_ston04.OZJ": "a1a75b6fbf236d8747cb2e27555d871253cff7d2e48304226f0b68dbc83fa2f9",
+    "src/bin/Data/Object1/tile_wood03.OZJ": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+    "src/bin/Data/Object1/tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda",
+    "src/bin/Data/Object1/tile_windows01.OZJ": "ac20b7b25abeda1fb515b55c9d8d9e2bb0064f6bc1652f6862a7ac1466969367",
+    "src/bin/Data/Object1/bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc",
+    "src/bin/Data/Object1/tile_space01.OZJ": "3ec6d88e703a4ade939bbb96ae538d5ac71bb00ff5aeac0b3e9d11bcc26a6e82"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 358,
+  "bind_bounds": [
+    [
+      -250.01089477539062,
+      -240.25079345703125,
+      -0.8140000104904175
+    ],
+    [
+      252.6663055419922,
+      199.92037963867188,
+      413.9349060058594
+    ]
+  ]
+}

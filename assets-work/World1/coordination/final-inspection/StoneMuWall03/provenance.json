@@ -1,0 +1,23 @@
+{
+  "model": "StoneMuWall03",
+  "game_files": {
+    "src/bin/Data/Object1/StoneMuWall03.bmd": "da3246175a2f50993de1f8b17aa9483165b389021f871145cec7ef37f7ee608a",
+    "src/bin/Data/Object1/c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "src/bin/Data/Object1/c_wall06.OZJ": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 84,
+  "bind_bounds": [
+    [
+      -149.5059051513672,
+      -109.97560119628906,
+      -103.46980285644531
+    ],
+    [
+      150.4940948486328,
+      49.924598693847656,
+      291.26849365234375
+    ]
+  ]
+}

@@ -1,0 +1,6 @@
+# bmdconv action manifest for SteelWall03.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd SteelWall03.smd <output.bmd> --manifest SteelWall03.actions.txt
+model SteelWall03.smd
+action 0 file=SteelWall03_a00.smd keys=1 lock=0
+texture 0 steel_barred_b.jpg original=steel_barred_b.jpg
+texture 1 steel_barred_a.tga original=steel_barred_a.tga

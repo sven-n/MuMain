@@ -1,0 +1,47 @@
+{
+  "status": "PASS: Blender checks; engine comparison required",
+  "triangles": 116,
+  "meshes_after_texture_merge": 1,
+  "bounds_before": [
+    [
+      -88.82341003417969,
+      -9.03140640258789,
+      -0.3346250057220459
+    ],
+    [
+      88.93399810791016,
+      11.977607727050781,
+      100.83080291748047
+    ]
+  ],
+  "bounds_after": [
+    [
+      -88.82341003417969,
+      -9.03140640258789,
+      -0.3346099853515625
+    ],
+    [
+      88.93399810791016,
+      11.977607727050781,
+      100.83079528808594
+    ]
+  ],
+  "bone_order": [
+    "Box07"
+  ],
+  "action_meta": {
+    "Fence01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_wood02.jpg": [
+      128,
+      128
+    ]
+  },
+  "skinning": "exactly one valid full-weight bone per vertex",
+  "geometry": "triangles, finite positions/UVs, nonzero face area, identity transforms",
+  "uv": "one UVMap set; all finite coordinates in [0,1]"
+}

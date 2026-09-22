@@ -1,0 +1,64 @@
+{
+  "steel_barred_a": {
+    "original_size": [
+      64,
+      128
+    ],
+    "final_size": [
+      256,
+      512
+    ],
+    "mask": "Exact original alpha resized 4\u00d7 bilinearly; no new opaque areas painted",
+    "coverage_at_threshold": {
+      "1": [
+        0.1475830078125,
+        0.19830322265625
+      ],
+      "64": [
+        0.1431884765625,
+        0.1651611328125
+      ],
+      "128": [
+        0.1409912109375,
+        0.1403045654296875
+      ],
+      "254": [
+        0.125732421875,
+        0.0834503173828125
+      ]
+    },
+    "rgba_unpremultiplied": true,
+    "negative_space": "Original bar/scroll silhouette and holes retained"
+  },
+  "steel_barred_door": {
+    "original_size": [
+      64,
+      128
+    ],
+    "final_size": [
+      256,
+      512
+    ],
+    "mask": "Exact original alpha resized 4\u00d7 bilinearly; no new opaque areas painted",
+    "coverage_at_threshold": {
+      "1": [
+        0.620361328125,
+        0.7045364379882812
+      ],
+      "64": [
+        0.5863037109375,
+        0.6177902221679688
+      ],
+      "128": [
+        0.5606689453125,
+        0.56121826171875
+      ],
+      "254": [
+        0.4642333984375,
+        0.35964202880859375
+      ]
+    },
+    "rgba_unpremultiplied": true,
+    "negative_space": "Original bar/scroll silhouette and holes retained"
+  }
+}

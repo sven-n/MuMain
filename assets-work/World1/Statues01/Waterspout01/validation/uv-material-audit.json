@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "zero_uv_before": [],
+  "zero_uv_after": [],
+  "uv_reprojected_original_triangles": [],
+  "head_cap_note": null,
+  "all_other_original_UV_preservation": "See modular-anchors.json; interpolated coordinates only inside explicit remodeled panels"
+}

@@ -1,0 +1,13 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/render_placements.py:51: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if not mat.name.startswith('horse_drawn_03.jpg') or not mat.use_nodes:
+00:02.280  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/paired-carts-before.png'
+00:04.088  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/paired-carts-after.png'
+00:06.019  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/stacked-hay-before.png'
+00:07.889  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/stacked-hay-after.png'
+00:09.691  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/loaded-cart-before.png'
+00:11.487  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/loaded-cart-after.png'
+00:13.349  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/crossed-hay-before.png'
+00:15.152  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/review/placements/crossed-hay-after.png'
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

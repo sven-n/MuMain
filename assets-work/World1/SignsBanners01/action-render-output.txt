@@ -1,0 +1,153 @@
+00:00.618  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/original/source.blend"
+00:02.467  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/review/action-before-0.png'
+00:04.245  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/review/action-before-10.png'
+00:06.324  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/review/action-before-20.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/exports/Sign01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w67o6m2k
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w67o6m2k/Sign01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w67o6m2k/Sign01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w67o6m2k/Sign01.actions.txt
+
+SMD IMPORTER: now working on Sign01
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: notice.jpg
+- New material: signboard.tga
+- New material: doorknob.tga
+- Imported 46 polys
+SMD Sign01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Sign01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Sign01_skeleton"
+- Imported 21 frames of animation
+SMD Sign01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:08.566  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/review/action-after-0.png'
+00:10.846  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/review/action-after-10.png'
+00:13.467  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/review/action-after-20.png'
+00:13.468  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/original/source.blend"
+00:15.517  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/review/action-before-0.png'
+00:17.761  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/review/action-before-12.png'
+00:19.796  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/review/action-before-25.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/exports/Curtain01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uxdtu4f_
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uxdtu4f_/Curtain01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uxdtu4f_/Curtain01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uxdtu4f_/Curtain01.actions.txt
+
+SMD IMPORTER: now working on Curtain01
+- This is a mesh
+- Imported 7 new bones
+- Imported 1 frames of animation
+- New material: badge_01.jpg
+- New material: badge_02.tga
+- Imported 68 polys
+SMD Curtain01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Curtain01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 7 bones against armature "Curtain01_skeleton"
+- Imported 26 frames of animation
+SMD Curtain01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:21.801  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/review/action-after-0.png'
+00:23.538  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/review/action-after-12.png'
+00:25.328  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/review/action-after-25.png'
+00:25.333  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/original/source.blend"
+00:27.150  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/review/action-before-0.png'
+00:29.063  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/review/action-before-12.png'
+00:30.998  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/review/action-before-24.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/validation/reimported.blend: 1 mesh object(s), 7 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/exports/StoneWall04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g7j7y8k5
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g7j7y8k5/StoneWall04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g7j7y8k5/StoneWall04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g7j7y8k5/StoneWall04.actions.txt
+
+SMD IMPORTER: now working on StoneWall04
+- This is a mesh
+- Imported 8 new bones
+- Imported 1 frames of animation
+- New material: badge_01.jpg
+- New material: badge_03.tga
+- Imported 36 polys
+SMD StoneWall04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 8 bones against armature "StoneWall04_skeleton"
+- Imported 25 frames of animation
+SMD StoneWall04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:33.023  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/review/action-after-0.png'
+00:35.022  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/review/action-after-12.png'
+00:36.982  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/review/action-after-24.png'
+00:36.986  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/original/source.blend"
+00:38.794  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/review/action-before-0.png'
+00:40.647  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/review/action-before-12.png'
+00:42.361  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/review/action-before-24.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/validation/reimported.blend: 1 mesh object(s), 8 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/exports/StoneWall06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hfq3y16w
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hfq3y16w/StoneWall06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hfq3y16w/StoneWall06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_hfq3y16w/StoneWall06.actions.txt
+
+SMD IMPORTER: now working on StoneWall06
+- This is a mesh
+- Imported 9 new bones
+- Imported 1 frames of animation
+- New material: badge_01.jpg
+- New material: badge_03.tga
+- New material: tile_01.jpg
+- Imported 88 polys
+SMD StoneWall06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 9 bones against armature "StoneWall06_skeleton"
+- Imported 25 frames of animation
+SMD StoneWall06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:44.379  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/review/action-after-0.png'
+00:46.228  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/review/action-after-12.png'
+00:48.408  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/review/action-after-24.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/validation/reimported.blend: 1 mesh object(s), 9 bones, 1 animation clips, 3 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

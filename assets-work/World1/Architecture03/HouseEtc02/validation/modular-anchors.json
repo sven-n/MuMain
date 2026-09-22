@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 250,
+  "retained_triangles_by_texture": {
+    "tile_wood02.jpg": 2,
+    "tile_ston04.jpg": 46,
+    "c_wall04.jpg": 49,
+    "tile_wood03.jpg": 16,
+    "tile_house01.jpg": 5,
+    "tile_ston01.jpg": 8,
+    "horse_drawn_01.jpg": 94,
+    "tile_ston06.jpg": 30
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0,
+  "max_retained_normal_direction_degrees": 0,
+  "frozen_container_sha256": {
+    "tile_wood03.OZJ": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+    "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "tile_ston01.OZJ": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+  },
+  "panel_face_pairs": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit non-effect panel pairs retain position, bone and UV. Modular end faces, roof edges, ladder contacts, complete waterwheel, scrolling water and accepted compatibility geometry remain unchanged.",
+  "normals": "Protected original corner normals restored after the official Blender mesh export through the supported bmdconv SMD/manifest path; engine conversion can normalize/quantize slightly. Measured differences are retained.",
+  "note": "Selected panel centers are recessed by 0.18\u20130.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

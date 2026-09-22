@@ -1,0 +1,5 @@
+# bmdconv action manifest for Well02.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Well02.smd <output.bmd> --manifest Well02.actions.txt
+model preserved-bind.smd
+action 0 file=Well02_a00.smd keys=1 lock=0
+texture 0 well.jpg original=well.jpg

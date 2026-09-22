@@ -1,0 +1,18 @@
+00:00.614  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign01/original/source.blend"
+00:00.657  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Sign02/original/source.blend"
+00:00.670  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/Curtain01/original/source.blend"
+00:00.683  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/original/source.blend"
+00:00.700  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall06/original/source.blend"
+Info: Saved as "source.blend"
+Sign01 46 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Sign02 46 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Curtain01 68 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+StoneWall04 36 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+StoneWall06 88 triangles; original bounds and every original vertex retained
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

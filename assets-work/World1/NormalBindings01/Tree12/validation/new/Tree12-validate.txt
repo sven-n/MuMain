@@ -1,0 +1,2 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-normal-bindings/assets-work/World1/NormalBindings01/Tree12/validation/new/Tree12.smd: bones=9 frames=1 triangles=393 materials=2
+OK

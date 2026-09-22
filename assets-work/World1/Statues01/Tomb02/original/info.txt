@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/src/bin/Data/Object1/Tomb02.bmd
+  name field: Data2\Object1\Tomb_cross.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 40
+  bounds (bind pose): min -71.53 -119.48 -0.04  max 69.06 122.99 49.19  size 140.59 242.47 49.23
+  mesh 0: triangles=40 vertices=28 normals=10 uvs=56 texture=grave_01.jpg
+  bone 0: "Mesh01" parent=-1
+  action 0: keys=1 lock=0

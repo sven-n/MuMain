@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-groundcover/assets-work/World1/Groundcover01/Grass02/exports/Grass02.bmd
+  name field: Grass02.smd  version: 12
+  meshes: 1  bones: 5  actions: 1  triangles: 120
+  bounds (bind pose): min -253.83 -269.85 -0.54  max 252.41 215.50 28.38  size 506.23 485.36 28.92
+  mesh 0: triangles=120 vertices=160 normals=159 uvs=4 texture=tree_08.tga
+  bone 0: "QuadPatch01" parent=-1
+  bone 1: "QuadPatch02" parent=-1
+  bone 2: "QuadPatch03" parent=-1
+  bone 3: "QuadPatch04" parent=-1
+  bone 4: "QuadPatch05" parent=-1
+  action 0: keys=1 lock=0

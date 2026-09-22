@@ -1,0 +1,5 @@
+# bmdconv action manifest for StoneStatue02.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd StoneStatue02.smd <output.bmd> --manifest StoneStatue02.actions.txt
+model StoneStatue02.smd
+action 0 file=StoneStatue02_a00.smd keys=1 lock=0
+texture 0 stone_statue01.jpg original=stone_statue01.jpg

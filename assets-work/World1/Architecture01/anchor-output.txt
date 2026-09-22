@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/validate_anchors.py", line 61, in <module>
+    assert max_normal_angle < .1, (name, 'Roundtrip changed shading direction', max_normal_angle)
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('House01', 'Roundtrip changed shading direction', 0.42267282886670166)

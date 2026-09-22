@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "original_geometry_uv_skinning_transform_sha256": "1bd72fc742244e6b68584eae0477c22624543588d33d2b2a01d3e19806e20f01",
+  "ref_original": "byte-identical numeric mesh snapshot to preserved import",
+  "packed_images": {
+    "c_wall04.jpg": "2b6dbe7bb9cfc32f95cdf023545b1269bd07f7806a364cfd5e574c8986d892a9",
+    "c_wall04.jpg.001": "2b6dbe7bb9cfc32f95cdf023545b1269bd07f7806a364cfd5e574c8986d892a9",
+    "horse_drawn_01.jpg": "efce2d578d8dd48c3ebcd5dc43521d9dc55a54fd2f6b10d82a46dad31fee4287",
+    "horse_drawn_01.jpg.001": "9765a869a1b35993979dd11d98665fb2eb72b32e068621e440621d0b77fdd8fb",
+    "tile_house01.jpg": "25fee671a8f3b83c5f6fa59f5f9bc11011d83e2fab82089ba405dd15cbae2130",
+    "tile_house01.jpg.001": "25fee671a8f3b83c5f6fa59f5f9bc11011d83e2fab82089ba405dd15cbae2130",
+    "tile_ston01.jpg": "7de9697a369f73cc40286f2c7b8c7eeb258e90ef25c7ba31a160139724b4a0fb",
+    "tile_ston01.jpg.001": "7de9697a369f73cc40286f2c7b8c7eeb258e90ef25c7ba31a160139724b4a0fb",
+    "tile_ston04.jpg": "52b5ff770c9b22832ea912d1d1b28146fc8aa962120523889f17bb89b554adcf",
+    "tile_ston04.jpg.001": "52b5ff770c9b22832ea912d1d1b28146fc8aa962120523889f17bb89b554adcf",
+    "tile_ston06.jpg": "95c2c9aad9797ea32254d55159412b2d7211a28ba9b95f75286ba338e47c06f3",
+    "tile_ston06.jpg.001": "95c2c9aad9797ea32254d55159412b2d7211a28ba9b95f75286ba338e47c06f3",
+    "tile_wood02.jpg": "60e495ea35afdaab2aa8c1b95e3441d41a677a99a7e3f361d0bba3d46350e2f5",
+    "tile_wood02.jpg.001": "60e495ea35afdaab2aa8c1b95e3441d41a677a99a7e3f361d0bba3d46350e2f5",
+    "tile_wood03.jpg": "de65a81ef594c923a9d4179037b73b62ea0cb9a2f7dc8b6dba611966b322302c",
+    "tile_wood03.jpg.001": "de65a81ef594c923a9d4179037b73b62ea0cb9a2f7dc8b6dba611966b322302c"
+  },
+  "high_poly": "excluded editable authored meshes with 3-segment fine-bevel modifiers",
+  "no_external_images_required": true
+}

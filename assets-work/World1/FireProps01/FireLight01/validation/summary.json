@@ -1,0 +1,44 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -28.57,
+      -28.47,
+      -0.41
+    ],
+    [
+      28.61,
+      28.71,
+      175.23
+    ]
+  ],
+  "bounds_after": [
+    [
+      -28.57,
+      -28.47,
+      -0.41
+    ],
+    [
+      28.61,
+      28.71,
+      175.23
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "light.tga",
+    "light2.jpg",
+    "light3.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "light.OZT": "9528a5a30f4ea4bc65386c2230890ac92f851797b2b376485eb5e4c0f7cf2dca",
+    "FireLight01.bmd": "6b0e61192c0eec9e177ec5ad23216ee736eec76ffafea957d72a7807045fd8af",
+    "light3.OZJ": "4c68cd942c486c888534fc96faca22aecb018a41359a1b2f87d37230839a1401",
+    "light2.OZJ": "d1295081bca78033e0da9ed712c5fbb1ac0e2c7b83da47e97d24a7afaa8396a5"
+  }
+}

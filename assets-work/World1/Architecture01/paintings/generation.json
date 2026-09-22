@@ -1,0 +1,74 @@
+[
+  {
+    "name": "tile_house01",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_house01-master.png",
+    "prompt": "tile_house01-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_ston05",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_ston05-master.png",
+    "prompt": "tile_ston05-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_windows01",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_windows01-master.png",
+    "prompt": "tile_windows01-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_ston07",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_ston07-master.png",
+    "prompt": "tile_ston07-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Original 128px alpha retained exactly at nearest 4x scale"
+  },
+  {
+    "name": "tile_space01",
+    "size": [
+      256,
+      256
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_space01-master.png",
+    "prompt": "tile_space01-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "light_02",
+    "size": [
+      128,
+      128
+    ],
+    "tool": "Built-in imagegen",
+    "source": "light_02-master.png",
+    "prompt": "light_02-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "evidence": "OFFLINE Blender; not client",
+  "models": [
+    {
+      "model": "Straw02",
+      "placement": {
+        "position": [
+          18050.0,
+          4100.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          -5.0,
+          0.0,
+          -1080.0
+        ],
+        "scale": 0.5600004196166992,
+        "tile": [
+          180.5,
+          41.0
+        ]
+      }
+    }
+  ],
+  "world_origin_subtracted": [
+    18050.0,
+    4100.0,
+    164.99998474121094
+  ],
+  "world_transform": "Translation @ EulerXYZ(rotation degrees) @ uniform scale; original records unchanged",
+  "camera_bounds": [
+    [
+      -64.62214660644531,
+      -116.37339782714844,
+      -9.239596366882324
+    ],
+    [
+      78.37921142578125,
+      129.85333251953125,
+      113.1624984741211
+    ]
+  ],
+  "terrain": "Terrain and surrounding architecture omitted",
+  "light": "Carriage01 mesh2 uses render-only additive approximation"
+}

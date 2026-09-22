@@ -1,0 +1,22 @@
+{
+  "model": "Grass05",
+  "game_files": {
+    "src/bin/Data/Object1/Grass05.bmd": "d38099917cb6fa26fd603882fe74b919ebf97a2fd2840e4d5a5c09d25f0962e3",
+    "src/bin/Data/Object1/tree_09.OZT": "cb9cf4565ffda802131cde6b53e64a66550c2949efbf3b123f2f73a00aa65349"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 112,
+  "bind_bounds": [
+    [
+      -167.84140014648438,
+      -135.8939971923828,
+      -1.077510952949524
+    ],
+    [
+      154.57281494140625,
+      138.66891479492188,
+      86.22689819335938
+    ]
+  ]
+}

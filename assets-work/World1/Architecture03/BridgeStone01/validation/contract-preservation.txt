@@ -1,0 +1,15 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/validation/official-export/BridgeStone01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/validation/official-export/BridgeStone01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/validation/official-export/BridgeStone01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/validation/locked-motion/BridgeStone01.smd: bones=2 frames=1 triangles=106 materials=4
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/validation/locked-motion/BridgeStone01_a00.smd: bones=2 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/exports/BridgeStone01.bmd (1 action(s))
+
+meshes 4 vs 4, bones 2 vs 2, actions 1 vs 1, triangles 106 vs 106
+unmatched triangles: 0  max corner distance: 0.0011  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT

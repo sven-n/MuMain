@@ -1,0 +1,31 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/original/Tree02.bmd
+  name field: Data2\Object1\treebig.smd  version: 10
+  meshes: 2  bones: 24  actions: 1  triangles: 770
+  bounds (bind pose): min -375.50 -399.63 -5.23  max 469.63 340.30 893.52  size 845.12 739.93 898.74
+  mesh 0: triangles=606 vertices=338 normals=338 uvs=444 texture=tree.jpg
+  mesh 1: triangles=164 vertices=328 normals=232 uvs=4 texture=Tree_a.tga
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Bone04" parent=2
+  bone 4: "Bone05" parent=3
+  bone 5: "Bone06" parent=1
+  bone 6: "Bone07" parent=5
+  bone 7: "Bone08" parent=6
+  bone 8: "Bone09" parent=1
+  bone 9: "Bone10" parent=8
+  bone 10: "Bone11" parent=9
+  bone 11: "Bone12" parent=1
+  bone 12: "stop" parent=11
+  bone 13: "Bone14" parent=12
+  bone 14: "Bone15" parent=13
+  bone 15: "notice_7" parent=0
+  bone 16: "notice_5" parent=0
+  bone 17: "notice_12" parent=0
+  bone 18: "tree_big" parent=0
+  bone 19: "Box17" parent=0
+  bone 20: "Dummy20" parent=-1 dummy
+  bone 21: "Dummy21" parent=-1 dummy
+  bone 22: "Dummy22" parent=-1 dummy
+  bone 23: "Dummy23" parent=-1 dummy
+  action 0: keys=31 lock=0

@@ -1,0 +1,22 @@
+{
+  "model": "TreasureDrum01",
+  "game_files": {
+    "src/bin/Data/Object1/TreasureDrum01.bmd": "445adb6a928a667d36857af9cb1b459f2012b67e876540da1f962d3fd865c4c0",
+    "src/bin/Data/Object1/drum.OZJ": "1d48c6672bd96e3d689bf1b874eb40e9ec0de198c19439f335e41cbedb5f488f"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 1456,
+  "bind_bounds": [
+    [
+      -40.567298889160156,
+      -40.21580123901367,
+      0.0019229999743402004
+    ],
+    [
+      40.70109939575195,
+      41.0526008605957,
+      102.97920227050781
+    ]
+  ]
+}

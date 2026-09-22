@@ -1,0 +1,104 @@
+{
+  "stone_statue02": {
+    "original_size": [
+      64,
+      128
+    ],
+    "final_size": [
+      256,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "stone_statue02-master.png",
+    "prompt": "stone_statue02-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "stone_statue01": {
+    "original_size": [
+      128,
+      128
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "stone_statue01-master.png",
+    "prompt": "stone_statue01-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "angel_stone_statue": {
+    "original_size": [
+      128,
+      128
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "angel_stone_statue-master.png",
+    "prompt": "angel_stone_statue-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "tombstone_big": {
+    "original_size": [
+      128,
+      128
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "tombstone_big-master.png",
+    "prompt": "tombstone_big-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "grave_02": {
+    "original_size": [
+      128,
+      128
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "grave_02-master.png",
+    "prompt": "grave_02-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "grave_01": {
+    "original_size": [
+      128,
+      128
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "grave_01-master.png",
+    "prompt": "grave_01-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  }
+}

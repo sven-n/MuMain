@@ -1,0 +1,64 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 88,
+  "original_triangles": 88,
+  "bounds_before": [
+    [
+      -54.8092041015625,
+      -50.90120315551758,
+      0.28070101141929626
+    ],
+    [
+      246.2310028076172,
+      249.86549377441406,
+      264.47900390625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -54.8092041015625,
+      -50.90120315551758,
+      0.28070101141929626
+    ],
+    [
+      246.2310028076172,
+      249.86549377441406,
+      264.47900390625
+    ]
+  ],
+  "original_vertices_retained": 64,
+  "bone_order": [
+    "joint_01"
+  ],
+  "action_meta": {
+    "HouseWall04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_wood01.jpg": [
+      512,
+      512
+    ],
+    "tile_wood02.jpg": [
+      512,
+      512
+    ],
+    "tile_ston04.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "tile_wood01.jpg",
+    "tile_wood02.jpg",
+    "tile_ston04.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": true
+}

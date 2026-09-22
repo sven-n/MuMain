@@ -1,0 +1,102 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 358,
+  "original_triangles": 358,
+  "bounds_before": [
+    [
+      -250.01089477539062,
+      -240.25079345703125,
+      -0.8140000104904175
+    ],
+    [
+      252.6663055419922,
+      199.92037963867188,
+      413.9349060058594
+    ]
+  ],
+  "bounds_after": [
+    [
+      -250.01089477539062,
+      -240.25079345703125,
+      -0.8140000104904175
+    ],
+    [
+      252.6663055419922,
+      199.92037963867188,
+      413.9349060058594
+    ]
+  ],
+  "original_vertices_retained": 271,
+  "bone_order": [
+    "Mesh02",
+    "Box02",
+    "boness_01",
+    "boness_02",
+    "Object02",
+    "boness_03",
+    "boness_04",
+    "Object01",
+    "Object03"
+  ],
+  "action_meta": {
+    "House04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_02.jpg": [
+      512,
+      512
+    ],
+    "tile_wood01.jpg": [
+      512,
+      512
+    ],
+    "tile_house01.jpg": [
+      512,
+      512
+    ],
+    "tile_ston04.jpg": [
+      512,
+      512
+    ],
+    "tile_wood03.jpg": [
+      512,
+      512
+    ],
+    "tile_wood02.jpg": [
+      512,
+      512
+    ],
+    "tile_windows01.jpg": [
+      512,
+      512
+    ],
+    "bridge_01.jpg": [
+      1024,
+      512
+    ],
+    "tile_space01.jpg": [
+      256,
+      256
+    ]
+  },
+  "material_order": [
+    "tile_02.jpg",
+    "tile_wood01.jpg",
+    "tile_house01.jpg",
+    "tile_ston04.jpg",
+    "tile_wood03.jpg",
+    "tile_wood02.jpg",
+    "tile_windows01.jpg",
+    "bridge_01.jpg",
+    "tile_space01.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": true
+}

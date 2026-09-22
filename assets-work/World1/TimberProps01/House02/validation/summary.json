@@ -1,0 +1,42 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -114.89,
+      -64.12,
+      -0.16
+    ],
+    [
+      89.39,
+      72.78,
+      188.55
+    ]
+  ],
+  "bounds_after": [
+    [
+      -114.89,
+      -64.12,
+      -0.16
+    ],
+    [
+      89.39,
+      72.78,
+      188.55
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "drum.jpg",
+    "steel.jpg"
+  ],
+  "export_sha256": {
+    "House02.bmd": "f5f28ce013478d5369a1815ac8388c0b4e4597e3410c8832e2b2a5b57c8e1916",
+    "drum.OZJ": "1d48c6672bd96e3d689bf1b874eb40e9ec0de198c19439f335e41cbedb5f488f",
+    "steel.OZJ": "c407f13d8694533d676479eff5ce197dfd951f452c1dceaab227f5a66283994b"
+  }
+}

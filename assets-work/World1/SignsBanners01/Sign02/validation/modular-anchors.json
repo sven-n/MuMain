@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "position_tolerance": 0.001,
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 26,
+  "retained_triangles_by_texture": {
+    "notice.jpg": 26
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 4.099999999999937e-05,
+  "max_retained_normal_direction_degrees": 0.002355032580065003,
+  "frozen_container_sha256": {},
+  "panel_face_pairs": [
+    [
+      0,
+      1
+    ],
+    [
+      2,
+      3
+    ]
+  ],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit notice panel pairs retain position, bone and UV. Ornamental bracket, suspension rings, poles and animated cloth retain their original geometry and UVs.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Wooden notice panel centers are recessed by 0.25 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

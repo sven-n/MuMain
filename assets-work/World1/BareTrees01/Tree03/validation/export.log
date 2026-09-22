@@ -1,0 +1,36 @@
+00:00.575  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree03/source.blend"
+skipping reference object 'Tree03' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Tree03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sd4wpcwg/Tree03_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 273 polys
+- Exported 1 materials
+   tree_03.jpg
+- SMD export took 0.00591278076171875
+
+
+Blender Source Tools: exporting Tree03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sd4wpcwg/anims/Tree03_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0007059574127197266
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sd4wpcwg/Tree03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree03/exports/Tree03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_sd4wpcwg/anims/Tree03_a00.smd --name Tree03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree03/exports/Tree03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree03/exports/Tree03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree03/exports/Tree03.bmd
+  name field: Tree03.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 273
+  bounds (bind pose): min -257.26 -243.68 -1.89  max 248.24 261.08 536.01  size 505.50 504.76 537.90
+  mesh 0: triangles=273 vertices=185 normals=212 uvs=149 texture=tree_03.jpg
+  bone 0: "Cylinder05" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,9 @@
+{
+  "evidence": "OFFLINE Blender renders, not client screenshots",
+  "replacement": "Reimported exported BMD",
+  "camera": "Matching camera, lighting and scale before/after",
+  "terrain": "Completed pilot TileGrass01; 100 world units per repeat",
+  "scale_proxy_height": 190,
+  "terrain_view_width": 1000,
+  "placement": "Preview at origin, not an actual World1 placement or measured client camera"
+}

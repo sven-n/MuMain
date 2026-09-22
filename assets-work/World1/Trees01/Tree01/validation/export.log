@@ -1,0 +1,59 @@
+00:00.972  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/source.blend"
+skipping reference object 'Tree01' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Tree01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_epex1ilf/Tree01_mu_export.smd
+- Exported 16 bones
+- Exported 1 frames
+- Exported 412 polys
+- Exported 2 materials
+   tree.jpg
+   Tree_a.tga
+- SMD export took 0.010332107543945312
+
+
+Blender Source Tools: exporting Tree01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_epex1ilf/anims/Tree01_a00.smd
+- Exported 16 bones
+- Exported 31 frames
+- SMD export took 0.012127876281738281
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_epex1ilf/Tree01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/exports/Tree01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_epex1ilf/anims/Tree01_a00.smd --name Tree01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/exports/Tree01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/exports/Tree01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/exports/Tree01.bmd
+  name field: Tree01.smd  version: 12
+  meshes: 2  bones: 16  actions: 1  triangles: 412
+  bounds (bind pose): min -407.63 -328.57 0.13  max 344.26 279.47 825.10  size 751.89 608.03 824.97
+  mesh 0: triangles=268 vertices=145 normals=145 uvs=203 texture=tree.jpg
+  mesh 1: triangles=144 vertices=288 normals=154 uvs=4 texture=Tree_a.tga
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Bone04" parent=2
+  bone 4: "Bone05" parent=1
+  bone 5: "Bone06" parent=4
+  bone 6: "Bone07" parent=1
+  bone 7: "Bone08" parent=6
+  bone 8: "notice_3" parent=1
+  bone 9: "notice_10" parent=1
+  bone 10: "notice_6" parent=1
+  bone 11: "tree01" parent=0
+  bone 12: "Box35" parent=0
+  bone 13: "Dummy13" parent=-1 dummy
+  bone 14: "Dummy14" parent=-1 dummy
+  bone 15: "Dummy15" parent=-1 dummy
+  action 0: keys=31 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
+warning: Tree01_mu_export.smd: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_mu_export.smd: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_mu_export.smd: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin

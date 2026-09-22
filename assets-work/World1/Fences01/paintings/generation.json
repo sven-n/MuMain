@@ -1,0 +1,9 @@
+{
+  "tool": "Built-in imagegen",
+  "prompt_file": "prompt.txt",
+  "source": "joint-master.png",
+  "generated_source": "/Users/webproduktion3/.codex/generated_images/01a0c96e-b7ee-72a1-9ad2-5f430b2130fb/exec-84010c0f-29a0-4277-9865-59daba614fc4.png",
+  "processing": "RGB, Lanczos resize to 512x512, JPEG quality 95 4:4:4, OZJ wrap",
+  "texture": "joint.jpg / joint.OZJ",
+  "alpha": "opaque RGB; unchanged convention"
+}

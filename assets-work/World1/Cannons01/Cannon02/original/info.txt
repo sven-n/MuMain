@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Cannon02/original/Cannon02.bmd
+  name field: Data2\Object1\gun_02.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 155
+  bounds (bind pose): min -67.44 -78.26 -0.99  max 68.04 57.38 132.44  size 135.48 135.64 133.43
+  mesh 0: triangles=155 vertices=109 normals=46 uvs=140 texture=horse_drawn_01.jpg
+  bone 0: "Box06" parent=-1
+  action 0: keys=1 lock=0

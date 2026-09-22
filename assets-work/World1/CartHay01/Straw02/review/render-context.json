@@ -1,0 +1,10 @@
+{
+  "evidence": "OFFLINE Blender renders, not client screenshots",
+  "replacement": "Reimported exported BMD; mesh2 light uses render-only additive approximation",
+  "camera": "Matching camera, lighting and scale before/after",
+  "terrain": "Completed TileGrass01, 100-unit repeats as staging proxy; engine density depends on texture width",
+  "scale_proxy_height": 190,
+  "terrain_view_width": 800,
+  "animation": "Carriage01 all21 keys validated; sample frames0,10,20. Others original one-frame action.",
+  "placement": "Preview at origin, not an actual World1 placement or measured client camera"
+}

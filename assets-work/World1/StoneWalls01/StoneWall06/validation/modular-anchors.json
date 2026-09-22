@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "position_tolerance": 0.001,
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.00036599999998543353,
+  "unchanged_triangle_count": 48,
+  "retained_triangles_by_texture": {
+    "badge_01.jpg": 28,
+    "badge_03.tga": 8,
+    "tile_01.jpg": 12
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0.00012200000000001099,
+  "max_retained_normal_direction_degrees": 0.008013944324635662,
+  "frozen_container_sha256": {
+    "badge_01.OZJ": "c320a30bb1df3444a314ecb2ef6102d9b79d9ea88201e2618d97f729d96723e3",
+    "badge_03.OZT": "212525201745f7a7b74a9ca3537d88aadd4e070ccebebb9074ed63015e6b4069"
+  },
+  "panel_face_pairs": [
+    [
+      40,
+      41
+    ],
+    [
+      42,
+      43
+    ],
+    [
+      44,
+      45
+    ],
+    [
+      46,
+      47
+    ]
+  ],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit tile_01 panel pairs retain position, bone and UV. Gate portcullis, gate inward jamb planes, wall endpoint planes, banner silhouettes and frozen siege details unchanged.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Panel centers are recessed by 0.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

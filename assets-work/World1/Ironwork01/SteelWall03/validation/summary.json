@@ -1,0 +1,91 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      18,
+      82
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -49.875301,
+          -3.2306,
+          0.000389
+        ],
+        [
+          50.121605,
+          3.206801,
+          220.071594
+        ]
+      ],
+      [
+        [
+          -49.875446,
+          -3.230313,
+          0.000381
+        ],
+        [
+          50.121773,
+          3.206718,
+          220.071732
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.00028699999999970416,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true,
+    "surface_checks_before_after": [
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      },
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      }
+    ]
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=SteelWall03_a00.smd keys=1 lock=0",
+      "texture 0 steel_barred_b.jpg original=steel_barred_b.jpg",
+      "texture 1 steel_barred_a.tga original=steel_barred_a.tga"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "SteelWall03.smd",
+        "nodes_exact": "0 \"Box04\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "SteelWall03_a00.smd",
+        "nodes_exact": "0 \"Box04\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "DIFFERENT",
+  "mesh_texture_order": [
+    "steel_barred_b.jpg",
+    "steel_barred_a.tga"
+  ],
+  "export_sha256": {
+    "SteelWall03.bmd": "0ba89db4e0d966a7f4115825fd1c81ed11d020886b7f127dc7850efe3828bd23",
+    "steel_barred_a.OZT": "6a362e7e813e3656e6598b9239cd6094381a48bf2f4a62f706c8f9b2151997a3",
+    "steel_barred_b.OZJ": "18fb54247b0dc08f4dfe2daab5f9f4edfde880513d0ed597e449e58efafd8087"
+  }
+}

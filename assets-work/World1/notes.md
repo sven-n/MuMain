@@ -166,3 +166,8 @@ before/after screenshots. Start with Candle01 near `(126.58,128.25)`, TreasureCh
 `(185.17,140.06)`, and Tomb03 near `(130.50,215.00)`. Full placements and bounds are in each
 prop's notes. The user's offline authorization remains in force; no client verification is
 claimed and no stability work was attempted.
+
+
+## 2026-09-22 — Complete Lorencia static art integration
+
+All 106 in-scope static models are accepted offline on `art/lorencia-rebuild` in the sibling `MuMain-lorencia-rebuild` worktree. The 17 terrain paintings and four completed pilot props above remain unchanged. Use the [consolidated handoff](coordination/notes.md), [asset board](coordination/asset-board.md), [exact changed game files](coordination/changed-game-files.md) and [combined offline gallery](coordination/final-review.md) for current ownership, commits and evidence. There is no remaining static production batch. Client verification and real 1920×1080 captures remain pending; this rebuild task performed no shared-runtime installation or client launch.

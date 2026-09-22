@@ -1,0 +1,42 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -3.84,
+      -21.56,
+      -0.08
+    ],
+    [
+      98.57,
+      13.02,
+      179.99
+    ]
+  ],
+  "bounds_after": [
+    [
+      -3.84,
+      -21.56,
+      -0.08
+    ],
+    [
+      98.57,
+      13.02,
+      179.99
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=25 lock=0"
+  ],
+  "material_order": [
+    "badge_01.jpg",
+    "badge_03.tga"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "badge_01.OZJ": "d1f42275a74f1c90ed2a79afd23b964facd1d5bcc8121e5f957f429c66c96ffe",
+    "StoneWall04.bmd": "6777489dd3d71e6304d464b0ae691726d5ecce34c6ef25d63934190a7b46fba9",
+    "badge_03.OZT": "a17e37582909ebbe250bff640c3fc1a7d024b3959d0ca3ad2bc666a86af1ebaa"
+  }
+}

@@ -1,0 +1,4 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/textures/final/horse_drawn_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/textures/final/jar_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/textures/final/tub.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/textures/final/well.OZJ

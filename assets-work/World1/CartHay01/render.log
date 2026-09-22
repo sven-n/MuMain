@@ -1,0 +1,411 @@
+00:00.495  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/original/source.blend"
+00:01.870  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/before.png'
+00:03.109  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/reverse-before.png'
+00:04.322  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/action-before-10.png'
+00:05.560  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/action-before-20.png'
+00:06.841  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/terrain-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/exports/Carriage01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_daimuxsd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_daimuxsd/Carriage01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_daimuxsd/Carriage01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_daimuxsd/Carriage01.actions.txt
+
+SMD IMPORTER: now working on Carriage01
+- This is a mesh
+- Imported 14 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: horse_drawn_02.tga
+- New material: horse_drawn_03.jpg
+- Imported 472 polys
+SMD Carriage01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 14 bones against armature "Carriage01_skeleton"
+- Imported 21 frames of animation
+SMD Carriage01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:08.158  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/after.png'
+00:09.316  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/reverse-after.png'
+00:10.532  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/action-after-10.png'
+00:11.766  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/action-after-20.png'
+00:13.173  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/reimported.blend: 1 mesh object(s), 14 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/exports/Carriage01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar2ecpv8
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar2ecpv8/Carriage01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar2ecpv8/Carriage01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar2ecpv8/Carriage01.actions.txt
+
+SMD IMPORTER: now working on Carriage01
+- This is a mesh
+- Imported 14 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: horse_drawn_02.tga
+- New material: horse_drawn_03.jpg
+- Imported 472 polys
+SMD Carriage01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 14 bones against armature "Carriage01_skeleton"
+- Imported 21 frames of animation
+SMD Carriage01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:14.363  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/review/wireframe.png'
+00:14.364  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/original/source.blend"
+00:15.513  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/before.png'
+00:16.636  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/reverse-before.png'
+00:17.858  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage01/validation/reimported.blend: 1 mesh object(s), 14 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/exports/Carriage02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zkua22m3
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zkua22m3/Carriage02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zkua22m3/Carriage02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zkua22m3/Carriage02.actions.txt
+
+SMD IMPORTER: now working on Carriage02
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 450 polys
+SMD Carriage02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "Carriage02_skeleton"
+- Imported 1 frames of animation
+SMD Carriage02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:19.035  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/after.png'
+00:20.160  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/reverse-after.png'
+00:21.383  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/exports/Carriage02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_819x2to9
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_819x2to9/Carriage02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_819x2to9/Carriage02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_819x2to9/Carriage02.actions.txt
+
+SMD IMPORTER: now working on Carriage02
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- Imported 450 polys
+SMD Carriage02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "Carriage02_skeleton"
+- Imported 1 frames of animation
+SMD Carriage02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:22.531  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/review/wireframe.png'
+00:22.533  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/original/source.blend"
+00:23.718  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/before.png'
+00:24.859  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/reverse-before.png'
+00:26.092  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/exports/Carriage03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y5c5fmd7
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y5c5fmd7/Carriage03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y5c5fmd7/Carriage03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_y5c5fmd7/Carriage03.actions.txt
+
+SMD IMPORTER: now working on Carriage03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tub.jpg
+- New material: horse_drawn_01.jpg
+- Imported 538 polys
+SMD Carriage03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Carriage03_skeleton"
+- Imported 1 frames of animation
+SMD Carriage03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:27.326  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/after.png'
+00:28.469  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/reverse-after.png'
+00:29.706  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/exports/Carriage03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_87_bisqk
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_87_bisqk/Carriage03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_87_bisqk/Carriage03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_87_bisqk/Carriage03.actions.txt
+
+SMD IMPORTER: now working on Carriage03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tub.jpg
+- New material: horse_drawn_01.jpg
+- Imported 538 polys
+SMD Carriage03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Carriage03_skeleton"
+- Imported 1 frames of animation
+SMD Carriage03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:30.869  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/review/wireframe.png'
+00:30.870  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/original/source.blend"
+00:32.148  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/before.png'
+00:33.352  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/reverse-before.png'
+00:34.670  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rttz3_vg
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rttz3_vg/Carriage04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rttz3_vg/Carriage04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rttz3_vg/Carriage04.actions.txt
+
+SMD IMPORTER: now working on Carriage04
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: grass_01.tga
+- Imported 882 polys
+SMD Carriage04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Carriage04_skeleton"
+- Imported 1 frames of animation
+SMD Carriage04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:35.993  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/after.png'
+00:37.241  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/reverse-after.png'
+00:38.628  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_1pmbs378
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_1pmbs378/Carriage04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_1pmbs378/Carriage04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_1pmbs378/Carriage04.actions.txt
+
+SMD IMPORTER: now working on Carriage04
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: horse_drawn_01.jpg
+- New material: grass_01.tga
+- Imported 882 polys
+SMD Carriage04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Carriage04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Carriage04_skeleton"
+- Imported 1 frames of animation
+SMD Carriage04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:39.817  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/review/wireframe.png'
+00:39.818  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/original/source.blend"
+00:41.177  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/before.png'
+00:42.555  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/reverse-before.png'
+00:43.821  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/exports/Straw01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_q7qbzlqe
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_q7qbzlqe/Straw01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_q7qbzlqe/Straw01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_q7qbzlqe/Straw01.actions.txt
+
+SMD IMPORTER: now working on Straw01
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: grass_01.tga
+- Imported 432 polys
+SMD Straw01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Straw01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "Straw01_skeleton"
+- Imported 1 frames of animation
+SMD Straw01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:45.157  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/after.png'
+00:46.449  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/reverse-after.png'
+00:47.709  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/exports/Straw01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fjpxjo8o
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fjpxjo8o/Straw01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fjpxjo8o/Straw01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_fjpxjo8o/Straw01.actions.txt
+
+SMD IMPORTER: now working on Straw01
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: grass_01.tga
+- Imported 432 polys
+SMD Straw01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Straw01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "Straw01_skeleton"
+- Imported 1 frames of animation
+SMD Straw01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:48.889  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/review/wireframe.png'
+00:48.891  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/original/source.blend"
+00:50.143  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/before.png'
+00:51.399  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/reverse-before.png'
+00:52.772  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_j7eiz0va
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_j7eiz0va/Straw02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_j7eiz0va/Straw02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_j7eiz0va/Straw02.actions.txt
+
+SMD IMPORTER: now working on Straw02
+- This is a mesh
+- Imported 8 new bones
+- Imported 1 frames of animation
+- New material: grass_01.tga
+- Imported 1152 polys
+SMD Straw02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Straw02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 8 bones against armature "Straw02_skeleton"
+- Imported 1 frames of animation
+SMD Straw02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:54.075  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/after.png'
+00:55.298  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/reverse-after.png'
+00:56.623  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/validation/reimported.blend: 1 mesh object(s), 8 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0qmm2t5_
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0qmm2t5_/Straw02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0qmm2t5_/Straw02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0qmm2t5_/Straw02.actions.txt
+
+SMD IMPORTER: now working on Straw02
+- This is a mesh
+- Imported 8 new bones
+- Imported 1 frames of animation
+- New material: grass_01.tga
+- Imported 1152 polys
+SMD Straw02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Straw02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 8 bones against armature "Straw02_skeleton"
+- Imported 1 frames of animation
+SMD Straw02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:57.807  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw02/validation/reimported.blend: 1 mesh object(s), 8 bones, 1 animation clips, 1 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

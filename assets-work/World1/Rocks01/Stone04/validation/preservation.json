@@ -1,0 +1,9 @@
+{
+  "rig": {
+    "component": "skeleton",
+    "texture": null,
+    "triangles": 0,
+    "compare": "EQUIVALENT",
+    "bindings_and_uvs": "all original corners matched"
+  }
+}

@@ -1,0 +1,23 @@
+Beer02 meshes 5 vs 5, bones 6 vs 6, actions 1 vs 1, triangles 232 vs 952
+unmatched triangles: 230  max corner distance: 0.0001  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Beer03 meshes 2 vs 2, bones 3 vs 3, actions 1 vs 1, triangles 108 vs 516
+unmatched triangles: 108  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Furniture01 meshes 4 vs 4, bones 6 vs 6, actions 1 vs 1, triangles 272 vs 732
+unmatched triangles: 266  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Furniture02 meshes 2 vs 2, bones 13 vs 13, actions 1 vs 1, triangles 464 vs 1288
+unmatched triangles: 458  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Furniture06 meshes 2 vs 2, bones 1 vs 1, actions 1 vs 1, triangles 54 vs 132
+unmatched triangles: 43  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Furniture07 meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 42 vs 174
+unmatched triangles: 36  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT

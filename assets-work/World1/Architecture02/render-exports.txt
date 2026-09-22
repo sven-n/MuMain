@@ -1,0 +1,660 @@
+00:00.487  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/source.blend"
+00:00.495  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/original/source.blend"
+00:02.171  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/neutral-before.png'
+00:04.024  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/before.png'
+00:05.837  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/action-before-0.png'
+00:07.640  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/action-before-14.png'
+00:09.623  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/action-before-29.png'
+00:11.459  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/gameplay-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/exports/House05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b2ntjal9
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b2ntjal9/House05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b2ntjal9/House05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b2ntjal9/House05.actions.txt
+
+SMD IMPORTER: now working on House05
+- This is a mesh
+- Imported 10 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_wood01.jpg
+- New material: ston02.jpg
+- Imported 324 polys
+SMD House05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 10 bones against armature "House05_skeleton"
+- Imported 30 frames of animation
+SMD House05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:13.327  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/neutral-after.png'
+00:15.456  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/after.png'
+00:17.855  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/action-after-0.png'
+00:19.897  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/action-after-14.png'
+00:22.088  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/action-after-29.png'
+00:23.897  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/validation/reimported.blend: 1 mesh object(s), 10 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/exports/House05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z9156flh
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z9156flh/House05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z9156flh/House05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z9156flh/House05.actions.txt
+
+SMD IMPORTER: now working on House05
+- This is a mesh
+- Imported 10 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_wood01.jpg
+- New material: ston02.jpg
+- Imported 324 polys
+SMD House05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 10 bones against armature "House05_skeleton"
+- Imported 30 frames of animation
+SMD House05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:25.723  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/review/wireframe.png'
+00:25.724  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/source.blend"
+00:25.734  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/original/source.blend"
+00:27.770  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/review/before.png'
+00:29.660  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/validation/reimported.blend: 1 mesh object(s), 10 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/exports/HouseWall01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_tf7pizm3
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_tf7pizm3/HouseWall01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_tf7pizm3/HouseWall01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_tf7pizm3/HouseWall01.actions.txt
+
+SMD IMPORTER: now working on HouseWall01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- Imported 52 polys
+SMD HouseWall01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall01_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:31.735  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/review/after.png'
+00:33.336  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/exports/HouseWall01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v03l2ofv
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v03l2ofv/HouseWall01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v03l2ofv/HouseWall01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v03l2ofv/HouseWall01.actions.txt
+
+SMD IMPORTER: now working on HouseWall01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- Imported 52 polys
+SMD HouseWall01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall01_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:34.950  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/review/wireframe.png'
+00:34.952  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/source.blend"
+00:34.960  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/original/source.blend"
+00:37.676  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/review/before.png'
+00:39.121  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_eei5fvnk
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_eei5fvnk/HouseWall04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_eei5fvnk/HouseWall04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_eei5fvnk/HouseWall04.actions.txt
+
+SMD IMPORTER: now working on HouseWall04
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- Imported 88 polys
+SMD HouseWall04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall04_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:41.559  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/review/after.png'
+00:43.022  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_33h8firv
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_33h8firv/HouseWall04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_33h8firv/HouseWall04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_33h8firv/HouseWall04.actions.txt
+
+SMD IMPORTER: now working on HouseWall04
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- Imported 88 polys
+SMD HouseWall04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall04_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:45.019  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/review/wireframe.png'
+00:45.020  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/source.blend"
+00:45.028  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/original/source.blend"
+00:47.081  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/review/before.png'
+00:48.558  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/exports/HouseWall05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mxfuq4oi
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mxfuq4oi/HouseWall05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mxfuq4oi/HouseWall05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mxfuq4oi/HouseWall05.actions.txt
+
+SMD IMPORTER: now working on HouseWall05
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_wood03.jpg
+- Imported 54 polys
+SMD HouseWall05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall05_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:50.937  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/review/after.png'
+00:52.369  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/exports/HouseWall05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_u2jmkq6q
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_u2jmkq6q/HouseWall05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_u2jmkq6q/HouseWall05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_u2jmkq6q/HouseWall05.actions.txt
+
+SMD IMPORTER: now working on HouseWall05
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_wood03.jpg
+- Imported 54 polys
+SMD HouseWall05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall05_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:54.153  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/review/wireframe.png'
+00:54.154  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/source.blend"
+00:54.165  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/original/source.blend"
+00:56.346  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/review/before.png'
+00:58.368  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall05/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/exports/HouseWall06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0d3vnzcx
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0d3vnzcx/HouseWall06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0d3vnzcx/HouseWall06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0d3vnzcx/HouseWall06.actions.txt
+
+SMD IMPORTER: now working on HouseWall06
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_wood03.jpg
+- Imported 52 polys
+SMD HouseWall06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall06_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+01:00.773  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/review/after.png'
+01:03.039  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/exports/HouseWall06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n_x3vk6p
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n_x3vk6p/HouseWall06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n_x3vk6p/HouseWall06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n_x3vk6p/HouseWall06.actions.txt
+
+SMD IMPORTER: now working on HouseWall06
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_wood03.jpg
+- Imported 52 polys
+SMD HouseWall06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseWall06_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+01:05.071  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/review/wireframe.png'
+01:05.073  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/source.blend"
+01:05.082  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/original/source.blend"
+01:07.754  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/review/before.png'
+01:10.126  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall06/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxxmjqw9
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxxmjqw9/Stair01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxxmjqw9/Stair01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nxxmjqw9/Stair01.actions.txt
+
+SMD IMPORTER: now working on Stair01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood01.jpg
+- Imported 182 polys
+SMD Stair01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stair01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stair01_skeleton"
+- Imported 1 frames of animation
+SMD Stair01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+01:12.660  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/review/after.png'
+01:14.974  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bo3s4abu
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bo3s4abu/Stair01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bo3s4abu/Stair01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bo3s4abu/Stair01.actions.txt
+
+SMD IMPORTER: now working on Stair01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood01.jpg
+- Imported 182 polys
+SMD Stair01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Stair01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Stair01_skeleton"
+- Imported 1 frames of animation
+SMD Stair01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+01:17.167  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/review/wireframe.png'
+01:17.168  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/source.blend"
+01:17.183  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/original/source.blend"
+01:20.572  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/neutral-before.png'
+01:24.354  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/before.png'
+01:27.577  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/action-before-0.png'
+01:31.685  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/action-before-19.png'
+01:35.585  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/action-before-39.png'
+01:38.388  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/exports/House04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wlf16ryx
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wlf16ryx/House04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wlf16ryx/House04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wlf16ryx/House04.actions.txt
+
+SMD IMPORTER: now working on House04
+- This is a mesh
+- Imported 9 new bones
+- Imported 1 frames of animation
+- New material: tile_02.jpg
+- New material: tile_wood01.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_wood02.jpg
+- New material: tile_windows01.jpg
+- New material: bridge_01.jpg
+- New material: tile_space01.jpg
+- Imported 358 polys
+SMD House04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 9 bones against armature "House04_skeleton"
+- Imported 40 frames of animation
+SMD House04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+01:41.958  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/neutral-after.png'
+01:45.905  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/after.png'
+01:49.701  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/action-after-0.png'
+01:54.099  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/action-after-19.png'
+01:58.106  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/action-after-39.png'
+02:00.656  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 9 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/validation/reimported.blend: 1 mesh object(s), 9 bones, 1 animation clips, 9 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/exports/House04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qwekq11s
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qwekq11s/House04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qwekq11s/House04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qwekq11s/House04.actions.txt
+
+SMD IMPORTER: now working on House04
+- This is a mesh
+- Imported 9 new bones
+- Imported 1 frames of animation
+- New material: tile_02.jpg
+- New material: tile_wood01.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_wood02.jpg
+- New material: tile_windows01.jpg
+- New material: bridge_01.jpg
+- New material: tile_space01.jpg
+- Imported 358 polys
+SMD House04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 9 bones against armature "House04_skeleton"
+- Imported 40 frames of animation
+SMD House04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+02:02.743  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/review/wireframe.png'
+02:02.744  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/source.blend"
+02:02.755  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/original/source.blend"
+02:05.468  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/neutral-before.png'
+02:08.534  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/before.png'
+02:10.361  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 9 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House04/validation/reimported.blend: 1 mesh object(s), 9 bones, 1 animation clips, 9 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/exports/HouseWall02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_upo544r2
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_upo544r2/HouseWall02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_upo544r2/HouseWall02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_upo544r2/HouseWall02.actions.txt
+
+SMD IMPORTER: now working on HouseWall02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_ston06.jpg
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: light_02.jpg
+- Imported 110 polys
+SMD HouseWall02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseWall02_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+02:13.376  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/neutral-after.png'
+02:16.662  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/after.png'
+02:18.412  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 5 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 5 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/exports/HouseWall02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rx42c_u6
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rx42c_u6/HouseWall02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rx42c_u6/HouseWall02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rx42c_u6/HouseWall02.actions.txt
+
+SMD IMPORTER: now working on HouseWall02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_ston06.jpg
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: light_02.jpg
+- Imported 110 polys
+SMD HouseWall02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseWall02_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+02:20.484  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/review/wireframe.png'
+02:20.485  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/source.blend"
+02:20.498  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/original/source.blend"
+02:23.256  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/review/before.png'
+02:25.323  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 5 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 5 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/exports/HouseEtc02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bq7p07jh
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bq7p07jh/HouseEtc02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bq7p07jh/HouseEtc02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bq7p07jh/HouseEtc02.actions.txt
+
+SMD IMPORTER: now working on HouseEtc02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: c_wall04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_ston06.jpg
+- Imported 250 polys
+SMD HouseEtc02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseEtc02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseEtc02_skeleton"
+- Imported 1 frames of animation
+SMD HouseEtc02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+02:28.259  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/review/after.png'
+02:30.546  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 8 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 8 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/exports/HouseEtc02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_igi4h0ph
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_igi4h0ph/HouseEtc02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_igi4h0ph/HouseEtc02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_igi4h0ph/HouseEtc02.actions.txt
+
+SMD IMPORTER: now working on HouseEtc02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: c_wall04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_ston06.jpg
+- Imported 250 polys
+SMD HouseEtc02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseEtc02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseEtc02_skeleton"
+- Imported 1 frames of animation
+SMD HouseEtc02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+02:32.933  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 8 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseEtc02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 8 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

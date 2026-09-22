@@ -1,0 +1,290 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 324,
+  "original_triangles": 276,
+  "bounds_before": [
+    [
+      -200.17633056640625,
+      -275.53076171875,
+      -147.37710571289062
+    ],
+    [
+      293.5078125,
+      601.860595703125,
+      359.635986328125
+    ]
+  ],
+  "bounds_after": [
+    [
+      -200.17633056640625,
+      -275.53076171875,
+      -147.37710571289062
+    ],
+    [
+      293.5078125,
+      601.860595703125,
+      359.635986328125
+    ]
+  ],
+  "original_vertices_retained": 208,
+  "bone_order": [
+    "ki12",
+    "Box02",
+    "Box03",
+    "Box04",
+    "Box05",
+    "Box06",
+    "Box01",
+    "Box08",
+    "Box07",
+    "Mesh01"
+  ],
+  "action_meta": {
+    "House05_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_wood02.jpg": [
+      128,
+      128
+    ],
+    "tile_wood01.jpg": [
+      512,
+      512
+    ],
+    "ston02.jpg": [
+      128,
+      128
+    ]
+  },
+  "material_order": [
+    "tile_wood02.jpg",
+    "tile_wood01.jpg",
+    "ston02.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "All textures opaque RGB; water and accepted effects retain original indexed geometry and materials",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        228,
+        229
+      ],
+      "boundary_vertices": [
+        168,
+        169,
+        170,
+        171
+      ],
+      "inset_fraction": 0.01731960036382863,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          149.55459594726562,
+          200.7255859375,
+          -0.030400000512599945
+        ],
+        [
+          41.25410079956055,
+          200.7255859375,
+          0.0
+        ],
+        [
+          41.25419998168945,
+          200.7255859375,
+          268.0840148925781
+        ],
+        [
+          149.55459594726562,
+          200.7255859375,
+          225.34129333496094
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        230,
+        231
+      ],
+      "boundary_vertices": [
+        169,
+        172,
+        173,
+        170
+      ],
+      "inset_fraction": 0.014404866141986702,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          41.25410079956055,
+          200.7255859375,
+          0.0
+        ],
+        [
+          -153.65089416503906,
+          200.72561645507812,
+          0.0
+        ],
+        [
+          -153.65089416503906,
+          200.72561645507812,
+          221.2205047607422
+        ],
+        [
+          41.25419998168945,
+          200.7255859375,
+          268.0840148925781
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        232,
+        233
+      ],
+      "boundary_vertices": [
+        172,
+        174,
+        175,
+        173
+      ],
+      "inset_fraction": 0.00874591337360041,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          -153.65089416503906,
+          200.72561645507812,
+          0.0
+        ],
+        [
+          -153.6509246826172,
+          -199.56979370117188,
+          0.0
+        ],
+        [
+          -153.6509246826172,
+          -199.56979370117188,
+          221.2205047607422
+        ],
+        [
+          -153.65089416503906,
+          200.72561645507812,
+          221.2205047607422
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        234,
+        235
+      ],
+      "boundary_vertices": [
+        174,
+        176,
+        177,
+        175
+      ],
+      "inset_fraction": 0.01440486468250842,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          -153.6509246826172,
+          -199.56979370117188,
+          0.0
+        ],
+        [
+          41.25416946411133,
+          -199.56979370117188,
+          0.0
+        ],
+        [
+          41.25416946411133,
+          -199.56979370117188,
+          268.0840148925781
+        ],
+        [
+          -153.6509246826172,
+          -199.56979370117188,
+          221.2205047607422
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        236,
+        237
+      ],
+      "boundary_vertices": [
+        176,
+        178,
+        179,
+        177
+      ],
+      "inset_fraction": 0.017319604169004854,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          41.25416946411133,
+          -199.56979370117188,
+          0.0
+        ],
+        [
+          149.55467224121094,
+          -199.56982421875,
+          -0.030400000512599945
+        ],
+        [
+          149.5545654296875,
+          -199.56973266601562,
+          225.34129333496094
+        ],
+        [
+          41.25416946411133,
+          -199.56979370117188,
+          268.0840148925781
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        238,
+        239
+      ],
+      "boundary_vertices": [
+        178,
+        168,
+        171,
+        179
+      ],
+      "inset_fraction": 0.008707414330253438,
+      "recess_depth": 0.65,
+      "original_perimeter": [
+        [
+          149.55467224121094,
+          -199.56982421875,
+          -0.030400000512599945
+        ],
+        [
+          149.55459594726562,
+          200.7255859375,
+          -0.030400000512599945
+        ],
+        [
+          149.55459594726562,
+          200.7255859375,
+          225.34129333496094
+        ],
+        [
+          149.5545654296875,
+          -199.56973266601562,
+          225.34129333496094
+        ]
+      ]
+    }
+  ],
+  "protected": "Every original corner retained. Modular end faces, roof edges, ladder contacts, waterwheel and scrolling water geometry remain unchanged; only selected fixed panel interiors refined.",
+  "readonly_compatibility": false
+}

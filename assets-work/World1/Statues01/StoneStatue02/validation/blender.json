@@ -1,0 +1,62 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 107,
+  "original_triangles": 107,
+  "bounds_before": [
+    [
+      -134.2958984375,
+      -139.451904296875,
+      0.603600025177002
+    ],
+    [
+      134.95370483398438,
+      106.06719970703125,
+      485.8786926269531
+    ]
+  ],
+  "bounds_after": [
+    [
+      -134.2958984375,
+      -139.451904296875,
+      0.603600025177002
+    ],
+    [
+      134.95370483398438,
+      106.06719970703125,
+      485.8786926269531
+    ]
+  ],
+  "original_vertices_retained": 60,
+  "bone_order": [
+    "Cylinder02"
+  ],
+  "action_meta": {
+    "StoneStatue02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "stone_statue01.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "stone_statue01.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained except six reprojected head cap triangles; new panel coordinates interpolated",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque RGB stone atlases; frozen fountain water remains opaque texture for original BlendMesh3",
+  "uv_reprojected_faces": [
+    32,
+    33,
+    69,
+    70,
+    93,
+    94
+  ],
+  "uv_reprojection": "Head top cap only: planar projection into the same atlas plain stone region; fixes legacy 0.023-high UV sliver",
+  "panel_recesses": [],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

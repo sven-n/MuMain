@@ -1,0 +1,1500 @@
+{
+  "result": "PASS: offline integration; no client claim",
+  "integration_head": "973ab58db8c5bd57237b063711c41f89223a824e",
+  "baseline": "ac0f6dd8",
+  "changed_game_files": {
+    "src/bin/Data/Object1/Furniture03.bmd": {
+      "sha256": "6c427d73a9937d9e3b7d287b0f3f74b7f2014b0a423bd666590e26e9886e4d94",
+      "export": "assets-work/World1/TavernProps/Furniture03/exports/Furniture03.bmd",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/Furniture04.bmd": {
+      "sha256": "d1afed82e4ca519a11fe752a73a79a20a9624d788007344e7cbc9ec85bc49a4c",
+      "export": "assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/Furniture05.bmd": {
+      "sha256": "d1fb904efbb81091c7ef5841d6f4e3416da3a8dc5b382bd3e20bf15f528631d3",
+      "export": "assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/desk_big.OZJ": {
+      "sha256": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4",
+      "export": "assets-work/World1/TavernProps/Furniture03/exports/desk_big.OZJ",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/Grass01.bmd": {
+      "sha256": "d77daca6778078e17097831edf0a704d4e197db59892cbc4f1387c6f99eb7f32",
+      "export": "assets-work/World1/Groundcover01/Grass01/exports/Grass01.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/Grass05.bmd": {
+      "sha256": "d38099917cb6fa26fd603882fe74b919ebf97a2fd2840e4d5a5c09d25f0962e3",
+      "export": "assets-work/World1/Groundcover01/Grass05/exports/Grass05.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/Grass06.bmd": {
+      "sha256": "c656def11e72fe698f4ed99167b47db04eed37bc1e606983368fb99c1335d4c5",
+      "export": "assets-work/World1/Groundcover01/Grass06/exports/Grass06.bmd",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/tree_08.OZT": {
+      "sha256": "a1d60fa0bb30b7ceddbd52a7c74771929f3902052c460d6b015dbfdf34b47d78",
+      "export": "assets-work/World1/Groundcover01/textures/final/tree_08.OZT",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/tree_09.OZT": {
+      "sha256": "cb9cf4565ffda802131cde6b53e64a66550c2949efbf3b123f2f73a00aa65349",
+      "export": "assets-work/World1/Groundcover01/textures/final/tree_09.OZT",
+      "batch": "Groundcover01"
+    },
+    "src/bin/Data/Object1/Fence01.bmd": {
+      "sha256": "594570345d8a5f665ad86718c03b491744835179cc1e4e56589387b1bd8b7d34",
+      "export": "assets-work/World1/Fences01/Fence01/exports/Fence01.bmd",
+      "batch": "Fences01"
+    },
+    "src/bin/Data/Object1/Fence02.bmd": {
+      "sha256": "89dcccfeaa86da94174b6edc14dd7de4ca72f15c59bffb132e7c826422f8d677",
+      "export": "assets-work/World1/Fences01/Fence02/exports/Fence02.bmd",
+      "batch": "Fences01"
+    },
+    "src/bin/Data/Object1/Fence03.bmd": {
+      "sha256": "3c4507f510bda323fda43775559499ec028a8c58f797761459fa84896216a07c",
+      "export": "assets-work/World1/Fences01/Fence03/exports/Fence03.bmd",
+      "batch": "Fences01"
+    },
+    "src/bin/Data/Object1/Fence04.bmd": {
+      "sha256": "45717fae749fb663b25a6431bd25fc81379200419c5c4cc08a409736da31ce9f",
+      "export": "assets-work/World1/Fences01/Fence04/exports/Fence04.bmd",
+      "batch": "Fences01"
+    },
+    "src/bin/Data/Object1/joint.OZJ": {
+      "sha256": "ab1b30fc23a5d937dd33434f4014d0c036d56e6c4f74583e0c4c7b795631fb15",
+      "export": "assets-work/World1/Fences01/Fence02/exports/joint.OZJ",
+      "batch": "Fences01"
+    },
+    "src/bin/Data/Object1/Tree09.bmd": {
+      "sha256": "148d3f262f26d320339e0ab809b0db35c77d93f12518e919af3a6c9d2ccef11a",
+      "export": "assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Tree10.bmd": {
+      "sha256": "efc5e8c23a602b7150324d0c7122fb15bcebf416e0cff35a84ebfb7ba7cb99fd",
+      "export": "assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Grass03.bmd": {
+      "sha256": "7d8c7dad65f330d39687e43b35623eaec91d06ec6afb5bf117fef45d34c6794b",
+      "export": "assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Grass04.bmd": {
+      "sha256": "48cbd9087f3197a701bb5e8c42698d2b9bb48bb1d68d7ddcc04e1335eb2c9c5b",
+      "export": "assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/tree_01.OZT": {
+      "sha256": "8cf7925f6ded30b83a2ecf6856617b5c823e5abb7aaccea7acb73fc7403ea0d6",
+      "export": "assets-work/World1/Scrub01/Grass03/exports/tree_01.OZT",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/tree_02.OZT": {
+      "sha256": "472a7d0305c6af309c431cd62c8adc8301a16ef8d97499ef058dd87282b7a4be",
+      "export": "assets-work/World1/Scrub01/Grass03/exports/tree_02.OZT",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/tree_07.OZT": {
+      "sha256": "2d39a05c692b757ab88eb2f1b0fe4af483c2b86ba75e206354a8c010bb9c6a9f",
+      "export": "assets-work/World1/Scrub01/Tree09/exports/tree_07.OZT",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Tree01.bmd": {
+      "sha256": "479639bef9a1791bf78fdffc577722212b9600573c49f5079b61a7e05bac350c",
+      "export": "assets-work/World1/Trees01/Tree01/exports/Tree01.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree02.bmd": {
+      "sha256": "79ed1abc556290b58898f9270992c0a7e38c3d3a4ddc73a7c9451cab7436e125",
+      "export": "assets-work/World1/Trees01/Tree02/exports/Tree02.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree11.bmd": {
+      "sha256": "6a9fa891a24dc83ab72a6cb095e6f558fccc8e1579d580f31a5aa0114b370f8d",
+      "export": "assets-work/World1/Trees01/Tree11/exports/Tree11.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree06.bmd": {
+      "sha256": "d4b63d362e5cbca78266e29c88e1bd463e7198ab088045a86569a523cb4b9236",
+      "export": "assets-work/World1/Trees01/Tree06/exports/Tree06.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/tree.OZJ": {
+      "sha256": "a6ce1540257cff35b2ee69a78cff19ae345dd2f382e0028bedddc7ec018a8b08",
+      "export": "assets-work/World1/Trees01/textures/final/tree.OZJ",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree_a.OZT": {
+      "sha256": "27a661544f254ed116af332969a7afdc88dbfd91750b1e3ab2bed9554daf108b",
+      "export": "assets-work/World1/Trees01/textures/final/Tree_a.OZT",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/tree_06.OZT": {
+      "sha256": "46428b82dd78db28498a2636b897f0f27b1608146593e7fb8d3894a6508fd754",
+      "export": "assets-work/World1/Trees01/textures/final/tree_06.OZT",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/tree_02.OZJ": {
+      "sha256": "eef7dfe236aa633a03430e676634fc952aa02bd55dd0863dd2423f4d58639dd7",
+      "export": "assets-work/World1/Trees01/textures/final/tree_02.OZJ",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/House02.bmd": {
+      "sha256": "f5f28ce013478d5369a1815ac8388c0b4e4597e3410c8832e2b2a5b57c8e1916",
+      "export": "assets-work/World1/TimberProps01/House02/exports/House02.bmd",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/TreasureDrum01.bmd": {
+      "sha256": "445adb6a928a667d36857af9cb1b459f2012b67e876540da1f962d3fd865c4c0",
+      "export": "assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/StreetLight01.bmd": {
+      "sha256": "344b3175428b92e49e1bd8ecfddc2fc0bf77a898d7950ae7e31048ad161e7401",
+      "export": "assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/drum.OZJ": {
+      "sha256": "1d48c6672bd96e3d689bf1b874eb40e9ec0de198c19439f335e41cbedb5f488f",
+      "export": "assets-work/World1/TimberProps01/House02/exports/drum.OZJ",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/steel.OZJ": {
+      "sha256": "c407f13d8694533d676479eff5ce197dfd951f452c1dceaab227f5a66283994b",
+      "export": "assets-work/World1/TimberProps01/House02/exports/steel.OZJ",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/streetlight.OZJ": {
+      "sha256": "1d0477719c2911b807ebb4a2159e037b25de778440e646f588e7d5d3bb836f23",
+      "export": "assets-work/World1/TimberProps01/StreetLight01/exports/streetlight.OZJ",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/streetlight_brightness2.OZJ": {
+      "sha256": "deb4c642c210ca598e497018d543949d7ca3735dfa3c623105c7d776973baae3",
+      "export": "assets-work/World1/TimberProps01/StreetLight01/exports/streetlight_brightness2.OZJ",
+      "batch": "TimberProps01"
+    },
+    "src/bin/Data/Object1/Stone01.bmd": {
+      "sha256": "1eb05f2514a831f8268e63c64b17b9b04903eb9860c5b21ea963b526f754507e",
+      "export": "assets-work/World1/Rocks01/Stone01/exports/Stone01.bmd",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/Stone02.bmd": {
+      "sha256": "036ceeccd14624e5dd93faf5e2500db8c5643e8f9bf0bc5aed75f7861b41d2e1",
+      "export": "assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/Stone03.bmd": {
+      "sha256": "045807cd21abd6d7c783b8b75bbc0744befa195e8666f4850a2887809cc5387b",
+      "export": "assets-work/World1/Rocks01/Stone03/exports/Stone03.bmd",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/Stone04.bmd": {
+      "sha256": "1dc2af66dea6ed878d71db68775bfeb58553dd5b33e977f37fdfcdbcebc2f2e8",
+      "export": "assets-work/World1/Rocks01/Stone04/exports/Stone04.bmd",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/Stone05.bmd": {
+      "sha256": "fda40f2964ac52c3a6d310e552b08990989cb2cf635e2cdcd15aa0a47c01007c",
+      "export": "assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/ston01.OZJ": {
+      "sha256": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784",
+      "export": "assets-work/World1/Rocks01/textures/ston01.OZJ",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/ston02.OZT": {
+      "sha256": "9cc2f1dfa531853fc48ff7dc6bd25ef1757b74db6890f7436039db7611d6a1dd",
+      "export": "assets-work/World1/Rocks01/textures/ston02.OZT",
+      "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/Tree08.bmd": {
+      "sha256": "d15208a04f46e4c339df97afa8c4c159700d16bd8909a2817cdde3d1a51ec0e4",
+      "export": "assets-work/World1/Flowering01/Tree08/exports/Tree08.bmd",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/tree_01.OZJ": {
+      "sha256": "87aecaa23b8ba3975b8b80eb19dc391f716a6123653a578eb38babff3a82cf8a",
+      "export": "assets-work/World1/Flowering01/textures/final/tree_01.OZJ",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/tree_04.OZT": {
+      "sha256": "78ab37edb53ab4a99eb3c3d609b33233a2314f154f1c847fa23d9ea563a1b819",
+      "export": "assets-work/World1/Flowering01/textures/final/tree_04.OZT",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/tree_05.OZT": {
+      "sha256": "0f850800c8a18408bc9dd75879f9f6eca46e7dfbf2c716bd5da6973f34aad108",
+      "export": "assets-work/World1/Flowering01/textures/final/tree_05.OZT",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/Grass07.bmd": {
+      "sha256": "e1e81ece76155e14c6e3c9e6d5df2e0673d6db3616eae802085b6da18dfae810",
+      "export": "assets-work/World1/Mushrooms01/Grass07/exports/Grass07.bmd",
+      "batch": "Mushrooms01"
+    },
+    "src/bin/Data/Object1/Grass08.bmd": {
+      "sha256": "afef512a07acb5dad3255b4dc0c065a0f93f57000ef8bab7abfd588248ea6c3c",
+      "export": "assets-work/World1/Mushrooms01/Grass08/exports/Grass08.bmd",
+      "batch": "Mushrooms01"
+    },
+    "src/bin/Data/Object1/mushroom.OZJ": {
+      "sha256": "3bd25dc928f1f17ff41243e7c9cd8622dc298b2d55ada64aa36d250d845d2402",
+      "export": "assets-work/World1/Mushrooms01/textures/final/mushroom.OZJ",
+      "batch": "Mushrooms01"
+    },
+    "src/bin/Data/Object1/Tree03.bmd": {
+      "sha256": "052fcedd6f5e44d230e365d62e268d797908790972fc4382e1869791905de302",
+      "export": "assets-work/World1/BareTrees01/Tree03/exports/Tree03.bmd",
+      "batch": "BareTrees01"
+    },
+    "src/bin/Data/Object1/Tree04.bmd": {
+      "sha256": "bbc98fe75c981c37be468f29c5d11b42300660ca310f5b43b1d199af22fe3a16",
+      "export": "assets-work/World1/BareTrees01/Tree04/exports/Tree04.bmd",
+      "batch": "BareTrees01"
+    },
+    "src/bin/Data/Object1/Tree05.bmd": {
+      "sha256": "8180b86e4a850e63d825e8f9c0cf7a60b8cbec41fb89236ba43f6add44ded48d",
+      "export": "assets-work/World1/BareTrees01/Tree05/exports/Tree05.bmd",
+      "batch": "BareTrees01"
+    },
+    "src/bin/Data/Object1/Tree07.bmd": {
+      "sha256": "27d7b5872de6d8b7e6d5b53ce0ab694e262fa519b0039467e18572ef74f6aca6",
+      "export": "assets-work/World1/BareTrees01/Tree07/exports/Tree07.bmd",
+      "batch": "BareTrees01"
+    },
+    "src/bin/Data/Object1/tree_03.OZJ": {
+      "sha256": "c2f6a1551cd47c49b3632546d563512daa1a2e50616b37cfdb2691d9a58002aa",
+      "export": "assets-work/World1/BareTrees01/textures/final/tree_03.OZJ",
+      "batch": "BareTrees01"
+    },
+    "src/bin/Data/Object1/SteelWall01.bmd": {
+      "sha256": "549723d5a0bb0126f6d52f4e311ea99eca69e819e0ccc8f1ddaed1591a6c4fdb",
+      "export": "assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/SteelWall02.bmd": {
+      "sha256": "5425434423f7025a2be0e0eb7cbc4400ccb008595333721dd8f7b751e965d968",
+      "export": "assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/SteelWall03.bmd": {
+      "sha256": "0ba89db4e0d966a7f4115825fd1c81ed11d020886b7f127dc7850efe3828bd23",
+      "export": "assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/SteelDoor01.bmd": {
+      "sha256": "86822c7626b45ff15e1fcd554e55e0baa7443c55f8584faf29e81e96b8b104e6",
+      "export": "assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/HouseEtc03.bmd": {
+      "sha256": "78e0ddb7630d6eb077c6b3b79287fc87cff5be4f5754c571c407a1d06b7d1f53",
+      "export": "assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/steel_barred_b.OZJ": {
+      "sha256": "18fb54247b0dc08f4dfe2daab5f9f4edfde880513d0ed597e449e58efafd8087",
+      "export": "assets-work/World1/Ironwork01/textures/steel_barred_b.OZJ",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/steel_barred_a.OZT": {
+      "sha256": "6a362e7e813e3656e6598b9239cd6094381a48bf2f4a62f706c8f9b2151997a3",
+      "export": "assets-work/World1/Ironwork01/textures/steel_barred_a.OZT",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/steel_barred_door.OZT": {
+      "sha256": "36f41caa9871ef74ddd8cbe51798ba258ab77cd1db87d90da23d4cf876bdf741",
+      "export": "assets-work/World1/Ironwork01/textures/steel_barred_door.OZT",
+      "batch": "Ironwork01"
+    },
+    "src/bin/Data/Object1/HouseEtc01.bmd": {
+      "sha256": "646273f66d753761d78bfc04c33ad9ba73adf4b87e69a2c376a8c530e8fff22c",
+      "export": "assets-work/World1/Masonry01/HouseEtc01/exports/HouseEtc01.bmd",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/StoneMuWall01.bmd": {
+      "sha256": "3e5a80be0b0e045b02874daeb804388e27962152c2f9db4ae652d7803d59b7b6",
+      "export": "assets-work/World1/Masonry01/StoneMuWall01/exports/StoneMuWall01.bmd",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/StoneMuWall02.bmd": {
+      "sha256": "71871c76baa85db5b0e8d4017ee0a5c797eeb4897bf14dfa2129da19264ea4cd",
+      "export": "assets-work/World1/Masonry01/StoneMuWall02/exports/StoneMuWall02.bmd",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/StoneMuWall03.bmd": {
+      "sha256": "da3246175a2f50993de1f8b17aa9483165b389021f871145cec7ef37f7ee608a",
+      "export": "assets-work/World1/Masonry01/StoneMuWall03/exports/StoneMuWall03.bmd",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/StoneMuWall04.bmd": {
+      "sha256": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471",
+      "export": "assets-work/World1/Masonry01/StoneMuWall04/exports/StoneMuWall04.bmd",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/HouseEtc02.bmd": {
+      "sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa",
+      "export": "assets-work/World1/Masonry01/HouseEtc02/exports/HouseEtc02.bmd",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/c_wall04.OZJ": {
+      "sha256": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+      "export": "assets-work/World1/Masonry01/HouseEtc01/exports/c_wall04.OZJ",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/c_wall05.OZJ": {
+      "sha256": "e2890842d739f4fa2010e2a90d4af1e368a97bf2028d26c4e15dac0030e05083",
+      "export": "assets-work/World1/Masonry01/StoneMuWall01/exports/c_wall05.OZJ",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/c_wall06.OZJ": {
+      "sha256": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
+      "export": "assets-work/World1/Masonry01/HouseEtc01/exports/c_wall06.OZJ",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/tile_ston01.OZJ": {
+      "sha256": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+      "export": "assets-work/World1/Masonry01/HouseEtc02/exports/tile_ston01.OZJ",
+      "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/StoneWall01.bmd": {
+      "sha256": "a32fca0ef1cf2bd3de64d9a5992ecb8c606c5c57cb159564ed9eb8867c4fb7a4",
+      "export": "assets-work/World1/StoneWalls01/StoneWall01/exports/StoneWall01.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall02.bmd": {
+      "sha256": "55ffbbebc40e46569f7137bdd52e84c977a5c78c78c7b0cff3dc092d5db8cdb9",
+      "export": "assets-work/World1/StoneWalls01/StoneWall02/exports/StoneWall02.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall03.bmd": {
+      "sha256": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+      "export": "assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall05.bmd": {
+      "sha256": "63044d3abd022ff09c8348176559fdecc1390d0da3b192faa79a9811bace993c",
+      "export": "assets-work/World1/StoneWalls01/StoneWall05/exports/StoneWall05.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall06.bmd": {
+      "sha256": "5763998af97cdb7cfe595476cda2592558458f0f8046ce0204580301e0f80a62",
+      "export": "assets-work/World1/StoneWalls01/StoneWall06/exports/StoneWall06.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/tile_01.OZJ": {
+      "sha256": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+      "export": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_01.OZJ",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/tile_03.OZJ": {
+      "sha256": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+      "export": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_03.OZJ",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/FireLight01.bmd": {
+      "sha256": "6b0e61192c0eec9e177ec5ad23216ee736eec76ffafea957d72a7807045fd8af",
+      "export": "assets-work/World1/FireProps01/FireLight01/exports/FireLight01.bmd",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/FireLight02.bmd": {
+      "sha256": "ec0536c70b842499803e762b0420a7dd07af693ab0a58f9d050d71a7617011c2",
+      "export": "assets-work/World1/FireProps01/FireLight02/exports/FireLight02.bmd",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/Bonfire01.bmd": {
+      "sha256": "a5a5ea2bc310df59f6bca0245cb7b427c42491473c328f8f584d9ce07aca9373",
+      "export": "assets-work/World1/FireProps01/Bonfire01/exports/Bonfire01.bmd",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/DoungeonGate01.bmd": {
+      "sha256": "d7d099751f59d75610fe00e40c9564ba5f660450abbd21cadaa68b2c75f2a553",
+      "export": "assets-work/World1/FireProps01/DoungeonGate01/exports/DoungeonGate01.bmd",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/light.OZT": {
+      "sha256": "9528a5a30f4ea4bc65386c2230890ac92f851797b2b376485eb5e4c0f7cf2dca",
+      "export": "assets-work/World1/FireProps01/textures/final/light.OZT",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/light2.OZJ": {
+      "sha256": "d1295081bca78033e0da9ed712c5fbb1ac0e2c7b83da47e97d24a7afaa8396a5",
+      "export": "assets-work/World1/FireProps01/textures/final/light2.OZJ",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/fire_light_01.OZT": {
+      "sha256": "c0830981259f80dadfd79269ddec829742bdfda21874ab867b6b646242ba6ecb",
+      "export": "assets-work/World1/FireProps01/textures/final/fire_light_01.OZT",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/copra_gate.OZJ": {
+      "sha256": "786ddb0a32e0eab0f1d05953e51db11715f0a6ed1399d475a2ddbac5a2ed66e3",
+      "export": "assets-work/World1/FireProps01/textures/final/copra_gate.OZJ",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/fire_01.OZJ": {
+      "sha256": "1b5f30547a9edd7877005a40c09946294c5772ac2b5953d3ffa92161c9a98294",
+      "export": "assets-work/World1/FireProps01/textures/final/fire_01.OZJ",
+      "batch": "FireProps01"
+    },
+    "src/bin/Data/Object1/Beer02.bmd": {
+      "sha256": "7a1828ec40249657fe2f9e970c077b8761bf110953ab5a24fe32bedd5fba6de4",
+      "export": "assets-work/World1/TavernDetails01/Beer02/exports/Beer02.bmd",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/Beer03.bmd": {
+      "sha256": "651280bb61913c8c73d1ff9109d64360b447a1f246e8d4b29e4d6f99de27ee89",
+      "export": "assets-work/World1/TavernDetails01/Beer03/exports/Beer03.bmd",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/Furniture01.bmd": {
+      "sha256": "bf8a001f20276728e26b414963efac77b48cb9164b0c0a6c8631b2e93bb035bd",
+      "export": "assets-work/World1/TavernDetails01/Furniture01/exports/Furniture01.bmd",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/Furniture02.bmd": {
+      "sha256": "f32d05c6ad0412feb5075e5a5754e44b84ce2772a240ef1a353d3e2c71520d24",
+      "export": "assets-work/World1/TavernDetails01/Furniture02/exports/Furniture02.bmd",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/Furniture06.bmd": {
+      "sha256": "d67d5a5227817283efedd187e23d0a692be1a29ffae7fbf5dfe954cfaaf03163",
+      "export": "assets-work/World1/TavernDetails01/Furniture06/exports/Furniture06.bmd",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/Furniture07.bmd": {
+      "sha256": "730ff99b63e9896a03df3be9ac1a54ba4adfd63c7d1b153897240bca833f4dbd",
+      "export": "assets-work/World1/TavernDetails01/Furniture07/exports/Furniture07.bmd",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/pot3.ozt": {
+      "sha256": "f781d4941982f54e20b573c9664a23f05bd01d13af578d9a0d01e202e59b4d60",
+      "export": "assets-work/World1/TavernDetails01/Beer02/exports/pot3.ozt",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/apple.OZJ": {
+      "sha256": "b983993be19b329f531199b3aa24943d5c9a7b0e01a805087bfc5dd24f916871",
+      "export": "assets-work/World1/TavernDetails01/Beer02/exports/apple.OZJ",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/bottle.ozt": {
+      "sha256": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4",
+      "export": "assets-work/World1/TavernDetails01/Beer02/exports/bottle.ozt",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/plate.OZJ": {
+      "sha256": "839c50e5fdf9aa87ac121e13a4c7bb5a0b7b892c658a848411198ff32d77bed1",
+      "export": "assets-work/World1/TavernDetails01/Beer02/exports/plate.OZJ",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/winecup.OZJ": {
+      "sha256": "a0e0cb895f554bcb82a2350b7f70dc405fc6f6024c61615c82ccb1111fcedf63",
+      "export": "assets-work/World1/TavernDetails01/Beer02/exports/winecup.OZJ",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/pot.OZJ": {
+      "sha256": "542374b123083c016557cc210c9bd5ed6626e70f8a263371fa9c3f1b4f7a5cb3",
+      "export": "assets-work/World1/TavernDetails01/Furniture01/exports/pot.OZJ",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/pot2.OZJ": {
+      "sha256": "0b5cacd93c5f11e8aa27b02d9509c291e52ba21a32a016e6ae9b9678ab000679",
+      "export": "assets-work/World1/TavernDetails01/Furniture01/exports/pot2.OZJ",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/bookshelf.OZJ": {
+      "sha256": "b94d717a16ca66016f14e51cf8d27a33b1595da8911077c281e57114a33b0318",
+      "export": "assets-work/World1/TavernDetails01/Furniture01/exports/bookshelf.OZJ",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/chair2.OZT": {
+      "sha256": "a6108326cdca1506bdc4c0e3fd18e839dd386646ee08a9dfa68a5d3dde851103",
+      "export": "assets-work/World1/TavernDetails01/Furniture06/exports/chair2.OZT",
+      "batch": "TavernDetails01"
+    },
+    "src/bin/Data/Object1/House01.bmd": {
+      "sha256": "498f0224e6c7f0f32d228b8a7ffbeb051e9796f7749ffb1e340149a632da737e",
+      "export": "assets-work/World1/Architecture01/House01/exports/House01.bmd",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/House03.bmd": {
+      "sha256": "a8015a4a6155d5dc2cef379bebb6c054ec6a31c428329163a1a696424ea1b7f7",
+      "export": "assets-work/World1/Architecture01/House03/exports/House03.bmd",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/House04.bmd": {
+      "sha256": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa",
+      "export": "assets-work/World1/Architecture01/House04/exports/House04.bmd",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/Tent01.bmd": {
+      "sha256": "6be4f98d11e1f6dec88d53be6f78354e89b3cb4a5ac0a057acd71ea9477e8713",
+      "export": "assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/HouseWall02.bmd": {
+      "sha256": "6ac7e3fb619b8c92c3d0e445c53beca1da53d5395609bfd60a06cdfb6f066470",
+      "export": "assets-work/World1/Architecture01/HouseWall02/exports/HouseWall02.bmd",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/tile_house01.OZJ": {
+      "sha256": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+      "export": "assets-work/World1/Architecture01/House01/exports/tile_house01.OZJ",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/tile_ston05.OZJ": {
+      "sha256": "738fb32a62ece9f970cc822477361fb1105cbdde32dd4d475edda77a7d1fbc76",
+      "export": "assets-work/World1/Architecture01/House01/exports/tile_ston05.OZJ",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/tile_windows01.OZJ": {
+      "sha256": "ac20b7b25abeda1fb515b55c9d8d9e2bb0064f6bc1652f6862a7ac1466969367",
+      "export": "assets-work/World1/Architecture01/House04/exports/tile_windows01.OZJ",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/tile_space01.OZJ": {
+      "sha256": "3ec6d88e703a4ade939bbb96ae538d5ac71bb00ff5aeac0b3e9d11bcc26a6e82",
+      "export": "assets-work/World1/Architecture01/House04/exports/tile_space01.OZJ",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/tile_ston07.OZT": {
+      "sha256": "af1fd6419d0c0dfa43228eea2c18cecb3b6d47502ecb0e7b2b70f4ecb8609093",
+      "export": "assets-work/World1/Architecture01/House03/exports/tile_ston07.OZT",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/light_02.OZJ": {
+      "sha256": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9",
+      "export": "assets-work/World1/Architecture01/House03/exports/light_02.OZJ",
+      "batch": "Architecture01"
+    },
+    "src/bin/Data/Object1/Sign01.bmd": {
+      "sha256": "e319480ee29feebf6a64862407dece3eae3ea0cc24a951b8f57695bef2034f70",
+      "export": "assets-work/World1/SignsBanners01/Sign01/exports/Sign01.bmd",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/notice.OZJ": {
+      "sha256": "85e028c06cee35c5ba6334b9613a5a839df9ffff20d58a4ab567bf793290416f",
+      "export": "assets-work/World1/SignsBanners01/Sign01/exports/notice.OZJ",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/signboard.OZT": {
+      "sha256": "c62e1b18d97e75000ee4f5a071aff9858c8449187404dfabff927947a8883fa9",
+      "export": "assets-work/World1/SignsBanners01/Sign01/exports/signboard.OZT",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/doorknob.OZT": {
+      "sha256": "1f0413df12aa7ef21fdea28fda3c322abed0f28d4837b40ead3ba67a246afb84",
+      "export": "assets-work/World1/SignsBanners01/Sign01/exports/doorknob.OZT",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/Sign02.bmd": {
+      "sha256": "57ba53604b7ed9f6ad4296c573b7ccc82617021b2e869e6848b72d3233842adb",
+      "export": "assets-work/World1/SignsBanners01/Sign02/exports/Sign02.bmd",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/Curtain01.bmd": {
+      "sha256": "5039343393d7af0ba7fad2c3e87159db47d8e103e46f87e739bae91bfdc49314",
+      "export": "assets-work/World1/SignsBanners01/Curtain01/exports/Curtain01.bmd",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/badge_01.OZJ": {
+      "sha256": "d1f42275a74f1c90ed2a79afd23b964facd1d5bcc8121e5f957f429c66c96ffe",
+      "export": "assets-work/World1/SignsBanners01/Curtain01/exports/badge_01.OZJ",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/badge_02.OZT": {
+      "sha256": "6161467ef65772f847ef5318cd277cc77183848210d6cf437cea55fe90369b08",
+      "export": "assets-work/World1/SignsBanners01/Curtain01/exports/badge_02.OZT",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/StoneWall04.bmd": {
+      "sha256": "6777489dd3d71e6304d464b0ae691726d5ecce34c6ef25d63934190a7b46fba9",
+      "export": "assets-work/World1/SignsBanners01/StoneWall04/exports/StoneWall04.bmd",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/badge_03.OZT": {
+      "sha256": "a17e37582909ebbe250bff640c3fc1a7d024b3959d0ca3ad2bc666a86af1ebaa",
+      "export": "assets-work/World1/SignsBanners01/StoneWall04/exports/badge_03.OZT",
+      "batch": "SignsBanners01"
+    },
+    "src/bin/Data/Object1/Ship01.bmd": {
+      "sha256": "26c2e0309638634f24cf2396f26464afe587236de2e264ea54567cbdbfdf6921",
+      "export": "assets-work/World1/Ship01/Ship01/exports/Ship01.bmd",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/TileGround03.OZJ": {
+      "sha256": "a630c6d2b44c370d9d239a285ae87c637c7ea780b6694032554273f579570d33",
+      "export": "assets-work/World1/Ship01/textures/final/TileGround03.OZJ",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/ship01.OZJ": {
+      "sha256": "f54714c5cfa7556d6958fb79bd0b691cc57f738d28ea0b6957ecdbfc9f9e5d2d",
+      "export": "assets-work/World1/Ship01/textures/final/ship01.OZJ",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/ship03.OZJ": {
+      "sha256": "0d9a45d9abcafa7a739f47fbd82b7907fb523b1ad11046bcd19d3f4d3a83afb0",
+      "export": "assets-work/World1/Ship01/textures/final/ship03.OZJ",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/ship04.OZJ": {
+      "sha256": "be23ab1dc3f090c8f97114a48aa1080880d46d2f2a6adfc0f1d002ea4ca3aef1",
+      "export": "assets-work/World1/Ship01/textures/final/ship04.OZJ",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/ship07.OZJ": {
+      "sha256": "ba085bac813252797168b85cf9424e1bdcb9faafba447cd0dd3f7ee08999c721",
+      "export": "assets-work/World1/Ship01/textures/final/ship07.OZJ",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/ship05.OZJ": {
+      "sha256": "c8e7d174f298315aa0b552644bdbc212b6a9ac6b4ac3d275afbdae7b1216fe3d",
+      "export": "assets-work/World1/Ship01/textures/final/ship05.OZJ",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/ship05.OZT": {
+      "sha256": "1d3276c92eb11ef3270a23dddf165ae5c5db50c4c00ca884f986d87479c9b153",
+      "export": "assets-work/World1/Ship01/textures/final/ship05.OZT",
+      "batch": "Ship01"
+    },
+    "src/bin/Data/Object1/House05.bmd": {
+      "sha256": "67208130091a7808a621a6d0fd054b99dd01342d730b9194a4d49ad32a7133f5",
+      "export": "assets-work/World1/Architecture02/House05/exports/House05.bmd",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/HouseWall01.bmd": {
+      "sha256": "55bdc3e6d196849cf1300d72fe395bccf026acbfba0e74bf0711df4a06928665",
+      "export": "assets-work/World1/Architecture02/HouseWall01/exports/HouseWall01.bmd",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/HouseWall04.bmd": {
+      "sha256": "8511bc422fc0606174a39eb931266979fb1f5e2a72f1cdb8e95f4b15535ec4a6",
+      "export": "assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/HouseWall05.bmd": {
+      "sha256": "5ff5b789528517f047668b1c1499dd059fac61c23df0ae3a920db1b64678c0d6",
+      "export": "assets-work/World1/Architecture02/HouseWall05/exports/HouseWall05.bmd",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/HouseWall06.bmd": {
+      "sha256": "fd082b68ed0e4c4ac9898be26a15bde8e90e6c4a8baa79ecaa0a12d8dc7db2ef",
+      "export": "assets-work/World1/Architecture02/HouseWall06/exports/HouseWall06.bmd",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/Stair01.bmd": {
+      "sha256": "a8762396fc2b3db1704905701e98613804f449541ab085e58c73c15665bb11b0",
+      "export": "assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/tile_wood01.OZJ": {
+      "sha256": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+      "export": "assets-work/World1/Architecture02/House04/exports/tile_wood01.OZJ",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/tile_wood03.OZJ": {
+      "sha256": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+      "export": "assets-work/World1/Architecture02/House04/exports/tile_wood03.OZJ",
+      "batch": "Architecture02"
+    },
+    "src/bin/Data/Object1/StoneStatue01.bmd": {
+      "sha256": "1114562c9d5abcdfb5ef125a61a2285c3fe82e2fb5b9bc745c777be86e9454ad",
+      "export": "assets-work/World1/Statues01/StoneStatue01/exports/StoneStatue01.bmd",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/stone_statue02.OZJ": {
+      "sha256": "e1d4f7b95afae6c9936eb117a71592e94322b041efafa887bcdf6d731e4a630b",
+      "export": "assets-work/World1/Statues01/StoneStatue01/exports/stone_statue02.OZJ",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/StoneStatue02.bmd": {
+      "sha256": "668759a5ccada44481a7e7f052e835cf43d83319c5c46ece0e9d33fb31c3687d",
+      "export": "assets-work/World1/Statues01/StoneStatue02/exports/StoneStatue02.bmd",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/stone_statue01.OZJ": {
+      "sha256": "b4f503907f84e79d846ed818bc511d86720ded44c0eff2306360887385094073",
+      "export": "assets-work/World1/Statues01/StoneStatue02/exports/stone_statue01.OZJ",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/StoneStatue03.bmd": {
+      "sha256": "cbbf03b5de8c57cb46e76ea96d27ed43aefc119956f39082f48382d6677e228f",
+      "export": "assets-work/World1/Statues01/StoneStatue03/exports/StoneStatue03.bmd",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/angel_stone_statue.OZJ": {
+      "sha256": "41badb3711151f592185b4c105701cc0652bce19ae796987f978294485673d12",
+      "export": "assets-work/World1/Statues01/StoneStatue03/exports/angel_stone_statue.OZJ",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/tombstone_big.OZJ": {
+      "sha256": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940",
+      "export": "assets-work/World1/Statues01/SteelStatue01/exports/tombstone_big.OZJ",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/SteelStatue01.bmd": {
+      "sha256": "47cf79132fab1d62873120638485e62f48cb7aa31814771872c8700486ac8536",
+      "export": "assets-work/World1/Statues01/SteelStatue01/exports/SteelStatue01.bmd",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/Tomb01.bmd": {
+      "sha256": "ad04c5b2d595dc24769c29e6803e44d40b4888b9983b223d60cb2af19ba64d61",
+      "export": "assets-work/World1/Statues01/Tomb01/exports/Tomb01.bmd",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/grave_02.OZJ": {
+      "sha256": "31aff047b31909fd90a51d7900a4ce980a7bafa8bff44b2b84a7821daff37b00",
+      "export": "assets-work/World1/Statues01/Tomb01/exports/grave_02.OZJ",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/Tomb02.bmd": {
+      "sha256": "52ca4f57e048f379c4729cf19519a060c05314759cba9bda56ed5b118137b78e",
+      "export": "assets-work/World1/Statues01/Tomb02/exports/Tomb02.bmd",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/grave_01.OZJ": {
+      "sha256": "3faeb80e3bd7378aee6b1fe9e531bdc4a32eef8083757d5e0b7858b7496c0735",
+      "export": "assets-work/World1/Statues01/Tomb02/exports/grave_01.OZJ",
+      "batch": "Statues01"
+    },
+    "src/bin/Data/Object1/Carriage01.bmd": {
+      "sha256": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622",
+      "export": "assets-work/World1/CartHay01/Carriage01/exports/Carriage01.bmd",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/Carriage02.bmd": {
+      "sha256": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+      "export": "assets-work/World1/CartHay01/Carriage02/exports/Carriage02.bmd",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/Carriage03.bmd": {
+      "sha256": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296",
+      "export": "assets-work/World1/CartHay01/Carriage03/exports/Carriage03.bmd",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/Carriage04.bmd": {
+      "sha256": "77e81ed05d87ebf6938770b91428b77131fae9bda967f36d587525c323f14ab2",
+      "export": "assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/Straw01.bmd": {
+      "sha256": "485d0ae5e304335823ebebb01c97e595a54819aadff04af236fa1dd03c0d0e03",
+      "export": "assets-work/World1/CartHay01/Straw01/exports/Straw01.bmd",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/Straw02.bmd": {
+      "sha256": "caa5e3da90369c5467fc91e5baaf69b48b76c00bd35848f0661573262c923a67",
+      "export": "assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/horse_drawn_02.OZT": {
+      "sha256": "f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079",
+      "export": "assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_02.OZT",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/horse_drawn_03.OZJ": {
+      "sha256": "e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5",
+      "export": "assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_03.OZJ",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/grass_01.OZT": {
+      "sha256": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15",
+      "export": "assets-work/World1/CartHay01/Carriage04/exports/grass_01.OZT",
+      "batch": "CartHay01"
+    },
+    "src/bin/Data/Object1/Well01.bmd": {
+      "sha256": "c753f37c049f5716deb7db64186083fed58920b925da133abea7303a851977a3",
+      "export": "assets-work/World1/Wells01/Well01/exports/Well01.bmd",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/Well02.bmd": {
+      "sha256": "1abd72cb18be477740863d1677592eda32277e94f70154e999754933854adf22",
+      "export": "assets-work/World1/Wells01/Well02/exports/Well02.bmd",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/Well03.bmd": {
+      "sha256": "6a5d07341847640c760c1a1f578eba6608391d876ab7b67024433be62c063955",
+      "export": "assets-work/World1/Wells01/Well03/exports/Well03.bmd",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/Well04.bmd": {
+      "sha256": "3090273ccc5e2bd86d8e7478ce6e3a6bc5ff9e46d851694010a46e8865a16da0",
+      "export": "assets-work/World1/Wells01/Well04/exports/Well04.bmd",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/well.OZJ": {
+      "sha256": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e",
+      "export": "assets-work/World1/Wells01/textures/final/well.OZJ",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/jar_01.OZJ": {
+      "sha256": "d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5",
+      "export": "assets-work/World1/Wells01/textures/final/jar_01.OZJ",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/tub.OZJ": {
+      "sha256": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+      "export": "assets-work/World1/Wells01/textures/final/tub.OZJ",
+      "batch": "Wells01"
+    },
+    "src/bin/Data/Object1/HouseWall03.bmd": {
+      "sha256": "4cceec4106eae52c353329a7c55c725118cd18982736c42c543a4ed76c72266f",
+      "export": "assets-work/World1/Architecture03/HouseWall03/exports/HouseWall03.bmd",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/tile_wood02.OZJ": {
+      "sha256": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda",
+      "export": "assets-work/World1/Architecture03/HouseWall01/exports/tile_wood02.OZJ",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/Bridge01.bmd": {
+      "sha256": "877e47a0fb1277d333c0b0a6c72469cafa78ace838d2c3bc782a79d9210bc71d",
+      "export": "assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/bridge_01.OZJ": {
+      "sha256": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc",
+      "export": "assets-work/World1/Architecture03/StoneMuWall01/exports/bridge_01.OZJ",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/BridgeStone01.bmd": {
+      "sha256": "d3fa1a44db54c9575824cc557275a7d2a2d59c2bc579ab4eb9cf0105c2c7451c",
+      "export": "assets-work/World1/Architecture03/BridgeStone01/exports/BridgeStone01.bmd",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/tree_04.OZJ": {
+      "sha256": "4b9a12637d3967b2f0ff5412830b3988664f937cca31733c7ae97e41cf63ca4f",
+      "export": "assets-work/World1/Architecture03/BridgeStone01/exports/tree_04.OZJ",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/tile_ston06.OZJ": {
+      "sha256": "c0eb1cde0172be5b4f1a1e7a19e274c6891d1e97d91479cdb11424a464847a3b",
+      "export": "assets-work/World1/Architecture03/House01/exports/tile_ston06.OZJ",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/tile_ston04.OZJ": {
+      "sha256": "a1a75b6fbf236d8747cb2e27555d871253cff7d2e48304226f0b68dbc83fa2f9",
+      "export": "assets-work/World1/Architecture03/HouseWall01/exports/tile_ston04.OZJ",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/tile_02.OZJ": {
+      "sha256": "428d88339fd1c04b6d153e33a1ed5a4a03d753130271e11fbf62f68564dfadcf",
+      "export": "assets-work/World1/Architecture03/StoneMuWall01/exports/tile_02.OZJ",
+      "batch": "Architecture03"
+    },
+    "src/bin/Data/Object1/Cannon01.bmd": {
+      "sha256": "7d285fd5d3647cc75bf25742623f04421c589e69140137652f5bd1d14225abf0",
+      "export": "assets-work/World1/Cannons01/Cannon01/exports/Cannon01.bmd",
+      "batch": "Cannons01"
+    },
+    "src/bin/Data/Object1/Cannon02.bmd": {
+      "sha256": "1eccefa4bceeb9dccf921e4f98358e289f454106d9d450820c75350043e6c4bf",
+      "export": "assets-work/World1/Cannons01/Cannon02/exports/Cannon02.bmd",
+      "batch": "Cannons01"
+    },
+    "src/bin/Data/Object1/Cannon03.bmd": {
+      "sha256": "c5688d3022e2dca8cc6390b47c788d5e970f7fa6b0b060e46063f758fab6669c",
+      "export": "assets-work/World1/Cannons01/Cannon03/exports/Cannon03.bmd",
+      "batch": "Cannons01"
+    },
+    "src/bin/Data/Object1/Hanging01.bmd": {
+      "sha256": "6f150a12d38358a26ee5ec5ac245c0df8f869295f6fca3a30d809e611640784c",
+      "export": "assets-work/World1/Cannons01/Hanging01/exports/Hanging01.bmd",
+      "batch": "Cannons01"
+    },
+    "src/bin/Data/Object1/horse_drawn_01.OZJ": {
+      "sha256": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e",
+      "export": "assets-work/World1/Cannons01/Carriage01/exports/horse_drawn_01.OZJ",
+      "batch": "Cannons01"
+    }
+  },
+  "retained_game_files": {
+    "src/bin/Data/Object1/Grass02.bmd": {
+      "sha256": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea",
+      "export": "assets-work/World1/NormalBindings01/Grass02/exports/Grass02.bmd",
+      "batch": "NormalBindings01"
+    },
+    "src/bin/Data/Object1/Tree12.bmd": {
+      "sha256": "f2c6dbc600ebb76c5af82198699ffe83bfb532ba5db0a6f805efb4425545f502",
+      "export": "assets-work/World1/NormalBindings01/Tree12/exports/Tree12.bmd",
+      "batch": "NormalBindings01"
+    },
+    "src/bin/Data/Object1/Tree13.bmd": {
+      "sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf",
+      "export": "assets-work/World1/NormalBindings01/Tree13/exports/Tree13.bmd",
+      "batch": "NormalBindings01"
+    }
+  },
+  "protected_file_count": 141,
+  "world1_files_unchanged": true,
+  "original_archive_hashes": {
+    "TavernProps/Furniture03": {
+      "revision": "ac0f6dd8",
+      "sha256": "4a03abcf52f60261cfba44952f9b0651b86ffedfdd7ed14ba7fdd71a1f4c8985"
+    },
+    "TavernProps/Furniture04": {
+      "revision": "ac0f6dd8",
+      "sha256": "c4874cf98f4c3163c70b9514033571a2ff6653d6bf15df98c8382267c2c5fedc"
+    },
+    "TavernProps/Furniture05": {
+      "revision": "ac0f6dd8",
+      "sha256": "0f176df870aa4c5f2780a9248f55281db37c7afd9714dc90ca9db59026a9a994"
+    },
+    "Groundcover01/Grass01": {
+      "revision": "ac0f6dd8",
+      "sha256": "f6e9e43fbc9750d97e7d3d29361a491ed9f83a3193705f58a11e69ea4088d42f"
+    },
+    "Groundcover01/Grass02": {
+      "revision": "ac0f6dd8",
+      "sha256": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea"
+    },
+    "Groundcover01/Grass05": {
+      "revision": "ac0f6dd8",
+      "sha256": "f16ec91515672de50a9033e5668f790736644825120ae03e5888e6547ae8e45b"
+    },
+    "Groundcover01/Grass06": {
+      "revision": "ac0f6dd8",
+      "sha256": "52513bac5515332dcb078dfe8de91c1512dca1b44d5487314c8fb0954fc6e988"
+    },
+    "Fences01/Fence01": {
+      "revision": "ac0f6dd8",
+      "sha256": "330920bc62c8de3964b96d1001189c6496a61dc828fee37988060b157c0ce0dd"
+    },
+    "Fences01/Fence02": {
+      "revision": "ac0f6dd8",
+      "sha256": "450cc7c06fce2fd12eaa2b409a94bd30039f8d57abc73913c73bd4d4ac8e0c55"
+    },
+    "Fences01/Fence03": {
+      "revision": "ac0f6dd8",
+      "sha256": "921d62b0482da9d683a7ad844ed6c8347ef005eb8ad90562b4ef5ef74ea755ce"
+    },
+    "Fences01/Fence04": {
+      "revision": "ac0f6dd8",
+      "sha256": "b58daf2200b03d1fcb9f00bda906c7ba2acc798f052dc528a45764cd3830b851"
+    },
+    "Scrub01/Tree09": {
+      "revision": "ac0f6dd8",
+      "sha256": "ffd5c7ce308c42bdde1f8fd42c64d051c05eb6e5f91f2f55ae2c64e98ece995e"
+    },
+    "Scrub01/Tree10": {
+      "revision": "ac0f6dd8",
+      "sha256": "5e84fde224528e1d50b12778a1df05ddd7c50f300c5874be46c205e78d233b47"
+    },
+    "Scrub01/Grass03": {
+      "revision": "ac0f6dd8",
+      "sha256": "1defeac9a09bce7df56d46ab323e0735e2139bb588607d6be455fecaf115eb32"
+    },
+    "Scrub01/Grass04": {
+      "revision": "ac0f6dd8",
+      "sha256": "f9d5eb81cb80c915a98011c98bb5bee706790aac9c9b99ceb41059496ca07196"
+    },
+    "Trees01/Tree01": {
+      "revision": "ac0f6dd8",
+      "sha256": "f402e95bd45fac4940912cab00c6b6f6a352b29a5983016080b154cdab31c61f"
+    },
+    "Trees01/Tree02": {
+      "revision": "ac0f6dd8",
+      "sha256": "38020ef3abe78b5b6a1579535ed22a9150d75c0cead2f48ffaeb09c99a15654d"
+    },
+    "Trees01/Tree11": {
+      "revision": "ac0f6dd8",
+      "sha256": "96e721e2749724a8078d14bb874002d7efba102c3a3e3d3c745bc04744384ebf"
+    },
+    "Trees01/Tree06": {
+      "revision": "ac0f6dd8",
+      "sha256": "ab37a0ad05291db385b701fc7ec8db1f7cde112ba2062b88b957cd4c6aa39666"
+    },
+    "TimberProps01/House02": {
+      "revision": "ac0f6dd8",
+      "sha256": "03bfebfd050e3f66850b53304581b651b5e5880ea8f21ed29b73e483a5d17f0f"
+    },
+    "TimberProps01/TreasureDrum01": {
+      "revision": "ac0f6dd8",
+      "sha256": "f022411c2a6e0409329b5b3f1ae2412623674223493665a99058859d4831da8f"
+    },
+    "TimberProps01/StreetLight01": {
+      "revision": "ac0f6dd8",
+      "sha256": "b0486a6b566a0ae773f4bb80063f8646fd529baaee36f03a208ac6ad0b16ebc3"
+    },
+    "Rocks01/Stone01": {
+      "revision": "ac0f6dd8",
+      "sha256": "dc4af5aac6b0881fdbb6b4d51eb0eef117b7e4155912342bfd6d64d167aeaa63"
+    },
+    "Rocks01/Stone02": {
+      "revision": "ac0f6dd8",
+      "sha256": "2a8f8348f8a2616f4fbe08433cf2de8c91c6de59fbf56d34b1716dbfe19beff0"
+    },
+    "Rocks01/Stone03": {
+      "revision": "ac0f6dd8",
+      "sha256": "337a59ca7cfd6f0de6156e36eb7a8f0660e36cf82da931496a4df8421ef7eb2d"
+    },
+    "Rocks01/Stone04": {
+      "revision": "ac0f6dd8",
+      "sha256": "9be9019c4a4b6f51e4578d0cc1f5109a8f58dcccf9ed4c7429896bd09b9a517f"
+    },
+    "Rocks01/Stone05": {
+      "revision": "ac0f6dd8",
+      "sha256": "f0743f0527ffe0b8055ed8e97cc98f1d803a58592c795a8db5805ede38d6f7da"
+    },
+    "Rocks01/Waterspout01": {
+      "revision": "ac0f6dd8",
+      "sha256": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83"
+    },
+    "Flowering01/Tree08": {
+      "revision": "ac0f6dd8",
+      "sha256": "08c0f6bf9468f4db83a0d7579656b6453254b2573331a08654cf226a20805e25"
+    },
+    "Flowering01/Tree12": {
+      "revision": "ac0f6dd8",
+      "sha256": "f2c6dbc600ebb76c5af82198699ffe83bfb532ba5db0a6f805efb4425545f502"
+    },
+    "Flowering01/Tree13": {
+      "revision": "ac0f6dd8",
+      "sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf"
+    },
+    "Mushrooms01/Grass07": {
+      "revision": "ac0f6dd8",
+      "sha256": "ab0ddf511f5e21fb670b29f7c08ca269d898e236fe2b3614f4cab68cc5646718"
+    },
+    "Mushrooms01/Grass08": {
+      "revision": "ac0f6dd8",
+      "sha256": "1ff64ade57809b9a38686ea7e80123bd9964f5a7ee9af1fd6a365e45fca83d0c"
+    },
+    "BareTrees01/Tree03": {
+      "revision": "ac0f6dd8",
+      "sha256": "d5caacd3ecd571d7d832c7fc4f3d5615c2ea9a08a26490003493fd1035c99e3d"
+    },
+    "BareTrees01/Tree04": {
+      "revision": "ac0f6dd8",
+      "sha256": "b19e0b3ee759cba9cb21170084b47a972ff8a118c2c9213ff8303f10321eb29e"
+    },
+    "BareTrees01/Tree05": {
+      "revision": "ac0f6dd8",
+      "sha256": "c5a334dfbf3b05a1c9923cd5f99d73491fe103839d0c570495b3316965cde0d2"
+    },
+    "BareTrees01/Tree07": {
+      "revision": "ac0f6dd8",
+      "sha256": "b8dbfa66f4bb6a0257685f86836edb3547151962124aae2e4758be26b414efe4"
+    },
+    "BareTrees01/Tree11": {
+      "revision": "ac16ffeb",
+      "sha256": "6a9fa891a24dc83ab72a6cb095e6f558fccc8e1579d580f31a5aa0114b370f8d"
+    },
+    "Ironwork01/SteelWall01": {
+      "revision": "ac0f6dd8",
+      "sha256": "30307d668eb3b9e6a59e0a3ceae7dc7bb8e4f76d7fb202d8109c984719aeef0b"
+    },
+    "Ironwork01/SteelWall02": {
+      "revision": "ac0f6dd8",
+      "sha256": "1f018ccbc189a732c7da04ca54ac540d3bf3350388ba587201ff067125f74ba1"
+    },
+    "Ironwork01/SteelWall03": {
+      "revision": "ac0f6dd8",
+      "sha256": "c589e6b23cae87fd7177873f379e4ce89f574c1d937f7a79fb01d9e720b8a0d5"
+    },
+    "Ironwork01/SteelDoor01": {
+      "revision": "ac0f6dd8",
+      "sha256": "7921fb1b0367031fe9ae62f7fa9ad84c411e875206fdcb9c5a9e338118cec826"
+    },
+    "Ironwork01/HouseEtc03": {
+      "revision": "ac0f6dd8",
+      "sha256": "f0511bd7cd98b3f18c01b7c21306d79ed6ba88780b5648874a5cdbb0ef51ef92"
+    },
+    "Masonry01/HouseEtc01": {
+      "revision": "ac0f6dd8",
+      "sha256": "1b22883fbd015bf163bba26f75d7d28ed8e040edc9331334e0b9a78002f65904"
+    },
+    "Masonry01/StoneMuWall01": {
+      "revision": "ac0f6dd8",
+      "sha256": "b689bb0eea842b5c3fcbeecc02040c0091cedda1e83682da8669d56cb49a1037"
+    },
+    "Masonry01/StoneMuWall02": {
+      "revision": "ac0f6dd8",
+      "sha256": "0bfc494b832f491e6d0cc242c094c6d25c315f8716945f87fe2e1ba9ed3c3e03"
+    },
+    "Masonry01/StoneMuWall03": {
+      "revision": "ac0f6dd8",
+      "sha256": "cc16286a0720d42518418c0822eedfb25d1217e621e8c28c8937b4f079a71e3c"
+    },
+    "Masonry01/StoneMuWall04": {
+      "revision": "ac0f6dd8",
+      "sha256": "2207182e1d41f0d7a7b749e21fa7da2e9679a17d461e3e0e118aeaa2a67ed626"
+    },
+    "Masonry01/HouseEtc02": {
+      "revision": "ac0f6dd8",
+      "sha256": "e7fc6f955b3725e202decf8c6784c1c198fee8c962e2be8ce05a8203534585f1"
+    },
+    "StoneWalls01/StoneWall01": {
+      "revision": "ac0f6dd8",
+      "sha256": "8d8c715c3fb06765e96771c21980ce802aeec769926a51b0c30753091f768694"
+    },
+    "StoneWalls01/StoneWall02": {
+      "revision": "ac0f6dd8",
+      "sha256": "775f4c9e406576519663663e053bbb8607b2091a65f4a301c2e6c52f5bad0fd9"
+    },
+    "StoneWalls01/StoneWall03": {
+      "revision": "ac0f6dd8",
+      "sha256": "adaa2c892e3c7bee25c0c596e35a4d2f8dac50eec44abe03ab5ec2690657a35a"
+    },
+    "StoneWalls01/StoneWall05": {
+      "revision": "ac0f6dd8",
+      "sha256": "7e74ae7ef6e3393acdf4ddb182438aa4c72ae1f023121017eb4532b5e5ab9e8f"
+    },
+    "StoneWalls01/StoneWall06": {
+      "revision": "ac0f6dd8",
+      "sha256": "2a232cd90d37114ee2d52ee57d888e107740c8f86a2d9d93182c92e475e8394f"
+    },
+    "FireProps01/FireLight01": {
+      "revision": "ac0f6dd8",
+      "sha256": "212dd03667dbd058975da8648b2b2f7c8c092de30a310a4afe5eb00e2b4a05da"
+    },
+    "FireProps01/FireLight02": {
+      "revision": "ac0f6dd8",
+      "sha256": "7fa169fd7c146d229df07af86a6bf9f109af21d6e7cd098b460187ef609b11d8"
+    },
+    "FireProps01/Bonfire01": {
+      "revision": "ac0f6dd8",
+      "sha256": "6db3de69334a99c47c165c9a127a57df4c5754130c9939173fd1f1fe36fafda0"
+    },
+    "FireProps01/DoungeonGate01": {
+      "revision": "ac0f6dd8",
+      "sha256": "35a7848a8b3e38bde874271331b457e381863f82b721c58c1c574a995626f681"
+    },
+    "TavernDetails01/Beer02": {
+      "revision": "ac0f6dd8",
+      "sha256": "5f4df4413b86f7c6f632c8041d45f9e8993515eb5d0a007a14c1d104cf53f83f"
+    },
+    "TavernDetails01/Beer03": {
+      "revision": "ac0f6dd8",
+      "sha256": "fabceaf15a03fdbbb0bd1b92291feb8d18b382d79a4e223669a0322dfa6327da"
+    },
+    "TavernDetails01/Furniture01": {
+      "revision": "ac0f6dd8",
+      "sha256": "8ea6f7cc1c8e2ba1c16a46c479643a3404c3f31aed60535ba3ace42224870869"
+    },
+    "TavernDetails01/Furniture02": {
+      "revision": "ac0f6dd8",
+      "sha256": "fbf3ab4befc97ce13e7269a758beba579e5aed796d8126f8c6e8fad6a5e706a9"
+    },
+    "TavernDetails01/Furniture06": {
+      "revision": "ac0f6dd8",
+      "sha256": "cdb32810b742f71a48f86da55df337a5ec383d0ead300e45b17c4de178299638"
+    },
+    "TavernDetails01/Furniture07": {
+      "revision": "ac0f6dd8",
+      "sha256": "da9a17c5360d90b16f1bf223addaa2a3dc588f2a387ec42b26dbe1b9ace90271"
+    },
+    "Architecture01/House01": {
+      "revision": "ac0f6dd8",
+      "sha256": "6b8b9a4972ac3dab598f8fb079e93760d89e1220dae27d15878dc4fdb852a0d5"
+    },
+    "Architecture01/House03": {
+      "revision": "ac0f6dd8",
+      "sha256": "35880888c4caeee3783d2dbc60820f59539ad73bdd72d5e6f2cc4a6b46c5f61b"
+    },
+    "Architecture01/House04": {
+      "revision": "ac0f6dd8",
+      "sha256": "62de7a560d8f7e05940c606f99762d0bb79afd7688e1ff76e5de3611ce92a20f"
+    },
+    "Architecture01/Tent01": {
+      "revision": "ac0f6dd8",
+      "sha256": "8a14eb3d77ac55c4cd4c4bcecd1157bea01945f6eccbd53fcbfa8e2e802f071c"
+    },
+    "Architecture01/HouseWall02": {
+      "revision": "ac0f6dd8",
+      "sha256": "51bb448423caf18e2a992bdf0a472f6fc126d82da9fb66caa084d2304c89b173"
+    },
+    "Architecture01/HouseEtc02": {
+      "revision": "f1fbb29c",
+      "sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa"
+    },
+    "SignsBanners01/Sign01": {
+      "revision": "ac0f6dd8",
+      "sha256": "727b91522978149118eb9355fdb7dfa9ba80c8f5c1d088b93cf35303c312559d"
+    },
+    "SignsBanners01/Sign02": {
+      "revision": "ac0f6dd8",
+      "sha256": "9da8c8ac29ca2912f34bfa4ea34465ed529f963f595e8e0bb59a2ec8ab5db2e3"
+    },
+    "SignsBanners01/Curtain01": {
+      "revision": "ac0f6dd8",
+      "sha256": "13b63e8ca1347f6b5cce40b3852913b5aaa75b2fef6de484eda303dd870a3173"
+    },
+    "SignsBanners01/StoneWall04": {
+      "revision": "ac0f6dd8",
+      "sha256": "c886f4526e3b9dde6be1060f9310167bdf48c39127f14ab9a388204cbd2bfe3e"
+    },
+    "SignsBanners01/StoneWall06": {
+      "revision": "149780be",
+      "sha256": "5763998af97cdb7cfe595476cda2592558458f0f8046ce0204580301e0f80a62"
+    },
+    "Ship01/Ship01": {
+      "revision": "ac0f6dd8",
+      "sha256": "e17bdc04887b90a0be39c8a1098ac2937d7d630e2f238148756f61517b56de19"
+    },
+    "Architecture02/House05": {
+      "revision": "ac0f6dd8",
+      "sha256": "a38c88a6dfc42eefb31bfa65233c22de13d61ca227bcbecd7fe86a127caa13d2"
+    },
+    "Architecture02/HouseWall01": {
+      "revision": "ac0f6dd8",
+      "sha256": "0a37be8059ee8c7eabd72c71fe152d0295f14e96a572c7ce0ff5676ac0b3f053"
+    },
+    "Architecture02/HouseWall04": {
+      "revision": "ac0f6dd8",
+      "sha256": "825f3680e2e03a5db8ea33194b24cb8b6657f39c3d4c58067e2031949f13f300"
+    },
+    "Architecture02/HouseWall05": {
+      "revision": "ac0f6dd8",
+      "sha256": "f796a6c2fdc04f352a2aaf09cc61aa7645d27a3cc1eb62918992c8dbb4408c22"
+    },
+    "Architecture02/HouseWall06": {
+      "revision": "ac0f6dd8",
+      "sha256": "c412888cf774dca87993e98da84b517d324e853180133d1601131d15511a6c10"
+    },
+    "Architecture02/Stair01": {
+      "revision": "ac0f6dd8",
+      "sha256": "5b397f72abc68a44acf070b21fdd6c037ba7d605d62100678fa724afa8867073"
+    },
+    "Architecture02/House04": {
+      "revision": "8094616d",
+      "sha256": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa"
+    },
+    "Architecture02/HouseWall02": {
+      "revision": "8094616d",
+      "sha256": "6ac7e3fb619b8c92c3d0e445c53beca1da53d5395609bfd60a06cdfb6f066470"
+    },
+    "Architecture02/HouseEtc02": {
+      "revision": "f1fbb29c",
+      "sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa"
+    },
+    "Statues01/StoneStatue01": {
+      "revision": "ac0f6dd8",
+      "sha256": "6353791e5fb29e57d808208e318008f250c1e56cd98de92f09fa4097041cb2c7"
+    },
+    "Statues01/StoneStatue02": {
+      "revision": "ac0f6dd8",
+      "sha256": "82fc220e9eb12632f86a8d9e5e10e6f1d97a2c5c045c296b607873eee17a7b01"
+    },
+    "Statues01/StoneStatue03": {
+      "revision": "ac0f6dd8",
+      "sha256": "df0d74c55ea45ed2f3cca673901990e569f50a8e9867f8fa67bb75909e04d93d"
+    },
+    "Statues01/SteelStatue01": {
+      "revision": "ac0f6dd8",
+      "sha256": "65d9d9046552f23b1ec6998eab4d45388e662a039b04a7f91aefa5fc19059770"
+    },
+    "Statues01/Tomb01": {
+      "revision": "ac0f6dd8",
+      "sha256": "e5ddc0c81d9f76c9ecfaf7e7dcc0258c6d9577c330f566daac6c1374a1504b5f"
+    },
+    "Statues01/Tomb02": {
+      "revision": "ac0f6dd8",
+      "sha256": "f1da568290b7a97c1ec5970cbf395661367594d4208e74b3d864178109772df6"
+    },
+    "Statues01/Waterspout01": {
+      "revision": "ac0f6dd8",
+      "sha256": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83"
+    },
+    "CartHay01/Carriage01": {
+      "revision": "ac0f6dd8",
+      "sha256": "702981058493a4fc785b55e515a6d482ae00b589b2e3c7fccbcc957b5f9dedc2"
+    },
+    "CartHay01/Carriage02": {
+      "revision": "ac0f6dd8",
+      "sha256": "837ea49a2c31b1fddee738be1ee24994d81af3db0efd5c6db33a8f7e886fd814"
+    },
+    "CartHay01/Carriage03": {
+      "revision": "ac0f6dd8",
+      "sha256": "1ac29929c0016150b60df280ec24efc9164bfead16fe7e806ee84663c0545a4a"
+    },
+    "CartHay01/Carriage04": {
+      "revision": "ac0f6dd8",
+      "sha256": "83a4e2910d8c6cca430a04dcbbe9e01e9277873842b3d11e3446dac41267e16c"
+    },
+    "CartHay01/Straw01": {
+      "revision": "ac0f6dd8",
+      "sha256": "8537c9e944ee8fd3460bbd7510f6b1e241644aa6649f69fe5ec837e4421ed1af"
+    },
+    "CartHay01/Straw02": {
+      "revision": "ac0f6dd8",
+      "sha256": "81329b7b2da10e40af21cb40d6f46333168be9f5f13e7eafcd8f2c097b784ed0"
+    },
+    "NormalBindings01/Grass02": {
+      "revision": "ac0f6dd8",
+      "sha256": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea"
+    },
+    "NormalBindings01/Tree12": {
+      "revision": "ac0f6dd8",
+      "sha256": "f2c6dbc600ebb76c5af82198699ffe83bfb532ba5db0a6f805efb4425545f502"
+    },
+    "NormalBindings01/Tree13": {
+      "revision": "ac0f6dd8",
+      "sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf"
+    },
+    "Wells01/Well01": {
+      "revision": "ac0f6dd8",
+      "sha256": "380abf8d1c4e6c7d2998ade24cee83ae5490eeb9130f4c6ab8e97504608856fa"
+    },
+    "Wells01/Well02": {
+      "revision": "ac0f6dd8",
+      "sha256": "1b5649c5b2f49010ab4621a11ed322d8dbdc10d2cfd811b0e3129fd3ac8c92b8"
+    },
+    "Wells01/Well03": {
+      "revision": "ac0f6dd8",
+      "sha256": "6404fe523f2b538684bfcf23cfb3bf9b651fe7d6142dfd4d59e2da2d5f46b691"
+    },
+    "Wells01/Well04": {
+      "revision": "ac0f6dd8",
+      "sha256": "c3b12e4660a4c2518be1d6925b8c750e5693fbb1cacf78227d418e332030ade4"
+    },
+    "Wells01/Carriage03": {
+      "revision": "93ca193e",
+      "sha256": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296"
+    },
+    "Architecture03/HouseWall03": {
+      "revision": "ac0f6dd8",
+      "sha256": "51883e125b9f7e19f5e7771115dbf9d12740cfc10666a0c647b291f1e6e1e5f8"
+    },
+    "Architecture03/Bridge01": {
+      "revision": "ac0f6dd8",
+      "sha256": "b8872827ca63771b79e77cc91f9027d1ae3732b9ff903379fccbe9e8bf82adcc"
+    },
+    "Architecture03/BridgeStone01": {
+      "revision": "ac0f6dd8",
+      "sha256": "a46cf37919a4499ed653b2895c13ab1c516f900e9a8b80a291f9a387f521bb12"
+    },
+    "Architecture03/Fence01": {
+      "revision": "6b025039",
+      "sha256": "594570345d8a5f665ad86718c03b491744835179cc1e4e56589387b1bd8b7d34"
+    },
+    "Architecture03/FireLight02": {
+      "revision": "6b025039",
+      "sha256": "ec0536c70b842499803e762b0420a7dd07af693ab0a58f9d050d71a7617011c2"
+    },
+    "Architecture03/House01": {
+      "revision": "6b025039",
+      "sha256": "498f0224e6c7f0f32d228b8a7ffbeb051e9796f7749ffb1e340149a632da737e"
+    },
+    "Architecture03/House03": {
+      "revision": "6b025039",
+      "sha256": "a8015a4a6155d5dc2cef379bebb6c054ec6a31c428329163a1a696424ea1b7f7"
+    },
+    "Architecture03/House04": {
+      "revision": "6b025039",
+      "sha256": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa"
+    },
+    "Architecture03/House05": {
+      "revision": "6b025039",
+      "sha256": "67208130091a7808a621a6d0fd054b99dd01342d730b9194a4d49ad32a7133f5"
+    },
+    "Architecture03/HouseEtc02": {
+      "revision": "6b025039",
+      "sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa"
+    },
+    "Architecture03/HouseWall01": {
+      "revision": "6b025039",
+      "sha256": "55bdc3e6d196849cf1300d72fe395bccf026acbfba0e74bf0711df4a06928665"
+    },
+    "Architecture03/HouseWall02": {
+      "revision": "6b025039",
+      "sha256": "6ac7e3fb619b8c92c3d0e445c53beca1da53d5395609bfd60a06cdfb6f066470"
+    },
+    "Architecture03/HouseWall04": {
+      "revision": "6b025039",
+      "sha256": "8511bc422fc0606174a39eb931266979fb1f5e2a72f1cdb8e95f4b15535ec4a6"
+    },
+    "Architecture03/HouseWall05": {
+      "revision": "6b025039",
+      "sha256": "5ff5b789528517f047668b1c1499dd059fac61c23df0ae3a920db1b64678c0d6"
+    },
+    "Architecture03/HouseWall06": {
+      "revision": "6b025039",
+      "sha256": "fd082b68ed0e4c4ac9898be26a15bde8e90e6c4a8baa79ecaa0a12d8dc7db2ef"
+    },
+    "Architecture03/StoneMuWall01": {
+      "revision": "6b025039",
+      "sha256": "3e5a80be0b0e045b02874daeb804388e27962152c2f9db4ae652d7803d59b7b6"
+    },
+    "Architecture03/StoneWall01": {
+      "revision": "6b025039",
+      "sha256": "a32fca0ef1cf2bd3de64d9a5992ecb8c606c5c57cb159564ed9eb8867c4fb7a4"
+    },
+    "Architecture03/StoneWall02": {
+      "revision": "6b025039",
+      "sha256": "55ffbbebc40e46569f7137bdd52e84c977a5c78c78c7b0cff3dc092d5db8cdb9"
+    },
+    "Architecture03/Tent01": {
+      "revision": "6b025039",
+      "sha256": "6be4f98d11e1f6dec88d53be6f78354e89b3cb4a5ac0a057acd71ea9477e8713"
+    },
+    "Architecture03/Tree07": {
+      "revision": "6b025039",
+      "sha256": "27d7b5872de6d8b7e6d5b53ce0ab694e262fa519b0039467e18572ef74f6aca6"
+    },
+    "Cannons01/Cannon01": {
+      "revision": "ac0f6dd8",
+      "sha256": "c7d0e2b9d3a9d9764c5f6f2c4d9c5496c64d141ec5eae69a02ac36580162d1a0"
+    },
+    "Cannons01/Cannon02": {
+      "revision": "ac0f6dd8",
+      "sha256": "aec342ce42aca9db7fa009cd148ef673a485fb3e5fda259ff9b7997d234d9f81"
+    },
+    "Cannons01/Cannon03": {
+      "revision": "ac0f6dd8",
+      "sha256": "725df6fe11dcc6c54338be8b3ee426dc90d92e5d76c841b57f7b15822b8116aa"
+    },
+    "Cannons01/Hanging01": {
+      "revision": "ac0f6dd8",
+      "sha256": "2edfebee6a7be95b8e68bbc92ec35edbe1e8db63b37f0700daba3a05fcc71c71"
+    },
+    "Cannons01/Carriage01": {
+      "revision": "0bb84512",
+      "sha256": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622"
+    },
+    "Cannons01/Carriage02": {
+      "revision": "0bb84512",
+      "sha256": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e"
+    },
+    "Cannons01/Carriage03": {
+      "revision": "0bb84512",
+      "sha256": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296"
+    },
+    "Cannons01/Carriage04": {
+      "revision": "0bb84512",
+      "sha256": "77e81ed05d87ebf6938770b91428b77131fae9bda967f36d587525c323f14ab2"
+    },
+    "Cannons01/HouseEtc02": {
+      "revision": "0bb84512",
+      "sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa"
+    },
+    "Cannons01/StoneMuWall04": {
+      "revision": "0bb84512",
+      "sha256": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471"
+    },
+    "Cannons01/StoneWall03": {
+      "revision": "0bb84512",
+      "sha256": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e"
+    },
+    "Cannons01/Well01": {
+      "revision": "46daddf2",
+      "sha256": "c753f37c049f5716deb7db64186083fed58920b925da133abea7303a851977a3"
+    }
+  },
+  "combined_models": 115,
+  "missing_textures": [],
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/TileGround03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/Tree_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/angel_stone_statue.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/apple.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/badge_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/badge_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/badge_03.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/bookshelf.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/bottle.ozt\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/bridge_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall05.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall06.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/chair2.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/copra_gate.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/doorknob.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/drum.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/fire_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/fire_light_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/grass_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/grave_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/grave_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/horse_drawn_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/horse_drawn_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/horse_drawn_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/jar_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/light.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/light2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/light_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/mushroom.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/notice.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/plate.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/pot.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/pot2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/pot3.ozt\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ship01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ship03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ship04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ship05.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ship05.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ship07.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/signboard.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_b.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_door.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/stone_statue01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/stone_statue02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight_brightness2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_house01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_space01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston05.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston06.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_windows01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_wood01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_wood02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_wood03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tombstone_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_04.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_05.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_06.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tub.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/well.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/winecup.OZJ\n",
+  "client_verified": false,
+  "runtime_modified": false
+}

@@ -1,0 +1,28 @@
+{
+  "light": {
+    "original_size": [
+      64,
+      64
+    ],
+    "final_size": [
+      256,
+      256
+    ],
+    "mask": "Exact bilinear resample of original scalar alpha; color-only repaint",
+    "original_coverage": 0.505615234375,
+    "final_coverage": 0.504608154296875
+  },
+  "fire_light_01": {
+    "original_size": [
+      24,
+      24
+    ],
+    "final_size": [
+      256,
+      256
+    ],
+    "mask": "Exact bilinear resample of original scalar alpha; color-only repaint",
+    "original_coverage": 0.34375,
+    "final_coverage": 0.34405517578125
+  }
+}

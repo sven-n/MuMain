@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd
+  name field: Tent01.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 130
+  bounds (bind pose): min -154.20 -201.18 -1.37  max 156.02 200.29 330.41  size 310.22 401.47 331.78
+  mesh 0: triangles=26 vertices=18 normals=18 uvs=18 texture=tile_house01.jpg
+  mesh 1: triangles=104 vertices=64 normals=83 uvs=28 texture=tile_ston06.jpg
+  bone 0: "boness01" parent=-1
+  bone 1: "boness02" parent=0
+  bone 2: "boness" parent=1
+  bone 3: "Mesh01" parent=0
+  action 0: keys=36 lock=0

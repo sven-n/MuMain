@@ -1,0 +1,85 @@
+{
+  "evidence": "OFFLINE Blender; not client",
+  "models": [
+    {
+      "model": "Carriage02",
+      "placement": {
+        "position": [
+          14666.75,
+          14661.8076171875,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          2160.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          146.6675,
+          146.618076171875
+        ]
+      }
+    },
+    {
+      "model": "Straw01",
+      "placement": {
+        "position": [
+          14850.0,
+          14700.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          148.5,
+          147.0
+        ]
+      }
+    },
+    {
+      "model": "Straw01",
+      "placement": {
+        "position": [
+          14913.1962890625,
+          14675.0048828125,
+          305.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          149.131962890625,
+          146.750048828125
+        ]
+      }
+    }
+  ],
+  "world_origin_subtracted": [
+    14666.75,
+    14661.8076171875,
+    165.00001525878906
+  ],
+  "world_transform": "Translation @ EulerXYZ(rotation degrees) @ uniform scale; original records unchanged",
+  "camera_bounds": [
+    [
+      -90.38162994384766,
+      -218.18389892578125,
+      -1.1697514057159424
+    ],
+    [
+      315.3046569824219,
+      218.92640686035156,
+      281.7475891113281
+    ]
+  ],
+  "terrain": "Terrain and surrounding architecture omitted",
+  "light": "Carriage01 mesh2 uses render-only additive approximation"
+}

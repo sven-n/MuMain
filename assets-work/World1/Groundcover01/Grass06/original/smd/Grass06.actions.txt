@@ -1,0 +1,5 @@
+# bmdconv action manifest for Grass06.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Grass06.smd <output.bmd> --manifest Grass06.actions.txt
+model Data2\Object1\grass_06.smd
+action 0 file=Grass06_a00.smd keys=1 lock=0
+texture 0 tree_09.tga original=tree_09.tga

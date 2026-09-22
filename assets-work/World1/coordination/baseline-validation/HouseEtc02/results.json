@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02.actions.txt\n"
+  },
+  {
+    "command": "validate HouseEtc02.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02.smd: bones=3 frames=1 triangles=226 materials=8\nOK\n"
+  },
+  {
+    "command": "validate HouseEtc02_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseEtc02/smd/HouseEtc02_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

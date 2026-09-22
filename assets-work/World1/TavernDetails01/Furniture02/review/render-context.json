@@ -1,0 +1,11 @@
+{
+  "evidence": "OFFLINE Blender renders, not client screenshots",
+  "replacement": "Reimported exported BMD",
+  "camera": "Matching camera, lighting and scale before/after",
+  "terrain": "Completed TileGrass01, 100-unit repeats as staging proxy; engine density depends on texture width",
+  "scale_proxy_height": 190,
+  "terrain_view_width": 460,
+  "animation": "Every original one-frame action validated numerically",
+  "placement": "Preview at origin, not an actual World1 placement or measured client camera",
+  "scale_proxy": "190-unit figure is an illustrative height reference, not a client character capture"
+}

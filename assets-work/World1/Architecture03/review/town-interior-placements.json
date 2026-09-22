@@ -1,0 +1,482 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    12900.0,
+    12400.0,
+    165.00001525878906
+  ],
+  "objects": [
+    {
+      "name": "HouseWall03",
+      "placement_index": 2,
+      "position": [
+        12900.0,
+        12400.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        630.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.0,
+        124.0
+      ]
+    },
+    {
+      "name": "HouseWall03",
+      "placement_index": 3,
+      "position": [
+        12900.0,
+        13200.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        630.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.0,
+        132.0
+      ]
+    },
+    {
+      "name": "HouseWall01",
+      "placement_index": 1,
+      "position": [
+        12950.0,
+        12800.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        810.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        128.0
+      ]
+    },
+    {
+      "name": "HouseWall01",
+      "placement_index": 2,
+      "position": [
+        12950.0,
+        13400.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        134.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 4,
+      "position": [
+        12600.0,
+        12050.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1080.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        126.0,
+        120.5
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 5,
+      "position": [
+        12050.0,
+        12600.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        990.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        126.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 6,
+      "position": [
+        12400.0,
+        12050.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1080.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        124.0,
+        120.5
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 7,
+      "position": [
+        12050.0,
+        12400.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        124.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 8,
+      "position": [
+        12050.0,
+        12800.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        128.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 9,
+      "position": [
+        12050.0,
+        13000.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        990.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        130.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 12,
+      "position": [
+        12050.0,
+        13200.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        132.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 13,
+      "position": [
+        12950.0,
+        12600.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        810.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        126.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 14,
+      "position": [
+        12950.0,
+        13000.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        810.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        130.0
+      ]
+    },
+    {
+      "name": "HouseWall04",
+      "placement_index": 4,
+      "position": [
+        12050.0,
+        12050.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        720.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        120.5
+      ]
+    },
+    {
+      "name": "HouseWall04",
+      "placement_index": 6,
+      "position": [
+        12950.0,
+        12050.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        120.5
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 4,
+      "position": [
+        12314.4248046875,
+        12312.9951171875,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        123.144248046875,
+        123.129951171875
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 5,
+      "position": [
+        12719.33984375,
+        12312.9951171875,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        127.1933984375,
+        123.129951171875
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 6,
+      "position": [
+        12335.8232421875,
+        13512.9267578125,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        123.358232421875,
+        135.129267578125
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 7,
+      "position": [
+        12718.4775390625,
+        13520.6220703125,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        127.184775390625,
+        135.206220703125
+      ]
+    },
+    {
+      "name": "HouseWall06",
+      "placement_index": 0,
+      "position": [
+        12714.40234375,
+        12719.556640625,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        127.1440234375,
+        127.19556640625
+      ]
+    },
+    {
+      "name": "HouseWall06",
+      "placement_index": 1,
+      "position": [
+        12312.8232421875,
+        12714.2314453125,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        123.128232421875,
+        127.142314453125
+      ]
+    },
+    {
+      "name": "HouseWall06",
+      "placement_index": 2,
+      "position": [
+        12311.1328125,
+        13116.2421875,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        123.111328125,
+        131.162421875
+      ]
+    },
+    {
+      "name": "HouseWall06",
+      "placement_index": 3,
+      "position": [
+        12716.19140625,
+        13120.7802734375,
+        475.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        127.1619140625,
+        131.207802734375
+      ]
+    },
+    {
+      "name": "Tent01",
+      "placement_index": 1,
+      "position": [
+        12800.0,
+        11850.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        2880.0
+      ],
+      "scale": 0.7800002098083496,
+      "tile": [
+        128.0,
+        118.5
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only assigned and readonly compatibility geometry shown. Original terrain height, lighting, collision and other buildings omitted. Light beams approximate additive rendering at 0.55 emission, not engine evidence.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -960.9676513671875,
+      -706.9185180664062,
+      -1.0720514059066772
+    ],
+    [
+      160.96763610839844,
+      1380.303955078125,
+      354.5704040527344
+    ]
+  ],
+  "roof_fade_preview": "OFFLINE HeroTile4 target0 roof omission approximation"
+}

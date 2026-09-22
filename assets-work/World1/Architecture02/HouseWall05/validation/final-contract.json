@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "triangles": 54,
+  "textures": {
+    "tile_wood02.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_wood03.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -2.7853,
+      2.3599
+    ],
+    [
+      -0.676,
+      2.6927
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -2.7853,
+      2.3599
+    ],
+    [
+      -0.676,
+      2.6927
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

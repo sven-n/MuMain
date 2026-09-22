@@ -1,0 +1,24 @@
+{
+  "model": "FireLight01",
+  "game_files": {
+    "src/bin/Data/Object1/FireLight01.bmd": "6b0e61192c0eec9e177ec5ad23216ee736eec76ffafea957d72a7807045fd8af",
+    "src/bin/Data/Object1/light.OZT": "9528a5a30f4ea4bc65386c2230890ac92f851797b2b376485eb5e4c0f7cf2dca",
+    "src/bin/Data/Object1/light2.OZJ": "d1295081bca78033e0da9ed712c5fbb1ac0e2c7b83da47e97d24a7afaa8396a5",
+    "src/bin/Data/Object1/light3.OZJ": "4c68cd942c486c888534fc96faca22aecb018a41359a1b2f87d37230839a1401"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 80,
+  "bind_bounds": [
+    [
+      -28.570100784301758,
+      -28.46769905090332,
+      -0.40790000557899475
+    ],
+    [
+      28.6072998046875,
+      28.709699630737305,
+      175.2342987060547
+    ]
+  ]
+}

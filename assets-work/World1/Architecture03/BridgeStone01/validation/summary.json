@@ -1,0 +1,47 @@
+{
+  "bounds_before": [
+    [
+      -0.18,
+      -199.96,
+      -159.82
+    ],
+    [
+      83.34,
+      200.14,
+      9.8
+    ]
+  ],
+  "bounds_after": [
+    [
+      -0.18,
+      -199.96,
+      -159.82
+    ],
+    [
+      83.34,
+      200.14,
+      9.8
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "textures": [
+    "tree_04.jpg",
+    "tile_ston06.jpg",
+    "tile_wood02.jpg",
+    "bridge_shadow01.tga"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": false,
+  "export_sha256": {
+    "BridgeStone01.bmd": "d3fa1a44db54c9575824cc557275a7d2a2d59c2bc579ab4eb9cf0105c2c7451c",
+    "tree_04.OZJ": "4b9a12637d3967b2f0ff5412830b3988664f937cca31733c7ae97e41cf63ca4f",
+    "bridge_shadow01.OZT": "ea197a3247438aea7d5796715ea51cb0283b2dc688ff455571ee16efabb9e49e",
+    "tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda",
+    "tile_ston06.OZJ": "c0eb1cde0172be5b4f1a1e7a19e274c6891d1e97d91479cdb11424a464847a3b"
+  }
+}

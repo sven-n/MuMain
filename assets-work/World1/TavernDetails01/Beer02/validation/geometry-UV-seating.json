@@ -1,0 +1,260 @@
+{
+  "status": "PASS",
+  "surface": {
+    "minimum_uv_triangle_area": 0.0003839999999999997,
+    "minimum_geometry_triangle_area": 1.3972222932559997,
+    "minimum_winding_normal_dot": 0.3912884531272465,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "apple.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -43.764599,
+          -15.1044,
+          -0.205599
+        ],
+        [
+          -26.9548,
+          1.7695,
+          16.604099
+        ]
+      ],
+      "after": [
+        [
+          -43.764668,
+          -15.104378,
+          -0.205648
+        ],
+        [
+          -26.954868,
+          1.769522,
+          16.60409
+        ]
+      ],
+      "max_difference": 6.900000000342743e-05
+    },
+    {
+      "material": "apple.jpg",
+      "bone_index": 5,
+      "before": [
+        [
+          -32.891499,
+          -28.3578,
+          -0.7967
+        ],
+        [
+          -13.7813,
+          -9.320299,
+          18.5345
+        ]
+      ],
+      "after": [
+        [
+          -32.891438,
+          -28.357784,
+          -0.796709
+        ],
+        [
+          -13.781238,
+          -9.320282,
+          18.534527
+        ]
+      ],
+      "max_difference": 6.199999999978445e-05
+    },
+    {
+      "material": "bottle.tga",
+      "bone_index": 1,
+      "before": [
+        [
+          -1.4169,
+          10.4969,
+          0.6475
+        ],
+        [
+          11.115801,
+          23.526699,
+          61.4739
+        ]
+      ],
+      "after": [
+        [
+          -1.416901,
+          10.4969,
+          0.6475
+        ],
+        [
+          11.115801,
+          23.526699,
+          61.4739
+        ]
+      ],
+      "max_difference": 9.999999999177334e-07
+    },
+    {
+      "material": "plate.jpg",
+      "bone_index": 2,
+      "before": [
+        [
+          -28.6404,
+          -9.9689,
+          0.1271
+        ],
+        [
+          -0.3994,
+          14.4886,
+          11.2588
+        ]
+      ],
+      "after": [
+        [
+          -28.6404,
+          -9.9689,
+          0.1271
+        ],
+        [
+          -0.3994,
+          14.4886,
+          11.2588
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "plate.jpg",
+      "bone_index": 4,
+      "before": [
+        [
+          21.881399,
+          3.649,
+          -0.2279
+        ],
+        [
+          44.474201,
+          23.215,
+          8.6775
+        ]
+      ],
+      "after": [
+        [
+          21.881399,
+          3.649,
+          -0.2279
+        ],
+        [
+          44.474201,
+          23.215,
+          8.6775
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "pot3.tga",
+      "bone_index": 0,
+      "before": [
+        [
+          -42.739201,
+          -6.418,
+          12.7007
+        ],
+        [
+          -33.7873,
+          0.7808,
+          23.405001
+        ]
+      ],
+      "after": [
+        [
+          -42.739197,
+          -6.41798,
+          12.700696
+        ],
+        [
+          -33.787285,
+          0.78077,
+          23.405014
+        ]
+      ],
+      "max_difference": 3.0000000000085514e-05
+    },
+    {
+      "material": "pot3.tga",
+      "bone_index": 5,
+      "before": [
+        [
+          -31.988001,
+          -26.3689,
+          14.0455
+        ],
+        [
+          -24.197201,
+          -16.3489,
+          26.355499
+        ]
+      ],
+      "after": [
+        [
+          -31.988037,
+          -26.36891,
+          14.0455
+        ],
+        [
+          -24.197161,
+          -16.348906,
+          26.355459
+        ]
+      ],
+      "max_difference": 3.999999999848569e-05
+    },
+    {
+      "material": "winecup.jpg",
+      "bone_index": 3,
+      "before": [
+        [
+          5.9219,
+          -10.6366,
+          -0.358801
+        ],
+        [
+          25.551001,
+          13.618301,
+          27.1439
+        ]
+      ],
+      "after": [
+        [
+          5.9219,
+          -10.6366,
+          -0.358801
+        ],
+        [
+          25.551001,
+          13.618301,
+          27.1439
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "alpha_cards": {
+    "status": "PASS",
+    "original_card_geometry_UV_rigid_bone_retained": true,
+    "max_position_difference": 6.100000000230921e-05
+  },
+  "seating": {
+    "status": "not a seat"
+  },
+  "material_order": [
+    "pot3.tga",
+    "apple.jpg",
+    "bottle.tga",
+    "plate.jpg",
+    "winecup.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

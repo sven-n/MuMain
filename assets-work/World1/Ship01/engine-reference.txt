@@ -1,0 +1,36 @@
+4565-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+4566-    {
+4567-        switch (Type)
+4568-        {
+4569:        case MODEL_SHIP:
+4570-            o->Scale = 0.8f;
+4571-            Vector(0.2f, 0.2f, 0.2f, o->Light);
+4572-            o->LightEnable = true;
+4573-            break;
+4574-        case MODEL_WAVEBYSHIP:
+4575-            o->Scale = 0.8f;
+4576-            o->BlendMesh = 0;
+4577-            o->BlendMeshLight = 1.f;
+4578-            Vector(1.f, 1.f, 1.f, o->Light);
+4579-            break;
+4580-        case MODEL_MUGAME:
+4581-            o->Scale = 2.2f;
+4582-            o->BlendMesh = 1;
+4583-            o->LightEnable = false;
+4584-            break;
+
+MapManager.cpp WorldActive==0 model load:
+1037:         gLoadData.AccessModel(MODEL_STEEL_STATUE, L"Data\\Object1\\", L"SteelStatue", 1);
+1038:         for (i = 0; i < 3; i++)
+1039:             gLoadData.AccessModel(MODEL_TOMB01 + i, L"Data\\Object1\\", L"Tomb", i + 1);
+1040:         for (i = 0; i < 2; i++)
+1041:             gLoadData.AccessModel(MODEL_FIRE_LIGHT01 + i, L"Data\\Object1\\", L"FireLight", i + 1);
+1042:         gLoadData.AccessModel(MODEL_BONFIRE, L"Data\\Object1\\", L"Bonfire", 1);
+1043:         gLoadData.AccessModel(MODEL_DUNGEON_GATE, L"Data\\Object1\\", L"DoungeonGate", 1);
+1044:         gLoadData.AccessModel(MODEL_TREASURE_DRUM, L"Data\\Object1\\", L"TreasureDrum", 1);
+1045:         gLoadData.AccessModel(MODEL_TREASURE_CHEST, L"Data\\Object1\\", L"TreasureChest", 1);
+1046:         gLoadData.AccessModel(MODEL_SHIP, L"Data\\Object1\\", L"Ship", 1);
+1047: 
+1048:         for (i = 0; i < 6; i++)
+1049:             gLoadData.AccessModel(MODEL_STONE_WALL01 + i, L"Data\\Object1\\", L"StoneWall", i + 1);
+1050:         for (i = 0; i < 4; i++)

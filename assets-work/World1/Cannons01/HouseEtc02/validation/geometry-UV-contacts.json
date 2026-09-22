@@ -1,0 +1,278 @@
+{
+  "status": "PASS",
+  "authored_bindings": {
+    "status": "PASS",
+    "source_vertices": 233,
+    "all_exported_corners_match_authored_bone_and_position": true,
+    "maximum_coordinate_deviation": 4.995117208750344e-07,
+    "tolerance": 0.005
+  },
+  "surface": {
+    "minimum_uv_triangle_area": 0.0,
+    "minimum_geometry_triangle_area": 64.93220222749886,
+    "minimum_winding_normal_dot": 0.9495915195466115,
+    "zero_area_triangles": 0,
+    "collapsed_uv_triangles": 4,
+    "winding_disagreements": 0
+  },
+  "original_surface": {
+    "minimum_uv_triangle_area": 0.0,
+    "minimum_geometry_triangle_area": 64.93220222749886,
+    "minimum_winding_normal_dot": 0.9495915195466115,
+    "zero_area_triangles": 0,
+    "collapsed_uv_triangles": 4,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "c_wall04.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -244.127106,
+          -248.433701,
+          -0.1512
+        ],
+        [
+          144.636505,
+          248.999603,
+          286.791412
+        ]
+      ],
+      "after": [
+        [
+          -244.127106,
+          -248.433701,
+          -0.1512
+        ],
+        [
+          144.636505,
+          248.999603,
+          286.791412
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 1,
+      "before": [
+        [
+          -216.764709,
+          299.959106,
+          -0.025101
+        ],
+        [
+          198.919983,
+          408.200714,
+          141.307098
+        ]
+      ],
+      "after": [
+        [
+          -216.764709,
+          299.959106,
+          -0.025101
+        ],
+        [
+          198.919983,
+          408.200714,
+          141.307098
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tile_house01.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          101.219101,
+          -104.275597,
+          -0.081
+        ],
+        [
+          101.2192,
+          37.9272,
+          221.411102
+        ]
+      ],
+      "after": [
+        [
+          101.219101,
+          -104.275597,
+          -0.081
+        ],
+        [
+          101.2192,
+          37.9272,
+          221.411102
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tile_ston01.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          99.819702,
+          -248.507004,
+          0.0637
+        ],
+        [
+          279.599213,
+          248.80188,
+          35.970699
+        ]
+      ],
+      "after": [
+        [
+          99.819702,
+          -248.507004,
+          0.0637
+        ],
+        [
+          279.599213,
+          248.80188,
+          35.970699
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tile_ston04.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -302.532196,
+          -299.570892,
+          -0.0001
+        ],
+        [
+          297.876404,
+          399.450592,
+          157.553604
+        ]
+      ],
+      "after": [
+        [
+          -302.532196,
+          -299.570892,
+          -0.0001
+        ],
+        [
+          297.876404,
+          399.450592,
+          157.553604
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tile_ston06.jpg",
+      "bone_index": 2,
+      "before": [
+        [
+          -253.350693,
+          -166.880371,
+          122.021103
+        ],
+        [
+          154.378693,
+          188.307495,
+          250.060898
+        ]
+      ],
+      "after": [
+        [
+          -253.350693,
+          -166.880371,
+          122.021103
+        ],
+        [
+          154.378693,
+          188.307495,
+          250.060898
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tile_wood02.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -189.759003,
+          -193.901398,
+          303.837189
+        ],
+        [
+          90.112801,
+          194.4673,
+          303.837189
+        ]
+      ],
+      "after": [
+        [
+          -189.759003,
+          -193.901398,
+          303.837189
+        ],
+        [
+          90.112801,
+          194.4673,
+          303.837189
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "tile_wood03.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -244.127106,
+          -248.433701,
+          286.791412
+        ],
+        [
+          144.617493,
+          248.999603,
+          332.477112
+        ]
+      ],
+      "after": [
+        [
+          -244.127106,
+          -248.433701,
+          286.791412
+        ],
+        [
+          144.617493,
+          248.999603,
+          332.477112
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "retained_surfaces": {
+    "status": "PASS",
+    "original_retained_corners": 750,
+    "max_position_difference": 4.995117208750344e-07,
+    "UV_tolerance": 2e-06,
+    "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+  },
+  "material_order": [
+    "tile_wood02.jpg",
+    "tile_ston04.jpg",
+    "c_wall04.jpg",
+    "tile_wood03.jpg",
+    "tile_house01.jpg",
+    "tile_ston01.jpg",
+    "horse_drawn_01.jpg",
+    "tile_ston06.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

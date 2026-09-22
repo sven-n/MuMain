@@ -1,0 +1,18 @@
+{
+  "baseline_bounds": [
+    [
+      -59.3927001953125,
+      -44.40629959106445,
+      -0.40209999680519104
+    ],
+    [
+      56.12160110473633,
+      58.592498779296875,
+      29.013599395751953
+    ]
+  ],
+  "camera": "Matching orthographic; direction (1.35,-2,1.3)",
+  "scale_proxy_height": 190,
+  "world_units_per_terrain_tile": 100,
+  "client_screenshot": false
+}

@@ -1,0 +1,22 @@
+{
+  "model": "Carriage02",
+  "game_files": {
+    "src/bin/Data/Object1/Carriage02.bmd": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+    "src/bin/Data/Object1/horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 450,
+  "bind_bounds": [
+    [
+      -90.38159942626953,
+      -218.1839599609375,
+      -1.1697009801864624
+    ],
+    [
+      88.69639587402344,
+      218.9263916015625,
+      182.28445434570312
+    ]
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "tile_02.jpg": [
+    "src/bin/Data/Object1/tile_02.OZJ"
+  ],
+  "fire_light_01.tga": [
+    "src/bin/Data/Object1/fire_light_01.OZT"
+  ],
+  "copra_gate.jpg": [
+    "src/bin/Data/Object1/copra_gate.OZJ"
+  ]
+}

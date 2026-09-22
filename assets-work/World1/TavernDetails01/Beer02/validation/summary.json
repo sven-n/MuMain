@@ -1,0 +1,49 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Intentional profile/carpentry rebuild; full geometry comparison DIFFERENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -43.76,
+      -28.36,
+      -0.8
+    ],
+    [
+      44.47,
+      23.53,
+      61.47
+    ]
+  ],
+  "bounds_after": [
+    [
+      -43.76,
+      -28.36,
+      -0.8
+    ],
+    [
+      44.47,
+      23.53,
+      61.47
+    ]
+  ],
+  "materials": [
+    "pot3.tga",
+    "apple.jpg",
+    "bottle.tga",
+    "plate.jpg",
+    "winecup.jpg"
+  ],
+  "meshes": 5,
+  "exports": {
+    "Beer02.bmd": "7a1828ec40249657fe2f9e970c077b8761bf110953ab5a24fe32bedd5fba6de4",
+    "winecup.OZJ": "a0e0cb895f554bcb82a2350b7f70dc405fc6f6024c61615c82ccb1111fcedf63",
+    "plate.OZJ": "839c50e5fdf9aa87ac121e13a4c7bb5a0b7b892c658a848411198ff32d77bed1",
+    "bottle.ozt": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4",
+    "pot3.ozt": "f781d4941982f54e20b573c9664a23f05bd01d13af578d9a0d01e202e59b4d60",
+    "apple.OZJ": "b983993be19b329f531199b3aa24943d5c9a7b0e01a805087bfc5dd24f916871"
+  }
+}

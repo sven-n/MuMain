@@ -1,0 +1,43 @@
+{
+  "bounds_before": [
+    [
+      -49.21,
+      -399.4,
+      -158.0
+    ],
+    [
+      83.97,
+      400.28,
+      99.39
+    ]
+  ],
+  "bounds_after": [
+    [
+      -49.21,
+      -399.4,
+      -158.0
+    ],
+    [
+      83.97,
+      400.28,
+      99.39
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "textures": [
+    "bridge_01.jpg",
+    "bridge_shadow01.tga"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": false,
+  "export_sha256": {
+    "bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc",
+    "bridge_shadow01.OZT": "ea197a3247438aea7d5796715ea51cb0283b2dc688ff455571ee16efabb9e49e",
+    "Bridge01.bmd": "877e47a0fb1277d333c0b0a6c72469cafa78ace838d2c3bc782a79d9210bc71d"
+  }
+}

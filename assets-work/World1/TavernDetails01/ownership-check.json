@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "owned_game_files": [
+    "src/bin/Data/Object1/Beer02.bmd",
+    "src/bin/Data/Object1/Beer03.bmd",
+    "src/bin/Data/Object1/Furniture01.bmd",
+    "src/bin/Data/Object1/Furniture02.bmd",
+    "src/bin/Data/Object1/Furniture06.bmd",
+    "src/bin/Data/Object1/Furniture07.bmd",
+    "src/bin/Data/Object1/pot3.ozt",
+    "src/bin/Data/Object1/apple.OZJ",
+    "src/bin/Data/Object1/bottle.ozt",
+    "src/bin/Data/Object1/plate.OZJ",
+    "src/bin/Data/Object1/winecup.OZJ",
+    "src/bin/Data/Object1/pot.OZJ",
+    "src/bin/Data/Object1/pot2.OZJ",
+    "src/bin/Data/Object1/bookshelf.OZJ",
+    "src/bin/Data/Object1/chair2.OZT"
+  ],
+  "protected_file_count": 309
+}

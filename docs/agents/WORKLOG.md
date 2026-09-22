@@ -321,6 +321,102 @@ overlays, input/alert states, gameplay readability and HiDPI checks remain pendi
 The rest of the HUD is outside this five-file benchmark. All previews are labeled
 offline mockups, not client screenshots.
 
+## 2026-09-22 - Lorencia rebuild coordination and first integrations (ASTRA / Codex)
+**Goal:** Rebuild the placed static environment in independent worktrees while preserving
+completed terrain/Beer01 and all gameplay-bound data.
+
+**Done:** Created `art/lorencia-rebuild` in the sibling `MuMain-lorencia-rebuild` worktree
+from reviewed World1 pilot `ac0f6dd8`. Inspected all task/worktree ownership and existing
+handoffs, mapped 115 BMDs/105 texture dependencies with exact World1 placements, and imported
+and visually identified all 106 in-scope assets. Added coordinator-only
+[`asset-board.md`](../../assets-work/World1/coordination/asset-board.md), immutable baseline
+inspection scenes, six review sheets, dependency map and integration ledger. Independent
+review accepted prior Furniture03/04/05; integrated their original and production commits.
+Parallel subagents completed Grass01/02/05/06 surface paintings and Fence01–04 remodels;
+coordinator reviewed actual export images and integrated each validated batch sequentially.
+Trees, tall scrub, barrel/crate/lantern and the next shared rock group are assigned separately.
+
+**Verified:** Tavern joins and original rig/actions independently pass; groundcover full-model
+comparisons are EQUIVALENT; fences intentionally DIFFERENT for geometry with EQUIVALENT
+rig/actions. Coordinator rechecked installed groundcover BMDs. Independent cross-review
+accepted fence visuals and actual-placement joining sheets. Combined model scan resolves all
+textures, installed hashes match exports and untouched original archives match pilot history.
+Fifteen game files differ from the integration baseline; all other 309 World1/Object1 files,
+including all terrain/light/placement/alpha data and completed pilot assets, are unchanged.
+No runtime installation, client launch, engine/CMake/UI edit, push or main merge.
+
+**Open / next:** Production continues through the board. These are offline acceptances only;
+no asset was observed in client by this task. All client loading, shading/filtering, motion,
+placement and matched 1920×1080 capture checks remain pending. Consolidated handoff:
+[`coordination/notes.md`](../../assets-work/World1/coordination/notes.md).
+
+## 2026-09-22 - Lorencia static inventory completed offline (ASTRA / Codex)
+**Goal:** Complete the coherent dark-medieval Lorencia static art pass through the actual
+World1/Object1 inventory, with independent worktrees, exclusive texture ownership and
+sequential reviewed integration.
+
+**Done:** All 106 in-scope static models are accepted offline on `art/lorencia-rebuild` in
+`/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. This includes
+four preserved pilot models and 102 accepted integrations (including prior tavern work),
+covering furniture/tableware, buildings and modular walls, gates/fences, vegetation/rocks,
+lamps/fire props, notices/banners, cart/hay sets, monuments/graves, boat, wells/pottery,
+bridges, cannons and gallows. The three worker agents (groundcover, fences, reviewer) and
+coordinator used isolated branches/worktrees with explicit BMD/container ownership; shared
+materials were reviewed across all consumers. Final production integration `973ab58d`
+completes Cannons01; every source/integration/review commit and exact asset owner is recorded
+in the consolidated ledger and board. All production sources, REF_ORIGINAL, originals,
+editable paintings, imagegen masters/prompts, reproduction scripts and offline evidence
+are retained under assets-work/World1. Six final combined sheets show all 106 actual
+integrated model/material combinations with per-model SHA-256 provenance.
+
+**Verified:** Combined validation passes for all 115 inventory BMDs and complete texture
+resolution. Exactly 183 source-game files differ from reviewed pilot ac0f6dd8: 98 Object1
+BMDs and 85 Object1 texture containers; all 141 other baseline World1/Object1 files are
+byte-identical. Original archives and source/export hashes match. Rig names/order/parents,
+actions, mesh-material ordering, original anchors and modular openings are preserved.
+Remodeled full compares correctly report DIFFERENT; rig/action equivalence is proved
+separately. The coordinator's bidirectional named-bone vertex audit passes all 72 remodeled
+models; raw normal-node checks pass 101 changed/retained BMDs across bind and all keys.
+Grass02/Tree12/Tree13 retain exact original BMD bytes with new paintings after converter
+normal-sharing review; pre-existing Tree12/13 behavior is preserved, not declared repaired.
+Independent review accepted the batch packages and cross-batch completeness; two final
+cannon visual issues (bright atlas gutters and dark muzzle rims) were corrected before
+acceptance. Protected completed terrain/Beer01/other pilot files remain unchanged.
+No engine/CMake, UI, characters, monsters, equipment, other maps, terrain placement/height/
+walk/lighting/alpha data, shared runtime, push or main-merge changes were performed.
+
+**Open / next:** No production asset remains blocked or unfinished within the 106-model
+static scope. Nine fauna/hidden-marker models are excluded and unchanged. **Client verified:
+none in this task.** Existing client instability and the user's explicit offline authorization
+leave loading, shading/filtering/alpha, engine effects, motion, collision/interaction and
+1920×1080 before/after captures pending. Do these serially in a stable client session; all
+current images are labeled offline Blender evidence. Consolidated handoff, complete owners/
+commits, exact changed paths and review gallery:
+[coordination/notes.md](../../assets-work/World1/coordination/notes.md).
+
+
+## 2026-09-22 - Publish complete Lorencia static rebuild (ASTRA / Codex)
+**Goal:** Follow the owner's explicit request to commit, push and create a PR for the
+completed static environment pass.
+
+**Done:** Merged origin/main at 0f589224 into art/lorencia-rebuild (179fa7b9), preserving
+all worklog entries and taking main's newer tavern handoff and guarded install helper.
+Pushed the branch to vaskodagamo/MuMain and opened [PR #11](https://github.com/vaskodagamo/MuMain/pull/11)
+against main. The PR describes the complete offline validation, retained editable sources,
+exact game scope and pending client acceptance. Added a PR-specific game-file manifest and
+publication metadata; updated the consolidated handoff and board with publication status.
+
+**Verified:** All 183 reviewed Object1 export hashes still match b850741b; the main merge
+changed no World1/Object1 bytes. Relative to current main, the PR changes only 179 Object1
+game files (95 BMDs and 84 containers): the four TavernProps files were already merged in
+PR #6. No engine/CMake/UI/other-map changes occur in the PR diff. Python syntax and authored
+Python/Markdown/JSON whitespace checks pass. Retained converter logs keep their original
+output whitespace. Previous art validation and independent acceptance remain applicable;
+no assets were regenerated or runtime files written, and no client or engine build ran.
+
+**Open / next:** PR review, CI and the previously deferred real client acceptance/captures.
+The PR has not been merged. Publication supersedes the earlier no-push instruction for this
+branch; the boundary against merging into main remains.
 ## 2026-09-22 - Extend the approved style across the bottom HUD (ASTRA / Codex)
 **Goal:** Remake the other HUD elements after the user merged PR #9.
 

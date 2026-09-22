@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "nodes": "Bone names, order, parents identical",
+  "samples": [
+    {
+      "file": "Grass06.smd",
+      "frames": 1,
+      "bone_samples": 4,
+      "max_local_position_component": 2.0000000020559128e-06,
+      "max_rotation_matrix_component": 4.732054143336335e-07
+    },
+    {
+      "file": "Grass06_a00.smd",
+      "frames": 1,
+      "bone_samples": 4,
+      "max_local_position_component": 2.0000000020559128e-06,
+      "max_rotation_matrix_component": 4.732054143336335e-07
+    }
+  ],
+  "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+  "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+}

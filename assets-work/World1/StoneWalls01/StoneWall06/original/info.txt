@@ -1,0 +1,17 @@
+model src/bin/Data/Object1/StoneWall06.bmd
+  name field: Data2\Object1\wall_06.smd  version: 10
+  meshes: 3  bones: 9  actions: 1  triangles: 56
+  bounds (bind pose): min -50.73 -49.66 -79.37  max 49.75 88.94 448.76  size 100.47 138.61 528.13
+  mesh 0: triangles=28 vertices=17 normals=20 uvs=25 texture=badge_01.jpg
+  mesh 1: triangles=8 vertices=10 normals=11 uvs=10 texture=badge_03.tga
+  mesh 2: triangles=20 vertices=12 normals=10 uvs=22 texture=tile_01.jpg
+  bone 0: "bonee01" parent=-1
+  bone 1: "bonee02" parent=0
+  bone 2: "bonee03" parent=1
+  bone 3: "bonee04" parent=2
+  bone 4: "bonee05" parent=3
+  bone 5: "bonee06" parent=4
+  bone 6: "Box24" parent=0
+  bone 7: "Object04" parent=0
+  bone 8: "Object05" parent=-1
+  action 0: keys=25 lock=0

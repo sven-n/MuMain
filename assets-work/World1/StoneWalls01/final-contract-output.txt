@@ -1,0 +1,1 @@
+PASS: immutable original bytes, two textures wholly owned by five models, exported UV/skin/material/alpha contracts

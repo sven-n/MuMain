@@ -1,0 +1,210 @@
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/exports/House01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cryf_yb2
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cryf_yb2/House01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cryf_yb2/House01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cryf_yb2/House01.actions.txt
+
+SMD IMPORTER: now working on House01
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: tile_ston05.jpg
+- New material: tile_ston04.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston06.jpg
+- Imported 208 polys
+SMD House01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "House01_skeleton"
+- Imported 1 frames of animation
+SMD House01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:02.060  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House03/exports/House03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_612fj_i1
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_612fj_i1/House03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_612fj_i1/House03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_612fj_i1/House03.actions.txt
+
+SMD IMPORTER: now working on House03
+- This is a mesh
+- Imported 7 new bones
+- Imported 1 frames of animation
+- New material: tile_ston05.jpg
+- New material: tile_ston04.jpg
+- New material: tile_ston06.jpg
+- New material: tile_ston07.tga
+- New material: light_02.jpg
+- Imported 313 polys
+SMD House03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 7 bones against armature "House03_skeleton"
+- Imported 1 frames of animation
+SMD House03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:03.420  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House03/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 5 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House03/validation/reimported.blend: 1 mesh object(s), 7 bones, 1 animation clips, 5 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/exports/House04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_18ejwqen
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_18ejwqen/House04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_18ejwqen/House04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_18ejwqen/House04.actions.txt
+
+SMD IMPORTER: now working on House04
+- This is a mesh
+- Imported 9 new bones
+- Imported 1 frames of animation
+- New material: tile_02.jpg
+- New material: tile_wood01.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_wood02.jpg
+- New material: tile_windows01.jpg
+- New material: bridge_01.jpg
+- New material: tile_space01.jpg
+- Imported 358 polys
+SMD House04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 9 bones against armature "House04_skeleton"
+- Imported 40 frames of animation
+SMD House04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:04.850  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 9 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/validation/reimported.blend: 1 mesh object(s), 9 bones, 1 animation clips, 9 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import__toovuax
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import__toovuax/Tent01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import__toovuax/Tent01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import__toovuax/Tent01.actions.txt
+
+SMD IMPORTER: now working on Tent01
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tile_house01.jpg
+- New material: tile_ston06.jpg
+- Imported 130 polys
+SMD Tent01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tent01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Tent01_skeleton"
+- Imported 36 frames of animation
+SMD Tent01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:06.208  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseWall02/exports/HouseWall02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w5bk6jgl
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w5bk6jgl/HouseWall02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w5bk6jgl/HouseWall02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_w5bk6jgl/HouseWall02.actions.txt
+
+SMD IMPORTER: now working on HouseWall02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_ston06.jpg
+- New material: tile_wood01.jpg
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: light_02.jpg
+- Imported 110 polys
+SMD HouseWall02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseWall02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseWall02_skeleton"
+- Imported 1 frames of animation
+SMD HouseWall02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:07.633  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseWall02/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 5 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseWall02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 5 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseEtc02/exports/HouseEtc02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kw_48_lf
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kw_48_lf/HouseEtc02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kw_48_lf/HouseEtc02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kw_48_lf/HouseEtc02.actions.txt
+
+SMD IMPORTER: now working on HouseEtc02
+- This is a mesh
+- Imported 3 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- New material: tile_ston04.jpg
+- New material: c_wall04.jpg
+- New material: tile_wood03.jpg
+- New material: tile_house01.jpg
+- New material: tile_ston01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_ston06.jpg
+- Imported 250 polys
+SMD HouseEtc02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseEtc02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 3 bones against armature "HouseEtc02_skeleton"
+- Imported 1 frames of animation
+SMD HouseEtc02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:09.096  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseEtc02/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 8 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseEtc02/validation/reimported.blend: 1 mesh object(s), 3 bones, 1 animation clips, 8 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,33 @@
+{
+  "status": "PASS; isolated source worktree only",
+  "runtime_written": false,
+  "client_verified": false,
+  "unchanged_world1_object1_files": 316,
+  "installed": {
+    "src/bin/Data/Object1/House05.bmd": "67208130091a7808a621a6d0fd054b99dd01342d730b9194a4d49ad32a7133f5",
+    "src/bin/Data/Object1/tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "src/bin/Data/Object1/HouseWall01.bmd": "55bdc3e6d196849cf1300d72fe395bccf026acbfba0e74bf0711df4a06928665",
+    "src/bin/Data/Object1/HouseWall04.bmd": "8511bc422fc0606174a39eb931266979fb1f5e2a72f1cdb8e95f4b15535ec4a6",
+    "src/bin/Data/Object1/HouseWall05.bmd": "5ff5b789528517f047668b1c1499dd059fac61c23df0ae3a920db1b64678c0d6",
+    "src/bin/Data/Object1/tile_wood03.OZJ": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+    "src/bin/Data/Object1/HouseWall06.bmd": "fd082b68ed0e4c4ac9898be26a15bde8e90e6c4a8baa79ecaa0a12d8dc7db2ef",
+    "src/bin/Data/Object1/Stair01.bmd": "a8762396fc2b3db1704905701e98613804f449541ab085e58c73c15665bb11b0"
+  },
+  "shared_texture_exports_identical": {
+    "tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+    "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "tile_wood03.OZJ": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+    "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "tile_ston01.OZJ": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6",
+    "light_02.OZJ": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9",
+    "ston02.OZJ": "09d1dbbbc7672fe05d82a89a115bee1ec538e615b3f39e93b9e244e7cd61d151",
+    "bridge_01.OZJ": "3ad1e1b0591a90fb0c169c9d6b29d0ea4330f68d81d3636de757886033b0d9ca",
+    "tile_windows01.OZJ": "ac20b7b25abeda1fb515b55c9d8d9e2bb0064f6bc1652f6862a7ac1466969367",
+    "tile_space01.OZJ": "3ec6d88e703a4ade939bbb96ae538d5ac71bb00ff5aeac0b3e9d11bcc26a6e82",
+    "tile_02.OZJ": "36aac008ed4c9369c9ec99fc0514872fc9feeae9700b983dddb9d86d241231a0"
+  }
+}

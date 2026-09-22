@@ -1,0 +1,10 @@
+model src/bin/Data/Object1/StoneWall02.bmd
+  name field: Data2\Object1\wall_02.smd  version: 10
+  meshes: 4  bones: 1  actions: 1  triangles: 318
+  bounds (bind pose): min -298.04 -84.12 -1.53  max 297.44 88.56 421.60  size 595.48 172.68 423.12
+  mesh 0: triangles=88 vertices=64 normals=13 uvs=80 texture=tile_01.jpg
+  mesh 1: triangles=20 vertices=16 normals=5 uvs=20 texture=tile_03.jpg
+  mesh 2: triangles=82 vertices=61 normals=10 uvs=33 texture=tile_02.jpg
+  mesh 3: triangles=128 vertices=88 normals=44 uvs=44 texture=bridge_01.jpg
+  bone 0: "gate" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 110,
+  "retained_triangles_by_texture": {
+    "tile_ston06.jpg": 10,
+    "tile_wood01.jpg": 50,
+    "tile_wood02.jpg": 36,
+    "tile_ston04.jpg": 8,
+    "light_02.jpg": 6
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0,
+  "max_retained_normal_direction_degrees": 0,
+  "frozen_container_sha256": {
+    "tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "light_02.OZJ": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9"
+  },
+  "panel_face_pairs": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit non-effect panel pairs retain position, bone and UV. Modular end faces, roof edges, ladder contacts, complete waterwheel, scrolling water and accepted compatibility geometry remain unchanged.",
+  "normals": "Protected original corner normals restored after the official Blender mesh export through the supported bmdconv SMD/manifest path; engine conversion can normalize/quantize slightly. Measured differences are retained.",
+  "note": "Selected panel centers are recessed by 0.18\u20130.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

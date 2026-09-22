@@ -1,0 +1,30 @@
+src/source/World/MapInfra/MapManager.cpp-1046-        gLoadData.AccessModel(MODEL_SHIP, L"Data\\Object1\\", L"Ship", 1);
+src/source/World/MapInfra/MapManager.cpp-1047-
+src/source/World/MapInfra/MapManager.cpp-1048-        for (i = 0; i < 6; i++)
+src/source/World/MapInfra/MapManager.cpp:1049:            gLoadData.AccessModel(MODEL_STONE_WALL01 + i, L"Data\\Object1\\", L"StoneWall", i + 1);
+src/source/World/MapInfra/MapManager.cpp-1050-        for (i = 0; i < 4; i++)
+src/source/World/MapInfra/MapManager.cpp-1051-            gLoadData.AccessModel(MODEL_MU_WALL01 + i, L"Data\\Object1\\", L"StoneMuWall", i + 1);
+src/source/World/MapInfra/MapManager.cpp-1052-        for (i = 0; i < 3; i++)
+--
+src/source/Core/Globals/_enum.h-776-    MODEL_STEEL_WALL02,
+src/source/Core/Globals/_enum.h-777-    MODEL_STEEL_WALL03,
+src/source/Core/Globals/_enum.h-778-    MODEL_STEEL_DOOR,
+src/source/Core/Globals/_enum.h:779:    MODEL_STONE_WALL01,
+src/source/Core/Globals/_enum.h:780:    MODEL_STONE_WALL02,
+src/source/Core/Globals/_enum.h:781:    MODEL_STONE_WALL03,
+src/source/Core/Globals/_enum.h:782:    MODEL_STONE_WALL04,
+src/source/Core/Globals/_enum.h:783:    MODEL_STONE_WALL05,
+src/source/Core/Globals/_enum.h:784:    MODEL_STONE_WALL06,
+src/source/Core/Globals/_enum.h-785-    MODEL_MU_WALL01,
+src/source/Core/Globals/_enum.h-786-    MODEL_MU_WALL02,
+src/source/Core/Globals/_enum.h-787-    MODEL_MU_WALL03,
+--
+src/source/Engine/Object/ZzzObject.cpp-3883-            Vector(50.f, -10.f, 120.f, p);
+src/source/Engine/Object/ZzzObject.cpp-3884-            //CreateShiny(o,p);
+src/source/Engine/Object/ZzzObject.cpp-3885-            break;
+src/source/Engine/Object/ZzzObject.cpp:3886:            /*case MODEL_STONE_WALL01+3:
+src/source/Engine/Object/ZzzObject.cpp-3887-            o->Live = false;
+src/source/Engine/Object/ZzzObject.cpp-3888-            break;*/
+src/source/Engine/Object/ZzzObject.cpp-3889-        }
+
+All original mesh order, texture render/alpha conventions, bone indices and actions preserved. Commented StoneWall04 case is outside this batch. No engine files changed.

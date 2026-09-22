@@ -1,0 +1,94 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "0f9457ecf809ce9a77e21d0e0090c668b6eb4836123de0147f3c3675b7e355ff",
+  "rig_unchanged": {
+    "bones": [
+      [
+        "Sphere04",
+        null
+      ],
+      [
+        "Sphere05",
+        null
+      ],
+      [
+        "Sphere06",
+        null
+      ],
+      [
+        "Sphere07",
+        null
+      ]
+    ],
+    "bone_order": [
+      "Sphere04",
+      "Sphere05",
+      "Sphere06",
+      "Sphere07"
+    ],
+    "actions": {
+      "Grass03_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "tree_01.tga": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "49da83281dffd1fb2d398c21bf4f16252ff54f38ad57dc6c51434821ba402c0f"
+    },
+    "tree_01.tga.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "b704bf6834637188dac4f4bf3c4fa3d0d859ee1c3da184e6978e0d7ac53ccff6"
+    },
+    "tree_02.tga": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "f76ec2abdb8c2d1aa2095e61ff23712fc37b9146c87d698cd5142c9c7c257873"
+    },
+    "tree_02.tga.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "528b282b1a3a99aca7491e2c942ce2d6932be4db950dfa07ba811b6775e1ccca"
+    }
+  },
+  "no_external_images_required": true
+}

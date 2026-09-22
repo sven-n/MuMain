@@ -1,0 +1,15 @@
+{
+  "status": "PASS; isolated source worktree only",
+  "runtime_written": false,
+  "client_verified": false,
+  "unchanged_world1_object1_files": 317,
+  "installed": {
+    "src/bin/Data/Object1/House02.bmd": "f5f28ce013478d5369a1815ac8388c0b4e4597e3410c8832e2b2a5b57c8e1916",
+    "src/bin/Data/Object1/drum.OZJ": "1d48c6672bd96e3d689bf1b874eb40e9ec0de198c19439f335e41cbedb5f488f",
+    "src/bin/Data/Object1/steel.OZJ": "c407f13d8694533d676479eff5ce197dfd951f452c1dceaab227f5a66283994b",
+    "src/bin/Data/Object1/TreasureDrum01.bmd": "445adb6a928a667d36857af9cb1b459f2012b67e876540da1f962d3fd865c4c0",
+    "src/bin/Data/Object1/StreetLight01.bmd": "344b3175428b92e49e1bd8ecfddc2fc0bf77a898d7950ae7e31048ad161e7401",
+    "src/bin/Data/Object1/streetlight.OZJ": "1d0477719c2911b807ebb4a2159e037b25de778440e646f588e7d5d3bb836f23",
+    "src/bin/Data/Object1/streetlight_brightness2.OZJ": "deb4c642c210ca598e497018d543949d7ca3735dfa3c623105c7d776973baae3"
+  }
+}

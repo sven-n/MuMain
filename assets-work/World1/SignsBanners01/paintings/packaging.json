@@ -1,0 +1,109 @@
+{
+  "notice": {
+    "original_size": [
+      64,
+      64
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "notice-master.png",
+    "prompt": "notice-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "signboard": {
+    "original_size": [
+      64,
+      32
+    ],
+    "final_size": [
+      512,
+      256
+    ],
+    "mode": "RGBA",
+    "generated_master": "signboard-master.png",
+    "prompt": "signboard-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Exact bilinear original scalar field",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 0.4570159912109375
+  },
+  "doorknob": {
+    "original_size": [
+      16,
+      16
+    ],
+    "final_size": [
+      128,
+      128
+    ],
+    "mode": "RGBA",
+    "generated_master": "doorknob-master.png",
+    "prompt": "doorknob-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Exact bilinear original scalar field",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 0.357421875
+  },
+  "badge_01": {
+    "original_size": [
+      8,
+      64
+    ],
+    "final_size": [
+      64,
+      512
+    ],
+    "mode": "RGB",
+    "generated_master": "badge_01-master.png",
+    "prompt": "badge_01-prompt.txt",
+    "atlas_crop": [
+      228,
+      0,
+      498,
+      2170
+    ],
+    "alpha": "Opaque RGB",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 1.0
+  },
+  "badge_02": {
+    "original_size": [
+      32,
+      64
+    ],
+    "final_size": [
+      256,
+      512
+    ],
+    "mode": "RGBA",
+    "generated_master": "badge_02-master.png",
+    "prompt": "badge_02-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Exact bilinear original scalar field",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 0.947418212890625
+  },
+  "badge_03": {
+    "original_size": [
+      64,
+      64
+    ],
+    "final_size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "generated_master": "badge_03-master.png",
+    "prompt": "badge_03-prompt.txt",
+    "atlas_crop": null,
+    "alpha": "Exact bilinear original scalar field",
+    "fringe": "Nearest opaque RGB extended into alpha<128; alpha itself unchanged",
+    "alpha_coverage_128": 0.8578834533691406
+  }
+}

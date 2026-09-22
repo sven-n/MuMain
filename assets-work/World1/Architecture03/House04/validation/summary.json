@@ -1,0 +1,57 @@
+{
+  "bounds_before": [
+    [
+      -250.01,
+      -240.25,
+      -0.81
+    ],
+    [
+      252.67,
+      199.92,
+      413.93
+    ]
+  ],
+  "bounds_after": [
+    [
+      -250.01,
+      -240.25,
+      -0.81
+    ],
+    [
+      252.67,
+      199.92,
+      413.93
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "textures": [
+    "tile_02.jpg",
+    "tile_wood01.jpg",
+    "tile_house01.jpg",
+    "tile_ston04.jpg",
+    "tile_wood03.jpg",
+    "tile_wood02.jpg",
+    "tile_windows01.jpg",
+    "bridge_01.jpg",
+    "tile_space01.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=40 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": true,
+  "export_sha256": {
+    "House04.bmd": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa",
+    "bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc",
+    "tile_windows01.OZJ": "ac20b7b25abeda1fb515b55c9d8d9e2bb0064f6bc1652f6862a7ac1466969367",
+    "tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "tile_wood03.OZJ": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+    "tile_space01.OZJ": "3ec6d88e703a4ade939bbb96ae538d5ac71bb00ff5aeac0b3e9d11bcc26a6e82",
+    "tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda",
+    "tile_02.OZJ": "428d88339fd1c04b6d153e33a1ed5a4a03d753130271e11fbf62f68564dfadcf",
+    "tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "tile_ston04.OZJ": "a1a75b6fbf236d8747cb2e27555d871253cff7d2e48304226f0b68dbc83fa2f9"
+  }
+}

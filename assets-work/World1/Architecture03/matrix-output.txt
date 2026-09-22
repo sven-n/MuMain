@@ -1,0 +1,23 @@
+Bridge01 matrix and posed-bounds PASS 0 0
+BridgeStone01 matrix and posed-bounds PASS 0 3.0517578125e-05
+Fence01 matrix and posed-bounds PASS 0 0
+FireLight02 matrix and posed-bounds PASS 0 0
+House01 matrix and posed-bounds PASS 0 0
+House03 matrix and posed-bounds PASS 0 0
+House04 matrix and posed-bounds PASS 0 0
+House05 matrix and posed-bounds PASS 0 0
+HouseEtc02 matrix and posed-bounds PASS 0 0
+HouseWall01 matrix and posed-bounds PASS 0 0
+HouseWall02 matrix and posed-bounds PASS 0 0
+HouseWall03 matrix and posed-bounds PASS 0 0
+HouseWall04 matrix and posed-bounds PASS 0 0
+HouseWall05 matrix and posed-bounds PASS 0 0
+HouseWall06 matrix and posed-bounds PASS 0 0
+StoneMuWall01 matrix and posed-bounds PASS 0 0
+StoneWall01 matrix and posed-bounds PASS 0 0
+StoneWall02 matrix and posed-bounds PASS 0 0
+Tent01 matrix and posed-bounds PASS 0 0
+Tree07 matrix and posed-bounds PASS 0 0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

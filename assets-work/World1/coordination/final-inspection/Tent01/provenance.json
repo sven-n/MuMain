@@ -1,0 +1,23 @@
+{
+  "model": "Tent01",
+  "game_files": {
+    "src/bin/Data/Object1/Tent01.bmd": "6be4f98d11e1f6dec88d53be6f78354e89b3cb4a5ac0a057acd71ea9477e8713",
+    "src/bin/Data/Object1/tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "src/bin/Data/Object1/tile_ston06.OZJ": "c0eb1cde0172be5b4f1a1e7a19e274c6891d1e97d91479cdb11424a464847a3b"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 130,
+  "bind_bounds": [
+    [
+      -154.2024383544922,
+      -201.17735290527344,
+      -1.374405026435852
+    ],
+    [
+      156.02105712890625,
+      200.2891387939453,
+      330.4096984863281
+    ]
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "triangles": 46,
+  "textures": {
+    "doorknob.tga": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGBA",
+      "alpha": true
+    },
+    "signboard.tga": {
+      "dimensions": [
+        512,
+        256
+      ],
+      "mode": "RGBA",
+      "alpha": true
+    },
+    "notice.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -0.0015,
+      0.9995
+    ],
+    [
+      0.0005,
+      1.0043
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -0.0015,
+      0.9995
+    ],
+    [
+      0.0005,
+      1.0043
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

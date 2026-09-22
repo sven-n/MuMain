@@ -1,0 +1,14 @@
+{
+  "kind": "OFFLINE BLENDER; NOT CLIENT SCREENSHOTS",
+  "after": "Re-imported exported BMD",
+  "camera": "Identical orthographic camera and diffuse lighting before/after",
+  "lantern": "Transparent + diffuse-image emission approximates original additive mesh; client result unverified",
+  "action_frames": [],
+  "scale": {
+    "world_view_width": 900,
+    "pixels": 900,
+    "terrain_tile_units": 100,
+    "proxy_height": 190,
+    "caveat": "Offline scale assumption, not the actual client camera"
+  }
+}

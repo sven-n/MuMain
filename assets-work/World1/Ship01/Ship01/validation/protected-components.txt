@@ -1,0 +1,49 @@
+TileGround03.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 284 vs 284
+unmatched triangles: 0  max corner distance: 0.0005  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship01.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 34 vs 34
+unmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship03.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 62 vs 62
+unmatched triangles: 0  max corner distance: 0.0001  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship04.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 58 vs 58
+unmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship07.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 188 vs 188
+unmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship05.tga
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 8 vs 8
+unmatched triangles: 0  max corner distance: 0.0001  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship07.tga
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 24 vs 24
+unmatched triangles: 0  max corner distance: 0.0001  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship06.tga
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 24 vs 24
+unmatched triangles: 0  max corner distance: 0.0001  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship06.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 12 vs 12
+unmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+ship05.jpg
+meshes 1 vs 1, bones 10 vs 10, actions 1 vs 1, triangles 60 vs 60
+unmatched triangles: 0  max corner distance: 0.0004  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT

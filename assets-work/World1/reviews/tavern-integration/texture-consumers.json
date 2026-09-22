@@ -1,0 +1,445 @@
+{
+  "plate2.jpg": [
+    "Beer01.bmd"
+  ],
+  "pot3.tga": [
+    "Beer02.bmd"
+  ],
+  "apple.jpg": [
+    "Beer02.bmd"
+  ],
+  "bottle.tga": [
+    "Beer02.bmd",
+    "Beer03.bmd",
+    "Furniture01.bmd",
+    "Furniture02.bmd"
+  ],
+  "plate.jpg": [
+    "Beer02.bmd"
+  ],
+  "winecup.jpg": [
+    "Beer02.bmd",
+    "Beer03.bmd"
+  ],
+  "bird.tga": [
+    "Bird01.bmd"
+  ],
+  "fire_01.jpg": [
+    "Bonfire01.bmd"
+  ],
+  "fire_02.jpg": [
+    "Bonfire01.bmd"
+  ],
+  "bridge_01.jpg": [
+    "Bridge01.bmd",
+    "House04.bmd",
+    "StoneMuWall01.bmd",
+    "StoneWall01.bmd",
+    "StoneWall02.bmd"
+  ],
+  "bridge_shadow01.tga": [
+    "Bridge01.bmd",
+    "BridgeStone01.bmd"
+  ],
+  "tree_04.jpg": [
+    "BridgeStone01.bmd",
+    "Tree07.bmd"
+  ],
+  "tile_ston06.jpg": [
+    "BridgeStone01.bmd",
+    "House01.bmd",
+    "House03.bmd",
+    "HouseEtc02.bmd",
+    "HouseWall02.bmd",
+    "Tent01.bmd"
+  ],
+  "tile_wood02.jpg": [
+    "BridgeStone01.bmd",
+    "Fence01.bmd",
+    "House04.bmd",
+    "House05.bmd",
+    "HouseEtc02.bmd",
+    "HouseWall01.bmd",
+    "HouseWall02.bmd",
+    "HouseWall03.bmd",
+    "HouseWall04.bmd",
+    "HouseWall05.bmd",
+    "HouseWall06.bmd"
+  ],
+  "Butterfly.tga": [
+    "Butterfly01.bmd"
+  ],
+  "candle.jpg": [
+    "Candle01.bmd"
+  ],
+  "candle2.jpg": [
+    "Candle01.bmd"
+  ],
+  "horse_drawn_01.jpg": [
+    "Cannon01.bmd",
+    "Cannon02.bmd",
+    "Cannon03.bmd",
+    "Carriage01.bmd",
+    "Carriage02.bmd",
+    "Carriage03.bmd",
+    "Carriage04.bmd",
+    "Hanging01.bmd",
+    "HouseEtc02.bmd",
+    "StoneMuWall04.bmd",
+    "StoneWall03.bmd",
+    "Well01.bmd"
+  ],
+  "horse_drawn_02.tga": [
+    "Carriage01.bmd"
+  ],
+  "horse_drawn_03.jpg": [
+    "Carriage01.bmd"
+  ],
+  "tub.jpg": [
+    "Carriage03.bmd",
+    "Well01.bmd"
+  ],
+  "grass_01.tga": [
+    "Carriage04.bmd",
+    "Straw01.bmd",
+    "Straw02.bmd"
+  ],
+  "badge_01.jpg": [
+    "Curtain01.bmd",
+    "StoneWall04.bmd",
+    "StoneWall06.bmd"
+  ],
+  "badge_02.tga": [
+    "Curtain01.bmd"
+  ],
+  "copra_gate.jpg": [
+    "DoungeonGate01.bmd",
+    "FireLight02.bmd"
+  ],
+  "joint.jpg": [
+    "Fence02.bmd",
+    "Fence03.bmd",
+    "Fence04.bmd"
+  ],
+  "light.tga": [
+    "FireLight01.bmd"
+  ],
+  "light2.jpg": [
+    "FireLight01.bmd"
+  ],
+  "light3.jpg": [
+    "FireLight01.bmd"
+  ],
+  "tile_02.jpg": [
+    "FireLight02.bmd",
+    "House04.bmd",
+    "StoneMuWall01.bmd",
+    "StoneWall01.bmd",
+    "StoneWall02.bmd"
+  ],
+  "fire_light_01.tga": [
+    "FireLight02.bmd"
+  ],
+  "fish.tga": [
+    "Fish01.bmd"
+  ],
+  "pot.jpg": [
+    "Furniture01.bmd"
+  ],
+  "pot2.jpg": [
+    "Furniture01.bmd"
+  ],
+  "bookshelf.jpg": [
+    "Furniture01.bmd",
+    "Furniture02.bmd",
+    "Furniture06.bmd",
+    "Furniture07.bmd"
+  ],
+  "desk_big.jpg": [
+    "Furniture03.bmd",
+    "Furniture04.bmd",
+    "Furniture05.bmd"
+  ],
+  "chair2.tga": [
+    "Furniture06.bmd"
+  ],
+  "tree_08.tga": [
+    "Grass01.bmd",
+    "Grass02.bmd"
+  ],
+  "tree_01.tga": [
+    "Grass03.bmd",
+    "Grass04.bmd"
+  ],
+  "tree_02.tga": [
+    "Grass03.bmd",
+    "Grass04.bmd"
+  ],
+  "tree_09.tga": [
+    "Grass05.bmd",
+    "Grass06.bmd"
+  ],
+  "mushroom.jpg": [
+    "Grass07.bmd",
+    "Grass08.bmd"
+  ],
+  "tile_ston05.jpg": [
+    "House01.bmd",
+    "House03.bmd"
+  ],
+  "tile_ston04.jpg": [
+    "House01.bmd",
+    "House03.bmd",
+    "House04.bmd",
+    "HouseEtc02.bmd",
+    "HouseWall01.bmd",
+    "HouseWall02.bmd",
+    "HouseWall04.bmd"
+  ],
+  "tile_house01.jpg": [
+    "House01.bmd",
+    "House04.bmd",
+    "HouseEtc02.bmd",
+    "Tent01.bmd"
+  ],
+  "drum.jpg": [
+    "House02.bmd",
+    "TreasureDrum01.bmd"
+  ],
+  "steel.jpg": [
+    "House02.bmd"
+  ],
+  "tile_ston07.tga": [
+    "House03.bmd"
+  ],
+  "light_02.jpg": [
+    "House03.bmd",
+    "HouseWall02.bmd"
+  ],
+  "tile_wood01.jpg": [
+    "House04.bmd",
+    "House05.bmd",
+    "HouseWall01.bmd",
+    "HouseWall02.bmd",
+    "HouseWall04.bmd",
+    "Stair01.bmd"
+  ],
+  "tile_wood03.jpg": [
+    "House04.bmd",
+    "HouseEtc02.bmd",
+    "HouseWall05.bmd",
+    "HouseWall06.bmd"
+  ],
+  "tile_windows01.jpg": [
+    "House04.bmd"
+  ],
+  "tile_space01.jpg": [
+    "House04.bmd"
+  ],
+  "ston02.jpg": [
+    "House05.bmd",
+    "Waterspout01.bmd"
+  ],
+  "c_wall04.jpg": [
+    "HouseEtc01.bmd",
+    "HouseEtc02.bmd",
+    "StoneMuWall01.bmd",
+    "StoneMuWall02.bmd",
+    "StoneMuWall03.bmd",
+    "StoneMuWall04.bmd"
+  ],
+  "c_wall06.jpg": [
+    "HouseEtc01.bmd",
+    "StoneMuWall01.bmd",
+    "StoneMuWall02.bmd",
+    "StoneMuWall03.bmd",
+    "StoneMuWall04.bmd"
+  ],
+  "tile_ston01.jpg": [
+    "HouseEtc02.bmd"
+  ],
+  "steel_barred_a.tga": [
+    "HouseEtc03.bmd",
+    "SteelWall01.bmd",
+    "SteelWall02.bmd",
+    "SteelWall03.bmd"
+  ],
+  "steel_barred_door.tga": [
+    "HouseEtc03.bmd",
+    "SteelDoor01.bmd"
+  ],
+  "ston03.jpg": [
+    "Light01.bmd",
+    "Light02.bmd",
+    "Light03.bmd",
+    "PoseBox01.bmd"
+  ],
+  "merchant_moster_a01.jpg": [
+    "MerchantAnimal01.bmd"
+  ],
+  "merchant_moster_a02.tga": [
+    "MerchantAnimal01.bmd"
+  ],
+  "merchant_moster_b01.jpg": [
+    "MerchantAnimal02.bmd"
+  ],
+  "TileGround03.jpg": [
+    "Ship01.bmd"
+  ],
+  "ship01.jpg": [
+    "Ship01.bmd"
+  ],
+  "ship03.jpg": [
+    "Ship01.bmd"
+  ],
+  "ship04.jpg": [
+    "Ship01.bmd"
+  ],
+  "ship07.jpg": [
+    "Ship01.bmd"
+  ],
+  "ship05.tga": [
+    "Ship01.bmd"
+  ],
+  "ship07.tga": [
+    "Ship01.bmd"
+  ],
+  "ship06.tga": [
+    "Ship01.bmd"
+  ],
+  "ship06.jpg": [
+    "Ship01.bmd"
+  ],
+  "ship05.jpg": [
+    "Ship01.bmd"
+  ],
+  "notice.jpg": [
+    "Sign01.bmd",
+    "Sign02.bmd"
+  ],
+  "signboard.tga": [
+    "Sign01.bmd"
+  ],
+  "doorknob.tga": [
+    "Sign01.bmd"
+  ],
+  "steel_barred_b.jpg": [
+    "SteelDoor01.bmd",
+    "SteelWall01.bmd",
+    "SteelWall02.bmd",
+    "SteelWall03.bmd"
+  ],
+  "tombstone_big.jpg": [
+    "SteelStatue01.bmd",
+    "StoneStatue03.bmd"
+  ],
+  "ston01.jpg": [
+    "Stone01.bmd",
+    "Stone02.bmd",
+    "Stone03.bmd",
+    "Stone04.bmd",
+    "Stone05.bmd",
+    "Waterspout01.bmd"
+  ],
+  "ston02.tga": [
+    "Stone01.bmd",
+    "Stone02.bmd"
+  ],
+  "c_wall05.jpg": [
+    "StoneMuWall01.bmd",
+    "StoneMuWall02.bmd"
+  ],
+  "stone_statue02.jpg": [
+    "StoneStatue01.bmd",
+    "Waterspout01.bmd"
+  ],
+  "stone_statue01.jpg": [
+    "StoneStatue02.bmd"
+  ],
+  "angel_stone_statue.jpg": [
+    "StoneStatue03.bmd"
+  ],
+  "tile_01.jpg": [
+    "StoneWall01.bmd",
+    "StoneWall02.bmd",
+    "StoneWall03.bmd",
+    "StoneWall05.bmd",
+    "StoneWall06.bmd"
+  ],
+  "tile_03.jpg": [
+    "StoneWall01.bmd",
+    "StoneWall02.bmd",
+    "StoneWall03.bmd",
+    "StoneWall05.bmd"
+  ],
+  "badge_03.tga": [
+    "StoneWall04.bmd",
+    "StoneWall06.bmd"
+  ],
+  "streetlight.jpg": [
+    "StreetLight01.bmd"
+  ],
+  "streetlight_brightness2.jpg": [
+    "StreetLight01.bmd"
+  ],
+  "grave_02.jpg": [
+    "Tomb01.bmd"
+  ],
+  "grave_01.jpg": [
+    "Tomb02.bmd"
+  ],
+  "tombstone.jpg": [
+    "Tomb03.bmd"
+  ],
+  "treasure_chest.jpg": [
+    "TreasureChest01.bmd"
+  ],
+  "tree.jpg": [
+    "Tree01.bmd",
+    "Tree02.bmd"
+  ],
+  "Tree_a.tga": [
+    "Tree01.bmd",
+    "Tree02.bmd"
+  ],
+  "tree_03.jpg": [
+    "Tree03.bmd",
+    "Tree04.bmd",
+    "Tree05.bmd",
+    "Tree07.bmd",
+    "Tree11.bmd"
+  ],
+  "tree_02.jpg": [
+    "Tree06.bmd"
+  ],
+  "tree_01.jpg": [
+    "Tree08.bmd",
+    "Tree12.bmd",
+    "Tree13.bmd"
+  ],
+  "tree_07.tga": [
+    "Tree09.bmd",
+    "Tree10.bmd"
+  ],
+  "tree_06.tga": [
+    "Tree11.bmd"
+  ],
+  "tree_04.tga": [
+    "Tree12.bmd"
+  ],
+  "tree_05.tga": [
+    "Tree13.bmd"
+  ],
+  "reagon_waterspout.jpg": [
+    "Waterspout01.bmd"
+  ],
+  "well.jpg": [
+    "Well01.bmd",
+    "Well02.bmd"
+  ],
+  "jar_01.jpg": [
+    "Well01.bmd",
+    "Well03.bmd",
+    "Well04.bmd"
+  ]
+}

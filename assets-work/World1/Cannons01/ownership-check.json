@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "owned_game_files": [
+    "src/bin/Data/Object1/Cannon01.bmd",
+    "src/bin/Data/Object1/Cannon02.bmd",
+    "src/bin/Data/Object1/Cannon03.bmd",
+    "src/bin/Data/Object1/Hanging01.bmd",
+    "src/bin/Data/Object1/horse_drawn_01.OZJ"
+  ],
+  "protected_file_count": 319
+}

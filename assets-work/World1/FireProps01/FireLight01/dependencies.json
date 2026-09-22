@@ -1,0 +1,11 @@
+{
+  "light.tga": [
+    "src/bin/Data/Object1/light.OZT"
+  ],
+  "light2.jpg": [
+    "src/bin/Data/Object1/light2.OZJ"
+  ],
+  "light3.jpg": [
+    "src/bin/Data/Object1/light3.OZJ"
+  ]
+}

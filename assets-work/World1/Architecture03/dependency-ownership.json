@@ -1,0 +1,54 @@
+{
+  "bridge_01": [
+    "Bridge01",
+    "House04",
+    "StoneMuWall01",
+    "StoneWall01",
+    "StoneWall02"
+  ],
+  "tree_04": [
+    "BridgeStone01",
+    "Tree07"
+  ],
+  "tile_ston06": [
+    "BridgeStone01",
+    "House01",
+    "House03",
+    "HouseEtc02",
+    "HouseWall02",
+    "Tent01"
+  ],
+  "tile_wood02": [
+    "BridgeStone01",
+    "Fence01",
+    "House04",
+    "House05",
+    "HouseEtc02",
+    "HouseWall01",
+    "HouseWall02",
+    "HouseWall03",
+    "HouseWall04",
+    "HouseWall05",
+    "HouseWall06"
+  ],
+  "tile_ston04": [
+    "House01",
+    "House03",
+    "House04",
+    "HouseEtc02",
+    "HouseWall01",
+    "HouseWall02",
+    "HouseWall04"
+  ],
+  "tile_02": [
+    "FireLight02",
+    "House04",
+    "StoneMuWall01",
+    "StoneWall01",
+    "StoneWall02"
+  ],
+  "bridge_shadow01": [
+    "Bridge01",
+    "BridgeStone01"
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 46,
+  "original_triangles": 30,
+  "bounds_before": [
+    [
+      -48.55839920043945,
+      -5.940299987792969,
+      -0.6732940077781677
+    ],
+    [
+      50.78670120239258,
+      9.465799331665039,
+      134.4405975341797
+    ]
+  ],
+  "bounds_after": [
+    [
+      -48.55839920043945,
+      -5.940299987792969,
+      -0.6732940077781677
+    ],
+    [
+      50.78670120239258,
+      9.465799331665039,
+      134.4405975341797
+    ]
+  ],
+  "original_vertices_retained": 24,
+  "bone_order": [
+    "Box01"
+  ],
+  "action_meta": {
+    "Sign02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "notice.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "notice.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque notice and pole atlases; original scalar masks retained for four alpha textures",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        0,
+        1
+      ],
+      "boundary_vertices": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "inset_fraction": 0.010254577787130225,
+      "recess_depth": 0.25,
+      "original_perimeter": [
+        [
+          -48.55839920043945,
+          -5.940299987792969,
+          124.65799713134766
+        ],
+        [
+          -48.55839920043945,
+          -5.940299987792969,
+          62.81590270996094
+        ],
+        [
+          50.78670120239258,
+          -5.940299987792969,
+          62.81590270996094
+        ],
+        [
+          50.78670120239258,
+          -5.940299987792969,
+          124.65799713134766
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        2,
+        3
+      ],
+      "boundary_vertices": [
+        4,
+        5,
+        7,
+        6
+      ],
+      "inset_fraction": 0.010254577787130225,
+      "recess_depth": 0.25,
+      "original_perimeter": [
+        [
+          50.78670120239258,
+          0.9199000000953674,
+          62.81590270996094
+        ],
+        [
+          -48.55839920043945,
+          0.9199000000953674,
+          62.81590270996094
+        ],
+        [
+          -48.55839920043945,
+          0.9199000000953674,
+          124.65799713134766
+        ],
+        [
+          50.78670120239258,
+          0.9199000000953674,
+          124.65799713134766
+        ]
+      ]
+    }
+  ],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

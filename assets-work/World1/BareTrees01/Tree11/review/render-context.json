@@ -1,0 +1,10 @@
+{
+  "evidence": "OFFLINE Blender renders, not client screenshots",
+  "replacement": "Unchanged accepted Tree11 BMD with final bark",
+  "camera": "Matching camera, lighting and scale before/after",
+  "terrain": "Completed pilot TileGrass01; 100 world units per repeat",
+  "scale_proxy_height": 190,
+  "terrain_view_width": 1300,
+  "animation": "Frames 0,15,30 matched; all31 keys validated numerically for animated trees",
+  "placement": "Preview at origin, not an actual World1 placement or measured client camera"
+}

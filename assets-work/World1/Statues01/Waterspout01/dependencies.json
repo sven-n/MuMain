@@ -1,0 +1,14 @@
+{
+  "stone_statue02.jpg": [
+    "src/bin/Data/Object1/stone_statue02.OZJ"
+  ],
+  "reagon_waterspout.jpg": [
+    "src/bin/Data/Object1/reagon_waterspout.OZJ"
+  ],
+  "ston01.jpg": [
+    "src/bin/Data/Object1/ston01.OZJ"
+  ],
+  "ston02.jpg": [
+    "src/bin/Data/Object1/ston02.OZJ"
+  ]
+}

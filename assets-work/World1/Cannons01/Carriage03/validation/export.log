@@ -1,0 +1,43 @@
+00:00.469  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/source.blend"
+skipping reference object 'Carriage03' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_1' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Carriage03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export__bvrhyps/Carriage03_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 538 polys
+- Exported 2 materials
+   horse_drawn_01.jpg
+   tub.jpg
+- SMD export took 0.009000778198242188 
+
+
+Blender Source Tools: exporting Carriage03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export__bvrhyps/anims/Carriage03_a00.smd
+- Exported 4 bones
+- Exported 1 frames
+- SMD export took 0.0006537437438964844 
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export__bvrhyps/Carriage03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/exports/Carriage03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export__bvrhyps/anims/Carriage03_a00.smd --name Carriage03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/exports/Carriage03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/exports/Carriage03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage03/exports/Carriage03.bmd
+  name field: Carriage03.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 538
+  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45
+  mesh 0: triangles=72 vertices=48 normals=53 uvs=28 texture=tub.jpg
+  mesh 1: triangles=466 vertices=309 normals=296 uvs=252 texture=horse_drawn_01.jpg
+  bone 0: "Cylinder01" parent=-1
+  bone 1: "Cylinder03" parent=-1
+  bone 2: "Mesh01" parent=-1
+  bone 3: "Cylinder11" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

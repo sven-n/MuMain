@@ -1,0 +1,22 @@
+{
+  "model": "Sign02",
+  "game_files": {
+    "src/bin/Data/Object1/Sign02.bmd": "57ba53604b7ed9f6ad4296c573b7ccc82617021b2e869e6848b72d3233842adb",
+    "src/bin/Data/Object1/notice.OZJ": "85e028c06cee35c5ba6334b9613a5a839df9ffff20d58a4ab567bf793290416f"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 46,
+  "bind_bounds": [
+    [
+      -48.55839920043945,
+      -5.940299987792969,
+      -0.6732940077781677
+    ],
+    [
+      50.78670120239258,
+      9.465799331665039,
+      134.4405975341797
+    ]
+  ]
+}

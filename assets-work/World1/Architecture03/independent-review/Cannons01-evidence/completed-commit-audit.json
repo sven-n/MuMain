@@ -1,0 +1,620 @@
+{
+  "status": "PASS",
+  "pinned_commit": "ab832f5de4cea0dcaee144dce3df77870e565815",
+  "original_baseline": "0bb845121f92e451a5d61afff38a4abf948a637a",
+  "game_files": [
+    "src/bin/Data/Object1/Cannon01.bmd",
+    "src/bin/Data/Object1/Cannon02.bmd",
+    "src/bin/Data/Object1/Cannon03.bmd",
+    "src/bin/Data/Object1/Hanging01.bmd",
+    "src/bin/Data/Object1/horse_drawn_01.OZJ"
+  ],
+  "method": "Fresh converter extraction/validation from immutable Git BMD blobs; direct hierarchical action matrices and every posed mesh corner; direct raw BMD normal ownership; no producer checkout writes",
+  "tolerances": {
+    "matrix": 0.0002,
+    "posed_bounds": 0.005,
+    "raw_normal_rotation": 1e-05
+  },
+  "assets": {
+    "Cannon01": {
+      "status": "PASS",
+      "triangles": 707,
+      "original_sha256": "c7d0e2b9d3a9d9764c5f6f2c4d9c5496c64d141ec5eae69a02ac36580162d1a0",
+      "export_sha256": "7d285fd5d3647cc75bf25742623f04421c589e69140137652f5bd1d14225abf0",
+      "full_compare": "DIFFERENT",
+      "full_compare_output": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 181 vs 707\nunmatched triangles: 82  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/original/Cannon01.bmd\n  name field: Data2\\Object1\\gun_01.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 181\n  bounds (bind pose): min -64.29 -78.26 -0.99  max 68.04 57.38 132.44  size 132.33 135.64 133.43\n  mesh 0: triangles=181 vertices=125 normals=50 uvs=140 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/new/Cannon01.bmd\n  name field: Cannon01.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 707\n  bounds (bind pose): min -64.29 -78.26 -0.99  max 68.04 57.38 132.44  size 132.33 135.64 133.43\n  mesh 0: triangles=707 vertices=382 normals=359 uvs=388 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Box06\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 1,
+        "samples": 1,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 2,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 1.52587890625e-05,
+        "max_authored_to_export_position_delta": 1.52587890625e-05
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/original/Cannon01.smd: bones=1 frames=1 triangles=181 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/original/Cannon01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/new/Cannon01.smd: bones=1 frames=1 triangles=707 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/new/Cannon01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Cannon02": {
+      "status": "PASS",
+      "triangles": 681,
+      "original_sha256": "aec342ce42aca9db7fa009cd148ef673a485fb3e5fda259ff9b7997d234d9f81",
+      "export_sha256": "1eccefa4bceeb9dccf921e4f98358e289f454106d9d450820c75350043e6c4bf",
+      "full_compare": "DIFFERENT",
+      "full_compare_output": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 155 vs 681\nunmatched triangles: 82  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/original/Cannon02.bmd\n  name field: Data2\\Object1\\gun_02.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 155\n  bounds (bind pose): min -67.44 -78.26 -0.99  max 68.04 57.38 132.44  size 135.48 135.64 133.43\n  mesh 0: triangles=155 vertices=109 normals=46 uvs=140 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/new/Cannon02.bmd\n  name field: Cannon02.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 681\n  bounds (bind pose): min -67.44 -78.26 -0.99  max 68.04 57.38 132.44  size 135.48 135.64 133.43\n  mesh 0: triangles=681 vertices=366 normals=332 uvs=388 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Box06\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 1,
+        "samples": 1,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 2,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 1.33514404296875e-05,
+        "max_authored_to_export_position_delta": 1.33514404296875e-05
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/original/Cannon02.smd: bones=1 frames=1 triangles=155 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/original/Cannon02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/new/Cannon02.smd: bones=1 frames=1 triangles=681 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/new/Cannon02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Cannon03": {
+      "status": "PASS",
+      "triangles": 367,
+      "original_sha256": "725df6fe11dcc6c54338be8b3ee426dc90d92e5d76c841b57f7b15822b8116aa",
+      "export_sha256": "c5688d3022e2dca8cc6390b47c788d5e970f7fa6b0b060e46063f758fab6669c",
+      "full_compare": "DIFFERENT",
+      "full_compare_output": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 75 vs 367\nunmatched triangles: 28  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/original/Cannon03.bmd\n  name field: Data2\\Object1\\gun_03.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 75\n  bounds (bind pose): min -36.70 -78.26 -0.99  max 35.95 57.38 132.44  size 72.65 135.64 133.43\n  mesh 0: triangles=75 vertices=54 normals=26 uvs=77 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/new/Cannon03.bmd\n  name field: Cannon03.smd  version: 12\n  meshes: 1  bones: 1  actions: 1  triangles: 367\n  bounds (bind pose): min -36.70 -78.26 -0.99  max 35.95 57.38 132.44  size 72.65 135.64 133.43\n  mesh 0: triangles=367 vertices=200 normals=196 uvs=288 texture=horse_drawn_01.jpg\n  bone 0: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Box06\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 1,
+        "samples": 1,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 2,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 7.62939453125e-06,
+        "max_authored_to_export_position_delta": 7.62939453125e-06
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/original/Cannon03.smd: bones=1 frames=1 triangles=75 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/original/Cannon03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/new/Cannon03.smd: bones=1 frames=1 triangles=367 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/new/Cannon03_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Hanging01": {
+      "status": "PASS",
+      "triangles": 338,
+      "original_sha256": "2edfebee6a7be95b8e68bbc92ec35edbe1e8db63b37f0700daba3a05fcc71c71",
+      "export_sha256": "6f150a12d38358a26ee5ec5ac245c0df8f869295f6fca3a30d809e611640784c",
+      "full_compare": "DIFFERENT",
+      "full_compare_output": "meshes 1 vs 1, bones 4 vs 4, actions 1 vs 1, triangles 162 vs 338\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/original/Hanging01.bmd\n  name field: Data2\\Object1\\execution_ground_0  version: 10\n  meshes: 1  bones: 4  actions: 1  triangles: 162\n  bounds (bind pose): min -100.94 -98.34 -0.34  max 200.18 111.74 423.89  size 301.13 210.07 424.23\n  mesh 0: triangles=162 vertices=146 normals=27 uvs=171 texture=horse_drawn_01.jpg\n  bone 0: \"Box08\" parent=-1\n  bone 1: \"Box09\" parent=0\n  bone 2: \"Box10\" parent=1\n  bone 3: \"Box03\" parent=0\n  action 0: keys=25 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/new/Hanging01.bmd\n  name field: Hanging01.smd  version: 12\n  meshes: 1  bones: 4  actions: 1  triangles: 338\n  bounds (bind pose): min -100.94 -98.34 -0.34  max 200.18 111.74 423.89  size 301.13 210.07 424.23\n  mesh 0: triangles=338 vertices=242 normals=221 uvs=255 texture=horse_drawn_01.jpg\n  bone 0: \"Box08\" parent=-1\n  bone 1: \"Box09\" parent=0\n  bone 2: \"Box10\" parent=1\n  bone 3: \"Box03\" parent=0\n  action 0: keys=25 lock=0\n",
+      "contract": [
+        "bone 0: \"Box08\" parent=-1",
+        "bone 1: \"Box09\" parent=0",
+        "bone 2: \"Box10\" parent=1",
+        "bone 3: \"Box03\" parent=0",
+        "action 0: keys=25 lock=0"
+      ],
+      "motion": {
+        "keys": 25,
+        "bones": 4,
+        "samples": 100,
+        "max_hierarchical_matrix_delta": 3.0517578125e-05,
+        "max_local_matrix_delta": 4.57763671875e-05,
+        "max_posed_bound_delta": 1.52587890625e-05
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 2,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 3.0517578125e-05,
+        "max_authored_to_export_position_delta": 3.0517578125e-05
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/original/Hanging01.smd: bones=4 frames=1 triangles=162 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/original/Hanging01_a00.smd: bones=4 frames=25 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/new/Hanging01.smd: bones=4 frames=1 triangles=338 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/new/Hanging01_a00.smd: bones=4 frames=25 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Carriage01": {
+      "status": "PASS",
+      "triangles": 472,
+      "original_sha256": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622",
+      "export_sha256": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 3 vs 3, bones 14 vs 14, actions 1 vs 1, triangles 472 vs 472\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/original/Carriage01.bmd\n  name field: Carriage01.smd  version: 12\n  meshes: 3  bones: 14  actions: 1  triangles: 472\n  bounds (bind pose): min -114.62 -94.23 -14.50  max 244.57 92.68 201.91  size 359.18 186.91 216.41\n  mesh 0: triangles=462 vertices=331 normals=313 uvs=298 texture=horse_drawn_01.jpg\n  mesh 1: triangles=8 vertices=8 normals=9 uvs=8 texture=horse_drawn_02.tga\n  mesh 2: triangles=2 vertices=4 normals=2 uvs=4 texture=horse_drawn_03.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Box02\" parent=0\n  bone 5: \"Dummy05\" parent=-1 dummy\n  bone 6: \"Bone06\" parent=-1\n  bone 7: \"Bone07\" parent=6\n  bone 8: \"Bone08\" parent=7\n  bone 9: \"Box03\" parent=6\n  bone 10: \"Bone05\" parent=-1\n  bone 11: \"Bone09\" parent=10\n  bone 12: \"Tube01\" parent=10\n  bone 13: \"Bone_point\" parent=10\n  action 0: keys=21 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/new/Carriage01.bmd\n  name field: Carriage01.smd  version: 12\n  meshes: 3  bones: 14  actions: 1  triangles: 472\n  bounds (bind pose): min -114.62 -94.23 -14.50  max 244.57 92.68 201.91  size 359.18 186.91 216.41\n  mesh 0: triangles=462 vertices=331 normals=313 uvs=298 texture=horse_drawn_01.jpg\n  mesh 1: triangles=8 vertices=8 normals=9 uvs=8 texture=horse_drawn_02.tga\n  mesh 2: triangles=2 vertices=4 normals=2 uvs=4 texture=horse_drawn_03.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Box02\" parent=0\n  bone 5: \"Dummy05\" parent=-1 dummy\n  bone 6: \"Bone06\" parent=-1\n  bone 7: \"Bone07\" parent=6\n  bone 8: \"Bone08\" parent=7\n  bone 9: \"Box03\" parent=6\n  bone 10: \"Bone05\" parent=-1\n  bone 11: \"Bone09\" parent=10\n  bone 12: \"Tube01\" parent=10\n  bone 13: \"Bone_point\" parent=10\n  action 0: keys=21 lock=0\n",
+      "contract": [
+        "bone 0: \"Bone01\" parent=-1",
+        "bone 1: \"Bone02\" parent=0",
+        "bone 2: \"Bone03\" parent=1",
+        "bone 3: \"Bone04\" parent=2",
+        "bone 4: \"Box02\" parent=0",
+        "bone 5: \"Dummy05\" parent=-1 dummy",
+        "bone 6: \"Bone06\" parent=-1",
+        "bone 7: \"Bone07\" parent=6",
+        "bone 8: \"Bone08\" parent=7",
+        "bone 9: \"Box03\" parent=6",
+        "bone 10: \"Bone05\" parent=-1",
+        "bone 11: \"Bone09\" parent=10",
+        "bone 12: \"Tube01\" parent=10",
+        "bone 13: \"Bone_point\" parent=10",
+        "action 0: keys=21 lock=0"
+      ],
+      "motion": {
+        "keys": 21,
+        "bones": 14,
+        "samples": 294,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 6,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/original/Carriage01.smd: bones=14 frames=1 triangles=472 materials=3\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/original/Carriage01_a00.smd: bones=14 frames=21 triangles=0 materials=0\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/new/Carriage01.smd: bones=14 frames=1 triangles=472 materials=3\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/new/Carriage01_a00.smd: bones=14 frames=21 triangles=0 materials=0\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      ]
+    },
+    "Carriage02": {
+      "status": "PASS",
+      "triangles": 450,
+      "original_sha256": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+      "export_sha256": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 1 vs 1, bones 2 vs 2, actions 1 vs 1, triangles 450 vs 450\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/original/Carriage02.bmd\n  name field: Carriage02.smd  version: 12\n  meshes: 1  bones: 2  actions: 1  triangles: 450\n  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.28  size 179.08 437.11 183.45\n  mesh 0: triangles=450 vertices=285 normals=287 uvs=246 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/new/Carriage02.bmd\n  name field: Carriage02.smd  version: 12\n  meshes: 1  bones: 2  actions: 1  triangles: 450\n  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.28  size 179.08 437.11 183.45\n  mesh 0: triangles=450 vertices=285 normals=287 uvs=246 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Cylinder03\" parent=-1",
+        "bone 1: \"Mesh01\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 2,
+        "samples": 2,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 2,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/original/Carriage02.smd: bones=2 frames=1 triangles=450 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/original/Carriage02_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/new/Carriage02.smd: bones=2 frames=1 triangles=450 materials=1\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/new/Carriage02_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Carriage03": {
+      "status": "PASS",
+      "triangles": 538,
+      "original_sha256": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296",
+      "export_sha256": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 2 vs 2, bones 4 vs 4, actions 1 vs 1, triangles 538 vs 538\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/original/Carriage03.bmd\n  name field: Carriage03.smd  version: 12\n  meshes: 2  bones: 4  actions: 1  triangles: 538\n  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45\n  mesh 0: triangles=72 vertices=48 normals=92 uvs=28 texture=tub.jpg\n  mesh 1: triangles=466 vertices=309 normals=320 uvs=252 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder03\" parent=-1\n  bone 2: \"Mesh01\" parent=-1\n  bone 3: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/new/Carriage03.bmd\n  name field: Carriage03.smd  version: 12\n  meshes: 2  bones: 4  actions: 1  triangles: 538\n  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45\n  mesh 0: triangles=72 vertices=48 normals=92 uvs=28 texture=tub.jpg\n  mesh 1: triangles=466 vertices=309 normals=320 uvs=252 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder03\" parent=-1\n  bone 2: \"Mesh01\" parent=-1\n  bone 3: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Cylinder01\" parent=-1",
+        "bone 1: \"Cylinder03\" parent=-1",
+        "bone 2: \"Mesh01\" parent=-1",
+        "bone 3: \"Cylinder11\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 4,
+        "samples": 4,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {
+          "3:0": 0.0
+        }
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 4,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/original/Carriage03.smd: bones=4 frames=1 triangles=538 materials=2\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/original/Carriage03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/new/Carriage03.smd: bones=4 frames=1 triangles=538 materials=2\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/new/Carriage03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Carriage04": {
+      "status": "PASS",
+      "triangles": 882,
+      "original_sha256": "77e81ed05d87ebf6938770b91428b77131fae9bda967f36d587525c323f14ab2",
+      "export_sha256": "77e81ed05d87ebf6938770b91428b77131fae9bda967f36d587525c323f14ab2",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 2 vs 2, bones 5 vs 5, actions 1 vs 1, triangles 882 vs 882\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/original/Carriage04.bmd\n  name field: Carriage04.smd  version: 12\n  meshes: 2  bones: 5  actions: 1  triangles: 882\n  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08\n  mesh 0: triangles=450 vertices=285 normals=282 uvs=246 texture=horse_drawn_01.jpg\n  mesh 1: triangles=432 vertices=222 normals=221 uvs=91 texture=grass_01.tga\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  bone 2: \"Cylinder05\" parent=-1\n  bone 3: \"Cylinder12\" parent=-1\n  bone 4: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/new/Carriage04.bmd\n  name field: Carriage04.smd  version: 12\n  meshes: 2  bones: 5  actions: 1  triangles: 882\n  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08\n  mesh 0: triangles=450 vertices=285 normals=282 uvs=246 texture=horse_drawn_01.jpg\n  mesh 1: triangles=432 vertices=222 normals=221 uvs=91 texture=grass_01.tga\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  bone 2: \"Cylinder05\" parent=-1\n  bone 3: \"Cylinder12\" parent=-1\n  bone 4: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Cylinder03\" parent=-1",
+        "bone 1: \"Mesh01\" parent=-1",
+        "bone 2: \"Cylinder05\" parent=-1",
+        "bone 3: \"Cylinder12\" parent=-1",
+        "bone 4: \"Cylinder13\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 5,
+        "samples": 5,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 4,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/original/Carriage04.smd: bones=5 frames=1 triangles=882 materials=2\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/original/Carriage04_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/new/Carriage04.smd: bones=5 frames=1 triangles=882 materials=2\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/new/Carriage04_a00.smd: bones=5 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "HouseEtc02": {
+      "status": "PASS",
+      "triangles": 250,
+      "original_sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa",
+      "export_sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 8 vs 8, bones 3 vs 3, actions 1 vs 1, triangles 250 vs 250\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/original/HouseEtc02.bmd\n  name field: HouseEtc02.smd  version: 12\n  meshes: 8  bones: 3  actions: 1  triangles: 250\n  bounds (bind pose): min -302.53 -299.57 -0.15  max 297.88 408.20 332.48  size 600.41 707.77 332.63\n  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_wood02.jpg\n  mesh 1: triangles=46 vertices=32 normals=25 uvs=41 texture=tile_ston04.jpg\n  mesh 2: triangles=49 vertices=35 normals=53 uvs=33 texture=c_wall04.jpg\n  mesh 3: triangles=16 vertices=12 normals=10 uvs=13 texture=tile_wood03.jpg\n  mesh 4: triangles=5 vertices=7 normals=5 uvs=7 texture=tile_house01.jpg\n  mesh 5: triangles=8 vertices=10 normals=4 uvs=12 texture=tile_ston01.jpg\n  mesh 6: triangles=94 vertices=109 normals=15 uvs=92 texture=horse_drawn_01.jpg\n  mesh 7: triangles=30 vertices=24 normals=6 uvs=12 texture=tile_ston06.jpg\n  bone 0: \"ihix01\" parent=-1\n  bone 1: \"Box03\" parent=-1\n  bone 2: \"Mesh03\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/new/HouseEtc02.bmd\n  name field: HouseEtc02.smd  version: 12\n  meshes: 8  bones: 3  actions: 1  triangles: 250\n  bounds (bind pose): min -302.53 -299.57 -0.15  max 297.88 408.20 332.48  size 600.41 707.77 332.63\n  mesh 0: triangles=2 vertices=4 normals=1 uvs=4 texture=tile_wood02.jpg\n  mesh 1: triangles=46 vertices=32 normals=25 uvs=41 texture=tile_ston04.jpg\n  mesh 2: triangles=49 vertices=35 normals=53 uvs=33 texture=c_wall04.jpg\n  mesh 3: triangles=16 vertices=12 normals=10 uvs=13 texture=tile_wood03.jpg\n  mesh 4: triangles=5 vertices=7 normals=5 uvs=7 texture=tile_house01.jpg\n  mesh 5: triangles=8 vertices=10 normals=4 uvs=12 texture=tile_ston01.jpg\n  mesh 6: triangles=94 vertices=109 normals=15 uvs=92 texture=horse_drawn_01.jpg\n  mesh 7: triangles=30 vertices=24 normals=6 uvs=12 texture=tile_ston06.jpg\n  bone 0: \"ihix01\" parent=-1\n  bone 1: \"Box03\" parent=-1\n  bone 2: \"Mesh03\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"ihix01\" parent=-1",
+        "bone 1: \"Box03\" parent=-1",
+        "bone 2: \"Mesh03\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 3,
+        "samples": 3,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {}
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 16,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/original/HouseEtc02.smd: bones=3 frames=1 triangles=250 materials=8\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/original/HouseEtc02_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/new/HouseEtc02.smd: bones=3 frames=1 triangles=250 materials=8\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/new/HouseEtc02_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "StoneMuWall04": {
+      "status": "PASS",
+      "triangles": 317,
+      "original_sha256": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471",
+      "export_sha256": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 3 vs 3, bones 3 vs 3, actions 1 vs 1, triangles 317 vs 317\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/original/StoneMuWall04.bmd\n  name field: StoneMuWall04.smd  version: 12\n  meshes: 3  bones: 3  actions: 1  triangles: 317\n  bounds (bind pose): min -149.51 -109.98 -103.47  max 150.49 169.39 299.24  size 300.00 279.37 402.71\n  mesh 0: triangles=70 vertices=42 normals=87 uvs=61 texture=c_wall04.jpg\n  mesh 1: triangles=14 vertices=12 normals=12 uvs=12 texture=c_wall06.jpg\n  mesh 2: triangles=233 vertices=195 normals=123 uvs=177 texture=horse_drawn_01.jpg\n  bone 0: \"Box02\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/new/StoneMuWall04.bmd\n  name field: StoneMuWall04.smd  version: 12\n  meshes: 3  bones: 3  actions: 1  triangles: 317\n  bounds (bind pose): min -149.51 -109.98 -103.47  max 150.49 169.39 299.24  size 300.00 279.37 402.71\n  mesh 0: triangles=70 vertices=42 normals=87 uvs=61 texture=c_wall04.jpg\n  mesh 1: triangles=14 vertices=12 normals=12 uvs=12 texture=c_wall06.jpg\n  mesh 2: triangles=233 vertices=195 normals=123 uvs=177 texture=horse_drawn_01.jpg\n  bone 0: \"Box02\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Box02\" parent=-1",
+        "bone 1: \"Box23\" parent=-1",
+        "bone 2: \"Box06\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 3,
+        "samples": 3,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {
+          "2:1": 0.0
+        }
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 6,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/original/StoneMuWall04.smd: bones=3 frames=1 triangles=317 materials=3\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/original/StoneMuWall04_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/new/StoneMuWall04.smd: bones=3 frames=1 triangles=317 materials=3\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/new/StoneMuWall04_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "StoneWall03": {
+      "status": "PASS",
+      "triangles": 333,
+      "original_sha256": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+      "export_sha256": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 3 vs 3, bones 4 vs 4, actions 1 vs 1, triangles 333 vs 333\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/original/StoneWall03.bmd\n  name field: StoneWall03.smd  version: 12\n  meshes: 3  bones: 4  actions: 1  triangles: 333\n  bounds (bind pose): min -199.33 -43.04 -2.10  max 198.83 180.50 299.24  size 398.15 223.54 301.34\n  mesh 0: triangles=90 vertices=60 normals=42 uvs=75 texture=tile_01.jpg\n  mesh 1: triangles=233 vertices=195 normals=127 uvs=177 texture=horse_drawn_01.jpg\n  mesh 2: triangles=10 vertices=8 normals=11 uvs=12 texture=tile_03.jpg\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  bone 3: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/new/StoneWall03.bmd\n  name field: StoneWall03.smd  version: 12\n  meshes: 3  bones: 4  actions: 1  triangles: 333\n  bounds (bind pose): min -199.33 -43.04 -2.10  max 198.83 180.50 299.24  size 398.15 223.54 301.34\n  mesh 0: triangles=90 vertices=60 normals=42 uvs=75 texture=tile_01.jpg\n  mesh 1: triangles=233 vertices=195 normals=127 uvs=177 texture=horse_drawn_01.jpg\n  mesh 2: triangles=10 vertices=8 normals=11 uvs=12 texture=tile_03.jpg\n  bone 0: \"Box04\" parent=-1\n  bone 1: \"Box23\" parent=-1\n  bone 2: \"Box06\" parent=-1\n  bone 3: \"Object01\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Box04\" parent=-1",
+        "bone 1: \"Box23\" parent=-1",
+        "bone 2: \"Box06\" parent=-1",
+        "bone 3: \"Object01\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 4,
+        "samples": 4,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {
+          "2:1": 0.0
+        }
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 6,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/original/StoneWall03.smd: bones=4 frames=1 triangles=333 materials=3\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/original/StoneWall03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/new/StoneWall03.smd: bones=4 frames=1 triangles=333 materials=3\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/new/StoneWall03_a00.smd: bones=4 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    },
+    "Well01": {
+      "status": "PASS",
+      "triangles": 915,
+      "original_sha256": "c753f37c049f5716deb7db64186083fed58920b925da133abea7303a851977a3",
+      "export_sha256": "c753f37c049f5716deb7db64186083fed58920b925da133abea7303a851977a3",
+      "full_compare": "EQUIVALENT",
+      "full_compare_output": "meshes 4 vs 4, bones 7 vs 7, actions 1 vs 1, triangles 915 vs 915\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "info_before": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/original/Well01.bmd\n  name field: preserved-bind.smd  version: 12\n  meshes: 4  bones: 7  actions: 1  triangles: 915\n  bounds (bind pose): min -154.76 -125.85 -0.07  max 121.57 93.46 270.82  size 276.33 219.31 270.89\n  mesh 0: triangles=72 vertices=48 normals=174 uvs=28 texture=tub.jpg\n  mesh 1: triangles=16 vertices=24 normals=2 uvs=6 texture=horse_drawn_01.jpg\n  mesh 2: triangles=123 vertices=89 normals=253 uvs=101 texture=well.jpg\n  mesh 3: triangles=704 vertices=391 normals=425 uvs=378 texture=jar_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder04\" parent=-1\n  bone 2: \"Cylinder07\" parent=-1\n  bone 3: \"Cylinder08\" parent=-1\n  bone 4: \"Cylinder09\" parent=-1\n  bone 5: \"Cylinder10\" parent=-1\n  bone 6: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "info_after": "model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/new/Well01.bmd\n  name field: preserved-bind.smd  version: 12\n  meshes: 4  bones: 7  actions: 1  triangles: 915\n  bounds (bind pose): min -154.76 -125.85 -0.07  max 121.57 93.46 270.82  size 276.33 219.31 270.89\n  mesh 0: triangles=72 vertices=48 normals=174 uvs=28 texture=tub.jpg\n  mesh 1: triangles=16 vertices=24 normals=2 uvs=6 texture=horse_drawn_01.jpg\n  mesh 2: triangles=123 vertices=89 normals=253 uvs=101 texture=well.jpg\n  mesh 3: triangles=704 vertices=391 normals=425 uvs=378 texture=jar_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder04\" parent=-1\n  bone 2: \"Cylinder07\" parent=-1\n  bone 3: \"Cylinder08\" parent=-1\n  bone 4: \"Cylinder09\" parent=-1\n  bone 5: \"Cylinder10\" parent=-1\n  bone 6: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+      "contract": [
+        "bone 0: \"Cylinder01\" parent=-1",
+        "bone 1: \"Cylinder04\" parent=-1",
+        "bone 2: \"Cylinder07\" parent=-1",
+        "bone 3: \"Cylinder08\" parent=-1",
+        "bone 4: \"Cylinder09\" parent=-1",
+        "bone 5: \"Cylinder10\" parent=-1",
+        "bone 6: \"Cylinder11\" parent=-1",
+        "action 0: keys=1 lock=0"
+      ],
+      "motion": {
+        "keys": 1,
+        "bones": 7,
+        "samples": 7,
+        "max_hierarchical_matrix_delta": 0,
+        "max_local_matrix_delta": 0,
+        "max_posed_bound_delta": 0
+      },
+      "raw_bindings": {
+        "status": "PASS",
+        "unequal_node_pair_rotation_deltas": {
+          "6:0": 0.0
+        }
+      },
+      "packed_source": {
+        "status": "PASS",
+        "packed_images": 8,
+        "reference_collections_hidden_and_marked": true,
+        "every_exported_corner_and_source_vertex_matches_intended_bone": true,
+        "max_export_to_authored_position_delta": 0.0,
+        "max_authored_to_export_position_delta": 0.0
+      },
+      "converter_validations": [
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/original/Well01.smd: bones=7 frames=1 triangles=915 materials=4\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/original/Well01_a00.smd: bones=7 frames=1 triangles=0 materials=0\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/new/Well01.smd: bones=7 frames=1 triangles=915 materials=4\nOK\n",
+        "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/new/Well01_a00.smd: bones=7 frames=1 triangles=0 materials=0\nOK\n"
+      ]
+    }
+  },
+  "textures": {
+    "status": "PASS",
+    "containers": {
+      "horse_drawn_01.OZJ": {
+        "sha256": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e",
+        "frozen": false
+      },
+      "horse_drawn_02.OZT": {
+        "sha256": "f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079",
+        "frozen": true
+      },
+      "horse_drawn_03.OZJ": {
+        "sha256": "e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5",
+        "frozen": true
+      },
+      "tub.OZJ": {
+        "sha256": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+        "frozen": true
+      },
+      "grass_01.OZT": {
+        "sha256": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15",
+        "frozen": true
+      },
+      "tile_wood02.OZJ": {
+        "sha256": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+        "frozen": true
+      },
+      "tile_ston04.OZJ": {
+        "sha256": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+        "frozen": true
+      },
+      "c_wall04.OZJ": {
+        "sha256": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+        "frozen": true
+      },
+      "tile_wood03.OZJ": {
+        "sha256": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+        "frozen": true
+      },
+      "tile_house01.OZJ": {
+        "sha256": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+        "frozen": true
+      },
+      "tile_ston01.OZJ": {
+        "sha256": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+        "frozen": true
+      },
+      "tile_ston06.OZJ": {
+        "sha256": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+        "frozen": true
+      },
+      "c_wall06.OZJ": {
+        "sha256": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
+        "frozen": true
+      },
+      "tile_01.OZJ": {
+        "sha256": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+        "frozen": true
+      },
+      "tile_03.OZJ": {
+        "sha256": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+        "frozen": true
+      },
+      "well.OZJ": {
+        "sha256": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e",
+        "frozen": true
+      },
+      "jar_01.OZJ": {
+        "sha256": "d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5",
+        "frozen": true
+      }
+    },
+    "wrapper_validation": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/horse_drawn_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/horse_drawn_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/horse_drawn_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tub.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/grass_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_wood02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_ston04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/c_wall04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_wood03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_house01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_ston06.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/c_wall06.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/tile_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/well.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/jar_01.OZJ\n",
+    "all_twelve_consumer_atlases_identical": true
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "result": "PASS",
+  "original_anchors": 89,
+  "max_anchor_component_delta": 0.0,
+  "anchor_tolerance": 0.01,
+  "anchor_space": "Official Blender reimport world coordinates",
+  "packed_source_and_reference": true,
+  "max_authored_vertex_delta": 0.0,
+  "authored_vertex_count": 89,
+  "authored_rigid_parts": "Every vertex found at intended bone and world position in final BMD reimport",
+  "original": {
+    "zero_uv": 6,
+    "zero_area": 0,
+    "triangles": 123,
+    "uv_range": [
+      -0.0010999999940395355,
+      1.0
+    ]
+  },
+  "replacement": {
+    "zero_uv": 6,
+    "zero_area": 0,
+    "triangles": 123,
+    "uv_range": [
+      -0.0010999999940395355,
+      1.0
+    ]
+  },
+  "uv_note": "Original repeating coordinates retained. No newly collapsed geometry or UV triangles.",
+  "rigid_binding": "Each vertex uses one original bone with weight 1"
+}

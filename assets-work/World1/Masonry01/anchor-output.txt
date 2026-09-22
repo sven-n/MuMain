@@ -1,0 +1,6 @@
+HouseEtc01 PASS: 30 unchanged triangles; 1.0000000010279564e-06 maximum original-vertex drift
+HouseEtc02 PASS: 220 unchanged triangles; 0.0 maximum original-vertex drift
+StoneMuWall01 PASS: 298 unchanged triangles; 0.0 maximum original-vertex drift
+StoneMuWall02 PASS: 36 unchanged triangles; 0.0 maximum original-vertex drift
+StoneMuWall03 PASS: 44 unchanged triangles; 0.0 maximum original-vertex drift
+StoneMuWall04 PASS: 277 unchanged triangles; 0.0 maximum original-vertex drift

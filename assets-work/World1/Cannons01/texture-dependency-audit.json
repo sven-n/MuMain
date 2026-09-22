@@ -1,0 +1,232 @@
+{
+  "status": "PASS",
+  "readonly_BMDs_byte_identical": [
+    "Carriage01",
+    "Carriage02",
+    "Carriage03",
+    "Carriage04",
+    "HouseEtc02",
+    "StoneMuWall04",
+    "StoneWall03",
+    "Well01"
+  ],
+  "textures": {
+    "horse_drawn_01.OZJ": {
+      "sha256": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "Cannon01",
+        "Cannon02",
+        "Cannon03",
+        "Hanging01",
+        "Carriage01",
+        "Carriage02",
+        "Carriage03",
+        "Carriage04",
+        "HouseEtc02",
+        "StoneMuWall04",
+        "StoneWall03",
+        "Well01"
+      ],
+      "frozen": false
+    },
+    "horse_drawn_02.OZT": {
+      "sha256": "f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "consumers": [
+        "Carriage01"
+      ],
+      "frozen": true
+    },
+    "horse_drawn_03.OZJ": {
+      "sha256": "e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "Carriage01"
+      ],
+      "frozen": true
+    },
+    "tub.OZJ": {
+      "sha256": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+      "dimensions": [
+        512,
+        256
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "Carriage03",
+        "Well01"
+      ],
+      "frozen": true
+    },
+    "grass_01.OZT": {
+      "sha256": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "consumers": [
+        "Carriage04"
+      ],
+      "frozen": true
+    },
+    "tile_wood02.OZJ": {
+      "sha256": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02"
+      ],
+      "frozen": true
+    },
+    "tile_ston04.OZJ": {
+      "sha256": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02"
+      ],
+      "frozen": true
+    },
+    "c_wall04.OZJ": {
+      "sha256": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02",
+        "StoneMuWall04"
+      ],
+      "frozen": true
+    },
+    "tile_wood03.OZJ": {
+      "sha256": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02"
+      ],
+      "frozen": true
+    },
+    "tile_house01.OZJ": {
+      "sha256": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02"
+      ],
+      "frozen": true
+    },
+    "tile_ston01.OZJ": {
+      "sha256": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02"
+      ],
+      "frozen": true
+    },
+    "tile_ston06.OZJ": {
+      "sha256": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "HouseEtc02"
+      ],
+      "frozen": true
+    },
+    "c_wall06.OZJ": {
+      "sha256": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "StoneMuWall04"
+      ],
+      "frozen": true
+    },
+    "tile_01.OZJ": {
+      "sha256": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "StoneWall03"
+      ],
+      "frozen": true
+    },
+    "tile_03.OZJ": {
+      "sha256": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "StoneWall03"
+      ],
+      "frozen": true
+    },
+    "well.OZJ": {
+      "sha256": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "Well01"
+      ],
+      "frozen": true
+    },
+    "jar_01.OZJ": {
+      "sha256": "d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "consumers": [
+        "Well01"
+      ],
+      "frozen": true
+    }
+  }
+}

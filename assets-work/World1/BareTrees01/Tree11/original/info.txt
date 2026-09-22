@@ -1,0 +1,17 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree11/original/Tree11.bmd
+  name field: Tree11.smd  version: 12
+  meshes: 2  bones: 10  actions: 1  triangles: 169
+  bounds (bind pose): min -178.11 -170.89 -0.05  max 195.18 187.60 560.52  size 373.29 358.49 560.58
+  mesh 0: triangles=144 vertices=102 normals=102 uvs=17 texture=tree_06.tga
+  mesh 1: triangles=25 vertices=16 normals=16 uvs=20 texture=tree_03.jpg
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Bone04" parent=2
+  bone 4: "Bone05" parent=2
+  bone 5: "Bone06" parent=4
+  bone 6: "Bone07" parent=2
+  bone 7: "Bone08" parent=6
+  bone 8: "Bone09" parent=7
+  bone 9: "Sphere02" parent=0
+  action 0: keys=31 lock=0

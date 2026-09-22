@@ -1,0 +1,5 @@
+SteelWall01 44 original anchors; max drift 5.6568542473784125e-06
+SteelWall02 80 original anchors; max drift 0.000395744867307452
+SteelWall03 20 original anchors; max drift 0.0005782776149898422
+SteelDoor01 56 original anchors; max drift 0.00018800000000000067
+HouseEtc03 14 original anchors; max drift 0.0

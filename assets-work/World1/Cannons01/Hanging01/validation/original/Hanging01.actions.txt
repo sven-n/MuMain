@@ -1,0 +1,5 @@
+# bmdconv action manifest for Hanging01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Hanging01.smd <output.bmd> --manifest Hanging01.actions.txt
+model Data2\Object1\execution_ground_0
+action 0 file=Hanging01_a00.smd keys=25 lock=0
+texture 0 horse_drawn_01.jpg original=horse_drawn_01.jpg

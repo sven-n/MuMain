@@ -1,0 +1,67 @@
+00:00.535  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/source.blend"
+skipping reference object 'StreetLight01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Braced_Timber_Post' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Iron_Post_Foot' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Iron_Crossbeam_Strap' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Iron_Crossbeam_Strap.001' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Lantern_Foot' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Tiered_Lantern_Cap' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Glass_Stay_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Glass_Stay_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Glass_Stay_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Glass_Stay_3' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Glass_Stay_4' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Forged_Glass_Stay_5' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Preserved_Additive_Glass' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting StreetLight01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ncpd52qf/StreetLight01_mu_export.smd
+- Exported 11 bones
+- Exported 1 frames
+- Exported 572 polys
+- Exported 2 materials
+   streetlight_brightness2.jpg
+   streetlight.jpg
+- SMD export took 0.011244058609008789
+
+
+Blender Source Tools: exporting StreetLight01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ncpd52qf/anims/StreetLight01_a00.smd
+- Exported 11 bones
+- Exported 21 frames
+- SMD export took 0.008522987365722656
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ncpd52qf/StreetLight01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ncpd52qf/anims/StreetLight01_a00.smd --name StreetLight01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd
+  name field: StreetLight01.smd  version: 12
+  meshes: 2  bones: 11  actions: 1  triangles: 572
+  bounds (bind pose): min -12.11 -73.27 0.34  max 12.63 6.81 258.32  size 24.74 80.09 257.98
+  mesh 0: triangles=536 vertices=321 normals=389 uvs=214 texture=streetlight.jpg
+  mesh 1: triangles=36 vertices=24 normals=34 uvs=28 texture=streetlight_brightness2.jpg
+  bone 0: "Dummy00" parent=-1 dummy
+  bone 1: "Dummy01" parent=-1 dummy
+  bone 2: "Dummy02" parent=-1 dummy
+  bone 3: "Mesh02" parent=-1
+  bone 4: "Cylinder02" parent=-1
+  bone 5: "Bone01" parent=-1
+  bone 6: "Bone02" parent=5
+  bone 7: "Bone03" parent=6
+  bone 8: "Bone04" parent=7
+  bone 9: "Bone05" parent=8
+  bone 10: "Mesh01" parent=5
+  action 0: keys=21 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
+warning: StreetLight01_mu_export.smd: line 3: bone 'Dummy00' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: StreetLight01_mu_export.smd: line 4: bone 'Dummy01' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: StreetLight01_mu_export.smd: line 5: bone 'Dummy02' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: StreetLight01_a00.smd: line 3: bone 'Dummy00' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: StreetLight01_a00.smd: line 4: bone 'Dummy01' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: StreetLight01_a00.smd: line 5: bone 'Dummy02' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin

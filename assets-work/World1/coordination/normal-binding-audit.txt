@@ -1,0 +1,4 @@
+PASS 101 models
+Bind and every animation key; direction tolerance 0.0001.
+Exact original BMD behavior retained for legacy sharing: Tree12, Tree13
+Full per-model/material measurements: normal-binding-audit.json. Client verification: none.

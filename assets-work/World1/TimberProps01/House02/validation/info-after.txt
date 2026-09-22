@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd
+  name field: House02.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 1215
+  bounds (bind pose): min -114.89 -64.12 -0.16  max 89.39 72.78 188.55  size 204.28 136.90 188.71
+  mesh 0: triangles=1068 vertices=556 normals=376 uvs=593 texture=drum.jpg
+  mesh 1: triangles=147 vertices=99 normals=140 uvs=35 texture=steel.jpg
+  bone 0: "Box02" parent=-1
+  action 0: keys=1 lock=0

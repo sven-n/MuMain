@@ -1,0 +1,80 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 639,
+  "original_triangles": 639,
+  "bounds_before": [
+    [
+      -199.06100463867188,
+      -199.74362182617188,
+      -0.13779999315738678
+    ],
+    [
+      199.23431396484375,
+      198.55169677734375,
+      311.2048034667969
+    ]
+  ],
+  "bounds_after": [
+    [
+      -199.06100463867188,
+      -199.74362182617188,
+      -0.13779999315738678
+    ],
+    [
+      199.23431396484375,
+      198.55169677734375,
+      311.2048034667969
+    ]
+  ],
+  "original_vertices_retained": 358,
+  "bone_order": [
+    "OilTank01",
+    "Box04",
+    "Box01",
+    "Box02",
+    "Box03",
+    "QuadPatch01",
+    "Box05",
+    "Box06",
+    "Box07",
+    "Box08",
+    "QuadPatch02"
+  ],
+  "action_meta": {
+    "Waterspout01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "stone_statue02.jpg": [
+      256,
+      512
+    ],
+    "reagon_waterspout.jpg": [
+      128,
+      128
+    ],
+    "ston01.jpg": [
+      512,
+      512
+    ],
+    "ston02.jpg": [
+      128,
+      128
+    ]
+  },
+  "material_order": [
+    "stone_statue02.jpg",
+    "reagon_waterspout.jpg",
+    "ston01.jpg",
+    "ston02.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained except six reprojected head cap triangles; new panel coordinates interpolated",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque RGB stone atlases; frozen fountain water remains opaque texture for original BlendMesh3",
+  "uv_reprojected_faces": [],
+  "uv_reprojection": null,
+  "panel_recesses": [],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

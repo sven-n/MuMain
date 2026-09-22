@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "original_geometry_uv_skinning_transform_sha256": "3342ccbdb1416874d1c38cc8c30cee0a8f0078ffb9484363b7b9c90728dfc433",
+  "ref_original": "byte-identical numeric mesh snapshot to preserved import",
+  "packed_images": {
+    "apple.jpg": "7ac9770508e656f418f4c3bd6b72c46df417fee93f3a31c3c8073d736bf5d26c",
+    "apple.jpg.001": "63d68b1b154a38ae149c537c39d9eeb1a13b14d81374d940aef1097bf83826b8",
+    "bottle.tga": "449addf4b27daed89e03d712557df29d814d3ec8cd78f8ed7dd62f5effee4926",
+    "bottle.tga.001": "ba4080fd51dc5187fe701db7df438975aeab96266b59534053aceb1fec6304f5",
+    "plate.jpg": "da14ba48faa2fd445d9b4c8724cbf78ab11b80a69fb132eb675b0c7e962458a5",
+    "plate.jpg.001": "dd6007f5de5475e1d3b89486975cc817670ead62ff72b478f8d3a4ebdc49748f",
+    "pot3.tga": "bc87509fab6807e5492358f06bfe531f2c8679b2b5bb8144e8c7da8034e2e4c3",
+    "pot3.tga.001": "900e9b1496a7628423d4328935c6bccc461151a715f89550718711239c5438c5",
+    "winecup.jpg": "3d396dd6b56f4870bc32d8fe6a3f40171e6592118ba8115069ba71be0b4e8435",
+    "winecup.jpg.001": "25b5777cdbdcae7cd03e3956f5b913b88d747c05a8b5e2111eecfb597b68c0f1"
+  },
+  "high_poly": "excluded editable authored meshes with 3-segment fine-bevel modifiers",
+  "no_external_images_required": true
+}

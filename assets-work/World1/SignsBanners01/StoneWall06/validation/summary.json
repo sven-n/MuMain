@@ -1,0 +1,44 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -50.73,
+      -49.66,
+      -79.37
+    ],
+    [
+      49.75,
+      88.94,
+      448.76
+    ]
+  ],
+  "bounds_after": [
+    [
+      -50.73,
+      -49.66,
+      -79.37
+    ],
+    [
+      49.75,
+      88.94,
+      448.76
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=25 lock=0"
+  ],
+  "material_order": [
+    "badge_01.jpg",
+    "badge_03.tga",
+    "tile_01.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "badge_01.OZJ": "d1f42275a74f1c90ed2a79afd23b964facd1d5bcc8121e5f957f429c66c96ffe",
+    "StoneWall06.bmd": "5763998af97cdb7cfe595476cda2592558458f0f8046ce0204580301e0f80a62",
+    "badge_03.OZT": "a17e37582909ebbe250bff640c3fc1a7d024b3959d0ca3ad2bc666a86af1ebaa",
+    "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27"
+  }
+}

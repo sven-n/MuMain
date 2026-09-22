@@ -1,0 +1,5 @@
+# bmdconv action manifest for Cannon01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Cannon01.smd <output.bmd> --manifest Cannon01.actions.txt
+model Data2\Object1\gun_01.smd
+action 0 file=Cannon01_a00.smd keys=1 lock=0
+texture 0 horse_drawn_01.jpg original=horse_drawn_01.jpg

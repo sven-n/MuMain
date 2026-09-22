@@ -1,0 +1,38 @@
+00:00.483  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/source.blend"
+skipping reference object 'Carriage02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Retained_0' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Carriage02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0oazqaz9/Carriage02_mu_export.smd
+- Exported 2 bones
+- Exported 1 frames
+- Exported 450 polys
+- Exported 1 materials
+   horse_drawn_01.jpg
+- SMD export took 0.007875919342041016 
+
+
+Blender Source Tools: exporting Carriage02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0oazqaz9/anims/Carriage02_a00.smd
+- Exported 2 bones
+- Exported 1 frames
+- SMD export took 0.0005507469177246094 
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0oazqaz9/Carriage02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_0oazqaz9/anims/Carriage02_a00.smd --name Carriage02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cannons/assets-work/World1/Cannons01/Carriage02/exports/Carriage02.bmd
+  name field: Carriage02.smd  version: 12
+  meshes: 1  bones: 2  actions: 1  triangles: 450
+  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.29  size 179.08 437.11 183.45
+  mesh 0: triangles=450 vertices=285 normals=300 uvs=246 texture=horse_drawn_01.jpg
+  bone 0: "Cylinder03" parent=-1
+  bone 1: "Mesh01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

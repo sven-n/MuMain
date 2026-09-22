@@ -1,0 +1,6 @@
+# bmdconv action manifest for StreetLight01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd StreetLight01.smd <output.bmd> --manifest StreetLight01.actions.txt
+model Data2\Object1\StreetLight.smd
+action 0 file=StreetLight01_a00.smd keys=21 lock=0
+texture 0 streetlight.jpg original=streetlight.jpg
+texture 1 streetlight_brightness2.jpg original=streetlight_brightness2.jpg

@@ -1,0 +1,18 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/House05/original/House05.bmd
+  name field: Data2\Object1\house_mill.smd  version: 10
+  meshes: 3  bones: 10  actions: 1  triangles: 276
+  bounds (bind pose): min -200.18 -275.53 -147.38  max 293.51 601.86 359.64  size 493.68 877.39 507.01
+  mesh 0: triangles=228 vertices=168 normals=149 uvs=174 texture=tile_wood02.jpg
+  mesh 1: triangles=20 vertices=20 normals=4 uvs=22 texture=tile_wood01.jpg
+  mesh 2: triangles=28 vertices=24 normals=24 uvs=24 texture=ston02.jpg
+  bone 0: "ki12" parent=-1
+  bone 1: "Box02" parent=-1
+  bone 2: "Box03" parent=1
+  bone 3: "Box04" parent=2
+  bone 4: "Box05" parent=3
+  bone 5: "Box06" parent=4
+  bone 6: "Box01" parent=1
+  bone 7: "Box08" parent=-1
+  bone 8: "Box07" parent=7
+  bone 9: "Mesh01" parent=7
+  action 0: keys=30 lock=0

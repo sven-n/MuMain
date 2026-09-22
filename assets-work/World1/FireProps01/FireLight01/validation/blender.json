@@ -1,0 +1,49 @@
+{
+  "bounds_before": [
+    [
+      -28.570100784301758,
+      -28.46769905090332,
+      -0.40790000557899475
+    ],
+    [
+      28.6072998046875,
+      28.709699630737305,
+      175.2342987060547
+    ]
+  ],
+  "bounds_after": [
+    [
+      -28.570100784301758,
+      -28.46769905090332,
+      -0.40790000557899475
+    ],
+    [
+      28.6072998046875,
+      28.709699630737305,
+      175.2342987060547
+    ]
+  ],
+  "triangles": 80,
+  "edits": [
+    {
+      "original_stem_triangles": 8,
+      "new_stem_triangles": 40,
+      "endpoints": "All eight original end corners retained exactly",
+      "protected_materials": [
+        "light.tga",
+        "light3.jpg"
+      ]
+    }
+  ],
+  "bone_order": [
+    "Cylinder02"
+  ],
+  "action_meta": {
+    "FireLight01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "retained_geometry": false,
+  "note": "Gateway opening, fire offsets and effect mesh geometry/UVs retained"
+}

@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-bare-trees/assets-work/World1/BareTrees01/Tree03/original/Tree03.bmd
+  name field: Data2\Object1\treea_01.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 273
+  bounds (bind pose): min -257.26 -243.68 -1.89  max 248.24 261.08 536.01  size 505.50 504.76 537.90
+  mesh 0: triangles=273 vertices=185 normals=203 uvs=149 texture=tree_03.jpg
+  bone 0: "Cylinder05" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,16 @@
+{
+  "tile_wood01": [
+    "House04",
+    "House05",
+    "HouseWall01",
+    "HouseWall02",
+    "HouseWall04",
+    "Stair01"
+  ],
+  "tile_wood03": [
+    "House04",
+    "HouseEtc02",
+    "HouseWall05",
+    "HouseWall06"
+  ]
+}

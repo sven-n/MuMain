@@ -1,0 +1,93 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "b33ef53afc6a963d6f41abd35dd962c21dd25d5d59834d342f24afe99d9417d2",
+  "original_connection_vertices_exact": 14,
+  "source_bounds_exact": [
+    [
+      -99.78469848632812,
+      -99.54920196533203,
+      3.09689998626709
+    ],
+    [
+      100.21530151367188,
+      100.26261138916016,
+      246.61390686035156
+    ]
+  ],
+  "editable_high_poly_excluded": false,
+  "rig_unchanged": {
+    "bones": [
+      [
+        "Box03",
+        null
+      ]
+    ],
+    "bone_order": [
+      "Box03"
+    ],
+    "actions": {
+      "HouseEtc03_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "steel_barred_a.tga": {
+      "size": [
+        64,
+        128
+      ],
+      "sha256": "4d279d5bb652982a9086096b6f0d70a25d477f08f6a509cd24673ebb34b8b156"
+    },
+    "steel_barred_a.tga.001": {
+      "size": [
+        256,
+        512
+      ],
+      "sha256": "1accfbbfbcccddebfce8ca0f04498fa07543e7ec733047a441e9e6672fea196c"
+    },
+    "steel_barred_door.tga": {
+      "size": [
+        64,
+        128
+      ],
+      "sha256": "bc548a7d7efda042e4d8c8c50bfb2ab13e68753b63066f2511210bfe889d0fbb"
+    },
+    "steel_barred_door.tga.001": {
+      "size": [
+        256,
+        512
+      ],
+      "sha256": "2dbd320c169903aa088a37b637625eaef592b736a9aa5efb1aa41c2d72afdeb7"
+    }
+  },
+  "no_external_images_required": true
+}

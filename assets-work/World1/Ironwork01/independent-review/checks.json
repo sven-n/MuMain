@@ -1,0 +1,345 @@
+{
+  "Tree01": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree01.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01.smd: bones=16 frames=1 triangles=412 materials=2\nOK\n",
+        "stderr": "warning: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree01/Tree01_a00.smd: bones=16 frames=31 triangles=0 materials=0\nOK\n",
+        "stderr": "warning: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Trees01/Tree01/original/Tree01.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree01.bmd"
+        ],
+        "returncode": 0,
+        "stdout": "meshes 2 vs 2, bones 16 vs 16, actions 1 vs 1, triangles 412 vs 412\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0002  differing bone names: 0\nEQUIVALENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  },
+  "Tree02": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree02.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02.smd: bones=24 frames=1 triangles=770 materials=2\nOK\n",
+        "stderr": "warning: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree02/Tree02_a00.smd: bones=24 frames=31 triangles=0 materials=0\nOK\n",
+        "stderr": "warning: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Trees01/Tree02/original/Tree02.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree02.bmd"
+        ],
+        "returncode": 0,
+        "stdout": "meshes 2 vs 2, bones 24 vs 24, actions 1 vs 1, triangles 770 vs 770\nunmatched triangles: 0  max corner distance: 0.0048  max bone distance: 0.0002  differing bone names: 0\nEQUIVALENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  },
+  "Tree06": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree06.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06.smd: bones=1 frames=1 triangles=89 materials=1\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree06/Tree06_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Trees01/Tree06/original/Tree06.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree06.bmd"
+        ],
+        "returncode": 0,
+        "stdout": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 89 vs 89\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  },
+  "Tree11": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree11.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11.smd: bones=10 frames=1 triangles=169 materials=2\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/Tree11/Tree11_a00.smd: bones=10 frames=31 triangles=0 materials=0\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Trees01/Tree11/original/Tree11.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/Tree11.bmd"
+        ],
+        "returncode": 0,
+        "stdout": "meshes 2 vs 2, bones 10 vs 10, actions 1 vs 1, triangles 169 vs 169\nunmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0001  differing bone names: 0\nEQUIVALENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  },
+  "House02": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/House02.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02.smd: bones=1 frames=1 triangles=1215 materials=2\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/House02/House02_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/TimberProps01/House02/original/House02.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/House02.bmd"
+        ],
+        "returncode": 2,
+        "stdout": "meshes 2 vs 2, bones 1 vs 1, actions 1 vs 1, triangles 173 vs 1215\nunmatched triangles: 95  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  },
+  "TreasureDrum01": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/TreasureDrum01.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01.smd: bones=1 frames=1 triangles=1456 materials=1\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/TreasureDrum01/TreasureDrum01_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/TimberProps01/TreasureDrum01/original/TreasureDrum01.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/TreasureDrum01.bmd"
+        ],
+        "returncode": 2,
+        "stdout": "meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 60 vs 1456\nunmatched triangles: 60  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0\nDIFFERENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  },
+  "StreetLight01": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "bmd2smd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/StreetLight01.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01"
+        ],
+        "returncode": 0,
+        "stdout": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01.actions.txt\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01.smd"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01.smd: bones=11 frames=1 triangles=572 materials=2\nOK\n",
+        "stderr": "warning: line 3: bone 'Dummy00' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 4: bone 'Dummy01' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 5: bone 'Dummy02' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "validate",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01_a00.smd",
+          "--animation"
+        ],
+        "returncode": 0,
+        "stdout": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/independent-review/StreetLight01/StreetLight01_a00.smd: bones=11 frames=21 triangles=0 materials=0\nOK\n",
+        "stderr": "warning: line 3: bone 'Dummy00' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 4: bone 'Dummy01' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 5: bone 'Dummy02' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+      },
+      {
+        "command": [
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv",
+          "compare",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/TimberProps01/StreetLight01/original/StreetLight01.bmd",
+          "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/src/bin/Data/Object1/StreetLight01.bmd"
+        ],
+        "returncode": 2,
+        "stdout": "meshes 2 vs 2, bones 11 vs 11, actions 1 vs 1, triangles 84 vs 572\nunmatched triangles: 63  max corner distance: 0.0000  max bone distance: 0.0001  differing bone names: 0\nDIFFERENT\n",
+        "stderr": ""
+      }
+    ],
+    "source_game_hashes_match_validation": true
+  }
+}

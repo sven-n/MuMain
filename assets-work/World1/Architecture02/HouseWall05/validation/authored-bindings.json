@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "authored_new_vertices": 12,
+  "authored_panel_triangles_checked": 30,
+  "intended_bones": [
+    "Box01"
+  ],
+  "every_new_triangle_retains_intended_bone_indices": true,
+  "maximum_source_to_final_position_component_delta": 4.173339842594714e-06,
+  "position_tolerance": 0.002,
+  "uv_tolerance": 1e-05,
+  "method": "Packed Blender authored triangles versus final BMD re-extracted SMD; each cyclically aligned corner must retain material, intended bone index, position and UV. Original corner normalization is audited separately."
+}

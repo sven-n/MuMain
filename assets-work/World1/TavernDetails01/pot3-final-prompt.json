@@ -1,0 +1,4 @@
+{
+  "prompt": "Edit this existing apple sprig texture only. Preserve its material colors, position, stem and top leaf. Make each of the two broad middle leaves about 40% taller in the vertical dimension, keeping their tips and horizontal span the same. Their upper edges should rise and lower edges fall around the current central veins, so they occupy more of the square. Current actual opaque alpha coverage is27.7%; aim for35-39% opaque coverage. Keep genuine transparent background and small spaces between stem and leaves. The stem still ends at the bottom center and the top leaf at y5%. Do not add new leaves or fruit, do not add a background, shadow, text or border. This serves the original alpha-card silhouette in the game.",
+  "generated_path": "/Users/webproduktion3/.codex/generated_images/01a0c96e-6c81-7f83-a47e-13549021223d/exec-1618f652-deef-47cd-bddd-f860090e413f.png"
+}

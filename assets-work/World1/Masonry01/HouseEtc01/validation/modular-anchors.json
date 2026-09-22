@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 1.0000000010279564e-06,
+  "unchanged_triangle_count": 30,
+  "retained_triangles_by_texture": {
+    "c_wall04.jpg": 4,
+    "c_wall06.jpg": 26
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 4.700000000001925e-05,
+  "max_retained_normal_direction_degrees": 0.004093741539513553,
+  "frozen_container_sha256": {},
+  "panel_face_pairs": [
+    [
+      0,
+      1
+    ],
+    [
+      4,
+      5
+    ]
+  ],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit c_wall04 panel pairs retain position, bone and UV. Gate portcullis, gate inward jamb planes, hut doorway, relief silhouettes and frozen siege details unchanged.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Panel centers are recessed by 0.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

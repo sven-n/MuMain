@@ -1,0 +1,44 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -50.01,
+      -147.4,
+      -174.17
+    ],
+    [
+      49.99,
+      49.92,
+      334.09
+    ]
+  ],
+  "bounds_after": [
+    [
+      -50.01,
+      -147.4,
+      -174.17
+    ],
+    [
+      49.99,
+      49.92,
+      334.09
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "c_wall06.jpg",
+    "c_wall05.jpg",
+    "c_wall04.jpg"
+  ],
+  "export_sha256": {
+    "StoneMuWall02.bmd": "71871c76baa85db5b0e8d4017ee0a5c797eeb4897bf14dfa2129da19264ea4cd",
+    "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "c_wall05.OZJ": "e2890842d739f4fa2010e2a90d4af1e368a97bf2028d26c4e15dac0030e05083",
+    "c_wall06.OZJ": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4"
+  }
+}

@@ -1,0 +1,85 @@
+00:00.744  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/original/source.blend"
+00:00.799  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/build_source.py:51: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if material.name.endswith('.tga') and material.use_nodes:
+00:00.822  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/original/source.blend"
+00:00.843  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Fence01/original/source.blend"
+00:00.858  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/FireLight02/original/source.blend"
+00:00.880  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House01/original/source.blend"
+00:00.905  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House03/original/source.blend"
+00:00.944  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House04/original/source.blend"
+00:00.980  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House05/original/source.blend"
+00:01.003  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseEtc02/original/source.blend"
+00:01.034  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall01/original/source.blend"
+00:01.052  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall02/original/source.blend"
+00:01.076  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall04/original/source.blend"
+00:01.095  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall05/original/source.blend"
+00:01.110  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall06/original/source.blend"
+00:01.127  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneMuWall01/original/source.blend"
+00:01.158  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/original/source.blend"
+00:01.184  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall02/original/source.blend"
+00:01.211  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tent01/original/source.blend"
+00:01.231  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tree07/original/source.blend"
+Info: Saved as "source.blend"
+HouseWall03 36 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+Bridge01 276 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+BridgeStone01 106 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+Fence01 116 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+FireLight02 34 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+House01 208 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+House03 313 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+House04 358 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+House05 324 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseEtc02 250 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseWall01 52 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseWall02 110 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseWall04 88 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseWall05 54 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseWall06 52 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+StoneMuWall01 398 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+StoneWall01 414 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+StoneWall02 414 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+Tent01 130 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+Tree07 90 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

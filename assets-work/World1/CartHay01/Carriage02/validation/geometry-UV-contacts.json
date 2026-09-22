@@ -1,0 +1,90 @@
+{
+  "status": "PASS",
+  "authored_bindings": {
+    "status": "PASS",
+    "source_vertices": 285,
+    "all_exported_corners_match_authored_bone_and_position": true,
+    "maximum_coordinate_deviation": 0.00035126269531815524,
+    "tolerance": 0.005
+  },
+  "surface": {
+    "minimum_uv_triangle_area": 0.00012374100000000007,
+    "minimum_geometry_triangle_area": 7.651889153337774,
+    "minimum_winding_normal_dot": 0.8469399961132488,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -90.381599,
+          19.248695,
+          -1.169701
+        ],
+        [
+          88.696396,
+          143.825699,
+          129.818298
+        ]
+      ],
+      "after": [
+        [
+          -90.381599,
+          19.248695,
+          -1.169701
+        ],
+        [
+          88.696396,
+          143.825699,
+          129.818298
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 1,
+      "before": [
+        [
+          -80.530197,
+          -218.18396,
+          0.950294
+        ],
+        [
+          76.30069,
+          218.926422,
+          182.284195
+        ]
+      ],
+      "after": [
+        [
+          -80.530014,
+          -218.18396,
+          0.950226
+        ],
+        [
+          76.300949,
+          218.926392,
+          182.284454
+        ]
+      ],
+      "max_difference": 0.0002589999999997872
+    }
+  ],
+  "retained_surfaces": {
+    "status": "PASS",
+    "all_original_cart_wheel_axle_seat_cask_lamp_effect_corners_retained": true,
+    "UV_tolerance": 0.001001,
+    "UV_note": "Four pre-existing collapsed wood UV triangles opened within quarter original atlas texel; other original UVs exact",
+    "corner_samples": 774,
+    "max_position_difference": 0.00035100000000909404,
+    "additive_mesh_index": null
+  },
+  "material_order": [
+    "horse_drawn_01.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

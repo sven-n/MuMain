@@ -1,0 +1,59 @@
+{
+  "path": "src/bin/Data/Object1/Beer02.bmd",
+  "type": 152,
+  "placements": [
+    {
+      "position": [
+        6264.2958984375,
+        13110.44140625,
+        172.68199157714844
+      ],
+      "rotation": [
+        355.0,
+        0.0,
+        2430.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        62.642958984375,
+        131.1044140625
+      ]
+    },
+    {
+      "position": [
+        12734.263671875,
+        12772.3427734375,
+        260.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        127.34263671875,
+        127.723427734375
+      ]
+    }
+  ],
+  "textures": {
+    "pot3.tga": [
+      "src/bin/Data/Object1/pot3.ozt"
+    ],
+    "apple.jpg": [
+      "src/bin/Data/Object1/apple.OZJ"
+    ],
+    "bottle.tga": [
+      "src/bin/Data/Object1/bottle.ozt"
+    ],
+    "plate.jpg": [
+      "src/bin/Data/Object1/plate.OZJ"
+    ],
+    "winecup.jpg": [
+      "src/bin/Data/Object1/winecup.OZJ"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Beer02.bmd\n  name field: Data2\\Object1\\house_in_beer_02.s  version: 10\n  meshes: 5  bones: 6  actions: 1  triangles: 232\n  bounds (bind pose): min -43.76 -28.36 -0.80  max 44.47 23.53 61.47  size 88.24 51.88 62.27\n  mesh 0: triangles=4 vertices=8 normals=2 uvs=4 texture=pot3.tga\n  mesh 1: triangles=96 vertices=52 normals=52 uvs=30 texture=apple.jpg\n  mesh 2: triangles=36 vertices=20 normals=20 uvs=30 texture=bottle.tga\n  mesh 3: triangles=60 vertices=38 normals=25 uvs=28 texture=plate.jpg\n  mesh 4: triangles=36 vertices=25 normals=31 uvs=29 texture=winecup.jpg\n  bone 0: \"ytut\" parent=-1\n  bone 1: \"Cylinder32\" parent=-1\n  bone 2: \"Cylinder33\" parent=-1\n  bone 3: \"Cylinder34\" parent=-1\n  bone 4: \"Cylinder35\" parent=-1\n  bone 5: \"ytut01\" parent=-1\n  action 0: keys=1 lock=0\n",
+  "scope_exclusion": null
+}

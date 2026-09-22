@@ -1,0 +1,55 @@
+{
+  "triangles": 472,
+  "bounds_before": [
+    [
+      -114.61540222167969,
+      -94.22530364990234,
+      -14.5018310546875
+    ],
+    [
+      244.5664825439453,
+      92.68309783935547,
+      201.9051971435547
+    ]
+  ],
+  "bounds_after": [
+    [
+      -114.61540222167969,
+      -94.22530364990234,
+      -14.5018310546875
+    ],
+    [
+      244.5664825439453,
+      92.68309783935547,
+      201.9051971435547
+    ]
+  ],
+  "material_order": [
+    "horse_drawn_01.jpg",
+    "horse_drawn_02.tga",
+    "horse_drawn_03.jpg"
+  ],
+  "bone_order": [
+    "Bone01",
+    "Bone02",
+    "Bone03",
+    "Bone04",
+    "Box02",
+    "Dummy05",
+    "Bone06",
+    "Bone07",
+    "Bone08",
+    "Box03",
+    "Bone05",
+    "Bone09",
+    "Tube01",
+    "Bone_point"
+  ],
+  "action_meta": {
+    "Carriage01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "geometry": "Readonly original geometry and BMD bytes retained; shared texture compatibility"
+}

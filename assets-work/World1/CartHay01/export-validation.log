@@ -1,0 +1,23 @@
+Carriage01 meshes 3 vs 3, bones 14 vs 14, actions 1 vs 1, triangles 280 vs 472
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0001  differing bone names: 0
+DIFFERENT
+
+Carriage02 meshes 1 vs 1, bones 2 vs 2, actions 1 vs 1, triangles 258 vs 450
+unmatched triangles: 0  max corner distance: 0.0005  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Carriage03 meshes 2 vs 2, bones 4 vs 4, actions 1 vs 1, triangles 346 vs 538
+unmatched triangles: 0  max corner distance: 0.0017  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Carriage04 meshes 2 vs 2, bones 5 vs 5, actions 1 vs 1, triangles 390 vs 882
+unmatched triangles: 132  max corner distance: 0.0007  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Straw01 meshes 1 vs 1, bones 3 vs 3, actions 1 vs 1, triangles 132 vs 432
+unmatched triangles: 132  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+
+Straw02 meshes 1 vs 1, bones 8 vs 8, actions 1 vs 1, triangles 352 vs 1152
+unmatched triangles: 352  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT

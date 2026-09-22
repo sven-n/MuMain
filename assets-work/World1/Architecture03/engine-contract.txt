@@ -1,0 +1,87 @@
+Architecture03 / retained source renderer contracts
+
+src/source/Engine/Object/ZzzObject.cpp:3828
+3828:             o->HiddenMesh = -2;
+3829:             break;
+3830:         case MODEL_BRIDGE:
+3831:             CreateFire(0, o, 90.f, -200.f, 30.f);
+3832:             CreateFire(0, o, 90.f, 200.f, 30.f);
+3833:             break;
+3834:         case MODEL_DUNGEON_GATE:
+
+src/source/Engine/Object/ZzzObject.cpp:4611
+4611:     case WD_0LORENCIA:
+4612:         switch (Type)
+4613:         {
+4614:         case MODEL_BRIDGE:
+4615:             o->CollisionRange = -50.f;
+4616:             break;
+4617:         case MODEL_HOUSE01 + 2:
+
+Accepted readonly indexed effects: House03 mesh4 light_02; House04 mesh8 tile_space01 V-scroll; House05 mesh2 ston02 water V-scroll; HouseWall02 mesh4 light_02; HouseWall05/06 HeroTile4 alpha fade. All 17 compatibility BMDs and every other texture container stay byte-identical. Existing earlier accepted architecture engine-contract excerpts are preserved below.
+
+Architecture renderer contract — inspected without edits.
+Special effect indices are zero-based.
+src/source/Engine/Object/ZzzObject.cpp:3808-3817
+3808:         switch (o->Type)
+3809:         {
+3810:         case MODEL_HOUSE01 + 3:
+3811:         case MODEL_HOUSE01 + 4:
+3812:             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
+3813:             break;
+3814:         case MODEL_HOUSE01 + 2:
+3815:         case MODEL_HOUSE_WALL01 + 1:
+3816:             o->BlendMeshLight = (float)(rand() % 4 + 4) * 0.1f;
+3817:             break;
+src/source/Engine/Object/ZzzObject.cpp:4617-4627
+4617:         case MODEL_HOUSE01 + 2:
+4618:             o->BlendMesh = 4;
+4619:             break;
+4620:         case MODEL_HOUSE01 + 3:
+4621:             o->BlendMesh = 8;
+4622:             break;
+4623:         case MODEL_HOUSE01 + 4:
+4624:             o->BlendMesh = 2;
+4625:             break;
+4626:         case MODEL_HOUSE_WALL01 + 1:
+4627:             o->BlendMesh = 4;
+
+House03 mesh4 light_02.jpg and HouseWall02 mesh4 light_02.jpg: additive brightness 0.4–0.7.
+House04 mesh8 tile_space01.jpg: world-time V scroll. Original surface geometry and UVs retained.
+Actual client rendering not observed; Blender emission/scroll examples explicitly approximate these rules.
+
+Architecture02 renderer contract; source inspected without edits.
+src/source/Engine/Object/ZzzObject.cpp:3708-3717
+3708:     if (gMapManager.WorldActive == 0)
+3709:     {
+3710:         if (o->Type == MODEL_HOUSE_WALL01 + 4 || o->Type == MODEL_HOUSE_WALL01 + 5)
+3711:         {
+3712:             if (HeroTile == 4)
+3713:                 o->AlphaTarget = 0.f;
+3714:             else
+3715:                 o->AlphaTarget = 1.f;
+3716:         }
+3717: #ifdef _PVP_MURDERER_HERO_ITEM
+src/source/Engine/Object/ZzzObject.cpp:3808-3817
+3808:         switch (o->Type)
+3809:         {
+3810:         case MODEL_HOUSE01 + 3:
+3811:         case MODEL_HOUSE01 + 4:
+3812:             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
+3813:             break;
+3814:         case MODEL_HOUSE01 + 2:
+3815:         case MODEL_HOUSE_WALL01 + 1:
+3816:             o->BlendMeshLight = (float)(rand() % 4 + 4) * 0.1f;
+3817:             break;
+src/source/Engine/Object/ZzzObject.cpp:4617-4627
+4617:         case MODEL_HOUSE01 + 2:
+4618:             o->BlendMesh = 4;
+4619:             break;
+4620:         case MODEL_HOUSE01 + 3:
+4621:             o->BlendMesh = 8;
+4622:             break;
+4623:         case MODEL_HOUSE01 + 4:
+4624:             o->BlendMesh = 2;
+4625:             break;
+4626:         case MODEL_HOUSE_WALL01 + 1:
+4627:             o->BlendMesh = 4;

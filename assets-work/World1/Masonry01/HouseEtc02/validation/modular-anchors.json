@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 220,
+  "retained_triangles_by_texture": {
+    "tile_wood02.jpg": 2,
+    "tile_ston04.jpg": 46,
+    "c_wall04.jpg": 19,
+    "tile_wood03.jpg": 16,
+    "tile_house01.jpg": 5,
+    "tile_ston01.jpg": 8,
+    "horse_drawn_01.jpg": 94,
+    "tile_ston06.jpg": 30
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0.001404,
+  "max_retained_normal_direction_degrees": 0.08171869042104614,
+  "frozen_container_sha256": {
+    "tile_wood03.OZJ": "aa7ab051d5598e159f196ac20f52654f8c1d81c57f220cb6b50a5e62a7112195",
+    "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_house01.OZJ": "efdf9cf6b54ccf4b9d3d805cf0e7ecdc398aa1fb3c7e77d21778a55790fff683",
+    "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+  },
+  "panel_face_pairs": [
+    [
+      50,
+      51
+    ],
+    [
+      52,
+      53
+    ],
+    [
+      54,
+      55
+    ]
+  ],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit c_wall04 panel pairs retain position, bone and UV. Gate portcullis, gate inward jamb planes, hut doorway, relief silhouettes and frozen siege details unchanged.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Panel centers are recessed by 0.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

@@ -1,0 +1,42 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -72.77,
+      -53.36,
+      -0.08
+    ],
+    [
+      74.61,
+      39.88,
+      264.77
+    ]
+  ],
+  "bounds_after": [
+    [
+      -72.77,
+      -53.36,
+      -0.08
+    ],
+    [
+      74.61,
+      39.88,
+      264.77
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "tombstone_big.jpg",
+    "angel_stone_statue.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "angel_stone_statue.OZJ": "41badb3711151f592185b4c105701cc0652bce19ae796987f978294485673d12",
+    "tombstone_big.OZJ": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940",
+    "StoneStatue03.bmd": "cbbf03b5de8c57cb46e76ea96d27ed43aefc119956f39082f48382d6677e228f"
+  }
+}

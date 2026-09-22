@@ -1,0 +1,24 @@
+{
+  "c_wall04": [
+    "HouseEtc01",
+    "HouseEtc02",
+    "StoneMuWall01",
+    "StoneMuWall02",
+    "StoneMuWall03",
+    "StoneMuWall04"
+  ],
+  "c_wall05": [
+    "StoneMuWall01",
+    "StoneMuWall02"
+  ],
+  "c_wall06": [
+    "HouseEtc01",
+    "StoneMuWall01",
+    "StoneMuWall02",
+    "StoneMuWall03",
+    "StoneMuWall04"
+  ],
+  "tile_ston01": [
+    "HouseEtc02"
+  ]
+}

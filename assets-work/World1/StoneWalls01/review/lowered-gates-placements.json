@@ -1,0 +1,152 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    17500.0,
+    2000.0,
+    170.49488830566406
+  ],
+  "objects": [
+    {
+      "name": "StoneWall01",
+      "placement_index": 1,
+      "position": [
+        18100.0,
+        2000.0,
+        165.1825408935547
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        181.0,
+        20.0
+      ]
+    },
+    {
+      "name": "StoneWall02",
+      "placement_index": 0,
+      "position": [
+        17500.0,
+        2000.0,
+        170.49488830566406
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -180.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        175.0,
+        20.0
+      ]
+    },
+    {
+      "name": "StoneWall02",
+      "placement_index": 1,
+      "position": [
+        17100.0,
+        2950.0,
+        175.17616271972656
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        171.0,
+        29.5
+      ]
+    },
+    {
+      "name": "StoneWall02",
+      "placement_index": 2,
+      "position": [
+        16893.865234375,
+        2386.70751953125,
+        -13.400360107421875
+      ],
+      "rotation": [
+        -50.0,
+        0.0,
+        -390.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        168.93865234375,
+        23.8670751953125
+      ]
+    },
+    {
+      "name": "StoneWall03",
+      "placement_index": 0,
+      "position": [
+        17354.60546875,
+        2700.505126953125,
+        -13.400390625
+      ],
+      "rotation": [
+        -50.0,
+        0.0,
+        -390.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        173.5460546875,
+        27.00505126953125
+      ]
+    },
+    {
+      "name": "StoneWall03",
+      "placement_index": 1,
+      "position": [
+        17897.953125,
+        2539.4326171875,
+        119.47312927246094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -360.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        178.97953125,
+        25.394326171875
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -890.9844970703125,
+      -88.55765533447266,
+      -323.5196228027344
+    ],
+    [
+      897.4361572265625,
+      1248.04248046875,
+      618.261962890625
+    ]
+  ],
+  "exact_shared_camera": {
+    "location": [
+      2297.419921875,
+      -3086.164306640625,
+      2460.090087890625
+    ],
+    "rotation": [
+      1.0766301155090332,
+      5.3025267732209613e-08,
+      0.5937497019767761
+    ],
+    "ortho_scale": 2437.0953055245536
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      58,
+      218
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -1.550201,
+          -6.617287,
+          0.453094
+        ],
+        [
+          152.895706,
+          6.704713,
+          356.476501
+        ]
+      ],
+      [
+        [
+          -1.550201,
+          -6.617188,
+          0.453094
+        ],
+        [
+          152.895706,
+          6.704893,
+          356.476501
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.00018000000000029104,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true,
+    "surface_checks_before_after": [
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 58
+      },
+      {
+        "zero_area_triangles": 0,
+        "opposing_averaged_normals": 0
+      }
+    ]
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=SteelDoor01_a00.smd keys=1 lock=0",
+      "texture 0 steel_barred_b.jpg original=steel_barred_b.jpg",
+      "texture 1 steel_barred_door.tga original=steel_barred_door.tga"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "SteelDoor01.smd",
+        "nodes_exact": "0 \"Cylinder04\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 3.0717958665604783e-07
+      },
+      {
+        "file": "SteelDoor01_a00.smd",
+        "nodes_exact": "0 \"Cylinder04\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 0,
+        "max_rotation_difference_radians": 3.0717958665604783e-07
+      }
+    ]
+  },
+  "full_compare": "DIFFERENT",
+  "mesh_texture_order": [
+    "steel_barred_b.jpg",
+    "steel_barred_door.tga"
+  ],
+  "export_sha256": {
+    "SteelDoor01.bmd": "86822c7626b45ff15e1fcd554e55e0baa7443c55f8584faf29e81e96b8b104e6",
+    "steel_barred_door.OZT": "36f41caa9871ef74ddd8cbe51798ba258ab77cd1db87d90da23d4cf876bdf741",
+    "steel_barred_b.OZJ": "18fb54247b0dc08f4dfe2daab5f9f4edfde880513d0ed597e449e58efafd8087"
+  }
+}

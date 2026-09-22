@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "position_tolerance": 0.001,
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 639,
+  "retained_triangles_by_texture": {
+    "stone_statue02.jpg": 72,
+    "reagon_waterspout.jpg": 417,
+    "ston01.jpg": 60,
+    "ston02.jpg": 90
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0,
+  "max_retained_normal_direction_degrees": 0,
+  "frozen_container_sha256": {
+    "reagon_waterspout.OZJ": "0da0208475dd23f3838e39615ff562ddec46a5f094c198b7c1e481443135b67d",
+    "ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784",
+    "ston02.OZJ": "09d1dbbbc7672fe05d82a89a115bee1ec538e615b3f39e93b9e244e7cd61d151"
+  },
+  "panel_face_pairs": [],
+  "uv_reprojected_faces": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit stone panel pairs retain position, bone and UV. Sculptural head/angel forms and all fountain components retain their original geometry and UVs.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Selected stone panel centers are recessed by 0.4 units; no original source perimeter vertices moved. Tomb01 original slanted root incurs measured 0.002633-unit export reconstruction; explicit 0.005 tolerance. All other assets use 0.001. No placement/collision/terrain changes."
+}

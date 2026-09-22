@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "bridge_01.jpg",
+    "bridge_01.jpg.001",
+    "tile_01.jpg",
+    "tile_01.jpg.001",
+    "tile_02.jpg",
+    "tile_02.jpg.001",
+    "tile_03.jpg",
+    "tile_03.jpg.001"
+  ],
+  "original_rig_reused": true,
+  "reference_exclusion": "REF_* collections and mu_reference",
+  "export_objects": 1
+}

@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd
+  name field: TreasureDrum01.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 1456
+  bounds (bind pose): min -40.57 -40.22 0.00  max 40.70 41.05 102.98  size 81.27 81.27 102.98
+  mesh 0: triangles=1456 vertices=786 normals=1258 uvs=332 texture=drum.jpg
+  bone 0: "Cylinder03" parent=-1
+  action 0: keys=1 lock=0

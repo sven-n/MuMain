@@ -1,0 +1,39 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Original cards retained; full BMD comparison EQUIVALENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -161.84,
+      -51.36,
+      0.11
+    ],
+    [
+      102.59,
+      58.3,
+      60.74
+    ]
+  ],
+  "bounds_after": [
+    [
+      -161.84,
+      -51.36,
+      0.11
+    ],
+    [
+      102.59,
+      58.3,
+      60.74
+    ]
+  ],
+  "material": "tree_09.tga",
+  "meshes": 1,
+  "exports": {
+    "tree_09.OZT": "cb9cf4565ffda802131cde6b53e64a66550c2949efbf3b123f2f73a00aa65349",
+    "Grass06.bmd": "c656def11e72fe698f4ed99167b47db04eed37bc1e606983368fb99c1335d4c5"
+  }
+}

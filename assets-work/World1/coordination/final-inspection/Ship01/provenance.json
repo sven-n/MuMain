@@ -1,0 +1,31 @@
+{
+  "model": "Ship01",
+  "game_files": {
+    "src/bin/Data/Object1/Ship01.bmd": "26c2e0309638634f24cf2396f26464afe587236de2e264ea54567cbdbfdf6921",
+    "src/bin/Data/Object1/TileGround03.OZJ": "a630c6d2b44c370d9d239a285ae87c637c7ea780b6694032554273f579570d33",
+    "src/bin/Data/Object1/ship01.OZJ": "f54714c5cfa7556d6958fb79bd0b691cc57f738d28ea0b6957ecdbfc9f9e5d2d",
+    "src/bin/Data/Object1/ship03.OZJ": "0d9a45d9abcafa7a739f47fbd82b7907fb523b1ad11046bcd19d3f4d3a83afb0",
+    "src/bin/Data/Object1/ship04.OZJ": "be23ab1dc3f090c8f97114a48aa1080880d46d2f2a6adfc0f1d002ea4ca3aef1",
+    "src/bin/Data/Object1/ship07.OZJ": "ba085bac813252797168b85cf9424e1bdcb9faafba447cd0dd3f7ee08999c721",
+    "src/bin/Data/Object1/ship05.OZT": "1d3276c92eb11ef3270a23dddf165ae5c5db50c4c00ca884f986d87479c9b153",
+    "src/bin/Data/Object1/ship07.OZT": "63d91dfd26a7b59c34a276c243e86f7ab6a9e2b87b15fa6ff538a48df76dc400",
+    "src/bin/Data/Object1/ship06.OZT": "cd39596a685210e12159a57bb5e7d8377e4b7228d17263ec3fca56dbdccd86a4",
+    "src/bin/Data/Object1/ship06.OZJ": "89b302263ce1cc14b6a6984c0e540030034e8fcf34ca2535ca815a2c8bd28d0b",
+    "src/bin/Data/Object1/ship05.OZJ": "c8e7d174f298315aa0b552644bdbc212b6a9ac6b4ac3d275afbdae7b1216fe3d"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 754,
+  "bind_bounds": [
+    [
+      -581.9429321289062,
+      -1166.513671875,
+      -100.15499877929688
+    ],
+    [
+      553.4609985351562,
+      669.2794189453125,
+      937.9290161132812
+    ]
+  ]
+}

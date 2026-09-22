@@ -1,0 +1,15 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/validation/official-export/House04.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/validation/official-export/House04_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/validation/official-export/House04.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/validation/locked-motion/House04.smd: bones=9 frames=1 triangles=358 materials=9
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/validation/locked-motion/House04_a00.smd: bones=9 frames=40 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/exports/House04.bmd (1 action(s))
+
+meshes 9 vs 9, bones 9 vs 9, actions 1 vs 1, triangles 358 vs 358
+unmatched triangles: 0  max corner distance: 0.0015  max bone distance: 0.0004  differing bone names: 0
+EQUIVALENT

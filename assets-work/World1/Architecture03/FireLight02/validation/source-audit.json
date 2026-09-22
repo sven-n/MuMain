@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "copra_gate.jpg",
+    "copra_gate.jpg.001",
+    "fire_light_01.tga",
+    "fire_light_01.tga.001",
+    "tile_02.jpg",
+    "tile_02.jpg.001"
+  ],
+  "original_rig_reused": true,
+  "reference_exclusion": "REF_* collections and mu_reference",
+  "export_objects": 1
+}

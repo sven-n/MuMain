@@ -1,0 +1,196 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    12600.0,
+    12050.0,
+    165.00001525878906
+  ],
+  "objects": [
+    {
+      "name": "Tent01",
+      "placement_index": 1,
+      "position": [
+        12800.0,
+        11850.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        2880.0
+      ],
+      "scale": 0.7800002098083496,
+      "tile": [
+        128.0,
+        118.5
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 4,
+      "position": [
+        12600.0,
+        12050.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1080.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        126.0,
+        120.5
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 5,
+      "position": [
+        12050.0,
+        12600.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        990.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        126.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 6,
+      "position": [
+        12400.0,
+        12050.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1080.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        124.0,
+        120.5
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 7,
+      "position": [
+        12050.0,
+        12400.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        124.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 8,
+      "position": [
+        12050.0,
+        12800.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        128.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 9,
+      "position": [
+        12050.0,
+        13000.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        990.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        130.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 13,
+      "position": [
+        12950.0,
+        12600.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        810.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        126.0
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 14,
+      "position": [
+        12950.0,
+        13000.0,
+        165.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        810.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        129.5,
+        130.0
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted. Light beams approximate additive rendering at0.55 emission, not engine evidence.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -660.9676513671875,
+      -356.9185485839844,
+      -1.0720514059066772
+    ],
+    [
+      460.9676513671875,
+      1051.1446533203125,
+      264.47900390625
+    ]
+  ]
+}

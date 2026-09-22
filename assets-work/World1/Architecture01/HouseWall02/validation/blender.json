@@ -1,0 +1,257 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 110,
+  "original_triangles": 70,
+  "bounds_before": [
+    [
+      -100.95050048828125,
+      -110.96759796142578,
+      0.2808069884777069
+    ],
+    [
+      101.14462280273438,
+      49.54890060424805,
+      264.47900390625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -100.95050048828125,
+      -110.96759796142578,
+      0.2808069884777069
+    ],
+    [
+      101.14462280273438,
+      49.54890060424805,
+      264.47900390625
+    ]
+  ],
+  "original_vertices_retained": 60,
+  "bone_order": [
+    "sdfeew",
+    "Object01",
+    "Object03"
+  ],
+  "action_meta": {
+    "HouseWall02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_ston06.jpg": [
+      128,
+      128
+    ],
+    "tile_wood01.jpg": [
+      128,
+      128
+    ],
+    "tile_wood02.jpg": [
+      128,
+      128
+    ],
+    "tile_ston04.jpg": [
+      128,
+      128
+    ],
+    "light_02.jpg": [
+      128,
+      128
+    ]
+  },
+  "material_order": [
+    "tile_ston06.jpg",
+    "tile_wood01.jpg",
+    "tile_wood02.jpg",
+    "tile_ston04.jpg",
+    "light_02.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "House03 awning uses original RGBA cutout mask; all other textures opaque RGB; effects retain original additive indices",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        20,
+        21
+      ],
+      "boundary_vertices": [
+        14,
+        21,
+        22,
+        15
+      ],
+      "inset_fraction": 0.045506971311116265,
+      "recess_depth": 0.4,
+      "original_perimeter": [
+        [
+          100.14407348632812,
+          13.563301086425781,
+          73.77510070800781
+        ],
+        [
+          100.14407348632812,
+          13.563400268554688,
+          246.1790008544922
+        ],
+        [
+          45.222808837890625,
+          13.563301086425781,
+          212.04010009765625
+        ],
+        [
+          45.222808837890625,
+          13.563301086425781,
+          131.5792999267578
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        22,
+        23
+      ],
+      "boundary_vertices": [
+        17,
+        13,
+        12,
+        23
+      ],
+      "inset_fraction": 0.044970372773484334,
+      "recess_depth": 0.4,
+      "original_perimeter": [
+        [
+          -99.94998168945312,
+          13.563301086425781,
+          246.1790008544922
+        ],
+        [
+          -99.94998168945312,
+          13.563301086425781,
+          73.77510070800781
+        ],
+        [
+          -43.36529541015625,
+          13.563301086425781,
+          131.5792999267578
+        ],
+        [
+          -43.36529541015625,
+          13.563301086425781,
+          212.04010009765625
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        26,
+        27
+      ],
+      "boundary_vertices": [
+        21,
+        17,
+        23,
+        22
+      ],
+      "inset_fraction": 0.04247958406888596,
+      "recess_depth": 0.4,
+      "original_perimeter": [
+        [
+          100.14407348632812,
+          13.563400268554688,
+          246.1790008544922
+        ],
+        [
+          -99.94998168945312,
+          13.563301086425781,
+          246.1790008544922
+        ],
+        [
+          -43.36529541015625,
+          13.563301086425781,
+          212.04010009765625
+        ],
+        [
+          45.222808837890625,
+          13.563301086425781,
+          212.04010009765625
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        38,
+        39
+      ],
+      "boundary_vertices": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "inset_fraction": 0.018766046898552744,
+      "recess_depth": 0.4,
+      "original_perimeter": [
+        [
+          100.14352416992188,
+          3.672400951385498,
+          73.73760223388672
+        ],
+        [
+          -99.94998168945312,
+          3.672400951385498,
+          73.73760223388672
+        ],
+        [
+          -99.94998168945312,
+          3.672400951385498,
+          0.2808069884777069
+        ],
+        [
+          100.14352416992188,
+          3.672400951385498,
+          0.2808069884777069
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        52,
+        53
+      ],
+      "boundary_vertices": [
+        38,
+        39,
+        35,
+        34
+      ],
+      "inset_fraction": 0.01964281012765761,
+      "recess_depth": 0.4,
+      "original_perimeter": [
+        [
+          -100.95050048828125,
+          8.820301055908203,
+          239.4683074951172
+        ],
+        [
+          101.14462280273438,
+          8.820301055908203,
+          239.46820068359375
+        ],
+        [
+          101.14462280273438,
+          8.820301055908203,
+          264.4789123535156
+        ],
+        [
+          -100.95050048828125,
+          8.820301055908203,
+          264.47900390625
+        ]
+      ]
+    }
+  ],
+  "protected": "Every original corner retained; only explicitly selected non-effect panel interiors refined. Footprints, roof perimeters, openings, awning, canopy and effect meshes unchanged.",
+  "readonly_compatibility": false
+}

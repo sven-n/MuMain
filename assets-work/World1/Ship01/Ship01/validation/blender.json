@@ -1,0 +1,48 @@
+{
+  "bounds_before": [
+    [
+      -581.9429321289062,
+      -1166.513671875,
+      -100.15499877929688
+    ],
+    [
+      553.4611206054688,
+      669.2794189453125,
+      937.9290161132812
+    ]
+  ],
+  "bounds_after": [
+    [
+      -581.9429321289062,
+      -1166.513671875,
+      -100.15499877929688
+    ],
+    [
+      553.4611206054688,
+      669.2794189453125,
+      937.9290161132812
+    ]
+  ],
+  "triangles": 754,
+  "edits": [],
+  "bone_order": [
+    "Box01",
+    "Box02",
+    "Box03",
+    "Box05",
+    "Box04",
+    "Box06",
+    "ship",
+    "Cylinder01",
+    "Bone01",
+    "Bone02"
+  ],
+  "action_meta": {
+    "Ship01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "retained_geometry": true,
+  "note": "Hull silhouette, rigging attachments, decorative alpha cards and all 30 keys retained"
+}

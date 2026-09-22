@@ -1,0 +1,180 @@
+00:00.505  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/original/source.blend"
+00:02.010  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/review/before-offline.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bzc5alc8
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bzc5alc8/SteelWall01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bzc5alc8/SteelWall01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bzc5alc8/SteelWall01.actions.txt
+
+SMD IMPORTER: now working on SteelWall01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: steel_barred_b.jpg
+- New material: steel_barred_a.tga
+- Imported 84 polys
+SMD SteelWall01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on SteelWall01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "SteelWall01_skeleton"
+- Imported 1 frames of animation
+SMD SteelWall01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:03.516  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/review/after-offline.png'
+00:05.005  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/review/reverse-offline.png'
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/scripts/render_review.py:50: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes=True
+00:06.494  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/review/wireframe-offline.png'
+00:06.498  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/original/source.blend"
+00:08.405  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ty54xwca
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ty54xwca/SteelWall02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ty54xwca/SteelWall02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ty54xwca/SteelWall02.actions.txt
+
+SMD IMPORTER: now working on SteelWall02
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: steel_barred_b.jpg
+- New material: steel_barred_a.tga
+- Imported 328 polys
+SMD SteelWall02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on SteelWall02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "SteelWall02_skeleton"
+- Imported 1 frames of animation
+SMD SteelWall02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:10.374  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/review/after-offline.png'
+00:12.247  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/review/reverse-offline.png'
+00:14.663  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/review/wireframe-offline.png'
+00:14.664  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/original/source.blend"
+00:16.223  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_abnz698f
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_abnz698f/SteelWall03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_abnz698f/SteelWall03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_abnz698f/SteelWall03.actions.txt
+
+SMD IMPORTER: now working on SteelWall03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: steel_barred_b.jpg
+- New material: steel_barred_a.tga
+- Imported 82 polys
+SMD SteelWall03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on SteelWall03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "SteelWall03_skeleton"
+- Imported 1 frames of animation
+SMD SteelWall03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:17.891  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/review/after-offline.png'
+00:19.427  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/review/reverse-offline.png'
+00:21.288  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/review/wireframe-offline.png'
+00:21.289  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/original/source.blend"
+00:22.807  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ncc2icmp
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ncc2icmp/SteelDoor01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ncc2icmp/SteelDoor01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ncc2icmp/SteelDoor01.actions.txt
+
+SMD IMPORTER: now working on SteelDoor01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: steel_barred_b.jpg
+- New material: steel_barred_door.tga
+- Imported 218 polys
+SMD SteelDoor01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on SteelDoor01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "SteelDoor01_skeleton"
+- Imported 1 frames of animation
+SMD SteelDoor01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:24.511  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/review/after-offline.png'
+00:26.112  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/review/reverse-offline.png'
+00:27.833  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/review/wireframe-offline.png'
+00:27.835  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/original/source.blend"
+00:30.093  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z439pulj
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z439pulj/HouseEtc03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z439pulj/HouseEtc03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_z439pulj/HouseEtc03.actions.txt
+
+SMD IMPORTER: now working on HouseEtc03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: steel_barred_a.tga
+- New material: steel_barred_door.tga
+- Imported 16 polys
+SMD HouseEtc03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on HouseEtc03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "HouseEtc03_skeleton"
+- Imported 1 frames of animation
+SMD HouseEtc03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:32.476  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/review/after-offline.png'
+00:34.874  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/review/reverse-offline.png'
+00:37.933  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/review/wireframe-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

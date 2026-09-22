@@ -1,0 +1,46 @@
+{
+  "status": "PASS: authored geometry; engine validation separately required",
+  "triangles": 1456,
+  "bounds_before": [
+    [
+      -40.567298889160156,
+      -40.21580123901367,
+      0.0019000000320374966
+    ],
+    [
+      40.70109939575195,
+      41.0526008605957,
+      102.97920227050781
+    ]
+  ],
+  "bounds_after": [
+    [
+      -40.567298889160156,
+      -40.21580123901367,
+      0.0019229999743402004
+    ],
+    [
+      40.70109939575195,
+      41.0526008605957,
+      102.97920227050781
+    ]
+  ],
+  "bone_order": [
+    "Cylinder03"
+  ],
+  "action_meta": {
+    "TreasureDrum01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "drum.jpg": [
+      512,
+      512
+    ]
+  },
+  "skinning": "Exactly one valid non-dummy full-weight bone per vertex",
+  "uv": "One UVMap set, finite; new UVs [0,1]; original lantern glow repeat to -0.0936 retained",
+  "materials": "Original order and texture filenames; one diffuse image per mesh; no alpha or flags added"
+}

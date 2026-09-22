@@ -1,0 +1,179 @@
+{
+  "status": "PASS",
+  "authored_bindings": {
+    "status": "PASS",
+    "source_vertices": 343,
+    "all_exported_corners_match_authored_bone_and_position": true,
+    "maximum_coordinate_deviation": 1.5658203125212822e-05,
+    "tolerance": 0.005
+  },
+  "surface": {
+    "minimum_uv_triangle_area": 2.0223899999999825e-05,
+    "minimum_geometry_triangle_area": 7.651915550711674,
+    "minimum_winding_normal_dot": 0.846243932704969,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -114.615402,
+          -64.351799,
+          -14.501816
+        ],
+        [
+          244.566483,
+          65.675201,
+          196.878998
+        ]
+      ],
+      "after": [
+        [
+          -114.615402,
+          -64.351799,
+          -14.501831
+        ],
+        [
+          244.566483,
+          65.675201,
+          196.878998
+        ]
+      ],
+      "max_difference": 1.4999999999432134e-05
+    },
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 2,
+      "before": [
+        [
+          -40.994797,
+          11.3495,
+          139.4216
+        ],
+        [
+          -11.2964,
+          33.1301,
+          177.312698
+        ]
+      ],
+      "after": [
+        [
+          -40.994797,
+          11.349498,
+          139.421616
+        ],
+        [
+          -11.296402,
+          33.130096,
+          177.312714
+        ]
+      ],
+      "max_difference": 1.5999999988025593e-05
+    },
+    {
+      "material": "horse_drawn_01.jpg",
+      "bone_index": 10,
+      "before": [
+        [
+          -58.5368,
+          -94.225304,
+          0.404598
+        ],
+        [
+          59.342701,
+          92.683098,
+          117.638397
+        ]
+      ],
+      "after": [
+        [
+          -58.5368,
+          -94.225304,
+          0.404598
+        ],
+        [
+          59.342701,
+          92.683098,
+          117.638397
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "horse_drawn_02.tga",
+      "bone_index": 2,
+      "before": [
+        [
+          -40.994797,
+          11.3495,
+          139.4216
+        ],
+        [
+          -11.2964,
+          33.1301,
+          173.052795
+        ]
+      ],
+      "after": [
+        [
+          -40.994797,
+          11.349498,
+          139.421616
+        ],
+        [
+          -11.296402,
+          33.130096,
+          173.052811
+        ]
+      ],
+      "max_difference": 1.5999999988025593e-05
+    },
+    {
+      "material": "horse_drawn_03.jpg",
+      "bone_index": 7,
+      "before": [
+        [
+          -92.177101,
+          54.632702,
+          90.911903
+        ],
+        [
+          23.907799,
+          54.632702,
+          201.905197
+        ]
+      ],
+      "after": [
+        [
+          -92.177101,
+          54.632698,
+          90.911903
+        ],
+        [
+          23.907799,
+          54.632698,
+          201.905197
+        ]
+      ],
+      "max_difference": 4.0000000041118255e-06
+    }
+  ],
+  "retained_surfaces": {
+    "status": "PASS",
+    "all_original_cart_wheel_axle_seat_cask_lamp_effect_corners_retained": true,
+    "UV_tolerance": 0.001001,
+    "UV_note": "Four pre-existing collapsed wood UV triangles opened within quarter original atlas texel; other original UVs exact",
+    "corner_samples": 840,
+    "max_position_difference": 1.6000000016447302e-05,
+    "additive_mesh_index": 2
+  },
+  "material_order": [
+    "horse_drawn_01.jpg",
+    "horse_drawn_02.tga",
+    "horse_drawn_03.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

@@ -1,0 +1,40 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -43.64,
+      -134.58,
+      -1.26
+    ],
+    [
+      58.29,
+      126.73,
+      99.26
+    ]
+  ],
+  "bounds_after": [
+    [
+      -43.64,
+      -134.58,
+      -1.26
+    ],
+    [
+      58.29,
+      126.73,
+      99.26
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "jar_01.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "jar_01.OZJ": "d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5",
+    "Well04.bmd": "3090273ccc5e2bd86d8e7478ce6e3a6bc5ff9e46d851694010a46e8865a16da0"
+  }
+}

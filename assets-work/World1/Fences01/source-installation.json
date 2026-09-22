@@ -1,0 +1,14 @@
+{
+  "status": "PASS; isolated source worktree only",
+  "runtime_written": false,
+  "client_verified": false,
+  "unchanged_world1_object1_files": 319,
+  "frozen_shared_wood_unchanged": true,
+  "installed": {
+    "src/bin/Data/Object1/Fence01.bmd": "594570345d8a5f665ad86718c03b491744835179cc1e4e56589387b1bd8b7d34",
+    "src/bin/Data/Object1/Fence02.bmd": "89dcccfeaa86da94174b6edc14dd7de4ca72f15c59bffb132e7c826422f8d677",
+    "src/bin/Data/Object1/Fence03.bmd": "3c4507f510bda323fda43775559499ec028a8c58f797761459fa84896216a07c",
+    "src/bin/Data/Object1/Fence04.bmd": "45717fae749fb663b25a6431bd25fc81379200419c5c4cc08a409736da31ce9f",
+    "src/bin/Data/Object1/joint.OZJ": "ab1b30fc23a5d937dd33434f4014d0c036d56e6c4f74583e0c4c7b795631fb15"
+  }
+}

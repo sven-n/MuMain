@@ -1,0 +1,11 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd
+  name field: SteelWall02.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 328
+  bounds (bind pose): min -199.68 -3.23 0.00  max 200.48 3.21 220.07  size 400.16 6.44 220.07
+  mesh 0: triangles=320 vertices=192 normals=192 uvs=91 texture=steel_barred_b.jpg
+  mesh 1: triangles=8 vertices=16 normals=2 uvs=4 texture=steel_barred_a.tga
+  bone 0: "Box04" parent=-1
+  bone 1: "Box05" parent=-1
+  bone 2: "Box06" parent=-1
+  bone 3: "Box07" parent=-1
+  action 0: keys=1 lock=0

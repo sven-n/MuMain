@@ -1,0 +1,5 @@
+SteelWall01 rig/protected alpha-plane preservation PASS
+SteelWall02 rig/protected alpha-plane preservation PASS
+SteelWall03 rig/protected alpha-plane preservation PASS
+SteelDoor01 rig/protected alpha-plane preservation PASS
+HouseEtc03 rig/protected alpha-plane preservation PASS

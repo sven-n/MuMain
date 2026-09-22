@@ -1,0 +1,43 @@
+{
+  "triangles": 338,
+  "bounds_before": [
+    [
+      -100.94451141357422,
+      -98.33830261230469,
+      -0.33969101309776306
+    ],
+    [
+      200.18490600585938,
+      111.73629760742188,
+      423.8855895996094
+    ]
+  ],
+  "bounds_after": [
+    [
+      -100.94451141357422,
+      -98.33830261230469,
+      -0.33969101309776306
+    ],
+    [
+      200.18490600585938,
+      111.73629760742188,
+      423.8855895996094
+    ]
+  ],
+  "material_order": [
+    "horse_drawn_01.jpg"
+  ],
+  "bone_order": [
+    "Box08",
+    "Box09",
+    "Box10",
+    "Box03"
+  ],
+  "action_meta": {
+    "Hanging01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "geometry": "Original gallows plus fixed iron joints; animated rope retained"
+}

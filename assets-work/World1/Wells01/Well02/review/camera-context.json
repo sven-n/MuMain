@@ -1,0 +1,18 @@
+{
+  "baseline_bounds": [
+    [
+      -79.277099609375,
+      -93.45690155029297,
+      0.0
+    ],
+    [
+      77.99669647216797,
+      93.46320343017578,
+      270.81878662109375
+    ]
+  ],
+  "camera": "Matching orthographic; direction (1.35,-2,1.3)",
+  "scale_proxy_height": 190,
+  "client_screenshot": false,
+  "effect_shader": "Standard diffuse/alpha offline approximation; no runtime client claim"
+}

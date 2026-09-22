@@ -1,0 +1,254 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    7612.87548828125,
+    15495.802734375,
+    482.2471923828125
+  ],
+  "objects": [
+    {
+      "name": "HouseWall04",
+      "placement_index": 0,
+      "position": [
+        7449.6279296875,
+        15748.4423828125,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        74.496279296875,
+        157.484423828125
+      ]
+    },
+    {
+      "name": "HouseWall04",
+      "placement_index": 1,
+      "position": [
+        7450.0,
+        14850.0,
+        168.47018432617188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -720.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        74.5,
+        148.5
+      ]
+    },
+    {
+      "name": "HouseWall04",
+      "placement_index": 2,
+      "position": [
+        8150.0,
+        14850.0,
+        167.9481658935547
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        81.5,
+        148.5
+      ]
+    },
+    {
+      "name": "HouseWall04",
+      "placement_index": 3,
+      "position": [
+        8149.18603515625,
+        15753.2900390625,
+        164.59779357910156
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -180.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        81.4918603515625,
+        157.532900390625
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 0,
+      "position": [
+        7612.87548828125,
+        15495.802734375,
+        482.2471923828125
+      ],
+      "rotation": [
+        360.0,
+        0.0,
+        2430.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        76.1287548828125,
+        154.95802734375
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 1,
+      "position": [
+        7616.771484375,
+        15089.9228515625,
+        490.9484558105469
+      ],
+      "rotation": [
+        360.0,
+        0.0,
+        2520.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        76.16771484375,
+        150.899228515625
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 2,
+      "position": [
+        8017.88330078125,
+        15087.5166015625,
+        494.5207824707031
+      ],
+      "rotation": [
+        360.0,
+        0.0,
+        2610.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        80.1788330078125,
+        150.875166015625
+      ]
+    },
+    {
+      "name": "HouseWall05",
+      "placement_index": 3,
+      "position": [
+        8015.12158203125,
+        15484.90234375,
+        505.9753723144531
+      ],
+      "rotation": [
+        360.0,
+        0.0,
+        2700.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        80.1512158203125,
+        154.8490234375
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 0,
+      "position": [
+        7448.77734375,
+        15401.4453125,
+        169.60855102539062
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        74.4877734375,
+        154.014453125
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 1,
+      "position": [
+        7447.26416015625,
+        15201.611328125,
+        168.9656524658203
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        74.4726416015625,
+        152.01611328125
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 2,
+      "position": [
+        8154.00048828125,
+        15402.8974609375,
+        166.7784423828125
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        81.5400048828125,
+        154.028974609375
+      ]
+    },
+    {
+      "name": "HouseWall02",
+      "placement_index": 3,
+      "position": [
+        8154.0810546875,
+        15194.6083984375,
+        170.89840698242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        81.540810546875,
+        151.946083984375
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted. Light beams approximate additive rendering at0.55 emission, not engine evidence.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -276.5789794921875,
+      -700.6119384765625,
+      -317.3687744140625
+    ],
+    [
+      664.6898193359375,
+      308.3885803222656,
+      68.29861450195312
+    ]
+  ],
+  "roof_fade_preview": "Roofs fully visible"
+}

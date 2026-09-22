@@ -1,0 +1,23 @@
+{
+  "model": "Beer03",
+  "game_files": {
+    "src/bin/Data/Object1/Beer03.bmd": "651280bb61913c8c73d1ff9109d64360b447a1f246e8d4b29e4d6f99de27ee89",
+    "src/bin/Data/Object1/bottle.ozt": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4",
+    "src/bin/Data/Object1/winecup.OZJ": "a0e0cb895f554bcb82a2350b7f70dc405fc6f6024c61615c82ccb1111fcedf63"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 516,
+  "bind_bounds": [
+    [
+      -24.013200759887695,
+      -13.659008026123047,
+      -0.358801007270813
+    ],
+    [
+      23.705795288085938,
+      16.902999877929688,
+      61.473899841308594
+    ]
+  ]
+}

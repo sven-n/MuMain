@@ -1,0 +1,47 @@
+{
+  "status": "PASS: Blender checks; engine comparison required",
+  "triangles": 112,
+  "meshes_after_texture_merge": 1,
+  "bounds_before": [
+    [
+      -100.41949462890625,
+      -6.814000129699707,
+      0.0
+    ],
+    [
+      99.67900085449219,
+      19.699800491333008,
+      22.68869972229004
+    ]
+  ],
+  "bounds_after": [
+    [
+      -100.41949462890625,
+      -6.814000129699707,
+      0.0
+    ],
+    [
+      99.67900085449219,
+      19.699800491333008,
+      22.68869972229004
+    ]
+  ],
+  "bone_order": [
+    "Box01"
+  ],
+  "action_meta": {
+    "Fence03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "joint.jpg": [
+      512,
+      512
+    ]
+  },
+  "skinning": "exactly one valid full-weight bone per vertex",
+  "geometry": "triangles, finite positions/UVs, nonzero face area, identity transforms",
+  "uv": "one UVMap set; all finite coordinates in [0,1]"
+}

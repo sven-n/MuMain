@@ -1,0 +1,34 @@
+{
+  "status": "PASS; isolated source worktree only",
+  "runtime_written": false,
+  "client_verified": false,
+  "unchanged_world1_object1_files": 313,
+  "installed": {
+    "src/bin/Data/Object1/House01.bmd": "498f0224e6c7f0f32d228b8a7ffbeb051e9796f7749ffb1e340149a632da737e",
+    "src/bin/Data/Object1/tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "src/bin/Data/Object1/tile_ston05.OZJ": "738fb32a62ece9f970cc822477361fb1105cbdde32dd4d475edda77a7d1fbc76",
+    "src/bin/Data/Object1/House03.bmd": "a8015a4a6155d5dc2cef379bebb6c054ec6a31c428329163a1a696424ea1b7f7",
+    "src/bin/Data/Object1/tile_ston07.OZT": "af1fd6419d0c0dfa43228eea2c18cecb3b6d47502ecb0e7b2b70f4ecb8609093",
+    "src/bin/Data/Object1/light_02.OZJ": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9",
+    "src/bin/Data/Object1/House04.bmd": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa",
+    "src/bin/Data/Object1/tile_windows01.OZJ": "ac20b7b25abeda1fb515b55c9d8d9e2bb0064f6bc1652f6862a7ac1466969367",
+    "src/bin/Data/Object1/tile_space01.OZJ": "3ec6d88e703a4ade939bbb96ae538d5ac71bb00ff5aeac0b3e9d11bcc26a6e82",
+    "src/bin/Data/Object1/Tent01.bmd": "6be4f98d11e1f6dec88d53be6f78354e89b3cb4a5ac0a057acd71ea9477e8713",
+    "src/bin/Data/Object1/HouseWall02.bmd": "6ac7e3fb619b8c92c3d0e445c53beca1da53d5395609bfd60a06cdfb6f066470"
+  },
+  "shared_texture_exports_identical": {
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+    "tile_ston05.OZJ": "738fb32a62ece9f970cc822477361fb1105cbdde32dd4d475edda77a7d1fbc76",
+    "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "tile_ston07.OZT": "af1fd6419d0c0dfa43228eea2c18cecb3b6d47502ecb0e7b2b70f4ecb8609093",
+    "light_02.OZJ": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9",
+    "bridge_01.OZJ": "3ad1e1b0591a90fb0c169c9d6b29d0ea4330f68d81d3636de757886033b0d9ca",
+    "tile_windows01.OZJ": "ac20b7b25abeda1fb515b55c9d8d9e2bb0064f6bc1652f6862a7ac1466969367",
+    "tile_wood01.OZJ": "dac17be91243a7152192d9e9520e20290e48372d1506b98ed20281f7f4a2b7c8",
+    "tile_wood03.OZJ": "aa7ab051d5598e159f196ac20f52654f8c1d81c57f220cb6b50a5e62a7112195",
+    "tile_space01.OZJ": "3ec6d88e703a4ade939bbb96ae538d5ac71bb00ff5aeac0b3e9d11bcc26a6e82",
+    "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+    "tile_02.OZJ": "36aac008ed4c9369c9ec99fc0514872fc9feeae9700b983dddb9d86d241231a0"
+  }
+}

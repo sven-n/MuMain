@@ -1,0 +1,50 @@
+{
+  "status": "PASS: authored geometry; engine validation separately required",
+  "triangles": 1215,
+  "bounds_before": [
+    [
+      -114.88809967041016,
+      -64.12229919433594,
+      -0.1624000072479248
+    ],
+    [
+      89.38980102539062,
+      72.77970123291016,
+      188.55130004882812
+    ]
+  ],
+  "bounds_after": [
+    [
+      -114.88809967041016,
+      -64.12229919433594,
+      -0.16155299544334412
+    ],
+    [
+      89.38980102539062,
+      72.77970123291016,
+      188.55130004882812
+    ]
+  ],
+  "bone_order": [
+    "Box02"
+  ],
+  "action_meta": {
+    "House02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "drum.jpg": [
+      512,
+      512
+    ],
+    "steel.jpg": [
+      512,
+      512
+    ]
+  },
+  "skinning": "Exactly one valid non-dummy full-weight bone per vertex",
+  "uv": "One UVMap set, finite; new UVs [0,1]; original lantern glow repeat to -0.0936 retained",
+  "materials": "Original order and texture filenames; one diffuse image per mesh; no alpha or flags added"
+}

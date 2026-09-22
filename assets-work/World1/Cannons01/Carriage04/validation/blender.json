@@ -1,0 +1,45 @@
+{
+  "triangles": 882,
+  "bounds_before": [
+    [
+      -90.8573989868164,
+      -216.33218383789062,
+      -1.1697009801864624
+    ],
+    [
+      88.22059631347656,
+      220.7781219482422,
+      272.91070556640625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -90.8573989868164,
+      -216.33218383789062,
+      -1.1697009801864624
+    ],
+    [
+      88.22059631347656,
+      220.7781219482422,
+      272.91070556640625
+    ]
+  ],
+  "material_order": [
+    "horse_drawn_01.jpg",
+    "grass_01.tga"
+  ],
+  "bone_order": [
+    "Cylinder03",
+    "Mesh01",
+    "Cylinder05",
+    "Cylinder12",
+    "Cylinder13"
+  ],
+  "action_meta": {
+    "Carriage04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "geometry": "Readonly original geometry and BMD bytes retained; shared texture compatibility"
+}

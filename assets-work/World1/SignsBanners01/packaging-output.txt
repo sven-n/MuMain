@@ -1,0 +1,4 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/package_textures.py:104: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  alpha_coverage_128=sum(v>=128 for v in alpha.getdata())/(size[0]*size[1]))
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/package_textures.py:50: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  pixels, mask = list(color.getdata()), list(alpha.getdata())

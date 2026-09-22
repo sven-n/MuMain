@@ -1,0 +1,14 @@
+{
+  "House04": {
+    "accepted_commit": "8094616d",
+    "original_bmd_sha256": "a1c4950b46c6a4c466a680d0be3d8ade35a4982b0665b1ce53b68e41e62219fa"
+  },
+  "HouseWall02": {
+    "accepted_commit": "8094616d",
+    "original_bmd_sha256": "6ac7e3fb619b8c92c3d0e445c53beca1da53d5395609bfd60a06cdfb6f066470"
+  },
+  "HouseEtc02": {
+    "accepted_commit": "f1fbb29c",
+    "original_bmd_sha256": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "triangles": 276,
+  "textures": {
+    "bridge_01.jpg": {
+      "dimensions": [
+        1024,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "bridge_shadow01.tga": {
+      "dimensions": [
+        2,
+        32
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "original_rgba_and_padding_byte_exact": true
+    }
+  },
+  "uv_range": [
+    [
+      -0.0029,
+      0.9995
+    ],
+    [
+      0.0005,
+      0.9995
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -0.0029,
+      0.9995
+    ],
+    [
+      0.0005,
+      0.9995
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

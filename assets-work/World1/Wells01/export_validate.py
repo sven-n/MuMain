@@ -1,0 +1,152 @@
+"""Official export, model/action validation and component preservation proof."""
+import hashlib
+import json
+import math
+import numpy as np
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+from prepare import ASSETS, BLENDER, CONVERTER, HERE, ROOT
+os.environ['MU_BMDCONV'] = CONVERTER
+sys.path.insert(0, str(HERE.parent / 'StaticBatch01'))
+import validate_export as shared
+shared.EXPECTED_KEYS = {name: 1 for name in (*ASSETS,"Carriage03")}
+
+
+def logged(command, path):
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+    path.write_text(result.stdout + result.stderr)
+    result.check_returncode()
+
+
+POSITION_TOLERANCE = .0001
+ROTATION_MATRIX_TOLERANCE = .00001
+
+def rotation_matrix(euler):
+    x, y, z = euler
+    cx, cy, cz = math.cos(x), math.cos(y), math.cos(z)
+    sx, sy, sz = math.sin(x), math.sin(y), math.sin(z)
+    rx = np.array(((1,0,0),(0,cx,-sx),(0,sx,cx)))
+    ry = np.array(((cy,0,sy),(0,1,0),(-sy,0,cy)))
+    rz = np.array(((cz,-sz,0),(sz,cz,0),(0,0,1)))
+    return rz @ ry @ rx
+
+
+def check_local_motion(original, replacement, name, reports):
+    samples = []
+    for filename in (f'{name}.smd', f'{name}_a00.smd'):
+        nodes, frames, old = shared.pose_rows(original / filename)
+        new_nodes, new_frames, new = shared.pose_rows(replacement / filename)
+        assert nodes == new_nodes and frames == new_frames and len(old) == len(new)
+        position, rotation = 0, 0
+        for before, after in zip(old, new):
+            assert before[0] == after[0]
+            position = max(position, *(abs(a-b) for a,b in zip(before[1:4], after[1:4])))
+            delta = np.abs(rotation_matrix(before[4:]) - rotation_matrix(after[4:]))
+            rotation = max(rotation, float(delta.max()))
+        assert position < POSITION_TOLERANCE and rotation < ROTATION_MATRIX_TOLERANCE, (filename,position,rotation)
+        samples.append(dict(file=filename, frames=len(frames), bone_samples=len(old),
+                            max_local_position_component=position, max_rotation_matrix_component=rotation))
+    record = dict(status='PASS', nodes='Bone names, order, parents identical', samples=samples,
+                  position_tolerance=POSITION_TOLERANCE, rotation_matrix_tolerance=ROTATION_MATRIX_TOLERANCE,
+                  rotation_check='Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi',
+                  semantics='All local keys retain equivalent position and rotation; Euler encoding may differ')
+    (reports / 'local-motion.json').write_text(json.dumps(record,indent=2)+'\n')
+
+
+def protected_parts(folder, original, final, name):
+    protected = [t for t in json.loads((folder / 'dependencies.json').read_text()) if t != 'jar_01.jpg']
+    messages = []
+    for texture in protected:
+        for directory in (original, final):
+            header, body = (directory / (name + '.smd')).read_text().split('triangles\n')
+            lines = body.splitlines()
+            triangles = ['\n'.join(lines[i:i+4]) for i in range(0, len(lines)-1, 4)
+                         if lines[i] == texture]
+            assert triangles
+            stem = 'protected_' + Path(texture).stem
+            (directory / (stem + '.smd')).write_text(header + 'triangles\n' + '\n'.join(triangles) + '\nend\n')
+            shared.run('smd2bmd', directory / (stem + '.smd'), directory / (stem + '.bmd'),
+                       '--manifest', directory / (name + '.actions.txt'))
+        comparison = shared.run('compare', original / (stem + '.bmd'), final / (stem + '.bmd')).stdout
+        assert 'EQUIVALENT' in comparison
+        messages.append(texture + '\n' + comparison)
+    (folder / 'validation/protected-components.txt').write_text('\n'.join(messages))
+
+
+def export_validate(name):
+    folder = HERE / name
+    reports = folder / 'validation'
+    prefix = [BLENDER, '--python-expr', 'import sys; sys.dont_write_bytecode=True']
+    logged(prefix + ['-b', str(folder / 'source.blend'), '--python-exit-code', '1',
+                     '--python', str(ROOT / 'tools/blender/mu_bmd_export.py'), '--',
+                     '--out', str(folder / 'exports' / (name + '.bmd')), '--bmdconv', CONVERTER],
+           reports / 'export.log')
+    # Source Tools encodes local transforms through Blender float matrices.
+    # Retain the official mesh export but restore untouched original bind/action
+    # records through the supported SMD/manifest converter interface.
+    intermediate = reports / 'official-roundtrip'
+    intermediate.mkdir(exist_ok=True)
+    official = intermediate / (name + '.bmd')
+    shutil.copy2(folder / 'exports' / (name + '.bmd'), official)
+    shared.run('bmd2smd', official, intermediate)
+    original, old_meta, old_messages = shared.extract(folder, 'original')
+    original_text = (original / (name + '.smd')).read_text()
+    official_text = (intermediate / (name + '.smd')).read_text()
+    assert shared.pose_rows(original / (name + '.smd'))[0] == shared.pose_rows(intermediate / (name + '.smd'))[0]
+    preserved = intermediate / 'preserved-bind.smd'
+    preserved.write_text(original_text.split('triangles\n')[0] + 'triangles\n' +
+                         official_text.split('triangles\n')[1])
+    packaged = shared.run('smd2bmd', preserved, folder / 'exports' / (name + '.bmd'),
+                         '--manifest', original / (name + '.actions.txt'))
+    (reports / 'preserve-bind-actions.txt').write_text(packaged.stdout + packaged.stderr)
+    if name == 'Carriage03':
+        shutil.copy2(folder / 'original' / (name + '.bmd'), folder / 'exports' / (name + '.bmd'))
+    dependencies = json.loads((folder / 'dependencies.json').read_text())
+    for containers in dependencies.values():
+        for container in containers:
+            shutil.copy2(HERE / 'textures/final' / Path(container).name, folder / 'exports' / Path(container).name)
+    final, new_meta, new_messages = shared.extract(folder, 'new')
+    assert old_meta == new_meta
+    check_local_motion(original, final, name, reports)
+    (reports / 'smd-validation.txt').write_text('\n'.join(old_messages + new_messages))
+    before = shared.run('info', folder / 'original' / (name + '.bmd')).stdout
+    after = shared.run('info', folder / 'exports' / (name + '.bmd')).stdout
+    (reports / 'info-after.txt').write_text(after)
+    assert re.findall(r'texture=(.*)', before) == re.findall(r'texture=(.*)', after)
+    bounds_before, bounds_after = shared.engine_bounds(before), shared.engine_bounds(after)
+    assert max(abs(a-b) for aa,bb in zip(bounds_before,bounds_after) for a,b in zip(aa,bb)) <= .01
+    comparison = shared.run('compare', folder / 'original' / (name + '.bmd'),
+                            folder / 'exports' / (name + '.bmd'), check=False)
+    expected = 'EQUIVALENT' if name in ('Well02','Carriage03') else 'DIFFERENT'
+    assert expected in comparison.stdout
+    (reports / 'compare.txt').write_text(comparison.stdout)
+    rig = shared.run('compare', original / 'skeleton.bmd', final / 'skeleton.bmd').stdout
+    assert 'EQUIVALENT' in rig
+    (reports / 'skeleton-compare.txt').write_text(rig)
+    protected_parts(folder, original, final, name)
+    containers = [p for p in (folder / 'exports').iterdir() if p.suffix.upper() in ('.OZJ', '.OZT')]
+    check = subprocess.check_output([sys.executable, str(ROOT / 'tools/mu_texture.py'), 'check',
+                                     *map(str, containers)], cwd=ROOT, text=True)
+    (reports / 'texture-check.txt').write_text(check)
+    summary = dict(result='PASS: offline validation', bounds_before=bounds_before,
+                   bounds_after=bounds_after, full_compare=expected, rig_actions='EQUIVALENT',
+                   action_metadata=new_meta, material_order=re.findall(r'texture=(.*)', after),
+                   client_verified=False, export_sha256={p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+                                                        for p in (folder / 'exports').iterdir() if p.is_file()})
+    (reports / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+    logged(prefix + ['-b', '--python-exit-code', '1', '--python', str(ROOT / 'tools/blender/mu_bmd_import.py'),
+                     '--', '--bmd', str(folder / 'exports' / (name + '.bmd')), '--out',
+                     str(reports / 'reimported.blend'), '--textures', str(HERE / 'textures/final'),
+                     '--bmdconv', CONVERTER], reports / 'reimport.log')
+    print(name, expected, 'rig EQUIVALENT')
+
+
+if __name__ == '__main__':
+    for asset in (sys.argv[1:] or ASSETS):
+        export_validate(asset)

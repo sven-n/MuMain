@@ -1,0 +1,23 @@
+{
+  "model": "StoneWall04",
+  "game_files": {
+    "src/bin/Data/Object1/StoneWall04.bmd": "6777489dd3d71e6304d464b0ae691726d5ecce34c6ef25d63934190a7b46fba9",
+    "src/bin/Data/Object1/badge_01.OZJ": "d1f42275a74f1c90ed2a79afd23b964facd1d5bcc8121e5f957f429c66c96ffe",
+    "src/bin/Data/Object1/badge_03.OZT": "a17e37582909ebbe250bff640c3fc1a7d024b3959d0ca3ad2bc666a86af1ebaa"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 36,
+  "bind_bounds": [
+    [
+      -3.8440001010894775,
+      -21.555885314941406,
+      -0.08319900184869766
+    ],
+    [
+      98.5679702758789,
+      13.018501281738281,
+      179.98910522460938
+    ]
+  ]
+}

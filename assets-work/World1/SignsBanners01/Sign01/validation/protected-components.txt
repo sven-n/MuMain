@@ -1,0 +1,9 @@
+signboard.tga
+meshes 1 vs 1, bones 4 vs 4, actions 1 vs 1, triangles 2 vs 2
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+doorknob.tga
+meshes 1 vs 1, bones 4 vs 4, actions 1 vs 1, triangles 4 vs 4
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT

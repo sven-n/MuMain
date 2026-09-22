@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01.actions.txt\n"
+  },
+  {
+    "command": "validate Waterspout01.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01.smd: bones=11 frames=1 triangles=639 materials=4\nOK\n"
+  },
+  {
+    "command": "validate Waterspout01_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Waterspout01/smd/Waterspout01_a00.smd: bones=11 frames=21 triangles=0 materials=0\nOK\n"
+  }
+]

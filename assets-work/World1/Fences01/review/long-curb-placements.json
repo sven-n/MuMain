@@ -1,0 +1,108 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    12080.3095703125,
+    8596.6142578125,
+    154.9999237060547
+  ],
+  "objects": [
+    {
+      "name": "Fence01",
+      "placement_index": 114,
+      "position": [
+        11800.0,
+        8700.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        540.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        118.0,
+        87.0
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 115,
+      "position": [
+        12000.0,
+        8700.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        540.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.0,
+        87.0
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 116,
+      "position": [
+        12200.0,
+        8700.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        540.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        122.0,
+        87.0
+      ]
+    },
+    {
+      "name": "Fence03",
+      "placement_index": 0,
+      "position": [
+        12080.3095703125,
+        8596.6142578125,
+        154.9999237060547
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.803095703125,
+        85.966142578125
+      ]
+    },
+    {
+      "name": "Fence03",
+      "placement_index": 1,
+      "position": [
+        12082.8720703125,
+        8398.94140625,
+        154.99993896484375
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.828720703125,
+        83.9894140625
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after"
+}

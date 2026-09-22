@@ -1,0 +1,6 @@
+# bmdconv action manifest for Carriage03.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Carriage03.smd <output.bmd> --manifest Carriage03.actions.txt
+model Carriage03.smd
+action 0 file=Carriage03_a00.smd keys=1 lock=0
+texture 0 tub.jpg original=tub.jpg
+texture 1 horse_drawn_01.jpg original=horse_drawn_01.jpg

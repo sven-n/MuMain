@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "triangles": 317,
+  "textures": {
+    "horse_drawn_01.jpg": {
+      "dimensions": [
+        256,
+        256
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall06.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "c_wall04.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -0.6839,
+      1.6837
+    ],
+    [
+      -1.7287,
+      1.6483
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -0.6839,
+      1.6837
+    ],
+    [
+      -1.7287,
+      1.6483
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

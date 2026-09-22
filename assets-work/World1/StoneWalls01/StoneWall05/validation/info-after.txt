@@ -1,0 +1,9 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/exports/StoneWall05.bmd
+  name field: StoneWall05.smd  version: 12
+  meshes: 2  bones: 2  actions: 1  triangles: 100
+  bounds (bind pose): min -199.33 -43.04 -1.61  max 198.83 41.85 236.54  size 398.15 84.89 238.15
+  mesh 0: triangles=90 vertices=60 normals=42 uvs=75 texture=tile_01.jpg
+  mesh 1: triangles=10 vertices=8 normals=11 uvs=12 texture=tile_03.jpg
+  bone 0: "Box04" parent=-1
+  bone 1: "Object01" parent=-1
+  action 0: keys=1 lock=0

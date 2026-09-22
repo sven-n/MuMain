@@ -1,0 +1,16 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-flowering/assets-work/World1/Flowering01/Tree12/exports/Tree12.bmd
+  name field: Tree12.smd  version: 12
+  meshes: 2  bones: 9  actions: 1  triangles: 393
+  bounds (bind pose): min -187.71 -196.27 0.19  max 236.19 229.76 490.08  size 423.90 426.02 489.89
+  mesh 0: triangles=273 vertices=185 normals=208 uvs=227 texture=tree_01.jpg
+  mesh 1: triangles=120 vertices=240 normals=141 uvs=4 texture=tree_04.tga
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Bone04" parent=2
+  bone 4: "Bone05" parent=3
+  bone 5: "Bone06" parent=2
+  bone 6: "Bone07" parent=5
+  bone 7: "Cylinder01" parent=0
+  bone 8: "Box07" parent=0
+  action 0: keys=31 lock=0

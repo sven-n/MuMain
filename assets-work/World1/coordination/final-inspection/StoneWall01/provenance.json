@@ -1,0 +1,25 @@
+{
+  "model": "StoneWall01",
+  "game_files": {
+    "src/bin/Data/Object1/StoneWall01.bmd": "a32fca0ef1cf2bd3de64d9a5992ecb8c606c5c57cb159564ed9eb8867c4fb7a4",
+    "src/bin/Data/Object1/tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+    "src/bin/Data/Object1/tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+    "src/bin/Data/Object1/tile_02.OZJ": "428d88339fd1c04b6d153e33a1ed5a4a03d753130271e11fbf62f68564dfadcf",
+    "src/bin/Data/Object1/bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 414,
+  "bind_bounds": [
+    [
+      -298.0425109863281,
+      -84.12359619140625,
+      0.7817990183830261
+    ],
+    [
+      297.4361877441406,
+      88.55770111083984,
+      623.5742797851562
+    ]
+  ]
+}

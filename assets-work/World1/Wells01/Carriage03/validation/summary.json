@@ -1,0 +1,42 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -160.09,
+      -216.33,
+      -1.17
+    ],
+    [
+      88.22,
+      220.78,
+      182.28
+    ]
+  ],
+  "bounds_after": [
+    [
+      -160.09,
+      -216.33,
+      -1.17
+    ],
+    [
+      88.22,
+      220.78,
+      182.28
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "tub.jpg",
+    "horse_drawn_01.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "tub.OZJ": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+    "Carriage03.bmd": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+  }
+}

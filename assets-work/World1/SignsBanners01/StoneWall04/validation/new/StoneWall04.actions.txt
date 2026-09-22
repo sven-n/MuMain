@@ -1,0 +1,6 @@
+# bmdconv action manifest for StoneWall04.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd StoneWall04.smd <output.bmd> --manifest StoneWall04.actions.txt
+model StoneWall04.smd
+action 0 file=StoneWall04_a00.smd keys=25 lock=0
+texture 0 badge_01.jpg original=badge_01.jpg
+texture 1 badge_03.tga original=badge_03.tga

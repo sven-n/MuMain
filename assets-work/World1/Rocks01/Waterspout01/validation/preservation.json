@@ -1,0 +1,22 @@
+{
+  "rig": {
+    "component": "skeleton",
+    "texture": null,
+    "triangles": 0,
+    "compare": "EQUIVALENT",
+    "bindings_and_uvs": "all original corners matched"
+  },
+  "water": {
+    "component": "water",
+    "texture": "ston02.jpg",
+    "triangles": 90,
+    "compare": "EQUIVALENT",
+    "bindings_and_uvs": "all original corners matched"
+  },
+  "fountain": {
+    "final_bmd": "byte-identical to original",
+    "sha256": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83",
+    "water_mesh_3": "exact original bytes including geometry, UVs, weights and all animation samples",
+    "official_roundtrip": "EQUIVALENT; retained and separately validated, not installed"
+  }
+}

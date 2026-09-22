@@ -1,0 +1,24 @@
+{
+  "model": "StoneWall03",
+  "game_files": {
+    "src/bin/Data/Object1/StoneWall03.bmd": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+    "src/bin/Data/Object1/tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+    "src/bin/Data/Object1/horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e",
+    "src/bin/Data/Object1/tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 333,
+  "bind_bounds": [
+    [
+      -199.32679748535156,
+      -43.0364990234375,
+      -2.1010000705718994
+    ],
+    [
+      198.82650756835938,
+      180.50369262695312,
+      299.2403869628906
+    ]
+  ]
+}

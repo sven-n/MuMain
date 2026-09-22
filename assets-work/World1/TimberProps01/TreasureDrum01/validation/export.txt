@@ -1,0 +1,57 @@
+00:00.549  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/source.blend"
+skipping reference object 'TreasureDrum01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_00' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_03' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_04' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_05' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_06' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_07' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_08' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_09' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_10' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_11' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_12' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_13' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_14' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Coopered_Stave_15' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Raised_Forged_Hoop' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Raised_Forged_Hoop.001' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Inset_Planked_Barrel_Lid' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Top_Stave_Lip' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Bottom_Closure' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting TreasureDrum01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zxblix_w/TreasureDrum01_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 1456 polys
+- Exported 1 materials
+   drum.jpg
+- SMD export took 0.026877164840698242
+
+
+Blender Source Tools: exporting TreasureDrum01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zxblix_w/anims/TreasureDrum01_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0013477802276611328
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zxblix_w/TreasureDrum01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zxblix_w/anims/TreasureDrum01_a00.smd --name TreasureDrum01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd
+  name field: TreasureDrum01.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 1456
+  bounds (bind pose): min -40.57 -40.22 0.00  max 40.70 41.05 102.98  size 81.27 81.27 102.98
+  mesh 0: triangles=1456 vertices=786 normals=1258 uvs=332 texture=drum.jpg
+  bone 0: "Cylinder03" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

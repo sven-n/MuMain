@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/src/bin/Data/Object1/StoneStatue01.bmd
+  name field: Data2\Object1\stone_statue01.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 92
+  bounds (bind pose): min -54.56 -54.34 0.00  max 54.62 56.47 399.99  size 109.19 110.81 399.99
+  mesh 0: triangles=92 vertices=61 normals=46 uvs=74 texture=stone_statue02.jpg
+  bone 0: "Box11" parent=-1
+  action 0: keys=1 lock=0

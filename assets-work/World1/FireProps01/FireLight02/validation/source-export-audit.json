@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "original_anchors": 25,
+  "max_anchor_component_delta": 0.00452423095703125,
+  "anchor_tolerance": 0.01,
+  "anchor_space": "Official Blender reimport world coordinates",
+  "packed_source_and_reference": true,
+  "original": {
+    "zero_uv": 0,
+    "zero_area": 0,
+    "triangles": 34,
+    "uv_range": [
+      -0.15860000252723694,
+      1.1277999877929688
+    ]
+  },
+  "replacement": {
+    "zero_uv": 0,
+    "zero_area": 0,
+    "triangles": 34,
+    "uv_range": [
+      -0.15860000252723694,
+      1.1277999877929688
+    ]
+  },
+  "uv_note": "Original repeating coordinates retained. No newly collapsed geometry or UV triangles.",
+  "rigid_binding": "Each vertex uses one original bone with weight 1"
+}

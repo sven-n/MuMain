@@ -1,0 +1,46 @@
+{
+  "triangles": 112,
+  "mesh_count": 1,
+  "geometry": "Retained unchanged; repaint only",
+  "bounds_before": [
+    [
+      -161.83990478515625,
+      -51.36349868774414,
+      0.11080200225114822
+    ],
+    [
+      102.59010314941406,
+      58.30039978027344,
+      60.738800048828125
+    ]
+  ],
+  "bounds_after": [
+    [
+      -161.83990478515625,
+      -51.36349868774414,
+      0.11080200225114822
+    ],
+    [
+      102.59010314941406,
+      58.30039978027344,
+      60.738800048828125
+    ]
+  ],
+  "texture": [
+    256,
+    512
+  ],
+  "bone_order": [
+    "Box01",
+    "Box02",
+    "Box03",
+    "Box04"
+  ],
+  "action_meta": {
+    "Grass06_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "checks": "One UV set, finite coordinates, nondegenerate triangles, one valid bone per vertex, identical bounds"
+}

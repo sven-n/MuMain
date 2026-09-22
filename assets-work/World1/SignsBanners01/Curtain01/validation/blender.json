@@ -1,0 +1,64 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 68,
+  "original_triangles": 68,
+  "bounds_before": [
+    [
+      -96.62920379638672,
+      -16.919097900390625,
+      -0.8587949872016907
+    ],
+    [
+      96.54609680175781,
+      9.524700164794922,
+      323.173095703125
+    ]
+  ],
+  "bounds_after": [
+    [
+      -96.62920379638672,
+      -16.919097900390625,
+      -0.8587949872016907
+    ],
+    [
+      96.54609680175781,
+      9.524700164794922,
+      323.173095703125
+    ]
+  ],
+  "original_vertices_retained": 45,
+  "bone_order": [
+    "bone_01",
+    "bone_02",
+    "bone_03",
+    "bone_04",
+    "bone_05",
+    "bone_06",
+    "Box16"
+  ],
+  "action_meta": {
+    "Curtain01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "badge_01.jpg": [
+      64,
+      512
+    ],
+    "badge_02.tga": [
+      256,
+      512
+    ]
+  },
+  "material_order": [
+    "badge_01.jpg",
+    "badge_02.tga"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque notice and pole atlases; original scalar masks retained for four alpha textures",
+  "panel_recesses": [],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

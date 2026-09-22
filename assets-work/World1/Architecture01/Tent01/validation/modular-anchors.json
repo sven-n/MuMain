@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 50,
+  "retained_triangles_by_texture": {
+    "tile_house01.jpg": 26,
+    "tile_ston06.jpg": 24
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 1.0000000000287557e-06,
+  "max_retained_normal_direction_degrees": 1.1066171232981577e-05,
+  "frozen_container_sha256": {
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7"
+  },
+  "panel_face_pairs": [
+    [
+      28,
+      29
+    ],
+    [
+      30,
+      31
+    ],
+    [
+      38,
+      39
+    ],
+    [
+      40,
+      41
+    ],
+    [
+      48,
+      49
+    ],
+    [
+      50,
+      51
+    ],
+    [
+      58,
+      59
+    ],
+    [
+      60,
+      61
+    ]
+  ],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit non-effect panel pairs retain position, bone and UV. Building footprints, original roof edges, door/window openings, moving canopy, smithy awning and renderer-indexed effect meshes unchanged.",
+  "normals": "Protected original corner normals restored after the official Blender mesh export through the supported bmdconv SMD/manifest path; engine conversion can normalize/quantize slightly. Measured differences are retained.",
+  "note": "Selected panel centers are recessed by 0.25\u20130.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

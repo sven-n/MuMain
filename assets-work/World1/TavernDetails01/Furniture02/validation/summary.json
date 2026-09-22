@@ -1,0 +1,43 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Intentional profile/carpentry rebuild; full geometry comparison DIFFERENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -80.46,
+      -23.38,
+      0.0
+    ],
+    [
+      79.72,
+      23.05,
+      228.92
+    ]
+  ],
+  "bounds_after": [
+    [
+      -80.46,
+      -23.38,
+      0.0
+    ],
+    [
+      79.72,
+      23.05,
+      228.92
+    ]
+  ],
+  "materials": [
+    "bottle.tga",
+    "bookshelf.jpg"
+  ],
+  "meshes": 2,
+  "exports": {
+    "bookshelf.OZJ": "b94d717a16ca66016f14e51cf8d27a33b1595da8911077c281e57114a33b0318",
+    "bottle.ozt": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4",
+    "Furniture02.bmd": "f32d05c6ad0412feb5075e5a5754e44b84ce2772a240ef1a353d3e2c71520d24"
+  }
+}

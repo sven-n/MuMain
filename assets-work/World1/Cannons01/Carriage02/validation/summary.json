@@ -1,0 +1,41 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -90.38,
+      -218.18,
+      -1.17
+    ],
+    [
+      88.7,
+      218.93,
+      182.28
+    ]
+  ],
+  "bounds_after": [
+    [
+      -90.38,
+      -218.18,
+      -1.17
+    ],
+    [
+      88.7,
+      218.93,
+      182.28
+    ]
+  ],
+  "materials": [
+    "horse_drawn_01.jpg"
+  ],
+  "meshes": 1,
+  "exports": {
+    "Carriage02.bmd": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+    "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+  }
+}

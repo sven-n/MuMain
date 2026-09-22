@@ -1,0 +1,468 @@
+00:00.478  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/source.blend"
+00:00.483  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/render_exports.py:33: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if not mat.use_nodes:
+00:02.022  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/review/before.png'
+00:03.514  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/review/gameplay-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/exports/StoneStatue01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uha5kxc9
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uha5kxc9/StoneStatue01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uha5kxc9/StoneStatue01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_uha5kxc9/StoneStatue01.actions.txt
+
+SMD IMPORTER: now working on StoneStatue01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: stone_statue02.jpg
+- Imported 100 polys
+SMD StoneStatue01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneStatue01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneStatue01_skeleton"
+- Imported 1 frames of animation
+SMD StoneStatue01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:05.150  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/review/after.png'
+00:06.978  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/exports/StoneStatue01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6l_bjm1y
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6l_bjm1y/StoneStatue01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6l_bjm1y/StoneStatue01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6l_bjm1y/StoneStatue01.actions.txt
+
+SMD IMPORTER: now working on StoneStatue01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: stone_statue02.jpg
+- Imported 100 polys
+SMD StoneStatue01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneStatue01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneStatue01_skeleton"
+- Imported 1 frames of animation
+SMD StoneStatue01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:08.467  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/review/wireframe.png'
+00:08.469  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/source.blend"
+00:08.476  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/original/source.blend"
+00:10.216  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/review/before.png'
+00:11.974  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/exports/StoneStatue02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zl7zl1vp
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zl7zl1vp/StoneStatue02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zl7zl1vp/StoneStatue02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_zl7zl1vp/StoneStatue02.actions.txt
+
+SMD IMPORTER: now working on StoneStatue02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: stone_statue01.jpg
+- Imported 107 polys
+SMD StoneStatue02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneStatue02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneStatue02_skeleton"
+- Imported 1 frames of animation
+SMD StoneStatue02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:13.799  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/review/after.png'
+00:15.426  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/exports/StoneStatue02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qye38966
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qye38966/StoneStatue02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qye38966/StoneStatue02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_qye38966/StoneStatue02.actions.txt
+
+SMD IMPORTER: now working on StoneStatue02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: stone_statue01.jpg
+- Imported 107 polys
+SMD StoneStatue02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneStatue02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneStatue02_skeleton"
+- Imported 1 frames of animation
+SMD StoneStatue02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:16.823  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/review/wireframe.png'
+00:16.823  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/source.blend"
+00:16.832  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/original/source.blend"
+00:18.340  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/review/before.png'
+00:19.876  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/exports/StoneStatue03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_s4bzqznn
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_s4bzqznn/StoneStatue03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_s4bzqznn/StoneStatue03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_s4bzqznn/StoneStatue03.actions.txt
+
+SMD IMPORTER: now working on StoneStatue03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tombstone_big.jpg
+- New material: angel_stone_statue.jpg
+- Imported 248 polys
+SMD StoneStatue03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneStatue03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneStatue03_skeleton"
+- Imported 1 frames of animation
+SMD StoneStatue03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:21.434  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/review/after.png'
+00:22.954  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/exports/StoneStatue03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8t2u5apm
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8t2u5apm/StoneStatue03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8t2u5apm/StoneStatue03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_8t2u5apm/StoneStatue03.actions.txt
+
+SMD IMPORTER: now working on StoneStatue03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tombstone_big.jpg
+- New material: angel_stone_statue.jpg
+- Imported 248 polys
+SMD StoneStatue03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneStatue03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneStatue03_skeleton"
+- Imported 1 frames of animation
+SMD StoneStatue03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:24.338  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/review/wireframe.png'
+00:24.339  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/source.blend"
+00:24.347  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/original/source.blend"
+00:25.877  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/review/before.png'
+00:27.404  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/exports/SteelStatue01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_ohwluh
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_ohwluh/SteelStatue01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_ohwluh/SteelStatue01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_ohwluh/SteelStatue01.actions.txt
+
+SMD IMPORTER: now working on SteelStatue01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tombstone_big.jpg
+- Imported 98 polys
+SMD SteelStatue01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on SteelStatue01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "SteelStatue01_skeleton"
+- Imported 1 frames of animation
+SMD SteelStatue01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:29.065  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/review/after.png'
+00:30.596  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/exports/SteelStatue01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2do5d4c6
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2do5d4c6/SteelStatue01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2do5d4c6/SteelStatue01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2do5d4c6/SteelStatue01.actions.txt
+
+SMD IMPORTER: now working on SteelStatue01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tombstone_big.jpg
+- Imported 98 polys
+SMD SteelStatue01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on SteelStatue01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "SteelStatue01_skeleton"
+- Imported 1 frames of animation
+SMD SteelStatue01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:32.007  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/review/wireframe.png'
+00:32.008  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/source.blend"
+00:32.016  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/original/source.blend"
+00:33.646  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/review/before.png'
+00:35.156  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/exports/Tomb01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nfpg1yhq
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nfpg1yhq/Tomb01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nfpg1yhq/Tomb01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_nfpg1yhq/Tomb01.actions.txt
+
+SMD IMPORTER: now working on Tomb01
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: grave_02.jpg
+- Imported 76 polys
+SMD Tomb01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tomb01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "Tomb01_skeleton"
+- Imported 1 frames of animation
+SMD Tomb01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:36.881  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/review/after.png'
+00:38.387  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/exports/Tomb01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b_gww12d
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b_gww12d/Tomb01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b_gww12d/Tomb01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_b_gww12d/Tomb01.actions.txt
+
+SMD IMPORTER: now working on Tomb01
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: grave_02.jpg
+- Imported 76 polys
+SMD Tomb01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tomb01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "Tomb01_skeleton"
+- Imported 1 frames of animation
+SMD Tomb01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:39.792  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/review/wireframe.png'
+00:39.794  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/source.blend"
+00:39.802  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/original/source.blend"
+00:41.386  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/review/before.png'
+00:42.886  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb01/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/exports/Tomb02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ufdv_l52
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ufdv_l52/Tomb02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ufdv_l52/Tomb02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ufdv_l52/Tomb02.actions.txt
+
+SMD IMPORTER: now working on Tomb02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: grave_01.jpg
+- Imported 72 polys
+SMD Tomb02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tomb02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Tomb02_skeleton"
+- Imported 1 frames of animation
+SMD Tomb02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:44.517  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/review/after.png'
+00:46.021  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/exports/Tomb02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a9lp6dmo
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a9lp6dmo/Tomb02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a9lp6dmo/Tomb02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a9lp6dmo/Tomb02.actions.txt
+
+SMD IMPORTER: now working on Tomb02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: grave_01.jpg
+- Imported 72 polys
+SMD Tomb02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tomb02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Tomb02_skeleton"
+- Imported 1 frames of animation
+SMD Tomb02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:47.415  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/review/wireframe.png'
+00:47.416  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/source.blend"
+00:47.426  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/original/source.blend"
+00:49.402  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/review/before.png'
+00:51.005  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/exports/Waterspout01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_n2847s
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_n2847s/Waterspout01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_n2847s/Waterspout01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6_n2847s/Waterspout01.actions.txt
+
+SMD IMPORTER: now working on Waterspout01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: stone_statue02.jpg
+- New material: reagon_waterspout.jpg
+- New material: ston01.jpg
+- New material: ston02.jpg
+- Imported 639 polys
+SMD Waterspout01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Waterspout01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "Waterspout01_skeleton"
+- Imported 21 frames of animation
+SMD Waterspout01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:53.014  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/review/after.png'
+00:54.596  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/exports/Waterspout01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cqa2c5zo
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cqa2c5zo/Waterspout01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cqa2c5zo/Waterspout01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cqa2c5zo/Waterspout01.actions.txt
+
+SMD IMPORTER: now working on Waterspout01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: stone_statue02.jpg
+- New material: reagon_waterspout.jpg
+- New material: ston01.jpg
+- New material: ston02.jpg
+- Imported 639 polys
+SMD Waterspout01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Waterspout01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "Waterspout01_skeleton"
+- Imported 21 frames of animation
+SMD Waterspout01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:56.101  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 4 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,43 @@
+{
+  "bounds_before": [
+    [
+      -154.2,
+      -201.18,
+      -1.37
+    ],
+    [
+      156.02,
+      200.29,
+      330.41
+    ]
+  ],
+  "bounds_after": [
+    [
+      -154.2,
+      -201.18,
+      -1.37
+    ],
+    [
+      156.02,
+      200.29,
+      330.41
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "textures": [
+    "tile_house01.jpg",
+    "tile_ston06.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=36 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": false,
+  "export_sha256": {
+    "Tent01.bmd": "6be4f98d11e1f6dec88d53be6f78354e89b3cb4a5ac0a057acd71ea9477e8713",
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03"
+  }
+}

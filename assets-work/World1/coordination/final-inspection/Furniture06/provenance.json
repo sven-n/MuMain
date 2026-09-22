@@ -1,0 +1,23 @@
+{
+  "model": "Furniture06",
+  "game_files": {
+    "src/bin/Data/Object1/Furniture06.bmd": "d67d5a5227817283efedd187e23d0a692be1a29ffae7fbf5dfe954cfaaf03163",
+    "src/bin/Data/Object1/bookshelf.OZJ": "b94d717a16ca66016f14e51cf8d27a33b1595da8911077c281e57114a33b0318",
+    "src/bin/Data/Object1/chair2.OZT": "a6108326cdca1506bdc4c0e3fd18e839dd386646ee08a9dfa68a5d3dde851103"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 132,
+  "bind_bounds": [
+    [
+      -20.836599349975586,
+      -25.627199172973633,
+      -0.04270000010728836
+    ],
+    [
+      21.477399826049805,
+      28.717599868774414,
+      110.8563003540039
+    ]
+  ]
+}

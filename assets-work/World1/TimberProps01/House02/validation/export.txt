@@ -1,0 +1,64 @@
+00:00.608  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/source.blend"
+skipping reference object 'House02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_0_Plank_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_0_Plank_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_0_Plank_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_0_Plank_3' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_0_Plank_4' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_1_Plank_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_1_Plank_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_1_Plank_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_1_Plank_3' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_1_Plank_4' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_0_Plank_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_0_Plank_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_0_Plank_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_1_Plank_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_1_Plank_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_1_Plank_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Original_Sloped_Display_Bed' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_FrontBack_Iron_Band' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_FrontBack_Iron_Band.001' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_FrontBack_Iron_Band.002' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_FrontBack_Iron_Band.003' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_Lower_Band' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Sloped_Iron_Rim' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Side_Lower_Band.001' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Crate_Sloped_Iron_Rim.001' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Preserved_Static_Blades_And_Shields' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting House02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7f8naji4/House02_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 1215 polys
+- Exported 2 materials
+   drum.jpg
+   steel.jpg
+- SMD export took 0.02463698387145996
+
+
+Blender Source Tools: exporting House02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7f8naji4/anims/House02_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.001856088638305664
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7f8naji4/House02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_7f8naji4/anims/House02_a00.smd --name House02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd
+  name field: House02.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 1215
+  bounds (bind pose): min -114.89 -64.12 -0.16  max 89.39 72.78 188.55  size 204.28 136.90 188.71
+  mesh 0: triangles=1068 vertices=556 normals=376 uvs=593 texture=drum.jpg
+  mesh 1: triangles=147 vertices=99 normals=140 uvs=35 texture=steel.jpg
+  bone 0: "Box02" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
