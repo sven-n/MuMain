@@ -1,0 +1,277 @@
+00:00.588  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/original/source.blend"
+00:02.265  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/before.png'
+00:04.086  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/action-before-15.png'
+00:05.666  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/action-before-30.png'
+00:06.953  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/terrain-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/exports/Tree01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_l1ijdkwl
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_l1ijdkwl/Tree01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_l1ijdkwl/Tree01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_l1ijdkwl/Tree01.actions.txt
+
+SMD IMPORTER: now working on Tree01
+- This is a mesh
+- Imported 16 new bones
+- Imported 1 frames of animation
+- New material: tree.jpg
+- New material: Tree_a.tga
+- Imported 412 polys
+SMD Tree01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 16 bones against armature "Tree01_skeleton"
+- Imported 31 frames of animation
+SMD Tree01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:08.479  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/after.png'
+00:09.916  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/action-after-15.png'
+00:11.358  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/action-after-30.png'
+00:12.707  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/reimported.blend: 1 mesh object(s), 16 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/exports/Tree01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_66qrvbrx
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_66qrvbrx/Tree01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_66qrvbrx/Tree01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_66qrvbrx/Tree01.actions.txt
+
+SMD IMPORTER: now working on Tree01
+- This is a mesh
+- Imported 16 new bones
+- Imported 1 frames of animation
+- New material: tree.jpg
+- New material: Tree_a.tga
+- Imported 412 polys
+SMD Tree01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 16 bones against armature "Tree01_skeleton"
+- Imported 31 frames of animation
+SMD Tree01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:14.119  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/review/wireframe.png'
+00:14.122  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/original/source.blend"
+00:15.924  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/before.png'
+00:17.540  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/action-before-15.png'
+00:19.030  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/action-before-30.png'
+00:20.387  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/reimported.blend: 1 mesh object(s), 16 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/exports/Tree02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6sm9s_ly
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6sm9s_ly/Tree02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6sm9s_ly/Tree02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_6sm9s_ly/Tree02.actions.txt
+
+SMD IMPORTER: now working on Tree02
+- This is a mesh
+- Imported 24 new bones
+- Imported 1 frames of animation
+- New material: tree.jpg
+- New material: Tree_a.tga
+- Imported 770 polys
+SMD Tree02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 24 bones against armature "Tree02_skeleton"
+- Imported 31 frames of animation
+SMD Tree02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:22.009  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/after.png'
+00:23.588  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/action-after-15.png'
+00:25.143  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/action-after-30.png'
+00:26.525  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/reimported.blend: 1 mesh object(s), 24 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/exports/Tree02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_clxwfiu3
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_clxwfiu3/Tree02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_clxwfiu3/Tree02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_clxwfiu3/Tree02.actions.txt
+
+SMD IMPORTER: now working on Tree02
+- This is a mesh
+- Imported 24 new bones
+- Imported 1 frames of animation
+- New material: tree.jpg
+- New material: Tree_a.tga
+- Imported 770 polys
+SMD Tree02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 24 bones against armature "Tree02_skeleton"
+- Imported 31 frames of animation
+SMD Tree02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:27.777  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/review/wireframe.png'
+00:27.779  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/original/source.blend"
+00:29.141  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/before.png'
+00:30.643  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/action-before-15.png'
+00:32.020  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/action-before-30.png'
+00:33.476  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/reimported.blend: 1 mesh object(s), 24 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/exports/Tree11.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wtadostq
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wtadostq/Tree11.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wtadostq/Tree11_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wtadostq/Tree11.actions.txt
+
+SMD IMPORTER: now working on Tree11
+- This is a mesh
+- Imported 10 new bones
+- Imported 1 frames of animation
+- New material: tree_06.tga
+- New material: tree_03.jpg
+- Imported 169 polys
+SMD Tree11 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree11_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 10 bones against armature "Tree11_skeleton"
+- Imported 31 frames of animation
+SMD Tree11_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:35.058  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/after.png'
+00:36.582  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/action-after-15.png'
+00:38.032  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/action-after-30.png'
+00:39.236  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/validation/reimported.blend: 1 mesh object(s), 10 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/exports/Tree11.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h8jqyqbi
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h8jqyqbi/Tree11.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h8jqyqbi/Tree11_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_h8jqyqbi/Tree11.actions.txt
+
+SMD IMPORTER: now working on Tree11
+- This is a mesh
+- Imported 10 new bones
+- Imported 1 frames of animation
+- New material: tree_06.tga
+- New material: tree_03.jpg
+- Imported 169 polys
+SMD Tree11 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree11_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 10 bones against armature "Tree11_skeleton"
+- Imported 31 frames of animation
+SMD Tree11_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:40.487  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/review/wireframe.png'
+00:40.489  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/original/source.blend"
+00:41.724  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/review/before.png'
+00:43.298  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/review/terrain-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree11/validation/reimported.blend: 1 mesh object(s), 10 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/exports/Tree06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ue2nz0m0
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ue2nz0m0/Tree06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ue2nz0m0/Tree06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ue2nz0m0/Tree06.actions.txt
+
+SMD IMPORTER: now working on Tree06
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tree_02.jpg
+- Imported 89 polys
+SMD Tree06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Tree06_skeleton"
+- Imported 1 frames of animation
+SMD Tree06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:44.691  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/review/after.png'
+00:48.022  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/review/terrain-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/exports/Tree06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jhnd4hd4
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jhnd4hd4/Tree06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jhnd4hd4/Tree06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jhnd4hd4/Tree06.actions.txt
+
+SMD IMPORTER: now working on Tree06
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tree_02.jpg
+- Imported 89 polys
+SMD Tree06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Tree06_skeleton"
+- Imported 1 frames of animation
+SMD Tree06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:51.693  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree06/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

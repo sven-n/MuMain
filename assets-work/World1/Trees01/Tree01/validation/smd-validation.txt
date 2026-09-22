@@ -1,0 +1,37 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/original/Tree01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/original/Tree01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/original/Tree01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/original/Tree01.smd: bones=16 frames=1 triangles=412 materials=2
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/original/Tree01_a00.smd: bones=16 frames=31 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+warning: Tree01_a00.smd: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/new/Tree01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/new/Tree01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/new/Tree01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/new/Tree01.smd: bones=16 frames=1 triangles=412 materials=2
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/new/Tree01_a00.smd: bones=16 frames=31 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+warning: Tree01_a00.smd: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree01_a00.smd: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin

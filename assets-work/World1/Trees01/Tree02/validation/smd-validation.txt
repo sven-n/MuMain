@@ -1,0 +1,41 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/original/Tree02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/original/Tree02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/original/Tree02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/original/Tree02.smd: bones=24 frames=1 triangles=770 materials=2
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/original/Tree02_a00.smd: bones=24 frames=31 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+warning: Tree02_a00.smd: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree02_a00.smd: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree02_a00.smd: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree02_a00.smd: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/new/Tree02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/new/Tree02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/new/Tree02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/new/Tree02.smd: bones=24 frames=1 triangles=770 materials=2
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/new/Tree02_a00.smd: bones=24 frames=31 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-trees/assets-work/World1/Trees01/Tree02/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+warning: Tree02_a00.smd: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree02_a00.smd: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree02_a00.smd: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin
+warning: Tree02_a00.smd: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin

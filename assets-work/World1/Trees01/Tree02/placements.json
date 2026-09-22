@@ -1,0 +1,407 @@
+{
+  "path": "src/bin/Data/Object1/Tree02.bmd",
+  "type": 1,
+  "placements": [
+    {
+      "position": [
+        350.0,
+        2350.0,
+        224.1425323486328
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        570.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        3.5,
+        23.5
+      ]
+    },
+    {
+      "position": [
+        250.0,
+        5300.0,
+        253.07077026367188
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        720.0
+      ],
+      "scale": 0.7400002479553223,
+      "tile": [
+        2.5,
+        53.0
+      ]
+    },
+    {
+      "position": [
+        300.0,
+        6750.0,
+        276.5972595214844
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        510.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        3.0,
+        67.5
+      ]
+    },
+    {
+      "position": [
+        250.0,
+        9150.0,
+        209.9722442626953
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        390.0
+      ],
+      "scale": 0.7400002479553223,
+      "tile": [
+        2.5,
+        91.5
+      ]
+    },
+    {
+      "position": [
+        311.82159423828125,
+        9718.9775390625,
+        189.19265747070312
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        210.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        3.1182159423828124,
+        97.189775390625
+      ]
+    },
+    {
+      "position": [
+        250.0,
+        18000.0,
+        297.4779357910156
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1890.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        2.5,
+        180.0
+      ]
+    },
+    {
+      "position": [
+        250.0,
+        20100.0,
+        336.74822998046875
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1890.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        2.5,
+        201.0
+      ]
+    },
+    {
+      "position": [
+        550.0,
+        21700.0,
+        267.1094055175781
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1890.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        5.5,
+        217.0
+      ]
+    },
+    {
+      "position": [
+        600.0,
+        24050.0,
+        164.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1770.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        6.0,
+        240.5
+      ]
+    },
+    {
+      "position": [
+        3350.0,
+        24700.0,
+        165.04403686523438
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        33.5,
+        247.0
+      ]
+    },
+    {
+      "position": [
+        5700.0,
+        24600.0,
+        166.32945251464844
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        57.0,
+        246.0
+      ]
+    },
+    {
+      "position": [
+        9300.0,
+        24650.0,
+        200.33872985839844
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        93.0,
+        246.5
+      ]
+    },
+    {
+      "position": [
+        12600.0,
+        24700.0,
+        176.0084228515625
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        -510.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        126.0,
+        247.0
+      ]
+    },
+    {
+      "position": [
+        13350.0,
+        24450.0,
+        177.6615447998047
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        -150.0
+      ],
+      "scale": 0.6200003623962402,
+      "tile": [
+        133.5,
+        244.5
+      ]
+    },
+    {
+      "position": [
+        13850.0,
+        24500.0,
+        214.359375
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        138.5,
+        245.0
+      ]
+    },
+    {
+      "position": [
+        15050.0,
+        24600.0,
+        177.09719848632812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1320.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        150.5,
+        246.0
+      ]
+    },
+    {
+      "position": [
+        16200.0,
+        25000.0,
+        279.99627685546875
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1320.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        162.0,
+        250.0
+      ]
+    },
+    {
+      "position": [
+        17550.0,
+        24700.0,
+        200.6952667236328
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1320.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        175.5,
+        247.0
+      ]
+    },
+    {
+      "position": [
+        16850.0,
+        24750.0,
+        228.59649658203125
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1320.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        168.5,
+        247.5
+      ]
+    },
+    {
+      "position": [
+        20600.0,
+        24850.0,
+        255.0557098388672
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1320.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        206.0,
+        248.5
+      ]
+    },
+    {
+      "position": [
+        19900.0,
+        24850.0,
+        276.27294921875
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1320.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        199.0,
+        248.5
+      ]
+    },
+    {
+      "position": [
+        22150.0,
+        24850.0,
+        279.831298828125
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1380.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        221.5,
+        248.5
+      ]
+    },
+    {
+      "position": [
+        22850.0,
+        24900.0,
+        178.77049255371094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1380.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        228.5,
+        249.0
+      ]
+    }
+  ],
+  "textures": {
+    "tree.jpg": [
+      "src/bin/Data/Object1/tree.OZJ"
+    ],
+    "Tree_a.tga": [
+      "src/bin/Data/Object1/Tree_a.OZT"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Tree02.bmd\n  name field: Data2\\Object1\\treebig.smd  version: 10\n  meshes: 2  bones: 24  actions: 1  triangles: 770\n  bounds (bind pose): min -375.50 -399.63 -5.23  max 469.63 340.30 893.52  size 845.12 739.93 898.74\n  mesh 0: triangles=606 vertices=338 normals=338 uvs=444 texture=tree.jpg\n  mesh 1: triangles=164 vertices=328 normals=232 uvs=4 texture=Tree_a.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=1\n  bone 6: \"Bone07\" parent=5\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Bone09\" parent=1\n  bone 9: \"Bone10\" parent=8\n  bone 10: \"Bone11\" parent=9\n  bone 11: \"Bone12\" parent=1\n  bone 12: \"stop\" parent=11\n  bone 13: \"Bone14\" parent=12\n  bone 14: \"Bone15\" parent=13\n  bone 15: \"notice_7\" parent=0\n  bone 16: \"notice_5\" parent=0\n  bone 17: \"notice_12\" parent=0\n  bone 18: \"tree_big\" parent=0\n  bone 19: \"Box17\" parent=0\n  bone 20: \"Dummy20\" parent=-1 dummy\n  bone 21: \"Dummy21\" parent=-1 dummy\n  bone 22: \"Dummy22\" parent=-1 dummy\n  bone 23: \"Dummy23\" parent=-1 dummy\n  action 0: keys=31 lock=0\n",
+  "scope_exclusion": null
+}
