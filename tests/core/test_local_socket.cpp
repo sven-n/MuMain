@@ -278,6 +278,11 @@ TEST_CASE("Local socket file is owner-only and replaces a stale file [core][loca
     // A socket file left behind by a crashed client: bound by a socket that
     // then went away without unlinking it, which is what a crash leaves.
     {
+        // This is the first socket call of the case, and ctest runs each case
+        // in its own process: without the start-up Winsock answers
+        // WSANOTINITIALISED here. The helpers below do it for themselves.
+        EnsureSocketLibrary();
+
         const SOCKET stale = ::socket(AF_UNIX, SOCK_STREAM, 0);
         REQUIRE(stale != INVALID_SOCKET);
         sockaddr_un address{};
