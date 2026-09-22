@@ -1,0 +1,15 @@
+model assets-work/World1/Beer01/original/Beer01.bmd
+  name field: Data2\Object1\house_in_beer_01.s  version: 10
+  meshes: 5  bones: 5  actions: 1  triangles: 216
+  bounds (bind pose): min -50.14 -29.63 -0.34  max 41.07 28.94 61.46  size 91.20 58.57 61.80
+  mesh 0: triangles=30 vertices=19 normals=25 uvs=28 texture=plate.jpg
+  mesh 1: triangles=36 vertices=25 normals=31 uvs=29 texture=winecup.jpg
+  mesh 2: triangles=110 vertices=69 normals=75 uvs=78 texture=plate2.jpg
+  mesh 3: triangles=4 vertices=6 normals=4 uvs=6 texture=pot3.tga
+  mesh 4: triangles=36 vertices=20 normals=20 uvs=30 texture=bottle.tga
+  bone 0: "Cylinder09" parent=-1
+  bone 1: "Cylinder11" parent=-1
+  bone 2: "Cylinder08" parent=-1
+  bone 3: "Sphere05" parent=-1
+  bone 4: "Cylinder31" parent=-1
+  action 0: keys=1 lock=0
