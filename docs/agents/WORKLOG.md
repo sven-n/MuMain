@@ -272,3 +272,21 @@ UI, Beer01/plate2, terrain/placement or shared-runtime changes; no client launch
 In a stable coordinated client session, check load logs, runtime lighting/filtering/culling,
 table silhouettes and the paired-half-table/counter seams at recorded placements; capture
 matched 1920×1080 before/after views. All supplied previews are labeled offline Blender.
+
+## 2026-09-22 - Publish the tavern furniture batch (ASTRA / Codex)
+**Goal:** Commit, push and create a PR for the completed tavern furniture work.
+
+**Done:** Pushed `art/lorencia-tavern-props` and opened
+[PR #6](https://github.com/vaskodagamo/MuMain/pull/6) against `main`. Merged the latest
+main (`300911ed`) first, preserving every work-log entry when resolving the sole conflict.
+Updated the installer to protect other artists' committed Data against HEAD after a main
+merge while retaining original-backup and claimed-export hash checks. The PR includes
+an offline preview, exact four-file game scope, validation evidence and pending client checks.
+
+**Verified:** Installer preflight passes with all four exports matching recorded hashes and
+320 protected files matching committed HEAD. The PR game diff contains only Furniture03,
+Furniture04, Furniture05 and desk_big.OZJ; `git diff origin/main...HEAD --check` passes.
+No assets were regenerated, runtime files written, client session launched or engine build
+performed during publication. Prior offline validation remains applicable.
+
+**Open / next:** PR review and previously deferred client acceptance. The PR is not merged.
