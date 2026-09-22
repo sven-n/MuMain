@@ -175,5 +175,29 @@
       "src/bin/Data/Object1/ston01.OZJ": "assets-work/World1/Rocks01/textures/ston01.OZJ",
       "src/bin/Data/Object1/ston02.OZT": "assets-work/World1/Rocks01/textures/ston02.OZT"
     }
+  },
+  {
+    "name": "Flowering01",
+    "models": [
+      "Tree08",
+      "Tree12",
+      "Tree13"
+    ],
+    "owner": "groundcover / flowering subagent",
+    "source_commits": [
+      "70cce08a"
+    ],
+    "integration_commits": [
+      "2d827ed5"
+    ],
+    "notes_path": "Flowering01/README.md",
+    "game_files": {
+      "src/bin/Data/Object1/Tree08.bmd": "assets-work/World1/Flowering01/Tree08/exports/Tree08.bmd",
+      "src/bin/Data/Object1/Tree12.bmd": "assets-work/World1/Flowering01/Tree12/exports/Tree12.bmd",
+      "src/bin/Data/Object1/Tree13.bmd": "assets-work/World1/Flowering01/Tree13/exports/Tree13.bmd",
+      "src/bin/Data/Object1/tree_01.OZJ": "assets-work/World1/Flowering01/textures/final/tree_01.OZJ",
+      "src/bin/Data/Object1/tree_04.OZT": "assets-work/World1/Flowering01/textures/final/tree_04.OZT",
+      "src/bin/Data/Object1/tree_05.OZT": "assets-work/World1/Flowering01/textures/final/tree_05.OZT"
+    }
   }
 ]

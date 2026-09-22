@@ -49,10 +49,11 @@ def check_originals(ledger):
         for name in batch['models']:
             path = ROOT / 'assets-work/World1' / batch['name'] / name / 'original' / (name + '.bmd')
             relative_game = 'src/bin/Data/Object1/' + name + '.bmd'
-            original = subprocess.check_output(['git', 'show', BASELINE + ':' + relative_game], cwd=ROOT)
+            revision = batch.get('original_revisions', {}).get(name, BASELINE)
+            original = subprocess.check_output(['git', 'show', revision + ':' + relative_game], cwd=ROOT)
             if not path.exists() or path.read_bytes() != original:
                 raise ValueError(f'Original archive differs from integration baseline: {name}')
-            result[name] = sha256(path)
+            result[batch['name'] + '/' + name] = {'revision': revision, 'sha256': sha256(path)}
     return result
 
 

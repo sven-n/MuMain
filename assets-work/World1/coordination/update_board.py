@@ -68,6 +68,8 @@ All source Data paths are relative to the integration worktree. Full placement a
     text += '\n## Batch texture ownership\n\nEvery listed BMD is exclusively owned by the named batch. Only its owned texture paths may change; all other dependencies are frozen.\n\n| Owner / branch | Owned BMDs | Owned textures | Frozen textures |\n|---|---|---|---|\n'
     for owner, batch in ASSIGNMENTS.items():
         names = ', '.join(batch['models'])
+        if batch.get('compatibility_models'):
+            names += '; read-only BMD compatibility: ' + ', '.join(batch['compatibility_models'])
         owned = '<br>'.join('`' + value + '`' for value in batch.get('owned_textures', [])) or 'None'
         frozen = '<br>'.join('`' + value + '`' for value in batch.get('frozen_textures', [])) or 'None'
         text += f"| {owner} / `{batch['branch']}` | {names} | {owned} | {frozen} |\n"

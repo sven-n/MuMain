@@ -1,6 +1,6 @@
 {
   "result": "PASS: offline integration; no client claim",
-  "integration_head": "db27198aa0bffdbaec3a6fc306e5c7ca25254502",
+  "integration_head": "2d827ed5225979087e9b68fbcf306879b48acd29",
   "baseline": "ac0f6dd8",
   "changed_game_files": {
     "src/bin/Data/Object1/Furniture03.bmd": {
@@ -222,43 +222,169 @@
       "sha256": "9cc2f1dfa531853fc48ff7dc6bd25ef1757b74db6890f7436039db7611d6a1dd",
       "export": "assets-work/World1/Rocks01/textures/ston02.OZT",
       "batch": "Rocks01"
+    },
+    "src/bin/Data/Object1/Tree08.bmd": {
+      "sha256": "d15208a04f46e4c339df97afa8c4c159700d16bd8909a2817cdde3d1a51ec0e4",
+      "export": "assets-work/World1/Flowering01/Tree08/exports/Tree08.bmd",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/Tree12.bmd": {
+      "sha256": "a2cff768f9c11031d6b77c100207f203257919f4d6fb101542b92c808c96504b",
+      "export": "assets-work/World1/Flowering01/Tree12/exports/Tree12.bmd",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/Tree13.bmd": {
+      "sha256": "864296c6842008676f3106ddd62711801a512a98fc1cdb3d63d7fca524ffa4f4",
+      "export": "assets-work/World1/Flowering01/Tree13/exports/Tree13.bmd",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/tree_01.OZJ": {
+      "sha256": "87aecaa23b8ba3975b8b80eb19dc391f716a6123653a578eb38babff3a82cf8a",
+      "export": "assets-work/World1/Flowering01/textures/final/tree_01.OZJ",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/tree_04.OZT": {
+      "sha256": "78ab37edb53ab4a99eb3c3d609b33233a2314f154f1c847fa23d9ea563a1b819",
+      "export": "assets-work/World1/Flowering01/textures/final/tree_04.OZT",
+      "batch": "Flowering01"
+    },
+    "src/bin/Data/Object1/tree_05.OZT": {
+      "sha256": "0f850800c8a18408bc9dd75879f9f6eca46e7dfbf2c716bd5da6973f34aad108",
+      "export": "assets-work/World1/Flowering01/textures/final/tree_05.OZT",
+      "batch": "Flowering01"
     }
   },
-  "protected_file_count": 280,
+  "protected_file_count": 274,
   "world1_files_unchanged": true,
   "original_archive_hashes": {
-    "Furniture03": "4a03abcf52f60261cfba44952f9b0651b86ffedfdd7ed14ba7fdd71a1f4c8985",
-    "Furniture04": "c4874cf98f4c3163c70b9514033571a2ff6653d6bf15df98c8382267c2c5fedc",
-    "Furniture05": "0f176df870aa4c5f2780a9248f55281db37c7afd9714dc90ca9db59026a9a994",
-    "Grass01": "f6e9e43fbc9750d97e7d3d29361a491ed9f83a3193705f58a11e69ea4088d42f",
-    "Grass02": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea",
-    "Grass05": "f16ec91515672de50a9033e5668f790736644825120ae03e5888e6547ae8e45b",
-    "Grass06": "52513bac5515332dcb078dfe8de91c1512dca1b44d5487314c8fb0954fc6e988",
-    "Fence01": "330920bc62c8de3964b96d1001189c6496a61dc828fee37988060b157c0ce0dd",
-    "Fence02": "450cc7c06fce2fd12eaa2b409a94bd30039f8d57abc73913c73bd4d4ac8e0c55",
-    "Fence03": "921d62b0482da9d683a7ad844ed6c8347ef005eb8ad90562b4ef5ef74ea755ce",
-    "Fence04": "b58daf2200b03d1fcb9f00bda906c7ba2acc798f052dc528a45764cd3830b851",
-    "Tree09": "ffd5c7ce308c42bdde1f8fd42c64d051c05eb6e5f91f2f55ae2c64e98ece995e",
-    "Tree10": "5e84fde224528e1d50b12778a1df05ddd7c50f300c5874be46c205e78d233b47",
-    "Grass03": "1defeac9a09bce7df56d46ab323e0735e2139bb588607d6be455fecaf115eb32",
-    "Grass04": "f9d5eb81cb80c915a98011c98bb5bee706790aac9c9b99ceb41059496ca07196",
-    "Tree01": "f402e95bd45fac4940912cab00c6b6f6a352b29a5983016080b154cdab31c61f",
-    "Tree02": "38020ef3abe78b5b6a1579535ed22a9150d75c0cead2f48ffaeb09c99a15654d",
-    "Tree11": "96e721e2749724a8078d14bb874002d7efba102c3a3e3d3c745bc04744384ebf",
-    "Tree06": "ab37a0ad05291db385b701fc7ec8db1f7cde112ba2062b88b957cd4c6aa39666",
-    "House02": "03bfebfd050e3f66850b53304581b651b5e5880ea8f21ed29b73e483a5d17f0f",
-    "TreasureDrum01": "f022411c2a6e0409329b5b3f1ae2412623674223493665a99058859d4831da8f",
-    "StreetLight01": "b0486a6b566a0ae773f4bb80063f8646fd529baaee36f03a208ac6ad0b16ebc3",
-    "Stone01": "dc4af5aac6b0881fdbb6b4d51eb0eef117b7e4155912342bfd6d64d167aeaa63",
-    "Stone02": "2a8f8348f8a2616f4fbe08433cf2de8c91c6de59fbf56d34b1716dbfe19beff0",
-    "Stone03": "337a59ca7cfd6f0de6156e36eb7a8f0660e36cf82da931496a4df8421ef7eb2d",
-    "Stone04": "9be9019c4a4b6f51e4578d0cc1f5109a8f58dcccf9ed4c7429896bd09b9a517f",
-    "Stone05": "f0743f0527ffe0b8055ed8e97cc98f1d803a58592c795a8db5805ede38d6f7da",
-    "Waterspout01": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83"
+    "TavernProps/Furniture03": {
+      "revision": "ac0f6dd8",
+      "sha256": "4a03abcf52f60261cfba44952f9b0651b86ffedfdd7ed14ba7fdd71a1f4c8985"
+    },
+    "TavernProps/Furniture04": {
+      "revision": "ac0f6dd8",
+      "sha256": "c4874cf98f4c3163c70b9514033571a2ff6653d6bf15df98c8382267c2c5fedc"
+    },
+    "TavernProps/Furniture05": {
+      "revision": "ac0f6dd8",
+      "sha256": "0f176df870aa4c5f2780a9248f55281db37c7afd9714dc90ca9db59026a9a994"
+    },
+    "Groundcover01/Grass01": {
+      "revision": "ac0f6dd8",
+      "sha256": "f6e9e43fbc9750d97e7d3d29361a491ed9f83a3193705f58a11e69ea4088d42f"
+    },
+    "Groundcover01/Grass02": {
+      "revision": "ac0f6dd8",
+      "sha256": "1e3f338fbf6d5956bbcc0e194f916f87389ea97a8c0742528e1306a3187de4ea"
+    },
+    "Groundcover01/Grass05": {
+      "revision": "ac0f6dd8",
+      "sha256": "f16ec91515672de50a9033e5668f790736644825120ae03e5888e6547ae8e45b"
+    },
+    "Groundcover01/Grass06": {
+      "revision": "ac0f6dd8",
+      "sha256": "52513bac5515332dcb078dfe8de91c1512dca1b44d5487314c8fb0954fc6e988"
+    },
+    "Fences01/Fence01": {
+      "revision": "ac0f6dd8",
+      "sha256": "330920bc62c8de3964b96d1001189c6496a61dc828fee37988060b157c0ce0dd"
+    },
+    "Fences01/Fence02": {
+      "revision": "ac0f6dd8",
+      "sha256": "450cc7c06fce2fd12eaa2b409a94bd30039f8d57abc73913c73bd4d4ac8e0c55"
+    },
+    "Fences01/Fence03": {
+      "revision": "ac0f6dd8",
+      "sha256": "921d62b0482da9d683a7ad844ed6c8347ef005eb8ad90562b4ef5ef74ea755ce"
+    },
+    "Fences01/Fence04": {
+      "revision": "ac0f6dd8",
+      "sha256": "b58daf2200b03d1fcb9f00bda906c7ba2acc798f052dc528a45764cd3830b851"
+    },
+    "Scrub01/Tree09": {
+      "revision": "ac0f6dd8",
+      "sha256": "ffd5c7ce308c42bdde1f8fd42c64d051c05eb6e5f91f2f55ae2c64e98ece995e"
+    },
+    "Scrub01/Tree10": {
+      "revision": "ac0f6dd8",
+      "sha256": "5e84fde224528e1d50b12778a1df05ddd7c50f300c5874be46c205e78d233b47"
+    },
+    "Scrub01/Grass03": {
+      "revision": "ac0f6dd8",
+      "sha256": "1defeac9a09bce7df56d46ab323e0735e2139bb588607d6be455fecaf115eb32"
+    },
+    "Scrub01/Grass04": {
+      "revision": "ac0f6dd8",
+      "sha256": "f9d5eb81cb80c915a98011c98bb5bee706790aac9c9b99ceb41059496ca07196"
+    },
+    "Trees01/Tree01": {
+      "revision": "ac0f6dd8",
+      "sha256": "f402e95bd45fac4940912cab00c6b6f6a352b29a5983016080b154cdab31c61f"
+    },
+    "Trees01/Tree02": {
+      "revision": "ac0f6dd8",
+      "sha256": "38020ef3abe78b5b6a1579535ed22a9150d75c0cead2f48ffaeb09c99a15654d"
+    },
+    "Trees01/Tree11": {
+      "revision": "ac0f6dd8",
+      "sha256": "96e721e2749724a8078d14bb874002d7efba102c3a3e3d3c745bc04744384ebf"
+    },
+    "Trees01/Tree06": {
+      "revision": "ac0f6dd8",
+      "sha256": "ab37a0ad05291db385b701fc7ec8db1f7cde112ba2062b88b957cd4c6aa39666"
+    },
+    "TimberProps01/House02": {
+      "revision": "ac0f6dd8",
+      "sha256": "03bfebfd050e3f66850b53304581b651b5e5880ea8f21ed29b73e483a5d17f0f"
+    },
+    "TimberProps01/TreasureDrum01": {
+      "revision": "ac0f6dd8",
+      "sha256": "f022411c2a6e0409329b5b3f1ae2412623674223493665a99058859d4831da8f"
+    },
+    "TimberProps01/StreetLight01": {
+      "revision": "ac0f6dd8",
+      "sha256": "b0486a6b566a0ae773f4bb80063f8646fd529baaee36f03a208ac6ad0b16ebc3"
+    },
+    "Rocks01/Stone01": {
+      "revision": "ac0f6dd8",
+      "sha256": "dc4af5aac6b0881fdbb6b4d51eb0eef117b7e4155912342bfd6d64d167aeaa63"
+    },
+    "Rocks01/Stone02": {
+      "revision": "ac0f6dd8",
+      "sha256": "2a8f8348f8a2616f4fbe08433cf2de8c91c6de59fbf56d34b1716dbfe19beff0"
+    },
+    "Rocks01/Stone03": {
+      "revision": "ac0f6dd8",
+      "sha256": "337a59ca7cfd6f0de6156e36eb7a8f0660e36cf82da931496a4df8421ef7eb2d"
+    },
+    "Rocks01/Stone04": {
+      "revision": "ac0f6dd8",
+      "sha256": "9be9019c4a4b6f51e4578d0cc1f5109a8f58dcccf9ed4c7429896bd09b9a517f"
+    },
+    "Rocks01/Stone05": {
+      "revision": "ac0f6dd8",
+      "sha256": "f0743f0527ffe0b8055ed8e97cc98f1d803a58592c795a8db5805ede38d6f7da"
+    },
+    "Rocks01/Waterspout01": {
+      "revision": "ac0f6dd8",
+      "sha256": "7e3c5e39d74227a3ac88dce45ec6da2573b0d7738d85384fbfdb5251069a9e83"
+    },
+    "Flowering01/Tree08": {
+      "revision": "ac0f6dd8",
+      "sha256": "08c0f6bf9468f4db83a0d7579656b6453254b2573331a08654cf226a20805e25"
+    },
+    "Flowering01/Tree12": {
+      "revision": "ac0f6dd8",
+      "sha256": "f2c6dbc600ebb76c5af82198699ffe83bfb532ba5db0a6f805efb4425545f502"
+    },
+    "Flowering01/Tree13": {
+      "revision": "ac0f6dd8",
+      "sha256": "54fa5331f342977f13dba3e586db8e320c15d4476f30d8ba19369ad3372cf4bf"
+    }
   },
   "combined_models": 115,
   "missing_textures": [],
-  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/Tree_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/drum.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight_brightness2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_06.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/Tree_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/drum.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight_brightness2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_04.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_05.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_06.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
   "client_verified": false,
   "runtime_modified": false
 }

@@ -173,5 +173,28 @@
       "src/bin/Data/Object1/steel_barred_door.OZT"
     ],
     "frozen_textures": []
+  },
+  "groundcover / bare trees": {
+    "models": [
+      "Tree03",
+      "Tree04",
+      "Tree05",
+      "Tree07"
+    ],
+    "compatibility_models": [
+      "Tree11"
+    ],
+    "branch": "codex/lorencia-bare-trees",
+    "worktree": "MuMain-lorencia-bare-trees",
+    "owned_textures": [
+      "src/bin/Data/Object1/tree_03.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tree_04.OZJ",
+      "src/bin/Data/Object1/tree_06.OZT"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/Tree11.bmd"
+    ]
   }
 }
