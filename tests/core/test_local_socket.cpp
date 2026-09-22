@@ -9,6 +9,15 @@
 
 #include "doctest.h"
 
+// <windows.h> arrives through the Winsock shim below, and its min/max macros
+// would eat the std::min calls in this file. The game's own stdafx.h does the
+// same before it includes the header.
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
 #include "Core/Platform/LocalSocket.h"
 
 #include "Core/Platform/WinSock.h" // SOCKET, closesocket, WSAStartup (no-ops on POSIX)
