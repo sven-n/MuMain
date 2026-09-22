@@ -110,12 +110,19 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
 
     const float range = EquippedAttackRange();
 
-    // The target tile is what the path finder and the wall test read, so it
-    // is set first; the client's own selection follows only once those have
-    // accepted the target, so a refused attack does not leave the UI
-    // pointing at something it will not hit.
+    // The target tile is what the path finder and the wall test read.
     TargetX = (int)(target->Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(target->Object.Position[1] / TERRAIN_SCALE);
+
+    // CheckWall reads the global SelectedCharacter on every step of its walk
+    // (ZzzInterface.cpp) to exempt gate models from the terrain-wall test —
+    // gates stand on no-move tiles, so without the exemption they can never
+    // be attacked. The selection therefore has to be this target *before*
+    // the checks, as the helper path this was extracted from did. A refused
+    // attack still must not leave the UI pointing at something it will not
+    // hit, so the previous selection is put back on the refusal paths.
+    const int previousSelection = SelectedCharacter;
+    SelectedCharacter = targetIndex;
 
     // Range first, then a path only when one is needed — the order the
     // engine's own attack loop uses (ZzzInterface.cpp:1282, 1349). The other
@@ -125,6 +132,7 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
     const bool inRange = CheckTile(Hero, &Hero->Object, range);
     if (inRange && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
     {
+        SelectedCharacter = previousSelection;
         return AttackResult::Blocked;
     }
 
@@ -132,10 +140,9 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
     if (!inRange && !PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &path,
                                   static_cast<float>(huntingDistance) + range))
     {
+        SelectedCharacter = previousSelection;
         return AttackResult::NoPath;
     }
-
-    SelectedCharacter = targetIndex;
 
     if (!inRange)
     {
