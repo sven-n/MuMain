@@ -47,9 +47,15 @@
 
 .gauge-num {
 	position: absolute;
+	/* Long values extend beyond the gauge: keep every digit above adjacent fills. */
+	z-index: 1;
 	left: 0;
-	bottom: 2px;
-	width: 100%;
+	top: 30px;
+	/* Reserve enough text width for full resource values, even on 16px gauges.
+	   RmlUi cannot centre overflowing inline text in those narrow boxes. */
+	width: 96px;
+	font-size: 12px;
+	line-height: 12px;
 	text-align: center;
 	color: #ffffff;
 	font-weight: bold;
@@ -58,28 +64,33 @@
 	pointer-events: none;
 }
 
-/* Tooltips are siblings of their trigger, not nested descendants -- this build's shrink-to-fit
-   width clamps to a nested trigger's own narrow width, so nesting would cap them there. Each
-   gets an explicit width, a z-index bump against later siblings, and a precomputed static `left`
-   instead of translateX(-50%), since `%` in a transform resolves against the border-box before
-   it's ready on a display:none element flipping to :hover. */
+/* Numeric anchors match the original readouts rather than the gauge centres. */
+#bar_hp .gauge-num { left: -25.25px; }
+#bar_mp .gauge-num { left: -20px; }
+#bar_sd .gauge-num { left: -35px; top: 31px; }
+#bar_ag .gauge-num { left: -40.5px; top: 31px; }
+
+/* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size
+   binding rasterizes at display size; its inverse transform cancels the HUD scale.
+   Use content width and stable edge anchors, not a hidden box's percentage transform. */
 .tooltip {
 	display: none;
 	position: absolute;
-	width: 160px;
+	width: auto;
+	transform-origin: left top;
 	white-space: nowrap;
 	background-color: rgba(0, 0, 0, 200);
 	color: #ffffff;
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
-	font-size: 11px;
+	padding: 1px 2px;
+	border-radius: 0px;
+	font-family: "DejaVu Sans";
+	font-size: 10px;
 	pointer-events: none;
 }
-.tooltip-hp { left: 100.5px; } /* anchor 180.5px */
-.tooltip-sd { left: 132px;   } /* anchor 212px */
-.tooltip-ag { left: 348px;   } /* anchor 428px */
-.tooltip-mp { left: 379.5px; } /* anchor 459.5px */
+.tooltip-hp { left: 158px; }
+.tooltip-sd { left: 184px; }
+.tooltip-ag { left: 400px; }
+.tooltip-mp { left: 437px; }
 #bar_hp:hover ~ .tooltip-hp,
 #bar_sd:hover ~ .tooltip-sd,
 #bar_ag:hover ~ .tooltip-ag,
@@ -88,7 +99,8 @@
 	display: block;
 	z-index: 1;
 }
-#bars .tooltip { bottom: 44px; }
+/* All four gauge hints share the same anchor row, not the 39px root's bottom. */
+.tooltip-hp, .tooltip-sd, .tooltip-ag, .tooltip-mp { top: 418px; }
 
 /* Buttons: nested inside #bars, plain reference-pixel position next to the mana bar. */
 @spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
@@ -126,13 +138,14 @@
    CItemHotKey::RenderItemCount()'s offset); empty string renders nothing. */
 .item-stack-label {
 	position: absolute;
-	right: 1px;
-	bottom: 1px;
+	left: 19px;
+	top: 14px;
+	transform: translateX(-50%);
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
-	font-size: 8px;
-	line-height: 8px;
+	font-size: 12px;
+	line-height: 12px;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -224,11 +237,12 @@
 #btn_window   { left: 121px; decorator: image(mainframe-btn-window-normal); }
 #btn_window.open   { decorator: image(mainframe-btn-window-open); }
 
-.tooltip-cshop    { left: -64px; } /* anchor 16px */
-.tooltip-chainfo  { left: -34px; } /* anchor 46px */
-.tooltip-myinven  { left: -4px;  } /* anchor 76px */
-.tooltip-friend   { left: 26px;  } /* anchor 106px */
-.tooltip-window   { left: 56px;  } /* anchor 136px */
+#buttons .tooltip { top: -11px; }
+.tooltip-cshop    { left: -18px; }
+.tooltip-chainfo  { left: 18px; }
+.tooltip-myinven  { left: 45px; }
+.tooltip-friend   { right: 178px; transform-origin: right top; }
+.tooltip-window   { right: 148px; transform-origin: right top; }
 #btn_cshop:hover ~ .tooltip-cshop,
 #btn_chainfo:hover ~ .tooltip-chainfo,
 #btn_myinven:hover ~ .tooltip-myinven,
@@ -260,14 +274,20 @@
 	height: 10px;
 	pointer-events: auto;
 }
+/* Original menu artwork's bottom strip, independent of the progress fill. */
+@spritesheet mainframe-exp-left-sheet { src: "../../../newui_menu01.jpg"; mainframe-exp-left: 0px 41px 256px 10px; }
+@spritesheet mainframe-exp-middle-sheet { src: "../../../newui_menu02.jpg"; mainframe-exp-middle: 0px 41px 128px 10px; }
+@spritesheet mainframe-exp-right-sheet { src: "../../../partCharge1/newui_menu03.jpg"; mainframe-exp-right: 0px 41px 256px 10px; }
+.exp-frame { position: absolute; top: 0px; height: 10px; pointer-events: none; }
+#exp_frame_left { left: 0px; width: 256px; decorator: image(mainframe-exp-left); }
+#exp_frame_middle { left: 256px; width: 128px; decorator: image(mainframe-exp-middle); }
+#exp_frame_right { left: 384px; width: 256px; decorator: image(mainframe-exp-right); }
 #exp_track {
 	position: absolute;
 	left: 2px;
-	right: 1px;
-	top: 0;
-	bottom: 0;
-	background-color: rgba(0, 0, 0, 160);
-	border: 1px rgba(0, 0, 0, 200);
+	width: 629px;
+	top: 3px;
+	height: 4px;
 }
 /* Real gauge art (legacy only) -- 6x4 rect matches the real decoded source pixels. */
 @spritesheet mainframe-gauge-exp-sheet { src: "../../../newui_exbar.jpg"; mainframe-gauge-exp: 0px 0px 6px 4px; }
@@ -280,19 +300,18 @@
 }
 #exp_digit {
 	position: absolute;
-	right: 4px;
-	top: 50%;
-	transform: translateY(-50%);
+	right: 1px;
+	top: -1px;
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
 	font-family: "Liberation Sans";
-	font-size: 9px;
+	font-size: 12px;
+	line-height: 12px;
 	pointer-events: none;
 }
-/* left is a precomputed centered value (640px width minus half the tooltip's 160px), not
-   left:50%+translateX(-50%) -- same fix as .tooltip-hp etc. above. */
+/* EXP shares the gauge hint row; #exp starts at reference y=470. */
 #exp_tooltip {
-	bottom: 12px;
-	left: 240px;
+	top: -52px;
+	left: 280px;
 }
