@@ -139,7 +139,7 @@
 .item-stack-label {
 	position: absolute;
 	left: 19px;
-	top: 11px;
+	top: 14px;
 	transform: translateX(-50%);
 	color: #ffffff;
 	font-weight: bold;
@@ -301,7 +301,7 @@
 #exp_digit {
 	position: absolute;
 	right: 1px;
-	top: -4px;
+	top: -1px;
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
