@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "candle.jpg",
+    "candle.jpg.001",
+    "candle2.jpg",
+    "candle2.jpg.001"
+  ],
+  "reference_objects": 1,
+  "high_poly_sources": 16,
+  "export_objects": 17,
+  "original_rig_reused": true,
+  "external_image_files_required": false,
+  "reference_exclusion": "REF_* collections + mu_reference"
+}

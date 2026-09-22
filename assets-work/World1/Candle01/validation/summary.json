@@ -1,0 +1,42 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=7 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -19.32,
+      -11.26,
+      0.01
+    ],
+    [
+      19.35,
+      11.21,
+      87.07
+    ]
+  ],
+  "bounds_after": [
+    [
+      -19.32,
+      -11.26,
+      0.01
+    ],
+    [
+      19.35,
+      11.21,
+      87.07
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "candle.jpg",
+    "candle2.jpg"
+  ],
+  "export_sha256": {
+    "Candle01.bmd": "d754131aa39b7a77cb5118b683c23e793c4a8829ab713436723b04c7508d98d5",
+    "candle.OZJ": "8a3247f2b3f0491d74f4f14ed4b54157b0060b8bb2f53a8f61ecf5c9c5626567",
+    "candle2.OZJ": "269019e39be5b7603ee388b80776a19ff4adba889da0dcf6d77d769bea58b1ec"
+  }
+}

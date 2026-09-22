@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/original/Candle01.smd
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/original/Candle01_a00.smd
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/original/Candle01.actions.txt
+
+/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/original/Candle01.smd: bones=9 frames=1 triangles=116 materials=2
+OK
+
+/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/original/Candle01_a00.smd: bones=9 frames=7 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/new/Candle01.smd
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/new/Candle01_a00.smd
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/new/Candle01.actions.txt
+
+/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/new/Candle01.smd: bones=9 frames=1 triangles=1018 materials=2
+OK
+
+/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/new/Candle01_a00.smd: bones=9 frames=7 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain/assets-work/World1/Candle01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

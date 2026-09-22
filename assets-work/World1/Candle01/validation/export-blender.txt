@@ -1,0 +1,62 @@
+00:00.772  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/source.blend"
+skipping reference object 'Candle01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_OctagonalFoot' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_TurnedBronzeStem' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_DarkCollar' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ForgedArm-1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_GothicScroll-1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ForgedArm1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_GothicScroll1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LeftDripCup' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LeftBeeswax' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LeftWick' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CenterDripCup' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CenterBeeswax' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CenterWick' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_RightDripCup' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_RightBeeswax' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_RightWick' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Candle01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_y_qj8cos/Candle01_mu_export.smd
+- Exported 9 bones
+- Exported 1 frames
+- Exported 1018 polys
+- Exported 2 materials
+   candle2.jpg
+   candle.jpg
+- SMD export took 0.02531599998474121
+
+
+Blender Source Tools: exporting Candle01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_y_qj8cos/anims/Candle01_a00.smd
+- Exported 9 bones
+- Exported 7 frames
+- SMD export took 0.005530834197998047
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_y_qj8cos/Candle01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/exports/Candle01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_y_qj8cos/anims/Candle01_a00.smd --name Candle01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/exports/Candle01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/exports/Candle01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Candle01/exports/Candle01.bmd
+  name field: Candle01.smd  version: 12
+  meshes: 2  bones: 9  actions: 1  triangles: 1018
+  bounds (bind pose): min -19.32 -11.26 0.01  max 19.35 11.21 87.07  size 38.67 22.47 87.06
+  mesh 0: triangles=1012 vertices=535 normals=468 uvs=307 texture=candle.jpg
+  mesh 1: triangles=6 vertices=15 normals=5 uvs=15 texture=candle2.jpg
+  bone 0: "Cylinder05" parent=-1
+  bone 1: "Bone01" parent=-1
+  bone 2: "Bone02" parent=1
+  bone 3: "Bone03" parent=2
+  bone 4: "Bone04" parent=1
+  bone 5: "Bone05" parent=4
+  bone 6: "Bone06" parent=1
+  bone 7: "Bone07" parent=6
+  bone 8: "Mesh03" parent=1
+  action 0: keys=7 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
