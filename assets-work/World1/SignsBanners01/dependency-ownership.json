@@ -1,0 +1,24 @@
+{
+  "notice": [
+    "Sign01",
+    "Sign02"
+  ],
+  "signboard": [
+    "Sign01"
+  ],
+  "doorknob": [
+    "Sign01"
+  ],
+  "badge_01": [
+    "Curtain01",
+    "StoneWall04",
+    "StoneWall06"
+  ],
+  "badge_02": [
+    "Curtain01"
+  ],
+  "badge_03": [
+    "StoneWall04",
+    "StoneWall06"
+  ]
+}

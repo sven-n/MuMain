@@ -1,0 +1,9 @@
+badge_01.jpg
+meshes 1 vs 1, bones 7 vs 7, actions 1 vs 1, triangles 60 vs 60
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0001  differing bone names: 0
+EQUIVALENT
+
+badge_02.tga
+meshes 1 vs 1, bones 7 vs 7, actions 1 vs 1, triangles 8 vs 8
+unmatched triangles: 0  max corner distance: 0.0001  max bone distance: 0.0001  differing bone names: 0
+EQUIVALENT

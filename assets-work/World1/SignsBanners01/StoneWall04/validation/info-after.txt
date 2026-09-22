@@ -1,0 +1,15 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-signs-banners/assets-work/World1/SignsBanners01/StoneWall04/exports/StoneWall04.bmd
+  name field: StoneWall04.smd  version: 12
+  meshes: 2  bones: 8  actions: 1  triangles: 36
+  bounds (bind pose): min -3.84 -21.56 -0.08  max 98.57 13.02 179.99  size 102.41 34.57 180.07
+  mesh 0: triangles=28 vertices=17 normals=44 uvs=25 texture=badge_01.jpg
+  mesh 1: triangles=8 vertices=10 normals=11 uvs=10 texture=badge_03.tga
+  bone 0: "bonee01" parent=-1
+  bone 1: "bonee02" parent=0
+  bone 2: "bonee03" parent=1
+  bone 3: "bonee04" parent=2
+  bone 4: "bonee05" parent=3
+  bone 5: "bonee06" parent=4
+  bone 6: "Box24" parent=0
+  bone 7: "Object04" parent=0
+  action 0: keys=25 lock=0

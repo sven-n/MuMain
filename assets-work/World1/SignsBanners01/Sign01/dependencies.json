@@ -1,0 +1,11 @@
+{
+  "notice.jpg": [
+    "src/bin/Data/Object1/notice.OZJ"
+  ],
+  "signboard.tga": [
+    "src/bin/Data/Object1/signboard.OZT"
+  ],
+  "doorknob.tga": [
+    "src/bin/Data/Object1/doorknob.OZT"
+  ]
+}

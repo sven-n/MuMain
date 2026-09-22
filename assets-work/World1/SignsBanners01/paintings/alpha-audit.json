@@ -1,0 +1,116 @@
+{
+  "notice": {
+    "status": "PASS",
+    "dimensions": [
+      512,
+      512
+    ],
+    "original_dimensions": [
+      64,
+      64
+    ],
+    "exact_bilinear_original_alpha": true,
+    "coverage": {
+      "0": 1.0,
+      "63": 1.0,
+      "127": 1.0,
+      "191": 1.0
+    },
+    "rgb_fringe": "Opaque RGB"
+  },
+  "signboard": {
+    "status": "PASS",
+    "dimensions": [
+      512,
+      256
+    ],
+    "original_dimensions": [
+      64,
+      32
+    ],
+    "exact_bilinear_original_alpha": true,
+    "coverage": {
+      "0": 0.6420059204101562,
+      "63": 0.5117950439453125,
+      "127": 0.4570159912109375,
+      "191": 0.39208221435546875
+    },
+    "rgb_fringe": "Nearest >=128 alpha RGB extends into lower alpha; no white/black matte inserted"
+  },
+  "doorknob": {
+    "status": "PASS",
+    "dimensions": [
+      128,
+      128
+    ],
+    "original_dimensions": [
+      16,
+      16
+    ],
+    "exact_bilinear_original_alpha": true,
+    "coverage": {
+      "0": 0.66015625,
+      "63": 0.4560546875,
+      "127": 0.357421875,
+      "191": 0.24072265625
+    },
+    "rgb_fringe": "Nearest >=128 alpha RGB extends into lower alpha; no white/black matte inserted"
+  },
+  "badge_01": {
+    "status": "PASS",
+    "dimensions": [
+      64,
+      512
+    ],
+    "original_dimensions": [
+      8,
+      64
+    ],
+    "exact_bilinear_original_alpha": true,
+    "coverage": {
+      "0": 1.0,
+      "63": 1.0,
+      "127": 1.0,
+      "191": 1.0
+    },
+    "rgb_fringe": "Opaque RGB"
+  },
+  "badge_02": {
+    "status": "PASS",
+    "dimensions": [
+      256,
+      512
+    ],
+    "original_dimensions": [
+      32,
+      64
+    ],
+    "exact_bilinear_original_alpha": true,
+    "coverage": {
+      "0": 0.9987716674804688,
+      "63": 0.9631576538085938,
+      "127": 0.947418212890625,
+      "191": 0.9326171875
+    },
+    "rgb_fringe": "Nearest >=128 alpha RGB extends into lower alpha; no white/black matte inserted"
+  },
+  "badge_03": {
+    "status": "PASS",
+    "dimensions": [
+      512,
+      512
+    ],
+    "original_dimensions": [
+      64,
+      64
+    ],
+    "exact_bilinear_original_alpha": true,
+    "coverage": {
+      "0": 0.9419937133789062,
+      "63": 0.8942070007324219,
+      "127": 0.8578834533691406,
+      "191": 0.812713623046875
+    },
+    "rgb_fringe": "Nearest >=128 alpha RGB extends into lower alpha; no white/black matte inserted"
+  }
+}

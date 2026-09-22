@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "triangles": 88,
+  "textures": {
+    "badge_03.tga": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alpha": true
+    },
+    "badge_01.jpg": {
+      "dimensions": [
+        64,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_01.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -2.4543,
+      0.9996
+    ],
+    [
+      -1.9949,
+      3.4283
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -2.4543,
+      0.9996
+    ],
+    [
+      -1.9949,
+      3.4283
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

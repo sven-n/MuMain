@@ -1,0 +1,13 @@
+{
+  "kind": "OFFLINE BLENDER; NOT CLIENT SCREENSHOTS",
+  "after": "Re-imported exported BMD",
+  "camera": "Identical orthographic camera and diffuse lighting before/after",
+  "alpha_preview": "Both sides approximate documented RGBA >0.25 alpha test plus scalar blend; not client proof",
+  "scale": {
+    "world_view_width": 1450,
+    "pixels": 900,
+    "terrain_tile_units": 100,
+    "proxy_height": 190,
+    "caveat": "Offline scale assumption with flat grass proxy, not actual terrain or client camera"
+  }
+}

@@ -1,0 +1,5 @@
+Curtain01 PASS: 68 unchanged triangles; 6.20000000000065e-05 maximum original-vertex drift
+Sign01 PASS: 26 unchanged triangles; 0.0 maximum original-vertex drift
+Sign02 PASS: 26 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall04 PASS: 36 unchanged triangles; 0.0001299999999986312 maximum original-vertex drift
+StoneWall06 PASS: 88 unchanged triangles; 0.0 maximum original-vertex drift

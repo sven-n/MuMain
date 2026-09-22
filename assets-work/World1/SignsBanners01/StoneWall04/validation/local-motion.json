@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "nodes": "Bone names, order, parents identical",
+  "samples": [
+    {
+      "file": "StoneWall04.smd",
+      "frames": 1,
+      "bone_samples": 8,
+      "max_local_position_component": 1.3e-05,
+      "max_rotation_matrix_component": 2.837626765783696e-07
+    },
+    {
+      "file": "StoneWall04_a00.smd",
+      "frames": 25,
+      "bone_samples": 200,
+      "max_local_position_component": 2.9e-05,
+      "max_rotation_matrix_component": 2.837626765783696e-07
+    }
+  ],
+  "position_tolerance": 0.0001,
+  "rotation_matrix_tolerance": 1e-05,
+  "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+  "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+}
