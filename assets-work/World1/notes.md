@@ -111,3 +111,58 @@ After client stability is resolved separately:
    should be distinguished from replacement asset failures.
 
 Do not mark this pilot verified in client until those checks pass.
+
+
+## Static batch 01 — 2026-09-22
+
+**Three more props exported, validated offline and installed; client acceptance pending.**
+Inventory covered all 115 Object1 models, with eight candidates imported and visually
+inspected. The [selection report](StaticBatch01/README.md) records identities, placements,
+shared texture exclusions and source render controls. Selected:
+
+| Prop | Observed identity | Triangles before → after | Textures before → after | Placements |
+|---|---|---:|---|---:|
+| [Candle01](Candle01/notes.md) | Three-candle bronze stand | 116 → 1,018 | candle 32² → 512²; candle2 16² → 128² | 6 |
+| [TreasureChest01](TreasureChest01/notes.md) | Arched timber chest | 66 → 1,174 | treasure_chest 128² → 512² | 3 |
+| [Tomb03](Tomb03/notes.md) | Upright carved grave marker | 30 → 200 | tombstone 128² → 512² | 5 |
+
+All replaced textures are exclusive to their selected model. The barrel was deferred because
+its drum texture is shared with House02; the three tables/counter share desk_big and belong
+in a coordinated future pass. Candle01 complements the tavern still life directly; the chest
+and grave marker add wood/stone detail to the completed terrain surroundings.
+
+The per-prop folders retain original BMDs, containers, unwrapped textures, info/SMD/action
+files and placements; packed original/rebuilt Blender sources; original references and
+excluded higher-resolution geometry; imagegen paintings/prompts; final game exports;
+comparison, wireframe, scale and action renders; and complete validation reports.
+[Batch preview](StaticBatch01/batch-review.jpg) is explicitly **offline Blender output**.
+The final review images use re-imported BMD exports, with original matched camera/lighting.
+Scale studies use 100-unit terrain repeats and a 190-unit proxy; they are not actual client
+camera captures. Candle additive rendering in Blender is an approximation.
+
+Three reference models and their actions pass bmdconv validation; four textures pass loader
+checks. Full compares report DIFFERENT for intentional geometry changes. Skeleton/action-only
+compares report **EQUIVALENT** for all three, with zero reported bone-origin deviations.
+Additional checks verify bone indices/names/parents, all local translations/rotations, action
+order, 7/7/1 frame counts and lock=0. Candle01 retains its two mesh slots, original six flame
+triangles, weights and UVs, with a separate EQUIVALENT comparison. New geometry has exactly
+one valid bone per vertex. Bounds match, except for the chest keyhole's 0.0036-unit projection.
+All three sources reopen with packed images and excluded REF collections.
+
+[Installation checksums](StaticBatch01/installed-files.json) cover seven new replacements
+(three BMDs, four OZJs), installed in source and the existing macOS runtime. The 317 other
+World1/Object1 files remain byte-identical in both destinations, including all completed
+terrain, TerrainLight, alpha strips and Beer01. No engine/CMake changes or filenames changed.
+
+During validation another process switched the shared primary checkout to main. The
+installation guard caught the resulting baseline mismatch and wrote nothing there. This
+batch then continued on **art/world1-pilot** in
+`/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain`. The art source checkout
+and existing runtime contain the replacements; main was not committed to or overwritten.
+
+Pending client checks: asset loads/error log, candle blend/flicker and terrain light,
+chest/stone material readability at real zoom, footprint/contact/orientation, and matched
+before/after screenshots. Start with Candle01 near `(126.58,128.25)`, TreasureChest01 near
+`(185.17,140.06)`, and Tomb03 near `(130.50,215.00)`. Full placements and bounds are in each
+prop's notes. The user's offline authorization remains in force; no client verification is
+claimed and no stability work was attempted.

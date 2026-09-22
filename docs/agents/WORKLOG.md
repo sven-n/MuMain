@@ -98,3 +98,42 @@ continuation and deferred client verification. Resolve stability separately, obt
 town/grass/rock screenshots, compare replacements at matching views and inspect Beer01 near
 Lorencia `(127.4,128.4)`. The delivered Blender comparison is labeled offline. The visual
 benchmark and end-to-end proof remain pending client acceptance.
+
+
+## 2026-09-22 - Three Lorencia static props, offline continuation (ASTRA / Codex)
+**Goal:** Continue `art/world1-pilot` with three visually identified props, preserving engine
+contracts and completed terrain/Beer01. Client stability explicitly outside scope.
+
+**Done:** Inventoried all 115 Object1 BMDs, imported/rendered eight candidates and decoded
+World1 placements read-only. Selected Candle01 (three-candle stand, 6 placements),
+TreasureChest01 (arched timber chest, 3 placements), and Tomb03 (upright grave marker,
+5 placements). Rebuilt them at 1,018 / 1,174 / 200 triangles from 116 / 66 / 30. Repainted
+exclusive candle, treasure_chest and tombstone atlases at 512×512, plus candle2 at 128×128.
+Retained all original game filenames and mesh slots. Preserved originals, packed Blender
+sources with REF_ORIGINAL and excluded higher-resolution sources, paintings/prompts,
+exports, raw validation data and labeled offline before/after, wireframe, action and scale
+reviews under [`assets-work/World1/`](../../assets-work/World1/notes.md).
+
+**Verified:** Reference/action SMDs and all four textures pass engine/loader validation.
+All three isolated skeleton/action comparisons EQUIVALENT; names, order, parents, action
+order, lock=0 and 7/7/1 frame counts unchanged. Local translations/rotations checked over
+all keys (largest component differences 0.000015 units / 0.0000003072 radians modulo 2π).
+Candle's six original flame triangles and UVs separately verified; original BlendMesh=1
+material order retained. Intentional full-model comparisons DIFFERENT. Bind sizes remain
+38.67×22.47×87.06, 114.57×64.32×84.04 and 89.76×19.64×117.25 units; chest keyhole adds only
+0.0036 units of front projection. Packed sources reopened, final BMDs re-imported for review.
+Seven replacements installed with matching hashes in the art source and existing runtime;
+317 other World1/Object1 files remain unchanged in each, including all World1 terrain,
+TerrainLight/alpha strips and Beer01. No engine/CMake edits.
+
+**Workspace coordination:** Another process switched the shared primary checkout to main
+during validation. The installation guard refused the changed baseline before writing.
+Continued on the existing art/world1-pilot branch in the isolated worktree
+`/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain`; no commits or replacement
+files written to main. The existing runtime is still the primary checkout's macOS app.
+
+**Open / next:** **Not verified in client.** User-authorized offline continuation remains.
+Check real client loading/logs, candle additive blending/flicker, lighting, gameplay zoom,
+object contacts/orientation and matched screenshots once stability is addressed separately.
+Useful review tiles: Candle01 `(126.58,128.25)`, chest `(185.17,140.06)`, Tomb03 `(130.50,215.00)`.
+The delivered renders are Blender evidence, not client screenshots or visual acceptance.
