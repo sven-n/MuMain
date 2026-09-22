@@ -1,0 +1,9 @@
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/scripts/render_assembly.py:26: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes=True
+00:04.596  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/review/north-gate-original.png'
+00:08.292  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/review/north-gate-replacement.png'
+00:12.605  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/review/prison-corner-original.png'
+00:16.831  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/review/prison-corner-replacement.png'
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

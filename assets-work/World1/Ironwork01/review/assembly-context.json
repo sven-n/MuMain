@@ -1,0 +1,98 @@
+{
+  "north-gate": {
+    "actual_World1_record_indices": {
+      "SteelWall01": [
+        0,
+        1
+      ],
+      "SteelWall02": [
+        3,
+        12,
+        13,
+        16,
+        18
+      ],
+      "SteelDoor01": [
+        2,
+        3
+      ]
+    },
+    "camera_bounds": [
+      [
+        12799.9443359375,
+        20776.37109375,
+        164.98214721679688
+      ],
+      [
+        14903.5361328125,
+        21250.474609375,
+        521.4765625
+      ]
+    ],
+    "exact_shared_camera": {
+      "location": [
+        14598.4404296875,
+        16782.265625,
+        2395.220947265625
+      ],
+      "rotation": [
+        1.113154649734497,
+        2.8345130687057463e-09,
+        0.1732456237077713
+      ],
+      "ortho_scale": 2462.0541198730466
+    },
+    "placement_changes": false,
+    "status": "OFFLINE XYZ transform reconstruction; no terrain/client simulation"
+  },
+  "prison-corner": {
+    "actual_World1_record_indices": {
+      "SteelWall02": [
+        0,
+        1,
+        2
+      ],
+      "SteelWall03": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "SteelDoor01": [
+        0,
+        1
+      ],
+      "HouseEtc03": [
+        4,
+        5
+      ]
+    },
+    "camera_bounds": [
+      [
+        11300.125,
+        10700.3154296875,
+        165.0003662109375
+      ],
+      [
+        12203.23046875,
+        11603.23046875,
+        411.61395263671875
+      ]
+    ],
+    "exact_shared_camera": {
+      "location": [
+        12144.529296875,
+        9353.3896484375,
+        1180.198974609375
+      ],
+      "rotation": [
+        1.113154649734497,
+        -1.6784863277052864e-08,
+        0.17324568331241608
+      ],
+      "ortho_scale": 1728.2942975725443
+    },
+    "placement_changes": false,
+    "status": "OFFLINE XYZ transform reconstruction; no terrain/client simulation"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "status": "OFFLINE BLENDER ONLY",
+  "after_source": "officially reimported exported BMD/OZT",
+  "camera_bounds": [
+    [
+      -99.78469848632812,
+      -99.54920196533203,
+      3.09689998626709
+    ],
+    [
+      100.21530151367188,
+      100.26261138916016,
+      246.61390686035156
+    ]
+  ],
+  "camera_direction": [
+    1.35,
+    -2,
+    1.3
+  ],
+  "orthographic_scale": 456.7270202636719,
+  "resolution": [
+    840,
+    700
+  ],
+  "lighting": "diffuse-only Cycles, Standard, 16 samples",
+  "matched_camera_and_lighting": true,
+  "client_verified": false
+}

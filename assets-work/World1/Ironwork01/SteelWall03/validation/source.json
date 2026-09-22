@@ -1,0 +1,48 @@
+{
+  "original_reference_unchanged": true,
+  "geometry_unchanged": false,
+  "ridge_refinement": [
+    {
+      "collapsed_chamfer_uvs_repaired": 4,
+      "bars_refined": 2,
+      "chamfer_width": 0.35,
+      "original_end_vertices_exact": true,
+      "transition_length": 2.0,
+      "alpha_planes": "geometry UVs and bones unchanged"
+    }
+  ],
+  "numeric_snapshot_sha256": "407b21790e1c9a9e89ce3b46a551cdfe523e774acc6a5635847ebf71e2102a48",
+  "triangles": 82,
+  "bone_order": [
+    "Box04"
+  ],
+  "action_meta": {
+    "SteelWall03_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "material_order": [
+    "steel_barred_b.jpg",
+    "steel_barred_a.tga"
+  ],
+  "packed_images": {
+    "steel_barred_a.tga": [
+      64,
+      128
+    ],
+    "steel_barred_a.tga.001": [
+      256,
+      512
+    ],
+    "steel_barred_b.jpg": [
+      32,
+      32
+    ],
+    "steel_barred_b.jpg.001": [
+      512,
+      512
+    ]
+  },
+  "client_verified": false
+}

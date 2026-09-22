@@ -1,0 +1,93 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "042cf88c56869274d9f48bf659ac3210dc7fa558ae4028aaf58e8b4ebf350bc6",
+  "original_connection_vertices_exact": 44,
+  "source_bounds_exact": [
+    [
+      -49.993507385253906,
+      -50.01490783691406,
+      0.0003969999961555004
+    ],
+    [
+      3.438400983810425,
+      3.535900115966797,
+      247.03399658203125
+    ]
+  ],
+  "editable_high_poly_excluded": true,
+  "rig_unchanged": {
+    "bones": [
+      [
+        "Cylinder04",
+        null
+      ]
+    ],
+    "bone_order": [
+      "Cylinder04"
+    ],
+    "actions": {
+      "SteelWall01_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "steel_barred_a.tga": {
+      "size": [
+        64,
+        128
+      ],
+      "sha256": "4d279d5bb652982a9086096b6f0d70a25d477f08f6a509cd24673ebb34b8b156"
+    },
+    "steel_barred_a.tga.001": {
+      "size": [
+        256,
+        512
+      ],
+      "sha256": "1accfbbfbcccddebfce8ca0f04498fa07543e7ec733047a441e9e6672fea196c"
+    },
+    "steel_barred_b.jpg": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "f06bdcb1393c37e357f02e8ea0be042472e2e655927ed01aee3d7e47f7efe8d0"
+    },
+    "steel_barred_b.jpg.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "b4cbec80fe1f4197762b7ee12fb3c7d8a4c1bd8a268f71bf91f1eb8a05f110d1"
+    }
+  },
+  "no_external_images_required": true
+}

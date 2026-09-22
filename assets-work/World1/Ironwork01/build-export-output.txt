@@ -1,0 +1,192 @@
+00:00.828  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/scripts/build_and_export.py:19: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes = True
+Info: Saved as "source.blend"
+skipping reference object 'SteelWall01' (REF_ collection or mu_reference)
+skipping reference object 'Editable_Forged_Edge_Profile' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting SteelWall01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_pjxskpu4/SteelWall01_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 84 polys
+- Exported 2 materials
+   steel_barred_a.tga
+   steel_barred_b.jpg
+- SMD export took 0.002719879150390625
+
+
+Blender Source Tools: exporting SteelWall01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_pjxskpu4/anims/SteelWall01_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0033211708068847656
+
+2 files exported in 0.0 seconds
+00:00.984  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_pjxskpu4/SteelWall01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_pjxskpu4/anims/SteelWall01_a00.smd --name SteelWall01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd
+  name field: SteelWall01.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 84
+  bounds (bind pose): min -49.99 -50.01 0.00  max 3.44 3.54 247.03  size 53.43 53.55 247.03
+  mesh 0: triangles=80 vertices=54 normals=57 uvs=63 texture=steel_barred_b.jpg
+  mesh 1: triangles=4 vertices=6 normals=3 uvs=6 texture=steel_barred_a.tga
+  bone 0: "Cylinder04" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'SteelWall02' (REF_ collection or mu_reference)
+skipping reference object 'Editable_Forged_Edge_Profile' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting SteelWall02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_wnvzxabr/SteelWall02_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 328 polys
+- Exported 2 materials
+   steel_barred_a.tga
+   steel_barred_b.jpg
+- SMD export took 0.007271289825439453
+
+
+Blender Source Tools: exporting SteelWall02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_wnvzxabr/anims/SteelWall02_a00.smd
+- Exported 4 bones
+- Exported 1 frames
+- SMD export took 0.0008120536804199219
+
+2 files exported in 0.0 seconds
+00:01.085  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_wnvzxabr/SteelWall02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_wnvzxabr/anims/SteelWall02_a00.smd --name SteelWall02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd
+  name field: SteelWall02.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 328
+  bounds (bind pose): min -199.68 -3.23 0.00  max 200.48 3.21 220.07  size 400.16 6.44 220.07
+  mesh 0: triangles=320 vertices=192 normals=192 uvs=91 texture=steel_barred_b.jpg
+  mesh 1: triangles=8 vertices=16 normals=2 uvs=4 texture=steel_barred_a.tga
+  bone 0: "Box04" parent=-1
+  bone 1: "Box05" parent=-1
+  bone 2: "Box06" parent=-1
+  bone 3: "Box07" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'SteelWall03' (REF_ collection or mu_reference)
+skipping reference object 'Editable_Forged_Edge_Profile' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting SteelWall03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_50mdekj5/SteelWall03_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 82 polys
+- Exported 2 materials
+   steel_barred_a.tga
+   steel_barred_b.jpg
+- SMD export took 0.0019609928131103516
+
+
+Blender Source Tools: exporting SteelWall03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_50mdekj5/anims/SteelWall03_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0005660057067871094
+
+2 files exported in 0.0 seconds
+00:01.168  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_50mdekj5/SteelWall03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_50mdekj5/anims/SteelWall03_a00.smd --name SteelWall03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd
+  name field: SteelWall03.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 82
+  bounds (bind pose): min -49.88 -3.23 0.00  max 50.12 3.21 220.07  size 100.00 6.44 220.07
+  mesh 0: triangles=80 vertices=48 normals=71 uvs=68 texture=steel_barred_b.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_a.tga
+  bone 0: "Box04" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'SteelDoor01' (REF_ collection or mu_reference)
+skipping reference object 'Editable_Forged_Edge_Profile' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting SteelDoor01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_lecvxjej/SteelDoor01_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 218 polys
+- Exported 2 materials
+   steel_barred_door.tga
+   steel_barred_b.jpg
+- SMD export took 0.004705905914306641
+
+
+Blender Source Tools: exporting SteelDoor01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_lecvxjej/anims/SteelDoor01_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0007569789886474609
+
+2 files exported in 0.0 seconds
+00:01.246  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_lecvxjej/SteelDoor01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_lecvxjej/anims/SteelDoor01_a00.smd --name SteelDoor01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd
+  name field: SteelDoor01.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 218
+  bounds (bind pose): min -1.55 -6.62 0.45  max 152.90 6.70 356.48  size 154.45 13.32 356.02
+  mesh 0: triangles=216 vertices=132 normals=176 uvs=244 texture=steel_barred_b.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=steel_barred_door.tga
+  bone 0: "Cylinder04" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'HouseEtc03' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting HouseEtc03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_64txir9b/HouseEtc03_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 16 polys
+- Exported 2 materials
+   steel_barred_door.tga
+   steel_barred_a.tga
+- SMD export took 0.0009760856628417969
+
+
+Blender Source Tools: exporting HouseEtc03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_64txir9b/anims/HouseEtc03_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0007479190826416016
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_64txir9b/HouseEtc03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_64txir9b/anims/HouseEtc03_a00.smd --name HouseEtc03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ironwork/assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd
+  name field: HouseEtc03.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 16
+  bounds (bind pose): min -99.78 -99.55 3.10  max 100.22 100.26 246.61  size 200.00 199.81 243.52
+  mesh 0: triangles=12 vertices=8 normals=6 uvs=12 texture=steel_barred_a.tga
+  mesh 1: triangles=4 vertices=6 normals=1 uvs=4 texture=steel_barred_door.tga
+  bone 0: "Box03" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

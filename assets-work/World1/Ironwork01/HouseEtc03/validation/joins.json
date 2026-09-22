@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "all_original_anchors_preserved": 14,
+  "bone_assignments_retained": true,
+  "maximum_exported_anchor_distance": 0.0,
+  "maximum_World1_scaled_anchor_distance": 0.0,
+  "source_connection_vertices": "exact (source-audit.json)",
+  "tolerance_game_units": 0.002,
+  "opening_envelopes": "Original support endpoints and every alpha-plane corner/UV retained",
+  "placement_count": 8,
+  "placement_changes": false
+}

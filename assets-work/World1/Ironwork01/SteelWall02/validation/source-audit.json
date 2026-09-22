@@ -1,0 +1,108 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "820517b9e351bbbb98a8e09e8a997aed245a3ac4339566eaa5563e5a988c4040",
+  "original_connection_vertices_exact": 80,
+  "source_bounds_exact": [
+    [
+      -199.68409729003906,
+      -3.230600118637085,
+      0.00038899999344721437
+    ],
+    [
+      200.47549438476562,
+      3.206800937652588,
+      220.07159423828125
+    ]
+  ],
+  "editable_high_poly_excluded": true,
+  "rig_unchanged": {
+    "bones": [
+      [
+        "Box04",
+        null
+      ],
+      [
+        "Box05",
+        null
+      ],
+      [
+        "Box06",
+        null
+      ],
+      [
+        "Box07",
+        null
+      ]
+    ],
+    "bone_order": [
+      "Box04",
+      "Box05",
+      "Box06",
+      "Box07"
+    ],
+    "actions": {
+      "SteelWall02_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "steel_barred_a.tga": {
+      "size": [
+        64,
+        128
+      ],
+      "sha256": "4d279d5bb652982a9086096b6f0d70a25d477f08f6a509cd24673ebb34b8b156"
+    },
+    "steel_barred_a.tga.001": {
+      "size": [
+        256,
+        512
+      ],
+      "sha256": "1accfbbfbcccddebfce8ca0f04498fa07543e7ec733047a441e9e6672fea196c"
+    },
+    "steel_barred_b.jpg": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "f06bdcb1393c37e357f02e8ea0be042472e2e655927ed01aee3d7e47f7efe8d0"
+    },
+    "steel_barred_b.jpg.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "b4cbec80fe1f4197762b7ee12fb3c7d8a4c1bd8a268f71bf91f1eb8a05f110d1"
+    }
+  },
+  "no_external_images_required": true
+}

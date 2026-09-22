@@ -1,0 +1,19 @@
+Read-only engine reference inspection: MapManager.cpp
+sha256 6f419cc21fb703e324cb466cf7f8c147331f0cdc9b278192daaa014c9ba95ccf
+Steel walls/door and cage use original model constants and filenames. No model-specific render switch was found by named-symbol search in ZzzObject.cpp.
+
+1049:             gLoadData.AccessModel(MODEL_STONE_WALL01 + i, L"Data\\Object1\\", L"StoneWall", i + 1);
+1050:         for (i = 0; i < 4; i++)
+1051:             gLoadData.AccessModel(MODEL_MU_WALL01 + i, L"Data\\Object1\\", L"StoneMuWall", i + 1);
+1052:         for (i = 0; i < 3; i++)
+1053:             gLoadData.AccessModel(MODEL_STEEL_WALL01 + i, L"Data\\Object1\\", L"SteelWall", i + 1);
+1054:         gLoadData.AccessModel(MODEL_STEEL_DOOR, L"Data\\Object1\\", L"SteelDoor", 1);
+1055:         for (i = 0; i < 3; i++)
+1056:             gLoadData.AccessModel(MODEL_CANNON01 + i, L"Data\\Object1\\", L"Cannon", i + 1);
+
+1082:         for (i = 0; i < 6; i++)
+1083:             gLoadData.AccessModel(MODEL_HOUSE_WALL01 + i, L"Data\\Object1\\", L"HouseWall", i + 1);
+1084:         for (i = 0; i < 3; i++)
+1085:             gLoadData.AccessModel(MODEL_HOUSE_ETC01 + i, L"Data\\Object1\\", L"HouseEtc", i + 1);
+1086:         for (i = 0; i < 3; i++)
+1087:             gLoadData.AccessModel(MODEL_LIGHT01 + i, L"Data\\Object1\\", L"Light", i + 1);

@@ -1,0 +1,11 @@
+version 1
+nodes
+0 "Box04" -1
+end
+skeleton
+time 0
+0 -49.875298 0.852520 118.468994 1.570796 -0.785398 1.570796
+end
+triangles
+
+end
