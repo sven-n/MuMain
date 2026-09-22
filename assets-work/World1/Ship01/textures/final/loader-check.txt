@@ -1,0 +1,10 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/TileGround03.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship03.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship04.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship05.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship05.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship06.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship06.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship07.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/textures/final/ship07.OZT

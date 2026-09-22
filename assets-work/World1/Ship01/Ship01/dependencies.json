@@ -1,0 +1,32 @@
+{
+  "TileGround03.jpg": [
+    "src/bin/Data/Object1/TileGround03.OZJ"
+  ],
+  "ship01.jpg": [
+    "src/bin/Data/Object1/ship01.OZJ"
+  ],
+  "ship03.jpg": [
+    "src/bin/Data/Object1/ship03.OZJ"
+  ],
+  "ship04.jpg": [
+    "src/bin/Data/Object1/ship04.OZJ"
+  ],
+  "ship07.jpg": [
+    "src/bin/Data/Object1/ship07.OZJ"
+  ],
+  "ship05.tga": [
+    "src/bin/Data/Object1/ship05.OZT"
+  ],
+  "ship07.tga": [
+    "src/bin/Data/Object1/ship07.OZT"
+  ],
+  "ship06.tga": [
+    "src/bin/Data/Object1/ship06.OZT"
+  ],
+  "ship06.jpg": [
+    "src/bin/Data/Object1/ship06.OZJ"
+  ],
+  "ship05.jpg": [
+    "src/bin/Data/Object1/ship05.OZJ"
+  ]
+}

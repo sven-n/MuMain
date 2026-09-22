@@ -1,0 +1,10 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship05.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship07.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship06.OZT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/TileGround03.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship07.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship06.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship04.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship05.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/ship03.OZJ

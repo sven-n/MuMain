@@ -1,0 +1,6 @@
+{
+  "ship05": "Original 64x32 alpha enlarged exactly bilinearly to 512x256",
+  "ship06": "Original 4x16 RGBA texture container byte-identical, including graded alpha45..255",
+  "ship07": "Original 8x32 RGBA texture container byte-identical",
+  "client_verified": false
+}

@@ -1,0 +1,58 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -581.94,
+      -1166.51,
+      -100.15
+    ],
+    [
+      553.46,
+      669.28,
+      937.93
+    ]
+  ],
+  "bounds_after": [
+    [
+      -581.94,
+      -1166.51,
+      -100.15
+    ],
+    [
+      553.46,
+      669.28,
+      937.93
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=30 lock=0"
+  ],
+  "material_order": [
+    "TileGround03.jpg",
+    "ship01.jpg",
+    "ship03.jpg",
+    "ship04.jpg",
+    "ship07.jpg",
+    "ship05.tga",
+    "ship07.tga",
+    "ship06.tga",
+    "ship06.jpg",
+    "ship05.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "Ship01.bmd": "26c2e0309638634f24cf2396f26464afe587236de2e264ea54567cbdbfdf6921",
+    "ship05.OZT": "1d3276c92eb11ef3270a23dddf165ae5c5db50c4c00ca884f986d87479c9b153",
+    "ship07.OZT": "63d91dfd26a7b59c34a276c243e86f7ab6a9e2b87b15fa6ff538a48df76dc400",
+    "ship06.OZT": "cd39596a685210e12159a57bb5e7d8377e4b7228d17263ec3fca56dbdccd86a4",
+    "TileGround03.OZJ": "a630c6d2b44c370d9d239a285ae87c637c7ea780b6694032554273f579570d33",
+    "ship07.OZJ": "ba085bac813252797168b85cf9424e1bdcb9faafba447cd0dd3f7ee08999c721",
+    "ship06.OZJ": "89b302263ce1cc14b6a6984c0e540030034e8fcf34ca2535ca815a2c8bd28d0b",
+    "ship04.OZJ": "be23ab1dc3f090c8f97114a48aa1080880d46d2f2a6adfc0f1d002ea4ca3aef1",
+    "ship05.OZJ": "c8e7d174f298315aa0b552644bdbc212b6a9ac6b4ac3d275afbdae7b1216fe3d",
+    "ship01.OZJ": "f54714c5cfa7556d6958fb79bd0b691cc57f738d28ea0b6957ecdbfc9f9e5d2d",
+    "ship03.OZJ": "0d9a45d9abcafa7a739f47fbd82b7907fb523b1ad11046bcd19d3f4d3a83afb0"
+  }
+}

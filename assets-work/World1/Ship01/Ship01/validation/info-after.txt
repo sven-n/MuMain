@@ -1,0 +1,25 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-ship/assets-work/World1/Ship01/Ship01/exports/Ship01.bmd
+  name field: preserved-bind.smd  version: 12
+  meshes: 10  bones: 10  actions: 1  triangles: 754
+  bounds (bind pose): min -581.94 -1166.51 -100.15  max 553.46 669.28 937.93  size 1135.40 1835.79 1038.08
+  mesh 0: triangles=284 vertices=263 normals=330 uvs=309 texture=TileGround03.jpg
+  mesh 1: triangles=34 vertices=38 normals=40 uvs=22 texture=ship01.jpg
+  mesh 2: triangles=62 vertices=76 normals=85 uvs=74 texture=ship03.jpg
+  mesh 3: triangles=58 vertices=68 normals=78 uvs=66 texture=ship04.jpg
+  mesh 4: triangles=188 vertices=152 normals=160 uvs=77 texture=ship07.jpg
+  mesh 5: triangles=8 vertices=10 normals=10 uvs=6 texture=ship05.tga
+  mesh 6: triangles=24 vertices=48 normals=47 uvs=23 texture=ship07.tga
+  mesh 7: triangles=24 vertices=48 normals=47 uvs=9 texture=ship06.tga
+  mesh 8: triangles=12 vertices=14 normals=14 uvs=7 texture=ship06.jpg
+  mesh 9: triangles=60 vertices=36 normals=36 uvs=36 texture=ship05.jpg
+  bone 0: "Box01" parent=-1
+  bone 1: "Box02" parent=0
+  bone 2: "Box03" parent=1
+  bone 3: "Box05" parent=2
+  bone 4: "Box04" parent=1
+  bone 5: "Box06" parent=4
+  bone 6: "ship" parent=0
+  bone 7: "Cylinder01" parent=0
+  bone 8: "Bone01" parent=-1
+  bone 9: "Bone02" parent=-1
+  action 0: keys=30 lock=0
