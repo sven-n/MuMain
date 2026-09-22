@@ -35,7 +35,7 @@ def main():
         path = HERE / f'final-sheet-{page:02d}.jpg'
         canvas.save(path, quality=92)
         links += [f'![Combined offline inventory {page}]({path.name})', '']
-    (HERE / 'final-review.md').write_text('\n'.join(links) + '\n')
+    (HERE / 'final-review.md').write_text('\n'.join(links).rstrip() + '\n')
 
 
 if __name__ == '__main__':

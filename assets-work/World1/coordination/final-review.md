@@ -15,4 +15,3 @@ Black effect cards on candles, the bonfire and some window beams are visible in 
 ![Combined offline inventory 5](final-sheet-05.jpg)
 
 ![Combined offline inventory 6](final-sheet-06.jpg)
-

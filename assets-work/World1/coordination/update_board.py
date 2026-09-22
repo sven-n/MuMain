@@ -56,7 +56,7 @@ def main():
     data = json.loads((HERE / 'dependency-map.json').read_text())
     text = '''# Lorencia rebuild asset board — ASTRA coordinator — 2026-09-22
 
-Integration: `art/lorencia-rebuild` at `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`, based on `ac0f6dd8` (contains reviewed pilot commits `2e2ed427`, `b232470c`, `8d22a912` and completed static batch). Only coordinator edits this board/shared handoff. No push or main merge. All acceptance here is **offline only**; no assets verified in client by this task.
+Integration: `art/lorencia-rebuild` at `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`, based on `ac0f6dd8` (contains reviewed pilot commits `2e2ed427`, `b232470c`, `8d22a912` and completed static batch). Only coordinator edits this board/shared handoff. Publication status is in [the handoff](notes.md); the integration has not been merged into main. All acceptance here is **offline only**; no assets verified in client by this task.
 
 ## Ownership and dependency policy
 
@@ -80,7 +80,7 @@ All source Data paths are relative to the integration worktree. Full placement a
         owned = '<br>'.join('`' + value + '`' for value in batch.get('owned_textures', [])) or 'None'
         frozen = '<br>'.join('`' + value + '`' for value in batch.get('frozen_textures', [])) or 'None'
         text += f"| {owner} / `{batch['branch']}` | {names} | {owned} | {frozen} |\n"
-    (HERE / 'asset-board.md').write_text(text + '\n')
+    (HERE / 'asset-board.md').write_text(text.rstrip() + '\n')
 
 
 if __name__ == '__main__':

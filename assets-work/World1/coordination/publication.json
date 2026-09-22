@@ -1,0 +1,15 @@
+{
+  "pr_number": 11,
+  "pr_url": "https://github.com/vaskodagamo/MuMain/pull/11",
+  "branch": "art/lorencia-rebuild",
+  "base_branch": "main",
+  "main_baseline": "0f589224a034ae5b2509e9b2793b732ab9f130af",
+  "main_integration_commit": "179fa7b9",
+  "reviewed_art_commit": "b850741b",
+  "pr_game_file_count": 179,
+  "pr_bmd_count": 95,
+  "pr_texture_count": 84,
+  "reviewed_world1_object1_bytes_unchanged": true,
+  "client_verified": false,
+  "merged_into_main": false
+}

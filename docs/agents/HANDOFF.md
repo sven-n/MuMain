@@ -122,4 +122,8 @@ alpha strips, placement/height/walk data, Beer01 and earlier props remain protec
 The [combined gallery](../../assets-work/World1/coordination/final-review.md) uses actual
 integrated models/materials and retains per-model provenance hashes. All validation and
 preview evidence is offline: this task has not installed runtime assets or verified them
-in the client. No engine/CMake/UI changes, push or merge to main were performed.
+in the client. No engine/CMake/UI edits were authored for this pass. Following explicit publication
+authorization, the branch is pushed and [PR #11](https://github.com/vaskodagamo/MuMain/pull/11)
+is open against main. Main was integrated without changing the reviewed World1/Object1
+bytes. The PR contains 179 Object1 game files because four tavern files are already on main;
+it has not been merged.

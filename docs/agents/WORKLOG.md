@@ -393,3 +393,27 @@ leave loading, shading/filtering/alpha, engine effects, motion, collision/intera
 current images are labeled offline Blender evidence. Consolidated handoff, complete owners/
 commits, exact changed paths and review gallery:
 [coordination/notes.md](../../assets-work/World1/coordination/notes.md).
+
+
+## 2026-09-22 - Publish complete Lorencia static rebuild (ASTRA / Codex)
+**Goal:** Follow the owner's explicit request to commit, push and create a PR for the
+completed static environment pass.
+
+**Done:** Merged origin/main at 0f589224 into art/lorencia-rebuild (179fa7b9), preserving
+all worklog entries and taking main's newer tavern handoff and guarded install helper.
+Pushed the branch to vaskodagamo/MuMain and opened [PR #11](https://github.com/vaskodagamo/MuMain/pull/11)
+against main. The PR describes the complete offline validation, retained editable sources,
+exact game scope and pending client acceptance. Added a PR-specific game-file manifest and
+publication metadata; updated the consolidated handoff and board with publication status.
+
+**Verified:** All 183 reviewed Object1 export hashes still match b850741b; the main merge
+changed no World1/Object1 bytes. Relative to current main, the PR changes only 179 Object1
+game files (95 BMDs and 84 containers): the four TavernProps files were already merged in
+PR #6. No engine/CMake/UI/other-map changes occur in the PR diff. Python syntax and authored
+Python/Markdown/JSON whitespace checks pass. Retained converter logs keep their original
+output whitespace. Previous art validation and independent acceptance remain applicable;
+no assets were regenerated or runtime files written, and no client or engine build ran.
+
+**Open / next:** PR review, CI and the previously deferred real client acceptance/captures.
+The PR has not been merged. Publication supersedes the earlier no-push instruction for this
+branch; the boundary against merging into main remains.

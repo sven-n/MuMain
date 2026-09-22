@@ -2,7 +2,7 @@
 
 **106/106 in-scope static assets accepted offline**, representing the actual World1 inventory; the complete static inventory has 2,786 placements. Four completed pilot models are preserved, and later batches cover the remaining models. The 17 completed terrain paintings remain unchanged. Client acceptance is pending for this entire pass.
 
-Integration branch: **art/lorencia-rebuild**. Worktree: `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. Reviewed baseline: `ac0f6dd8` (contains `2e2ed427`, `b232470c`, `8d22a912` and completed static pilot). Art/review revision when this handoff was generated: `edf0c7a6a0df94af92dacac7dbca21fa81486406`. The final documentation commit may follow it. No push or merge to main.
+Integration branch: **art/lorencia-rebuild**. Worktree: `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`. Reviewed baseline: `ac0f6dd8` (contains `2e2ed427`, `b232470c`, `8d22a912` and completed static pilot). Art/review revision when this handoff was generated: `179fa7b9f7104ba8e3eaca222a72152ebaa2ece9`. The final documentation commit may follow it. Published as [PR #11](https://github.com/vaskodagamo/MuMain/pull/11) against `main`, following explicit user authorization. Not merged into main. The PR changes 179 Object1 files relative to its main baseline; four tavern files are already on main. See [the exact PR path list](pr-game-files.txt). Main's intervening changes were merged into this branch; the reviewed World1/Object1 bytes remain unchanged.
 
 ## Accepted batches and owners
 

@@ -13,6 +13,18 @@ def read(name):
     return json.loads((HERE / name).read_text())
 
 
+def publication_status():
+    if not (HERE / 'publication.json').exists():
+        return 'No push or merge to main.'
+    publication = read('publication.json')
+    return (
+        f"Published as [PR #{publication['pr_number']}]({publication['pr_url']}) against `main`, "
+        "following explicit user authorization. Not merged into main. "
+        f"The PR changes {publication['pr_game_file_count']} Object1 files relative to its main baseline; "
+        "four tavern files are already on main. See [the exact PR path list](pr-game-files.txt). "
+        "Main's intervening changes were merged into this branch; the reviewed World1/Object1 bytes remain unchanged.")
+
+
 def main():
     ledger = read('integration-ledger.json')
     validation = read('combined-validation.json')
@@ -39,7 +51,7 @@ def main():
 
 **{accepted_count}/106 in-scope static assets accepted offline**, representing the actual World1 inventory; the complete static inventory has 2,786 placements. Four completed pilot models are preserved, and later batches cover the remaining models. The 17 completed terrain paintings remain unchanged. Client acceptance is pending for this entire pass.
 
-Integration branch: **art/lorencia-rebuild**. Worktree: `{ROOT}`. Reviewed baseline: `ac0f6dd8` (contains `2e2ed427`, `b232470c`, `8d22a912` and completed static pilot). Art/review revision when this handoff was generated: `{head}`. The final documentation commit may follow it. No push or merge to main.
+Integration branch: **art/lorencia-rebuild**. Worktree: `{ROOT}`. Reviewed baseline: `ac0f6dd8` (contains `2e2ed427`, `b232470c`, `8d22a912` and completed static pilot). Art/review revision when this handoff was generated: `{head}`. The final documentation commit may follow it. {publication_status()}
 
 ## Accepted batches and owners
 
