@@ -53,6 +53,7 @@ def inspect(name, model):
 
 
 def main():
+    bpy.context.preferences.filepaths.save_version = 0
     data = json.loads((HERE / 'dependency-map.json').read_text())
     for name, model in sorted(data['models'].items()):
         if not model['scope_exclusion']:

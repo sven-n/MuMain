@@ -14,7 +14,8 @@ def main():
     identity = json.loads((HERE / 'identities.json').read_text())
     title, small = ImageFont.truetype(FONT, 25), ImageFont.truetype(FONT, 16)
     links = ['# Combined Lorencia offline review', '',
-             'All 106 in-scope static assets, rendered from the integration game files and their current shared textures. Each image has a SHA-256 provenance record. These are Blender diffuse previews, not client captures. Per-batch matching-camera comparisons, wireframes, animations and placement assemblies remain in each asset deliverable.', '']
+             'All 106 in-scope static assets, rendered from the integration game files and their current shared textures. Each image has a SHA-256 provenance record. These are Blender diffuse previews, not client captures. Per-batch matching-camera comparisons, wireframes, animations and placement assemblies remain in each asset deliverable.', '',
+             'Black effect cards on candles, the bonfire and some window beams are visible in this neutral diffuse view because the client applies additive blending to those mesh slots. See the labeled per-batch effect previews for that approximation. This gallery does not simulate client additive/scroll effects, terrain lighting or collision.', '']
     for start in range(0, len(names), 20):
         selected = names[start:start+20]
         canvas = Image.new('RGB', (1920, 100 + 500*((len(selected)+3)//4)), '#242a2d')
