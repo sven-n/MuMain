@@ -48,7 +48,7 @@
 .gauge-num {
 	position: absolute;
 	left: 0;
-	top: 29px;
+	top: 30px;
 	/* Reserve enough text width for full resource values, even on 16px gauges.
 	   RmlUi cannot centre overflowing inline text in those narrow boxes. */
 	width: 96px;
@@ -63,10 +63,10 @@
 }
 
 /* Numeric anchors match the original readouts rather than the gauge centres. */
-#bar_hp .gauge-num { left: -25.5px; }
-#bar_mp .gauge-num { left: -20px; }
-#bar_sd .gauge-num { left: -35px; top: 30px; }
-#bar_ag .gauge-num { left: -40px; top: 30px; }
+#bar_hp .gauge-num { left: -26px; }
+#bar_mp .gauge-num { left: -21px; }
+#bar_sd .gauge-num { left: -36px; top: 31px; }
+#bar_ag .gauge-num { left: -41px; top: 31px; }
 
 /* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size
    binding rasterizes at display size; its inverse transform cancels the HUD scale.
