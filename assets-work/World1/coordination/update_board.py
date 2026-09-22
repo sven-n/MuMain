@@ -1,0 +1,72 @@
+"""Coordinator-owned rendering of the asset register; workers must not edit this file."""
+
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+WORKTREE_ROOT = '/Users/webproduktion3/Documents/claude-test-mumain/'
+PREVIOUS = {
+    'Beer01': ('tavern still life: bottle, mug, bowls, grapes, vine', '8d22a912', 'Beer01/notes.md'),
+    'Candle01': ('three-candle bronze stand with animated flames', 'c7a9765a', 'Candle01/notes.md'),
+    'TreasureChest01': ('arched timber chest', '993304be', 'TreasureChest01/notes.md'),
+    'Tomb03': ('upright carved grave marker', '100071aa', 'Tomb03/notes.md'),
+}
+TAVERN = {'Furniture03': 'four-legged rectangular tavern table',
+          'Furniture04': 'half-round pedestal table', 'Furniture05': 'modular tavern counter'}
+ASSIGNMENTS = {
+    'groundcover': {'models': ['Grass01', 'Grass02', 'Grass05', 'Grass06'],
+                    'branch': 'codex/lorencia-groundcover', 'worktree': 'MuMain-lorencia-groundcover'},
+    'fences': {'models': ['Fence01', 'Fence02', 'Fence03', 'Fence04'],
+               'branch': 'codex/lorencia-fences', 'worktree': 'MuMain-lorencia-fences'},
+}
+
+
+def row(name, model):
+    status, owner, branch, worktree, evidence = 'unclaimed', '—', '—', '—', 'Awaiting visual inspection and production'
+    identity = 'Loader family ' + name.rstrip('0123456789') + '; precise identity pending visual inspection'
+    if name in PREVIOUS:
+        identity, commit, notes = PREVIOUS[name]
+        status, owner, branch = 'accepted', 'ASTRA previous pilot', 'art/world1-pilot'
+        worktree = '/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain'
+        evidence = f'`{commit}`; [offline validation](../{notes}); client pending'
+    if name in TAVERN:
+        identity, status, owner, branch = TAVERN[name], 'review', 'ASTRA tavern artist / reviewer', 'art/lorencia-tavern-props'
+        worktree = WORKTREE_ROOT + 'MuMain-tavern-props'
+        evidence = '`fe69aa12`, `45c82ea0`; independent integration review in progress; client pending'
+    for agent, claim in ASSIGNMENTS.items():
+        if name in claim['models']:
+            status, owner, branch = 'in progress', agent, claim['branch']
+            worktree, evidence = WORKTREE_ROOT + claim['worktree'], 'Claimed; inspect geometry/materials before production'
+    if model['scope_exclusion']:
+        status, identity, evidence = 'blocked', model['scope_exclusion'], 'Excluded from this static-art scope; preserve unchanged'
+    placements = model['placements']
+    first = ', '.join(f'{v:.2f}' for v in placements[0]['tile']) if placements else 'none'
+    dependencies = '<br>'.join(f'`{path}` ({texture})' for texture, paths in model['textures'].items() for path in paths)
+    return f'| {name} — {identity} | {model["type"]}; {len(placements)}; first ({first}) | `{model["path"]}` | {dependencies} | {owner}; `{branch}`; `{worktree}` | {status} | {evidence} |'
+
+
+def main():
+    data = json.loads((HERE / 'dependency-map.json').read_text())
+    text = '''# Lorencia rebuild asset board — ASTRA coordinator — 2026-09-22
+
+Integration: `art/lorencia-rebuild` at `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild`, based on `ac0f6dd8` (contains reviewed pilot commits `2e2ed427`, `b232470c`, `8d22a912` and completed static batch). Only coordinator edits this board/shared handoff. No push or main merge. All acceptance here is **offline only**; no assets verified in client by this task.
+
+## Ownership and dependency policy
+
+[Dependency map](dependency-map.json) records all 115 actual BMD info reports, all 105 resolved texture dependencies, all exact World1 placements (position/rotation/scale), and source loader references. No missing textures. There are 33 connected texture groups; a large 56-model component connects architecture, rocks, carts and some trees. Shared textures in this component stay unchanged unless the entire consumer set is assigned to one texture owner. Geometry ownership may be split only with those textures frozen. No renaming to escape sharing.
+
+Initial production claims: groundcover owns Grass01/02/05/06 and Object1 tree_08.OZT + tree_09.OZT. Fences owns Fence01/02/03/04 and Object1 joint.OZJ; tile_wood02.OZJ is **frozen** (architecture consumers). Reviewer owns only review evidence. World1 terrain, TerrainLight, all alpha strips, existing Beer01/plate2, Candle01, chest and Tomb03 are protected. Tavern Furniture03/04/05 + desk_big stay with prior owner pending independent review. UI and runtime excluded.
+
+All source Data paths are relative to the integration worktree. Full placement arrays and mesh-slot texture order are in the dependency map. Candidate identities marked pending are deliberately not inferred from filenames; the assigned worker must inspect original geometry, textures and source references before committing a replacement.
+
+## Candidates
+
+| Candidate and actual identity | World1 type; count; first tile | BMD path | Complete texture dependencies | Agent; branch; worktree | Status | Commits, validation, blockers |
+|---|---|---|---|---|---|---|
+'''
+    text += '\n'.join(row(name, model) for name, model in sorted(data['models'].items(), key=lambda x: (-len(x[1]['placements']), x[0])))
+    (HERE / 'asset-board.md').write_text(text + '\n')
+
+
+if __name__ == '__main__':
+    main()
