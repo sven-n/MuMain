@@ -22,7 +22,9 @@
 			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
 			<span class="gauge-num">{{hp_current_text}}</span>
 		</div>
-		<span class="tooltip tooltip-hp">{{hp_tooltip}}</span>
+		<!-- Rasterize the hint at its displayed size, then cancel the root's texture
+		     enlargement. Layout remains theme-owned; the model already exposes scale. -->
+		<span class="tooltip tooltip-hp" data-style-font-size="10 * bars_scale + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{hp_tooltip}}</span>
 		<div id="bar_sd" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-sd gauge-fill-vertical" data-style-height="sd_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-sd gauge-fill-horizontal" data-style-width="sd_fraction * 100 + '%'"></div>
@@ -71,6 +73,9 @@
 		<!-- EXP bar spans from the item-hotkey band's start to the button group's end.
 		     exp_fraction is progress within the current decile, not overall level. -->
 		<div id="exp">
+			<div id="exp_frame_left" class="exp-frame"></div>
+			<div id="exp_frame_middle" class="exp-frame"></div>
+			<div id="exp_frame_right" class="exp-frame"></div>
 			<div id="exp_track" class="slot-frame slot-fill">
 				<div id="exp_fill" data-style-width="exp_fraction * 100 + '%'"></div>
 			</div>
