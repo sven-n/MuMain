@@ -38,5 +38,14 @@
     ],
     "branch": "codex/lorencia-trees",
     "worktree": "MuMain-lorencia-trees"
+  },
+  "fences / timber props": {
+    "models": [
+      "House02",
+      "TreasureDrum01",
+      "StreetLight01"
+    ],
+    "branch": "codex/lorencia-timber-props",
+    "worktree": "MuMain-lorencia-timber-props"
   }
 }
