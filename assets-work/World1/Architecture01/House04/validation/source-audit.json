@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "bridge_01.jpg",
+    "bridge_01.jpg.001",
+    "tile_02.jpg",
+    "tile_02.jpg.001",
+    "tile_house01.jpg",
+    "tile_house01.jpg.001",
+    "tile_space01.jpg",
+    "tile_space01.jpg.001",
+    "tile_ston04.jpg",
+    "tile_ston04.jpg.001",
+    "tile_windows01.jpg",
+    "tile_windows01.jpg.001",
+    "tile_wood01.jpg",
+    "tile_wood01.jpg.001",
+    "tile_wood02.jpg",
+    "tile_wood02.jpg.001",
+    "tile_wood03.jpg",
+    "tile_wood03.jpg.001"
+  ],
+  "original_rig_reused": true,
+  "reference_exclusion": "REF_* collections and mu_reference",
+  "export_objects": 1
+}

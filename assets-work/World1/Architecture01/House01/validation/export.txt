@@ -1,0 +1,44 @@
+00:00.628  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/source.blend"
+skipping reference object 'House01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_House01_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting House01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_v59hcq/House01_mu_export.smd
+- Exported 2 bones
+- Exported 1 frames
+- Exported 208 polys
+- Exported 4 materials
+   tile_ston06.jpg
+   tile_ston04.jpg
+   tile_house01.jpg
+   tile_ston05.jpg
+- SMD export took 0.003969907760620117
+
+
+Blender Source Tools: exporting House01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_v59hcq/anims/House01_a00.smd
+- Exported 2 bones
+- Exported 1 frames
+- SMD export took 0.0008008480072021484
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_v59hcq/House01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/exports/House01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_v59hcq/anims/House01_a00.smd --name House01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/exports/House01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/exports/House01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/exports/House01.bmd
+  name field: House01.smd  version: 12
+  meshes: 4  bones: 2  actions: 1  triangles: 208
+  bounds (bind pose): min -222.34 -301.18 -0.62  max 213.05 302.26 314.60  size 435.39 603.45 315.22
+  mesh 0: triangles=10 vertices=8 normals=10 uvs=8 texture=tile_ston05.jpg
+  mesh 1: triangles=89 vertices=54 normals=59 uvs=65 texture=tile_ston04.jpg
+  mesh 2: triangles=5 vertices=7 normals=2 uvs=7 texture=tile_house01.jpg
+  mesh 3: triangles=104 vertices=80 normals=36 uvs=46 texture=tile_ston06.jpg
+  bone 0: "Box28" parent=-1
+  bone 1: "Bone01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,29 @@
+Architecture renderer contract — inspected without edits.
+Special effect indices are zero-based.
+src/source/Engine/Object/ZzzObject.cpp:3808-3817
+3808:         switch (o->Type)
+3809:         {
+3810:         case MODEL_HOUSE01 + 3:
+3811:         case MODEL_HOUSE01 + 4:
+3812:             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
+3813:             break;
+3814:         case MODEL_HOUSE01 + 2:
+3815:         case MODEL_HOUSE_WALL01 + 1:
+3816:             o->BlendMeshLight = (float)(rand() % 4 + 4) * 0.1f;
+3817:             break;
+src/source/Engine/Object/ZzzObject.cpp:4617-4627
+4617:         case MODEL_HOUSE01 + 2:
+4618:             o->BlendMesh = 4;
+4619:             break;
+4620:         case MODEL_HOUSE01 + 3:
+4621:             o->BlendMesh = 8;
+4622:             break;
+4623:         case MODEL_HOUSE01 + 4:
+4624:             o->BlendMesh = 2;
+4625:             break;
+4626:         case MODEL_HOUSE_WALL01 + 1:
+4627:             o->BlendMesh = 4;
+
+House03 mesh4 light_02.jpg and HouseWall02 mesh4 light_02.jpg: additive brightness 0.4–0.7.
+House04 mesh8 tile_space01.jpg: world-time V scroll. Original surface geometry and UVs retained.
+Actual client rendering not observed; Blender emission/scroll examples explicitly approximate these rules.

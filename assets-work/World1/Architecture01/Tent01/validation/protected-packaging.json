@@ -1,0 +1,6 @@
+{
+  "restored_original_triangles": 50,
+  "official_authored_triangles": 80,
+  "reason": "Retain protected original positions, bone indices, UVs and normals despite Blender split-normal roundtrip quantization",
+  "original_bind_and_actions": true
+}

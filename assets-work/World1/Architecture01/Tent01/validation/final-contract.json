@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "triangles": 130,
+  "textures": {
+    "tile_house01.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_ston06.jpg": {
+      "dimensions": [
+        128,
+        128
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      -0.0145,
+      0.9895
+    ],
+    [
+      -0.9286,
+      1.9286
+    ]
+  ],
+  "original_uv_range": [
+    [
+      -0.0145,
+      0.9895
+    ],
+    [
+      -0.9286,
+      1.9286
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

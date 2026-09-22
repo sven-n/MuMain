@@ -1,0 +1,6 @@
+House01 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+House03 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+House04 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+Tent01 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+HouseWall02 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+HouseEtc02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS

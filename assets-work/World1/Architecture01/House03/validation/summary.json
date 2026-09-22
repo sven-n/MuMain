@@ -1,0 +1,49 @@
+{
+  "bounds_before": [
+    [
+      -330.6,
+      -463.45,
+      -1.37
+    ],
+    [
+      302.32,
+      450.87,
+      381.38
+    ]
+  ],
+  "bounds_after": [
+    [
+      -330.6,
+      -463.45,
+      -1.37
+    ],
+    [
+      302.32,
+      450.87,
+      381.38
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "textures": [
+    "tile_ston05.jpg",
+    "tile_ston04.jpg",
+    "tile_ston06.jpg",
+    "tile_ston07.tga",
+    "light_02.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": false,
+  "export_sha256": {
+    "House03.bmd": "a8015a4a6155d5dc2cef379bebb6c054ec6a31c428329163a1a696424ea1b7f7",
+    "tile_ston07.OZT": "af1fd6419d0c0dfa43228eea2c18cecb3b6d47502ecb0e7b2b70f4ecb8609093",
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_ston05.OZJ": "738fb32a62ece9f970cc822477361fb1105cbdde32dd4d475edda77a7d1fbc76",
+    "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "light_02.OZJ": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9"
+  }
+}

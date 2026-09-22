@@ -1,0 +1,25 @@
+{
+  "tile_house01": [
+    "House01",
+    "House04",
+    "HouseEtc02",
+    "Tent01"
+  ],
+  "tile_ston05": [
+    "House01",
+    "House03"
+  ],
+  "tile_windows01": [
+    "House04"
+  ],
+  "tile_ston07": [
+    "House03"
+  ],
+  "tile_space01": [
+    "House04"
+  ],
+  "light_02": [
+    "House03",
+    "HouseWall02"
+  ]
+}

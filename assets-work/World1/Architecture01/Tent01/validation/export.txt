@@ -1,0 +1,42 @@
+00:00.488  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/source.blend"
+skipping reference object 'Tent01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Tent01_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Tent01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_appsuvtj/Tent01_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 130 polys
+- Exported 2 materials
+   tile_ston06.jpg
+   tile_house01.jpg
+- SMD export took 0.002766132354736328
+
+
+Blender Source Tools: exporting Tent01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_appsuvtj/anims/Tent01_a00.smd
+- Exported 4 bones
+- Exported 36 frames
+- SMD export took 0.0052471160888671875
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_appsuvtj/Tent01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_appsuvtj/anims/Tent01_a00.smd --name Tent01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd
+  name field: Tent01.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 130
+  bounds (bind pose): min -154.20 -201.18 -1.37  max 156.02 200.29 330.41  size 310.22 401.47 331.78
+  mesh 0: triangles=26 vertices=18 normals=18 uvs=18 texture=tile_house01.jpg
+  mesh 1: triangles=104 vertices=64 normals=85 uvs=28 texture=tile_ston06.jpg
+  bone 0: "boness01" parent=-1
+  bone 1: "boness02" parent=0
+  bone 2: "boness" parent=1
+  bone 3: "Mesh01" parent=0
+  action 0: keys=36 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

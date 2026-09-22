@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "c_wall04.jpg",
+    "c_wall04.jpg.001",
+    "horse_drawn_01.jpg",
+    "horse_drawn_01.jpg.001",
+    "tile_house01.jpg",
+    "tile_house01.jpg.001",
+    "tile_ston01.jpg",
+    "tile_ston01.jpg.001",
+    "tile_ston04.jpg",
+    "tile_ston04.jpg.001",
+    "tile_ston06.jpg",
+    "tile_ston06.jpg.001",
+    "tile_wood02.jpg",
+    "tile_wood02.jpg.001",
+    "tile_wood03.jpg",
+    "tile_wood03.jpg.001"
+  ],
+  "original_rig_reused": true,
+  "reference_exclusion": "REF_* collections and mu_reference",
+  "export_objects": 1
+}

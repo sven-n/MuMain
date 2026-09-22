@@ -1,0 +1,27 @@
+00:00.500  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House01/original/source.blend"
+00:00.550  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House03/original/source.blend"
+00:00.582  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/House04/original/source.blend"
+00:00.612  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/Tent01/original/source.blend"
+00:00.632  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseWall02/original/source.blend"
+00:00.649  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture/assets-work/World1/Architecture01/HouseEtc02/original/source.blend"
+Info: Saved as "source.blend"
+House01 208 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+House03 313 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+House04 358 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+Tent01 130 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseWall02 110 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Info: Saved as "source.blend"
+HouseEtc02 250 triangles; original bounds and every original vertex retained
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

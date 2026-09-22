@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 250,
+  "retained_triangles_by_texture": {
+    "tile_wood02.jpg": 2,
+    "tile_ston04.jpg": 46,
+    "c_wall04.jpg": 49,
+    "tile_wood03.jpg": 16,
+    "tile_house01.jpg": 5,
+    "tile_ston01.jpg": 8,
+    "horse_drawn_01.jpg": 94,
+    "tile_ston06.jpg": 30
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0,
+  "max_retained_normal_direction_degrees": 0,
+  "frozen_container_sha256": {
+    "tile_wood03.OZJ": "aa7ab051d5598e159f196ac20f52654f8c1d81c57f220cb6b50a5e62a7112195",
+    "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+    "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+    "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+    "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+    "tile_ston01.OZJ": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+  },
+  "panel_face_pairs": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit non-effect panel pairs retain position, bone and UV. Building footprints, original roof edges, door/window openings, moving canopy, smithy awning and renderer-indexed effect meshes unchanged.",
+  "normals": "Protected original corner normals restored after the official Blender mesh export through the supported bmdconv SMD/manifest path; engine conversion can normalize/quantize slightly. Measured differences are retained.",
+  "note": "Selected panel centers are recessed by 0.25\u20130.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

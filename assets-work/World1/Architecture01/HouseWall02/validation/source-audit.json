@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "light_02.jpg",
+    "light_02.jpg.001",
+    "tile_ston04.jpg",
+    "tile_ston04.jpg.001",
+    "tile_ston06.jpg",
+    "tile_ston06.jpg.001",
+    "tile_wood01.jpg",
+    "tile_wood01.jpg.001",
+    "tile_wood02.jpg",
+    "tile_wood02.jpg.001"
+  ],
+  "original_rig_reused": true,
+  "reference_exclusion": "REF_* collections and mu_reference",
+  "export_objects": 1
+}
