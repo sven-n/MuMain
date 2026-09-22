@@ -70,6 +70,10 @@ def check_dependencies(ledger):
     for model in sorted((ROOT / 'src/bin/Data/Object1').glob('*.bmd')):
         report = subprocess.check_output([str(CONVERTER), 'info', str(model)], text=True)
         info[model.stem] = report.replace(str(ROOT) + '/', '')
+        original_info = baseline['models'][model.stem]['info']
+        for pattern in (r'texture=(.*)', r'bone \d+: .*', r'action \d+: .*'):
+            if re.findall(pattern, report) != re.findall(pattern, original_info):
+                raise ValueError(f'Mesh material order or rig/action metadata changed: {model.stem}: {pattern}')
         for texture in re.findall(r'texture=(.*)', report):
             suffix = {'.jpg': '.ozj', '.tga': '.ozt'}[Path(texture).suffix.lower()]
             if Path(texture).stem.lower() + suffix not in containers:

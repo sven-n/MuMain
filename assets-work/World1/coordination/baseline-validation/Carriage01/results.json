@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01.actions.txt\n"
+  },
+  {
+    "command": "validate Carriage01.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01.smd: bones=14 frames=1 triangles=280 materials=3\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+  },
+  {
+    "command": "validate Carriage01_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage01/smd/Carriage01_a00.smd: bones=14 frames=21 triangles=0 materials=0\nOK\nwarning: line 8: bone 'Dummy05' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+  }
+]

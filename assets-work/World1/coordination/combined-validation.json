@@ -1,6 +1,6 @@
 {
   "result": "PASS: offline integration; no client claim",
-  "integration_head": "185fd5a874ee90d476309007329ec448048d58b7",
+  "integration_head": "465136d4eace6a2c15a718589529beb495494f30",
   "baseline": "ac0f6dd8",
   "changed_game_files": {
     "src/bin/Data/Object1/Furniture03.bmd": {
@@ -77,9 +77,44 @@
       "sha256": "ab1b30fc23a5d937dd33434f4014d0c036d56e6c4f74583e0c4c7b795631fb15",
       "export": "assets-work/World1/Fences01/Fence02/exports/joint.OZJ",
       "batch": "Fences01"
+    },
+    "src/bin/Data/Object1/Tree09.bmd": {
+      "sha256": "148d3f262f26d320339e0ab809b0db35c77d93f12518e919af3a6c9d2ccef11a",
+      "export": "assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Tree10.bmd": {
+      "sha256": "efc5e8c23a602b7150324d0c7122fb15bcebf416e0cff35a84ebfb7ba7cb99fd",
+      "export": "assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Grass03.bmd": {
+      "sha256": "7d8c7dad65f330d39687e43b35623eaec91d06ec6afb5bf117fef45d34c6794b",
+      "export": "assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Grass04.bmd": {
+      "sha256": "48cbd9087f3197a701bb5e8c42698d2b9bb48bb1d68d7ddcc04e1335eb2c9c5b",
+      "export": "assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/tree_01.OZT": {
+      "sha256": "8cf7925f6ded30b83a2ecf6856617b5c823e5abb7aaccea7acb73fc7403ea0d6",
+      "export": "assets-work/World1/Scrub01/Grass03/exports/tree_01.OZT",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/tree_02.OZT": {
+      "sha256": "472a7d0305c6af309c431cd62c8adc8301a16ef8d97499ef058dd87282b7a4be",
+      "export": "assets-work/World1/Scrub01/Grass03/exports/tree_02.OZT",
+      "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/tree_07.OZT": {
+      "sha256": "2d39a05c692b757ab88eb2f1b0fe4af483c2b86ba75e206354a8c010bb9c6a9f",
+      "export": "assets-work/World1/Scrub01/Tree09/exports/tree_07.OZT",
+      "batch": "Scrub01"
     }
   },
-  "protected_file_count": 309,
+  "protected_file_count": 302,
   "world1_files_unchanged": true,
   "original_archive_hashes": {
     "Furniture03": "4a03abcf52f60261cfba44952f9b0651b86ffedfdd7ed14ba7fdd71a1f4c8985",
@@ -92,11 +127,15 @@
     "Fence01": "330920bc62c8de3964b96d1001189c6496a61dc828fee37988060b157c0ce0dd",
     "Fence02": "450cc7c06fce2fd12eaa2b409a94bd30039f8d57abc73913c73bd4d4ac8e0c55",
     "Fence03": "921d62b0482da9d683a7ad844ed6c8347ef005eb8ad90562b4ef5ef74ea755ce",
-    "Fence04": "b58daf2200b03d1fcb9f00bda906c7ba2acc798f052dc528a45764cd3830b851"
+    "Fence04": "b58daf2200b03d1fcb9f00bda906c7ba2acc798f052dc528a45764cd3830b851",
+    "Tree09": "ffd5c7ce308c42bdde1f8fd42c64d051c05eb6e5f91f2f55ae2c64e98ece995e",
+    "Tree10": "5e84fde224528e1d50b12778a1df05ddd7c50f300c5874be46c205e78d233b47",
+    "Grass03": "1defeac9a09bce7df56d46ab323e0735e2139bb588607d6be455fecaf115eb32",
+    "Grass04": "f9d5eb81cb80c915a98011c98bb5bee706790aac9c9b99ceb41059496ca07196"
   },
   "combined_models": 115,
   "missing_textures": [],
-  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
   "client_verified": false,
   "runtime_modified": false
 }

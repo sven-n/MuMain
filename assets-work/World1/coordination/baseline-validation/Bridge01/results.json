@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01.actions.txt\n"
+  },
+  {
+    "command": "validate Bridge01.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01.smd: bones=2 frames=1 triangles=196 materials=2\nOK\n"
+  },
+  {
+    "command": "validate Bridge01_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Bridge01/smd/Bridge01_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

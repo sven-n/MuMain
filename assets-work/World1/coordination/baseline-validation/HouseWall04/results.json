@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04.actions.txt\n"
+  },
+  {
+    "command": "validate HouseWall04.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04.smd: bones=1 frames=1 triangles=56 materials=3\nOK\n"
+  },
+  {
+    "command": "validate HouseWall04_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/HouseWall04/smd/HouseWall04_a00.smd: bones=1 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

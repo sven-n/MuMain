@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02.actions.txt\n"
+  },
+  {
+    "command": "validate Carriage02.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02.smd: bones=2 frames=1 triangles=258 materials=1\nOK\n"
+  },
+  {
+    "command": "validate Carriage02_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Carriage02/smd/Carriage02_a00.smd: bones=2 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

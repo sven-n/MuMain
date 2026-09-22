@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03.actions.txt\n"
+  },
+  {
+    "command": "validate Beer03.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03.smd: bones=3 frames=1 triangles=108 materials=2\nOK\n"
+  },
+  {
+    "command": "validate Beer03_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Beer03/smd/Beer03_a00.smd: bones=3 frames=1 triangles=0 materials=0\nOK\n"
+  }
+]

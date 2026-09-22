@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01.actions.txt\n"
+  },
+  {
+    "command": "validate Tree01.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01.smd: bones=16 frames=1 triangles=412 materials=2\nOK\nwarning: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+  },
+  {
+    "command": "validate Tree01_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree01/smd/Tree01_a00.smd: bones=16 frames=31 triangles=0 materials=0\nOK\nwarning: line 16: bone 'Dummy13' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 17: bone 'Dummy14' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 18: bone 'Dummy15' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+  }
+]

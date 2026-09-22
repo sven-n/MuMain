@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02.actions.txt\n"
+  },
+  {
+    "command": "validate Tree02.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02.smd: bones=24 frames=1 triangles=770 materials=2\nOK\nwarning: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+  },
+  {
+    "command": "validate Tree02_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Tree02/smd/Tree02_a00.smd: bones=24 frames=31 triangles=0 materials=0\nOK\nwarning: line 23: bone 'Dummy20' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 24: bone 'Dummy21' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 25: bone 'Dummy22' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\nwarning: line 26: bone 'Dummy23' starts with 'Du' and is treated as a dummy: its keyframes are dropped and vertices bound to it stay at the model origin\n"
+  }
+]

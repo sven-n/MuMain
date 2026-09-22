@@ -72,5 +72,30 @@
       "src/bin/Data/Object1/Fence04.bmd": "assets-work/World1/Fences01/Fence04/exports/Fence04.bmd",
       "src/bin/Data/Object1/joint.OZJ": "assets-work/World1/Fences01/Fence02/exports/joint.OZJ"
     }
+  },
+  {
+    "name": "Scrub01",
+    "models": [
+      "Tree09",
+      "Tree10",
+      "Grass03",
+      "Grass04"
+    ],
+    "owner": "reviewer / scrub subagent",
+    "source_commits": [
+      "3ea6d48b"
+    ],
+    "integration_commits": [
+      "465136d4"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Tree09.bmd": "assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd",
+      "src/bin/Data/Object1/Tree10.bmd": "assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd",
+      "src/bin/Data/Object1/Grass03.bmd": "assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd",
+      "src/bin/Data/Object1/Grass04.bmd": "assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd",
+      "src/bin/Data/Object1/tree_01.OZT": "assets-work/World1/Scrub01/Grass03/exports/tree_01.OZT",
+      "src/bin/Data/Object1/tree_02.OZT": "assets-work/World1/Scrub01/Grass03/exports/tree_02.OZT",
+      "src/bin/Data/Object1/tree_07.OZT": "assets-work/World1/Scrub01/Tree09/exports/tree_07.OZT"
+    }
   }
 ]

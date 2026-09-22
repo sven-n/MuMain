@@ -1,0 +1,5 @@
+# bmdconv action manifest for SteelStatue01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd SteelStatue01.smd <output.bmd> --manifest SteelStatue01.actions.txt
+model Data2\Object1\steel_barred_door_
+action 0 file=SteelStatue01_a00.smd keys=1 lock=0
+texture 0 tombstone_big.jpg original=tombstone_big.jpg

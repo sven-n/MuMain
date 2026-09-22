@@ -1,0 +1,17 @@
+[
+  {
+    "command": "bmd2smd",
+    "exit_code": 0,
+    "output": "wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01_a00.smd\nwrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01.actions.txt\n"
+  },
+  {
+    "command": "validate Hanging01.smd",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01.smd: bones=4 frames=1 triangles=162 materials=1\nOK\n"
+  },
+  {
+    "command": "validate Hanging01_a00.smd --animation",
+    "exit_code": 0,
+    "output": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/assets-work/World1/coordination/baseline-validation/Hanging01/smd/Hanging01_a00.smd: bones=4 frames=25 triangles=0 materials=0\nOK\n"
+  }
+]
