@@ -207,6 +207,11 @@ FetchContent_Declare(SDL3_ttf
 
 add_subdirectory("src")
 
+option(MU_BUILD_ASSET_TOOLS "Build the asset conversion tools (tools/bmdconv)" ON)
+if(MU_BUILD_ASSET_TOOLS)
+    add_subdirectory(tools/bmdconv)
+endif()
+
 add_dependencies(Main ValidateStagedShaderBlobs)
 if(TARGET ValidateStagedDxilReflection)
     add_dependencies(Main ValidateStagedDxilReflection)
