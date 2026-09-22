@@ -1,0 +1,14 @@
+tub.jpg
+meshes 1 vs 1, bones 7 vs 7, actions 1 vs 1, triangles 72 vs 72
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+horse_drawn_01.jpg
+meshes 1 vs 1, bones 7 vs 7, actions 1 vs 1, triangles 16 vs 16
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+
+well.jpg
+meshes 1 vs 1, bones 7 vs 7, actions 1 vs 1, triangles 123 vs 123
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT

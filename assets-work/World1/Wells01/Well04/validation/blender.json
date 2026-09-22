@@ -1,0 +1,52 @@
+{
+  "bounds_before": [
+    [
+      -43.642601013183594,
+      -134.58270263671875,
+      -1.258499026298523
+    ],
+    [
+      58.29050064086914,
+      126.72509765625,
+      99.25900268554688
+    ]
+  ],
+  "bounds_after": [
+    [
+      -43.642601013183594,
+      -134.58270263671875,
+      -1.258499026298523
+    ],
+    [
+      58.29050064086914,
+      126.72509765625,
+      99.25900268554688
+    ]
+  ],
+  "triangles": 1408,
+  "edits": [
+    {
+      "original_anchors": 240,
+      "final_triangles": 1408,
+      "rounding": 0.55
+    }
+  ],
+  "bone_order": [
+    "Cylinder07",
+    "Cylinder08",
+    "Cylinder09",
+    "Cylinder10",
+    "Cylinder11",
+    "Cylinder12",
+    "Cylinder13",
+    "Cylinder14"
+  ],
+  "action_meta": {
+    "Well04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "retained_geometry": false,
+  "note": "Original pottery anchors retained; new curved edge points constrained to each original bone AABB"
+}

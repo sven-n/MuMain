@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/original/Well03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/original/Well03_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/original/Well03.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/original/Well03.smd: bones=4 frames=1 triangles=194 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/original/Well03_a00.smd: bones=4 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/new/Well03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/new/Well03_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/new/Well03.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/new/Well03.smd: bones=4 frames=1 triangles=704 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/new/Well03_a00.smd: bones=4 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well03/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

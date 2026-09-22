@@ -1,0 +1,16 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-wells/assets-work/World1/Wells01/Well01/exports/Well01.bmd
+  name field: preserved-bind.smd  version: 12
+  meshes: 4  bones: 7  actions: 1  triangles: 915
+  bounds (bind pose): min -154.76 -125.85 -0.07  max 121.57 93.46 270.82  size 276.33 219.31 270.89
+  mesh 0: triangles=72 vertices=48 normals=174 uvs=28 texture=tub.jpg
+  mesh 1: triangles=16 vertices=24 normals=2 uvs=6 texture=horse_drawn_01.jpg
+  mesh 2: triangles=123 vertices=89 normals=253 uvs=101 texture=well.jpg
+  mesh 3: triangles=704 vertices=391 normals=425 uvs=378 texture=jar_01.jpg
+  bone 0: "Cylinder01" parent=-1
+  bone 1: "Cylinder04" parent=-1
+  bone 2: "Cylinder07" parent=-1
+  bone 3: "Cylinder08" parent=-1
+  bone 4: "Cylinder09" parent=-1
+  bone 5: "Cylinder10" parent=-1
+  bone 6: "Cylinder11" parent=-1
+  action 0: keys=1 lock=0

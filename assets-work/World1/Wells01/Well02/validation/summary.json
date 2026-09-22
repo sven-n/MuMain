@@ -1,0 +1,40 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -79.28,
+      -93.46,
+      0.0
+    ],
+    [
+      78.0,
+      93.46,
+      270.82
+    ]
+  ],
+  "bounds_after": [
+    [
+      -79.28,
+      -93.46,
+      0.0
+    ],
+    [
+      78.0,
+      93.46,
+      270.82
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "well.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "Well02.bmd": "1abd72cb18be477740863d1677592eda32277e94f70154e999754933854adf22",
+    "well.OZJ": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e"
+  }
+}
