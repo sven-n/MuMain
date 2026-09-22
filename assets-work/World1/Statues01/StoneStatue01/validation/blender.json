@@ -1,0 +1,92 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 100,
+  "original_triangles": 92,
+  "bounds_before": [
+    [
+      -54.56480026245117,
+      -54.33789825439453,
+      0.0
+    ],
+    [
+      54.6244010925293,
+      56.472900390625,
+      399.9866943359375
+    ]
+  ],
+  "bounds_after": [
+    [
+      -54.56480026245117,
+      -54.33789825439453,
+      0.0
+    ],
+    [
+      54.6244010925293,
+      56.472900390625,
+      399.9866943359375
+    ]
+  ],
+  "original_vertices_retained": 61,
+  "bone_order": [
+    "Box11"
+  ],
+  "action_meta": {
+    "StoneStatue01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "stone_statue02.jpg": [
+      256,
+      512
+    ]
+  },
+  "material_order": [
+    "stone_statue02.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained except six reprojected head cap triangles; new panel coordinates interpolated",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Opaque RGB stone atlases; frozen fountain water remains opaque texture for original BlendMesh3",
+  "uv_reprojected_faces": [],
+  "uv_reprojection": null,
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        2,
+        3
+      ],
+      "boundary_vertices": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "inset_fraction": 0.012027650557644978,
+      "recess_depth": 0.4,
+      "original_perimeter": [
+        [
+          -39.97019958496094,
+          -38.932498931884766,
+          0.0
+        ],
+        [
+          40.02980041503906,
+          -38.932498931884766,
+          0.0
+        ],
+        [
+          40.02980041503906,
+          -38.932498931884766,
+          145.77450561523438
+        ],
+        [
+          -39.97019958496094,
+          -38.932498931884766,
+          145.77450561523438
+        ]
+      ]
+    }
+  ],
+  "protected": "All original vertices and unmodified triangle corners retained; only named panel interiors changed"
+}

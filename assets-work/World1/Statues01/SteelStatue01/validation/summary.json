@@ -1,0 +1,40 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -65.92,
+      -65.01,
+      -0.04
+    ],
+    [
+      65.87,
+      66.77,
+      321.58
+    ]
+  ],
+  "bounds_after": [
+    [
+      -65.92,
+      -65.01,
+      -0.04
+    ],
+    [
+      65.87,
+      66.77,
+      321.58
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "tombstone_big.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "tombstone_big.OZJ": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940",
+    "SteelStatue01.bmd": "47cf79132fab1d62873120638485e62f48cb7aa31814771872c8700486ac8536"
+  }
+}

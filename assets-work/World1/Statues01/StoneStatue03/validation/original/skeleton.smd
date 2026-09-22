@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Box03" -1
+end
+skeleton
+time 0
+0 -0.042188 0.048254 -0.084234 0.000000 0.000000 0.000000
+end
+triangles
+end

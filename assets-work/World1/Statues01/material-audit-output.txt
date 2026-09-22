@@ -1,0 +1,1 @@
+PASS: no new collapsed UV triangles, six explicitly identified repaired head-cap UVs, opaque diffuse roles

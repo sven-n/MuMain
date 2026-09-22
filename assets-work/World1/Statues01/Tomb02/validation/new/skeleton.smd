@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Mesh01" -1
+end
+skeleton
+time 0
+0 -1.236460 1.824290 23.137222 0.000000 -0.000000 -3.141592
+end
+triangles
+end

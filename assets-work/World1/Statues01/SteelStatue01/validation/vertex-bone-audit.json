@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "authored_vertices": 64,
+  "reimported_vertices": 64,
+  "every_authored_vertex_retains_intended_named_bone": true,
+  "every_final_vertex_has_authored_match": true,
+  "max_authored_to_final_component_error": 0.0,
+  "max_final_to_authored_component_error": 0.0,
+  "position_tolerance": 0.001,
+  "original_reference_snapshot_exact": true,
+  "reference_sha256": "bb609cc241ad1c872eca52f86dd36eac833d3b3e7581cc7f1fccd4c242b19d9a",
+  "all_source_images_packed": true,
+  "source_original_reference_excluded": true,
+  "note": "Compares every frame-zero evaluated authored and final vertex with exact named bone match; prevents converter position deduplication from silently transferring root ownership."
+}

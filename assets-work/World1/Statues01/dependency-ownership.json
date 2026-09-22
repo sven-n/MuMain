@@ -1,0 +1,22 @@
+{
+  "tombstone_big": [
+    "SteelStatue01",
+    "StoneStatue03"
+  ],
+  "stone_statue02": [
+    "StoneStatue01",
+    "Waterspout01"
+  ],
+  "stone_statue01": [
+    "StoneStatue02"
+  ],
+  "angel_stone_statue": [
+    "StoneStatue03"
+  ],
+  "grave_02": [
+    "Tomb01"
+  ],
+  "grave_01": [
+    "Tomb02"
+  ]
+}

@@ -1,0 +1,20 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Waterspout01/exports/Waterspout01.bmd
+  name field: Data2\Object1\waterspout.smd  version: 10
+  meshes: 4  bones: 11  actions: 1  triangles: 639
+  bounds (bind pose): min -199.06 -199.74 -0.14  max 199.23 198.55 311.20  size 398.30 398.30 311.34
+  mesh 0: triangles=72 vertices=60 normals=36 uvs=29 texture=stone_statue02.jpg
+  mesh 1: triangles=417 vertices=232 normals=209 uvs=224 texture=reagon_waterspout.jpg
+  mesh 2: triangles=60 vertices=36 normals=36 uvs=39 texture=ston01.jpg
+  mesh 3: triangles=90 vertices=66 normals=66 uvs=66 texture=ston02.jpg
+  bone 0: "OilTank01" parent=-1
+  bone 1: "Box04" parent=-1
+  bone 2: "Box01" parent=1
+  bone 3: "Box02" parent=2
+  bone 4: "Box03" parent=3
+  bone 5: "QuadPatch01" parent=1
+  bone 6: "Box05" parent=-1
+  bone 7: "Box06" parent=6
+  bone 8: "Box07" parent=7
+  bone 9: "Box08" parent=8
+  bone 10: "QuadPatch02" parent=6
+  action 0: keys=21 lock=0

@@ -1,0 +1,7 @@
+SteelStatue01 PASS: 58 unchanged triangles; 0.0 maximum original-vertex drift
+StoneStatue01 PASS: 90 unchanged triangles; 0.0 maximum original-vertex drift
+StoneStatue02 PASS: 101 unchanged triangles; 0.0 maximum original-vertex drift
+StoneStatue03 PASS: 248 unchanged triangles; 0.0 maximum original-vertex drift
+Tomb01 PASS: 36 unchanged triangles; 0.002633000000002994 maximum original-vertex drift
+Tomb02 PASS: 32 unchanged triangles; 6.900000001053286e-05 maximum original-vertex drift
+Waterspout01 PASS: 639 unchanged triangles; 0.0 maximum original-vertex drift

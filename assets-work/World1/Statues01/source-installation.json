@@ -1,0 +1,28 @@
+{
+  "status": "PASS; isolated source worktree only",
+  "runtime_written": false,
+  "client_verified": false,
+  "unchanged_world1_object1_files": 312,
+  "installed": {
+    "src/bin/Data/Object1/StoneStatue01.bmd": "1114562c9d5abcdfb5ef125a61a2285c3fe82e2fb5b9bc745c777be86e9454ad",
+    "src/bin/Data/Object1/stone_statue02.OZJ": "e1d4f7b95afae6c9936eb117a71592e94322b041efafa887bcdf6d731e4a630b",
+    "src/bin/Data/Object1/StoneStatue02.bmd": "668759a5ccada44481a7e7f052e835cf43d83319c5c46ece0e9d33fb31c3687d",
+    "src/bin/Data/Object1/stone_statue01.OZJ": "b4f503907f84e79d846ed818bc511d86720ded44c0eff2306360887385094073",
+    "src/bin/Data/Object1/StoneStatue03.bmd": "cbbf03b5de8c57cb46e76ea96d27ed43aefc119956f39082f48382d6677e228f",
+    "src/bin/Data/Object1/angel_stone_statue.OZJ": "41badb3711151f592185b4c105701cc0652bce19ae796987f978294485673d12",
+    "src/bin/Data/Object1/tombstone_big.OZJ": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940",
+    "src/bin/Data/Object1/SteelStatue01.bmd": "47cf79132fab1d62873120638485e62f48cb7aa31814771872c8700486ac8536",
+    "src/bin/Data/Object1/Tomb01.bmd": "ad04c5b2d595dc24769c29e6803e44d40b4888b9983b223d60cb2af19ba64d61",
+    "src/bin/Data/Object1/grave_02.OZJ": "31aff047b31909fd90a51d7900a4ce980a7bafa8bff44b2b84a7821daff37b00",
+    "src/bin/Data/Object1/Tomb02.bmd": "52ca4f57e048f379c4729cf19519a060c05314759cba9bda56ed5b118137b78e",
+    "src/bin/Data/Object1/grave_01.OZJ": "3faeb80e3bd7378aee6b1fe9e531bdc4a32eef8083757d5e0b7858b7496c0735"
+  },
+  "shared_texture_exports_identical": {
+    "stone_statue02.OZJ": "e1d4f7b95afae6c9936eb117a71592e94322b041efafa887bcdf6d731e4a630b",
+    "stone_statue01.OZJ": "b4f503907f84e79d846ed818bc511d86720ded44c0eff2306360887385094073",
+    "angel_stone_statue.OZJ": "41badb3711151f592185b4c105701cc0652bce19ae796987f978294485673d12",
+    "tombstone_big.OZJ": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940",
+    "grave_02.OZJ": "31aff047b31909fd90a51d7900a4ce980a7bafa8bff44b2b84a7821daff37b00",
+    "grave_01.OZJ": "3faeb80e3bd7378aee6b1fe9e531bdc4a32eef8083757d5e0b7858b7496c0735"
+  }
+}

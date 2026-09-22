@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/original/StoneStatue01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/original/StoneStatue01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/original/StoneStatue01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/original/StoneStatue01.smd: bones=1 frames=1 triangles=92 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/original/StoneStatue01_a00.smd: bones=1 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/new/StoneStatue01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/new/StoneStatue01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/new/StoneStatue01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/new/StoneStatue01.smd: bones=1 frames=1 triangles=100 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/new/StoneStatue01_a00.smd: bones=1 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/StoneStatue01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

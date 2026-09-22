@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "position_tolerance": 0.001,
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 6.900000001053286e-05,
+  "unchanged_triangle_count": 32,
+  "retained_triangles_by_texture": {
+    "grave_01.jpg": 32
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 2.199999999996649e-05,
+  "max_retained_normal_direction_degrees": 0.0014940531415729495,
+  "frozen_container_sha256": {},
+  "panel_face_pairs": [
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      8,
+      9
+    ]
+  ],
+  "uv_reprojected_faces": [],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit stone panel pairs retain position, bone and UV. Sculptural head/angel forms and all fountain components retain their original geometry and UVs.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Selected stone panel centers are recessed by 0.4 units; no original source perimeter vertices moved. Tomb01 original slanted root incurs measured 0.002633-unit export reconstruction; explicit 0.005 tolerance. All other assets use 0.001. No placement/collision/terrain changes."
+}

@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/SteelStatue01/exports/SteelStatue01.bmd
+  name field: SteelStatue01.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 98
+  bounds (bind pose): min -65.92 -65.01 -0.04  max 65.87 66.77 321.58  size 131.79 131.79 321.62
+  mesh 0: triangles=98 vertices=64 normals=59 uvs=94 texture=tombstone_big.jpg
+  bone 0: "Box02" parent=-1
+  action 0: keys=1 lock=0

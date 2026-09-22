@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-monuments/assets-work/World1/Statues01/Tomb02/exports/Tomb02.bmd
+  name field: Tomb02.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 72
+  bounds (bind pose): min -71.53 -119.48 -0.04  max 69.06 122.99 49.19  size 140.59 242.47 49.23
+  mesh 0: triangles=72 vertices=44 normals=61 uvs=64 texture=grave_01.jpg
+  bone 0: "Mesh01" parent=-1
+  action 0: keys=1 lock=0

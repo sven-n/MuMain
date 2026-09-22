@@ -1,0 +1,40 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -54.56,
+      -54.34,
+      0.0
+    ],
+    [
+      54.62,
+      56.47,
+      399.99
+    ]
+  ],
+  "bounds_after": [
+    [
+      -54.56,
+      -54.34,
+      0.0
+    ],
+    [
+      54.62,
+      56.47,
+      399.99
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "stone_statue02.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "StoneStatue01.bmd": "1114562c9d5abcdfb5ef125a61a2285c3fe82e2fb5b9bc745c777be86e9454ad",
+    "stone_statue02.OZJ": "e1d4f7b95afae6c9936eb117a71592e94322b041efafa887bcdf6d731e4a630b"
+  }
+}

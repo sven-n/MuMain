@@ -1,0 +1,40 @@
+{
+  "result": "PASS: offline validation",
+  "bounds_before": [
+    [
+      -117.53,
+      -140.51,
+      -0.08
+    ],
+    [
+      62.39,
+      121.84,
+      78.1
+    ]
+  ],
+  "bounds_after": [
+    [
+      -117.53,
+      -140.51,
+      -0.08
+    ],
+    [
+      62.39,
+      121.84,
+      78.1
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "rig_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "material_order": [
+    "grave_02.jpg"
+  ],
+  "client_verified": false,
+  "export_sha256": {
+    "grave_02.OZJ": "31aff047b31909fd90a51d7900a4ce980a7bafa8bff44b2b84a7821daff37b00",
+    "Tomb01.bmd": "ad04c5b2d595dc24769c29e6803e44d40b4888b9983b223d60cb2af19ba64d61"
+  }
+}
