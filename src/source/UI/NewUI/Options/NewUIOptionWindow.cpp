@@ -192,31 +192,31 @@ namespace
     constexpr int OPTION_CLOSE_Y_LOCAL = 427;
     constexpr int OPTION_WINDOW_HEIGHT = 458;
     constexpr int OPTION_FRAME_SLAT_COUNT = 35;
-    } // namespace
+} // namespace
 
-    //////////////////////////////////////////////////////////////////////
-    // Construction/Destruction
-    //////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
-    SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
-    {
-        m_pNewUIMng = NULL;
-        m_Pos.x = 0;
-        m_Pos.y = 0;
+SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
+{
+    m_pNewUIMng = NULL;
+    m_Pos.x = 0;
+    m_Pos.y = 0;
 
-        m_bAutoAttack = true;
-        m_bWhisperSound = false;
-        m_bSlideHelp = true;
-        m_iVolumeLevel = GameConfig::GetInstance().GetSoundVolume();
-        m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
-        m_iRenderLevel = 4;
-        m_bRenderAllEffects = true;
-        m_iResolutionIndex = 0;
-        m_bWindowedMode = (g_bUseWindowMode == TRUE);
-        m_bBottomHudClassic = GameConfig::GetInstance().GetBottomHudClassic();
-        m_iLanguageIndex = FindCurrentLanguageIndex();
-        m_iFontIndex = FindCurrentFontIndex();
-    }
+    m_bAutoAttack = true;
+    m_bWhisperSound = false;
+    m_bSlideHelp = true;
+    m_iVolumeLevel = GameConfig::GetInstance().GetSoundVolume();
+    m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
+    m_iRenderLevel = 4;
+    m_bRenderAllEffects = true;
+    m_iResolutionIndex = 0;
+    m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_bBottomHudClassic = GameConfig::GetInstance().GetBottomHudClassic();
+    m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_iFontIndex = FindCurrentFontIndex();
+}
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
 {
