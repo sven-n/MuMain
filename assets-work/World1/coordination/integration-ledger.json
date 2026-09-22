@@ -124,5 +124,29 @@
       "src/bin/Data/Object1/tree_06.OZT": "assets-work/World1/Trees01/textures/final/tree_06.OZT",
       "src/bin/Data/Object1/tree_02.OZJ": "assets-work/World1/Trees01/textures/final/tree_02.OZJ"
     }
+  },
+  {
+    "name": "TimberProps01",
+    "models": [
+      "House02",
+      "TreasureDrum01",
+      "StreetLight01"
+    ],
+    "owner": "fences / timber props subagent",
+    "source_commits": [
+      "0b271edc"
+    ],
+    "integration_commits": [
+      "9a7eedf7"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/House02.bmd": "assets-work/World1/TimberProps01/House02/exports/House02.bmd",
+      "src/bin/Data/Object1/TreasureDrum01.bmd": "assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd",
+      "src/bin/Data/Object1/StreetLight01.bmd": "assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd",
+      "src/bin/Data/Object1/drum.OZJ": "assets-work/World1/TimberProps01/House02/exports/drum.OZJ",
+      "src/bin/Data/Object1/steel.OZJ": "assets-work/World1/TimberProps01/House02/exports/steel.OZJ",
+      "src/bin/Data/Object1/streetlight.OZJ": "assets-work/World1/TimberProps01/StreetLight01/exports/streetlight.OZJ",
+      "src/bin/Data/Object1/streetlight_brightness2.OZJ": "assets-work/World1/TimberProps01/StreetLight01/exports/streetlight_brightness2.OZJ"
+    }
   }
 ]

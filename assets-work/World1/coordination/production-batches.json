@@ -128,5 +128,33 @@
       "src/bin/Data/Object1/mushroom.OZJ"
     ],
     "frozen_textures": []
+  },
+  "fences / masonry": {
+    "models": [
+      "HouseEtc01",
+      "StoneMuWall01",
+      "StoneMuWall02",
+      "StoneMuWall03",
+      "StoneMuWall04",
+      "HouseEtc02"
+    ],
+    "branch": "codex/lorencia-masonry",
+    "worktree": "MuMain-lorencia-masonry",
+    "owned_textures": [
+      "src/bin/Data/Object1/c_wall04.OZJ",
+      "src/bin/Data/Object1/c_wall05.OZJ",
+      "src/bin/Data/Object1/c_wall06.OZJ",
+      "src/bin/Data/Object1/tile_ston01.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/bridge_01.OZJ",
+      "src/bin/Data/Object1/horse_drawn_01.OZJ",
+      "src/bin/Data/Object1/tile_02.OZJ",
+      "src/bin/Data/Object1/tile_house01.OZJ",
+      "src/bin/Data/Object1/tile_ston04.OZJ",
+      "src/bin/Data/Object1/tile_ston06.OZJ",
+      "src/bin/Data/Object1/tile_wood02.OZJ",
+      "src/bin/Data/Object1/tile_wood03.OZJ"
+    ]
   }
 }
