@@ -116,5 +116,17 @@
       "src/bin/Data/Object1/tree_05.OZT"
     ],
     "frozen_textures": []
+  },
+  "coordinator / mushrooms": {
+    "models": [
+      "Grass07",
+      "Grass08"
+    ],
+    "branch": "codex/lorencia-mushrooms",
+    "worktree": "MuMain-lorencia-mushrooms",
+    "owned_textures": [
+      "src/bin/Data/Object1/mushroom.OZJ"
+    ],
+    "frozen_textures": []
   }
 }
