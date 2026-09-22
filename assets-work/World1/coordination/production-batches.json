@@ -59,5 +59,14 @@
     ],
     "branch": "codex/lorencia-rocks",
     "worktree": "MuMain-lorencia-rocks"
+  },
+  "groundcover / flowering": {
+    "models": [
+      "Tree08",
+      "Tree12",
+      "Tree13"
+    ],
+    "branch": "codex/lorencia-flowering",
+    "worktree": "MuMain-lorencia-flowering"
   }
 }

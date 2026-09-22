@@ -97,5 +97,32 @@
       "src/bin/Data/Object1/tree_02.OZT": "assets-work/World1/Scrub01/Grass03/exports/tree_02.OZT",
       "src/bin/Data/Object1/tree_07.OZT": "assets-work/World1/Scrub01/Tree09/exports/tree_07.OZT"
     }
+  },
+  {
+    "name": "Trees01",
+    "models": [
+      "Tree01",
+      "Tree02",
+      "Tree11",
+      "Tree06"
+    ],
+    "owner": "groundcover / trees subagent",
+    "source_commits": [
+      "0b6864f1"
+    ],
+    "integration_commits": [
+      "ac16ffeb"
+    ],
+    "notes_path": "Trees01/README.md",
+    "game_files": {
+      "src/bin/Data/Object1/Tree01.bmd": "assets-work/World1/Trees01/Tree01/exports/Tree01.bmd",
+      "src/bin/Data/Object1/Tree02.bmd": "assets-work/World1/Trees01/Tree02/exports/Tree02.bmd",
+      "src/bin/Data/Object1/Tree11.bmd": "assets-work/World1/Trees01/Tree11/exports/Tree11.bmd",
+      "src/bin/Data/Object1/Tree06.bmd": "assets-work/World1/Trees01/Tree06/exports/Tree06.bmd",
+      "src/bin/Data/Object1/tree.OZJ": "assets-work/World1/Trees01/textures/final/tree.OZJ",
+      "src/bin/Data/Object1/Tree_a.OZT": "assets-work/World1/Trees01/textures/final/Tree_a.OZT",
+      "src/bin/Data/Object1/tree_06.OZT": "assets-work/World1/Trees01/textures/final/tree_06.OZT",
+      "src/bin/Data/Object1/tree_02.OZJ": "assets-work/World1/Trees01/textures/final/tree_02.OZJ"
+    }
   }
 ]

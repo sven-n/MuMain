@@ -1,6 +1,6 @@
 {
   "result": "PASS: offline integration; no client claim",
-  "integration_head": "465136d4eace6a2c15a718589529beb495494f30",
+  "integration_head": "ac16ffebbf209ca7fa9968fe514f244e33b3903b",
   "baseline": "ac0f6dd8",
   "changed_game_files": {
     "src/bin/Data/Object1/Furniture03.bmd": {
@@ -112,9 +112,49 @@
       "sha256": "2d39a05c692b757ab88eb2f1b0fe4af483c2b86ba75e206354a8c010bb9c6a9f",
       "export": "assets-work/World1/Scrub01/Tree09/exports/tree_07.OZT",
       "batch": "Scrub01"
+    },
+    "src/bin/Data/Object1/Tree01.bmd": {
+      "sha256": "479639bef9a1791bf78fdffc577722212b9600573c49f5079b61a7e05bac350c",
+      "export": "assets-work/World1/Trees01/Tree01/exports/Tree01.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree02.bmd": {
+      "sha256": "79ed1abc556290b58898f9270992c0a7e38c3d3a4ddc73a7c9451cab7436e125",
+      "export": "assets-work/World1/Trees01/Tree02/exports/Tree02.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree11.bmd": {
+      "sha256": "6a9fa891a24dc83ab72a6cb095e6f558fccc8e1579d580f31a5aa0114b370f8d",
+      "export": "assets-work/World1/Trees01/Tree11/exports/Tree11.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree06.bmd": {
+      "sha256": "d4b63d362e5cbca78266e29c88e1bd463e7198ab088045a86569a523cb4b9236",
+      "export": "assets-work/World1/Trees01/Tree06/exports/Tree06.bmd",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/tree.OZJ": {
+      "sha256": "a6ce1540257cff35b2ee69a78cff19ae345dd2f382e0028bedddc7ec018a8b08",
+      "export": "assets-work/World1/Trees01/textures/final/tree.OZJ",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/Tree_a.OZT": {
+      "sha256": "27a661544f254ed116af332969a7afdc88dbfd91750b1e3ab2bed9554daf108b",
+      "export": "assets-work/World1/Trees01/textures/final/Tree_a.OZT",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/tree_06.OZT": {
+      "sha256": "46428b82dd78db28498a2636b897f0f27b1608146593e7fb8d3894a6508fd754",
+      "export": "assets-work/World1/Trees01/textures/final/tree_06.OZT",
+      "batch": "Trees01"
+    },
+    "src/bin/Data/Object1/tree_02.OZJ": {
+      "sha256": "eef7dfe236aa633a03430e676634fc952aa02bd55dd0863dd2423f4d58639dd7",
+      "export": "assets-work/World1/Trees01/textures/final/tree_02.OZJ",
+      "batch": "Trees01"
     }
   },
-  "protected_file_count": 302,
+  "protected_file_count": 294,
   "world1_files_unchanged": true,
   "original_archive_hashes": {
     "Furniture03": "4a03abcf52f60261cfba44952f9b0651b86ffedfdd7ed14ba7fdd71a1f4c8985",
@@ -131,11 +171,15 @@
     "Tree09": "ffd5c7ce308c42bdde1f8fd42c64d051c05eb6e5f91f2f55ae2c64e98ece995e",
     "Tree10": "5e84fde224528e1d50b12778a1df05ddd7c50f300c5874be46c205e78d233b47",
     "Grass03": "1defeac9a09bce7df56d46ab323e0735e2139bb588607d6be455fecaf115eb32",
-    "Grass04": "f9d5eb81cb80c915a98011c98bb5bee706790aac9c9b99ceb41059496ca07196"
+    "Grass04": "f9d5eb81cb80c915a98011c98bb5bee706790aac9c9b99ceb41059496ca07196",
+    "Tree01": "f402e95bd45fac4940912cab00c6b6f6a352b29a5983016080b154cdab31c61f",
+    "Tree02": "38020ef3abe78b5b6a1579535ed22a9150d75c0cead2f48ffaeb09c99a15654d",
+    "Tree11": "96e721e2749724a8078d14bb874002d7efba102c3a3e3d3c745bc04744384ebf",
+    "Tree06": "ab37a0ad05291db385b701fc7ec8db1f7cde112ba2062b88b957cd4c6aa39666"
   },
   "combined_models": 115,
   "missing_textures": [],
-  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/Tree_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_06.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
   "client_verified": false,
   "runtime_modified": false
 }
