@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "date": "2026-09-22",
+  "input": "diffuse-initial.png",
+  "output": "diffuse-master.png",
+  "prompt": "Refine this exact flat texture atlas. Preserve the left half wood and bottom-right dark iron unchanged, preserve all quadrant boundaries precisely. Change ONLY the upper-right brass quadrant: make the broad antique brass base substantially brighter, muted pale ochre and aged golden bronze, with clearly legible pale worn edging and shallow engraved gothic scrollwork. It must remain convincingly brass under flat diffuse shading at gameplay distance, not dark brown wood. Keep shadowed patina but reduce its area, brighter midtones; restrained metallic material definition baked into paint without specular effects. No new shapes outside the quadrant. No object, no text, no labels. Same flat 2D atlas layout and square dimensions."
+}
