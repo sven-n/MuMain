@@ -199,5 +199,24 @@
       "src/bin/Data/Object1/tree_04.OZT": "assets-work/World1/Flowering01/textures/final/tree_04.OZT",
       "src/bin/Data/Object1/tree_05.OZT": "assets-work/World1/Flowering01/textures/final/tree_05.OZT"
     }
+  },
+  {
+    "name": "Mushrooms01",
+    "models": [
+      "Grass07",
+      "Grass08"
+    ],
+    "owner": "ASTRA coordinator; independent review groundcover agent",
+    "source_commits": [
+      "37a3cbcf"
+    ],
+    "integration_commits": [
+      "f8928697"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Grass07.bmd": "assets-work/World1/Mushrooms01/Grass07/exports/Grass07.bmd",
+      "src/bin/Data/Object1/Grass08.bmd": "assets-work/World1/Mushrooms01/Grass08/exports/Grass08.bmd",
+      "src/bin/Data/Object1/mushroom.OZJ": "assets-work/World1/Mushrooms01/textures/final/mushroom.OZJ"
+    }
   }
 ]

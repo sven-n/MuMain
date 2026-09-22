@@ -196,5 +196,27 @@
     "frozen_models": [
       "src/bin/Data/Object1/Tree11.bmd"
     ]
+  },
+  "coordinator / fire props": {
+    "models": [
+      "FireLight01",
+      "FireLight02",
+      "Bonfire01",
+      "DoungeonGate01"
+    ],
+    "branch": "codex/lorencia-fire-props",
+    "worktree": "MuMain-lorencia-fire-props",
+    "owned_textures": [
+      "src/bin/Data/Object1/light.OZT",
+      "src/bin/Data/Object1/light2.OZJ",
+      "src/bin/Data/Object1/light3.OZJ",
+      "src/bin/Data/Object1/fire_light_01.OZT",
+      "src/bin/Data/Object1/copra_gate.OZJ",
+      "src/bin/Data/Object1/fire_01.OZJ",
+      "src/bin/Data/Object1/fire_02.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tile_02.OZJ"
+    ]
   }
 }
