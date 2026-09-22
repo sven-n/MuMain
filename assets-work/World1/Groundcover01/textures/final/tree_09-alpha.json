@@ -1,0 +1,36 @@
+{
+  "original": {
+    "size": [
+      32,
+      64
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.572265625,
+    "fully_transparent_fraction": 0.23828125,
+    "alpha_test_used_for_report": 64
+  },
+  "generated": {
+    "size": [
+      887,
+      1774
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.5133006003032656,
+    "fully_transparent_fraction": 0.4785457993388148,
+    "alpha_test_used_for_report": 64
+  },
+  "final": {
+    "size": [
+      256,
+      512
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.5146865844726562,
+    "fully_transparent_fraction": 0.47187042236328125,
+    "alpha_test_used_for_report": 64
+  },
+  "fringe": "Nearest visible RGB padded under alpha=0; alpha unchanged"
+}

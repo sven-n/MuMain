@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "corners": 336,
+  "maximum_uv_component_difference": 0,
+  "material": "tree_09.tga",
+  "mesh_order": "Single original material/mesh retained",
+  "binding": "Every original corner retains matching bone, position and UV"
+}

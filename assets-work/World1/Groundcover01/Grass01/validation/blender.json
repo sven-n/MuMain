@@ -1,0 +1,47 @@
+{
+  "triangles": 120,
+  "mesh_count": 1,
+  "geometry": "Retained unchanged; repaint only",
+  "bounds_before": [
+    [
+      -235.29061889648438,
+      -193.60130310058594,
+      -0.5449000000953674
+    ],
+    [
+      247.67379760742188,
+      215.5050048828125,
+      28.37809944152832
+    ]
+  ],
+  "bounds_after": [
+    [
+      -235.29061889648438,
+      -193.60130310058594,
+      -0.5449000000953674
+    ],
+    [
+      247.67379760742188,
+      215.5050048828125,
+      28.37809944152832
+    ]
+  ],
+  "texture": [
+    512,
+    512
+  ],
+  "bone_order": [
+    "QuadPatch01",
+    "QuadPatch02",
+    "QuadPatch03",
+    "QuadPatch04",
+    "QuadPatch05"
+  ],
+  "action_meta": {
+    "Grass01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "checks": "One UV set, finite coordinates, nondegenerate triangles, one valid bone per vertex, identical bounds"
+}
