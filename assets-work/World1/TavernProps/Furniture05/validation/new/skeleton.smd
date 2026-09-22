@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Box13" -1
+end
+skeleton
+time 0
+0 -7.072189 0.182766 79.532784 0.000000 -0.000000 0.000000
+end
+triangles
+end

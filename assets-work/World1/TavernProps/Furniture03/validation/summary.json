@@ -1,0 +1,97 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "triangles": 680,
+  "bounds_before": [
+    [
+      -101.68,
+      -51.5,
+      0.0
+    ],
+    [
+      101.78,
+      51.39,
+      86.58
+    ]
+  ],
+  "bounds_after": [
+    [
+      -101.68,
+      -51.5,
+      0.0
+    ],
+    [
+      101.78,
+      51.39,
+      86.58
+    ]
+  ],
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "full_compare": "DIFFERENT: intentional geometry remodel",
+  "local_motion": {
+    "status": "PASS",
+    "tolerance": 0.0001,
+    "samples": [
+      {
+        "file": "Furniture03.smd",
+        "frames": 1,
+        "nodes": "0 \"Box09\" -1",
+        "max_translation": 0,
+        "max_rotation_radians": 0
+      },
+      {
+        "file": "Furniture03_a00.smd",
+        "frames": 1,
+        "nodes": "0 \"Box09\" -1",
+        "max_translation": 0,
+        "max_rotation_radians": 0
+      }
+    ]
+  },
+  "connection_points": {
+    "status": "not modular",
+    "note": "Matched overall bounds and measured splayed foot centers."
+  },
+  "precise_bounds": {
+    "status": "PASS",
+    "before": [
+      [
+        -101.684799,
+        -51.504002,
+        0.0
+      ],
+      [
+        101.784798,
+        51.387402,
+        86.580902
+      ]
+    ],
+    "after": [
+      [
+        -101.684799,
+        -51.504002,
+        0.0
+      ],
+      [
+        101.784798,
+        51.387402,
+        86.580902
+      ]
+    ],
+    "max_component_deviation": 0.0
+  },
+  "exported_corners": {
+    "status": "PASS",
+    "zero_uv_area_faces": 0,
+    "winding_normal_disagreements": 0,
+    "minimum_uv_area": 3.069188849999991e-05,
+    "minimum_normal_dot": 0.999999432555004
+  },
+  "export_sha256": {
+    "Furniture03.bmd": "6c427d73a9937d9e3b7d287b0f3f74b7f2014b0a423bd666590e26e9886e4d94",
+    "desk_big.OZJ": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4"
+  }
+}

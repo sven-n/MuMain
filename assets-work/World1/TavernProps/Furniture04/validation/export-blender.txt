@@ -1,0 +1,41 @@
+00:00.493  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/source.blend"
+skipping reference object 'Furniture04' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_HalfRoundCarvedTop' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FlaredPedestal' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_PedestalIronCollar' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_PedestalPin_-8.0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_PedestalPin_8.27' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Furniture04_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_udezhymn/Furniture04_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 324 polys
+- Exported 1 materials
+   desk_big.jpg
+- SMD export took 0.0056498050689697266
+
+
+Blender Source Tools: exporting Furniture04_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_udezhymn/anims/Furniture04_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0009059906005859375
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_udezhymn/Furniture04_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_udezhymn/anims/Furniture04_a00.smd --name Furniture04.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props/assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd
+  name field: Furniture04.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 324
+  bounds (bind pose): min -106.61 -99.69 0.00  max 97.08 -0.40 86.33  size 203.69 99.29 86.33
+  mesh 0: triangles=324 vertices=172 normals=201 uvs=200 texture=desk_big.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
