@@ -22,8 +22,8 @@ ASSIGNMENTS = {
 
 
 def row(name, model):
-    status, owner, branch, worktree, evidence = 'unclaimed', '—', '—', '—', 'Awaiting visual inspection and production'
-    identity = 'Loader family ' + name.rstrip('0123456789') + '; precise identity pending visual inspection'
+    status, owner, branch, worktree, evidence = 'unclaimed', '—', '—', '—', 'Visually identified in baseline inspection; awaiting production'
+    identity = json.loads((HERE / 'identities.json').read_text()).get(name, 'Scope marker / animated fauna')
     if name in PREVIOUS:
         identity, commit, notes = PREVIOUS[name]
         status, owner, branch = 'accepted', 'ASTRA previous pilot', 'art/world1-pilot'
@@ -36,7 +36,7 @@ def row(name, model):
     for agent, claim in ASSIGNMENTS.items():
         if name in claim['models']:
             status, owner, branch = 'in progress', agent, claim['branch']
-            worktree, evidence = WORKTREE_ROOT + claim['worktree'], 'Claimed; inspect geometry/materials before production'
+            worktree, evidence = WORKTREE_ROOT + claim['worktree'], 'Baseline geometry visually identified; production and engine checks in progress'
     if model['scope_exclusion']:
         status, identity, evidence = 'blocked', model['scope_exclusion'], 'Excluded from this static-art scope; preserve unchanged'
     placements = model['placements']
@@ -57,7 +57,7 @@ Integration: `art/lorencia-rebuild` at `/Users/webproduktion3/Documents/claude-t
 
 Initial production claims: groundcover owns Grass01/02/05/06 and Object1 tree_08.OZT + tree_09.OZT. Fences owns Fence01/02/03/04 and Object1 joint.OZJ; tile_wood02.OZJ is **frozen** (architecture consumers). Reviewer owns only review evidence. World1 terrain, TerrainLight, all alpha strips, existing Beer01/plate2, Candle01, chest and Tomb03 are protected. Tavern Furniture03/04/05 + desk_big stay with prior owner pending independent review. UI and runtime excluded.
 
-All source Data paths are relative to the integration worktree. Full placement arrays and mesh-slot texture order are in the dependency map. Candidate identities marked pending are deliberately not inferred from filenames; the assigned worker must inspect original geometry, textures and source references before committing a replacement.
+All source Data paths are relative to the integration worktree. Full placement arrays and mesh-slot texture order are in the dependency map. All 106 in-scope identities were visually inspected from imported BMDs; see `identities.json` and `inventory-sheet-01.jpg` through `inventory-sheet-06.jpg`. Sheets show the integration baseline (including completed pilot assets), not client evidence. Workers inspect precise geometry/materials and source controls before production.
 
 ## Candidates
 

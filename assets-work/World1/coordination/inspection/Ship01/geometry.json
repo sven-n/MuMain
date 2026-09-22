@@ -1,0 +1,30 @@
+[
+  {
+    "mesh": "Ship01",
+    "bounds": [
+      [
+        -581.9429321289062,
+        -1166.513671875,
+        -100.15499877929688
+      ],
+      [
+        553.4611206054688,
+        669.2794189453125,
+        937.9290161132812
+      ]
+    ],
+    "triangles": 754,
+    "materials": [
+      "TileGround03.jpg",
+      "ship01.jpg",
+      "ship03.jpg",
+      "ship04.jpg",
+      "ship07.jpg",
+      "ship05.tga",
+      "ship07.tga",
+      "ship06.tga",
+      "ship06.jpg",
+      "ship05.jpg"
+    ]
+  }
+]

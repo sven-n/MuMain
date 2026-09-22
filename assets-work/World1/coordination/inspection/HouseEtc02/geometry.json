@@ -1,0 +1,28 @@
+[
+  {
+    "mesh": "HouseEtc02",
+    "bounds": [
+      [
+        -302.5321960449219,
+        -299.5708923339844,
+        -0.15119999647140503
+      ],
+      [
+        297.87640380859375,
+        408.2007141113281,
+        332.47711181640625
+      ]
+    ],
+    "triangles": 226,
+    "materials": [
+      "tile_wood02.jpg",
+      "tile_ston04.jpg",
+      "c_wall04.jpg",
+      "tile_wood03.jpg",
+      "tile_house01.jpg",
+      "tile_ston01.jpg",
+      "horse_drawn_01.jpg",
+      "tile_ston06.jpg"
+    ]
+  }
+]
