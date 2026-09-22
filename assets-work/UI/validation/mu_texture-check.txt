@@ -1,0 +1,10 @@
+WARN assets-work/UI/exports/Interface/partCharge1/newui_menu03.OZJ
+     256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt01.OZJ
+     30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt02.OZJ
+     30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt03.OZJ
+     30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt04.OZJ
+     30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
