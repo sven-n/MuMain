@@ -1,0 +1,482 @@
+{
+  "Carriage01": {
+    "path": "src/bin/Data/Object1/Carriage01.bmd",
+    "type": 98,
+    "placements": [
+      {
+        "position": [
+          7399.314453125,
+          10326.396484375,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -330.0
+        ],
+        "scale": 1.1999998092651367,
+        "tile": [
+          73.99314453125,
+          103.26396484375
+        ]
+      },
+      {
+        "position": [
+          12350.0,
+          14650.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -660.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          123.5,
+          146.5
+        ]
+      },
+      {
+        "position": [
+          19500.0,
+          21450.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          420.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          195.0,
+          214.5
+        ]
+      },
+      {
+        "position": [
+          21300.0,
+          8200.0,
+          182.12835693359375
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          60.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          213.0,
+          82.0
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "horse_drawn_02.tga": [
+        "src/bin/Data/Object1/horse_drawn_02.OZT"
+      ],
+      "horse_drawn_03.jpg": [
+        "src/bin/Data/Object1/horse_drawn_03.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage01.bmd\n  name field: Data2\\Object1\\horse_drawn.smd  version: 10\n  meshes: 3  bones: 14  actions: 1  triangles: 280\n  bounds (bind pose): min -114.62 -94.23 -14.50  max 244.57 92.68 201.91  size 359.18 186.91 216.41\n  mesh 0: triangles=270 vertices=231 normals=96 uvs=218 texture=horse_drawn_01.jpg\n  mesh 1: triangles=8 vertices=8 normals=5 uvs=8 texture=horse_drawn_02.tga\n  mesh 2: triangles=2 vertices=4 normals=1 uvs=4 texture=horse_drawn_03.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Box02\" parent=0\n  bone 5: \"Dummy05\" parent=-1 dummy\n  bone 6: \"Bone06\" parent=-1\n  bone 7: \"Bone07\" parent=6\n  bone 8: \"Bone08\" parent=7\n  bone 9: \"Box03\" parent=6\n  bone 10: \"Bone05\" parent=-1\n  bone 11: \"Bone09\" parent=10\n  bone 12: \"Tube01\" parent=10\n  bone 13: \"Bone_point\" parent=10\n  action 0: keys=21 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage02": {
+    "path": "src/bin/Data/Object1/Carriage02.bmd",
+    "type": 99,
+    "placements": [
+      {
+        "position": [
+          7200.0,
+          10000.0,
+          165.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -720.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          72.0,
+          100.0
+        ]
+      },
+      {
+        "position": [
+          10583.5009765625,
+          6736.84033203125,
+          165.0001220703125
+        ],
+        "rotation": [
+          360.0,
+          0.0,
+          90.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          105.835009765625,
+          67.3684033203125
+        ]
+      },
+      {
+        "position": [
+          12290.529296875,
+          6982.15771484375,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          360.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          122.90529296875,
+          69.8215771484375
+        ]
+      },
+      {
+        "position": [
+          14666.75,
+          14661.8076171875,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          2160.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          146.6675,
+          146.618076171875
+        ]
+      },
+      {
+        "position": [
+          17400.0,
+          3800.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -630.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          174.0,
+          38.0
+        ]
+      },
+      {
+        "position": [
+          20900.0,
+          14300.0,
+          165.0000457763672
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          870.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          209.0,
+          143.0
+        ]
+      },
+      {
+        "position": [
+          22650.0,
+          24550.0,
+          175.31459045410156
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          690.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          226.5,
+          245.5
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage02.bmd\n  name field: Data2\\Object1\\carriage_01.smd  version: 10\n  meshes: 1  bones: 2  actions: 1  triangles: 258\n  bounds (bind pose): min -90.38 -218.18 -1.17  max 88.70 218.93 182.28  size 179.08 437.11 183.45\n  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage03": {
+    "path": "src/bin/Data/Object1/Carriage03.bmd",
+    "type": 100,
+    "placements": [],
+    "textures": {
+      "tub.jpg": [
+        "src/bin/Data/Object1/tub.OZJ"
+      ],
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage03.bmd\n  name field: Data2\\Object1\\carriage_02.smd  version: 10\n  meshes: 2  bones: 4  actions: 1  triangles: 346\n  bounds (bind pose): min -160.09 -216.33 -1.17  max 88.22 220.78 182.28  size 248.31 437.11 183.45\n  mesh 0: triangles=72 vertices=48 normals=24 uvs=28 texture=tub.jpg\n  mesh 1: triangles=274 vertices=209 normals=131 uvs=176 texture=horse_drawn_01.jpg\n  bone 0: \"Cylinder01\" parent=-1\n  bone 1: \"Cylinder03\" parent=-1\n  bone 2: \"Mesh01\" parent=-1\n  bone 3: \"Cylinder11\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Carriage04": {
+    "path": "src/bin/Data/Object1/Carriage04.bmd",
+    "type": 101,
+    "placements": [
+      {
+        "position": [
+          12800.0,
+          13900.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          990.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          128.0,
+          139.0
+        ]
+      },
+      {
+        "position": [
+          17950.0,
+          4650.0,
+          165.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -780.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          179.5,
+          46.5
+        ]
+      }
+    ],
+    "textures": {
+      "horse_drawn_01.jpg": [
+        "src/bin/Data/Object1/horse_drawn_01.OZJ"
+      ],
+      "grass_01.tga": [
+        "src/bin/Data/Object1/grass_01.OZT"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Carriage04.bmd\n  name field: Data2\\Object1\\carriage_03.smd  version: 10\n  meshes: 2  bones: 5  actions: 1  triangles: 390\n  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08\n  mesh 0: triangles=258 vertices=185 normals=129 uvs=170 texture=horse_drawn_01.jpg\n  mesh 1: triangles=132 vertices=96 normals=32 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder03\" parent=-1\n  bone 1: \"Mesh01\" parent=-1\n  bone 2: \"Cylinder05\" parent=-1\n  bone 3: \"Cylinder12\" parent=-1\n  bone 4: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Straw01": {
+    "path": "src/bin/Data/Object1/Straw01.bmd",
+    "type": 102,
+    "placements": [
+      {
+        "position": [
+          12550.0,
+          12000.0,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          990.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          125.5,
+          120.0
+        ]
+      },
+      {
+        "position": [
+          11350.0,
+          14600.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          720.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          113.5,
+          146.0
+        ]
+      },
+      {
+        "position": [
+          14850.0,
+          14700.0,
+          164.99996948242188
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          148.5,
+          147.0
+        ]
+      },
+      {
+        "position": [
+          14913.1962890625,
+          14675.0048828125,
+          305.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          900.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          149.131962890625,
+          146.750048828125
+        ]
+      },
+      {
+        "position": [
+          17300.0,
+          4750.0,
+          175.45346069335938
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -1140.0
+        ],
+        "scale": 0.6600003242492676,
+        "tile": [
+          173.0,
+          47.5
+        ]
+      },
+      {
+        "position": [
+          17243.03515625,
+          3373.989990234375,
+          164.94342041015625
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -1110.0
+        ],
+        "scale": 0.7200002670288086,
+        "tile": [
+          172.4303515625,
+          33.73989990234375
+        ]
+      },
+      {
+        "position": [
+          17450.0,
+          4800.0,
+          173.98565673828125
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -1080.0
+        ],
+        "scale": 0.7400002479553223,
+        "tile": [
+          174.5,
+          48.0
+        ]
+      },
+      {
+        "position": [
+          18050.0,
+          2450.0,
+          192.02479553222656
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -1110.0
+        ],
+        "scale": 0.6000003814697266,
+        "tile": [
+          180.5,
+          24.5
+        ]
+      }
+    ],
+    "textures": {
+      "grass_01.tga": [
+        "src/bin/Data/Object1/grass_01.OZT"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Straw01.bmd\n  name field: Data2\\Object1\\rice_01.smd  version: 10\n  meshes: 1  bones: 3  actions: 1  triangles: 132\n  bounds (bind pose): min -68.86 -100.91 1.94  max 69.15 105.19 141.75  size 138.01 206.10 139.80\n  mesh 0: triangles=132 vertices=96 normals=32 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder05\" parent=-1\n  bone 1: \"Cylinder12\" parent=-1\n  bone 2: \"Cylinder13\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  },
+  "Straw02": {
+    "path": "src/bin/Data/Object1/Straw02.bmd",
+    "type": 103,
+    "placements": [
+      {
+        "position": [
+          15250.0,
+          10800.0,
+          165.00001525878906
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          1890.0
+        ],
+        "scale": 0.5400004386901855,
+        "tile": [
+          152.5,
+          108.0
+        ]
+      },
+      {
+        "position": [
+          18050.0,
+          4100.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          -5.0,
+          0.0,
+          -1080.0
+        ],
+        "scale": 0.5600004196166992,
+        "tile": [
+          180.5,
+          41.0
+        ]
+      }
+    ],
+    "textures": {
+      "grass_01.tga": [
+        "src/bin/Data/Object1/grass_01.OZT"
+      ]
+    },
+    "info": "model src/bin/Data/Object1/Straw02.bmd\n  name field: Data2\\Object1\\rice_02.smd  version: 10\n  meshes: 1  bones: 8  actions: 1  triangles: 352\n  bounds (bind pose): min -115.39 -210.70 -6.52  max 139.96 221.64 199.44  size 255.36 432.34 205.96\n  mesh 0: triangles=352 vertices=256 normals=192 uvs=22 texture=grass_01.tga\n  bone 0: \"Cylinder05\" parent=-1\n  bone 1: \"Cylinder12\" parent=-1\n  bone 2: \"Cylinder13\" parent=-1\n  bone 3: \"Cylinder14\" parent=-1\n  bone 4: \"Cylinder15\" parent=-1\n  bone 5: \"Cylinder16\" parent=-1\n  bone 6: \"Cylinder17\" parent=-1\n  bone 7: \"Cylinder18\" parent=-1\n  action 0: keys=1 lock=0\n",
+    "scope_exclusion": null
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "status": "PASS",
+  "authored_bindings": {
+    "status": "PASS",
+    "source_vertices": 222,
+    "all_exported_corners_match_authored_bone_and_position": true,
+    "maximum_coordinate_deviation": 8.126953119358404e-06,
+    "tolerance": 0.005
+  },
+  "surface": {
+    "minimum_uv_triangle_area": 0.0011049999999999973,
+    "minimum_geometry_triangle_area": 65.26842004763212,
+    "minimum_winding_normal_dot": 0.7477576333582943,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "grass_01.tga",
+      "bone_index": 0,
+      "before": [
+        [
+          -68.858398,
+          -100.906395,
+          1.942799
+        ],
+        [
+          0.230206,
+          103.095299,
+          81.719398
+        ]
+      ],
+      "after": [
+        [
+          -68.858398,
+          -100.906395,
+          1.942799
+        ],
+        [
+          0.230206,
+          103.095299,
+          81.719398
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "grass_01.tga",
+      "bone_index": 1,
+      "before": [
+        [
+          0.0602,
+          -100.906395,
+          2.2593
+        ],
+        [
+          69.148804,
+          103.095299,
+          82.035896
+        ]
+      ],
+      "after": [
+        [
+          0.0602,
+          -100.906395,
+          2.2593
+        ],
+        [
+          69.148804,
+          103.095299,
+          82.035896
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "grass_01.tga",
+      "bone_index": 2,
+      "before": [
+        [
+          -35.4879,
+          -98.808403,
+          61.970901
+        ],
+        [
+          33.600704,
+          105.193298,
+          141.747604
+        ]
+      ],
+      "after": [
+        [
+          -35.4879,
+          -98.808403,
+          61.970901
+        ],
+        [
+          33.600704,
+          105.193298,
+          141.747604
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "retained_surfaces": {
+    "status": "PASS",
+    "all_original_cart_wheel_axle_seat_cask_lamp_effect_corners_retained": true,
+    "UV_tolerance": 0.001001,
+    "UV_note": "Four pre-existing collapsed wood UV triangles opened within quarter original atlas texel; other original UVs exact",
+    "corner_samples": 0,
+    "max_position_difference": 0,
+    "additive_mesh_index": null
+  },
+  "material_order": [
+    "grass_01.tga"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

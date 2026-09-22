@@ -1,0 +1,9 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Straw01/exports/Straw01.bmd
+  name field: Straw01.smd  version: 12
+  meshes: 1  bones: 3  actions: 1  triangles: 432
+  bounds (bind pose): min -68.86 -100.91 1.94  max 69.15 105.19 141.75  size 138.01 206.10 139.80
+  mesh 0: triangles=432 vertices=222 normals=214 uvs=91 texture=grass_01.tga
+  bone 0: "Cylinder05" parent=-1
+  bone 1: "Cylinder12" parent=-1
+  bone 2: "Cylinder13" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,6 @@
+Carriage01 [{'stage': 'original', 'keys': 21, 'raw_vertex_normal_node_pair_rotation_delta': {'10:0': 0.14780942456092275}}, {'stage': 'new', 'keys': 21, 'raw_vertex_normal_node_pair_rotation_delta': {}}]
+Carriage02 [{'stage': 'original', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {}}, {'stage': 'new', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {}}]
+Carriage03 [{'stage': 'original', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'3:0': 0.0}}, {'stage': 'new', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'3:0': 0.0}}]
+Carriage04 [{'stage': 'original', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'3:2': 0.0, '4:2': 0.0}}, {'stage': 'new', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {}}]
+Straw01 [{'stage': 'original', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'1:0': 0.0, '2:0': 0.0}}, {'stage': 'new', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'1:0': 0.0, '2:0': 0.0, '2:1': 0.0}}]
+Straw02 [{'stage': 'original', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'1:0': 0.0, '3:0': 0.0}}, {'stage': 'new', 'keys': 1, 'raw_vertex_normal_node_pair_rotation_delta': {'1:0': 0.0, '3:0': 0.0}}]

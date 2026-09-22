@@ -1,0 +1,45 @@
+{
+  "evidence": "OFFLINE Blender; not client",
+  "models": [
+    {
+      "model": "Carriage04",
+      "placement": {
+        "position": [
+          12800.0,
+          13900.0,
+          164.99998474121094
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          990.0
+        ],
+        "scale": 1.0,
+        "tile": [
+          128.0,
+          139.0
+        ]
+      }
+    }
+  ],
+  "world_origin_subtracted": [
+    12800.0,
+    13900.0,
+    164.99998474121094
+  ],
+  "world_transform": "Translation @ EulerXYZ(rotation degrees) @ uniform scale; original records unchanged",
+  "camera_bounds": [
+    [
+      -216.33212280273438,
+      -88.22064971923828,
+      -1.1697512865066528
+    ],
+    [
+      220.77809143066406,
+      90.85736083984375,
+      272.9106750488281
+    ]
+  ],
+  "terrain": "Terrain and surrounding architecture omitted",
+  "light": "Carriage01 mesh2 uses render-only additive approximation"
+}

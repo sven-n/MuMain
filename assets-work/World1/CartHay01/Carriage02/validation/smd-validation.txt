@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/original/Carriage02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/original/Carriage02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/original/Carriage02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/original/Carriage02.smd: bones=2 frames=1 triangles=258 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/original/Carriage02_a00.smd: bones=2 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/new/Carriage02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/new/Carriage02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/new/Carriage02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/new/Carriage02.smd: bones=2 frames=1 triangles=450 materials=1
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/new/Carriage02_a00.smd: bones=2 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage02/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

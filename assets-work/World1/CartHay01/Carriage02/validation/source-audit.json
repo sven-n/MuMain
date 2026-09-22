@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "original_geometry_uv_skinning_transform_sha256": "e098ecc6c7eb19f8d39259361c8f9d2332648d7281fb4ee3b63abe86882b296f",
+  "ref_original": "byte-identical numeric mesh snapshot to preserved import",
+  "packed_images": {
+    "horse_drawn_01.jpg": "efce2d578d8dd48c3ebcd5dc43521d9dc55a54fd2f6b10d82a46dad31fee4287",
+    "horse_drawn_01.jpg.001": "efce2d578d8dd48c3ebcd5dc43521d9dc55a54fd2f6b10d82a46dad31fee4287"
+  },
+  "high_poly": "excluded editable authored meshes with 3-segment fine-bevel modifiers",
+  "no_external_images_required": true
+}

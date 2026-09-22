@@ -1,0 +1,35 @@
+{
+  "original": {
+    "size": [
+      32,
+      64
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.95947265625,
+    "fully_transparent_fraction": 0.01025390625,
+    "alpha_test_used_for_report": 64
+  },
+  "final": {
+    "size": [
+      512,
+      512
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.9540824890136719,
+    "fully_transparent_fraction": 0.024211883544921875,
+    "alpha_test_used_for_report": 64
+  },
+  "rgb_mean_original": [
+    113.02685546875,
+    89.30126953125,
+    56.29638671875
+  ],
+  "rgb_mean_final": [
+    142.45792388916016,
+    113.37786865234375,
+    74.69050216674805
+  ],
+  "processing": "Imagegen artwork resized and encoded; generated alpha retained. RGB padded under cutoff64."
+}

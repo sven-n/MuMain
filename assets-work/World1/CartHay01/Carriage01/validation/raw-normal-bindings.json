@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "criterion": "Actual raw normal node has equivalent world rotation to vertex bone for every original action key",
+  "stages": [
+    {
+      "stage": "original",
+      "keys": 21,
+      "raw_vertex_normal_node_pair_rotation_delta": {
+        "10:0": 0.14780942456092275
+      }
+    },
+    {
+      "stage": "new",
+      "keys": 21,
+      "raw_vertex_normal_node_pair_rotation_delta": {}
+    }
+  ]
+}

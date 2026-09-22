@@ -1,0 +1,45 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Intentional straw profile/hub rebuild; full geometry comparison DIFFERENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=21 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -114.62,
+      -94.23,
+      -14.5
+    ],
+    [
+      244.57,
+      92.68,
+      201.91
+    ]
+  ],
+  "bounds_after": [
+    [
+      -114.62,
+      -94.23,
+      -14.5
+    ],
+    [
+      244.57,
+      92.68,
+      201.91
+    ]
+  ],
+  "materials": [
+    "horse_drawn_01.jpg",
+    "horse_drawn_02.tga",
+    "horse_drawn_03.jpg"
+  ],
+  "meshes": 3,
+  "exports": {
+    "horse_drawn_02.OZT": "f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079",
+    "Carriage01.bmd": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622",
+    "horse_drawn_03.OZJ": "e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5",
+    "horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+  }
+}

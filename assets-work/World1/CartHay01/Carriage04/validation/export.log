@@ -1,0 +1,47 @@
+00:00.497  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/source.blend"
+skipping reference object 'Carriage04' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder03_IronHub' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder03_IronHub.001' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder05_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder12_TiedStraw' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder13_TiedStraw' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Carriage04_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_s50g1jb_/Carriage04_mu_export.smd
+- Exported 5 bones
+- Exported 1 frames
+- Exported 882 polys
+- Exported 2 materials
+   horse_drawn_01.jpg
+   grass_01.tga
+- SMD export took 0.015195131301879883
+
+
+Blender Source Tools: exporting Carriage04_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_s50g1jb_/anims/Carriage04_a00.smd
+- Exported 5 bones
+- Exported 1 frames
+- SMD export took 0.0007333755493164062
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_s50g1jb_/Carriage04_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_s50g1jb_/anims/Carriage04_a00.smd --name Carriage04.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-cart-hay/assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd
+  name field: Carriage04.smd  version: 12
+  meshes: 2  bones: 5  actions: 1  triangles: 882
+  bounds (bind pose): min -90.86 -216.33 -1.17  max 88.22 220.78 272.91  size 179.08 437.11 274.08
+  mesh 0: triangles=450 vertices=285 normals=282 uvs=246 texture=horse_drawn_01.jpg
+  mesh 1: triangles=432 vertices=222 normals=221 uvs=91 texture=grass_01.tga
+  bone 0: "Cylinder03" parent=-1
+  bone 1: "Mesh01" parent=-1
+  bone 2: "Cylinder05" parent=-1
+  bone 3: "Cylinder12" parent=-1
+  bone 4: "Cylinder13" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,17 @@
+{
+  "prompt": "Use case: stylized-concept. Asset type: one 1024x1024 square diffuse RGBA game texture ATLAS for medieval bundled straw. Follow supplied painted straw color/style, muted tan ochre graygold brown. Technical atlas layout: LEFT75percent width is a full-height rectangular side strip of densely packed vertical dry straw, two narrow horizontal coarse twine bands at y33percent and67percent, parallel fibrous stalks, mostly opaque with slight frayed transparent tips only at very top/bottom. RIGHT25percent width TOP HALF is a completely OPAQUE tightly packed mosaic of CUT STRAW ENDS seen end-on: tiny hollow circular/oval straw cross-sections and dark gaps, irregular natural arrangement, same tan ochre palette, no growth rings and no vertical lines; fill the entire rectangle, no border, no background. RIGHT25percent BOTTOM HALF is an opaque dense patch of short broken chaff/straw chips, no rope. Hard clean atlas split x75percent, no gutters/labels, each region runs flush to edges. This is texture artwork, no rendered3D bundle, no perspective, no cast shadows. Broad readable hand-painted shading, no modern material maps. Keep alpha96percentoverall or higher; actual transparent pixels only for frayed tips along top/bottom of LEFT region. Needs convincing fibrous cut ends, absolutely not woodgrain or wood rings.",
+  "layout_observed": {
+    "side_u": [
+      0,
+      0.663
+    ],
+    "cut_end_u": [
+      0.672,
+      0.995
+    ],
+    "cut_end_v": [
+      0.505,
+      0.995
+    ]
+  }
+}
