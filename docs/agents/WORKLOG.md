@@ -99,3 +99,60 @@ authorization: load errors, actual hover/selected/alert behavior, dynamic text
 and skill/gauge overlays, HiDPI, resizing and gameplay readability. The mockups
 are explicitly labeled offline reconstructions. Cash-shop and remaining HUD
 art are unchanged dependencies, outside this five-file pilot.
+## 2026-09-22 - macOS client crashes: miniaudio use-after-free on missing audio files (Claude Fable 5.1)
+**Goal:** Find and fix the recurring crashes of the macOS client (ten crash reports on this day:
+IOGPU assertion and blit-encoder assertion in `EndFrame()`, `objc_release` of `0x1` on the Metal
+completion queue, CFPrefs walking `0x1` from `IMKClient`, NSXPC and AudioComponent crashes).
+
+**Done:**
+- Read the ten `.ips` reports: every crash site is an Apple framework object holding a pointer
+  that is `0x1` or `0x9` (a `0` or `0x8` incremented by one), on different threads and scenes,
+  as early as 12 s after launch. That is heap corruption in the client, not a renderer bug. The
+  SDL GPU code in `EndFrame()` and the buffer growth helpers are sound: SDL releases buffers
+  and textures deferred, by reference count, once the command buffers that use them complete.
+- Built the client with `-fsanitize=address` in a second build directory
+  (`out/build/macos-arm64-asan`, config `RelWithDebInfo` with `-O1 -g` so asserts stay on;
+  add `-fsanitize-recover=address` and run with `ASAN_OPTIONS=halt_on_error=0` to collect
+  every finding in one run). Findings, in the order they appeared:
+  1. miniaudio 0.11.25 `ma_resource_manager_data_buffer_node_acquire()` reads the node after
+     freeing it when a sound file cannot be opened (every `LoadSound` at startup, no `Data/Sound`).
+  2. miniaudio's data-stream load job increments `pDataStream->executionPointer` *after*
+     signalling the waiting caller. When the file cannot be opened, the caller frees the stream
+     on wake-up, so the job thread writes `+1` into freed memory. The login scene and Lorencia's
+     safe zone call `PlayMp3()` every frame and the same-track guard never engages on failure,
+     so with no `Data/Music` this ran ~75 times per second (38 000 log lines per session). This
+     is the mechanism behind the `0x1` / `0x9` pointers.
+  3. `BMD::CreateBoundingBox()` indexes the global `BoundingMin/Max` tables with the vertex bone
+     index; `Data/Skill/CW_Bow_Skill.bmd` carries `-8888` on an unreferenced vertex and normal,
+     so every launch read and wrote far outside those tables.
+  4. `ReceiveOption()` reads the 4-byte `QWERLevel` field one byte past the 32-byte option
+     packet OpenMU sends (the client struct is 34 bytes). Read only; left as a follow-up.
+- Fixes: `cmake/patches/miniaudio-0.11.25-resource-manager-use-after-free.patch` (applied by
+  the existing `ApplyGitPatch.cmake` step; that script now stops git's repository discovery at
+  the dependency directory, because a tarball dependency inside the build tree was silently
+  skipped before), `MiniAudioBackend` remembers a track that failed to open and skips it until
+  a different or enforced request (one log line per track instead of one per frame),
+  `BMD::Open2()` clamps out-of-range bone indices to bone 0 and reports the model.
+- Docs: macOS guide (missing music behaviour), `HANDOFF.md` (state, symptom table, the stale
+  libc++ folder is gone), unit test for the failed-track guard.
+
+**Verified:**
+- `ctest` 215/215 (Release), including the new audio test.
+- Sanitizer build, before the fixes: report within 2 s of launch (finding 1); after the
+  miniaudio patch: finding 3; after all fixes, 200 s run in which the owner logged in and
+  played in the main scene: only finding 4, clean exit.
+- Release build with `MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1`: 4 min 25 s alive (login,
+  character select, main scene), no validation error, no crash report, clean shutdown on
+  SIGTERM. Before the fixes the same build died within 16 s to 3 min of the main scene.
+- Do not launch the client from a sandboxed tool shell (window server, audio and GPU access);
+  the Bash tool needs its sandbox disabled for the run, and `MTL_DEBUG_LAYER_WARNING_MODE=nslog`
+  writes gigabytes per minute (sampler descriptor dumps), so keep warnings off.
+
+**Open / next:**
+- Follow-up chip: size-check the option packet in `ReceiveOption()` before reading `QWERLevel`.
+- miniaudio's other resource-manager jobs (`load_data_buffer_node`, `load_data_buffer`,
+  `free_data_buffer_node`) touch their object after signalling as well; the client never
+  exercises them (sound effects decode synchronously). Report upstream together with the patch.
+- SDL 3.4.8 `METAL_INTERNAL_AcquireSwapchainTexture()` does not check `nextDrawable` for nil;
+  upstream main is the same. Revisit only if a render-pass crash appears without heap corruption.
+- `[UI] EnableAnimationTaskPool=1` (worker threads for character animation) was not tested.

@@ -96,36 +96,85 @@ TEST_CASE("an active one-channel sound is not restarted [audio][ambient]")
     ma_audio_buffer_uninit(&audioBuffer);
 }
 
-TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
+namespace
 {
-    auto backend = std::make_unique<mu::MiniAudioBackend>();
-
+// Initializes the backend on a silent engine so tests need no audio device.
+void InitializeHeadlessBackend(mu::MiniAudioBackend& backend)
+{
     ma_engine_config engineConfig = ma_engine_config_init();
     engineConfig.noDevice = MA_TRUE;
     engineConfig.channels = 1;
     engineConfig.sampleRate = 48000;
-    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
-    backend->m_initialized = true;
+    REQUIRE(ma_engine_init(&engineConfig, &backend.m_engine) == MA_SUCCESS);
+    backend.m_initialized = true;
+}
 
+// Creates a unique temporary directory for the files of one test.
+std::filesystem::path CreateTestDirectory(const std::string& prefix)
+{
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path directory =
+        std::filesystem::temp_directory_path() / (prefix + std::to_string(timestamp));
+    REQUIRE(std::filesystem::create_directories(directory));
+    return directory;
+}
+
+// Writes a valid one-sample mono 16-bit WAV file.
+void WriteTinyWav(const std::filesystem::path& path)
+{
     constexpr std::array<unsigned char, 46> wav = {
         'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
         0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
         0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
     };
-    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
-    const std::filesystem::path testDirectory =
-        std::filesystem::temp_directory_path() / ("mu_audio_path_" + std::to_string(timestamp));
-    const std::filesystem::path assetPath = testDirectory / "Data" / "Sound" / "iButtonClick.wav";
-    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
-    {
-        std::ofstream file(assetPath, std::ios::binary);
-        REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
-    }
+    std::filesystem::create_directories(path.parent_path());
+    std::ofstream file(path, std::ios::binary);
+    REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+}
+} // namespace
+
+TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitializeHeadlessBackend(*backend);
+
+    const std::filesystem::path testDirectory = CreateTestDirectory("mu_audio_path_");
+    WriteTinyWav(testDirectory / "Data" / "Sound" / "iButtonClick.wav");
 
     const std::wstring wideAssetPath = (testDirectory / "data" / "sound" / "ibuttonclick.wav").wstring();
     backend->LoadSound(SOUND_CLICK01, wideAssetPath.c_str(), 1, false);
 
     CHECK(backend->m_soundLoaded[static_cast<int>(SOUND_CLICK01)]);
     backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
+
+TEST_CASE("a music track that failed to open is not retried until enforced [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitializeHeadlessBackend(*backend);
+
+    const std::filesystem::path testDirectory = CreateTestDirectory("mu_audio_music_");
+    const std::filesystem::path trackPath = testDirectory / "Data" / "Music" / "MuTheme.wav";
+    const std::string trackName = trackPath.string();
+
+    // Scenes request their track every frame. The first request fails because the file is missing.
+    backend->PlayMusic(trackName.c_str(), false);
+    CHECK_FALSE(backend->m_musicLoaded);
+    CHECK(backend->IsEndMusic());
+    CHECK_FALSE(backend->m_unavailableMusicName.empty());
+
+    // Once the file exists, a plain request still does not retry the failed track ...
+    WriteTinyWav(trackPath);
+    backend->PlayMusic(trackName.c_str(), false);
+    CHECK_FALSE(backend->m_musicLoaded);
+
+    // ... but an enforced request does.
+    backend->PlayMusic(trackName.c_str(), true);
+    CHECK(backend->m_musicLoaded);
+    CHECK(backend->m_unavailableMusicName.empty());
+
+    backend->Shutdown();
+    CHECK_FALSE(backend->m_musicLoaded);
     std::filesystem::remove_all(testDirectory);
 }
