@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "base": "0f589224",
+  "source_UI_files_checked": 761,
+  "unchanged_source_UI_files": 747,
+  "changed_files": [
+    "src/bin/Data/Interface/Exbar_Master.OZJ",
+    "src/bin/Data/Interface/newui_Exbar.OZJ",
+    "src/bin/Data/Interface/newui_menu01.OZJ",
+    "src/bin/Data/Interface/newui_menu02-03.OZJ",
+    "src/bin/Data/Interface/newui_menu02.OZJ",
+    "src/bin/Data/Interface/newui_menu_AG.OZJ",
+    "src/bin/Data/Interface/newui_menu_SD.OZJ",
+    "src/bin/Data/Interface/newui_menu_blue.OZJ",
+    "src/bin/Data/Interface/newui_menu_green.OZJ",
+    "src/bin/Data/Interface/newui_menu_red.OZJ",
+    "src/bin/Data/Interface/newui_skillbox.OZJ",
+    "src/bin/Data/Interface/newui_skillbox2.OZJ",
+    "src/bin/Data/Interface/partCharge1/newui_menu03.OZJ",
+    "src/bin/Data/Interface/partCharge1/newui_menu_Bt05.OZJ"
+  ],
+  "approved_Bt01_through_Bt04": "unchanged",
+  "engine_changes": false,
+  "shared_runtime_touched": false
+}

@@ -1,0 +1,299 @@
+{
+  "base": "0f589224",
+  "assets": [
+    {
+      "path": "Interface/newui_menu01.OZJ",
+      "size": [
+        256,
+        51
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        256,
+        64
+      ],
+      "container_sha256": "d2457a291d5cc6768bfc93e34a95a809f21e2fbe1410ddc8f31808278fdf7f72",
+      "payload_sha256": "73b96357315b10312e8fbca2ec2f6973df7efa2ef81d8f7ffe3c0744421b3d47",
+      "baseline_warnings": [
+        "256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu02.OZJ",
+      "size": [
+        128,
+        51
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        128,
+        64
+      ],
+      "container_sha256": "e6002d056cd628362fe8fd5ad9780faaf30c60233e8b8162b48b55c5ecb9badc",
+      "payload_sha256": "0dd21d4333f9d3a2715c9ba5f6ee7fbeb30b0bea7e7330b671fe17f5072c8f0d",
+      "baseline_warnings": [
+        "128x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/partCharge1/newui_menu03.OZJ",
+      "size": [
+        256,
+        51
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        256,
+        64
+      ],
+      "container_sha256": "8dc843702ba3aaf9c26fabe398b65c8ded02948165ea6ad834754051e58a5703",
+      "payload_sha256": "d719878e03100c9c05baca78ccfe6a390aca567a7adead5e2be41216e36af74b",
+      "baseline_warnings": [
+        "256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu02-03.OZJ",
+      "size": [
+        160,
+        42
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        256,
+        64
+      ],
+      "container_sha256": "103a21a6da1b74eaab5c1e1973b46d78f859b7bcf14209c918afd62e7eac346e",
+      "payload_sha256": "98541a47a8cd7d96614590199716a9944d2b986d7ea74f17c246412976dfbd97",
+      "baseline_warnings": [
+        "160x42 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/partCharge1/newui_menu_Bt05.OZJ",
+      "size": [
+        30,
+        164
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        32,
+        256
+      ],
+      "container_sha256": "7d8878195717f28ac1daab67467ee4b7c3a6e4175ae1d1a4529867c797ec8349",
+      "payload_sha256": "973e15e450ed704f871631c6fd890ef273ed0acbd3de8c43229aaacb1fc098de",
+      "baseline_warnings": [
+        "30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu_red.OZJ",
+      "size": [
+        45,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        64,
+        64
+      ],
+      "container_sha256": "91b6299af1dd0fc277fe4a710c8eb19a3376f0169eb04b874cda83556b2fdb78",
+      "payload_sha256": "fbac847f2bc83d404bf18f6375559a06b6d3bc2bbcb2bbb6900ca0b1db099a91",
+      "baseline_warnings": [
+        "45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu_green.OZJ",
+      "size": [
+        45,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        64,
+        64
+      ],
+      "container_sha256": "18f06e64f8483834228d9dfcb4b1b65bef9241cc501b74645daee1a4805440f9",
+      "payload_sha256": "35545dce580d00eac02149b77f39c758f2e968399934424cbcf041c76d367050",
+      "baseline_warnings": [
+        "45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu_blue.OZJ",
+      "size": [
+        45,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        64,
+        64
+      ],
+      "container_sha256": "d5785b6520991e5053e287d9a2a5e8ece959e7966542b0f41e370c83af15a4ca",
+      "payload_sha256": "044007556fb1ae98545471c4ac187b6252143409913bfe771dd34062407f7c2a",
+      "baseline_warnings": [
+        "45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu_SD.OZJ",
+      "size": [
+        16,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        16,
+        64
+      ],
+      "container_sha256": "4ab2adf482df9400bac76ac00806d3aa6e24ff42dfe40b1c66e12d3fa46584af",
+      "payload_sha256": "3f04bb1311e7ca29e730de39b39128188187e0c68fdd01e72d438c92dbf88dc7",
+      "baseline_warnings": [
+        "16x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_menu_AG.OZJ",
+      "size": [
+        16,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        16,
+        64
+      ],
+      "container_sha256": "9f90b97d20296772615e70f42de6e8579bd7532498441cb70b623aadb842a53a",
+      "payload_sha256": "4b52ce62f9e25dcb323920c118300e837add67e091b31d37b36f6ebe4ae92fa7",
+      "baseline_warnings": [
+        "16x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_Exbar.OZJ",
+      "size": [
+        6,
+        4
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        8,
+        4
+      ],
+      "container_sha256": "3ca37ea80541b5f7f9cd6bdc23228db681af6ab4841ca3b4714f9d5393375b04",
+      "payload_sha256": "35ff136a845d48f219e1979e39efc10765a850ce1098d670cd500ce7b1677136",
+      "baseline_warnings": [
+        "6x4 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/Exbar_Master.OZJ",
+      "size": [
+        6,
+        4
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        8,
+        4
+      ],
+      "container_sha256": "efb4230f485da568efdacfa29cabb899695c846c37de2c86588d54d24c94c3fc",
+      "payload_sha256": "baed2bd79eb6df70a961349720178bbccb73780c21fb7ab02737170a8d45fa2b",
+      "baseline_warnings": [
+        "6x4 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_skillbox.OZJ",
+      "size": [
+        32,
+        38
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        32,
+        64
+      ],
+      "container_sha256": "e11e04e42a174f1cf143f3f79039b986628ed1007e8532eae40cfad4197f943e",
+      "payload_sha256": "b900155969f92739a0e34f7810a1e6ecc2fb457f97ec1a68604b3c7c66588fe7",
+      "baseline_warnings": [
+        "32x38 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "path": "Interface/newui_skillbox2.OZJ",
+      "size": [
+        32,
+        38
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "gpu_allocation": [
+        32,
+        64
+      ],
+      "container_sha256": "b4ef63fad84c1ed30fa83fa46838fed4c1c5faf7d3cdd0ca6978f0b4840125b5",
+      "payload_sha256": "bbb6792040661080b69c402c93e0d1c7017b91abf82aff22e859269139e34bd5",
+      "baseline_warnings": [
+        "32x38 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    }
+  ]
+}

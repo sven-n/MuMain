@@ -417,3 +417,36 @@ no assets were regenerated or runtime files written, and no client or engine bui
 **Open / next:** PR review, CI and the previously deferred real client acceptance/captures.
 The PR has not been merged. Publication supersedes the earlier no-push instruction for this
 branch; the boundary against merging into main remains.
+## 2026-09-22 - Extend the approved style across the bottom HUD (ASTRA / Codex)
+**Goal:** Remake the other HUD elements after the user merged PR #9.
+
+**Done:** Created `MuMain-ui-hud` / `codex/ui-hud-completion` from merged main
+`0f589224`. Inspected actual loading/drawing and shared uses, then selected the
+14 connected panel, gauge, XP, cash-shop and normal/selected skill-slot textures.
+Generated four imagegen paintings and assembled the exact-size atlases with
+quiet dark metal, thin steel/brass trim and matching red/blue/green/gold/violet
+resource fills. Replaced the old empty gauge backings together with their opaque
+fills. Retained fixed key legends and all dynamic overlay space. Kept the four
+approved right-side buttons unchanged. Delivered originals, inventory, prompts,
+14 editable ORAs, lossless masters, wrapped exports, nine labeled offline
+previews and reproducible assembly/validation scripts under
+[`assets-work/UI/HudCompletion/`](../../assets-work/UI/HudCompletion/notes.md).
+Installed the 14 validated exports only into this worktree's source Data.
+
+**Verified:** Every `mu_texture.py check` passes with exit 0 and its original NPOT
+warning only. All exact dimensions, RGB/alpha=255, OZJ wrapping and cash states
+pass. JPEG maximum channel error is 4/255. Verified 760 original UI payloads and
+14 merged-baseline container/payload pairs. All 14 editable composites match;
+reassembly reproduces 42 master/payload/export hashes. Four empty gauge backings
+and five shared frame masks match exactly in masters. Low-fill review caught
+and corrected excess generated margin; 10% fills now have visible colored
+energy in all four resources. Inspected all fill levels, poison/master variants,
+slot/shop states, native size, light/dark edges and both 1080p layout modes.
+The source diff contains exactly the 14 claimed assets, with no engine/CMake,
+World1/Object1 or shared-runtime changes; no client launch/build.
+
+**Open / next:** Client loading/filtering, resource cut lines, XP gain flashes,
+hotkeys/selection/cooldown/disabled overlays, item models and counts, localized
+tooltips, HiDPI and real gameplay readability remain pending. Shared skill-slot
+art also requires MU Helper and pet-window review. All previews are offline
+mockups, not client screenshots.
