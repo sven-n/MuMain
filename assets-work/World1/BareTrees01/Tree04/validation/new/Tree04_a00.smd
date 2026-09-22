@@ -1,0 +1,8 @@
+version 1
+nodes
+0 "Cylinder06" -1
+end
+skeleton
+time 0
+0 -120.162529 -16.906746 -0.053442 0.000000 0.610865 0.000000
+end

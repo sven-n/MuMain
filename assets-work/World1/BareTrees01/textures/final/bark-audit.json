@@ -1,0 +1,11 @@
+{
+  "size": [
+    512,
+    256
+  ],
+  "mode": "RGB",
+  "horizontal_edge_mean_absolute_difference": 6.123697916666667,
+  "vertical_edge_mean_absolute_difference": 5.89453125,
+  "processing": "Resize, JPEG encoding and MU wrapper only; no painted modification",
+  "alpha": "Bark remains opaque RGB; frozen conifer alpha texture unchanged"
+}

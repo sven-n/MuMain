@@ -1,0 +1,43 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Original trunk/crown geometry retained; full BMD comparison EQUIVALENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -70.45,
+      -73.18,
+      -1.29
+    ],
+    [
+      72.04,
+      82.17,
+      69.24
+    ]
+  ],
+  "bounds_after": [
+    [
+      -70.45,
+      -73.18,
+      -1.29
+    ],
+    [
+      72.04,
+      82.17,
+      69.24
+    ]
+  ],
+  "materials": [
+    "tree_03.jpg",
+    "tree_04.jpg"
+  ],
+  "meshes": 2,
+  "exports": {
+    "Tree07.bmd": "27d7b5872de6d8b7e6d5b53ce0ab694e262fa519b0039467e18572ef74f6aca6",
+    "tree_04.OZJ": "b4a957c5da27a299f023f324bd927e0440009b153f3d7d05bd7c05f6da2dc6c7",
+    "tree_03.OZJ": "c2f6a1551cd47c49b3632546d563512daa1a2e50616b37cfdb2691d9a58002aa"
+  }
+}

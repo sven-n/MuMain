@@ -1,0 +1,27 @@
+{
+  "Tree03": {
+    "original_revision": "ac0f6dd8",
+    "SHA256": "d5caacd3ecd571d7d832c7fc4f3d5615c2ea9a08a26490003493fd1035c99e3d",
+    "role": "legacy production original"
+  },
+  "Tree04": {
+    "original_revision": "ac0f6dd8",
+    "SHA256": "b19e0b3ee759cba9cb21170084b47a972ff8a118c2c9213ff8303f10321eb29e",
+    "role": "legacy production original"
+  },
+  "Tree05": {
+    "original_revision": "ac0f6dd8",
+    "SHA256": "c5a334dfbf3b05a1c9923cd5f99d73491fe103839d0c570495b3316965cde0d2",
+    "role": "legacy production original"
+  },
+  "Tree07": {
+    "original_revision": "ac0f6dd8",
+    "SHA256": "b8dbfa66f4bb6a0257685f86836edb3547151962124aae2e4758be26b414efe4",
+    "role": "legacy production original"
+  },
+  "Tree11": {
+    "original_revision": "ac16ffeb",
+    "SHA256": "6a9fa891a24dc83ab72a6cb095e6f558fccc8e1579d580f31a5aa0114b370f8d",
+    "role": "accepted compatibility consumer"
+  }
+}

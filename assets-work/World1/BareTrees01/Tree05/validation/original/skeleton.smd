@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Cylinder08" -1
+end
+skeleton
+time 0
+0 9.973572 0.721741 -0.053448 0.000000 0.000000 0.000000
+end
+triangles
+end
