@@ -302,13 +302,24 @@ void LocalSocketListener::Unlink(const std::string& path)
 
 namespace
 {
+#ifdef _WIN32
+// A path with no file behind it. Winsock has no WSAENOENT: the AF_UNIX
+// provider reports the missing path through the Win32 file errors themselves,
+// which WSAGetLastError() hands back unchanged (winerror.h's
+// ERROR_FILE_NOT_FOUND and ERROR_PATH_NOT_FOUND, named here because that
+// header is not part of the Winsock shim).
+constexpr int WindowsFileNotFound = 2;
+constexpr int WindowsPathNotFound = 3;
+#endif
+
 // Whether a failed connect means something is still there. Windows' AF_UNIX
 // answers a path with no listener through more than one code depending on the
 // build, so all of them count as stale.
 bool ProbeFailureIsLive(int failure)
 {
 #ifdef _WIN32
-    return failure != WSAECONNREFUSED && failure != WSAENOENT && failure != WSAEINVAL && failure != WSAEFAULT;
+    return failure != WSAECONNREFUSED && failure != WindowsFileNotFound && failure != WindowsPathNotFound &&
+           failure != WSAEINVAL && failure != WSAEFAULT;
 #else
     return failure != ECONNREFUSED && failure != ENOENT;
 #endif
