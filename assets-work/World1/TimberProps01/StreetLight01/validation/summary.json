@@ -1,0 +1,42 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=21 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -12.11,
+      -73.27,
+      0.34
+    ],
+    [
+      12.63,
+      6.81,
+      258.32
+    ]
+  ],
+  "bounds_after": [
+    [
+      -12.11,
+      -73.27,
+      0.34
+    ],
+    [
+      12.63,
+      6.81,
+      258.32
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "streetlight.jpg",
+    "streetlight_brightness2.jpg"
+  ],
+  "export_sha256": {
+    "StreetLight01.bmd": "344b3175428b92e49e1bd8ecfddc2fc0bf77a898d7950ae7e31048ad161e7401",
+    "streetlight.OZJ": "1d0477719c2911b807ebb4a2159e037b25de778440e646f588e7d5d3bb836f23",
+    "streetlight_brightness2.OZJ": "deb4c642c210ca598e497018d543949d7ca3735dfa3c623105c7d776973baae3"
+  }
+}

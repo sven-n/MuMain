@@ -1,0 +1,6 @@
+00:00.579  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/original/source.blend"
+{"status": "PASS: authored geometry; engine validation separately required", "triangles": 572, "bounds_before": [[-12.10568618774414, -73.27314758300781, 0.3388980031013489], [12.633095741271973, 6.812636852264404, 258.31719970703125]], "bounds_after": [[-12.10568618774414, -73.27314758300781, 0.3388980031013489], [12.633095741271973, 6.812579154968262, 258.317138671875]], "bone_order": ["Dummy00", "Dummy01", "Dummy02", "Mesh02", "Cylinder02", "Bone01", "Bone02", "Bone03", "Bone04", "Bone05", "Mesh01"], "action_meta": {"StreetLight01_a00": {"index": 0, "lock": false}}, "textures": {"streetlight.jpg": [512, 512], "streetlight_brightness2.jpg": [128, 128]}, "skinning": "Exactly one valid non-dummy full-weight bone per vertex", "uv": "One UVMap set, finite; new UVs [0,1]; original lantern glow repeat to -0.0936 retained", "materials": "Original order and texture filenames; one diffuse image per mesh; no alpha or flags added"}
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

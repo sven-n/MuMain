@@ -1,0 +1,109 @@
+00:00.700  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/source.blend"
+00:00.709  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/original/source.blend"
+00:02.691  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/before.png'
+00:04.329  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-before-0.png'
+00:06.239  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-before-10.png'
+00:07.885  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-before-20.png'
+00:09.261  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/gameplay-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9wttxw6g
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9wttxw6g/StreetLight01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9wttxw6g/StreetLight01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9wttxw6g/StreetLight01.actions.txt
+
+SMD IMPORTER: now working on StreetLight01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: streetlight.jpg
+- New material: streetlight_brightness2.jpg
+- Imported 572 polys
+SMD StreetLight01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StreetLight01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "StreetLight01_skeleton"
+- Imported 21 frames of animation
+SMD StreetLight01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:11.211  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/after.png'
+00:13.083  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-after-0.png'
+00:14.776  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-after-10.png'
+00:16.597  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-after-20.png'
+00:18.174  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/gameplay-after.png'
+00:18.177  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/original/source.blend"
+00:19.733  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/neutral-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_px1ni9mv
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_px1ni9mv/StreetLight01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_px1ni9mv/StreetLight01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_px1ni9mv/StreetLight01.actions.txt
+
+SMD IMPORTER: now working on StreetLight01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: streetlight.jpg
+- New material: streetlight_brightness2.jpg
+- Imported 572 polys
+SMD StreetLight01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StreetLight01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "StreetLight01_skeleton"
+- Imported 21 frames of animation
+SMD StreetLight01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:21.325  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/neutral-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cw5hal2q
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cw5hal2q/StreetLight01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cw5hal2q/StreetLight01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cw5hal2q/StreetLight01.actions.txt
+
+SMD IMPORTER: now working on StreetLight01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: streetlight.jpg
+- New material: streetlight_brightness2.jpg
+- Imported 572 polys
+SMD StreetLight01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StreetLight01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "StreetLight01_skeleton"
+- Imported 21 frames of animation
+SMD StreetLight01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:23.269  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 2 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

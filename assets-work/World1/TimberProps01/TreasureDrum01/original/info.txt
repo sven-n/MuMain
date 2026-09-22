@@ -1,0 +1,7 @@
+model src/bin/Data/Object1/TreasureDrum01.bmd
+  name field: Data2\Object1\Drum.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 60
+  bounds (bind pose): min -40.57 -40.22 0.00  max 40.70 41.05 102.98  size 81.27 81.27 102.98
+  mesh 0: triangles=60 vertices=32 normals=34 uvs=52 texture=drum.jpg
+  bone 0: "Cylinder03" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "material": "steel.jpg",
+  "triangles": 147,
+  "positions_uv_and_one_bone_assignment_preserved": true,
+  "max_corner_distance": 0,
+  "position_tolerance": 0.002,
+  "uv_tolerance": 1.1e-06,
+  "normals": "Recalculated by Blender export; normal equality is not claimed",
+  "renderer": "Static scenery blade/shield display remains in original material slot1"
+}

@@ -1,0 +1,63 @@
+[
+  {
+    "name": "drum",
+    "size": [
+      512,
+      512
+    ],
+    "owners": [
+      "House02",
+      "TreasureDrum01"
+    ],
+    "tool": "Built-in imagegen",
+    "source": "drum-master.png",
+    "prompt": "drum-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; existing additive lantern mesh retained"
+  },
+  {
+    "name": "steel",
+    "size": [
+      512,
+      512
+    ],
+    "owners": [
+      "House02"
+    ],
+    "tool": "Built-in imagegen",
+    "source": "steel-master.png",
+    "prompt": "steel-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; existing additive lantern mesh retained"
+  },
+  {
+    "name": "streetlight",
+    "size": [
+      512,
+      512
+    ],
+    "owners": [
+      "StreetLight01"
+    ],
+    "tool": "Built-in imagegen",
+    "source": "streetlight-master.png",
+    "prompt": "streetlight-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; existing additive lantern mesh retained"
+  },
+  {
+    "name": "streetlight_brightness2",
+    "size": [
+      128,
+      128
+    ],
+    "owners": [
+      "StreetLight01"
+    ],
+    "tool": "Built-in imagegen",
+    "source": "brightness-master.png",
+    "prompt": "brightness-prompt.txt",
+    "processing": "RGB, Lanczos resize, JPEG quality95 4:4:4, OZJ wrap",
+    "alpha": "Opaque RGB; existing additive lantern mesh retained"
+  }
+]

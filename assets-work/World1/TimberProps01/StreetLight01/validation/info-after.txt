@@ -1,0 +1,18 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd
+  name field: StreetLight01.smd  version: 12
+  meshes: 2  bones: 11  actions: 1  triangles: 572
+  bounds (bind pose): min -12.11 -73.27 0.34  max 12.63 6.81 258.32  size 24.74 80.09 257.98
+  mesh 0: triangles=536 vertices=321 normals=389 uvs=214 texture=streetlight.jpg
+  mesh 1: triangles=36 vertices=24 normals=34 uvs=28 texture=streetlight_brightness2.jpg
+  bone 0: "Dummy00" parent=-1 dummy
+  bone 1: "Dummy01" parent=-1 dummy
+  bone 2: "Dummy02" parent=-1 dummy
+  bone 3: "Mesh02" parent=-1
+  bone 4: "Cylinder02" parent=-1
+  bone 5: "Bone01" parent=-1
+  bone 6: "Bone02" parent=5
+  bone 7: "Bone03" parent=6
+  bone 8: "Bone04" parent=7
+  bone 9: "Bone05" parent=8
+  bone 10: "Mesh01" parent=5
+  action 0: keys=21 lock=0

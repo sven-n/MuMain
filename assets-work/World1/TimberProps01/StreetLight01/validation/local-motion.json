@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "nodes": "names, indices and parents identical",
+  "tolerance": 0.0001,
+  "rotation_note": "Equivalent Euler components compared modulo 2*pi",
+  "samples": [
+    {
+      "file": "StreetLight01.smd",
+      "bone_samples": 11,
+      "frames": 1,
+      "max_position_component": 2.19999999995224e-05,
+      "max_euler_component_radians": 0
+    },
+    {
+      "file": "StreetLight01_a00.smd",
+      "bone_samples": 231,
+      "frames": 21,
+      "max_position_component": 3.399999999942338e-05,
+      "max_euler_component_radians": 0
+    }
+  ]
+}

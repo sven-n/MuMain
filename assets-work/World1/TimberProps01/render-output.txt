@@ -1,0 +1,208 @@
+00:00.625  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/source.blend"
+00:00.634  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/original/source.blend"
+00:03.227  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/review/before.png'
+00:04.471  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/review/gameplay-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a75ioico
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a75ioico/House02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a75ioico/House02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_a75ioico/House02.actions.txt
+
+SMD IMPORTER: now working on House02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: drum.jpg
+- New material: steel.jpg
+- Imported 1215 polys
+SMD House02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "House02_skeleton"
+- Imported 1 frames of animation
+SMD House02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:07.016  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/review/after.png'
+00:08.271  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/exports/House02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mf21i82y
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mf21i82y/House02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mf21i82y/House02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_mf21i82y/House02.actions.txt
+
+SMD IMPORTER: now working on House02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: drum.jpg
+- New material: steel.jpg
+- Imported 1215 polys
+SMD House02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on House02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "House02_skeleton"
+- Imported 1 frames of animation
+SMD House02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:10.438  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/review/wireframe.png'
+00:10.442  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/source.blend"
+00:10.453  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/original/source.blend"
+00:13.443  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/review/before.png'
+00:14.601  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/House02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_t0msr1cq
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_t0msr1cq/TreasureDrum01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_t0msr1cq/TreasureDrum01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_t0msr1cq/TreasureDrum01.actions.txt
+
+SMD IMPORTER: now working on TreasureDrum01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: drum.jpg
+- Imported 1456 polys
+SMD TreasureDrum01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on TreasureDrum01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "TreasureDrum01_skeleton"
+- Imported 1 frames of animation
+SMD TreasureDrum01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:17.196  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/review/after.png'
+00:18.466  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/exports/TreasureDrum01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jjatknnt
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jjatknnt/TreasureDrum01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jjatknnt/TreasureDrum01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jjatknnt/TreasureDrum01.actions.txt
+
+SMD IMPORTER: now working on TreasureDrum01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: drum.jpg
+- Imported 1456 polys
+SMD TreasureDrum01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on TreasureDrum01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "TreasureDrum01_skeleton"
+- Imported 1 frames of animation
+SMD TreasureDrum01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:20.236  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/review/wireframe.png'
+00:20.237  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/source.blend"
+00:20.247  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/original/source.blend"
+00:22.217  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/before.png'
+00:23.720  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-before-0.png'
+00:25.790  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-before-10.png'
+00:27.262  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-before-20.png'
+00:29.105  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/TreasureDrum01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cgf3jbkj
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cgf3jbkj/StreetLight01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cgf3jbkj/StreetLight01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_cgf3jbkj/StreetLight01.actions.txt
+
+SMD IMPORTER: now working on StreetLight01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: streetlight.jpg
+- New material: streetlight_brightness2.jpg
+- Imported 572 polys
+SMD StreetLight01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StreetLight01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "StreetLight01_skeleton"
+- Imported 21 frames of animation
+SMD StreetLight01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:30.686  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/after.png'
+00:32.680  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-after-0.png'
+00:34.361  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-after-10.png'
+00:36.388  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/action-after-20.png'
+00:37.605  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/exports/StreetLight01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_3v3f0l13
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_3v3f0l13/StreetLight01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_3v3f0l13/StreetLight01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_3v3f0l13/StreetLight01.actions.txt
+
+SMD IMPORTER: now working on StreetLight01
+- This is a mesh
+- Imported 11 new bones
+- Imported 1 frames of animation
+- New material: streetlight.jpg
+- New material: streetlight_brightness2.jpg
+- Imported 572 polys
+SMD StreetLight01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StreetLight01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 11 bones against armature "StreetLight01_skeleton"
+- Imported 21 frames of animation
+SMD StreetLight01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:39.192  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-timber-props/assets-work/World1/TimberProps01/StreetLight01/validation/reimported.blend: 1 mesh object(s), 11 bones, 1 animation clips, 2 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

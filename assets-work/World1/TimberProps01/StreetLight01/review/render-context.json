@@ -1,0 +1,19 @@
+{
+  "kind": "OFFLINE BLENDER; NOT CLIENT SCREENSHOTS",
+  "after": "Re-imported exported BMD",
+  "camera": "Identical orthographic camera and diffuse lighting before/after",
+  "lantern": "Transparent + diffuse-image emission approximates original additive mesh; opaque camera backdrop preserves emitted pixels; client result unverified",
+  "neutral": "StreetLight01 neutral-before/after use diffuse-only image material without additive approximation",
+  "action_frames": [
+    0,
+    10,
+    20
+  ],
+  "scale": {
+    "world_view_width": 900,
+    "pixels": 900,
+    "terrain_tile_units": 100,
+    "proxy_height": 190,
+    "caveat": "Offline scale assumption, not the actual client camera"
+  }
+}
