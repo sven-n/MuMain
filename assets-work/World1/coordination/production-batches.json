@@ -7,7 +7,13 @@
       "Grass04"
     ],
     "branch": "codex/lorencia-scrub",
-    "worktree": "MuMain-lorencia-scrub"
+    "worktree": "MuMain-lorencia-scrub",
+    "owned_textures": [
+      "src/bin/Data/Object1/tree_01.OZT",
+      "src/bin/Data/Object1/tree_02.OZT",
+      "src/bin/Data/Object1/tree_07.OZT"
+    ],
+    "frozen_textures": []
   },
   "groundcover": {
     "models": [
@@ -17,7 +23,12 @@
       "Grass06"
     ],
     "branch": "codex/lorencia-groundcover",
-    "worktree": "MuMain-lorencia-groundcover"
+    "worktree": "MuMain-lorencia-groundcover",
+    "owned_textures": [
+      "src/bin/Data/Object1/tree_08.OZT",
+      "src/bin/Data/Object1/tree_09.OZT"
+    ],
+    "frozen_textures": []
   },
   "fences": {
     "models": [
@@ -27,7 +38,13 @@
       "Fence04"
     ],
     "branch": "codex/lorencia-fences",
-    "worktree": "MuMain-lorencia-fences"
+    "worktree": "MuMain-lorencia-fences",
+    "owned_textures": [
+      "src/bin/Data/Object1/joint.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tile_wood02.OZJ"
+    ]
   },
   "groundcover / trees": {
     "models": [
@@ -37,7 +54,16 @@
       "Tree06"
     ],
     "branch": "codex/lorencia-trees",
-    "worktree": "MuMain-lorencia-trees"
+    "worktree": "MuMain-lorencia-trees",
+    "owned_textures": [
+      "src/bin/Data/Object1/tree.OZJ",
+      "src/bin/Data/Object1/Tree_a.OZT",
+      "src/bin/Data/Object1/tree_06.OZT",
+      "src/bin/Data/Object1/tree_02.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tree_03.OZJ"
+    ]
   },
   "fences / timber props": {
     "models": [
@@ -46,7 +72,14 @@
       "StreetLight01"
     ],
     "branch": "codex/lorencia-timber-props",
-    "worktree": "MuMain-lorencia-timber-props"
+    "worktree": "MuMain-lorencia-timber-props",
+    "owned_textures": [
+      "src/bin/Data/Object1/drum.OZJ",
+      "src/bin/Data/Object1/steel.OZJ",
+      "src/bin/Data/Object1/streetlight.OZJ",
+      "src/bin/Data/Object1/streetlight_brightness2.OZJ"
+    ],
+    "frozen_textures": []
   },
   "reviewer / rocks": {
     "models": [
@@ -58,7 +91,16 @@
       "Waterspout01"
     ],
     "branch": "codex/lorencia-rocks",
-    "worktree": "MuMain-lorencia-rocks"
+    "worktree": "MuMain-lorencia-rocks",
+    "owned_textures": [
+      "src/bin/Data/Object1/ston01.OZJ",
+      "src/bin/Data/Object1/ston02.OZT",
+      "src/bin/Data/Object1/reagon_waterspout.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/ston02.OZJ",
+      "src/bin/Data/Object1/stone_statue02.OZJ"
+    ]
   },
   "groundcover / flowering": {
     "models": [
@@ -67,6 +109,12 @@
       "Tree13"
     ],
     "branch": "codex/lorencia-flowering",
-    "worktree": "MuMain-lorencia-flowering"
+    "worktree": "MuMain-lorencia-flowering",
+    "owned_textures": [
+      "src/bin/Data/Object1/tree_01.OZJ",
+      "src/bin/Data/Object1/tree_04.OZT",
+      "src/bin/Data/Object1/tree_05.OZT"
+    ],
+    "frozen_textures": []
   }
 }

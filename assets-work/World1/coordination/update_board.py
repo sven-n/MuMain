@@ -36,7 +36,7 @@ def row(name, model):
     for batch in LEDGER:
         if name in batch['models']:
             status, owner = 'accepted', batch['owner']
-            evidence = 'Integrated ' + ', '.join('`' + c + '`' for c in batch['integration_commits']) + '; [batch notes](../' + batch['name'] + '/notes.md); offline accepted; client pending'
+            evidence = 'Integrated ' + ', '.join('`' + c + '`' for c in batch['integration_commits']) + '; [batch notes](../' + batch.get('notes_path', batch['name'] + '/notes.md') + '); offline accepted; client pending'
     if model['scope_exclusion']:
         status, identity, evidence = 'blocked', model['scope_exclusion'], 'Excluded from this static-art scope; preserve unchanged'
     placements = model['placements']
@@ -65,6 +65,12 @@ All source Data paths are relative to the integration worktree. Full placement a
 |---|---|---|---|---|---|---|
 '''
     text += '\n'.join(row(name, model) for name, model in sorted(data['models'].items(), key=lambda x: (-len(x[1]['placements']), x[0])))
+    text += '\n## Batch texture ownership\n\nEvery listed BMD is exclusively owned by the named batch. Only its owned texture paths may change; all other dependencies are frozen.\n\n| Owner / branch | Owned BMDs | Owned textures | Frozen textures |\n|---|---|---|---|\n'
+    for owner, batch in ASSIGNMENTS.items():
+        names = ', '.join(batch['models'])
+        owned = '<br>'.join('`' + value + '`' for value in batch.get('owned_textures', [])) or 'None'
+        frozen = '<br>'.join('`' + value + '`' for value in batch.get('frozen_textures', [])) or 'None'
+        text += f"| {owner} / `{batch['branch']}` | {names} | {owned} | {frozen} |\n"
     (HERE / 'asset-board.md').write_text(text + '\n')
 
 
