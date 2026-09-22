@@ -66,28 +66,27 @@
 #bar_sd .gauge-num { left: 6px; top: 28px; }
 #bar_ag .gauge-num { left: 1px; top: 28px; }
 
-/* Tooltips are siblings of their trigger, not nested descendants -- this build's shrink-to-fit
-   width clamps to a nested trigger's own narrow width, so nesting would cap them there. Each
-   gets an explicit width, a z-index bump against later siblings, and a precomputed static `left`
-   instead of translateX(-50%), since `%` in a transform resolves against the border-box before
-   it's ready on a display:none element flipping to :hover. */
+/* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size
+   binding rasterizes at display size; its inverse transform cancels the HUD scale.
+   Use content width and stable edge anchors, not a hidden box's percentage transform. */
 .tooltip {
 	display: none;
 	position: absolute;
-	width: 160px;
+	width: auto;
+	transform-origin: left top;
 	white-space: nowrap;
 	background-color: rgba(0, 0, 0, 200);
 	color: #ffffff;
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
-	font-size: 11px;
+	padding: 1px 2px;
+	border-radius: 0px;
+	font-family: "DejaVu Sans";
+	font-size: 10px;
 	pointer-events: none;
 }
-.tooltip-hp { left: 100.5px; } /* anchor 180.5px */
-.tooltip-sd { left: 132px;   } /* anchor 212px */
-.tooltip-ag { left: 348px;   } /* anchor 428px */
-.tooltip-mp { left: 379.5px; } /* anchor 459.5px */
+.tooltip-hp { left: 158px; }
+.tooltip-sd { left: 184px; }
+.tooltip-ag { left: 400px; }
+.tooltip-mp { left: 437px; }
 #bar_hp:hover ~ .tooltip-hp,
 #bar_sd:hover ~ .tooltip-sd,
 #bar_ag:hover ~ .tooltip-ag,
@@ -96,19 +95,8 @@
 	display: block;
 	z-index: 1;
 }
-#bars .tooltip { bottom: 44px; }
-/* Gauge hints live in the reference-space root, whose height is only 39px.
-   Anchor to the gauge row instead of placing them above that root. */
-#bars .tooltip-hp {
-	transform-origin: left top;
-	left: 158px;
-	top: 418px;
-	bottom: auto;
-	width: auto;
-	font-size: 9px;
-	padding: 1px 2px;
-	border-radius: 0px;
-}
+/* All four gauge hints share the same anchor row, not the 39px root's bottom. */
+.tooltip-hp, .tooltip-sd, .tooltip-ag, .tooltip-mp { top: 418px; }
 
 /* Buttons: nested inside #bars, plain reference-pixel position next to the mana bar. */
 @spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
@@ -245,11 +233,12 @@
 #btn_window   { left: 121px; decorator: image(mainframe-btn-window-normal); }
 #btn_window.open   { decorator: image(mainframe-btn-window-open); }
 
-.tooltip-cshop    { left: -64px; } /* anchor 16px */
-.tooltip-chainfo  { left: -34px; } /* anchor 46px */
-.tooltip-myinven  { left: -4px;  } /* anchor 76px */
-.tooltip-friend   { left: 26px;  } /* anchor 106px */
-.tooltip-window   { left: 56px;  } /* anchor 136px */
+#buttons .tooltip { top: -11px; }
+.tooltip-cshop    { left: -18px; }
+.tooltip-chainfo  { left: 18px; }
+.tooltip-myinven  { left: 45px; }
+.tooltip-friend   { right: 178px; transform-origin: right top; }
+.tooltip-window   { right: 148px; transform-origin: right top; }
 #btn_cshop:hover ~ .tooltip-cshop,
 #btn_chainfo:hover ~ .tooltip-chainfo,
 #btn_myinven:hover ~ .tooltip-myinven,
@@ -317,9 +306,8 @@
 	line-height: 12px;
 	pointer-events: none;
 }
-/* left is a precomputed centered value (640px width minus half the tooltip's 160px), not
-   left:50%+translateX(-50%) -- same fix as .tooltip-hp etc. above. */
+/* EXP shares the gauge hint row; #exp starts at reference y=470. */
 #exp_tooltip {
-	bottom: 12px;
-	left: 240px;
+	top: -52px;
+	left: 280px;
 }
