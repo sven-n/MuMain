@@ -43,7 +43,8 @@ What was added on top of that:
 Settings are written next to the executable as `config.ini`. The options
 window writes to these sections:
 
-- `[Window]` - width, height, windowed flag.
+- `[Window]` - width, height, windowed flag. A fresh install starts windowed at
+  1920x1080; the options window or the ini changes it from there.
 - `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
   update it; startup and fullscreen/resolution changes reapply it before the
   next frame begins.
