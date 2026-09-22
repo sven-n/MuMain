@@ -412,5 +412,23 @@
       "src/bin/Data/Object1/HouseWall02.bmd",
       "src/bin/Data/Object1/HouseEtc02.bmd"
     ]
+  },
+  "coordinator / wells": {
+    "models": [
+      "Well01",
+      "Well02",
+      "Well03",
+      "Well04"
+    ],
+    "branch": "codex/lorencia-wells",
+    "worktree": "MuMain-lorencia-wells",
+    "owned_textures": [
+      "src/bin/Data/Object1/well.OZJ",
+      "src/bin/Data/Object1/jar_01.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tub.OZJ",
+      "src/bin/Data/Object1/horse_drawn_01.OZJ"
+    ]
   }
 }

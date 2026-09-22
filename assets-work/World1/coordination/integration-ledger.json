@@ -428,5 +428,37 @@
       "src/bin/Data/Object1/tile_ston07.OZT": "assets-work/World1/Architecture01/House03/exports/tile_ston07.OZT",
       "src/bin/Data/Object1/light_02.OZJ": "assets-work/World1/Architecture01/House03/exports/light_02.OZJ"
     }
+  },
+  {
+    "name": "SignsBanners01",
+    "models": [
+      "Sign01",
+      "Sign02",
+      "Curtain01",
+      "StoneWall04",
+      "StoneWall06"
+    ],
+    "owner": "reviewer / signs and banners",
+    "source_commits": [
+      "50a9de6e"
+    ],
+    "integration_commits": [
+      "cd7ed604"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Sign01.bmd": "assets-work/World1/SignsBanners01/Sign01/exports/Sign01.bmd",
+      "src/bin/Data/Object1/notice.OZJ": "assets-work/World1/SignsBanners01/Sign01/exports/notice.OZJ",
+      "src/bin/Data/Object1/signboard.OZT": "assets-work/World1/SignsBanners01/Sign01/exports/signboard.OZT",
+      "src/bin/Data/Object1/doorknob.OZT": "assets-work/World1/SignsBanners01/Sign01/exports/doorknob.OZT",
+      "src/bin/Data/Object1/Sign02.bmd": "assets-work/World1/SignsBanners01/Sign02/exports/Sign02.bmd",
+      "src/bin/Data/Object1/Curtain01.bmd": "assets-work/World1/SignsBanners01/Curtain01/exports/Curtain01.bmd",
+      "src/bin/Data/Object1/badge_01.OZJ": "assets-work/World1/SignsBanners01/Curtain01/exports/badge_01.OZJ",
+      "src/bin/Data/Object1/badge_02.OZT": "assets-work/World1/SignsBanners01/Curtain01/exports/badge_02.OZT",
+      "src/bin/Data/Object1/StoneWall04.bmd": "assets-work/World1/SignsBanners01/StoneWall04/exports/StoneWall04.bmd",
+      "src/bin/Data/Object1/badge_03.OZT": "assets-work/World1/SignsBanners01/StoneWall04/exports/badge_03.OZT"
+    },
+    "original_revisions": {
+      "StoneWall06": "149780be"
+    }
   }
 ]
