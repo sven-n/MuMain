@@ -622,5 +622,36 @@
       "src/bin/Data/Object1/Tree12.bmd": "assets-work/World1/NormalBindings01/Tree12/exports/Tree12.bmd",
       "src/bin/Data/Object1/Tree13.bmd": "assets-work/World1/NormalBindings01/Tree13/exports/Tree13.bmd"
     }
+  },
+  {
+    "name": "Wells01",
+    "models": [
+      "Well01",
+      "Well02",
+      "Well03",
+      "Well04",
+      "Carriage03"
+    ],
+    "owner": "coordinator / wells",
+    "source_commits": [
+      "46daddf2",
+      "0599ac0a"
+    ],
+    "integration_commits": [
+      "8e24f6fb",
+      "08d2c469"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Well01.bmd": "assets-work/World1/Wells01/Well01/exports/Well01.bmd",
+      "src/bin/Data/Object1/Well02.bmd": "assets-work/World1/Wells01/Well02/exports/Well02.bmd",
+      "src/bin/Data/Object1/Well03.bmd": "assets-work/World1/Wells01/Well03/exports/Well03.bmd",
+      "src/bin/Data/Object1/Well04.bmd": "assets-work/World1/Wells01/Well04/exports/Well04.bmd",
+      "src/bin/Data/Object1/well.OZJ": "assets-work/World1/Wells01/textures/final/well.OZJ",
+      "src/bin/Data/Object1/jar_01.OZJ": "assets-work/World1/Wells01/textures/final/jar_01.OZJ",
+      "src/bin/Data/Object1/tub.OZJ": "assets-work/World1/Wells01/textures/final/tub.OZJ"
+    },
+    "original_revisions": {
+      "Carriage03": "93ca193e"
+    }
   }
 ]

@@ -1987,6 +1987,84 @@
       "original_bytes_preserved": true,
       "acceptance_basis": "Exact original BMD retains pre-existing normal behavior",
       "result": "PASS"
+    },
+    {
+      "model": "Well01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tub.jpg",
+          "shared_normal_cases": 42,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "horse_drawn_01.jpg",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "well.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "jar_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Well02",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "well.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Well03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "jar_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Well04",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "jar_01.jpg",
+          "shared_normal_cases": 2,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
     }
   ],
   "client_verified": false

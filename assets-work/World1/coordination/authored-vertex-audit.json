@@ -833,6 +833,58 @@
         "Cylinder18"
       ],
       "result": "PASS"
+    },
+    {
+      "model": "Well01",
+      "source": "assets-work/World1/Wells01/Well01",
+      "authored_vertices": 528,
+      "reimport_vertices": 528,
+      "authored_to_export_max": 8.190502558136359e-05,
+      "export_to_authored_max": 8.190502558136359e-05,
+      "bone_names": [
+        "Cylinder01",
+        "Cylinder04",
+        "Cylinder07",
+        "Cylinder08",
+        "Cylinder09",
+        "Cylinder10",
+        "Cylinder11"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Well03",
+      "source": "assets-work/World1/Wells01/Well03",
+      "authored_vertices": 391,
+      "reimport_vertices": 391,
+      "authored_to_export_max": 0.00012870010687038302,
+      "export_to_authored_max": 0.00012870010687038302,
+      "bone_names": [
+        "Cylinder07",
+        "Cylinder08",
+        "Cylinder09",
+        "Cylinder10"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Well04",
+      "source": "assets-work/World1/Wells01/Well04",
+      "authored_vertices": 782,
+      "reimport_vertices": 782,
+      "authored_to_export_max": 7.827104127500206e-05,
+      "export_to_authored_max": 7.827104127500206e-05,
+      "bone_names": [
+        "Cylinder07",
+        "Cylinder08",
+        "Cylinder09",
+        "Cylinder10",
+        "Cylinder11",
+        "Cylinder12",
+        "Cylinder13",
+        "Cylinder14"
+      ],
+      "result": "PASS"
     }
   ]
 }
