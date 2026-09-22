@@ -1,0 +1,164 @@
+00:00.892  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/scripts/build_and_export.py:18: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes = True
+Info: Saved as "source.blend"
+skipping reference object 'Tree09' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Tree09_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_04z71e/Tree09_mu_export.smd
+- Exported 5 bones
+- Exported 1 frames
+- Exported 240 polys
+- Exported 1 materials
+   tree_07.tga
+- SMD export took 0.0050389766693115234 
+
+
+Blender Source Tools: exporting Tree09_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_04z71e/anims/Tree09_a00.smd
+- Exported 5 bones
+- Exported 1 frames
+- SMD export took 0.0008561611175537109 
+
+2 files exported in 0.0 seconds
+00:01.008  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_04z71e/Tree09_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_d_04z71e/anims/Tree09_a00.smd --name Tree09.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd
+  name field: Tree09.smd  version: 12
+  meshes: 1  bones: 5  actions: 1  triangles: 240
+  bounds (bind pose): min -123.82 -129.51 0.56  max 156.32 111.42 192.24  size 280.14 240.93 191.68
+  mesh 0: triangles=240 vertices=180 normals=180 uvs=28 texture=tree_07.tga
+  bone 0: "Cylinder04" parent=-1
+  bone 1: "Cylinder05" parent=-1
+  bone 2: "Cylinder06" parent=-1
+  bone 3: "Cylinder07" parent=-1
+  bone 4: "Cylinder08" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Tree10' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Tree10_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a1a77y6_/Tree10_mu_export.smd
+- Exported 10 bones
+- Exported 1 frames
+- Exported 480 polys
+- Exported 1 materials
+   tree_07.tga
+- SMD export took 0.010158777236938477 
+
+
+Blender Source Tools: exporting Tree10_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a1a77y6_/anims/Tree10_a00.smd
+- Exported 10 bones
+- Exported 1 frames
+- SMD export took 0.000946044921875 
+
+2 files exported in 0.0 seconds
+00:01.102  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a1a77y6_/Tree10_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_a1a77y6_/anims/Tree10_a00.smd --name Tree10.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd
+  name field: Tree10.smd  version: 12
+  meshes: 1  bones: 10  actions: 1  triangles: 480
+  bounds (bind pose): min -199.56 -175.26 0.44  max 134.86 178.79 159.08  size 334.42 354.05 158.64
+  mesh 0: triangles=480 vertices=360 normals=358 uvs=28 texture=tree_07.tga
+  bone 0: "Cylinder04" parent=-1
+  bone 1: "Cylinder05" parent=-1
+  bone 2: "Cylinder06" parent=-1
+  bone 3: "Cylinder07" parent=-1
+  bone 4: "Cylinder08" parent=-1
+  bone 5: "Cylinder09" parent=-1
+  bone 6: "Cylinder10" parent=-1
+  bone 7: "Cylinder11" parent=-1
+  bone 8: "Cylinder12" parent=-1
+  bone 9: "Cylinder13" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Grass03' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Grass03_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t1z3_93s/Grass03_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 128 polys
+- Exported 2 materials
+   tree_02.tga
+   tree_01.tga
+- SMD export took 0.003162860870361328 
+
+
+Blender Source Tools: exporting Grass03_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t1z3_93s/anims/Grass03_a00.smd
+- Exported 4 bones
+- Exported 1 frames
+- SMD export took 0.0007259845733642578 
+
+2 files exported in 0.0 seconds
+00:01.184  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/original/source.blend"
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t1z3_93s/Grass03_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t1z3_93s/anims/Grass03_a00.smd --name Grass03.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd
+  name field: Grass03.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 128
+  bounds (bind pose): min -178.46 -159.31 -3.08  max 136.39 122.73 131.26  size 314.86 282.04 134.34
+  mesh 0: triangles=96 vertices=112 normals=112 uvs=7 texture=tree_01.tga
+  mesh 1: triangles=32 vertices=64 normals=64 uvs=4 texture=tree_02.tga
+  bone 0: "Sphere04" parent=-1
+  bone 1: "Sphere05" parent=-1
+  bone 2: "Sphere06" parent=-1
+  bone 3: "Sphere07" parent=-1
+  action 0: keys=1 lock=0
+Info: Saved as "source.blend"
+skipping reference object 'Grass04' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Grass04_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zudqoerf/Grass04_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 128 polys
+- Exported 2 materials
+   tree_02.tga
+   tree_01.tga
+- SMD export took 0.004072904586791992 
+
+
+Blender Source Tools: exporting Grass04_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zudqoerf/anims/Grass04_a00.smd
+- Exported 4 bones
+- Exported 1 frames
+- SMD export took 0.0009551048278808594 
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zudqoerf/Grass04_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_zudqoerf/anims/Grass04_a00.smd --name Grass04.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd
+  name field: Grass04.smd  version: 12
+  meshes: 2  bones: 4  actions: 1  triangles: 128
+  bounds (bind pose): min -216.27 -78.82 -2.90  max 165.65 88.88 115.98  size 381.92 167.70 118.88
+  mesh 0: triangles=96 vertices=112 normals=112 uvs=7 texture=tree_01.tga
+  mesh 1: triangles=32 vertices=64 normals=64 uvs=4 texture=tree_02.tga
+  bone 0: "Sphere04" parent=-1
+  bone 1: "Sphere05" parent=-1
+  bone 2: "Sphere06" parent=-1
+  bone 3: "Sphere07" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

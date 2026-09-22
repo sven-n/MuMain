@@ -1,0 +1,32 @@
+{
+  "geometry_uv_weights_transforms_unchanged": true,
+  "numeric_snapshot_sha256": "c371d8c9f4926a3740deb19106ad5133fa0b22d1cfddd7b0d58d8dc741518f88",
+  "triangles": 240,
+  "bone_order": [
+    "Cylinder04",
+    "Cylinder05",
+    "Cylinder06",
+    "Cylinder07",
+    "Cylinder08"
+  ],
+  "action_meta": {
+    "Tree09_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "material_order": [
+    "tree_07.tga"
+  ],
+  "packed_images": {
+    "tree_07.tga": [
+      32,
+      32
+    ],
+    "tree_07.tga.001": [
+      512,
+      512
+    ]
+  },
+  "client_verified": false
+}

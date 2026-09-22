@@ -1,0 +1,81 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      128,
+      128
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -178.463394,
+          -159.308701,
+          -3.079201
+        ],
+        [
+          136.392105,
+          122.726501,
+          131.263306
+        ]
+      ],
+      [
+        [
+          -178.463409,
+          -159.308731,
+          -3.079201
+        ],
+        [
+          136.39209,
+          122.726532,
+          131.263306
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 3.100000000699765e-05,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=Grass03_a00.smd keys=1 lock=0",
+      "texture 0 tree_01.tga original=tree_01.tga",
+      "texture 1 tree_02.tga original=tree_02.tga"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "Grass03.smd",
+        "nodes_exact": "0 \"Sphere04\" -1\n1 \"Sphere05\" -1\n2 \"Sphere06\" -1\n3 \"Sphere07\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 1.6000000002236447e-05,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "Grass03_a00.smd",
+        "nodes_exact": "0 \"Sphere04\" -1\n1 \"Sphere05\" -1\n2 \"Sphere06\" -1\n3 \"Sphere07\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 1.6000000002236447e-05,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "EQUIVALENT at converter default 0.05 unit tolerance",
+  "mesh_texture_order": [
+    "tree_01.tga",
+    "tree_02.tga"
+  ],
+  "export_sha256": {
+    "Grass03.bmd": "7d8c7dad65f330d39687e43b35623eaec91d06ec6afb5bf117fef45d34c6794b",
+    "tree_02.OZT": "472a7d0305c6af309c431cd62c8adc8301a16ef8d97499ef058dd87282b7a4be",
+    "tree_01.OZT": "8cf7925f6ded30b83a2ecf6856617b5c823e5abb7aaccea7acb73fc7403ea0d6"
+  }
+}

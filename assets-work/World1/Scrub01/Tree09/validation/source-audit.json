@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "reference_geometry_uv_weights_transform": "identical to preserved import",
+  "reference_snapshot_sha256": "7bb24ed06b69746f30a402eb767d6571ab2d221c60470e6bb8df5ca0728a3e95",
+  "rig_unchanged": {
+    "bones": [
+      [
+        "Cylinder04",
+        null
+      ],
+      [
+        "Cylinder05",
+        null
+      ],
+      [
+        "Cylinder06",
+        null
+      ],
+      [
+        "Cylinder07",
+        null
+      ],
+      [
+        "Cylinder08",
+        null
+      ]
+    ],
+    "bone_order": [
+      "Cylinder04",
+      "Cylinder05",
+      "Cylinder06",
+      "Cylinder07",
+      "Cylinder08"
+    ],
+    "actions": {
+      "Tree09_a00": {
+        "index": 0,
+        "lock": false
+      }
+    },
+    "transform": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "packed_images": {
+    "tree_07.tga": {
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "18e0f2139fc960c736c12a6fe5ed64eac5295656d2c0e593a4617dae7a0d6dc2"
+    },
+    "tree_07.tga.001": {
+      "size": [
+        512,
+        512
+      ],
+      "sha256": "65fa27c5d77b04cedd7defc59db9c573b7c13d0a4a3210b4df30b99863c17c4a"
+    }
+  },
+  "no_external_images_required": true
+}

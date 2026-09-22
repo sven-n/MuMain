@@ -1,0 +1,143 @@
+00:00.814  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/original/source.blend"
+00:03.127  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/review/before-offline.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/exports/Tree09.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jiyizw00
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jiyizw00/Tree09.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jiyizw00/Tree09_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jiyizw00/Tree09.actions.txt
+
+SMD IMPORTER: now working on Tree09
+- This is a mesh
+- Imported 5 new bones
+- Imported 1 frames of animation
+- New material: tree_07.tga
+- Imported 240 polys
+SMD Tree09 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree09_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 5 bones against armature "Tree09_skeleton"
+- Imported 1 frames of animation
+SMD Tree09_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:05.621  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/review/after-offline.png'
+00:07.870  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/review/reverse-offline.png'
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/scripts/render_review.py:37: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes=True
+00:09.777  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/review/wireframe-offline.png'
+00:09.778  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/original/source.blend"
+00:12.005  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree09/validation/reimported.blend: 1 mesh object(s), 5 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e9l4c0qd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e9l4c0qd/Tree10.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e9l4c0qd/Tree10_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_e9l4c0qd/Tree10.actions.txt
+
+SMD IMPORTER: now working on Tree10
+- This is a mesh
+- Imported 10 new bones
+- Imported 1 frames of animation
+- New material: tree_07.tga
+- Imported 480 polys
+SMD Tree10 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Tree10_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 10 bones against armature "Tree10_skeleton"
+- Imported 1 frames of animation
+SMD Tree10_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:14.305  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/review/after-offline.png'
+00:16.657  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/review/reverse-offline.png'
+00:18.775  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/review/wireframe-offline.png'
+00:18.777  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/original/source.blend"
+00:21.044  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/validation/reimported.blend: 1 mesh object(s), 10 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/exports/Grass03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wxiz01uy
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wxiz01uy/Grass03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wxiz01uy/Grass03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_wxiz01uy/Grass03.actions.txt
+
+SMD IMPORTER: now working on Grass03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tree_01.tga
+- New material: tree_02.tga
+- Imported 128 polys
+SMD Grass03 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Grass03_skeleton"
+- Imported 1 frames of animation
+SMD Grass03_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:23.313  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/review/after-offline.png'
+00:25.611  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/review/reverse-offline.png'
+00:27.516  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/review/wireframe-offline.png'
+00:27.517  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/original/source.blend"
+00:29.397  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/review/before-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/exports/Grass04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kofcvw7z
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kofcvw7z/Grass04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kofcvw7z/Grass04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_kofcvw7z/Grass04.actions.txt
+
+SMD IMPORTER: now working on Grass04
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tree_01.tga
+- New material: tree_02.tga
+- Imported 128 polys
+SMD Grass04 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Grass04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "Grass04_skeleton"
+- Imported 1 frames of animation
+SMD Grass04_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+00:31.305  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/review/after-offline.png'
+00:33.173  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/review/reverse-offline.png'
+00:34.848  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/review/wireframe-offline.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Grass04/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 2 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,78 @@
+{
+  "status": "PASS OFFLINE",
+  "client_verified": false,
+  "geometry": {
+    "triangles_before_after": [
+      480,
+      480
+    ],
+    "bounds_before_after": [
+      [
+        [
+          -199.555298,
+          -175.255402,
+          0.4408
+        ],
+        [
+          134.863297,
+          178.791901,
+          159.078293
+        ]
+      ],
+      [
+        [
+          -199.555374,
+          -175.255524,
+          0.4408
+        ],
+        [
+          134.863281,
+          178.791962,
+          159.078293
+        ]
+      ]
+    ],
+    "max_bound_component_difference": 0.00012200000000461841,
+    "collapsed_uv_triangles_before_after": [
+      0,
+      0
+    ],
+    "all_export_vertices_single_bone": true,
+    "all_finite": true
+  },
+  "rig": {
+    "status": "PASS",
+    "metadata": [
+      "action 0 file=Tree10_a00.smd keys=1 lock=0",
+      "texture 0 tree_07.tga original=tree_07.tga"
+    ],
+    "local_pose_samples": [
+      {
+        "file": "Tree10.smd",
+        "nodes_exact": "0 \"Cylinder04\" -1\n1 \"Cylinder05\" -1\n2 \"Cylinder06\" -1\n3 \"Cylinder07\" -1\n4 \"Cylinder08\" -1\n5 \"Cylinder09\" -1\n6 \"Cylinder10\" -1\n7 \"Cylinder11\" -1\n8 \"Cylinder12\" -1\n9 \"Cylinder13\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 7.000000010748408e-06,
+        "max_rotation_difference_radians": 0
+      },
+      {
+        "file": "Tree10_a00.smd",
+        "nodes_exact": "0 \"Cylinder04\" -1\n1 \"Cylinder05\" -1\n2 \"Cylinder06\" -1\n3 \"Cylinder07\" -1\n4 \"Cylinder08\" -1\n5 \"Cylinder09\" -1\n6 \"Cylinder10\" -1\n7 \"Cylinder11\" -1\n8 \"Cylinder12\" -1\n9 \"Cylinder13\" -1",
+        "frames_exact": [
+          "time 0"
+        ],
+        "max_translation_difference": 7.000000010748408e-06,
+        "max_rotation_difference_radians": 0
+      }
+    ]
+  },
+  "full_compare": "EQUIVALENT at converter default 0.05 unit tolerance",
+  "mesh_texture_order": [
+    "tree_07.tga"
+  ],
+  "export_sha256": {
+    "Tree10.bmd": "efc5e8c23a602b7150324d0c7122fb15bcebf416e0cff35a84ebfb7ba7cb99fd",
+    "tree_07.OZT": "2d39a05c692b757ab88eb2f1b0fe4af483c2b86ba75e206354a8c010bb9c6a9f"
+  }
+}

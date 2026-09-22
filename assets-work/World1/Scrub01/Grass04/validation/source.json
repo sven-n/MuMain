@@ -1,0 +1,40 @@
+{
+  "geometry_uv_weights_transforms_unchanged": true,
+  "numeric_snapshot_sha256": "146567ee8762bac64392bd880a9ce4090082e1b3ea507950e26ed35c751e9fbd",
+  "triangles": 128,
+  "bone_order": [
+    "Sphere04",
+    "Sphere05",
+    "Sphere06",
+    "Sphere07"
+  ],
+  "action_meta": {
+    "Grass04_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "material_order": [
+    "tree_01.tga",
+    "tree_02.tga"
+  ],
+  "packed_images": {
+    "tree_01.tga": [
+      32,
+      32
+    ],
+    "tree_01.tga.001": [
+      512,
+      512
+    ],
+    "tree_02.tga": [
+      32,
+      32
+    ],
+    "tree_02.tga.001": [
+      512,
+      512
+    ]
+  },
+  "client_verified": false
+}

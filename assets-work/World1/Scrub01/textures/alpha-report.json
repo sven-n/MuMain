@@ -1,0 +1,56 @@
+{
+  "tree_01": {
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "original_size": [
+      32,
+      32
+    ],
+    "alpha": "Exact original alpha resized with bilinear filtering; no new cutouts",
+    "all_channels_unpremultiplied": true,
+    "transparent_rgb_black_pixels": 23,
+    "transparent_rgb_white_pixels": 0,
+    "fringe_color_source": "Continuous botanical painting across entire canvas, including hidden pixels",
+    "alpha_mean_original": 97.3984375,
+    "alpha_mean_final": 97.4166259765625
+  },
+  "tree_02": {
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "original_size": [
+      32,
+      32
+    ],
+    "alpha": "Exact original alpha resized with bilinear filtering; no new cutouts",
+    "all_channels_unpremultiplied": true,
+    "transparent_rgb_black_pixels": 0,
+    "transparent_rgb_white_pixels": 0,
+    "fringe_color_source": "Continuous botanical painting across entire canvas, including hidden pixels",
+    "alpha_mean_original": 80.76171875,
+    "alpha_mean_final": 80.78811645507812
+  },
+  "tree_07": {
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "original_size": [
+      32,
+      32
+    ],
+    "alpha": "Exact original alpha resized with bilinear filtering; no new cutouts",
+    "all_channels_unpremultiplied": true,
+    "transparent_rgb_black_pixels": 0,
+    "transparent_rgb_white_pixels": 0,
+    "fringe_color_source": "Continuous botanical painting across entire canvas, including hidden pixels",
+    "alpha_mean_original": 134.4658203125,
+    "alpha_mean_final": 134.495849609375
+  }
+}

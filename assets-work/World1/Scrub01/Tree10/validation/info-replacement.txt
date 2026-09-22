@@ -1,0 +1,16 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-scrub/assets-work/World1/Scrub01/Tree10/exports/Tree10.bmd
+  name field: Tree10.smd  version: 12
+  meshes: 1  bones: 10  actions: 1  triangles: 480
+  bounds (bind pose): min -199.56 -175.26 0.44  max 134.86 178.79 159.08  size 334.42 354.05 158.64
+  mesh 0: triangles=480 vertices=360 normals=358 uvs=28 texture=tree_07.tga
+  bone 0: "Cylinder04" parent=-1
+  bone 1: "Cylinder05" parent=-1
+  bone 2: "Cylinder06" parent=-1
+  bone 3: "Cylinder07" parent=-1
+  bone 4: "Cylinder08" parent=-1
+  bone 5: "Cylinder09" parent=-1
+  bone 6: "Cylinder10" parent=-1
+  bone 7: "Cylinder11" parent=-1
+  bone 8: "Cylinder12" parent=-1
+  bone 9: "Cylinder13" parent=-1
+  action 0: keys=1 lock=0
