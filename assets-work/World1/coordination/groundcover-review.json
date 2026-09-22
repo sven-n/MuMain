@@ -1,0 +1,107 @@
+{
+  "reviewer": "ASTRA coordinator",
+  "client_verified": false,
+  "visual_review": "Matched images for all four assets and terrain proxy inspected; sparse ivy coverage and olive palette accepted; economical original card geometry retained.",
+  "assets": {
+    "Grass01": {
+      "actual_installed_bmd_compare": "meshes 1 vs 1, bones 5 vs 5, actions 1 vs 1, triangles 120 vs 120\nunmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "local_key_evidence": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Grass01.smd",
+            "frames": 1,
+            "bone_samples": 5,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Grass01_a00.smd",
+            "frames": 1,
+            "bone_samples": 5,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      }
+    },
+    "Grass02": {
+      "actual_installed_bmd_compare": "meshes 1 vs 1, bones 5 vs 5, actions 1 vs 1, triangles 120 vs 120\nunmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "local_key_evidence": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Grass02.smd",
+            "frames": 1,
+            "bone_samples": 5,
+            "max_local_position_component": 6.999999996537554e-06,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Grass02_a00.smd",
+            "frames": 1,
+            "bone_samples": 5,
+            "max_local_position_component": 6.999999996537554e-06,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      }
+    },
+    "Grass05": {
+      "actual_installed_bmd_compare": "meshes 1 vs 1, bones 4 vs 4, actions 1 vs 1, triangles 112 vs 112\nunmatched triangles: 0  max corner distance: 0.0002  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "local_key_evidence": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Grass05.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 2.9999999995311555e-06,
+            "max_rotation_matrix_component": 4.732054143336335e-07
+          },
+          {
+            "file": "Grass05_a00.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 2.9999999995311555e-06,
+            "max_rotation_matrix_component": 4.732054143336335e-07
+          }
+        ],
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      }
+    },
+    "Grass06": {
+      "actual_installed_bmd_compare": "meshes 1 vs 1, bones 4 vs 4, actions 1 vs 1, triangles 112 vs 112\nunmatched triangles: 0  max corner distance: 0.0001  max bone distance: 0.0000  differing bone names: 0\nEQUIVALENT\n",
+      "local_key_evidence": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Grass06.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 2.0000000020559128e-06,
+            "max_rotation_matrix_component": 4.732054143336335e-07
+          },
+          {
+            "file": "Grass06_a00.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 2.0000000020559128e-06,
+            "max_rotation_matrix_component": 4.732054143336335e-07
+          }
+        ],
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      }
+    }
+  }
+}

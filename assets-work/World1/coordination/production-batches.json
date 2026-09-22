@@ -47,5 +47,17 @@
     ],
     "branch": "codex/lorencia-timber-props",
     "worktree": "MuMain-lorencia-timber-props"
+  },
+  "reviewer / rocks": {
+    "models": [
+      "Stone01",
+      "Stone02",
+      "Stone03",
+      "Stone04",
+      "Stone05",
+      "Waterspout01"
+    ],
+    "branch": "codex/lorencia-rocks",
+    "worktree": "MuMain-lorencia-rocks"
   }
 }

@@ -49,5 +49,28 @@
       "src/bin/Data/Object1/tree_08.OZT": "assets-work/World1/Groundcover01/textures/final/tree_08.OZT",
       "src/bin/Data/Object1/tree_09.OZT": "assets-work/World1/Groundcover01/textures/final/tree_09.OZT"
     }
+  },
+  {
+    "name": "Fences01",
+    "models": [
+      "Fence01",
+      "Fence02",
+      "Fence03",
+      "Fence04"
+    ],
+    "owner": "fences subagent",
+    "source_commits": [
+      "150fcfd0"
+    ],
+    "integration_commits": [
+      "185fd5a8"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Fence01.bmd": "assets-work/World1/Fences01/Fence01/exports/Fence01.bmd",
+      "src/bin/Data/Object1/Fence02.bmd": "assets-work/World1/Fences01/Fence02/exports/Fence02.bmd",
+      "src/bin/Data/Object1/Fence03.bmd": "assets-work/World1/Fences01/Fence03/exports/Fence03.bmd",
+      "src/bin/Data/Object1/Fence04.bmd": "assets-work/World1/Fences01/Fence04/exports/Fence04.bmd",
+      "src/bin/Data/Object1/joint.OZJ": "assets-work/World1/Fences01/Fence02/exports/joint.OZJ"
+    }
   }
 ]
