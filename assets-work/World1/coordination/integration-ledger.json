@@ -330,5 +330,34 @@
       "src/bin/Data/Object1/tile_01.OZJ": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_01.OZJ",
       "src/bin/Data/Object1/tile_03.OZJ": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_03.OZJ"
     }
+  },
+  {
+    "name": "FireProps01",
+    "models": [
+      "FireLight01",
+      "FireLight02",
+      "Bonfire01",
+      "DoungeonGate01"
+    ],
+    "owner": "ASTRA coordinator; independent review reviewer agent",
+    "source_commits": [
+      "967dc888",
+      "ece578a3"
+    ],
+    "integration_commits": [
+      "d3c18b11",
+      "97f21562"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/FireLight01.bmd": "assets-work/World1/FireProps01/FireLight01/exports/FireLight01.bmd",
+      "src/bin/Data/Object1/FireLight02.bmd": "assets-work/World1/FireProps01/FireLight02/exports/FireLight02.bmd",
+      "src/bin/Data/Object1/Bonfire01.bmd": "assets-work/World1/FireProps01/Bonfire01/exports/Bonfire01.bmd",
+      "src/bin/Data/Object1/DoungeonGate01.bmd": "assets-work/World1/FireProps01/DoungeonGate01/exports/DoungeonGate01.bmd",
+      "src/bin/Data/Object1/light.OZT": "assets-work/World1/FireProps01/textures/final/light.OZT",
+      "src/bin/Data/Object1/light2.OZJ": "assets-work/World1/FireProps01/textures/final/light2.OZJ",
+      "src/bin/Data/Object1/fire_light_01.OZT": "assets-work/World1/FireProps01/textures/final/fire_light_01.OZT",
+      "src/bin/Data/Object1/copra_gate.OZJ": "assets-work/World1/FireProps01/textures/final/copra_gate.OZJ",
+      "src/bin/Data/Object1/fire_01.OZJ": "assets-work/World1/FireProps01/textures/final/fire_01.OZJ"
+    }
   }
 ]

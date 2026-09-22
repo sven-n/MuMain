@@ -328,5 +328,25 @@
     "frozen_textures": [
       "src/bin/Data/Object1/tile_01.OZJ"
     ]
+  },
+  "coordinator / ship": {
+    "models": [
+      "Ship01"
+    ],
+    "branch": "codex/lorencia-ship",
+    "worktree": "MuMain-lorencia-ship",
+    "owned_textures": [
+      "src/bin/Data/Object1/TileGround03.OZJ",
+      "src/bin/Data/Object1/ship01.OZJ",
+      "src/bin/Data/Object1/ship03.OZJ",
+      "src/bin/Data/Object1/ship04.OZJ",
+      "src/bin/Data/Object1/ship07.OZJ",
+      "src/bin/Data/Object1/ship05.OZT",
+      "src/bin/Data/Object1/ship07.OZT",
+      "src/bin/Data/Object1/ship06.OZT",
+      "src/bin/Data/Object1/ship06.OZJ",
+      "src/bin/Data/Object1/ship05.OZJ"
+    ],
+    "frozen_textures": []
   }
 }
