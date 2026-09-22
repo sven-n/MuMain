@@ -1,0 +1,8 @@
+Python 3.12.14
+Pillow 12.3.0
+numpy 2.3.5
+OS: macOS, offline CPU image assembly and previews
+Baseline: origin/main 0f589224 (merged PR #9)
+Branch: codex/ui-hud-completion
+Image generation: built-in imagegen tool, four retained paintings
+No engine build, GPU execution or client capture

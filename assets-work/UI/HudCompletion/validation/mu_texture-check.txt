@@ -1,0 +1,28 @@
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu01.OZJ
+     256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu02.OZJ
+     128x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/partCharge1/newui_menu03.OZJ
+     256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu02-03.OZJ
+     160x42 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/partCharge1/newui_menu_Bt05.OZJ
+     30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu_red.OZJ
+     45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu_green.OZJ
+     45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu_blue.OZJ
+     45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu_SD.OZJ
+     16x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_menu_AG.OZJ
+     16x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_Exbar.OZJ
+     6x4 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/Exbar_Master.OZJ
+     6x4 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_skillbox.OZJ
+     32x38 is not a power of two; the loader pads to the next power of two and UVs will not cover the image
+WARN /Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/HudCompletion/exports/Interface/newui_skillbox2.OZJ
+     32x38 is not a power of two; the loader pads to the next power of two and UVs will not cover the image

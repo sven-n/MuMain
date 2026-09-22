@@ -32,6 +32,7 @@ in [`../asset-pipeline.md`](../asset-pipeline.md). The artist agent's own brief 
 | Lorencia asset pilot | 17 ground textures, Beer01 and three more static props (Candle01, TreasureChest01, Tomb03) exported/validated offline on `art/world1-pilot`; client acceptance pending. See [`assets-work/World1/notes.md`](../../assets-work/World1/notes.md). |
 | Game data in `src/bin/Data` | Complete except: no `Sound/`, no `Music/`, most of `Object74/` missing, a few effect/skill models missing. |
 | UI art pilot revision (`art/ui-modern-pilot`) | Five right-HUD textures revised with clean dark metal, bold symbols and clearer selected states. User selected this restrained direction. Offline validation and source Data installation are isolated to the revision worktree. Native/1080p comparisons cover anchored and classic layouts: [`assets-work/UI/notes.md`](../../assets-work/UI/notes.md). Client verification pending; shared runtime untouched. |
+| Remaining bottom HUD (`codex/ui-hud-completion`) | Extends merged PR #9's style across 14 connected frame, gauge, item/skill-slot, XP and cash-shop textures. Exact dimensions/UVs preserved; all exports, 10% resource visibility, shared backing alignment and reproducible assembly pass offline checks. Installed only in `MuMain-ui-hud` source Data. [Inventory, sources, previews and client checklist](../../assets-work/UI/HudCompletion/notes.md). Shared skill slots also affect MU Helper/pet information; client acceptance pending. |
 
 ## 3. Development machine (owner's Mac)
 

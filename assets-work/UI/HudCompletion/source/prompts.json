@@ -1,0 +1,38 @@
+[
+  {
+    "key": "slot",
+    "prompt": "Use case: precise-object-edit. Input image is the approved MU Online modern HUD button, a style and material reference. Create the matching EMPTY equipment / skill SLOT tile: remove the backpack icon entirely. Retain the thin steel beveled rectangular edge, tiny restrained aged brass corner tabs, blue-black dark recessed metal/leather interior with soft upper-left light. Make the interior especially quiet and near-black so 20x28 game icons are readable over it. No icon, no text, no letters, no numbers, no emblem, no extra ornament. Orthographic straight-on 2D painted game UI raster asset, full-bleed outer frame close to all image edges, no scene or perspective. The finished art will be sampled into a small 32x38-pixel slot, so strong simple edge hierarchy, very little fine surface noise. Match the approved reference closely; premium clean restrained dark fantasy. Opaque black background.",
+    "tool": "built-in imagegen",
+    "output_hint": "Generated images are saved to /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15 as /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15/exec-45ca408e-575d-451c-bfb8-6fefa444c020.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "retained_source": "source/slot-generated.png"
+  },
+  {
+    "key": "cash",
+    "prompt": "Use case: precise-object-edit. Input image is the approved MU Online modern Inventory HUD button. Make its matching Cash Shop button. Replace ONLY the central backpack symbol with a clearly recognizable compact tied coin purse, a simple rounded sack with a gathered tied neck and one small circular coin inset, pale ivory/silver silhouette, no currency letter or number. Keep the exact blue-black dark metal button material, thin steel bevel border, aged brass corner accents, upper-left lighting, and icon centering of the reference. No text, no letters, no counters, no extra ornament, no scene. This is a painted raster GUI sprite to be reduced to a 30x41-pixel button, so use broad readable shapes. Preserve the overall frame and background as closely as possible.",
+    "tool": "built-in imagegen",
+    "output_hint": "Generated images are saved to /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15 as /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15/exec-be7dda16-8119-4248-a8b3-a43dd3d3c29b.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "retained_source": "source/cash-generated.png"
+  },
+  {
+    "key": "gem",
+    "refs": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/original/Interface/newui_menu_red.jpg",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/source/button2-generated.png"
+    ],
+    "prompt": "Use case: style-transfer. Asset: MU Online life reservoir HUD texture. Input 1 is the legacy red life gem, showing its overall low rounded faceted shape; input 2 is the approved new UI material/style reference. Repaint input 1 in the clean restrained dark-fantasy style of input 2. Create ONE large polished ruby-red faceted life reservoir, a broad low hexagonal magical jewel, unmistakably MU health gem. Slight tilted top facet like the old gem but a mostly symmetric readable silhouette, simple broad bevels, rich dark crimson depth with selective red highlights, small upper-left warm white reflection, no white outline around every facet. The jewel fills most of the canvas, set into a VERY THIN dark-steel mount with tiny aged-brass retaining corner tabs. Blue-black background, no ornate scrolling vines. Compose as a front-on 2D HUD raster texture, nearly square landscape aspect about 45:39, no outside margin. The tiny final sprite is 45x39 pixels: make shape and color strong, clean broad facets, not noise. NO text, NO labels, NO numerals, NO fill-level line, NO extra gems, NO interface mockup. Full reservoir only; empty/poison/mana versions will be derived with identical geometry. Opaque background.",
+    "tool": "built-in imagegen",
+    "output_hint": "Generated images are saved to /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15 as /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15/exec-6959bc61-332a-4a9b-93b7-cf0965030986.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "retained_source": "source/gem-generated.png"
+  },
+  {
+    "key": "column",
+    "refs": [
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/original/Interface/newui_menu_SD.jpg",
+      "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-hud/assets-work/UI/source/button2-generated.png"
+    ],
+    "prompt": "Use case: style-transfer. Asset: MU Online vertical shield gauge sprite. Input 1 is the old 16x39 yellow-gold SD gauge; input 2 is the approved modern UI material reference. Repaint the full vertical gauge as a tall narrow amber-gold luminous glass/energy column, simple refined broad shading with a bright left-side reflection, rich honey center and darker right edge. Very thin dark-steel vertical side rails and tiny restrained brass top/bottom caps that match input 2. Straight front view 2D painted game sprite, column occupies the entire frame almost edge-to-edge. Tall rectangular canvas aspect ratio 16:39. No extra pedestal, no outer empty margin, no decorations, no text, no markings, no numbers, no tick marks. Clean premium dark fantasy; at final 16x39 resolution broad shape and bright fill color must read immediately. Black opaque background, full-level gauge. The corresponding purple AG and empty versions will be derived with identical geometry.",
+    "tool": "built-in imagegen",
+    "output_hint": "Generated images are saved to /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15 as /Users/webproduktion3/.codex/generated_images/01a0c936-5f0c-7c82-b3d8-a5f515a8ba15/exec-c09b5dcb-d594-4188-b46c-2eee199a1517.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "retained_source": "source/column-generated.png"
+  }
+]

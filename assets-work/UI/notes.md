@@ -1,5 +1,9 @@
 # ASTRA — modern right HUD revision
 
+The follow-up [remaining bottom-HUD batch](HudCompletion/notes.md) extends this
+approved style to 14 connected panel, gauge, slot and shop textures. Its reports
+and previews are separate; the four controls documented here remain unchanged.
+
 2026-09-22. **Offline validated; client review pending.** Branch `art/ui-modern-pilot`
 in `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-modern`, based on
 current main `7a88d829`. This revises the visually insufficient first pass from PR #4.

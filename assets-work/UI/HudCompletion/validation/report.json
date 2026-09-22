@@ -1,0 +1,310 @@
+{
+  "status": "OFFLINE PASS; CLIENT REVIEW PENDING",
+  "base": "0f589224",
+  "branch": "codex/ui-hud-completion",
+  "files": [
+    {
+      "file": "Interface/newui_menu01.OZJ",
+      "status": "PASS",
+      "size": [
+        256,
+        51
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "c26614ead864fe9582e7c9c3965980acbd53097bd17b9888c373b01f2467bd12",
+      "jpeg_max_channel_error": 4,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu02.OZJ",
+      "status": "PASS",
+      "size": [
+        128,
+        51
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "03455ba97af6ab358291ff7ba81822c945e7cf913d45940eb54a79416d439c17",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "128x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/partCharge1/newui_menu03.OZJ",
+      "status": "PASS",
+      "size": [
+        256,
+        51
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "d74624a62aeb079ba5c18148d9b6df9b9d88364ab9cb556c5aaafaca55ae952b",
+      "jpeg_max_channel_error": 4,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "256x51 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu02-03.OZJ",
+      "status": "PASS",
+      "size": [
+        160,
+        42
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "3c8abe2af22e8a842134d297b0b2b19497e34819322e9a81b37d1f27f5ef0c02",
+      "jpeg_max_channel_error": 4,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "160x42 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/partCharge1/newui_menu_Bt05.OZJ",
+      "status": "PASS",
+      "size": [
+        30,
+        164
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "27bab93b488ab92f0d2704407939e7b1211ef9cc586a5e959ce9cbf3849edaa5",
+      "jpeg_max_channel_error": 4,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "30x164 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu_red.OZJ",
+      "status": "PASS",
+      "size": [
+        45,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "2dfb80a0822a7042181772065b94c0e51af51a91ebcaa260a292b1253ea54922",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu_green.OZJ",
+      "status": "PASS",
+      "size": [
+        45,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "5fa53f8e5d9d63b926fb3aa762fbe2f69da977e74daccb2b2e7a17aa41c6e085",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu_blue.OZJ",
+      "status": "PASS",
+      "size": [
+        45,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "ac09c73e437772e1be4b6811300e0d1d87386c1f0ad58fa1ebd4683ad9c634dd",
+      "jpeg_max_channel_error": 4,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "45x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu_SD.OZJ",
+      "status": "PASS",
+      "size": [
+        16,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "9be2ac6f2cf4ca438de692d8aef9422b620fa323ed74ed647ab66becf2ae857c",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "16x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_menu_AG.OZJ",
+      "status": "PASS",
+      "size": [
+        16,
+        39
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "8502edfeba6b57f449c527e3c7a5ae0811ac1d88ee4fa05312d5799dd5dfadf0",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "16x39 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_Exbar.OZJ",
+      "status": "PASS",
+      "size": [
+        6,
+        4
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "a5d53d4296176265585f621be88af40e01a1c0066c8e6cc663c70990cc758b4b",
+      "jpeg_max_channel_error": 1,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "6x4 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/Exbar_Master.OZJ",
+      "status": "PASS",
+      "size": [
+        6,
+        4
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "ba9c07676ffd261050be4b0db39bad39836bc3e40e53f43bad6116fb4fc824f6",
+      "jpeg_max_channel_error": 1,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "6x4 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_skillbox.OZJ",
+      "status": "PASS",
+      "size": [
+        32,
+        38
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "bd9b3e1183e3667a7a3275200e52ecd820fc466ac35cc43ae46223fae2e855a1",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "32x38 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    },
+    {
+      "file": "Interface/newui_skillbox2.OZJ",
+      "status": "PASS",
+      "size": [
+        32,
+        38
+      ],
+      "mode": "RGB",
+      "alpha": [
+        255,
+        255
+      ],
+      "sha256": "d7cb98dae875d64a1fdf60b6969142b3dbd6d7a926d94dfe3fa42b1ea41f53f3",
+      "jpeg_max_channel_error": 3,
+      "wrapper_roundtrip": "byte-identical",
+      "editable_composite": "exact",
+      "warnings": [
+        "32x38 is not a power of two; the loader pads to the next power of two and UVs will not cover the image"
+      ]
+    }
+  ],
+  "original_payloads_verified": 760,
+  "baseline_containers_verified": 14,
+  "gauge_backing": "PASS: four empty backings and five unchanged frame masks match exactly in masters",
+  "10_percent_fill_visible_energy_pixels_at_1080p": {
+    "red": 237,
+    "blue": 280,
+    "SD": 180,
+    "AG": 96
+  },
+  "cash_state_mean_rgb": [
+    48.15,
+    54.316,
+    42.116,
+    51.815
+  ],
+  "reassembled_identical_files": 42,
+  "installed_in_this_worktree": true,
+  "shared_runtime_touched": false,
+  "limitations": [
+    "No GPU or client execution.",
+    "NPOT warnings match originals.",
+    "Fixed source sizes retained; this is not a resolution increase."
+  ]
+}
