@@ -460,5 +460,30 @@
     "original_revisions": {
       "StoneWall06": "149780be"
     }
+  },
+  {
+    "name": "Ship01",
+    "models": [
+      "Ship01"
+    ],
+    "owner": "coordinator / ship",
+    "source_commits": [
+      "e687807a",
+      "29487fcd"
+    ],
+    "integration_commits": [
+      "0e2b794d",
+      "16da3679"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Ship01.bmd": "assets-work/World1/Ship01/Ship01/exports/Ship01.bmd",
+      "src/bin/Data/Object1/TileGround03.OZJ": "assets-work/World1/Ship01/textures/final/TileGround03.OZJ",
+      "src/bin/Data/Object1/ship01.OZJ": "assets-work/World1/Ship01/textures/final/ship01.OZJ",
+      "src/bin/Data/Object1/ship03.OZJ": "assets-work/World1/Ship01/textures/final/ship03.OZJ",
+      "src/bin/Data/Object1/ship04.OZJ": "assets-work/World1/Ship01/textures/final/ship04.OZJ",
+      "src/bin/Data/Object1/ship07.OZJ": "assets-work/World1/Ship01/textures/final/ship07.OZJ",
+      "src/bin/Data/Object1/ship05.OZJ": "assets-work/World1/Ship01/textures/final/ship05.OZJ",
+      "src/bin/Data/Object1/ship05.OZT": "assets-work/World1/Ship01/textures/final/ship05.OZT"
+    }
   }
 ]
