@@ -1,0 +1,84 @@
+{
+  "path": "src/bin/Data/Object1/Beer03.bmd",
+  "type": 153,
+  "placements": [
+    {
+      "position": [
+        6329.7265625,
+        13085.8642578125,
+        170.71902465820312
+      ],
+      "rotation": [
+        355.0,
+        0.0,
+        2550.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        63.297265625,
+        130.858642578125
+      ]
+    },
+    {
+      "position": [
+        12202.4443359375,
+        12945.6181640625,
+        254.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        122.024443359375,
+        129.456181640625
+      ]
+    },
+    {
+      "position": [
+        12290.0078125,
+        13441.9599609375,
+        270.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        210.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        122.900078125,
+        134.419599609375
+      ]
+    },
+    {
+      "position": [
+        12530.4677734375,
+        13436.0263671875,
+        270.00006103515625
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        150.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        125.304677734375,
+        134.360263671875
+      ]
+    }
+  ],
+  "textures": {
+    "bottle.tga": [
+      "src/bin/Data/Object1/bottle.ozt"
+    ],
+    "winecup.jpg": [
+      "src/bin/Data/Object1/winecup.OZJ"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Beer03.bmd\n  name field: Data2\\Object1\\house_in_beer_03.s  version: 10\n  meshes: 2  bones: 3  actions: 1  triangles: 108\n  bounds (bind pose): min -24.01 -13.66 -0.36  max 23.71 16.90 61.47  size 47.72 30.56 61.83\n  mesh 0: triangles=72 vertices=40 normals=20 uvs=30 texture=bottle.tga\n  mesh 1: triangles=36 vertices=25 normals=31 uvs=29 texture=winecup.jpg\n  bone 0: \"Cylinder36\" parent=-1\n  bone 1: \"Cylinder37\" parent=-1\n  bone 2: \"Cylinder38\" parent=-1\n  action 0: keys=1 lock=0\n",
+  "scope_exclusion": null
+}

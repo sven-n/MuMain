@@ -1,0 +1,6 @@
+# bmdconv action manifest for Beer03.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Beer03.smd <output.bmd> --manifest Beer03.actions.txt
+model Beer03.smd
+action 0 file=Beer03_a00.smd keys=1 lock=0
+texture 0 bottle.tga original=bottle.tga
+texture 1 winecup.jpg original=winecup.jpg

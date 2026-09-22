@@ -1,0 +1,68 @@
+00:00.501  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture02/source.blend"
+skipping reference object 'Furniture02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder04_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ShelfBoard_0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ShelfBoard_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ShelfRearRail_1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ShelfBoard_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ShelfRearRail_2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ShelfBoard_3' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder12_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder13_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder15_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder16_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder17_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder18_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder19_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder21_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder22_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder23_Body' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Cylinder24_Body' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Furniture02_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_oiinffuh/Furniture02_mu_export.smd
+- Exported 13 bones
+- Exported 1 frames
+- Exported 1288 polys
+- Exported 2 materials
+   bottle.tga
+   bookshelf.jpg
+- SMD export took 0.02203512191772461
+
+
+Blender Source Tools: exporting Furniture02_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_oiinffuh/anims/Furniture02_a00.smd
+- Exported 13 bones
+- Exported 1 frames
+- SMD export took 0.0011608600616455078
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_oiinffuh/Furniture02_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture02/exports/Furniture02.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_oiinffuh/anims/Furniture02_a00.smd --name Furniture02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture02/exports/Furniture02.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture02/exports/Furniture02.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture02/exports/Furniture02.bmd
+  name field: Furniture02.smd  version: 12
+  meshes: 2  bones: 13  actions: 1  triangles: 1288
+  bounds (bind pose): min -80.46 -23.38 0.00  max 79.72 23.05 228.92  size 160.18 46.43 228.92
+  mesh 0: triangles=1152 vertices=600 normals=552 uvs=70 texture=bottle.tga
+  mesh 1: triangles=136 vertices=80 normals=62 uvs=52 texture=bookshelf.jpg
+  bone 0: "Cylinder04" parent=-1
+  bone 1: "Box03" parent=-1
+  bone 2: "Cylinder12" parent=-1
+  bone 3: "Cylinder13" parent=-1
+  bone 4: "Cylinder15" parent=-1
+  bone 5: "Cylinder16" parent=-1
+  bone 6: "Cylinder17" parent=-1
+  bone 7: "Cylinder18" parent=-1
+  bone 8: "Cylinder19" parent=-1
+  bone 9: "Cylinder21" parent=-1
+  bone 10: "Cylinder22" parent=-1
+  bone 11: "Cylinder23" parent=-1
+  bone 12: "Cylinder24" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

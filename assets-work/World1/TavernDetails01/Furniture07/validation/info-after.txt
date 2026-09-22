@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Furniture07/exports/Furniture07.bmd
+  name field: Furniture07.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 174
+  bounds (bind pose): min -25.64 -20.88 0.00  max 17.74 21.46 51.41  size 43.38 42.33 51.41
+  mesh 0: triangles=174 vertices=97 normals=128 uvs=163 texture=bookshelf.jpg
+  bone 0: "Cylinder02" parent=-1
+  action 0: keys=1 lock=0

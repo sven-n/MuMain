@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/src/bin/Data/Object1/Furniture06.bmd
+  name field: Data2\Object1\house_in_06.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 54
+  bounds (bind pose): min -20.84 -25.63 -0.04  max 21.48 28.72 110.86  size 42.31 54.34 110.90
+  mesh 0: triangles=52 vertices=48 normals=5 uvs=56 texture=bookshelf.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=chair2.tga
+  bone 0: "Box11" parent=-1
+  action 0: keys=1 lock=0

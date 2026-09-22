@@ -1,0 +1,201 @@
+{
+  "status": "PASS",
+  "surface": {
+    "minimum_uv_triangle_area": 4.848722999999962e-05,
+    "minimum_geometry_triangle_area": 0.1060875057466795,
+    "minimum_winding_normal_dot": 0.39243477662047316,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "bookshelf.jpg",
+      "bone_index": 2,
+      "before": [
+        [
+          -80.223793,
+          -23.370899,
+          0.0019
+        ],
+        [
+          79.955299,
+          23.0578,
+          210.075806
+        ]
+      ],
+      "after": [
+        [
+          -80.223793,
+          -23.370899,
+          0.0019
+        ],
+        [
+          79.955299,
+          23.0578,
+          210.075806
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "bottle.tga",
+      "bone_index": 3,
+      "before": [
+        [
+          -59.922199,
+          -2.2186,
+          61.371101
+        ],
+        [
+          -47.522598,
+          10.8191,
+          122.197502
+        ]
+      ],
+      "after": [
+        [
+          -59.922199,
+          -2.2186,
+          61.371101
+        ],
+        [
+          -47.522598,
+          10.8191,
+          122.197502
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "bottle.tga",
+      "bone_index": 4,
+      "before": [
+        [
+          -38.506901,
+          6.734,
+          61.371101
+        ],
+        [
+          -29.8636,
+          15.7201,
+          103.320396
+        ]
+      ],
+      "after": [
+        [
+          -38.506901,
+          6.734001,
+          61.371101
+        ],
+        [
+          -29.8636,
+          15.7201,
+          103.320396
+        ]
+      ],
+      "max_difference": 1.000000000139778e-06
+    },
+    {
+      "material": "bottle.tga",
+      "bone_index": 5,
+      "before": [
+        [
+          36.3414,
+          -8.1476,
+          61.371101
+        ],
+        [
+          55.560799,
+          12.0608,
+          102.0541
+        ]
+      ],
+      "after": [
+        [
+          36.3414,
+          -8.1476,
+          61.371101
+        ],
+        [
+          55.560799,
+          12.0608,
+          102.0541
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "pot.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -28.2085,
+          -8.3049,
+          170.408401
+        ],
+        [
+          -2.4982,
+          11.4889,
+          200.115204
+        ]
+      ],
+      "after": [
+        [
+          -28.208498,
+          -8.304897,
+          170.408401
+        ],
+        [
+          -2.498192,
+          11.488898,
+          200.115204
+        ]
+      ],
+      "max_difference": 8.000000000230045e-06
+    },
+    {
+      "material": "pot2.jpg",
+      "bone_index": 1,
+      "before": [
+        [
+          2.969999,
+          -12.498501,
+          62.747898
+        ],
+        [
+          37.5452,
+          17.4445,
+          116.065399
+        ]
+      ],
+      "after": [
+        [
+          2.969999,
+          -12.498501,
+          62.747898
+        ],
+        [
+          37.5452,
+          17.4445,
+          116.065399
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "alpha_cards": {
+    "status": "PASS",
+    "original_card_geometry_UV_rigid_bone_retained": true,
+    "max_position_difference": 0
+  },
+  "seating": {
+    "status": "not a seat"
+  },
+  "material_order": [
+    "pot.jpg",
+    "pot2.jpg",
+    "bookshelf.jpg",
+    "bottle.tga"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

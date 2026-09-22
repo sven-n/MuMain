@@ -1,0 +1,43 @@
+{
+  "status": "PASS: offline",
+  "client_verified": false,
+  "geometry": "Intentional profile/carpentry rebuild; full geometry comparison DIFFERENT",
+  "skeleton_actions": "EQUIVALENT",
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -24.01,
+      -13.66,
+      -0.36
+    ],
+    [
+      23.71,
+      16.9,
+      61.47
+    ]
+  ],
+  "bounds_after": [
+    [
+      -24.01,
+      -13.66,
+      -0.36
+    ],
+    [
+      23.71,
+      16.9,
+      61.47
+    ]
+  ],
+  "materials": [
+    "bottle.tga",
+    "winecup.jpg"
+  ],
+  "meshes": 2,
+  "exports": {
+    "winecup.OZJ": "a0e0cb895f554bcb82a2350b7f70dc405fc6f6024c61615c82ccb1111fcedf63",
+    "Beer03.bmd": "651280bb61913c8c73d1ff9109d64360b447a1f246e8d4b29e4d6f99de27ee89",
+    "bottle.ozt": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4"
+  }
+}

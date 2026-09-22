@@ -1,0 +1,71 @@
+{
+  "triangles": 952,
+  "bounds_before": [
+    [
+      -43.76459884643555,
+      -28.357799530029297,
+      -0.7967000007629395
+    ],
+    [
+      44.47420120239258,
+      23.52669906616211,
+      61.473899841308594
+    ]
+  ],
+  "bounds_after": [
+    [
+      -43.76459884643555,
+      -28.357799530029297,
+      -0.7967000007629395
+    ],
+    [
+      44.47420120239258,
+      23.52669906616211,
+      61.473899841308594
+    ]
+  ],
+  "material_order": [
+    "pot3.tga",
+    "apple.jpg",
+    "bottle.tga",
+    "plate.jpg",
+    "winecup.jpg"
+  ],
+  "bone_order": [
+    "ytut",
+    "Cylinder32",
+    "Cylinder33",
+    "Cylinder34",
+    "Cylinder35",
+    "ytut01"
+  ],
+  "action_meta": {
+    "Beer02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "pot3.tga": [
+      512,
+      512
+    ],
+    "apple.jpg": [
+      512,
+      512
+    ],
+    "bottle.tga": [
+      512,
+      512
+    ],
+    "plate.jpg": [
+      512,
+      512
+    ],
+    "winecup.jpg": [
+      512,
+      512
+    ]
+  },
+  "geometry": "Authored vessel profiles and measured carpentry; original seat surfaces and alpha cards retained"
+}

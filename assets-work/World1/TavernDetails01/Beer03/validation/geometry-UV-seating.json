@@ -1,0 +1,112 @@
+{
+  "status": "PASS",
+  "surface": {
+    "minimum_uv_triangle_area": 0.0003839999999999997,
+    "minimum_geometry_triangle_area": 1.2283481747104548,
+    "minimum_winding_normal_dot": 0.39422637508432945,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "bottle.tga",
+      "bone_index": 0,
+      "before": [
+        [
+          -24.013201,
+          -8.0262,
+          0.6475
+        ],
+        [
+          -11.4805,
+          5.0036,
+          61.4739
+        ]
+      ],
+      "after": [
+        [
+          -24.013201,
+          -8.0262,
+          0.6475
+        ],
+        [
+          -11.4805,
+          5.0036,
+          61.4739
+        ]
+      ],
+      "max_difference": 0.0
+    },
+    {
+      "material": "bottle.tga",
+      "bone_index": 2,
+      "before": [
+        [
+          -7.4051,
+          3.8732,
+          0.8356
+        ],
+        [
+          5.1275,
+          16.903,
+          47.625099
+        ]
+      ],
+      "after": [
+        [
+          -7.4051,
+          3.8732,
+          0.8356
+        ],
+        [
+          5.127501,
+          16.903,
+          47.625099
+        ]
+      ],
+      "max_difference": 9.999999992515995e-07
+    },
+    {
+      "material": "winecup.jpg",
+      "bone_index": 1,
+      "before": [
+        [
+          -0.8864,
+          -13.659,
+          -0.358801
+        ],
+        [
+          23.705799,
+          5.3012,
+          27.1439
+        ]
+      ],
+      "after": [
+        [
+          -0.886401,
+          -13.659008,
+          -0.358801
+        ],
+        [
+          23.705795,
+          5.301197,
+          27.143902
+        ]
+      ],
+      "max_difference": 7.999999999341867e-06
+    }
+  ],
+  "alpha_cards": {
+    "status": "PASS",
+    "original_card_geometry_UV_rigid_bone_retained": true,
+    "max_position_difference": 0
+  },
+  "seating": {
+    "status": "not a seat"
+  },
+  "material_order": [
+    "bottle.tga",
+    "winecup.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "surface": {
+    "minimum_uv_triangle_area": 0.0009690911999999997,
+    "minimum_geometry_triangle_area": 6.171963638088776,
+    "minimum_winding_normal_dot": 0.9999993544472842,
+    "zero_area_triangles": 0,
+    "winding_disagreements": 0
+  },
+  "per_material_and_bone_bounds": [
+    {
+      "material": "bookshelf.jpg",
+      "bone_index": 0,
+      "before": [
+        [
+          -25.6399,
+          -20.875601,
+          0.0019
+        ],
+        [
+          17.743401,
+          21.455601,
+          51.411301
+        ]
+      ],
+      "after": [
+        [
+          -25.6399,
+          -20.875601,
+          0.0019
+        ],
+        [
+          17.743401,
+          21.455601,
+          51.411301
+        ]
+      ],
+      "max_difference": 0.0
+    }
+  ],
+  "alpha_cards": {
+    "status": "PASS",
+    "original_card_geometry_UV_rigid_bone_retained": true,
+    "max_position_difference": 0
+  },
+  "seating": {
+    "status": "PASS",
+    "seat_height": 51.41130065917969,
+    "original_seat_triangles": 6,
+    "exact_surface_triangle_max_deviation": 0,
+    "original_foot_corners": 36,
+    "max_foot_corner_deviation": 0.0,
+    "engine_hook": "CreateOperate preserved; no source or collision edit"
+  },
+  "material_order": [
+    "bookshelf.jpg"
+  ],
+  "rigid_bindings": "Original primary bone indices only; no extra weights"
+}

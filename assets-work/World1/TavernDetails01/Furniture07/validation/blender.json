@@ -1,0 +1,46 @@
+{
+  "triangles": 174,
+  "bounds_before": [
+    [
+      -25.63990020751953,
+      -20.875600814819336,
+      0.0019000000320374966
+    ],
+    [
+      17.74340057373047,
+      21.45560073852539,
+      51.41130065917969
+    ]
+  ],
+  "bounds_after": [
+    [
+      -25.63990020751953,
+      -20.875600814819336,
+      0.0019000000320374966
+    ],
+    [
+      17.74340057373047,
+      21.45560073852539,
+      51.41130065917969
+    ]
+  ],
+  "material_order": [
+    "bookshelf.jpg"
+  ],
+  "bone_order": [
+    "Cylinder02"
+  ],
+  "action_meta": {
+    "Furniture07_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "bookshelf.jpg": [
+      512,
+      512
+    ]
+  },
+  "geometry": "Authored vessel profiles and measured carpentry; original seat surfaces and alpha cards retained"
+}

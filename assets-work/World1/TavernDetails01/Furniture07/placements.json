@@ -1,0 +1,64 @@
+{
+  "path": "src/bin/Data/Object1/Furniture07.bmd",
+  "type": 146,
+  "placements": [
+    {
+      "position": [
+        12250.0,
+        13350.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        2490.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        122.5,
+        133.5
+      ]
+    },
+    {
+      "position": [
+        12450.267578125,
+        13342.9775390625,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0399999618530273,
+      "tile": [
+        124.50267578125,
+        133.429775390625
+      ]
+    },
+    {
+      "position": [
+        12655.0888671875,
+        13344.9091796875,
+        164.9999542236328
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0399999618530273,
+      "tile": [
+        126.550888671875,
+        133.449091796875
+      ]
+    }
+  ],
+  "textures": {
+    "bookshelf.jpg": [
+      "src/bin/Data/Object1/bookshelf.OZJ"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Furniture07.bmd\n  name field: Data2\\Object1\\house_in_07.smd  version: 10\n  meshes: 1  bones: 1  actions: 1  triangles: 42\n  bounds (bind pose): min -25.64 -20.88 0.00  max 17.74 21.46 51.41  size 43.38 42.33 51.41\n  mesh 0: triangles=42 vertices=37 normals=37 uvs=39 texture=bookshelf.jpg\n  bone 0: \"Cylinder02\" parent=-1\n  action 0: keys=1 lock=0\n",
+  "scope_exclusion": null
+}

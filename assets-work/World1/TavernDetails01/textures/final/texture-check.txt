@@ -1,0 +1,9 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/pot3.ozt
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/apple.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/bottle.ozt
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/plate.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/winecup.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/pot.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/pot2.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/bookshelf.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/textures/final/chair2.OZT

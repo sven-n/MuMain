@@ -1,0 +1,66 @@
+{
+  "triangles": 732,
+  "bounds_before": [
+    [
+      -80.22379302978516,
+      -23.370899200439453,
+      0.0019000000320374966
+    ],
+    [
+      79.9552993774414,
+      23.05780029296875,
+      210.0758056640625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -80.22379302978516,
+      -23.370899200439453,
+      0.0019000000320374966
+    ],
+    [
+      79.9552993774414,
+      23.05780029296875,
+      210.0758056640625
+    ]
+  ],
+  "material_order": [
+    "pot.jpg",
+    "pot2.jpg",
+    "bookshelf.jpg",
+    "bottle.tga"
+  ],
+  "bone_order": [
+    "Cylinder07",
+    "Cylinder06",
+    "Box12",
+    "Cylinder26",
+    "Cylinder29",
+    "Cylinder30"
+  ],
+  "action_meta": {
+    "Furniture01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "pot.jpg": [
+      512,
+      512
+    ],
+    "pot2.jpg": [
+      512,
+      512
+    ],
+    "bookshelf.jpg": [
+      512,
+      512
+    ],
+    "bottle.tga": [
+      512,
+      512
+    ]
+  },
+  "geometry": "Authored vessel profiles and measured carpentry; original seat surfaces and alpha cards retained"
+}

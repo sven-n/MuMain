@@ -1,0 +1,56 @@
+{
+  "path": "src/bin/Data/Object1/Furniture01.bmd",
+  "type": 140,
+  "placements": [
+    {
+      "position": [
+        7550.0,
+        15600.0,
+        168.57843017578125
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        75.5,
+        156.0
+      ]
+    },
+    {
+      "position": [
+        12360.353515625,
+        13654.720703125,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        900.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        123.60353515625,
+        136.54720703125
+      ]
+    }
+  ],
+  "textures": {
+    "pot.jpg": [
+      "src/bin/Data/Object1/pot.OZJ"
+    ],
+    "pot2.jpg": [
+      "src/bin/Data/Object1/pot2.OZJ"
+    ],
+    "bookshelf.jpg": [
+      "src/bin/Data/Object1/bookshelf.OZJ"
+    ],
+    "bottle.tga": [
+      "src/bin/Data/Object1/bottle.ozt"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Furniture01.bmd\n  name field: Data2\\Object1\\house_in_01.smd  version: 10\n  meshes: 4  bones: 6  actions: 1  triangles: 272\n  bounds (bind pose): min -80.22 -23.37 0.00  max 79.96 23.06 210.08  size 160.18 46.43 210.07\n  mesh 0: triangles=78 vertices=46 normals=52 uvs=52 texture=pot.jpg\n  mesh 1: triangles=54 vertices=31 normals=37 uvs=36 texture=pot2.jpg\n  mesh 2: triangles=32 vertices=32 normals=5 uvs=39 texture=bookshelf.jpg\n  mesh 3: triangles=108 vertices=60 normals=40 uvs=30 texture=bottle.tga\n  bone 0: \"Cylinder07\" parent=-1\n  bone 1: \"Cylinder06\" parent=-1\n  bone 2: \"Box12\" parent=-1\n  bone 3: \"Cylinder26\" parent=-1\n  bone 4: \"Cylinder29\" parent=-1\n  bone 5: \"Cylinder30\" parent=-1\n  action 0: keys=1 lock=0\n",
+  "scope_exclusion": null
+}

@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/original/Beer02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/original/Beer02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/original/Beer02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/original/Beer02.smd: bones=6 frames=1 triangles=232 materials=5
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/original/Beer02_a00.smd: bones=6 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/new/Beer02.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/new/Beer02_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/new/Beer02.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/new/Beer02.smd: bones=6 frames=1 triangles=952 materials=5
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/new/Beer02_a00.smd: bones=6 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-tavern-details/assets-work/World1/TavernDetails01/Beer02/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

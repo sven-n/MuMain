@@ -1,0 +1,10 @@
+{
+  "pot3": {
+    "prompt": "Edit target: the generated apple sprig (first image). Supporting reference: original sprig silhouette (second image, gray means transparent). Keep the same painted olive/brown material quality, but restore the original silhouette coverage: current generated alpha at cutoff64 covers only11% of the entire square; target34-38%. Enlarge the two main leaves a lot so they are broad, near-horizontal and extend from x5% to95% around the middle. Stem begins at bottom center touching the bottom edge and reaches y5% at top, with a small top leaf. Main leaves span y25%-65% with broad lobes. Preserve a genuinely transparent background around sprig, no enclosing rectangle or shadow. Square canvas. It is a tiny leaf card above apples, need readable broad solid forms. No fruit or extra objects.",
+    "generated_path": "/Users/webproduktion3/.codex/generated_images/01a0c96e-6c81-7f83-a47e-13549021223d/exec-779dd4d2-5925-402b-8d19-76e2a54b0da7.png"
+  },
+  "chair2": {
+    "prompt": "Edit target: generated wooden chair fretwork (first image). Original legacy silhouette (second image, gray means transparent). Keep existing carved-oak palette/style and exact ornamental structure, but make the wooden rails, spindle and scrolls thicker so transparent openings shrink. Measured current alpha cutoff64 coverage71.5%, original84%; target82-86% opaque coverage across whole square. Keep symmetric recognizable open holes, no opaque background. Broad wood that connects at all four edges. Genuinely transparent holes. No scene, no furniture render, only flat diffuse panel. Square canvas.",
+    "generated_path": "/Users/webproduktion3/.codex/generated_images/01a0c96e-6c81-7f83-a47e-13549021223d/exec-ec8f3c5a-863a-4070-82ff-d4a3ea2f61b6.png"
+  }
+}

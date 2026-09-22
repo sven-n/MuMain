@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "original_geometry_uv_skinning_transform_sha256": "2e6fd7df886f1859bcbf0fa7a28e26a2b9ae23188f521c7cbe7478d258e921a0",
+  "ref_original": "byte-identical numeric mesh snapshot to preserved import",
+  "packed_images": {
+    "bottle.tga": "449addf4b27daed89e03d712557df29d814d3ec8cd78f8ed7dd62f5effee4926",
+    "bottle.tga.001": "ba4080fd51dc5187fe701db7df438975aeab96266b59534053aceb1fec6304f5",
+    "winecup.jpg": "3d396dd6b56f4870bc32d8fe6a3f40171e6592118ba8115069ba71be0b4e8435",
+    "winecup.jpg.001": "25b5777cdbdcae7cd03e3956f5b913b88d747c05a8b5e2111eecfb597b68c0f1"
+  },
+  "high_poly": "excluded editable authored meshes with 3-segment fine-bevel modifiers",
+  "no_external_images_required": true
+}

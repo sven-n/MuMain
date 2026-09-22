@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "original_geometry_uv_skinning_transform_sha256": "77172c98e80224a6c0bf671ea3fa639a8d65d1f624fa4d36f9b94991216a7f32",
+  "ref_original": "byte-identical numeric mesh snapshot to preserved import",
+  "packed_images": {
+    "bookshelf.jpg": "5e46da5ac01974463e32fb10a3f461d8550a0b5ee3b1c1e176f3665c3b458a46",
+    "bookshelf.jpg.001": "3bfb18cd44b316a1d7cc108d951cb80c039631e3c9aa769062754f45307ae189"
+  },
+  "high_poly": "excluded editable authored meshes with 3-segment fine-bevel modifiers",
+  "no_external_images_required": true
+}

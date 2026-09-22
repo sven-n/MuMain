@@ -1,0 +1,26 @@
+{
+  "original": {
+    "size": [
+      32,
+      32
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.83984375,
+    "fully_transparent_fraction": 0.138671875,
+    "alpha_test_used_for_report": 64
+  },
+  "final": {
+    "size": [
+      512,
+      512
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "visible_fraction": 0.8658561706542969,
+    "fully_transparent_fraction": 0.11026763916015625,
+    "alpha_test_used_for_report": 64
+  },
+  "processing": "Generated RGB retained; encode only. Alpha-tested transparent RGB padded below cutoff64.",
+  "bottle_alpha": null
+}

@@ -1,0 +1,26 @@
+{
+  "original": {
+    "size": [
+      32,
+      32
+    ],
+    "alpha_min": 181,
+    "alpha_max": 255,
+    "visible_fraction": 1.0,
+    "fully_transparent_fraction": 0.0,
+    "alpha_test_used_for_report": 64
+  },
+  "final": {
+    "size": [
+      512,
+      512
+    ],
+    "alpha_min": 181,
+    "alpha_max": 255,
+    "visible_fraction": 1.0,
+    "fully_transparent_fraction": 0.0,
+    "alpha_test_used_for_report": 64
+  },
+  "processing": "Generated RGB retained; encode only. Alpha-tested transparent RGB padded below cutoff64.",
+  "bottle_alpha": "Original 181..255 opacity field preserved exactly by nearest resampling"
+}
