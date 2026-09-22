@@ -206,10 +206,15 @@ float UI::Scaling::FloatingWorkspaceContentHeight(int windowWidth, int windowHei
     return physicalHeight / transform.scaleY;
 }
 
-UI::Scaling::Viewport UI::Scaling::WorldViewport(int windowWidth, int windowHeight, bool)
+UI::Scaling::Viewport UI::Scaling::WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled)
 {
     const int physicalWidth = std::max(windowWidth, 1);
-    return {0, 0, physicalWidth, std::max(windowHeight, 1)};
+    if (topViewEnabled)
+    {
+        return {0, 0, physicalWidth, std::max(windowHeight, 1)};
+    }
+
+    return {0, 0, physicalWidth, RoundedBottomHudTop(windowWidth, windowHeight)};
 }
 
 float UI::Scaling::WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled)

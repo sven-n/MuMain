@@ -52,6 +52,11 @@ press F10 again.
   the camera. They now all share the same Default-camera zoom range.
 - **Widescreen rendering fix.** On 16:9 the upper-left and upper-right
   screen corners no longer show missing terrain.
+- **World framing above the HUD.** The 3D world is drawn into the band that
+  ends at the top of the bottom HUD, the way the original client did - it
+  reserved the bottom of the reference screen for the HUD frame. Projection,
+  terrain culling and world clicks share that same rectangle, so the view no
+  longer stretches behind the HUD and the scene is framed as it was.
 - **Editor-only:** the FreeFly cone overlay now draws coloured lines on
   the ground showing where the spectated camera's view actually meets the
   terrain - red at the near edge, yellow at the far edge.
