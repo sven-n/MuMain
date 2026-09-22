@@ -1,6 +1,6 @@
 {
   "result": "PASS: offline integration; no client claim",
-  "integration_head": "fe0bace2797af6180fd12847b1d2a6bb20ab7ddc",
+  "integration_head": "149780bef427fd46e8d68390b8b2701862abbefc",
   "baseline": "ac0f6dd8",
   "changed_game_files": {
     "src/bin/Data/Object1/Furniture03.bmd": {
@@ -382,9 +382,44 @@
       "sha256": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
       "export": "assets-work/World1/Masonry01/HouseEtc02/exports/tile_ston01.OZJ",
       "batch": "Masonry01"
+    },
+    "src/bin/Data/Object1/StoneWall01.bmd": {
+      "sha256": "a32fca0ef1cf2bd3de64d9a5992ecb8c606c5c57cb159564ed9eb8867c4fb7a4",
+      "export": "assets-work/World1/StoneWalls01/StoneWall01/exports/StoneWall01.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall02.bmd": {
+      "sha256": "55ffbbebc40e46569f7137bdd52e84c977a5c78c78c7b0cff3dc092d5db8cdb9",
+      "export": "assets-work/World1/StoneWalls01/StoneWall02/exports/StoneWall02.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall03.bmd": {
+      "sha256": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+      "export": "assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall05.bmd": {
+      "sha256": "63044d3abd022ff09c8348176559fdecc1390d0da3b192faa79a9811bace993c",
+      "export": "assets-work/World1/StoneWalls01/StoneWall05/exports/StoneWall05.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/StoneWall06.bmd": {
+      "sha256": "5763998af97cdb7cfe595476cda2592558458f0f8046ce0204580301e0f80a62",
+      "export": "assets-work/World1/StoneWalls01/StoneWall06/exports/StoneWall06.bmd",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/tile_01.OZJ": {
+      "sha256": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+      "export": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_01.OZJ",
+      "batch": "StoneWalls01"
+    },
+    "src/bin/Data/Object1/tile_03.OZJ": {
+      "sha256": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+      "export": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_03.OZJ",
+      "batch": "StoneWalls01"
     }
   },
-  "protected_file_count": 248,
+  "protected_file_count": 241,
   "world1_files_unchanged": true,
   "original_archive_hashes": {
     "TavernProps/Furniture03": {
@@ -582,11 +617,31 @@
     "Masonry01/HouseEtc02": {
       "revision": "ac0f6dd8",
       "sha256": "e7fc6f955b3725e202decf8c6784c1c198fee8c962e2be8ce05a8203534585f1"
+    },
+    "StoneWalls01/StoneWall01": {
+      "revision": "ac0f6dd8",
+      "sha256": "8d8c715c3fb06765e96771c21980ce802aeec769926a51b0c30753091f768694"
+    },
+    "StoneWalls01/StoneWall02": {
+      "revision": "ac0f6dd8",
+      "sha256": "775f4c9e406576519663663e053bbb8607b2091a65f4a301c2e6c52f5bad0fd9"
+    },
+    "StoneWalls01/StoneWall03": {
+      "revision": "ac0f6dd8",
+      "sha256": "adaa2c892e3c7bee25c0c596e35a4d2f8dac50eec44abe03ab5ec2690657a35a"
+    },
+    "StoneWalls01/StoneWall05": {
+      "revision": "ac0f6dd8",
+      "sha256": "7e74ae7ef6e3393acdf4ddb182438aa4c72ae1f023121017eb4532b5e5ab9e8f"
+    },
+    "StoneWalls01/StoneWall06": {
+      "revision": "ac0f6dd8",
+      "sha256": "2a232cd90d37114ee2d52ee57d888e107740c8f86a2d9d93182c92e475e8394f"
     }
   },
   "combined_models": 115,
   "missing_textures": [],
-  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/Tree_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall05.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall06.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/drum.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/mushroom.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_b.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_door.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight_brightness2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_04.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_05.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_06.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/Tree_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall04.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall05.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/c_wall06.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/drum.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/joint.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/mushroom.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_a.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_b.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/steel_barred_door.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/ston02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/streetlight_brightness2.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tile_ston01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_01.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_02.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_03.OZJ\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_04.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_05.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_06.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_07.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_08.OZT\nOK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/tree_09.OZT\n",
   "client_verified": false,
   "runtime_modified": false
 }

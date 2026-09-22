@@ -304,5 +304,31 @@
       "src/bin/Data/Object1/c_wall06.OZJ": "assets-work/World1/Masonry01/HouseEtc01/exports/c_wall06.OZJ",
       "src/bin/Data/Object1/tile_ston01.OZJ": "assets-work/World1/Masonry01/HouseEtc02/exports/tile_ston01.OZJ"
     }
+  },
+  {
+    "name": "StoneWalls01",
+    "models": [
+      "StoneWall01",
+      "StoneWall02",
+      "StoneWall03",
+      "StoneWall05",
+      "StoneWall06"
+    ],
+    "owner": "reviewer / stone walls subagent",
+    "source_commits": [
+      "0fc5cb36"
+    ],
+    "integration_commits": [
+      "149780be"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/StoneWall01.bmd": "assets-work/World1/StoneWalls01/StoneWall01/exports/StoneWall01.bmd",
+      "src/bin/Data/Object1/StoneWall02.bmd": "assets-work/World1/StoneWalls01/StoneWall02/exports/StoneWall02.bmd",
+      "src/bin/Data/Object1/StoneWall03.bmd": "assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd",
+      "src/bin/Data/Object1/StoneWall05.bmd": "assets-work/World1/StoneWalls01/StoneWall05/exports/StoneWall05.bmd",
+      "src/bin/Data/Object1/StoneWall06.bmd": "assets-work/World1/StoneWalls01/StoneWall06/exports/StoneWall06.bmd",
+      "src/bin/Data/Object1/tile_01.OZJ": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_01.OZJ",
+      "src/bin/Data/Object1/tile_03.OZJ": "assets-work/World1/StoneWalls01/StoneWall01/exports/tile_03.OZJ"
+    }
   }
 ]

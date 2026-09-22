@@ -301,5 +301,32 @@
       "src/bin/Data/Object1/horse_drawn_01.OZJ",
       "src/bin/Data/Object1/tile_02.OZJ"
     ]
+  },
+  "reviewer / signs and banners": {
+    "models": [
+      "Sign01",
+      "Sign02",
+      "Curtain01",
+      "StoneWall04"
+    ],
+    "compatibility_models": [
+      "StoneWall06"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/StoneWall06.bmd"
+    ],
+    "branch": "codex/lorencia-signs-banners",
+    "worktree": "MuMain-lorencia-signs-banners",
+    "owned_textures": [
+      "src/bin/Data/Object1/notice.OZJ",
+      "src/bin/Data/Object1/signboard.OZT",
+      "src/bin/Data/Object1/doorknob.OZT",
+      "src/bin/Data/Object1/badge_01.OZJ",
+      "src/bin/Data/Object1/badge_02.OZT",
+      "src/bin/Data/Object1/badge_03.OZT"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/tile_01.OZJ"
+    ]
   }
 }
