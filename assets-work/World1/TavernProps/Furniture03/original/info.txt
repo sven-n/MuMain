@@ -1,0 +1,7 @@
+model src/bin/Data/Object1/Furniture03.bmd
+  name field: Data2\Object1\house_in_03.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 42
+  bounds (bind pose): min -101.68 -51.50 0.00  max 101.78 51.39 86.58  size 203.47 102.89 86.58
+  mesh 0: triangles=42 vertices=40 normals=9 uvs=38 texture=desk_big.jpg
+  bone 0: "Box09" parent=-1
+  action 0: keys=1 lock=0
