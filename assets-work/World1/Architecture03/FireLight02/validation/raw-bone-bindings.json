@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "before": {
+    "file": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/FireLight02/original/FireLight02.bmd",
+    "mesh_bindings": [
+      {
+        "mesh": 0,
+        "material": "tile_02.jpg",
+        "vertex_to_normal_node_mismatch_corner_counts": {}
+      },
+      {
+        "mesh": 1,
+        "material": "fire_light_01.tga",
+        "vertex_to_normal_node_mismatch_corner_counts": {}
+      },
+      {
+        "mesh": 2,
+        "material": "copra_gate.jpg",
+        "vertex_to_normal_node_mismatch_corner_counts": {}
+      }
+    ]
+  },
+  "after": {
+    "file": "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/FireLight02/exports/FireLight02.bmd",
+    "mesh_bindings": [
+      {
+        "mesh": 0,
+        "material": "tile_02.jpg",
+        "vertex_to_normal_node_mismatch_corner_counts": {}
+      },
+      {
+        "mesh": 1,
+        "material": "fire_light_01.tga",
+        "vertex_to_normal_node_mismatch_corner_counts": {}
+      },
+      {
+        "mesh": 2,
+        "material": "copra_gate.jpg",
+        "vertex_to_normal_node_mismatch_corner_counts": {}
+      }
+    ]
+  },
+  "conclusion": "All authored model corners use the intended vertex bone for their raw normal as well. No cross-bone normal deduplication occurred. Readonly bindings are unchanged.",
+  "helper": "Read-only raw_bindings.py copied from parallel CartHay01 worker; follows engine v10/v12 disk structs and MapFileDecrypt",
+  "helper_sha256": "b6ad7b5344868838050beb09eca362ea55482af2a0c60ccf3d2817d87731e73c"
+}

@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "joint_01" -1
+end
+skeleton
+time 0
+0 124.986542 40.713223 137.286621 1.570796 -0.000000 0.000000
+end
+triangles
+end

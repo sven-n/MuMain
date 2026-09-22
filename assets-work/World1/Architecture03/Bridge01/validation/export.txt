@@ -1,0 +1,40 @@
+00:00.474  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/source.blend"
+skipping reference object 'Bridge01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Bridge01_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Bridge01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_j21iadjg/Bridge01_mu_export.smd
+- Exported 2 bones
+- Exported 1 frames
+- Exported 276 polys
+- Exported 2 materials
+   bridge_01.jpg
+   bridge_shadow01.tga
+- SMD export took 0.0048639774322509766
+
+
+Blender Source Tools: exporting Bridge01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_j21iadjg/anims/Bridge01_a00.smd
+- Exported 2 bones
+- Exported 1 frames
+- SMD export took 0.0005970001220703125
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_j21iadjg/Bridge01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_j21iadjg/anims/Bridge01_a00.smd --name Bridge01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd
+  name field: Bridge01.smd  version: 12
+  meshes: 2  bones: 2  actions: 1  triangles: 276
+  bounds (bind pose): min -49.21 -399.40 -158.00  max 83.97 400.28 99.39  size 133.18 799.68 257.39
+  mesh 0: triangles=274 vertices=186 normals=198 uvs=161 texture=bridge_01.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=bridge_shadow01.tga
+  bone 0: "Box02" parent=-1
+  bone 1: "Box01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

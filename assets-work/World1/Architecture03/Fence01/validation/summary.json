@@ -1,0 +1,41 @@
+{
+  "bounds_before": [
+    [
+      -88.82,
+      -9.03,
+      -0.33
+    ],
+    [
+      88.93,
+      11.98,
+      100.83
+    ]
+  ],
+  "bounds_after": [
+    [
+      -88.82,
+      -9.03,
+      -0.33
+    ],
+    [
+      88.93,
+      11.98,
+      100.83
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "textures": [
+    "tile_wood02.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": true,
+  "export_sha256": {
+    "Fence01.bmd": "594570345d8a5f665ad86718c03b491744835179cc1e4e56589387b1bd8b7d34",
+    "tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda"
+  }
+}

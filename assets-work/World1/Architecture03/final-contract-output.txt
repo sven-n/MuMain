@@ -1,0 +1,1 @@
+PASS: immutable originals; six paints cover three owned models plus seventeen readonly compatibility models; bridge shadow byte-exact; UV/skin/alpha/effect contracts

@@ -1,0 +1,59 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 90,
+  "original_triangles": 90,
+  "bounds_before": [
+    [
+      -70.45230102539062,
+      -73.18070220947266,
+      -1.2868000268936157
+    ],
+    [
+      72.04239654541016,
+      82.17269897460938,
+      69.23519897460938
+    ]
+  ],
+  "bounds_after": [
+    [
+      -70.45230102539062,
+      -73.18070220947266,
+      -1.2868000268936157
+    ],
+    [
+      72.04239654541016,
+      82.17269897460938,
+      69.23519897460938
+    ]
+  ],
+  "original_vertices_retained": 58,
+  "bone_order": [
+    "Cylinder02"
+  ],
+  "action_meta": {
+    "Tree07_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tree_03.jpg": [
+      512,
+      256
+    ],
+    "tree_04.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "tree_03.jpg",
+    "tree_04.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": true
+}

@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Fence01/exports/Fence01.bmd
+  name field: Fence01.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 116
+  bounds (bind pose): min -88.82 -9.03 -0.33  max 88.93 11.98 100.83  size 177.76 21.01 101.17
+  mesh 0: triangles=116 vertices=66 normals=82 uvs=46 texture=tile_wood02.jpg
+  bone 0: "Box07" parent=-1
+  action 0: keys=1 lock=0

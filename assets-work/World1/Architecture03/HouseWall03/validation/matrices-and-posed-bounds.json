@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "method": "SMD local translation times XYZ Euler rotation, composed through original parents; bind-relative deformation of every exported triangle corner",
+  "bones": 1,
+  "frames": 1,
+  "action_matrix_samples": 1,
+  "max_world_matrix_component_delta": 0,
+  "max_posed_bounds_component_delta": 0,
+  "frames_checked": [
+    {
+      "frame": 0,
+      "matrix_component_delta": 0.0,
+      "bounds_before": [
+        [
+          -101.28359985351562,
+          -0.7201011180877686,
+          -0.5256065130233765
+        ],
+        [
+          100.8115234375,
+          42.665199279785156,
+          264.47900390625
+        ]
+      ],
+      "bounds_after": [
+        [
+          -101.28359985351562,
+          -0.7201011180877686,
+          -0.5256065130233765
+        ],
+        [
+          100.8115234375,
+          42.665199279785156,
+          264.47900390625
+        ]
+      ]
+    }
+  ]
+}

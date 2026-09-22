@@ -1,0 +1,94 @@
+HouseWall03 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+Bridge01 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+BridgeStone01 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+Fence01 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+FireLight02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+House01 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+House03 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+House04 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+House05 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseEtc02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseWall01 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseWall02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseWall04 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseWall05 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseWall06 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+StoneMuWall01 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+StoneWall01 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+StoneWall02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+Tent01 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+Tree07 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+Bridge01 PASS: 176 unchanged triangles; 0.0 maximum original-vertex drift
+BridgeStone01 PASS: 66 unchanged triangles; 3.100000000699765e-05 maximum original-vertex drift
+Fence01 PASS: 116 unchanged triangles; 0.0 maximum original-vertex drift
+FireLight02 PASS: 34 unchanged triangles; 0.0 maximum original-vertex drift
+House01 PASS: 208 unchanged triangles; 0.0 maximum original-vertex drift
+House03 PASS: 313 unchanged triangles; 0.0 maximum original-vertex drift
+House04 PASS: 358 unchanged triangles; 0.0 maximum original-vertex drift
+House05 PASS: 324 unchanged triangles; 0.0 maximum original-vertex drift
+HouseEtc02 PASS: 250 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall01 PASS: 52 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall02 PASS: 110 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall03 PASS: 16 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall04 PASS: 88 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall05 PASS: 54 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall06 PASS: 52 unchanged triangles; 0.0 maximum original-vertex drift
+StoneMuWall01 PASS: 398 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall01 PASS: 414 unchanged triangles; 0.0 maximum original-vertex drift
+StoneWall02 PASS: 414 unchanged triangles; 0.0 maximum original-vertex drift
+Tent01 PASS: 130 unchanged triangles; 0.0 maximum original-vertex drift
+Tree07 PASS: 90 unchanged triangles; 0.0 maximum original-vertex drift
+
+PASS: immutable originals; six paints cover three owned models plus seventeen readonly compatibility models; bridge shadow byte-exact; UV/skin/alpha/effect contracts
+Bridge01 raw vertex/normal ownership PASS
+BridgeStone01 raw vertex/normal ownership PASS
+Fence01 raw vertex/normal ownership PASS
+FireLight02 raw vertex/normal ownership PASS
+House01 raw vertex/normal ownership PASS
+House03 raw vertex/normal ownership PASS
+House04 raw vertex/normal ownership PASS
+House05 raw vertex/normal ownership PASS
+HouseEtc02 raw vertex/normal ownership PASS
+HouseWall01 raw vertex/normal ownership PASS
+HouseWall02 raw vertex/normal ownership PASS
+HouseWall03 raw vertex/normal ownership PASS
+HouseWall04 raw vertex/normal ownership PASS
+HouseWall05 raw vertex/normal ownership PASS
+HouseWall06 raw vertex/normal ownership PASS
+StoneMuWall01 raw vertex/normal ownership PASS
+StoneWall01 raw vertex/normal ownership PASS
+StoneWall02 raw vertex/normal ownership PASS
+Tent01 raw vertex/normal ownership PASS
+Tree07 raw vertex/normal ownership PASS
+Bridge01 matrix and posed-bounds PASS 0 0
+BridgeStone01 matrix and posed-bounds PASS 0 3.0517578125e-05
+Fence01 matrix and posed-bounds PASS 0 0
+FireLight02 matrix and posed-bounds PASS 0 0
+House01 matrix and posed-bounds PASS 0 0
+House03 matrix and posed-bounds PASS 0 0
+House04 matrix and posed-bounds PASS 0 0
+House05 matrix and posed-bounds PASS 0 0
+HouseEtc02 matrix and posed-bounds PASS 0 0
+HouseWall01 matrix and posed-bounds PASS 0 0
+HouseWall02 matrix and posed-bounds PASS 0 0
+HouseWall03 matrix and posed-bounds PASS 0 0
+HouseWall04 matrix and posed-bounds PASS 0 0
+HouseWall05 matrix and posed-bounds PASS 0 0
+HouseWall06 matrix and posed-bounds PASS 0 0
+StoneMuWall01 matrix and posed-bounds PASS 0 0
+StoneWall01 matrix and posed-bounds PASS 0 0
+StoneWall02 matrix and posed-bounds PASS 0 0
+Tent01 matrix and posed-bounds PASS 0 0
+Tree07 matrix and posed-bounds PASS 0 0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
+00:00.574  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/source.blend"
+00:00.584  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/source.blend"
+00:00.648  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/source.blend"
+HouseWall03 authored binding PASS 20 triangles; ['joint_02'] maximum drift 7.201660153555167e-06
+Bridge01 authored binding PASS 100 triangles; ['Box02'] maximum drift 1.5273437497853593e-05
+BridgeStone01 authored binding PASS 40 triangles; ['464'] maximum drift 0.0009308662109503985
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

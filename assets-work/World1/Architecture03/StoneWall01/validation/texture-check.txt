@@ -1,0 +1,4 @@
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/exports/bridge_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/exports/tile_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/exports/tile_02.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/exports/tile_03.OZJ

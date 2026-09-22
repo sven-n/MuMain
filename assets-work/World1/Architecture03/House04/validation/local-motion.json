@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "nodes": "names, indices and parents identical",
+  "tolerance": 0.0001,
+  "rotation_note": "Equivalent Euler components compared modulo 2*pi",
+  "samples": [
+    {
+      "file": "House04.smd",
+      "bone_samples": 9,
+      "frames": 1,
+      "max_position_component": 0,
+      "max_euler_component_radians": 0
+    },
+    {
+      "file": "House04_a00.smd",
+      "bone_samples": 360,
+      "frames": 40,
+      "max_position_component": 0,
+      "max_euler_component_radians": 0
+    }
+  ]
+}

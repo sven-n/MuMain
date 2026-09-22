@@ -1,0 +1,8 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tree07/exports/Tree07.bmd
+  name field: Tree07.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 90
+  bounds (bind pose): min -70.45 -73.18 -1.29  max 72.04 82.17 69.24  size 142.49 155.35 70.52
+  mesh 0: triangles=84 vertices=58 normals=58 uvs=61 texture=tree_03.jpg
+  mesh 1: triangles=6 vertices=8 normals=1 uvs=8 texture=tree_04.jpg
+  bone 0: "Cylinder02" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,47 @@
+{
+  "bounds_before": [
+    [
+      -298.04,
+      -84.12,
+      0.78
+    ],
+    [
+      297.44,
+      88.56,
+      623.57
+    ]
+  ],
+  "bounds_after": [
+    [
+      -298.04,
+      -84.12,
+      0.78
+    ],
+    [
+      297.44,
+      88.56,
+      623.57
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "textures": [
+    "tile_01.jpg",
+    "tile_03.jpg",
+    "tile_02.jpg",
+    "bridge_01.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": true,
+  "export_sha256": {
+    "bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc",
+    "StoneWall01.bmd": "a32fca0ef1cf2bd3de64d9a5992ecb8c606c5c57cb159564ed9eb8867c4fb7a4",
+    "tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+    "tile_02.OZJ": "428d88339fd1c04b6d153e33a1ed5a4a03d753130271e11fbf62f68564dfadcf",
+    "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27"
+  }
+}

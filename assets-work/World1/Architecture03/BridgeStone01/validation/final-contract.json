@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "triangles": 106,
+  "textures": {
+    "bridge_shadow01.tga": {
+      "dimensions": [
+        2,
+        32
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "original_rgba_and_padding_byte_exact": true
+    },
+    "tile_ston06.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tile_wood02.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    },
+    "tree_04.jpg": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "alpha": false
+    }
+  },
+  "uv_range": [
+    [
+      0.0005,
+      0.9995
+    ],
+    [
+      -0.0012,
+      0.9995
+    ]
+  ],
+  "original_uv_range": [
+    [
+      0.0005,
+      0.9995
+    ],
+    [
+      -0.0012,
+      0.9995
+    ]
+  ],
+  "rigid_skin": "Exactly one valid original bone per BMD corner",
+  "finite_export_geometry": true,
+  "source_originals_match_git": true
+}

@@ -1,0 +1,235 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    9998.10546875,
+    12554.6240234375,
+    170.88510131835938
+  ],
+  "objects": [
+    {
+      "name": "Bridge01",
+      "placement_index": 0,
+      "position": [
+        9998.10546875,
+        12554.6240234375,
+        170.88510131835938
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        99.9810546875,
+        125.546240234375
+      ]
+    },
+    {
+      "name": "Bridge01",
+      "placement_index": 1,
+      "position": [
+        10795.8828125,
+        12554.6806640625,
+        172.47146606445312
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        107.958828125,
+        125.546806640625
+      ]
+    },
+    {
+      "name": "Bridge01",
+      "placement_index": 2,
+      "position": [
+        10002.4580078125,
+        13046.3623046875,
+        172.47750854492188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        100.024580078125,
+        130.463623046875
+      ]
+    },
+    {
+      "name": "Bridge01",
+      "placement_index": 3,
+      "position": [
+        10800.3095703125,
+        13046.583984375,
+        174.81524658203125
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        108.003095703125,
+        130.46583984375
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 4,
+      "position": [
+        9600.0,
+        12450.0,
+        161.8663787841797
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        124.5
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 5,
+      "position": [
+        9600.0,
+        12250.0,
+        159.5030975341797
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        122.5
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 6,
+      "position": [
+        9600.0,
+        12050.0,
+        160.25546264648438
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        120.5
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 7,
+      "position": [
+        9600.0,
+        11850.0,
+        158.44073486328125
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        118.5
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 8,
+      "position": [
+        9600.0,
+        11650.0,
+        160.23475646972656
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        116.5
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 11,
+      "position": [
+        9600.0,
+        13200.0,
+        162.99813842773438
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        132.0
+      ]
+    },
+    {
+      "name": "Fence01",
+      "placement_index": 12,
+      "position": [
+        9600.0,
+        13400.0,
+        156.0502166748047
+      ],
+      "rotation": [
+        365.0,
+        0.0,
+        2790.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        96.0,
+        134.0
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only assigned and readonly compatibility geometry shown. Original terrain height, lighting, collision and other buildings omitted. Light beams approximate additive rendering at 0.55 emission, not engine evidence.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -415.3363342285156,
+      -993.5579833984375,
+      -158.00320434570312
+    ],
+    [
+      1201.6021728515625,
+      934.1994018554688,
+      103.32084655761719
+    ]
+  ],
+  "roof_fade_preview": "Roofs fully visible"
+}

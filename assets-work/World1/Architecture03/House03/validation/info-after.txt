@@ -1,0 +1,17 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House03/exports/House03.bmd
+  name field: House03.smd  version: 12
+  meshes: 5  bones: 7  actions: 1  triangles: 313
+  bounds (bind pose): min -330.60 -463.45 -1.37  max 302.32 450.87 381.38  size 632.92 914.32 382.76
+  mesh 0: triangles=10 vertices=8 normals=9 uvs=8 texture=tile_ston05.jpg
+  mesh 1: triangles=93 vertices=57 normals=37 uvs=80 texture=tile_ston04.jpg
+  mesh 2: triangles=192 vertices=144 normals=21 uvs=58 texture=tile_ston06.jpg
+  mesh 3: triangles=12 vertices=15 normals=15 uvs=9 texture=tile_ston07.tga
+  mesh 4: triangles=6 vertices=12 normals=3 uvs=4 texture=light_02.jpg
+  bone 0: "Box08" parent=-1
+  bone 1: "Box29" parent=-1
+  bone 2: "Mesh01" parent=-1
+  bone 3: "Mesh02" parent=-1
+  bone 4: "Bone01" parent=-1
+  bone 5: "Bone02" parent=-1
+  bone 6: "Bone03" parent=-1
+  action 0: keys=1 lock=0

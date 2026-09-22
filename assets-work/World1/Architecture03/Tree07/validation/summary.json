@@ -1,0 +1,43 @@
+{
+  "bounds_before": [
+    [
+      -70.45,
+      -73.18,
+      -1.29
+    ],
+    [
+      72.04,
+      82.17,
+      69.24
+    ]
+  ],
+  "bounds_after": [
+    [
+      -70.45,
+      -73.18,
+      -1.29
+    ],
+    [
+      72.04,
+      82.17,
+      69.24
+    ]
+  ],
+  "full_compare": "EQUIVALENT",
+  "textures": [
+    "tree_03.jpg",
+    "tree_04.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": true,
+  "export_sha256": {
+    "Tree07.bmd": "27d7b5872de6d8b7e6d5b53ce0ab694e262fa519b0039467e18572ef74f6aca6",
+    "tree_04.OZJ": "4b9a12637d3967b2f0ff5412830b3988664f937cca31733c7ae97e41cf63ca4f",
+    "tree_03.OZJ": "c2f6a1551cd47c49b3632546d563512daa1a2e50616b37cfdb2691d9a58002aa"
+  }
+}

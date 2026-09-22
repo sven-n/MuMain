@@ -1,0 +1,43 @@
+00:00.492  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/original/source.blend"
+00:02.025  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall03/original/inspection.png'
+00:02.026  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/original/source.blend"
+00:03.404  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/original/inspection.png'
+00:03.405  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/original/source.blend"
+00:04.849  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/BridgeStone01/original/inspection.png'
+00:04.850  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Fence01/original/source.blend"
+00:06.203  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Fence01/original/inspection.png'
+00:06.203  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/FireLight02/original/source.blend"
+00:07.562  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/FireLight02/original/inspection.png'
+00:07.563  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House01/original/source.blend"
+00:09.411  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House01/original/inspection.png'
+00:09.412  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House03/original/source.blend"
+00:11.068  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House03/original/inspection.png'
+00:11.069  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House04/original/source.blend"
+00:12.990  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House04/original/inspection.png'
+00:12.990  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House05/original/source.blend"
+00:14.547  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/House05/original/inspection.png'
+00:14.548  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseEtc02/original/source.blend"
+00:16.391  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseEtc02/original/inspection.png'
+00:16.396  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall01/original/source.blend"
+00:18.288  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall01/original/inspection.png'
+00:18.290  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall02/original/source.blend"
+00:20.213  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall02/original/inspection.png'
+00:20.214  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall04/original/source.blend"
+00:22.148  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall04/original/inspection.png'
+00:22.152  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall05/original/source.blend"
+00:24.142  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall05/original/inspection.png'
+00:24.143  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall06/original/source.blend"
+00:26.373  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/HouseWall06/original/inspection.png'
+00:26.374  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneMuWall01/original/source.blend"
+00:28.736  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneMuWall01/original/inspection.png'
+00:28.737  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/original/source.blend"
+00:30.969  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall01/original/inspection.png'
+00:30.970  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall02/original/source.blend"
+00:33.343  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/StoneWall02/original/inspection.png'
+00:33.344  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tent01/original/source.blend"
+00:35.718  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tent01/original/inspection.png'
+00:35.720  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tree07/original/source.blend"
+00:37.698  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Tree07/original/inspection.png'
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

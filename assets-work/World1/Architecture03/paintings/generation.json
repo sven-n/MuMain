@@ -1,0 +1,74 @@
+[
+  {
+    "name": "bridge_01",
+    "size": [
+      1024,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "bridge_01-master.png",
+    "prompt": "bridge_01-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tree_04",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tree_04-master.png",
+    "prompt": "tree_04-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_ston06",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_ston06-master.png",
+    "prompt": "tile_ston06-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_wood02",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_wood02-master.png",
+    "prompt": "tile_wood02-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_ston04",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_ston04-master.png",
+    "prompt": "tile_ston04-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_02",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_02-master.png",
+    "prompt": "tile_02-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  }
+]

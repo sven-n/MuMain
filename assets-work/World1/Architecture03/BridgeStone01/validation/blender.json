@@ -1,0 +1,215 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 106,
+  "original_triangles": 74,
+  "bounds_before": [
+    [
+      -0.18240399658679962,
+      -199.96299743652344,
+      -159.8170928955078
+    ],
+    [
+      83.34391021728516,
+      200.14100646972656,
+      9.804899215698242
+    ]
+  ],
+  "bounds_after": [
+    [
+      -0.18240399658679962,
+      -199.96299743652344,
+      -159.8170928955078
+    ],
+    [
+      83.34391021728516,
+      200.14100646972656,
+      9.804899215698242
+    ]
+  ],
+  "original_vertices_retained": 69,
+  "bone_order": [
+    "464",
+    "Box01"
+  ],
+  "action_meta": {
+    "BridgeStone01_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tree_04.jpg": [
+      512,
+      512
+    ],
+    "tile_ston06.jpg": [
+      512,
+      512
+    ],
+    "tile_wood02.jpg": [
+      512,
+      512
+    ],
+    "bridge_shadow01.tga": [
+      2,
+      32
+    ]
+  },
+  "material_order": [
+    "tree_04.jpg",
+    "tile_ston06.jpg",
+    "tile_wood02.jpg",
+    "bridge_shadow01.tga"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [
+    {
+      "original_face_pair": [
+        64,
+        65
+      ],
+      "boundary_vertices": [
+        54,
+        55,
+        53,
+        56
+      ],
+      "inset_fraction": 0.027350967271341776,
+      "recess_depth": 0.55,
+      "original_perimeter": [
+        [
+          59.535797119140625,
+          -145.60987854003906,
+          -16.804798126220703
+        ],
+        [
+          81.16571044921875,
+          -167.2398223876953,
+          -16.804800033569336
+        ],
+        [
+          81.16571807861328,
+          -167.2398223876953,
+          -159.81707763671875
+        ],
+        [
+          59.535797119140625,
+          -145.60987854003906,
+          -159.8170928955078
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        66,
+        67
+      ],
+      "boundary_vertices": [
+        55,
+        58,
+        57,
+        53
+      ],
+      "inset_fraction": 0.027350969807997734,
+      "recess_depth": 0.55,
+      "original_perimeter": [
+        [
+          81.16571044921875,
+          -167.2398223876953,
+          -16.804800033569336
+        ],
+        [
+          59.535804748535156,
+          -188.8697052001953,
+          -16.804798126220703
+        ],
+        [
+          59.535804748535156,
+          -188.8697052001953,
+          -159.81707763671875
+        ],
+        [
+          81.16571807861328,
+          -167.2398223876953,
+          -159.81707763671875
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        68,
+        69
+      ],
+      "boundary_vertices": [
+        60,
+        61,
+        59,
+        62
+      ],
+      "inset_fraction": 0.02734104515920119,
+      "recess_depth": 0.55,
+      "original_perimeter": [
+        [
+          59.446502685546875,
+          192.97830200195312,
+          -16.804798126220703
+        ],
+        [
+          81.25509643554688,
+          171.16969299316406,
+          -16.80480194091797
+        ],
+        [
+          81.2551040649414,
+          171.16969299316406,
+          -159.8170928955078
+        ],
+        [
+          59.446510314941406,
+          192.97830200195312,
+          -159.8170928955078
+        ]
+      ]
+    },
+    {
+      "original_face_pair": [
+        70,
+        71
+      ],
+      "boundary_vertices": [
+        61,
+        64,
+        63,
+        59
+      ],
+      "inset_fraction": 0.027341051513434765,
+      "recess_depth": 0.55,
+      "original_perimeter": [
+        [
+          81.25509643554688,
+          171.16969299316406,
+          -16.80480194091797
+        ],
+        [
+          59.446510314941406,
+          149.3612060546875,
+          -16.80480194091797
+        ],
+        [
+          59.446502685546875,
+          149.36109924316406,
+          -159.8170928955078
+        ],
+        [
+          81.2551040649414,
+          171.16969299316406,
+          -159.8170928955078
+        ]
+      ]
+    }
+  ],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": false
+}

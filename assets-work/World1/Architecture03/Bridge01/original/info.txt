@@ -1,0 +1,9 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/Bridge01/original/Bridge01.bmd
+  name field: Data2\Object1\bridge_01.smd  version: 10
+  meshes: 2  bones: 2  actions: 1  triangles: 196
+  bounds (bind pose): min -49.21 -399.40 -158.00  max 83.97 400.28 99.39  size 133.18 799.68 257.39
+  mesh 0: triangles=194 vertices=146 normals=65 uvs=121 texture=bridge_01.jpg
+  mesh 1: triangles=2 vertices=4 normals=1 uvs=4 texture=bridge_shadow01.tga
+  bone 0: "Box02" parent=-1
+  bone 1: "Box01" parent=-1
+  action 0: keys=1 lock=0

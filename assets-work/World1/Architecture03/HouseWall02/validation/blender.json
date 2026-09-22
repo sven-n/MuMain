@@ -1,0 +1,76 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 110,
+  "original_triangles": 110,
+  "bounds_before": [
+    [
+      -100.95050048828125,
+      -110.96759796142578,
+      0.2808069884777069
+    ],
+    [
+      101.14462280273438,
+      49.54890060424805,
+      264.47900390625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -100.95050048828125,
+      -110.96759796142578,
+      0.2808069884777069
+    ],
+    [
+      101.14462280273438,
+      49.54890060424805,
+      264.47900390625
+    ]
+  ],
+  "original_vertices_retained": 80,
+  "bone_order": [
+    "sdfeew",
+    "Object01",
+    "Object03"
+  ],
+  "action_meta": {
+    "HouseWall02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_ston06.jpg": [
+      512,
+      512
+    ],
+    "tile_wood01.jpg": [
+      512,
+      512
+    ],
+    "tile_wood02.jpg": [
+      512,
+      512
+    ],
+    "tile_ston04.jpg": [
+      512,
+      512
+    ],
+    "light_02.jpg": [
+      128,
+      128
+    ]
+  },
+  "material_order": [
+    "tile_ston06.jpg",
+    "tile_wood01.jpg",
+    "tile_wood02.jpg",
+    "tile_ston04.jpg",
+    "light_02.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": true
+}

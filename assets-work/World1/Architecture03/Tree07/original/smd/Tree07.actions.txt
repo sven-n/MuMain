@@ -1,0 +1,6 @@
+# bmdconv action manifest for Tree07.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Tree07.smd <output.bmd> --manifest Tree07.actions.txt
+model Tree07.smd
+action 0 file=Tree07_a00.smd keys=1 lock=0
+texture 0 tree_03.jpg original=tree_03.jpg
+texture 1 tree_04.jpg original=tree_04.jpg

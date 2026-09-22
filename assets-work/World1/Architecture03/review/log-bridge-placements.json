@@ -1,0 +1,140 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    23300.0,
+    23900.0,
+    165.00003051757812
+  ],
+  "objects": [
+    {
+      "name": "BridgeStone01",
+      "placement_index": 8,
+      "position": [
+        22900.0,
+        23900.0,
+        164.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        229.0,
+        239.0
+      ]
+    },
+    {
+      "name": "BridgeStone01",
+      "placement_index": 9,
+      "position": [
+        23300.0,
+        23900.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        233.0,
+        239.0
+      ]
+    },
+    {
+      "name": "BridgeStone01",
+      "placement_index": 10,
+      "position": [
+        23700.0,
+        23900.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        237.0,
+        239.0
+      ]
+    },
+    {
+      "name": "BridgeStone01",
+      "placement_index": 11,
+      "position": [
+        22898.595703125,
+        24086.37890625,
+        166.09165954589844
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        228.98595703125,
+        240.8637890625
+      ]
+    },
+    {
+      "name": "BridgeStone01",
+      "placement_index": 12,
+      "position": [
+        23294.380859375,
+        24092.146484375,
+        164.95240783691406
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        232.94380859375,
+        240.92146484375
+      ]
+    },
+    {
+      "name": "BridgeStone01",
+      "placement_index": 13,
+      "position": [
+        23693.630859375,
+        24094.6953125,
+        164.99993896484375
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        236.93630859375,
+        240.946953125
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only assigned and readonly compatibility geometry shown. Original terrain height, lighting, collision and other buildings omitted. Light beams approximate additive rendering at 0.55 emission, not engine evidence.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -601.5453491210938,
+      -83.34396362304688,
+      -159.8644561767578
+    ],
+    [
+      600.1410522460938,
+      278.0393371582031,
+      10.897492408752441
+    ]
+  ],
+  "roof_fade_preview": "Roofs fully visible"
+}

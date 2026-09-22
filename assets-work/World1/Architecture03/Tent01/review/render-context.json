@@ -1,0 +1,19 @@
+{
+  "kind": "OFFLINE BLENDER; NOT CLIENT SCREENSHOTS",
+  "after": "Re-imported exported BMD",
+  "camera": "Identical orthographic camera and diffuse lighting before/after",
+  "additive": "OFFLINE APPROXIMATION: transparent plus image emission; light_02 midpoint brightness 0.55, ston02 and tile_space01 brightness 1. Neutral diffuse images also retained.",
+  "animation_frames": [
+    0,
+    17,
+    35
+  ],
+  "porthole_scroll": "House04 and House05 pose columns pair recorded action frames with illustrative V offsets 0/-1/3/-2/3. Actual engine scroll is world-time driven; mesh UVs are unmodified.",
+  "scale": {
+    "world_view_width": 1800,
+    "pixels": 900,
+    "terrain_tile_units": 100,
+    "proxy_height": 190,
+    "caveat": "Offline scale assumption with flat grass proxy, not actual terrain or client camera"
+  }
+}

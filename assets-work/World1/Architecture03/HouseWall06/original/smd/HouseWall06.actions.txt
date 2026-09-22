@@ -1,0 +1,6 @@
+# bmdconv action manifest for HouseWall06.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd HouseWall06.smd <output.bmd> --manifest HouseWall06.actions.txt
+model HouseWall06.smd
+action 0 file=HouseWall06_a00.smd keys=1 lock=0
+texture 0 tile_wood02.jpg original=tile_wood02.jpg
+texture 1 tile_wood03.jpg original=tile_wood03.jpg

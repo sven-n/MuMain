@@ -1,0 +1,65 @@
+{
+  "status": "PASS: source checks; exported engine checks separately required",
+  "triangles": 34,
+  "original_triangles": 34,
+  "bounds_before": [
+    [
+      -19.627899169921875,
+      -43.74542236328125,
+      0.7593989968299866
+    ],
+    [
+      19.328704833984375,
+      2.244170904159546,
+      78.22119140625
+    ]
+  ],
+  "bounds_after": [
+    [
+      -19.627899169921875,
+      -43.74542236328125,
+      0.7593989968299866
+    ],
+    [
+      19.328704833984375,
+      2.244170904159546,
+      78.22119140625
+    ]
+  ],
+  "original_vertices_retained": 25,
+  "bone_order": [
+    "Box07",
+    "Bone01"
+  ],
+  "action_meta": {
+    "FireLight02_a00": {
+      "index": 0,
+      "lock": false
+    }
+  },
+  "textures": {
+    "tile_02.jpg": [
+      512,
+      512
+    ],
+    "fire_light_01.tga": [
+      256,
+      256
+    ],
+    "copra_gate.jpg": [
+      512,
+      512
+    ]
+  },
+  "material_order": [
+    "tile_02.jpg",
+    "fire_light_01.tga",
+    "copra_gate.jpg"
+  ],
+  "uv": "One finite UVMap; original UVs and repeats retained; new coordinates interpolated within old panels",
+  "skinning": "Exactly one original non-dummy bone with weight 1 per vertex",
+  "alpha": "Six opaque RGB paintings; original RGBA shadow and accepted alpha textiles copied byte-exact. All indexed effects unchanged.",
+  "panel_recesses": [],
+  "protected": "All original corners, bridge end planes, arches, beast heads, flame anchors, shadow meshes, log ends and door contacts retained; only selected interior panel faces refined.",
+  "readonly_compatibility": true
+}
