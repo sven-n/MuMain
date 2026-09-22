@@ -1090,6 +1090,12 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
 
     if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
     {
+        // CreatePickedItem has already new-ed the picked-item singleton by
+        // the time Create() can fail (NewUIInventoryCtrl.cpp), so a bare
+        // return would leave it non-null: every later move — ours and the
+        // player's own picking — would answer "an item is already being
+        // moved" for the rest of the session.
+        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the item could not be picked up");
     }
     inventory->RemoveItem(moving);
