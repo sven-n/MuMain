@@ -13,14 +13,8 @@ PREVIOUS = {
 }
 TAVERN = {'Furniture03': 'four-legged rectangular tavern table',
           'Furniture04': 'half-round pedestal table', 'Furniture05': 'modular tavern counter'}
-ASSIGNMENTS = {
-    'reviewer / scrub': {'models': ['Tree09', 'Tree10', 'Grass03', 'Grass04'],
-                         'branch': 'codex/lorencia-scrub', 'worktree': 'MuMain-lorencia-scrub'},
-    'groundcover': {'models': ['Grass01', 'Grass02', 'Grass05', 'Grass06'],
-                    'branch': 'codex/lorencia-groundcover', 'worktree': 'MuMain-lorencia-groundcover'},
-    'fences': {'models': ['Fence01', 'Fence02', 'Fence03', 'Fence04'],
-               'branch': 'codex/lorencia-fences', 'worktree': 'MuMain-lorencia-fences'},
-}
+ASSIGNMENTS = json.loads((HERE / 'production-batches.json').read_text())
+LEDGER = json.loads((HERE / 'integration-ledger.json').read_text())
 
 
 def row(name, model):
@@ -39,6 +33,10 @@ def row(name, model):
         if name in claim['models']:
             status, owner, branch = 'in progress', agent, claim['branch']
             worktree, evidence = WORKTREE_ROOT + claim['worktree'], 'Baseline geometry visually identified; production and engine checks in progress'
+    for batch in LEDGER:
+        if name in batch['models']:
+            status, owner = 'accepted', batch['owner']
+            evidence = 'Integrated ' + ', '.join('`' + c + '`' for c in batch['integration_commits']) + '; [batch notes](../' + batch['name'] + '/notes.md); offline accepted; client pending'
     if model['scope_exclusion']:
         status, identity, evidence = 'blocked', model['scope_exclusion'], 'Excluded from this static-art scope; preserve unchanged'
     placements = model['placements']

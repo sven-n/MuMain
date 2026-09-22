@@ -1,0 +1,32 @@
+{
+  "reviewer / scrub": {
+    "models": [
+      "Tree09",
+      "Tree10",
+      "Grass03",
+      "Grass04"
+    ],
+    "branch": "codex/lorencia-scrub",
+    "worktree": "MuMain-lorencia-scrub"
+  },
+  "groundcover": {
+    "models": [
+      "Grass01",
+      "Grass02",
+      "Grass05",
+      "Grass06"
+    ],
+    "branch": "codex/lorencia-groundcover",
+    "worktree": "MuMain-lorencia-groundcover"
+  },
+  "fences": {
+    "models": [
+      "Fence01",
+      "Fence02",
+      "Fence03",
+      "Fence04"
+    ],
+    "branch": "codex/lorencia-fences",
+    "worktree": "MuMain-lorencia-fences"
+  }
+}
