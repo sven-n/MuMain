@@ -218,5 +218,29 @@
     "frozen_textures": [
       "src/bin/Data/Object1/tile_02.OZJ"
     ]
+  },
+  "groundcover / tavern details": {
+    "models": [
+      "Beer02",
+      "Beer03",
+      "Furniture01",
+      "Furniture02",
+      "Furniture06",
+      "Furniture07"
+    ],
+    "branch": "codex/lorencia-tavern-details",
+    "worktree": "MuMain-lorencia-tavern-details",
+    "owned_textures": [
+      "src/bin/Data/Object1/pot3.ozt",
+      "src/bin/Data/Object1/apple.OZJ",
+      "src/bin/Data/Object1/bottle.ozt",
+      "src/bin/Data/Object1/plate.OZJ",
+      "src/bin/Data/Object1/winecup.OZJ",
+      "src/bin/Data/Object1/pot.OZJ",
+      "src/bin/Data/Object1/pot2.OZJ",
+      "src/bin/Data/Object1/bookshelf.OZJ",
+      "src/bin/Data/Object1/chair2.OZT"
+    ],
+    "frozen_textures": []
   }
 }

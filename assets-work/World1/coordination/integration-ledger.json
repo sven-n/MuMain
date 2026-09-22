@@ -218,5 +218,32 @@
       "src/bin/Data/Object1/Grass08.bmd": "assets-work/World1/Mushrooms01/Grass08/exports/Grass08.bmd",
       "src/bin/Data/Object1/mushroom.OZJ": "assets-work/World1/Mushrooms01/textures/final/mushroom.OZJ"
     }
+  },
+  {
+    "name": "BareTrees01",
+    "models": [
+      "Tree03",
+      "Tree04",
+      "Tree05",
+      "Tree07",
+      "Tree11"
+    ],
+    "original_revisions": {
+      "Tree11": "ac16ffeb"
+    },
+    "owner": "groundcover / bare trees subagent",
+    "source_commits": [
+      "c9705c23"
+    ],
+    "integration_commits": [
+      "8b853434"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Tree03.bmd": "assets-work/World1/BareTrees01/Tree03/exports/Tree03.bmd",
+      "src/bin/Data/Object1/Tree04.bmd": "assets-work/World1/BareTrees01/Tree04/exports/Tree04.bmd",
+      "src/bin/Data/Object1/Tree05.bmd": "assets-work/World1/BareTrees01/Tree05/exports/Tree05.bmd",
+      "src/bin/Data/Object1/Tree07.bmd": "assets-work/World1/BareTrees01/Tree07/exports/Tree07.bmd",
+      "src/bin/Data/Object1/tree_03.OZJ": "assets-work/World1/BareTrees01/textures/final/tree_03.OZJ"
+    }
   }
 ]
