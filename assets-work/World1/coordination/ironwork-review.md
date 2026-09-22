@@ -1,0 +1,3 @@
+# Ironwork01 coordinator review
+
+Accepted offline 2026-09-22. Reviewed overview, light/dark alpha sheet, north-gate and prison-corner matching-camera reconstructions, technical handoff and changed paths. Five assets / 44 placements, 84/328/82/218/16 triangles. Readable aged iron, original ornamental negative space preserved. Original alpha masks are exact bilinear resamples; source joins exact, final anchor delta at most 0.000578. Four geometry comparisons DIFFERENT; cage and all rigs/actions EQUIVALENT. No client verification. Independently reviewed Trees01/TimberProps01 evidence is included separately.

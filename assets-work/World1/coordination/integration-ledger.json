@@ -245,5 +245,34 @@
       "src/bin/Data/Object1/Tree07.bmd": "assets-work/World1/BareTrees01/Tree07/exports/Tree07.bmd",
       "src/bin/Data/Object1/tree_03.OZJ": "assets-work/World1/BareTrees01/textures/final/tree_03.OZJ"
     }
+  },
+  {
+    "name": "Ironwork01",
+    "models": [
+      "SteelWall01",
+      "SteelWall02",
+      "SteelWall03",
+      "SteelDoor01",
+      "HouseEtc03"
+    ],
+    "owner": "reviewer / ironwork subagent",
+    "source_commits": [
+      "8788f85c",
+      "a031bc72"
+    ],
+    "integration_commits": [
+      "f5c11181",
+      "37844e87"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/SteelWall01.bmd": "assets-work/World1/Ironwork01/SteelWall01/exports/SteelWall01.bmd",
+      "src/bin/Data/Object1/SteelWall02.bmd": "assets-work/World1/Ironwork01/SteelWall02/exports/SteelWall02.bmd",
+      "src/bin/Data/Object1/SteelWall03.bmd": "assets-work/World1/Ironwork01/SteelWall03/exports/SteelWall03.bmd",
+      "src/bin/Data/Object1/SteelDoor01.bmd": "assets-work/World1/Ironwork01/SteelDoor01/exports/SteelDoor01.bmd",
+      "src/bin/Data/Object1/HouseEtc03.bmd": "assets-work/World1/Ironwork01/HouseEtc03/exports/HouseEtc03.bmd",
+      "src/bin/Data/Object1/steel_barred_b.OZJ": "assets-work/World1/Ironwork01/textures/steel_barred_b.OZJ",
+      "src/bin/Data/Object1/steel_barred_a.OZT": "assets-work/World1/Ironwork01/textures/steel_barred_a.OZT",
+      "src/bin/Data/Object1/steel_barred_door.OZT": "assets-work/World1/Ironwork01/textures/steel_barred_door.OZT"
+    }
   }
 ]
