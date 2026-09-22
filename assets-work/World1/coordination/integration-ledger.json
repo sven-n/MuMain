@@ -359,5 +359,74 @@
       "src/bin/Data/Object1/copra_gate.OZJ": "assets-work/World1/FireProps01/textures/final/copra_gate.OZJ",
       "src/bin/Data/Object1/fire_01.OZJ": "assets-work/World1/FireProps01/textures/final/fire_01.OZJ"
     }
+  },
+  {
+    "name": "TavernDetails01",
+    "models": [
+      "Beer02",
+      "Beer03",
+      "Furniture01",
+      "Furniture02",
+      "Furniture06",
+      "Furniture07"
+    ],
+    "owner": "groundcover / tavern details subagent",
+    "source_commits": [
+      "dd01d2eb"
+    ],
+    "integration_commits": [
+      "d051ee31"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Beer02.bmd": "assets-work/World1/TavernDetails01/Beer02/exports/Beer02.bmd",
+      "src/bin/Data/Object1/Beer03.bmd": "assets-work/World1/TavernDetails01/Beer03/exports/Beer03.bmd",
+      "src/bin/Data/Object1/Furniture01.bmd": "assets-work/World1/TavernDetails01/Furniture01/exports/Furniture01.bmd",
+      "src/bin/Data/Object1/Furniture02.bmd": "assets-work/World1/TavernDetails01/Furniture02/exports/Furniture02.bmd",
+      "src/bin/Data/Object1/Furniture06.bmd": "assets-work/World1/TavernDetails01/Furniture06/exports/Furniture06.bmd",
+      "src/bin/Data/Object1/Furniture07.bmd": "assets-work/World1/TavernDetails01/Furniture07/exports/Furniture07.bmd",
+      "src/bin/Data/Object1/pot3.ozt": "assets-work/World1/TavernDetails01/Beer02/exports/pot3.ozt",
+      "src/bin/Data/Object1/apple.OZJ": "assets-work/World1/TavernDetails01/Beer02/exports/apple.OZJ",
+      "src/bin/Data/Object1/bottle.ozt": "assets-work/World1/TavernDetails01/Beer02/exports/bottle.ozt",
+      "src/bin/Data/Object1/plate.OZJ": "assets-work/World1/TavernDetails01/Beer02/exports/plate.OZJ",
+      "src/bin/Data/Object1/winecup.OZJ": "assets-work/World1/TavernDetails01/Beer02/exports/winecup.OZJ",
+      "src/bin/Data/Object1/pot.OZJ": "assets-work/World1/TavernDetails01/Furniture01/exports/pot.OZJ",
+      "src/bin/Data/Object1/pot2.OZJ": "assets-work/World1/TavernDetails01/Furniture01/exports/pot2.OZJ",
+      "src/bin/Data/Object1/bookshelf.OZJ": "assets-work/World1/TavernDetails01/Furniture01/exports/bookshelf.OZJ",
+      "src/bin/Data/Object1/chair2.OZT": "assets-work/World1/TavernDetails01/Furniture06/exports/chair2.OZT"
+    }
+  },
+  {
+    "name": "Architecture01",
+    "models": [
+      "House01",
+      "House03",
+      "House04",
+      "Tent01",
+      "HouseWall02",
+      "HouseEtc02"
+    ],
+    "original_revisions": {
+      "HouseEtc02": "f1fbb29c"
+    },
+    "owner": "fences / architecture subagent",
+    "source_commits": [
+      "6fef840f"
+    ],
+    "integration_commits": [
+      "8094616d"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/House01.bmd": "assets-work/World1/Architecture01/House01/exports/House01.bmd",
+      "src/bin/Data/Object1/House03.bmd": "assets-work/World1/Architecture01/House03/exports/House03.bmd",
+      "src/bin/Data/Object1/House04.bmd": "assets-work/World1/Architecture01/House04/exports/House04.bmd",
+      "src/bin/Data/Object1/Tent01.bmd": "assets-work/World1/Architecture01/Tent01/exports/Tent01.bmd",
+      "src/bin/Data/Object1/HouseWall02.bmd": "assets-work/World1/Architecture01/HouseWall02/exports/HouseWall02.bmd",
+      "src/bin/Data/Object1/tile_house01.OZJ": "assets-work/World1/Architecture01/House01/exports/tile_house01.OZJ",
+      "src/bin/Data/Object1/tile_ston05.OZJ": "assets-work/World1/Architecture01/House01/exports/tile_ston05.OZJ",
+      "src/bin/Data/Object1/tile_windows01.OZJ": "assets-work/World1/Architecture01/House04/exports/tile_windows01.OZJ",
+      "src/bin/Data/Object1/tile_space01.OZJ": "assets-work/World1/Architecture01/House04/exports/tile_space01.OZJ",
+      "src/bin/Data/Object1/tile_ston07.OZT": "assets-work/World1/Architecture01/House03/exports/tile_ston07.OZT",
+      "src/bin/Data/Object1/light_02.OZJ": "assets-work/World1/Architecture01/House03/exports/light_02.OZJ"
+    }
   }
 ]

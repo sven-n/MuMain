@@ -348,5 +348,69 @@
       "src/bin/Data/Object1/ship05.OZJ"
     ],
     "frozen_textures": []
+  },
+  "groundcover / carts and hay": {
+    "models": [
+      "Carriage01",
+      "Carriage02",
+      "Carriage03",
+      "Carriage04",
+      "Straw01",
+      "Straw02"
+    ],
+    "compatibility_models": [],
+    "branch": "codex/lorencia-cart-hay",
+    "worktree": "MuMain-lorencia-cart-hay",
+    "owned_textures": [
+      "src/bin/Data/Object1/horse_drawn_02.OZT",
+      "src/bin/Data/Object1/horse_drawn_03.OZJ",
+      "src/bin/Data/Object1/grass_01.OZT"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/horse_drawn_01.OZJ",
+      "src/bin/Data/Object1/tub.OZJ"
+    ],
+    "frozen_models": []
+  },
+  "fences / architecture timber": {
+    "models": [
+      "House05",
+      "HouseWall01",
+      "HouseWall04",
+      "HouseWall05",
+      "HouseWall06",
+      "Stair01"
+    ],
+    "compatibility_models": [
+      "House04",
+      "HouseWall02",
+      "HouseEtc02"
+    ],
+    "branch": "codex/lorencia-architecture-timber",
+    "worktree": "MuMain-lorencia-architecture-timber",
+    "owned_textures": [
+      "src/bin/Data/Object1/tile_wood01.OZJ",
+      "src/bin/Data/Object1/tile_wood03.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/bridge_01.OZJ",
+      "src/bin/Data/Object1/c_wall04.OZJ",
+      "src/bin/Data/Object1/horse_drawn_01.OZJ",
+      "src/bin/Data/Object1/light_02.OZJ",
+      "src/bin/Data/Object1/ston02.OZJ",
+      "src/bin/Data/Object1/tile_02.OZJ",
+      "src/bin/Data/Object1/tile_house01.OZJ",
+      "src/bin/Data/Object1/tile_space01.OZJ",
+      "src/bin/Data/Object1/tile_ston01.OZJ",
+      "src/bin/Data/Object1/tile_ston04.OZJ",
+      "src/bin/Data/Object1/tile_ston06.OZJ",
+      "src/bin/Data/Object1/tile_windows01.OZJ",
+      "src/bin/Data/Object1/tile_wood02.OZJ"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/House04.bmd",
+      "src/bin/Data/Object1/HouseWall02.bmd",
+      "src/bin/Data/Object1/HouseEtc02.bmd"
+    ]
   }
 }

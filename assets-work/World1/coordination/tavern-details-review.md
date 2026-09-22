@@ -1,0 +1,3 @@
+# TavernDetails01 coordinator review
+
+Accepted offline 2026-09-22. All six matching-camera sheets reviewed with technical handoff: rounded tableware, brownglass, pewter and carved oak are coherent with Beer01 and accepted furniture. 32 placements, 952/516/732/1288/132/174 triangles. Exact original seat triangles and foot corners preserved, all rigs/actions EQUIVALENT, geometry DIFFERENT. Alpha paintings preserve openwork readability; bottle graded alpha exact. Nine 512-square paints / complete dependency group. Fifteen game paths checked before integration. Terrain repeat/figure views explicitly staging proxies, no client verification.
