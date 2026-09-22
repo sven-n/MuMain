@@ -1,0 +1,34 @@
+{
+  "result": "PASS: offline integration; no client claim",
+  "integration_head": "7486d5ad587477f323f6854e9e846b9dc036262f",
+  "baseline": "ac0f6dd8",
+  "changed_game_files": {
+    "src/bin/Data/Object1/Furniture03.bmd": {
+      "sha256": "6c427d73a9937d9e3b7d287b0f3f74b7f2014b0a423bd666590e26e9886e4d94",
+      "export": "assets-work/World1/TavernProps/Furniture03/exports/Furniture03.bmd",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/Furniture04.bmd": {
+      "sha256": "d1afed82e4ca519a11fe752a73a79a20a9624d788007344e7cbc9ec85bc49a4c",
+      "export": "assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/Furniture05.bmd": {
+      "sha256": "d1fb904efbb81091c7ef5841d6f4e3416da3a8dc5b382bd3e20bf15f528631d3",
+      "export": "assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd",
+      "batch": "TavernProps"
+    },
+    "src/bin/Data/Object1/desk_big.OZJ": {
+      "sha256": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4",
+      "export": "assets-work/World1/TavernProps/Furniture03/exports/desk_big.OZJ",
+      "batch": "TavernProps"
+    }
+  },
+  "protected_file_count": 320,
+  "world1_files_unchanged": true,
+  "combined_models": 115,
+  "missing_textures": [],
+  "texture_loader_checks": "OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-rebuild/src/bin/Data/Object1/desk_big.OZJ\n",
+  "client_verified": false,
+  "runtime_modified": false
+}

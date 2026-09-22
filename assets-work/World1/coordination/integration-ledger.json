@@ -1,0 +1,26 @@
+[
+  {
+    "name": "TavernProps",
+    "models": [
+      "Furniture03",
+      "Furniture04",
+      "Furniture05"
+    ],
+    "owner": "prior ASTRA tavern artist",
+    "source_commits": [
+      "fe69aa12",
+      "45c82ea0"
+    ],
+    "integration_commits": [
+      "9a10643c",
+      "527e82d8"
+    ],
+    "independent_review": "9787b981",
+    "game_files": {
+      "src/bin/Data/Object1/Furniture03.bmd": "assets-work/World1/TavernProps/Furniture03/exports/Furniture03.bmd",
+      "src/bin/Data/Object1/Furniture04.bmd": "assets-work/World1/TavernProps/Furniture04/exports/Furniture04.bmd",
+      "src/bin/Data/Object1/Furniture05.bmd": "assets-work/World1/TavernProps/Furniture05/exports/Furniture05.bmd",
+      "src/bin/Data/Object1/desk_big.OZJ": "assets-work/World1/TavernProps/Furniture03/exports/desk_big.OZJ"
+    }
+  }
+]
