@@ -1,0 +1,7 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/exports/Fence03.bmd
+  name field: Fence03.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 112
+  bounds (bind pose): min -100.42 -6.81 0.00  max 99.68 19.70 22.69  size 200.10 26.51 22.69
+  mesh 0: triangles=112 vertices=64 normals=34 uvs=54 texture=joint.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0

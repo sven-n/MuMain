@@ -1,0 +1,89 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    12150.0,
+    11550.0,
+    165.00001525878906
+  ],
+  "objects": [
+    {
+      "name": "Fence02",
+      "placement_index": 0,
+      "position": [
+        12150.0,
+        11550.0,
+        165.00001525878906
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        2610.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        121.5,
+        115.5
+      ]
+    },
+    {
+      "name": "Fence04",
+      "placement_index": 1,
+      "position": [
+        11950.0,
+        11600.0,
+        165.0000457763672
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        119.5,
+        116.0
+      ]
+    },
+    {
+      "name": "Fence04",
+      "placement_index": 2,
+      "position": [
+        12050.0,
+        11600.0,
+        164.99996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1260.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        120.5,
+        116.0
+      ]
+    },
+    {
+      "name": "Fence04",
+      "placement_index": 3,
+      "position": [
+        12200.0,
+        11450.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1530.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        122.0,
+        114.5
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after"
+}

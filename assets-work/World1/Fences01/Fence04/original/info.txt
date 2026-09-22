@@ -1,0 +1,7 @@
+model src/bin/Data/Object1/Fence04.bmd
+  name field: Data2\Object1\joint_03.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 10
+  bounds (bind pose): min -49.82 -6.81 0.00  max 50.22 19.70 22.69  size 100.03 26.51 22.69
+  mesh 0: triangles=10 vertices=8 normals=5 uvs=12 texture=joint.jpg
+  bone 0: "Object02" parent=-1
+  action 0: keys=1 lock=0

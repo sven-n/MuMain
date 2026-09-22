@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "packed_images": [
+    "joint.jpg",
+    "joint.jpg.001"
+  ],
+  "original_rig_reused": true,
+  "reference_exclusion": "REF_* collections and mu_reference",
+  "export_objects": 4
+}

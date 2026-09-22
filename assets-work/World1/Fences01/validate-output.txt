@@ -1,0 +1,35 @@
+Fence01
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 36 vs 116
+unmatched triangles: 36  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/exports/tile_wood02.OZJ
+
+Fence02
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 16 vs 112
+unmatched triangles: 14  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/exports/joint.OZJ
+
+Fence03
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 10 vs 112
+unmatched triangles: 8  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/exports/joint.OZJ
+
+Fence04
+meshes 1 vs 1, bones 1 vs 1, actions 1 vs 1, triangles 10 vs 56
+unmatched triangles: 8  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/exports/joint.OZJ

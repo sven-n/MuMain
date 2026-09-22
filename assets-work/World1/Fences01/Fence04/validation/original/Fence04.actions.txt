@@ -1,0 +1,5 @@
+# bmdconv action manifest for Fence04.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Fence04.smd <output.bmd> --manifest Fence04.actions.txt
+model Data2\Object1\joint_03.smd
+action 0 file=Fence04_a00.smd keys=1 lock=0
+texture 0 joint.jpg original=joint.jpg

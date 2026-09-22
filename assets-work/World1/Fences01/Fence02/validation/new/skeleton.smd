@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Object01" -1
+end
+skeleton
+time 0
+0 -99.657173 -47.542126 0.000000 0.000000 -0.000000 0.000000
+end
+triangles
+end

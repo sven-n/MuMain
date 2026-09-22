@@ -1,0 +1,263 @@
+00:00.516  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/source.blend"
+00:00.521  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/original/source.blend"
+00:02.068  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/review/before.png'
+00:03.101  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/review/gameplay-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/exports/Fence01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_pqybif6h
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_pqybif6h/Fence01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_pqybif6h/Fence01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_pqybif6h/Fence01.actions.txt
+
+SMD IMPORTER: now working on Fence01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- Imported 116 polys
+SMD Fence01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence01_skeleton"
+- Imported 1 frames of animation
+SMD Fence01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:04.549  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/review/after.png'
+00:05.588  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/exports/Fence01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_11jlej42
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_11jlej42/Fence01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_11jlej42/Fence01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_11jlej42/Fence01.actions.txt
+
+SMD IMPORTER: now working on Fence01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_wood02.jpg
+- Imported 116 polys
+SMD Fence01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence01_skeleton"
+- Imported 1 frames of animation
+SMD Fence01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:06.932  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/review/wireframe.png'
+00:06.933  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/source.blend"
+00:06.941  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/original/source.blend"
+00:08.682  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/review/before.png'
+00:09.725  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/exports/Fence02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9yaezy68
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9yaezy68/Fence02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9yaezy68/Fence02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_9yaezy68/Fence02.actions.txt
+
+SMD IMPORTER: now working on Fence02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: joint.jpg
+- Imported 112 polys
+SMD Fence02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence02_skeleton"
+- Imported 1 frames of animation
+SMD Fence02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:11.421  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/review/after.png'
+00:12.538  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/exports/Fence02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bwrbtti7
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bwrbtti7/Fence02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bwrbtti7/Fence02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_bwrbtti7/Fence02.actions.txt
+
+SMD IMPORTER: now working on Fence02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: joint.jpg
+- Imported 112 polys
+SMD Fence02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence02_skeleton"
+- Imported 1 frames of animation
+SMD Fence02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:13.925  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/review/wireframe.png'
+00:13.927  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/source.blend"
+00:13.934  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/original/source.blend"
+00:15.340  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/review/before.png'
+00:16.360  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/exports/Fence03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lieqlmez
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lieqlmez/Fence03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lieqlmez/Fence03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lieqlmez/Fence03.actions.txt
+
+SMD IMPORTER: now working on Fence03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: joint.jpg
+- Imported 112 polys
+SMD Fence03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence03_skeleton"
+- Imported 1 frames of animation
+SMD Fence03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:17.782  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/review/after.png'
+00:18.809  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/exports/Fence03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x28z106_
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x28z106_/Fence03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x28z106_/Fence03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_x28z106_/Fence03.actions.txt
+
+SMD IMPORTER: now working on Fence03
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: joint.jpg
+- Imported 112 polys
+SMD Fence03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence03_skeleton"
+- Imported 1 frames of animation
+SMD Fence03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:20.132  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/review/wireframe.png'
+00:20.133  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/source.blend"
+00:20.140  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/original/source.blend"
+00:21.657  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/review/before.png'
+00:22.728  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence03/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/exports/Fence04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lkkfswn2
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lkkfswn2/Fence04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lkkfswn2/Fence04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_lkkfswn2/Fence04.actions.txt
+
+SMD IMPORTER: now working on Fence04
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: joint.jpg
+- Imported 56 polys
+SMD Fence04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence04_skeleton"
+- Imported 1 frames of animation
+SMD Fence04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:24.503  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/review/after.png'
+00:25.545  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/exports/Fence04.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jewmg60u
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jewmg60u/Fence04.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jewmg60u/Fence04_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_jewmg60u/Fence04.actions.txt
+
+SMD IMPORTER: now working on Fence04
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: joint.jpg
+- Imported 56 polys
+SMD Fence04 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Fence04_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Fence04_skeleton"
+- Imported 1 frames of animation
+SMD Fence04_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:26.902  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-fences/assets-work/World1/Fences01/Fence04/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
