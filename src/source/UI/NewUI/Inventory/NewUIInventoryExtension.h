@@ -61,12 +61,16 @@ namespace SEASON3B
         void DeleteAllItems() const;
         int FindEmptySlot(int cx, int cy, const CNewUIInventoryCtrl* excluded = nullptr) const;
         CNewUIInventoryCtrl* GetOwnerOf(const CNewUIPickedItem* pPickedItem) const;
+        // The control holding that inventory index, or null: which extension
+        // a slot belongs to is not derivable from the index alone, and
+        // picking an item up needs the control it sits in.
+        CNewUIInventoryCtrl* TryGetExtensionByInventoryIndex(int iIndex) const;
+
     private:
         void Init();
 
         void LoadImages();
         void UnloadImages();
-        CNewUIInventoryCtrl* TryGetExtensionByInventoryIndex(int iIndex) const;
 
         bool InventoryProcess();
 

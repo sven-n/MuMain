@@ -78,6 +78,12 @@ endif()
 # Editor mode option (for admin builds)
 option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 
+# Developer control socket: a local socket through which test scripts drive
+# the client (login, move, attack, state, events). Never for player builds:
+# when OFF, none of its sources are compiled and the activation variable does
+# not exist in the binary (enforced by the control_socket_leak test).
+option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (never for player builds)" OFF)
+
 # ---------------------------------------------------------------------------
 # Engine/game code -> static library (libMuClient); MuMain -> thin executable.
 #
@@ -124,6 +130,18 @@ list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRend
 # Profile backend is preserved through the existing Render/Renderer API, not
 # compiled as a second backend.
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\](Core|RHI|Shaders)[/\\]")
+
+# The control socket and its local-socket transport exist only in developer
+# builds. The two headers that the rest of the client includes
+# (App/Control/ControlTaps.h, ControlServer.h) compile to no-ops without
+# MU_ENABLE_CONTROL_SOCKET, so the call sites need no conditionals.
+if(NOT ENABLE_CONTROL_SOCKET)
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]App[/\\]Control[/\\]")
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]LocalSocket\\.cpp$")
+  # The injector is the control socket's hands; its header compiles the two
+  # calls the rest of the client makes to nothing.
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Input[/\\]SyntheticInput\\.cpp$")
+endif()
 
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
@@ -513,6 +531,9 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb"
+  # nlohmann/json backs the control socket's request/response encoding. Only
+  # the App/Control sources include it, so a player build does not see it.
+  $<$<BOOL:${ENABLE_CONTROL_SOCKET}>:${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty>
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
@@ -534,6 +555,7 @@ target_compile_definitions(MuClient PUBLIC
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
   $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
+  $<$<BOOL:${ENABLE_CONTROL_SOCKET}>:MU_ENABLE_CONTROL_SOCKET>  # Developer control socket
 )
 
 if (MSVC)

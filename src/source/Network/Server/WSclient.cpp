@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
 #include <memory>
@@ -965,6 +966,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
+        App::Control::Events::RecordDisconnected("the session went back to the character list");
         StopMusic();
         AllStopSound();
 
@@ -996,6 +998,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
         SelectMarkColor = 0;
         g_ErrorReport.Write(L"[ReceiveLogOut]");
+        App::Control::Events::RecordDisconnected("the server closed the session");
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
@@ -1025,6 +1028,8 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 void ResetClientToLoginScene()
 {
+    App::Control::Events::RecordDisconnected("the game session was torn down");
+
     // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
     // active game session and return to a clean login scene. The auto-reconnect
     // flow always runs this from MAIN_SCENE, so the teardown is unconditional.
@@ -1165,6 +1170,11 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 
     LockInputStatus = false;
     Input::IME::CheckStatus(true, 0);
+
+    // The other way a character lands somewhere: a warp to a map on another
+    // map server arrives here instead of through the teleport packet, and a
+    // scripted `warp` waits for exactly this signal.
+    App::Control::Events::RecordTeleportPacket();
 
     LoadingWorld = 30;
     MouseUpdateTime = 0;
@@ -1841,6 +1851,15 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText);
         Text[MAX_CHAT_SIZE] = L'\0';
 
+        // The prefix the branches below consume is what says which channel
+        // this line belongs to; it is read before they shift it away.
+        const char* chatKind = Text[0] == L'~'                        ? "party"
+                               : (Text[0] == L'@' && Text[1] == L'@') ? "union"
+                               : Text[0] == L'@'                      ? "guild"
+                               : Text[0] == L'$'                      ? "gens"
+                               : Text[0] == L'#'                      ? "gm"
+                                                                      : "public";
+
         if (Text[0] == L'~')
         {
             for (int i = 0; i < messageSize - 1; i++)
@@ -1925,6 +1944,8 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_CHAT_MESSAGE);
             }
         }
+
+        App::Control::Events::RecordChatLine(ID, Text, chatKind);
     }
 }
 
@@ -1954,6 +1975,8 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
     }
 
     g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_WHISPER_MESSAGE);
+
+    App::Control::Events::RecordChatLine(ID, Text, "whisper");
 }
 
 void ReceiveChatWhisperResult(const BYTE* ReceiveBuffer)
@@ -2198,6 +2221,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
+        // Before the view is emptied, not after: the events name the objects
+        // that are about to disappear, and their slots are reused.
+        App::Control::Events::RecordViewCleared("the character teleported");
         ClearItems();
         ClearCharacters(HeroKey);
         RemoveAllShopTitleExceptHero();
@@ -2314,6 +2340,8 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", Data->Flag);
+
+    App::Control::Events::RecordTeleportPacket();
 
     return (TRUE);
 }
@@ -2703,6 +2731,8 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
         }
     }
 
+    App::Control::Events::RecordViewEnterKey(Key);
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewportExtended]");
 }
 
@@ -2954,6 +2984,8 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
             MUHelper::g_MuHelper.AddTarget(Key, false);
         }
 
+        App::Control::Events::RecordViewEnterKey(Key);
+
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
             RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
@@ -3179,6 +3211,8 @@ void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
             UnRegisterBuff(g_CharacterBuff((&pCha->Object), k), &pCha->Object);
         }
 
+        App::Control::Events::RecordViewLeaveKey(Key);
+
         DeleteCharacter(Key);
         CHARACTER* pPlayer = FindCharacterTagShopTitle(Key);
         if (pPlayer)
@@ -3206,6 +3240,8 @@ void ReceiveDamage(const BYTE* ReceiveBuffer)
         CharacterAttribute->Shield = ShieldDamage;
     else
         CharacterAttribute->Shield = 0;
+
+    App::Control::Events::RecordAttackDamage(AttackPlayer, HeroKey, Damage, ShieldDamage, 0);
 }
 
 void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, const int key, const int damage,
@@ -3558,6 +3594,8 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
         ReceiveAttackDamage(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly,
                             bDoubleEnable, bComboEnable);
     }
+
+    App::Control::Events::RecordAttackDamage(AttackPlayer, Key, Damage, ShieldDamage, DamageType);
 }
 
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
@@ -5717,6 +5755,9 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     c->Dead = 1;
     c->Movement = false;
 
+    App::Control::Events::RecordDeathOf(Key, HeroKey);
+    App::Control::Events::RecordExperienceGain(Exp, Damage);
+
     if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
@@ -5929,6 +5970,8 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
     c->m_byDieType = SkillType;
 
+    App::Control::Events::RecordDeathOf(Key, -1);
+
     if (gMapManager.InBloodCastle() == true)
     {
         FallingStartCharacter(c, o);
@@ -6002,6 +6045,7 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
 
     CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
     MUHelper::g_MuHelper.AddItem(Data->Id, {Data->PositionX, Data->PositionY});
+    App::Control::Events::RecordDropAppeared(Data->Id);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
 }
@@ -6045,6 +6089,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
 
         CreateItemDrop(&Items[id], params, Position, isFreshDrop);
         MUHelper::g_MuHelper.AddItem(id, {itemStartData->PositionX, itemStartData->PositionY});
+        App::Control::Events::RecordDropAppeared(id);
 
         Offset += length;
     }
@@ -6060,8 +6105,15 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
     {
         auto Data2 = (LPPDELETE_CHARACTER)(ReceiveBuffer + Offset);
         int Key = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
-        if (Key < 0 || Key >= MAX_ITEMS)
+        const bool KeyInRange = Key >= 0 && Key < MAX_ITEMS;
+        if (!KeyInRange)
             Key = 0;
+        // Only a real slot is reported: the clamp above turns anything else
+        // into slot 0, and announcing that as vanished would tell a
+        // scripted caller a drop it is tracking is gone.
+        if (KeyInRange)
+            App::Control::Events::RecordDropVanished(Key, "gone");
+
         Items[Key].Object.Live = false;
         Offset += sizeof(PDELETE_CHARACTER);
 
@@ -6887,6 +6939,7 @@ void ReceiveRepair(const BYTE* ReceiveBuffer)
 
 void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
 {
+
     if (Size >= sizeof(PRECEIVE_LEVEL_UP_EXTENDED))
     {
         auto Data = (LPPRECEIVE_LEVEL_UP_EXTENDED)ReceiveBuffer;
@@ -6947,6 +7000,8 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 0, o);
     }
     PlayBuffer(SOUND_LEVEL_UP);
+
+    App::Control::Events::RecordLevelUp(CharacterAttribute->Level);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceiveLevelUp]");
 }
@@ -7078,6 +7133,8 @@ void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 
         break;
     }
+
+    App::Control::Events::RecordHeroStats();
 }
 
 void ReceivePK(const BYTE* ReceiveBuffer)
@@ -7394,6 +7451,8 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
         Party[i].index = -1;
     }
 
+    App::Control::Events::RecordPartyChange("list", Party[0].Name);
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
 }
 
@@ -7416,6 +7475,8 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 
 void ReceivePartyLeave(const BYTE* ReceiveBuffer)
 {
+    App::Control::Events::RecordPartyChange("left", L"");
+
     PartyNumber = 0;
     memset(Party, 0, sizeof(Party));
     for (int i = 0; i < MAX_PARTYS; i++)
@@ -10228,20 +10289,18 @@ void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
     }
 
     if (g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET)
+    {
+        ZeroMemory(g_strGiftName, sizeof(char) * 64);
 
-        if (g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET)
-        {
-            ZeroMemory(g_strGiftName, sizeof(char) * 64);
-
-            ClearInput(FALSE);
-            InputTextMax[0] = 12;
-            InputNumber = 1;
-            InputEnable = false;
-            GoldInputEnable = false;
-            InputGold = 0;
-            StorageGoldFlag = 0;
-            g_bScratchTicket = true;
-        }
+        ClearInput(FALSE);
+        InputTextMax[0] = 12;
+        InputNumber = 1;
+        InputEnable = false;
+        GoldInputEnable = false;
+        InputGold = 0;
+        StorageGoldFlag = 0;
+        g_bScratchTicket = true;
+    }
 }
 
 void ReceiveEventChip(const BYTE* ReceiveBuffer)

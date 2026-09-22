@@ -7,6 +7,9 @@ CServerGroup::CServerGroup()
     m_iSequence = 0;
     m_iServerIndex = 0;
     m_iNumServer = 0;
+    // A group only gets a button position once UpdateDisplay() places it, and
+    // it skips groups that do not fit; -1 says "no button" until then.
+    m_iBtnPos = -1;
 
     for (int i = 0; i < MAX_SERVER_PER_GROUP; i++)
     {
