@@ -1,5 +1,8 @@
 {
   "base_commit": "9a8b2027",
+  "revision_base_commit": "7a88d829",
+  "work_branch": "art/ui-modern-pilot",
+  "art_revision": 2,
   "reference_canvas": [640, 480],
   "panel": {
     "path": "Interface/partCharge1/newui_menu03.OZJ",
@@ -11,7 +14,8 @@
       {"name": "right controls backing", "source": [104, 0, 152, 41], "destination": [488, 429, 152, 41], "transform": "right"},
       {"name": "experience trough", "source": [0, 41, 256, 10], "destination": [384, 470, 256, 10], "transform": "experience"}
     ],
-    "protected_rectangles_xyxy": [[0, 0, 256, 2], [0, 40, 256, 51], [0, 0, 2, 51], [254, 0, 256, 51], [0, 2, 35, 6], [0, 36, 35, 40], [0, 6, 4, 36], [31, 6, 35, 36], [36, 2, 52, 41], [53, 3, 98, 42], [102, 0, 106, 41], [106, 2, 256, 40]]
+    "protected_rectangles_xyxy": [[0, 0, 1, 51], [255, 0, 256, 51], [36, 0, 104, 42]],
+    "reserved_dynamic_rectangles_xyxy": [[0, 2, 35, 40], [36, 2, 52, 41], [53, 3, 98, 42], [0, 44, 256, 48]]
   },
   "buttons": {
     "payload": [30, 164],
@@ -20,7 +24,7 @@
     "state_y": [0, 41, 82, 123],
     "state_names": ["normal", "hover", "pressed-selected", "selected-hover"],
     "disabled": "No separately registered disabled atlas state in this HUD configuration.",
-    "edit_rectangle_xyxy": [2, 4, 28, 39],
+    "edit_rectangle_xyxy": [0, 0, 30, 41],
     "icons": [
       {"file": "newui_menu_Bt01.OZJ", "label": "Character", "x": 519, "y": 429, "glyph_box": [8, 13, 24, 32]},
       {"file": "newui_menu_Bt02.OZJ", "label": "Inventory", "x": 549, "y": 429, "glyph_box": [7, 12, 24, 33]},

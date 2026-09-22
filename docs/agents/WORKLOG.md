@@ -290,3 +290,33 @@ No assets were regenerated, runtime files written, client session launched or en
 performed during publication. Prior offline validation remains applicable.
 
 **Open / next:** PR review and previously deferred client acceptance. The PR is not merged.
+
+## 2026-09-22 - Modern UI revision after visual feedback (ASTRA / Codex)
+**Goal:** Make the five-file right-HUD pilot visibly cleaner and more readable after
+the first pass failed the user's visual expectations.
+
+**Done:** Created isolated `MuMain-ui-modern` / `art/ui-modern-pilot` from main
+`7a88d829`; the earlier pilot PR #4 was already merged. Generated five new painted
+sources with the built-in imagegen tool and repainted complete button faces with
+dark metal, bold pale symbols and a gold selected-state underline. The user selected
+the clean, restrained dark-fantasy direction. Repainted the emerald skill well and
+XP trough while retaining the AG/mana backing required by unchanged opaque gauge
+fills. Kept filenames, dimensions, atlas boundaries and all interaction geometry.
+Retained first-pass payloads/prompts for comparison, updated editable sources and
+reproduction scripts, and produced eight offline previews including actual 1080p
+control sizes and both existing HUD layout modes. Installed only the same five
+validated OZJs into this worktree's source Data. Details:
+[`assets-work/UI/notes.md`](../../assets-work/UI/notes.md).
+
+**Verified:** `mu_texture.py check` exits 0 for every export with only the same five
+pre-existing NPOT warnings. Verified 760 original payload hashes, unchanged opaque
+RGB dimensions, wrappers, protected panel pixels, state ordering and JPEG error
+at most 4/255 per channel. Reassembly reproduced all ten master/export hashes;
+all five editable ORA composites match their masters. Inspected native, all-state,
+1080p and light/dark previews. No engine, CMake, World1, Object1 or shared-runtime
+changes; no client launch or engine build.
+
+**Open / next:** Client loading, GPU filtering, localized text, skill/counter
+overlays, input/alert states, gameplay readability and HiDPI checks remain pending.
+The rest of the HUD is outside this five-file benchmark. All previews are labeled
+offline mockups, not client screenshots.

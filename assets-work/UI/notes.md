@@ -1,122 +1,112 @@
-# ASTRA — right HUD art pilot
+# ASTRA — modern right HUD revision
 
-2026-09-22. **Offline validated; client verification pending.** Worktree:
-`/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-pilot`, branch
-`art/ui-pilot`, based on `main` at `9a8b2027`. The World1 checkout and shared
-runtime have not been written to. No engine, CMake, World1 or Object1 changes.
+2026-09-22. **Offline validated; client review pending.** Branch `art/ui-modern-pilot`
+in `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-ui-modern`, based on
+current main `7a88d829`. This revises the visually insufficient first pass from PR #4.
+The original inventory baseline remains `9a8b2027`; untouched originals are unchanged.
 
-## What changed
+## Art direction and changed assets
 
-| Source Data file, under `Interface/partCharge1/` | Size | Treatment |
+The first pass retained too much of the old patterned framing and reduced the new
+paintings to nearly the same old appearance. This revision repaints complete
+button faces and borders with smooth blue-black metal, restrained steel/brass
+edges, and bold pale symbols. It is judged at actual 1080p control size, not from
+the large source paintings. The selected state has a clear gold underline.
+
+The same five game filenames are replaced:
+
+| File under Interface/partCharge1 | Payload size | Revision |
 |---|---|---|
-| `newui_menu03.OZJ` | 256×51 | Subdued green worn-stone skill-well interior and aged exposed trim. Conservative partial repaint: 1,083 of 13,056 master pixels change. |
-| `newui_menu_Bt01.OZJ` | 30×164 | Character icon retained, worn iron frame and quiet dark inset. |
-| `newui_menu_Bt02.OZJ` | 30×164 | Inventory icon retained, same material family. |
-| `newui_menu_Bt03.OZJ` | 30×164 | Friends icon retained, same material family. |
-| `newui_menu_Bt04.OZJ` | 30×164 | Menu/power symbol retained, same material family. |
+| newui_menu03.OZJ | 256×51 | Clean emerald skill well, thin metal framing, quieter XP trough and backing. |
+| newui_menu_Bt01.OZJ | 30×164 | Crisp circular inspection symbol for Character. |
+| newui_menu_Bt02.OZJ | 30×164 | Legible satchel symbol for Inventory. |
+| newui_menu_Bt03.OZJ | 30×164 | Clear paired-profile symbol for Friends. |
+| newui_menu_Bt04.OZJ | 30×164 | Familiar power/menu symbol. |
 
-The controls have cleaner light/dark separation, restrained brass accents and
-reduced background noise. This is a benchmark for the material language, not a
-full-HUD repaint. The cash-shop button, left/center panels, colorful gauge fills,
-skill icons, counters and XP textures remain original. The active assets live in
-`partCharge1`; the similarly named root-level Interface files are untouched.
+Inventory and Friends symbols are reinterpreted for immediate recognition of the
+same functions. No control, hit rectangle, tooltip or interaction behavior is changed.
+The four 30×41 atlas cells remain at Y=0,41,82,123: normal, hover, pressed/selected,
+selected-hover. No separate disabled state is invented.
 
-## Layout, alpha and edge handling
+The panel changes 5,007 master pixels versus the original. Its 68×42 AG/mana
+backing is retained because the unchanged gauge-fill images contain their own
+old ornament; mixing those fills with a newly shaped empty backing created a
+visible mismatch. The panel's first and last columns are also retained for joins.
+The old border pixels on the four buttons are fully repainted inside the same
+atlas rectangles. Preserving UV boundaries does not require preserving the old
+surface artwork.
 
-See [inventory/README.md](inventory/README.md) for engine references, normalized
-UVs, dependencies and 1920×1080 transforms, and [source/layout.json](source/layout.json)
-for exact source/destination rectangles and protected areas.
+## What remains fixed
 
-- Every button retains four 30×41 cells at Y=0,41,82,123. They mean normal,
-  hover, pressed/selected and selected-hover. No separate disabled texture is
-  registered by this HUD. Quest/mail alerts reuse hover states.
-- The same normal painting produces all four states through fixed light/color
-  adjustments, so there is no generated position drift between states.
-- Original two-pixel side guards, top rail, cell boundaries and bottom edges
-  remain byte-identical in the lossless button masters. Only x=2…27,y=4…38
-  within each cell is repainted. Icon meanings and control hit rectangles stay
-  the same; no click offset or geometry is introduced.
-- Panel slices remain x=0…103 / x=104…255, y=0…40; its XP slice is y=41…50.
-  Mana/AG rectangles, green well border, black backing, XP strip, outside borders
-  and guards around x=104 are protected. The empty green well contains no icon,
-  label or number; runtime skill content still has its original space.
-- All five payloads are RGB JPEG in OZJ, with a repeated 24-byte JPEG prefix.
-  Alpha is 255 everywhere, including black. No transparency, premultiplication,
-  color key or new fringe has been introduced. Light/dark background previews
-  explicitly demonstrate the opaque contract.
-- The original non-power-of-two payload dimensions are intentional here:
-  256×51 allocates 256×64, and 30×164 allocates 32×256. Existing half-texel UV
-  insets and clamp-to-edge linear sampling are unchanged. No file is enlarged.
-- JPEG exports use quality 100, 4:4:4, baseline encoding. Protected pixels are
-  exact in PNG/ORA masters; decoded JPEG channel differences from those masters
-  are at most **4/255**. This is measured, not an assertion of lossless JPEG.
+- Same filenames, OZJ wrappers, RGB JPEG encoding, payload dimensions and GPU
+  padded allocations (256×64 panel, 32×256 buttons).
+- Same panel slices: (0,0,104,41), (104,0,152,41), (0,41,256,10).
+- Same logical control positions and half-texel UV insets; see
+  [inventory/README.md](inventory/README.md) and [source/layout.json](source/layout.json).
+- No dynamic text, counters, status values or skill icons are baked in.
+- All final pixels remain opaque, including black. Working paintings with alpha
+  are explicitly composited onto black before conversion to the original RGB
+  contract, avoiding colored fringes from hidden RGB.
+- Quality-100, 4:4:4 baseline JPEG, wrapped with `tools/mu_texture.py`.
+- No engine, CMake, World1, Object1 or shared-runtime changes.
 
-## Deliverables
+The cash-shop button and the rest of the HUD are unchanged. This remains a
+five-file visual benchmark, not a completed whole-HUD skin. The 30-pixel source
+width still limits fine detail; this revision improves shape and contrast within
+that constraint and does not claim HD texture resolution.
 
-- `inventory/interface.csv` and `.json`: 760 UI images, paths, dimensions,
-  alpha statistics, original hashes and literal source references. The 738
-  wrapped images were unwrapped with `mu_texture.py`; 22 raw shop TGA tiles were
-  copied unchanged. `Thumbs.db` is not an image and was excluded.
-- `original/Interface/`: all untouched image payloads. `original/containers/`:
-  byte-for-byte backups of the five selected original OZJ containers.
-- `inventory/contact-01.png` … `contact-26.png`: labeled original contact sheets;
-  `pilot-original-atlases.png`: enlarged atlas/state inspection reference.
-- `source/*-generated.png`: five retained high-resolution painted inputs, made
-  with the **built-in imagegen tool**. They are working paintings, not runtime
-  textures. [source/prompts.json](source/prompts.json) preserves every final prompt
-  and input reference. Prompt theme: aged charcoal iron, tarnished silver,
-  restrained brass, worn stone/leather; fixed layout and familiar symbols; no text.
-- `source/editable/*.ora`: native-size OpenRaster projects, with an untouched
-  reference layer and a masked painted layer. Open with Krita, GIMP or another
-  OpenRaster editor. `source/masks/` holds the exact protection masks.
-- `masters/`: lossless native-size PNGs. `payloads/`: final JPEGs. `exports/`:
-  wrapped OZJ game files, installed identically in this worktree's `src/bin/Data`.
-- `previews/`: decoded-export native before/after, all four state comparisons,
-  light/dark opacity inspection and separate 1920×1080 before/after mockups.
-  **Every preview is an offline reconstruction, not a client screenshot.**
-- `validation/`: machine report, original/export `mu_texture.py check` output,
-  environment versions and visual review notes.
+## Review artifacts
 
-## Reproduce the assembly and checks
+Start with [first pass versus revision at 1080p control size](previews/offline-revision-comparison-1080p.png).
+Those are actual 60×82 pixel draw sizes, reconstructed from decoded OZJ exports.
 
-Run from this worktree, with Python, Pillow and numpy available (versions used
-are in `validation/environment.txt`). On the current Mac the bundled interpreter
-is `/Users/webproduktion3/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3`.
+- `previews/offline-1920x1080-after.png`: current default separate-anchor mode.
+- `previews/offline-1920x1080-after-classic.png`: current classic centered mode.
+- Matching before images, native 640×480 logical-layout comparisons, all four
+  states, and light/dark opacity checks are retained in `previews/`.
+- **All previews are offline mockups, not client screenshots.** Runtime text,
+  item models and skill icons are omitted; unchanged gauge fills are illustrated
+  roughly half full.
+- At 1920×1080/contentScale=1 the HUD scale is 2×. Default mode stretches XP
+  horizontally 3×; classic mode centers the complete HUD at 2× including XP.
+  This models the existing main-branch option without changing client code.
+
+## Editable sources and reproduction
+
+All 760 original images and 26 inventory contact sheets remain intact.
+`previous/Interface/partCharge1/` retains the first-pass JPEGs for honest comparison.
+Historical first-pass documentation is in [notes-v1.md](notes-v1.md).
+
+Five new painted sources were made with the **built-in imagegen tool**.
+[source/prompts.json](source/prompts.json) preserves their prompts;
+`prompts-v1.json` preserves the earlier prompts. `source/editable/*.ora` contains
+native-size original and masked painting layers. `source/masks/`, `masters/`,
+`payloads/` and `exports/` retain masks, lossless PNGs, final JPEGs and wrapped OZJs.
+
+With Python, Pillow and numpy installed, run from this worktree:
 
 ```sh
 python3 assets-work/UI/scripts/assemble.py
 python3 assets-work/UI/scripts/preview.py
-python3 assets-work/UI/scripts/validate.py
 python3 assets-work/UI/scripts/validate.py --install
 ```
 
-Assembly uses the retained generated inputs and creates the same lossless pixels
-and JPEG/OZJ bytes. Generating new paintings from the prompts is not deterministic.
-The scripts write under `assets-work/UI`; only the explicit `--install` step
-writes the five selected source Data files, after successful checks and a branch/
-path guard. They never address the shared runtime. `inventory.py` can regenerate
-contact sheets from the retained original inventory without re-indexing installed
-replacements. Do not unwrap installed replacements into `original/`.
+The bundled interpreter on this Mac is
+`/Users/webproduktion3/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3`.
+Scripts recreate deterministic master/export bytes from the retained paintings;
+image generation itself is not deterministic. Installation is guarded to this
+branch and this worktree's source Data paths. The shared runtime is never addressed.
 
-## Validation and client review
+## Validation and pending client checks
 
-All five exports passed size, mode, alpha, protected-pixel, state-order, prefix,
-wrap/unwrap and decoder checks. All 760 original payload hashes match the retained
-inventory. `mu_texture.py check` returned exit 0 for every original and export,
-with the **same five baseline NPOT warnings**, and no rejection. These are not
-warning-free power-of-two textures; changing them would violate the requested
-pixel contract. Installation is restricted to this worktree's source Data.
+All five exports pass the loader-format checks with exit 0 and the same five
+pre-existing non-power-of-two warnings as the originals. Exact dimensions,
+alpha=255, wrapping, state ordering, protected panel pixels and 760 original
+payload hashes are verified. Decoded JPEG error is at most 4/255 per channel.
+The editable layer composites and repeated assembly are checked separately;
+reports are in `validation/`.
 
-The mockup uses inspected engine draw rectangles and half-texel bilinear sampling
-at contentScale=1. Its 1920×1080 HUD is 2× with separate left/center/right anchors;
-the XP strip is 3× horizontally. It is not a GPU render. Neutral backgrounds and
-roughly half-full unchanged gauges are illustrative. Runtime item/skill content,
-numeric text, tooltips, animations and scene lighting are omitted. Existing hotkey
-letters and numerals visible in unchanged original panels are not new painted text.
-
-Pending client checks when a stable capture is available: loading without errors;
-native and HiDPI scaling; hover/click/selected feedback; quest/mail blinking;
-tooltips and localized labels; skill icons and counters over the reserved areas;
-empty/full/poison life, mana and AG; normal/master XP; and seams during window
-resizing. Compare the right controls against the unchanged cash-shop button and
-other HUD regions before extending this benchmark. No stability fix was attempted.
+Visual inspection covers all states at actual 1080p size, classic/default full
+layouts and light/dark backgrounds. Actual client loading, input, selected/alert
+feedback, localized text, overlaid skills/counters, HiDPI scaling and motion
+readability remain pending. This revision does not attempt a stability fix.

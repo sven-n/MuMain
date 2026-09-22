@@ -1,6 +1,7 @@
 Python 3.12.14
 Pillow 12.3.0
 numpy 2.3.5
-Baseline: main 9a8b2027
-Branch: art/ui-pilot
+Original inventory baseline: main 9a8b2027
+Revision worktree base: main 7a88d829
+Branch: art/ui-modern-pilot
 OS: macOS (offline CPU previews)
