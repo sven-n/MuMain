@@ -1,0 +1,33 @@
+{
+  "path": "src/bin/Data/Object1/Tree12.bmd",
+  "type": 11,
+  "placements": [
+    {
+      "position": [
+        11600.0,
+        10850.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1500.0
+      ],
+      "scale": 0.6000003814697266,
+      "tile": [
+        116.0,
+        108.5
+      ]
+    }
+  ],
+  "textures": {
+    "tree_01.jpg": [
+      "src/bin/Data/Object1/tree_01.OZJ"
+    ],
+    "tree_04.tga": [
+      "src/bin/Data/Object1/tree_04.OZT"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Tree12.bmd\n  name field: Data2\\Object1\\treea_10.smd  version: 10\n  meshes: 2  bones: 9  actions: 1  triangles: 393\n  bounds (bind pose): min -187.71 -196.27 0.19  max 236.19 229.76 490.08  size 423.90 426.02 489.89\n  mesh 0: triangles=273 vertices=185 normals=203 uvs=227 texture=tree_01.jpg\n  mesh 1: triangles=120 vertices=240 normals=60 uvs=4 texture=tree_04.tga\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=2\n  bone 6: \"Bone07\" parent=5\n  bone 7: \"Cylinder01\" parent=0\n  bone 8: \"Box07\" parent=0\n  action 0: keys=31 lock=0\n",
+  "scope_exclusion": null
+}

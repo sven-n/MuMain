@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "corners": 1179,
+  "maximum_uv_component_difference": 0,
+  "maximum_corner_distance": 0,
+  "position_tolerance": 0.01,
+  "materials": [
+    "tree_05.tga",
+    "tree_01.jpg"
+  ],
+  "mesh_order": "Original order retained and asserted by converter info",
+  "binding": "Every corner retains matching original rigid bone, material and UV, including legacy repeats"
+}

@@ -1,0 +1,84 @@
+{
+  "path": "src/bin/Data/Object1/Tree13.bmd",
+  "type": 12,
+  "placements": [
+    {
+      "position": [
+        11450.0,
+        10850.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1470.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        114.5,
+        108.5
+      ]
+    },
+    {
+      "position": [
+        21350.0,
+        7500.0,
+        182.53372192382812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        120.0
+      ],
+      "scale": 0.7600002288818359,
+      "tile": [
+        213.5,
+        75.0
+      ]
+    },
+    {
+      "position": [
+        21350.0,
+        7900.0,
+        195.5723114013672
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -30.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        213.5,
+        79.0
+      ]
+    },
+    {
+      "position": [
+        22550.0,
+        8850.0,
+        198.34056091308594
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        60.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        225.5,
+        88.5
+      ]
+    }
+  ],
+  "textures": {
+    "tree_05.tga": [
+      "src/bin/Data/Object1/tree_05.OZT"
+    ],
+    "tree_01.jpg": [
+      "src/bin/Data/Object1/tree_01.OZJ"
+    ]
+  },
+  "info": "model src/bin/Data/Object1/Tree13.bmd\n  name field: Data2\\Object1\\treea_11.smd  version: 10\n  meshes: 2  bones: 10  actions: 1  triangles: 393\n  bounds (bind pose): min -203.43 -203.05 0.39  max 248.12 194.01 472.28  size 451.56 397.07 471.89\n  mesh 0: triangles=120 vertices=240 normals=60 uvs=4 texture=tree_05.tga\n  mesh 1: triangles=273 vertices=185 normals=205 uvs=227 texture=tree_01.jpg\n  bone 0: \"Bone01\" parent=-1\n  bone 1: \"Bone02\" parent=0\n  bone 2: \"Bone03\" parent=1\n  bone 3: \"Bone04\" parent=2\n  bone 4: \"Bone05\" parent=3\n  bone 5: \"Bone06\" parent=4\n  bone 6: \"Bone07\" parent=3\n  bone 7: \"Bone08\" parent=6\n  bone 8: \"Box08\" parent=0\n  bone 9: \"Cylinder07\" parent=0\n  action 0: keys=31 lock=0\n",
+  "scope_exclusion": null
+}

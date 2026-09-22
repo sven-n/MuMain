@@ -1,0 +1,48 @@
+{
+  "evidence": "OFFLINE: actual object transforms, proxy ground and lighting, not client screenshot",
+  "placements": {
+    "Tree12": {
+      "position": [
+        11600.0,
+        10850.0,
+        165.00003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1500.0
+      ],
+      "scale": 0.6000003814697266,
+      "tile": [
+        116.0,
+        108.5
+      ]
+    },
+    "Tree13": {
+      "position": [
+        11450.0,
+        10850.0,
+        164.99998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1470.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        114.5,
+        108.5
+      ]
+    }
+  },
+  "normalization_origin": [
+    11500.0,
+    10850.0,
+    165.0
+  ],
+  "terrain_units_per_repeat": 100,
+  "figure_proxy_height": 190,
+  "world_view_width": 1100,
+  "omitted": "Actual terrain height, baked lighting, surrounding town/buildings and other objects"
+}
