@@ -114,6 +114,7 @@ namespace SEASON3B
         bool m_bRenderAllEffects;
         int m_iResolutionIndex;
         bool m_bWindowedMode;
+        bool m_bBottomHudClassic;
         int m_iLanguageIndex;
         int m_iFontIndex;
 
@@ -134,6 +135,7 @@ namespace SEASON3B
         void InitResolutionCombo();
         void SyncResolutionComboToWindow();
         void ApplyWindowModeToggle();
+        void ApplyBottomHudClassic();
 
         void ApplyLanguage();
         int FindCurrentLanguageIndex();

@@ -37,6 +37,9 @@ What was added on top of that:
   centered dialogs remain capped at 2 times their reference size. Text grows
   with the active layout up to the dock scale, shrinking only when needed to
   fit an existing control.
+- **Classic bottom HUD** is an opt-in UI setting. It keeps the original 640-wide
+  bar uniformly scaled and centered on wide windows; leave it off to use the
+  responsive three-band layout. The change applies immediately.
 
 ## What it stores in `config.ini`
 
@@ -53,6 +56,8 @@ window writes to these sections:
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see
   "Remembering login credentials" below.
 - `[ConnectionSettings]`
+- `[UI]` - locale, font, and `BottomHudClassic` (`0` by default; `1` enables the
+  classic centered bottom bar).
 - `[Camera]` - orbital wheel-zoom radius (`Zoom`). **New in this PR**, the
   only key the camera rework added.
 
