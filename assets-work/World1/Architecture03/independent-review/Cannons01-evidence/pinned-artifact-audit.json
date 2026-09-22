@@ -1,0 +1,3623 @@
+{
+  "status": "PASS",
+  "pinned_commit": "ab832f5de4cea0dcaee144dce3df77870e565815",
+  "protected_game_file_count": 319,
+  "consumer_count": 12,
+  "pinned_review_image_count": 138,
+  "image_sha256": {
+    "assets-work/World1/Cannons01/Cannon01/review/after.png": "9c879d908c189a7cfb286f72963a9a807ccbdd9bcea1432b340ecc4a880610e3",
+    "assets-work/World1/Cannons01/Cannon01/review/before.png": "d587c81dd3f0eb1cb2e1f293d031b4554635cb0fadf9df281ac881454628d42f",
+    "assets-work/World1/Cannons01/Cannon01/review/comparison.jpg": "ccae9e8d54a44f6e65fa9cfb6d3fceda9d040bf537fdf39ec5266e7275ce26ed",
+    "assets-work/World1/Cannons01/Cannon01/review/readability-after.png": "0fa152373335d0fda895ef179667e0b65e793fb26aeeea03bcfee574efcd0c8b",
+    "assets-work/World1/Cannons01/Cannon01/review/readability-before.png": "f21c41708091ffee6f7872b186c192b42783c5f4a0c985fcab1b3ae772b57d1a",
+    "assets-work/World1/Cannons01/Cannon01/review/reverse-after.png": "e9675a8247841a1cf3037ed2ec3eb658b507aeeb1554e3470ac83331e2400209",
+    "assets-work/World1/Cannons01/Cannon01/review/reverse-before.png": "fe787c23e1a2a18e10a58959677b0857a7cc09eafb59e9dcf3b419221f45e52d",
+    "assets-work/World1/Cannons01/Cannon01/review/terrain-after.png": "1ef9388eca3a16e2ebc93d3db40b7db673b952f1f1d4aedf427311f283664ef3",
+    "assets-work/World1/Cannons01/Cannon01/review/terrain-before.png": "ff9a8ac60c74962c1007e8027d4c96f6fd8c43dd63baaa4621edfc9457dec71c",
+    "assets-work/World1/Cannons01/Cannon01/review/wireframe.png": "64b7c2d06ef36982cf6b43695e6bc32d823f55cb4eca4b6d49854c7dc3eff339",
+    "assets-work/World1/Cannons01/Cannon02/review/after.png": "ac8cdabc02dedcb81201b453e45c18eb1b456c7a0261eb61305bb225c238fc93",
+    "assets-work/World1/Cannons01/Cannon02/review/before.png": "d03eba0582f4b82cdbf7805307aaafb5849141f981b6eaa89fec7e37d4f18bfc",
+    "assets-work/World1/Cannons01/Cannon02/review/comparison.jpg": "c64ddc63f52b8ceb0541a3d305d70197e2c14be3da12a9230dd51bd2537f81ab",
+    "assets-work/World1/Cannons01/Cannon02/review/readability-after.png": "8a565c437e6d5200a1b5703445b4e3886490737d2a0fb9773b4bcdf3af4c84b1",
+    "assets-work/World1/Cannons01/Cannon02/review/readability-before.png": "1c0ef0bb045e0f8c22286d19e51ba8d0f919deaa4ac67dc8aef1c71abdfce0e8",
+    "assets-work/World1/Cannons01/Cannon02/review/reverse-after.png": "7ebdae54d1428d308b7371bf4f00705b93abd0cd78ad4ad98d20e4cbc719776e",
+    "assets-work/World1/Cannons01/Cannon02/review/reverse-before.png": "5c5e6a07f8704253b5d4552bc15a79aaf330fc004b9b7375030dc14440dc6ebd",
+    "assets-work/World1/Cannons01/Cannon02/review/terrain-after.png": "713b15f9bd4d8866ec42a3eb525dacebf493a0d20cabb8587ff54cef133cdbcc",
+    "assets-work/World1/Cannons01/Cannon02/review/terrain-before.png": "c43bc0e6179b11ae71e000c985fe9710de4b757f0ddd0487d87ea6ced06f2da3",
+    "assets-work/World1/Cannons01/Cannon02/review/wireframe.png": "3984a1dd19df41dae124c2831001d6a22e00222d848cd14a6a7e0c64d44d7e29",
+    "assets-work/World1/Cannons01/Cannon03/review/after.png": "8403d2f9013fcdbf8a291244733d3109b203088aafd20b71a5f158a28b6090fd",
+    "assets-work/World1/Cannons01/Cannon03/review/before.png": "834370a785816b83a4a7cb0334cb07b34cd007f649fbb5f268d1266272dfbe1c",
+    "assets-work/World1/Cannons01/Cannon03/review/comparison.jpg": "f91a4519f961eaddc368f822f12b28aea16c91b19671c145aadfdc9382600722",
+    "assets-work/World1/Cannons01/Cannon03/review/readability-after.png": "ed7434bd2d85a49ebfebc6e4a8850700b292ef5c4db06abb4c0ad61cac72dd00",
+    "assets-work/World1/Cannons01/Cannon03/review/readability-before.png": "e3ce40808c44772eebd356ec1e0e307d677029cf2ba5c2d97c3043a66b05f8ce",
+    "assets-work/World1/Cannons01/Cannon03/review/reverse-after.png": "75c479a31e4f4750d63bda19e1621fb047227739126812f7ca38eb88c6bb4b50",
+    "assets-work/World1/Cannons01/Cannon03/review/reverse-before.png": "1347df7bb5d3e93ea99519843ff7b9c377f92f3951f5e874ff1b110341c65ba3",
+    "assets-work/World1/Cannons01/Cannon03/review/terrain-after.png": "f655b393e0174be256a6d819ef6181566cca9f3e32cd71cb235000b09664656e",
+    "assets-work/World1/Cannons01/Cannon03/review/terrain-before.png": "05aa6372c4370c24faa75fa98d6492734dd5a75b9153502f9158747183c0dbc3",
+    "assets-work/World1/Cannons01/Cannon03/review/wireframe.png": "0e51a1ca552df9c3a4f6a5d84846c656c8e7fba0de1cc217c1068f585e87245b",
+    "assets-work/World1/Cannons01/Carriage01/review/action-after-10.png": "717e11d0551a4d2c64355a1e9f8b1e5effd5f415e92a48b700d9dcc4903d9fb9",
+    "assets-work/World1/Cannons01/Carriage01/review/action-after-20.png": "6435204bf97cde2e3134a7fe190bb53f9e8598f8813f19c87775211bc74e1060",
+    "assets-work/World1/Cannons01/Carriage01/review/action-before-10.png": "b2c546be30463ef5fbc739c76d7089fec4fc8a89ccc138e87c19d883bb1de10d",
+    "assets-work/World1/Cannons01/Carriage01/review/action-before-20.png": "75fd5119e87d234ed08d18facd04ef58286f79cb594d077e3001c166309fe5fe",
+    "assets-work/World1/Cannons01/Carriage01/review/after.png": "bbcd14360e8bf3d132014341b0d36466b4c00544b49cf8053a1de7bbd213bb08",
+    "assets-work/World1/Cannons01/Carriage01/review/before.png": "6cfdb83852162f7a0cbcdb492bb0bc296dc6a892a49381c250afa661f1eb8c27",
+    "assets-work/World1/Cannons01/Carriage01/review/comparison.jpg": "18878545f77a9c2dcd141fbddfdca877c6494f03eb756f7461de525c4799b869",
+    "assets-work/World1/Cannons01/Carriage01/review/readability-after.png": "477fb371d2e873aa62e7054cb015a79a6058f6145ccb170fd4ec991494e22b7b",
+    "assets-work/World1/Cannons01/Carriage01/review/readability-before.png": "2d63d87f0266d9d3099402e8024a696412dca6792bde710b5fb286b2db236f24",
+    "assets-work/World1/Cannons01/Carriage01/review/reverse-after.png": "a0af0e905b02d576cf63f9b3467fcd19c7c02e7c69253624c2e59bb3e20d8004",
+    "assets-work/World1/Cannons01/Carriage01/review/reverse-before.png": "993553db2cb11ee5a5100ba2a47c3142272230d842ed7174bcf316d3253b0c05",
+    "assets-work/World1/Cannons01/Carriage01/review/terrain-after.png": "4d7d6f7413f9c30d1801981cdaa78b3ed6d8a9a0b2baf009dcfcf383f0c40f9f",
+    "assets-work/World1/Cannons01/Carriage01/review/terrain-before.png": "dec8717fdbc08d9aa7ad5ed81bd85dcd15e45b745a9bf7714a5a76df3d643cb4",
+    "assets-work/World1/Cannons01/Carriage01/review/wireframe.png": "f26b4fd19908846e5fad8fccb5a34fe8b3eb9d8afe717fe37c0b5cac9bde5751",
+    "assets-work/World1/Cannons01/Carriage02/review/after.png": "e0ef3f3dfcb80fc3556d0c5af6be91208f47cdf567f64da5f5a5d5d04e999c39",
+    "assets-work/World1/Cannons01/Carriage02/review/before.png": "4d48442253234a10ed9f55665f7da70ad722ae448cb40d3fee73e1aab2b2a797",
+    "assets-work/World1/Cannons01/Carriage02/review/comparison.jpg": "6b06dbc3d7d24617ffe20f36c53363c1f11e793382858ad1a45c09d023cf2655",
+    "assets-work/World1/Cannons01/Carriage02/review/readability-after.png": "428e5ff00d87484fa5551a06a9c798fa1406e0847dbf3123c430c53ab5c29fee",
+    "assets-work/World1/Cannons01/Carriage02/review/readability-before.png": "6d444173c7bff704933fcb6aa332842159b8ee4949b123e55d385ed183c20b23",
+    "assets-work/World1/Cannons01/Carriage02/review/reverse-after.png": "51174d94fa6b0008b358f7eccddd0cbe4f6939843864fc34544cbc08c76c36d1",
+    "assets-work/World1/Cannons01/Carriage02/review/reverse-before.png": "2d7dae60dfaa075311a23186919fe6584d818ff499890a835f8fc09c1270c1e8",
+    "assets-work/World1/Cannons01/Carriage02/review/terrain-after.png": "82f0b585822849678a80b74ff00ff4d4200a5db22a74bc762189a674659e1729",
+    "assets-work/World1/Cannons01/Carriage02/review/terrain-before.png": "e46dacfad4cc1593cc3ea240d0d6e0a199a82dce7e6c405e354dde9b45072f81",
+    "assets-work/World1/Cannons01/Carriage02/review/wireframe.png": "637006f05f738dcbb23d337475a02871e18fb6c61d054f0a47ccbc36ee536fb8",
+    "assets-work/World1/Cannons01/Carriage03/review/after.png": "5ad802f5c8b3b30b9c6733a4d6702ec304735a4ef7b0a31e61fa9e1ad440c883",
+    "assets-work/World1/Cannons01/Carriage03/review/before.png": "e047f59136d09ff4082d192019d2985444cacad4ffaf1f9b58e8cf93532dbea6",
+    "assets-work/World1/Cannons01/Carriage03/review/comparison.jpg": "99744e9c74a51631f38cadd5fa258f83af7bcd540a871c7f20ff64e4fa9d3f6a",
+    "assets-work/World1/Cannons01/Carriage03/review/readability-after.png": "040f905ea2aed3b047fdadfe76946d0c785050bc762810fd1e6b237180987f76",
+    "assets-work/World1/Cannons01/Carriage03/review/readability-before.png": "92405134e1e30086936b25a00e687528b71e99b883b06f2a09f9abfe78439793",
+    "assets-work/World1/Cannons01/Carriage03/review/reverse-after.png": "3f3906cd7b528f71c46b1787b3c83275a9d5fde45b6160f7cdc41ffe0ecbd33f",
+    "assets-work/World1/Cannons01/Carriage03/review/reverse-before.png": "e021f82597ed16482aa1a9cb5511d26b98ab7219509d5a3ebe9afedb7f2f5994",
+    "assets-work/World1/Cannons01/Carriage03/review/terrain-after.png": "890e5329ea569a283fe960a5969045e5652c19d37ce9f6f0c1b3961955efd5c6",
+    "assets-work/World1/Cannons01/Carriage03/review/terrain-before.png": "83948899f2d65f376bf7ea30ff92892b4290e1285eb23faa661f4a575d7b5de4",
+    "assets-work/World1/Cannons01/Carriage03/review/wireframe.png": "000ac9710d26519bc3008b1f059b6500db91cc646f8b8000e233222dd201fc25",
+    "assets-work/World1/Cannons01/Carriage04/review/after.png": "47d25f8f7ac806ffaeb7a8643c21a2f798c3fab5af93df822096d5d38abb7de2",
+    "assets-work/World1/Cannons01/Carriage04/review/before.png": "8c5112c00f8f697ccfe79b1b64059e5ce27f1b5cf75d007a8588ae798885abf1",
+    "assets-work/World1/Cannons01/Carriage04/review/comparison.jpg": "88ec359f43a3a099d07fd94025c1c2fe4ea256908f2409f199dfdd57b38bc47a",
+    "assets-work/World1/Cannons01/Carriage04/review/readability-after.png": "28bf441bca2d1995aa9cd8d1ac2f158c3b71a5a0ec7e49a67c305926f43077ea",
+    "assets-work/World1/Cannons01/Carriage04/review/readability-before.png": "837af421395295df1dc5d93bb3f965ed33d6dcf55a8a323a52a053f682286ee2",
+    "assets-work/World1/Cannons01/Carriage04/review/reverse-after.png": "848cda50060ae9fa813c1fa0e0e81c28a7ac491b4cab495e483a5654c4841ab8",
+    "assets-work/World1/Cannons01/Carriage04/review/reverse-before.png": "09b1495090e4571a0fec9441c8baad9eeaa73ae6fe97c3cfd555ac4446da59d3",
+    "assets-work/World1/Cannons01/Carriage04/review/terrain-after.png": "797c1f566fbeff480e4b7c26ad8b2086cafa9cd33f9b56ccc6a892812c474de0",
+    "assets-work/World1/Cannons01/Carriage04/review/terrain-before.png": "fd989f57f31311d535ebb02ac970d12c962132d356034d3295c7f9aeb2668a1c",
+    "assets-work/World1/Cannons01/Carriage04/review/wireframe.png": "5a12ad1ada8bd6df334715e0343e0c79c3ba0a39d464bfbcc0d0a67f05ef82df",
+    "assets-work/World1/Cannons01/Hanging01/review/action-after-12.png": "8856e03ee76a6d89b3e434f495e0301e841a2880481ed35009fd399268591ddb",
+    "assets-work/World1/Cannons01/Hanging01/review/action-after-24.png": "0715a429c26e95c6e817ecd10e0baba2e42d4188372165da278fc7dc3ac19fb2",
+    "assets-work/World1/Cannons01/Hanging01/review/action-before-12.png": "c944a397ad1f88f5363861c210d63dfde39b2117deb7730738e67db3e650e714",
+    "assets-work/World1/Cannons01/Hanging01/review/action-before-24.png": "5f829808c8ff5ebb331cf43b2825759a0afdfc77034057a45b44793ba0c32adb",
+    "assets-work/World1/Cannons01/Hanging01/review/after.png": "beac3ea537d1b3755a46a7405d4a774801d0b9fd5ae5b9266ba1f449ae6403ab",
+    "assets-work/World1/Cannons01/Hanging01/review/before.png": "715e782df9cffa3b95356eb1c30bc4a51ab6de788cdb2a6aa65c8e2c368c8679",
+    "assets-work/World1/Cannons01/Hanging01/review/comparison.jpg": "fbec6f6d9964c41d4b07a1504e7bb9fdb2cfe55baf5c3b6c2e56690e4db8f26f",
+    "assets-work/World1/Cannons01/Hanging01/review/readability-after.png": "04a2c86e1514f67bef7206ea2c18f0e32f647874b275448f6369a89077ac16e8",
+    "assets-work/World1/Cannons01/Hanging01/review/readability-before.png": "e56f1c515a647739f381e0981905210c4fd7d23c54e3d6dcf56b5b44089d6106",
+    "assets-work/World1/Cannons01/Hanging01/review/reverse-after.png": "b6ffcc6a8b77276fe95ff91ac1fcf072dd181b06b707b2ebf8d12c430d1f582e",
+    "assets-work/World1/Cannons01/Hanging01/review/reverse-before.png": "a72e851e7682b37876d7f4bb39b769972120579487edfe63cbd7c236b6c35183",
+    "assets-work/World1/Cannons01/Hanging01/review/terrain-after.png": "e6be340c8b3a6f6ad3120fe888186fb8a26cc8e73c3a67e70d0c89a2f43c55de",
+    "assets-work/World1/Cannons01/Hanging01/review/terrain-before.png": "c6b1dfac78ade33672af02b549f730d993c0d0bfaf5e7b4991becb5970d9390d",
+    "assets-work/World1/Cannons01/Hanging01/review/wireframe.png": "05992dca09f753b91061ee74733cf0858888decffe0db0986481f7ace2f3ad41",
+    "assets-work/World1/Cannons01/HouseEtc02/review/after.png": "66642986f00de0dc76c65a3568b2ff90ef8ee0f2b87f8ac3b8844947d31fe17c",
+    "assets-work/World1/Cannons01/HouseEtc02/review/before.png": "c0f4ccb18afbc1289f4cbbb86160f0d4fd26263150ac2412ec480e09541ceeab",
+    "assets-work/World1/Cannons01/HouseEtc02/review/comparison.jpg": "255f525733a2d24e7477a8e5457e4aca54b1f4fb23f72103905b581901b243b7",
+    "assets-work/World1/Cannons01/HouseEtc02/review/readability-after.png": "e1bea3d4fb07db3cc73d7ce30efe1e9f46a501b0b261a4a3c40d781bb09a52ba",
+    "assets-work/World1/Cannons01/HouseEtc02/review/readability-before.png": "bc160088dea65fdca8a1b4abf1e0b88232353bb5ea0e4880218c53b5e45b9335",
+    "assets-work/World1/Cannons01/HouseEtc02/review/reverse-after.png": "29ef581bc6dc157a4a840ba886893db3288897560870972f01f3b42f6f861f81",
+    "assets-work/World1/Cannons01/HouseEtc02/review/reverse-before.png": "462ef02ad1184b6bfe56a7ed72c9d7bd6bc38e6160a90b35574f7fd4627377eb",
+    "assets-work/World1/Cannons01/HouseEtc02/review/terrain-after.png": "85d83b86993dd1c6316ab92190e9c3ce199f2847d0b6fb0d27391d9797b66462",
+    "assets-work/World1/Cannons01/HouseEtc02/review/terrain-before.png": "fd361816dfd0338ae7f8de1862e348894d26285e6ce9c458a8eb532961303715",
+    "assets-work/World1/Cannons01/HouseEtc02/review/wireframe.png": "92a67e331ff23731c38ebd759d75dbf146e1bf092adaaff4115aeb0a3b190640",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/after.png": "1d1bb47561122913ab4b016d5d16a4c9715fa8f993dfeb7122804858bf101498",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/before.png": "dffd05efdd6e7a95db5b0a9ece421b4459cbdc03fe8ab2405131834879e67885",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/comparison.jpg": "d1ac51450150b6126547c50aca5a47b69d58552d05b59ec5c99cda563c2de8bf",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/readability-after.png": "87e77213073324c5d20eb6e7cda6fdbf3b8dd1fe880ddcf055542b8c5951d024",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/readability-before.png": "50db7b1c4be433b0a8d9376b1d374cfde3ce936a52feb10a782d9abc248efc7d",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/reverse-after.png": "647ef17484198413e0f335efd7f87a5e07c5c3e59854aa41cc57dfddc7335e72",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/reverse-before.png": "764dea4256b8cb5e88245907f9babaca3a34bd8e9777911368a9996bf65072f4",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/terrain-after.png": "8dcccb3317ebb4331a14202b66871de2ddc6c32904a859b22ad996b8a97925f9",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/terrain-before.png": "460f18fe83bb3311675c82fe598463d13be485da5601ae8b43a470050c6c9e0d",
+    "assets-work/World1/Cannons01/StoneMuWall04/review/wireframe.png": "916d4576ca7a5bb54f2c622cae005c842230bf1960d42c59a0f5b0b101d9ce4c",
+    "assets-work/World1/Cannons01/StoneWall03/review/after.png": "8486bfccf9b4f8afabccb8a7c2218c0065cc1a48f7fa85ef9513ca0ed843931f",
+    "assets-work/World1/Cannons01/StoneWall03/review/before.png": "01c7fbacc23b9ff0af445ebea50802b47b34dbc018c124262d8fe05ef52a7576",
+    "assets-work/World1/Cannons01/StoneWall03/review/comparison.jpg": "a7745e8788f3eb208361a37942ba1a11296128c7076144aafd6230e89cdc6a7b",
+    "assets-work/World1/Cannons01/StoneWall03/review/readability-after.png": "82b1eab71aad1edbe8b382e1e878ad4e2834ac2dd5b58f6be310afb4d8e366be",
+    "assets-work/World1/Cannons01/StoneWall03/review/readability-before.png": "ddb7ee41030839de8029de7aab72b0c9bd4d30b280fae835408032170d5cdc66",
+    "assets-work/World1/Cannons01/StoneWall03/review/reverse-after.png": "148efb3131873442d16b72be00b7cf57fecd9e3ce29f9c69f7e8ce6f32abad21",
+    "assets-work/World1/Cannons01/StoneWall03/review/reverse-before.png": "93e490b08aa0101917fdbf3c6316346e6c191c2a870507370352fbf234cdf63c",
+    "assets-work/World1/Cannons01/StoneWall03/review/terrain-after.png": "8ca6efe495849d921f7698de853cff5f5e064808eb595a2cf2f4e7c2cb5e0267",
+    "assets-work/World1/Cannons01/StoneWall03/review/terrain-before.png": "5c0ebbd95f09a86b3c232db13551457c8da4d55b18ca5a1fe7876c90fe7f8258",
+    "assets-work/World1/Cannons01/StoneWall03/review/wireframe.png": "cfcaef7b6f4611d266e460726b80565b7f609fda1e40e983c11dd6b51bbf6519",
+    "assets-work/World1/Cannons01/Well01/review/after.png": "d46595af4d16e6876799502064e3e5d032dbaf84771bab63f9f7e8de85a81544",
+    "assets-work/World1/Cannons01/Well01/review/before.png": "09011684110919dc3df60762fed9b4d59f932da121706119dc48d5b621b4396f",
+    "assets-work/World1/Cannons01/Well01/review/comparison.jpg": "191f19c264b58451910f98210a4945a1dc315d37135edc4dd8758a0582246825",
+    "assets-work/World1/Cannons01/Well01/review/readability-after.png": "62cad7e731a98c6c144d7c61ea93a87626814ab0cc61137b504b894bd62c3ad7",
+    "assets-work/World1/Cannons01/Well01/review/readability-before.png": "d2938964b76f16ef30da8ae3a31ade19bff06e9fb287b8df6df66d321d4167eb",
+    "assets-work/World1/Cannons01/Well01/review/reverse-after.png": "4b80d93fa0eea581eedfaa75ebb7af11d0dd779026cb7166f3b894e8d95fb5ad",
+    "assets-work/World1/Cannons01/Well01/review/reverse-before.png": "9d38a31501804e29cf5742b12b9af4a4a6ce00a3e36b494c0d9d6ece80db7e06",
+    "assets-work/World1/Cannons01/Well01/review/terrain-after.png": "1b395f19cbd93d91ca0fe5e3665cf1f358d65869f2a444c3e9007a8bda378b27",
+    "assets-work/World1/Cannons01/Well01/review/terrain-before.png": "ed7a41103468d0a402cc9bd7419fdcb2514e9a2723d14c939cdb8f24ecebf0ef",
+    "assets-work/World1/Cannons01/Well01/review/wireframe.png": "4c8d32ed615a7e393dc4288b58fa619f743552fbabf6796559f4099f70191166",
+    "assets-work/World1/Cannons01/review/all-consumers.jpg": "56e4df6a8860737bfb568815d1acbba968c2a6ae2210e35ea0bf3bd0dfdf0622",
+    "assets-work/World1/Cannons01/review/placements/boxed-cannon-after.png": "304fa3059d4f36c63a0846b852dd77800258a68e7095560bc4b892760aa927e2",
+    "assets-work/World1/Cannons01/review/placements/boxed-cannon-before.png": "cb8a8387748a2ba031f4b047fb972fb80bf9d62ae71a12f99d63d209e0b7a1cb",
+    "assets-work/World1/Cannons01/review/placements/boxed-cannon-comparison.jpg": "8ab51a74d2bd07aa27dfefd96d1839f6f715b2eff8bda7d14c0b5cc6453e57b3",
+    "assets-work/World1/Cannons01/review/placements/cannon-row-after.png": "4ff0b5e5da0965af8db243d952820e767ce927114fbe11bec03adc8c6bca8bcc",
+    "assets-work/World1/Cannons01/review/placements/cannon-row-before.png": "dbbc10e603aba7a1613f5b3f606696175737e067fe33c24a5813446244c2ba30",
+    "assets-work/World1/Cannons01/review/placements/cannon-row-comparison.jpg": "aadfcc8613fb1e01365a65fb8d62c62650828172563c2452d4644679b1dfa143",
+    "assets-work/World1/Cannons01/review/placements/gallows-after.png": "ffa01069fd9cc19c4a70f236893842365de4417b2f13b680f04f51d8ea5f69b7",
+    "assets-work/World1/Cannons01/review/placements/gallows-before.png": "824f00b4200da0982e7933eff1540cde494f163a0ec76ef30e6de9ae4a2b0ad8",
+    "assets-work/World1/Cannons01/review/placements/gallows-comparison.jpg": "006b786b7f534bb2b44b7131d78cc2d3b4d2c8038d4de347c8a97ece0097bb12"
+  },
+  "producer_reports_cross_checked": {
+    "Cannon01": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Intentional geometry rebuild, full compare DIFFERENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -64.29,
+            -78.26,
+            -0.99
+          ],
+          [
+            68.04,
+            57.38,
+            132.44
+          ]
+        ],
+        "bounds_after": [
+          [
+            -64.29,
+            -78.26,
+            -0.99
+          ],
+          [
+            68.04,
+            57.38,
+            132.44
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 1,
+        "exports": {
+          "Cannon01.bmd": "7d285fd5d3647cc75bf25742623f04421c589e69140137652f5bd1d14225abf0",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 382,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 1.54609374973802e-05,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 2.0569529999998977e-06,
+          "minimum_geometry_triangle_area": 3.2840185122129797,
+          "minimum_winding_normal_dot": 0.7147413333333333,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 2.4604999999999928e-05,
+          "minimum_geometry_triangle_area": 3.2840185122129797,
+          "minimum_winding_normal_dot": 0.6155203417992621,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -64.289902,
+                -78.257797,
+                -0.9878
+              ],
+              [
+                68.040695,
+                57.3797,
+                132.441193
+              ]
+            ],
+            "after": [
+              [
+                -64.289902,
+                -78.257797,
+                -0.9878
+              ],
+              [
+                68.040695,
+                57.3797,
+                132.441193
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 297,
+          "max_position_difference": 4.863281262146302e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Cannon01.smd",
+            "frames": 1,
+            "bone_samples": 1,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Cannon01_a00.smd",
+            "frames": 1,
+            "bone_samples": 1,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -64.289902,
+              -78.257797,
+              -0.9878
+            ],
+            [
+              68.040695,
+              57.3797,
+              132.441193
+            ]
+          ]
+        ]
+      }
+    },
+    "Cannon02": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Intentional geometry rebuild, full compare DIFFERENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -67.44,
+            -78.26,
+            -0.99
+          ],
+          [
+            68.04,
+            57.38,
+            132.44
+          ]
+        ],
+        "bounds_after": [
+          [
+            -67.44,
+            -78.26,
+            -0.99
+          ],
+          [
+            68.04,
+            57.38,
+            132.44
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 1,
+        "exports": {
+          "Cannon02.bmd": "1eccefa4bceeb9dccf921e4f98358e289f454106d9d450820c75350043e6c4bf",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 366,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 1.3338745116442396e-05,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 2.0569529999998977e-06,
+          "minimum_geometry_triangle_area": 3.2840185122129797,
+          "minimum_winding_normal_dot": 0.7132596666666666,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 2.4604999999999928e-05,
+          "minimum_geometry_triangle_area": 3.2840185122129797,
+          "minimum_winding_normal_dot": 0.6155203417992621,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -67.436203,
+                -78.257797,
+                -0.9878
+              ],
+              [
+                68.040695,
+                57.3797,
+                132.441193
+              ]
+            ],
+            "after": [
+              [
+                -67.436203,
+                -78.257797,
+                -0.9878
+              ],
+              [
+                68.040695,
+                57.3797,
+                132.441193
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 219,
+          "max_position_difference": 4.892578111537205e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Cannon02.smd",
+            "frames": 1,
+            "bone_samples": 1,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Cannon02_a00.smd",
+            "frames": 1,
+            "bone_samples": 1,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -67.436203,
+              -78.257797,
+              -0.9878
+            ],
+            [
+              68.040695,
+              57.3797,
+              132.441193
+            ]
+          ]
+        ]
+      }
+    },
+    "Cannon03": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Intentional geometry rebuild, full compare DIFFERENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -36.7,
+            -78.26,
+            -0.99
+          ],
+          [
+            35.95,
+            57.38,
+            132.44
+          ]
+        ],
+        "bounds_after": [
+          [
+            -36.7,
+            -78.26,
+            -0.99
+          ],
+          [
+            35.95,
+            57.38,
+            132.44
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 1,
+        "exports": {
+          "Cannon03.bmd": "c5688d3022e2dca8cc6390b47c788d5e970f7fa6b0b060e46063f758fab6669c",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 200,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 8.095214838022002e-06,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 2.0569529999998977e-06,
+          "minimum_geometry_triangle_area": 3.284018512212984,
+          "minimum_winding_normal_dot": 0.7714841755252588,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 5.694999999999978e-05,
+          "minimum_geometry_triangle_area": 3.284018512212984,
+          "minimum_winding_normal_dot": 0.615520872255083,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -36.696396,
+                -78.257797,
+                -0.9878
+              ],
+              [
+                35.954605,
+                57.3797,
+                132.441193
+              ]
+            ],
+            "after": [
+              [
+                -36.696396,
+                -78.257797,
+                -0.9878
+              ],
+              [
+                35.954605,
+                57.3797,
+                132.441193
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 141,
+          "max_position_difference": 4.2333984140441316e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Cannon03.smd",
+            "frames": 1,
+            "bone_samples": 1,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Cannon03_a00.smd",
+            "frames": 1,
+            "bone_samples": 1,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -36.696396,
+              -78.257797,
+              -0.9878
+            ],
+            [
+              35.954605,
+              57.3797,
+              132.441193
+            ]
+          ]
+        ]
+      }
+    },
+    "Carriage01": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=21 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -114.62,
+            -94.23,
+            -14.5
+          ],
+          [
+            244.57,
+            92.68,
+            201.91
+          ]
+        ],
+        "bounds_after": [
+          [
+            -114.62,
+            -94.23,
+            -14.5
+          ],
+          [
+            244.57,
+            92.68,
+            201.91
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg",
+          "horse_drawn_02.tga",
+          "horse_drawn_03.jpg"
+        ],
+        "meshes": 3,
+        "exports": {
+          "horse_drawn_02.OZT": "f13c4b5c6c1d89dc30a29ed4b99f4dbb16a9db06d18625746eb308a319a4c079",
+          "Carriage01.bmd": "6ccc9c9d081ded7d27de3bb18f46acf91d7a1d715b5b42a6293e16807564b622",
+          "horse_drawn_03.OZJ": "e16b0f639a27594bd557ea1903cb426c08a3b0421490ebae33154312a27088c5",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 343,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.98535158044433e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 2.0223899999999825e-05,
+          "minimum_geometry_triangle_area": 7.651915550711674,
+          "minimum_winding_normal_dot": 0.846243932704969,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 2.0223899999999825e-05,
+          "minimum_geometry_triangle_area": 7.651915550711674,
+          "minimum_winding_normal_dot": 0.846243932704969,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -114.615402,
+                -64.351799,
+                -14.501831
+              ],
+              [
+                244.566483,
+                65.675201,
+                196.878998
+              ]
+            ],
+            "after": [
+              [
+                -114.615402,
+                -64.351799,
+                -14.501831
+              ],
+              [
+                244.566483,
+                65.675201,
+                196.878998
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 2,
+            "before": [
+              [
+                -40.994797,
+                11.349498,
+                139.421616
+              ],
+              [
+                -11.296402,
+                33.130096,
+                177.312714
+              ]
+            ],
+            "after": [
+              [
+                -40.994797,
+                11.349498,
+                139.421616
+              ],
+              [
+                -11.296402,
+                33.130096,
+                177.312714
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 10,
+            "before": [
+              [
+                -58.5368,
+                -94.225304,
+                0.404598
+              ],
+              [
+                59.342701,
+                92.683098,
+                117.638397
+              ]
+            ],
+            "after": [
+              [
+                -58.5368,
+                -94.225304,
+                0.404598
+              ],
+              [
+                59.342701,
+                92.683098,
+                117.638397
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_02.tga",
+            "bone_index": 2,
+            "before": [
+              [
+                -40.994797,
+                11.349498,
+                139.421616
+              ],
+              [
+                -11.296402,
+                33.130096,
+                173.052811
+              ]
+            ],
+            "after": [
+              [
+                -40.994797,
+                11.349498,
+                139.421616
+              ],
+              [
+                -11.296402,
+                33.130096,
+                173.052811
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_03.jpg",
+            "bone_index": 7,
+            "before": [
+              [
+                -92.177101,
+                54.632698,
+                90.911903
+              ],
+              [
+                23.907799,
+                54.632698,
+                201.905197
+              ]
+            ],
+            "after": [
+              [
+                -92.177101,
+                54.632698,
+                90.911903
+              ],
+              [
+                23.907799,
+                54.632698,
+                201.905197
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 1416,
+          "max_position_difference": 4.98535158044433e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg",
+          "horse_drawn_02.tga",
+          "horse_drawn_03.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Carriage01.smd",
+            "frames": 1,
+            "bone_samples": 14,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Carriage01_a00.smd",
+            "frames": 21,
+            "bone_samples": 294,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 21,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              201.905197
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              196.878998
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              204.12731389132625
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              204.84047041679676
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              205.92636308994818
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              207.15492258858404
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              207.7658783606514
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              207.07702248748058
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              204.93807881382813
+            ]
+          ],
+          [
+            [
+              -114.61540199999999,
+              -94.225304,
+              -14.501831
+            ],
+            [
+              244.56648299999998,
+              92.683098,
+              201.87296430156044
+            ]
+          ]
+        ]
+      }
+    },
+    "Carriage02": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -90.38,
+            -218.18,
+            -1.17
+          ],
+          [
+            88.7,
+            218.93,
+            182.28
+          ]
+        ],
+        "bounds_after": [
+          [
+            -90.38,
+            -218.18,
+            -1.17
+          ],
+          [
+            88.7,
+            218.93,
+            182.28
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 1,
+        "exports": {
+          "Carriage02.bmd": "ade2d91f489060d0b792504a92325b6557966cd39411e46bbc346e1240b8d85e",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 285,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.99511713769607e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.00012374100000000007,
+          "minimum_geometry_triangle_area": 7.651889153337774,
+          "minimum_winding_normal_dot": 0.8469399961132488,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.00012374100000000007,
+          "minimum_geometry_triangle_area": 7.651889153337774,
+          "minimum_winding_normal_dot": 0.8469399961132488,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -90.381599,
+                19.248695,
+                -1.169701
+              ],
+              [
+                88.696396,
+                143.825699,
+                129.818298
+              ]
+            ],
+            "after": [
+              [
+                -90.381599,
+                19.248695,
+                -1.169701
+              ],
+              [
+                88.696396,
+                143.825699,
+                129.818298
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -80.530014,
+                -218.18396,
+                0.950226
+              ],
+              [
+                76.300949,
+                218.926392,
+                182.284454
+              ]
+            ],
+            "after": [
+              [
+                -80.530014,
+                -218.18396,
+                0.950226
+              ],
+              [
+                76.300949,
+                218.926392,
+                182.284454
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 1350,
+          "max_position_difference": 4.99511713769607e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Carriage02.smd",
+            "frames": 1,
+            "bone_samples": 2,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Carriage02_a00.smd",
+            "frames": 1,
+            "bone_samples": 2,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -90.381599,
+              -218.18396000000007,
+              -1.169701000000017
+            ],
+            [
+              88.696396,
+              218.92639200000005,
+              182.284454
+            ]
+          ]
+        ]
+      }
+    },
+    "Carriage03": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -160.09,
+            -216.33,
+            -1.17
+          ],
+          [
+            88.22,
+            220.78,
+            182.28
+          ]
+        ],
+        "bounds_after": [
+          [
+            -160.09,
+            -216.33,
+            -1.17
+          ],
+          [
+            88.22,
+            220.78,
+            182.28
+          ]
+        ],
+        "materials": [
+          "tub.jpg",
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 2,
+        "exports": {
+          "tub.OZJ": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+          "Carriage03.bmd": "47d5c3c47defb5a1ff2a56ab8d4748c4ddb59e449e7a953f99857eef47bdb296",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 357,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.946289067220278e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.00012374100000000007,
+          "minimum_geometry_triangle_area": 7.651915783780475,
+          "minimum_winding_normal_dot": 0.8468816993510215,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.00012374100000000007,
+          "minimum_geometry_triangle_area": 7.651915783780475,
+          "minimum_winding_normal_dot": 0.8468816993510215,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -150.225601,
+                -145.635193,
+                0.1847
+              ],
+              [
+                -93.838409,
+                -96.802498,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -150.225601,
+                -145.635193,
+                0.1847
+              ],
+              [
+                -93.838409,
+                -96.802498,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -90.857399,
+                21.100403,
+                -1.169701
+              ],
+              [
+                88.220596,
+                145.677505,
+                129.818298
+              ]
+            ],
+            "after": [
+              [
+                -90.857399,
+                21.100403,
+                -1.169701
+              ],
+              [
+                88.220596,
+                145.677505,
+                129.818298
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 2,
+            "before": [
+              [
+                -81.005821,
+                -216.33255,
+                0.951714
+              ],
+              [
+                75.82515,
+                220.778412,
+                182.283875
+              ]
+            ],
+            "after": [
+              [
+                -81.005821,
+                -216.33255,
+                0.951714
+              ],
+              [
+                75.82515,
+                220.778412,
+                182.283875
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 3,
+            "before": [
+              [
+                -146.293198,
+                -65.756897,
+                0.1847
+              ],
+              [
+                -89.906006,
+                -16.924103,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -146.293198,
+                -65.756897,
+                0.1847
+              ],
+              [
+                -89.906006,
+                -16.924103,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tub.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -160.093399,
+                -154.181,
+                0.1847
+              ],
+              [
+                -83.970596,
+                -88.256699,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -160.093399,
+                -154.181,
+                0.1847
+              ],
+              [
+                -83.970596,
+                -88.256699,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tub.jpg",
+            "bone_index": 3,
+            "before": [
+              [
+                -156.160995,
+                -74.302704,
+                0.1847
+              ],
+              [
+                -80.038208,
+                -8.378399,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -156.160995,
+                -74.302704,
+                0.1847
+              ],
+              [
+                -80.038208,
+                -8.378399,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 1614,
+          "max_position_difference": 4.946289067220278e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "tub.jpg",
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Carriage03.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Carriage03_a00.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -160.093399,
+              -216.33255000000005,
+              -1.1697010000000103
+            ],
+            [
+              88.22059599999999,
+              220.77841200000006,
+              182.283875
+            ]
+          ]
+        ]
+      }
+    },
+    "Carriage04": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -90.86,
+            -216.33,
+            -1.17
+          ],
+          [
+            88.22,
+            220.78,
+            272.91
+          ]
+        ],
+        "bounds_after": [
+          [
+            -90.86,
+            -216.33,
+            -1.17
+          ],
+          [
+            88.22,
+            220.78,
+            272.91
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg",
+          "grass_01.tga"
+        ],
+        "meshes": 2,
+        "exports": {
+          "grass_01.OZT": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15",
+          "Carriage04.bmd": "77e81ed05d87ebf6938770b91428b77131fae9bda967f36d587525c323f14ab2",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 507,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.999999987376214e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.00012374100000000007,
+          "minimum_geometry_triangle_area": 7.651915783780475,
+          "minimum_winding_normal_dot": 0.7469897225303009,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.00012374100000000007,
+          "minimum_geometry_triangle_area": 7.651915783780475,
+          "minimum_winding_normal_dot": 0.7469897225303009,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 0,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "grass_01.tga",
+            "bone_index": 2,
+            "before": [
+              [
+                -65.059792,
+                -8.962738,
+                89.775482
+              ],
+              [
+                4.028605,
+                208.735504,
+                219.633301
+              ]
+            ],
+            "after": [
+              [
+                -65.059792,
+                -8.962738,
+                89.775482
+              ],
+              [
+                4.028605,
+                208.735504,
+                219.633301
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "grass_01.tga",
+            "bone_index": 3,
+            "before": [
+              [
+                -14.098001,
+                -8.962738,
+                89.775482
+              ],
+              [
+                54.990402,
+                208.735504,
+                219.633301
+              ]
+            ],
+            "after": [
+              [
+                -14.098001,
+                -8.962738,
+                89.775482
+              ],
+              [
+                54.990402,
+                208.735504,
+                219.633301
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "grass_01.tga",
+            "bone_index": 4,
+            "before": [
+              [
+                -42.141201,
+                -24.727814,
+                143.052887
+              ],
+              [
+                26.947201,
+                192.970398,
+                272.910706
+              ]
+            ],
+            "after": [
+              [
+                -42.141201,
+                -24.727814,
+                143.052887
+              ],
+              [
+                26.947201,
+                192.970398,
+                272.910706
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -90.857399,
+                21.100403,
+                -1.169701
+              ],
+              [
+                88.220596,
+                145.677505,
+                129.818298
+              ]
+            ],
+            "after": [
+              [
+                -90.857399,
+                21.100403,
+                -1.169701
+              ],
+              [
+                88.220596,
+                145.677505,
+                129.818298
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -81.005821,
+                -216.332184,
+                0.949631
+              ],
+              [
+                75.82515,
+                220.778122,
+                182.284714
+              ]
+            ],
+            "after": [
+              [
+                -81.005821,
+                -216.332184,
+                0.949631
+              ],
+              [
+                75.82515,
+                220.778122,
+                182.284714
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 2646,
+          "max_position_difference": 4.999999987376214e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg",
+          "grass_01.tga"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Carriage04.smd",
+            "frames": 1,
+            "bone_samples": 5,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Carriage04_a00.smd",
+            "frames": 1,
+            "bone_samples": 5,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -90.85739900000002,
+              -216.33218400000007,
+              -1.1697010000000103
+            ],
+            [
+              88.22059599999999,
+              220.77812200000005,
+              272.910706
+            ]
+          ]
+        ]
+      }
+    },
+    "Hanging01": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Intentional geometry rebuild, full compare DIFFERENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=25 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -100.94,
+            -98.34,
+            -0.34
+          ],
+          [
+            200.18,
+            111.74,
+            423.89
+          ]
+        ],
+        "bounds_after": [
+          [
+            -100.94,
+            -98.34,
+            -0.34
+          ],
+          [
+            200.18,
+            111.74,
+            423.89
+          ]
+        ],
+        "materials": [
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 1,
+        "exports": {
+          "Hanging01.bmd": "6f150a12d38358a26ee5ec5ac245c0df8f869295f6fca3a30d809e611640784c",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 242,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 3.05996093743488e-05,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 0.012470835096624503,
+          "minimum_winding_normal_dot": 0.9999569591901477,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 16,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 19.235485287274813,
+          "minimum_winding_normal_dot": 0.2359866603794437,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 16,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -100.944511,
+                -98.338303,
+                -0.339691
+              ],
+              [
+                200.184906,
+                111.736298,
+                423.88559
+              ]
+            ],
+            "after": [
+              [
+                -100.944527,
+                -98.338303,
+                -0.339691
+              ],
+              [
+                200.184906,
+                111.736298,
+                423.88559
+              ]
+            ],
+            "max_difference": 1.5999999988025593e-05
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                20.334101,
+                -4.1604,
+                275.035309
+              ],
+              [
+                49.165798,
+                -1.0463,
+                319.05191
+              ]
+            ],
+            "after": [
+              [
+                20.334097,
+                -4.1604,
+                275.035309
+              ],
+              [
+                49.165794,
+                -1.0463,
+                319.05191
+              ]
+            ],
+            "max_difference": 4.0000000041118255e-06
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 486,
+          "max_position_difference": 3.05996093743488e-05,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Hanging01.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 1.6000000016447302e-05,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Hanging01_a00.smd",
+            "frames": 25,
+            "bone_samples": 100,
+            "max_local_position_component": 4.500000000007276e-05,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 25,
+        "max_bounds_delta": 1.5999999988025593e-05,
+        "replacement_bounds": [
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ],
+          [
+            [
+              -100.944527,
+              -98.338303,
+              -0.3396910000000142
+            ],
+            [
+              200.184906,
+              111.736298,
+              423.88559
+            ]
+          ]
+        ]
+      }
+    },
+    "HouseEtc02": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -302.53,
+            -299.57,
+            -0.15
+          ],
+          [
+            297.88,
+            408.2,
+            332.48
+          ]
+        ],
+        "bounds_after": [
+          [
+            -302.53,
+            -299.57,
+            -0.15
+          ],
+          [
+            297.88,
+            408.2,
+            332.48
+          ]
+        ],
+        "materials": [
+          "tile_wood02.jpg",
+          "tile_ston04.jpg",
+          "c_wall04.jpg",
+          "tile_wood03.jpg",
+          "tile_house01.jpg",
+          "tile_ston01.jpg",
+          "horse_drawn_01.jpg",
+          "tile_ston06.jpg"
+        ],
+        "meshes": 8,
+        "exports": {
+          "HouseEtc02.bmd": "b5147e1dc4add656c57232499cf9b3ef0aad832c4a9333f3229773c16756d9fa",
+          "tile_wood03.OZJ": "080c832a287c14bc571e5f6bee02a3e1f5e668cd36ec2fe45622c682f12d245b",
+          "tile_wood02.OZJ": "c690ffd01f21afc6f32e0c96e73fae1ac252b2a5c0c5e5c5639543ba2478da6f",
+          "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+          "tile_ston06.OZJ": "3ed658c200c572e9c52839a0d2dbe2ade64b1f1e2af19c95dab35416036786d7",
+          "tile_house01.OZJ": "c06449901b08eafba82b4d035972740cc3e454d730343065417644f3fa8a1a03",
+          "tile_ston04.OZJ": "6ea584334d1a25fdb9b182aa75ae49fcdaf1a8a6820c611eec1f7483ee2d02c1",
+          "tile_ston01.OZJ": "bbb56aa18e2fbb0fad9ba172d10e140dd9b99af5179ebeba0e1d7cc59b0099f5",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 233,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.995117208750344e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 64.93220222749886,
+          "minimum_winding_normal_dot": 0.9495915195466115,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 4,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 64.93220222749886,
+          "minimum_winding_normal_dot": 0.9495915195466115,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 4,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "c_wall04.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -244.127106,
+                -248.433701,
+                -0.1512
+              ],
+              [
+                144.636505,
+                248.999603,
+                286.791412
+              ]
+            ],
+            "after": [
+              [
+                -244.127106,
+                -248.433701,
+                -0.1512
+              ],
+              [
+                144.636505,
+                248.999603,
+                286.791412
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -216.764709,
+                299.959106,
+                -0.025101
+              ],
+              [
+                198.919983,
+                408.200714,
+                141.307098
+              ]
+            ],
+            "after": [
+              [
+                -216.764709,
+                299.959106,
+                -0.025101
+              ],
+              [
+                198.919983,
+                408.200714,
+                141.307098
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_house01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                101.219101,
+                -104.275597,
+                -0.081
+              ],
+              [
+                101.2192,
+                37.9272,
+                221.411102
+              ]
+            ],
+            "after": [
+              [
+                101.219101,
+                -104.275597,
+                -0.081
+              ],
+              [
+                101.2192,
+                37.9272,
+                221.411102
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_ston01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                99.819702,
+                -248.507004,
+                0.0637
+              ],
+              [
+                279.599213,
+                248.80188,
+                35.970699
+              ]
+            ],
+            "after": [
+              [
+                99.819702,
+                -248.507004,
+                0.0637
+              ],
+              [
+                279.599213,
+                248.80188,
+                35.970699
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_ston04.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -302.532196,
+                -299.570892,
+                -0.0001
+              ],
+              [
+                297.876404,
+                399.450592,
+                157.553604
+              ]
+            ],
+            "after": [
+              [
+                -302.532196,
+                -299.570892,
+                -0.0001
+              ],
+              [
+                297.876404,
+                399.450592,
+                157.553604
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_ston06.jpg",
+            "bone_index": 2,
+            "before": [
+              [
+                -253.350693,
+                -166.880371,
+                122.021103
+              ],
+              [
+                154.378693,
+                188.307495,
+                250.060898
+              ]
+            ],
+            "after": [
+              [
+                -253.350693,
+                -166.880371,
+                122.021103
+              ],
+              [
+                154.378693,
+                188.307495,
+                250.060898
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_wood02.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -189.759003,
+                -193.901398,
+                303.837189
+              ],
+              [
+                90.112801,
+                194.4673,
+                303.837189
+              ]
+            ],
+            "after": [
+              [
+                -189.759003,
+                -193.901398,
+                303.837189
+              ],
+              [
+                90.112801,
+                194.4673,
+                303.837189
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_wood03.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -244.127106,
+                -248.433701,
+                286.791412
+              ],
+              [
+                144.617493,
+                248.999603,
+                332.477112
+              ]
+            ],
+            "after": [
+              [
+                -244.127106,
+                -248.433701,
+                286.791412
+              ],
+              [
+                144.617493,
+                248.999603,
+                332.477112
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 750,
+          "max_position_difference": 4.995117208750344e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "tile_wood02.jpg",
+          "tile_ston04.jpg",
+          "c_wall04.jpg",
+          "tile_wood03.jpg",
+          "tile_house01.jpg",
+          "tile_ston01.jpg",
+          "horse_drawn_01.jpg",
+          "tile_ston06.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "HouseEtc02.smd",
+            "frames": 1,
+            "bone_samples": 3,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "HouseEtc02_a00.smd",
+            "frames": 1,
+            "bone_samples": 3,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -302.532196,
+              -299.570892,
+              -0.1512
+            ],
+            [
+              297.876404,
+              408.200714,
+              332.477112
+            ]
+          ]
+        ]
+      }
+    },
+    "StoneMuWall04": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -149.51,
+            -109.98,
+            -103.47
+          ],
+          [
+            150.49,
+            169.39,
+            299.24
+          ]
+        ],
+        "bounds_after": [
+          [
+            -149.51,
+            -109.98,
+            -103.47
+          ],
+          [
+            150.49,
+            169.39,
+            299.24
+          ]
+        ],
+        "materials": [
+          "c_wall04.jpg",
+          "c_wall06.jpg",
+          "horse_drawn_01.jpg"
+        ],
+        "meshes": 3,
+        "exports": {
+          "StoneMuWall04.bmd": "bfdc5558ab6c7412438d5925d9ffb98bdce9538a8a5fd593b80cb3dc2d47c471",
+          "c_wall04.OZJ": "c7ba893ef3542cb9bb265ef7735c1d7d2c2bf58f7284d8cff8f0940860828ed3",
+          "c_wall06.OZJ": "81c037340624b795b295c58071bc26f66f785c20be11cddfd304e585b10c77f4",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 249,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.995117208750344e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 3.283910332948405,
+          "minimum_winding_normal_dot": 0.6155687205201633,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 14,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 3.283910332948405,
+          "minimum_winding_normal_dot": 0.6155687205201633,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 14,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "c_wall04.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -149.505905,
+                -109.975601,
+                -103.469803
+              ],
+              [
+                150.494095,
+                49.924599,
+                291.268494
+              ]
+            ],
+            "after": [
+              [
+                -149.505905,
+                -109.975601,
+                -103.469803
+              ],
+              [
+                150.494095,
+                49.924599,
+                291.268494
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "c_wall06.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -84.415298,
+                -109.975601,
+                -103.469803
+              ],
+              [
+                84.634697,
+                -2.852,
+                257.296204
+              ]
+            ],
+            "after": [
+              [
+                -84.415298,
+                -109.975601,
+                -103.469803
+              ],
+              [
+                84.634697,
+                -2.852,
+                257.296204
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -79.656097,
+                24.619095,
+                -2.101
+              ],
+              [
+                78.144798,
+                169.392502,
+                174.715698
+              ]
+            ],
+            "after": [
+              [
+                -79.656097,
+                24.619095,
+                -2.101
+              ],
+              [
+                78.144798,
+                169.392502,
+                174.715698
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 2,
+            "before": [
+              [
+                -96.861702,
+                11.603199,
+                165.811493
+              ],
+              [
+                77.171799,
+                147.240707,
+                299.240387
+              ]
+            ],
+            "after": [
+              [
+                -96.861702,
+                11.603199,
+                165.811493
+              ],
+              [
+                77.171799,
+                147.240707,
+                299.240387
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 951,
+          "max_position_difference": 4.995117208750344e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "c_wall04.jpg",
+          "c_wall06.jpg",
+          "horse_drawn_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "StoneMuWall04.smd",
+            "frames": 1,
+            "bone_samples": 3,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "StoneMuWall04_a00.smd",
+            "frames": 1,
+            "bone_samples": 3,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -149.505905,
+              -109.975601,
+              -103.469803
+            ],
+            [
+              150.494095,
+              169.392502,
+              299.240387
+            ]
+          ]
+        ]
+      }
+    },
+    "StoneWall03": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -199.33,
+            -43.04,
+            -2.1
+          ],
+          [
+            198.83,
+            180.5,
+            299.24
+          ]
+        ],
+        "bounds_after": [
+          [
+            -199.33,
+            -43.04,
+            -2.1
+          ],
+          [
+            198.83,
+            180.5,
+            299.24
+          ]
+        ],
+        "materials": [
+          "tile_01.jpg",
+          "horse_drawn_01.jpg",
+          "tile_03.jpg"
+        ],
+        "meshes": 3,
+        "exports": {
+          "StoneWall03.bmd": "37e91cdc44ed4844b6ab0686d38fba884e894ce1a04f0c9a6595fc20119d278e",
+          "tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e",
+          "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 263,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.990234288015927e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 3.2839103329483894,
+          "minimum_winding_normal_dot": 0.615582535814143,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 14,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 3.2839103329483894,
+          "minimum_winding_normal_dot": 0.615582535814143,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 14,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -75.7939,
+                35.730408,
+                -2.101
+              ],
+              [
+                82.007004,
+                180.503693,
+                174.715698
+              ]
+            ],
+            "after": [
+              [
+                -75.7939,
+                35.730408,
+                -2.101
+              ],
+              [
+                82.007004,
+                180.503693,
+                174.715698
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 2,
+            "before": [
+              [
+                -92.999405,
+                22.7145,
+                165.811493
+              ],
+              [
+                81.034103,
+                158.352005,
+                299.240387
+              ]
+            ],
+            "after": [
+              [
+                -92.999405,
+                22.7145,
+                165.811493
+              ],
+              [
+                81.034103,
+                158.352005,
+                299.240387
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -199.326797,
+                -36.527302,
+                -1.613899
+              ],
+              [
+                198.826508,
+                40.290501,
+                236.536514
+              ]
+            ],
+            "after": [
+              [
+                -199.326797,
+                -36.527302,
+                -1.613899
+              ],
+              [
+                198.826508,
+                40.290501,
+                236.536514
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tile_03.jpg",
+            "bone_index": 3,
+            "before": [
+              [
+                -199.326797,
+                -43.036499,
+                0.2614
+              ],
+              [
+                198.826508,
+                41.849701,
+                62.892101
+              ]
+            ],
+            "after": [
+              [
+                -199.326797,
+                -43.036499,
+                0.2614
+              ],
+              [
+                198.826508,
+                41.849701,
+                62.892101
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 999,
+          "max_position_difference": 4.990234288015927e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "tile_01.jpg",
+          "horse_drawn_01.jpg",
+          "tile_03.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "StoneWall03.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "StoneWall03_a00.smd",
+            "frames": 1,
+            "bone_samples": 4,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -199.326797,
+              -43.036499,
+              -2.101
+            ],
+            [
+              198.826508,
+              180.503693,
+              299.240387
+            ]
+          ]
+        ]
+      }
+    },
+    "Well01": {
+      "summary.json": {
+        "status": "PASS: offline",
+        "client_verified": false,
+        "geometry": "Readonly accepted BMD retained byte-identical, full compare EQUIVALENT",
+        "skeleton_actions": "EQUIVALENT",
+        "action_metadata": [
+          "action 0 keys=1 lock=0"
+        ],
+        "bounds_before": [
+          [
+            -154.76,
+            -125.85,
+            -0.07
+          ],
+          [
+            121.57,
+            93.46,
+            270.82
+          ]
+        ],
+        "bounds_after": [
+          [
+            -154.76,
+            -125.85,
+            -0.07
+          ],
+          [
+            121.57,
+            93.46,
+            270.82
+          ]
+        ],
+        "materials": [
+          "tub.jpg",
+          "horse_drawn_01.jpg",
+          "well.jpg",
+          "jar_01.jpg"
+        ],
+        "meshes": 4,
+        "exports": {
+          "tub.OZJ": "adbb92efec0f21b43147d1aefea5c7de7345877dfbfbd821417378af99ad4346",
+          "Well01.bmd": "c753f37c049f5716deb7db64186083fed58920b925da133abea7303a851977a3",
+          "jar_01.OZJ": "d26fe57d6a0c086a5bb64aa6c7939d08a3f18c1eb4469497065fb7f9fd5ffae5",
+          "well.OZJ": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e",
+          "horse_drawn_01.OZJ": "fb570a0b0c9c00e0face1e27f81fbc01d8edd6aeb6bc54280573a49d4dd7ad0e"
+        }
+      },
+      "geometry-UV-contacts.json": {
+        "status": "PASS",
+        "authored_bindings": {
+          "status": "PASS",
+          "source_vertices": 552,
+          "all_exported_corners_match_authored_bone_and_position": true,
+          "maximum_coordinate_deviation": 4.995117208750344e-07,
+          "tolerance": 0.005
+        },
+        "surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 6.880868631267018,
+          "minimum_winding_normal_dot": 0.35650225718172984,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 24,
+          "winding_disagreements": 0
+        },
+        "original_surface": {
+          "minimum_uv_triangle_area": 0.0,
+          "minimum_geometry_triangle_area": 6.880868631267018,
+          "minimum_winding_normal_dot": 0.35650225718172984,
+          "zero_area_triangles": 0,
+          "collapsed_uv_triangles": 24,
+          "winding_disagreements": 0
+        },
+        "per_material_and_bone_bounds": [
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -127.191704,
+                -87.824501,
+                0.1847
+              ],
+              [
+                -70.804497,
+                -38.991699,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -127.191704,
+                -87.824501,
+                0.1847
+              ],
+              [
+                -70.804497,
+                -38.991699,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "horse_drawn_01.jpg",
+            "bone_index": 6,
+            "before": [
+              [
+                -144.891815,
+                3.098198,
+                0.1847
+              ],
+              [
+                -88.504509,
+                51.931,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -144.891815,
+                3.098198,
+                0.1847
+              ],
+              [
+                -88.504509,
+                51.931,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "jar_01.jpg",
+            "bone_index": 2,
+            "before": [
+              [
+                -12.5986,
+                -125.850998,
+                -0.0681
+              ],
+              [
+                48.0765,
+                -82.486603,
+                100.971497
+              ]
+            ],
+            "after": [
+              [
+                -12.5986,
+                -125.850998,
+                -0.0681
+              ],
+              [
+                48.0765,
+                -82.486603,
+                100.971497
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "jar_01.jpg",
+            "bone_index": 3,
+            "before": [
+              [
+                -111.043999,
+                -83.1735,
+                107.748497
+              ],
+              [
+                -76.093102,
+                -46.424,
+                177.908005
+              ]
+            ],
+            "after": [
+              [
+                -111.043999,
+                -83.1735,
+                107.748497
+              ],
+              [
+                -76.093102,
+                -46.424,
+                177.908005
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "jar_01.jpg",
+            "bone_index": 4,
+            "before": [
+              [
+                48.871101,
+                -115.151199,
+                1.2432
+              ],
+              [
+                102.485703,
+                -58.777401,
+                46.946499
+              ]
+            ],
+            "after": [
+              [
+                48.871101,
+                -115.151199,
+                1.2432
+              ],
+              [
+                102.485703,
+                -58.777401,
+                46.946499
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "jar_01.jpg",
+            "bone_index": 5,
+            "before": [
+              [
+                80.506638,
+                -61.173321,
+                -0.0681
+              ],
+              [
+                121.568771,
+                -30.026112,
+                72.904999
+              ]
+            ],
+            "after": [
+              [
+                80.506638,
+                -61.173321,
+                -0.0681
+              ],
+              [
+                121.568771,
+                -30.026112,
+                72.904999
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tub.jpg",
+            "bone_index": 0,
+            "before": [
+              [
+                -137.059387,
+                -96.370193,
+                0.1847
+              ],
+              [
+                -60.936699,
+                -30.445999,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -137.059387,
+                -96.370193,
+                0.1847
+              ],
+              [
+                -60.936699,
+                -30.445999,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "tub.jpg",
+            "bone_index": 6,
+            "before": [
+              [
+                -154.759521,
+                -5.447495,
+                0.1847
+              ],
+              [
+                -78.636803,
+                60.4767,
+                111.4179
+              ]
+            ],
+            "after": [
+              [
+                -154.759521,
+                -5.447495,
+                0.1847
+              ],
+              [
+                -78.636803,
+                60.4767,
+                111.4179
+              ]
+            ],
+            "max_difference": 0.0
+          },
+          {
+            "material": "well.jpg",
+            "bone_index": 1,
+            "before": [
+              [
+                -79.2771,
+                -93.456902,
+                0.0
+              ],
+              [
+                77.996696,
+                93.463203,
+                270.818787
+              ]
+            ],
+            "after": [
+              [
+                -79.2771,
+                -93.456902,
+                0.0
+              ],
+              [
+                77.996696,
+                93.463203,
+                270.818787
+              ]
+            ],
+            "max_difference": 0.0
+          }
+        ],
+        "retained_surfaces": {
+          "status": "PASS",
+          "original_retained_corners": 2745,
+          "max_position_difference": 4.995117208750344e-07,
+          "UV_tolerance": 2e-06,
+          "purpose": "All retained timber contacts, steps, noose and compatibility surfaces keep their positions, UVs and intended bones"
+        },
+        "material_order": [
+          "tub.jpg",
+          "horse_drawn_01.jpg",
+          "well.jpg",
+          "jar_01.jpg"
+        ],
+        "rigid_bindings": "Original primary bone indices only; no extra weights"
+      },
+      "local-motion.json": {
+        "status": "PASS",
+        "nodes": "Bone names, order, parents identical",
+        "samples": [
+          {
+            "file": "Well01.smd",
+            "frames": 1,
+            "bone_samples": 7,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          },
+          {
+            "file": "Well01_a00.smd",
+            "frames": 1,
+            "bone_samples": 7,
+            "max_local_position_component": 0,
+            "max_rotation_matrix_component": 0
+          }
+        ],
+        "position_tolerance": 0.001,
+        "rotation_matrix_tolerance": 1e-05,
+        "rotation_check": "Compare Rz*Ry*Rx matrices because equivalent Euler branches differ by pi",
+        "semantics": "All local keys retain equivalent position and rotation; Euler encoding may differ"
+      },
+      "all-key-posed-bounds.json": {
+        "status": "PASS",
+        "keys": 1,
+        "max_bounds_delta": 0.0,
+        "replacement_bounds": [
+          [
+            [
+              -154.759521,
+              -125.850998,
+              -0.0681
+            ],
+            [
+              121.568771,
+              93.463203,
+              270.818787
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

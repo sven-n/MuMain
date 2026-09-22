@@ -1,0 +1,27 @@
+00:00.871  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon01/source.blend"
+Cannon01 DIFFERENT {'keys': 1, 'bones': 1, 'samples': 1, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:01.624  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon02/source.blend"
+Cannon02 DIFFERENT {'keys': 1, 'bones': 1, 'samples': 1, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:02.338  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Cannon03/source.blend"
+Cannon03 DIFFERENT {'keys': 1, 'bones': 1, 'samples': 1, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:02.676  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Hanging01/source.blend"
+Hanging01 DIFFERENT {'keys': 25, 'bones': 4, 'samples': 100, 'max_hierarchical_matrix_delta': 3.0517578125e-05, 'max_local_matrix_delta': 4.57763671875e-05, 'max_posed_bound_delta': 1.52587890625e-05}
+00:03.005  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage01/source.blend"
+Carriage01 EQUIVALENT {'keys': 21, 'bones': 14, 'samples': 294, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:03.399  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage02/source.blend"
+Carriage02 EQUIVALENT {'keys': 1, 'bones': 2, 'samples': 2, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:03.785  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage03/source.blend"
+Carriage03 EQUIVALENT {'keys': 1, 'bones': 4, 'samples': 4, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:04.174  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Carriage04/source.blend"
+Carriage04 EQUIVALENT {'keys': 1, 'bones': 5, 'samples': 5, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:04.600  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/HouseEtc02/source.blend"
+HouseEtc02 EQUIVALENT {'keys': 1, 'bones': 3, 'samples': 3, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:04.812  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneMuWall04/source.blend"
+StoneMuWall04 EQUIVALENT {'keys': 1, 'bones': 3, 'samples': 3, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:05.036  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/StoneWall03/source.blend"
+StoneWall03 EQUIVALENT {'keys': 1, 'bones': 4, 'samples': 4, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+00:05.272  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-final/assets-work/World1/Architecture03/independent-review/Cannons01-evidence/audit-esnqt74f/Well01/source.blend"
+Well01 EQUIVALENT {'keys': 1, 'bones': 7, 'samples': 7, 'max_hierarchical_matrix_delta': 0, 'max_local_matrix_delta': 0, 'max_posed_bound_delta': 0}
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
