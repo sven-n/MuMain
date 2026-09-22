@@ -1,0 +1,21 @@
+{
+  "reference_canvas": [640, 480],
+  "hud_strip_size": [640, 51],
+  "panel_crops_xyxy": [[0, 0, 256, 51], [256, 0, 384, 51], [384, 0, 640, 51]],
+  "item_slots": {"start": [0, 2], "cell": [38, 39], "keys": "QWER"},
+  "skill_slots": {"start": [222, 2], "cell": [32, 38], "keys": "12345"},
+  "alternate_slots": {"start": [0, 2], "cell": [32, 38], "keys": "67890", "size": [160, 42]},
+  "current_skill": {"position": [384, 2], "size": [36, 38]},
+  "life": {"position": [158, 3], "size": [45, 39]},
+  "mana": {"position": [437, 3], "size": [45, 39]},
+  "shield": {"position": [204, 2], "size": [16, 39]},
+  "ability": {"position": [420, 2], "size": [16, 39]},
+  "cash": {"position": [489, 429], "cell": [30, 41], "state_y": [0, 41, 82, 123], "glyph_box": [7, 11, 25, 33]},
+  "column_source_crop_xyxy": [203, 8, 597, 1938],
+  "gem_source_crop_xyxy": [20, 70, 1327, 1040],
+  "column_energy_xyxy": [2, 2, 14, 37],
+  "slot_interior_normalized_1024": [130, 165, 900, 865],
+  "xp": {"source_y": 41, "height": 10, "fill_destination": [2, 473, 629, 4], "source": [0, 0, 6, 4], "separator_x": [0, 63, 126, 189, 252, 315, 378, 441, 504, 567, 630], "counter_x": 631},
+  "skill_icon_area": [6, 6, 20, 28],
+  "sampling": "Half-texel inset for panel/button/slot RenderImage; no inset for RenderBitmap gauges and XP. Existing padded allocation retained. All alpha=255."
+}
