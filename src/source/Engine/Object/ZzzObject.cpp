@@ -4975,18 +4975,27 @@ int OpenObjects(wchar_t* FileName)
 
     int DataPtr = 0;
 
-    BYTE Version = *((BYTE*)(Data + DataPtr)); DataPtr += 1;
+    BYTE Version = Data[DataPtr];
+    DataPtr += 1;
 
     int iMapNumber = 0;
-    short Count = *((short*)(Data + DataPtr)); DataPtr += 2;
+    short Count = 0;
+    memcpy(&Count, Data + DataPtr, sizeof(Count));
+    DataPtr += sizeof(Count);
     for (int i = 0; i < Count; i++)
     {
         vec3_t Position;
         vec3_t Angle;
-        short Type = *((short*)(Data + DataPtr)); DataPtr += 2;
-        memcpy(Position, Data + DataPtr, sizeof(vec3_t)); DataPtr += sizeof(vec3_t);
-        memcpy(Angle, Data + DataPtr, sizeof(vec3_t)); DataPtr += sizeof(vec3_t);
-        float Scale = *((float*)(Data + DataPtr)); DataPtr += 4;
+        short Type = 0;
+        memcpy(&Type, Data + DataPtr, sizeof(Type));
+        DataPtr += sizeof(Type);
+        memcpy(Position, Data + DataPtr, sizeof(vec3_t));
+        DataPtr += sizeof(vec3_t);
+        memcpy(Angle, Data + DataPtr, sizeof(vec3_t));
+        DataPtr += sizeof(vec3_t);
+        float Scale = 0.f;
+        memcpy(&Scale, Data + DataPtr, sizeof(Scale));
+        DataPtr += sizeof(Scale);
         CreateObject(Type, Position, Angle, Scale);
     }
     delete[] Data;
@@ -5019,17 +5028,26 @@ int OpenObjectsEnc(wchar_t* FileName)
 
     int DataPtr = 0;
     DataPtr += 1;
-    int iMapNumber = (int)*((BYTE*)(Data + DataPtr)); DataPtr += 1;
-    short Count = *((short*)(Data + DataPtr)); DataPtr += 2;
+    int iMapNumber = static_cast<int>(Data[DataPtr]);
+    DataPtr += 1;
+    short Count = 0;
+    memcpy(&Count, Data + DataPtr, sizeof(Count));
+    DataPtr += sizeof(Count);
     g_iTotalObj = Count;
     for (int i = 0; i < Count; i++)
     {
         vec3_t Position;
         vec3_t Angle;
-        short Type = *((short*)(Data + DataPtr)); DataPtr += 2;
-        memcpy(Position, Data + DataPtr, sizeof(vec3_t)); DataPtr += sizeof(vec3_t);
-        memcpy(Angle, Data + DataPtr, sizeof(vec3_t)); DataPtr += sizeof(vec3_t);
-        float Scale = *((float*)(Data + DataPtr)); DataPtr += 4;
+        short Type = 0;
+        memcpy(&Type, Data + DataPtr, sizeof(Type));
+        DataPtr += sizeof(Type);
+        memcpy(Position, Data + DataPtr, sizeof(vec3_t));
+        DataPtr += sizeof(vec3_t);
+        memcpy(Angle, Data + DataPtr, sizeof(vec3_t));
+        DataPtr += sizeof(vec3_t);
+        float Scale = 0.f;
+        memcpy(&Scale, Data + DataPtr, sizeof(Scale));
+        DataPtr += sizeof(Scale);
         CreateObject(Type, Position, Angle, Scale);
     }
     delete[] Data;
