@@ -1,0 +1,22 @@
+{
+  "model": "TreasureChest01",
+  "game_files": {
+    "src/bin/Data/Object1/TreasureChest01.bmd": "0bace282136cde57a955216bfb69402abf02d33b343662d7ccf58891f98d79fe",
+    "src/bin/Data/Object1/treasure_chest.OZJ": "0d5350d962d3dd6ff26d37b286f63fd14ae456476adb398f47e0161082590c2a"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 1174,
+  "bind_bounds": [
+    [
+      -57.73350143432617,
+      -34.3650016784668,
+      0.05379899963736534
+    ],
+    [
+      56.83259963989258,
+      29.95870018005371,
+      84.09149932861328
+    ]
+  ]
+}

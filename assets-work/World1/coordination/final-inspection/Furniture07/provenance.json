@@ -1,0 +1,22 @@
+{
+  "model": "Furniture07",
+  "game_files": {
+    "src/bin/Data/Object1/Furniture07.bmd": "730ff99b63e9896a03df3be9ac1a54ba4adfd63c7d1b153897240bca833f4dbd",
+    "src/bin/Data/Object1/bookshelf.OZJ": "b94d717a16ca66016f14e51cf8d27a33b1595da8911077c281e57114a33b0318"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 174,
+  "bind_bounds": [
+    [
+      -25.63990020751953,
+      -20.875600814819336,
+      0.0019000000320374966
+    ],
+    [
+      17.74340057373047,
+      21.45560073852539,
+      51.41130065917969
+    ]
+  ]
+}

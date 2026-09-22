@@ -1,0 +1,22 @@
+{
+  "model": "Stair01",
+  "game_files": {
+    "src/bin/Data/Object1/Stair01.bmd": "a8762396fc2b3db1704905701e98613804f449541ab085e58c73c15665bb11b0",
+    "src/bin/Data/Object1/tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 182,
+  "bind_bounds": [
+    [
+      -42.279300689697266,
+      -4.6722002029418945,
+      0.0
+    ],
+    [
+      42.04240417480469,
+      4.7027997970581055,
+      330.0
+    ]
+  ]
+}

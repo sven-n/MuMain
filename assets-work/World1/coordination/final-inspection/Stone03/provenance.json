@@ -1,0 +1,22 @@
+{
+  "model": "Stone03",
+  "game_files": {
+    "src/bin/Data/Object1/Stone03.bmd": "045807cd21abd6d7c783b8b75bbc0744befa195e8666f4850a2887809cc5387b",
+    "src/bin/Data/Object1/ston01.OZJ": "593c4ec54ab68801d842b15f2b397b02918526d85190b613c875106110d33784"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 186,
+  "bind_bounds": [
+    [
+      -128.78562927246094,
+      -73.91922760009766,
+      -69.80853271484375
+    ],
+    [
+      102.01997375488281,
+      103.59368133544922,
+      124.82801818847656
+    ]
+  ]
+}

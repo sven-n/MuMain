@@ -1,0 +1,22 @@
+{
+  "model": "Tomb03",
+  "game_files": {
+    "src/bin/Data/Object1/Tomb03.bmd": "05df32a3fbf115cc11678b431246bd86bd6457e8c85cc1856b5099e5a4b74a1d",
+    "src/bin/Data/Object1/tombstone.OZJ": "5ffcd05b9045e6637295cc353c21dc4ae39e6e3cd12befa0702f216ed9a011a1"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 200,
+  "bind_bounds": [
+    [
+      -44.991302490234375,
+      -9.927603721618652,
+      0.04690000042319298
+    ],
+    [
+      44.76789855957031,
+      9.707405090332031,
+      117.30068969726562
+    ]
+  ]
+}

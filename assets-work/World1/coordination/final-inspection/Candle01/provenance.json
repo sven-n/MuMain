@@ -1,0 +1,23 @@
+{
+  "model": "Candle01",
+  "game_files": {
+    "src/bin/Data/Object1/Candle01.bmd": "d754131aa39b7a77cb5118b683c23e793c4a8829ab713436723b04c7508d98d5",
+    "src/bin/Data/Object1/candle.OZJ": "8a3247f2b3f0491d74f4f14ed4b54157b0060b8bb2f53a8f61ecf5c9c5626567",
+    "src/bin/Data/Object1/candle2.OZJ": "269019e39be5b7603ee388b80776a19ff4adba889da0dcf6d77d769bea58b1ec"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 1018,
+  "bind_bounds": [
+    [
+      -19.321300506591797,
+      -11.260199546813965,
+      0.00570000009611249
+    ],
+    [
+      19.348602294921875,
+      11.21150016784668,
+      87.06829833984375
+    ]
+  ]
+}

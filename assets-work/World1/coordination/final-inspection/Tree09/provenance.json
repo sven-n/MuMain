@@ -1,0 +1,22 @@
+{
+  "model": "Tree09",
+  "game_files": {
+    "src/bin/Data/Object1/Tree09.bmd": "148d3f262f26d320339e0ab809b0db35c77d93f12518e919af3a6c9d2ccef11a",
+    "src/bin/Data/Object1/tree_07.OZT": "2d39a05c692b757ab88eb2f1b0fe4af483c2b86ba75e206354a8c010bb9c6a9f"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 240,
+  "bind_bounds": [
+    [
+      -123.81730651855469,
+      -129.51211547851562,
+      0.5619000196456909
+    ],
+    [
+      156.32191467285156,
+      111.42080688476562,
+      192.24130249023438
+    ]
+  ]
+}

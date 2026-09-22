@@ -1,0 +1,22 @@
+{
+  "model": "StoneStatue02",
+  "game_files": {
+    "src/bin/Data/Object1/StoneStatue02.bmd": "668759a5ccada44481a7e7f052e835cf43d83319c5c46ece0e9d33fb31c3687d",
+    "src/bin/Data/Object1/stone_statue01.OZJ": "b4f503907f84e79d846ed818bc511d86720ded44c0eff2306360887385094073"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 107,
+  "bind_bounds": [
+    [
+      -134.2958984375,
+      -139.451904296875,
+      0.603600025177002
+    ],
+    [
+      134.95370483398438,
+      106.06719970703125,
+      485.8786926269531
+    ]
+  ]
+}

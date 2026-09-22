@@ -1,0 +1,23 @@
+{
+  "model": "House02",
+  "game_files": {
+    "src/bin/Data/Object1/House02.bmd": "f5f28ce013478d5369a1815ac8388c0b4e4597e3410c8832e2b2a5b57c8e1916",
+    "src/bin/Data/Object1/drum.OZJ": "1d48c6672bd96e3d689bf1b874eb40e9ec0de198c19439f335e41cbedb5f488f",
+    "src/bin/Data/Object1/steel.OZJ": "c407f13d8694533d676479eff5ce197dfd951f452c1dceaab227f5a66283994b"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 1215,
+  "bind_bounds": [
+    [
+      -114.88809967041016,
+      -64.12229919433594,
+      -0.16155299544334412
+    ],
+    [
+      89.38980102539062,
+      72.77970123291016,
+      188.55130004882812
+    ]
+  ]
+}

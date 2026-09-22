@@ -1,0 +1,23 @@
+{
+  "model": "HouseEtc03",
+  "game_files": {
+    "src/bin/Data/Object1/HouseEtc03.bmd": "78e0ddb7630d6eb077c6b3b79287fc87cff5be4f5754c571c407a1d06b7d1f53",
+    "src/bin/Data/Object1/steel_barred_a.OZT": "6a362e7e813e3656e6598b9239cd6094381a48bf2f4a62f706c8f9b2151997a3",
+    "src/bin/Data/Object1/steel_barred_door.OZT": "36f41caa9871ef74ddd8cbe51798ba258ab77cd1db87d90da23d4cf876bdf741"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 16,
+  "bind_bounds": [
+    [
+      -99.78469848632812,
+      -99.54920196533203,
+      3.09689998626709
+    ],
+    [
+      100.21530151367188,
+      100.26261138916016,
+      246.61390686035156
+    ]
+  ]
+}

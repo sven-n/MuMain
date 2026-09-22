@@ -653,5 +653,69 @@
     "original_revisions": {
       "Carriage03": "93ca193e"
     }
+  },
+  {
+    "name": "Architecture03",
+    "models": [
+      "HouseWall03",
+      "Bridge01",
+      "BridgeStone01",
+      "Fence01",
+      "FireLight02",
+      "House01",
+      "House03",
+      "House04",
+      "House05",
+      "HouseEtc02",
+      "HouseWall01",
+      "HouseWall02",
+      "HouseWall04",
+      "HouseWall05",
+      "HouseWall06",
+      "StoneMuWall01",
+      "StoneWall01",
+      "StoneWall02",
+      "Tent01",
+      "Tree07"
+    ],
+    "owner": "fences / architecture final",
+    "source_commits": [
+      "e8fef936",
+      "29cffdb4"
+    ],
+    "integration_commits": [
+      "3ce1f68b",
+      "95386cd8"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/HouseWall03.bmd": "assets-work/World1/Architecture03/HouseWall03/exports/HouseWall03.bmd",
+      "src/bin/Data/Object1/tile_wood02.OZJ": "assets-work/World1/Architecture03/HouseWall01/exports/tile_wood02.OZJ",
+      "src/bin/Data/Object1/Bridge01.bmd": "assets-work/World1/Architecture03/Bridge01/exports/Bridge01.bmd",
+      "src/bin/Data/Object1/bridge_01.OZJ": "assets-work/World1/Architecture03/StoneMuWall01/exports/bridge_01.OZJ",
+      "src/bin/Data/Object1/BridgeStone01.bmd": "assets-work/World1/Architecture03/BridgeStone01/exports/BridgeStone01.bmd",
+      "src/bin/Data/Object1/tree_04.OZJ": "assets-work/World1/Architecture03/BridgeStone01/exports/tree_04.OZJ",
+      "src/bin/Data/Object1/tile_ston06.OZJ": "assets-work/World1/Architecture03/House01/exports/tile_ston06.OZJ",
+      "src/bin/Data/Object1/tile_ston04.OZJ": "assets-work/World1/Architecture03/HouseWall01/exports/tile_ston04.OZJ",
+      "src/bin/Data/Object1/tile_02.OZJ": "assets-work/World1/Architecture03/StoneMuWall01/exports/tile_02.OZJ"
+    },
+    "original_revisions": {
+      "Fence01": "6b025039",
+      "FireLight02": "6b025039",
+      "House01": "6b025039",
+      "House03": "6b025039",
+      "House04": "6b025039",
+      "House05": "6b025039",
+      "HouseEtc02": "6b025039",
+      "HouseWall01": "6b025039",
+      "HouseWall02": "6b025039",
+      "HouseWall04": "6b025039",
+      "HouseWall05": "6b025039",
+      "HouseWall06": "6b025039",
+      "StoneMuWall01": "6b025039",
+      "StoneWall01": "6b025039",
+      "StoneWall02": "6b025039",
+      "Tent01": "6b025039",
+      "Tree07": "6b025039"
+    }
   }
 ]

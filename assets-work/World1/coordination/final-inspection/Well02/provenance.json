@@ -1,0 +1,22 @@
+{
+  "model": "Well02",
+  "game_files": {
+    "src/bin/Data/Object1/Well02.bmd": "1abd72cb18be477740863d1677592eda32277e94f70154e999754933854adf22",
+    "src/bin/Data/Object1/well.OZJ": "2e9a79bc4eac535e212e1f5485d9c5d0e3e7d817ce2236d43c2414eac2db8c8e"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 123,
+  "bind_bounds": [
+    [
+      -79.277099609375,
+      -93.45690155029297,
+      0.0
+    ],
+    [
+      77.99669647216797,
+      93.46320343017578,
+      270.81878662109375
+    ]
+  ]
+}

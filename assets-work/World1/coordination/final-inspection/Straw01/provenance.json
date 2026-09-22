@@ -1,0 +1,22 @@
+{
+  "model": "Straw01",
+  "game_files": {
+    "src/bin/Data/Object1/Straw01.bmd": "485d0ae5e304335823ebebb01c97e595a54819aadff04af236fa1dd03c0d0e03",
+    "src/bin/Data/Object1/grass_01.OZT": "1572db097eb23dd42e282fc526e91d15415ed0919489e264a466b532e99e5e15"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 432,
+  "bind_bounds": [
+    [
+      -68.8583984375,
+      -100.9063949584961,
+      1.9427989721298218
+    ],
+    [
+      69.1488037109375,
+      105.19329833984375,
+      141.7476043701172
+    ]
+  ]
+}

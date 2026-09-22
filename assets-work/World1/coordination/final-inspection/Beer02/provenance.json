@@ -1,0 +1,26 @@
+{
+  "model": "Beer02",
+  "game_files": {
+    "src/bin/Data/Object1/Beer02.bmd": "7a1828ec40249657fe2f9e970c077b8761bf110953ab5a24fe32bedd5fba6de4",
+    "src/bin/Data/Object1/pot3.ozt": "f781d4941982f54e20b573c9664a23f05bd01d13af578d9a0d01e202e59b4d60",
+    "src/bin/Data/Object1/apple.OZJ": "b983993be19b329f531199b3aa24943d5c9a7b0e01a805087bfc5dd24f916871",
+    "src/bin/Data/Object1/bottle.ozt": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4",
+    "src/bin/Data/Object1/plate.OZJ": "839c50e5fdf9aa87ac121e13a4c7bb5a0b7b892c658a848411198ff32d77bed1",
+    "src/bin/Data/Object1/winecup.OZJ": "a0e0cb895f554bcb82a2350b7f70dc405fc6f6024c61615c82ccb1111fcedf63"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 952,
+  "bind_bounds": [
+    [
+      -43.76466751098633,
+      -28.357784271240234,
+      -0.7967090010643005
+    ],
+    [
+      44.47420120239258,
+      23.52669906616211,
+      61.473899841308594
+    ]
+  ]
+}

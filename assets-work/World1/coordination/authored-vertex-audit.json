@@ -885,6 +885,44 @@
         "Cylinder14"
       ],
       "result": "PASS"
+    },
+    {
+      "model": "HouseWall03",
+      "source": "assets-work/World1/Architecture03/HouseWall03",
+      "authored_vertices": 24,
+      "reimport_vertices": 24,
+      "authored_to_export_max": 7.68876816437114e-06,
+      "export_to_authored_max": 7.68876816437114e-06,
+      "bone_names": [
+        "joint_02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "Bridge01",
+      "source": "assets-work/World1/Architecture03/Bridge01",
+      "authored_vertices": 190,
+      "reimport_vertices": 190,
+      "authored_to_export_max": 1.52587890625e-05,
+      "export_to_authored_max": 1.52587890625e-05,
+      "bone_names": [
+        "Box01",
+        "Box02"
+      ],
+      "result": "PASS"
+    },
+    {
+      "model": "BridgeStone01",
+      "source": "assets-work/World1/Architecture03/BridgeStone01",
+      "authored_vertices": 85,
+      "reimport_vertices": 85,
+      "authored_to_export_max": 0.0010012835264205933,
+      "export_to_authored_max": 0.0010012835264205933,
+      "bone_names": [
+        "464",
+        "Box01"
+      ],
+      "result": "PASS"
     }
   ]
 }

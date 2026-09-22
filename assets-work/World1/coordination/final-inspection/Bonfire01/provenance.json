@@ -1,0 +1,23 @@
+{
+  "model": "Bonfire01",
+  "game_files": {
+    "src/bin/Data/Object1/Bonfire01.bmd": "a5a5ea2bc310df59f6bca0245cb7b427c42491473c328f8f584d9ce07aca9373",
+    "src/bin/Data/Object1/fire_01.OZJ": "1b5f30547a9edd7877005a40c09946294c5772ac2b5953d3ffa92161c9a98294",
+    "src/bin/Data/Object1/fire_02.OZJ": "e84366780b0047b3ad4232b114703835b4bff3728aa5ff9872cfd8fa170c9086"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 110,
+  "bind_bounds": [
+    [
+      -57.606201171875,
+      -54.8291015625,
+      -6.945098876953125
+    ],
+    [
+      62.04010009765625,
+      55.015899658203125,
+      55.954498291015625
+    ]
+  ]
+}

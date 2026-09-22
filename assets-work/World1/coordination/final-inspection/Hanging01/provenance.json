@@ -1,0 +1,22 @@
+{
+  "model": "Hanging01",
+  "game_files": {
+    "src/bin/Data/Object1/Hanging01.bmd": "2edfebee6a7be95b8e68bbc92ec35edbe1e8db63b37f0700daba3a05fcc71c71",
+    "src/bin/Data/Object1/horse_drawn_01.OZJ": "6084ffad52ffb38bc5d0e87cd58586caef1d564b9c7d8d9c2759f62fecfd75c6"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 162,
+  "bind_bounds": [
+    [
+      -100.94451141357422,
+      -98.33830261230469,
+      -0.33969101309776306
+    ],
+    [
+      200.18490600585938,
+      111.73629760742188,
+      423.8855895996094
+    ]
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "model": "SteelWall02",
+  "game_files": {
+    "src/bin/Data/Object1/SteelWall02.bmd": "5425434423f7025a2be0e0eb7cbc4400ccb008595333721dd8f7b751e965d968",
+    "src/bin/Data/Object1/steel_barred_b.OZJ": "18fb54247b0dc08f4dfe2daab5f9f4edfde880513d0ed597e449e58efafd8087",
+    "src/bin/Data/Object1/steel_barred_a.OZT": "6a362e7e813e3656e6598b9239cd6094381a48bf2f4a62f706c8f9b2151997a3"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 328,
+  "bind_bounds": [
+    [
+      -199.68417358398438,
+      -3.2304539680480957,
+      0.00038899999344721437
+    ],
+    [
+      200.4755859375,
+      3.206696033477783,
+      220.07168579101562
+    ]
+  ]
+}

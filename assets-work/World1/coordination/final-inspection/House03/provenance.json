@@ -1,0 +1,26 @@
+{
+  "model": "House03",
+  "game_files": {
+    "src/bin/Data/Object1/House03.bmd": "a8015a4a6155d5dc2cef379bebb6c054ec6a31c428329163a1a696424ea1b7f7",
+    "src/bin/Data/Object1/tile_ston05.OZJ": "738fb32a62ece9f970cc822477361fb1105cbdde32dd4d475edda77a7d1fbc76",
+    "src/bin/Data/Object1/tile_ston04.OZJ": "a1a75b6fbf236d8747cb2e27555d871253cff7d2e48304226f0b68dbc83fa2f9",
+    "src/bin/Data/Object1/tile_ston06.OZJ": "c0eb1cde0172be5b4f1a1e7a19e274c6891d1e97d91479cdb11424a464847a3b",
+    "src/bin/Data/Object1/tile_ston07.OZT": "af1fd6419d0c0dfa43228eea2c18cecb3b6d47502ecb0e7b2b70f4ecb8609093",
+    "src/bin/Data/Object1/light_02.OZJ": "4a0211f098896fb68d11429da31482b70bc9d62b1130d50004412a2ddd3ca4e9"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 313,
+  "bind_bounds": [
+    [
+      -330.6037902832031,
+      -463.4543762207031,
+      -1.374400019645691
+    ],
+    [
+      302.3160095214844,
+      450.86981201171875,
+      381.3833923339844
+    ]
+  ]
+}

@@ -33,10 +33,17 @@ def row(name, model):
         if name in claim['models']:
             status, owner, branch = 'in progress', agent, claim['branch']
             worktree, evidence = WORKTREE_ROOT + claim['worktree'], 'Baseline geometry visually identified; production and engine checks in progress'
-    for batch in LEDGER:
-        if name in batch['models']:
-            status, owner = 'accepted', batch['owner']
-            evidence = 'Integrated ' + ', '.join('`' + c + '`' for c in batch['integration_commits']) + '; [batch notes](../' + batch.get('notes_path', batch['name'] + '/notes.md') + '); offline accepted; client pending'
+    accepted = [batch for batch in LEDGER if name in batch['models']]
+    if accepted:
+        status = 'accepted'
+        if owner == '—':
+            owner = accepted[0]['owner']
+        evidence = '<br>'.join(
+            '[{0}](../{1}): {2}'.format(
+                batch['name'], batch.get('notes_path', batch['name'] + '/notes.md'),
+                ', '.join('`' + commit + '`' for commit in batch['integration_commits']))
+            for batch in accepted)
+        evidence += '; offline accepted; client pending'
     if model['scope_exclusion']:
         status, identity, evidence = 'blocked', model['scope_exclusion'], 'Excluded from this static-art scope; preserve unchanged'
     placements = model['placements']
@@ -55,7 +62,7 @@ Integration: `art/lorencia-rebuild` at `/Users/webproduktion3/Documents/claude-t
 
 [Dependency map](dependency-map.json) records all 115 actual BMD info reports, all 105 resolved texture dependencies, all exact World1 placements (position/rotation/scale), and source loader references. No missing textures. There are 33 connected texture groups; a large 56-model component connects architecture, rocks, carts and some trees. Shared textures in this component stay unchanged unless the entire consumer set is assigned to one texture owner. Geometry ownership may be split only with those textures frozen. No renaming to escape sharing.
 
-Initial production claims: groundcover owns Grass01/02/05/06 and Object1 tree_08.OZT + tree_09.OZT. Fences owns Fence01/02/03/04 and Object1 joint.OZJ; tile_wood02.OZJ is **frozen** (architecture consumers). Reviewer finished tavern acceptance, then owns Tree09/10 + Grass03/04 and Object1 tree_07.OZT/tree_01.OZT/tree_02.OZT on codex/lorencia-scrub. World1 terrain, TerrainLight, all alpha strips, existing Beer01/plate2, Candle01, chest and Tomb03 are protected. Tavern Furniture03/04/05 + desk_big were independently accepted offline and integrated. UI and runtime excluded.
+The table records primary BMD ownership and every subsequent shared-material compatibility review. Frozen textures in an earlier batch may be changed later only by their assigned texture owner after reviewing all consumers. Completed terrain, TerrainLight, all terrain alpha strips, Beer01/plate2, Candle01, chest and Tomb03 remain protected. UI and runtime are excluded. Grass02, Tree12 and Tree13 retain their original BMD bytes after the normal-binding review; their accepted paintings remain installed.
 
 All source Data paths are relative to the integration worktree. Full placement arrays and mesh-slot texture order are in the dependency map. All 106 in-scope identities were visually inspected from imported BMDs; see `identities.json` and `inventory-sheet-01.jpg` through `inventory-sheet-06.jpg`. Sheets show the integration baseline (including completed pilot assets), not client evidence. Workers inspect precise geometry/materials and source controls before production.
 

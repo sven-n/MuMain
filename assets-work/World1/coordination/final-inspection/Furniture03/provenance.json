@@ -1,0 +1,22 @@
+{
+  "model": "Furniture03",
+  "game_files": {
+    "src/bin/Data/Object1/Furniture03.bmd": "6c427d73a9937d9e3b7d287b0f3f74b7f2014b0a423bd666590e26e9886e4d94",
+    "src/bin/Data/Object1/desk_big.OZJ": "a63356ccc6d203809697d6e079ec232ff0b39587cfbc13896a249e8babf2c2e4"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 680,
+  "bind_bounds": [
+    [
+      -101.68479919433594,
+      -51.50400161743164,
+      0.0
+    ],
+    [
+      101.78479766845703,
+      51.38740158081055,
+      86.58090209960938
+    ]
+  ]
+}

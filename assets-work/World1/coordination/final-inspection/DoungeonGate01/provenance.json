@@ -1,0 +1,22 @@
+{
+  "model": "DoungeonGate01",
+  "game_files": {
+    "src/bin/Data/Object1/DoungeonGate01.bmd": "d7d099751f59d75610fe00e40c9564ba5f660450abbd21cadaa68b2c75f2a553",
+    "src/bin/Data/Object1/copra_gate.OZJ": "786ddb0a32e0eab0f1d05953e51db11715f0a6ed1399d475a2ddbac5a2ed66e3"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 333,
+  "bind_bounds": [
+    [
+      -199.59620666503906,
+      -233.4867401123047,
+      -7.967735767364502
+    ],
+    [
+      200.50489807128906,
+      227.8905792236328,
+      315.7945251464844
+    ]
+  ]
+}

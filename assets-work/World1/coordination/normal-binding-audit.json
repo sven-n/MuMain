@@ -2065,6 +2065,75 @@
       "original_bytes_preserved": false,
       "acceptance_basis": "Normal direction invariant across every key",
       "result": "PASS"
+    },
+    {
+      "model": "HouseWall03",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "Bridge01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "bridge_01.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_shadow01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
+    },
+    {
+      "model": "BridgeStone01",
+      "frames_including_bind": 2,
+      "meshes": [
+        {
+          "material": "tree_04.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_ston06.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "tile_wood02.jpg",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        },
+        {
+          "material": "bridge_shadow01.tga",
+          "shared_normal_cases": 0,
+          "max_direction_delta": 0,
+          "result": "PASS"
+        }
+      ],
+      "original_bytes_preserved": false,
+      "acceptance_basis": "Normal direction invariant across every key",
+      "result": "PASS"
     }
   ],
   "client_verified": false

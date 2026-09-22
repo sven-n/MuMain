@@ -1,0 +1,23 @@
+{
+  "model": "StoneStatue03",
+  "game_files": {
+    "src/bin/Data/Object1/StoneStatue03.bmd": "cbbf03b5de8c57cb46e76ea96d27ed43aefc119956f39082f48382d6677e228f",
+    "src/bin/Data/Object1/tombstone_big.OZJ": "e4a98d7db022ec92f6d9f63d147475f2c6c34bae82aa306f68b3f60f9c113940",
+    "src/bin/Data/Object1/angel_stone_statue.OZJ": "41badb3711151f592185b4c105701cc0652bce19ae796987f978294485673d12"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 248,
+  "bind_bounds": [
+    [
+      -72.76699829101562,
+      -53.358001708984375,
+      -0.08420000225305557
+    ],
+    [
+      74.60669708251953,
+      39.88209915161133,
+      264.7676086425781
+    ]
+  ]
+}

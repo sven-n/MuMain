@@ -1,0 +1,22 @@
+{
+  "model": "Fence01",
+  "game_files": {
+    "src/bin/Data/Object1/Fence01.bmd": "594570345d8a5f665ad86718c03b491744835179cc1e4e56589387b1bd8b7d34",
+    "src/bin/Data/Object1/tile_wood02.OZJ": "1e829e6bc9af60739335ec85fc307d2c17806700e6d95f8845b7da78c4532eda"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 116,
+  "bind_bounds": [
+    [
+      -88.82341003417969,
+      -9.033096313476562,
+      -0.33436599373817444
+    ],
+    [
+      88.93399810791016,
+      11.976278305053711,
+      100.83116912841797
+    ]
+  ]
+}

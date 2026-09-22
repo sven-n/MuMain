@@ -1,0 +1,23 @@
+{
+  "model": "Bridge01",
+  "game_files": {
+    "src/bin/Data/Object1/Bridge01.bmd": "877e47a0fb1277d333c0b0a6c72469cafa78ace838d2c3bc782a79d9210bc71d",
+    "src/bin/Data/Object1/bridge_01.OZJ": "0447ac5d335b4fd530ac58fb7fce35a3123055f7107d0813c749d36385c5b1bc",
+    "src/bin/Data/Object1/bridge_shadow01.OZT": "ea197a3247438aea7d5796715ea51cb0283b2dc688ff455571ee16efabb9e49e"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 276,
+  "bind_bounds": [
+    [
+      -49.207000732421875,
+      -399.3981018066406,
+      -158.00320434570312
+    ],
+    [
+      83.97480010986328,
+      400.28289794921875,
+      99.39070129394531
+    ]
+  ]
+}

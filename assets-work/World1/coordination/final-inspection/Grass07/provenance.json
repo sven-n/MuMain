@@ -1,0 +1,22 @@
+{
+  "model": "Grass07",
+  "game_files": {
+    "src/bin/Data/Object1/Grass07.bmd": "e1e81ece76155e14c6e3c9e6d5df2e0673d6db3616eae802085b6da18dfae810",
+    "src/bin/Data/Object1/mushroom.OZJ": "3bd25dc928f1f17ff41243e7c9cd8622dc298b2d55ada64aa36d250d845d2402"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 1162,
+  "bind_bounds": [
+    [
+      -59.3927001953125,
+      -44.40629196166992,
+      -0.40209999680519104
+    ],
+    [
+      56.12160110473633,
+      58.592506408691406,
+      29.013599395751953
+    ]
+  ]
+}

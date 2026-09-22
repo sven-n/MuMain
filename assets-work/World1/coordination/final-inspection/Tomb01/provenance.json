@@ -1,0 +1,22 @@
+{
+  "model": "Tomb01",
+  "game_files": {
+    "src/bin/Data/Object1/Tomb01.bmd": "ad04c5b2d595dc24769c29e6803e44d40b4888b9983b223d60cb2af19ba64d61",
+    "src/bin/Data/Object1/grave_02.OZJ": "31aff047b31909fd90a51d7900a4ce980a7bafa8bff44b2b84a7821daff37b00"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 76,
+  "bind_bounds": [
+    [
+      -117.53323364257812,
+      -140.5079345703125,
+      -0.08420000225305557
+    ],
+    [
+      62.3922004699707,
+      121.84239959716797,
+      78.099365234375
+    ]
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "model": "Grass04",
+  "game_files": {
+    "src/bin/Data/Object1/Grass04.bmd": "48cbd9087f3197a701bb5e8c42698d2b9bb48bb1d68d7ddcc04e1335eb2c9c5b",
+    "src/bin/Data/Object1/tree_01.OZT": "8cf7925f6ded30b83a2ecf6856617b5c823e5abb7aaccea7acb73fc7403ea0d6",
+    "src/bin/Data/Object1/tree_02.OZT": "472a7d0305c6af309c431cd62c8adc8301a16ef8d97499ef058dd87282b7a4be"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 128,
+  "bind_bounds": [
+    [
+      -216.26719665527344,
+      -78.81742095947266,
+      -2.9033010005950928
+    ],
+    [
+      165.65476989746094,
+      88.8839111328125,
+      115.97699737548828
+    ]
+  ]
+}

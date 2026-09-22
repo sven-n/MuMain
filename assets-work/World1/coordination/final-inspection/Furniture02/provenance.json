@@ -1,0 +1,23 @@
+{
+  "model": "Furniture02",
+  "game_files": {
+    "src/bin/Data/Object1/Furniture02.bmd": "f32d05c6ad0412feb5075e5a5754e44b84ce2772a240ef1a353d3e2c71520d24",
+    "src/bin/Data/Object1/bottle.ozt": "de32ec6f5138ea531bcd44ce2693152c4884f4c2bf83fee228c1c62f56c528d4",
+    "src/bin/Data/Object1/bookshelf.OZJ": "b94d717a16ca66016f14e51cf8d27a33b1595da8911077c281e57114a33b0318"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 1288,
+  "bind_bounds": [
+    [
+      -80.45639038085938,
+      -23.37619972229004,
+      0.0019000000320374966
+    ],
+    [
+      79.72270202636719,
+      23.052499771118164,
+      228.9241943359375
+    ]
+  ]
+}

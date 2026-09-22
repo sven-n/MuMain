@@ -1,0 +1,24 @@
+{
+  "model": "Sign01",
+  "game_files": {
+    "src/bin/Data/Object1/Sign01.bmd": "e319480ee29feebf6a64862407dece3eae3ea0cc24a951b8f57695bef2034f70",
+    "src/bin/Data/Object1/notice.OZJ": "85e028c06cee35c5ba6334b9613a5a839df9ffff20d58a4ab567bf793290416f",
+    "src/bin/Data/Object1/signboard.OZT": "c62e1b18d97e75000ee4f5a071aff9858c8449187404dfabff927947a8883fa9",
+    "src/bin/Data/Object1/doorknob.OZT": "1f0413df12aa7ef21fdea28fda3c322abed0f28d4837b40ead3ba67a246afb84"
+  },
+  "client_verified": false,
+  "method": "Actual combined BMD and wrapped textures; Blender diffuse preview at bind pose. Engine additive, scrolling, lighting and placement effects are not client evidence.",
+  "triangles": 46,
+  "bind_bounds": [
+    [
+      -118.8777084350586,
+      -4.635499954223633,
+      0.050999000668525696
+    ],
+    [
+      0.9241870045661926,
+      7.9309000968933105,
+      81.77239990234375
+    ]
+  ]
+}
