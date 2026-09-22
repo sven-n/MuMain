@@ -1,0 +1,6 @@
+Python 3.12.14
+Pillow 12.3.0
+numpy 2.3.5
+Baseline: main 9a8b2027
+Branch: art/ui-pilot
+OS: macOS (offline CPU previews)
