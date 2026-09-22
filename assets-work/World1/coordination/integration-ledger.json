@@ -485,5 +485,41 @@
       "src/bin/Data/Object1/ship05.OZJ": "assets-work/World1/Ship01/textures/final/ship05.OZJ",
       "src/bin/Data/Object1/ship05.OZT": "assets-work/World1/Ship01/textures/final/ship05.OZT"
     }
+  },
+  {
+    "name": "Architecture02",
+    "models": [
+      "House05",
+      "HouseWall01",
+      "HouseWall04",
+      "HouseWall05",
+      "HouseWall06",
+      "Stair01",
+      "House04",
+      "HouseWall02",
+      "HouseEtc02"
+    ],
+    "owner": "fences / architecture timber",
+    "source_commits": [
+      "0c8cee9d"
+    ],
+    "integration_commits": [
+      "6b025039"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/House05.bmd": "assets-work/World1/Architecture02/House05/exports/House05.bmd",
+      "src/bin/Data/Object1/HouseWall01.bmd": "assets-work/World1/Architecture02/HouseWall01/exports/HouseWall01.bmd",
+      "src/bin/Data/Object1/HouseWall04.bmd": "assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd",
+      "src/bin/Data/Object1/HouseWall05.bmd": "assets-work/World1/Architecture02/HouseWall05/exports/HouseWall05.bmd",
+      "src/bin/Data/Object1/HouseWall06.bmd": "assets-work/World1/Architecture02/HouseWall06/exports/HouseWall06.bmd",
+      "src/bin/Data/Object1/Stair01.bmd": "assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd",
+      "src/bin/Data/Object1/tile_wood01.OZJ": "assets-work/World1/Architecture02/House04/exports/tile_wood01.OZJ",
+      "src/bin/Data/Object1/tile_wood03.OZJ": "assets-work/World1/Architecture02/House04/exports/tile_wood03.OZJ"
+    },
+    "original_revisions": {
+      "House04": "8094616d",
+      "HouseWall02": "8094616d",
+      "HouseEtc02": "f1fbb29c"
+    }
   }
 ]
