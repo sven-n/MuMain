@@ -67,3 +67,34 @@ bone deviation 0.0002 units over all 7 actions, bone order and lock flags restor
 
 **Open / next:** first real asset pass per the plan (Phase 1 textures, World1). Port the three
 Map Editor file dialogs to SDL so the editor builds on macOS. Add sound/music data.
+
+## 2026-09-22 - World1 pilot, offline art and validation (ASTRA / Codex)
+**Goal:** Establish the Lorencia terrain benchmark and exercise one static prop through the
+Blender/BMD pipeline on `art/world1-pilot`, branched from main at `9a8b2027`.
+
+**Done:** Inventoried and unwrapped all 32 World1 texture containers. Repainted all 17 base
+filenames explicitly listed in the brief (14 loaded terrain slots plus three legacy variants)
+at 512×512. Rebuilt Beer01 as the tavern still life it actually contains, after user
+confirmation: bottle, mug, bowls, grapes and vine. Exported 784 triangles with an exclusive
+512×512 plate2 atlas, retaining all five bones and the original one-frame action. Preserved
+original geometry, packed Blender sources, higher-resolution source geometry, raw paintings,
+scripts, comparison renders and validation reports under
+[`assets-work/World1/`](../../assets-work/World1/notes.md). Installed the 19 exported files in
+source and runtime Data folders. No engine/CMake files or filenames changed.
+
+**Verified:** All 18 replacement texture containers pass mu_texture checks; decoded terrain
+JPEG edge mismatch averages at most 0.424/255 (maximum single-channel delta 5/255). Reviewed
+3×3 repeats offline. Reference and action SMDs pass bmdconv validation. Full-model compare
+reports DIFFERENT for the intended geometry change (216 → 784 triangles; 5 → 1 meshes),
+with zero bone-motion deviation. Isolated original/replacement skeletons and actual actions
+compare EQUIVALENT. Bind sizes: 91.20×58.57×61.80 → 91.19×58.48×61.80 units. All 35 protected
+World1 files, including TerrainLight and alpha strips, match their baseline hashes. All 19
+installed file hashes match the exports in both source and runtime.
+
+**Open / next:** **Not verified in client.** The unchanged client repeatedly crashed in
+server selection/Lorencia, including Metal command-buffer assertions, before the three
+1920×1080 baseline captures were completed. The user explicitly authorized offline
+continuation and deferred client verification. Resolve stability separately, obtain baseline
+town/grass/rock screenshots, compare replacements at matching views and inspect Beer01 near
+Lorencia `(127.4,128.4)`. The delivered Blender comparison is labeled offline. The visual
+benchmark and end-to-end proof remain pending client acceptance.

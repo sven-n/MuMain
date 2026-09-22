@@ -1,0 +1,4 @@
+meshes 5 vs 1, bones 5 vs 5, actions 1 vs 1, triangles 216 vs 784
+unmatched triangles: 216  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+note: mesh count differs (meshes sharing a texture are merged by the SMD path)
+DIFFERENT

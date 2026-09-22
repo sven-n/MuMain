@@ -1,0 +1,22 @@
+{
+  "triangles": 784,
+  "objects": 18,
+  "bones": 5,
+  "actions": 1,
+  "bounds": {
+    "min": [
+      -50.1349983215332,
+      -29.6299991607666,
+      -0.3400000035762787
+    ],
+    "max": [
+      41.060001373291016,
+      28.850000381469727,
+      61.459999084472656
+    ]
+  },
+  "uv": "one set, finite, within atlas",
+  "skinning": "exactly one valid bone per vertex",
+  "texture": "plate2.jpg, 512\u00d7512, single diffuse atlas",
+  "status": "Blender checks PASS; engine checks required"
+}

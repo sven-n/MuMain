@@ -1,0 +1,59 @@
+00:00.496  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/source.blend"
+skipping reference object 'Beer01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SmallBowl' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_ServingPlatter' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_OakTankard' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_OliveBottle' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_TankardHandle' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape00' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape02' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape03' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape04' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape05' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape06' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape07' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape08' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape09' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape10' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Grape11' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_HerbSprig' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Beer01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t56uk2ae/Beer01_mu_export.smd
+- Exported 5 bones
+- Exported 1 frames
+- Exported 784 polys
+- Exported 1 materials
+   plate2.jpg
+- SMD export took 0.014397144317626953
+
+
+Blender Source Tools: exporting Beer01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t56uk2ae/anims/Beer01_a00.smd
+- Exported 5 bones
+- Exported 1 frames
+- SMD export took 0.001567840576171875
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t56uk2ae/Beer01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/exports/Beer01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t56uk2ae/anims/Beer01_a00.smd --name Beer01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/exports/Beer01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/exports/Beer01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/exports/Beer01.bmd
+  name field: Beer01.smd  version: 12
+  meshes: 1  bones: 5  actions: 1  triangles: 784
+  bounds (bind pose): min -50.13 -29.63 -0.34  max 41.06 28.85 61.46  size 91.19 58.48 61.80
+  mesh 0: triangles=784 vertices=432 normals=303 uvs=399 texture=plate2.jpg
+  bone 0: "Cylinder09" parent=-1
+  bone 1: "Cylinder11" parent=-1
+  bone 2: "Cylinder08" parent=-1
+  bone 3: "Sphere05" parent=-1
+  bone 4: "Cylinder31" parent=-1
+  action 0: keys=1 lock=0
+intermediate SMD files kept in /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_t56uk2ae
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
