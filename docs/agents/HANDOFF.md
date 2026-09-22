@@ -15,7 +15,8 @@ objects, terrain textures and UI at higher quality, then extend maps a little an
 Assets are produced by AI tooling that drives Blender; the server is
 [OpenMU](https://github.com/MUnique/OpenMU). The regeneration plan and the rules the game
 imposes are in [`ASSET_REGENERATION_PLAN.md`](ASSET_REGENERATION_PLAN.md); formats and tools
-in [`../asset-pipeline.md`](../asset-pipeline.md).
+in [`../asset-pipeline.md`](../asset-pipeline.md). The artist agent's own brief is
+[`../../ASTRA.md`](../../ASTRA.md).
 
 ## 2. What exists and works (as of 2026-09-22)
 

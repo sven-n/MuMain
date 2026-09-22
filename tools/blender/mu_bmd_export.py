@@ -15,7 +15,8 @@ Options:
     --keep-temp      keep the intermediate SMD files and print their folder
 
 Rules the export enforces so the game accepts the result:
-    * all mesh objects are joined into one temporary object (one BMD = one model)
+    * all mesh objects are joined into one temporary object (one BMD = one model); objects in
+      collections named ``REF_*`` or tagged with a ``mu_reference`` property are left out
     * every vertex keeps only its heaviest vertex group (the engine binds one bone per vertex)
     * every bone is exported in armature order (attachments are addressed by bone index)
     * actions are ordered by their ``mu_index`` property, else by a leading number in the
@@ -66,12 +67,38 @@ def bone_shape_objects() -> set:
     return shapes
 
 
+REFERENCE_COLLECTION_PREFIX = "REF_"
+
+
+def reference_collection_names() -> set:
+    """Collections named REF_* (and everything nested in them) hold originals kept for
+    comparison; nothing in them is part of the exported model."""
+    names = set()
+    for collection in bpy.data.collections:
+        if collection.name.startswith(REFERENCE_COLLECTION_PREFIX):
+            names.add(collection.name)
+            names.update(child.name for child in collection.children_recursive)
+    return names
+
+
+def is_reference_object(obj, reference_collections: set) -> bool:
+    if obj.get("mu_reference"):
+        return True
+    return any(collection.name in reference_collections for collection in obj.users_collection)
+
+
 def mesh_objects() -> list:
     excluded = bone_shape_objects()
-    return [
-        obj for obj in bpy.context.scene.objects
-        if obj.type == "MESH" and len(obj.data.polygons) > 0 and obj.name not in excluded and not obj.get("mu_helper")
-    ]
+    references = reference_collection_names()
+    selected = []
+    for obj in bpy.context.scene.objects:
+        if obj.type != "MESH" or len(obj.data.polygons) == 0 or obj.name in excluded or obj.get("mu_helper"):
+            continue
+        if is_reference_object(obj, references):
+            print(f"skipping reference object '{obj.name}' (REF_ collection or mu_reference)")
+            continue
+        selected.append(obj)
+    return selected
 
 
 def armature_of(meshes: list):
