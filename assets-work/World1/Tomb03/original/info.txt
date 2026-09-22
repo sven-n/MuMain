@@ -1,0 +1,7 @@
+model src/bin/Data/Object1/Tomb03.bmd
+  name field: Data2\Object1\TombStone.smd  version: 10
+  meshes: 1  bones: 1  actions: 1  triangles: 30
+  bounds (bind pose): min -44.99 -9.93 0.05  max 44.77 9.71 117.30  size 89.76 19.64 117.25
+  mesh 0: triangles=30 vertices=18 normals=18 uvs=30 texture=tombstone.jpg
+  bone 0: "Cylinder01" parent=-1
+  action 0: keys=1 lock=0

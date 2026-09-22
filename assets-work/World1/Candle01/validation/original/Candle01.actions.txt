@@ -1,0 +1,6 @@
+# bmdconv action manifest for Candle01.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Candle01.smd <output.bmd> --manifest Candle01.actions.txt
+model Data2\Object1\candle.smd
+action 0 file=Candle01_a00.smd keys=7 lock=0
+texture 0 candle.jpg original=candle.jpg
+texture 1 candle2.jpg original=candle2.jpg

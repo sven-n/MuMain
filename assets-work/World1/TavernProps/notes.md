@@ -7,6 +7,13 @@ Branch: `art/lorencia-tavern-props`, based on `main` at `9a8b2027`.
 Worktree: `/Users/webproduktion3/Documents/claude-test-mumain/MuMain-tavern-props`.
 Start the visual review with [review-overview.jpg](review-overview.jpg).
 
+Publication integration: merged `origin/main` at `300911ed` after the World1/UI art and
+stability fixes landed. Those changes are inherited from main; this PR still changes only
+the four claimed game files relative to main. The 320-file original-baseline result below
+records the initial isolated installation. Subsequent installer preflights protect other
+artists' files against the current committed HEAD, while retaining the immutable original
+backup and claimed-export hash checks.
+
 ## Selection and exact game changes
 
 | File under `src/bin/Data/Object1/` | Observed identity | Triangles before → after | World1 instances |
@@ -117,7 +124,9 @@ python3 assets-work/World1/TavernProps/scripts/install.py --install
 Inventory and original-import scripts are guarded first-run steps; do not run them over the
 preserved originals. Generation itself is not deterministic; packaging reuses the retained
 painting. The installer checks the branch, all export hashes and protected baseline before
-copying only the four claimed source Data files. It never targets the runtime.
+copying only the four claimed source Data files. Protected data must match committed HEAD,
+so legitimate main merges are accepted and unrelated local edits are rejected. Original
+backups must still match the initial baseline. The installer never targets the runtime.
 
 ## Pending client checks
 

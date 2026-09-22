@@ -1,0 +1,172 @@
+[
+  {
+    "file": "TileGrass01.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.4016927083333333,
+    "vertical_mean": 0.3678385416666667,
+    "max_delta": 3.0
+  },
+  {
+    "file": "TileGrass02.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.400390625,
+    "vertical_mean": 0.3802083333333333,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileGround01.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.41015625,
+    "vertical_mean": 0.3821614583333333,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileGround01x.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.3743489583333333,
+    "vertical_mean": 0.423828125,
+    "max_delta": 3.0
+  },
+  {
+    "file": "TileGround02.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.3795572916666667,
+    "vertical_mean": 0.419921875,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileGround03.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.37109375,
+    "vertical_mean": 0.39453125,
+    "max_delta": 5.0
+  },
+  {
+    "file": "TileMgrass.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.404296875,
+    "vertical_mean": 0.4029947916666667,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileMstone.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.40234375,
+    "vertical_mean": 0.3841145833333333,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileRock01.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.3899739583333333,
+    "vertical_mean": 0.3958333333333333,
+    "max_delta": 5.0
+  },
+  {
+    "file": "TileRock02.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.3834635416666667,
+    "vertical_mean": 0.3723958333333333,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileRock03.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.41015625,
+    "vertical_mean": 0.41015625,
+    "max_delta": 5.0
+  },
+  {
+    "file": "TileRock04.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.4166666666666667,
+    "vertical_mean": 0.380859375,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileRock05.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.3619791666666667,
+    "vertical_mean": 0.3352864583333333,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileRock06.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.390625,
+    "vertical_mean": 0.369140625,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileRock07.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.4212239583333333,
+    "vertical_mean": 0.3873697916666667,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileWater01.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.4029947916666667,
+    "vertical_mean": 0.3515625,
+    "max_delta": 4.0
+  },
+  {
+    "file": "TileWood01.jpg",
+    "size": [
+      512,
+      512
+    ],
+    "horizontal_mean": 0.380859375,
+    "vertical_mean": 0.40625,
+    "max_delta": 4.0
+  }
+]

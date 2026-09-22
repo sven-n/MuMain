@@ -1,0 +1,7 @@
+00:00.924  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/original/source.blend"
+00:05.072  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/review/after.png'
+{"status": "PASS: Blender checks; engine comparison required", "triangles": 1174, "meshes_after_texture_merge": 1, "bounds_before": [[-57.73350143432617, -34.36140060424805, 0.05379899963736534], [56.83259963989258, 29.95870018005371, 84.09149932861328]], "bounds_after": [[-57.73350143432617, -34.3650016784668, 0.05380000174045563], [56.83259963989258, 29.95870018005371, 84.09149932861328]], "bone_order": ["Bone01", "Bone02", "Bone03", "Box12"], "action_meta": {"TreasureChest01_a00": {"index": 0, "lock": false}}, "textures": {"treasure_chest.jpg": [512, 512]}, "skinning": "exactly one valid full-weight bone per vertex", "geometry": "triangles, finite positions/UVs, nonzero face area, identity transforms", "uv": "one set; new UVs within [0,1]; unchanged candle flame UVs retain legacy repeat to 1.0074"}
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

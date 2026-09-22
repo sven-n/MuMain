@@ -1,0 +1,79 @@
+00:00.800  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/source.blend"
+skipping reference object 'TreasureChest01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_WalnutPanel0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_WalnutPanel1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_WalnutPanel2' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_WalnutPanel3' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_WalnutPanel4' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CornerPost-57.7335_-29.5275' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CornerPost-57.7335_25.9587' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CornerPost52.8326_-29.5275' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_CornerPost52.8326_25.9587' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Rim-29.5275_0.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Rim-29.5275_43.3454' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Rim27.5587_0.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Rim27.5587_43.3454' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SideRim-57.7335_0.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SideRim-57.7335_43.3454' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SideRim54.4326_0.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_SideRim54.4326_43.3454' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_TwelveSlatHollowLid' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LeftLidEnd' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_RightLidEnd' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_EngravedArchBinding0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_EngravedArchBinding1' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LockReceiver' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_HingedHasp' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_KeyholeStem' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_KeyholeEye' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet0_2.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet0_45.245400000000004' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet1_2.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet1_45.245400000000004' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet2_2.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet2_45.245400000000004' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet3_2.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet3_45.245400000000004' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet4_2.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet4_45.245400000000004' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet5_2.0538' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_FrontRivet5_45.245400000000004' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LidRivet0' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_LidRivet1' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting TreasureChest01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ycrrx8a4/TreasureChest01_mu_export.smd
+- Exported 4 bones
+- Exported 1 frames
+- Exported 1174 polys
+- Exported 1 materials
+   treasure_chest.jpg
+- SMD export took 0.02486562728881836
+
+
+Blender Source Tools: exporting TreasureChest01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ycrrx8a4/anims/TreasureChest01_a00.smd
+- Exported 4 bones
+- Exported 7 frames
+- SMD export took 0.008122920989990234
+
+2 files exported in 0.1 seconds
+Info: 2 files exported in 0.1 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ycrrx8a4/TreasureChest01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/exports/TreasureChest01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_ycrrx8a4/anims/TreasureChest01_a00.smd --name TreasureChest01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/exports/TreasureChest01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/exports/TreasureChest01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/TreasureChest01/exports/TreasureChest01.bmd
+  name field: TreasureChest01.smd  version: 12
+  meshes: 1  bones: 4  actions: 1  triangles: 1174
+  bounds (bind pose): min -57.73 -34.37 0.05  max 56.83 29.96 84.09  size 114.57 64.32 84.04
+  mesh 0: triangles=1174 vertices=666 normals=317 uvs=327 texture=treasure_chest.jpg
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Box12" parent=0
+  action 0: keys=7 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

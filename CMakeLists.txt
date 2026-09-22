@@ -184,11 +184,19 @@ FetchContent_Declare(spdlog
 )
 FetchContent_MakeAvailable(spdlog)
 
+# The patch fixes two use-after-free bugs in miniaudio's resource manager that
+# crash the client whenever an audio file is missing (docs/agents/WORKLOG.md,
+# 2026-09-22). Re-check it when bumping the miniaudio version.
 FetchContent_Declare(miniaudio
     URL https://github.com/mackron/miniaudio/archive/9634bedb5b5a2ca38c1ee7108a9358a4e233f14d.tar.gz
     URL_HASH SHA256=1a3a79b80fc6f0b0cc155e28b954a598e0ddfa2db64e2afa8466be88c476fa55
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     SOURCE_SUBDIR _fetchcontent_only
+    PATCH_COMMAND
+        "${CMAKE_COMMAND}"
+        "-DSOURCE_DIR=<SOURCE_DIR>"
+        "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/miniaudio-0.11.25-resource-manager-use-after-free.patch"
+        -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
 )
 FetchContent_MakeAvailable(miniaudio)
 

@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "reassembled_identical_files": 10,
+  "editable_ORA_composite_matches_master": 5,
+  "hashes": {
+    "assets-work/UI/exports/Interface/partCharge1/newui_menu03.OZJ": "48eec49a85fb548eee7d0de5fd220dadd9f0bc02f6cf2b804043cb045ae4754e",
+    "assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt01.OZJ": "c6b4c8d23b5d5363ed938de1415c821e3eaa03c342d7284cdaa1af64c2c09b4e",
+    "assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt02.OZJ": "51fc7415e2ff4f2071c3dc4aaa8ef361b4b53835695ab03617bd4342dca1c0e4",
+    "assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt03.OZJ": "f5f8fa6e0a79c884964f91ff1a7631e6cfe2232e89c808cd6aab69f59974be32",
+    "assets-work/UI/exports/Interface/partCharge1/newui_menu_Bt04.OZJ": "6ffb7aa910ed3cf91d223b3492b14cf3acbf82b4fc211df9302286260e4cfc1e",
+    "assets-work/UI/masters/Interface/partCharge1/newui_menu03.png": "c8d4b1a142c9782c29e80c26b17387e4eb67cf4a8f4348994b22fb650dd818fa",
+    "assets-work/UI/masters/Interface/partCharge1/newui_menu_Bt01.png": "3ece05306fb18df3188c84c2b95797b0afe0ec0b06cf486b1ba8a20ca4bf6a0c",
+    "assets-work/UI/masters/Interface/partCharge1/newui_menu_Bt02.png": "f911013fc960404a0ee27f1ccd8a910706ed4700610fac840df60f5e61c0b73e",
+    "assets-work/UI/masters/Interface/partCharge1/newui_menu_Bt03.png": "79c13ecc3ad9015a16d8c3d167bdd023fd0ebd91031dbe5e51cad244907af53f",
+    "assets-work/UI/masters/Interface/partCharge1/newui_menu_Bt04.png": "1a4a25e7ffd58db54d1c45a5c86d719c60bb5eda71358a7817c55cf50c231fa5"
+  }
+}

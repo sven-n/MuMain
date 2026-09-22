@@ -36,10 +36,14 @@ def export_files():
 
 def protect_baseline(files):
     baseline = json.loads((ROOT / 'protected-baseline.json').read_text())
+    changed = subprocess.check_output(['git', 'diff', 'HEAD', '--name-only', '--',
+        'src/bin/Data/Object1', 'src/bin/Data/World1'], cwd=REPOSITORY, text=True).splitlines()
+    allowed = {'src/bin/Data/' + relative for relative in files}
+    assert set(changed) <= allowed, f'Unexpected protected Data edit: {set(changed) - allowed}'
     for relative, digest in baseline.items():
-        accepted = {digest}
-        if relative in files:
-            accepted.add(sha256(files[relative]))
+        if relative not in files:
+            continue  # Other artists' committed assets can arrive through a main merge.
+        accepted = {digest, sha256(files[relative])}
         assert sha256(DATA / relative) in accepted, f'Unexpected source Data edit: {relative}'
     for name in PROPS:
         original = ROOT / name / 'original'
@@ -57,14 +61,15 @@ def main():
     files = export_files()
     protected_count = protect_baseline(files)
     if not args.install:
-        print(f'Preflight PASS: four exports; {protected_count} protected files unchanged. Add --install to copy.')
+        print(f'Preflight PASS: four exports; {protected_count} protected files match committed HEAD. Add --install to copy.')
         return
     for relative, source in files.items():
         shutil.copy2(source, DATA / relative)
         assert sha256(source) == sha256(DATA / relative)
     protect_baseline(files)
     report = dict(status='PASS', branch=branch, destination='this worktree src/bin/Data only',
-        protected_unchanged_files=protected_count, runtime_written=False, client_launched=False,
+        protected_unchanged_files=protected_count, protected_reference='committed HEAD',
+        runtime_written=False, client_launched=False,
         installed={relative: sha256(DATA / relative) for relative in sorted(files)})
     (ROOT / 'installed-files.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2))

@@ -1,0 +1,62 @@
+diff --git a/miniaudio.h b/miniaudio.h
+index c6d493e..8a94444 100644
+--- a/miniaudio.h
++++ b/miniaudio.h
+@@ -70911,17 +70911,11 @@ static ma_result ma_resource_manager_data_buffer_node_acquire(ma_resource_manage
+     }
+ 
+ done:
+-    /* If we failed to initialize the data buffer we need to free it. */
+-    if (result != MA_SUCCESS) {
+-        if (nodeAlreadyExists == MA_FALSE) {
+-            ma_resource_manager_data_buffer_node_remove(pResourceManager, pDataBufferNode);
+-            ma_free(pDataBufferNode, &pResourceManager->config.allocationCallbacks);
+-        }
+-    }
+-
+     /*
+     The init notification needs to be uninitialized. This will be used if the node does not already
+     exist, and we've specified ASYNC | WAIT_INIT.
++
++    MuMain patch: this reads the node, so it runs before the node is freed below.
+     */
+     if (nodeAlreadyExists == MA_FALSE && pDataBufferNode->isDataOwnedByResourceManager && (flags & MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_ASYNC) != 0) {
+         if ((flags & MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_WAIT_INIT) != 0) {
+@@ -70929,6 +70923,14 @@ done:
+         }
+     }
+ 
++    /* If we failed to initialize the data buffer we need to free it. */
++    if (result != MA_SUCCESS) {
++        if (nodeAlreadyExists == MA_FALSE) {
++            ma_resource_manager_data_buffer_node_remove(pResourceManager, pDataBufferNode);
++            ma_free(pDataBufferNode, &pResourceManager->config.allocationCallbacks);
++        }
++    }
++
+     if (ppDataBufferNode != NULL) {
+         *ppDataBufferNode = pDataBufferNode;
+     }
+@@ -73262,6 +73264,14 @@ done:
+     /* We can only change the status away from MA_BUSY. If it's set to anything else it means an error has occurred somewhere or the uninitialization process has started (most likely). */
+     ma_atomic_compare_and_swap_i32(&pDataStream->result, MA_BUSY, result);
+ 
++    /*
++    MuMain patch: advance the execution pointer BEFORE signalling. A caller waiting in
++    ma_resource_manager_data_stream_init_ex() returns as soon as the notification fires and,
++    when initialization failed, frees the data stream right away, so pDataStream must not be
++    touched after the signal.
++    */
++    ma_atomic_fetch_add_32(&pDataStream->executionPointer, 1);
++
+     /* Only signal the other threads after the result has been set just for cleanliness sake. */
+     if (pJob->data.resourceManager.loadDataStream.pInitNotification != NULL) {
+         ma_async_notification_signal(pJob->data.resourceManager.loadDataStream.pInitNotification);
+@@ -73270,7 +73280,6 @@ done:
+         ma_fence_release(pJob->data.resourceManager.loadDataStream.pInitFence);
+     }
+ 
+-    ma_atomic_fetch_add_32(&pDataStream->executionPointer, 1);
+     return result;
+ }
+ 

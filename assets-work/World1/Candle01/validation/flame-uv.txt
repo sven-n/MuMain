@@ -1,0 +1,1 @@
+PASS: all 18 original triangle corners retain their bone, position and UV.

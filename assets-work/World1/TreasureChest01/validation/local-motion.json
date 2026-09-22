@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "nodes": "names, indices and parents identical",
+  "tolerance": 0.0001,
+  "rotation_note": "Equivalent Euler components compared modulo 2*pi",
+  "samples": [
+    {
+      "file": "TreasureChest01.smd",
+      "bone_samples": 4,
+      "frames": 1,
+      "max_position_component": 0,
+      "max_euler_component_radians": 0
+    },
+    {
+      "file": "TreasureChest01_a00.smd",
+      "bone_samples": 28,
+      "frames": 7,
+      "max_position_component": 7.999999994012796e-06,
+      "max_euler_component_radians": 0
+    }
+  ]
+}

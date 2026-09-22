@@ -1,0 +1,40 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=7 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -57.73,
+      -34.36,
+      0.05
+    ],
+    [
+      56.83,
+      29.96,
+      84.09
+    ]
+  ],
+  "bounds_after": [
+    [
+      -57.73,
+      -34.37,
+      0.05
+    ],
+    [
+      56.83,
+      29.96,
+      84.09
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "treasure_chest.jpg"
+  ],
+  "export_sha256": {
+    "TreasureChest01.bmd": "0bace282136cde57a955216bfb69402abf02d33b343662d7ccf58891f98d79fe",
+    "treasure_chest.OZJ": "0d5350d962d3dd6ff26d37b286f63fd14ae456476adb398f47e0161082590c2a"
+  }
+}

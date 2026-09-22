@@ -1,0 +1,111 @@
+{
+  "TileGrass01": {
+    "source": "GroundTiles/paintings/TileGrass01.png",
+    "prompt": "Use case: stylized-concept. Asset type: production diffuse ground tile for a modern reinterpretation of classic MU Online Lorencia, TileGrass01.jpg. Create a square, seamless repeating top-down flat surface texture of dark olive medieval grass and moss, broad soft clumps and clearly painted short blade groups, scattered subdued brown earth visible. Rich painterly material definition, controlled low-frequency variation readable at distant isometric gameplay scale. Palette muted yellow olive, deep green, umber; no neon green. No directional illumination, no cast shadows, no vignette, no perspective, no border, no labels, no objects, no grid, no watermark. All four edges must wrap seamlessly; distributed homogeneous texture with no central focal spot. Texture only, fills entire square. Excellent restrained hand-painted game art, not photorealistic noise. Output 1024x1024 square; will become 512x512 game texture.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-9f027150-a8e2-46d3-a991-d3cdad2038a0.png"
+  },
+  "TileGrass02": {
+    "source": "GroundTiles/paintings/TileGrass02.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Single square top-down orthographic surface, fills the whole image, 1024x1024. Must repeat seamlessly on all edges. Broad readable material features, restrained detail and contrast, muted earthy palette, painted ambient crevice shading only. No directional light, cast shadows, vignette, perspective, border, text, logo, grid or central motif. Pale dry trodden grey-brown earth with small embedded stones and dry grass fragments; keep a clear light tan earth identity without becoming bright sand. Even material coverage.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-d7284983-7758-436c-a4b1-81ec432bf439.png"
+  },
+  "TileGround01": {
+    "source": "GroundTiles/paintings/TileGround01.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Single square top-down orthographic surface, fills the whole image, 1024x1024. Must repeat seamlessly on all edges. Broad readable material features, restrained detail and contrast, muted earthy palette, painted ambient crevice shading only. No directional light, cast shadows, vignette, perspective, border, text, logo, grid or central motif. Worn irregular cobblestone town paving, tightly laid hand-shaped stones, 6 to 9 stones across the tile; warm grey slate and muted taupe, dark shallow joints with tiny touches of olive moss, subtle chipped edges with painterly bevel definition. Ground plane, not wall. Distributed irregular joints.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-9f54af4f-0b90-462e-a3d8-2a02f8bb3203.png"
+  },
+  "TileGround02": {
+    "source": "GroundTiles/paintings/TileGround02.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Single square top-down orthographic surface, fills the whole image, 1024x1024. Must repeat seamlessly on all edges. Broad readable material features, restrained detail and contrast, muted earthy palette, painted ambient crevice shading only. No directional light, cast shadows, vignette, perspective, border, text, logo, grid or central motif. Very worn large rectangular brown-grey sandstone floor slabs, about 3 stones across with staggered broken joints. Old tavern street paving, softened edges, broad subtle stains, small chips and restrained rubbed highlights. Dark desaturated umber and warm grey, readable large-scale paving.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-2fa29252-8d1b-424d-8298-66394c80f7ae.png"
+  },
+  "TileGround03": {
+    "source": "GroundTiles/paintings/TileGround03.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Single square top-down orthographic surface, fills the whole image, 1024x1024. Must repeat seamlessly on all edges. Broad readable material features, restrained detail and contrast, muted earthy palette, painted ambient crevice shading only. No directional light, cast shadows, vignette, perspective, border, text, logo, grid or central motif. Seamless repeating ancient gothic carved stone paving, dark brown muted bronze stone. Four quarter-circle intertwined engraved medallions meet across tile edges, elegant broad scrollwork and cross forms as in old MU Lorencia town ritual paving. Shallow carving is painted into stone with restrained bevel highlights, dusty dark recesses, no emissive glow. Repeating ornament with equal treatment everywhere.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-2440e254-9c7f-492c-b65c-765f8e2f95da.png"
+  },
+  "TileGround01x": {
+    "source": "GroundTiles/paintings/TileGround01x.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval hand-painted game art. Single square top-down orthographic surface texture, fills entire image, 1024x1024. Must repeat seamlessly in both directions. Broad readable material features, restrained fine detail and contrast, muted earthy palette, painted ambient crevice shading only. No strong directional light, cast shadows, vignette, perspective, border, text, logo, grid, or focal object. Weathered stratified ochre-grey rock with short vertical broken ridges and subdued olive lichen. Retain a striated sandstone surface identity, no pavement, no grass. Small interlocking long angular facets, sharp but subtle painted bevels. Fairly even brightness throughout.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-e519dfa3-f7dc-4957-a398-0eef21d945f5.png"
+  },
+  "TileMgrass": {
+    "source": "GroundTiles/paintings/TileMgrass.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval hand-painted game art. Single square top-down orthographic surface texture, fills entire image, 1024x1024. Must repeat seamlessly in both directions. Broad readable material features, restrained fine detail and contrast, muted earthy palette, painted ambient crevice shading only. No strong directional light, cast shadows, vignette, perspective, border, text, logo, grid, or focal object. Weathered stratified ochre-grey rock with vertical broken ridges and subdued olive lichen, a sibling variant of a striated sandstone surface, no pavement, no grass. Small interlocking long angular facets, subtle painted bevels, homogeneous even coverage.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-e4030770-b175-409e-b596-8cdc02275d77.png"
+  },
+  "TileMstone": {
+    "source": "GroundTiles/paintings/TileMstone.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval hand-painted game art. Single square top-down orthographic surface texture, fills entire image, 1024x1024. Must repeat seamlessly in both directions. Broad readable material features, restrained fine detail and contrast, muted earthy palette, painted ambient crevice shading only. No strong directional light, cast shadows, vignette, perspective, border, text, logo, grid, or focal object. A lush medieval moss and low grass surface, deep desaturated green and muted olive. Broad velvety moss clumps, some small fernlike short leaves, subtle earth openings. Moderate detail, no flowers, no isolated focal clump. Dark natural green identity, no neon.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-028c767d-08ad-4b2c-b4c8-78acdfd1f16d.png"
+  },
+  "TileRock01": {
+    "source": "GroundTiles/paintings/TileRock01.png",
+    "prompt": "Use case: stylized-concept. Production diffuse ground texture for classic MU Online Lorencia reimagined as premium dark medieval hand-painted game art. Single square top-down orthographic surface texture, fills entire image, 1024x1024. Must repeat seamlessly in both directions. Broad readable material features, restrained fine detail and contrast, muted earthy palette, painted ambient crevice shading only. No strong directional light, cast shadows, vignette, perspective, border, text, logo, grid, or focal object. Angular weathered natural limestone bedrock, small broad broken stone facets and muted brown soil in the interstices. Ash grey, restrained taupe, very slight olive lichen. Ground plane of craggy rock, not masonry, no mortar, no big isolated rock boulders. Readable low-frequency faceted material.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-68aa4524-ea7b-4937-a007-9b9b17d59dac.png"
+  },
+  "TileRock02": {
+    "source": "GroundTiles/paintings/TileRock02.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, subtle painted crevice shading. No directional illumination, cast shadows, vignette, perspective, border, text, logo or focal object. Moss-covered brown-grey stony earth, fine scattered flat pebbles half hidden beneath muted olive ochre moss and dry earth. A restrained rough transition between grass and stone. Homogeneous scattered distribution, no large patches, low contrast.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-50d42329-cfbe-45b0-a258-0cdf475331b4.png"
+  },
+  "TileRock03": {
+    "source": "GroundTiles/paintings/TileRock03.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, subtle painted crevice shading. No directional illumination, cast shadows, vignette, perspective, border, text, logo or focal object. Cold blue charcoal weathered block stone paving. Uneven square broad granite blocks, roughly 5 across, subtle chipped edges, restrained cool grey painted bevel highlights, deep joints, very small olive moss accents. Gothic medieval dark dungeon stone, not bright or modern brick.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-8fd18a20-0980-468f-bd46-793bab696ecb.png"
+  },
+  "TileRock04": {
+    "source": "GroundTiles/paintings/TileRock04.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, subtle painted crevice shading. No directional illumination, cast shadows, vignette, perspective, border, text, logo or focal object. Dark charcoal blue-grey granular volcanic rock, fine slate-like fractured facets, broad subtle mottling and restrained texture grain. Almost uniform rocky ground without regular cracks, masonry, or pattern. Dark cool ground with moderate readability, no crushed blacks.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-11a38329-2041-45c5-b9b4-06861dc093be.png"
+  },
+  "TileRock05": {
+    "source": "GroundTiles/paintings/TileRock05.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, subtle painted crevice shading. No directional illumination, cast shadows, vignette, perspective, border, text, logo or focal object. Worn dusty ochre-grey sandstone square block paving, faint mostly filled shallow horizontal and vertical joints, about 5 block widths across. Pale muted taupe brown stone surfaces worn almost smooth, darker dusty recesses, broad stains, restrained small chips. A subdued ancient stone floor.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-0a968283-6d26-4f41-8b65-7c7273d208d1.png"
+  },
+  "plate2": {
+    "source": "Beer01/paintings/plate2.png",
+    "prompt": "Use case: precise-object-edit. Edit this single 2x2 diffuse game texture atlas. Preserve the exact four-quadrant divisions and preserve the bottom-left pewter and bottom-right oak quadrants unchanged. Replace only the TOP-LEFT roasted meat surface with a deep aubergine / wine-purple grape-skin surface: restrained softly mottled dusty plum, a broad gentle pale violet waxy bloom highlight, no roasted meat, no orange, no complete grape objects or circular fruit shapes, homogeneous material texture for UV-mapped grape geometry. Keep the TOP-RIGHT dark olive bottle glass, but add a narrow horizontal aged cream parchment bottle-label band across most of that quadrant. This band lies at image y=74% to 80% of that quadrant's height (global image y\u224837% to 40%); x=56% to 95% of the whole image. Label has subtly frayed straight edges, subdued age stains and a tiny simple faded burgundy diamond mark centered, no text. Preserve the glass elsewhere. Keep all textures painterly, diffuse-only, dark medieval MU Online identity, no PBR. Output exactly square 1024x1024.",
+    "mode": "built-in image_gen edit",
+    "initial_prompt": "Use case: stylized-concept. Asset type: single game diffuse texture atlas for a tiny dark medieval MU Online tavern still life. Create exactly 4 equal square quadrants in a 2x2 layout with boundaries at the exact midpoint. Texture flat surfaces, not objects, no perspective, no borders, no labels. Entire atlas square 1024x1024. Top-left quadrant: rich browned roasted meat surface, warm umber and sienna, broad lightly glazed patches and tiny char marks. Top-right quadrant: dark olive-green antique bottle glass surface, muted translucent-looking painted olive variation, a broad subtle vertical glint, no actual transparency, no bottle shape. Bottom-left quadrant: worn pewter and dark grey ceramic, cool grey-brown patina, restrained rubbed silver highlights with thin brushed texture, homogeneous texture. Bottom-right quadrant: dark aged oak wood grain, vertical grain, broad umber and russet streaks, no plank divisions. Painterly diffuse textures, controlled small amount of wear, broad readable material definition. It must work without PBR, metalness or normal maps, no strong lighting or shadows, no recognizable complete object, no text or logo. The four quadrants must have clean exact 50% divisions; surfaces fill their quadrants edge to edge.",
+    "generated_file": "exec-de8b7bd6-721f-4638-9a71-7e9e7175c37c.png"
+  },
+  "TileRock06": {
+    "source": "GroundTiles/paintings/TileRock06.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, painted material definition only. No cast shadows, vignette, perspective, text, logo or extraneous objects. A single black marble gothic floor slab with very restrained faded antique gold filigree at its four corners and narrow worn gold inset lines, matching a legacy MU ornamental black-marble tile. Dark umber-black stone with sparse fine subdued ochre veins. Corners and lines should repeat cleanly into a floor grid. No jewel, no central medallion. Almost flat material.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-d12e7b55-aede-4eb4-afac-af969c0139d5.png"
+  },
+  "TileRock07": {
+    "source": "GroundTiles/paintings/TileRock07.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, painted material definition only. No cast shadows, vignette, perspective, text, logo or extraneous objects. Nearly uniform dark blue charcoal slate with subtle broad weathered facets and fine cracks. Natural dark stone ground. Keep evenly distributed texture with no logo, no writing, no bright motif, no central large feature; restrained small worn pale scratches. Seamless homogeneous surface.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-d143697a-6951-47a8-a740-74b96d98ebeb.png"
+  },
+  "TileWater01": {
+    "source": "GroundTiles/paintings/TileWater01.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, painted material definition only. No cast shadows, vignette, perspective, text, logo or extraneous objects. Dark blue-green medieval river water viewed exactly overhead. Painterly broad interlocking ripples and muted turquoise thin caustic wisps on deep desaturated teal. Calm diffuse water texture, no horizon, no reflections of objects, no foam, no bright glints or white, no central whirlpool. Homogeneous repeat.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-de9e0f9c-59d4-4e6a-bef4-27a1ff02c9ec.png"
+  },
+  "TileWood01": {
+    "source": "GroundTiles/paintings/TileWood01.png",
+    "prompt": "Use case: stylized-concept. Production diffuse tile for classic MU Online Lorencia reimagined as premium dark medieval painted game art. Square top-down orthographic surface, 1024x1024, fills whole image. Must repeat seamlessly on all four edges. Broad readable material features, restrained fine detail, painted material definition only. No cast shadows, vignette, perspective, text, logo or extraneous objects. Weathered medieval oak decking with 6 broad horizontal planks filling the tile, desaturated dark ochre and grey-brown. Irregular worn edges, restrained broad sweeping wood grain, subtle cracks, old softened grain ridges. Boards continue across left/right edges; no end grain, no nails, no knots larger than a small accent. Rustic hand-painted dark wood material, readable from distance.",
+    "mode": "built-in image_gen",
+    "generated_file": "exec-f1601b5c-578e-44dc-932e-5842cd17b703.png"
+  }
+}

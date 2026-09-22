@@ -1,0 +1,12 @@
+00:00.684  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/original/source.blend"
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/build_source.py:48: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes = True
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/build_source.py:286: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  scene.world.use_nodes = True
+00:03.024  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain/assets-work/World1/Beer01/preview.png'
+{"triangles": 784, "objects": 18, "bones": 5, "actions": 1, "bounds": {"min": [-50.1349983215332, -29.6299991607666, -0.3400000035762787], "max": [41.060001373291016, 28.850000381469727, 61.459999084472656]}, "uv": "one set, finite, within atlas", "skinning": "exactly one valid bone per vertex", "texture": "plate2.jpg, 512\u00d7512, single diffuse atlas", "status": "Blender checks PASS; engine checks required"}
+Info: Packed 1 file(s)
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

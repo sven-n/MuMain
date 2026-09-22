@@ -94,9 +94,15 @@ private:
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
 
+    // Stops and releases the current music stream, if any.
+    void ReleaseMusicStream();
+
     ma_sound m_musicSound{};
     bool m_musicLoaded = false;
     std::string m_currentMusicName;
+    // Track whose stream failed to open. Scenes request their music every frame, so a
+    // missing file is not retried until a different track or an enforced play is requested.
+    std::string m_unavailableMusicName;
     bool m_initialized = false;
 };
 

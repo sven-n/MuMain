@@ -24,11 +24,14 @@ in [`../asset-pipeline.md`](../asset-pipeline.md). The artist agent's own brief 
 |------|-------|
 | Player client build on macOS (Apple Silicon) | Works: `cmake --preset macos-arm64 ...`, see [`../build/macos/console.md`](../build/macos/console.md). Tests 100 % green. |
 | Client vs OpenMU | Verified: connects to the local Docker OpenMU on port 44406, receives the server list, reaches the login scene. |
+| Client stability on macOS | Fixed 2026-09-22: crashes in Metal/CoreFoundation after seconds to minutes were heap corruption from miniaudio's failure paths, triggered by the missing `Data/Music` files (see WORKLOG). miniaudio is patched at configure time (`cmake/patches/`). |
 | Editor build (`ENABLE_EDITOR=ON`) | Windows only. On macOS three Map Editor files fail (Win32 file dialog). See the macOS guide. |
 | `bmdconv` (model converter BMD <-> SMD, compare, validate) | Works, tested (`tests/tools`). |
 | `tools/mu_texture.py` | Works, byte-identical round trips on shipped textures. |
 | Blender scripts (`tools/blender/`) | Import and export through Blender Source Tools; verified round trip on `Monster01.bmd` (geometry, bone order, 7 actions equivalent). |
+| Lorencia asset pilot | 17 ground textures, Beer01 and three more static props (Candle01, TreasureChest01, Tomb03) exported/validated offline on `art/world1-pilot`; client acceptance pending. See [`assets-work/World1/notes.md`](../../assets-work/World1/notes.md). |
 | Game data in `src/bin/Data` | Complete except: no `Sound/`, no `Music/`, most of `Object74/` missing, a few effect/skill models missing. |
+| UI art pilot (`art/ui-pilot`) | Five right-HUD textures repainted and offline validated in an isolated worktree; source Data installed there only. Native/1080p mockups, originals and editable sources: [`assets-work/UI/notes.md`](../../assets-work/UI/notes.md). Client verification pending; shared runtime untouched. |
 
 ## 3. Development machine (owner's Mac)
 
@@ -37,10 +40,10 @@ Facts an agent needs when working on that machine; adjust if the environment mov
 - Apple Silicon, macOS 15, Xcode Command Line Tools, Homebrew in `/opt/homebrew`. An **old Intel
   Homebrew also exists in `/usr/local`**; keep `/opt/homebrew/bin` first on `PATH` and pass
   `-DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)"`.
-- The Command Line Tools have a **stale libc++ header folder** that breaks every C++ build
-  with `'cassert' file not found`. Until `sudo mv /Library/Developer/CommandLineTools/usr/include/c++/v1 ~/CLT-stale-cxx-v1-backup`
-  has been run, configure with
-  `"-DCMAKE_CXX_FLAGS=-nostdinc++ -isystem $(xcrun --sdk macosx --show-sdk-path)/usr/include/c++/v1"`.
+- The Command Line Tools used to carry a **stale libc++ header folder** that broke every C++
+  build with `'cassert' file not found`. The owner moved it away on 2026-09-22, so a plain
+  `cmake --preset macos-arm64` works; if the error returns after a tools update, see the
+  troubleshooting section of the macOS guide.
 - .NET 10 SDK in `~/.dotnet` (exported in `~/.zshrc`; GUI-launched IDEs need it set separately).
 - Build directory: `out/build/macos-arm64` (Ninja Multi-Config; Release built). Runtime:
   `out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/` (run `./Main` from there;
@@ -82,7 +85,7 @@ out/build/macos-arm64/tools/bmdconv/Release/bmdconv compare src/bin/Data/Item/Sw
 
 ## 6. Open work, in priority order
 
-1. **Phase 1 of the asset plan**: texture pass for World1 and the starting character parts.
+1. **Asset plan**: Lorencia terrain, Beer01 and three additional static props are installed and validated offline. Client acceptance/screenshots remain pending under explicit offline authorization; investigate stability separately. Continue starting-character textures and further selected Object1 work after reading the [World1 handoff](../../assets-work/World1/notes.md). The art branch currently resides in `/Users/webproduktion3/.codex/worktrees/world1-static-batch/MuMain`; the shared primary checkout was switched to main externally.
 2. **Editor on macOS**: replace `GetOpenFileNameW` in `MapTextureImport.cpp`,
    `MapMinimapCapture.cpp`, `MapAttributeSave.cpp` (`src/MuEditor/UI/MapEditor/`) with
    `SDL_ShowOpenFileDialog`, then verify the Map/Item/Skill editors run under Metal.
@@ -97,6 +100,7 @@ out/build/macos-arm64/tools/bmdconv/Release/bmdconv compare src/bin/Data/Item/Sw
 | Symptom | Look at |
 |---------|---------|
 | Client window opens but nothing loads | `MuError.log` beside `Main` (asset paths, GPU driver, fonts) |
+| Client dies in Metal, CoreFoundation or XPC code with an address like `0x1` | Heap corruption in the client, not a driver bug. Build with `-fsanitize=address` (see WORKLOG 2026-09-22) and run from a normal Terminal, not a sandboxed tool shell. |
 | Client cannot connect | `docker ps`, `docker logs openmu-startup`, `config.ini` ServerIP/Port (44406) |
 | Build fails on a standard header | stale libc++ folder, see section 3 |
 | Model does not load in game | `bmdconv info` on the file; `bmdconv validate` on its SMD; texture names vs files |

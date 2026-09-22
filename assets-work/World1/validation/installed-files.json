@@ -1,0 +1,83 @@
+{
+  "files": [
+    {
+      "file": "World1/TileGrass01.OZJ",
+      "sha256": "6b218b2c9d728c03d28c857927bda136cb803d3b191549b159942967d22cc9b6"
+    },
+    {
+      "file": "World1/TileGrass02.OZJ",
+      "sha256": "6203bcf9807e0f5729a96b2d7f668761228c0c53d0772588d4b71201903b3b42"
+    },
+    {
+      "file": "World1/TileGround01.OZJ",
+      "sha256": "49426c6732b6c56561e29023f6d25cdfbe774d881ce0365ece258ae14ee9c300"
+    },
+    {
+      "file": "World1/TileGround01x.OZJ",
+      "sha256": "bd8294fa46442d876c00354a49a678021a7dee756f2438f600397347cac08229"
+    },
+    {
+      "file": "World1/TileGround02.OZJ",
+      "sha256": "fede2d6a8186c8e417e51797235b3513728fe521f17cf6d69840696780d64930"
+    },
+    {
+      "file": "World1/TileGround03.OZJ",
+      "sha256": "d6b41c8054257c2790e2dfa415af478c7b12cd886d85ad99eef8b33012f39bb5"
+    },
+    {
+      "file": "World1/TileMgrass.OZJ",
+      "sha256": "8859db845638f29d0d6811aa5cd71645e9a6b184800211d1b5906ad805c6868e"
+    },
+    {
+      "file": "World1/TileMstone.OZJ",
+      "sha256": "5fa7b79617aa343ce2fc75c191a5d61f9c928098410731d2d4f262046b466cac"
+    },
+    {
+      "file": "World1/TileRock01.OZJ",
+      "sha256": "a4eb76c9386c5be107d1da09e1472da6d842097a10e11c94d622f55413a000c1"
+    },
+    {
+      "file": "World1/TileRock02.OZJ",
+      "sha256": "d78eecc91c090fd6fce9f8cdb05af5af1b1ec3f153d5207fbec03c14b030e2e1"
+    },
+    {
+      "file": "World1/TileRock03.OZJ",
+      "sha256": "ee32624417db686d0926987b93d638001aacf1c2bf91570350c92a41e296ba80"
+    },
+    {
+      "file": "World1/TileRock04.OZJ",
+      "sha256": "e9a57bdac82f6813f4758225a8d67013e83cf93da2c38023b0b13935f6728659"
+    },
+    {
+      "file": "World1/TileRock05.OZJ",
+      "sha256": "9114f4a5d8abcb2d5cb0190ab32a78acbdba03437afd14a4420d7f30afc04bf4"
+    },
+    {
+      "file": "World1/TileRock06.OZJ",
+      "sha256": "aef9c4f3015513c901b736526d9f180cd832ca998924ed42886f7512ebe51dca"
+    },
+    {
+      "file": "World1/TileRock07.OZJ",
+      "sha256": "a21510e42e51b83faf9e8f25a89838bf2a8b38924d55a188e256bcc514cb8371"
+    },
+    {
+      "file": "World1/TileWater01.OZJ",
+      "sha256": "9cd02e727f64b3eba5a28090a53d8b8d42cf8cfccbac240edffecd5b9ed50c94"
+    },
+    {
+      "file": "World1/TileWood01.OZJ",
+      "sha256": "9134d1f8eaafc33b063766aa0202168e6740356227ce0c27803e1e9bcefad1c1"
+    },
+    {
+      "file": "Object1/Beer01.bmd",
+      "sha256": "84cfe988ce3b0cfcdb5d415a689e6e6af3a63428af2f7f878561cd7dafd3e49f"
+    },
+    {
+      "file": "Object1/plate2.OZJ",
+      "sha256": "78e2f955ed1e3905977027b3fa6bf138204687ae1dda510f17d65307d3349847"
+    }
+  ],
+  "protected_world1_files": 35,
+  "client_verified": false,
+  "reason": "Original client crashes; offline continuation authorized."
+}

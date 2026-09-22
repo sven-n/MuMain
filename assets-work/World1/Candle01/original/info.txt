@@ -1,0 +1,16 @@
+model src/bin/Data/Object1/Candle01.bmd
+  name field: Data2\Object1\candle.smd  version: 10
+  meshes: 2  bones: 9  actions: 1  triangles: 116
+  bounds (bind pose): min -19.32 -11.26 0.01  max 19.35 11.21 87.07  size 38.67 22.47 87.06
+  mesh 0: triangles=110 vertices=64 normals=64 uvs=74 texture=candle.jpg
+  mesh 1: triangles=6 vertices=15 normals=4 uvs=15 texture=candle2.jpg
+  bone 0: "Cylinder05" parent=-1
+  bone 1: "Bone01" parent=-1
+  bone 2: "Bone02" parent=1
+  bone 3: "Bone03" parent=2
+  bone 4: "Bone04" parent=1
+  bone 5: "Bone05" parent=4
+  bone 6: "Bone06" parent=1
+  bone 7: "Bone07" parent=6
+  bone 8: "Mesh03" parent=1
+  action 0: keys=7 lock=0

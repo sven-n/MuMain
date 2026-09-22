@@ -1,0 +1,37 @@
+{
+  "base_commit": "9a8b2027",
+  "reference_canvas": [640, 480],
+  "panel": {
+    "path": "Interface/partCharge1/newui_menu03.OZJ",
+    "payload": [256, 51],
+    "gpu_allocation": [256, 64],
+    "generation_crop_normalized_1024": [0, 410, 1024, 614],
+    "regions": [
+      {"name": "center-right HUD", "source": [0, 0, 104, 41], "destination": [384, 429, 104, 41], "transform": "center"},
+      {"name": "right controls backing", "source": [104, 0, 152, 41], "destination": [488, 429, 152, 41], "transform": "right"},
+      {"name": "experience trough", "source": [0, 41, 256, 10], "destination": [384, 470, 256, 10], "transform": "experience"}
+    ],
+    "protected_rectangles_xyxy": [[0, 0, 256, 2], [0, 40, 256, 51], [0, 0, 2, 51], [254, 0, 256, 51], [0, 2, 35, 6], [0, 36, 35, 40], [0, 6, 4, 36], [31, 6, 35, 36], [36, 2, 52, 41], [53, 3, 98, 42], [102, 0, 106, 41], [106, 2, 256, 40]]
+  },
+  "buttons": {
+    "payload": [30, 164],
+    "gpu_allocation": [32, 256],
+    "cell": [30, 41],
+    "state_y": [0, 41, 82, 123],
+    "state_names": ["normal", "hover", "pressed-selected", "selected-hover"],
+    "disabled": "No separately registered disabled atlas state in this HUD configuration.",
+    "edit_rectangle_xyxy": [2, 4, 28, 39],
+    "icons": [
+      {"file": "newui_menu_Bt01.OZJ", "label": "Character", "x": 519, "y": 429, "glyph_box": [8, 13, 24, 32]},
+      {"file": "newui_menu_Bt02.OZJ", "label": "Inventory", "x": 549, "y": 429, "glyph_box": [7, 12, 24, 33]},
+      {"file": "newui_menu_Bt03.OZJ", "label": "Friends", "x": 579, "y": 429, "glyph_box": [7, 12, 25, 33]},
+      {"file": "newui_menu_Bt04.OZJ", "label": "Menu", "x": 609, "y": 429, "glyph_box": [8, 12, 23, 32]}
+    ]
+  },
+  "sampling": {
+    "filter": "GL_LINEAR",
+    "wrap": "GL_CLAMP_TO_EDGE",
+    "uv_formula": "u=(sx+0.5)/paddedWidth; v=(sy+0.5)/paddedHeight; du=(sw-1)/paddedWidth; dv=(sh-1)/paddedHeight",
+    "alpha": "JPEG RGB becomes alpha=255, including black pixels and zero-initialized GPU padding. No color key."
+  }
+}

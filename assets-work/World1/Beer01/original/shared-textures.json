@@ -1,0 +1,25 @@
+{
+  "plate": [
+    "Beer01.bmd",
+    "Beer02.bmd"
+  ],
+  "winecup": [
+    "Beer01.bmd",
+    "Beer02.bmd",
+    "Beer03.bmd"
+  ],
+  "plate2": [
+    "Beer01.bmd"
+  ],
+  "pot3": [
+    "Beer01.bmd",
+    "Beer02.bmd"
+  ],
+  "bottle": [
+    "Beer01.bmd",
+    "Beer02.bmd",
+    "Beer03.bmd",
+    "Furniture01.bmd",
+    "Furniture02.bmd"
+  ]
+}

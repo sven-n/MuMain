@@ -1,0 +1,10 @@
+model src/bin/Data/Object1/TreasureChest01.bmd
+  name field: Data2\Object1\Treasure_Chest.smd  version: 10
+  meshes: 1  bones: 4  actions: 1  triangles: 66
+  bounds (bind pose): min -57.73 -34.36 0.05  max 56.83 29.96 84.09  size 114.57 64.32 84.04
+  mesh 0: triangles=66 vertices=42 normals=34 uvs=73 texture=treasure_chest.jpg
+  bone 0: "Bone01" parent=-1
+  bone 1: "Bone02" parent=0
+  bone 2: "Bone03" parent=1
+  bone 3: "Box12" parent=0
+  action 0: keys=7 lock=0
