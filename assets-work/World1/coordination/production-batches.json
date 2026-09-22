@@ -430,5 +430,36 @@
       "src/bin/Data/Object1/tub.OZJ",
       "src/bin/Data/Object1/horse_drawn_01.OZJ"
     ]
+  },
+  "reviewer / monuments": {
+    "models": [
+      "StoneStatue01",
+      "StoneStatue02",
+      "StoneStatue03",
+      "SteelStatue01",
+      "Tomb01",
+      "Tomb02"
+    ],
+    "compatibility_models": [
+      "Waterspout01"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/Waterspout01.bmd"
+    ],
+    "branch": "codex/lorencia-monuments",
+    "worktree": "MuMain-lorencia-monuments",
+    "owned_textures": [
+      "src/bin/Data/Object1/tombstone_big.OZJ",
+      "src/bin/Data/Object1/stone_statue02.OZJ",
+      "src/bin/Data/Object1/stone_statue01.OZJ",
+      "src/bin/Data/Object1/angel_stone_statue.OZJ",
+      "src/bin/Data/Object1/grave_02.OZJ",
+      "src/bin/Data/Object1/grave_01.OZJ"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/reagon_waterspout.OZJ",
+      "src/bin/Data/Object1/ston01.OZJ",
+      "src/bin/Data/Object1/ston02.OZJ"
+    ]
   }
 }
