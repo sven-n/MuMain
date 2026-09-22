@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "original_geometry_uv_skinning_transform_sha256": "7367caa152e0017fdbb552552045fa9705678c8a9d5486f0d3001027eb5eebcb",
+  "ref_original": "byte-identical numeric mesh snapshot to preserved import",
+  "packed_images": {
+    "desk_big.jpg": "14f2eaced592aa9e6714a31b12bba06c454bd47502c3fc5d3ab54d454c7d10e1",
+    "desk_big.jpg.001": "42c64ea22e61bee77ec1a9c1ce9b538be88ce68dec85d3465e244e8ecb26fae2"
+  },
+  "high_poly": "excluded editable authored meshes with 3-segment fine-bevel modifiers",
+  "no_external_images_required": true
+}

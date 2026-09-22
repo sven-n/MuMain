@@ -1,0 +1,5 @@
+# bmdconv action manifest for Furniture04.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Furniture04.smd <output.bmd> --manifest Furniture04.actions.txt
+model Furniture04.smd
+action 0 file=Furniture04_a00.smd keys=1 lock=0
+texture 0 desk_big.jpg original=desk_big.jpg

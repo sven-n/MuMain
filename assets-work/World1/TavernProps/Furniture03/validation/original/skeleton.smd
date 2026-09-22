@@ -1,0 +1,10 @@
+version 1
+nodes
+0 "Box09" -1
+end
+skeleton
+time 0
+0 -6.972691 -0.058266 79.532784 0.000000 0.000000 0.000000
+end
+triangles
+end
