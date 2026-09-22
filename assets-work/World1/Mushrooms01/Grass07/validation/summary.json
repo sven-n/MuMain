@@ -1,0 +1,40 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -59.39,
+      -44.41,
+      -0.4
+    ],
+    [
+      56.12,
+      58.59,
+      29.01
+    ]
+  ],
+  "bounds_after": [
+    [
+      -59.39,
+      -44.41,
+      -0.4
+    ],
+    [
+      56.12,
+      58.59,
+      29.01
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "mushroom.jpg"
+  ],
+  "export_sha256": {
+    "Grass07.bmd": "e1e81ece76155e14c6e3c9e6d5df2e0673d6db3616eae802085b6da18dfae810",
+    "mushroom.OZJ": "3bd25dc928f1f17ff41243e7c9cd8622dc298b2d55ada64aa36d250d845d2402"
+  }
+}

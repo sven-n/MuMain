@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "packed_source_and_reference": true,
+  "triangles": 498,
+  "uv_range": [
+    0.017999999225139618,
+    0.9819999933242798
+  ],
+  "minimum_uv_triangle_area": 1.416798971365374e-06,
+  "rigid_bindings": "One original non-dummy bone per vertex",
+  "alpha": "Opaque RGB; no alpha material"
+}

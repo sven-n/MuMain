@@ -1,0 +1,9 @@
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-mushrooms/assets-work/World1/Mushrooms01/Grass08/original/Grass08.bmd
+  name field: Data2\Object1\mushroom_02.smd  version: 10
+  meshes: 1  bones: 3  actions: 1  triangles: 54
+  bounds (bind pose): min -47.68 -8.23 -0.40  max 26.67 18.41 22.88  size 74.36 26.63 23.29
+  mesh 0: triangles=54 vertices=57 normals=57 uvs=21 texture=mushroom.jpg
+  bone 0: "Sphere05" parent=-1
+  bone 1: "Sphere09" parent=-1
+  bone 2: "Sphere10" parent=-1
+  action 0: keys=1 lock=0
