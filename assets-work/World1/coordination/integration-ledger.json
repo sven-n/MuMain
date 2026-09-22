@@ -554,5 +554,34 @@
       "src/bin/Data/Object1/Tomb02.bmd": "assets-work/World1/Statues01/Tomb02/exports/Tomb02.bmd",
       "src/bin/Data/Object1/grave_01.OZJ": "assets-work/World1/Statues01/Tomb02/exports/grave_01.OZJ"
     }
+  },
+  {
+    "name": "CartHay01",
+    "models": [
+      "Carriage01",
+      "Carriage02",
+      "Carriage03",
+      "Carriage04",
+      "Straw01",
+      "Straw02"
+    ],
+    "owner": "groundcover / carts and hay",
+    "source_commits": [
+      "93ca193e"
+    ],
+    "integration_commits": [
+      "8e6f9ef0"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Carriage01.bmd": "assets-work/World1/CartHay01/Carriage01/exports/Carriage01.bmd",
+      "src/bin/Data/Object1/Carriage02.bmd": "assets-work/World1/CartHay01/Carriage02/exports/Carriage02.bmd",
+      "src/bin/Data/Object1/Carriage03.bmd": "assets-work/World1/CartHay01/Carriage03/exports/Carriage03.bmd",
+      "src/bin/Data/Object1/Carriage04.bmd": "assets-work/World1/CartHay01/Carriage04/exports/Carriage04.bmd",
+      "src/bin/Data/Object1/Straw01.bmd": "assets-work/World1/CartHay01/Straw01/exports/Straw01.bmd",
+      "src/bin/Data/Object1/Straw02.bmd": "assets-work/World1/CartHay01/Straw02/exports/Straw02.bmd",
+      "src/bin/Data/Object1/horse_drawn_02.OZT": "assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_02.OZT",
+      "src/bin/Data/Object1/horse_drawn_03.OZJ": "assets-work/World1/CartHay01/Carriage01/exports/horse_drawn_03.OZJ",
+      "src/bin/Data/Object1/grass_01.OZT": "assets-work/World1/CartHay01/Carriage04/exports/grass_01.OZT"
+    }
   }
 ]

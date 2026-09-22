@@ -560,5 +560,56 @@
       "src/bin/Data/Object1/tree_05.OZT",
       "src/bin/Data/Object1/tree_08.OZT"
     ]
+  },
+  "groundcover / cannons and shared wood": {
+    "models": [
+      "Cannon01",
+      "Cannon02",
+      "Cannon03",
+      "Hanging01"
+    ],
+    "compatibility_models": [
+      "Carriage01",
+      "Carriage02",
+      "Carriage03",
+      "Carriage04",
+      "HouseEtc02",
+      "StoneMuWall04",
+      "StoneWall03",
+      "Well01"
+    ],
+    "branch": "codex/lorencia-cannons",
+    "worktree": "MuMain-lorencia-cannons",
+    "owned_textures": [
+      "src/bin/Data/Object1/horse_drawn_01.OZJ"
+    ],
+    "frozen_models": [
+      "src/bin/Data/Object1/Carriage01.bmd",
+      "src/bin/Data/Object1/Carriage02.bmd",
+      "src/bin/Data/Object1/Carriage03.bmd",
+      "src/bin/Data/Object1/Carriage04.bmd",
+      "src/bin/Data/Object1/HouseEtc02.bmd",
+      "src/bin/Data/Object1/StoneMuWall04.bmd",
+      "src/bin/Data/Object1/StoneWall03.bmd",
+      "src/bin/Data/Object1/Well01.bmd"
+    ],
+    "frozen_textures": [
+      "src/bin/Data/Object1/c_wall04.OZJ",
+      "src/bin/Data/Object1/c_wall06.OZJ",
+      "src/bin/Data/Object1/grass_01.OZT",
+      "src/bin/Data/Object1/horse_drawn_02.OZT",
+      "src/bin/Data/Object1/horse_drawn_03.OZJ",
+      "src/bin/Data/Object1/jar_01.OZJ",
+      "src/bin/Data/Object1/tile_01.OZJ",
+      "src/bin/Data/Object1/tile_03.OZJ",
+      "src/bin/Data/Object1/tile_house01.OZJ",
+      "src/bin/Data/Object1/tile_ston01.OZJ",
+      "src/bin/Data/Object1/tile_ston04.OZJ",
+      "src/bin/Data/Object1/tile_ston06.OZJ",
+      "src/bin/Data/Object1/tile_wood02.OZJ",
+      "src/bin/Data/Object1/tile_wood03.OZJ",
+      "src/bin/Data/Object1/tub.OZJ",
+      "src/bin/Data/Object1/well.OZJ"
+    ]
   }
 }
