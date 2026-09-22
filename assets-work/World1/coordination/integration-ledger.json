@@ -148,5 +148,32 @@
       "src/bin/Data/Object1/streetlight.OZJ": "assets-work/World1/TimberProps01/StreetLight01/exports/streetlight.OZJ",
       "src/bin/Data/Object1/streetlight_brightness2.OZJ": "assets-work/World1/TimberProps01/StreetLight01/exports/streetlight_brightness2.OZJ"
     }
+  },
+  {
+    "name": "Rocks01",
+    "models": [
+      "Stone01",
+      "Stone02",
+      "Stone03",
+      "Stone04",
+      "Stone05",
+      "Waterspout01"
+    ],
+    "owner": "reviewer / rocks subagent",
+    "source_commits": [
+      "8d3cbcb7"
+    ],
+    "integration_commits": [
+      "db27198a"
+    ],
+    "game_files": {
+      "src/bin/Data/Object1/Stone01.bmd": "assets-work/World1/Rocks01/Stone01/exports/Stone01.bmd",
+      "src/bin/Data/Object1/Stone02.bmd": "assets-work/World1/Rocks01/Stone02/exports/Stone02.bmd",
+      "src/bin/Data/Object1/Stone03.bmd": "assets-work/World1/Rocks01/Stone03/exports/Stone03.bmd",
+      "src/bin/Data/Object1/Stone04.bmd": "assets-work/World1/Rocks01/Stone04/exports/Stone04.bmd",
+      "src/bin/Data/Object1/Stone05.bmd": "assets-work/World1/Rocks01/Stone05/exports/Stone05.bmd",
+      "src/bin/Data/Object1/ston01.OZJ": "assets-work/World1/Rocks01/textures/ston01.OZJ",
+      "src/bin/Data/Object1/ston02.OZT": "assets-work/World1/Rocks01/textures/ston02.OZT"
+    }
   }
 ]

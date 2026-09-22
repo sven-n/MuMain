@@ -156,5 +156,22 @@
       "src/bin/Data/Object1/tile_wood02.OZJ",
       "src/bin/Data/Object1/tile_wood03.OZJ"
     ]
+  },
+  "reviewer / ironwork": {
+    "models": [
+      "SteelWall01",
+      "SteelWall02",
+      "SteelWall03",
+      "SteelDoor01",
+      "HouseEtc03"
+    ],
+    "branch": "codex/lorencia-ironwork",
+    "worktree": "MuMain-lorencia-ironwork",
+    "owned_textures": [
+      "src/bin/Data/Object1/steel_barred_b.OZJ",
+      "src/bin/Data/Object1/steel_barred_a.OZT",
+      "src/bin/Data/Object1/steel_barred_door.OZT"
+    ],
+    "frozen_textures": []
   }
 }
