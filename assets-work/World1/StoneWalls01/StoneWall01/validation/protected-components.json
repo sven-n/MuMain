@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "components": [
+    {
+      "texture": "tile_02.jpg",
+      "triangles": 82,
+      "full_component_compare": "EQUIVALENT",
+      "exact_corner_uv_and_bone": true,
+      "max_position_component_error": 0
+    },
+    {
+      "texture": "bridge_01.jpg",
+      "triangles": 128,
+      "full_component_compare": "EQUIVALENT",
+      "exact_corner_uv_and_bone": true,
+      "max_position_component_error": 0
+    }
+  ],
+  "alpha": null,
+  "position_tolerance": 0.001,
+  "scope": "Gate and siege fixtures, banner cloth/pole geometry and all 25 animation keys preserved"
+}

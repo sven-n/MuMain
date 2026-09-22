@@ -1,0 +1,350 @@
+00:00.511  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/source.blend"
+00:00.519  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/original/source.blend"
+00:02.332  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/review/before.png'
+00:03.944  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/review/gameplay-before.png'
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/exports/StoneWall01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n6uqbwig
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n6uqbwig/StoneWall01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n6uqbwig/StoneWall01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_n6uqbwig/StoneWall01.actions.txt
+
+SMD IMPORTER: now working on StoneWall01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: tile_03.jpg
+- New material: tile_02.jpg
+- New material: bridge_01.jpg
+- Imported 414 polys
+SMD StoneWall01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneWall01_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:05.609  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/review/after.png'
+00:07.232  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/exports/StoneWall01.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import___jlw5_m
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import___jlw5_m/StoneWall01.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import___jlw5_m/StoneWall01_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import___jlw5_m/StoneWall01.actions.txt
+
+SMD IMPORTER: now working on StoneWall01
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: tile_03.jpg
+- New material: tile_02.jpg
+- New material: bridge_01.jpg
+- Imported 414 polys
+SMD StoneWall01 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall01_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneWall01_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall01_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:08.643  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/review/wireframe.png'
+00:08.645  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/source.blend"
+00:08.654  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/original/source.blend"
+00:10.293  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/review/before.png'
+00:11.884  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/exports/StoneWall02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v6c1wzqe
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v6c1wzqe/StoneWall02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v6c1wzqe/StoneWall02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_v6c1wzqe/StoneWall02.actions.txt
+
+SMD IMPORTER: now working on StoneWall02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: tile_03.jpg
+- New material: tile_02.jpg
+- New material: bridge_01.jpg
+- Imported 414 polys
+SMD StoneWall02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneWall02_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:13.588  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/review/after.png'
+00:15.301  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/exports/StoneWall02.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2n2bahfu
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2n2bahfu/StoneWall02.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2n2bahfu/StoneWall02_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_2n2bahfu/StoneWall02.actions.txt
+
+SMD IMPORTER: now working on StoneWall02
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: tile_03.jpg
+- New material: tile_02.jpg
+- New material: bridge_01.jpg
+- Imported 414 polys
+SMD StoneWall02 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall02_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "StoneWall02_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall02_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:16.721  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/review/wireframe.png'
+00:16.722  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/source.blend"
+00:16.734  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/original/source.blend"
+00:18.586  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/review/before.png'
+00:20.165  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 4 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 4 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0bbemzwx
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0bbemzwx/StoneWall03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0bbemzwx/StoneWall03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_0bbemzwx/StoneWall03.actions.txt
+
+SMD IMPORTER: now working on StoneWall03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_03.jpg
+- Imported 333 polys
+SMD StoneWall03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "StoneWall03_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:22.301  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/review/after.png'
+00:24.496  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/StoneWall03.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_k1k33or2
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_k1k33or2/StoneWall03.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_k1k33or2/StoneWall03_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_k1k33or2/StoneWall03.actions.txt
+
+SMD IMPORTER: now working on StoneWall03
+- This is a mesh
+- Imported 4 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: horse_drawn_01.jpg
+- New material: tile_03.jpg
+- Imported 333 polys
+SMD StoneWall03 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall03_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 4 bones against armature "StoneWall03_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall03_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:26.395  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/review/wireframe.png'
+00:26.397  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/source.blend"
+00:26.408  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/original/source.blend"
+00:28.790  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/review/before.png'
+00:30.781  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/validation/reimported.blend: 1 mesh object(s), 4 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/exports/StoneWall05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar_78sls
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar_78sls/StoneWall05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar_78sls/StoneWall05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ar_78sls/StoneWall05.actions.txt
+
+SMD IMPORTER: now working on StoneWall05
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: tile_03.jpg
+- Imported 100 polys
+SMD StoneWall05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "StoneWall05_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:33.071  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/review/after.png'
+00:34.910  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/exports/StoneWall05.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1m6jevq
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1m6jevq/StoneWall05.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1m6jevq/StoneWall05_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_g1m6jevq/StoneWall05.actions.txt
+
+SMD IMPORTER: now working on StoneWall05
+- This is a mesh
+- Imported 2 new bones
+- Imported 1 frames of animation
+- New material: tile_01.jpg
+- New material: tile_03.jpg
+- Imported 100 polys
+SMD StoneWall05 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall05_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 2 bones against armature "StoneWall05_skeleton"
+- Imported 1 frames of animation
+SMD StoneWall05_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:36.695  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/review/wireframe.png'
+00:36.697  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/source.blend"
+00:36.707  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/original/source.blend"
+00:38.666  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/review/before.png'
+00:40.963  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/review/gameplay-before.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 2 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/validation/reimported.blend: 1 mesh object(s), 2 bones, 1 animation clips, 2 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/exports/StoneWall06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ahvcj94g
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ahvcj94g/StoneWall06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ahvcj94g/StoneWall06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_ahvcj94g/StoneWall06.actions.txt
+
+SMD IMPORTER: now working on StoneWall06
+- This is a mesh
+- Imported 9 new bones
+- Imported 1 frames of animation
+- New material: badge_01.jpg
+- New material: badge_03.tga
+- New material: tile_01.jpg
+- Imported 88 polys
+SMD StoneWall06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 9 bones against armature "StoneWall06_skeleton"
+- Imported 25 frames of animation
+SMD StoneWall06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:42.698  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/review/after.png'
+00:44.526  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/review/gameplay-after.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/validation/reimported.blend: 1 mesh object(s), 9 bones, 1 animation clips, 3 materials (0 without texture)
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/exports/StoneWall06.bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rei930ki
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rei930ki/StoneWall06.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rei930ki/StoneWall06_a00.smd
+wrote /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_import_rei930ki/StoneWall06.actions.txt
+
+SMD IMPORTER: now working on StoneWall06
+- This is a mesh
+- Imported 9 new bones
+- Imported 1 frames of animation
+- New material: badge_01.jpg
+- New material: badge_03.tga
+- New material: tile_01.jpg
+- Imported 88 polys
+SMD StoneWall06 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on StoneWall06_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 9 bones against armature "StoneWall06_skeleton"
+- Imported 25 frames of animation
+SMD StoneWall06_a00 imported in under 1 second
+
+Imported 1 files in 0.0 seconds
+00:46.532  render           | Saved: '/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/review/wireframe.png'
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 3 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/validation/reimported.blend: 1 mesh object(s), 9 bones, 1 animation clips, 3 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

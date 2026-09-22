@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "components": [
+    {
+      "texture": "badge_01.jpg",
+      "triangles": 28,
+      "full_component_compare": "EQUIVALENT",
+      "exact_corner_uv_and_bone": true,
+      "max_position_component_error": 2.000000000279556e-06
+    },
+    {
+      "texture": "badge_03.tga",
+      "triangles": 8,
+      "full_component_compare": "EQUIVALENT",
+      "exact_corner_uv_and_bone": true,
+      "max_position_component_error": 0.00036599999998543353
+    }
+  ],
+  "alpha": {
+    "texture": "badge_03.tga",
+    "dimensions": [
+      64,
+      64
+    ],
+    "full_rgba_sha256": "c97838cd7f7b4ebd01fb79c5fef163679e4b546b6bf8775d6fb8fbd227174ba0",
+    "alpha_sha256": "cb497e1c3e4b8b6f7f39e4c6b5c4394bd0220af7d4e8340f2b8fd11ad62ecfd9",
+    "preservation": "RGBA pixels, transparent fringe RGB and alpha masks byte-identical"
+  },
+  "position_tolerance": 0.001,
+  "scope": "Gate and siege fixtures, banner cloth/pole geometry and all 25 animation keys preserved"
+}

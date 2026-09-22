@@ -1,0 +1,95 @@
+{
+  "status": "OFFLINE BLENDER PLACEMENT REVIEW; NOT CLIENT EVIDENCE",
+  "coordinate_anchor": [
+    18100.0,
+    2000.0,
+    165.1825408935547
+  ],
+  "objects": [
+    {
+      "name": "StoneWall01",
+      "placement_index": 1,
+      "position": [
+        18100.0,
+        2000.0,
+        165.1825408935547
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        181.0,
+        20.0
+      ]
+    },
+    {
+      "name": "StoneWall02",
+      "placement_index": 0,
+      "position": [
+        17500.0,
+        2000.0,
+        170.49488830566406
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -180.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        175.0,
+        20.0
+      ]
+    },
+    {
+      "name": "StoneWall03",
+      "placement_index": 1,
+      "position": [
+        17897.953125,
+        2539.4326171875,
+        119.47312927246094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -360.0
+      ],
+      "scale": 1.0,
+      "tile": [
+        178.97953125,
+        25.394326171875
+      ]
+    }
+  ],
+  "placement_source": "Unchanged World1 EncTerrain1.obj, decoded by coordination inventory",
+  "caveat": "Only owned geometry shown. Original terrain height, lighting, collision and other buildings omitted.",
+  "join_checks": "Actual World1 position/rotation/scale retained; camera identical before/after",
+  "camera_bounds_from_original_evaluated_meshes": [
+    [
+      -897.4362182617188,
+      -88.55765533447266,
+      -47.8104133605957
+    ],
+    [
+      297.4361877441406,
+      719.9363403320312,
+      623.5742797851562
+    ]
+  ],
+  "exact_shared_camera": {
+    "location": [
+      1232.886962890625,
+      -2247.2900390625,
+      1657.9766845703125
+    ],
+    "rotation": [
+      1.0766299962997437,
+      2.6775024863923136e-08,
+      0.5937495231628418
+    ],
+    "ortho_scale": 1420.693864222935
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "position_tolerance": 0.001,
+  "every_original_vertex_position_and_bone_retained": true,
+  "max_original_corner_position_component_error": 0.0,
+  "unchanged_triangle_count": 294,
+  "retained_triangles_by_texture": {
+    "tile_01.jpg": 64,
+    "tile_03.jpg": 20,
+    "tile_02.jpg": 82,
+    "bridge_01.jpg": 128
+  },
+  "max_unchanged_uv_component_error": 0,
+  "max_unchanged_normal_component_error": 0.0006760000000000099,
+  "max_retained_normal_direction_degrees": 0.039789053312063075,
+  "frozen_container_sha256": {
+    "bridge_01.OZJ": "3ad1e1b0591a90fb0c169c9d6b29d0ea4330f68d81d3636de757886033b0d9ca",
+    "tile_02.OZJ": "36aac008ed4c9369c9ec99fc0514872fc9feeae9700b983dddb9d86d241231a0"
+  },
+  "panel_face_pairs": [
+    [
+      0,
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      12,
+      13
+    ],
+    [
+      18,
+      19
+    ],
+    [
+      20,
+      21
+    ],
+    [
+      26,
+      27
+    ],
+    [
+      28,
+      29
+    ],
+    [
+      34,
+      35
+    ],
+    [
+      38,
+      39
+    ],
+    [
+      44,
+      45
+    ],
+    [
+      46,
+      47
+    ]
+  ],
+  "protected": "All original connection extrema and edges retained. All triangles outside explicit tile_01 panel pairs retain position, bone and UV. Gate portcullis, gate inward jamb planes, wall endpoint planes, banner silhouettes and frozen siege details unchanged.",
+  "normals": "Original split normals copied into source; official import/export normalizes and requantizes them. Measured component and direction differences are reported, not claimed byte-equivalent.",
+  "note": "Panel centers are recessed by 0.65 units; no original perimeter vertices moved. No placement/collision/terrain changes."
+}

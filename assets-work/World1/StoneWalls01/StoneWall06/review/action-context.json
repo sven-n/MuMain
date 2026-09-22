@@ -1,0 +1,10 @@
+{
+  "status": "OFFLINE BLENDER; CLIENT VERIFICATION PENDING",
+  "samples": [
+    0,
+    12,
+    24
+  ],
+  "total_original_keys": 25,
+  "source": "Original BMD and reimported actual exported BMD; same camera and diffuse lighting"
+}

@@ -1,0 +1,25 @@
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/original/StoneWall01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/original/StoneWall01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/original/StoneWall01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/original/StoneWall01.smd: bones=1 frames=1 triangles=318 materials=4
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/original/StoneWall01_a00.smd: bones=1 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/original/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/new/StoneWall01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/new/StoneWall01_a00.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/new/StoneWall01.actions.txt
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/new/StoneWall01.smd: bones=1 frames=1 triangles=414 materials=4
+OK
+
+/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/new/StoneWall01_a00.smd: bones=1 frames=1 triangles=0 materials=0
+OK
+
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/validation/new/skeleton.bmd (1 action(s))
+warning: skeleton.smd: triangles block is empty: this describes a skeleton-only model (animations without a mesh)

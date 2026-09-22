@@ -1,0 +1,54 @@
+StoneWall01
+meshes 4 vs 4, bones 1 vs 1, actions 1 vs 1, triangles 318 vs 414
+unmatched triangles: 24  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/exports/bridge_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/exports/tile_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/exports/tile_02.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall01/exports/tile_03.OZJ
+
+StoneWall02
+meshes 4 vs 4, bones 1 vs 1, actions 1 vs 1, triangles 318 vs 414
+unmatched triangles: 24  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 1 vs 1, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/exports/bridge_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/exports/tile_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/exports/tile_02.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall02/exports/tile_03.OZJ
+
+StoneWall03
+meshes 3 vs 3, bones 4 vs 4, actions 1 vs 1, triangles 293 vs 333
+unmatched triangles: 10  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 4 vs 4, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/horse_drawn_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/tile_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall03/exports/tile_03.OZJ
+
+StoneWall05
+meshes 2 vs 2, bones 2 vs 2, actions 1 vs 1, triangles 60 vs 100
+unmatched triangles: 10  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 2 vs 2, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0000  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/exports/tile_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall05/exports/tile_03.OZJ
+
+StoneWall06
+meshes 3 vs 3, bones 9 vs 9, actions 1 vs 1, triangles 56 vs 88
+unmatched triangles: 8  max corner distance: 0.0004  max bone distance: 0.0002  differing bone names: 0
+DIFFERENT
+meshes 0 vs 0, bones 9 vs 9, actions 1 vs 1, triangles 0 vs 0
+unmatched triangles: 0  max corner distance: 0.0000  max bone distance: 0.0002  differing bone names: 0
+EQUIVALENT
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/exports/badge_01.OZJ
+OK /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-stone-walls/assets-work/World1/StoneWalls01/StoneWall06/exports/tile_01.OZJ

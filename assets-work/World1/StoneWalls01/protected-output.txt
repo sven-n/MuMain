@@ -1,0 +1,5 @@
+StoneWall01 PASS: 2 frozen components; alpha False
+StoneWall02 PASS: 2 frozen components; alpha False
+StoneWall03 PASS: 1 frozen components; alpha False
+StoneWall05 PASS: 0 frozen components; alpha False
+StoneWall06 PASS: 2 frozen components; alpha True

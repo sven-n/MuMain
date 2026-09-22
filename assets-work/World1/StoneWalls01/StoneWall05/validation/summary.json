@@ -1,0 +1,42 @@
+{
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "bounds_before": [
+    [
+      -199.33,
+      -43.04,
+      -1.61
+    ],
+    [
+      198.83,
+      41.85,
+      236.54
+    ]
+  ],
+  "bounds_after": [
+    [
+      -199.33,
+      -43.04,
+      -1.61
+    ],
+    [
+      198.83,
+      41.85,
+      236.54
+    ]
+  ],
+  "full_compare": "DIFFERENT: intentional remodel",
+  "skeleton_actions": "EQUIVALENT",
+  "textures": [
+    "tile_01.jpg",
+    "tile_03.jpg"
+  ],
+  "export_sha256": {
+    "StoneWall05.bmd": "63044d3abd022ff09c8348176559fdecc1390d0da3b192faa79a9811bace993c",
+    "tile_01.OZJ": "fb370ba03c82feb336424dd2363d62e7b85214d6bf0c68acfb71937cde0fdc27",
+    "tile_03.OZJ": "07c8c71fed26d0ca14561f0955ea9a63fb961b04de4dacefee22d0aae3a75d7e"
+  }
+}

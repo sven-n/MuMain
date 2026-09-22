@@ -1,0 +1,26 @@
+[
+  {
+    "name": "tile_01",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_01-master.png",
+    "prompt": "tile_01-prompt.txt",
+    "processing": "RGB, Lanczos 512px, JPEG quality95 4:4:4, official OZJ wrap",
+    "alpha": "Opaque; frozen banner alpha container copied byte-identical"
+  },
+  {
+    "name": "tile_03",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_03-master.png",
+    "prompt": "tile_03-prompt.txt",
+    "processing": "RGB, Lanczos 512px, JPEG quality95 4:4:4, official OZJ wrap",
+    "alpha": "Opaque; frozen banner alpha container copied byte-identical"
+  }
+]
