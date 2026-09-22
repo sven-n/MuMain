@@ -1,0 +1,10 @@
+{
+  "restored_original_triangles": 22,
+  "official_authored_triangles": 30,
+  "panel_boundary_restoration": {
+    "original_panel_boundary_corners": 36,
+    "maximum_boundary_correction": 0
+  },
+  "reason": "Retain protected original positions, bone indices, UVs and normals despite Blender split-normal roundtrip quantization",
+  "original_bind_and_actions": true
+}

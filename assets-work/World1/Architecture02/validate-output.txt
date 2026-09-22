@@ -1,0 +1,19 @@
+House05 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+HouseWall01 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+HouseWall04 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+HouseWall05 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+HouseWall06 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+Stair01 DIFFERENT rig/action EQUIVALENT all texture checks PASS
+House04 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseWall02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+HouseEtc02 EQUIVALENT rig/action EQUIVALENT all texture checks PASS
+House04 PASS: 358 unchanged triangles; 0.0 maximum original-vertex drift
+House05 PASS: 264 unchanged triangles; 1.6000000002236447e-05 maximum original-vertex drift
+HouseEtc02 PASS: 250 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall01 PASS: 32 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall02 PASS: 110 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall04 PASS: 48 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall05 PASS: 24 unchanged triangles; 0.0 maximum original-vertex drift
+HouseWall06 PASS: 22 unchanged triangles; 0.0 maximum original-vertex drift
+Stair01 PASS: 52 unchanged triangles; 0.0 maximum original-vertex drift
+PASS: immutable originals; two textures cover six owned models plus three readonly compatibility models; UV/skin/alpha/effect contracts

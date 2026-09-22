@@ -1,0 +1,12 @@
+House04 matrix and posed-bounds PASS 0 0
+House05 matrix and posed-bounds PASS 0 0
+HouseEtc02 matrix and posed-bounds PASS 0 0
+HouseWall01 matrix and posed-bounds PASS 0 0
+HouseWall02 matrix and posed-bounds PASS 0 0
+HouseWall04 matrix and posed-bounds PASS 0 0
+HouseWall05 matrix and posed-bounds PASS 0 0
+HouseWall06 matrix and posed-bounds PASS 0 0
+Stair01 matrix and posed-bounds PASS 0 0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

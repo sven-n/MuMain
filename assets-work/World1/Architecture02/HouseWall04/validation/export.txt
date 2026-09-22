@@ -1,0 +1,41 @@
+00:00.469  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/source.blend"
+skipping reference object 'HouseWall04' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_HouseWall04_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting HouseWall04_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_dhnzvsf9/HouseWall04_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 88 polys
+- Exported 3 materials
+   tile_wood01.jpg
+   tile_ston04.jpg
+   tile_wood02.jpg
+- SMD export took 0.0018723011016845703
+
+
+Blender Source Tools: exporting HouseWall04_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_dhnzvsf9/anims/HouseWall04_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0004830360412597656
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_dhnzvsf9/HouseWall04_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_dhnzvsf9/anims/HouseWall04_a00.smd --name HouseWall04.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/HouseWall04/exports/HouseWall04.bmd
+  name field: HouseWall04.smd  version: 12
+  meshes: 3  bones: 1  actions: 1  triangles: 88
+  bounds (bind pose): min -54.81 -50.90 0.28  max 246.23 249.87 264.48  size 301.04 300.77 264.20
+  mesh 0: triangles=44 vertices=28 normals=38 uvs=38 texture=tile_wood01.jpg
+  mesh 1: triangles=32 vertices=25 normals=19 uvs=56 texture=tile_wood02.jpg
+  mesh 2: triangles=12 vertices=11 normals=6 uvs=20 texture=tile_ston04.jpg
+  bone 0: "joint_01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

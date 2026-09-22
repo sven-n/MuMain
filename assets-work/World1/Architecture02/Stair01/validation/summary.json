@@ -1,0 +1,41 @@
+{
+  "bounds_before": [
+    [
+      -42.28,
+      -4.67,
+      0.0
+    ],
+    [
+      42.04,
+      4.7,
+      330.0
+    ]
+  ],
+  "bounds_after": [
+    [
+      -42.28,
+      -4.67,
+      0.0
+    ],
+    [
+      42.04,
+      4.7,
+      330.0
+    ]
+  ],
+  "full_compare": "DIFFERENT",
+  "textures": [
+    "tile_wood01.jpg"
+  ],
+  "status": "PASS: offline engine validation",
+  "client_verified": false,
+  "action_metadata": [
+    "action 0 keys=1 lock=0"
+  ],
+  "skeleton_actions": "EQUIVALENT",
+  "readonly_compatibility": false,
+  "export_sha256": {
+    "tile_wood01.OZJ": "51537840533e1c755569d3b57d9bea468353208c669daa2baeb2a421c41bf192",
+    "Stair01.bmd": "a8762396fc2b3db1704905701e98613804f449541ab085e58c73c15665bb11b0"
+  }
+}

@@ -1,0 +1,35 @@
+Architecture02 renderer contract; source inspected without edits.
+src/source/Engine/Object/ZzzObject.cpp:3708-3717
+3708:     if (gMapManager.WorldActive == 0)
+3709:     {
+3710:         if (o->Type == MODEL_HOUSE_WALL01 + 4 || o->Type == MODEL_HOUSE_WALL01 + 5)
+3711:         {
+3712:             if (HeroTile == 4)
+3713:                 o->AlphaTarget = 0.f;
+3714:             else
+3715:                 o->AlphaTarget = 1.f;
+3716:         }
+3717: #ifdef _PVP_MURDERER_HERO_ITEM
+src/source/Engine/Object/ZzzObject.cpp:3808-3817
+3808:         switch (o->Type)
+3809:         {
+3810:         case MODEL_HOUSE01 + 3:
+3811:         case MODEL_HOUSE01 + 4:
+3812:             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
+3813:             break;
+3814:         case MODEL_HOUSE01 + 2:
+3815:         case MODEL_HOUSE_WALL01 + 1:
+3816:             o->BlendMeshLight = (float)(rand() % 4 + 4) * 0.1f;
+3817:             break;
+src/source/Engine/Object/ZzzObject.cpp:4617-4627
+4617:         case MODEL_HOUSE01 + 2:
+4618:             o->BlendMesh = 4;
+4619:             break;
+4620:         case MODEL_HOUSE01 + 3:
+4621:             o->BlendMesh = 8;
+4622:             break;
+4623:         case MODEL_HOUSE01 + 4:
+4624:             o->BlendMesh = 2;
+4625:             break;
+4626:         case MODEL_HOUSE_WALL01 + 1:
+4627:             o->BlendMesh = 4;

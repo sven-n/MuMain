@@ -1,0 +1,9 @@
+House04 raw vertex/normal ownership PASS
+House05 raw vertex/normal ownership PASS
+HouseEtc02 raw vertex/normal ownership PASS
+HouseWall01 raw vertex/normal ownership PASS
+HouseWall02 raw vertex/normal ownership PASS
+HouseWall04 raw vertex/normal ownership PASS
+HouseWall05 raw vertex/normal ownership PASS
+HouseWall06 raw vertex/normal ownership PASS
+Stair01 raw vertex/normal ownership PASS

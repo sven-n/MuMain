@@ -1,0 +1,26 @@
+[
+  {
+    "name": "tile_wood01",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_wood01-master.png",
+    "prompt": "tile_wood01-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  },
+  {
+    "name": "tile_wood03",
+    "size": [
+      512,
+      512
+    ],
+    "tool": "Built-in imagegen",
+    "source": "tile_wood03-master.png",
+    "prompt": "tile_wood03-prompt.txt",
+    "packaging": "Lanczos RGB resize; JPEG95 4:4:4 or RGBA uncompressed bottom-left TGA; official mu_texture wrap",
+    "alpha": "Opaque RGB"
+  }
+]

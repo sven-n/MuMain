@@ -1,0 +1,37 @@
+00:00.473  blend            | Read blend: "/Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/source.blend"
+skipping reference object 'Stair01' (REF_ collection or mu_reference)
+skipping reference object 'HIGH_Stair01_Dressed_Stone' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting Stair01_mu_export
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_rgct6x8v/Stair01_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 182 polys
+- Exported 1 materials
+   tile_wood01.jpg
+- SMD export took 0.0037322044372558594
+
+
+Blender Source Tools: exporting Stair01_skeleton
+- Baking...
+- /private/var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_rgct6x8v/anims/Stair01_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0005421638488769531
+
+2 files exported in 0.0 seconds
+Info: 2 files exported in 0.0 seconds
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv smd2bmd /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_rgct6x8v/Stair01_mu_export.smd /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd --anim /var/folders/8p/y7qf5mcn3zz__8r7hssc53x40000gn/T/mu_export_rgct6x8v/anims/Stair01_a00.smd --name Stair01.smd
+wrote /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd (1 action(s))
++ /Users/webproduktion3/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv info /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd
+model /Users/webproduktion3/Documents/claude-test-mumain/MuMain-lorencia-architecture-timber/assets-work/World1/Architecture02/Stair01/exports/Stair01.bmd
+  name field: Stair01.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 182
+  bounds (bind pose): min -42.28 -4.67 0.00  max 42.04 4.70 330.00  size 84.32 9.38 330.00
+  mesh 0: triangles=182 vertices=122 normals=137 uvs=30 texture=tile_wood01.jpg
+  bone 0: "Box02" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
