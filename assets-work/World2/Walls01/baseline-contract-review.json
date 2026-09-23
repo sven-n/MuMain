@@ -1,0 +1,68 @@
+{
+  "decision": "CONTRACT_AND_DIRECTION_ONLY_NO_CANDIDATE_ACCEPTANCE",
+  "baseline_revision": "7b808473",
+  "assets": {
+    "Object01": {
+      "baseline_sha256": "81be1d93794c0f3e59becb2d1f6bd2020ec6852322049bf3c665a464edc11124",
+      "placements": 1262,
+      "protected": "End faces22\u201327 at x149.873 and28\u201333 at x-150.127 form complete joins. Fixed motif faces56/57 lie y-12.883. Opening-jamb planes x-83.627/83.373 and z100/200 define opening proportions; preserve all boundary edges and their registering UV. Bottom footprint and original top contact/profile must not be rounded across module ends.",
+      "direction": "Dressed broad crown and inner cornice/reveal can improve structural shading. Keep motif plane unchanged. Actual958/959/960 centers are precisely300 apart at same yaw1170, equal nominal module width: exposed end-corner removal would create repeat seam notches. Ramp dressing away from complete end surfaces; compare reduced assembly for meaningful gain."
+    },
+    "Object03": {
+      "baseline_sha256": "f7f71ab2da84dcde2d665dfc0551d08580a24f19dcf603907f0787f479c4fbc9",
+      "placements": 27,
+      "protected": "Distinct four-sided tower/pier variant,130tri; not a direct duplicate of58tri Object01. Preserve all four motif planes, foot and complete wall-facing contact surfaces. Inner upper cap at z270.123 and outer crown max287.16 define existing recessed top; no arbitrary filling or height change.",
+      "direction": "Baseline already has tapered lower shoulder, four niches and beveled octagonal crown. Any dressed crown/niche revision must strengthen large construction planes without flattening its existing distinctive mass. Actual964 adjoins wall960 off-center; full exterior contacting surface matters, not just an assumed central join."
+    },
+    "Object04": {
+      "baseline_sha256": "e0df1c4477e02bb37d59155dbf56a5f1f7bacaa064bb34568ce738de07c8ae1f",
+      "placements": 588,
+      "protected": "Cap faces0/1 z317.2; side2/3 x49.855 and4/5 x-50.145; back6/7 y-50.228 and low front8/9 y49.772. Relief10\u201381 editable only with registered continuous boundary and support envelope preserved. Remaining trim/base faces exact. Protect nose/extrema and all actual tilted supports, not local bounds alone.",
+      "direction": "Existing projected mask is visible in straight-wall/tilted context; coherent broad brow-cheek-neck curvature can remove triangular facets. Keep relief connected and texture registered. Avoid isolated raised islands or steep narrow socket walls that magnify frozen texels. Reject high triangle growth if the painted view at reduced scale does not improve. Corner assembly already exposes mismatched side orientation naturally; no placement compensation."
+    }
+  },
+  "shared_checks": {
+    "raw_normal_aliases": {
+      "Object01": 0,
+      "Object03": 0,
+      "Object04": 0
+    },
+    "zero_area_UV_faces": {
+      "Object01": 0,
+      "Object03": 0,
+      "Object04": 0
+    },
+    "nonpositive_corner_normal_faces": {
+      "Object01": 0,
+      "Object03": 0,
+      "Object04": 0
+    },
+    "rig": "One bone, one action/key; distinct root names. Preserve raw CP949 name field and numeric pose, action lock, material order. No baseline normal-incidence exception required.",
+    "texture_scope": "All containers frozen. deep_wall01 also has excluded markers/falling stone consumers. deep_wall02 shared only01/03; deep_wall03 also16/17. No painting authorized by this review.",
+    "geometry_contract": "Preserve continuous full join surfaces with UV/bone/winding, not merely boundary vertices or local AABB. Test all actual rotation supporting planes and contact planes; unchanged faces retain custom corner normals. Authored-to-export triangle and normal world-direction audits mandatory."
+  },
+  "evidence_sha256": {
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/review/wall960-pillar964-baseline.png": "a3189d12e2becdd638ad19809c7ab58ca9199331dc3207b7231e0d59eafc2c92",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/review/wall960-pillar964-baseline-reverse.png": "97f45dacb1fe2e263fcdefd26f0722ae27e93a228df5509a9a374de1cfcfde01",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/review/wall960-pillar964-baseline-small.png": "f59225da4176cecf9651251a2b1013ebfb4fc6befb6995e9496f1949ea452362",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object03/review/baseline-reverse.png": "cf891b8306916ac575e70d6753ddcb3ed16be8fcd3be72160e3bee075ef89ef9",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object03/review/baseline.png": "b5f3c0ae8300177b5e06e2a1a6057d732afdd462d567e047ee78d9ac9e664549",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object03/review/baseline-small.png": "9573bae67d4679e34b7bee6e175af3e2144daadc54b59c984761ff0e0da28351",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object01/review/baseline-reverse.png": "ca9ffc4b0e706ef1e49335dad77775060037d22712ddbc9df4902be9d74eb9b0",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object01/review/baseline.png": "e9f4244e2f40de7223264cee18eeda9595021bb4a78bb5efdaba3f27e49e601e",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object01/review/baseline-small.png": "f4e705445408542ab8162814cae8f86a7e19e401ad3c22534d9ee92630c8e187",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/corner/current-small.png": "1236683f481b9f83b939993c1130bca1b2f2d00347a1905308367e776d1d0801",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/corner/current-reverse.png": "176cdfe50e884496491e24015acac3d9dc7d7fabd235bb7d91f228f9667446cf",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/corner/current.png": "b0df294efe64366475ad9dbe5f619d1f02759ed2c36f94d4082cce1a0034e31f",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/straight-wall/current-small.png": "cef7174cfa5c04437039873f2ba1f98bbe91211466eafa8309f789f8aaf1ba30",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/straight-wall/current-reverse.png": "112a00c9b5877819dd34fe71b918d7a0ee4b4afa4fafca3b0e97d2a7e87090a0",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/straight-wall/current.png": "351447e64bb447934da39dd07658cfa40bd5eb8bcd5ec5b74724edd977cc8651",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/tilted-pier/current-small.png": "adb2b0124db8eb239539a9457fddc9924a35732246f9fb4d1652b5baf878bee5",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/tilted-pier/current-reverse.png": "f343726c9e16fdd3f73f76c06619f5a3bea5026fef75622ce49806f1effac622",
+    "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/review-assemblies/tilted-pier/current.png": "9e44ff035d06617be325c712620c549d81b1c175465dc25a1c9c4b993d11b121"
+  },
+  "limits": [
+    "Offline baseline context, no terrain or client rendering.",
+    "No candidate inspected or accepted by this report."
+  ]
+}

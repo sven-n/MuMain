@@ -1,0 +1,29 @@
+{
+  "decision": "REJECT_FIRST_DIRECTION_INSUFFICIENT_GAIN",
+  "asset": "Object01",
+  "snapshot": "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/experiments/Object01-study01",
+  "bmd_sha256": "ac86c7b64fd2c7f461edeb750e856d340a1a1cbbd6455fe3330d001b82bc55a7",
+  "source_sha256": "edf7b1eb379ed34571d98da6a4b025ea8921ad609288e7873f9d74cbf74d1835",
+  "triangles": 78,
+  "art": "Dragon plaque restored and plainly present. Small bed/neck strip beneath upper stone adds minor depth, but broad crown shape and projecting jambs remain visually almost baseline. Repeated960-context and reduced image show insufficient architectural gain; reverse does not reveal a compelling improvement.",
+  "technical": "52 original faces protected including all12 end faces22\u201333 and plaque56/57. Authored match position4.253e-7/UV4.823e-7, protectednormal4.5e-5, positive new normals, exact action/name and all1262 support/bounds reports pass. Source/export matched snapshot, not live next-study source.",
+  "next_variant": "Use one broad dressed crown plane across approximately140\u2013145 units central span, with12-unit end transitions and roughly10\u201318 units of readable vertical profile within original envelope. Keep all module end surfaces and opening planes exact. Avoid adding tiny bevel courses; effect must read in300px assembly and not stripe/stretch existing trim. These are study targets, not approved final dimensions.",
+  "evidence_sha256": {
+    "context/wall960-pillar964-candidate-reverse.png": "54d1d694969c26f22716862edd03893e542729023d595317970c00642ff875df",
+    "context/wall960-pillar964-candidate-small.png": "289994bcc80349f8dc96727afa3e3aef641a06a171270abc3f7310f06e12b5ab",
+    "context/wall960-pillar964-baseline.png": "41aad91d52060ad27316f0a9855d15a02d8b19a144feeb0d3f6195ed879ae5ba",
+    "context/wall960-pillar964-candidate.png": "8d40ad8874acb0d1743842a0b1703e6c877bf5505407f67fa53fd1cfff6a89e3",
+    "context/wall960-pillar964-baseline-reverse.png": "06c2045d82c49ddfc7bc47e6e141768574a6afda314e9acbf7f905b5b26ea96c",
+    "context/wall960-pillar964-baseline-small.png": "0e3f6e0973d9b8d0b00327dfb83acc12ec829587fbc75eae5d0f53f920c041b7",
+    "review/baseline-reverse.png": "3fe612a083379572f6a34b308205e95878c3ac380ef10d2836c815adabe86d42",
+    "review/baseline.png": "e437ea3f8c5022ab43d68f579ed47895a8eaa23e6f9f2b37cf34dbe2437adcd3",
+    "review/candidate-small.png": "0a1588ef31f39b7a49831c4b3ded5efa515c1c37211b402f1aaccaef5c64d289",
+    "review/candidate-reverse.png": "763d86969a157ecf8390e35dd588d0d0a8ded77a7ffa219586e014412925225a",
+    "review/candidate.png": "975c48734c69d29732089fefcc3c6b957a9d488aeeb74f9f745004f6422a9b68",
+    "review/baseline-small.png": "199f237a36fed1546dc6d7e317d113b953ea25e1fdd34bb47d10a942fbe9fb83"
+  },
+  "limits": [
+    "Direction only, no installation acceptance.",
+    "Offline actual placement context, no client proof."
+  ]
+}

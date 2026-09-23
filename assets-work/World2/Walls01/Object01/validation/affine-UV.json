@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "maximum_original_UV_projection_delta": 4.931126836860145e-07,
+  "original_projection_tolerance": 1e-06,
+  "changed_triangles": 10,
+  "classified": {
+    "top": 4,
+    "front": 2,
+    "new_plain_stone": 4
+  },
+  "new_plain_stone_UV_per_world_unit": 0.007259880239520959,
+  "maximum_new_stone_density_delta": 2.396503487062801e-08,
+  "new_stone_density_tolerance": 1e-07,
+  "method": "Original lower ornament and top corners recover original affine mapping. Every new upper stone edge independently has uniform physical UV density in the existing plain stone V .43-.71 patch; no texture edits."
+}

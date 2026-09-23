@@ -1,0 +1,2 @@
+/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object01/validation/new/Object01.smd: bones=1 frames=1 triangles=88 materials=2
+OK

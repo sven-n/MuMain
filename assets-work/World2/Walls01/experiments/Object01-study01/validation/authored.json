@@ -1,0 +1,90 @@
+{
+  "triangles": 78,
+  "replaced_original_faces": [
+    18,
+    19,
+    38,
+    39,
+    40,
+    41
+  ],
+  "protected_original_faces": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57
+  ],
+  "bounds_before": [
+    [
+      -150.126999,
+      -61.038601,
+      0.0
+    ],
+    [
+      149.873001,
+      53.4599,
+      291.606201
+    ]
+  ],
+  "bounds_after": [
+    [
+      -150.126999,
+      -61.038601,
+      0.0
+    ],
+    [
+      149.873001,
+      53.4599,
+      291.606201171875
+    ]
+  ],
+  "construction": "Broad lower projecting bed, recessed neck and dressed upper stone course within original sloped central crown; plaque, jambs, ground and full module ends unchanged"
+}

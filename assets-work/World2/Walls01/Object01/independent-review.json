@@ -1,0 +1,35 @@
+{
+  "decision": "ACCEPT_ARTISTIC_DIRECTION_BOUNDED_CROWN_REFINEMENT",
+  "bmd_sha256": "aea82532ebb824c2aac1cbbe277135ad96a7379f3f9a615a6a1b9ccfcae1ee01",
+  "source_sha256": "25c91027c6c5c7cf59067cd26f355ff136a064b058c684c19792ea8072b87bb6",
+  "triangles": 64,
+  "art": "Upper chamfer now reads as a broad dressed stone plane with coherent grain scale, replacing the stretched streaks and deep scoop ends of study02. Planar mitres integrate with the unchanged side profile. Gain is localized and modest in reduced three-module context, but purposeful and visible on the crown at individual and closer assembly scale, with only6 added triangles. Dragon plaque, existing strong recess and overall stepped wall silhouette remain the identity. This is a bounded refinement, not a substantial complete wall rebuild.",
+  "technical": "Hash verified.54protected faces include full ends22\u201333 and motif56/57. Full authored/export triangle UV/normal match PASS, positive new UV/normal incidence; raw name exact, motion delta0, frozen textures,1262actual placed bounds/support tests pass. No new end seam notch observed in actual repeated module context.",
+  "remaining": "Before integration retain original/wire and final packed-source/provenance evidence if not yet present; Object03 requires separate decision. This report accepts Object01 artistic direction at exact hash, not entire batch/client.",
+  "evidence_sha256": {
+    "Object01/review/baseline-reverse.png": "f11b2d3c84a7498799ca57235caf9b8cd48ff92f5ab97c5380f599d8ab695a3a",
+    "Object01/review/baseline.png": "df445efb58c9ba6ab65c5f5d264fcbf499f7e6216fc10461ffa508d9fde303f1",
+    "Object01/review/candidate-small.png": "828e3140e1e6043301163e0857ef1a73bac21cf6e371a1b4702c2eaf041fe7ee",
+    "Object01/review/candidate-reverse.png": "6abfb86a381a486574820ae4fa915a07c176763453e9cc730adf92a0e28f7961",
+    "Object01/review/candidate.png": "ecdada8a9e02872c9a3439ad3de839387884243285f2acb4fd6ae3c9530c9dcb",
+    "Object01/review/baseline-small.png": "0aac071a163fadfcf3ca4c4452333213a3164c8c448f2059f6089223bfe83912",
+    "review/wall960-pillar964-candidate-reverse.png": "6dfd8f0dbde3e1d9bf90bf499c60e56234907ef77ccbf74e30858830e7c0c430",
+    "review/baseline-context.json": "78f8252982bd5f9ab9749c7487d8fe58efe43a5dd9e76adc942c6dec1c1a34c7",
+    "review/wall960-pillar964-candidate-small.png": "d5dc35cb8b12f4a171d90c56ff19c9ea320932f8b2a2e592002fba79f751e9c1",
+    "review/wall960-pillar964-baseline.png": "f756ea91463811b791eb03e9b333281d86d4a76d15cb89dd818d50d37f0e2720",
+    "review/wall960-pillar964-candidate.png": "0e0dc7b966cc5a029d3f4fe63c2b775bffeec38540bf8f9edc736ef00547ea03",
+    "review/candidate-context.json": "2edee857cc0f507b80feed1059fc3d4b1a3925ce707f140f4c6297d849976a11",
+    "review/wall960-pillar964-baseline-reverse.png": "aa345b5b3661e2e79be91623fb0633bb48d497201c641f4d4e14fd4b62dca7c2",
+    "review/wall960-pillar964-baseline-small.png": "69985ba271519ea44a00f0c94541a93de3470c2d82e21b3f9a4b90fe438bc2cb",
+    "Object01/validation/summary.json": "76205c972eafc9ff199408d7d9787594a6b116a499134bdf8ca0b856ec223599",
+    "Object01/validation/authored-export-contract.json": "3122e2b1ba8b18349108e0250d18ced771090a79211b58142174b7cf0932df4f",
+    "Object01/validation/affine-UV.json": "16c08b75947b52b57af03ec1f7031df9af4a76d031de3573f1f529513cca1ded",
+    "Object01/validation/name-field.json": "ef47ca13b088c6af9686fecbea4b05c2df20a1bd8fe25e448e0bcd04bd47dd3b",
+    "Object01/validation/authored.json": "3f227e73523e2691c9768781ad81c3cc3e61c3da729b910d8fedfbc9e4d4a044",
+    "Object01/validation/contact-envelope.json": "645dcfbe715b98e04a567f47b2df6ecbe3e08d25a384cd9c546764e9d2226746"
+  },
+  "limits": [
+    "Small-distance gain modest; no claim dramatic remake.",
+    "Offline only, client pending."
+  ]
+}

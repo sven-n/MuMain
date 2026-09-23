@@ -1,0 +1,31 @@
+{
+  "decision": "RETAIN_OBJECT03_BASELINE",
+  "baseline_sha256": "f7f71ab2da84dcde2d665dfc0551d08580a24f19dcf603907f0787f479c4fbc9",
+  "placements": 27,
+  "triangles": 130,
+  "rationale": "Distinct four-sided tapered pier has substantial sloped base, deep framed niches, continuous decorated belt and already chamfered crown with recessed top. These large forms remain readable at reduced scale and terminate the repeated wall coherently in actual960/964 context. It is not a duplicate wall panel and does not need the same added crown treatment as Object01. Existing proportions and recess depth already supply a purposeful construction silhouette.",
+  "weak_surfaces": "Upper crown and sloping lower shoulders show stretched stone grain at close view; decorated belt has visible atlas segmentation. These do not defeat the coherent silhouette/material reading at normal-distance context, and no blanket repaint or added subdivision is justified. Retention is a visual judgment, not absence of permission to change.",
+  "current_provenance": "Retained baseline and integration BMD hashes match baseline-evidence.json; frozen deep_wall01/02 container hashes match current integration. Individual baseline import source and actual context provenance retained in batch.",
+  "texture_dependencies": {
+    "deep_wall01.OZJ": "78379458cc441ce547c482f20656e13f6672fd565c39373865de7fb9ebb9504a",
+    "deep_wall02.OZJ": "56690fc74a00d9b1b59a80f1a9c9ffc5222680aa20822cbdc79016d7b17c9457"
+  },
+  "texture_scope": "deep_wall02 also Object01; deep_wall01 broad group includes excluded marker/fallingstone consumers. Both frozen, no consumer change introduced.",
+  "evidence_sha256": {
+    "Object03/review/baseline-reverse.png": "cf891b8306916ac575e70d6753ddcb3ed16be8fcd3be72160e3bee075ef89ef9",
+    "Object03/review/baseline.png": "b5f3c0ae8300177b5e06e2a1a6057d732afdd462d567e047ee78d9ac9e664549",
+    "Object03/review/baseline-small.png": "9573bae67d4679e34b7bee6e175af3e2144daadc54b59c984761ff0e0da28351",
+    "review/wall960-pillar964-candidate-reverse.png": "6dfd8f0dbde3e1d9bf90bf499c60e56234907ef77ccbf74e30858830e7c0c430",
+    "review/wall960-pillar964-candidate-small.png": "d5dc35cb8b12f4a171d90c56ff19c9ea320932f8b2a2e592002fba79f751e9c1",
+    "review/wall960-pillar964-baseline.png": "f756ea91463811b791eb03e9b333281d86d4a76d15cb89dd818d50d37f0e2720",
+    "review/wall960-pillar964-candidate.png": "0e0dc7b966cc5a029d3f4fe63c2b775bffeec38540bf8f9edc736ef00547ea03",
+    "review/wall960-pillar964-baseline-reverse.png": "aa345b5b3661e2e79be91623fb0633bb48d497201c641f4d4e14fd4b62dca7c2",
+    "review/wall960-pillar964-baseline-small.png": "69985ba271519ea44a00f0c94541a93de3470c2d82e21b3f9a4b90fe438bc2cb"
+  },
+  "baseline_source_sha256": "e7b3c99fb463ce976c240fe549b1e791be11987d778c2b618464884e2b050d83",
+  "limits": [
+    "Offline main/reverse/reduced and actual wall960/pier964 context only.",
+    "No personal client verification.",
+    "Retained asset, no new geometry or texture work counted."
+  ]
+}

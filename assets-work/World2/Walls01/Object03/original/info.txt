@@ -1,0 +1,8 @@
+model assets-work/World2/Walls01/Object03/original/Object03.bmd
+  name field: Data2\Object2\\xb4\xf8\xc0\xfc\xba\xae02.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 130
+  bounds (bind pose): min -113.74 -113.58 0.00  max 113.53 113.70 287.16  size 227.27 227.27 287.16
+  mesh 0: triangles=122 vertices=72 normals=85 uvs=108 texture=deep_wall01.jpg
+  mesh 1: triangles=8 vertices=16 normals=4 uvs=12 texture=deep_wall02.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0

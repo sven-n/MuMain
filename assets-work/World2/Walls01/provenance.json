@@ -1,0 +1,69 @@
+{
+  "status": "Object01 accepted offline bounded refinement; Object03 retained",
+  "baseline_revision": "7b808473",
+  "source": {
+    "Object01/source.blend": "25c91027c6c5c7cf59067cd26f355ff136a064b058c684c19792ea8072b87bb6"
+  },
+  "exports": {
+    "Object01/exports/Object01.bmd": "aea82532ebb824c2aac1cbbe277135ad96a7379f3f9a615a6a1b9ccfcae1ee01"
+  },
+  "retained": {
+    "src/bin/Data/Object2/Object03.bmd": "f7f71ab2da84dcde2d665dfc0551d08580a24f19dcf603907f0787f479c4fbc9"
+  },
+  "textures": {
+    "deep_wall01.OZJ": "78379458cc441ce547c482f20656e13f6672fd565c39373865de7fb9ebb9504a",
+    "deep_wall02.OZJ": "56690fc74a00d9b1b59a80f1a9c9ffc5222680aa20822cbdc79016d7b17c9457"
+  },
+  "texture_dimensions": {
+    "deep_wall01.OZJ": [
+      128,
+      128
+    ],
+    "deep_wall02.OZJ": [
+      128,
+      128
+    ]
+  },
+  "evidence": {
+    "Object01/review/baseline-reverse.png": "f11b2d3c84a7498799ca57235caf9b8cd48ff92f5ab97c5380f599d8ab695a3a",
+    "Object01/review/baseline-small.png": "0aac071a163fadfcf3ca4c4452333213a3164c8c448f2059f6089223bfe83912",
+    "Object01/review/baseline.png": "df445efb58c9ba6ab65c5f5d264fcbf499f7e6216fc10461ffa508d9fde303f1",
+    "Object01/review/candidate-reverse.png": "6abfb86a381a486574820ae4fa915a07c176763453e9cc730adf92a0e28f7961",
+    "Object01/review/candidate-small.png": "828e3140e1e6043301163e0857ef1a73bac21cf6e371a1b4702c2eaf041fe7ee",
+    "Object01/review/candidate.png": "ecdada8a9e02872c9a3439ad3de839387884243285f2acb4fd6ae3c9530c9dcb",
+    "Object01/review/final-evidence.txt": "b6694ee16924df5cc01cab97d20c33f51134eee1f55ded9bceb78cfe7d1f7c2b",
+    "Object01/review/original-reverse.png": "1ddb452e2d47ed7ed5e898a97fba212c588873558ad0bcb015589f1d536c2d27",
+    "Object01/review/original.png": "ca6d489ae66a730d26da02ddd300c15108b3a51fc6ae0373386cbcbe54f5b04d",
+    "Object01/review/render.txt": "aa6138ceebfcd456b2f4e434a375f31a2ccb95064ec70951ab7d04038f1ba7ad",
+    "Object01/review/wireframe-reverse.png": "ef1ad58251b5af9f870f1dbe5223e9f3ab73bc61f3767ec169b23f4760d7ee35",
+    "Object01/review/wireframe.png": "af35aa9346e73a470dcd1bca6ed5acc71f147406d4a12197f49aa7a4f59ce6db",
+    "Object01/validation/affine-UV.json": "16c08b75947b52b57af03ec1f7031df9af4a76d031de3573f1f529513cca1ded",
+    "Object01/validation/authored-export-contract.json": "3122e2b1ba8b18349108e0250d18ced771090a79211b58142174b7cf0932df4f",
+    "Object01/validation/authored.json": "3f227e73523e2691c9768781ad81c3cc3e61c3da729b910d8fedfbc9e4d4a044",
+    "Object01/validation/build.txt": "04206e7679eb9fd36bcdc29fb36a02b87c333f6061262b8f14b9745d3ae9d060",
+    "Object01/validation/compare.txt": "5fd4ff2b52389a6fb74c2d8ca15f5385ed23efaf92c42876d49108479451f398",
+    "Object01/validation/contact-envelope.json": "645dcfbe715b98e04a567f47b2df6ecbe3e08d25a384cd9c546764e9d2226746",
+    "Object01/validation/export.txt": "0a65b39363a3546bffc9aa82d2f7433ce61438ab2efecd30986c67a1fb48018b",
+    "Object01/validation/info.txt": "c26d1e4ec3c8bd9380fe4d29674f13bd5fc794406899218b164e8c6250f07248",
+    "Object01/validation/name-field.json": "ef47ca13b088c6af9686fecbea4b05c2df20a1bd8fe25e448e0bcd04bd47dd3b",
+    "Object01/validation/new/Object01.actions.txt": "7117dbc8b20731b3c14c54e943df986d8a3fefc5170590332b6cbd86b9f1918b",
+    "Object01/validation/reimport.txt": "9b8eb6d203ba14e8a8c71bdc71e8de3723fb637ba940d0c25c1fbdd9271770ff",
+    "Object01/validation/skeleton-compare.txt": "07e081ba1effb9ceb7974b78b347b163b711cd90c782df64724ab4e3fdff022c",
+    "Object01/validation/source-audit.txt": "d941f3915fb64486b15eaa68feba45627b95ae041af550e4267f8a1a4f9f54ac",
+    "Object01/validation/summary.json": "76205c972eafc9ff199408d7d9787594a6b116a499134bdf8ca0b856ec223599",
+    "Object01/validation/validate.txt": "75af9629efa1a719d9471fb2619d56700439b1f251a2567d04ffd750242ead9b",
+    "Object03/review/baseline-reverse.png": "cf891b8306916ac575e70d6753ddcb3ed16be8fcd3be72160e3bee075ef89ef9",
+    "Object03/review/baseline-small.png": "9573bae67d4679e34b7bee6e175af3e2144daadc54b59c984761ff0e0da28351",
+    "Object03/review/baseline.png": "b5f3c0ae8300177b5e06e2a1a6057d732afdd462d567e047ee78d9ac9e664549",
+    "review/baseline-context.json": "78f8252982bd5f9ab9749c7487d8fe58efe43a5dd9e76adc942c6dec1c1a34c7",
+    "review/baseline-render.txt": "e0e6a1bd9ab1ba3df075a081b03a3fba4128cd96b71ccd2b47403aebc711eb7a",
+    "review/candidate-context.json": "2edee857cc0f507b80feed1059fc3d4b1a3925ce707f140f4c6297d849976a11",
+    "review/candidate-render.txt": "3902f352fac5d82a0d0594d43e6a5aa7af01d4315a6bd9af98ab278921fe612d",
+    "review/wall960-pillar964-baseline-reverse.png": "aa345b5b3661e2e79be91623fb0633bb48d497201c641f4d4e14fd4b62dca7c2",
+    "review/wall960-pillar964-baseline-small.png": "69985ba271519ea44a00f0c94541a93de3470c2d82e21b3f9a4b90fe438bc2cb",
+    "review/wall960-pillar964-baseline.png": "f756ea91463811b791eb03e9b333281d86d4a76d15cb89dd818d50d37f0e2720",
+    "review/wall960-pillar964-candidate-reverse.png": "6dfd8f0dbde3e1d9bf90bf499c60e56234907ef77ccbf74e30858830e7c0c430",
+    "review/wall960-pillar964-candidate-small.png": "d5dc35cb8b12f4a171d90c56ff19c9ea320932f8b2a2e592002fba79f751e9c1",
+    "review/wall960-pillar964-candidate.png": "0e0dc7b966cc5a029d3f4fe63c2b775bffeec38540bf8f9edc736ef00547ea03"
+  }
+}

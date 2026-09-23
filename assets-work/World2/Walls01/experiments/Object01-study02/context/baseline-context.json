@@ -1,0 +1,86 @@
+{
+  "kind": "OFFLINE_ACTUAL_PLACEMENTS",
+  "records": [
+    {
+      "name": "Object01",
+      "source": "Object01/baseline/source.blend",
+      "index": 958,
+      "position": [
+        6150.0,
+        11450.0,
+        169.49996948242188
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1170.0
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "Object01",
+      "source": "Object01/baseline/source.blend",
+      "index": 959,
+      "position": [
+        6150.0,
+        11750.0,
+        169.50003051757812
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1170.0
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "Object01",
+      "source": "Object01/baseline/source.blend",
+      "index": 960,
+      "position": [
+        6150.0,
+        12050.0,
+        169.5000457763672
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        1170.0
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "Object03",
+      "source": "Object03/baseline/source.blend",
+      "index": 964,
+      "position": [
+        6300.0,
+        12100.0,
+        169.49998474121094
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        -360.0
+      ],
+      "scale": 1.0
+    }
+  ],
+  "bounds": [
+    [
+      -203.45994567871094,
+      -800.1270141601562,
+      -3.0517578125e-05
+    ],
+    [
+      113.52970886230469,
+      113.69770812988281,
+      291.60626220703125
+    ]
+  ],
+  "anchor": [
+    6300.0,
+    12100.0,
+    169.5
+  ]
+}

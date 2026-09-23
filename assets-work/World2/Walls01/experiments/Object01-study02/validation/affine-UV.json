@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "maximum_UV_projection_delta": 4.371257489310665e-07,
+  "tolerance": 1e-06,
+  "changed_triangles": 34,
+  "classified": {
+    "top": 4,
+    "front": 30
+  },
+  "method": "Every changed exported corner recovered from original front x/z or top x/y barycentric UV projection; all other faces matched independently."
+}

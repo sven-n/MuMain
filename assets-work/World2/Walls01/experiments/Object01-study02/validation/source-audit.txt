@@ -1,0 +1,5 @@
+00:00.767  blend            | Read blend: "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Walls01/Object01/source.blend"
+{"status": "PASS", "triangles": 88, "position_tolerance": 0.0003, "maximum_position_delta": 4.252929670656158e-07, "UV_tolerance": 1e-06, "maximum_UV_delta": 4.3609762191698653e-07, "normal_tolerance": 0.001, "maximum_authored_raw_world_normal_delta": 6.371008851060852e-07, "protected_original_triangles": 54, "maximum_protected_normal_delta": 1.2962194567723172e-05, "packed_images": ["deep_wall01.jpg", "deep_wall02.jpg"], "winding": "Every actual triangle matches authored cyclic order", "minimum_triangle_area": 56.039515313850885, "minimum_UV_area": 0.001948424729920184, "minimum_corner_normal_face_dot": 0.9999998658895493}
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "triangles": 78,
+  "position_tolerance": 0.0003,
+  "maximum_position_delta": 4.252929670656158e-07,
+  "UV_tolerance": 1e-06,
+  "maximum_UV_delta": 4.82246399036157e-07,
+  "normal_tolerance": 0.001,
+  "maximum_authored_raw_world_normal_delta": 4.762754275185017e-07,
+  "protected_original_triangles": 52,
+  "maximum_protected_normal_delta": 4.4999994460171174e-05,
+  "packed_images": [
+    "deep_wall01.jpg",
+    "deep_wall02.jpg"
+  ],
+  "winding": "Every actual triangle matches authored cyclic order",
+  "minimum_triangle_area": 0.905676857810819,
+  "minimum_UV_area": 3.97544438248687e-05,
+  "minimum_corner_normal_face_dot": 0.9999998807907104
+}
