@@ -145,6 +145,18 @@
 	height: 150px;
 	overflow: auto hidden;
 }
+
+/* #reward_popup_anchor (quest_progress.rml/quest_progress_etc.rml) marks where
+   QuestProgress.cpp/QuestProgressByEtc.cpp's still-native reward-item info-tooltip popup anchors --
+   same left/top the popup's old hardcoded m_Pos+95,+360 offset resolved to (.qp-reward itself has
+   zero left/top, so this is panel-relative). */
+.qp-popup-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#reward_popup_anchor { left: 95px; top: 360px; }
 .qp-reward-row {
 	display: block;
 	width: 100%;

@@ -50,6 +50,10 @@
 		<!-- Siblings of .quest-tab, not children -- .quest-tab is itself position:absolute, so a
 		     nested absolute child would resolve against its box, not #panel's, silently shifting
 		     these buttons off-panel. -->
+		<!-- Zero-size marker read live by MyQuestInfoWindow.cpp's Render() -- where the selected
+		     reward-item's native info-tooltip popup anchors, replacing a hardcoded m_Pos+95,+230
+		     offset (a theme can now move it by moving this element instead). -->
+		<div id="reward_popup_anchor" class="quest-popup-anchor" data-class-hidden="active_tab != 0"></div>
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
 		     data-class-locked="!open_enabled" data-event-click="myquest_click_open"></div>
 		<span class="tooltip tooltip-open">{{open_tooltip}}</span>

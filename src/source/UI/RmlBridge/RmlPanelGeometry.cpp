@@ -28,3 +28,23 @@ bool UI::RmlBridge::RefreshLogicalPanelSize(Rml::ElementDocument* doc, const cha
     height = size.y / transform.scaleY;
     return true;
 }
+
+bool UI::RmlBridge::RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* anchorId,
+    UI::Scaling::LayoutMode layoutMode, float& x, float& y)
+{
+    if (!doc)
+        return false;
+
+    Rml::Element* anchor = doc->GetElementById(anchorId);
+    if (!anchor)
+        return false;
+
+    const auto transform = UI::Scaling::TransformForLayout(layoutMode, WindowWidth, WindowHeight);
+    if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
+        return false;
+
+    const Rml::Vector2f offset = anchor->GetAbsoluteOffset();
+    x = UI::Scaling::LogicalX(transform, offset.x);
+    y = UI::Scaling::LogicalY(transform, offset.y);
+    return true;
+}

@@ -120,6 +120,18 @@
 	height: 169px;
 	overflow: auto hidden;
 }
+
+/* #reward_popup_anchor (my_quest_info.rml) marks where MyQuestInfoWindow.cpp's still-native
+   reward-item info-tooltip popup anchors -- panel-relative (a sibling of .quest-tab, not nested
+   inside it, matching that div's own comment), same left/top the popup's old hardcoded
+   m_Pos+95,+230 offset resolved to. */
+.quest-popup-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#reward_popup_anchor { left: 95px; top: 230px; }
 .quest-content-row {
 	display: block;
 	width: 100%;

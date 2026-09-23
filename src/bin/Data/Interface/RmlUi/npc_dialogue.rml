@@ -24,7 +24,10 @@
 		<span id="title">{{npc_name}}</span>
 		<div class="nd-contribute" data-class-hidden="!show_contribute">{{contribute_text}}</div>
 
-		<div class="nd-npc-lines">
+		<!-- id read live by NPCDialogue.cpp's ResolveDialogueWrapGeometry() -- its own resolved
+		     width plus the vertical gap to #btn_npc_next below replace hardcoded wrap-width/
+		     lines-per-page constants, so a theme resizing this area doesn't need a C++ change. -->
+		<div id="npc_lines_container" class="nd-npc-lines">
 			<span class="nd-line" data-for="l : npc_lines">{{l.text}}</span>
 		</div>
 
@@ -35,7 +38,9 @@
 
 		<div class="nd-divider"></div>
 
-		<div class="nd-answers" data-class-hidden="!show_answers">
+		<!-- id read live by NPCDialogue.cpp's ResolveDialogueWrapGeometry() -- same reasoning as
+		     #npc_lines_container above, using #btn_ans_next as this area's lower boundary. -->
+		<div id="answers_container" class="nd-answers" data-class-hidden="!show_answers">
 			<div class="nd-answer-row" data-for="a : answers"
 			     data-event-click="npcdialogue_select_answer(a.index)">{{a.text}}</div>
 		</div>

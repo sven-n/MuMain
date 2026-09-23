@@ -20,6 +20,7 @@
 #include "Core/Utilities/StringUtils.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
@@ -277,8 +278,39 @@ void CNPCQuest::RenderItem3D()
     if (QUEST_ING != byCurQuestState)
         return;
 
+    // #conditions_anchor (npc_quest.rml) and its own live child-row height replace a hardcoded
+    // m_Pos+235 origin / 32px step -- the RmlUi-rendered condition ROW TEXT lives in these exact
+    // rows, so reading their real geometry (instead of duplicating npc_quest.rcss's
+    // .nq-condition-row height in C++) is what keeps this still-native item-icon preview aligned
+    // with them across a theme change, rather than only by both themes happening to agree today.
     auto x = float(m_Pos.x + 30);
     auto y = float(m_Pos.y + 235);
+    float rowStep = 32.f;
+
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* conditionsEl = m_pRmlDoc->GetElementById("conditions_anchor"))
+        {
+            const auto transform = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+            if (transform.scaleX > 0.0f && transform.scaleY > 0.0f)
+            {
+                // Icon sits 22px left / 9px above the row's own text origin -- a native rendering
+                // choice, not theme geometry, so it stays a fixed offset from whatever the anchor's
+                // live position resolves to.
+                const auto offset = conditionsEl->GetAbsoluteOffset();
+                x = UI::Scaling::LogicalX(transform, offset.x) - 22.f;
+                y = UI::Scaling::LogicalY(transform, offset.y) - 9.f;
+
+                if (Rml::Element* firstRow = conditionsEl->GetChild(0))
+                {
+                    const float rowHeightPx = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
+                    if (rowHeightPx > 0.0f)
+                        rowStep = rowHeightPx / transform.scaleY;
+                }
+            }
+        }
+    }
+
     const float Height = 27.f;
 
     QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();
@@ -298,7 +330,7 @@ void CNPCQuest::RenderItem3D()
 
             ::RenderItem3D(x, y, 20.f, Height, nItemType, nItemLevel, 0, 0, false);
 
-            y += Height + 5.f;
+            y += rowStep;
         }
     }
 }

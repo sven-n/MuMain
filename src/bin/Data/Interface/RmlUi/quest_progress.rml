@@ -53,6 +53,11 @@
 				      data-class-clickable="r.clickable" data-style-color="r.color"
 				      data-event-click="questprogress_select_reward(r.index)">{{r.text}}</span>
 			</div>
+			<!-- Zero-size marker read live by QuestProgress.cpp's Render() -- where the selected
+			     reward-item's native info-tooltip popup anchors, replacing a hardcoded m_Pos+95,+360
+			     offset. .qp-reward has zero left/top of its own, so this resolves to the same
+			     panel-relative coordinates the old offset did. -->
+			<div id="reward_popup_anchor" class="qp-popup-anchor"></div>
 			<div id="btn_complete" class="qp-btn-complete" data-class-disabled="!request_complete"
 			     data-event-click="questprogress_complete">{{ok_label}}</div>
 		</div>

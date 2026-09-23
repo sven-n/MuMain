@@ -25,7 +25,10 @@
 		<div class="nq-quest-title" data-class-hidden="!show_quest_title">{{quest_title}}</div>
 
 		<div class="nq-divider" data-class-hidden="!show_conditions"></div>
-		<div class="nq-conditions" data-class-hidden="!show_conditions">
+		<!-- id read live by NPCQuest.cpp's RenderItem3D() -- its own resolved position/child-row
+		     height replace a hardcoded m_Pos+235/32px-step, so the still-native quest-item icon
+		     preview stays aligned with these RmlUi-rendered rows across a theme change. -->
+		<div id="conditions_anchor" class="nq-conditions" data-class-hidden="!show_conditions">
 			<div class="nq-condition-row" data-for="c : conditions" data-style-color="c.color">{{c.text}}</div>
 		</div>
 		<div id="btn_complete" class="nq-btn-complete" data-class-hidden="!show_conditions"

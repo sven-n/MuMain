@@ -222,7 +222,12 @@ bool CQuestProgressByEtc::Render()
 {
     if (m_eLowerView == REQUEST_REWARD_MODE && m_pSelectedRewardItem)
     {
-        ::RenderItemInfo(m_Pos.x + 95, m_Pos.y + 360, m_pSelectedRewardItem, false, 0, true);
+        // #reward_popup_anchor (quest_progress_etc.rml) replaces a hardcoded m_Pos+95,+360 offset --
+        // reading it live means a theme can reposition the reward list without a C++ edit.
+        float anchorX = static_cast<float>(m_Pos.x + 95);
+        float anchorY = static_cast<float>(m_Pos.y + 360);
+        UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "reward_popup_anchor", GetLayoutMode(), anchorX, anchorY);
+        ::RenderItemInfo(static_cast<int>(anchorX), static_cast<int>(anchorY), m_pSelectedRewardItem, false, 0, true);
     }
 
     return true;

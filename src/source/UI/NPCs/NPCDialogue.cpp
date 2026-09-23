@@ -17,16 +17,15 @@
 #include "Core/Utilities/StringUtils.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
+#include <algorithm>
 #include <string>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
-
-#define ND_NPC_MAX_LINE_PER_PAGE		7
-#define ND_SEL_TEXT_MAX_LINE_PER_PAGE	11
 
 CNPCDialogue::CNPCDialogue()
 {
@@ -273,6 +272,84 @@ void CNPCDialogue::SetContents(DWORD dwDlgIndex)
     m_nSelSelText = 0;
 }
 
+void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLinesPerPage,
+    float& answerWrapWidth, int& answerLinesPerPage) const
+{
+    npcWrapWidth = 160.f;
+    npcLinesPerPage = ND_NPC_MAX_LINE_PER_PAGE;
+    answerWrapWidth = 160.f;
+    answerLinesPerPage = ND_SEL_TEXT_MAX_LINE_PER_PAGE;
+
+    if (!m_pRmlDoc)
+        return;
+
+    const auto transform = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
+        return;
+
+    // DivideStringByPixel() wraps using g_pRenderText's own (native/GDI-driven) pixel metrics, a
+    // different measurement system than RmlUi's font rendering -- reading the RmlUi container's
+    // live real-pixel width and normalizing it back to this window's own logical/reference-space
+    // units (same convention m_Pos/WindowGeometry already use) is the closest equivalent "wrap
+    // budget" available without replacing the wrap algorithm itself.
+    Rml::Element* npcContainer = m_pRmlDoc->GetElementById("npc_lines_container");
+    Rml::Element* answerContainer = m_pRmlDoc->GetElementById("answers_container");
+
+    if (npcContainer)
+    {
+        const float containerWidthPx = npcContainer->GetBox().GetSize(Rml::BoxArea::Border).x;
+        if (containerWidthPx > 0.0f)
+            npcWrapWidth = containerWidthPx / transform.scaleX;
+    }
+    if (answerContainer)
+    {
+        const float containerWidthPx = answerContainer->GetBox().GetSize(Rml::BoxArea::Border).x;
+        if (containerWidthPx > 0.0f)
+            answerWrapWidth = containerWidthPx / transform.scaleX;
+    }
+
+    // One physical text line's real rendered height -- shared below by both the NPC-words area and
+    // the answers area (both use the same font-size in npc_dialogue.rcss), sampled from .nd-line
+    // specifically because it's always exactly one physical line (white-space:nowrap); an
+    // .nd-answer-row can be several physical lines joined by '\n' (SyncRmlModel()'s own comment),
+    // so its own box height isn't a reliable single-line measurement. Only ever populated from
+    // whatever's currently bound -- empty on the very first call this session, before
+    // SetContents() has ever run once (this window always has NPC words whenever it's open, so
+    // every call after the first one finds a real line here).
+    float linePitchPx = 0.f;
+    if (npcContainer)
+    {
+        if (Rml::Element* firstLine = npcContainer->GetChild(0))
+            linePitchPx = firstLine->GetBox().GetSize(Rml::BoxArea::Border).y;
+    }
+
+    if (linePitchPx <= 0.0f)
+        return;
+
+    // .nd-npc-lines/.nd-answers have no fixed height of their own (they size to content, which is
+    // exactly what's being decided here) -- the real per-theme budget is the gap to the next fixed
+    // anchor below each: the pager row it must not run into, not the (theme-owned but purely
+    // decorative) divider further below.
+    if (npcContainer)
+    {
+        if (Rml::Element* npcBoundary = m_pRmlDoc->GetElementById("btn_npc_next"))
+        {
+            const float availableHeightPx = npcBoundary->GetAbsoluteOffset().y - npcContainer->GetAbsoluteOffset().y;
+            if (availableHeightPx > 0.0f)
+                npcLinesPerPage = std::max(1, static_cast<int>(availableHeightPx / linePitchPx));
+        }
+    }
+    if (answerContainer)
+    {
+        if (Rml::Element* answerBoundary = m_pRmlDoc->GetElementById("btn_ans_next"))
+        {
+            const float availableHeightPx = answerBoundary->GetAbsoluteOffset().y - answerContainer->GetAbsoluteOffset().y;
+            if (availableHeightPx > 0.0f)
+                answerLinesPerPage = std::max(1, static_cast<int>(availableHeightPx / linePitchPx));
+        }
+    }
+}
+
 void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
 {
     memset(m_aszNPCWords[0], 0, sizeof(wchar_t) * ND_NPC_LINE_MAX * ND_WORDS_ROW_MAX);
@@ -284,13 +361,21 @@ void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
     else
         pszSrc = g_QuestMng.GetNPCDlgNPCWords(m_dwCurDlgIndex);
 
+    float npcWrapWidth, answerWrapWidth;
+    int npcLinesPerPage, answerLinesPerPage;
+    ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
+
     int nLine = ::DivideStringByPixel(&m_aszNPCWords[0][0], ND_NPC_LINE_MAX, ND_WORDS_ROW_MAX,
-        pszSrc, 160);
+        pszSrc, static_cast<int>(npcWrapWidth));
 
     if (1 > nLine)
         return;
 
-    m_nMaxNPCPage = (nLine - 1) / ND_NPC_MAX_LINE_PER_PAGE;
+    // Stored, not just used locally -- SyncRmlModel() slices m_aszNPCWords by this same value when
+    // it later binds the current page's lines, so the two never disagree on where a page boundary
+    // falls (see m_nNpcLinesPerPage's own comment).
+    m_nNpcLinesPerPage = npcLinesPerPage;
+    m_nMaxNPCPage = (nLine - 1) / m_nNpcLinesPerPage;
     m_eLowerView = (1 <= m_nMaxNPCPage) ? NON_SEL_TEXTS_MODE : SEL_TEXTS_MODE;
 
     m_nSelNPCPage = 0;
@@ -302,6 +387,10 @@ void CNPCDialogue::SetCurSelTexts()
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
 
     g_pRenderText->SetFont(g_hFont);
+
+    float npcWrapWidth, answerWrapWidth;
+    int npcLinesPerPage, answerLinesPerPage;
+    ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
 
     wchar_t szAnswer[2 * ND_WORDS_ROW_MAX];
     const wchar_t* pszAnswer;
@@ -315,7 +404,7 @@ void CNPCDialogue::SetCurSelTexts()
             break;
         ::wcscat(szAnswer, pszAnswer);
 
-        m_anSelTextLine[i] = ::DivideStringByPixel(&m_aszSelTexts[nSelTextLineSum][0], 2, ND_WORDS_ROW_MAX, szAnswer, 160, false);
+        m_anSelTextLine[i] = ::DivideStringByPixel(&m_aszSelTexts[nSelTextLineSum][0], 2, ND_WORDS_ROW_MAX, szAnswer, static_cast<int>(answerWrapWidth), false);
 
         nSelTextLineSum += m_anSelTextLine[i];
 
@@ -325,10 +414,10 @@ void CNPCDialogue::SetCurSelTexts()
 
     m_nSelTextCount = i;
 
-    CalculateSelTextMaxPage(i);
+    CalculateSelTextMaxPage(i, answerLinesPerPage);
 }
 
-void CNPCDialogue::CalculateSelTextMaxPage(int nSelTextCount)
+void CNPCDialogue::CalculateSelTextMaxPage(int nSelTextCount, int nMaxLinePerPage)
 {
     m_nSelSelTextPage = 0;
     m_nMaxSelTextPage = 0;
@@ -341,7 +430,7 @@ void CNPCDialogue::CalculateSelTextMaxPage(int nSelTextCount)
         ++m_anSelTextCountPerPage[m_nMaxSelTextPage];
         m_anSelTextLinePerPage[m_nMaxSelTextPage] += m_anSelTextLine[i];
 
-        if (m_anSelTextLinePerPage[m_nMaxSelTextPage] > ND_SEL_TEXT_MAX_LINE_PER_PAGE)
+        if (m_anSelTextLinePerPage[m_nMaxSelTextPage] > nMaxLinePerPage)
         {
             --m_anSelTextCountPerPage[m_nMaxSelTextPage];
             m_anSelTextLinePerPage[m_nMaxSelTextPage] -= m_anSelTextLine[i];
@@ -364,6 +453,10 @@ void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
 
     ::memset(m_aszSelTexts[0], 0, sizeof(wchar_t) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
+
+    float npcWrapWidth, answerWrapWidth;
+    int npcLinesPerPage, answerLinesPerPage;
+    ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
 
     wchar_t szSelText[2 * ND_WORDS_ROW_MAX];
     const wchar_t* pszSelText;
@@ -388,7 +481,7 @@ void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
         ::wcscat(szSelText, pszSelText);
 
         m_anSelTextLine[i] = ::DivideStringByPixel(&m_aszSelTexts[nSelTextRow][0],
-            2, ND_WORDS_ROW_MAX, szSelText, 160, false);
+            2, ND_WORDS_ROW_MAX, szSelText, static_cast<int>(answerWrapWidth), false);
 
         nSelTextRow += m_anSelTextLine[i];
 
@@ -396,7 +489,7 @@ void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
             break;
     }
 
-    CalculateSelTextMaxPage(i);
+    CalculateSelTextMaxPage(i, answerLinesPerPage);
 }
 
 void CNPCDialogue::SetContributePoint(DWORD dwContributePoint)
@@ -674,12 +767,14 @@ void CNPCDialogue::SyncRmlModel()
     model.npcName = StringUtils::WideToNarrow(g_QuestMng.GetNPCName());
     m_RmlBinder.MarkDirty("npc_name");
 
-    // Current page's up-to-7 lines, already wrapped by SetCurNPCWords()'s DivideStringByPixel() call
-    // -- bound as literal non-wrapping lines (see NPCDialogueRmlModel.h's own npcLines comment).
+    // Current page's up-to-m_nNpcLinesPerPage lines, already wrapped by SetCurNPCWords()'s
+    // DivideStringByPixel() call -- bound as literal non-wrapping lines (see NPCDialogueRmlModel.h's
+    // own npcLines comment). Slices by m_nNpcLinesPerPage, not a hardcoded macro, so this always
+    // agrees with whatever value SetCurNPCWords() actually used to compute m_nMaxNPCPage.
     model.npcLines.clear();
-    for (int i = 0; i < ND_NPC_MAX_LINE_PER_PAGE; ++i)
+    for (int i = 0; i < m_nNpcLinesPerPage; ++i)
     {
-        const wchar_t* line = m_aszNPCWords[i + ND_NPC_MAX_LINE_PER_PAGE * m_nSelNPCPage];
+        const wchar_t* line = m_aszNPCWords[i + m_nNpcLinesPerPage * m_nSelNPCPage];
         if (line[0] == L'\0')
             break;
         model.npcLines.push_back({ StringUtils::WideToNarrow(line) });
