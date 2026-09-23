@@ -1,18 +1,16 @@
-//////////////////////////////////////////////////////////////////////
-// NewBloodCastleSystem.cpp: implementation of the CNewBloodCastleSystem class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"
 
 #include "NewBloodCastleSystem.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewBloodCastleSystem::CNewBloodCastleSystem()
 {
@@ -31,7 +29,7 @@ void CNewBloodCastleSystem::SetMatchResult(const int iNumDevilRank, const int iM
 
     m_iNumResult = Success;
     memcpy(m_MatchResult, pMatchResult, sizeof(MatchResult));
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBloodCastleResultMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CBloodCastleResultMsgBoxLayout));
 }
 
 void CNewBloodCastleSystem::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data)
@@ -101,9 +99,9 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
         case 5:
             if (m_iMatchTime > 0)
             {
-                if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE_TIME))
+                if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE_TIME))
                 {
-                    g_pNewUISystem->Show(SEASON3B::INTERFACE_BLOODCASTLE_TIME);
+                    g_pNewUISystem->Show(mu::ui::window::INTERFACE_BLOODCASTLE_TIME);
                 }
 
                 g_pBloodCastle->SetTime(m_iMatchTime);
@@ -117,9 +115,9 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
     }
     else
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE_TIME))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE_TIME))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_BLOODCASTLE_TIME);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE_TIME);
         }
     }
 }

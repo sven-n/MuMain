@@ -1,0 +1,321 @@
+/* Legacy theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. #bars binds
+   left/top/scale live from C++; #buttons/#exp nest inside it to inherit that transform, so their
+   coordinates below are plain px, not dp -- dp would double the ancestor's own scale. Gauge
+   fills use real legacy gauge textures; numeric readouts are plain text; buttons use a brightness
+   filter for hover instead of a separate sprite frame. */
+
+#bars {
+	position: absolute;
+	transform-origin: left top;
+	font-family: "token(font-body)";
+	font-size: 9px;
+	width: 640px;
+	height: 39px;
+}
+#item_hotkey_anchor, #skill_list_anchor { left: 0px; top: 0px; }
+/* pointer-events:auto required -- otherwise these inherit body's none (base.rcss), and
+   #bar_hp:hover ~ .tooltip-hp etc. below could never fire. */
+.gauge-slot {
+	position: absolute;
+	pointer-events: auto;
+}
+#bar_hp   { left: 158px; top: 432px; width: 45px; height: 39px; }
+#bar_sd   { left: 204px; top: 431px; width: 16px; height: 39px; }
+#bar_ag   { left: 420px; top: 431px; width: 16px; height: 39px; }
+#bar_mp   { left: 437px; top: 432px; width: 45px; height: 39px; }
+
+/* Fills bottom-up (height = filled fraction); sprites sample only the top 39px of each source
+   texture, matching the legacy UV math. */
+@spritesheet mainframe-gauge-hp-sheet { src: "../../../newui_menu_red.jpg";   mainframe-gauge-hp:   0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-hpp-sheet { src: "../../../newui_menu_green.jpg"; mainframe-gauge-hp-poisoned: 0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-mp-sheet { src: "../../../newui_menu_blue.jpg";  mainframe-gauge-mp:   0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-ag-sheet { src: "../../../newui_menu_ag.jpg";    mainframe-gauge-ag:   0px 0px 16px 39px; }
+@spritesheet mainframe-gauge-sd-sheet { src: "../../../newui_menu_sd.jpg";    mainframe-gauge-sd:   0px 0px 16px 39px; }
+
+.gauge-fill {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+}
+.gauge-fill-horizontal { display: none; }
+.gauge-fill-hp { decorator: image(mainframe-gauge-hp); }
+.gauge-fill-hp.poisoned { decorator: image(mainframe-gauge-hp-poisoned); }
+.gauge-fill-mp { decorator: image(mainframe-gauge-mp); }
+.gauge-fill-ag { decorator: image(mainframe-gauge-ag); }
+.gauge-fill-sd { decorator: image(mainframe-gauge-sd); }
+
+.gauge-num {
+	position: absolute;
+	/* Long values extend beyond the gauge: keep every digit above adjacent fills. */
+	z-index: 1;
+	left: 0;
+	top: 30px;
+	/* Reserve enough text width for full resource values, even on 16px gauges.
+	   RmlUi cannot centre overflowing inline text in those narrow boxes. */
+	width: 96px;
+	font-size: 12px;
+	line-height: 12px;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Numeric anchors match the original readouts rather than the gauge centres. */
+#bar_hp .gauge-num { left: -25.25px; }
+#bar_mp .gauge-num { left: -20px; }
+#bar_sd .gauge-num { left: -35px; top: 31px; }
+#bar_ag .gauge-num { left: -40.5px; top: 31px; }
+
+/* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size
+   binding rasterizes at display size; its inverse transform cancels the HUD scale.
+   Use content width and stable edge anchors, not a hidden box's percentage transform. */
+.tooltip {
+	display: none;
+	position: absolute;
+	width: auto;
+	transform-origin: left top;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 1px 2px;
+	border-radius: 0px;
+	font-family: "DejaVu Sans";
+	font-size: 10px;
+	pointer-events: none;
+}
+.tooltip-hp { left: 158px; }
+.tooltip-sd { left: 184px; }
+.tooltip-ag { left: 400px; }
+.tooltip-mp { left: 437px; }
+#bar_hp:hover ~ .tooltip-hp,
+#bar_sd:hover ~ .tooltip-sd,
+#bar_ag:hover ~ .tooltip-ag,
+#bar_mp:hover ~ .tooltip-mp,
+#exp:hover .tooltip {
+	display: block;
+	z-index: 1;
+}
+/* All four gauge hints share the same anchor row, not the 39px root's bottom. */
+.tooltip-hp, .tooltip-sd, .tooltip-ag, .tooltip-mp { top: 418px; }
+
+/* Buttons: nested inside #bars, plain reference-pixel position next to the mana bar. */
+@spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-chainfo-sheet { src: "../../../partCharge1/newui_menu_Bt01.jpg"; mainframe-btn-chainfo-normal: 0px 0px 30px 41px; mainframe-btn-chainfo-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-myinven-sheet { src: "../../../partCharge1/newui_menu_Bt02.jpg"; mainframe-btn-myinven-normal: 0px 0px 30px 41px; mainframe-btn-myinven-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-friend-sheet  { src: "../../../partCharge1/newui_menu_Bt03.jpg"; mainframe-btn-friend-normal: 0px 0px 30px 41px; mainframe-btn-friend-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-window-sheet  { src: "../../../partCharge1/newui_menu_Bt04.jpg"; mainframe-btn-window-normal: 0px 0px 30px 41px; mainframe-btn-window-open: 0px 82px 30px 41px; }
+
+#buttons {
+	position: absolute;
+	left: 488px;
+	top: 429px;
+	width: 300px;
+	height: 41px;
+}
+.frame-btn {
+	position: absolute;
+	top: 0px;
+	width: 30px;
+	height: 41px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.frame-btn:hover { filter: brightness(1.25); }
+
+.btn-icon-label { display: none; }
+/* Item hotkey chrome: hit-test/stack-count only. Q/W/E/R letters are baked into the sprite art
+   (.slot-hotkey-label stays hidden); stack count has no baked-in equivalent so it needs a real
+   style below. */
+#buttons_top { display: none; }
+#gauge_bg_left, #gauge_bg_right { display: none; }
+.slot-hotkey-label { display: none; }
+
+/* Stack count for a bound potion, bottom-right of the icon (matches
+   CItemHotKey::RenderItemCount()'s offset); empty string renders nothing. */
+.item-stack-label {
+	position: absolute;
+	left: 19px;
+	top: 14px;
+	transform: translateX(-50%);
+	color: token(text-primary);
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 12px;
+	line-height: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
+   (MainFrameWindow.cpp); purely a positioning context, these slots paint nothing of their own.
+   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size") -- both sides carry
+   an explicit cross-reference comment now; update together. */
+#skill_slots { position: absolute; left: 0; top: 0; }
+#skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_3 { position: absolute; left: 318px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
+#current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
+
+/* Zero-shift wrapper (legacy has no offset, unlike modern's shifted copy); each slot matches
+   CItemHotKey::RenderItems()'s native icon draw position/size (x = 10 + i*38, y = 443, 20x20).
+   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size") -- both sides carry
+   an explicit cross-reference comment now; update together. */
+#item_slots { position: absolute; left: 0; top: 0; }
+#item_slot_0 { position: absolute; left: 10px;  top: 443px; width: 20px; height: 20px; }
+#item_slot_1 { position: absolute; left: 48px;  top: 443px; width: 20px; height: 20px; }
+#item_slot_2 { position: absolute; left: 86px;  top: 443px; width: 20px; height: 20px; }
+#item_slot_3 { position: absolute; left: 124px; top: 443px; width: 20px; height: 20px; }
+
+/* Real hover/click targets now (main_frame.rml) -- opt back into pointer-events (inherited none
+   from body). */
+#item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
+#current_skill_slot {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Expanded grid + pet-command row -- zero shift; left/top values come straight from
+   CSkillList::RebuildGridSnapshot(). Containers stay non-interactive; only .skill-cell opts back
+   into pointer-events. */
+#skill_grid, #pet_skill_row {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+}
+
+/* No border here -- legacy always draws the real IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE sprite
+   underneath (MainFrameWindow.cpp Render()), so an RmlUi border would double up. */
+.skill-cell {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+/* .selected deliberately left unstyled -- legacy's real IMAGE_SKILLBOX_USE sprite is the
+   current-skill highlight; an RmlUi outline would double it up. */
+
+/* Bottom-anchored translucent wipe, shrinking top-down as cooldown counts down -- matches the
+   retired RenderSkillDelay()'s ARGB-quad direction (0x80FF8080, alpha ~50%). */
+.cooldown-wipe {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgba(255, 128, 128, 128);
+	pointer-events: none;
+}
+
+/* Bottom-right, matching the retired RenderNumber(x+20,y+20,...) subscript position
+   (MainFrameWindow.cpp) -- plain text instead of the legacy digit-sprite atlas. */
+.skill-hotkey-label {
+	position: absolute;
+	right: 2px;
+	bottom: 1px;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 9px;
+	line-height: 9px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+#btn_cshop    { left: 1px;   decorator: image(mainframe-btn-cshop-normal); }
+#btn_cshop.open    { decorator: image(mainframe-btn-cshop-open); }
+#btn_chainfo  { left: 31px;  decorator: image(mainframe-btn-chainfo-normal); }
+#btn_chainfo.open  { decorator: image(mainframe-btn-chainfo-open); }
+#btn_myinven  { left: 61px;  decorator: image(mainframe-btn-myinven-normal); }
+#btn_myinven.open  { decorator: image(mainframe-btn-myinven-open); }
+#btn_friend   { left: 91px;  decorator: image(mainframe-btn-friend-normal); }
+#btn_friend.open   { decorator: image(mainframe-btn-friend-open); }
+#btn_window   { left: 121px; decorator: image(mainframe-btn-window-normal); }
+#btn_window.open   { decorator: image(mainframe-btn-window-open); }
+
+#buttons .tooltip { top: -11px; }
+.tooltip-cshop    { left: -18px; }
+.tooltip-chainfo  { left: 18px; }
+.tooltip-myinven  { left: 45px; }
+.tooltip-friend   { right: 178px; transform-origin: right top; }
+.tooltip-window   { right: 148px; transform-origin: right top; }
+#btn_cshop:hover ~ .tooltip-cshop,
+#btn_chainfo:hover ~ .tooltip-chainfo,
+#btn_myinven:hover ~ .tooltip-myinven,
+#btn_friend:hover ~ .tooltip-friend,
+#btn_window:hover ~ .tooltip-window {
+	display: block;
+	z-index: 1;
+}
+
+/* Char-info quest-alert / friend mail-chat-alert blink dot. */
+.alert-dot {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 8px;
+	height: 8px;
+	border-radius: 4px;
+	background-color: #ffd700;
+	pointer-events: none;
+}
+
+/* EXP: nested inside #bars, spans reference x=0-640 (item-hotkey band start to button group end);
+   pointer-events:auto so #exp:hover .tooltip below can fire. */
+#exp {
+	position: absolute;
+	left: 0px;
+	top: 470px;
+	width: 640px;
+	height: 10px;
+	pointer-events: auto;
+}
+/* Original menu artwork's bottom strip, independent of the progress fill. */
+@spritesheet mainframe-exp-left-sheet { src: "../../../newui_menu01.jpg"; mainframe-exp-left: 0px 41px 256px 10px; }
+@spritesheet mainframe-exp-middle-sheet { src: "../../../newui_menu02.jpg"; mainframe-exp-middle: 0px 41px 128px 10px; }
+@spritesheet mainframe-exp-right-sheet { src: "../../../partCharge1/newui_menu03.jpg"; mainframe-exp-right: 0px 41px 256px 10px; }
+.exp-frame { position: absolute; top: 0px; height: 10px; pointer-events: none; }
+#exp_frame_left { left: 0px; width: 256px; decorator: image(mainframe-exp-left); }
+#exp_frame_middle { left: 256px; width: 128px; decorator: image(mainframe-exp-middle); }
+#exp_frame_right { left: 384px; width: 256px; decorator: image(mainframe-exp-right); }
+#exp_track {
+	position: absolute;
+	left: 2px;
+	width: 629px;
+	top: 3px;
+	height: 4px;
+}
+/* Real gauge art (legacy only) -- 6x4 rect matches the real decoded source pixels. */
+@spritesheet mainframe-gauge-exp-sheet { src: "../../../newui_exbar.jpg"; mainframe-gauge-exp: 0px 0px 6px 4px; }
+#exp_fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	decorator: image(mainframe-gauge-exp);
+}
+#exp_digit {
+	position: absolute;
+	right: 1px;
+	top: -1px;
+	color: token(text-primary);
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-family: "token(font-body)";
+	font-size: 12px;
+	line-height: 12px;
+	pointer-events: none;
+}
+/* EXP shares the gauge hint row; #exp starts at reference y=470. */
+#exp_tooltip {
+	top: -52px;
+	left: 280px;
+}

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 
 class CUIManager;
 class CUIGuildInfo;
@@ -31,16 +31,12 @@ protected:
     CUIButton		m_NextButton;
     CUIButton		m_PreviousButton;
 
-    DWORD			m_dwEditGuildMarkConfirmPopup;
-    DWORD			m_dwGuildRelationShipReplyPopup;
-
 protected:
     BOOL IsValidGuildName(const wchar_t* szName);
     BOOL IsValidGuildMark();
 
     void StepPrev();
     void StepNext();
-    void CloseMyPopup();
 
     void DoCreateGuildAction();
     void RenderCreateGuild();
@@ -55,8 +51,6 @@ protected:
     void RenderGuildMasterMain();
 
 public:
-    void ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType, BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL);
-
     virtual BOOL DoMouseAction();
     virtual void Render();
     void Open();

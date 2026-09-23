@@ -18,8 +18,8 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 
 #include "json.hpp"
@@ -1037,7 +1037,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // The extension slots live in their own control, and the main inventory
     // does not know them: the item is taken from whichever holds the slot.
     const bool inExtension = !IsMainInventorySlot(fromSlot);
-    SEASON3B::CNewUIInventoryCtrl* inventory = nullptr;
+    mu::ui::window::CInventoryCtrl* inventory = nullptr;
     ITEM* moving = nullptr;
     if (inExtension)
     {
@@ -1056,7 +1056,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the inventory is not available");
     }
 
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() != nullptr)
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem() != nullptr)
     {
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "an item is already being moved");
     }
@@ -1088,19 +1088,19 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // while it still occupies its own squares, a move that overlaps them
     // would be refused for colliding with itself.
 
-    if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
+    if (!mu::ui::window::CInventoryCtrl::CreatePickedItem(inventory, moving, true))
     {
         // CreatePickedItem has already new-ed the picked-item singleton by
         // the time Create() can fail (NewUIInventoryCtrl.cpp), so a bare
         // return would leave it non-null: every later move — ours and the
         // player's own picking — would answer "an item is already being
         // moved" for the rest of the session.
-        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the item could not be picked up");
     }
     inventory->RemoveItem(moving);
 
-    SEASON3B::CNewUIPickedItem* picked = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+    mu::ui::window::CPickedItem* picked = mu::ui::window::CInventoryCtrl::GetPickedItem();
     ITEM* lifted = picked != nullptr ? picked->GetItem() : nullptr;
 
     // Asked now, not before: the item has left its own squares, so a move
@@ -1109,7 +1109,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // NewUIInventoryActionController.cpp:123).
     if (toSlot >= MAX_EQUIPMENT_INDEX)
     {
-        SEASON3B::CNewUIInventoryCtrl* destination =
+        mu::ui::window::CInventoryCtrl* destination =
             IsMainInventorySlot(toSlot)
                 ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
                 : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
@@ -1119,7 +1119,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
             {
                 inventory->AddItem(lifted->x, lifted->y, lifted);
             }
-            SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+            mu::ui::window::CInventoryCtrl::DeletePickedItem();
             return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
         }
     }
@@ -1134,7 +1134,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
         {
             inventory->AddItem(lifted->x, lifted->y, lifted);
         }
-        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "another item move has not been answered yet");
     }
 

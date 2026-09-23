@@ -147,9 +147,14 @@ void CancelScriptedScreenshot();
 void SetTargetFps(double targetFps);
 double GetTargetFps();
 
-// Debug overlay controls
+// Debug overlay controls -- mutually exclusive (setting one clears the other), plain globals with
+// no GameConfig persistence, matching the $details/$fpscounter console commands' own behavior
+// (session-only, reset every launch). Getters exist only so a UI checkbox can read the live state
+// back (e.g. after the OTHER one was just toggled on).
 void SetShowDebugInfo(bool enabled);
+bool GetShowDebugInfo();
 void SetShowFpsCounter(bool enabled);
+bool GetShowFpsCounter();
 void ResetFrameStats();
 
 // SDL GPU frame counters and per-pass CPU timings. Console-toggled via `$glstats on/off`.

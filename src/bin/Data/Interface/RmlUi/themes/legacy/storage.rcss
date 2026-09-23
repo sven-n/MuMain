@@ -1,0 +1,120 @@
+/* Legacy theme for CStorageInventory's chrome (frame/title/money/buttons). #panel's left/top/
+   scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp.
+   Button layout matches my_inventory.rcss's own action row exactly (same 13/50/87/124 slots,
+   36x29 boxes, top:391) -- this window's frame budget is identical in that respect, just
+   different icons/tooltips/click targets. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 11px;
+	width: 190px;
+	text-align: center;
+	color: rgb(216, 216, 216);
+	font-weight: bold;
+	font-size: 12px;
+}
+/* Matches CStorageInventory::RenderText()'s former red title when locked (m_bLock). */
+#title.locked { color: rgb(240, 32, 32); }
+
+@spritesheet stor-money-sheet { src: "../../../newui_item_money3.tga"; stor-money: 0px 0px 170px 46px; }
+#money_bg {
+	position: absolute;
+	left: 10px;
+	top: 342px;
+	width: 170px;
+	height: 46px;
+	decorator: image(stor-money);
+	pointer-events: none;
+}
+#zen_text {
+	position: absolute;
+	right: 22px;
+	top: 350px;
+	font-weight: bold;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#fee_label {
+	position: absolute;
+	left: 25px;
+	top: 371px;
+	color: rgb(240, 64, 64);
+	font-weight: bold;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#fee_value {
+	position: absolute;
+	right: 22px;
+	top: 371px;
+	color: rgb(255, 220, 150);
+	font-weight: bold;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Buttons: same 36x29 reference-pixel boxes, same 13/50/87/124 slots as my_inventory.rcss's
+   action row. */
+@spritesheet stor-btn-insert-sheet    { src: "../../../newui_Bt_money01.tga";  stor-btn-insert:    0px 0px 36px 29px; }
+@spritesheet stor-btn-take-sheet      { src: "../../../newui_Bt_money02.tga";  stor-btn-take:      0px 0px 36px 29px; }
+@spritesheet stor-lock-unlocked-sheet { src: "../../../newui_Bt_lock02.tga";   stor-lock-unlocked: 0px 0px 36px 29px; }
+@spritesheet stor-lock-locked-sheet   { src: "../../../newui_Bt_lock.tga";     stor-lock-locked:   0px 0px 36px 29px; }
+@spritesheet stor-btn-expand-sheet    { src: "../../../newui_expansion_btn.tga"; stor-btn-expand:  0px 0px 36px 29px; }
+
+.stor-btn {
+	position: absolute;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stor-btn:hover { filter: brightness(1.25); }
+.stor-btn.hidden { display: none; }
+
+.stor-btn-insert { left: 13px;  decorator: image(stor-btn-insert); }
+.stor-btn-take   { left: 50px;  decorator: image(stor-btn-take); }
+.stor-btn-lock   { left: 87px;  decorator: image(stor-lock-unlocked); }
+/* Icon swap on the lock button itself -- same toggle-class mechanism as my_inventory.rcss's
+   .inv-btn-myshop/.close-mode, just swapping the actual sprite here instead of just an accent. */
+.stor-btn-lock.locked-mode { decorator: image(stor-lock-locked); }
+.stor-btn-expand { left: 124px; decorator: image(stor-btn-expand); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-insert { left: -30px; }
+.tooltip-take   { left: 7px; }
+.tooltip-lock   { left: 44px; }
+.tooltip-expand { left: 60px; }
+
+#btn_insert:hover ~ .tooltip-insert,
+#btn_take:hover ~ .tooltip-take,
+#btn_lock:hover ~ .tooltip-lock,
+#btn_expand:hover ~ .tooltip-expand {
+	display: block;
+}

@@ -27,12 +27,15 @@ enum class Pass : int
     Particles,
     Joints,
     Overlay,
+    RmlUiUpdate,
+    RmlUiRender,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
     "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
     "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay",
+    "RmlUpd", "RmlRend",
 };
 
 enum class Counter : int

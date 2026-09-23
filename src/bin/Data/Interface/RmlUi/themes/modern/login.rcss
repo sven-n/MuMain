@@ -1,0 +1,264 @@
+/* Modern theme for the login dialog -- fully programmatic, flat colors/vector shapes instead of
+   legacy art. Built from explicit RML layers (base.rcss's forged-dialog primitives) plus real
+   box-shadow (inset/outset, blur, multiple shadows are all supported by this renderer) directly
+   on the element it belongs to, so the shell reads as outer iron edge -> window surface -> inner
+   groove.
+
+   Engine notes: this engine's rgba() parses alpha as a 0-255 integer, not a 0-1 CSS float, so
+   every color below is pre-converted (e.g. .62 -> 158). No ::before/::after, `content:`, or
+   percentage border-radius. `transform: rotate()` is confirmed working and used for the
+   hero-plate ornaments and the checkbox checkmark. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* Window surface -- crimson belongs to the hero banner only, so #panel uses plain .modern-frame
+   with background-color/decorator overridden to a neutral forged fill. Border is a single flat
+   tone; real box-shadow carries the surface's depth (soft drop shadow, contact shadow, inner
+   hairline, warm inner band).
+
+   The frame strip between the shell-edge and inner groove needs to read lighter than the
+   recessed well without leaking light inward -- brightening the decorator's top stop doesn't
+   work since decorator paints #panel's entire box, not just this ring. The contrast instead comes
+   from the inset box-shadow band, which is confined to a fixed 3dp spread (alpha 190/255). */
+#panel {
+    position: absolute;
+    width: 329dp;
+    height: 245dp;
+
+    font-family: "token(font-body)";
+    font-size: 12dp;
+    color: token(text-primary);
+
+    border-radius: token(radius-sm)dp;
+
+    background-color: #080a08;
+    decorator:
+        linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+
+    border-width: 1dp;
+    border-color: token(border-frame);
+
+    box-shadow:
+        0 11dp 30dp rgba(0, 0, 0, 158),
+        0 2dp 5dp rgba(0, 0, 0, 217),
+        inset 0 0 0 1dp #090a08,
+        inset 0 0 0 3dp rgba(90, 87, 69, 46);
+}
+
+/* Outer iron edge, -3dp. Transparent fill -- a solid fill here would read as a second opaque
+   rectangle behind the window surface instead of a thin edge. Per-edge lighting is 4 separate
+   inset box-shadows rather than border-*-color. */
+.login-shell-edge {
+    background-color: transparent;
+    border-radius: token(radius-sm)dp;
+    border-color: rgba(31, 31, 26, 242);
+
+    box-shadow:
+        inset 1dp 0 0 rgba(130, 121, 91, 28),
+        inset -1dp 0 0 rgba(0, 0, 0, 204),
+        inset 0 1dp 0 rgba(151, 139, 101, 20),
+        inset 0 -1dp 0 rgba(0, 0, 0, 230);
+}
+
+/* Inner groove, ~4dp inward -- flat border plus a thin warm hairline and a broad 12dp inward
+   darkness; the darkness is what sells the recessed/carved look, the border alone reads too
+   thin. */
+.login-groove {
+    position: absolute;
+
+    left: 4dp;
+    right: 4dp;
+    top: 4dp;
+    bottom: 4dp;
+
+    pointer-events: none;
+
+    border-width: 1dp;
+    border-color: #24261f;
+
+    box-shadow:
+        inset 0 0 0 1dp rgba(121, 112, 83, 15),
+        inset 0 0 12dp rgba(0, 0, 0, 153);
+}
+
+/* The hero-banner IS Login's header, not nested inside a metal rail -- metal rail and crimson
+   hero-banner are alternative header styles, never combined. Depth comes from base.rcss's
+   .modern-title-plate box-shadow. */
+.login-hero-banner {
+	left: 8dp;
+	right: 8dp;
+	top: 8dp;
+	height: 37dp;
+}
+
+/* Ornaments are diamonds inside the plate (8dp from its edges) -- an 11x11 square rotated 45deg,
+   not external end-caps. */
+.login-hero-cap {
+	position: absolute;
+	top: 50%;
+	width: 11dp;
+	height: 11dp;
+	margin-top: -5.5dp;
+	background-color: #24100a;
+	border-width: 1dp;
+	border-color: #6a2a19;
+	transform: rotate(45deg);
+	pointer-events: none;
+	box-shadow:
+		inset 1dp 1dp 0 rgba(255, 208, 145, 9),
+		inset -1dp -1dp 0 rgba(0, 0, 0, 173);
+}
+.login-hero-cap-left { left: 8dp; }
+.login-hero-cap-right { right: 8dp; }
+
+.label {
+	position: absolute;
+	font-family: "token(font-body)";
+}
+
+/* Positioned via absolute + text-align rather than flex centering -- this engine's flex layout
+   doesn't treat a bare mustache-bound text node as a real flex item, so it didn't render at all
+   inside a flex container. top:11dp eyeballed to vertical-center the line in the 37dp banner. */
+.label-server {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 11dp;
+	text-align: center;
+	color: #e1b94e;
+	font-family: "token(font-title)";
+	font-size: 13dp;
+	font-weight: 500;
+	letter-spacing: 0.26dp;
+	font-effect: shadow(0dp 1dp #000000);
+}
+
+/* #input_account_anchor/#input_password_anchor (login.rml) mark exactly where LoginWin.cpp's
+   native text overlay renders, relative to #panel -- 6dp right/down from each .login-input's own
+   left/top (100/16,49), matching the visible border's inner edge. Keep the two in sync if either
+   changes. */
+.input-text-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#input_account_anchor { left: 115dp; top: 72dp; }
+#input_password_anchor { left: 115dp; top: 105dp; }
+
+/* Body is a real recessed cavity; broad inset shadow comes from base.rcss's .modern-content-well. */
+.login-content {
+	left: 9dp;
+	right: 9dp;
+	top: 50dp;
+	height: 139dp;
+	pointer-events: none;
+}
+
+/* Coordinates are local to .login-content. color #8d835f is a muted brass tone, distinct from
+   the general-purpose token(text-secondary) gray. */
+.label-account {
+	left: 21dp;
+	top: 25dp;
+	font-size: 8dp;
+	font-weight: 600;
+	letter-spacing: 0.64dp;
+	color: #8d835f;
+}
+.label-password {
+	left: 21dp;
+	top: 58dp;
+	font-size: 8dp;
+	font-weight: 600;
+	letter-spacing: 0.64dp;
+	color: #8d835f;
+}
+
+.login-input {
+	position: absolute;
+	width: 156dp;
+	height: 23dp;
+	pointer-events: none;
+	border-radius: token(radius-sm)dp;
+}
+.login-input-account  { left: 100dp; top: 16dp; }
+.login-input-password { left: 100dp; top: 49dp; }
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-remember-me   { left: 100dp; top: 84dp; }
+.checkbox-save-password { left: 100dp; top: 108dp; }
+
+/* Checkbox look is uniform everywhere (base.rcss's .checkbox-box/.checkbox-box.checked), no
+   per-instance override. Checkmark is a single 6x3 box with a left+bottom border rotated -45deg,
+   forming a check stroke. */
+.checkbox-tick {
+	display: none;
+	position: absolute;
+	left: 2dp;
+	top: 1dp;
+	width: 6dp;
+	height: 3dp;
+	border-left: 2dp #171006;
+	border-bottom: 2dp #171006;
+	transform: rotate(-45deg);
+}
+.checkbox-box.checked .checkbox-tick {
+	display: block;
+}
+
+/* Footer is a structural container only (base.rcss's .modern-footer-band) -- one plain border-top
+   carries the entire body-to-footer separation. */
+.login-footer {
+	left: 9dp;
+	right: 9dp;
+	top: 190dp;
+	height: 46dp;
+	bottom: auto;
+	pointer-events: none;
+	border-top-width: 1dp;
+	border-top-color: #24251f;
+}
+
+/* Position/size only -- color/box-shadow/font are inherited from base.rcss's shared .btn/.btn-ok,
+   so all consumers stay in sync. */
+.login-btn {
+	top: 8dp;
+	width: 76dp;
+	height: 26dp;
+	line-height: 26dp;
+}
+
+.login-btn-ok {
+	left: 145dp;
+}
+
+.login-btn-cancel {
+	left: 226dp;
+}
+
+.login-btn-label {
+	position: relative;
+	font-family: "token(font-body)";
+}
+
+/* Intentionally external to the forged dialog shell. top:257dp = 245dp window height + 12dp
+   below it. */
+.trust-warning {
+	position: absolute;
+	left: 30dp;
+	top: 257dp;
+	width: 280dp;
+	font-size: 10dp;
+	font-effect: shadow(0dp 1dp #000000);
+	color: token(semantic-warning);
+	font-family: "token(font-body)";
+}

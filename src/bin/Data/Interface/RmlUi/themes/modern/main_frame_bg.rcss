@@ -1,0 +1,38 @@
+/* Background-layer companion to main_frame.rcss -- flat fills only, loaded into a separate RmlUi
+   context that renders behind the legacy 3D-composited item/skill icons. */
+
+#bg_root {
+	position: absolute;
+	pointer-events: none;
+}
+
+#bg_left, #bg_center {
+	position: absolute;
+	top: 429px;
+	pointer-events: none;
+	/* Same literal as main_frame.rcss's .slot-fill, duplicated to keep this context independent. */
+	background-color: rgba(10, 10, 10, 150);
+}
+
+#bg_left {
+	width: 152px;
+	height: 41px;
+}
+
+#bg_center {
+	width: 210px; /* 424 - 214, RenderCenterFrame()'s own reference-space span */
+	height: 41px;
+}
+
+/* Former RenderCenterFrame()'s RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFFu) skill-list-
+   open highlight -- same literal geometry/color, now data-driven instead of an unconditional
+   native draw. This document has no base.rcss link, so .hidden is defined locally. */
+.hidden { display: none; }
+#skill_list_highlight {
+	position: absolute;
+	top: 429px;
+	width: 160px;
+	height: 40px;
+	background-color: rgba(255, 255, 255, 64); /* 0x40FFFFFFu */
+	pointer-events: none;
+}

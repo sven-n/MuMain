@@ -1,0 +1,136 @@
+/* Legacy theme for CPartyInfoWindow -- #panel/frame sprites/exit button/tooltip shape/group-box
+   corner-and-fill shape are shared with character_info/my_quest_info/pet_info via
+   docked_panel_frame.rcss (linked in party_info.rml before this file) -- only window-specific
+   content lives here now. This window's own top piece is newui_item_back01.tga, not back04.tga
+   (CPartyInfoWindow::IMAGE_PARTY_BASE_WINDOW_TOP aliases CMyInventory::IMAGE_INVENTORY_BACK_TOP, not
+   ...BACK_TOP2 like Pet/Character do) -- hence docked-bg-top-b below, not -a.
+
+   Each member row lets normal block flow do the iIndex*71 stacking RenderMemberStatue() computed by
+   hand (`iVal = iIndex * 71`) -- .party-row is just `height:71px`, and every child position below is
+   relative to the row itself (position:relative), not the panel. */
+.frame-top { decorator: image(docked-bg-top-b); }
+
+@spritesheet party-flag-sheet { src: "../../../newui_party_flag.tga"; party-flag: 0px 0px 10px 12px; }
+@spritesheet party-kick-sheet { src: "../../../newui_party_x.tga"; party-kick: 0px 0px 13px 13px; }
+@spritesheet party-hpbar-back-sheet { src: "../../../newui_party_lifebar01.jpg"; party-hpbar-back: 0px 0px 151px 8px; }
+@spritesheet party-hpbar-fill-sheet { src: "../../../newui_party_lifebar02.jpg"; party-hpbar-fill: 0px 0px 1px 4px; }
+
+#title {
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	width: 72px;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+
+.party-empty-msg {
+	position: absolute;
+	left: 20px;
+	top: 60px;
+	width: 160px;
+	color: token(text-primary);
+	font-size: 12px;
+	text-align: left;
+}
+.party-empty-msg span { display: block; line-height: 15px; }
+
+.party-list { position: absolute; left: 10px; top: 40px; width: 170px; }
+.party-row { position: relative; display: block; width: 170px; height: 71px; }
+
+/* Group-box shape comes from docked_panel_frame.rcss -- only per-instance position + which corner
+   sprite stays here. */
+.gbox-corner-tl { left: 0; top: 0; decorator: image(docked-corner-tl); }
+.gbox-corner-tr-title { left: 56px; top: 0; decorator: image(docked-corner-tr); }
+.gbox-corner-tr { left: 156px; top: 20px; decorator: image(docked-corner-tr); }
+.gbox-corner-bl { left: 0; top: 56px; decorator: image(docked-corner-bl); }
+.gbox-corner-br { left: 156px; top: 56px; decorator: image(docked-corner-br); }
+.gbox-title-fill { left: 3px; top: 2px; width: 62px; height: 20px; }
+.gbox-content-fill { left: 3px; top: 22px; width: 163px; height: 43px; }
+
+.party-name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 8px;
+	width: 70px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+.party-flag {
+	position: absolute;
+	left: 136px;
+	top: 23px;
+	width: 10px;
+	height: 12px;
+	decorator: image(party-flag);
+	pointer-events: none;
+}
+.party-map {
+	display: block;
+	position: absolute;
+	left: 10px;
+	top: 26px;
+	width: 70px;
+	text-align: left;
+	font-size: 12px;
+	color: rgba(194, 194, 194, 255);
+	pointer-events: none;
+}
+.party-coord {
+	display: block;
+	position: absolute;
+	left: 85px;
+	top: 26px;
+	width: 60px;
+	text-align: left;
+	font-size: 12px;
+	color: rgba(194, 194, 194, 255);
+	pointer-events: none;
+}
+.party-hp-bar {
+	position: absolute;
+	left: 8px;
+	top: 39px;
+	width: 151px;
+	height: 8px;
+	decorator: image(party-hpbar-back);
+	pointer-events: none;
+}
+.party-hp-fill {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	width: 0%;
+	max-width: 147px;
+	height: 4px;
+	decorator: image(party-hpbar-fill);
+	pointer-events: none;
+}
+.party-hp-text {
+	display: block;
+	position: absolute;
+	left: 88px;
+	top: 51px;
+	width: 70px;
+	text-align: right;
+	font-size: 12px;
+	color: token(text-primary);
+	pointer-events: none;
+}
+.party-kick-btn {
+	position: absolute;
+	left: 149px;
+	top: 23px;
+	width: 13px;
+	height: 13px;
+	decorator: image(party-kick);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.party-kick-btn:hover { filter: brightness(1.25); }

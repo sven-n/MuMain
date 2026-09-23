@@ -1,0 +1,81 @@
+<rml>
+<head>
+	<title>Login</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="login.rcss"/>
+</head>
+<body>
+	<!-- Modern theme's own copy of the login panel -- per-theme file since modern's decorative
+	     layering is modern-specific structure, not just style. Keep ids/data-model/event-callback
+	     names in sync with ../../login.rml.
+
+	     Unlike other modern windows, Login doesn't use .modern-header-rail/.modern-joint (the
+	     hero-banner is its header instead, see below). Depth comes from real box-shadow on
+	     window/header/body/hero-plate (confirmed supported by this renderer), not extra
+	     shadow-plane divs; the hero-plate's diamond studs use a real `transform: rotate(45deg)`
+	     square (SetTransform is confirmed wired into the renderer's vertex stage). #panel uses
+	     plain .modern-frame -- crimson belongs to the hero banner only -- and login.rcss overrides
+	     its border to a single tone since box-shadow now carries the depth. -->
+	<div id="panel" class="modern-frame" data-model="login">
+		<!-- Exterior blackened-metal silhouette: outer iron edge, -3dp. -->
+		<!-- Zero-size markers only -- LoginWin.cpp reads their resolved screen position to place the
+			     native username/password CUITextInputBox overlays instead of a per-theme hardcoded
+			     C++ offset (see login.rcss's own comments for each theme's position). -->
+			<div id="input_account_anchor" class="input-text-anchor"></div>
+			<div id="input_password_anchor" class="input-text-anchor"></div>
+			<div class="modern-shell-edge login-shell-edge"></div>
+
+		<!-- Inner groove, ~4dp inward. -->
+		<div class="login-groove"></div>
+
+		<!-- Two mutually-exclusive header styles exist: metal rail (one center rivet) and
+		     hero-banner (crimson, two side rivets) -- never nested together. Login's header IS
+		     the hero-banner itself (server identity display), with no separate rail/joint
+		     underneath; crimson stays confined to this banner, not the outer #panel shell. -->
+		<div class="modern-title-plate login-hero-banner">
+			<!-- Diamonds inside the plate, 8dp from its own left/right edges -- the hero-banner's
+			     ornament set. -->
+			<div class="login-hero-cap login-hero-cap-left"></div>
+			<div class="login-hero-cap login-hero-cap-right"></div>
+			<span class="label label-server">{{server_name}}</span>
+		</div>
+
+		<!-- Real recessed body: controls are structurally inside the well. -->
+		<div class="modern-content-well login-content">
+			<span class="label label-account">{{account_label}}</span>
+			<span class="label label-password">{{password_label}}</span>
+
+			<div class="login-input modern-control-well login-input-account"></div>
+			<div class="login-input modern-control-well login-input-password"></div>
+
+			<div class="checkbox-row checkbox-remember-me" data-event-click="login_toggle_remember_me">
+				<div class="checkbox-box" data-class-checked="remember_me_checked">
+					<div class="checkbox-tick"></div>
+				</div>
+				<span class="checkbox-label">{{remember_me_label}}</span>
+			</div>
+
+			<div class="checkbox-row checkbox-save-password" data-event-click="login_toggle_save_password">
+				<div class="checkbox-box" data-class-checked="save_password_checked">
+					<div class="checkbox-tick"></div>
+				</div>
+				<span class="checkbox-label">{{save_password_label}}</span>
+			</div>
+		</div>
+
+		<!-- Footer: structural container only -- a single border-top (.login-footer) carries the
+		     whole body-to-footer separation, matching the reference exactly (replaces a prior
+		     two-div shadow+shine pair). -->
+		<div class="modern-footer-band login-footer">
+			<div class="btn btn-ok login-btn login-btn-ok" data-event-click="login_ok_click">
+				<span class="login-btn-label">{{ok_label}}</span>
+			</div>
+			<div class="btn btn-cancel login-btn login-btn-cancel" data-event-click="login_cancel_click">
+				<span class="login-btn-label">{{cancel_label}}</span>
+			</div>
+		</div>
+
+		<span class="trust-warning">{{trust_warning}}</span>
+	</div>
+</body>
+</rml>

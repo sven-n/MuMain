@@ -22,7 +22,7 @@ enum eCursedTempleTeam
 };
 }; // namespace SEASON3A
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 enum INTERFACE_LIST
 {
@@ -75,7 +75,8 @@ enum INTERFACE_LIST
     INTERFACE_CHAOSCASTLE_TIME,
     INTERFACE_BATTLE_SOCCER_SCORE,
     INTERFACE_SLIDEWINDOW,
-    INTERFACE_HERO_POSITION_INFO,
+    INTERFACE_MU_HELPER_BAR, // renamed from INTERFACE_HERO_POSITION_INFO -- see
+                             // CMuHelperBar (UI/HUD/MuHelperBar.h)'s own header comment
     INTERFACE_MESSAGEBOX,
     INTERFACE_DUEL_WINDOW,
     INTERFACE_CRYWOLF,
@@ -114,6 +115,41 @@ enum INTERFACE_LIST
     INTERFACE_MUHELPER_SKILL_LIST,
     INTERFACE_SYSTEMLOGWINDOW,
     INTERFACE_COMMAND_LIST,
+    // CCreditWin is the pilot for migrating CUIMng's CWin-derived windows onto CManager's
+    // registry. Inserted just before INTERFACE_END so every other entry's numeric value is
+    // unaffected.
+    INTERFACE_CREDITS,
+    // CServerMsgWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_SERVER_MESSAGE,
+    // CServerSelWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_SERVER_SELECT,
+    // CMsgWin (distinct from INTERFACE_MESSAGEBOX, the unrelated MAIN_SCENE-tier
+    // CMessageBoxBase key) -- same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_MSG_WINDOW,
+    // CSysMenuWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_SYS_MENU,
+    // CCharSelMainWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_CHAR_SEL_MAIN,
+    // CCharMakeWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_CHAR_MAKE,
+    // CLoginMainWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_LOGIN_MAIN,
+    // CLoginWin (distinct from INTERFACE_LOGIN_MAIN, CLoginMainWin's own key), same
+    // reasoning as INTERFACE_CREDITS above.
+    INTERFACE_LOGIN,
+    // CCharInfoBalloonMng's thin adapter -- never a CWin, previously driven by direct
+    // CUIMng calls rather than through any list at all; same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_CHAR_INFO_BALLOON,
+    // CGenericConfirmDialog (UI/Dialogs/GenericConfirmDialog.h) -- the reusable RmlUi confirm-
+    // dialog primitive, distinct from INTERFACE_MESSAGEBOX (the native CMessageBoxBase/
+    // CMessageBoxMng system it's meant to eventually replace). Inserted just before INTERFACE_END,
+    // same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_GENERIC_CONFIRM_DIALOG,
+    // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h) -- sibling primitive to
+    // CGenericConfirmDialog for native "N-button menu" dialogs (CSystemMenuMsgBox and similar),
+    // a different button model (arbitrary labeled list vs two fixed OK/Cancel slots). Same
+    // reasoning as INTERFACE_CREDITS above.
+    INTERFACE_GENERIC_MENU_DIALOG,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

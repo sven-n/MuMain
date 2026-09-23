@@ -1,0 +1,66 @@
+/* Shared tooltip document -- see RmlTooltip.h's own comment. z-index is the actual z-order fix:
+   every other document in this codebase relies on z-index:auto (DOM/show order), so an explicit
+   positive value here guarantees this always paints above all of them, regardless of which window
+   or dialog most recently took focus. RmlTooltip.cpp sets #tooltip_panel's width explicitly in
+   C++ (measured against this file's own font) -- see its own comment for why shrink-to-fit isn't
+   used here. */
+body {
+	position: absolute;
+	pointer-events: none;
+	z-index: 9999;
+}
+
+/* font-size/padding/border-radius match buff_strip.rcss's own .tooltip exactly (dp, not px) --
+   the CBuffStrip tooltip is this codebase's one other real tooltip left, and it needs to look and
+   scale identically. Position (body's data-style-left/top) stays px -- RmlTooltip.cpp computes
+   that as a real device-pixel value in C++, unlike a plain dp-scaled CSS layout offset. */
+#tooltip_panel {
+	position: absolute;
+	pointer-events: none;
+	background-color: token(surface-tooltip);
+	border-radius: token(radius-sm)dp;
+	padding: 3dp 5dp;
+}
+
+/* display:block required -- RmlUi's default `display` is inline, not block, even for a <div>. */
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: nowrap;
+	min-height: 1.2em;
+	line-height: 1.2em;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+}
+.tt-line.bold { font-weight: bold; }
+
+/* config.textAlign == Center (RmlTooltip.h) -- matches RenderTipTextList()'s own default
+   RT3_SORT_CENTER (item/pet tooltips) and CTooltip::Render()'s own RT3_SORT_CENTER (button
+   tooltip). Targeted at .tt-line directly rather than relying on inherited text-align from
+   #tooltip_panel. */
+#tooltip_panel.tt-centered .tt-line { text-align: center; }
+
+/* Foreground colors -- exact RGB values from RenderTipTextList()'s own TEXT_COLOR_* switch
+   (ZzzInventory.cpp), so this can't visually drift from what every native tooltip already used. */
+.tt-line.tt-blue { color: #80b3ff; }
+.tt-line.tt-gray { color: #666666; }
+.tt-line.tt-red { color: #ff331a; }
+.tt-line.tt-yellow { color: #ffcc1a; }
+.tt-line.tt-green { color: #1aff80; }
+.tt-line.tt-purple { color: #ff1aff; }
+.tt-line.tt-redpurple { color: #cc80cc; }
+.tt-line.tt-violet { color: #b366ff; }
+.tt-line.tt-orange { color: #e66b0a; }
+
+/* Background-highlight variants -- text stays white except GreenBlue's own green, matching
+   RenderTipTextList()'s SetBgColor()/SetTextColor() pairing exactly. */
+.tt-line.tt-hl-darkred { color: #ffffff; background-color: rgba(160, 0, 0, 255); }
+.tt-line.tt-hl-darkblue { color: #ffffff; background-color: rgba(0, 0, 160, 255); }
+.tt-line.tt-hl-darkyellow { color: #ffffff; background-color: rgba(160, 102, 0, 255); }
+.tt-line.tt-hl-greenblue { color: #00ff00; background-color: rgba(60, 60, 200, 255); }
+
+/* Spacer lines render no text (see RmlTooltip.h's Line::Kind) -- only reserve vertical space.
+   Full-spacer matches a normal line's own height (native's non-halved multiplier), half-spacer is
+   roughly half that. */
+.tt-line.tt-half-spacer { min-height: 0.6em; line-height: 0.6em; }
+.tt-line.tt-full-spacer { min-height: 1.2em; line-height: 1.2em; }

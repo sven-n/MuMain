@@ -1,0 +1,50 @@
+/* Modern theme for CStorageInventoryExt's chrome -- header/exit-button are vector forged-metal
+   chrome (matching Login/SysMenu/MyInventory's forged-dialog language). Inventory grid stays fully
+   native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement there. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:6/height:29 (not MyInventory's 7/36) -- this window's native grid starts at `m_Pos.y + 36`
+   (StorageInventoryExt.cpp), a tighter budget than MyInventory's 44px. Ends at 35px, 1px clear.
+   top:6 (not lower) keeps .modern-joint-px's rivet at -2px, still inside storage_ext_bg.rcss's
+   .inv-shell-edge at -3px -- same contained relationship as MyInventory/SysMenu.
+
+   Named `.storext-*` (not `.ext-*`) -- inventory_extension.rcss independently picked the same
+   "ext-" shorthand for its own, unrelated header-rail/exit-button classes; harmless today since
+   the two documents never coexist, but a latent copy-paste trap if that ever changes. */
+.storext-header-rail {
+	top: 6px;
+	height: 29px;
+}
+
+/* Single exit button, centered: (190-37)/2. */
+.storext-btn-exit {
+	left: 77px;
+	color: #d59b79;
+	border-color: #5c382b;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	left: 40px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_exit:hover ~ .tooltip-exit { display: block; }

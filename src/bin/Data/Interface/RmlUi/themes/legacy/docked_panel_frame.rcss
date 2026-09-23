@@ -1,0 +1,96 @@
+/* Shared frame for the PanelColumnX()-docked single-document window family: character_info,
+   my_quest_info, pet_info, party_info. Their #panel/frame sprites/exit button/tooltip shape are
+   byte-identical (confirmed by diffing all four before this file existed) -- link this BEFORE the
+   window's own .rcss and keep only genuinely window-specific content there.
+
+   my_inventory is NOT part of this family here -- its frame paint lives in a separate *_bg.rml
+   RmlUi context that deliberately does not link base.rcss (see my_inventory_bg.rcss's own header
+   comment), so this file isn't reachable from there. It keeps its own duplicate of these same
+   values for that real technical reason, not oversight -- if that constraint is ever lifted, copy
+   these same values in, don't approximate them. */
+
+@spritesheet docked-bg-fill-sheet  { src: "../../../newui_msgbox_back.jpg";  docked-bg-fill:   0px 0px 190px 429px; }
+@spritesheet docked-bg-top-a-sheet { src: "../../../newui_item_back04.tga"; docked-bg-top-a: 0px 0px 190px 64px; }
+@spritesheet docked-bg-top-b-sheet { src: "../../../newui_item_back01.tga"; docked-bg-top-b: 0px 0px 190px 64px; }
+@spritesheet docked-bg-left-sheet  { src: "../../../newui_item_back02-L.tga"; docked-bg-left:  0px 0px 21px 320px; }
+@spritesheet docked-bg-right-sheet { src: "../../../newui_item_back02-R.tga"; docked-bg-right: 0px 0px 21px 320px; }
+@spritesheet docked-bg-bottom-sheet { src: "../../../newui_item_back03.tga"; docked-bg-bottom: 0px 0px 190px 45px; }
+
+@spritesheet docked-corner-tl-sheet { src: "../../../newui_item_table01(L).tga"; docked-corner-tl: 0px 0px 14px 14px; }
+@spritesheet docked-corner-tr-sheet { src: "../../../newui_item_table01(R).tga"; docked-corner-tr: 0px 0px 14px 14px; }
+@spritesheet docked-corner-bl-sheet { src: "../../../newui_item_table02(L).tga"; docked-corner-bl: 0px 0px 14px 14px; }
+@spritesheet docked-corner-br-sheet { src: "../../../newui_item_table02(R).tga"; docked-corner-br: 0px 0px 14px 14px; }
+
+@spritesheet docked-exit-btn-sheet { src: "../../../newui_exit_00.tga"; docked-exit-btn: 0px 0px 36px 29px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	decorator: image(docked-bg-fill);
+	font-family: "token(font-body)";
+}
+
+.frame-piece { position: absolute; pointer-events: none; }
+/* .frame-top's own decorator is the one real per-window variation (see header comment) -- the
+   window's own .rcss adds one line, ".frame-top { decorator: image(docked-bg-top-a); }" (or
+   docked-bg-top-b), which merges into this rule via the normal multi-file cascade. No RML change
+   needed either way. */
+.frame-top    { left: 0;   top: 0;    width: 190px; height: 64px; }
+.frame-left   { left: 0;   top: 64px; width: 21px;  height: 320px; decorator: image(docked-bg-left); }
+.frame-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(docked-bg-right); }
+.frame-bottom { left: 0;   top: 384px; width: 190px; height: 45px; decorator: image(docked-bg-bottom); }
+
+/* Group-box corner-bracket-and-fill technique -- reproduces RenderGroupBox()'s 9-slice tiling as 4
+   corner sprites + 2 flat fills, not a literal 1px-tile port (no verified repeat pattern exists in
+   this RmlUi build; character_info.rcss's original .summary-fill/.summary-corner established this
+   simplification first). Shape/color only here -- each window's own per-instance class (e.g.
+   ".gbox-dh-corner-tl") supplies left/top and picks which corner sprite via
+   image(docked-corner-tl/tr/bl/br). */
+.gbox-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
+.gbox-title-fill { position: absolute; background-color: token(surface-panel-title); pointer-events: none; }
+.gbox-content-fill { position: absolute; background-color: token(surface-panel-content); pointer-events: none; }
+.gbox-title-text {
+	display: block;
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	color: token(text-heading);
+	pointer-events: none;
+}
+
+/* Exit is byte-identical everywhere (same sprite, same 13,392,36,29 box) -- targeted by id since
+   every window's exit div already has id="btn_exit", so no per-window class or RML change is
+   needed. Wins over any leftover per-window class rule regardless of link order (id beats class
+   specificity), so old per-window "-exit" rules are safe to delete without a race. */
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(docked-exit-btn);
+}
+#btn_exit:hover { filter: brightness(1.25); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 365px;
+	width: 110px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: token(radius-sm)px;
+	font-size: 11px;
+	text-align: center;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

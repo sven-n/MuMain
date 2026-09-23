@@ -3,78 +3,110 @@
 //*****************************************************************************
 #pragma once
 
-#include "UI/Widgets/Win.h"
-#include "UI/Widgets/Button.h"
-#include "UI/Widgets/GaugeBar.h"
-#include "UI/Widgets/WinEx.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 
-#define SSW_SERVER_G_MAX 21
-#define SSW_SERVER_MAX 16
-#define SSW_DESC_LINE_MAX 2
-#define SSW_DESC_ROW_MAX 83
-#define SSW_LEFT_SERVER_G_MAX 10
-#define SSW_RIGHT_SERVER_G_MAX 10
+#include <vector>
+
+namespace Rml { class ElementDocument; }
 
 class CServerGroup;
 class CServerInfo;
 
-class CServerSelWin : public CWin
+// Pure RmlUi 2D UI: RmlUi owns all of this window's rendering and click handling. Two
+// always-visible columns laid out by server_select.rcss's flexbox rules -- server groups on the
+// left, and the servers within whichever group is selected on the right (empty/hidden until a
+// group is clicked). Self-centers via base.rcss's .center-both; UpdateMouseEvent() claims only its
+// own rect, computed from this window's authored footprint centered the same way.
+class CServerSelWin : public mu::ui::window::CObject
 {
-private:
-    enum SERVER_SELECT_WIN
-    {
-        SERVER_GROUP_BTN_WIDTH = 108,
-        SERVER_GROUP_BTN_HEIGHT = 26,
-        SERVER_BTN_WIDTH = 193,
-        SERVER_BTN_HEIGHT = 26,
-    };
-
-protected:
-    CButton m_aServerGroupBtn[SSW_SERVER_G_MAX];
-    CButton m_aServerBtn[SSW_SERVER_MAX];
-    CGaugeBar m_aServerGauge[SSW_SERVER_MAX];
-    CSprite m_aBtnDeco[2];
-    CSprite m_aArrowDeco[2];
-    CWinEx m_winDescription;
-
-    int m_icntServerGroup;
-    int m_icntLeftServerGroup;
-    int m_icntRightServerGroup;
-    int m_icntServer;
-    bool m_bTestServerBtn;
-
-    int m_iSelectServerBtnIndex;
-    CServerGroup* m_pSelectServerGroup;
-
-    wchar_t m_szDescription[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];
-
 public:
     CServerSelWin();
-    virtual ~CServerSelWin();
+    ~CServerSelWin() override;
+
     void Create();
-    void SetPosition(int nXCoord, int nYCoord);
+    void Release();
     void UpdateDisplay();
-    void Show(bool bShow);
-    bool CursorInWin(int nArea);
+    void Show(bool bShow) override;
+
+    void ReloadRmlTheme();
+
+    // Bound to the RmlUi document's data-event-click callbacks; acts immediately.
+    void RmlClickSelectGroup(int nBtnPos);
+    void RmlClickSelectServer(int nServerIndex);
 
     // Selects a server group and one of its servers without a click, doing
-    // exactly what the two button branches do. `groupName` empty or null picks
-    // the first group in the list. Returns false when the list holds no such
-    // group or server, or when the server is full.
+    // exactly what the two RmlUi click callbacks do. `groupName` empty or null
+    // picks the first group in the list. Returns false when the list holds no
+    // such group or server, or when the server is full.
     bool SelectServer(const wchar_t* groupName, int serverIndex);
 
-protected:
-    // Asks the connect server for the game server behind this entry and
-    // remembers the choice. Shared by the click path and SelectServer().
+    // mu::ui::window::IObject
+    bool Render() override;
+    bool Update() override;
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override
+    {
+        return true;
+    }
+    // Below CCreditWin/CSysMenuWin: the two can be visible simultaneously, and CSysMenuWin wins click priority.
+    float GetLayerDepth() override
+    {
+        return 20.0f;
+    }
+
+private:
+    void SelectGroup(int nBtnPos);
+    void BuildRmlUi();
+    void SyncRmlModel();
+
+    // Shared by RmlClickSelectServer() and SelectServer(). Returns false (and
+    // leaves the window open) without connecting when pServerInfo is null or
+    // the server is full/busy -- the caller decides what busy means to it.
     bool ConnectToServer(CServerInfo* pServerInfo);
 
-    void PreRelease();
-    void SetServerBtnPosition();
-    void SetArrowSpritePosition();
-    void ShowServerGBtns();
-    void ShowDecoSprite();
-    void ShowArrowSprite();
-    void ShowServerBtns();
-    void UpdateWhileActive(double dDeltaTick);
-    void RenderControls();
+    struct GroupEntry
+    {
+        Rml::String label;
+        int btnPos = 0; // CServerGroup::m_iBtnPos -- passed back to RmlClickSelectGroup; 0 is the rare center/"test server" group
+        bool checked = false;
+    };
+    struct ServerEntry
+    {
+        Rml::String label;
+        int index = 0; // position within the selected group's server list (CServerGroup::GetServerInfo(i))
+        float loadFraction = 0.f;
+        // One bool per color class since RmlUi's data-class-X binds a class per boolean, not a
+        // name. Neither flag set is the default (plain .server-row color).
+        bool colorGray = false;
+        bool colorOrange = false;
+        // No "checked"/selected state here -- clicking a server row connects immediately.
+    };
+    struct ServerSelRmlModel
+    {
+        // One merged, order-preserving list.
+        std::vector<GroupEntry> groups;
+        std::vector<ServerEntry> servers;
+
+        // True once a group has been clicked and its server list requested/populated.
+        bool serverListVisible = false;
+
+        bool pvpNotice = false;
+        Rml::String pvpNoticeLine0, pvpNoticeLine1, pvpNoticeLine2;
+
+        Rml::String descriptionText;
+    };
+    RmlModelBinder<ServerSelRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    int m_iSelectServerBtnIndex = -1;
+    CServerGroup* m_pSelectServerGroup = nullptr;
+
+    // Fixed, author-chosen footprint used only for UpdateMouseEvent()'s own-rect check
+    // (self-centered the same way SceneUICoordinator.cpp centers every other window); covers
+    // #panel's real max footprint (both columns plus the pvp notice/description text) with slack.
+    static constexpr int kPanelWidth = 420;
+    static constexpr int kPanelHeight = 460;
 };
+
+extern CServerSelWin g_ServerSelWin;

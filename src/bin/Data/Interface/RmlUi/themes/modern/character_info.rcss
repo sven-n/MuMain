@@ -1,0 +1,137 @@
+/* Modern theme for CCharacterInfoWindow -- same forged-dialog chrome recipe as CMyInventory
+   (shell-edge/groove/gradient panel fill, rail-with-rivet header, bordered square icon buttons),
+   not the generic .modern-frame/.modern-frame-crimson treatment: this window docks in the same
+   PanelColumnX() row as CMyInventory/CMyQuestInfoWindow/CPetInfoWindow/CPartyInfoWindow and should
+   read as the same family when open side by side. #panel/shell-edge/groove/header-rail chrome now
+   all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
+   window-specific content stays here. */
+
+#name, #classname, #servername {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+#name { color: token(text-warm); }
+#classname, #servername { top: 27px; color: token(text-secondary); font-weight: normal; font-size: 11px; }
+
+.summary-fill {
+	position: absolute;
+	left: 12px;
+	top: 48px;
+	width: 165px;
+	height: 71px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+
+.level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
+	display: block;
+	position: absolute;
+	left: 18px;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+.level-text { top: 58px; color: token(accent-gold-hover); font-weight: bold; }
+.levelup-point-text { top: 58px; left: 110px; color: token(accent-gold-hover); font-weight: bold; }
+.exp-text { top: 75px; color: token(text-primary); }
+.point-probability-text { top: 88px; color: token(accent-steel-hover); }
+.point-text { top: 101px; color: token(accent-steel-hover); }
+
+.attr-textbox {
+	position: absolute;
+	left: 11px;
+	width: 170px;
+	height: 21px;
+	background-color: token(surface-control);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+.attr-textbox-str { top: 120px; }
+.attr-textbox-agi { top: 175px; }
+.attr-textbox-vit { top: 240px; }
+.attr-textbox-ene { top: 295px; }
+.attr-textbox-cmd { top: 350px; }
+
+.attr-label, .attr-value {
+	display: block;
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+.attr-label { left: 12px; width: 74px; color: token(text-secondary); }
+.attr-value { left: 86px; width: 86px; }
+.attr-label-str, .attr-value-str { top: 126px; }
+.attr-label-agi, .attr-value-agi { top: 181px; }
+.attr-label-vit, .attr-value-vit { top: 246px; }
+.attr-label-ene, .attr-value-ene { top: 301px; }
+.attr-label-cmd, .attr-value-cmd { top: 356px; }
+
+.attr-lines { position: absolute; width: 160px; pointer-events: none; }
+.attr-lines span { display: block; line-height: 13px; font-size: 12px; font-family: "token(font-body)"; white-space: nowrap; }
+.attr-lines-str { left: 20px; top: 145px; }
+.attr-lines-agi { left: 20px; top: 199px; }
+.attr-lines-vit { left: 20px; top: 264px; }
+.attr-lines-ene { left: 18px; top: 319px; }
+
+/* Flat "+" button -- a generic affordance, kept simple rather than a full forged-metal square
+   (too small at 16x15 to carry that much chrome); recolored to this window's own metal/border
+   tokens instead of the generic accent-steel so it still reads as part of the same palette. */
+.stat-btn {
+	display: block;
+	position: absolute;
+	left: 160px;
+	width: 16px;
+	height: 15px;
+	background-color: token(metal-dark);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)dp;
+	text-align: center;
+	line-height: 13px;
+	font-weight: bold;
+	font-size: 11px;
+	color: token(text-warm);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stat-btn:hover { color: token(accent-gold-hover); border-color: token(border-hover); }
+.stat-btn-str { top: 122px; }
+.stat-btn-agi { top: 177px; }
+.stat-btn-vit { top: 242px; }
+.stat-btn-ene { top: 297px; }
+.stat-btn-cmd { top: 352px; }
+
+/* Action row: base.rcss's .modern-icon-btn-px at its own default geometry (top:392/37x26) --
+   same shared class CMyInventory's Exit/Repair/My Shop/Expand use, just this window's own left
+   offsets and glyphs. */
+.chainfo-btn-exit        { left: 13px;  color: #d59b79; border-color: #5c382b; }
+.chainfo-btn-quest       { left: 54px; }
+.chainfo-btn-pet         { left: 95px; }
+.chainfo-btn-masterlevel { left: 136px; }
+
+/* .tooltip's shared shape lives in docked_panel_frame.rcss -- this window's own action row sits a
+   touch lower than the others', hence its own top override. */
+.tooltip { top: 376px; }
+.tooltip-exit        { left: -24px; }
+.tooltip-quest       { left: 14px; }
+.tooltip-pet         { left: 55px; }
+.tooltip-masterlevel { left: 92px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_quest:hover ~ .tooltip-quest,
+#btn_pet:hover ~ .tooltip-pet,
+#btn_masterlevel:hover ~ .tooltip-masterlevel {
+	display: block;
+}

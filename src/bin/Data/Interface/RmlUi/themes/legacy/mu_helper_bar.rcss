@@ -1,0 +1,137 @@
+/* Legacy theme for the "Official MU Helper" mini control bar + hero position readout
+   (CMuHelperBar) -- fixed 207x25dp layout, anchored top-left via base.rcss's .anchor-top-left. */
+
+@spritesheet muhelper-seg-a-sheet
+{
+	src: "../../../Minimap_positionA.tga";
+	muhelper-seg-a-image: 0px 0px 22px 25px;
+}
+@spritesheet muhelper-seg-b-sheet
+{
+	src: "../../../Minimap_positionB.tga";
+	muhelper-seg-b-image: 3px 0px 19px 25px;
+}
+@spritesheet muhelper-seg-c-sheet
+{
+	src: "../../../MacroUI/Minimap_positionC.tga";
+	muhelper-seg-c-image: 0px 0px 73px 20px;
+}
+@spritesheet muhelper-config-sheet
+{
+	src: "../../../MacroUI/MacroUI_Setup.tga";
+	muhelper-config-image: 0px 0px 18px 13px;
+}
+@spritesheet muhelper-start-sheet
+{
+	src: "../../../MacroUI/MacroUI_Start.tga";
+	muhelper-start-image: 0px 0px 18px 13px;
+}
+@spritesheet muhelper-stop-sheet
+{
+	src: "../../../MacroUI/MacroUI_Stop.tga";
+	muhelper-stop-image: 0px 0px 18px 13px;
+}
+
+#panel {
+	position: absolute;
+	width: 207dp;
+	height: 25dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+}
+
+#seg_a {
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 22dp;
+	height: 25dp;
+	decorator: image(muhelper-seg-a-image);
+	pointer-events: none;
+}
+#seg_b {
+	position: absolute;
+	left: 22dp;
+	top: 0dp;
+	width: 112dp;
+	height: 25dp;
+	decorator: image(muhelper-seg-b-image);
+	pointer-events: none;
+}
+#seg_c {
+	position: absolute;
+	left: 134dp;
+	top: 0dp;
+	width: 73dp;
+	height: 20dp;
+	decorator: image(muhelper-seg-c-image);
+	pointer-events: none;
+}
+
+/* Match the original normal-font readout, not the panel's oversized 11dp font.
+   dp rasterizes at the displayed size directly (this panel has no scale transform). */
+#text {
+	position: absolute;
+	font-family: "DejaVu Sans";
+	font-size: 8dp;
+	line-height: 9dp;
+	left: 10dp;
+	top: 5dp;
+	width: 132dp;
+	height: 9dp;
+	text-align: center;
+	color: token(text-primary);
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.mu-btn {
+	position: absolute;
+	top: 0dp;
+	width: 18dp;
+	height: 13dp;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#btn_config {
+	left: 153dp;
+	decorator: image(muhelper-config-image);
+}
+#btn_start {
+	left: 171dp;
+	decorator: image(muhelper-start-image);
+}
+#btn_stop {
+	left: 171dp;
+	decorator: image(muhelper-stop-image);
+}
+
+.dot {
+	display: none;
+}
+
+/* Content-sized sibling hints sit below the bar, clear of its button artwork.
+   Stable left anchors avoid percentage transforms on initially hidden boxes. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 24dp;
+	width: auto;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 1px 2px;
+	border-radius: 0px;
+	font-family: "DejaVu Sans";
+	font-size: 8.5dp;
+	pointer-events: none;
+}
+.tooltip-config { left: 90dp; }
+.tooltip-start,
+.tooltip-stop   { left: 113dp; }
+#btn_config:hover ~ .tooltip-config,
+#btn_start:hover ~ .tooltip-start,
+#btn_stop:hover ~ .tooltip-stop {
+	display: block;
+	z-index: 1;
+}

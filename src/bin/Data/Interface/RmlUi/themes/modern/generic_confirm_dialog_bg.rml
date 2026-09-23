@@ -1,0 +1,21 @@
+<rml>
+<head>
+	<title>Generic Confirm Dialog Background</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="generic_confirm_dialog_bg.rcss"/>
+	<link type="text/template" href="window_shell_bg.rml"/>
+</head>
+<!-- Background-context document (see npc_shop_bg.rml for the mechanism) -- paints the panel's own
+     frame/fill BEFORE the 3D pass draws item3D each frame, so the item shows through the gap in
+     generic_confirm_dialog.rml's own now-paint-less #panel instead of being painted over by it. No
+     data-model -- #panel centers via plain CSS, unlike npc_shop_bg's own root_x/root_y/root_scale
+     data-style bindings: this dialog's position is never C++-computed.
+
+     Shell structure (edge/groove/content slot) now lives in window_shell_bg.rml -- see its own
+     comment for why #panel doesn't get .modern-frame here (this dialog's own bespoke hatched-iron
+     paint stays in generic_confirm_dialog_bg.rcss, targeting #panel/#content directly), and for why
+     base.rcss is linked directly HERE rather than from within the template (token(...) substitution
+     only applies to a document's own direct rcss links, not to anything a linked template brings
+     in). -->
+<body template="window_shell_bg"></body>
+</rml>

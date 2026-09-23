@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Render/Text/SdlTtfTextCache.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "UI/Scaling/UITransform.h"
 
 #include <string>

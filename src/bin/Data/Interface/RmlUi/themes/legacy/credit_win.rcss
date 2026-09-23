@@ -1,0 +1,151 @@
+/* Legacy theme for the login-scene credits screen (CCreditWin): background, crossfading
+   illustration pair, logo/deco art, close button, and scrolling credit text -- #panel owns 100%
+   of this window's visuals now. Positions are the original 800x600-reference pixel values carried
+   over directly as dp. Credit-text colors match the original g_pRenderText colors
+   (CLRDW_BR_GRAY/CLRDW_BR_YELLOW); font is "NanumGothic", not the shared Liberation-Sans
+   convention, since these credit names aren't guaranteed ASCII. */
+
+@spritesheet creditwin-logo-sheet
+{
+	src: "../../../cr_mu_lo.tga";
+	creditwin-logo-image: 0px 0px 290px 41px;
+}
+@spritesheet creditwin-deco-sheet
+{
+	src: "../../../deco.tga";
+	creditwin-deco-image: 0px 0px 189px 103px;
+}
+@spritesheet creditwin-close-sheet
+{
+	src: "../../../message_close_b_all.tga";
+	creditwin-close-idle:   0px  0px 54px 30px;
+	creditwin-close-hover:  0px 30px 54px 30px;
+	creditwin-close-active: 0px 60px 54px 30px;
+}
+
+/* One @spritesheet per illustration file (16 total, im1_1.jpg..im8_2.jpg, each its own file) --
+   named illust-im{N}-{M} to match CCreditWin::SyncRmlModel()'s generated decorator string; keep
+   both in sync if that changes. */
+@spritesheet illust-im1-1-sheet { src: "../../../im1_1.jpg"; illust-im1-1: 0px 0px 400px 400px; }
+@spritesheet illust-im1-2-sheet { src: "../../../im1_2.jpg"; illust-im1-2: 0px 0px 400px 400px; }
+@spritesheet illust-im2-1-sheet { src: "../../../im2_1.jpg"; illust-im2-1: 0px 0px 400px 400px; }
+@spritesheet illust-im2-2-sheet { src: "../../../im2_2.jpg"; illust-im2-2: 0px 0px 400px 400px; }
+@spritesheet illust-im3-1-sheet { src: "../../../im3_1.jpg"; illust-im3-1: 0px 0px 400px 400px; }
+@spritesheet illust-im3-2-sheet { src: "../../../im3_2.jpg"; illust-im3-2: 0px 0px 400px 400px; }
+@spritesheet illust-im4-1-sheet { src: "../../../im4_1.jpg"; illust-im4-1: 0px 0px 400px 400px; }
+@spritesheet illust-im4-2-sheet { src: "../../../im4_2.jpg"; illust-im4-2: 0px 0px 400px 400px; }
+@spritesheet illust-im5-1-sheet { src: "../../../im5_1.jpg"; illust-im5-1: 0px 0px 400px 400px; }
+@spritesheet illust-im5-2-sheet { src: "../../../im5_2.jpg"; illust-im5-2: 0px 0px 400px 400px; }
+@spritesheet illust-im6-1-sheet { src: "../../../im6_1.jpg"; illust-im6-1: 0px 0px 400px 400px; }
+@spritesheet illust-im6-2-sheet { src: "../../../im6_2.jpg"; illust-im6-2: 0px 0px 400px 400px; }
+@spritesheet illust-im7-1-sheet { src: "../../../im7_1.jpg"; illust-im7-1: 0px 0px 400px 400px; }
+@spritesheet illust-im7-2-sheet { src: "../../../im7_2.jpg"; illust-im7-2: 0px 0px 400px 400px; }
+@spritesheet illust-im8-1-sheet { src: "../../../im8_1.jpg"; illust-im8-1: 0px 0px 400px 400px; }
+@spritesheet illust-im8-2-sheet { src: "../../../im8_2.jpg"; illust-im8-2: 0px 0px 400px 400px; }
+
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000000;
+	pointer-events: none;
+}
+
+/* decorator swapped by SyncRmlModel() as m_byIllust advances; opacity animates during
+   AnimationIllust() fades. Percentage sizing keeps the two 50%-wide boxes summing to exactly
+   100% with no gap. */
+.illust {
+	position: absolute;
+	top: 21%;
+	width: 50%;
+	height: 66.6667%;
+	pointer-events: none;
+}
+.illust-left { left: 0%; }
+.illust-right { left: 50%; }
+
+.logo {
+	position: absolute;
+	left: 241dp;
+	top: 549dp;
+	width: 290dp;
+	height: 41dp;
+	pointer-events: none;
+	decorator: image(creditwin-logo-image);
+}
+
+/* Anchored to the bottom-right corner, same relationship CCreditWin::SetPosition() derives from
+   the screen-height fraction 527/600. */
+.deco {
+	position: absolute;
+	right: 0dp;
+	bottom: 73dp;
+	width: 189dp;
+	height: 103dp;
+	pointer-events: none;
+	decorator: image(creditwin-deco-image);
+}
+
+/* Positioned relative to .deco's own corner (deco_pos + 122,63 originally) as its own independent
+   corner anchor, since RmlUi can't anchor to a sibling's box directly. */
+.btn-close {
+	position: absolute;
+	right: 13dp;
+	bottom: 83dp;
+	width: 54dp;
+	height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(creditwin-close-idle);
+}
+.btn-close:hover {
+	decorator: image(creditwin-close-hover);
+}
+.btn-close:active {
+	decorator: image(creditwin-close-active);
+}
+
+/* Real art already reads as a close button -- no visible text needed over it. */
+.btn-close-label {
+	display: none;
+}
+
+.credit-label {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	font-family: "NanumGothic";
+	font-size: 14dp;
+	font-weight: bold;
+	pointer-events: none;
+}
+.credit-department {
+	top: 20dp;
+	color: token(text-dim);
+}
+.credit-team {
+	top: 46dp;
+	color: token(text-dim);
+}
+
+.credit-names {
+	position: absolute;
+	left: 0;
+	top: 72dp;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+}
+.credit-name {
+	font-family: "NanumGothic";
+	font-size: 14dp;
+	font-weight: bold;
+	color: #ffeec1;
+	white-space: nowrap;
+	margin-left: 20dp;
+	margin-right: 20dp;
+}

@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
@@ -36,13 +36,18 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/MixMgr.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include "UI/Inventory/MyShopInventory.h" // ShowPersonalShopItemValueDialog
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
 #include "World/MapInfra/PortalMgr.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>
@@ -410,11 +415,62 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
     DisableAlphaBlend();
 }
 
+// Declared in ZzzInventory.h -- shared by every other hover-tooltip call site still building its
+// content the legacy TextList way (MasterLevel.cpp, CursedTempleSystem.cpp), not just this file's
+// own RenderItemInfo()/RenderRepairInfo(). RenderHelpLine()/RenderHelpCategory() (this file, above)
+// also draw through RenderTipTextList() but build a persistent multi-cell table, not a single hover
+// tooltip -- they don't go through this conversion and keep calling RenderTipTextList() directly.
+std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltipLinesFromTextList(int textNum)
+{
+    std::vector<UI::RmlBridge::Tooltip::Line> lines;
+    lines.reserve(static_cast<size_t>(textNum));
+
+    for (int i = 0; i < textNum; ++i)
+    {
+        if (TextList[i][0] == L'\0')
+            break;
+
+        UI::RmlBridge::Tooltip::Line line;
+        if (TextList[i][0] == L'\n')
+        {
+            line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
+        }
+        else if (TextList[i][0] == L' ' && TextList[i][1] == L'\0')
+        {
+            line.kind = UI::RmlBridge::Tooltip::Line::Kind::FullSpacer;
+        }
+        else
+        {
+            line.text = StringUtils::WideToNarrow(TextList[i]);
+            line.bold = (TextBold[i] != 0);
+            switch (TextListColor[i])
+            {
+            case TEXT_COLOR_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
+            case TEXT_COLOR_GRAY: line.color = UI::RmlBridge::Tooltip::LineColor::Gray; break;
+            case TEXT_COLOR_RED: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
+            case TEXT_COLOR_YELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::Yellow; break;
+            case TEXT_COLOR_GREEN: line.color = UI::RmlBridge::Tooltip::LineColor::Green; break;
+            case TEXT_COLOR_PURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::Purple; break;
+            case TEXT_COLOR_REDPURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::RedPurple; break;
+            case TEXT_COLOR_VIOLET: line.color = UI::RmlBridge::Tooltip::LineColor::Violet; break;
+            case TEXT_COLOR_ORANGE: line.color = UI::RmlBridge::Tooltip::LineColor::Orange; break;
+            case TEXT_COLOR_DARKRED: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
+            case TEXT_COLOR_DARKBLUE: line.color = UI::RmlBridge::Tooltip::LineColor::DarkBlueHighlight; break;
+            case TEXT_COLOR_DARKYELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::DarkYellowHighlight; break;
+            case TEXT_COLOR_GREEN_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::GreenBlueHighlight; break;
+            case TEXT_COLOR_WHITE: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
+            }
+        }
+        lines.push_back(std::move(line));
+    }
+    return lines;
+}
+
 void SendRequestUse(int Index, int Target, bool addPoints)
 {
     if (!IsCanUseItem())
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseYourItemsWhileUsingTheVaultOrWhileTrading, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseYourItemsWhileUsingTheVaultOrWhileTrading, mu::ui::window::TYPE_ERROR_MESSAGE);
         return;
     }
     if (EnableUse > 0)
@@ -470,7 +526,7 @@ bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem,
 
 bool IsCanUseItem()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE) || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
     {
         return false;
     }
@@ -482,7 +538,7 @@ bool IsCanUseItem()
 
 bool IsCanTrade()
 {
-    if (g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE))
+    if (g_pUIManager->IsOpen(MUTEX_PERSONALSHOPSALE) || g_pUIManager->IsOpen(MUTEX_PERSONALSHOPPURCHASE))
     {
         return false;
     }
@@ -1219,7 +1275,7 @@ int64_t ConvertRepairGold(int64_t Gold, int Durability, int MaxDurability, short
 {
     int64_t repairGold = 0;
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop()) {
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop()) {
         repairGold = CalcRepairCost(Gold, Durability, MaxDurability, Type, false);
     }
     else if (g_pMyInventory->IsVisible() && !g_pNPCShop->IsVisible()) {
@@ -2050,6 +2106,13 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 
 void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
 {
+    // Unconditional: the early returns below (and the pet-item delegation further down, which
+    // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
+    // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
+    // for that item. The shared tooltip document is persistent, so this replicates that; the real
+    // Show() call near the end of this function makes it visible again once actually reached.
+    UI::RmlBridge::Tooltip::Hide();
+
     if (ip->Type == -1)
         return;
 
@@ -2185,7 +2248,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !IsSellingBan(ip))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) && !IsSellingBan(ip))
     {
         wchar_t Text[100];
         {
@@ -2210,7 +2273,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
     }
-    if ((Inventype == SEASON3B::TOOLTIP_TYPE_MY_SHOP || Inventype == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP)
+    if ((Inventype == mu::ui::window::TOOLTIP_TYPE_MY_SHOP || Inventype == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP)
         && !IsPersonalShopBan(ip))
     {
         {
@@ -5548,7 +5611,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         bool bThisisEquippedItem = false;
 
-        SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         ITEM* pFindItem = pNewInventoryCtrl->FindItemByKey(ip->Key);
         (pFindItem == NULL) ? bThisisEquippedItem = true : bThisisEquippedItem = false;
 
@@ -5590,15 +5653,33 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (isrendertooltip)
     {
-        if (bItemTextListBoxUse)
-            RenderTipTextList(sx, sy, TextNum, 0, RT3_SORT_CENTER, STRP_BOTTOMCENTER);
-        else
-            RenderTipTextList(sx, sy, TextNum, 0);
+        // sx/sy are reference-pixel, in the same space as this window's own m_Pos-based root_x/root_y
+        // conversion (CharacterInfoWindow.cpp etc.) -- convert through the ambient transform here,
+        // at the call site, rather than inside Tooltip::Show() (see RmlTooltip.h's own comment for
+        // why: a shared primitive can't safely guess which transform applies to a given caller).
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        UI::RmlBridge::Tooltip::Config config;
+        config.lines = BuildTooltipLinesFromTextList(TextNum);
+        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
+        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
+        config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
+        config.anchor = bItemTextListBoxUse ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
+                                             : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft;
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
+        UI::RmlBridge::Tooltip::Show(config);
     }
 }
 
 void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 {
+    // Unconditional: the many early returns below used to mean "this frame draws nothing" under
+    // the old per-frame native draw, which was already equivalent to "hidden" for that item type.
+    // The shared tooltip document is persistent, so an explicit Hide() here replicates that -- Show()
+    // at the very end of this function (reached only when none of the guards below fire) makes it
+    // visible again for an allowed item, same net effect as before, one frame earlier than a stale
+    // previous item's tooltip would otherwise have lingered.
+    UI::RmlBridge::Tooltip::Hide();
+
     if (IsRepairBan(ip) == true)
     {
         return;
@@ -5888,7 +5969,14 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     else
         sy += p->Height * INVENTORY_SCALE;
 
-    RenderTipTextList(sx, sy, TextNum, 0);
+    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+    UI::RmlBridge::Tooltip::Config config;
+    config.lines = BuildTooltipLinesFromTextList(TextNum);
+    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
+    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
+    config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
+    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
+    UI::RmlBridge::Tooltip::Show(config);
 }
 
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
@@ -6703,72 +6791,72 @@ int GetScreenWidth()
 
     // TODO: Refactor this. Wouldn't it be easier to just count how many windows are open? ;)
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY)
+        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT)
+        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYSHOP_INVENTORY))
     {
         iWidth = REFERENCE_WIDTH - (190 * 3);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-        && (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE_EXT)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY)
+        && (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE_EXT)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYSHOP_INVENTORY)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
             ))
     {
         iWidth = REFERENCE_WIDTH - (190 * 2);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-        && (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
+        && (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST)
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
         )
     {
         iWidth = REFERENCE_WIDTH - (190 * 2);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PET)
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
+        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PET)
         )
     {
         iWidth = REFERENCE_WIDTH - (190 * 2);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_REFINERY))
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_REFINERY))
     {
         iWidth = REFERENCE_WIDTH - (190 * 2);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUILDINFO)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUARDSMAN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SENATUS)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATEKEEPER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SERVERDIVISION)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATESWITCH)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GENSRANKING)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER)
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUARDSMAN)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SENATUS)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATEKEEPER)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SERVERDIVISION)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATESWITCH)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CATAPULT)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DEVILSQUARE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DUELWATCH)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DOPPELGANGER_NPC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GENSRANKING)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MUHELPER)
         )
     {
         iWidth = REFERENCE_WIDTH - 190;
@@ -9706,7 +9794,7 @@ bool UI::Items::ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, 
 
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp)
 {
-    const bool Success = UI::Items::ShouldAnimatePreview(SEASON3B::CheckMouseIn(sx, sy, Width, Height),
+    const bool Success = UI::Items::ShouldAnimatePreview(mu::ui::window::CheckMouseIn(sx, sy, Width, Height),
                                                          g_pPickedItem != nullptr, PickUp);
 
     if (Type >= ITEM_SWORD && Type < ITEM_SWORD + MAX_ITEM_INDEX)
@@ -10429,7 +10517,7 @@ void InitPartyList()
 
 void MoveServerDivisionInventory()
 {
-    if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
+    if (!g_pUIManager->IsOpen(MUTEX_SERVERDIVISION)) return;
     int x = REFERENCE_WIDTH - 190;
     int y = 0;
     int Width, Height;
@@ -10537,7 +10625,7 @@ bool g_bPadPushed = false;
 
 void MovePersonalShop()
 {
-    if ((g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)
+    if ((g_pUIManager->IsOpen(MUTEX_PERSONALSHOPSALE) || g_pUIManager->IsOpen(MUTEX_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)
     {
         if (g_iPersonalShopMsgType == 1)
         {
@@ -10565,16 +10653,29 @@ void MovePersonalShop()
                 if (g_bEnablePersonalShop)
                 {
                     SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
-                    g_pUIManager->Close(INTERFACE_INVENTORY);
+                    g_pUIManager->Close(MUTEX_INVENTORY);
                 }
                 else
                 {
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalshopCreateMsgBoxLayout));
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.showCancel = true;
+                    cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
+                    cfg.onPrimary = []
+                    {
+                        wchar_t shopTitle[MAX_SHOPTITLE]{};
+                        g_pMyShopInventory->GetTitle(shopTitle);
+                        wcscpy(g_szPersonalShopTitle, shopTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
+
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
             }
             else
             {
-                g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, mu::ui::window::TYPE_ERROR_MESSAGE);
             }
         }
 
@@ -10669,11 +10770,41 @@ void OpenPersonalShopMsgWnd(int iMsgType)
 {
     if (iMsgType == 1)
     {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopNameMsgBoxLayout));
+        // Was CPersonalShopNameMsgBoxLayout (CustomMessageBox.h) -- a plain (non-numeric,
+        // non-masked) Mode::Text entry, ported 2026-09-14.
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.showCancel = true;
+        cfg.lines = { { I18N::Game::EnterStoreName, false } };
+        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+        cfg.input->maxLength = 28;
+        cfg.onPrimary = []
+        {
+            const std::wstring strTextW = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+            if (strTextW.empty())
+            {
+                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                return;
+            }
+            const wchar_t* strText = strTextW.c_str();
+            if (IsCorrectShopTitle(strText))
+            {
+                wcscpy(g_szPersonalShopTitle, strText);
+            }
+            else
+            {
+                g_pSystemLogBox->AddText(I18N::Game::WrongStoreName, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            }
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (iMsgType == 2)
     {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueMsgBoxLayout));
+        // Unreachable in practice (this function's only caller always passes 1), kept in parity
+        // with this function's own original shape -- was CPersonalShopItemValueMsgBoxLayout, now
+        // ShowPersonalShopItemValueDialog() (MyShopInventory.h), same as MyShopInventory.cpp's own
+        // 3 real call sites.
+        mu::ui::window::ShowPersonalShopItemValueDialog();
     }
 }
 bool IsCorrectShopTitle(const wchar_t* szShopTitle)
@@ -10979,7 +11110,7 @@ void RenderGuildList(int StartX, int StartY)
 
 void RenderServerDivision()
 {
-    if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
+    if (!g_pUIManager->IsOpen(MUTEX_SERVERDIVISION)) return;
 
     float Width, Height, x, y;
 

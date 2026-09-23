@@ -1,0 +1,46 @@
+<rml>
+<head>
+	<title>NPC Quest</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="npc_quest.rcss"/>
+</head>
+<!-- Modern theme's own copy of CNPCQuest's foreground document -- no frame chrome here at all,
+     unlike every other sibling this session; see ../../npc_quest.rml's own header comment for why
+     (the live-3D quest-item preview would otherwise paint underneath an opaque #panel). Chrome
+     (shell-edge/groove/header-rail, including this window's own title text's usual home) lives in
+     ../modern/npc_quest_bg.rml instead -- #title here is a bare, unwrapped, unpainted element
+     positioned to land exactly where that document's own header rail sits (see npc_quest.rcss's own
+     #title rule). Keep ids/data-model/event-callback names in sync with ../../npc_quest.rml. -->
+<body>
+	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{npc_name}}</span>
+
+		<div class="nq-quest-title" data-class-hidden="!show_quest_title">{{quest_title}}</div>
+
+		<div class="nq-divider" data-class-hidden="!show_conditions"></div>
+		<div class="nq-conditions" data-class-hidden="!show_conditions">
+			<div class="nq-condition-row" data-for="c : conditions" data-style-color="c.color">{{c.text}}</div>
+		</div>
+		<div id="btn_complete" class="btn btn-ok nq-btn-complete" data-class-hidden="!show_conditions"
+		     data-class-disabled="!complete_enabled" data-event-click="npcquest_complete">{{complete_label}}</div>
+
+		<div class="nq-cost" data-class-hidden="!show_cost">
+			<span class="nq-cost-label">{{cost_label}}</span>
+			<span class="nq-cost-amount" data-style-color="cost_color">{{cost_amount}}</span>
+		</div>
+
+		<div class="nq-dialogue" data-style-top="dialogue_top + 'px'">
+			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
+			<div class="nq-answer-row" data-for="a : answers"
+			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+		</div>
+
+		<div id="btn_exit" class="modern-icon-btn-px nq-btn-exit" data-event-click="npcquest_click_close">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

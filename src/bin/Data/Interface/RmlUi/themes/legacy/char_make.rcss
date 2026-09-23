@@ -1,0 +1,169 @@
+/* Legacy theme for the character-creation dialog (CCharMakeWin) -- only idle/checked button
+   frames are reproduced. Stat/description panels were flat CSprite fills originally, so they're
+   plain background-color here too. */
+
+@spritesheet charmake-input-sheet
+{
+	src: "../../../cha_id.tga";
+	charmake-input-image: 0px 0px 346px 38px;
+}
+@spritesheet charmake-job-sheet
+{
+	src: "../../../cha_bt.tga";
+	charmake-job-unchecked: 0px 0px 108px 26px;
+	charmake-job-checked:   0px 78px 108px 26px;
+}
+@spritesheet charmake-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	charmake-ok-idle: 0px 0px 54px 30px;
+}
+@spritesheet charmake-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	charmake-cancel-idle: 0px 0px 54px 30px;
+}
+
+/* Static RCSS instead of C++-pushed for width/height and most children (except #panel's own
+   left/top, and job buttons which are per-instance data). Deliberately px, not dp -- this panel's
+   screen position also drives the live 3D character-preview viewport, a separate scale
+   mechanism. */
+#panel {
+	position: absolute;
+	width: 454px;
+	height: 406px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-primary);
+}
+
+#stat_panel  { left: 346px; top: 24px;  }
+#desc_panel  { left: 0px;   top: 355px; }
+#input_frame { left: 0px;   top: 317px; }
+#btn_ok      { left: 346px; top: 325px; }
+#btn_cancel  { left: 400px; top: 325px; }
+
+.job-btn {
+	position: absolute;
+	width: 108px;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(charmake-job-unchecked);
+	color: token(text-dim);
+}
+.job-btn.checked {
+	decorator: image(charmake-job-checked);
+	color: token(text-primary);
+}
+.job-btn.disabled {
+	pointer-events: none;
+	color: token(text-disabled);
+	cursor: default;
+}
+
+.stat-panel, .desc-panel {
+	position: absolute;
+}
+.stat-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 108px;
+	height: 80px;
+	background-color: token(surface-overlay);
+}
+.stat-bg.tall {
+	height: 96px;
+}
+.desc-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 454px;
+	height: 51px;
+	background-color: token(surface-overlay);
+}
+
+.stat-row {
+	position: absolute;
+	left: 22px;
+}
+.stat-label {
+	color: token(text-primary);
+}
+.stat-value {
+	position: absolute;
+	left: 54px;
+	color: #ffb400;
+}
+
+/* modern-only class-name title above the two description lines -- legacy's description panel
+   never had one. */
+.desc-title {
+	display: none;
+}
+.desc-line {
+	position: absolute;
+	left: 10px;
+	white-space: nowrap;
+}
+/* Exact original inline top:...px values for these two lines, moved to per-line classes so modern
+   can add .desc-title above without shifting legacy's own offsets. */
+.desc-line-1 { top: 12px; }
+.desc-line-2 { top: 31px; }
+
+.input-frame {
+	position: absolute;
+	width: 346px;
+	height: 38px;
+	decorator: image(charmake-input-image);
+	pointer-events: none;
+}
+
+/* Real legacy screen has no separate label element -- cha_id.tga's own baked art already shows
+   one as part of the single wide sprite above. */
+.input-label {
+	display: none;
+}
+
+/* modern-only decorative backdrops/kickers (char_make.rml's own comment) -- real legacy sprite art
+   already gives every element its own visual identity, no artificial backing panel needed. */
+.side-panel, .panel-kicker {
+	display: none;
+}
+
+/* Exactly the old kInputTextOffsetX=78/kInputTextOffsetY=21 (relative to kInputSpriteOffsetY=317),
+   expressed as RCSS instead of a C++ constant; CharMakeWin.cpp now reads this element's resolved
+   position. */
+#input_text_anchor { left: 78px; top: 338px; }
+.input-text-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it
+	   (color:transparent); line-height/text-align/vertical-align set explicitly rather than
+	   relying on inheritance from base.rcss's .btn. */
+	color: transparent;
+}
+.btn-ok {
+	decorator: image(charmake-ok-idle);
+}
+.btn-cancel {
+	decorator: image(charmake-cancel-idle);
+}

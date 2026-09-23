@@ -1,32 +1,29 @@
-//*****************************************************************************
-// Desc: implementation of the CServerSelWin class.
-//*****************************************************************************
 
 #include "stdafx.h"
 #include "ServerSelWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
-#include "App/Platform/Windows/Local.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Models/ZzzBMD.h"
-#include "Engine/Object/ZzzObject.h"
-#include "Engine/Object/ZzzCharacter.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIControls.h"
-
-#include "UI/NewUI/NewUISystem.h"
 #include "Network/Server/ServerListManager.h"
+#include "Core/Globals/_enum.h"
 
-#define	SSW_GAP_WIDTH	28
-#define	SSW_GAP_HEIGHT	5
-#define	SSW_GB_POS_X	16
-#define	SSW_GB_POS_Y	19
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Event.h>
 
+// Caps how many groups a server can grow this window's data to.
+namespace
+{
+    constexpr std::size_t kMaxGroups = 20;
+}
 
-
-
-using namespace SEASON3A;
+CServerSelWin g_ServerSelWin;
 
 CServerSelWin::CServerSelWin()
 {
@@ -34,444 +31,267 @@ CServerSelWin::CServerSelWin()
 
 CServerSelWin::~CServerSelWin()
 {
+    Release();
 }
 
 void CServerSelWin::Create()
 {
-    CWin::Create(0, 0, -2);
+    Release();
 
-    m_iSelectServerBtnIndex = -1;
-
-    int i;
-
-    for (i = 0; i < SSW_SERVER_G_MAX; ++i)
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
-        m_aServerGroupBtn[i].Create(SERVER_GROUP_BTN_WIDTH, SERVER_GROUP_BTN_HEIGHT, BITMAP_LOG_IN, 4, 2, 1, -1, 3);
-        CWin::RegisterButton(&m_aServerGroupBtn[i]);
+        BuildRmlUi();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
-    for (i = 0; i < SSW_SERVER_MAX; ++i)
-    {
-        m_aServerBtn[i].Create(SERVER_BTN_WIDTH, SERVER_BTN_HEIGHT, BITMAP_LOG_IN + 1, 3, 2, 1);
-        CWin::RegisterButton(&m_aServerBtn[i]);
-        m_aServerGauge[i].Create(160, 4, BITMAP_LOG_IN + 2);
-    }
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
 
-    SImgInfo aiiDeco[2] =
-    {
-        { BITMAP_LOG_IN + 3, 0, 0, 68, 95 },
-        { BITMAP_LOG_IN + 3, 68, 0, 68, 95 }
-    };
-    m_aBtnDeco[0].Create(&aiiDeco[0], 8, 19);
-    m_aBtnDeco[1].Create(&aiiDeco[1], 60, 19);
+    Show(false);
 
-    SImgInfo aiiArrow[2] =
-    {
-        { BITMAP_LOG_IN + 3, 136, 0, 23, 29 },
-        { BITMAP_LOG_IN + 3, 136, 30, 23, 29 }
-    };
-    m_aArrowDeco[0].Create(&aiiArrow[0], 1, 2);
-    m_aArrowDeco[1].Create(&aiiArrow[1], 23, 2);
-
-    SImgInfo aiiDescBg[WE_BG_MAX] =
-    {
-        { BITMAP_LOG_IN + 11, 0, 0, 4, 4 },
-        { BITMAP_LOG_IN + 12, 0, 0, 512, 6 },
-        { BITMAP_LOG_IN + 12, 0, 6, 512, 6 },
-        { BITMAP_LOG_IN + 13, 0, 0, 3, 4 },
-        { BITMAP_LOG_IN + 13, 3, 0, 3, 4 }
-    };
-    m_winDescription.Create(aiiDescBg, 1, 10);
-    m_winDescription.SetLine(10);
-
-    CWin::SetSize((SERVER_GROUP_BTN_WIDTH + SSW_GAP_WIDTH) * 2 + SERVER_BTN_WIDTH, SERVER_BTN_HEIGHT * SSW_SERVER_MAX + SSW_GAP_HEIGHT * 2 + SERVER_GROUP_BTN_HEIGHT + m_winDescription.GetHeight());
+    UpdateDisplay();
 }
 
-void CServerSelWin::PreRelease()
+void CServerSelWin::BuildRmlUi()
 {
-    int i;
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_select",
+            [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model)
+            {
+                auto group = c.RegisterStruct<GroupEntry>();
+                group.RegisterMember("label", &GroupEntry::label);
+                group.RegisterMember("btn_pos", &GroupEntry::btnPos);
+                group.RegisterMember("checked", &GroupEntry::checked);
+                c.RegisterArray<std::vector<GroupEntry>>();
 
-    for (i = 0; i < SSW_SERVER_MAX; ++i)
-    {
-        m_aServerGauge[i].Release();
-    }
+                auto server = c.RegisterStruct<ServerEntry>();
+                server.RegisterMember("label", &ServerEntry::label);
+                server.RegisterMember("index", &ServerEntry::index);
+                server.RegisterMember("load_fraction", &ServerEntry::loadFraction);
+                server.RegisterMember("color_gray", &ServerEntry::colorGray);
+                server.RegisterMember("color_orange", &ServerEntry::colorOrange);
+                c.RegisterArray<std::vector<ServerEntry>>();
 
-    for (i = 0; i < 2; ++i)
-    {
-        m_aBtnDeco[i].Release();
-        m_aArrowDeco[i].Release();
-    }
+                c.Bind("groups", &model.groups);
+                c.Bind("servers", &model.servers);
+                c.Bind("server_list_visible", &model.serverListVisible);
 
-    m_winDescription.Release();
-}
+                c.Bind("pvp_notice", &model.pvpNotice);
+                c.Bind("pvp_notice_line0", &model.pvpNoticeLine0);
+                c.Bind("pvp_notice_line1", &model.pvpNoticeLine1);
+                c.Bind("pvp_notice_line2", &model.pvpNoticeLine2);
 
-void CServerSelWin::SetPosition(int nXCoord, int nYCoord)
-{
-    CWin::SetPosition(nXCoord, nYCoord);
+                c.Bind("description_text", &model.descriptionText);
 
-    int nServerGBtnWidth = m_aServerGroupBtn[0].GetWidth();
-    int nServerGBtnHeight = m_aServerGroupBtn[0].GetHeight();
-    int nServerBtnWidth = m_aServerBtn[0].GetWidth();
-    int nServerBtnHeight = m_aServerBtn[0].GetHeight();
-    int nDescGgHeight = m_winDescription.GetHeight();
-    int nBtnPosY;
-    int i;
+                c.BindEventCallback("serversel_select_group",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectGroup(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("serversel_select_server",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectServer(arguments[0].Get<int>(-1));
+                    });
+            });
 
-    int nServerGBtnBasePosY = nYCoord + CWin::GetHeight() - (nServerGBtnHeight * 11 + SSW_GAP_HEIGHT * 2 + nDescGgHeight);
-    int nRServerGBtnPosX = nXCoord + nServerGBtnWidth + nServerBtnWidth + (SSW_GAP_WIDTH * 2);
+        if (modelCreated)
+        {
+            m_RmlBinder.GetModel().pvpNoticeLine0 = StringUtils::WideToNarrow(I18N::Game::SinceHelheimServer);
+            m_RmlBinder.GetModel().pvpNoticeLine1 = StringUtils::WideToNarrow(I18N::Game::TendsToBeCrowded);
+            m_RmlBinder.GetModel().pvpNoticeLine2 = StringUtils::WideToNarrow(I18N::Game::WeRecommendThatYouUseOtherServers);
 
-    int icntServreGroup = 0;
-    m_aServerGroupBtn[icntServreGroup++].SetPosition(nXCoord + (CWin::GetWidth() - nServerGBtnWidth) / 2, nYCoord + CWin::GetHeight() - nServerGBtnHeight - SSW_GAP_HEIGHT - nDescGgHeight);
-
-    for (i = 0; i < SSW_LEFT_SERVER_G_MAX; i++)
-    {
-        nBtnPosY = nServerGBtnBasePosY + nServerGBtnHeight * i;
-        m_aServerGroupBtn[icntServreGroup++].SetPosition(nXCoord, nBtnPosY);
-    }
-
-    for (i = 0; i < SSW_RIGHT_SERVER_G_MAX; i++)
-    {
-        nBtnPosY = nServerGBtnBasePosY + nServerGBtnHeight * i;
-        m_aServerGroupBtn[icntServreGroup++].SetPosition(nRServerGBtnPosX, nBtnPosY);
-    }
-
-    m_winDescription.SetPosition(nXCoord - ((m_winDescription.GetWidth() - CWin::GetWidth()) / 2), nYCoord + CWin::GetHeight() - m_winDescription.GetHeight());
-
-    m_aBtnDeco[0].SetPosition(m_aServerGroupBtn[1].GetXPos(), m_aServerGroupBtn[1].GetYPos());
-    m_aBtnDeco[1].SetPosition(m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetXPos() + SERVER_GROUP_BTN_WIDTH, m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetYPos());
-
-    int a = m_aServerGroupBtn[1].GetXPos();
-}
-
-void CServerSelWin::SetServerBtnPosition()
-{
-    if (m_iSelectServerBtnIndex == -1)
-        return;
-
-    int nServerBtnPosX = m_aServerGroupBtn[1].GetXPos() + m_aServerGroupBtn[0].GetWidth() + SSW_GAP_WIDTH;
-
-    int nServerBtnHeight = m_aServerBtn[0].GetHeight();
-
-    int nLServerGBtnHeightSum = m_aServerGroupBtn[1].GetHeight() * 10;
-
-    int nServerBtnHeightSum = nServerBtnHeight * m_icntServer;
-
-    int nLServerGBtnTop = m_aServerGroupBtn[1].GetYPos();
-
-    int nServerBtnBasePosY = nLServerGBtnHeightSum > nServerBtnHeightSum ? nLServerGBtnTop : nLServerGBtnTop - (nServerBtnHeightSum - nLServerGBtnHeightSum);
-
-    for (int i = 0; i < m_pSelectServerGroup->GetServerSize(); i++)
-    {
-        m_aServerBtn[i].SetPosition(nServerBtnPosX, nServerBtnBasePosY + nServerBtnHeight * i);
-        m_aServerGauge[i].SetPosition(m_aServerBtn[i].GetXPos() + SSW_GB_POS_X, m_aServerBtn[i].GetYPos() + SSW_GB_POS_Y);
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_select.rml");
     }
 }
 
-void CServerSelWin::SetArrowSpritePosition()
+void CServerSelWin::ReloadRmlTheme()
 {
-    if (m_iSelectServerBtnIndex == -1)
-        return;
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
 
-    if ((m_iSelectServerBtnIndex >= 0) && (m_iSelectServerBtnIndex <= SSW_LEFT_SERVER_G_MAX))
+    // No per-frame SyncRmlModel() poll here (see Update()), unlike the other 6 ported windows --
+    // a fresh BuildRmlUi() would otherwise come up with an empty/default model and hidden until
+    // the player closes/reopens this window, so both are restored explicitly below.
+    const bool wasVisible = IsVisible();
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    UpdateDisplay();
+    Show(wasVisible);
+}
+
+void CServerSelWin::Release()
+{
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+}
+
+void CServerSelWin::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+
+    if (m_pRmlDoc)
     {
-        m_aArrowDeco[0].SetPosition(m_aServerGroupBtn[m_iSelectServerBtnIndex].GetXPos() + SERVER_GROUP_BTN_WIDTH, m_aServerGroupBtn[m_iSelectServerBtnIndex].GetYPos());
-    }
-    else if ((m_iSelectServerBtnIndex > SSW_LEFT_SERVER_G_MAX) && (m_iSelectServerBtnIndex < SSW_SERVER_G_MAX))
-    {
-        m_aArrowDeco[1].SetPosition(m_aServerGroupBtn[m_iSelectServerBtnIndex].GetXPos(), m_aServerGroupBtn[m_iSelectServerBtnIndex].GetYPos());
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        else       m_pRmlDoc->Hide();
     }
 }
 
 void CServerSelWin::UpdateDisplay()
 {
-    m_pSelectServerGroup = NULL;
-    m_icntServerGroup = 0;
-    m_icntServer = 0;
-    m_icntLeftServerGroup = 0;
-    m_icntRightServerGroup = 0;
-    m_bTestServerBtn = false;
+    auto& model = m_RmlBinder.GetModel();
 
-    DWORD adwServerGBtnClr[BTN_IMG_MAX] =
+    model.groups.clear();
+
+    const int nGroupCount = g_ServerListManager->GetServerGroupSize();
+    if (nGroupCount >= 1)
     {
-        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0,
-        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0
-    };
+        CServerGroup* pServerGroup = nullptr;
+        g_ServerListManager->SetFirst();
 
-    DWORD adwServerBtnClr[4][4] =
-    {
-        { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 },
-        { CLRDW_YELLOW, CLRDW_YELLOW, CLRDW_BR_YELLOW, 0 },
-        { CLRDW_ORANGE, CLRDW_ORANGE, CLRDW_BR_ORANGE, 0 },
-        { CLRDW_ORANGE, CLRDW_ORANGE, CLRDW_BR_ORANGE, 0 },
-    };
-
-    m_icntServerGroup = g_ServerListManager->GetServerGroupSize();
-
-    if (m_icntServerGroup < 1)
-        return;
-
-    CServerGroup* pServerGroup = NULL;
-
-    g_ServerListManager->SetFirst();
-
-    while (g_ServerListManager->GetNext(pServerGroup))
-    {
-        if (pServerGroup->m_iWidthPos == CServerGroup::SBP_CENTER)
+        bool bTestServerFound = false;
+        int nNextBtnPos = 1;
+        while (g_ServerListManager->GetNext(pServerGroup))
         {
-            if (m_bTestServerBtn == true)
+            if (model.groups.size() >= kMaxGroups)
                 continue;
 
-            m_aServerGroupBtn[0].SetText(pServerGroup->m_szName, adwServerGBtnClr);
-            pServerGroup->m_iBtnPos = 0;
-            m_bTestServerBtn = true;
-        }
-        else if (pServerGroup->m_iWidthPos == CServerGroup::SBP_LEFT)
-        {
-            if (m_icntLeftServerGroup >= SSW_LEFT_SERVER_G_MAX)
+            const std::string label = StringUtils::WideToNarrow(pServerGroup->m_szName);
+
+            // SBP_CENTER is the rare "test/staff server" group; only the first sent is ever shown.
+            if (pServerGroup->m_iWidthPos == CServerGroup::SBP_CENTER)
+            {
+                if (bTestServerFound)
+                    continue;
+                bTestServerFound = true;
+
+                GroupEntry entry;
+                entry.label = label;
+                entry.btnPos = 0;
+                pServerGroup->m_iBtnPos = 0;
+                model.groups.push_back(entry);
                 continue;
+            }
 
-            m_aServerGroupBtn[m_icntLeftServerGroup + 1].SetText(pServerGroup->m_szName, adwServerGBtnClr);
-            pServerGroup->m_iBtnPos = m_icntLeftServerGroup + 1;
-
-            m_icntLeftServerGroup++;
-        }
-        else if (pServerGroup->m_iWidthPos == CServerGroup::SBP_RIGHT)
-        {
-            if (m_icntRightServerGroup >= SSW_RIGHT_SERVER_G_MAX)
-                continue;
-
-            m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + m_icntRightServerGroup + 1].SetText(pServerGroup->m_szName, adwServerGBtnClr);
-            pServerGroup->m_iBtnPos = SSW_LEFT_SERVER_G_MAX + m_icntRightServerGroup + 1;
-
-            m_icntRightServerGroup++;
+            GroupEntry entry;
+            entry.label = label;
+            entry.btnPos = nNextBtnPos++;
+            pServerGroup->m_iBtnPos = entry.btnPos;
+            model.groups.push_back(entry);
         }
     }
 
-    ShowServerGBtns();
-    ShowDecoSprite();
-
-    memset(m_szDescription, 0, sizeof(char) * SSW_DESC_LINE_MAX * SSW_DESC_ROW_MAX);
+    model.servers.clear();
+    model.descriptionText.clear();
+    model.pvpNotice = false;
 
     if (m_iSelectServerBtnIndex != -1)
-    {
         m_pSelectServerGroup = g_ServerListManager->GetServerGroupByBtnPos(m_iSelectServerBtnIndex);
-    }
-
-    if (m_pSelectServerGroup == NULL)
-        return;
-
-    m_icntServer = m_pSelectServerGroup->GetServerSize();
-
-    if (m_icntServer < 1)
-        return;
-
-    CServerInfo* pServerInfo = NULL;
-
-    m_pSelectServerGroup->SetFirst();
-
-    int icntServer = 0;
-    while (m_pSelectServerGroup->GetNext(pServerInfo))
-    {
-        m_aServerBtn[icntServer].SetText(pServerInfo->m_bName, adwServerBtnClr[pServerInfo->m_byNonPvP]);
-        m_aServerGauge[icntServer].SetValue(pServerInfo->m_iPercent, 100);
-        icntServer++;
-    }
-
-    ::SeparateTextIntoLines(m_pSelectServerGroup->m_szDescription, m_szDescription[0], SSW_DESC_LINE_MAX, SSW_DESC_ROW_MAX);
-
-    SetArrowSpritePosition();
-    SetServerBtnPosition();
-    ShowArrowSprite();
-    ShowServerBtns();
-}
-
-void CServerSelWin::Show(bool bShow)
-{
-    CWin::Show(bShow);
-}
-
-void CServerSelWin::ShowServerGBtns()
-{
-    int i;
-
-    if (m_bTestServerBtn == true)
-    {
-        m_aServerGroupBtn[0].Show(CWin::m_bShow);
-    }
     else
-    {
-        m_aServerGroupBtn[0].Show(false);
-    }
+        m_pSelectServerGroup = nullptr;
 
-    for (i = 1; i < m_icntLeftServerGroup + 1; i++)
+    if (m_pSelectServerGroup != nullptr)
     {
-        m_aServerGroupBtn[i].Show(CWin::m_bShow);
-    }
-    for (; i < SSW_LEFT_SERVER_G_MAX; ++i)
-    {
-        m_aServerGroupBtn[i].Show(false);
-    }
+        model.descriptionText = StringUtils::WideToNarrow(m_pSelectServerGroup->m_szDescription);
+        model.pvpNotice = m_pSelectServerGroup->m_bPvPServer;
 
-    for (i = SSW_LEFT_SERVER_G_MAX + 1; i < SSW_RIGHT_SERVER_G_MAX + 1 + m_icntRightServerGroup; i++)
-    {
-        m_aServerGroupBtn[i].Show(CWin::m_bShow);
-    }
-    for (; i < SSW_SERVER_G_MAX; i++)
-    {
-        m_aServerGroupBtn[i].Show(false);
-    }
-}
+        CServerInfo* pServerInfo = nullptr;
+        m_pSelectServerGroup->SetFirst();
 
-void CServerSelWin::ShowDecoSprite()
-{
-    if (m_icntLeftServerGroup > 0)
-    {
-        m_aBtnDeco[0].Show(CWin::m_bShow);
-    }
-    else
-    {
-        m_aBtnDeco[0].Show(false);
-    }
-
-    if (m_icntRightServerGroup > 0)
-    {
-        m_aBtnDeco[1].Show(CWin::m_bShow);
-    }
-    else
-    {
-        m_aBtnDeco[1].Show(false);
-    }
-}
-
-void CServerSelWin::ShowArrowSprite()
-{
-    if ((m_iSelectServerBtnIndex >= 0) && (m_iSelectServerBtnIndex <= SSW_LEFT_SERVER_G_MAX))
-    {
-        m_aArrowDeco[0].Show(CWin::m_bShow);
-        m_aArrowDeco[1].Show(false);
-    }
-    else if ((m_iSelectServerBtnIndex > SSW_LEFT_SERVER_G_MAX) && (m_iSelectServerBtnIndex < SSW_SERVER_G_MAX))
-    {
-        m_aArrowDeco[0].Show(false);
-        m_aArrowDeco[1].Show(CWin::m_bShow);
-    }
-    else
-    {
-        m_aArrowDeco[0].Show(false);
-        m_aArrowDeco[1].Show(false);
-    }
-}
-
-void CServerSelWin::ShowServerBtns()
-{
-    if (m_iSelectServerBtnIndex == -1)
-    {
-        m_winDescription.Show(false);
-        return;
-    }
-
-    int i;
-    for (i = 0; i < m_icntServer; i++)
-    {
-        m_aServerBtn[i].Show(CWin::m_bShow);
-        m_aServerGauge[i].Show(CWin::m_bShow);
-    }
-    for (; i < SSW_SERVER_MAX; i++)
-    {
-        m_aServerBtn[i].Show(false);
-        m_aServerGauge[i].Show(false);
-    }
-
-    m_winDescription.Show(CWin::m_bShow);
-}
-
-bool CServerSelWin::CursorInWin(int nArea)
-{
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
-}
-
-void CServerSelWin::UpdateWhileActive(double dDeltaTick)
-{
-    int i;
-
-    for (i = 0; i < SSW_SERVER_G_MAX; i++)
-    {
-        if (m_aServerGroupBtn[i].IsClick())
+        int nServerIndex = 0;
+        while (m_pSelectServerGroup->GetNext(pServerInfo))
         {
-            if (m_iSelectServerBtnIndex != -1)
-            {
-                m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
-            }
+            ServerEntry entry;
+            entry.label = StringUtils::WideToNarrow(pServerInfo->m_bName);
+            entry.index = nServerIndex;
+            entry.loadFraction = static_cast<float>(pServerInfo->m_iPercent) / 100.0f;
+            // 0 = gray, 1 = the unflagged default, 2/3 = orange.
+            entry.colorGray = (pServerInfo->m_byNonPvP == 0);
+            entry.colorOrange = (pServerInfo->m_byNonPvP >= 2);
+            model.servers.push_back(entry);
 
-            m_aServerGroupBtn[i].SetCheck(true);
-            m_iSelectServerBtnIndex = i;
-
-            SocketClient->ToConnectServer()->SendServerListRequest();
+            ++nServerIndex;
         }
     }
 
-    if (m_pSelectServerGroup == NULL)
+    // Unconditional: this is a genuine rebuild (clear + repopulate), not a per-frame poll.
+    m_RmlBinder.MarkDirty("groups");
+    m_RmlBinder.MarkDirty("servers");
+    m_RmlBinder.MarkDirty("pvp_notice");
+    m_RmlBinder.MarkDirty("description_text");
+
+    SyncRmlModel();
+}
+
+void CServerSelWin::SelectGroup(int nBtnPos)
+{
+    if (m_iSelectServerBtnIndex != -1)
+    {
+        for (auto& entry : m_RmlBinder.GetModel().groups)
+            if (entry.btnPos == m_iSelectServerBtnIndex) entry.checked = false;
+    }
+
+    m_iSelectServerBtnIndex = nBtnPos;
+
+    SyncRmlModel();
+
+    SocketClient->ToConnectServer()->SendServerListRequest();
+}
+
+void CServerSelWin::RmlClickSelectGroup(int nBtnPos)
+{
+    SelectGroup(nBtnPos);
+}
+
+void CServerSelWin::RmlClickSelectServer(int nServerIndex)
+{
+    if (m_pSelectServerGroup == nullptr)
         return;
 
-    CServerInfo* pServerInfo = NULL;
-    for (i = 0; i < m_icntServer; i++)
+    CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(nServerIndex);
+    if (pServerInfo == nullptr)
+        return;
+
+    if (pServerInfo->m_iPercent < 100)
     {
-        if (m_aServerBtn[i].IsClick())
-        {
-            pServerInfo = m_pSelectServerGroup->GetServerInfo(i);
-
-            if (pServerInfo == NULL)
-                return;
-
-            if (pServerInfo->m_iPercent < 100)
-            {
-                ConnectToServer(pServerInfo);
-                break;
-            }
-            else if (pServerInfo->m_iPercent < 128)
-            {
-                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
-            }
-        }
+        ConnectToServer(pServerInfo);
+    }
+    else if (pServerInfo->m_iPercent < 128)
+    {
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
     }
 }
 
 bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
 {
-    if (pServerInfo == NULL || m_pSelectServerGroup == NULL)
+    if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr)
         return false;
 
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 
     SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-    g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex,
-                                             pServerInfo->m_byNonPvP);
+    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
 
     return true;
 }
 
 bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
 {
-    CServerGroup* pChosenGroup = NULL;
-    CServerGroup* pServerGroup = NULL;
+    CServerGroup* pChosenGroup = nullptr;
+    CServerGroup* pServerGroup = nullptr;
 
     g_ServerListManager->SetFirst();
     while (g_ServerListManager->GetNext(pServerGroup))
     {
-        const bool bWanted = (groupName == NULL || groupName[0] == L'\0')
-                                 ? (pChosenGroup == NULL)
+        const bool bWanted = (groupName == nullptr || groupName[0] == L'\0')
+                                 ? (pChosenGroup == nullptr)
                                  : (wcscmp(pServerGroup->m_szName, groupName) == 0);
         if (bWanted)
         {
@@ -480,43 +300,33 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
         }
     }
 
-    if (pChosenGroup == NULL)
+    if (pChosenGroup == nullptr)
         return false;
 
-    // A group the display could not place has no button to check, so there is
-    // nothing this entry point can select.
+    // A group the display never placed (never sent this session) has no
+    // button position to select.
     const int iBtnPos = pChosenGroup->m_iBtnPos;
-    if (iBtnPos < 0 || iBtnPos >= SSW_SERVER_G_MAX)
+    if (iBtnPos < 0)
         return false;
 
-    // Same two steps the click path takes: mark the group, rebuild its server
-    // buttons, then connect to the chosen server. The group has to be marked
-    // before the server can be looked up, so a failure after this point puts
-    // the previous selection back rather than leaving the screen on a group
-    // the caller never reached.
+    // Same two steps the click path takes: mark the group, rebuild the
+    // server list against it, then connect to the chosen server. The group
+    // has to be marked before the server can be looked up, so a failure
+    // after this point puts the previous selection back rather than leaving
+    // the screen on a group the caller never reached.
     const int iPreviousBtnIndex = m_iSelectServerBtnIndex;
-    if (m_iSelectServerBtnIndex != -1)
-        m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
-
     m_iSelectServerBtnIndex = iBtnPos;
-    m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
     UpdateDisplay();
 
-    // UpdateDisplay re-derives m_pSelectServerGroup from the button index,
-    // which is only the same group while the buttons and the list agree;
-    // the group this call chose is the one it must connect to.
-    if (m_pSelectServerGroup != pChosenGroup)
-    {
-        m_pSelectServerGroup = pChosenGroup;
-    }
+    // UpdateDisplay() re-derives m_pSelectServerGroup from the button index,
+    // which only agrees with pChosenGroup while the list and the index agree
+    // -- the group this call chose is the one it must connect to regardless.
+    m_pSelectServerGroup = pChosenGroup;
 
     CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
-    if (pServerInfo == NULL || pServerInfo->m_iPercent >= 100)
+    if (pServerInfo == nullptr || pServerInfo->m_iPercent >= 100)
     {
-        m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
         m_iSelectServerBtnIndex = iPreviousBtnIndex;
-        if (m_iSelectServerBtnIndex != -1)
-            m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
         UpdateDisplay();
         return false;
     }
@@ -524,29 +334,54 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     return ConnectToServer(pServerInfo);
 }
 
-void CServerSelWin::RenderControls()
+bool CServerSelWin::UpdateMouseEvent()
 {
-    int i = 0;
+    if (!IsVisible())
+        return true;
 
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
+    const int nLeft = (static_cast<int>(WindowWidth) - kPanelWidth) / 2;
+    const int nTop = (static_cast<int>(WindowHeight) - kPanelHeight) / 2;
 
-    CWin::RenderButtons();
+    RECT rc;
+    ::SetRect(&rc, nLeft, nTop, nLeft + kPanelWidth, nTop + kPanelHeight);
+    if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
+        return false;
 
-    if (m_pSelectServerGroup != NULL)
+    return true;
+}
+
+bool CServerSelWin::Update()
+{
+    return true;
+}
+
+bool CServerSelWin::Render()
+{
+    return true;
+}
+
+// Called only at the point of an actual state change, not polled from Render() every frame --
+// this window's state only ever changes from its own click handlers.
+void CServerSelWin::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    bool groupsChanged = false;
+    for (auto& entry : model.groups)
     {
-        for (i = 0; i < m_icntServer; i++)
-        {
-            m_aServerGauge[i].Render();
-        }
+        const bool checked = (entry.btnPos == m_iSelectServerBtnIndex);
+        if (entry.checked != checked) { entry.checked = checked; groupsChanged = true; }
+    }
+    if (groupsChanged)
+        m_RmlBinder.MarkDirty("groups");
 
-        if (m_pSelectServerGroup->m_bPvPServer == true)
-        {
-            g_pRenderText->SetTextColor(ARGB(255, 255, 255, 255));
-            g_pRenderText->RenderText(90, 164 - 60, I18N::Game::SinceHelheimServer);
-            g_pRenderText->RenderText(90, 164 - 45, I18N::Game::TendsToBeCrowded);
-            g_pRenderText->RenderText(90, 164 - 30, I18N::Game::WeRecommendThatYouUseOtherServers);
-        }
+    // Derived from m_pSelectServerGroup rather than stored separately, so it can't drift out of sync.
+    const bool serverListVisible = (m_pSelectServerGroup != nullptr);
+    if (model.serverListVisible != serverListVisible)
+    {
+        model.serverListVisible = serverListVisible;
+        m_RmlBinder.MarkDirty("server_list_visible");
     }
 }

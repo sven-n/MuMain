@@ -1,0 +1,87 @@
+/* Modern theme for CStorageInventory's chrome -- header/wallet/action-row are vector forged-metal
+   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Inventory grid
+   stays fully native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement there. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:6/height:29 -- identical budget to storage_ext.rcss's .storext-header-rail: this window's
+   native grid also starts at `m_Pos.y + 36` (StorageInventory.cpp's CInventoryCtrl::Create()
+   call), the same tight budget as Storage Ext (both are 190x429 VAULT-family frames). Ends at
+   35px, 1px clear. Keeps .modern-joint-px's rivet at -2px, inside storage_bg.rcss's
+   .inv-shell-edge at -3px -- same contained relationship as StorageExt/MyInventory/SysMenu. */
+.stor-header-rail {
+	top: 6px;
+	height: 29px;
+}
+
+/* Wallet bar heightened to fit both the Zen balance (top row) and the Storage Fee line
+   CStorageInventory::RenderText() used to draw -- left/width stay the shared default (15/160). */
+.stor-wallet-px {
+	top: 342px;
+	height: 46px;
+}
+/* Override just the shared value text's top for the Zen row -- its default top:371px already
+   lines up with the Fee row below, so #fee_value reuses .modern-wallet-value-px unmodified. */
+#zen_text {
+	top: 349px;
+}
+/* Default top:50% centers these on the whole heightened 46px box (both Zen+Fee rows), not just
+   the Zen row -- pin to the same ~7px offset #zen_text uses instead. */
+.stor-wallet-px .modern-wallet-coin-px,
+.stor-wallet-px .modern-wallet-label-px {
+	top: 11px;
+	margin-top: -4px;
+}
+.stor-fee-label-px {
+	position: absolute;
+	left: 25px;
+	top: 371px;
+	color: token(semantic-danger);
+	font-size: 9px;
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Action row: base.rcss's shared .modern-icon-btn-px family at its default geometry (37x26,
+   top:392) -- same 4-slot spacing MyInventory's own row uses (15/56/97/138); base.rcss's own
+   comment on this class family names Storage explicitly as a consumer. */
+.stor-btn-insert { left: 15px;  }
+.stor-btn-take   { left: 56px;  }
+.stor-btn-lock   { left: 97px;  }
+.stor-btn-lock.locked-mode { color: token(accent-gold-hover); border-color: token(border-hover); }
+.stor-btn-expand { left: 138px; }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-insert { left: -27px; }
+.tooltip-take   { left: 15px; }
+.tooltip-lock   { left: 55px; }
+.tooltip-expand { left: 96px; }
+
+#btn_insert:hover ~ .tooltip-insert,
+#btn_take:hover ~ .tooltip-take,
+#btn_lock:hover ~ .tooltip-lock,
+#btn_expand:hover ~ .tooltip-expand {
+	display: block;
+}

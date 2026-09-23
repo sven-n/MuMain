@@ -1,0 +1,275 @@
+<rml>
+<head>
+	<title>Options</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="option_window.rcss"/>
+	<link type="text/template" href="window_shell.rml"/>
+</head>
+<!-- This .rml is shared by both themes (like login.rml) -- no per-theme markup override exists,
+     so LoadThemedDocument() (RmlTheme.cpp) falls back to this one file for either theme. Its own
+     <link href="option_window.rcss"> below still resolves per-theme though (against
+     LoadThemedDocument()'s sourceUrl, always themes/<theme>/) -- each theme needs a REAL copy of
+     that stylesheet at themes/<theme>/option_window.rcss, there is no equivalent "shared" fallback
+     for a <link>'s href the way there is for the .rml file itself. A root-level RCSS at this same
+     directory is never reachable by either theme, regardless of edits made there.
+     checkboxes/range-sliders/selects use the same shared base.rcss primitives in both themes, no
+     structural fork of THIS file needed yet. If a theme-specific rendering workaround ever forces a
+     DOM difference (the way generic_menu_dialog.rml's modern fork needed an extra .gmd-btn-fill
+     div), fork this file at that point rather than pre-emptively.
+
+     Every row uses the same two-column shape (label, then control), .option-row-label first in
+     each row's own markup order -- including the checkbox rows, which put the label BEFORE
+     .checkbox-box rather than using base.rcss's own .checkbox-label (position:absolute, glyph-
+     first, built for login.rml's standalone checkboxes). That convention doesn't line up with a
+     column of sibling rows: every label needs to start at the same x position a settings menu's
+     scannable label column requires, which only a shared in-flow .option-row-label achieves. Left-
+     justified throughout (no justify-content:center, unlike generic_menu_dialog's own centered
+     .gmd-button-row) -- centering would misalign the label column across rows whose controls have
+     different widths.
+
+     Frame/border/header/positioning/dragging all live in window_shell.rml -- this document
+     supplies only its own content, spliced into that template's #content slot. `positioned` is
+     always false for this window right now (see OptionWindow.h's own model comment) -- dragging
+     is off, so it's screen-centered via window_shell's own .center-both fallback, same as every
+     other window_shell consumer; no C++-computed position involved.
+
+     Tabs: one .option-tab-row of .option-tab-btn's, each data-class-active-tab="active_tab == N" +
+     data-event-click="option_select_tab(N)" -- same data-class-X toggle mechanism
+     window_shell.rcss's own data-class-has-title already proves, not a raw data-style override
+     (a class toggle avoids the cascade-tie risk a raw style override would carry for a toggled
+     visual state). Six .option-tab-panel siblings follow, one per tab, data-class-hidden="active_tab !=
+     N" -- each is itself a flex column (see option_window.rcss's own .option-tab-panel rule), and
+     needs the .option-tab-panel.hidden compound-selector override the same file also carries, or
+     it would tie with base.rcss's global .hidden{display:none} at equal specificity and silently
+     stay visible (window_shell.rcss hit this exact bug for its own header rail first). The tab row
+     and all six panels are direct children of this one <body> -- window_shell.rml's #content is a
+     single flex-column slot with no way to address more than one region, so tab switching is
+     purely a visibility toggle on siblings, not a structural split. The close button is NOT
+     markup here -- COptionWindow::BuildRmlUi() builds it directly in C++ inside window_shell.rml's
+     own #window_shell_footer instead (a `{{close_label}}` text node moved there via
+     UI::RmlBridge::PromoteToWindowShellFooter() after load never rendered its label -- RmlUi's
+     text-interpolation DataView is only created at that node's original parse, and re-attaching to
+     a new parent doesn't recreate it, see OptionWindow.h's own comment on m_pCloseButtonEl). -->
+<body template="window_shell" data-model="option_window">
+	<div class="option-tab-row">
+		<div class="option-tab-btn" data-class-active-tab="active_tab == 0" data-event-click="option_select_tab(0)">{{tab_gameplay_label}}</div>
+		<div class="option-tab-btn" data-class-active-tab="active_tab == 1" data-event-click="option_select_tab(1)">{{tab_audio_label}}</div>
+		<div class="option-tab-btn" data-class-active-tab="active_tab == 2" data-event-click="option_select_tab(2)">{{tab_video_label}}</div>
+		<div class="option-tab-btn" data-class-active-tab="active_tab == 3" data-event-click="option_select_tab(3)">{{tab_graphics_label}}</div>
+		<div class="option-tab-btn" data-class-active-tab="active_tab == 4" data-event-click="option_select_tab(4)">{{tab_ui_label}}</div>
+		<div class="option-tab-btn" data-class-active-tab="active_tab == 5" data-event-click="option_select_tab(5)">{{tab_general_label}}</div>
+	</div>
+
+	<!-- Tab 0: Gameplay -->
+	<div class="option-tab-panel" data-class-hidden="active_tab != 0">
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_auto_attack">
+			<span class="option-row-label">{{auto_attack_label}}</span>
+			<div class="checkbox-box" data-class-checked="auto_attack">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_whisper_sound">
+			<span class="option-row-label">{{whisper_sound_label}}</span>
+			<div class="checkbox-box" data-class-checked="whisper_sound">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Tab 1: Audio -->
+	<div class="option-tab-panel" data-class-hidden="active_tab != 1">
+		<div class="option-row option-slider-row">
+			<span class="option-row-label">{{sound_volume_label}}</span>
+			<input type="range" class="option-slider" min="0" max="10" step="1"
+			       data-attr-max="sound_volume_max" data-value="sound_volume"
+			       data-event-change="option_sound_volume_changed"/>
+		</div>
+		<div class="option-row option-slider-row">
+			<span class="option-row-label">{{music_volume_label}}</span>
+			<input type="range" class="option-slider" min="0" max="10" step="1"
+			       data-attr-max="music_volume_max" data-value="music_volume"
+			       data-event-change="option_music_volume_changed"/>
+		</div>
+	</div>
+
+	<!-- Tab 2: Video -->
+	<div class="option-tab-panel" data-class-hidden="active_tab != 2">
+		<div class="option-row option-slider-row">
+			<span class="option-row-label">{{render_level_label}}</span>
+			<input type="range" class="option-slider" min="0" max="5" step="1"
+			       data-attr-max="render_level_max" data-value="render_level"
+			       data-event-change="option_render_level_changed"/>
+		</div>
+		<!-- Custom dropdown, not RmlUi's native <select>/<option> -- that was tried first and never
+		     reliably worked in this engine: WidgetDropDown's own generated
+		     selectvalue/selectbox/selectarrow sub-elements need CSS this theme never fully gave
+		     them, and even once styled, option clicks still didn't reliably reach this window's
+		     change callback. Reuses the exact mechanism the tab bar above already proves reliable:
+		     .option-dropdown-value toggles open/closed (data-event-click="option_toggle_dropdown(N)",
+		     N identifying which dropdown -- see OptionWindow.h's model.openDropdown comment for the
+		     id scheme), .option-dropdown-list is a data-class-hidden sibling (NOT a child of
+		     .option-dropdown-value, so clicking an option doesn't also bubble into the toggle
+		     handler), and each data-for-generated .option-dropdown-option calls
+		     option_dropdown_option_click(N, it_index) on click. Same shape reused below for FPS
+		     Limit/UI Theme/UI Scale/Language/Font. -->
+		<div class="option-row option-select-row">
+			<span class="option-row-label">{{resolution_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(0)">{{resolution_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 0">
+					<div class="option-dropdown-option" data-for="label : resolution_labels"
+					     data-class-selected="it_index == resolution_index"
+					     data-event-click="option_dropdown_option_click(0, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_windowed_mode">
+			<span class="option-row-label">{{windowed_mode_label}}</span>
+			<div class="checkbox-box" data-class-checked="windowed_mode">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_vsync">
+			<span class="option-row-label">{{vsync_label}}</span>
+			<div class="checkbox-box" data-class-checked="vsync_enabled">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-select-row">
+			<span class="option-row-label">{{fps_cap_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(1)">{{fps_cap_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 1">
+					<div class="option-dropdown-option" data-for="label : fps_cap_labels"
+					     data-class-selected="it_index == fps_cap_index"
+					     data-event-click="option_dropdown_option_click(1, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Tab 3: Graphics -- per-system effect-cost toggles (MainScene.h) for reducing rendering cost
+	     on a low-end PC. -->
+	<div class="option-tab-panel" data-class-hidden="active_tab != 3">
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_render_all_effects">
+			<span class="option-row-label">{{render_all_effects_label}}</span>
+			<div class="checkbox-box" data-class-checked="render_all_effects">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_effects">
+			<span class="option-row-label">{{disable_effects_label}}</span>
+			<div class="checkbox-box" data-class-checked="disable_effects">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_particles">
+			<span class="option-row-label">{{disable_particles_label}}</span>
+			<div class="checkbox-box" data-class-checked="disable_particles">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_skill_effect_models">
+			<span class="option-row-label">{{disable_skill_effect_models_label}}</span>
+			<div class="checkbox-box" data-class-checked="disable_skill_effect_models">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_boids">
+			<span class="option-row-label">{{disable_boids_label}}</span>
+			<div class="checkbox-box" data-class-checked="disable_boids">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_wing_shadow">
+			<span class="option-row-label">{{disable_wing_shadow_label}}</span>
+			<div class="checkbox-box" data-class-checked="disable_wing_shadow">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Tab 4: UI -->
+	<div class="option-tab-panel" data-class-hidden="active_tab != 4">
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_slide_help">
+			<span class="option-row-label">{{slide_help_label}}</span>
+			<div class="checkbox-box" data-class-checked="slide_help">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<!-- Show FPS Counter/Show Debug Info are mutually exclusive (SceneManager.h enforces it
+		     internally) -- ticking one visually unticks the other on its own next sync, no extra
+		     markup needed here for that. -->
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_show_fps_counter">
+			<span class="option-row-label">{{show_fps_counter_label}}</span>
+			<div class="checkbox-box" data-class-checked="show_fps_counter">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_show_debug_info">
+			<span class="option-row-label">{{show_debug_info_label}}</span>
+			<div class="checkbox-box" data-class-checked="show_debug_info">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-select-row">
+			<span class="option-row-label">{{theme_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(2)">{{theme_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 2">
+					<div class="option-dropdown-option" data-for="label : theme_labels"
+					     data-class-selected="it_index == theme_index"
+					     data-event-click="option_dropdown_option_click(2, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+		<!-- UI Scale -- this row's label can't say what the percentage multiplies, so it carries a
+		     hover tooltip: .option-row-tip, a plain sibling span shown by an RCSS `:hover` rule, the
+		     same declarative mechanism main_frame.rcss's gauge tooltips use (no C++ hover callback is
+		     needed, unlike CMainFrameWindow's skill tooltip, whose content is per-skill data). It also
+		     carries the shared `.tooltip` class, which is a real tooltip shell in the modern theme's
+		     base.rcss; the legacy theme has no such shell and supplies the whole look from its own
+		     option_window.rcss. The span sits after .option-dropdown so it paints above an open list,
+		     and, this being the last row of its tab, the list opens upwards while the tip sits below
+		     the row (both themes' option_window.rcss). -->
+		<div class="option-row option-select-row option-row-tipped">
+			<span class="option-row-label">{{ui_scale_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(5)">{{ui_scale_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 5">
+					<div class="option-dropdown-option" data-for="label : ui_scale_labels"
+					     data-class-selected="it_index == ui_scale_index"
+					     data-event-click="option_dropdown_option_click(5, it_index)">{{label}}</div>
+				</div>
+			</div>
+			<span class="tooltip option-row-tip">{{ui_scale_tooltip}}</span>
+		</div>
+	</div>
+
+	<!-- Tab 5: General -->
+	<div class="option-tab-panel" data-class-hidden="active_tab != 5">
+		<div class="option-row option-select-row">
+			<span class="option-row-label">{{language_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(3)">{{language_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 3">
+					<div class="option-dropdown-option" data-for="label : language_labels"
+					     data-class-selected="it_index == language_index"
+					     data-event-click="option_dropdown_option_click(3, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="option-row option-select-row">
+			<span class="option-row-label">{{font_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(4)">{{font_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 4">
+					<div class="option-dropdown-option" data-for="label : font_labels"
+					     data-class-selected="it_index == font_index"
+					     data-event-click="option_dropdown_option_click(4, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

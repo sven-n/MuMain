@@ -7,10 +7,11 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "UIGuildInfo.h"
 #include "Character/CSParts.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -27,42 +28,6 @@ int s_nTargetFireMemberIndex = 0;
 char Guild_Skill_Button = 0;
 
 void RenderGoldRect(float fPos_x, float fPos_y, float fWidth, float fHeight, int iFillType = 0);
-
-int DoBreakUpGuildAction(POPUP_RESULT Result)
-{
-    if (Result == POPUP_RESULT_YES)
-    {
-        DeleteGuildIndex = 0;
-        ErrorMessage = MESSAGE_DELETE_GUILD;
-        ClearInput(FALSE);
-        InputEnable = FALSE;
-        InputNumber = 1;
-        InputTextMax[0] = g_iLengthAuthorityCode;
-        InputTextHide[0] = 1;
-    }
-
-    return 1;
-}
-
-int DoDisbandAction(POPUP_RESULT Result)
-{
-    if (Result == POPUP_RESULT_YES)
-    {
-        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(s_szTargetID), 0x03);
-        SocketClient->ToGameServer()->SendGuildListRequest();
-    }
-    return 1;
-}
-
-int DoFireAction(POPUP_RESULT Result)
-{
-    if (Result == POPUP_RESULT_YES)
-    {
-        DeleteGuildIndex = s_nTargetFireMemberIndex;
-        ErrorMessage = MESSAGE_DELETE_GUILD;
-    }
-    return 1;
-}
 
 POINT			s_ptAppointWindow;
 enum eAppointType { APPOINT_SUBGUILDMASTER = 64, APPOINT_BATTLEMASTSER = 32 };
@@ -244,19 +209,33 @@ void CUIGuildInfo::DoGuildInfoTabMouseAction()
         {
             if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
             {
-                wchar_t szText[50];
-                wcscpy(szText, I18N::Game::AllianceMasterCanTDisbandTheGuild);
-                m_dwPopupID = g_pUIPopup->SetPopup(szText, 1, 50, POPUP_OK, NULL);
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.lines = { { I18N::Game::AllianceMasterCanTDisbandTheGuild, false } };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
             else
             {
-                wchar_t szText[4][100];
-
-                wcscpy(szText[0], I18N::Game::OnceYouDisbandTheGuild);
-                wcscpy(szText[1], I18N::Game::AllTheItemsAndZenInTheGuildVaultWillDisappear);
-                wcscpy(szText[2], I18N::Game::AlsoTheGuildRankingInformationWillDisappear);
-                wcscpy(szText[3], I18N::Game::WouldYouLikeToDisbandTheGuild);
-                m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 4, 100, POPUP_YESNO, ::DoBreakUpGuildAction);
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.showCancel = true;
+                cfg.primaryLabel = I18N::Game::Yes;
+                cfg.cancelLabel = I18N::Game::No;
+                cfg.lines = {
+                    { I18N::Game::OnceYouDisbandTheGuild, false },
+                    { I18N::Game::AllTheItemsAndZenInTheGuildVaultWillDisappear, false },
+                    { I18N::Game::AlsoTheGuildRankingInformationWillDisappear, false },
+                    { I18N::Game::WouldYouLikeToDisbandTheGuild, false },
+                };
+                cfg.onPrimary = []
+                {
+                    DeleteGuildIndex = 0;
+                    ErrorMessage = MESSAGE_DELETE_GUILD;
+                    ClearInput(FALSE);
+                    InputEnable = FALSE;
+                    InputNumber = 1;
+                    InputTextMax[0] = g_iLengthAuthorityCode;
+                    InputTextHide[0] = 1;
+                };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
         }
         else
@@ -353,7 +332,7 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                     {
                         s_eAppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
                         wcscpy(s_szTargetID, pText->m_szID);
-                        m_dwPopupID = g_pUIPopup->SetPopup(NULL, 0, 0, POPUP_CUSTOM, NULL);
+                        m_dwPopupID = g_pUIPopup->SetPopup(NULL);
                         g_pUIPopup->SetPopupExtraFunc(::DoAppointAction, ::RenderAppoint);
                     }
                 }
@@ -366,15 +345,27 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
             {
                 if (pText->m_GuildStatus == G_SUB_MASTER || pText->m_GuildStatus == G_BATTLE_MASTER)
                 {
-                    wchar_t szText[2][64];
+                    wchar_t szText[64];
                     GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText();
-                    mu_swprintf(szText[0], I18N::Game::CharacterS, pText->m_szID);
-                    wcscpy(szText[1], I18N::Game::WouldYouLikeToCancelTheRanking);
+                    mu_swprintf(szText, I18N::Game::CharacterS, pText->m_szID);
 
                     if (GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText())
                         wcscpy(s_szTargetID, pText->m_szID);
 
-                    m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 2, 64, POPUP_YESNO, ::DoDisbandAction);
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.showCancel = true;
+                    cfg.primaryLabel = I18N::Game::Yes;
+                    cfg.cancelLabel = I18N::Game::No;
+                    cfg.lines = {
+                        { szText, false },
+                        { I18N::Game::WouldYouLikeToCancelTheRanking, false },
+                    };
+                    cfg.onPrimary = []
+                    {
+                        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(s_szTargetID), 0x03);
+                        SocketClient->ToGameServer()->SendGuildListRequest();
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
             }
         }
@@ -392,10 +383,23 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                         s_nTargetFireMemberIndex = GetGuildMemberIndex(pText->m_szID);
                     }
 
-                    wchar_t szText[2][64];
-                    mu_swprintf(szText[0], I18N::Game::CharacterS, pText->m_szID);
-                    wcscpy(szText[1], I18N::Game::WouldYouLikeToRelease);
-                    m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 2, 64, POPUP_YESNO, ::DoFireAction);
+                    wchar_t szText[64];
+                    mu_swprintf(szText, I18N::Game::CharacterS, pText->m_szID);
+
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.showCancel = true;
+                    cfg.primaryLabel = I18N::Game::Yes;
+                    cfg.cancelLabel = I18N::Game::No;
+                    cfg.lines = {
+                        { szText, false },
+                        { I18N::Game::WouldYouLikeToRelease, false },
+                    };
+                    cfg.onPrimary = []
+                    {
+                        DeleteGuildIndex = s_nTargetFireMemberIndex;
+                        ErrorMessage = MESSAGE_DELETE_GUILD;
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
             }
         }
@@ -415,15 +419,6 @@ void CUIGuildInfo::RenderGuildMemberTab()
     }
 }
 
-int DoBanUnionGuildAction(POPUP_RESULT Result)
-{
-    if (Result == POPUP_RESULT_YES)
-    {
-        SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(s_szTargetID));
-    }
-    return 1;
-}
-
 void CUIGuildInfo::DoGuildUnionMouseAction()
 {
     g_dwActiveUIID = m_UnionListBox.GetUIID();
@@ -438,9 +433,9 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
             {
                 if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
                 {
-                    wchar_t szText[50];
-                    wcscpy(szText, I18N::Game::AllianceMasterCanTWithdrawTheGuild);
-                    m_dwPopupID = g_pUIPopup->SetPopup(szText, 1, 50, POPUP_OK, NULL);
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.lines = { { I18N::Game::AllianceMasterCanTWithdrawTheGuild, false } };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
                 else
                 {
@@ -454,13 +449,23 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
                 {
                     if (wcscmp(pText->szName, GuildMark[Hero->GuildMarkIndex].GuildName))
                     {
-                        wchar_t szText[2][64];
-
-                        mu_swprintf(szText[0], I18N::Game::SGuildFromTheAlliance, pText->szName);
-                        wcscpy(szText[1], I18N::Game::WouldYouLikeToRelease);
+                        wchar_t szText[64];
+                        mu_swprintf(szText, I18N::Game::SGuildFromTheAlliance, pText->szName);
                         wcscpy(s_szTargetID, pText->szName);
 
-                        m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 2, 64, POPUP_YESNO, ::DoBanUnionGuildAction);
+                        mu::ui::window::GenericDialogConfig cfg;
+                        cfg.showCancel = true;
+                        cfg.primaryLabel = I18N::Game::Yes;
+                        cfg.cancelLabel = I18N::Game::No;
+                        cfg.lines = {
+                            { szText, false },
+                            { I18N::Game::WouldYouLikeToRelease, false },
+                        };
+                        cfg.onPrimary = []
+                        {
+                            SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(s_szTargetID));
+                        };
+                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                     }
                 }
             }

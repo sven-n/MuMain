@@ -1,0 +1,52 @@
+<rml>
+<head>
+	<title>Mix Inventory</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="mix_inventory.rcss"/>
+</head>
+<body data-model="mix_inventory">
+	<!-- Window frame/title/Mix button/recipe-result content are all RmlUi now
+	     (SyncMixContentModel(), MixInventory.cpp). Only the inventory grid and the socket list box
+	     (a real interactive widget, not presentation) stay fully native. Background lives in
+	     mix_inventory_bg.rml instead, since it must paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- Same header composition as MyInventory/StorageExt (base.rcss's .modern-header-rail
+		     family, -px variant since #panel carries transform:scale(root_scale)). -->
+		<div class="modern-header-rail-px mix-header-rail">
+			<div class="modern-joint-px"></div>
+			<div class="modern-header-text-px">
+				<div id="title" class="modern-header-title-px">{{title}}</div>
+			</div>
+		</div>
+
+		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate">{{tax_rate_text}}</div>
+
+		<div class="mix-content" data-class-hidden="!show_recipe">
+			<div class="mix-line mix-recipe-line" data-style-color="recipe_color">{{recipe_line1}}</div>
+			<div class="mix-line mix-recipe-line" data-style-color="recipe_color"
+			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</div>
+
+			<div class="mix-line mix-success-rate" data-class-hidden="!show_success_rate"
+			     data-style-color="success_rate_color">{{success_rate_text}}</div>
+
+			<div class="mix-line mix-required-zen" data-class-hidden="!show_required_zen">{{required_zen_text}}</div>
+
+			<div class="mix-line mix-prediction" data-class-hidden="!show_prediction">{{prediction_text}}</div>
+
+			<div class="mix-line" data-for="s : source_lines" data-style-color="s.color">{{s.text}}</div>
+			<div class="mix-line" data-for="s : status_lines" data-style-color="s.color">{{s.text}}</div>
+			<div class="mix-line" data-for="a : advice_lines" data-style-color="a.color">{{a.text}}</div>
+			<div class="mix-line" data-for="d : description_lines" data-style-color="d.color">{{d.text}}</div>
+
+			<div class="mix-line mix-socket-prompt" data-class-hidden="!show_socket_prompt">{{socket_prompt_text}}</div>
+		</div>
+
+		<div id="btn_mix" class="modern-icon-btn-px mix-btn-mix" data-class-hidden="!mix_visible"
+		     data-class-locked="mix_locked" data-event-click="mix_inventory_mix_click">
+			<span class="modern-icon-btn-glyph-px">&#8644;</span>
+		</div>
+		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
+	</div>
+</body>
+</rml>

@@ -1,0 +1,39 @@
+/* Background layer for lucky_item.rcss, rendered behind the still-native 3D inventory grid --
+   flat frame fill only, no interactive elements. Reuses the real 5-piece sprite composition
+   CLuckyItemWnd's old LoadImg()/SetFrame()/Render_Frame() drew, straight from LoadImg()'s
+   szFileName[] table -- note the TOP piece here is newui_item_back04.tga, NOT
+   newui_item_back01.tga like storage_ext_bg.rcss's own top piece; the two windows draw different
+   top art despite sharing left/right/bottom/fill.
+
+   Unlike storage_ext_bg.rcss's fixed 190x429, every piece here sizes off #bg_root's runtime
+   width/height (root_width/root_height) instead of a literal px box -- m_fSizeX/m_fSizeY are
+   genuinely runtime-variable for this window (LuckyItemWnd.h). */
+
+@spritesheet lucky-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   lucky-bg-fill:   0px 0px 190px 429px; }
+@spritesheet lucky-bg-top-sheet    { src: "../../../newui_item_back04.tga";   lucky-bg-top:    0px 0px 190px 64px;  }
+@spritesheet lucky-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; lucky-bg-left:   0px 0px 21px 320px;  }
+@spritesheet lucky-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; lucky-bg-right:  0px 0px 21px 320px;  }
+@spritesheet lucky-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   lucky-bg-bottom: 0px 0px 190px 45px;  }
+
+#bg_root {
+	position: absolute;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+/* All five pieces stretch to fill their own box regardless of the spritesheet rect above (RmlUi's
+   `image` decorator always fills the element's box) -- the same stretch behavior the native
+   RenderImage() calls always had, just driven by CSS now instead of C++ math. left/right have no
+   explicit height: with both `top` and `bottom` set, they stretch to whatever's left between the
+   fixed-height top/bottom pieces, tracking #bg_root's own runtime height. top/bottom have no
+   explicit width for the same reason (`left`+`right` stretch), tracking runtime width. */
+.bg-fill   { left: 0; top: 0; right: 0; bottom: 0; decorator: image(lucky-bg-fill); }
+.bg-top    { left: 0; top: 0; right: 0; height: 64px; decorator: image(lucky-bg-top); }
+.bg-left   { left: 0; top: 64px; bottom: 45px; width: 21px; decorator: image(lucky-bg-left); }
+.bg-right  { right: 0; top: 64px; bottom: 45px; width: 21px; decorator: image(lucky-bg-right); }
+.bg-bottom { left: 0; bottom: 0; right: 0; height: 45px; decorator: image(lucky-bg-bottom); }

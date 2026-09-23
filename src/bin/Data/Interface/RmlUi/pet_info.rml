@@ -1,0 +1,102 @@
+<rml>
+<head>
+	<title>Pet Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="pet_info.rcss"/>
+</head>
+<body>
+	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from UI::Scaling::GetActiveTransform(),
+	     same convention as character_info.rml's #panel (this window is collision-shuffled between the
+	     same PanelColumnX() slots, and force-paired with Character -- see WindowSystem.cpp). -->
+	<div id="panel" data-model="pet_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span id="title">{{window_title}}</span>
+
+		<div class="tab-row">
+			<div class="tab-btn tab-btn-darkhorse" data-class-active="active_tab == 0"
+			     data-event-click="petinfo_select_tab(0)">{{tab_darkhorse_label}}</div>
+			<div class="tab-btn tab-btn-darkspirit" data-class-active="active_tab == 1"
+			     data-event-click="petinfo_select_tab(1)">{{tab_darkspirit_label}}</div>
+		</div>
+
+		<!-- Dark Horse tab -->
+		<div class="pet-tab" data-class-hidden="active_tab != 0">
+			<span class="pet-no-pet-msg" data-class-hidden="dh_has_pet">{{dh_no_pet_text}}</span>
+			<div class="pet-info-block" data-class-hidden="!dh_has_pet">
+				<span class="pet-subtitle">{{tab_darkhorse_label}}</span>
+
+				<div class="gbox-corner gbox-dh-corner-tl"></div>
+				<div class="gbox-corner gbox-dh-corner-tr"></div>
+				<div class="gbox-corner gbox-dh-corner-bl"></div>
+				<div class="gbox-corner gbox-dh-corner-br"></div>
+				<div class="gbox-title-fill gbox-dh-title-fill"></div>
+				<div class="gbox-content-fill gbox-dh-content-fill"></div>
+				<span class="gbox-title-text gbox-dh-title-text">{{dh_level_text}}</span>
+
+				<span class="pet-stat-text pet-dh-life-text">{{dh_life_text}}</span>
+				<div class="hp-bar hp-bar-dh">
+					<div class="hp-bar-fill" data-style-width="dh_hp_percent + '%'"></div>
+				</div>
+				<span class="pet-stat-text pet-dh-exp-text">{{dh_exp_text}}</span>
+				<span class="pet-stat-text pet-dh-dmg-text">{{dh_dmg_text}}</span>
+				<span class="pet-stat-text pet-dh-atkspeed-text">{{dh_atkspeed_text}}</span>
+			</div>
+		</div>
+
+		<!-- Dark Spirit tab -->
+		<div class="pet-tab" data-class-hidden="active_tab != 1">
+			<span class="pet-no-pet-msg" data-class-hidden="ds_has_pet">{{ds_no_pet_text}}</span>
+			<div class="pet-info-block" data-class-hidden="!ds_has_pet">
+				<span class="pet-subtitle">{{tab_darkspirit_label}}</span>
+
+				<div class="gbox-corner gbox-ds1-corner-tl"></div>
+				<div class="gbox-corner gbox-ds1-corner-tr"></div>
+				<div class="gbox-corner gbox-ds1-corner-bl"></div>
+				<div class="gbox-corner gbox-ds1-corner-br"></div>
+				<div class="gbox-title-fill gbox-ds1-title-fill"></div>
+				<div class="gbox-content-fill gbox-ds1-content-fill"></div>
+				<span class="gbox-title-text gbox-ds1-title-text">{{ds_level_text}}</span>
+
+				<span class="pet-stat-text pet-ds-life-text">{{ds_life_text}}</span>
+				<div class="hp-bar hp-bar-ds">
+					<div class="hp-bar-fill" data-style-width="ds_hp_percent + '%'"></div>
+				</div>
+				<span class="pet-stat-text pet-ds-exp-text">{{ds_exp_text}}</span>
+				<span class="pet-stat-text pet-ds-dmg-text">{{ds_dmg_text}}</span>
+				<span class="pet-stat-text pet-ds-atkspeed-text">{{ds_atkspeed_text}}</span>
+				<span class="pet-stat-text pet-ds-charisma-text">{{ds_charisma_text}}</span>
+
+				<div class="gbox-corner gbox-ds2-corner-tl"></div>
+				<div class="gbox-corner gbox-ds2-corner-tr"></div>
+				<div class="gbox-corner gbox-ds2-corner-bl"></div>
+				<div class="gbox-corner gbox-ds2-corner-br"></div>
+				<div class="gbox-title-fill gbox-ds2-title-fill"></div>
+				<div class="gbox-content-fill gbox-ds2-content-fill"></div>
+				<span class="gbox-title-text gbox-ds2-title-text">{{commands_label}}</span>
+
+				<div class="skill-slot skill-slot-0"></div>
+				<div class="skill-icon skill-icon-0"></div>
+				<span class="skill-label skill-label-0">{{skill_basicaction_label}}</span>
+				<div class="skill-slot skill-slot-1"></div>
+				<div class="skill-icon skill-icon-1"></div>
+				<span class="skill-label skill-label-1">{{skill_randomattack_label}}</span>
+				<div class="skill-slot skill-slot-2"></div>
+				<div class="skill-icon skill-icon-2"></div>
+				<span class="skill-label skill-label-2">{{skill_attackwithowner_label}}</span>
+				<div class="skill-slot skill-slot-3"></div>
+				<div class="skill-icon skill-icon-3"></div>
+				<span class="skill-label skill-label-3">{{skill_attacktarget_label}}</span>
+			</div>
+		</div>
+
+		<div id="btn_exit" data-event-click="petinfo_click_exit"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

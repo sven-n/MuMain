@@ -1,0 +1,89 @@
+/* Legacy theme for CLuckyItemWnd's chrome (frame/title/mix button). #panel's left/top/scale/
+   width/height come live from C++ (SyncRmlModel()) -- width/height are genuinely runtime-variable
+   for this window (m_fSizeX/m_fSizeY), unlike every other fixed-size window in this family, so
+   there is no static width/height declared here (compare storage_ext.rcss's fixed 190px/429px).
+   Coordinates below are plain reference px, not dp. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	font-family: "token(font-body)";
+}
+
+/* left:0/right:0 (not a fixed width) so the title stays centered across #panel's runtime width.
+   top:11px matches storage_ext.rcss's own subject-text offset -- both windows' native RenderText
+   call used the same `m_Pos.y + 18` baseline offset. */
+#title {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 11px;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 12px;
+}
+
+/* Centered via left:50%/negative margin-left (half of the button's own 44px width) rather than
+   width-dependent centering math, so it stays centered regardless of #panel's runtime width --
+   same technique base.rcss's .modern-joint-px uses. top:380px matches the native
+   `m_ptPos.y + 380` offset exactly (LuckyItemWnd.cpp's old ChangeButtonInfo() call), a fixed
+   distance from the panel's TOP, not scaled with height. */
+@spritesheet lucky-mix-btn-sheet { src: "../../../newui_bt_mix.tga"; lucky-mix-btn: 0px 0px 44px 35px; }
+.mix-btn {
+	position: absolute;
+	left: 50%;
+	margin-left: -22px;
+	top: 380px;
+	width: 44px;
+	height: 35px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(lucky-mix-btn);
+}
+.mix-btn:hover { filter: brightness(1.25); }
+.mix-btn.hidden { display: none; }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-mix {
+	top: 364px;
+	left: 50%;
+	width: 120px;
+	margin-left: -60px;
+	text-align: center;
+}
+#btn_mix:hover ~ .tooltip-mix { display: block; }
+
+/* Former Render_Frame()'s m_sText[]/AddText() text loop. left:10/right:10 (rather than a fixed
+   width) mirrors the native `m_fSizeX - 20` width exactly, since #panel's own width is runtime-
+   variable (root_width). top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
+   is a fixed 11px-tall block (matching the native loop's `11.0f * i` per-slot spacing) so blank
+   spacer entries (empty text) still preserve the original's vertical rhythm. */
+#text_lines {
+	position: absolute;
+	left: 10px;
+	right: 10px;
+	top: 208px;
+}
+.lucky-line {
+	display: block;
+	height: 11px;
+	line-height: 11px;
+	overflow: hidden;
+	white-space: nowrap;
+	color: token(text-primary);
+	font-size: 12px;
+	text-align: center;
+}

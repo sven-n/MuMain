@@ -1,0 +1,85 @@
+/* Background-layer companion to generic_confirm_dialog.rcss -- see npc_shop_bg.rcss's own comment
+   for the full mechanism/rationale. base.rcss now comes in via window_shell_bg.rml's own head
+   (merged automatically into this document) rather than a direct link here.
+
+   dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
+   dialog is a LayoutMode::Dialog window, so it centers via plain CSS instead of a data-bound
+   root_x/root_y/root_scale transform.
+
+   body's own width/height must be set explicitly here -- window_shell_bg.rml's own base.rcss link
+   doesn't supply this, and #panel's left:50%/top:50% has nothing to resolve against otherwise. */
+
+body {
+	width: 100%;
+	height: 100%;
+}
+
+#panel {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 230dp;
+	height: 178dp;
+	pointer-events: none;
+	border-radius: token(radius-sm)dp;
+	background-color: #080a08;
+	decorator:
+		repeating-linear-gradient(135deg, rgba(255, 255, 255, 2) 0px 2dp, transparent 2dp 5dp),
+		linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11dp 30dp rgba(0, 0, 0, 158),
+		0 2dp 5dp rgba(0, 0, 0, 217),
+		inset 0 0 0 1dp #090a08,
+		inset 0 0 0 3dp rgba(90, 87, 69, 46);
+}
+/* Mirrors the fg document's own #panel.tall (GenericDialogConfig::tallPanel) -- kept in sync via
+   GenericConfirmDialog.cpp's Show()/ShowNext() (this document has no data model of its own to bind
+   a class through). .modern-shell-edge/.modern-groove/#content below are all fixed dp insets, not
+   percentages, so they auto-stretch to fill the extra height with no change needed. */
+#panel.tall {
+	height: 250dp;
+}
+
+/* window_shell_bg.rml supplies .modern-shell-edge/.modern-groove structurally (shared with any
+   other background-context consumer), but this dialog's own box-shadow highlight alphas are
+   dimmer than the shared class's defaults -- this same-document override (rcss is per-document, so
+   it can't affect any other window_shell_bg consumer) restores the exact values this panel shipped
+   with before adopting the shared structure. */
+.modern-shell-edge {
+	box-shadow:
+		inset 1dp 0 0 rgba(130, 121, 91, 28),
+		inset -1dp 0 0 rgba(0, 0, 0, 204),
+		inset 0 1dp 0 rgba(151, 139, 101, 20),
+		inset 0 -1dp 0 rgba(0, 0, 0, 230);
+}
+.modern-groove {
+	box-shadow:
+		inset 0 0 0 1dp rgba(121, 112, 83, 15),
+		inset 0 0 12dp rgba(0, 0, 0, 153);
+}
+
+/* Content-well's own fill, targeting window_shell_bg.rml's own #content slot (position AND paint
+   both stay this document's own responsibility -- .modern-content-well is deliberately not applied
+   there, since its shared paint has no hatch texture, unlike this dialog's own). left/right/top/
+   bottom match the fg document's own .gcd-body position exactly (fg's copy is layout-only now, no
+   fill of its own). */
+#content {
+	position: absolute;
+	left: 16dp;
+	right: 16dp;
+	top: 10dp;
+	bottom: 54dp;
+	pointer-events: none;
+	background-color: token(surface-recessed);
+	decorator:
+		repeating-linear-gradient(135deg, rgba(255, 255, 255, 2) 0px 1dp, transparent 1dp 4dp),
+		linear-gradient(to bottom, #0b0d0b, #070907);
+	border-width: 1dp;
+	border-color: token(border-inner);
+	box-shadow:
+		inset 0 0 16dp rgba(0, 0, 0, 166),
+		inset 0 1dp 0 rgba(255, 255, 255, 5);
+}

@@ -5,6 +5,8 @@
 #include <imagehlp.h>
 #endif
 
+#include <algorithm>
+
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
 #include "Core/Platform/WinCompat.h"
@@ -79,10 +81,21 @@ void GameConfig::Load()
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
+    m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
+    m_uiScalePercent = ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
     m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
+    m_renderBackend = GameConfigValidation::ValidateRenderBackend(
+        ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
+    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
+    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
+    m_disableSkillEffectModels =
+        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
+    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
+    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -124,9 +137,17 @@ void GameConfig::Save()
 
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
+    WriteString(CfgSectionUI, CfgKeyRmlTheme, m_rmlTheme);
+    WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+    WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
+    WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
+    WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
+    WriteBool(CfgSectionRender, CfgKeyDisableBoids, m_disableBoids);
+    WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
+    WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -193,6 +214,36 @@ void GameConfig::SetVSyncEnabled(bool enabled)
     m_vsyncEnabled = enabled;
 }
 
+void GameConfig::SetDisableEffects(bool disabled)
+{
+    m_disableEffects = disabled;
+}
+
+void GameConfig::SetDisableParticles(bool disabled)
+{
+    m_disableParticles = disabled;
+}
+
+void GameConfig::SetDisableSkillEffectModels(bool disabled)
+{
+    m_disableSkillEffectModels = disabled;
+}
+
+void GameConfig::SetDisableBoids(bool disabled)
+{
+    m_disableBoids = disabled;
+}
+
+void GameConfig::SetDisableWingShadow(bool disabled)
+{
+    m_disableWingShadow = disabled;
+}
+
+void GameConfig::SetFpsCap(int fps)
+{
+    m_fpsCap = fps;
+}
+
 void GameConfig::SetRememberMe(bool remember)
 {
     m_rememberMe = remember;
@@ -224,6 +275,44 @@ void GameConfig::SetUILocale(const std::wstring& locale)
 void GameConfig::SetFontSelection(const std::wstring& font)
 {
     m_fontSelection = font;
+}
+
+void GameConfig::SetRmlTheme(const std::wstring& theme)
+{
+    m_rmlTheme = theme;
+}
+
+void GameConfig::SetUIScalePercent(int percent)
+{
+    // Clamped, not validated-and-rejected: every writer (the options window's UI-scale row, the
+    // console command) is a user-facing dial, and silently keeping the previous value would look
+    // like the control did nothing. See CfgMinUIScalePercent's own comment for the bounds.
+    m_uiScalePercent = std::clamp(percent, CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+}
+
+bool GameConfig::GetWindowPosition(const std::wstring& windowId, int& outX, int& outY) const
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
+    const std::wstring prefix = CfgKeyWindowPositionPrefix + windowId + L".";
+    if (!ReadBool(CfgSectionUI, (prefix + L"HasOverride").c_str(), false))
+        return false;
+
+    outX = ReadInt(CfgSectionUI, (prefix + L"X").c_str(), 0);
+    outY = ReadInt(CfgSectionUI, (prefix + L"Y").c_str(), 0);
+    return true;
+}
+
+void GameConfig::SetWindowPosition(const std::wstring& windowId, int x, int y)
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
+    const std::wstring prefix = CfgKeyWindowPositionPrefix + windowId + L".";
+    WriteInt(CfgSectionUI, (prefix + L"X").c_str(), x);
+    WriteInt(CfgSectionUI, (prefix + L"Y").c_str(), y);
+    WriteBool(CfgSectionUI, (prefix + L"HasOverride").c_str(), true);
 }
 
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)
@@ -323,7 +412,7 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
 }
 
 // Helper functions using Windows INI API
-int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
+int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.wstring().c_str());
 }
@@ -336,7 +425,7 @@ void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
     WritePrivateProfileStringW(section, key, buffer, m_configPath.wstring().c_str());
 }
 
-bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
+bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue ? 1 : 0, m_configPath.wstring().c_str()) != 0;
 }

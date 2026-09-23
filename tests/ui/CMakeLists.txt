@@ -8,7 +8,7 @@ mu_add_test(
     NAME text_search_tests
     SOURCES
         test_text_search.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/Legacy/TextSearch.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Widgets/TextSearch.cpp
 )
 
 add_test(
@@ -21,7 +21,7 @@ add_test(
 add_test(
     NAME inventory_window_captures_hover
     COMMAND ${CMAKE_COMMAND}
-        -DMU_INVENTORY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/NewUI/Inventory/NewUIMyInventory.cpp
+        -DMU_INVENTORY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/MyInventory.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_mouse_capture.cmake
 )
 
@@ -67,5 +67,13 @@ add_test(
 mu_add_test(
     NAME character_name_lifecycle_tests
     SOURCES test_character_name_lifecycle.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME window_geometry_tests
+    SOURCES
+        test_window_geometry.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Core/WindowGeometry.cpp
     LINK_LIBS MuClient
 )

@@ -20,15 +20,18 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Core/Utilities/StringUtils.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Scaling/UITransform.h"
 
 extern  bool    SkillEnable;
 extern	wchar_t TextList[50][100];
@@ -159,6 +162,57 @@ namespace
         MouseRButtonPush = false;
         MouseRButton = false;
         MouseRButtonPress = 0;
+    }
+
+    // Same TextList/TextListColor/TextBold -> UI::RmlBridge::Tooltip::Line conversion as
+    // ZzzInventory.cpp's own BuildTooltipLinesFromTextList() (RenderItemInfo()/RenderRepairInfo()) --
+    // duplicated locally since that one has internal linkage there. Keeps RenderPetItemInfo()'s
+    // existing per-line text/color logic untouched; only what happens with the finished buffer
+    // changes, from a direct RenderTipTextList() native draw to the shared RmlUi tooltip.
+    std::vector<UI::RmlBridge::Tooltip::Line> BuildPetTooltipLinesFromTextList(int textNum)
+    {
+        std::vector<UI::RmlBridge::Tooltip::Line> lines;
+        lines.reserve(static_cast<size_t>(textNum));
+
+        for (int i = 0; i < textNum; ++i)
+        {
+            if (TextList[i][0] == L'\0')
+                break;
+
+            UI::RmlBridge::Tooltip::Line line;
+            if (TextList[i][0] == L'\n')
+            {
+                line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
+            }
+            else if (TextList[i][0] == L' ' && TextList[i][1] == L'\0')
+            {
+                line.kind = UI::RmlBridge::Tooltip::Line::Kind::FullSpacer;
+            }
+            else
+            {
+                line.text = StringUtils::WideToNarrow(TextList[i]);
+                line.bold = (TextBold[i] != 0);
+                switch (TextListColor[i])
+                {
+                case TEXT_COLOR_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
+                case TEXT_COLOR_GRAY: line.color = UI::RmlBridge::Tooltip::LineColor::Gray; break;
+                case TEXT_COLOR_RED: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
+                case TEXT_COLOR_YELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::Yellow; break;
+                case TEXT_COLOR_GREEN: line.color = UI::RmlBridge::Tooltip::LineColor::Green; break;
+                case TEXT_COLOR_PURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::Purple; break;
+                case TEXT_COLOR_REDPURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::RedPurple; break;
+                case TEXT_COLOR_VIOLET: line.color = UI::RmlBridge::Tooltip::LineColor::Violet; break;
+                case TEXT_COLOR_ORANGE: line.color = UI::RmlBridge::Tooltip::LineColor::Orange; break;
+                case TEXT_COLOR_DARKRED: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
+                case TEXT_COLOR_DARKBLUE: line.color = UI::RmlBridge::Tooltip::LineColor::DarkBlueHighlight; break;
+                case TEXT_COLOR_DARKYELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::DarkYellowHighlight; break;
+                case TEXT_COLOR_GREEN_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::GreenBlueHighlight; break;
+                case TEXT_COLOR_WHITE: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
+                }
+            }
+            lines.push_back(std::move(line));
+        }
+        return lines;
     }
 }
 
@@ -375,6 +429,47 @@ static std::uint8_t g_tabBar = 0;
             return true;
         }
         return false;
+    }
+
+    bool BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel)
+    {
+        if (Type < AT_PET_COMMAND_DEFAULT || Type >= AT_PET_COMMAND_END) return false;
+        if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD) return false;
+
+        using UI::Skills::Tooltip::Line;
+        using UI::Skills::Tooltip::LineColor;
+
+        const int cmdType = Type - AT_PET_COMMAND_DEFAULT;
+
+        // Mirrors RenderPetCmdInfo()'s own TextNum/SkipNum bookkeeping exactly -- every line here
+        // (including the two blanks AND the body line) increments SkipNum in the original, so
+        // outModel.skipCount must match 1:1 or Render()'s own height math (still used by this
+        // model's other consumers, RenderTipTextList via BuildModelForSlot) would drift.
+        auto pushLine = [&outModel](const wchar_t* text, LineColor color, bool bold, bool blank)
+        {
+            if (outModel.count >= UI::Skills::Tooltip::MAX_TOOLTIP_LINES) return;
+            Line& l = outModel.lines[outModel.count++];
+            wcsncpy(l.text, text, UI::Skills::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1);
+            l.text[UI::Skills::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1] = L'\0';
+            l.color = color;
+            l.isBold = bold;
+            l.isBlank = blank;
+            ++outModel.skipCount;
+        };
+
+        pushLine(I18N::Game::Lookup(1219 + cmdType), LineColor::Blue, true, false);
+        pushLine(L"\n", LineColor::White, false, true);
+        pushLine(L"\n", LineColor::White, false, true);
+
+        switch (cmdType)
+        {
+        case PET_CMD_DEFAULT: pushLine(I18N::Game::FollowAroundTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_RANDOM: pushLine(I18N::Game::AttackAnyMonstersAroundTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_OWNER: pushLine(I18N::Game::AttackTheMonsterTogetherWithTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_TARGET: pushLine(I18N::Game::AttackTheMonsterSelectedByTheCharacter, LineColor::White, false, false); break;
+        }
+
+        return true;
     }
 
     void DeletePet(CHARACTER* c)
@@ -632,7 +727,7 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_WHITE, false, true, L"\n");
         };
 
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
         {
             wchar_t textBuffer[kTooltipBufferCapacity] {};
             std::uint32_t gold = GetPetItemValue(&giPetManager::gs_PetInfo) / 3u;
@@ -642,7 +737,7 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_WHITE, true, false, priceFormat.c_str(), textBuffer);
             appendEmptyLine();
         }
-        else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
+        else if ((iInvenType == mu::ui::window::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP))
         {
             int price = 0;
             const int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
@@ -766,7 +861,14 @@ static std::uint8_t g_tabBar = 0;
             sy -= Height;
         }
 
-        RenderTipTextList(sx, sy, TextNum, 0);
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        UI::RmlBridge::Tooltip::Config config;
+        config.lines = BuildPetTooltipLinesFromTextList(TextNum);
+        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
+        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
+        config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
+        UI::RmlBridge::Tooltip::Show(config);
         return true;
     }
 }

@@ -1,0 +1,21 @@
+<rml>
+<head>
+	<title>My Shop Background</title>
+	<link type="text/rcss" href="my_shop_bg.rcss"/>
+</head>
+<body data-model="my_shop_bg">
+	<!-- Background-context document -- sits behind the grid's live 3D icons (native
+	     C3DRenderMng interleave). Never interactive. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+		<!-- Edit-box background strip, relocated from my_shop.rml's foreground document --
+		     see my_shop_bg.rcss's #edit_bg comment for why. -->
+		<div id="edit_bg"></div>
+	</div>
+</body>
+</rml>

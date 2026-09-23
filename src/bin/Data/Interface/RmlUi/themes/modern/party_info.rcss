@@ -1,0 +1,146 @@
+/* Modern theme for CPartyInfoWindow -- same forged-dialog shell/header-rail/exit-button family as
+   CCharacterInfoWindow/CMyQuestInfoWindow/CPetInfoWindow, via docked_panel_frame.rcss and
+   themes/modern/party_info.rml (this window's own per-theme markup override). Each member row still
+   stacks via normal block flow (height:71px), same as legacy's own .party-row. */
+#title {
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	width: 72px;
+	text-align: center;
+	color: token(text-warm);
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+
+.party-empty-msg {
+	position: absolute;
+	left: 20px;
+	top: 60px;
+	width: 160px;
+	color: token(text-primary);
+	font-size: 12px;
+	font-family: "token(font-body)";
+	text-align: left;
+}
+.party-empty-msg span { display: block; line-height: 15px; }
+
+.party-list { position: absolute; left: 10px; top: 40px; width: 170px; }
+.party-row { position: relative; display: block; width: 170px; height: 71px; }
+
+.gbox-content-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 170px;
+	height: 70px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+
+.party-name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 8px;
+	width: 70px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+.party-flag {
+	position: absolute;
+	left: 136px;
+	top: 24px;
+	width: 8px;
+	height: 10px;
+	background-color: token(accent-gold-hover);
+	border-radius: 1px;
+	pointer-events: none;
+}
+.party-map {
+	display: block;
+	position: absolute;
+	left: 10px;
+	top: 26px;
+	width: 70px;
+	text-align: left;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(text-secondary);
+	pointer-events: none;
+}
+.party-coord {
+	display: block;
+	position: absolute;
+	left: 85px;
+	top: 26px;
+	width: 60px;
+	text-align: left;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(text-secondary);
+	pointer-events: none;
+}
+.party-hp-bar {
+	position: absolute;
+	left: 10px;
+	top: 39px;
+	width: 147px;
+	height: 4px;
+	background-color: token(surface-control);
+	border-radius: 2px;
+	pointer-events: none;
+}
+.party-hp-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 0%;
+	height: 4px;
+	background-color: #7fc25c;
+	border-radius: 2px;
+	pointer-events: none;
+}
+.party-hp-text {
+	display: block;
+	position: absolute;
+	left: 88px;
+	top: 51px;
+	width: 70px;
+	text-align: right;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	pointer-events: none;
+}
+.party-kick-btn {
+	position: absolute;
+	left: 149px;
+	top: 23px;
+	width: 13px;
+	height: 13px;
+	background-color: token(surface-control);
+	border: 1px token(border-frame);
+	border-radius: 2px;
+	text-align: center;
+	line-height: 11px;
+	font-size: 10px;
+	color: token(accent-gold-hover);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.party-kick-btn:hover { border-color: token(border-hover); color: #ff8080; }
+
+/* Exit: base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family, this window's own
+   left offset only. */
+.party-btn-exit { left: 13px; }
+
+.tooltip { top: 365px; }
+.tooltip-exit { left: -24px; }

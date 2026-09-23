@@ -1,0 +1,52 @@
+/* Legacy theme for CStorageInventoryExt's chrome (frame/title/exit button). #panel's left/top/
+   scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 11px;
+	width: 190px;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 12px;
+}
+
+@spritesheet ext-btn-exit-sheet { src: "../../../newui_exit_00.tga"; ext-btn-exit: 0px 0px 36px 29px; }
+.ext-btn {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(ext-btn-exit);
+}
+.ext-btn:hover { filter: brightness(1.25); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	left: -30px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_exit:hover ~ .tooltip-exit { display: block; }

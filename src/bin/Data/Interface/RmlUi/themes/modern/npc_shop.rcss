@@ -1,0 +1,85 @@
+/* Modern theme for CNPCShop's chrome -- header/repair-buttons/repair-money strip are vector
+   forged-metal chrome (matching Login/SysMenu/MyInventory/Storage Ext's forged-dialog language).
+   Inventory grid stays fully native (sprite art + live 3D icons), same as legacy -- no RmlUi
+   involvement there. No exit button -- see npc_shop.rml's own comment; the frame-corner close "X"
+   stays native. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:7 matches MyInventory/SysMenu's own rail top (keeps .modern-joint-px's rivet at the same
+   -1px relative to npc_shop_bg.rcss's shell edge at -3px -- contained, identical relationship to
+   those windows). height:42 (not MyInventory's 36, or Storage Ext's 29) budgets for this window's
+   own TWO-line title (title + tax-rate) rather than either reference's single line -- this grid
+   starts at `m_Pos.y + 50` (NPCShop.cpp), a full 50px budget: ends at 49px, 1px clear. */
+.shop-header-rail {
+	top: 7px;
+	height: 42px;
+}
+
+/* Overrides modern-header-text-px's left-aligned single-line layout with a full-width centered
+   two-line block, matching this window's own native RT3_SORT_CENTER title/tax-rate lines (unlike
+   MyInventory/Storage Ext's left-aligned single title). margin-top approximates vertical centering
+   of the ~24px-tall two-line block within the 42px rail. */
+.shop-header-text-px {
+	left: 0;
+	width: 190px;
+	text-align: center;
+	margin-top: -13px;
+}
+.shop-tax-rate-px {
+	display: block;
+	margin-top: 2px;
+}
+
+/* Repair/Repair-All buttons: same 37x26 chrome as every other CInventoryCtrl-owning window's
+   corner buttons (base.rcss's .modern-icon-btn-px). Both use the same repair glyph -- the native
+   buttons shared one identical sprite (newui_repair_00.tga) too, differing only by tooltip. */
+.shop-btn-repair     { left: 54px; }
+.shop-btn-repair-all { left: 98px; }
+
+/* Repair-money strip: this window's own 10/355/170/24 native geometry (RenderRepairMoney()), not
+   MyInventory's 15/366/160 gold-strip column -- overridden per .modern-wallet-px's own base.rcss
+   comment inviting exactly this for a window whose layout doesn't share Inventory's column. */
+.shop-repair-wallet {
+	left: 10px;
+	top: 355px;
+	width: 170px;
+	height: 24px;
+}
+.shop-repair-value {
+	top: 360px;
+}
+.shop-repair-wallet.hidden,
+.shop-repair-value.hidden {
+	display: none;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-repair     { left: 12px; }
+.tooltip-repair-all { left: 56px; }
+
+#btn_repair:hover ~ .tooltip-repair,
+#btn_repair_all:hover ~ .tooltip-repair-all {
+	display: block;
+}

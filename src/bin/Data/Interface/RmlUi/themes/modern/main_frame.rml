@@ -1,0 +1,139 @@
+<rml>
+<head>
+	<title>Main Frame</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="main_frame.rcss"/>
+</head>
+<body data-model="main_frame">
+	<!-- Modern theme's copy of CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons.
+	     Per-theme file since the bottom-HUD button row is genuinely absent here (moved to
+	     #top_right_row), not just CSS-hidden -- keep ids/classes/bindings in sync with
+	     themes/legacy/main_frame.rml except #buttons/#buttons_top. #bars gets left/top/scale
+	     live from C++; #exp nests inside it to inherit that transform. -->
+	<div id="bars" data-style-left="bars_left + 'px'" data-style-top="bars_top + 'px'" data-style-transform="'scale(' + bars_scale + ')'">
+		<!-- Read-only-from-C++ anchors marking where the legacy item-hotkey/skill-hotkey bands
+		     go, so each theme controls the anchor without C++ knowing which theme is active. -->
+		<div id="item_hotkey_anchor" class="layout-anchor"></div>
+		<div id="skill_list_anchor" class="layout-anchor"></div>
+		<!-- #gauge_frame is declared AFTER the fill divs -- same-stacking-level siblings paint in
+		     DOM order, so declaring it first would let the fills' solid backgrounds paint over
+		     its thin top border. -->
+		<div id="gauge_fill_left"></div>
+		<div id="gauge_fill_right"></div>
+		<div id="gauge_frame"></div>
+		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
+			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{hp_text}}</span>
+		</div>
+		<span class="tooltip tooltip-hp">{{hp_tooltip}}</span>
+		<div id="bar_sd" class="gauge-slot slot-frame slot-fill">
+			<div class="gauge-fill gauge-fill-sd gauge-fill-vertical" data-style-height="sd_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-sd gauge-fill-horizontal" data-style-width="sd_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{sd_text}}</span>
+		</div>
+		<span class="tooltip tooltip-sd">{{sd_tooltip}}</span>
+		<div id="bar_ag" class="gauge-slot slot-frame slot-fill">
+			<div class="gauge-fill gauge-fill-ag gauge-fill-vertical" data-style-height="ag_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-ag gauge-fill-horizontal" data-style-width="ag_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{ag_text}}</span>
+		</div>
+		<span class="tooltip tooltip-ag">{{ag_tooltip}}</span>
+		<div id="bar_mp" class="gauge-slot slot-frame slot-fill">
+			<div class="gauge-fill gauge-fill-mp gauge-fill-vertical" data-style-height="mp_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-mp gauge-fill-horizontal" data-style-width="mp_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{mp_text}}</span>
+		</div>
+		<span class="tooltip tooltip-mp">{{mp_tooltip}}</span>
+
+		<!-- EXP bar spans from the item-hotkey band's start to the button group's end.
+		     exp_fraction is progress within the current decile, not overall level. -->
+		<div id="exp">
+			<div id="exp_track" class="slot-frame slot-fill">
+				<div id="exp_fill" data-style-width="exp_fraction * 100 + '%'"></div>
+			</div>
+			<span id="exp_digit">{{exp_digit}}</span>
+			<span class="tooltip" id="exp_tooltip">{{exp_tooltip}}</span>
+		</div>
+
+		<!-- Item hotkey chrome: interactive overlay only (hover highlight, stack count,
+		     right-click-to-use) -- icon art stays a live 3D model render underneath
+		     (RenderItem3D()/RenderObjectScreen(), no RmlUi equivalent). -->
+		<div id="item_slots">
+			<div id="item_slot_0" class="slot-frame" data-class-selected="item_slot_0_hovered" data-event-mouseover="item_hotkey_hover(0)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(0)"><span class="slot-hotkey-label">Q</span><span class="item-stack-label">{{item_slot_0_count}}</span></div>
+			<div id="item_slot_1" class="slot-frame" data-class-selected="item_slot_1_hovered" data-event-mouseover="item_hotkey_hover(1)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(1)"><span class="slot-hotkey-label">W</span><span class="item-stack-label">{{item_slot_1_count}}</span></div>
+			<div id="item_slot_2" class="slot-frame" data-class-selected="item_slot_2_hovered" data-event-mouseover="item_hotkey_hover(2)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(2)"><span class="slot-hotkey-label">E</span><span class="item-stack-label">{{item_slot_2_count}}</span></div>
+			<div id="item_slot_3" class="slot-frame" data-class-selected="item_slot_3_hovered" data-event-mouseover="item_hotkey_hover(3)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(3)"><span class="slot-hotkey-label">R</span><span class="item-stack-label">{{item_slot_3_count}}</span></div>
+		</div>
+		<!-- data-class-selected mirrors which hotkey slot shows the equipped skill.
+		     skill-hotkey-label uses its own class (not .slot-hotkey-label) since it's real
+		     visible content, not sprite-baked; empty string renders nothing for an unbound
+		     slot. -->
+		<div id="skill_slots">
+			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected" data-event-click="skill_hotkey_click(0)" data-event-mouseover="skill_hotkey_hover(0)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_0_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_0_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected" data-event-click="skill_hotkey_click(1)" data-event-mouseover="skill_hotkey_hover(1)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_1_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_1_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected" data-event-click="skill_hotkey_click(2)" data-event-mouseover="skill_hotkey_hover(2)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_2_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_2_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected" data-event-click="skill_hotkey_click(3)" data-event-mouseover="skill_hotkey_hover(3)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_3_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_3_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected" data-event-click="skill_hotkey_click(4)" data-event-mouseover="skill_hotkey_hover(4)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_4_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_4_cooldown * 100 + '%'"></div></div>
+			<div id="current_skill_slot" class="slot-frame" data-event-click="skill_current_click" data-event-mouseover="skill_current_hover" data-event-mouseout="skill_unhover"><div class="cooldown-wipe" data-style-height="current_skill_cooldown * 100 + '%'"></div></div>
+		</div>
+
+		<!-- Skill list: expanded grid + pet-command row, interactive overlay only (hit target,
+		     cooldown wipe, current-skill highlight) -- icon/box-frame art stays legacy 2D
+		     underneath (atlas lookup too irregular to port, see SkillCellEntry). data-for since
+		     cell count varies with skills learned. -->
+		<div id="skill_grid" data-class-hidden="!skill_grid_open">
+			<div class="skill-cell" data-for="cell : skill_grid_cells"
+			     data-style-left="cell.left + 'px'" data-style-top="cell.top + 'px'"
+			     data-class-selected="cell.is_current"
+			     data-event-click="skill_grid_click(cell.skill_index)"
+			     data-event-mouseover="skill_grid_hover(cell.skill_index)"
+			     data-event-mouseout="skill_unhover">
+				<div class="cooldown-wipe" data-style-height="cell.cooldown_fraction * 100 + '%'"></div>
+			</div>
+		</div>
+		<div id="pet_skill_row" data-class-hidden="!skill_grid_open">
+			<div class="skill-cell" data-for="cell : pet_skill_cells"
+			     data-style-left="cell.left + 'px'" data-style-top="cell.top + 'px'"
+			     data-class-selected="cell.is_current"
+			     data-event-click="skill_pet_click(cell.skill_index)"
+			     data-event-mouseover="skill_pet_hover(cell.skill_index)"
+			     data-event-mouseout="skill_unhover">
+				<div class="cooldown-wipe" data-style-height="cell.cooldown_fraction * 100 + '%'"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Top-right system-button panel, moved here from the bottom HUD to echo mu_helper_bar's
+	     styling. Own sibling document (separate C++ owners/data models -- RmlUi documents can't
+	     share a DOM parent anyway). Uses flex;justify-content:flex-end instead of
+	     `.anchor-top-right`'s `right:0` -- `right:0` was confirmed not to render this element at
+	     all here (root cause unknown), flex sidesteps it. -->
+	<div id="top_right_row" class="anchor-top-left">
+		<div id="buttons_top">
+			<div id="btn_cshop_top" class="frame-btn-top" data-class-open="cshop_open" data-event-click="mainframe_cshop_click">
+				<span>SHOP</span>
+			</div>
+			<span class="tooltip-top" id="tooltip_cshop_top">{{cshop_tooltip}}</span>
+			<div id="btn_chainfo_top" class="frame-btn-top" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click">
+				<span>CHAR</span>
+				<div class="alert-dot-top" data-class-hidden="!chainfo_alert"></div>
+			</div>
+			<span class="tooltip-top" id="tooltip_chainfo_top">{{chainfo_tooltip}}</span>
+			<div id="btn_myinven_top" class="frame-btn-top" data-class-open="myinven_open" data-event-click="mainframe_myinven_click">
+				<span>INV</span>
+			</div>
+			<span class="tooltip-top" id="tooltip_myinven_top">{{myinven_tooltip}}</span>
+			<div id="btn_friend_top" class="frame-btn-top" data-class-open="friend_open" data-event-click="mainframe_friend_click">
+				<span>FRIEND</span>
+				<div class="alert-dot-top" data-class-hidden="!friend_alert"></div>
+			</div>
+			<span class="tooltip-top" id="tooltip_friend_top">{{friend_tooltip}}</span>
+			<div id="btn_window_top" class="frame-btn-top" data-class-open="window_open" data-event-click="mainframe_window_click">
+				<span>MENU</span>
+			</div>
+			<span class="tooltip-top" id="tooltip_window_top">{{window_tooltip}}</span>
+		</div>
+	</div>
+</body>
+</rml>

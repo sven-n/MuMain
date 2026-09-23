@@ -1,0 +1,43 @@
+<rml>
+<head>
+	<title>Personal Store</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="my_shop.rcss"/>
+</head>
+<body data-model="my_shop">
+	<!-- Window frame/title/edit-box background strip/Open-Close-Exit buttons only -- inventory grid
+	     and the nickname/subject CUITextInputBox stay native (MyShopInventory.h). Background lives
+	     in my_shop_bg.rml instead, since it must paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<!-- #edit_bg moved to my_shop_bg.rml -- this context renders after the native
+		     CUITextInputBox's Render(), so it was covering the input box, not sitting behind it. -->
+
+		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+
+		<div id="btn_open" class="shop-btn shop-btn-open" data-class-locked="open_locked"
+		     data-event-click="my_shop_open_click"></div>
+		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
+
+		<div id="btn_close" class="shop-btn shop-btn-close" data-class-locked="close_locked"
+		     data-event-click="my_shop_close_click"></div>
+		<span class="tooltip tooltip-close">{{close_tooltip}}</span>
+
+		<!-- Former RenderTextInfo() -- fixed instructional text at the same reference-pixel offsets
+		     the native RenderText() calls used, static except still_opening's visibility. Colors are
+		     plain RCSS (myshop-line-* classes), not data-bound -- fixed decorative constants. -->
+		<div id="still_opening_line" class="myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening">{{still_opening_text}}</div>
+		<div id="warning_line" class="myshop-line myshop-line-warning">{{warning_text}}</div>
+		<div id="selling_price_line" class="myshop-line myshop-line-info">{{selling_price_text}}</div>
+		<div id="please_verify_line" class="myshop-line myshop-line-info">{{please_verify_text}}</div>
+		<div id="already_in_store_line" class="myshop-line myshop-line-info">{{already_in_store_text}}</div>
+		<div id="cancel_sold_line" class="myshop-line myshop-line-info">{{cancel_sold_text}}</div>
+		<div id="cant_be_returned_line" class="myshop-line myshop-line-info">{{cant_be_returned_text}}</div>
+		<div id="all_item_trading_line" class="myshop-line myshop-line-warning">{{all_item_trading_text}}</div>
+		<div id="can_only_be_done_using_zen_line" class="myshop-line myshop-line-warning">{{can_only_be_done_using_zen_text}}</div>
+	</div>
+</body>
+</rml>

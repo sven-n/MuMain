@@ -1,0 +1,84 @@
+/* Modern theme for CMixInventory's chrome -- header/Mix button are vector forged-metal chrome
+   (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Recipe-result content
+   (SyncMixContentModel(), MixInventory.cpp) is RmlUi too now. Inventory grid and the socket list
+   box (a real interactive widget) stay fully native. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* Same top/height as MyInventory's own .inv-header-rail -- this window's frame art is the SAME
+   asset (newui_item_back04.tga, see mix_inventory_bg.rcss's comment). The grid itself doesn't
+   start until `m_Pos.y + 110` (MixInventory.cpp's CInventoryCtrl::Create() call), well past this
+   rail's 43px bottom edge -- the 44-110px gap is .mix-tax-rate/.mix-content below. */
+.mix-header-rail {
+	top: 7px;
+	height: 36px;
+}
+
+/* Former RenderFrame()/RenderMixDescriptions() native text block -- .mix-content's children stack
+   via normal block flow instead of RenderFrame()'s own hand-accumulated fLine_y stepping. Per-line
+   color still comes from C++ (data-style-color) since it's a live gameplay signal
+   (ready/not-ready, source-satisfied/missing), not a theme choice -- same reasoning as legacy's
+   own copy of this rule block. */
+.mix-tax-rate {
+	position: absolute;
+	left: 15px;
+	top: 48px;
+	width: 160px;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: 600;
+	font-size: 12px;
+}
+.mix-content {
+	position: absolute;
+	left: 15px;
+	top: 70px;
+	width: 160px;
+	bottom: 40px;
+	overflow: hidden auto;
+}
+.mix-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	margin-bottom: 3px;
+	font-weight: 600;
+	font-size: 12px;
+	color: token(text-primary);
+}
+.mix-socket-prompt { color: token(text-secondary); }
+
+/* Single Mix button, centered: (190-37)/2, same family default size as every other
+   CInventoryCtrl-owning window's icon buttons (base.rcss's .modern-icon-btn-px comment) -- not a
+   pixel match for the native 44x35 sprite, same convention as StorageExt/MyInventory's own
+   buttons. */
+.mix-btn-mix {
+	left: 77px;
+	color: #d59b79;
+	border-color: #5c382b;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	left: 40px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_mix:hover ~ .tooltip-mix { display: block; }

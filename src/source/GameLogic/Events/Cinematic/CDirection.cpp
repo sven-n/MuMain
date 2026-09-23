@@ -10,8 +10,8 @@
 #include "Audio/DSPlaySound.h"
 
 #include "World/MapInfra/MapManager.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Core/WindowSystem.h"
 
 #include <algorithm>
 #include <cmath>
@@ -81,7 +81,7 @@ void CDirection::Init()
 
 void CDirection::CloseAllWindows()
 {
-    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
     g_pNewUISystem->HideAll();
 }
 

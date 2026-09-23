@@ -1,0 +1,95 @@
+/* Legacy theme for CMixInventory's chrome (frame/title/Mix button/recipe-result content). #panel's
+   left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px,
+   not dp. Only the inventory grid and the socket list box (a real interactive widget) render on
+   top of this document's frame now, out of scope here. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 11px;
+	width: 190px;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 12px;
+}
+
+/* Former RenderFrame()/RenderMixDescriptions() native text block (SyncMixContentModel(),
+   MixInventory.cpp) -- .mix-content's children stack via normal block flow instead of
+   RenderFrame()'s own hand-accumulated fLine_y stepping; per-line color still comes from C++
+   (data-style-color) since it's a live gameplay signal (ready/not-ready, source-satisfied/missing),
+   not a theme choice. */
+.mix-tax-rate {
+	position: absolute;
+	left: 15px;
+	top: 25px;
+	width: 160px;
+	text-align: center;
+	color: token(text-label);
+	font-weight: bold;
+	font-size: 12px;
+}
+.mix-content {
+	position: absolute;
+	left: 15px;
+	top: 49px;
+	width: 160px;
+	bottom: 40px;
+	overflow: hidden auto;
+}
+.mix-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	margin-bottom: 3px;
+	font-weight: bold;
+	font-size: 12px;
+	color: token(text-info);
+}
+.mix-socket-prompt { color: #c8c8c8; }
+
+/* 44x35 crop of the top-left ("up") frame of the native 2-frame vertical button sheet
+   (CMixInventory::Create()'s former ChangeButtonInfo(..., 44.f, 35.f)) -- hover uses a CSS
+   brightness filter instead of the sheet's own "down"/"over" frames, same convention as every
+   other migrated inv-btn/ext-btn. Centered: (190-44)/2 = 73, top matches the native
+   `m_Pos.y + 380`. */
+@spritesheet mix-btn-sheet { src: "../../../newui_bt_mix.tga"; mix-btn: 0px 0px 44px 35px; }
+.mix-btn {
+	position: absolute;
+	left: 73px;
+	top: 380px;
+	width: 44px;
+	height: 35px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(mix-btn);
+}
+.mix-btn:hover { filter: brightness(1.25); }
+.mix-btn.hidden { display: none; }
+.mix-btn.locked { pointer-events: none; filter: brightness(0.6); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 364px;
+	left: 35px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_mix:hover ~ .tooltip-mix { display: block; }

@@ -1,0 +1,160 @@
+/* Legacy theme for CCharacterInfoWindow -- a plain CManager-tier window (no C3DRenderMng, no
+   live-3D icon, no CUITextInputBox), so unlike the inventory family it needed no background-
+   context split: 100% of its chrome/text/buttons move straight to #panel's own foreground
+   document. #panel's frame (fill/top/left/right/bottom sprites, exit button, tooltip shape) is
+   shared with my_quest_info/pet_info/party_info via docked_panel_frame.rcss (linked below) -- only
+   window-specific content lives here now. Coordinates below are plain reference px, not dp, same
+   convention as my_quest_info.rcss.
+
+   The summary box's original 8-piece pixel-tiled frame (4 corner sprites + a 1px sprite tiled
+   across each edge, RenderFrame()'s nested for-loops) is reproduced as corner brackets + a flat
+   translucent fill instead of a literal repeating-tile port -- this build has no established,
+   verified pattern for a real 1px-tile repeat, and the brackets alone already read as "framed
+   corners" the way the original intended. This is a
+   simpler, single-fill variant of docked_panel_frame.rcss's own title/content-split group-box
+   technique (no title strip here), so it keeps its own local corner/fill classes rather than the
+   shared .gbox-* ones -- only the corner sprites themselves (docked-corner-tl/tr/bl/br) come from
+   the partial.
+
+   Attribute extra-line blocks (str/agi/vit/ene) use normal block flow (each line a
+   display:block span, line-height 13px) instead of individually positioned lines: the original
+   (RenderAttribute()) stacks a variable number of lines per block depending on class/buff state
+   at a constant +13px step, which block flow reproduces for free without hand-computing each
+   line's own top offset in C++. */
+@spritesheet chainfo-textbox-sheet { src: "../../../newui_cha_textbox02.tga"; chainfo-textbox: 0px 0px 170px 21px; }
+@spritesheet chainfo-stat-btn-sheet { src: "../../../newui_chainfo_btn_level.tga"; chainfo-stat-btn: 0px 0px 16px 15px; }
+@spritesheet chainfo-btn-quest-sheet { src: "../../../newui_chainfo_btn_quest.tga"; chainfo-btn-quest: 0px 0px 36px 29px; }
+@spritesheet chainfo-btn-pet-sheet { src: "../../../newui_chainfo_btn_pet.tga"; chainfo-btn-pet: 0px 0px 36px 29px; }
+@spritesheet chainfo-btn-masterlevel-sheet { src: "../../../newui_chainfo_btn_master.tga"; chainfo-btn-masterlevel: 0px 0px 36px 29px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+
+#name, #classname, #servername {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+#classname, #servername { top: 27px; color: token(text-primary); }
+
+.summary-fill {
+	position: absolute;
+	left: 12px;
+	top: 48px;
+	width: 165px;
+	height: 71px;
+	background-color: rgba(0, 0, 0, 77);
+	pointer-events: none;
+}
+.summary-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
+.corner-tl { left: 12px;  top: 48px; decorator: image(docked-corner-tl); }
+.corner-tr { left: 163px; top: 48px; decorator: image(docked-corner-tr); }
+.corner-bl { left: 12px;  top: 105px; decorator: image(docked-corner-bl); }
+.corner-br { left: 163px; top: 105px; decorator: image(docked-corner-br); }
+
+.level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
+	display: block;
+	position: absolute;
+	left: 18px;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.level-text { top: 58px; color: #e6e600; font-weight: bold; }
+.levelup-point-text { top: 58px; left: 110px; color: #ff8a00; font-weight: bold; }
+.exp-text { top: 75px; color: token(text-primary); }
+.point-probability-text { top: 88px; color: #4cc5fe; }
+.point-text { top: 101px; color: #4cc5fe; }
+
+/* Attribute rows: textbox background (170x21) + centered label/value halves + a variable-length
+   block of extra derived-stat lines below. HEIGHT_STRENGTH/DEXTERITY/VITALITY/ENERGY/CHARISMA
+   (CharacterInfoWindow.h) are 120/175/240/295/350. */
+.attr-textbox {
+	position: absolute;
+	left: 11px;
+	width: 170px;
+	height: 21px;
+	decorator: image(chainfo-textbox);
+	pointer-events: none;
+}
+.attr-textbox-str { top: 120px; }
+.attr-textbox-agi { top: 175px; }
+.attr-textbox-vit { top: 240px; }
+.attr-textbox-ene { top: 295px; }
+.attr-textbox-cmd { top: 350px; }
+
+.attr-label, .attr-value {
+	display: block;
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+.attr-label { left: 12px; width: 74px; color: token(text-primary); }
+.attr-value { left: 86px; width: 86px; }
+.attr-label-str, .attr-value-str { top: 126px; }
+.attr-label-agi, .attr-value-agi { top: 181px; }
+.attr-label-vit, .attr-value-vit { top: 246px; }
+.attr-label-ene, .attr-value-ene { top: 301px; }
+.attr-label-cmd, .attr-value-cmd { top: 356px; }
+
+/* Extra derived-stat lines: normal block flow, one span per line at a fixed 13px line-height --
+   reproduces RenderAttribute()'s iY += 13 stacking without per-line C++ offsets (see header
+   comment). Left/top per block match the original's own RenderText() call sites. */
+.attr-lines { position: absolute; width: 160px; pointer-events: none; }
+.attr-lines span { display: block; line-height: 13px; font-size: 12px; white-space: nowrap; }
+.attr-lines-str { left: 20px; top: 145px; }
+.attr-lines-agi { left: 20px; top: 199px; }
+.attr-lines-vit { left: 20px; top: 264px; }
+.attr-lines-ene { left: 18px; top: 319px; }
+
+.stat-btn {
+	position: absolute;
+	left: 160px;
+	width: 16px;
+	height: 15px;
+	decorator: image(chainfo-stat-btn);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stat-btn:hover { filter: brightness(1.25); }
+.stat-btn-str { top: 122px; }
+.stat-btn-agi { top: 177px; }
+.stat-btn-vit { top: 242px; }
+.stat-btn-ene { top: 297px; }
+.stat-btn-cmd { top: 352px; }
+
+/* Exit is fully shared now (docked_panel_frame.rcss's #btn_exit) -- only Quest/Pet/MasterLevel
+   (this window's own extra shortcuts, not part of the shared frame) stay local. */
+.info-btn {
+	position: absolute;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.info-btn:hover { filter: brightness(1.25); }
+.info-btn.locked { filter: brightness(0.6); }
+.info-btn-quest { left: 50px; decorator: image(chainfo-btn-quest); }
+.info-btn-pet { left: 87px; decorator: image(chainfo-btn-pet); }
+.info-btn-masterlevel { left: 124px; decorator: image(chainfo-btn-masterlevel); }
+
+/* Exit's sprite already has its own "X" baked in -- the shared label span is redundant here,
+   same convention as my_quest_info.rcss. */
+.btn-exit-label { display: none; }
+
+.tooltip-quest { left: 13px; }
+.tooltip-pet { left: 50px; }
+.tooltip-masterlevel { left: 87px; }
+
+#btn_quest:hover ~ .tooltip-quest,
+#btn_pet:hover ~ .tooltip-pet,
+#btn_masterlevel:hover ~ .tooltip-masterlevel {
+	display: block;
+}

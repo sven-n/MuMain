@@ -601,7 +601,7 @@ void AnimationFlag()
 
                 vec3_t DeltaV;
                 VectorSubtract(v1->v, v2->v, DeltaV);
-                float Dterm = (DotProduct(DeltaV, DeltaP) * Kd) / dist;
+                float Dterm = (VectorDotProduct(DeltaV, DeltaP) * Kd) / dist;
 
                 vec3_t SpringForce;
                 VectorScale(DeltaP, 1.f / dist, SpringForce);

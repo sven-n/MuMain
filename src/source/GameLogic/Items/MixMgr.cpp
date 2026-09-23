@@ -2,10 +2,10 @@
 #include "MixMgr.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
-#include "UI/Legacy/UIJewelHarmony.h"
+#include "UI/Inventory/UIJewelHarmony.h"
 #include "Network/Server/SocketSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 

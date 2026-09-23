@@ -1,6 +1,10 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include "UI/RmlBridge/RmlTooltip.h"
+
+#include <vector>
+
 enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
@@ -154,6 +158,12 @@ int64_t ConvertRepairGold(int64_t Gold, int Durability, int MaxDurability, short
 void RepairAllGold(void);
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
+
+// Converts the TextList/TextListColor/TextBold globals above (as any RenderTipTextList() caller
+// already populates them) into UI::RmlBridge::Tooltip's own Line list -- shared by every tooltip
+// call site still building its content the legacy TextList way, so each one doesn't hand-roll the
+// same TEXT_COLOR_*-to-LineColor switch and spacer-marker (leading '\n'/lone ' ') detection.
+std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltipLinesFromTextList(int textNum);
 
 void SendRequestUse(int Index, int Target, bool addPoints = true);
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex);

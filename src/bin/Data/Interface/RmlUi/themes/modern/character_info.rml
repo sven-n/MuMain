@@ -1,0 +1,113 @@
+<rml>
+<head>
+	<title>Character Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="character_info.rcss"/>
+</head>
+<body>
+	<!-- Modern theme's own copy of CCharacterInfoWindow's frame -- matches CMyInventory's own
+	     forged-dialog chrome (shell-edge/groove/gradient panel, rail-with-rivet header, bordered
+	     square icon buttons) rather than the generic .modern-frame/.modern-frame-crimson treatment,
+	     since this window docks in the same PanelColumnX() row as CMyInventory/CMyQuestInfoWindow/
+	     CPetInfoWindow/CPartyInfoWindow and is meant to read as the same visual family, not a
+	     one-off -- all four now share this exact shell via docked_panel_frame.rcss (#panel's own
+	     gradient/border/box-shadow, and .docked-header-rail-fill/.docked-rail-accent below); this
+	     file only carries what's genuinely window-specific. .modern-shell-edge/.modern-groove come
+	     straight from base.rcss (no more pointless unmodified per-window duplicate of them). Unlike
+	     CMyInventory, this window has no live-3D icon to paint behind, so the whole forged-dialog
+	     look lives directly in this one foreground document instead of a separate background
+	     context. Keep ids/data-model/event-callback names in sync with ../../character_info.rml. -->
+	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+
+		<!-- No top/height override needed -- .modern-header-rail-px's own default (top:7/height:38)
+		     already matches what this window wants. -->
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="docked-rail-accent"></div>
+		</div>
+
+		<span id="name" data-style-color="name_color">{{name_text}}</span>
+		<span id="classname" data-style-opacity="classname_opacity">{{classname_text}}</span>
+		<span id="servername" data-style-opacity="servername_opacity">{{servername_text}}</span>
+
+		<div class="summary-fill"></div>
+		<span class="level-text">{{level_text}}</span>
+		<span class="levelup-point-text" data-class-hidden="!can_level_up">{{levelup_point_text}}</span>
+		<span class="exp-text">{{exp_text}}</span>
+		<span class="point-probability-text">{{point_probability_text}}</span>
+		<span class="point-text">{{point_text}}</span>
+
+		<!-- STR row -->
+		<div class="attr-textbox attr-textbox-str"></div>
+		<span class="attr-label attr-label-str">{{str_label}}</span>
+		<span class="attr-value attr-value-str" data-style-color="str_value_color">{{str_value_text}}</span>
+		<div class="attr-lines attr-lines-str">
+			<span data-for="line : str_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(0)">+</div>
+
+		<!-- AGI row -->
+		<div class="attr-textbox attr-textbox-agi"></div>
+		<span class="attr-label attr-label-agi">{{agi_label}}</span>
+		<span class="attr-value attr-value-agi" data-style-color="agi_value_color">{{agi_value_text}}</span>
+		<div class="attr-lines attr-lines-agi">
+			<span data-for="line : agi_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(1)">+</div>
+
+		<!-- VIT row -->
+		<div class="attr-textbox attr-textbox-vit"></div>
+		<span class="attr-label attr-label-vit">{{vit_label}}</span>
+		<span class="attr-value attr-value-vit" data-style-color="vit_value_color">{{vit_value_text}}</span>
+		<div class="attr-lines attr-lines-vit">
+			<span data-for="line : vit_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(2)">+</div>
+
+		<!-- ENE row -->
+		<div class="attr-textbox attr-textbox-ene"></div>
+		<span class="attr-label attr-label-ene">{{ene_label}}</span>
+		<span class="attr-value attr-value-ene" data-style-color="ene_value_color">{{ene_value_text}}</span>
+		<div class="attr-lines attr-lines-ene">
+			<span data-for="line : ene_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(3)">+</div>
+
+		<!-- CMD row -- Dark Lord only. -->
+		<div class="attr-textbox attr-textbox-cmd" data-class-hidden="!show_charisma"></div>
+		<span class="attr-label attr-label-cmd" data-class-hidden="!show_charisma">{{cmd_label}}</span>
+		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-style-color="cmd_value_color">{{cmd_value_text}}</span>
+		<div class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
+		     data-event-click="chainfo_increase_stat(4)">+</div>
+
+		<!-- Bottom action row: same bordered forged-metal square buttons as CMyInventory's
+		     Exit/Repair/My Shop/Expand (base.rcss's .modern-icon-btn-px), not a flat exit button
+		     plus legacy-sprite icons -- keeps this row visually part of the same family. -->
+		<div id="btn_exit" class="modern-icon-btn-px chainfo-btn-exit" data-event-click="chainfo_click_exit">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<div id="btn_quest" class="modern-icon-btn-px chainfo-btn-quest" data-event-click="chainfo_click_quest">
+			<span class="modern-icon-btn-glyph-px">Q</span>
+		</div>
+		<span class="tooltip tooltip-quest">{{quest_tooltip}}</span>
+		<div id="btn_pet" class="modern-icon-btn-px chainfo-btn-pet" data-event-click="chainfo_click_pet">
+			<span class="modern-icon-btn-glyph-px">P</span>
+		</div>
+		<span class="tooltip tooltip-pet">{{pet_tooltip}}</span>
+		<div id="btn_masterlevel" class="modern-icon-btn-px chainfo-btn-masterlevel" data-class-locked="!master_level_enabled"
+		     data-event-click="chainfo_click_masterlevel">
+			<span class="modern-icon-btn-glyph-px">M</span>
+		</div>
+		<span class="tooltip tooltip-masterlevel">{{masterlevel_tooltip}}</span>
+	</div>
+</body>
+</rml>

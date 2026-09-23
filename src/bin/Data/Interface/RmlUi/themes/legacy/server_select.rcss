@@ -1,0 +1,138 @@
+/* Legacy theme for the server-select dialog (CServerSelWin) -- a fresh RmlUi layout, not a pixel
+   port of the old CWinEx/CButton/CGaugeBar screen. The load gauge is a flat color fill. #panel is
+   intentionally invisible (no background/border) -- the real legacy screen has no panel chrome,
+   just buttons and text over the login art. Two always-visible columns use real flexbox, not the
+   old absolutely-positioned flyout keyed to whichever group button was clicked. */
+
+/* No explicit position -- .center-both (base.rcss) supplies position:absolute plus centering,
+   same as sys_menu.rcss/msg_win.rcss's own #panel. */
+#panel {
+	width: 420px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-primary);
+	padding: 10px;
+}
+
+/* height is fixed, not auto -- #panel uses .center-both, which recenters on #panel's current size;
+   auto height would visibly shift the whole panel as it grew. Columns still scroll internally via
+   their own overflow:auto. */
+#columns {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 18px;
+	height: 300px;
+}
+
+/* height (not max-height) matches #columns' own fixed height for the same reason -- a shorter
+   list just centers via justify-content:center rather than shrinking the box. */
+#group_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px;
+	width: 140px;
+	height: 300px;
+	overflow: hidden auto;
+}
+#server_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px;
+	width: 220px;
+	height: 300px;
+	overflow: hidden auto;
+}
+/* #server_col is an ID selector, so it always outranks base.rcss's global `.hidden{display:none}`
+   on specificity alone (an ID beats any number of plain classes) -- unlike the many `.foo.hidden`
+   compound overrides elsewhere in this codebase, which only break a same-specificity class-vs-class
+   tie. Without this, data-class-hidden="!server_list_visible" (server_select.rml) never actually
+   hid this column. */
+#server_col.hidden {
+	display: none;
+}
+
+/* Ninepatch border (base.rcss) stretched from its native 108x30 rect; a translucent tint
+   decorator layered on top (RmlUi paints the first-listed decorator frontmost) gives the glassy
+   body look instead of the sprite's own opaque fill. Height 32px matches .server-row's real
+   on-screen height (25px + its own 3px+4px padding) below. */
+.group-btn {
+	width: 140px;
+	height: 32px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 32px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: linear-gradient(to bottom, rgba(0, 0, 0, 140), rgba(0, 0, 0, 140)), ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
+	color: token(text-secondary);
+}
+.group-btn:hover {
+	decorator: linear-gradient(to bottom, rgba(40, 40, 40, 150), rgba(40, 40, 40, 150)), ninepatch(legacy-btn-hover, legacy-btn-hover-inner);
+}
+.group-btn.checked {
+	decorator: linear-gradient(to bottom, rgba(60, 50, 20, 150), rgba(60, 50, 20, 150)), ninepatch(legacy-btn-active, legacy-btn-active-inner);
+	color: token(text-primary);
+}
+
+/* Same ninepatch + tint construction as .group-btn. No CSS `border` here -- a border-width on a
+   bordered element with a child doesn't render as a closed rectangle in this build; the ninepatch
+   decorator paints separately, unaffected. Height: 25px + this row's own 3px+4px padding = 32px,
+   matching .group-btn's on-screen height. Width: 200px = #server_col's 220px minus 10px+10px
+   padding; .server-gauge-slot's 180px is inset 10px left to center it. */
+.server-row {
+	display: block;
+	width: 200px;
+	height: 25px;
+	padding: 3px 10px 4px;
+	text-align: center;
+	line-height: 14px;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: linear-gradient(to bottom, rgba(0, 0, 0, 140), rgba(0, 0, 0, 140)), ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
+	color: #f0d74d;
+}
+.server-row:hover {
+	decorator: linear-gradient(to bottom, rgba(40, 40, 40, 150), rgba(40, 40, 40, 150)), ninepatch(legacy-btn-hover, legacy-btn-hover-inner);
+}
+.server-row:active {
+	transform: translateY(1px);
+}
+.server-row.gray {
+	color: #b0b0b0;
+}
+.server-row.orange {
+	color: #ff9c3c;
+}
+
+/* Plain fill, not repeating-linear-gradient -- unsupported here, renders as nothing. */
+.server-gauge-slot {
+	display: block;
+	width: 180px;
+	height: 5px;
+	margin: 4px 0 0 10px;
+	background-color: rgba(0, 0, 0, 160);
+}
+.server-gauge-fill {
+	display: block;
+	height: 100%;
+	background-color: #00bd8b;
+}
+
+/* Normal block flow below #columns now, not position:absolute with a hand-picked top offset. */
+#pvp_notice {
+	margin-top: 16px;
+	width: 100%;
+	color: #ffcc66;
+	font-size: 11px;
+}
+
+#desc_panel {
+	margin-top: 10px;
+	width: 100%;
+	color: token(text-secondary);
+	white-space: normal;
+}

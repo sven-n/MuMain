@@ -14,7 +14,7 @@
 #ifdef _WIN32
 #include <eh.h>
 #endif
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -126,7 +126,7 @@ namespace
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Social/MonkSystem.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
@@ -8402,7 +8402,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     }
 
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
-        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug()) // DXP-23 diagnostic
+        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug())
     {
         switch (Type)        // 날개인지 검사
         {

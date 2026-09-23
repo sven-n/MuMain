@@ -1,0 +1,306 @@
+/* Legacy theme for the generic confirm dialog. CCommonMessageBox's own native sprite composite
+   (back-fill + top cap + middle fill + bottom cap) moved to generic_confirm_dialog_bg.rcss -- see
+   that file's own comment for why (item3D layering: RmlUi's main context, which this document is
+   part of, always composites LAST in the frame, so the item would otherwise always be painted
+   over by the panel's own frame art). This file is layout/content only now, except for
+   `.gcd-header-rail`'s own sprite decorator below (an ordinary opaque foreground image, not a
+   compositing-order concern the way item3D is).
+
+   #panel is centered via the .center-both utility class (generic_confirm_dialog.rml); every
+   dimension is dp -- a LayoutMode::Dialog window (no transform:scale(root_scale)), not one of the
+   root_scale-tracking inventory-family windows. 230x160 matches native's own MSGBOX_WIDTH=230 and
+   base 2-line height (67+50=117) plus room to grow. No background-color/border here -- the sprite
+   composite lives in generic_confirm_dialog_bg.rcss's own same-sized #panel instead. */
+#panel {
+	width: 230dp;
+	height: 160dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-primary);
+}
+/* Optional taller variant (GenericDialogConfig::tallPanel) -- .gcd-body's own top/bottom insets
+   are fixed dp offsets from #panel's edges, so this alone grows .gcd-body/.gcd-text-col's
+   available content height for free; the OK/Cancel buttons below need their own .tall override
+   since they're positioned via a fixed `top` from #panel's TOP edge. 240dp grows the ~69dp
+   content well to ~149dp -- enough for a grown .gcd-portrait2d (100x93dp) + up to 3 lines, or the
+   numeric-keypad input row, without .gcd-text-col's own scrollbar. Mirrored onto the bg
+   document's own #panel imperatively (GenericConfirmDialog.cpp's Show()/ShowNext()) since that
+   document has no data model of its own to bind a class through. */
+#panel.tall {
+	height: 240dp;
+}
+
+/* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) -- a title-banner variant
+   of the plain top-cap art (newui_msgbox_top.tga, .gcd-bg-sprite-top in
+   generic_confirm_dialog_bg.rcss), swapped in whenever the box has a title, with title text drawn
+   directly on top. Same 230x67 slot/size as the plain version so it overlays that exact screen
+   rect with no seam. Lives in the FOREGROUND document (this file), not the bg one -- unlike
+   item3D, a title banner has no compositing-order reason to sit behind anything. */
+@spritesheet msgbox-titlebar-sheet
+{
+	src: "../../../newui_Message_03.tga";
+	msgbox-titlebar-image: 0px 0px 230px 67px;
+}
+
+/* GenericDialogConfig::Portrait2D's own art -- currently always native's IMAGE_MSGBOX_DUEL_BACK
+   sprite (newui_DuelWindow.tga), a fixed 148x138 portrait with a caption drawn directly on top --
+   the only real consumer today, though Portrait2D itself isn't Duel-specific. A plain, un-skinned
+   native asset, so both themes declare the identical rule set for it. A second consumer wanting
+   different art would need this sheet/rule to become configurable per Show() call. */
+@spritesheet portrait2d-sheet
+{
+	src: "../../../newui_DuelWindow.tga";
+	portrait2d-image: 0px 0px 148px 138px;
+}
+
+/* A direct #panel child, sibling of .gcd-body, positioned in #panel's own coordinate space
+   (edge-to-edge) rather than flowing with .gcd-body's inset content area. No severity color
+   variants of the art -- severity stays a text-color-only distinction (below). */
+.gcd-header-rail {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-titlebar-image);
+}
+/* Title text drawn directly over the sprite above -- simplified to one centered line rather than
+   replicating native's exact pixel-wrap math. No conflict with .gcd-body's own top:35dp below --
+   the title sits well above that, at y:10. */
+.gcd-header-title {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 10dp;
+	text-align: center;
+	font-family: "token(font-body)";
+	font-weight: bold;
+	color: token(accent-gold);
+	pointer-events: none;
+}
+.gcd-header-title.warning { color: token(semantic-warning); }
+.gcd-header-title.error { color: token(semantic-danger); }
+
+/* Text floats transparently over the sprite composite below it (painted by the background
+   document), matching native (no separate boxed "well"). left/right/top match native's own text
+   metrics (~25dp side margin, 35dp top blank); bottom leaves a gap above the buttons.
+
+   top+bottom (not top+height) deliberately -- this engine's box model is content-box only (no
+   box-sizing support anywhere in this codebase), so an explicit height combined with a bordered/
+   padded box can push past the intended bottom edge. Anchoring both edges keeps the box's outer
+   size exact regardless of its own content.
+
+   display:flex row: #gcd_item3d_anchor (item icon, left) + .gcd-text-col (fills the rest, right).
+   The title banner is NOT a child of this box -- it overlays #panel's own top edge instead. */
+.gcd-body {
+	position: absolute;
+	left: 25dp;
+	right: 25dp;
+	top: 35dp;
+	bottom: 56dp;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+/* Holds lines/input-row/progress-track. Fills .gcd-body's full height explicitly (rather than
+   relying on align-items, which wouldn't stretch under align-items:center) so its own
+   overflow:auto has a real bound to scroll within once content grows taller than the panel.
+
+   overflow is `overflow-x, overflow-y` (CSS shorthand order) -- `hidden auto`, NOT `auto hidden`:
+   this engine only ever instantiates a scrollbarvertical element when overflow-y is Auto/Scroll,
+   never Hidden (Layout/ContainerBox.cpp) -- getting this order backwards silently means no
+   scrollbar is ever created, regardless of text length.
+
+   pointer-events: auto is required here too -- base.rcss's `body { pointer-events: none; }`
+   inherits down to every descendant that doesn't explicitly opt back in, and the scrollbar's
+   generated slidertrack/sliderbar are real DOM children of THIS element, so they inherit whatever
+   this element's own computed value is -- without this, the scrollbar can't receive mouse events. */
+.gcd-text-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	flex: 1 1 auto;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+/* Minimal flat-color scrollbar -- RmlUi generates real child elements for these
+   (scrollbarvertical/slidertrack/sliderbar), not pseudo-elements. Arrow buttons collapsed to 0
+   size -- drag-only, simplest usable affordance for a narrow well. */
+.gcd-text-col scrollbarvertical {
+	width: 6dp;
+	margin: 0;
+}
+.gcd-text-col scrollbarvertical slidertrack {
+	background-color: token(surface-recessed);
+}
+.gcd-text-col scrollbarvertical sliderbar {
+	background-color: token(control-thumb);
+}
+.gcd-text-col scrollbarvertical sliderbar:hover,
+.gcd-text-col scrollbarvertical sliderbar:active {
+	background-color: token(control-thumb-hover);
+}
+.gcd-text-col scrollbarvertical sliderarrowdec,
+.gcd-text-col scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.gcd-text-col scrollbarhorizontal {
+	height: 0;
+}
+.gcd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: token(text-prompt);
+}
+.gcd-line.bold { font-weight: bold; }
+
+/* Invisible position reference for the native 3D item-preview render pass
+   (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
+   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40). Renders nothing itself.
+
+   position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
+   class assumes its own explicit top/left elsewhere, which this anchor doesn't have: it's meant
+   to flow as an ordinary flex child of .gcd-body (a row, sibling of .gcd-text-col). */
+.gcd-item3d-anchor {
+	position: static;
+	width: 40dp;
+	height: 40dp;
+	flex-shrink: 0;
+	margin-right: 8dp;
+}
+/* Cascade-tie fix: this anchor is conditionally hidden (data-class-hidden="!has_item3d") so
+   .gcd-text-col alone fills the row when there's no item3D, instead of always reserving a
+   40dp-wide empty slot. */
+.gcd-item3d-anchor.hidden { display: none; }
+
+/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a
+   static flex child INSIDE .gcd-text-col (icon-top/text-below) rather than a sibling like
+   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). .gcd-text-col's own
+   align-items:center centers it horizontally with no extra margin math needed. 100x93dp keeps
+   the current art's 148:138 aspect ratio. */
+.gcd-portrait2d {
+	position: relative;
+	width: 100dp;
+	height: 93dp;
+	flex-shrink: 0;
+	margin-bottom: 4dp;
+	decorator: image(portrait2d-image);
+}
+/* Same cascade-tie fix as .gcd-item3d-anchor above. */
+.gcd-portrait2d.hidden { display: none; }
+/* Beside layout -- same row-sibling slot/sizing convention as .gcd-item3d-anchor, sized a little
+   larger since this reads as hero art rather than a small icon. No text overlay in this layout --
+   .gcd-portrait2d-text is never a child of this element in the .rml. */
+.gcd-portrait2d-beside {
+	position: static;
+	width: 60dp;
+	height: 56dp;
+	flex-shrink: 0;
+	margin-right: 8dp;
+	margin-bottom: 0;
+	decorator: image(portrait2d-image);
+}
+/* Overlaid directly on the sprite (native draws this ON TOP of the art, not below it) -- matches
+   native's own bold yellow; font-effect:shadow keeps it legible over the sprite's bright areas. */
+.gcd-portrait2d-text {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 2dp;
+	text-align: center;
+	font-weight: bold;
+	font-size: 9dp;
+	color: token(text-heading);
+	font-effect: shadow(0dp 1dp #000000);
+}
+
+/* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
+   `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
+   static so they can flex-wrap into a grid instead of stacking on top of each other. */
+.gcd-input-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 4dp;
+}
+/* .gcd-input-row sets its own `display`, so an earlier same-specificity `.hidden { display: none;
+   }` (base.rcss) loses the cascade tie without this later, more specific override. */
+.gcd-input-row.hidden { display: none; }
+.gcd-keypad-display {
+	color: token(text-prompt);
+	font-weight: bold;
+	letter-spacing: 4dp;
+	min-height: 14dp;
+	margin-bottom: 4dp;
+}
+.gcd-keypad-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 150dp;
+}
+.gcd-keypad-grid.hidden { display: none; } /* same cascade-tie fix as .gcd-input-row above */
+.btn.gcd-keypad-btn, .btn.gcd-keypad-delete {
+	position: static;
+	width: 26dp;
+	height: 18dp;
+	margin: 1dp;
+	font-size: 10dp;
+}
+/* Position reference only, same idea as .gcd-item3d-anchor -- the native g_pSingleTextInputBox
+   widget draws on top of this natively, nothing renders through RmlUi here for Mode::Text. */
+.gcd-input-anchor {
+	position: static;
+	width: 150dp;
+	height: 18dp;
+}
+
+/* Optional progress bar -- same `x_fraction * 100 + '%'` fill technique main_frame.rml's own
+   HP/MP/AG/SD/EXP gauges use. */
+.gcd-progress-track {
+	width: 150dp;
+	height: 10dp;
+	margin-top: 4dp;
+	background-color: token(surface-recessed);
+	border: 1dp token(border-inner);
+}
+.gcd-progress-fill {
+	height: 100%;
+	background-color: token(accent-gold);
+}
+
+/* top: 110dp = native's own vertical math for a fixed 160dp panel. Buttons stay the shared .btn
+   sprite with real bound text, not native's own baked OK/Cancel art -- labels are data-driven.
+
+   Three fixed, named-role slots (primary/secondary/cancel -- see GenericDialogConfig's own
+   comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
+   Cancel; `.gcd-btn-cancel` is the always-Cancel/Close slot. Every existing Ok/OkCancel consumer
+   always renders solo or paired (primary+cancel), never triple. */
+.btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
+	top: 110dp;
+	width: 54dp;
+	height: 30dp;
+}
+.gcd-btn-primary   { left: 30dp; }
+.gcd-btn-primary.solo { left: 88dp; }
+/* Paired: whichever of secondary/cancel is the sole second button sits in this one slot -- both
+   selectors share the position since only one is ever visible outside of `.triple`. */
+.gcd-btn-secondary, .gcd-btn-cancel { left: 146dp; }
+/* Triple (all three shown, e.g. Create/Decrease/Cancel) -- native's own `triwidth = panelWidth/3`
+   centering (CUseFruitCheckMsgBox::SetButtonInfo(), CustomMessageBox.cpp), each 54dp button
+   centered within its own 230dp/3 = 76.67dp third: primary ~11dp, secondary ~88dp, cancel ~165dp. */
+.gcd-btn-primary.triple { left: 11dp; }
+.gcd-btn-secondary.triple { left: 88dp; }
+.gcd-btn-cancel.triple { left: 165dp; }
+/* #panel.tall's buttons keep the same 20dp bottom margin the default 160dp panel already has
+   (110 + 30 + 20 = 160). */
+#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary, #panel.tall .btn.gcd-btn-cancel {
+	top: 190dp;
+}

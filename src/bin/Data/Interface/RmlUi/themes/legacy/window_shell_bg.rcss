@@ -1,0 +1,67 @@
+/* Legacy theme's background-only window shell -- the same msgbox sprite composite
+   window_shell.rcss's own .window-shell-sprite-* rules already use, redeclared here (RmlUi
+   spritesheets are per-document, already this codebase's own established convention -- e.g.
+   generic_confirm_dialog_bg.rcss and generic_menu_dialog.rcss each redeclared their own identical
+   copy of this same native sprite family before this file existed). The back-sheet crop rect below
+   (222x150) is shorter than window_shell.rcss's own copy (222x250) -- each background-context
+   consumer's own panel height differs, so the crop is sized to whichever consumer needs it; today's
+   only consumer (CGenericConfirmDialog's bg document) is 160/240dp tall, not window_shell's own
+   230x260dp dialog panel. */
+@spritesheet msgbox-top-sheet
+{
+	src: "../../../newui_msgbox_top.tga";
+	msgbox-top-image: 0px 0px 230px 67px;
+}
+@spritesheet msgbox-middle-sheet
+{
+	src: "../../../newui_msgbox_middle.tga";
+	msgbox-middle-image: 0px 0px 230px 15px;
+}
+@spritesheet msgbox-bottom-sheet
+{
+	src: "../../../newui_msgbox_bottom.tga";
+	msgbox-bottom-image: 0px 0px 230px 50px;
+}
+@spritesheet msgbox-back-sheet
+{
+	src: "../../../newui_msgbox_back.jpg";
+	msgbox-back-image: 0px 0px 222px 150px;
+}
+.window-shell-sprite-back {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 5dp;
+	bottom: 5dp;
+	pointer-events: none;
+	decorator: image(msgbox-back-image);
+}
+.window-shell-sprite-top {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-top-image);
+}
+/* Stretches to fill the panel's remaining space -- a single stretched fill, not native's tiled
+   repeat. */
+.window-shell-sprite-middle {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 67dp;
+	bottom: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-middle-image);
+}
+.window-shell-sprite-bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-bottom-image);
+}

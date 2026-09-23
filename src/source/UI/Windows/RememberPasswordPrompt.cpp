@@ -2,58 +2,90 @@
 #include "UI/Windows/RememberPasswordPrompt.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Core/Input/Input.h"
 #include "I18N/All.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
 
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Event.h>
+
+// Bypasses the shared g_MessageBox stack: this dialog owns its own RmlUi document/state
+// independently, so callers gate on its own Pending state rather than the whole message-box stack.
 namespace
 {
-UI::Login::RememberPasswordChoice g_Choice = UI::Login::RememberPasswordChoice::None;
+    struct PromptModel
+    {
+        Rml::String titleText;
+        Rml::String bodyText;
+        Rml::String okLabel;
+        Rml::String cancelLabel;
+    };
 
-// Two-button confirmation, modelled on the game's other OK/Cancel dialogs (e.g.
-// the guild-request box). A bold yellow "WARNING!!!" header sits above the
-// orange message body.
-class CRememberPasswordMsgBoxLayout : public SEASON3B::TMsgBoxLayout<SEASON3B::CNewUICommonMessageBox>
-{
-public:
-    bool SetLayout() override;
-    static SEASON3B::CALLBACK_RESULT OnOk(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static SEASON3B::CALLBACK_RESULT OnCancel(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-};
+    RmlModelBinder<PromptModel> g_Binder;
+    Rml::ElementDocument* g_pDoc = nullptr;
+    UI::Login::RememberPasswordChoice g_Choice = UI::Login::RememberPasswordChoice::None;
 
-bool CRememberPasswordMsgBoxLayout::SetLayout()
-{
-    SEASON3B::CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-    if (pMsgBox == nullptr)
-        return false;
+    // Stable identity token for UI::RmlBridge's theme-reload registry -- this module has no `this`
+    // of its own, so its own address stands in.
+    char s_ThemeReloadOwner = 0;
 
-    if (!pMsgBox->Create(SEASON3B::MSGBOX_COMMON_TYPE_OKCANCEL))
-        return false;
+    void Resolve(UI::Login::RememberPasswordChoice choice)
+    {
+        g_Choice = choice;
+        PlayBuffer(SOUND_CLICK01);
+        if (g_pDoc)
+            g_pDoc->Hide();
+    }
 
-    pMsgBox->AddMsg(I18N::Game::LoginSavePasswordWarningTitle, CLRDW_YELLOW, SEASON3B::MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(I18N::Game::LoginSavePasswordWarningBody, CLRDW_ORANGE);
+    // Creates the document/model once, lazily, on first open.
+    void EnsureCreated()
+    {
+        if (g_pDoc || !RmlUiRuntime::Instance().IsCreated())
+            return;
 
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnOk, SEASON3B::MSGBOX_EVENT_USER_COMMON_OK);
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnCancel, SEASON3B::MSGBOX_EVENT_USER_COMMON_CANCEL);
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnOk, SEASON3B::MSGBOX_EVENT_PRESSKEY_RETURN);
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnCancel, SEASON3B::MSGBOX_EVENT_PRESSKEY_ESC);
-    return true;
-}
+        const bool modelCreated = g_Binder.Create(RmlUiRuntime::Instance().GetContext(), "remember_password_prompt",
+            [](Rml::DataModelConstructor& c, PromptModel& model)
+            {
+                c.Bind("title_text", &model.titleText);
+                c.Bind("body_text", &model.bodyText);
+                c.Bind("ok_label", &model.okLabel);
+                c.Bind("cancel_label", &model.cancelLabel);
 
-SEASON3B::CALLBACK_RESULT CRememberPasswordMsgBoxLayout::OnOk(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf&)
-{
-    g_Choice = UI::Login::RememberPasswordChoice::Ok;
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, SEASON3B::MSGBOX_EVENT_DESTROY);
-    return SEASON3B::CALLBACK_BREAK;
-}
+                c.BindEventCallback("prompt_ok_click",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Resolve(UI::Login::RememberPasswordChoice::Ok); });
+                c.BindEventCallback("prompt_cancel_click",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Resolve(UI::Login::RememberPasswordChoice::Cancel); });
+            });
 
-SEASON3B::CALLBACK_RESULT CRememberPasswordMsgBoxLayout::OnCancel(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf&)
-{
-    g_Choice = UI::Login::RememberPasswordChoice::Cancel;
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, SEASON3B::MSGBOX_EVENT_DESTROY);
-    return SEASON3B::CALLBACK_BREAK;
-}
+        if (modelCreated)
+            g_pDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/remember_password_prompt.rml");
+        if (g_pDoc)
+            UI::RmlBridge::RegisterForThemeReload(&s_ThemeReloadOwner, &UI::Login::ReloadRmlTheme);
+
+        // Centering is handled by #panel's own `.center-both` RCSS class, not pushed from here.
+    }
+
+    void SyncLabels()
+    {
+        auto syncLabel = [](Rml::String PromptModel::* field, const char* boundName, const wchar_t* text)
+        {
+            const std::string utf8 = StringUtils::WideToNarrow(text);
+            if (g_Binder.GetModel().*field != utf8)
+            {
+                g_Binder.GetModel().*field = utf8;
+                g_Binder.MarkDirty(boundName);
+            }
+        };
+        syncLabel(&PromptModel::titleText, "title_text", I18N::Game::LoginSavePasswordWarningTitle);
+        syncLabel(&PromptModel::bodyText, "body_text", I18N::Game::LoginSavePasswordWarningBody);
+        syncLabel(&PromptModel::okLabel, "ok_label", I18N::Game::OK);
+        syncLabel(&PromptModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
+    }
 } // namespace
 
 namespace UI::Login
@@ -61,7 +93,13 @@ namespace UI::Login
 void OpenRememberPasswordPrompt()
 {
     g_Choice = RememberPasswordChoice::Pending;
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CRememberPasswordMsgBoxLayout));
+    EnsureCreated();
+    if (g_pDoc)
+    {
+        SyncLabels();
+        // Modal: without it the login document underneath stays clickable and can steal focus back.
+        g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+    }
 }
 
 RememberPasswordChoice RememberPasswordChoiceState()
@@ -72,5 +110,34 @@ RememberPasswordChoice RememberPasswordChoiceState()
 void ClearRememberPasswordChoice()
 {
     g_Choice = RememberPasswordChoice::None;
+}
+
+void Tick()
+{
+    if (g_Choice != RememberPasswordChoice::Pending)
+        return;
+
+    if (CInput::Instance().IsKeyDown(VK_RETURN))
+        Resolve(RememberPasswordChoice::Ok);
+    else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
+        Resolve(RememberPasswordChoice::Cancel);
+}
+
+void ReloadRmlTheme()
+{
+    if (!g_pDoc) return; // never opened; EnsureCreated() will pick up the new theme later
+
+    const bool wasPending = (g_Choice == RememberPasswordChoice::Pending);
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    g_Binder.Destroy(context);
+    context->UnloadDocument(g_pDoc);
+    g_pDoc = nullptr;
+
+    EnsureCreated();
+    if (g_pDoc && wasPending)
+    {
+        SyncLabels();
+        g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+    }
 }
 } // namespace UI::Login

@@ -1,0 +1,90 @@
+/* Modern theme for CMyInventory's chrome -- frame/header/wallet/action-row are vector forged-metal
+   chrome (matching Login/SysMenu's forged-dialog language). Equipment board and bag grid stay
+   fully native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement there. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* Header uses base.rcss's .modern-header-rail-px/.modern-joint-px/.modern-header-text-px/
+   .modern-header-title-px family -- the px companions of SysMenu's own
+   dp-based classes (see base.rcss's comment on that class family for why a root_scale-driven
+   #panel like this one needs the px variants, not the dp originals).
+
+   top:7 matches SysMenu's own rail top exactly (so .modern-joint-px's rivet sits at the same -1px
+   relative to the frame's shell-edge at -3px in my_inventory_bg.rcss -- 2px contained clearance,
+   identical relationship to SysMenu's). Only height is trimmed, 36 vs SysMenu's 38, because the
+   native paperdoll grid starts at `m_Pos.y + 44` (MyInventory.cpp) -- ends at 43px, 1px clear. */
+.inv-header-rail {
+	top: 7px;
+	height: 36px;
+}
+
+/* Drag handle -- pointer-events/drag are force-set in C++ by UI::RmlBridge::MakeDraggable();
+   cursor here is purely cosmetic. Color/font come from .modern-header-title-px (shared with
+   SysMenu's dp version). */
+#title {
+	cursor: move;
+}
+
+/* Wallet bar and action buttons use base.rcss's shared .modern-wallet-px/.modern-icon-btn-px
+   family (generalized from this window's own original recipe -- see that file's comment) at their
+   default geometry, which already matches this window exactly. Only per-instance specifics stay
+   here: each button's own left offset, the exit button's warm-red accent, myshop's close-mode
+   accent, and the hover-hint tooltip positions. */
+.inv-btn-exit   { left: 15px;  color: #d59b79; border-color: #5c382b; }
+.inv-btn-repair { left: 56px;  }
+.inv-btn-myshop { left: 97px;  }
+.inv-btn-myshop.close-mode { color: token(accent-gold-hover); border-color: token(border-hover); }
+.inv-btn-expand { left: 138px; }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit   { left: -27px; }
+.tooltip-repair { left: 15px; }
+.tooltip-myshop { left: 55px; }
+.tooltip-expand { left: 96px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_repair:hover ~ .tooltip-repair,
+#btn_myshop:hover ~ .tooltip-myshop,
+#btn_expand:hover ~ .tooltip-expand {
+	display: block;
+}
+
+/* Set/Socket option header labels -- gray/yellow match legacy since they're semantic
+   (active vs. inactive), not part of modern's chrome palette. */
+.option-label {
+	position: absolute;
+	top: 32px;
+	width: 95px;
+	height: 12px;
+	text-align: center;
+	font-family: "token(font-body)";
+	font-weight: normal;
+	font-size: 10px;
+	color: #666666;
+	pointer-events: auto;
+	cursor: default;
+}
+.option-label.active { color: #ffcc1a; }
+.option-label-set { left: 0; }
+.option-label-socket { left: 95px; }

@@ -2,6 +2,8 @@
 
 #include <doctest.h>
 
+#include <algorithm>
+
 #include "Character/CharSelMainWin.h"
 #include "Core/Input/Input.h"
 #include "Core/Platform/WinCompat.h"
@@ -9,29 +11,29 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/UIMapName.h"
-#include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
-#include "UI/NewUI/HUD/NewUICommandWindow.h"
-#include "UI/NewUI/HUD/NewUIMoveCommandWindow.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/NewUI3DRenderMng.h"
-#include "UI/NewUI/NewUIManager.h"
-#include "UI/NewUI/NPCs/NewUINPCShop.h"
-#include "UI/NewUI/Options/NewUIOptionWindow.h"
-#include "UI/NewUI/UILayoutPolicy.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/HUD/UIMapName.h"
+#include "UI/Dialogs/ChatCommandWindow.h"
+#include "UI/HUD/CommandWindow.h"
+#include "UI/HUD/MoveCommandWindow.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/NPCs/NPCShop.h"
+#include "UI/Options/OptionWindow.h"
+#include "UI/Core/UILayoutPolicy.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/Widgets/Button.h"
 
 using UI::Scaling::FontRole;
-using SEASON3B::CNewUICommandWindow;
+using mu::ui::window::CCommandWindow;
 
 namespace
 {
-class Recording3DObject final : public SEASON3B::INewUI3DRenderObj
+class Recording3DObject final : public mu::ui::window::I3DRenderObj
 {
 public:
-    explicit Recording3DObject(SEASON3B::CNewUIObj* owner)
+    explicit Recording3DObject(mu::ui::window::CObject* owner)
         : m_owner(owner)
     {
     }
@@ -43,22 +45,22 @@ public:
     }
 
     bool IsVisible() const override { return true; }
-    SEASON3B::CNewUIObj* GetLayoutOwner() const override { return m_owner; }
+    mu::ui::window::CObject* GetLayoutOwner() const override { return m_owner; }
 
     int mouseX = -1;
     int mouseY = -1;
 
 private:
-    SEASON3B::CNewUIObj* m_owner;
+    mu::ui::window::CObject* m_owner;
 };
 
-class Test3DCamera final : public SEASON3B::CNewUI3DCamera
+class Test3DCamera final : public mu::ui::window::C3DCamera
 {
 public:
-    using CNewUI3DCamera::Render3D;
+    using C3DCamera::Render3D;
 };
 
-class RecordingUIObject final : public SEASON3B::CNewUIObj
+class RecordingUIObject final : public mu::ui::window::CObject
 {
 public:
     bool Render() override
@@ -229,6 +231,46 @@ TEST_CASE("display resolution options use unique supported sizes [ui][options]")
     CHECK(UI::Options::FindClosestDisplayResolutionIndex(resolutions, 1366, 768) == 0);
 }
 
+TEST_CASE("UI scale options offer an ascending ladder around the default [ui][options]")
+{
+    const auto& choices = UI::Options::UIScalePercentChoices();
+
+    REQUIRE(choices.size() >= 3);
+    CHECK(std::is_sorted(choices.begin(), choices.end()));
+    CHECK(std::adjacent_find(choices.begin(), choices.end()) == choices.end());
+    // The default must be selectable, or "back to normal" would not be reachable from the row.
+    CHECK(std::find(choices.begin(), choices.end(), CfgDefaults::CfgDefaultUIScalePercent) != choices.end());
+    // Never offers a value the config setter would clamp away.
+    CHECK(choices.front() >= CfgDefaults::CfgMinUIScalePercent);
+    CHECK(choices.back() <= CfgDefaults::CfgMaxUIScalePercent);
+
+    // A config.ini value between two offered steps shows the nearer one, out-of-range values the
+    // nearest end; exact values map to themselves.
+    for (size_t i = 0; i < choices.size(); ++i)
+        CHECK(UI::Options::FindClosestUIScaleIndex(choices[i]) == static_cast<int>(i));
+    CHECK(UI::Options::FindClosestUIScaleIndex(choices.front() - 1000) == 0);
+    CHECK(UI::Options::FindClosestUIScaleIndex(choices.back() + 1000) == static_cast<int>(choices.size()) - 1);
+    // Midway between two steps, the lower one wins (ties resolve down, see the declaration).
+    const int firstStep = choices[0];
+    const int secondStep = choices[1];
+    CHECK(UI::Options::FindClosestUIScaleIndex((firstStep + secondStep) / 2) == 0);
+}
+
+TEST_CASE("UI scale percent clamps to the supported range [config][ui]")
+{
+    auto& config = GameConfig::GetInstance();
+    const int previous = config.GetUIScalePercent();
+
+    config.SetUIScalePercent(CfgDefaults::CfgMinUIScalePercent - 10);
+    CHECK(config.GetUIScalePercent() == CfgDefaults::CfgMinUIScalePercent);
+    config.SetUIScalePercent(CfgDefaults::CfgMaxUIScalePercent + 100);
+    CHECK(config.GetUIScalePercent() == CfgDefaults::CfgMaxUIScalePercent);
+    config.SetUIScalePercent(125);
+    CHECK(config.GetUIScalePercent() == 125);
+
+    config.SetUIScalePercent(previous);
+}
+
 TEST_CASE("VSync preference defaults on and remains mutable [config][render]")
 {
     CHECK(CfgDefaults::CfgDefaultVSync);
@@ -260,17 +302,17 @@ TEST_CASE("inventory drag keeps border drops in their original slots [ui][invent
     const POINT leftTopLeft = UI::Items::Drag::ItemTopLeft(101, 201, leftOffset);
     CHECK(leftTopLeft.x == gridLeft);
     CHECK(leftTopLeft.y == gridTop);
-    CHECK((leftTopLeft.x - gridLeft) / SEASON3B::INVENTORY_SQUARE_WIDTH == 0);
-    CHECK((leftTopLeft.y - gridTop) / SEASON3B::INVENTORY_SQUARE_HEIGHT == 0);
+    CHECK((leftTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 0);
+    CHECK((leftTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
 
-    constexpr int rightItemLeft = gridLeft + 6 * SEASON3B::INVENTORY_SQUARE_WIDTH;
+    constexpr int rightItemLeft = gridLeft + 6 * mu::ui::window::INVENTORY_SQUARE_WIDTH;
     const POINT rightOffset = UI::Items::Drag::PickupOffset(rightItemLeft, gridTop, 40, 40,
                                                             rightItemLeft + 39, gridTop + 39, true);
     const POINT rightTopLeft = UI::Items::Drag::ItemTopLeft(rightItemLeft + 39, gridTop + 39, rightOffset);
     CHECK(rightTopLeft.x == rightItemLeft);
     CHECK(rightTopLeft.y == gridTop);
-    CHECK((rightTopLeft.x - gridLeft) / SEASON3B::INVENTORY_SQUARE_WIDTH == 6);
-    CHECK((rightTopLeft.y - gridTop) / SEASON3B::INVENTORY_SQUARE_HEIGHT == 0);
+    CHECK((rightTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 6);
+    CHECK((rightTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
 }
 
 TEST_CASE("inventory drag anchor survives dock scaling [ui][inventory]")
@@ -318,7 +360,7 @@ TEST_CASE("store window consumes passive hover before world selection [ui][store
     MouseY = 200;
 
     {
-        SEASON3B::CNewUINPCShop shop;
+        mu::ui::window::CNPCShop shop;
         shop.SetSellingItem(true);
         CHECK_FALSE(shop.UpdateMouseEvent());
     }
@@ -338,7 +380,7 @@ TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][s
 TEST_CASE("right-side status overlays stay adjacent to right-docked panels [ui][scaling]")
 {
     using UI::Scaling::LayoutMode;
-    for (const auto interfaceKey : {SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, SEASON3B::INTERFACE_PARTY_INFO_WINDOW})
+    for (const auto interfaceKey : {mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO, mu::ui::window::INTERFACE_PARTY_INFO_WINDOW})
     {
         const auto overlayMode = UI::Layout::ForInterface(interfaceKey);
         CHECK(overlayMode == LayoutMode::DockRight);
@@ -359,20 +401,20 @@ TEST_CASE("docked command window ends at the bottom HUD top [ui][scaling]")
 {
     CHECK(UI::Scaling::PositionY(
         UI::Scaling::DockRightTransform(1280, 1024),
-        CNewUICommandWindow::COMMAND_WINDOW_HEIGHT) == doctest::Approx(922.0f));
+        CCommandWindow::COMMAND_WINDOW_HEIGHT) == doctest::Approx(922.0f));
 }
 
 TEST_CASE("dockable command windows share the HUD boundary [ui][scaling]")
 {
     CHECK(UI::Scaling::DockLogicalBottom == 432);
-    CHECK(CNewUICommandWindow::COMMAND_WINDOW_HEIGHT == UI::Scaling::DockLogicalBottom);
-    CHECK(SEASON3B::CNewUIChatCommandWindow::WindowHeight == UI::Scaling::DockLogicalBottom);
+    CHECK(CCommandWindow::COMMAND_WINDOW_HEIGHT == UI::Scaling::DockLogicalBottom);
+    CHECK(mu::ui::window::CChatCommandWindow::WindowHeight == UI::Scaling::DockLogicalBottom);
 }
 
 TEST_CASE("command windows render between HUD and modal layers [ui][scaling]")
 {
-    CNewUICommandWindow commandWindow;
-    SEASON3B::CNewUIChatCommandWindow commandListWindow;
+    CCommandWindow commandWindow;
+    mu::ui::window::CChatCommandWindow commandListWindow;
 
     CHECK(UI::Layout::ForegroundPanelLayerDepth > 10.6f);
     CHECK(UI::Layout::ForegroundPanelLayerDepth < 10.7f);
@@ -487,7 +529,7 @@ TEST_CASE("3D item rendering uses its owner layout for hover input [ui][scaling]
     MouseX = 546;
     MouseY = 228;
 
-    CNewUICommandWindow owner;
+    CCommandWindow owner;
     owner.SetLayoutMode(UI::Scaling::LayoutMode::DockRight);
     Recording3DObject object(&owner);
     Test3DCamera camera;
@@ -530,8 +572,8 @@ TEST_CASE("managed rendering uses its layout mouse coordinates [ui][scaling]")
     MouseY = 202;
 
     RecordingUIObject object;
-    SEASON3B::CNewUIManager manager;
-    manager.AddUIObj(SEASON3B::INTERFACE_INVENTORY, &object);
+    mu::ui::window::CManager manager;
+    manager.AddUIObj(mu::ui::window::INTERFACE_INVENTORY, &object);
 
     manager.Render();
 
@@ -706,16 +748,16 @@ TEST_CASE("legacy UI preserves logical input and world-overlay coordinates [ui][
 TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scaling]")
 {
     using UI::Scaling::LayoutMode;
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MAINFRAME) == LayoutMode::Hud);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_HOTKEY) == LayoutMode::Hud);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_INVENTORY) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_INVENTORY) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
 }
 
 TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")

@@ -1,6 +1,4 @@
 // MuRenderer.h: Rendering abstraction interface for the MU Online game client.
-// Story 4.2.1 — Flow Code: VS1-RENDER-ABSTRACT-CORE
-// Story 4.4.1 — Flow Code: VS1-RENDER-TEXTURE-MIGRATE (GetDevice accessor added)
 //
 // IMuRenderer defines the stable rendering API surface that game code calls.
 // MuRendererSDLGpu.cpp implements it using the active SDL GPU backend.
@@ -14,23 +12,30 @@
 #include "FramePixelReadback.h"
 
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <string_view>
 
-// Story 4.4.1: Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
+// Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
 // The returned pointer is opaque — callers cast to SDL_GPUDevice* after including SDL3 headers.
-// Story 7.9.8: Forward declarations for SDL_ttf text engine and font handles.
+// Also forward-declares SDL_ttf text engine and font handles.
 struct SDL_GPUDevice;
 struct TTF_TextEngine;
 struct TTF_Font;
+
+// RmlUi port: forward declarations for the per-frame GPU context accessor below, same
+// opaque-pointer convention as GetDevice() -- callers cast after including SDL3 headers.
+struct SDL_GPUCommandBuffer;
+struct SDL_GPUTexture;
+struct SDL_Window;
 
 namespace mu
 {
 
 // ---------------------------------------------------------------------------
 // BlendMode: Rendering blend equation presets.
-// Maps to GL blend factor pairs documented in docs/architecture-rendering.md.
+// Maps to GL blend factor pairs used by this renderer's blend pipeline.
 // ---------------------------------------------------------------------------
 enum class BlendMode : std::uint8_t
 {
@@ -40,8 +45,8 @@ enum class BlendMode : std::uint8_t
     InverseColor, // GL_ONE_MINUS_DST_COLOR, GL_ZERO
     Mixed,        // GL_ONE,                GL_ONE_MINUS_SRC_ALPHA
     LightMap,     // GL_ZERO,               GL_SRC_COLOR
-    Glow,         // GL_ONE,                GL_ONE             (Story 4.2.5 — EnableAlphaBlend)
-    Luminance,    // GL_ONE_MINUS_SRC_COLOR, GL_ONE            (Story 4.2.5 — EnableAlphaBlend2)
+    Glow,         // GL_ONE,                GL_ONE
+    Luminance,    // GL_ONE_MINUS_SRC_COLOR, GL_ONE
 };
 
 // ---------------------------------------------------------------------------
@@ -126,6 +131,19 @@ struct SkinningParameters
     bool lightEnabled = false;
 };
 
+// RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored
+// RenderInterface_SDL_GPU (ThirdParty/RmlUi/Backends/) manages its own pipelines/buffers but
+// needs the active command buffer + swapchain texture to record into and present through --
+// this is how it gets them without a direct dependency on MuRendererSDLGpu.cpp internals
+// (same pattern as GetDevice() below). All fields are null/zero outside BeginFrame()/EndFrame().
+struct FrameGpuContext
+{
+    SDL_GPUCommandBuffer* commandBuffer = nullptr;
+    SDL_GPUTexture* swapchainTexture = nullptr;
+    std::uint32_t width = 0;
+    std::uint32_t height = 0;
+};
+
 struct RendererStats
 {
     std::uint32_t requestedDrawCalls = 0;
@@ -203,13 +221,13 @@ public:
     // Configure hardware fog for the current scene.
     virtual void SetFog(const FogParams& params) = 0;
 
-    // Story 7-9-2 (AC-1): 3D scene projection setup — replaces BeginOpengl()/EndOpengl().
+    // 3D scene projection setup — replaces BeginOpengl()/EndOpengl().
     // BeginScene sets viewport and projection (perspective + modelview).
     // EndScene restores matrix state.
     virtual void BeginScene(int x, int y, int w, int h) = 0;
     virtual void EndScene() = 0;
 
-    // Story 7-9-2 (AC-2): 2D orthographic pass — replaces BeginBitmap()/EndBitmap().
+    // 2D orthographic pass — replaces BeginBitmap()/EndBitmap().
     // Begin2DPass sets up orthographic projection for screen-space rendering.
     // End2DPass restores the previous projection state.
     // NOTE: OpenGL backend disables depth test in Begin2DPass and re-enables in End2DPass
@@ -217,18 +235,18 @@ public:
     virtual void Begin2DPass() = 0;
     virtual void End2DPass() = 0;
 
-    // Story 7-9-2 (AC-7): Clear the color and depth buffers.
+    // Clear the color and depth buffers.
     // OpenGL backend: glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT).
     // SDL_gpu backend: no-op (SDL_gpu clears in BeginFrame).
     virtual void ClearScreen() = 0;
 
-    // Story 7-9-2 (AC-7): Clear depth buffer only (mid-frame depth reset).
+    // Clear depth buffer only (mid-frame depth reset).
     // Used by UI 3D render panels to clear depth before rendering 3D items on top.
     // OpenGL backend: glClear(GL_DEPTH_BUFFER_BIT).
     // SDL_gpu backend: no-op (depth handled by render pass management).
     virtual void ClearDepthBuffer() {}
 
-    // Story 7-9-2 (AC-5): Render line primitives (GL_LINES replacement).
+    // Render line primitives (GL_LINES replacement).
     // Used by debug visualizations (collision, skeleton, waypoint gizmos).
     // Vertex count should be even (pairs); odd count logs a warning, last vertex ignored.
     virtual void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
@@ -262,7 +280,7 @@ public:
         return false;
     }
 
-    // Story 4.4.1 — Texture System Migration: SDL_gpu device accessor.
+    // SDL_gpu device accessor.
     // Returns the SDL_GPUDevice* used by the active backend, or nullptr if not available.
     // Default implementation returns nullptr (OpenGL backend has no SDL_GPUDevice).
     // MuRendererSDLGpu overrides to return s_device.
@@ -273,21 +291,86 @@ public:
         return nullptr;
     }
 
-    // Story 7.9.8 (AC-2): SDL_ttf GPU text engine accessor.
+    // RmlUi port: SDL_Window* accessor, same opaque-pointer/nullptr-default convention as
+    // GetDevice() above. RenderInterface_SDL_GPU's constructor needs both.
+    [[nodiscard]] virtual SDL_Window* GetWindow()
+    {
+        return nullptr;
+    }
+
+    // RmlUi port: current frame's command buffer + swapchain texture. See FrameGpuContext's
+    // own comment above. Valid only between BeginFrame() and EndFrame(); default (all-null)
+    // outside that window, same as GetDevice()'s "not initialized" nullptr default.
+    [[nodiscard]] virtual FrameGpuContext GetFrameGpuContext()
+    {
+        return {};
+    }
+
+    // RmlUi port: resolves this engine's logical texture id (BITMAP_t::TextureNumber, despite
+    // its GLuint-typed name -- CGlobalBitmap sets it from CreateTexture()'s returned id, not a
+    // real GL name, on this backend) to the raw SDL_GPUTexture* RmlUi's own vendored
+    // RenderInterface_SDL_GPU expects as its TextureHandle. Returns nullptr if textureId isn't
+    // currently registered. Opaque void*, same convention as GetDevice().
+    [[nodiscard]] virtual void* GetRawTexture(std::uint32_t /*textureId*/)
+    {
+        return nullptr;
+    }
+
+    // RmlUi port: registers a callback the backend invokes once per frame after its own
+    // game-content replay/blit is fully recorded onto the frame's command buffer, but before
+    // that command buffer is submitted. This is the seam RmlUi needs to render "last" without
+    // EndFrame() itself
+    // knowing anything about RmlUi -- RmlUiRuntime::Create() is the only caller. Calling
+    // RenderScene() (or similar, mid-frame) is too early: game content is only *recorded* there,
+    // not yet replayed onto the command buffer, so anything drawn at that point would land
+    // before the game's own content instead of on top of it. Calling after EndFrame() returns is
+    // too late: the command buffer is already submitted and the swapchain texture is gone.
+    // Pass an empty std::function to unregister. Default no-op backend never calls anything.
+    virtual void SetPreSubmitCallback(std::function<void()> /*callback*/) {}
+
+    // Fires after RmlUi's own render pass (the one SetPreSubmitCallback above triggers) has
+    // already closed, still before the frame's command buffer is submitted -- the seam for
+    // content that must sit visually on top of RmlUi (the game cursor, legacy CUITextInputBox
+    // text -- the cursor/text-ordering counterpart to the "pointer-events swallows every click"
+    // hazard). Backed by its own small
+    // render pass (LOAD, not CLEAR) that replays whatever this callback pushes via the normal
+    // RenderQuad2D-style functions -- calling those same functions from inside
+    // SetPreSubmitCallback's callback instead does NOT work: the main render pass (and the
+    // s_renderCmds list it replays) is already closed by the time that callback fires, so
+    // anything pushed there lands unreplayed at the tail of s_renderCmds until next frame's
+    // BeginFrame() silently clears it away. Pass an empty std::function to unregister. Default
+    // no-op backend never calls anything.
+    virtual void SetPostRmlUiCallback(std::function<void()> /*callback*/) {}
+
+    // RmlUi-behind-3D-icons seam: RmlUi's main context always composites last in the frame, so a
+    // caller that needs content to paint behind a live 3D render needs an earlier seam of its own.
+    // Opens a real render pass NOW, mid-recording, replaying only what's been recorded into this
+    // frame's command list since the last flush (or frame start), instead of waiting for the one
+    // pass EndFrame normally opens once. Content drawn immediately after this call (e.g. a second
+    // Rml::Context's Render()) lands behind whatever legacy content the caller records next, and
+    // in front of everything recorded before this call -- the two existing seams above only let
+    // content render after ALL game content for the frame; this is the one that lets something
+    // render in the *middle*. CLEARs the very first time it (or EndFrame's own final pass) runs
+    // each frame, LOADs every time after -- callers don't need to know which. Default no-op
+    // backend does nothing (nothing to flush). See MuRendererSDLGpu.cpp's implementation comment
+    // for the concrete pass-sequencing/state-tracking this requires.
+    virtual void FlushRenderCommands() {}
+
+    // SDL_ttf GPU text engine accessor.
     // Returns the TTF_TextEngine* for creating TTF_Text objects, or nullptr if unavailable.
     [[nodiscard]] virtual TTF_TextEngine* GetTextEngine()
     {
         return nullptr;
     }
 
-    // Story 7.9.8 (AC-2): Default TTF font accessor.
+    // Default TTF font accessor.
     // Returns the TTF_Font* loaded at init, or nullptr if no font was found.
     [[nodiscard]] virtual TTF_Font* GetTtfFont()
     {
         return nullptr;
     }
 
-    // F-1 fix: Font variant accessors for bold, big, and fixed-width text.
+    // Font variant accessors for bold, big, and fixed-width text.
     // Returns the default font as fallback if the variant wasn't loaded.
     [[nodiscard]] virtual TTF_Font* GetTtfFontBold()
     {
@@ -307,13 +390,13 @@ public:
         return false;
     }
 
-    // F-7 fix: Cached window height (updated per-frame in BeginFrame).
+    // Cached window height (updated per-frame in BeginFrame).
     [[nodiscard]] virtual int GetCachedWindowHeight()
     {
         return 0;
     }
 
-    // Story 7.9.8 (AC-6): Submit text triangles for deferred rendering.
+    // Submit text triangles for deferred rendering.
     // Vertices are Vertex2D format, atlasTexture is the glyph atlas from TTF draw data.
     // sampler may be null (uses default). Non-indexed triangle list.
     virtual void SubmitTextTriangles(std::span<const Vertex2D> vertices, void* atlasTexture, void* sampler = nullptr)
@@ -400,15 +483,15 @@ public:
 #endif // _EDITOR
 
     // -----------------------------------------------------------------------
-    // Story 7-9-6: GL state migration — replaces raw OpenGL calls.
+    // GL state migration — replaces raw OpenGL calls.
     // Default implementations are no-ops; SDL_gpu backend overrides them.
     // -----------------------------------------------------------------------
 
-    // AC-3: Clear color — replaces glClearColor.
+    // Clear color — replaces glClearColor.
     // SDL_gpu backend stores RGBA and applies in BeginFrame render pass.
     virtual void SetClearColor(float /*r*/, float /*g*/, float /*b*/, float /*a*/) {}
 
-    // AC-4: Matrix stack — replaces glMatrixMode/glPushMatrix/glPopMatrix/etc.
+    // Matrix stack — replaces glMatrixMode/glPushMatrix/glPopMatrix/etc.
     // SDL_gpu backend maintains internal MatrixStack and uploads to GPU uniform buffer.
     virtual void SetMatrixMode(int /*mode*/) {}
     virtual void PushMatrix() {}
@@ -421,7 +504,7 @@ public:
     virtual void LoadMatrix(const float* /*m*/) {}
     virtual void GetMatrix(int /*mode*/, float* /*m*/) {}
 
-    // AC-6: Depth/stencil/state — replaces glDepthFunc/glAlphaFunc/glStencilFunc/etc.
+    // Depth/stencil/state — replaces glDepthFunc/glAlphaFunc/glStencilFunc/etc.
     virtual void SetStencilTest(bool /*enabled*/) {}
     virtual void SetDepthFunc(int /*func*/) {}
     virtual void SetAlphaFunc(int /*func*/, float /*ref*/) {}
@@ -438,16 +521,16 @@ public:
     virtual void SetTexEnv(int /*target*/, int /*pname*/, int /*param*/) {}
     virtual void SetTexParameter(int /*target*/, int /*pname*/, int /*param*/) {}
 
-    // AC-6: Viewport/scissor — replaces glViewport/glScissor.
+    // Viewport/scissor — replaces glViewport/glScissor.
     virtual void SetViewport(int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
     virtual void SetScissor(int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
     virtual void SetScissorEnabled(bool /*enabled*/) {}
 
-    // AC-7: Screenshot — replaces glReadPixels.
+    // Screenshot — replaces glReadPixels.
     // SDL_gpu backend: SDL_GPUDownloadFromGPUTexture or SDL_RenderReadPixels.
     virtual void ReadPixels(int /*x*/, int /*y*/, int /*w*/, int /*h*/, void* /*data*/) {}
 
-    // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
+    // GPU backend driver name for error reporting.
     // Returns "unknown" by default; SDL GPU backend overrides with SDL_GetGPUDeviceDriver().
     [[nodiscard]] virtual const char* GetGPUDriverName() const
     {
@@ -460,7 +543,8 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
+                                      std::string_view renderBackend, float normalPointSize,
                                       float bigPointSize, float fixedPointSize);
 void WaitForSDLGpuIdle();
 void ShutdownSDLGpuRenderer();

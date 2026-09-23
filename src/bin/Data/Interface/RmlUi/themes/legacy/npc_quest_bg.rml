@@ -1,0 +1,21 @@
+<rml>
+<head>
+	<title>NPC Quest Background</title>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="npc_quest.rcss"/>
+</head>
+<!-- Background-context document (see RmlUiRuntime::GetBackgroundContext()'s own comment for the
+     mechanism) -- paints the outer frame behind CNPCQuest's still-native live-3D quest-item preview
+     (Render3D()/RenderItem3D()). Reuses docked_panel_frame.rcss directly (same shared frame family
+     as ../../npc_quest.rml's own foreground doc used to link before this split), so #panel/
+     .frame-piece here are the SAME id/classes that file already styles -- nothing bespoke. -->
+<body>
+	<div id="panel" data-model="npc_quest_bg" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+	</div>
+</body>
+</rml>

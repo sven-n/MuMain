@@ -1,0 +1,19 @@
+<rml>
+<head>
+	<title>Storage Extension</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="storage_ext.rcss"/>
+</head>
+<body data-model="storage_ext">
+	<!-- Window frame/title/exit button only -- inventory grid stays native
+	     (StorageInventoryExt.h). Background lives in storage_ext_bg.rml instead, since it must
+	     paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<div id="btn_exit" class="ext-btn" data-event-click="storage_ext_exit_click"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

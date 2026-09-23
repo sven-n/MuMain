@@ -1,0 +1,37 @@
+<rml>
+<head>
+	<title>Select Server</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="server_select.rcss"/>
+</head>
+<body data-model="server_select">
+	<div id="panel" class="center-both">
+		<div id="columns">
+			<!-- Left column: all server groups in one merged, order-preserving list (no more
+			     split columns or a floating test-server button) -- see ServerSelWin.h. -->
+			<div id="group_col">
+				<div class="group-btn" data-for="g : groups" data-class-checked="g.checked"
+				     data-event-click="serversel_select_group(g.btn_pos)">{{g.label}}</div>
+			</div>
+
+			<!-- Right column: servers in the currently-selected group; hidden until a group is
+			     picked (replaces the old flyout with a plain second column). -->
+			<div id="server_col" data-class-hidden="!server_list_visible">
+				<div class="server-row" data-for="s : servers" data-class-gray="s.color_gray" data-class-orange="s.color_orange"
+				     data-event-click="serversel_select_server(s.index)">{{s.label}}
+					<div class="server-gauge-slot"><div class="server-gauge-fill" data-style-width="s.load_fraction * 100 + '%'"
+					     data-class-tier-low="s.load_fraction < 0.5" data-class-tier-high="s.load_fraction >= 0.8"></div></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="pvp_notice" data-class-hidden="!pvp_notice">
+			<div class="pvp-line">{{pvp_notice_line0}}</div>
+			<div class="pvp-line">{{pvp_notice_line1}}</div>
+			<div class="pvp-line">{{pvp_notice_line2}}</div>
+		</div>
+
+		<div id="desc_panel">{{description_text}}</div>
+	</div>
+</body>
+</rml>

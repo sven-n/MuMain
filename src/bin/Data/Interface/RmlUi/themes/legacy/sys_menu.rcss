@@ -1,0 +1,33 @@
+/* Legacy theme for the login/character-scene system menu (SysMenuWin) -- panel chrome reproduces
+   the real CWinEx art via base.rcss's shared .panel-cap-* classes; buttons use base.rcss's
+   shared .btn. */
+
+@spritesheet sys-menu-top-sheet
+{
+	src: "../../../op1_back1.tga";
+	sys-menu-top: 0px 0px 213px 64px;
+}
+
+/* #panel isn't C++-positioned/sized (see modern theme's sys_menu.rcss for the derivation).
+   Bottom-anchor values (86/52 -> 56/22) account for CSS `bottom` measuring to the button's own
+   bottom edge, not its top. */
+#panel {
+	width: 213dp;
+	height: 187dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: white;
+}
+#panel.compact {
+	height: 155dp;
+}
+
+#btn_exit_game    { left: 52dp; top: 33dp; }
+#btn_select_server{ left: 52dp; top: 67dp; }
+#btn_option       { left: 52dp; bottom: 56dp; }
+#btn_close        { left: 52dp; bottom: 22dp; }
+
+.panel-cap-top {
+	height: 64dp;
+	decorator: image(sys-menu-top);
+}

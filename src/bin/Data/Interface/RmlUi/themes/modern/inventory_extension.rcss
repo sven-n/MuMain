@@ -1,0 +1,82 @@
+/* Modern theme for CInventoryExtension's chrome -- header/exit-button are vector forged-metal
+   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Extension
+   grids stay fully native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement
+   there. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:7/height:37 -- top matches MyInventory/SysMenu's own rail top exactly (so
+   .modern-joint-px's rivet sits at the same -1px relative to the frame's shell-edge at -3px in
+   inventory_extension_bg.rcss -- same contained relationship as those windows). Height trimmed to
+   37 (not MyInventory's 36, not SysMenu/StorageExt's own values) because this window's first
+   extension grid starts at `m_Pos.y + 45` (InventoryExtension.cpp) -- ends at 44px, 1px clear. */
+.ext-header-rail {
+	top: 7px;
+	height: 37px;
+}
+
+/* Single exit button, centered: (190-37)/2. */
+.ext-btn-exit {
+	left: 77px;
+	color: #d59b79;
+	border-color: #5c382b;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	left: 40px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* Locked (not-yet-purchased) page badge -- vector tile instead of legacy's raster lock-number
+   sprite, matching this theme's forged-metal chrome language (same dimmed-tile idea as
+   base.rcss's .modern-icon-btn-px.locked). Footprint matches the native placeholder area this
+   overlays (RenderImage(IMAGE_EXTENSION_NO.., x+85, ..., 25, 28) in InventoryExtension.cpp) so it
+   lines up with the still-native table/empty-slot backing art around it. */
+.ext-locked-page {
+	position: absolute;
+	left: 85px;
+	width: 25px;
+	height: 28px;
+	pointer-events: none;
+}
+.ext-locked-badge {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 25px;
+	height: 28px;
+	text-align: center;
+	line-height: 28px;
+	color: token(text-secondary);
+	font-family: "token(font-title)";
+	font-size: 13px;
+	font-weight: 500;
+	background-color: #13140f;
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		inset 0 1px 0 rgba(232, 215, 168, 12),
+		inset 0 -1px 0 #000000;
+	opacity: 0.75;
+	pointer-events: none;
+}

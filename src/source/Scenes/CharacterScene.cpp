@@ -18,12 +18,16 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/w_PetProcess.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Windows/SysMenuWin.h"
+#include "Character/CharSelMainWin.h"
+#include "Character/CharMakeWin.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/UiInputRouter.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Server/CSMapServer.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "SceneCommon.h"
@@ -67,7 +71,7 @@ void StartGame()
         }
 
         if (CTLCODE_01BLOCKCHAR & CharactersClient[SelectedHero].CtlCode)
-            CUIMng::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
+            CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
         else
         {
             CharacterAttribute->Level = CharactersClient[SelectedHero].Level;
@@ -149,7 +153,7 @@ void CreateCharacterScene()
     CharacterView.Object.Kind = 0;
 
     SelectedHero = -1;
-    CUIMng::Instance().CreateCharacterScene();
+    CSceneUICoordinator::Instance().CreateCharacterScene();
 
     ClearInventory();
     CharacterAttribute->SkillNumber = 0;
@@ -174,7 +178,7 @@ void CreateCharacterScene()
 
     for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(L"", L"", mu::ui::window::TYPE_WHISPER_MESSAGE);
     }
 
     HIMC hIMC = ImmGetContext(g_hWnd);
@@ -236,12 +240,12 @@ void NewMoveCharacterScene()
 #endif
 
     CInput& rInput = CInput::Instance();
-    CUIMng& rUIMng = CUIMng::Instance();
+    CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
 
     if (rInput.IsKeyDown(VK_RETURN))
     {
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow())
+        if (!(g_MsgWin.IsVisible() || g_CharMakeWin.IsVisible()
+            || g_SysMenuWin.IsVisible())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
             ::PlayBuffer(SOUND_CLICK01);
@@ -252,14 +256,21 @@ void NewMoveCharacterScene()
             ::StartGame();
         }
     }
-    // ESC menu toggle is handled by CUIMng::Update()
+    // ESC menu toggle is handled by CSceneUICoordinator::Update()
 
-    if (rUIMng.IsCursorOnUI())
+    // Core::Input::IsMouseOverUI() added as a 2nd gate -- IsCursorOnUI() alone runs on CCharSelMainWin's own
+    // UpdateMouseEvent() rect (CalculateFixedAnchorLayout()'s hand-duplicated math), which has
+    // already gone stale relative to the real RmlUi-rendered buttons once (see that function's
+    // own comment on the Delete-button no-op bug). RmlUi's own hit-test is authoritative here
+    // without any new per-window bounding-box query: char_sel_main.rml's #panel spans the full
+    // screen but is pointer-events:none, so IsMouseOverUI() only reports true over the real
+    // interactive children.
+    if (rUIMng.IsCursorOnUI() || Core::Input::IsMouseOverUI())
     {
         return;
     }
 
-    if (rInput.IsLBtnDbl() && rUIMng.m_CharSelMainWin.IsShow())
+    if (rInput.IsLBtnDbl() && g_CharSelMainWin.IsVisible())
     {
         if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_PER_ACCOUNT)
         {
@@ -275,7 +286,7 @@ void NewMoveCharacterScene()
             SelectedHero = -1;
         else
             SelectedHero = SelectedCharacter;
-        rUIMng.m_CharSelMainWin.UpdateDisplay();
+        g_CharSelMainWin.UpdateDisplay();
     }
 
     g_ConsoleDebug->UpdateMainScene();
@@ -345,15 +356,16 @@ static void ApplySelectedCharacterLighting()
  */
 static void RenderCharacterScene3D()
 {
-    // DXP-16 increment 1: terrain has a real D3D11 path now -- call unconditionally.
-    // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it.
-    // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
+    // Terrain has a real D3D11 path now -- call unconditionally. RenderObjects() (BMD static world
+    // meshes) joins it. RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();
     RenderMount();
 
-    if (!CUIMng::Instance().IsCursorOnUI())
+    // Core::Input::IsMouseOverUI() added as a 2nd gate here too -- same rationale as
+    // the check in Update() above.
+    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();
 
     RenderBlurs();
@@ -466,11 +478,21 @@ bool NewRenderCharacterScene(HDC hDC)
 
     RenderCharacterSceneUI();
 
-    // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    // Handle option window in login/character scenes (can't use full g_pNewUISystem update).
+    // Update() (not just UpdateMouseEvent()/UpdateKeyEvent()) is required here too -- it's what
+    // runs SyncRmlModel(), which pushes this window's own C++ state (tab/row labels, checkbox
+    // values, everything bound via {{}}) into its RmlUi data model. Without it, every bound field
+    // stays at its default-constructed empty value and the window renders with no text at all
+    // (found live: fixed the moment CManager::Update() started running this window normally, i.e.
+    // after reaching a scene that pumps the full g_pNewUISystem update -- the model, once
+    // populated there, stays populated even back in a scene that skips this call again, which is
+    // why the symptom didn't reappear after visiting one such scene). Same order the full
+    // CManager sweep uses (UpdateMouseEvent -> UpdateKeyEvent -> Update -> Render).
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION))
     {
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();
+        g_pOption->Update();
         BeginBitmap();
         g_pOption->Render();
         EndBitmap();

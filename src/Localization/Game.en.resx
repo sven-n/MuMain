@@ -1433,6 +1433,66 @@
   <data name="Windowed mode" xml:space="preserve">
     <value>Windowed mode</value>
   </data>
+  <data name="Gameplay" xml:space="preserve">
+    <value>Gameplay</value>
+  </data>
+  <data name="Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="Video" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="Graphics" xml:space="preserve">
+    <value>Graphics</value>
+  </data>
+  <data name="UI" xml:space="preserve">
+    <value>UI</value>
+  </data>
+  <data name="VSync" xml:space="preserve">
+    <value>VSync</value>
+  </data>
+  <data name="FPS Limit" xml:space="preserve">
+    <value>FPS Limit</value>
+  </data>
+  <data name="Disable Effects" xml:space="preserve">
+    <value>Disable Effects</value>
+  </data>
+  <data name="Disable Particles" xml:space="preserve">
+    <value>Disable Particles</value>
+  </data>
+  <data name="Disable Skill Effect Models" xml:space="preserve">
+    <value>Disable Skill Effects</value>
+  </data>
+  <data name="Disable Ambient Wildlife" xml:space="preserve">
+    <value>Disable Wildlife</value>
+  </data>
+  <data name="Disable Wing Shadow" xml:space="preserve">
+    <value>Disable Wing Shadow</value>
+  </data>
+  <data name="Show FPS Counter" xml:space="preserve">
+    <value>Show FPS Counter</value>
+  </data>
+  <data name="Show Debug Info" xml:space="preserve">
+    <value>Show Debug Info</value>
+  </data>
+  <data name="UI Theme" xml:space="preserve">
+    <value>UI Theme</value>
+  </data>
+  <data name="UI Scale" xml:space="preserve">
+    <value>UI Scale</value>
+  </data>
+  <data name="UI Scale Tooltip" xml:space="preserve">
+    <value>Multiplier on top of the automatic fit to the window size</value>
+  </data>
+  <data name="Legacy" xml:space="preserve">
+    <value>Legacy</value>
+  </data>
+  <data name="Modern" xml:space="preserve">
+    <value>Modern</value>
+  </data>
+  <data name="Uncapped" xml:space="preserve">
+    <value>Uncapped</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Close</value>
     <comment>legacy_id=388,1002</comment>

@@ -1,0 +1,170 @@
+/* Modern theme for CQuestProgress/CQuestProgressByEtc -- shared by both windows' own documents
+   (quest_progress.rml/quest_progress_etc.rml). #panel/shell-edge/groove/header-rail fill come from
+   docked_panel_frame.rcss, shared with character_info/my_quest_info/pet_info/party_info -- see
+   that file's own header comment. L/R pagination arrows reuse legacy's own sprites (theme-local
+   duplication), same reasoning my_quest_info.rcss's Open/Give-up buttons use -- a quest-specific
+   action with no generic modern equivalent. The Complete button uses base.rcss's shared .btn/
+   .btn-ok primary-action pair instead (a real generic confirm action) -- see its own comment below.
+
+   `#panel.qp-etc` overrides mark the same handful of per-window pixel deltas the legacy theme's own
+   quest_progress.rcss documents -- see that file's header comment for the full explanation. */
+@spritesheet qp-btn-l-sheet { src: "../../../Quest_bt_L.tga"; qp-btn-l: 0px 0px 17px 18px; }
+@spritesheet qp-btn-r-sheet { src: "../../../Quest_bt_R.tga"; qp-btn-r: 0px 0px 17px 18px; }
+
+.qp-subject {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 27px;
+	width: 190px;
+	text-align: center;
+	color: token(accent-steel-hover);
+	font-size: 12px;
+}
+
+.qp-npc-name {
+	display: block;
+	position: absolute;
+	left: 13px;
+	top: 51px;
+	color: token(accent-gold-hover);
+	font-size: 12px;
+}
+
+.qp-npc-lines {
+	position: absolute;
+	left: 13px;
+	top: 66px;
+	width: 164px;
+}
+#panel.qp-etc .qp-npc-lines { top: 59px; }
+.qp-line {
+	display: block;
+	color: token(text-primary);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.qp-divider {
+	position: absolute;
+	left: 0;
+	top: 181px;
+	width: 190px;
+	height: 21px;
+	border-top: 1dp token(border-frame);
+}
+
+.qp-btn-l, .qp-btn-r {
+	position: absolute;
+	top: 168px;
+	width: 17px;
+	height: 18px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#panel.qp-etc .qp-btn-l, #panel.qp-etc .qp-btn-r { top: 165px; }
+.qp-btn-l { left: 131px; decorator: image(qp-btn-l); }
+.qp-btn-r { left: 153px; decorator: image(qp-btn-r); }
+.qp-btn-l:hover, .qp-btn-r:hover { filter: brightness(1.25); }
+.qp-btn-l.locked, .qp-btn-r.locked { filter: brightness(0.6); }
+
+/* No explicit display -- see the legacy theme's own .qp-player-name comment for why (base.rcss's
+   .hidden must win the cascade uncontested). */
+.qp-player-name {
+	position: absolute;
+	left: 13px;
+	top: 207px;
+	color: token(accent-gold-hover);
+	font-size: 12px;
+}
+
+.qp-answers {
+	position: absolute;
+	left: 13px;
+	top: 222px;
+	width: 164px;
+}
+#panel.qp-etc .qp-answers { top: 207px; }
+.qp-player-words {
+	display: block;
+	color: token(text-primary);
+	font-size: 12px;
+	margin-bottom: 15px;
+}
+.qp-answer-row {
+	display: block;
+	color: token(text-primary);
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	margin-bottom: 2px;
+}
+.qp-answer-row:hover { background-color: token(surface-panel); color: token(accent-gold-hover); }
+
+.qp-reward {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 190px;
+	height: 429px;
+}
+.qp-reward-list {
+	position: absolute;
+	left: 9px;
+	top: 205px;
+	width: 174px;
+	height: 150px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	overflow: auto hidden;
+}
+
+/* #reward_popup_anchor (quest_progress.rml/quest_progress_etc.rml) marks where
+   QuestProgress.cpp/QuestProgressByEtc.cpp's still-native reward-item info-tooltip popup anchors --
+   same left/top the popup's old hardcoded m_Pos+95,+360 offset resolved to (.qp-reward itself has
+   zero left/top, so this is panel-relative). */
+.qp-popup-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#reward_popup_anchor { left: 95px; top: 360px; }
+.qp-reward-row {
+	display: block;
+	width: 100%;
+	text-align: center;
+	padding: 1px 4px;
+	font-size: 12px;
+	color: token(text-primary);
+}
+.qp-reward-row.bold { font-weight: bold; }
+.qp-reward-row.clickable { cursor: pointer; pointer-events: auto; }
+.qp-reward-row.clickable:hover { color: token(accent-gold-hover); }
+
+/* Complete reuses base.rcss's shared .btn/.btn-ok primary-action pair (class="btn qp-btn-complete"
+   in the RML) -- a real generic confirm action, unlike Open/Give-up, so no bespoke sprite needed.
+   .btn's own width/height/line-height/font-size are dp (scaled independently of this panel's own
+   fixed pixel grid, which every other element here -- including this button's own left/top --
+   matches in plain px); left uncontested they'd render this button a different, inconsistent size
+   from the rest of the 190x429 panel. Pin them to the legacy sprite's own 108x29 box instead, same
+   unit convention as everything else in this file. */
+.qp-btn-complete {
+	position: absolute;
+	left: 41px;
+	top: 362px;
+	width: 108px;
+	height: 29px;
+	line-height: 29px;
+	font-size: 12px;
+}
+
+/* Exit: base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family (same primitive as
+   every other window's corner buttons) -- only this window's own left offset needed on top of its
+   defaults (top:392px, 37x26, hover/locked states all included). */
+.qp-btn-exit { left: 13px; }
+
+/* Tooltip: shared shape from docked_panel_frame.rcss, position/offset are per-window. */
+.tooltip { top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

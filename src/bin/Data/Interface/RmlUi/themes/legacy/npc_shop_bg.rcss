@@ -1,0 +1,29 @@
+/* Background layer for npc_shop.rcss, rendered behind the still-native 3D inventory grid -- flat
+   frame fill only, no interactive elements. Reuses the real 5-piece sprite composition
+   CNPCShop::RenderFrame() drew -- the identical asset set CMyInventory's own background uses (see
+   my_inventory_bg.rcss), not storage_ext_bg.rcss's back01 variant. */
+
+@spritesheet shop-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   shop-bg-fill:   0px 0px 190px 429px; }
+@spritesheet shop-bg-top-sheet    { src: "../../../newui_item_back04.tga";   shop-bg-top:    0px 0px 190px 64px;  }
+@spritesheet shop-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; shop-bg-left:   0px 0px 21px 320px;  }
+@spritesheet shop-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; shop-bg-right:  0px 0px 21px 320px;  }
+@spritesheet shop-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   shop-bg-bottom: 0px 0px 190px 45px;  }
+
+#bg_root {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	pointer-events: none;
+}
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+.bg-fill   { left: 0;    top: 0;    width: 190px; height: 429px; decorator: image(shop-bg-fill); }
+.bg-top    { left: 0;    top: 0;    width: 190px; height: 64px;  decorator: image(shop-bg-top); }
+.bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(shop-bg-left); }
+.bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(shop-bg-right); }
+.bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(shop-bg-bottom); }

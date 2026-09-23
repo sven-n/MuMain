@@ -1,0 +1,208 @@
+/* Legacy theme for CMyQuestInfoWindow, retiring its last CUIControl-family pieces
+   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel/frame sprites/exit button/
+   tooltip shape are shared with character_info/pet_info/party_info via docked_panel_frame.rcss
+   (linked in my_quest_info.rml before this file) -- only window-specific content lives here now.
+   Coordinates below are plain reference px, not dp.
+
+   Content-area layout (quest list / divider / contents) reinterprets the original's intent rather
+   than porting CUICurQuestListBox/CUIQuestContentsListBox's own pixel math. Tab-row/button
+   positions are carried over exactly from SetPos()/SetButtonInfo()/RenderTabBtn(). */
+.frame-top { decorator: image(docked-bg-top-b); }
+
+@spritesheet myquest-line-sheet    { src: "../../../newui_myquest_Line.tga"; myquest-line:    0px 0px 188px 21px; }
+@spritesheet myquest-btn-open-sheet  { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:  0px 0px 36px 29px; }
+@spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
+@spritesheet myquest-tab-back-sheet  { src: "../../../Quest_tab01.tga"; myquest-tab-back:  0px 0px 166px 22px; }
+@spritesheet myquest-tab-small-sheet { src: "../../../Quest_tab02.tga"; myquest-tab-small: 0px 0px 48px 22px; }
+@spritesheet myquest-tab-big-sheet   { src: "../../../Quest_tab03.tga"; myquest-tab-big:   0px 0px 72px 22px; }
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: token(text-title);
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.tab-row {
+	position: absolute;
+	left: 10px;
+	top: 27px;
+	width: 166px;
+	height: 22px;
+	decorator: image(myquest-tab-back);
+}
+.tab-btn {
+	position: absolute;
+	top: 0;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 12px;
+	color: token(text-muted);
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.tab-btn.active { color: token(text-primary); }
+.tab-btn-quest { left: 0; width: 48px; }
+.tab-btn-jobchange { left: 48px; width: 48px; }
+.tab-btn-castletemple { left: 96px; width: 72px; }
+.tab-btn-quest.active { decorator: image(myquest-tab-small); }
+.tab-btn-jobchange.active { decorator: image(myquest-tab-small); }
+.tab-btn-castletemple.active { decorator: image(myquest-tab-big); }
+
+.quest-tab, .jobchange-tab, .castletemple-tab {
+	position: absolute;
+	left: 9px;
+	top: 60px;
+	width: 172px;
+	height: 320px;
+}
+
+/* display:block is load-bearing on every non-absolutely-positioned element below -- unstyled
+   elements default to `display:inline`, which ignores width/height and won't stack in its own
+   row. */
+.quest-empty-msg {
+	position: absolute;
+	left: 14px;
+	top: 30px;
+	width: 140px;
+	color: token(text-heading);
+	font-weight: bold;
+	font-size: 12px;
+	text-align: left;
+}
+.quest-empty-msg span { display: block; }
+
+.quest-list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 172px;
+	height: 130px;
+	overflow: auto hidden;
+}
+.quest-row {
+	display: block;
+	width: 100%;
+	height: 18px;
+	line-height: 18px;
+	padding-left: 4px;
+	color: token(text-primary);
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+}
+.quest-row:hover { color: token(text-hover); }
+.quest-row.selected { color: token(text-selected); font-weight: bold; }
+
+.quest-divider {
+	position: absolute;
+	left: 0;
+	top: 130px;
+	width: 172px;
+	height: 21px;
+	decorator: image(myquest-line);
+}
+
+.quest-contents {
+	position: absolute;
+	left: 0;
+	top: 151px;
+	width: 172px;
+	height: 169px;
+	overflow: auto hidden;
+}
+
+/* #reward_popup_anchor (my_quest_info.rml) marks where MyQuestInfoWindow.cpp's still-native
+   reward-item info-tooltip popup anchors -- panel-relative (a sibling of .quest-tab, not nested
+   inside it, matching that div's own comment), same left/top the popup's old hardcoded
+   m_Pos+95,+230 offset resolved to. */
+.quest-popup-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#reward_popup_anchor { left: 95px; top: 230px; }
+.quest-content-row {
+	display: block;
+	width: 100%;
+	padding: 1px 4px;
+	font-size: 12px;
+	color: token(text-info);
+}
+.quest-content-row.bold { font-weight: bold; }
+.quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
+.quest-content-row.clickable:hover { color: token(text-hover); }
+
+/* Open/Give-up only -- Exit is fully shared now (docked_panel_frame.rcss's #btn_exit). */
+.quest-btn {
+	position: absolute;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.quest-btn:hover { filter: brightness(1.25); }
+/* No pointer-events:none -- RmlClickOpen()/RmlClickGiveUp() already guard on
+   openEnabled/giveupEnabled, so a locked click is already a safe no-op; dimming alone is
+   enough. */
+.quest-btn.locked { filter: brightness(0.6); }
+.quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
+.quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
+
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the
+   shared label span is redundant. */
+.btn-exit-label { display: none; }
+
+.tooltip-open   { left: 13px; }
+.tooltip-giveup { left: 50px; }
+
+#btn_quest_open:hover ~ .tooltip-open,
+#btn_quest_giveup:hover ~ .tooltip-giveup {
+	display: block;
+}
+
+.jobchange-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(accent-teal);
+	font-weight: bold;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+.jobchange-contents, .jobchange-state {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 12px;
+}
+.jobchange-contents span, .jobchange-state span { display: block; }
+.jobchange-state { color: token(text-heading); font-weight: bold; margin-top: 12px; }
+
+.castle-title, .temple-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-heading);
+	font-weight: bold;
+	font-size: 12px;
+	margin-top: 6px;
+}
+.castle-line, .temple-line {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 12px;
+}

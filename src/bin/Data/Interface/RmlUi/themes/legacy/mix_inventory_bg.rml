@@ -1,0 +1,19 @@
+<rml>
+<head>
+	<title>Mix Inventory Background</title>
+	<link type="text/rcss" href="mix_inventory_bg.rcss"/>
+</head>
+<body data-model="mix_inventory_bg">
+	<!-- Background-context document -- sits behind the grid's live 3D icons (native
+	     C3DRenderMng interleave) and the still-native recipe/tax-rate/success-rate text block
+	     (RenderFrame()/RenderMixDescriptions()). Never interactive. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+	</div>
+</body>
+</rml>

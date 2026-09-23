@@ -1,0 +1,104 @@
+<rml>
+<head>
+	<title>Character Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="character_info.rcss"/>
+</head>
+<body>
+	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
+	     UI::Scaling::GetActiveTransform(), not RmlUi's dp auto-fit -- same convention as
+	     my_quest_info.rml's #panel (this window is collision-shuffled between the same
+	     PanelColumnX() slots). -->
+	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span id="name" data-style-color="name_color">{{name_text}}</span>
+		<!-- Class name and server name crossfade in place (legacy's sine-wave alpha blend
+		     between the two, RenderSubjectTexts()) -- two stacked spans, opacity-driven. -->
+		<span id="classname" data-style-opacity="classname_opacity">{{classname_text}}</span>
+		<span id="servername" data-style-opacity="servername_opacity">{{servername_text}}</span>
+
+		<!-- Summary backdrop: corner brackets + translucent fill, standing in for the
+		     original's pixel-tiled 8-piece frame (4 corner sprites + repeating 1px edge tiles) --
+		     see character_info.rcss's header comment for why the repeating edges were dropped.
+		     A bordered/backgrounded leaf with child elements can render an incomplete box in this
+		     RmlUi build, so the fill is its own childless leaf, and the corners are unstyled
+		     siblings, not children of it. -->
+		<div class="summary-fill"></div>
+		<div class="summary-corner corner-tl"></div>
+		<div class="summary-corner corner-tr"></div>
+		<div class="summary-corner corner-bl"></div>
+		<div class="summary-corner corner-br"></div>
+		<span class="level-text">{{level_text}}</span>
+		<span class="levelup-point-text" data-class-hidden="!can_level_up">{{levelup_point_text}}</span>
+		<span class="exp-text">{{exp_text}}</span>
+		<span class="point-probability-text">{{point_probability_text}}</span>
+		<span class="point-text">{{point_text}}</span>
+
+		<!-- STR row -->
+		<div class="attr-textbox attr-textbox-str"></div>
+		<span class="attr-label attr-label-str">{{str_label}}</span>
+		<span class="attr-value attr-value-str" data-style-color="str_value_color">{{str_value_text}}</span>
+		<div class="attr-lines attr-lines-str">
+			<span data-for="line : str_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(0)"></div>
+
+		<!-- AGI row -->
+		<div class="attr-textbox attr-textbox-agi"></div>
+		<span class="attr-label attr-label-agi">{{agi_label}}</span>
+		<span class="attr-value attr-value-agi" data-style-color="agi_value_color">{{agi_value_text}}</span>
+		<div class="attr-lines attr-lines-agi">
+			<span data-for="line : agi_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(1)"></div>
+
+		<!-- VIT row -->
+		<div class="attr-textbox attr-textbox-vit"></div>
+		<span class="attr-label attr-label-vit">{{vit_label}}</span>
+		<span class="attr-value attr-value-vit" data-style-color="vit_value_color">{{vit_value_text}}</span>
+		<div class="attr-lines attr-lines-vit">
+			<span data-for="line : vit_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(2)"></div>
+
+		<!-- ENE row -->
+		<div class="attr-textbox attr-textbox-ene"></div>
+		<span class="attr-label attr-label-ene">{{ene_label}}</span>
+		<span class="attr-value attr-value-ene" data-style-color="ene_value_color">{{ene_value_text}}</span>
+		<div class="attr-lines attr-lines-ene">
+			<span data-for="line : ene_lines" data-style-color="line.color">{{line.text}}</span>
+		</div>
+		<div class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
+		     data-event-click="chainfo_increase_stat(3)"></div>
+
+		<!-- CMD row -- Dark Lord only. -->
+		<div class="attr-textbox attr-textbox-cmd" data-class-hidden="!show_charisma"></div>
+		<span class="attr-label attr-label-cmd" data-class-hidden="!show_charisma">{{cmd_label}}</span>
+		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-style-color="cmd_value_color">{{cmd_value_text}}</span>
+		<div class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
+		     data-event-click="chainfo_increase_stat(4)"></div>
+
+		<!-- Bottom action row: shared close button plus Quest/Pet/Master-Level shortcuts. -->
+		<div id="btn_exit" class="info-btn info-btn-exit" data-event-click="chainfo_click_exit">
+			<span class="btn-exit-label">×</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<div id="btn_quest" class="info-btn info-btn-quest" data-event-click="chainfo_click_quest"></div>
+		<span class="tooltip tooltip-quest">{{quest_tooltip}}</span>
+		<div id="btn_pet" class="info-btn info-btn-pet" data-event-click="chainfo_click_pet"></div>
+		<span class="tooltip tooltip-pet">{{pet_tooltip}}</span>
+		<div id="btn_masterlevel" class="info-btn info-btn-masterlevel" data-class-locked="!master_level_enabled"
+		     data-event-click="chainfo_click_masterlevel"></div>
+		<span class="tooltip tooltip-masterlevel">{{masterlevel_tooltip}}</span>
+	</div>
+</body>
+</rml>

@@ -1,0 +1,241 @@
+/* Modern theme for the character-creation dialog -- flat programmatic chrome, no legacy sprite
+   art. Stat/description panels share the identical treatment as legacy (already flat fills in
+   the original). */
+
+/* Width/height and every child's left/top below are static RCSS, not C++-pushed (#panel's own
+   left/top still is). Deliberately `px`, not `dp`, and excluded from the global auto-fit -- this
+   panel's real screen position also drives the live 3D character-preview viewport, which reads
+   unscaled pixel bounds separately, so scaling #panel via dp without also rescaling that viewport
+   would desync the 2D chrome from the 3D preview. Documented non-scaling exception, same class as
+   main_frame's HUD band and char_info_balloon's live-projected position. */
+#panel {
+	position: absolute;
+	width: 454px;
+	height: 406px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-primary);
+}
+
+#stat_panel  { left: 346px; top: 24px;  }
+#desc_panel  { left: 0px;   top: 355px; }
+
+/* Carved-iron backdrop for the attributes/class/identity areas -- this build has no ::before/
+   ::after support, so the inset-highlight is a box-shadow layer on this same element instead of a
+   second child div. Positioned as independent siblings, not parents, of the content they sit
+   behind. */
+.side-panel {
+	position: absolute;
+	background-color: #0e0f0c;
+	decorator: linear-gradient(to bottom, rgba(205, 184, 129, 9), transparent 30%),
+		linear-gradient(to bottom, #16170f, #0c0d0a 55%, #060706);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		inset 0 1px 0 rgba(232, 215, 168, 10),
+		inset 0 0 10px rgba(0, 0, 0, 130),
+		0 3px 8px rgba(0, 0, 0, 110);
+	pointer-events: none;
+}
+/* left:338 = #stat_panel/.job-btn's own left (346) minus 8px, so the backdrop reads as a real
+   margin around them, flush against #panel's right edge (338+116=454). height:98 clears the
+   tallest (dark-lord) row's text with a few px to spare. */
+#attributes_panel { left: 338px; top: 14px;  width: 116px; height: 98px; }
+/* top:116 leaves a ~12px gap for the "Class" kicker before the first job button. height:214
+   covers the last button's bottom (298+26=324) plus padding. */
+#class_panel      { left: 338px; top: 116px; width: 116px; height: 214px; }
+/* Fills exactly the gap between the job-button column's bottom (324) and #desc_panel's top (355)
+   -- zero overlap on either side. */
+#identity_strip   { left: 0px;   top: 324px; width: 454px; height: 31px; }
+
+.panel-kicker {
+	position: absolute;
+	color: token(text-muted);
+	font-size: 8px;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+.panel-kicker-attributes { left: 346px; top: 18px;  }
+.panel-kicker-class      { left: 346px; top: 119px; }
+
+/* Row inside #identity_strip -- top:327 = strip's own 324 + 3px top padding, leaving a matching
+   ~3px below the row's 327+25=352 bottom before the strip's 355 bottom edge. */
+#input_frame { left: 68px;  top: 327px; }
+#btn_ok      { left: 322px; top: 327px; }
+#btn_cancel  { left: 386px; top: 327px; }
+
+/* width:93 + the 7px left padding = 100px total rendered footprint (content-box: padding adds to
+   width, not subtracted from it) -- fits inside #class_panel's 116px width with an equal 8px
+   margin on both sides. Left-aligned with a small left-padding, not centered. Position (left/top,
+   C++-pushed via job.rel_left/rel_top) is untouched -- this is visual-only. */
+.job-btn {
+	position: absolute;
+	width: 93px;
+	height: 24px;
+	padding: 0 0 0 7px;
+	text-align: left;
+	vertical-align: middle;
+	line-height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-secondary);
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 8), transparent 40%),
+		linear-gradient(to bottom, #1e1d17, #0e0f0c 58%, #080907);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+	font-size: 9px;
+}
+.job-btn:hover {
+	color: token(accent-gold-hover);
+	border-color: token(border-hover);
+}
+/* Gold left-accent bar (inset box-shadow, not a border-left -- keeps the 1px border-frame outline
+   intact all the way around) -- reference's own .class-btn.is-selected treatment. */
+.job-btn.checked {
+	color: token(text-warm);
+	border-color: token(accent-gold-hover);
+	background-color: #241a0d;
+	box-shadow: inset 2px 0 0 token(accent-gold-hover);
+}
+.job-btn.disabled {
+	pointer-events: none;
+	color: token(text-disabled);
+	cursor: default;
+	background-color: #0a0b09;
+	border-color: token(border-recessed);
+	opacity: 0.7;
+}
+
+.stat-panel, .desc-panel {
+	position: absolute;
+}
+/* Transparent -- #attributes_panel (a separate sibling) provides the real visible backdrop here,
+   so a fill on this element would just double up as a redundant darkening layer. Height class
+   kept (still driven by dark_lord_extra) even though invisible, in case anything keys off it. */
+.stat-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 108px;
+	height: 80px;
+	background-color: transparent;
+}
+.stat-bg.tall {
+	height: 96px;
+}
+/* Full bordered-panel treatment directly on this fill (no separate backdrop sibling, unlike
+   attributes/class/identity above -- one element is enough here). rgba throughout, not opaque hex
+   -- this box sits over the live 3D character preview, so ~78-84% alpha keeps the bordered/
+   gradient depth while still reading as a translucent overlay, not a solid plate. */
+.desc-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 454px;
+	height: 51px;
+	background-color: rgba(11, 13, 11, 200);
+	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 6), transparent 30%),
+		linear-gradient(to bottom, rgba(16, 18, 16, 200), rgba(9, 10, 8, 210) 60%, rgba(6, 7, 6, 215));
+	border: 1px token(border-recessed);
+	box-shadow: inset 0 0 14px rgba(0, 0, 0, 130);
+}
+
+.stat-row {
+	position: absolute;
+	left: 22px;
+	width: 84px;
+	padding-bottom: 3px;
+	border-bottom: 1px token(border-recessed);
+}
+.stat-label {
+	color: token(text-secondary);
+	font-size: 9px;
+	font-family: "token(font-body)";
+}
+.stat-value {
+	position: absolute;
+	left: 54px;
+	color: token(accent-gold);
+	font-weight: bold;
+	font-family: "token(font-body)";
+}
+
+/* white-space:nowrap -- without it, a class name that doesn't fit the box's implicit width (e.g.
+   "Dark Knight") wraps onto a second line and collides with .desc-line-1's text below it. */
+.desc-title {
+	position: absolute;
+	left: 10px;
+	top: 4px;
+	white-space: nowrap;
+	color: token(accent-gold);
+	font-weight: bold;
+	font-size: 10px;
+	font-family: "token(font-body)";
+}
+.desc-line {
+	position: absolute;
+	left: 10px;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+}
+.desc-line-1 { top: 17px; }
+.desc-line-2 { top: 33px; }
+
+/* Row inside #identity_strip -- width narrowed to fit beside the OK/Cancel buttons in the same
+   31px-tall strip; height:25 leaves ~3px top/bottom padding within the strip. */
+.input-frame {
+	position: absolute;
+	width: 246px;
+	height: 25px;
+	background-color: #080a08;
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow: inset 0 2px 6px rgba(0, 0, 0, 190);
+	pointer-events: none;
+}
+
+#input_label { left: 6px; top: 327px; }
+.input-label {
+	position: absolute;
+	width: 58px;
+	height: 25px;
+	line-height: 25px;
+	text-align: center;
+	color: token(text-secondary);
+	font-family: "token(font-body)";
+	font-size: 10px;
+}
+
+/* Marks where the legacy-drawn name text starts -- CharMakeWin.cpp reads this via
+   GetAbsoluteOffset(). left:74px = .input-frame's left edge (68px) + 6px inset; top:332px
+   vertically centers within the row's 25px height. */
+#input_text_anchor { left: 74px; top: 332px; }
+.input-text-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+/* Only width genuinely needs to differ from base.rcss's .btn. Do NOT add a `border` shorthand
+   here -- it silently stomps .btn-ok's crimson border back to gray on #btn_ok (same specificity,
+   this file linked after base.rcss, so the tie goes to this rule).
+
+   height/line-height/text-align/vertical-align are explicit here too, not inherited from
+   base.rcss's .btn -- that shared rule is dp, but #panel here deliberately stays fixed px, so
+   inheriting a dp line-height/height would grow the box past its fixed width/position at any
+   scale ratio other than 1.0. height:25 (not base's 30) matches #identity_strip's row height. */
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 25px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 25px;
+	cursor: pointer;
+	pointer-events: auto;
+}

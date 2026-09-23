@@ -4,3 +4,6 @@
 [submodule "src/ThirdParty/SDL"]
 	path = src/ThirdParty/SDL
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "src/ThirdParty/RmlUi"]
+	path = src/ThirdParty/RmlUi
+	url = https://github.com/mikke89/RmlUi.git

@@ -1,0 +1,54 @@
+<rml>
+<head>
+	<title>Party Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="party_info.rcss"/>
+</head>
+<body>
+	<!-- Modern theme's own copy of CPartyInfoWindow's frame -- same forged-dialog shell/header-rail/
+	     exit-button family as CCharacterInfoWindow/CMyQuestInfoWindow/CPetInfoWindow, via
+	     docked_panel_frame.rcss. Keep ids/data-model/event-callback names in sync with
+	     ../../party_info.rml. -->
+	<div id="panel" data-model="party_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+
+		<!-- No top/height override needed -- .modern-header-rail-px's own default (top:7/height:38)
+		     already leaves room above the member list (top:40). -->
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="docked-rail-accent"></div>
+		</div>
+
+		<span id="title">{{window_title}}</span>
+
+		<div class="party-empty-msg" data-class-hidden="has_party">
+			<span data-for="line : empty_state_lines">{{line.text}}</span>
+		</div>
+
+		<div class="party-list" data-class-hidden="!has_party">
+			<div class="party-row" data-for="m : members">
+				<div class="gbox-content-fill"></div>
+
+				<span class="party-name" data-style-color="m.name_color">{{m.name}}</span>
+				<div class="party-flag" data-class-hidden="!m.is_leader"></div>
+				<span class="party-map">{{m.map_text}}</span>
+				<span class="party-coord">{{m.coord_text}}</span>
+				<div class="party-hp-bar">
+					<div class="party-hp-fill" data-style-width="m.hp_percent + '%'"></div>
+				</div>
+				<span class="party-hp-text">{{m.hp_text}}</span>
+				<div class="party-kick-btn" data-class-hidden="!m.show_kick"
+				     data-event-click="party_kick_member(m.index)"></div>
+			</div>
+		</div>
+
+		<div id="btn_exit" class="modern-icon-btn-px party-btn-exit" data-event-click="party_click_exit">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

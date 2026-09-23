@@ -1,0 +1,197 @@
+/* Modern theme for CMyQuestInfoWindow -- flat/token styling for common chrome, but Open/Give-up
+   are quest-specific actions with no generic equivalent, so they reuse legacy's sprites
+   (theme-local duplication) instead of a flat placeholder.
+
+   #panel/shell-edge/groove/header-rail fill now come from docked_panel_frame.rcss, shared with
+   CCharacterInfoWindow/CPetInfoWindow/CPartyInfoWindow -- only the rail's own height override
+   (20px, shorter than the family default, to leave room for the tab-row) stays here. */
+@spritesheet myquest-btn-open-sheet   { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:   0px 0px 36px 29px; }
+@spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
+
+.quest-header-rail { height: 20px; }
+
+.tab-row {
+	position: absolute;
+	left: 10px;
+	top: 27px;
+	width: 166px;
+	height: 22px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+}
+.tab-btn {
+	position: absolute;
+	top: 0;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 12px;
+	color: token(text-secondary);
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.tab-btn.active { color: token(text-warm); background-color: token(accent-steel); border-radius: token(radius-sm)dp; }
+.tab-btn-quest { left: 0; width: 48px; }
+.tab-btn-jobchange { left: 48px; width: 48px; }
+.tab-btn-castletemple { left: 96px; width: 72px; }
+
+.quest-tab, .jobchange-tab, .castletemple-tab {
+	position: absolute;
+	left: 9px;
+	top: 60px;
+	width: 172px;
+	height: 320px;
+}
+
+/* display:block on every non-absolutely-positioned element below is load-bearing (see legacy
+   theme's my_quest_info.rcss for why). */
+.quest-empty-msg {
+	position: absolute;
+	left: 14px;
+	top: 30px;
+	width: 140px;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+	text-align: left;
+}
+.quest-empty-msg span { display: block; }
+
+.quest-list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 172px;
+	height: 130px;
+	overflow: auto hidden;
+}
+.quest-row {
+	display: block;
+	width: 100%;
+	height: 18px;
+	line-height: 18px;
+	padding-left: 4px;
+	color: token(text-primary);
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+}
+.quest-row:hover { color: token(accent-gold-hover); }
+.quest-row.selected { color: token(accent-gold-hover); font-weight: bold; background-color: token(surface-panel); }
+
+.quest-divider {
+	position: absolute;
+	left: 0;
+	top: 130px;
+	width: 172px;
+	height: 21px;
+	border-top: 1dp token(border-frame);
+}
+
+.quest-contents {
+	position: absolute;
+	left: 0;
+	top: 151px;
+	width: 172px;
+	height: 169px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	overflow: auto hidden;
+}
+
+/* #reward_popup_anchor (my_quest_info.rml) marks where MyQuestInfoWindow.cpp's still-native
+   reward-item info-tooltip popup anchors -- panel-relative (a sibling of .quest-tab, not nested
+   inside it, matching that div's own comment), same left/top the popup's old hardcoded
+   m_Pos+95,+230 offset resolved to. */
+.quest-popup-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#reward_popup_anchor { left: 95px; top: 230px; }
+.quest-content-row {
+	display: block;
+	width: 100%;
+	padding: 1px 4px;
+	font-size: 12px;
+	color: token(text-primary);
+}
+.quest-content-row.bold { font-weight: bold; }
+.quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
+.quest-content-row.clickable:hover { color: token(accent-gold-hover); }
+
+/* Open/Give-up only -- Exit uses base.rcss's shared .modern-icon-btn-px instead (below), which
+   already carries its own position/size/cursor/hover/locked treatment. */
+.quest-btn {
+	position: absolute;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Same brightness-filter hover used uniformly on these sprite-backed buttons. */
+.quest-btn:hover { filter: brightness(1.25); }
+/* No pointer-events:none here -- that would block :hover (and the tooltip) while locked, which
+   is the default state until a quest is selected. */
+.quest-btn.locked { filter: brightness(0.6); }
+
+.quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
+.quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
+
+/* Exit: base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family (same primitive
+   as every other window's corner buttons) -- only this window's own left offset needed on top of
+   its defaults (top:392px, 37x26, hover/locked states all included). */
+.quest-btn-exit { left: 13px; }
+
+/* Tooltips: siblings of their trigger button, shared shape from docked_panel_frame.rcss. */
+.tooltip { top: 365px; }
+.tooltip-exit   { left: -24px; }
+.tooltip-open   { left: 13px; }
+.tooltip-giveup { left: 50px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_quest_open:hover ~ .tooltip-open,
+#btn_quest_giveup:hover ~ .tooltip-giveup {
+	display: block;
+}
+
+.jobchange-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(accent-steel-hover);
+	font-weight: bold;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+.jobchange-contents, .jobchange-state {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 12px;
+}
+.jobchange-contents span, .jobchange-state span { display: block; }
+.jobchange-state { color: token(accent-gold-hover); font-weight: bold; margin-top: 12px; }
+
+.castle-title, .temple-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+	margin-top: 6px;
+}
+.castle-line, .temple-line {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 12px;
+}

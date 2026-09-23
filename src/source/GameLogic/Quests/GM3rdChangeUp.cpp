@@ -1,6 +1,4 @@
-﻿// GM3rdChangeUp.cpp: implementation of the CGM3rdChangeUp class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -9,7 +7,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"

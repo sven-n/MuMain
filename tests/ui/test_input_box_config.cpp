@@ -1,5 +1,5 @@
 #include "App/stdafx.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 
 #include "doctest.h"
 #include <limits>
