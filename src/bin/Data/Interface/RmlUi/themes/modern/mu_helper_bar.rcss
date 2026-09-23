@@ -78,7 +78,7 @@
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
 	border: 1dp token(border-frame);
-	color: #ffffff;
+	color: token(text-primary);
 	padding: 2dp 4dp;
 	border-radius: token(radius-sm)dp;
 	font-family: "token(font-body)";

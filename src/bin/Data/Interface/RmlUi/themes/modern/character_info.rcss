@@ -46,7 +46,6 @@
 .exp-text { top: 75px; color: token(text-primary); }
 .point-probability-text { top: 88px; color: token(accent-steel-hover); }
 .point-text { top: 101px; color: token(accent-steel-hover); }
-.hidden { display: none; }
 
 .attr-textbox {
 	position: absolute;

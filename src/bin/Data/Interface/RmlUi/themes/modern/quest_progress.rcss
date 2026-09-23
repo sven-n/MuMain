@@ -1,9 +1,10 @@
 /* Modern theme for CQuestProgress/CQuestProgressByEtc -- shared by both windows' own documents
    (quest_progress.rml/quest_progress_etc.rml). #panel/shell-edge/groove/header-rail fill come from
    docked_panel_frame.rcss, shared with character_info/my_quest_info/pet_info/party_info -- see
-   that file's own header comment. L/R pagination arrows and the Complete button reuse legacy's own
-   sprites (theme-local duplication), same reasoning my_quest_info.rcss's Open/Give-up buttons use
-   -- quest-specific actions with no generic modern equivalent.
+   that file's own header comment. L/R pagination arrows reuse legacy's own sprites (theme-local
+   duplication), same reasoning my_quest_info.rcss's Open/Give-up buttons use -- a quest-specific
+   action with no generic modern equivalent. The Complete button uses base.rcss's shared .btn/
+   .btn-ok primary-action pair instead (a real generic confirm action) -- see its own comment below.
 
    `#panel.qp-etc` overrides mark the same handful of per-window pixel deltas the legacy theme's own
    quest_progress.rcss documents -- see that file's header comment for the full explanation. */

@@ -16,7 +16,7 @@
 	font-family: "token(font-body)";
 }
 
-/* top:6/height:29 -- identical rail budget to StorageExt's .ext-header-rail. Ends at 35px, leaving
+/* top:6/height:29 -- identical rail budget to StorageExt's .storext-header-rail. Ends at 35px, leaving
    35..68 for the your-side nickname/level/guild block below, well inside the your-grid's own
    `m_Pos.y + 68` start. Rivet sits at -2px, still inside trade_bg.rcss's .inv-shell-edge at -3px --
    same contained relationship as StorageExt/MyInventory. */

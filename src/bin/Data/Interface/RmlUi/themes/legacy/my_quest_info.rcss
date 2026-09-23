@@ -63,7 +63,6 @@
 	width: 172px;
 	height: 320px;
 }
-.hidden { display: none; }
 
 /* display:block is load-bearing on every non-absolutely-positioned element below -- unstyled
    elements default to `display:inline`, which ignores width/height and won't stack in its own

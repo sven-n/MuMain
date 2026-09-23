@@ -44,7 +44,6 @@
 	width: 172px;
 	height: 320px;
 }
-.hidden { display: none; }
 
 /* display:block on every non-absolutely-positioned element below is load-bearing (see legacy
    theme's my_quest_info.rcss for why). */

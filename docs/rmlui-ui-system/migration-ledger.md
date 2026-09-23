@@ -176,11 +176,17 @@ uses, not a dialog itself.
 ## Dialog family (`UI/Dialogs/CommonMessageBox.h` / `CustomMessageBox.h`)
 
 The native `TMsgBoxLayout<T>` family is far smaller today than `STATUS.md`'s historical "~140
-classes" figure — that count predates this branch's migration work. 16 dialogs are already ported
-and their native classes deleted outright (3 on `CGenericConfirmDialog`, 13 on
+classes" figure — that count predates this branch's migration work. 16 native dialog *classes*
+have been ported and deleted outright (3 replaced by `CGenericConfirmDialog`, 13 by
 `CGenericMenuDialog` — see `component-catalog.md`'s Dialog section for how the two primitives
-work; per-dialog porting history lives in git log, not a doc, once a dialog is done). What's left,
-by current grep of the two headers:
+work; per-dialog porting history lives in git log, not a doc, once a dialog is done). That 3/13
+figure is classes replaced, not call sites — the two shared primitives are now called from far
+more places than that: 123 `g_pGenericConfirmDialog->Show()` call sites across 28 files, and 14
+`g_pGenericMenuDialog->Show()` call sites in 1 file (`CustomMessageBox.cpp`), by direct grep.
+Most of those call sites live inside still-fully-native, not-yet-ported windows reusing the shared
+dialog primitive for one sub-confirmation (see `CMasterLevel`/`CInGameShop`/`CGuildInfoWindow`/
+`CCastleWindow` above) — a high call-site count is not evidence that 123 or 14 dialogs have each
+been individually ported. What's left, by current grep of the two headers:
 
 | Component | Status | Target primitive | Detail pointer |
 |---|---|---|---|

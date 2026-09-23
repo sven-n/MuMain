@@ -69,7 +69,6 @@
 .exp-text { top: 75px; color: token(text-primary); }
 .point-probability-text { top: 88px; color: #4cc5fe; }
 .point-text { top: 101px; color: #4cc5fe; }
-.hidden { display: none; }
 
 /* Attribute rows: textbox background (170x21) + centered label/value halves + a variable-length
    block of extra derived-stat lines below. HEIGHT_STRENGTH/DEXTERITY/VITALITY/ENERGY/CHARISMA

@@ -63,7 +63,7 @@
 }
 
 /* Rail fill/accent relocated from the fg's now paint-less .modern-header-rail-px -- see
-   base.rcss's comment on that class. top/height match .ext-header-rail (storage_ext.rcss). */
+   base.rcss's comment on that class. top/height match .storext-header-rail (storage_ext.rcss). */
 .rail-fill {
 	position: absolute;
 	left: 8px;

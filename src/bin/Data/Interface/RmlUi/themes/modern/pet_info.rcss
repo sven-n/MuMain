@@ -45,7 +45,6 @@
 .tab-btn-darkspirit { left: 56px; }
 
 .pet-tab { position: absolute; left: 0; top: 0; width: 190px; height: 429px; }
-.hidden { display: none; }
 
 .pet-no-pet-msg {
 	display: block;

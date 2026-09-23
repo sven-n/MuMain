@@ -10,7 +10,7 @@
 	font-family: "token(font-body)";
 }
 
-/* top:6/height:29 -- identical budget to storage_ext.rcss's .ext-header-rail: this window's
+/* top:6/height:29 -- identical budget to storage_ext.rcss's .storext-header-rail: this window's
    native grid also starts at `m_Pos.y + 36` (StorageInventory.cpp's CInventoryCtrl::Create()
    call), the same tight budget as Storage Ext (both are 190x429 VAULT-family frames). Ends at
    35px, 1px clear. Keeps .modern-joint-px's rivet at -2px, inside storage_bg.rcss's
