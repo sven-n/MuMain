@@ -113,8 +113,8 @@ case-insensitive: letters, digits, `esc`, `enter`, `tab`, `space`, `backspace`,
 `printscreen` and `f1`–`f12`.
 
 Focus a text field with a supported UI click or keyboard navigation before
-`type`. For example, `tools/muctl type 'hello'` inserts committed text;
-`tools/muctl type 'hello' --enter` delivers Return on a later rendered frame.
+`type`. For example, `{"cmd":"type","text":"hello"}` inserts committed text;
+`{"cmd":"type","text":"hello","enter":true}` delivers Return on a later rendered frame.
 `text` must be 1–256 UTF-8 bytes with no NUL, ASCII control character or DEL;
 `enter` must be boolean. A successful reply confirms delivery, **not** that a
 field accepted the characters or a login succeeded. Its result reports only
