@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "baseline_boundary_segments": 20,
+  "exported_boundary_segments": 58,
+  "maximum_registered_seam_position_error": 1.6552945372974792e-05,
+  "criterion": "Each new open boundary edge lies on one original seam segment; non-overlapping intervals cover each complete original segment"
+}

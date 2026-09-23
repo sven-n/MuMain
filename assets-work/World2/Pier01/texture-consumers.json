@@ -1,0 +1,1151 @@
+{
+  "parsed_models": 5114,
+  "exact_consumers": [
+    {
+      "path": "src/bin/Data/Object2/Object04.bmd",
+      "mesh": 1,
+      "texture": "deep_wall03.jpg",
+      "resolved": "src/bin/Data/Object2/deep_wall03.OZJ",
+      "sha256": "e0df1c4477e02bb37d59155dbf56a5f1f7bacaa064bb34568ce738de07c8ae1f"
+    },
+    {
+      "path": "src/bin/Data/Object2/Object16.bmd",
+      "mesh": 2,
+      "texture": "deep_wall03.jpg",
+      "resolved": "src/bin/Data/Object2/deep_wall03.OZJ",
+      "sha256": "b662a725a3abe7c46f4c081fbfe4d30e0d88d1ca20f24001865cfd85813914b7"
+    },
+    {
+      "path": "src/bin/Data/Object2/Object17.bmd",
+      "mesh": 1,
+      "texture": "deep_wall03.jpg",
+      "resolved": "src/bin/Data/Object2/deep_wall03.OZJ",
+      "sha256": "ab347c35e3132b4c3f73247580458c7d6bf34342bf4d29c92f3764c3ea4f8ced"
+    }
+  ],
+  "same_name_other_paths": [],
+  "nonmodel_or_unsupported_files": [
+    {
+      "path": "src/bin/Data/World3/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World57/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World4/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World2/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Object3/Object90.bmd",
+      "error": "AssertionError",
+      "header_hex": "424d4400",
+      "converter_exit": 2,
+      "converter_message": "[Open2] Unknown BMD version: 0\n in s\nerror: not a BMD model the engine can read (bad header, unsupported version or truncated): src/bin/Data/Object3/Object90.bmd\n"
+    },
+    {
+      "path": "src/bin/Data/Object3/Object25.bmd",
+      "error": "AssertionError",
+      "header_hex": "424d4400",
+      "converter_exit": 2,
+      "converter_message": "[Open2] Unknown BMD version: 0\n in s\nerror: not a BMD model the engine can read (bad header, unsupported version or truncated): src/bin/Data/Object3/Object25.bmd\n"
+    },
+    {
+      "path": "src/bin/Data/Object3/Object33.bmd",
+      "error": "AssertionError",
+      "header_hex": "424d4400",
+      "converter_exit": 2,
+      "converter_message": "[Open2] Unknown BMD version: 0\n in s\nerror: not a BMD model the engine can read (bad header, unsupported version or truncated): src/bin/Data/Object3/Object33.bmd\n"
+    },
+    {
+      "path": "src/bin/Data/Object3/Object27.bmd",
+      "error": "AssertionError",
+      "header_hex": "424d4400",
+      "converter_exit": 2,
+      "converter_message": "[Open2] Unknown BMD version: 0\n in s\nerror: not a BMD model the engine can read (bad header, unsupported version or truncated): src/bin/Data/Object3/Object27.bmd\n"
+    },
+    {
+      "path": "src/bin/Data/World8/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World58/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World34/minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World42/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/gate.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/itemsettype.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/PetData.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/MasterSkillTree.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdceaafd",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/FilterName.bmd",
+      "error": "AssertionError",
+      "header_hex": "8baac986",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Skill.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/MasterSkillTreeData.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfaafc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/BuffEffect.bmd",
+      "error": "AssertionError",
+      "header_hex": "7f000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/mix.bmd",
+      "error": "AssertionError",
+      "header_hex": "accfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Quest.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfa8fc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/ItemAddOption.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/partCharge1/ShopUI.bmd",
+      "error": "AssertionError",
+      "header_hex": "13000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/partCharge1/ShopCategoryItems.bmd",
+      "error": "AssertionError",
+      "header_hex": "32000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World11/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/slide_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "c0cfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/skill.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/item_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "b7bdc28f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/JewelOfHarmonySmelt_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/ItemLevelTooltip_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccff993",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/socketitem_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/itemsetoption_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World2_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World34_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World35_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World3_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World57_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World1_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World11_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World8_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World9_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World5_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World58_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World82_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World32_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World4_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World39_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World64_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World52_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World42_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World81_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Minimap/Minimap_World38_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/ItemTooltipText_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfe89d",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/ItemTooltip_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/Quest_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfa8fc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/skill_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/movereq_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "25000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/MasterSkillTooltip_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "d0ceabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/QuestWords_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/item.bmd",
+      "error": "AssertionError",
+      "header_hex": "39661352",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/JewelOfHarmonyOption_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Spn/BuffEffect_spn.bmd",
+      "error": "AssertionError",
+      "header_hex": "9e000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Movereq.bmd",
+      "error": "AssertionError",
+      "header_hex": "26000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/ServerList.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccffd9d",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/MoveReq_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "25000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/skill_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World64/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/BuffEffect_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "9e000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/JewelOfHarmonyOption_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/skill.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/QuestWords_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/MasterSkillTooltip_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "d0ceabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/ItemTooltipText_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccffb93",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Quest_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfa8fc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/ItemTooltip_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World52/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World34_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World2_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World42_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World52_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World64_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World39_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World81_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World38_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World3_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World35_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World57_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World8_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World11_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World58_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World1_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World5_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World32_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World4_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World9_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World82_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World8_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World11_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World58_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World1_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World5_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World4_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World32_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World9_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World2_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World34_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World42_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World52_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World64_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World39_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World38_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World35_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World3_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/Minimap/Minimap_World57_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/socketitem_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/ItemLevelTooltip_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccffb99",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/JewelOfHarmonySmelt_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/itemsetoption_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/slide_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "c0cfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/item_eng_old.bmd",
+      "error": "AssertionError",
+      "header_hex": "b7bdc28f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/item_por.bmd",
+      "error": "AssertionError",
+      "header_hex": "b7bdc28f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Por/item.bmd",
+      "error": "AssertionError",
+      "header_hex": "39661352",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/MapCharacters.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/pet.bmd",
+      "error": "AssertionError",
+      "header_hex": "64000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/MonsterSkill.bmd",
+      "error": "AssertionError",
+      "header_hex": "38000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/ItemSetOption.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/NPCDialogue.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfaafd",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/MacroConfig.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/QuestProgress.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Filter.bmd",
+      "error": "AssertionError",
+      "header_hex": "9abac897",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/QuestWords.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Item.bmd",
+      "error": "AssertionError",
+      "header_hex": "7f812876",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/credit.bmd",
+      "error": "AssertionError",
+      "header_hex": "fd9cffbd",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/itemsettype.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/slide_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "c0cfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World1/minimaptest.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World1/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/item_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "b7bdc28f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/socketitem_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/item_eng_orig.bmd",
+      "error": "AssertionError",
+      "header_hex": "b7bdc28f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/ItemLevelTooltip_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccff89f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/JewelOfHarmonySmelt_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/itemsetoption_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World34_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World2_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World3_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World35_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World57_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World8_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World11_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World1_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World9_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World58_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World5_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World4_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World32_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World82_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World42_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World52_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World64_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World39_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World38_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Minimap/Minimap_World81_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/ItemTooltipText_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfe492",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/Quest_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfa8fc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/ItemTooltip_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/MoveReq_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "25000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/skill_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/item_eng_old.bmd",
+      "error": "AssertionError",
+      "header_hex": "b7bdc28f",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/BuffEffect_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "9e000000",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/JewelOfHarmonyOption_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/QuestWords_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/item.bmd",
+      "error": "AssertionError",
+      "header_hex": "39661352",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Local/Eng/MasterSkillTooltip_eng.bmd",
+      "error": "AssertionError",
+      "header_hex": "d0ceabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World9/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World81/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World32/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World35/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fdcfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World39/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World38/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World82/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/World5/Minimap.bmd",
+      "error": "AssertionError",
+      "header_hex": "fecfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Skill/skill.bmd",
+      "error": "AssertionError",
+      "header_hex": "fccfabfc",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Item/item.bmd",
+      "error": "AssertionError",
+      "header_hex": "39661352",
+      "classification": "Not a BMD model header"
+    },
+    {
+      "path": "src/bin/Data/Item/Itemtest.bmd",
+      "error": "AssertionError",
+      "header_hex": "39661352",
+      "classification": "Not a BMD model header"
+    }
+  ],
+  "target_sha256": "dee54424992a14b93c9732599c4190c164932c7f98708e9aa21ca03a21f63168",
+  "resolution": "Standard per-model texture folder, exact Object2 path; all same-name references reported"
+}

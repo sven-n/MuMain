@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "images": [
+    {
+      "texture": "deep_wall01.jpg",
+      "size": [
+        128,
+        128
+      ],
+      "packed_payload_sha256": "3d13a46f942032c9ebfe8954c1e229921437c6dcecdeb83e129b07cde7c9b2e6"
+    },
+    {
+      "texture": "deep_wall03.jpg",
+      "size": [
+        64,
+        128
+      ],
+      "packed_payload_sha256": "c8ee930eb095b634f09b0b4a7e67015a8fe30646dbe10ea23b4a70a4fdd5e97d"
+    }
+  ],
+  "reference_collection": "REF_ORIGINAL hidden and retained"
+}

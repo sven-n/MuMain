@@ -1,0 +1,148 @@
+{
+  "decision": "READ_ONLY prioritization; no production approval or baseline final acceptance",
+  "order": [
+    "Object01",
+    "Object04",
+    "Object06+Object13+Object15 context family"
+  ],
+  "assets": {
+    "Object01": {
+      "placements": 1262,
+      "provenance_verified_current": {
+        "source": "src/bin/Data/Object2/Object01.bmd",
+        "sha256": "81be1d93794c0f3e59becb2d1f6bd2020ec6852322049bf3c665a464edc11124",
+        "purpose": "Read-only baseline triage, not an accepted remake",
+        "dependencies": {
+          "src/bin/Data/Object2/Object01.bmd": "81be1d93794c0f3e59becb2d1f6bd2020ec6852322049bf3c665a464edc11124",
+          "src/bin/Data/Object2/deep_wall01.OZJ": "78379458cc441ce547c482f20656e13f6672fd565c39373865de7fb9ebb9504a",
+          "src/bin/Data/Object2/deep_wall02.OZJ": "56690fc74a00d9b1b59a80f1a9c9ffc5222680aa20822cbdc79016d7b17c9457"
+        },
+        "evidence": {
+          "baseline.blend": "396212121f7a5ddb2ebec97e8315053fa32d1f872fbc7a41efdd1c1c82f61cf9",
+          "baseline.png": "adfb712e7b9e4f3909c51167562262bbad6881203f768db07be0c2dbbaff8ae1"
+        }
+      }
+    },
+    "Object04": {
+      "placements": 588,
+      "provenance_verified_current": {
+        "source": "src/bin/Data/Object2/Object04.bmd",
+        "sha256": "e0df1c4477e02bb37d59155dbf56a5f1f7bacaa064bb34568ce738de07c8ae1f",
+        "purpose": "Read-only baseline triage, not an accepted remake",
+        "dependencies": {
+          "src/bin/Data/Object2/Object04.bmd": "e0df1c4477e02bb37d59155dbf56a5f1f7bacaa064bb34568ce738de07c8ae1f",
+          "src/bin/Data/Object2/deep_wall01.OZJ": "78379458cc441ce547c482f20656e13f6672fd565c39373865de7fb9ebb9504a",
+          "src/bin/Data/Object2/deep_wall03.OZJ": "dee54424992a14b93c9732599c4190c164932c7f98708e9aa21ca03a21f63168"
+        },
+        "evidence": {
+          "baseline.blend": "747dc289d825321263f39e61c28072e7ecc28e63d3f344d392fc0edacefe85a2",
+          "baseline.png": "7fb7a2ed5ea984da6fff541005453adfbe8973024704bccd6de085d46688a5f5"
+        }
+      }
+    },
+    "Object06": {
+      "placements": 179,
+      "provenance_verified_current": {
+        "source": "src/bin/Data/Object2/Object06.bmd",
+        "sha256": "130a34571f79c3fd28fe5cac0a51c54a2cc3e011cba2b1e483934e7e7026be05",
+        "purpose": "Read-only baseline triage, not an accepted remake",
+        "dependencies": {
+          "src/bin/Data/Object2/Object06.bmd": "130a34571f79c3fd28fe5cac0a51c54a2cc3e011cba2b1e483934e7e7026be05",
+          "src/bin/Data/Object2/deep_wall04.OZJ": "83037896d1e2825447e840b4af780ed3608b12c5971c8369eccdfc0f4fb21505"
+        },
+        "evidence": {
+          "baseline.blend": "37fe801382fbbbd7007965b5decfb851b777dff3771784c950aa5d362447517c",
+          "baseline.png": "4dbd7e0e9b6f591c1072e1d96b9bf3034c38703527f8f3b093a9e3294b447215"
+        }
+      }
+    },
+    "Object13": {
+      "placements": 50,
+      "provenance_verified_current": {
+        "source": "src/bin/Data/Object2/Object13.bmd",
+        "sha256": "54b586f03b7a79071018bf02907d577dc06237ba66f1d83706c7ca29f3f80dd2",
+        "purpose": "Read-only baseline triage, not an accepted remake",
+        "dependencies": {
+          "src/bin/Data/Object2/Object13.bmd": "54b586f03b7a79071018bf02907d577dc06237ba66f1d83706c7ca29f3f80dd2",
+          "src/bin/Data/Object2/deep_wall04.OZJ": "83037896d1e2825447e840b4af780ed3608b12c5971c8369eccdfc0f4fb21505",
+          "src/bin/Data/Object2/deep_wall01.OZJ": "78379458cc441ce547c482f20656e13f6672fd565c39373865de7fb9ebb9504a"
+        },
+        "evidence": {
+          "baseline.blend": "22cec2945e1a00e3571e22e30b0a7029cfd9a5e5a97ba9a2cd8fc829d1b00b45",
+          "baseline.png": "0f633a6dfe06deced16ed71113591bae03370c8e46530f3b8867201ca089642a"
+        }
+      }
+    },
+    "Object15": {
+      "placements": 217,
+      "provenance_verified_current": {
+        "source": "src/bin/Data/Object2/Object15.bmd",
+        "sha256": "8cef1f8cd8061020debb3cf108183ddbe79fe29be577caee0e2e11d28fdee957",
+        "purpose": "Read-only baseline triage, not an accepted remake",
+        "dependencies": {
+          "src/bin/Data/Object2/Object15.bmd": "8cef1f8cd8061020debb3cf108183ddbe79fe29be577caee0e2e11d28fdee957",
+          "src/bin/Data/Object2/deep_wall04.OZJ": "83037896d1e2825447e840b4af780ed3608b12c5971c8369eccdfc0f4fb21505"
+        },
+        "evidence": {
+          "baseline.blend": "0aff6fceccf98d7f2a1a74828b075234b677a49170b37d60aa94e2dd23f4721b",
+          "baseline.png": "d2948d03764e83a10bc5dbc4aac48e3731cf756a3cfb9f4fa19fa292ff1204c0"
+        }
+      }
+    }
+  },
+  "shared_geometry": "Independently compared parsed raw mesh0: Object06 andObject13 EXACT equality including vertices/normals/UV/triangles/material.13 adds2 deep_wall01 captriangles; total54vs56.15 is9triangle shallow collar with samefootprint, not proven exactsubset and must remain separate until measured.",
+  "engine": "World1Dungeon zero-basedtypes0/3/5/12/14; inspected Dungeon update3891 andcreation4674 switch, no specific effect assigned. No brazier/flame identity.06/13 root at top(z\u22480), shaft extends\u2248300units downward;15 liesz-17..0. GroundminZ is not architectural contactdatum.",
+  "texture_consumers": {
+    "deep_wall01.jpg": [
+      "DungeonStone01",
+      "Object01",
+      "Object03",
+      "Object04",
+      "Object05",
+      "Object07",
+      "Object13",
+      "Object14",
+      "Object16",
+      "Object17",
+      "Object37",
+      "Object40",
+      "Object52"
+    ],
+    "deep_wall02.jpg": [
+      "Object01",
+      "Object03"
+    ],
+    "deep_wall03.jpg": [
+      "Object04",
+      "Object16",
+      "Object17"
+    ],
+    "deep_wall04.jpg": [
+      "Object06",
+      "Object07",
+      "Object08",
+      "Object09",
+      "Object10",
+      "Object13",
+      "Object14",
+      "Object15",
+      "Object16",
+      "Object28",
+      "Object29",
+      "Object30",
+      "Object40",
+      "Object52"
+    ]
+  },
+  "priorities": {
+    "Object01": "1262 placements; highest environment screen coverage. Current recessed dragon panel and stepped cap already distinctive, but unrelieved broadstone edges and stretched cap/verticaltexel appearance warrant first context proof. Try purposeful inner reveal/lintel shaping only, preserving full module ends/top/bottom, trimregistration and alljoin surfaces. Do not repeat rejected globalbevel/faceisland approach.",
+    "Object04": "588 placements. Dominant stretched/blurry carvedface and paperthin-looking topcap may benefit from bounded sculptural/jamb profile; existing projectingnose already carries silhouette. Prioritize meaningful intermediatefaceplane/neck continuity after actualcontext. Freeze deep_wall03 because16/17consume; not a dedicatedportrait texture.",
+    "Object06+Object13+Object15": "179+50+217 placements. Treat as downward support/closedcap/open collar family, not brazier. Existing profile is purposeful and may be adequate when shaft submerged in dungeonvoid. Need actualjoin-context first; cap/opening andsupportroot are protected. Do not fill06 or15 black openings or put arbitrary stoneinterior behind them. Ranked afterwallfamily because visibleportion/contacts not yet established by assembledscene."
+  },
+  "limits": [
+    "Five currenthash baselinepreviews inspected; no new assemblies generated. Placement records constrainidentity but do not show terrain/void occlusion.",
+    "deep_wall01 includes excluded fallingstone/hiddenmarkers; deep_wall04 includes markers andpottery. Freeze allfourtextures for initialgeometry. A repaint would require full consumerownership/scope review.",
+    "01 placements havez-126..175,04 -275..185; supports13 84..444. Manyrotations:17/51/9/20/6 respectively. Full originalsurfaceenvelope and actualtransformed contactproof needed, not singlelocalbounds.",
+    "All legacy Korean names/root/actions must survive rawbytepreservation. No crossmapname-based reuse claim."
+  ]
+}

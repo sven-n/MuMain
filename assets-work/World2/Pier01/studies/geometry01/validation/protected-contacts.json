@@ -1,0 +1,2378 @@
+{
+  "status": "PASS",
+  "protected_triangles": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89
+  ],
+  "maximum_protected_corner_normal_error": 3.3541019662517975e-05,
+  "actual_placement_bounds": [
+    {
+      "index": 7,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 8,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 9,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 10,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 11,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 12,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 13,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 46,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 47,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 68,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 90,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 91,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 93,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 98,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 114,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 116,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 118,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 120,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 156,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 157,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 209,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 210,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 211,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 212,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 213,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 235,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 236,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 237,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 238,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 239,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 248,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 249,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 250,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 251,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 262,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 263,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 275,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 277,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 290,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 291,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 292,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 293,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 294,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 305,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 306,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 320,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 410,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 412,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 414,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 416,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 483,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 490,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 491,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 494,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 496,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 503,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 504,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 505,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 534,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 536,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 539,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 540,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 541,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 542,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 543,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 560,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 604,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 624,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 625,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 645,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 646,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 659,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 661,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 663,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 665,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 711,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 712,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 713,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 714,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 717,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 719,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 720,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 729,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 730,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 731,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 742,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 743,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 748,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 760,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 762,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 763,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 764,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 767,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 768,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 770,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 773,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 790,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 792,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 794,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 796,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 799,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 830,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 834,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 835,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 836,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 838,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 840,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 841,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 842,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 858,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 859,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 860,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 861,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 863,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 864,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 916,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 917,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 918,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 919,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 920,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 925,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 926,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 927,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 928,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 933,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 934,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 935,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 936,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 941,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 942,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 943,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 944,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 949,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 954,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 955,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 956,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 957,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 962,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 963,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 966,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 967,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 968,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 980,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 985,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 986,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 993,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 994,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 995,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 999,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1000,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1094,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1095,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1111,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1114,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1175,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1178,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1184,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1185,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1188,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1206,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1212,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1213,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1214,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1217,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1271,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1272,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1273,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1274,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1275,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1284,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1285,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1295,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1298,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1308,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1309,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1326,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1327,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1329,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1330,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1338,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1339,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1340,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1341,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1365,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1366,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1379,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1380,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1381,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1387,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1388,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1389,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1390,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1402,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1407,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1408,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1409,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1431,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1432,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1483,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1489,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1492,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1495,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1505,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1506,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1525,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1526,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1550,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1551,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1555,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1557,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1560,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1583,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1584,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1585,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1586,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1604,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1605,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1624,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1635,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1636,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1641,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1644,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1652,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1653,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1692,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1694,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1697,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1711,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1712,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1713,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1801,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1806,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1807,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1826,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1827,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1828,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1829,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1831,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1834,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1839,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1846,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1864,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1866,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1869,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1873,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1874,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1877,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1878,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1879,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1902,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1906,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1958,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1959,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1960,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1961,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1974,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1975,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1976,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1994,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1995,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 1996,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2003,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2006,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2008,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2012,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2013,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2014,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2016,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2026,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2027,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2028,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2029,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2030,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2041,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2042,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2043,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2045,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2058,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2130,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2153,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2154,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2157,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2176,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2179,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2185,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2186,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2187,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2196,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2209,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2241,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2242,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2243,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2244,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2247,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2285,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2286,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2287,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2298,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2299,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2300,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2301,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2302,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2319,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2320,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2321,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2365,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2366,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2367,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2368,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2369,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2375,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2389,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2393,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2394,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2395,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2396,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2399,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2400,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2403,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2404,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2419,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2420,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2421,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2428,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2429,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2430,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2431,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2432,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2435,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2436,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2457,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2458,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2459,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2460,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2461,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2482,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2492,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2504,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2543,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2544,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2546,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2547,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2550,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2553,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2554,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2560,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2564,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2565,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2568,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2573,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2574,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2575,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2576,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2591,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2592,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2593,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2594,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2646,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2651,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2652,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2664,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2665,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2666,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2669,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2670,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2686,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2687,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2688,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2690,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2691,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2692,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2695,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2698,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2745,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2749,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2750,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2754,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2767,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2773,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2784,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2785,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2786,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2787,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2797,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2805,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2806,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2807,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2822,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2823,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2827,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2861,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2870,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2871,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2873,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2874,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2875,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2876,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2885,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2902,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2903,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 2905,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3015,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3019,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3020,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3048,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3061,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3062,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3063,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3064,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3066,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3069,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3070,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3071,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3073,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3075,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3077,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3091,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3096,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3111,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3112,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3124,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3125,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3134,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3154,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3197,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3198,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3199,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3203,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3218,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3246,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3262,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3266,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3309,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3310,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3314,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3315,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3316,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3317,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3318,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3321,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3335,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3345,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3346,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3374,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3375,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3393,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3394,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3427,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3434,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3436,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3443,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3444,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3445,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3446,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3447,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3463,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3490,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3491,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3502,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3505,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3506,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3507,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3513,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3514,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3527,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3528,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3529,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3530,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3531,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3532,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3548,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3561,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3562,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3568,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3576,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3577,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3578,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3599,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3600,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3601,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3614,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3629,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3630,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3633,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3678,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3682,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3697,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3700,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3725,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3726,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3727,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3737,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3738,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3739,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3742,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3755,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3756,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3757,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3780,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3784,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3787,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3788,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3801,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3802,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3818,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3823,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3825,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3829,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3835,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3838,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3873,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3878,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3893,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3902,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3903,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3904,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3921,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3944,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3945,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3946,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3947,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3948,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3949,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3958,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3959,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3960,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3961,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3962,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3974,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3975,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3990,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4022,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4023,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4042,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4043,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4044,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4059,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4060,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4061,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4062,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4068,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4112,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4113,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4133,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4134,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4135,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4139,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4155,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4161,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4162,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4163,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4204,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4206,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4209,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4215,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4216,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4219,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4221,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4234,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4235,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4236,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4237,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4238,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4239,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4240,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4241,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4257,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4283,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4284,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4295,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4303,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4304,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4309,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4310,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4311,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4320,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4321,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4333,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4337,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4355,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4357,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4365,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4366,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4367,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4370,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4479,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4480,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4481,
+      "maximum_placed_bound_error": 0.0
+    }
+  ]
+}

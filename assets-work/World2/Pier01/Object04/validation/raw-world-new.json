@@ -1,0 +1,7 @@
+{
+  "stage": "new",
+  "keys": 1,
+  "normal_aliases": {},
+  "criterion": "Normal world direction differs by less than1e-5 at every action key",
+  "status": "PASS"
+}

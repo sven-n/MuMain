@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "maximum_position_error": 1.9073486328125e-06,
+  "maximum_uv_error": 6.743495761743046e-07,
+  "triangles": 487,
+  "maximum_position_or_uv_error": 1.9073486328125e-06,
+  "criteria": "Every triangle has same material, winding, bone ownership, positions and UV corners",
+  "position_tolerance": 0.0003,
+  "uv_tolerance": 1e-06,
+  "precision": "Six-decimal SMD roundtrip and float32 coordinates; maximum measured position and UV errors are separately reported against 0.0003 world-unit and 0.000001 UV-unit budgets"
+}

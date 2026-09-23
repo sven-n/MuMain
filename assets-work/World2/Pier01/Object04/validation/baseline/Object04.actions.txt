@@ -1,0 +1,6 @@
+# bmdconv action manifest for Object04.bmd. The order is the action index the game uses.
+# Re-import: bmdconv smd2bmd Object04.smd <output.bmd> --manifest Object04.actions.txt
+model Data2\Object2\´øÀüº®03.smd
+action 0 file=Object04_a00.smd keys=1 lock=0
+texture 0 deep_wall01.jpg original=deep_wall01.jpg
+texture 1 deep_wall03.jpg original=deep_wall03.jpg

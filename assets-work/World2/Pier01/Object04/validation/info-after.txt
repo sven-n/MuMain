@@ -1,0 +1,8 @@
+model /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/Object04/exports/Object04.bmd
+  name field: Data2\Object2\\xb4\xf8\xc0\xfc\xba\xae03.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 487
+  bounds (bind pose): min -58.65 -100.48 0.00  max 58.35 58.27 317.20  size 117.00 158.75 317.20
+  mesh 0: triangles=6 vertices=12 normals=3 uvs=8 texture=deep_wall01.jpg
+  mesh 1: triangles=481 vertices=330 normals=753 uvs=276 texture=deep_wall03.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0

@@ -1,0 +1,15 @@
+{
+  "file": "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/Object04/exports/Object04.bmd",
+  "mesh_bindings": [
+    {
+      "mesh": 0,
+      "material": "deep_wall01.jpg",
+      "vertex_to_normal_node_mismatch_corner_counts": {}
+    },
+    {
+      "mesh": 1,
+      "material": "deep_wall03.jpg",
+      "vertex_to_normal_node_mismatch_corner_counts": {}
+    }
+  ]
+}

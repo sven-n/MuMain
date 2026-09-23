@@ -1,0 +1,41 @@
+00:00.621  blend            | Read blend: "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/Object04/source.blend"
+skipping reference object 'Object04.001' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting REF_ORIGINAL
+ ERROR: Nothing in Group "REF_ORIGINAL" is enabled for export
+
+Blender Source Tools: exporting Object04_mu_export
+- Baking...
+- /private/var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_export_7jm717xu/Object04_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 576 polys
+- Exported 2 materials
+   deep_wall01.jpg
+   deep_wall03.jpg
+- SMD export took 0.01619696617126465 
+
+
+Blender Source Tools: exporting Object04_skeleton
+- Baking...
+- /private/var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_export_7jm717xu/anims/Object04_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.00055694580078125 
+
+1 Errors and 0 Warnings
+Error: Nothing in Group "REF_ORIGINAL" is enabled for export
+2 files exported in 0.0 seconds with 1 Errors and 0 Warnings
+Info: 2 files exported in 0.0 seconds with 1 Errors and 0 Warnings
+wrote /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/Object04/exports/Object04.bmd (1 action(s))
+model /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/Object04/exports/Object04.bmd
+  name field: Data2\Object2\\xb4\xf8\xc0\xfc\xba\xae03.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 576
+  bounds (bind pose): min -58.65 -100.48 0.00  max 58.35 58.27 317.20  size 117.00 158.75 317.20
+  mesh 0: triangles=6 vertices=12 normals=3 uvs=8 texture=deep_wall01.jpg
+  mesh 1: triangles=570 vertices=404 normals=577 uvs=316 texture=deep_wall03.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

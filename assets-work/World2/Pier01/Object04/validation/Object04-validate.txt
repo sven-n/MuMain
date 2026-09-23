@@ -1,0 +1,2 @@
+/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pier01/Object04/validation/new/Object04.smd: bones=1 frames=1 triangles=487 materials=2
+OK

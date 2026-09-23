@@ -1,0 +1,12 @@
+model src/bin/Data/Object2/Object16.bmd
+  name field: Data2\Object2\지상입구.smd  version: 10
+  meshes: 6  bones: 1  actions: 1  triangles: 460
+  bounds (bind pose): min -298.83 -290.06 -141.65  max 298.37 50.81 388.22  size 597.20 340.87 529.87
+  mesh 0: triangles=20 vertices=22 normals=2 uvs=40 texture=deep_wall04.jpg
+  mesh 1: triangles=8 vertices=12 normals=2 uvs=6 texture=deep_wall06.jpg
+  mesh 2: triangles=4 vertices=8 normals=1 uvs=8 texture=deep_wall03.jpg
+  mesh 3: triangles=58 vertices=48 normals=19 uvs=60 texture=deep_wall01.jpg
+  mesh 4: triangles=176 vertices=108 normals=54 uvs=29 texture=deep_dragon.jpg
+  mesh 5: triangles=194 vertices=187 normals=38 uvs=23 texture=wire_netting01.jpg
+  bone 0: "Box09" parent=-1
+  action 0: keys=1 lock=0
