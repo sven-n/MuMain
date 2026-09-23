@@ -6,7 +6,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 #title {
@@ -15,7 +15,7 @@
 	top: 11px;
 	width: 190px;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -40,11 +40,11 @@
 	left: -30px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;

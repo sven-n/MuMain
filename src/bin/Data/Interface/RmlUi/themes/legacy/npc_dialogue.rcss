@@ -23,7 +23,7 @@
 	top: 12px;
 	width: 190px;
 	text-align: center;
-	color: #96fff0;
+	color: token(accent-cyan);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -40,7 +40,7 @@
 	width: 168px;
 	height: 18px;
 	text-align: center;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	line-height: 18px;
 	decorator: image(nd-contribute-img);
@@ -54,7 +54,7 @@
 }
 .nd-line {
 	display: block;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	white-space: nowrap;
 }
@@ -93,14 +93,14 @@
 }
 .nd-answer-row {
 	display: block;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	white-space: pre-line;
 	cursor: pointer;
 	pointer-events: auto;
 	margin-bottom: 2px;
 }
-.nd-answer-row:hover { background-color: rgba(128, 128, 179, 77); }
+.nd-answer-row:hover { background-color: token(surface-hover); }
 
 /* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
    label span is redundant (same convention quest_progress.rcss's own .btn-exit-label uses). */

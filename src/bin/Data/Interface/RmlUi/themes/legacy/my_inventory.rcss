@@ -11,7 +11,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 /* Drag handle (MyInventory.cpp Create()) -- pointer-events/drag are force-set in C++ via
@@ -22,7 +22,7 @@
 	top: 12px;
 	width: 190px;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 12px;
 	cursor: move;
@@ -81,11 +81,11 @@
 	top: 375px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;
@@ -110,13 +110,13 @@
 	width: 95px;
 	height: 15px;
 	text-align: center;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-weight: bold;
 	font-size: 12px;
 	color: #666666;
 	pointer-events: auto;
 	cursor: default;
 }
-.option-label.active { color: #ffcc1a; }
+.option-label.active { color: token(text-selected); }
 .option-label-set { left: 0; }
 .option-label-socket { left: 95px; }

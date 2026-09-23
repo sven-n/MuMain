@@ -222,8 +222,14 @@ for "the full architecture is in place":
   display font chosen yet, this only names the future split). Caught and fixed one real,
   independent drift as part of the migration: the table said `border-metal` was
   `rgba(140, 146, 152, 140)`, but every actual shipped usage consistently used alpha `130` — the
-  table had the typo, not the RCSS; both now say `130`. `legacy` still has no token layer and
-  isn't in scope for one (theme-specific by design).
+  table had the typo, not the RCSS; both now say `130`. **Update, 2026-09-23**: `legacy` now has
+  its own token layer too (`themes/legacy/tokens.ini`, ~38 tokens) — the "isn't in scope, theme-
+  specific by design" framing above was wrong; the substitution mechanism was always theme-name-
+  agnostic, `legacy` was just never given a `tokens.ini` to resolve against. `legacy`'s own palette
+  is far more sprite/decorator-driven than `modern`'s flat-color panels, so its token set is
+  smaller and largely non-overlapping in VALUE (not role) with `modern`'s — see
+  [`theming-and-modding.md`](theming-and-modding.md)'s "Design tokens" section for what qualifies
+  and what deliberately doesn't (content-driven tooltip rich-text colors, structural geometry).
 - ~~Three "shared" RML files have theme-specific class names baked into them — `architecture-
   principles.md` §15 violation.~~ **Fixed 2026-09-04.** `login.rml`, `msg_win.rml`, and
   `remember_password_prompt.rml` used to have `modern`-specific classes (`modern-frame`,

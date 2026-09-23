@@ -124,11 +124,11 @@
 }
 .credit-department {
 	top: 20dp;
-	color: #e2e2e2;
+	color: token(text-dim);
 }
 .credit-team {
 	top: 46dp;
-	color: #e2e2e2;
+	color: token(text-dim);
 }
 
 .credit-names {

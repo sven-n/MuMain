@@ -17,8 +17,8 @@ body {
 #tooltip_panel {
 	position: absolute;
 	pointer-events: none;
-	background-color: rgba(0, 0, 0, 200);
-	border-radius: 3dp;
+	background-color: token(surface-tooltip);
+	border-radius: token(radius-sm)dp;
 	padding: 3dp 5dp;
 }
 
@@ -29,7 +29,7 @@ body {
 	white-space: nowrap;
 	min-height: 1.2em;
 	line-height: 1.2em;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 11dp;
 }
 .tt-line.bold { font-weight: bold; }

@@ -7,7 +7,7 @@
 #panel {
 	position: absolute;
 	transform-origin: left top;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 /* left:0/right:0 (not a fixed width) so the title stays centered across #panel's runtime width.
@@ -19,7 +19,7 @@
 	right: 0;
 	top: 11px;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -48,11 +48,11 @@
 	display: none;
 	position: absolute;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;
@@ -83,7 +83,7 @@
 	line-height: 11px;
 	overflow: hidden;
 	white-space: nowrap;
-	color: #ffffff;
+	color: token(text-primary);
 	font-size: 12px;
 	text-align: center;
 }

@@ -14,9 +14,9 @@
 #panel {
 	width: 230dp;
 	height: 160dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: white;
+	color: token(text-primary);
 }
 /* Optional taller variant (GenericDialogConfig::tallPanel) -- .gcd-body's own top/bottom insets
    are fixed dp offsets from #panel's edges, so this alone grows .gcd-body/.gcd-text-col's
@@ -74,13 +74,13 @@
 	right: 0;
 	top: 10dp;
 	text-align: center;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-weight: bold;
-	color: #ffd23c;
+	color: token(accent-gold);
 	pointer-events: none;
 }
-.gcd-header-title.warning { color: #ffb040; }
-.gcd-header-title.error { color: #ff4040; }
+.gcd-header-title.warning { color: token(semantic-warning); }
+.gcd-header-title.error { color: token(semantic-danger); }
 
 /* Text floats transparently over the sprite composite below it (painted by the background
    document), matching native (no separate boxed "well"). left/right/top match native's own text
@@ -135,14 +135,14 @@
 	margin: 0;
 }
 .gcd-text-col scrollbarvertical slidertrack {
-	background-color: #100c06;
+	background-color: token(surface-recessed);
 }
 .gcd-text-col scrollbarvertical sliderbar {
-	background-color: #4a4a45;
+	background-color: token(control-thumb);
 }
 .gcd-text-col scrollbarvertical sliderbar:hover,
 .gcd-text-col scrollbarvertical sliderbar:active {
-	background-color: #6e6e66;
+	background-color: token(control-thumb-hover);
 }
 .gcd-text-col scrollbarvertical sliderarrowdec,
 .gcd-text-col scrollbarvertical sliderarrowinc {
@@ -157,7 +157,7 @@
 	width: 100%;
 	text-align: center;
 	white-space: normal;
-	color: #ffe0a0;
+	color: token(text-prompt);
 }
 .gcd-line.bold { font-weight: bold; }
 
@@ -217,7 +217,7 @@
 	text-align: center;
 	font-weight: bold;
 	font-size: 9dp;
-	color: #ffff00;
+	color: token(text-heading);
 	font-effect: shadow(0dp 1dp #000000);
 }
 
@@ -234,7 +234,7 @@
    }` (base.rcss) loses the cascade tie without this later, more specific override. */
 .gcd-input-row.hidden { display: none; }
 .gcd-keypad-display {
-	color: #ffe0a0;
+	color: token(text-prompt);
 	font-weight: bold;
 	letter-spacing: 4dp;
 	min-height: 14dp;
@@ -268,12 +268,12 @@
 	width: 150dp;
 	height: 10dp;
 	margin-top: 4dp;
-	background-color: #100c06;
-	border: 1dp #4a3620;
+	background-color: token(surface-recessed);
+	border: 1dp token(border-recessed);
 }
 .gcd-progress-fill {
 	height: 100%;
-	background-color: #ffd23c;
+	background-color: token(accent-gold);
 }
 
 /* top: 110dp = native's own vertical math for a fixed 160dp panel. Buttons stay the shared .btn

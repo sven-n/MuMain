@@ -24,7 +24,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 @spritesheet nq-line-sheet { src: "../../../newui_myquest_Line.tga"; nq-line-img: 0px 0px 188px 21px; }
@@ -43,7 +43,7 @@
 	top: 16px;
 	width: 190px;
 	text-align: center;
-	color: #96fff0;
+	color: token(accent-cyan);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -96,7 +96,7 @@
 	text-align: center;
 	vertical-align: middle;
 	line-height: 29px;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	cursor: pointer;
 	pointer-events: auto;
@@ -104,7 +104,7 @@
 }
 .nq-btn-complete:hover { decorator: image(nq-btn-complete-hover); }
 .nq-btn-complete.disabled {
-	color: #aaaaaa;
+	color: token(text-inactive);
 	pointer-events: none;
 	cursor: default;
 	filter: brightness(0.6);
@@ -124,7 +124,7 @@
 	position: absolute;
 	left: 20px;
 	top: 7px;
-	color: #ffdc96;
+	color: token(text-hint);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -146,7 +146,7 @@
 }
 .nq-message-line {
 	display: block;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 }
 .nq-answer-row {

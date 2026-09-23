@@ -22,7 +22,7 @@
 	top: 12px;
 	width: 190px;
 	text-align: center;
-	color: #e6e6e6;
+	color: token(text-title);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -42,13 +42,13 @@
 	text-align: center;
 	line-height: 22px;
 	font-size: 12px;
-	color: #b5b5b5;
+	color: token(text-muted);
 	cursor: pointer;
 	pointer-events: auto;
 	white-space: nowrap;
 	overflow: hidden;
 }
-.tab-btn.active { color: #ffffff; }
+.tab-btn.active { color: token(text-primary); }
 .tab-btn-quest { left: 0; width: 48px; }
 .tab-btn-jobchange { left: 48px; width: 48px; }
 .tab-btn-castletemple { left: 96px; width: 72px; }
@@ -73,7 +73,7 @@
 	left: 14px;
 	top: 30px;
 	width: 140px;
-	color: #ffff00;
+	color: token(text-heading);
 	font-weight: bold;
 	font-size: 12px;
 	text-align: left;
@@ -94,14 +94,14 @@
 	height: 18px;
 	line-height: 18px;
 	padding-left: 4px;
-	color: #ffffff;
+	color: token(text-primary);
 	font-size: 12px;
 	cursor: pointer;
 	pointer-events: auto;
 	white-space: nowrap;
 }
-.quest-row:hover { color: #ffee88; }
-.quest-row.selected { color: #ffcc1a; font-weight: bold; }
+.quest-row:hover { color: token(text-hover); }
+.quest-row.selected { color: token(text-selected); font-weight: bold; }
 
 .quest-divider {
 	position: absolute;
@@ -137,11 +137,11 @@
 	width: 100%;
 	padding: 1px 4px;
 	font-size: 12px;
-	color: #d2e6ff;
+	color: token(text-info);
 }
 .quest-content-row.bold { font-weight: bold; }
 .quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
-.quest-content-row.clickable:hover { color: #ffee88; }
+.quest-content-row.clickable:hover { color: token(text-hover); }
 
 /* Open/Give-up only -- Exit is fully shared now (docked_panel_frame.rcss's #btn_exit). */
 .quest-btn {
@@ -176,7 +176,7 @@
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: #24f2fc;
+	color: token(accent-teal);
 	font-weight: bold;
 	font-size: 12px;
 	margin-bottom: 8px;
@@ -185,17 +185,17 @@
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: #ffffff;
+	color: token(text-primary);
 	font-size: 12px;
 }
 .jobchange-contents span, .jobchange-state span { display: block; }
-.jobchange-state { color: #ffff00; font-weight: bold; margin-top: 12px; }
+.jobchange-state { color: token(text-heading); font-weight: bold; margin-top: 12px; }
 
 .castle-title, .temple-title {
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: #ffff00;
+	color: token(text-heading);
 	font-weight: bold;
 	font-size: 12px;
 	margin-top: 6px;
@@ -204,6 +204,6 @@
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: #ffffff;
+	color: token(text-primary);
 	font-size: 12px;
 }

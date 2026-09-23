@@ -98,9 +98,9 @@
 	right: 0;
 	top: 10dp;
 	text-align: center;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-weight: bold;
-	color: #ffd23c;
+	color: token(accent-gold);
 	pointer-events: none;
 }
 .window-shell-header-title.hidden { display: none; }

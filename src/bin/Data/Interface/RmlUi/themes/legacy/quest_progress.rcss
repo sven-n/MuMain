@@ -25,7 +25,7 @@
 	top: 12px;
 	width: 190px;
 	text-align: center;
-	color: #e6e6e6;
+	color: token(text-title);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -37,7 +37,7 @@
 	top: 27px;
 	width: 190px;
 	text-align: center;
-	color: #24f2fc;
+	color: token(accent-teal);
 	font-size: 12px;
 }
 
@@ -59,7 +59,7 @@
 #panel.qp-etc .qp-npc-lines { top: 59px; }
 .qp-line {
 	display: block;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	white-space: nowrap;
 }
@@ -116,19 +116,19 @@
 #panel.qp-etc .qp-answers { top: 207px; }
 .qp-player-words {
 	display: block;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	margin-bottom: 15px;
 }
 .qp-answer-row {
 	display: block;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	cursor: pointer;
 	pointer-events: auto;
 	margin-bottom: 2px;
 }
-.qp-answer-row:hover { background-color: rgba(128, 128, 179, 77); }
+.qp-answer-row:hover { background-color: token(surface-hover); }
 
 .qp-reward {
 	position: absolute;
@@ -163,11 +163,11 @@
 	text-align: center;
 	padding: 1px 4px;
 	font-size: 12px;
-	color: #ffffff;
+	color: token(text-primary);
 }
 .qp-reward-row.bold { font-weight: bold; }
 .qp-reward-row.clickable { cursor: pointer; pointer-events: auto; }
-.qp-reward-row.clickable:hover { color: #ffee88; }
+.qp-reward-row.clickable:hover { color: token(text-hover); }
 
 .qp-btn-complete {
 	position: absolute;
@@ -178,7 +178,7 @@
 	text-align: center;
 	vertical-align: middle;
 	line-height: 29px;
-	color: #ffe6d2;
+	color: token(text-narrative);
 	font-size: 12px;
 	cursor: pointer;
 	pointer-events: auto;
@@ -186,7 +186,7 @@
 }
 .qp-btn-complete:hover { decorator: image(qp-btn-complete-hover); }
 .qp-btn-complete.disabled {
-	color: #aaaaaa;
+	color: token(text-inactive);
 	pointer-events: none;
 	cursor: default;
 	filter: brightness(0.6);

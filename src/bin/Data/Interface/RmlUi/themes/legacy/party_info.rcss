@@ -21,7 +21,7 @@
 	top: 12px;
 	width: 72px;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 12px;
 	pointer-events: none;
@@ -32,7 +32,7 @@
 	left: 20px;
 	top: 60px;
 	width: 160px;
-	color: #ffffff;
+	color: token(text-primary);
 	font-size: 12px;
 	text-align: left;
 }
@@ -121,7 +121,7 @@
 	width: 70px;
 	text-align: right;
 	font-size: 12px;
-	color: #ffffff;
+	color: token(text-primary);
 	pointer-events: none;
 }
 .party-kick-btn {

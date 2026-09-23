@@ -14,7 +14,7 @@
 #panel {
 	width: 213dp;
 	height: 187dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
 	color: white;
 }

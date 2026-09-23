@@ -43,9 +43,9 @@
 #panel {
 	width: 230dp;
 	height: 276dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 10dp;
-	color: #d9d0b8;
+	color: token(text-input);
 }
 
 /* Widens the control column from window_shell.rcss's own shared 32dp/side margin (166dp well,
@@ -93,13 +93,13 @@
 	overflow: hidden;
 	cursor: pointer;
 	pointer-events: auto;
-	color: #b5b5b5;
+	color: token(text-muted);
 }
 .option-tab-btn:hover {
-	color: #d9d0b8;
+	color: token(text-input);
 }
 .option-tab-btn.active-tab {
-	color: #ffffff;
+	color: token(text-primary);
 	decorator: ninepatch(option-tab-active, option-tab-active-inner);
 }
 
@@ -160,7 +160,7 @@
 	width: 116dp;
 	flex-shrink: 0;
 	white-space: nowrap;
-	color: #d9d0b8;
+	color: token(text-input);
 }
 
 .option-slider-row,
@@ -189,9 +189,9 @@
 }
 .option-slider slidertrack {
 	height: 4dp;
-	background-color: #100c06;
+	background-color: token(surface-recessed);
 	border-width: 1dp;
-	border-color: #514a35;
+	border-color: token(border-control);
 }
 .option-slider sliderbar {
 	width: 10dp;
@@ -235,10 +235,10 @@
 	overflow: hidden;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: #0c0e0b;
+	background-color: token(surface-input);
 	border-width: 1dp;
-	border-color: #514a35;
-	color: #d9d0b8;
+	border-color: token(border-control);
+	color: token(text-input);
 }
 /* Floating popup -- top:100% (not a hardcoded dp offset) so it always sits flush under the value
    box regardless of that row's own height. max-height+overflow-y:auto caps a long list
@@ -263,9 +263,9 @@
 	max-height: 90dp;
 	overflow-y: auto;
 	z-index: 1;
-	background-color: #0c0e0b;
+	background-color: token(surface-input);
 	border-width: 1dp;
-	border-color: #514a35;
+	border-color: token(border-control);
 	pointer-events: auto;
 }
 .option-dropdown-list.hidden {
@@ -282,14 +282,14 @@
 	margin: 0;
 }
 .option-dropdown-list scrollbarvertical slidertrack {
-	background-color: #100c06;
+	background-color: token(surface-recessed);
 }
 .option-dropdown-list scrollbarvertical sliderbar {
-	background-color: #4a4a45;
+	background-color: token(control-thumb);
 }
 .option-dropdown-list scrollbarvertical sliderbar:hover,
 .option-dropdown-list scrollbarvertical sliderbar:active {
-	background-color: #6e6e66;
+	background-color: token(control-thumb-hover);
 }
 .option-dropdown-list scrollbarvertical sliderarrowdec,
 .option-dropdown-list scrollbarvertical sliderarrowinc {
@@ -303,14 +303,14 @@
 	white-space: nowrap;
 	cursor: pointer;
 	pointer-events: auto;
-	color: #d9d0b8;
+	color: token(text-input);
 }
 .option-dropdown-option:hover {
-	color: #ffffff;
-	background-color: #514a35;
+	color: token(text-primary);
+	background-color: token(border-control);
 }
 .option-dropdown-option.selected {
-	color: #ffffff;
+	color: token(text-primary);
 	background-color: #8f6922;
 }
 
@@ -343,11 +343,11 @@
 	width: 190dp;
 	z-index: 2;
 	padding: 2dp 4dp;
-	background-color: rgba(0, 0, 0, 200);
+	background-color: token(surface-tooltip);
 	border-width: 1dp;
-	border-color: #514a35;
-	border-radius: 3dp;
-	color: #ffffff;
+	border-color: token(border-control);
+	border-radius: token(radius-sm)dp;
+	color: token(text-primary);
 	font-size: 9dp;
 	pointer-events: none;
 }

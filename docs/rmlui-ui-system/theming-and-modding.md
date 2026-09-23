@@ -230,6 +230,56 @@ fallback path when the OZT/OZJ lookup fails, specifically for RmlUi-referenced t
 would remove the proprietary-format conversion step for modders without touching the legacy
 game-asset pipeline everything else still depends on.
 
+## Design tokens: `themes/<theme>/tokens.ini`
+
+**Fixed 2026-09-23** — both built-in themes (`modern` since 2026-09-04, `legacy` since this date)
+have a `tokens.ini` file (`[Tokens]` section, plain `name=value` lines) that a theme's own `.rcss`
+files reference via a `token(name)` marker instead of repeating a literal value everywhere it's
+used. `UI::RmlBridge::LoadThemedDocument()`'s `InlineTokenizedStylesheet()`/`SubstituteTokens()`
+(`RmlTheme.cpp`) resolve every `token(name)` against the ACTIVE theme's own `tokens.ini` before
+RmlUi ever sees the stylesheet text — this vendored RmlUi build has no `var()`/custom-property
+mechanism of its own, so this is plain regex text substitution, not a CSS feature. The mechanism
+is entirely theme-name-agnostic (it keys off whichever theme is active, not a hardcoded name), so
+adding a token layer to a new theme is a pure content change — no engine code to touch, confirmed
+by inspection before `legacy`'s own layer was built.
+
+**What a token is for**: a *reusable, theme-level semantic choice* — the standard body text color,
+a shared muted/secondary text tier, the common tooltip backing, a shared accent/highlight, a
+warning/danger color, shared scrollbar track/thumb colors, a shared corner-radius. The test isn't
+"does this literal appear more than once" — it's "does changing this value represent one coherent
+design decision a theme author would actually want to make in one place." `legacy`'s own
+`tokens.ini` documents, token by token, which real recurring selector(s) motivated it; a token with
+no real call site backing it (invented for taxonomy-completeness alone) doesn't belong.
+
+**What should stay ordinary RCSS, not a token**:
+- **One-off decorative colors** — a single window's own specific accent choice with no cross-window
+  or cross-selector reuse. Most of a theme's literal colors are legitimately this; not every color
+  needs a lever.
+- **Content-driven/asset-driven palettes** — `tooltip.rcss`'s `.tt-blue`/`.tt-red`/`.tt-yellow`/etc.
+  rich-text colors (and their `.tt-hl-*` background-highlight pairs) are the exact RGB values
+  `RenderTipTextList()`'s native `TEXT_COLOR_*` switch (`ZzzInventory.cpp`) already used — they
+  identify a *content type* (an item's rarity tier, a warning message), not a theme aesthetic
+  choice, and both `legacy`'s and `modern`'s own copies of this file deliberately leave them as
+  literals with a comment saying so. A ninepatch/gradient decorator recipe tightly bound to one
+  specific sprite composition (`server_select.rcss`'s own button-tint overlays) is the same
+  category — asset-specific, not a theme palette lever.
+- **Structural geometry** — panel width/height, row height, pixel offsets, icon pitch, spritesheet
+  rects, native-companion-synchronized positions (anything documented in
+  [`tracked-deferrals.md`](tracked-deferrals.md) as a themeability-coupling gap). A value becoming
+  `token(foo)` does not make duplicated geometry architecturally themeable — that requires actually
+  deriving the position live (or, where that's currently impractical, an explicit pinned
+  cross-reference comment on both sides — see `tracked-deferrals.md`'s "hotkey slot pitch/size"
+  entry for the current example). Tokens are a color/typography/radius mechanism, not a substitute
+  for the geometry-decoupling work tracked separately.
+
+**Cross-theme naming**: reuse a `modern` token's NAME for a `legacy` token when the semantic ROLE
+genuinely matches (`text-primary`, `font-body`, `radius-sm` all exist in both, with each theme's
+own appropriate value — `legacy`'s `text-primary` is `#ffffff`, `modern`'s is a warm off-white).
+Don't force a shared name onto two concepts that don't actually match, and don't rename an existing
+token in one theme purely for cosmetic cross-theme symmetry — a real naming inconsistency is worth
+fixing, a theme's own genuinely distinct concept (an accent family the other theme doesn't have)
+just gets its own name.
+
 ## Coordinates, scaling, and positioning — what a theme actually controls
 
 ### Scaling: a global user setting, opt-in per element

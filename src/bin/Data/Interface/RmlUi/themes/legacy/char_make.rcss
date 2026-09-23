@@ -32,9 +32,9 @@
 	position: absolute;
 	width: 454px;
 	height: 406px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12px;
-	color: white;
+	color: token(text-primary);
 }
 
 #stat_panel  { left: 346px; top: 24px;  }
@@ -53,15 +53,15 @@
 	cursor: pointer;
 	pointer-events: auto;
 	decorator: image(charmake-job-unchecked);
-	color: #e2e2e2;
+	color: token(text-dim);
 }
 .job-btn.checked {
 	decorator: image(charmake-job-checked);
-	color: #ffffff;
+	color: token(text-primary);
 }
 .job-btn.disabled {
 	pointer-events: none;
-	color: #777777;
+	color: token(text-disabled);
 	cursor: default;
 }
 
@@ -74,7 +74,7 @@
 	top: 0;
 	width: 108px;
 	height: 80px;
-	background-color: rgba(0, 0, 0, 143);
+	background-color: token(surface-overlay);
 }
 .stat-bg.tall {
 	height: 96px;
@@ -85,7 +85,7 @@
 	top: 0;
 	width: 454px;
 	height: 51px;
-	background-color: rgba(0, 0, 0, 143);
+	background-color: token(surface-overlay);
 }
 
 .stat-row {
@@ -93,7 +93,7 @@
 	left: 22px;
 }
 .stat-label {
-	color: #ffffff;
+	color: token(text-primary);
 }
 .stat-value {
 	position: absolute;

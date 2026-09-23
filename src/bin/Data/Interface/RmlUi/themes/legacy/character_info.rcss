@@ -39,7 +39,7 @@
 	font-size: 12px;
 	pointer-events: none;
 }
-#classname, #servername { top: 27px; color: #ffffff; }
+#classname, #servername { top: 27px; color: token(text-primary); }
 
 .summary-fill {
 	position: absolute;
@@ -66,7 +66,7 @@
 }
 .level-text { top: 58px; color: #e6e600; font-weight: bold; }
 .levelup-point-text { top: 58px; left: 110px; color: #ff8a00; font-weight: bold; }
-.exp-text { top: 75px; color: #ffffff; }
+.exp-text { top: 75px; color: token(text-primary); }
 .point-probability-text { top: 88px; color: #4cc5fe; }
 .point-text { top: 101px; color: #4cc5fe; }
 .hidden { display: none; }
@@ -96,7 +96,7 @@
 	font-size: 12px;
 	pointer-events: none;
 }
-.attr-label { left: 12px; width: 74px; color: #ffffff; }
+.attr-label { left: 12px; width: 74px; color: token(text-primary); }
 .attr-value { left: 86px; width: 86px; }
 .attr-label-str, .attr-value-str { top: 126px; }
 .attr-label-agi, .attr-value-agi { top: 181px; }

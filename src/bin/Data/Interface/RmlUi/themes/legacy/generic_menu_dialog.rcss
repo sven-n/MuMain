@@ -13,9 +13,9 @@
 #panel {
 	width: 230dp;
 	height: 260dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: white;
+	color: token(text-primary);
 }
 
 .gmd-line {
@@ -23,7 +23,7 @@
 	width: 100%;
 	text-align: center;
 	white-space: normal;
-	color: #ffe0a0;
+	color: token(text-prompt);
 	margin-bottom: 4dp;
 }
 .gmd-line.bold { font-weight: bold; }
@@ -48,10 +48,10 @@
 	pointer-events: auto;
 }
 .gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
-.gmd-button-row scrollbarvertical slidertrack { background-color: #100c06; }
-.gmd-button-row scrollbarvertical sliderbar { background-color: #4a4a45; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: token(surface-recessed); }
+.gmd-button-row scrollbarvertical sliderbar { background-color: token(control-thumb); }
 .gmd-button-row scrollbarvertical sliderbar:hover,
-.gmd-button-row scrollbarvertical sliderbar:active { background-color: #6e6e66; }
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: token(control-thumb-hover); }
 .gmd-button-row scrollbarvertical sliderarrowdec,
 .gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
 .gmd-button-row scrollbarhorizontal { height: 0; }
@@ -158,9 +158,9 @@
 	text-align: center;
 	font-size: 10dp;
 	font-weight: normal;
-	color: white;
-	background-color: #100c06;
-	border: 1dp #4a3620;
+	color: token(text-primary);
+	background-color: token(surface-recessed);
+	border: 1dp token(border-recessed);
 	padding: 3dp 6dp;
 	pointer-events: none;
 }

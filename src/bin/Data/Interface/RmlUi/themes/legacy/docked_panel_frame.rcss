@@ -29,7 +29,7 @@
 	width: 190px;
 	height: 429px;
 	decorator: image(docked-bg-fill);
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 .frame-piece { position: absolute; pointer-events: none; }
@@ -49,15 +49,15 @@
    ".gbox-dh-corner-tl") supplies left/top and picks which corner sprite via
    image(docked-corner-tl/tr/bl/br). */
 .gbox-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
-.gbox-title-fill { position: absolute; background-color: rgba(0, 0, 0, 230); pointer-events: none; }
-.gbox-content-fill { position: absolute; background-color: rgba(0, 0, 0, 153); pointer-events: none; }
+.gbox-title-fill { position: absolute; background-color: token(surface-panel-title); pointer-events: none; }
+.gbox-content-fill { position: absolute; background-color: token(surface-panel-content); pointer-events: none; }
 .gbox-title-text {
 	display: block;
 	position: absolute;
 	text-align: center;
 	font-weight: bold;
 	font-size: 12px;
-	color: #ffff00;
+	color: token(text-heading);
 	pointer-events: none;
 }
 
@@ -83,10 +83,10 @@
 	top: 365px;
 	width: 110px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
+	border-radius: token(radius-sm)px;
 	font-size: 11px;
 	text-align: center;
 	pointer-events: none;

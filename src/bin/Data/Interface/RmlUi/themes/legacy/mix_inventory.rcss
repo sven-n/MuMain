@@ -8,7 +8,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 #title {
@@ -17,7 +17,7 @@
 	top: 11px;
 	width: 190px;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -33,7 +33,7 @@
 	top: 25px;
 	width: 160px;
 	text-align: center;
-	color: #dcdcdc;
+	color: token(text-label);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -52,7 +52,7 @@
 	margin-bottom: 3px;
 	font-weight: bold;
 	font-size: 12px;
-	color: #d2e6ff;
+	color: token(text-info);
 }
 .mix-socket-prompt { color: #c8c8c8; }
 
@@ -83,11 +83,11 @@
 	left: 35px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;

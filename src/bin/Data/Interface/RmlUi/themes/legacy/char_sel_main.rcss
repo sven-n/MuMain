@@ -79,7 +79,7 @@
 	right: 133dp;
 	bottom: 15dp;
 	height: 21dp;
-	background-color: rgba(0, 0, 0, 143);
+	background-color: token(surface-overlay);
 	pointer-events: none;
 }
 

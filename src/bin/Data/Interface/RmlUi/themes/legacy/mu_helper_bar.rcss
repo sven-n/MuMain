@@ -36,7 +36,7 @@
 	position: absolute;
 	width: 207dp;
 	height: 25dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 11dp;
 }
 
@@ -80,7 +80,7 @@
 	width: 132dp;
 	height: 9dp;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -118,8 +118,8 @@
 	top: 24dp;
 	width: auto;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 1px 2px;
 	border-radius: 0px;
 	font-family: "DejaVu Sans";

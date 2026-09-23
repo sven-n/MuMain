@@ -9,7 +9,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 #title {
@@ -18,7 +18,7 @@
 	top: 15px;
 	width: 190px;
 	text-align: center;
-	color: #49b0ff;
+	color: token(accent-blue);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -49,11 +49,11 @@
 	top: 375px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;
@@ -72,7 +72,7 @@
 .myshop-line {
 	position: absolute;
 	left: 30px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12px;
 }
 .myshop-line-still-opening {
@@ -84,7 +84,7 @@
 	font-weight: bold;
 }
 .myshop-line-warning { color: #ff2d2f; font-weight: bold; }
-.myshop-line-info { color: #f7ce4d; }
+.myshop-line-info { color: token(text-notice); }
 
 #warning_line { top: 230px; }
 #selling_price_line { top: 250px; }

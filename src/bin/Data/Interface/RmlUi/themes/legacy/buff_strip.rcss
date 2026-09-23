@@ -196,7 +196,7 @@
 #panel {
 	top: 15dp;
 	width: 200dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 11dp;
 	pointer-events: none;
 }
@@ -226,11 +226,11 @@
 	left: 0dp;
 	width: 160dp;
 	white-space: pre-line;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 3dp 5dp;
-	border-radius: 3dp;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)dp;
+	font-family: "token(font-body)";
 	font-size: 11dp;
 	pointer-events: none;
 }

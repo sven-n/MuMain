@@ -12,8 +12,8 @@
 	width: 118px;
 	height: 54px;
 	pointer-events: none;
-	font-family: "Liberation Sans";
-	color: white;
+	font-family: "token(font-body)";
+	color: token(text-primary);
 }
 .balloon-bg {
 	position: absolute;
@@ -38,7 +38,7 @@
 }
 .balloon-guild {
 	top: 22px;
-	color: #ffffff;
+	color: token(text-primary);
 }
 .balloon-class {
 	top: 38px;

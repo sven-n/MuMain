@@ -10,7 +10,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 #title {
@@ -19,7 +19,7 @@
 	top: 11px;
 	width: 190px;
 	text-align: center;
-	color: #d8d8d8;
+	color: token(text-secondary);
 	font-weight: bold;
 	font-size: 12px;
 	pointer-events: none;
@@ -47,7 +47,7 @@
 	pointer-events: none;
 }
 
-.id-text { position: absolute; color: #d2e6ff; white-space: nowrap; pointer-events: none; }
+.id-text { position: absolute; color: token(text-info); white-space: nowrap; pointer-events: none; }
 .id-text-your { left: 32px; top: 43px; font-size: 14px; font-weight: bold; }
 .id-text-my   { left: 20px; top: 253px; font-size: 12px; font-weight: bold; }
 
@@ -55,7 +55,7 @@
 	position: absolute;
 	left: 16px;
 	top: 30px;
-	color: #d8d8d8;
+	color: token(text-secondary);
 	font-weight: bold;
 	font-size: 12px;
 	white-space: nowrap;
@@ -133,11 +133,11 @@
 	top: 375px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;
@@ -164,7 +164,7 @@
 .notice-line {
 	position: absolute;
 	left: 20px;
-	color: #ffdc96;
+	color: token(text-hint);
 	font-weight: bold;
 	font-size: 12px;
 	white-space: nowrap;
@@ -182,7 +182,7 @@
 .item-warning-badge {
 	position: absolute;
 	background-color: rgba(210, 0, 0, 255);
-	color: #ffffff;
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 12px;
 	text-align: center;

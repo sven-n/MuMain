@@ -9,7 +9,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 #title {
@@ -18,7 +18,7 @@
 	top: 6px;
 	width: 190px;
 	text-align: center;
-	color: #dcdcdc;
+	color: token(text-label);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -28,7 +28,7 @@
 	top: 21px;
 	width: 190px;
 	text-align: center;
-	color: #dcdcdc;
+	color: token(text-label);
 	font-weight: bold;
 	font-size: 11px;
 }
@@ -72,7 +72,7 @@
 	white-space: nowrap;
 	pointer-events: none;
 }
-.repair-money-label { left: 20px; color: #dcdcdc; }
+.repair-money-label { left: 20px; color: token(text-label); }
 .repair-money-value { left: 100px; }
 .repair-money-label.hidden, .repair-money-value.hidden { display: none; }
 
@@ -82,11 +82,11 @@
 	top: 375px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;

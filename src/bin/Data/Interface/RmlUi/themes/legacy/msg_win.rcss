@@ -31,7 +31,7 @@
 	position: absolute;
 	width: 352dp;
 	height: 113dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
 	decorator: image(msgwin-back-image);
 }
@@ -43,7 +43,7 @@
 	right: 0;
 	top: 38dp;
 	text-align: center;
-	color: #ffffff;
+	color: token(text-primary);
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -61,7 +61,7 @@
 	left: 25dp;
 	top: 51dp;
 	text-align: left;
-	color: #ffffff;
+	color: token(text-primary);
 	white-space: nowrap;
 	pointer-events: none;
 }

@@ -34,9 +34,9 @@ body {
 	position: absolute;
 	width: 329dp;
 	height: 245dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: white;
+	color: token(text-primary);
 	decorator: image(login-back-image);
 }
 
@@ -170,5 +170,5 @@ body {
 	left: 30dp;
 	top: 252dp;
 	width: 280dp;
-	color: #ffd23c;
+	color: token(accent-gold);
 }

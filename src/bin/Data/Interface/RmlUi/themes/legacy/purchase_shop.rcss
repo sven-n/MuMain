@@ -7,7 +7,7 @@
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 }
 
 #title {
@@ -16,7 +16,7 @@
 	top: 15px;
 	width: 190px;
 	text-align: center;
-	color: #49b0ff;
+	color: token(accent-blue);
 	font-size: 12px;
 }
 
@@ -59,7 +59,7 @@
 .warning-line {
 	position: absolute;
 	left: 30px;
-	color: #f7ce4d;
+	color: token(text-notice);
 	font-size: 12px;
 	white-space: nowrap;
 	pointer-events: none;
