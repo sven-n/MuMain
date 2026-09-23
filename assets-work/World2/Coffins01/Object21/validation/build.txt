@@ -1,0 +1,6 @@
+00:00.704  blend            | Read blend: "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/baseline/source.blend"
+Info: No new files have been packed
+Info: Saved as "source.blend"
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

@@ -1,0 +1,55 @@
+{
+  "kind": "OFFLINE_ACTUAL_PLACEMENTS_NOT_CLIENT",
+  "records": [
+    {
+      "name": "Object21",
+      "source": "Object21/baseline/source.blend",
+      "index": 683,
+      "position": [
+        4650.0,
+        12550.0,
+        173.27944946289062
+      ],
+      "rotation": [
+        -50.0,
+        0.0,
+        -60.0
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "Object22",
+      "source": "Object22/baseline/source.blend",
+      "index": 685,
+      "position": [
+        4600.0,
+        12550.0,
+        174.0892791748047
+      ],
+      "rotation": [
+        -50.0,
+        0.0,
+        -120.0
+      ],
+      "scale": 1.0
+    }
+  ],
+  "anchor": [
+    4650.0,
+    12550.0,
+    173.27944946289062
+  ],
+  "bounds": [
+    [
+      -130.66172790527344,
+      -128.2174530029297,
+      -31.579418182373047
+    ],
+    [
+      125.25505065917969,
+      119.53168487548828,
+      72.4627456665039
+    ]
+  ],
+  "excluded": "Terrain, lighting bake and unrelated environment"
+}

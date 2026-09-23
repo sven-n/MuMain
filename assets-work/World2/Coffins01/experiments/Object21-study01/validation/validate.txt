@@ -1,0 +1,2 @@
+/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/validation/new/Object21.smd: bones=1 frames=1 triangles=364 materials=1
+OK

@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "raw32byte_name_equal": true,
+  "name_hex": "44617461325c4f626a656374325cb0fcb6d1b2b130322e736d64000000000000",
+  "mesh_bone_action_counts": [
+    1,
+    1,
+    1
+  ],
+  "keys": 1,
+  "maximum_motion_component_delta": 0.0,
+  "texture_frozen": true,
+  "sha256": "5bd840d5413672fcae7f0c4356bf701c7cba1955eb46fb226fdcf51d3fdf65ac"
+}

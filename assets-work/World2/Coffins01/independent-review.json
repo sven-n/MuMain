@@ -1,0 +1,43 @@
+{
+  "decision": "REJECT_CANDIDATES_RETAIN_BASELINES",
+  "scope": "Object21 and Object22 Dungeon coffin studies, offline art gate",
+  "assets": {
+    "Object21": {
+      "decision": "RETAIN_BASELINE",
+      "rationale": "Distinct tapered coffin outline, open cavity and visible wall thickness; painted horizontal timber courses and corner framing already read clearly. Candidate primarily deepens dark grooves with insufficient normal-distance gain.",
+      "baseline_sha256": "6e4a0e4324cedc6f9b25f0f865f4943b9b81319dde6ef3b92f69182134457653",
+      "rejected_candidate_sha256": "b9fb90e3ab13cebc2da84cdaaf189b8cd332d70364ba3a026b53caf468d79b53",
+      "rejected_source_sha256": "5fcf0283a283382cc489a74317d773a24b2e4bba8c7fa7c692b24ab386581cf9"
+    },
+    "Object22": {
+      "decision": "RETAIN_BASELINE",
+      "rationale": "Plain fitted tapered lid reads coherently with body and has distinct longitudinal boards and framed ends. Candidate stepped edge and notches add little beyond existing painted construction.",
+      "baseline_sha256": "9996504fb0288ec2c32cc0416c3673fe560fb4d96c236788fb5e774d1a9865e9",
+      "rejected_candidate_sha256": "225be590871b2910516b63b793dfa1a8f1513dcf6ec8843168106109c178d815",
+      "rejected_source_sha256": "31466ec37c6a374083d37607c725f4059ba604bbfe15efce6edcf9ea31513a7c"
+    }
+  },
+  "evidence_sha256": {
+    "review/4122-4123-candidate-small.png": "da75de760a78d860ee05e5829f45cd4f4fe96e227fb41ac4045435b39eab348d",
+    "review/4122-4123-baseline-small.png": "3ca070998650a49547224816de2f1937406bb014b9cd7f1a6ed8fee33c9dc292",
+    "review/683-685-candidate-small.png": "8090af2e2d892097c325c23ce44c15cf0905243ef0da3203b48ad44e9031db31",
+    "review/683-685-candidate-context.json": "2fd2ac07cfd84eb2a7a7ba81847024c488c7d8c300e480503ea554df6e37eb8e",
+    "review/4122-4123-baseline-reverse.png": "d03c5a1853c95df1b8fa0d25065c1f9b48261c1f34849ab91f7fdf01ee0c02cb",
+    "review/683-685-candidate-reverse.png": "2ccbe3b500c452e78afcac9138f57c4b03a71a8dff9e5dbb98ffdd3738b732e5",
+    "review/683-685-baseline-context.json": "b59f13d080df313b37b7d000d7f2efb3418933e13e8cc21c71de41324f9d8969",
+    "review/683-685-baseline.png": "eb35ba12d01dd8a0b8b19bedeffd883535b4bfc807bcaca3ac0a3069620dd854",
+    "review/683-685-baseline-small.png": "b80ebb128de470c252e96a7ba2497c97a2685d98503eaa398d6b1efe3ce121d3",
+    "review/4122-4123-candidate.png": "7fbb3d731b5032ed81d9c34d6268d5ab96e7520328d8c073b2fccfda9ba446e9",
+    "review/4122-4123-candidate-reverse.png": "305a2a33a57a6fe93e602cc86073fc088603da2ad1685f03814d8e671a61e98c",
+    "review/4122-4123-baseline-context.json": "5b9c6057811a334577aa2c98bc8ef5212f7c2585212a54fd71b225461b441462",
+    "review/683-685-baseline-reverse.png": "dc236573f335e787ec52c0bfc7c4074ae57658e91637acf142aad336d2497900",
+    "review/683-685-candidate.png": "1cee819caa828c21d729842e075d636bb8d1fa44151c747a642e3f4d80f1c5dd",
+    "review/4122-4123-candidate-context.json": "618d0558751102da849982fd35894dfd780f01feececd0adc907dfc698b2c888",
+    "review/4122-4123-baseline.png": "d60cfc4f6716ec194a5d2f9b4eed7eaf653a6c1681dd464039b240f06fbaaf76"
+  },
+  "limits": [
+    "No new game files accepted.",
+    "Offline diffuse paired placements, not client verification.",
+    "Dark low-resolution wood painting remains historic material character; arbitrary added ornament is not justified."
+  ]
+}

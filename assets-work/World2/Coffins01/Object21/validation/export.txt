@@ -1,0 +1,39 @@
+00:00.589  blend            | Read blend: "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/source.blend"
+skipping reference object 'Object21.001' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting REF_ORIGINAL
+ ERROR: Nothing in Group "REF_ORIGINAL" is enabled for export
+
+Blender Source Tools: exporting Object21_mu_export
+- Baking...
+- /private/var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_export_eijg8trx/Object21_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 364 polys
+- Exported 1 materials
+   wood01.jpg
+- SMD export took 0.014239072799682617 
+
+
+Blender Source Tools: exporting Object21_skeleton
+- Baking...
+- /private/var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_export_eijg8trx/anims/Object21_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.0006947517395019531 
+
+1 Errors and 0 Warnings
+Error: Nothing in Group "REF_ORIGINAL" is enabled for export
+2 files exported in 0.0 seconds with 1 Errors and 0 Warnings
+Info: 2 files exported in 0.0 seconds with 1 Errors and 0 Warnings
+wrote /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/exports/Object21.bmd (1 action(s))
+model /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/exports/Object21.bmd
+  name field: Data2\Object2\\xb0\xfc01.smd  version: 12
+  meshes: 1  bones: 1  actions: 1  triangles: 364
+  bounds (bind pose): min -103.08 -40.44 0.80  max 136.79 41.90 64.54  size 239.87 82.34 63.73
+  mesh 0: triangles=364 vertices=204 normals=198 uvs=175 texture=wood01.jpg
+  bone 0: "Box01" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

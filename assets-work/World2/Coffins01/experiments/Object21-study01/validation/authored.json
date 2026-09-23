@@ -1,0 +1,61 @@
+{
+  "triangles": 364,
+  "bounds_before": [
+    [
+      -103.07569885253906,
+      -40.44380187988281,
+      0.804099977016449
+    ],
+    [
+      136.7917022705078,
+      41.89870071411133,
+      64.53820037841797
+    ]
+  ],
+  "bounds_after": [
+    [
+      -103.07569885253906,
+      -40.44380187988281,
+      0.804099977016449
+    ],
+    [
+      136.7917022705078,
+      41.89870071411133,
+      64.53820037841797
+    ]
+  ],
+  "original_corner_anchors": 24,
+  "maximum_anchor_distance": 0.0,
+  "protected_original_faces": [
+    0,
+    1,
+    2,
+    3,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "original_rim_floor_inner_walls_exact": true,
+  "construction": "Four broad wood board faces perwall, bevelled into joints, cornerstiles and upper/lower rails, entirely inside original outerwall"
+}

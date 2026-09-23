@@ -1,0 +1,12 @@
+{
+  "kind": "OFFLINE_DIFFUSE_NOT_CLIENT",
+  "baseline": "Exact original BMD and frozen wood01",
+  "candidate": "Official exported/reimported BMD",
+  "lighting": "Identical standard neutral ambient and diffuse sun",
+  "views": [
+    "main",
+    "330px reduced",
+    "reverse",
+    "underside"
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "status": "PASS",
+  "tolerance": 0.0003,
+  "original_convex_support_planes": 56,
+  "maximum_outward_support_excess": 7.600366657811719e-06,
+  "actual_placements": [
+    {
+      "index": 575,
+      "rotation": [
+        0.0,
+        0.0,
+        720.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 684,
+      "rotation": [
+        -50.0,
+        0.0,
+        -60.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 685,
+      "rotation": [
+        -50.0,
+        0.0,
+        -120.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 686,
+      "rotation": [
+        -50.0,
+        0.0,
+        -90.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 780,
+      "rotation": [
+        -45.0,
+        0.0,
+        1020.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 808,
+      "rotation": [
+        0.0,
+        0.0,
+        1050.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2070,
+      "rotation": [
+        -60.0,
+        0.0,
+        -450.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2140,
+      "rotation": [
+        -15.0,
+        0.0,
+        -1440.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2163,
+      "rotation": [
+        -15.0,
+        0.0,
+        -1440.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2410,
+      "rotation": [
+        50.0,
+        0.0,
+        -30.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4097,
+      "rotation": [
+        60.0,
+        0.0,
+        1470.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4123,
+      "rotation": [
+        5.0,
+        0.0,
+        1410.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4142,
+      "rotation": [
+        -30.0,
+        0.0,
+        240.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4265,
+      "rotation": [
+        0.0,
+        0.0,
+        -420.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4266,
+      "rotation": [
+        0.0,
+        0.0,
+        -360.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4267,
+      "rotation": [
+        0.0,
+        0.0,
+        -450.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4268,
+      "rotation": [
+        0.0,
+        0.0,
+        -450.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4269,
+      "rotation": [
+        30.0,
+        0.0,
+        -390.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4375,
+      "rotation": [
+        -15.0,
+        0.0,
+        300.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4395,
+      "rotation": [
+        -30.0,
+        0.0,
+        240.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    }
+  ],
+  "underside_perimeter_surface_samples": 126,
+  "continuous_underside": "Original4triangles independently exactly matched in authored-export-contract.json",
+  "method": "All original convex support planes contain final geometry; all actual tilted placement bounds unchanged; underside perimeter sampled over full edges in addition to exact original face matching"
+}

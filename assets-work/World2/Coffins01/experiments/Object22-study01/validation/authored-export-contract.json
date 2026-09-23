@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "triangles": 156,
+  "position_tolerance": 0.0003,
+  "maximum_position_delta": 8.120605471617637e-06,
+  "UV_tolerance": 1e-06,
+  "normal_tolerance": 0.001,
+  "maximum_authored_raw_world_normal_delta": 7.450580596923828e-07,
+  "minimum_triangle_area": 0.3024787931456814,
+  "original_contact_corners": 12,
+  "maximum_contact_distance": 0.0,
+  "underside_exact_triangles": 4,
+  "packed_images": [
+    "wood01.jpg"
+  ],
+  "winding": "Every actual triangle matches authored cyclic order, no reversed match allowed"
+}

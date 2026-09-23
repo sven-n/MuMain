@@ -1,0 +1,341 @@
+{
+  "status": "PASS",
+  "tolerance": 0.0003,
+  "original_convex_support_planes": 84,
+  "maximum_outward_support_excess": 0.0001209736014260443,
+  "actual_placements": [
+    {
+      "index": 296,
+      "rotation": [
+        0.0,
+        0.0,
+        630.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 574,
+      "rotation": [
+        0.0,
+        0.0,
+        690.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 680,
+      "rotation": [
+        15.0,
+        0.0,
+        -60.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 681,
+      "rotation": [
+        15.0,
+        0.0,
+        -30.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 682,
+      "rotation": [
+        15.0,
+        0.0,
+        -120.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 683,
+      "rotation": [
+        -50.0,
+        0.0,
+        -60.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 778,
+      "rotation": [
+        25.0,
+        0.0,
+        660.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 779,
+      "rotation": [
+        -25.0,
+        0.0,
+        990.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 803,
+      "rotation": [
+        25.0,
+        0.0,
+        900.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 804,
+      "rotation": [
+        5.0,
+        0.0,
+        1080.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 805,
+      "rotation": [
+        5.0,
+        0.0,
+        1080.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 806,
+      "rotation": [
+        5.0,
+        0.0,
+        1080.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 807,
+      "rotation": [
+        -45.0,
+        0.0,
+        990.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 1423,
+      "rotation": [
+        25.0,
+        0.0,
+        630.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2069,
+      "rotation": [
+        -25.0,
+        0.0,
+        -120.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2139,
+      "rotation": [
+        -35.0,
+        0.0,
+        -1410.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2162,
+      "rotation": [
+        -35.0,
+        0.0,
+        -1560.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2408,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 2409,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4096,
+      "rotation": [
+        65.0,
+        0.0,
+        1410.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4121,
+      "rotation": [
+        -35.0,
+        0.0,
+        1320.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4122,
+      "rotation": [
+        5.0,
+        0.0,
+        1470.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4258,
+      "rotation": [
+        0.0,
+        0.0,
+        30.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4259,
+      "rotation": [
+        0.0,
+        0.0,
+        -120.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4260,
+      "rotation": [
+        -60.0,
+        0.0,
+        -60.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4261,
+      "rotation": [
+        -60.0,
+        0.0,
+        -60.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4262,
+      "rotation": [
+        25.0,
+        0.0,
+        -420.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4263,
+      "rotation": [
+        25.0,
+        0.0,
+        -450.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4264,
+      "rotation": [
+        0.0,
+        0.0,
+        -390.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4374,
+      "rotation": [
+        25.0,
+        0.0,
+        330.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4392,
+      "rotation": [
+        -40.0,
+        0.0,
+        330.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4393,
+      "rotation": [
+        0.0,
+        0.0,
+        240.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    },
+    {
+      "index": 4394,
+      "rotation": [
+        35.0,
+        0.0,
+        480.0
+      ],
+      "maximum_bound_delta": 0.0,
+      "ground_min_z_delta": 0.0
+    }
+  ],
+  "underside_perimeter_surface_samples": 0,
+  "continuous_underside": null,
+  "method": "All original convex support planes contain final geometry; all actual tilted placement bounds unchanged; underside perimeter sampled over full edges in addition to exact original face matching"
+}

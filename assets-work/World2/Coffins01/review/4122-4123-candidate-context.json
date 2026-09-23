@@ -1,0 +1,55 @@
+{
+  "kind": "OFFLINE_ACTUAL_PLACEMENTS_NOT_CLIENT",
+  "records": [
+    {
+      "name": "Object21",
+      "source": "Object21/validation/reimported.blend",
+      "index": 4122,
+      "position": [
+        23794.599609375,
+        12874.173828125,
+        164.5038299560547
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        1470.0
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "Object22",
+      "source": "Object22/validation/reimported.blend",
+      "index": 4123,
+      "position": [
+        23794.97265625,
+        12896.3076171875,
+        234.5526885986328
+      ],
+      "rotation": [
+        5.0,
+        0.0,
+        1410.0
+      ],
+      "scale": 1.0
+    }
+  ],
+  "anchor": [
+    23794.599609375,
+    12874.173828125,
+    164.5038299560547
+  ],
+  "bounds": [
+    [
+      -97.8293685913086,
+      -70.0460205078125,
+      -2.7238667011260986
+    ],
+    [
+      133.1217498779297,
+      90.10539245605469,
+      83.3778305053711
+    ]
+  ],
+  "excluded": "Terrain, lighting bake and unrelated environment"
+}

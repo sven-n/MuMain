@@ -1,0 +1,32 @@
++ /Users/lukasmac/Documents/claude-test-mumain/MuMain/out/build/macos-arm64/tools/bmdconv/Release/bmdconv bmd2smd /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/exports/Object21.bmd /var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_import_5qek0hem
+wrote /var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_import_5qek0hem/Object21.smd
+wrote /var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_import_5qek0hem/Object21_a00.smd
+wrote /var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_import_5qek0hem/Object21.actions.txt
+
+SMD IMPORTER: now working on Object21
+- This is a mesh
+- Imported 1 new bones
+- Imported 1 frames of animation
+- New material: wood01.jpg
+- Imported 364 polys
+SMD Object21 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+
+SMD IMPORTER: now working on Object21_a00
+- This is a skeltal animation or pose
+- Appending bones from animations is destructive; switching Bone Append Mode to "Validate"
+- Validated 1 bones against armature "Object21_skeleton"
+- Imported 1 frames of animation
+SMD Object21_a00 imported in under 1 second 
+
+Imported 1 files in 0.0 seconds
+Info: Imported 1 files in 0.0 seconds
+imported 1 of 1 actions
+Info: Packed 1 file(s)
+Info: Saved as "reimported.blend"
+saved /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-architecture/assets-work/World2/Coffins01/Object21/validation/reimported.blend: 1 mesh object(s), 1 bones, 1 animation clips, 1 materials (0 without texture)
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
