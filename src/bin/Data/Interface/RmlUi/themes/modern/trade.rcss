@@ -204,3 +204,20 @@
 .notice-line1 { left: 34px; top: 198px; }
 .notice-line2 { top: 206px; }
 .notice-line3 { top: 213px; }
+
+/* Former RenderWarningArrow()'s "Warning" text badge -- left/top/width come live from C++ per
+   entry (item_warning_badges), since they track a live, variable-length set of flagged item grid
+   cells (including the same sinf() wobble the native arrow glyph still animates with). Renders
+   after both native grids and the native arrow glyph (this main context paints last), matching the
+   original's own draw order (text drawn on top of the arrow within the same native call). */
+.item-warning-badge {
+	position: absolute;
+	background-color: token(semantic-danger);
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 12px;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}

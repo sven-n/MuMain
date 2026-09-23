@@ -10,6 +10,8 @@
 #include "UI/Inventory/StorageInventory.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
+#include <vector>
+
 namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
@@ -55,9 +57,13 @@ namespace mu::ui::window
         // Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/
         // divider/buttons are RmlUi. Both CInventoryCtrl grids stay native since their icons are
         // live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt). The
-        // guild-mark emblem (RenderGuildMark()) and the cursor-following warning arrow
-        // (RenderWarningArrow()) also stay native -- both are live-rendered/live-tracking effects,
-        // not static chrome.
+        // guild-mark emblem (RenderGuildMark()) also stays native -- it's a dynamically-generated
+        // bitmap built fresh from live guild-mark data, a live-rendered icon like the item icons
+        // themselves. RenderWarningArrow()'s animated cursor-tracking arrow glyph (a texture-atlas
+        // crop with a color tint, using an intentional GL_CLAMP UV overflow trick -- see its own
+        // comment) also stays native, but the "Warning" text badge it used to draw next to that
+        // arrow is presentation chrome, not item rendering, so it's RmlUi now (itemWarningBadges
+        // below) -- see SyncRmlModel().
         struct TradeRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
@@ -87,6 +93,18 @@ namespace mu::ui::window
 
             Rml::String closeTooltip;
             Rml::String zenTooltip;
+
+            // Former RenderWarningArrow()'s "Warning" text badge -- one entry per your-side item
+            // currently flagged ITEM_COLOR_TRADE_WARNING, positioned to match that item's live grid
+            // cell (including the same sinf() wobble the native arrow glyph still animates with),
+            // so C++ must supply per-entry pixel coordinates rather than fixed RCSS ones.
+            struct ItemWarningBadge
+            {
+                float x = 0.f, y = 0.f, width = 0.f;
+                bool operator==(const ItemWarningBadge&) const = default;
+            };
+            Rml::String itemWarningText; // "Warning" -- set once, same string every badge
+            std::vector<ItemWarningBadge> itemWarningBadges;
         };
         RmlModelBinder<TradeRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

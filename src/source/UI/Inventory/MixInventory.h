@@ -7,6 +7,7 @@
 #include "UI/Widgets/UIControls.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include <span>
+#include <vector>
 
 namespace Rml { class ElementDocument; }
 
@@ -37,11 +38,15 @@ namespace mu::ui::window
 
         CUISocketListBox m_SocketListBox;
 
-        // Window frame/title/Mix button are RmlUi. The inventory grid, the socket list box, and
-        // the large native recipe/tax-rate/success-rate description panel (RenderMixDescriptions()
-        // and the dynamic text block RenderFrame() still draws directly) stay fully native and
-        // untouched -- same reasoning as CStorageInventoryExt for the grid, plus this window's own
-        // out-of-scope text panel.
+        // Window frame/title/Mix button/recipe-result content are all RmlUi now. Only the
+        // inventory grid and the socket list box (CUISocketListBox, a real interactive widget, not
+        // presentation) stay fully native -- same reasoning as CStorageInventoryExt for the grid.
+        struct MixLine
+        {
+            Rml::String text;
+            Rml::String color; // "rgba(r,g,b,a)"
+            bool operator==(const MixLine&) const = default;
+        };
         struct MixInventoryRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
@@ -49,6 +54,35 @@ namespace mu::ui::window
             bool mixVisible = true;
             bool mixLocked = false;
             Rml::String mixTooltip;
+
+            // Former RenderFrame()/RenderMixDescriptions() native text block, ported here --
+            // see SyncMixContentModel()'s own comment for the byte-for-byte translation of each
+            // field's source condition/color.
+            bool showTaxRate = false;
+            Rml::String taxRateText;
+
+            bool showRecipe = false;
+            Rml::String recipeLine1, recipeLine2;
+            bool showRecipeLine2 = false;
+            Rml::String recipeColor;
+
+            bool showSuccessRate = false;
+            Rml::String successRateText;
+            Rml::String successRateColor;
+
+            bool showRequiredZen = false;
+            Rml::String requiredZenText;
+
+            bool showPrediction = false;
+            Rml::String predictionText;
+
+            std::vector<MixLine> sourceLines;
+            std::vector<MixLine> statusLines;
+            std::vector<MixLine> adviceLines;
+            std::vector<MixLine> descriptionLines;
+
+            bool showSocketPrompt = false;
+            Rml::String socketPromptText;
         };
         RmlModelBinder<MixInventoryRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -107,14 +141,15 @@ namespace mu::ui::window
         void LoadImages();
         void UnloadImages();
 
-        void RenderFrame();
         bool InventoryProcess();
         bool BtnProcess();
 
         bool AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
             CInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);
 
-        void RenderMixDescriptions(float fPos_x, float fPos_y);
+        // Former RenderFrame()/RenderMixDescriptions() native text -- see its own comment
+        // (MixInventory.cpp) for the full per-field translation.
+        void SyncMixContentModel();
 
         void CheckMixInventory();
         bool Mix();

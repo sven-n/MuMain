@@ -74,8 +74,16 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `CMyShopInventory`/`CPurchaseShopInventory` keep their native `CUITextInputBox` subject-line field
   exactly where `building-new-ui.md` says a Type-2 companion widget belongs — only its decorative
   background sprite moved to RmlUi (and, after a visual bug, from the fg document to the bg one, so
-  it doesn't cover the real input box). `CMixInventory`'s large recipe/success-rate dynamic text
-  block stays native — frame chrome only for this pass, the text panel is a separate, bigger job.
+  it doesn't cover the real input box). **Update, 2026-09-23**: the remaining ordinary native text
+  blocks in this tier are also ported now — `CMixInventory`'s recipe/success-rate/source/advice/
+  per-mixtype description text, `CMyShopInventory`'s static instructional lines (former
+  `RenderTextInfo()`), `CLuckyItemWnd`'s result/description text (former `Render_Frame()`'s
+  `m_sText[]`/`AddText()` loop), and `CTrade`'s "Warning" item-overlay badge (former
+  `RenderWarningArrow()`'s text half) all moved to RmlUi, each window's own C++ still owning the
+  semantic strings/colors/line lists. Each window's `CInventoryCtrl` grid(s) stay native as noted
+  above; `CLuckyItemWnd`'s mix-completion sparkle effect and `CTrade`'s animated warning-arrow
+  glyph (a texture-atlas crop with a GL_CLAMP UV-overflow tint trick) also stay native as genuine
+  rendering techniques, not chrome.
 - **`CCharacterInfoWindow`** — **done, both themes (2026-09-13)**: fully ported, no permanently-
   native content at all (unlike the inventory family above, this window has no `CInventoryCtrl`
   grid, no live-3D icon, and no `CUITextInputBox` — it's a plain `CManager`-tier window, not

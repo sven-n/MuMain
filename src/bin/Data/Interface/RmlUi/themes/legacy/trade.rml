@@ -8,8 +8,10 @@
 	<!-- Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/divider/
 	     buttons only -- both CInventoryCtrl grids stay native (Trade.h). Background lives in
 	     trade_bg.rml instead, since it must paint behind the native 3D icons. The guild-mark emblem
-	     (RenderGuildMark()) and the cursor-following warning arrow (RenderWarningArrow()) also stay
-	     native -- both are live-rendered/live-tracking effects, not static chrome. -->
+	     (RenderGuildMark()) and the warning arrow's animated glyph (RenderWarningArrow()) also stay
+	     native -- both are live-rendered/live-tracking effects, not static chrome. The arrow's
+	     "Warning" text badge (item_warning_badges below) is RmlUi now, positioned per-frame from
+	     C++ since it tracks a live, variable-length set of flagged item grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<span id="title">{{title}}</span>
@@ -49,6 +51,10 @@
 		<span id="notice_line1" class="notice-line notice-line1">{{notice_line1}}</span>
 		<span id="notice_line2" class="notice-line notice-line2">{{notice_line2}}</span>
 		<span id="notice_line3" class="notice-line notice-line3">{{notice_line3}}</span>
+
+		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
+		<div class="item-warning-badge" data-for="w : item_warning_badges"
+		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="w.width + 'px'">{{item_warning_text}}</div>
 	</div>
 </body>
 </rml>

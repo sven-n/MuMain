@@ -5,8 +5,11 @@
 	<link type="text/rcss" href="trade.rcss"/>
 </head>
 <body data-model="trade">
-	<!-- Chrome only -- both CInventoryCtrl grids, the guild-mark emblem, and the warning arrow
-	     stay native (Trade.h). Elements below sit in the gaps the grids' fixed y-offsets leave. -->
+	<!-- Chrome only -- both CInventoryCtrl grids, the guild-mark emblem, and the warning arrow's
+	     animated glyph stay native (Trade.h). Elements below sit in the gaps the grids' fixed
+	     y-offsets leave. The arrow's "Warning" text badge (item_warning_badges below) is RmlUi now,
+	     positioned per-frame from C++ since it tracks a live, variable-length set of flagged item
+	     grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<!-- Header rail: `-px` since #panel carries transform:scale(root_scale) (base.rcss). -->
@@ -60,6 +63,10 @@
 		<span id="notice_line1" class="notice-line notice-line1">{{notice_line1}}</span>
 		<span id="notice_line2" class="notice-line notice-line2">{{notice_line2}}</span>
 		<span id="notice_line3" class="notice-line notice-line3">{{notice_line3}}</span>
+
+		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
+		<div class="item-warning-badge" data-for="w : item_warning_badges"
+		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="w.width + 'px'">{{item_warning_text}}</div>
 	</div>
 </body>
 </rml>

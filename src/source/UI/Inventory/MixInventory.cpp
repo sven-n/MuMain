@@ -85,6 +85,37 @@ void CMixInventory::BuildRmlUi()
                 c.Bind("mix_locked", &model.mixLocked);
                 c.Bind("mix_tooltip", &model.mixTooltip);
 
+                c.Bind("show_tax_rate", &model.showTaxRate);
+                c.Bind("tax_rate_text", &model.taxRateText);
+
+                c.Bind("show_recipe", &model.showRecipe);
+                c.Bind("recipe_line1", &model.recipeLine1);
+                c.Bind("recipe_line2", &model.recipeLine2);
+                c.Bind("show_recipe_line2", &model.showRecipeLine2);
+                c.Bind("recipe_color", &model.recipeColor);
+
+                c.Bind("show_success_rate", &model.showSuccessRate);
+                c.Bind("success_rate_text", &model.successRateText);
+                c.Bind("success_rate_color", &model.successRateColor);
+
+                c.Bind("show_required_zen", &model.showRequiredZen);
+                c.Bind("required_zen_text", &model.requiredZenText);
+
+                c.Bind("show_prediction", &model.showPrediction);
+                c.Bind("prediction_text", &model.predictionText);
+
+                auto mixLine = c.RegisterStruct<MixLine>();
+                mixLine.RegisterMember("text", &MixLine::text);
+                mixLine.RegisterMember("color", &MixLine::color);
+                c.RegisterArray<std::vector<MixLine>>();
+                c.Bind("source_lines", &model.sourceLines);
+                c.Bind("status_lines", &model.statusLines);
+                c.Bind("advice_lines", &model.adviceLines);
+                c.Bind("description_lines", &model.descriptionLines);
+
+                c.Bind("show_socket_prompt", &model.showSocketPrompt);
+                c.Bind("socket_prompt_text", &model.socketPromptText);
+
                 c.BindEventCallback("mix_inventory_mix_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
@@ -353,8 +384,12 @@ bool CMixInventory::Render()
 
     // Frame background panel is RmlUi, routed through the background context (see
     // MixInventoryBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer()
-    // call before this window's own Render()/Render3D() run.
-    RenderFrame();
+    // call before this window's own Render()/Render3D() run. Recipe/tax-rate/success-rate content
+    // is RmlUi too now (SyncMixContentModel()) -- only the socket list box below is still a real
+    // native interactive widget, not presentation.
+    const int mixType = g_MixRecipeMgr.GetMixInventoryType();
+    if (mixType == SEASON3A::MIXTYPE_ATTACH_SOCKET || mixType == SEASON3A::MIXTYPE_DETACH_SOCKET)
+        m_SocketListBox.Render();
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
@@ -394,9 +429,8 @@ void CMixInventory::SyncRmlModel()
         if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
     };
 
-    // Mirrors RenderFrame()'s own title switch (kept there for its fLine_y layout side effect on
-    // the still-native recipe/tax-rate text laid out below it) -- same cases, same strings, just
-    // without the native RenderText() call, which is now this RmlUi title span.
+    // Former RenderFrame() title switch -- same cases, same strings, now driving this RmlUi title
+    // span instead of a native RenderText() call.
     const wchar_t* titleText = I18N::Game::Chaos;
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
@@ -439,6 +473,8 @@ void CMixInventory::SyncRmlModel()
     // rendering at all) and SetMixState()'s former m_BtnMix.Lock()/UnLock() calls.
     syncBool(&MixInventoryRmlModel::mixVisible, "mix_visible", GetMixState() != MIX_FINISHED);
     syncBool(&MixInventoryRmlModel::mixLocked, "mix_locked", GetMixState() == MIX_REQUESTED);
+
+    SyncMixContentModel();
 }
 
 float CMixInventory::GetLayerDepth()
@@ -479,119 +515,91 @@ void CMixInventory::UnloadImages()
     DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
 }
 
-void CMixInventory::RenderFrame()
+bool CMixInventory::BtnProcess()
 {
-    // Frame sprites (back/top/left/right/bottom) are RmlUi now -- see mix_inventory_bg.rcss.
-    // Everything below (recipe name/tax-rate/success-rate/prediction text) stays native and
-    // untouched; only the title's own RenderText() call (a few lines down) was removed since that
-    // text now renders via the RmlUi title span synced in SyncRmlModel().
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MIXINVENTORY);
 
-    wchar_t szText[256] = { 0, };
-    float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
-    float fLine_y = 13.0f;
+    return false;
+}
 
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    switch (g_MixRecipeMgr.GetMixInventoryType())
-    {
-    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        mu_swprintf(szText, L"%ls", I18N::Game::RegularCombination);
-        break;
-    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        mu_swprintf(szText, L"%ls", I18N::Game::ChaosWeaponCombination);
-        break;
-    case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        mu_swprintf(szText, L"%ls", I18N::Game::ItemOptionCombination);
-        break;
-    case SEASON3A::MIXTYPE_CASTLE_SENIOR:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Store1640);
-        break;
-    case SEASON3A::MIXTYPE_TRAINER:
-        mu_swprintf(szText, L"%ls", I18N::Game::ResurrectSpirit);
-        break;
-    case SEASON3A::MIXTYPE_OSBOURNE:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Refine);
-        break;
-    case SEASON3A::MIXTYPE_JERRIDON:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Restore);
-        break;
-    case SEASON3A::MIXTYPE_ELPIS:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Refine);
-        break;
-    case SEASON3A::MIXTYPE_CHAOS_CARD:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::ChaosCardCombination);
-        break;
-    case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::SpiritOfCherryBlossoms);
-        break;
-    case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Extraction);
-        break;
-    case SEASON3A::MIXTYPE_SEED_SPHERE:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Assembly);
-        break;
-    case SEASON3A::MIXTYPE_ATTACH_SOCKET:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Application);
-        break;
-    case SEASON3A::MIXTYPE_DETACH_SOCKET:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Destruction);
-        break;
-    default:
-        fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", I18N::Game::Chaos);
-        break;
-    }
-    // Title text itself now renders via RmlUi (SyncRmlModel() mirrors this same switch for the
-    // string); the switch stays here because fLine_y's per-case adjustment still governs the
-    // still-native text laid out below.
-
-    fLine_y += 12;
-    switch (g_MixRecipeMgr.GetMixInventoryType())
-    {
-    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-    case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-    case SEASON3A::MIXTYPE_TRAINER:
-        mu_swprintf(szText, I18N::Game::TaxRateDChangedInRealTime, g_nChaosTaxRate);
-        g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
-        break;
-    default:
-        fLine_y -= 5;
-        break;
-    }
-
-    if (GetMixState() == MIX_FINISHED)
-    {
+void CMixInventory::SyncMixContentModel()
+{
+    if (!m_pRmlDoc)
         return;
-    }
 
-    fLine_y += 24;
-    if (!g_MixRecipeMgr.IsReadyToMix())
-        g_pRenderText->SetTextColor(255, 48, 48, 255);
+    auto& model = m_RmlBinder.GetModel();
+    auto syncWide = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncBool = [&](bool MixInventoryRmlModel::* field, const char* boundName, bool value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto makeColor = [](int r, int g, int b, int a) -> Rml::String
+    {
+        wchar_t buf[32];
+        mu_swprintf(buf, L"rgba(%d,%d,%d,%d)", r, g, b, a);
+        return StringUtils::WideToNarrow(buf);
+    };
+    auto syncColor = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, int r, int g, int b, int a)
+    {
+        const Rml::String value = makeColor(r, g, b, a);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncLines = [&](std::vector<MixLine> MixInventoryRmlModel::* field, const char* boundName,
+        std::vector<MixLine> newLines)
+    {
+        if (model.*field != newLines) { model.*field = std::move(newLines); m_RmlBinder.MarkDirty(boundName); }
+    };
+
+    wchar_t szText[256] = {};
+    const int mixType = g_MixRecipeMgr.GetMixInventoryType();
+
+    // Tax rate -- former RenderFrame() first switch's TaxRateDChangedInRealTime line. NOT gated by
+    // MIX_FINISHED below (this rendered before RenderFrame()'s own early-return check).
+    bool showTax = false;
+    switch (mixType)
+    {
+    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
+    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
+    case SEASON3A::MIXTYPE_GOBLIN_ADD380:
+    case SEASON3A::MIXTYPE_TRAINER:
+        showTax = true;
+        mu_swprintf(szText, I18N::Game::TaxRateDChangedInRealTime, g_nChaosTaxRate);
+        break;
+    default:
+        break;
+    }
+    syncBool(&MixInventoryRmlModel::showTaxRate, "show_tax_rate", showTax);
+    if (showTax)
+        syncWide(&MixInventoryRmlModel::taxRateText, "tax_rate_text", szText);
+
+    // Recipe result name onward -- hidden entirely once MIX_FINISHED, mirroring RenderFrame()'s own
+    // early return (nothing past that point ever rendered either).
+    const bool showRecipe = (GetMixState() != MIX_FINISHED);
+    syncBool(&MixInventoryRmlModel::showRecipe, "show_recipe", showRecipe);
+    if (!showRecipe)
+        return;
+
+    if (g_MixRecipeMgr.IsReadyToMix())
+        syncColor(&MixInventoryRmlModel::recipeColor, "recipe_color", 255, 255, 48, 255);
     else
-        g_pRenderText->SetTextColor(255, 255, 48, 255);
-    g_pRenderText->SetBgColor(40, 40, 40, 128);
+        syncColor(&MixInventoryRmlModel::recipeColor, "recipe_color", 255, 48, 48, 255);
 
     g_MixRecipeMgr.GetCurRecipeName(szText, 1);
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-    fLine_y += 10;
-    if (g_MixRecipeMgr.GetCurRecipeName(szText, 2))
-        g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-    fLine_y += 10;
+    syncWide(&MixInventoryRmlModel::recipeLine1, "recipe_line1", szText);
+    szText[0] = L'\0';
+    const bool showRecipeLine2 = (g_MixRecipeMgr.GetCurRecipeName(szText, 2) == TRUE);
+    syncBool(&MixInventoryRmlModel::showRecipeLine2, "show_recipe_line2", showRecipeLine2);
+    if (showRecipeLine2)
+        syncWide(&MixInventoryRmlModel::recipeLine2, "recipe_line2", szText);
 
-    switch (g_MixRecipeMgr.GetMixInventoryType())
+    // Success rate -- type-gated exactly like RenderFrame()'s own second switch.
+    bool showSuccess = false;
+    switch (mixType)
     {
     case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
@@ -601,21 +609,17 @@ void CMixInventory::RenderFrame()
     case SEASON3A::MIXTYPE_TRAINER:
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
     case SEASON3A::MIXTYPE_SEED_SPHERE:
+        showSuccess = true;
         if (g_MixRecipeMgr.IsReadyToMix() &&
             g_MixRecipeMgr.GetPlusChaosRate() > 0 && g_MixRecipeMgr.GetCurRecipe()->m_bMixOption == 'F')
         {
-            g_pRenderText->SetTextColor(255, 255, 48, 255);
-            g_pRenderText->SetBgColor(40, 40, 40, 128);
             mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
             mu_swprintf(szText, L"%ls + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-            g_pRenderText->SetTextColor(210, 230, 255, 255);
+            syncColor(&MixInventoryRmlModel::successRateColor, "success_rate_color", 255, 255, 48, 255);
         }
         else
         {
-            g_pRenderText->SetTextColor(210, 230, 255, 255);
-            g_pRenderText->SetBgColor(40, 40, 40, 128);
-            switch (g_MixRecipeMgr.GetMixInventoryType())
+            switch (mixType)
             {
             case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
             case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
@@ -628,19 +632,25 @@ void CMixInventory::RenderFrame()
                 mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Resurrection, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_OSBOURNE:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
-                break;
             case SEASON3A::MIXTYPE_ELPIS:
                 mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
                 break;
             }
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
+            syncColor(&MixInventoryRmlModel::successRateColor, "success_rate_color", 210, 230, 255, 255);
         }
-        fLine_y += 20;
+        break;
+    default:
         break;
     }
+    syncBool(&MixInventoryRmlModel::showSuccessRate, "show_success_rate", showSuccess);
+    if (showSuccess)
+        syncWide(&MixInventoryRmlModel::successRateText, "success_rate_text", szText);
 
-    switch (g_MixRecipeMgr.GetMixInventoryType())
+    // Required zen -- type-gated exactly like RenderFrame()'s own third switch. Always rendered in
+    // the same (210,230,255) tone natively by the time this ran (every branch above it resets to
+    // that color before falling through), so no separate color field is needed.
+    bool showZen = false;
+    switch (mixType)
     {
     case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
@@ -653,251 +663,152 @@ void CMixInventory::RenderFrame()
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
     {
+        showZen = true;
         wchar_t szGoldText[32];
         wchar_t szGoldText2[32];
-
         ConvertGold(g_MixRecipeMgr.GetReqiredZen(), szGoldText);
         ConvertChaosTaxGold(g_MixRecipeMgr.GetReqiredZen(), szGoldText2);
         if (g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetCurRecipe()->m_bRequiredZenType == 'C')
-        {
             mu_swprintf(szText, I18N::Game::RequiredZenForPotionSS, szGoldText2, szGoldText);
-        }
         else
-        {
             mu_swprintf(szText, I18N::Game::RequiredZenSS, szGoldText2, szGoldText);
-        }
-
-        g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
+        break;
     }
-    fLine_y += 20;
-    break;
+    default:
+        break;
     }
+    syncBool(&MixInventoryRmlModel::showRequiredZen, "show_required_zen", showZen);
+    if (showZen)
+        syncWide(&MixInventoryRmlModel::requiredZenText, "required_zen_text", szText);
 
-    fLine_y = 203;
-    int iTextPos_y = 0;
+    // Prediction / source checklist / status message -- former fLine_y=203 block. Long strings are
+    // bound whole, for RmlUi's own text layout to wrap (mix_inventory.rcss), rather than
+    // pre-splitting them with the native CutStr()/pixel-width measurement RenderFrame() used to --
+    // that measurement is native-GDI-calibrated, a different system than RmlUi's own font
+    // rendering (see NPCDialogue.cpp's own comment on this same class of problem).
+    std::vector<MixLine> sourceLines;
+    std::vector<MixLine> statusLines;
+    bool showPrediction = false;
+    wchar_t predictionText[256] = {};
+
     if (g_MixRecipeMgr.GetMostSimilarRecipe() != NULL)
     {
-        g_pRenderText->SetTextColor(220, 220, 220, 255);
-        g_pRenderText->SetBgColor(40, 40, 40, 128);
-
-        wchar_t szTempText[2][100] = { 0 };
-        int iTextLines = 0;
-        if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
+        wchar_t szName[100] = {};
+        if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szName, 1) == TRUE)
         {
-            mu_swprintf(szText, I18N::Game::AssemblyPredictionS, szTempText[0]);
-            iTextLines = CutStr(szText, szTempText[0], 150, 2, 100);
-
-            for (int i = 0; i < iTextLines; i++)
-            {
-                if (i >= 2)
-                    break;
-
-                g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (iTextPos_y * 15), szTempText[i]);
-                iTextPos_y++;
-            }
+            showPrediction = true;
+            mu_swprintf(predictionText, I18N::Game::AssemblyPredictionS, szName);
         }
-        int iResult;
+
         for (int iLine = 0; iLine < 8; ++iLine)
         {
-            iResult = g_MixRecipeMgr.GetSourceName(iLine, szText);
+            const int iResult = g_MixRecipeMgr.GetSourceName(iLine, szText);
             if (iResult == SEASON3A::MIX_SOURCE_ERROR) break;
-            else if (iResult == SEASON3A::MIX_SOURCE_NO) g_pRenderText->SetTextColor(255, 50, 20, 255);
-            else if (iResult == SEASON3A::MIX_SOURCE_PARTIALLY) g_pRenderText->SetTextColor(210, 230, 255, 255);
-            else if (iResult == SEASON3A::MIX_SOURCE_YES) g_pRenderText->SetTextColor(255, 255, 48, 255);
 
-            iTextLines = CutStr(szText, szTempText[0], 156, 2, 100);
+            Rml::String color;
+            if (iResult == SEASON3A::MIX_SOURCE_NO) color = makeColor(255, 50, 20, 255);
+            else if (iResult == SEASON3A::MIX_SOURCE_PARTIALLY) color = makeColor(210, 230, 255, 255);
+            else if (iResult == SEASON3A::MIX_SOURCE_YES) color = makeColor(255, 255, 48, 255);
 
-            for (int i = 0; i < iTextLines; i++)
-            {
-                if (i >= 2)
-                    break;
-
-                g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (iTextPos_y * 15), szTempText[i]);
-                iTextPos_y++;
-            }
+            sourceLines.push_back({ StringUtils::WideToNarrow(szText), color });
         }
     }
     else if (g_MixRecipeMgr.IsMixInit())
     {
-        g_pRenderText->SetTextColor(255, 50, 20, 255);
-        g_pRenderText->SetBgColor(40, 40, 40, 128);
-
-        mu_swprintf(szText, I18N::Game::PleaseUploadTheAssemblyItems);
-        g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-        iTextPos_y++;
+        statusLines.push_back({ StringUtils::WideToNarrow(I18N::Game::PleaseUploadTheAssemblyItems), makeColor(255, 50, 20, 255) });
     }
     else
     {
-        g_pRenderText->SetTextColor(255, 50, 20, 255);
-        g_pRenderText->SetBgColor(40, 40, 40, 128);
-
         mu_swprintf(szText, I18N::Game::AssemblyPredictionS, L" ");
-        g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-
-        mu_swprintf(szText, I18N::Game::ImproperItemsForCombination);
-        g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
+        statusLines.push_back({ StringUtils::WideToNarrow(szText), makeColor(255, 50, 20, 255) });
+        statusLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ImproperItemsForCombination), makeColor(255, 50, 20, 255) });
     }
 
-    ++iTextPos_y;
-    g_pRenderText->SetTextColor(255, 50, 20, 255);
-    g_pRenderText->SetBgColor(40, 40, 40, 128);
+    syncBool(&MixInventoryRmlModel::showPrediction, "show_prediction", showPrediction);
+    if (showPrediction)
+        syncWide(&MixInventoryRmlModel::predictionText, "prediction_text", predictionText);
+    syncLines(&MixInventoryRmlModel::sourceLines, "source_lines", sourceLines);
+    syncLines(&MixInventoryRmlModel::statusLines, "status_lines", statusLines);
 
+    // Recipe description (ready to mix) or advice for the closest match (not ready) -- former
+    // trailing block, always rendered in the same reddish tone natively.
+    std::vector<MixLine> adviceLines;
+    const Rml::String adviceColor = makeColor(255, 50, 20, 255);
     if (g_MixRecipeMgr.IsReadyToMix())
     {
-        if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 1) == TRUE)
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
-        if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 2) == TRUE)
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
-        if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 3) == TRUE)
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
+        if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 1) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
+        if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 2) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
+        if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 3) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
     }
     else if (g_MixRecipeMgr.GetMostSimilarRecipe() != NULL)
     {
-        if (g_MixRecipeMgr.GetRecipeAdvice(szText, 1) == TRUE)
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
-        if (g_MixRecipeMgr.GetRecipeAdvice(szText, 2) == TRUE)
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
-        if (g_MixRecipeMgr.GetRecipeAdvice(szText, 3) == TRUE)
-            g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
+        if (g_MixRecipeMgr.GetRecipeAdvice(szText, 1) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
+        if (g_MixRecipeMgr.GetRecipeAdvice(szText, 2) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
+        if (g_MixRecipeMgr.GetRecipeAdvice(szText, 3) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
     }
+    syncLines(&MixInventoryRmlModel::adviceLines, "advice_lines", adviceLines);
 
-    RenderMixDescriptions(fPos_x, fPos_y);
-
-    // Mix button's tooltip (formerly a per-mix-type m_BtnMix.ChangeToolTipText() switch here) is
-    // now mirrored in SyncRmlModel() and rendered by the RmlUi Mix button instead.
-}
-
-bool CMixInventory::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    return false;
-}
-
-void CMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
-{
-    wchar_t szText[256] = { 0, };
-    switch (g_MixRecipeMgr.GetMixInventoryType())
+    // Former RenderMixDescriptions() -- static per-mix-type instructional text. Placed in normal
+    // document flow after the advice block above (mix_inventory.rcss), rather than at
+    // RenderFrame()'s own independent fixed fPos_y+250/+270/+280 offsets, which could in principle
+    // overlap the advice/source content above depending on how many lines it produced.
+    std::vector<MixLine> descriptionLines;
+    bool showSocketPrompt = false;
+    wchar_t socketPromptText[128] = {};
+    switch (mixType)
     {
-    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-    case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        break;
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
-    {
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(200, 200, 200, 255);
         for (int i = 0; i < 6; ++i)
-            g_pRenderText->RenderText(fPos_x, fPos_y + 270 + i * 13, I18N::Game::Lookup(1644 + i), 160.0f, 0, RT3_SORT_CENTER);
-    }
-    break;
-    case SEASON3A::MIXTYPE_TRAINER:
+            descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Lookup(1644 + i)), makeColor(200, 200, 200, 255) });
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
-    {
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::RefineTheItemToCreate);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::TheRefiningStone);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::RefineTheItemToCreate), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::TheRefiningStone), makeColor(255, 255, 255, 255) });
         mu_swprintf(szText, I18N::Game::SForOnlyS, I18N::Game::Refine, I18N::Game::WeaponsOrShields);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::Allowed);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        g_pRenderText->SetTextColor(255, 0, 0, 255);
-        mu_swprintf(szText, I18N::Game::ItemWillDisappearWhenFailed);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-    }
-    break;
+        descriptionLines.push_back({ StringUtils::WideToNarrow(szText), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Allowed), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ItemWillDisappearWhenFailed), makeColor(255, 0, 0, 255) });
+        break;
     case SEASON3A::MIXTYPE_JERRIDON:
-    {
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::RestorationIsDeletingThe);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::ReinforcementOption);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::OfTheWeapons);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::ForRestoringReinforcedItem);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::ReinforcementOptionHasToBe);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::DeletedThroughRestoration);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 5 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-    }
-    break;
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::RestorationIsDeletingThe), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ReinforcementOption), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::OfTheWeapons), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ForRestoringReinforcedItem), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ReinforcementOptionHasToBe), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::DeletedThroughRestoration), makeColor(255, 255, 255, 255) });
+        break;
     case SEASON3A::MIXTYPE_ELPIS:
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::GettingThroughRefiningProcess);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::OfJewelOfHarmonyOrignal);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::GemstoneWillGiveMorePower);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::GettingThroughRefiningProcess), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::OfJewelOfHarmonyOrignal), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::GemstoneWillGiveMorePower), makeColor(255, 255, 255, 255) });
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
-    {
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-        g_pRenderText->SetTextColor(255, 40, 20, 255);
-        mu_swprintf(szText, I18N::Game::Warning2223);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::CombinationsCanBeUsedOnceAtATime);
-        g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 6 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
-
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded);
-        g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 7 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
-
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
-        g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 8 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
-    }
-    break;
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Warning2223), makeColor(255, 40, 20, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::CombinationsCanBeUsedOnceAtATime), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::YouCanAchieveSpecialItemsWithCombinations), makeColor(255, 255, 255, 255) });
+        break;
     case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-    {
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-        g_pRenderText->SetTextColor(255, 40, 20, 255);
-        mu_swprintf(szText, I18N::Game::Warning2223);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::_255GoldenCherryBlossomBranches);
-        g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_LEFT);
-
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::OnlyTheSameTypeOfCherryBlossomsBranchesCanBeUploaded);
-        g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 3 * 13, szText, 180.0f, 0, RT3_SORT_LEFT);
-
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded);
-        g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 4 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
-    }
-    break;
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Warning2223), makeColor(255, 40, 20, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::_255GoldenCherryBlossomBranches), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::OnlyTheSameTypeOfCherryBlossomsBranchesCanBeUploaded), makeColor(255, 255, 255, 255) });
+        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded), makeColor(255, 255, 255, 255) });
+        break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(200, 200, 200, 255);
-        mu_swprintf(szText, I18N::Game::SelectApplicableSocket);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 280 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        m_SocketListBox.Render();
+        showSocketPrompt = true;
+        mu_swprintf(socketPromptText, L"%ls", I18N::Game::SelectApplicableSocket);
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(200, 200, 200, 255);
-        mu_swprintf(szText, I18N::Game::SelectDestructibleSocket);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 280 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        m_SocketListBox.Render();
+        showSocketPrompt = true;
+        mu_swprintf(socketPromptText, L"%ls", I18N::Game::SelectDestructibleSocket);
         break;
     default:
         break;
     }
+    syncLines(&MixInventoryRmlModel::descriptionLines, "description_lines", descriptionLines);
+    syncBool(&MixInventoryRmlModel::showSocketPrompt, "show_socket_prompt", showSocketPrompt);
+    if (showSocketPrompt)
+        syncWide(&MixInventoryRmlModel::socketPromptText, "socket_prompt_text", socketPromptText);
 }
 
 int CMixInventory::Rtn_MixRequireZen(int _nMixZen, int _nTax)

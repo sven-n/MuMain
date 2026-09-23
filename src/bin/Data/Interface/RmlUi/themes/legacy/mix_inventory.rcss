@@ -1,7 +1,7 @@
-/* Legacy theme for CMixInventory's chrome (frame/title/Mix button). #panel's left/top/scale come
-   live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. The large
-   native recipe/tax-rate/success-rate text block (RenderFrame()/RenderMixDescriptions()) and the
-   socket list box render on top of this document's frame, untouched and out of scope here. */
+/* Legacy theme for CMixInventory's chrome (frame/title/Mix button/recipe-result content). #panel's
+   left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px,
+   not dp. Only the inventory grid and the socket list box (a real interactive widget) render on
+   top of this document's frame now, out of scope here. */
 
 #panel {
 	position: absolute;
@@ -21,6 +21,40 @@
 	font-weight: bold;
 	font-size: 12px;
 }
+
+/* Former RenderFrame()/RenderMixDescriptions() native text block (SyncMixContentModel(),
+   MixInventory.cpp) -- .mix-content's children stack via normal block flow instead of
+   RenderFrame()'s own hand-accumulated fLine_y stepping; per-line color still comes from C++
+   (data-style-color) since it's a live gameplay signal (ready/not-ready, source-satisfied/missing),
+   not a theme choice. */
+.mix-tax-rate {
+	position: absolute;
+	left: 15px;
+	top: 25px;
+	width: 160px;
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 12px;
+}
+.mix-content {
+	position: absolute;
+	left: 15px;
+	top: 49px;
+	width: 160px;
+	bottom: 40px;
+	overflow: hidden auto;
+}
+.mix-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	margin-bottom: 3px;
+	font-weight: bold;
+	font-size: 12px;
+	color: #d2e6ff;
+}
+.mix-socket-prompt { color: #c8c8c8; }
 
 /* 44x35 crop of the top-left ("up") frame of the native 2-frame vertical button sheet
    (CMixInventory::Create()'s former ChangeButtonInfo(..., 44.f, 35.f)) -- hover uses a CSS

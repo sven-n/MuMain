@@ -10,6 +10,8 @@
 #include "UI/Inventory/MyInventory.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
+#include <vector>
+
 namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
@@ -44,13 +46,20 @@ namespace mu::ui::window
         eLUCKYITEM				m_eWndAction;
         eLUCKYITEM				m_eEnd;
 
-        // Window frame/title/mix-button are RmlUi; the inventory grid and the large dynamic
-        // multi-line result/description text block (m_sText[]/AddText()/SetFrame_Text()) stay
-        // native -- grid icons are live 3D renders (same reasoning as CStorageInventoryExt), and
-        // the text block is out of this migration's scope entirely. Unlike every other window in
-        // this "inventory family", #panel/#bg_root's width/height are NOT a fixed constant --
-        // m_fSizeX/m_fSizeY are genuinely runtime-variable (see SetSize()), so both RmlUi models
-        // also bind/sync rootWidth/rootHeight every tick instead of hardcoding a px size in RCSS.
+        // Window frame/title/mix-button/result-description text block are RmlUi; only the inventory
+        // grid and the mix-completion sparkle effect stay native -- grid icons are live 3D renders
+        // (same reasoning as CStorageInventoryExt), and the sparkle effect is a native 2D particle
+        // overlay with no RmlUi equivalent. Unlike every other window in this "inventory family",
+        // #panel/#bg_root's width/height are NOT a fixed constant -- m_fSizeX/m_fSizeY are genuinely
+        // runtime-variable (see SetSize()), so both RmlUi models also bind/sync
+        // rootWidth/rootHeight every tick instead of hardcoding a px size in RCSS.
+        struct LuckyLine
+        {
+            Rml::String text;
+            Rml::String color; // "rgba(r,g,b,a)"
+            Rml::String align; // "left" or "center" -- former RT3_SORT_LEFT/RT3_SORT_CENTER
+            bool operator==(const LuckyLine&) const = default;
+        };
         struct LuckyItemRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
@@ -58,6 +67,12 @@ namespace mu::ui::window
             Rml::String title;
             Rml::String mixTooltip;
             bool mixVisible = true;
+
+            // Former Render_Frame()'s m_sText[]/AddText() loop -- one entry per slot in
+            // [0, m_nTextMaxLine), including blank spacer slots (empty text), so line spacing
+            // matches the original's fixed per-slot vertical rhythm without duplicating its pixel
+            // math (see SyncMixLines() equivalent in SyncRmlModel(), LuckyItemWnd.cpp).
+            std::vector<LuckyLine> textLines;
         };
         RmlModelBinder<LuckyItemRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

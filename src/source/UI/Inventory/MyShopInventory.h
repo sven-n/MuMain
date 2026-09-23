@@ -35,10 +35,11 @@ namespace mu::ui::window
         CInventoryCtrl* m_pNewInventoryCtrl;
         POINT m_Pos;
 
-        // Window frame/title/edit-box background strip/Open-Close-Exit buttons are RmlUi; the
-        // inventory grid stays native since its icons are live 3D model renders (same reasoning as
-        // CMyInventory/CStorageInventoryExt). The nickname/subject CUITextInputBox (m_EditBox below)
-        // also stays fully native -- it has no RmlUi equivalent yet.
+        // Window frame/title/edit-box background strip/Open-Close-Exit buttons/instructional text
+        // (former RenderTextInfo()) are RmlUi; the inventory grid stays native since its icons are
+        // live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt). The
+        // nickname/subject CUITextInputBox (m_EditBox below) also stays fully native -- it has no
+        // RmlUi equivalent yet.
         struct MyShopRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
@@ -51,6 +52,24 @@ namespace mu::ui::window
 
             bool closeLocked = true;
             Rml::String closeTooltip;
+
+            // Former RenderTextInfo() -- only stillOpening's visibility ever changes at runtime
+            // (m_EnablePersonalShop), so every other line here is set once (BuildRmlUi()) and never
+            // re-synced, same convention CCharacterInfoWindow's own static labels use. Colors are
+            // plain RCSS now (my_shop.rcss's .myshop-line-* rules), not data-bound -- these are
+            // fixed per-line decorative constants, not a live gameplay signal the way e.g.
+            // CMixInventory's success-rate color is.
+            bool showStillOpening = false;
+            Rml::String stillOpeningText;
+
+            Rml::String warningText;
+            Rml::String sellingPriceText;
+            Rml::String pleaseVerifyText;
+            Rml::String alreadyInStoreText;
+            Rml::String cancelSoldText;
+            Rml::String cantBeReturnedText;
+            Rml::String allItemTradingText;
+            Rml::String canOnlyBeDoneUsingZenText;
         };
         RmlModelBinder<MyShopRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -118,9 +137,6 @@ namespace mu::ui::window
     private:
         bool MyShopInventoryProcess();
         bool WindowProcess();
-
-    private:
-        void RenderTextInfo();
 
     private:
         int					m_TargetIndex;

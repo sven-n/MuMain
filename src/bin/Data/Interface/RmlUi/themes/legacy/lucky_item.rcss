@@ -65,3 +65,25 @@
 	text-align: center;
 }
 #btn_mix:hover ~ .tooltip-mix { display: block; }
+
+/* Former Render_Frame()'s m_sText[]/AddText() text loop. left:10/right:10 (rather than a fixed
+   width) mirrors the native `m_fSizeX - 20` width exactly, since #panel's own width is runtime-
+   variable (root_width). top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
+   is a fixed 11px-tall block (matching the native loop's `11.0f * i` per-slot spacing) so blank
+   spacer entries (empty text) still preserve the original's vertical rhythm. */
+#text_lines {
+	position: absolute;
+	left: 10px;
+	right: 10px;
+	top: 208px;
+}
+.lucky-line {
+	display: block;
+	height: 11px;
+	line-height: 11px;
+	overflow: hidden;
+	white-space: nowrap;
+	color: #ffffff;
+	font-size: 12px;
+	text-align: center;
+}

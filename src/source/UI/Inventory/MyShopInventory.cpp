@@ -289,6 +289,17 @@ void mu::ui::window::CMyShopInventory::BuildRmlUi()
                 c.Bind("close_locked", &model.closeLocked);
                 c.Bind("close_tooltip", &model.closeTooltip);
 
+                c.Bind("show_still_opening", &model.showStillOpening);
+                c.Bind("still_opening_text", &model.stillOpeningText);
+                c.Bind("warning_text", &model.warningText);
+                c.Bind("selling_price_text", &model.sellingPriceText);
+                c.Bind("please_verify_text", &model.pleaseVerifyText);
+                c.Bind("already_in_store_text", &model.alreadyInStoreText);
+                c.Bind("cancel_sold_text", &model.cancelSoldText);
+                c.Bind("cant_be_returned_text", &model.cantBeReturnedText);
+                c.Bind("all_item_trading_text", &model.allItemTradingText);
+                c.Bind("can_only_be_done_using_zen_text", &model.canOnlyBeDoneUsingZenText);
+
                 c.BindEventCallback("my_shop_exit_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
@@ -345,7 +356,24 @@ void mu::ui::window::CMyShopInventory::BuildRmlUi()
             });
 
         if (modelCreated)
+        {
+            // Former RenderTextInfo()'s static instructional lines -- set once here, not
+            // re-synced every frame, since none of this text ever changes at runtime (same
+            // convention CCharacterInfoWindow's own static labels use). Only show_still_opening
+            // (SyncRmlModel()) reflects live state.
+            auto& model = m_RmlBinder.GetModel();
+            model.warningText = StringUtils::WideToNarrow(I18N::Game::Warning);
+            model.sellingPriceText = StringUtils::WideToNarrow(I18N::Game::SellingPriceWhenOpeningTheStore);
+            model.pleaseVerifyText = StringUtils::WideToNarrow(I18N::Game::PleaseVerify);
+            model.alreadyInStoreText = StringUtils::WideToNarrow(I18N::Game::AlreadyInThePersonalStore);
+            model.cancelSoldText = StringUtils::WideToNarrow(I18N::Game::CancelSoldItem);
+            model.cantBeReturnedText = StringUtils::WideToNarrow(I18N::Game::CanTBeReturned);
+            model.allItemTradingText = StringUtils::WideToNarrow(I18N::Game::AllItemTrading);
+            model.canOnlyBeDoneUsingZenText = StringUtils::WideToNarrow(I18N::Game::CanOnlyBeDoneUsingZen);
+            model.stillOpeningText = StringUtils::WideToNarrow(I18N::Game::StillOpening);
+
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_shop.rml");
+        }
 
         // Frame background panel uses the background context -- see MyShopBgRmlModel (MyShopInventory.h).
         if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
@@ -734,48 +762,8 @@ void mu::ui::window::CMyShopInventory::SyncRmlModel()
 
     syncBool(&MyShopRmlModel::closeLocked, "close_locked", !m_EnablePersonalShop);
     syncWide(&MyShopRmlModel::closeTooltip, "close_tooltip", I18N::Game::Closed);
-}
 
-void mu::ui::window::CMyShopInventory::RenderTextInfo()
-{
-    wchar_t Text[100];
-
-    if (m_EnablePersonalShop)
-    {
-        RenderText(I18N::Game::StillOpening, m_Pos.x, m_Pos.y + 200, INVENTORY_WIDTH, 0, RGBA(215, 138, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
-    }
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::Warning);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::SellingPriceWhenOpeningTheStore);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::PleaseVerify);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::AlreadyInThePersonalStore);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::CancelSoldItem);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::CanTBeReturned);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::AllItemTrading);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::CanOnlyBeDoneUsingZen);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
+    syncBool(&MyShopRmlModel::showStillOpening, "show_still_opening", m_EnablePersonalShop);
 }
 
 bool mu::ui::window::CMyShopInventory::Render()
@@ -784,8 +772,8 @@ bool mu::ui::window::CMyShopInventory::Render()
 
     // Frame background panel is RmlUi, routed through the background context (see
     // MyShopBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer() call
-    // before this window's own Render()/Render3D() run.
-    RenderTextInfo();
+    // before this window's own Render()/Render3D() run. The former RenderTextInfo() instructional
+    // text is RmlUi now too (MyShopRmlModel), driven by SyncRmlModel()/my_shop.rml.
 
     if (m_EditBox)
     {

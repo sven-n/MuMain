@@ -47,3 +47,30 @@
 #btn_close:hover ~ .tooltip-close {
 	display: block;
 }
+
+/* Former RenderTextInfo() -- same reference-pixel offsets the native RenderText() calls used. */
+.myshop-line {
+	position: absolute;
+	left: 30px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+}
+.myshop-line-still-opening {
+	left: 0;
+	top: 200px;
+	width: 190px;
+	text-align: center;
+	color: token(text-warm);
+	font-weight: bold;
+}
+.myshop-line-warning { color: token(semantic-danger); font-weight: bold; }
+.myshop-line-info { color: token(text-warm); }
+
+#warning_line { top: 230px; }
+#selling_price_line { top: 250px; }
+#please_verify_line { top: 262px; }
+#already_in_store_line { top: 274px; }
+#cancel_sold_line { top: 286px; }
+#cant_be_returned_line { top: 298px; }
+#all_item_trading_line { top: 320px; }
+#can_only_be_done_using_zen_line { top: 332px; }

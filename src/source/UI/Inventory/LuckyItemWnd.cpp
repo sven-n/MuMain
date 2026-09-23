@@ -32,6 +32,11 @@ CLuckyItemWnd::CLuckyItemWnd()
     memset(m_szSubject, 0, 255);
     m_eType = eLuckyItemType_None;
     m_nMixEffectTimer = 0;
+    // Otherwise garbage until OpeningProcess()/SetFrame_Text() first run -- SyncRmlModel() now
+    // reads this every Update() tick (not just while Render_Frame() used to run), so an
+    // uninitialized value here could drive an out-of-bounds m_sText[] loop before the window is
+    // ever opened.
+    m_nTextMaxLine = 0;
 }
 
 CLuckyItemWnd::~CLuckyItemWnd()
@@ -51,25 +56,12 @@ int CLuckyItemWnd::GetLuckyItemRate(int _nType)
 
 void CLuckyItemWnd::Render_Frame(void)
 {
-    // Frame background/border/subject-title/mix-button are RmlUi now (lucky_item.rml/
-    // lucky_item_bg.rml -- see SyncRmlModel()). Only the mix-completion sparkle effect and the
-    // dynamic result/description text block (m_sText[]/AddText()) stay native here, untouched.
-    int	i = 0;
-
+    // Frame background/border/subject-title/mix-button/result-description text are RmlUi now
+    // (lucky_item.rml/lucky_item_bg.rml -- see SyncRmlModel()). Only the mix-completion sparkle
+    // effect stays native here, untouched.
     if (m_eEnd == eLuckyItem_End)
     {
         g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
-    }
-
-    float fTextY = m_ptPos.y + 18.0f + 190;
-    for (i = 0; i < m_nTextMaxLine; i++)
-    {
-        if (m_sText[i].s_nTextIndex < 0)	break;
-        if (m_sText[i].s_nTextIndex == 0)	continue;
-
-        g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->SetTextColor(m_sText[i].s_dwColor);
-        g_pRenderText->RenderText(m_ptPos.x + 10, fTextY + 11.0f * i, I18N::Game::Lookup(m_sText[i].s_nTextIndex), m_fSizeX - 20, 0, m_sText[i].s_nLine);
     }
 }
 
@@ -254,6 +246,13 @@ void CLuckyItemWnd::BuildRmlUi()
                 c.Bind("title", &model.title);
                 c.Bind("mix_tooltip", &model.mixTooltip);
                 c.Bind("mix_visible", &model.mixVisible);
+
+                auto luckyLine = c.RegisterStruct<LuckyLine>();
+                luckyLine.RegisterMember("text", &LuckyLine::text);
+                luckyLine.RegisterMember("color", &LuckyLine::color);
+                luckyLine.RegisterMember("align", &LuckyLine::align);
+                c.RegisterArray<std::vector<LuckyLine>>();
+                c.Bind("text_lines", &model.textLines);
 
                 c.BindEventCallback("lucky_item_mix_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
@@ -678,6 +677,11 @@ void CLuckyItemWnd::SyncRmlModel()
     {
         if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
     };
+    auto syncLines = [&](std::vector<LuckyLine> LuckyItemRmlModel::* field, const char* boundName,
+        std::vector<LuckyLine> newLines)
+    {
+        if (model.*field != newLines) { model.*field = std::move(newLines); m_RmlBinder.MarkDirty(boundName); }
+    };
 
     // m_szSubject is only re-written by OpeningProcess() (on Trade/Refinery mode switch), but it's
     // cheap to re-check every tick the same change-checked way as every other field here.
@@ -689,6 +693,33 @@ void CLuckyItemWnd::SyncRmlModel()
     // Same m_eEnd != eLuckyItem_End condition Render_Frame() checks for the mix-completion
     // sparkle effect -- drives the RmlUi mix button's visibility here.
     syncBool(&LuckyItemRmlModel::mixVisible, "mix_visible", m_eEnd != eLuckyItem_End);
+
+    // Former Render_Frame()'s m_sText[]/AddText() text loop. One entry per slot in
+    // [0, m_nTextMaxLine), including blank spacer slots (s_nTextIndex == 0), so line spacing in
+    // normal document flow matches the original's fixed per-slot vertical rhythm. s_dwColor is
+    // packed the same way CUIRenderTextSDLTtf::SetTextColor(DWORD) unpacks it (mu::sdlttf::
+    // PackColorDWORD: alpha<<24 | blue<<16 | green<<8 | red), not classic 0xAARRGGBB.
+    std::vector<LuckyLine> textLines;
+    for (int i = 0; i < m_nTextMaxLine; ++i)
+    {
+        if (m_sText[i].s_nTextIndex < 0) break;
+        if (m_sText[i].s_nTextIndex == 0) { textLines.push_back({}); continue; }
+
+        const DWORD dwColor = m_sText[i].s_dwColor;
+        const int r = dwColor & 0xFF;
+        const int g = (dwColor >> 8) & 0xFF;
+        const int b = (dwColor >> 16) & 0xFF;
+        const int a = (dwColor >> 24) & 0xFF;
+        wchar_t colorBuf[32];
+        mu_swprintf(colorBuf, L"rgba(%d,%d,%d,%d)", r, g, b, a);
+
+        textLines.push_back({
+            StringUtils::WideToNarrow(I18N::Game::Lookup(m_sText[i].s_nTextIndex)),
+            StringUtils::WideToNarrow(colorBuf),
+            m_sText[i].s_nLine == RT3_SORT_LEFT ? "left" : "center"
+        });
+    }
+    syncLines(&LuckyItemRmlModel::textLines, "text_lines", std::move(textLines));
 }
 
 float CLuckyItemWnd::GetLayerDepth(void)

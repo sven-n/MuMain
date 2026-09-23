@@ -5,12 +5,12 @@
 	<link type="text/rcss" href="lucky_item.rcss"/>
 </head>
 <body data-model="lucky_item">
-	<!-- Window frame/title/mix-button only -- inventory grid and the large dynamic result/
-	     description text block stay native (LuckyItemWnd.h/.cpp's m_sText[]/AddText()/
-	     SetFrame_Text(), fully out of scope). Background lives in lucky_item_bg.rml instead, since
-	     it must paint behind the native 3D icons. Unlike every other window in this "inventory
-	     family", #panel's width/height are genuinely runtime-variable (root_width/root_height),
-	     not a fixed CSS value -- m_fSizeX/m_fSizeY are real runtime floats (LuckyItemWnd.h). -->
+	<!-- Window frame/title/mix-button/result-description text block -- inventory grid and the
+	     mix-completion sparkle effect stay native (LuckyItemWnd.h/.cpp). Background lives in
+	     lucky_item_bg.rml instead, since it must paint behind the native 3D icons. Unlike every
+	     other window in this "inventory family", #panel's width/height are genuinely
+	     runtime-variable (root_width/root_height), not a fixed CSS value -- m_fSizeX/m_fSizeY are
+	     real runtime floats (LuckyItemWnd.h). -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
@@ -18,6 +18,12 @@
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-event-click="lucky_item_mix_click"></div>
 		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
+
+		<!-- Former Render_Frame()'s m_sText[]/AddText() result/description block. -->
+		<div id="text_lines">
+			<div class="lucky-line" data-for="t : text_lines" data-style-color="t.color"
+			     data-style-text-align="t.align">{{t.text}}</div>
+		</div>
 	</div>
 </body>
 </rml>

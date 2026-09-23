@@ -38,6 +38,19 @@
 			<span class="modern-icon-btn-glyph-px">&#9632;</span>
 		</div>
 		<span class="tooltip tooltip-close">{{close_tooltip}}</span>
+
+		<!-- Former RenderTextInfo() -- fixed instructional text at the same reference-pixel offsets
+		     the native RenderText() calls used, static except still_opening's visibility. Colors are
+		     plain RCSS (myshop-line-* classes), not data-bound -- fixed decorative constants. -->
+		<div id="still_opening_line" class="myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening">{{still_opening_text}}</div>
+		<div id="warning_line" class="myshop-line myshop-line-warning">{{warning_text}}</div>
+		<div id="selling_price_line" class="myshop-line myshop-line-info">{{selling_price_text}}</div>
+		<div id="please_verify_line" class="myshop-line myshop-line-info">{{please_verify_text}}</div>
+		<div id="already_in_store_line" class="myshop-line myshop-line-info">{{already_in_store_text}}</div>
+		<div id="cancel_sold_line" class="myshop-line myshop-line-info">{{cancel_sold_text}}</div>
+		<div id="cant_be_returned_line" class="myshop-line myshop-line-info">{{cant_be_returned_text}}</div>
+		<div id="all_item_trading_line" class="myshop-line myshop-line-warning">{{all_item_trading_text}}</div>
+		<div id="can_only_be_done_using_zen_line" class="myshop-line myshop-line-warning">{{can_only_be_done_using_zen_text}}</div>
 	</div>
 </body>
 </rml>

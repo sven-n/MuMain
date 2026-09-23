@@ -115,6 +115,14 @@ void CTrade::BuildRmlUi()
                 c.Bind("close_tooltip", &model.closeTooltip);
                 c.Bind("zen_tooltip", &model.zenTooltip);
 
+                c.Bind("item_warning_text", &model.itemWarningText);
+                auto itemWarningBadge = c.RegisterStruct<TradeRmlModel::ItemWarningBadge>();
+                itemWarningBadge.RegisterMember("x", &TradeRmlModel::ItemWarningBadge::x);
+                itemWarningBadge.RegisterMember("y", &TradeRmlModel::ItemWarningBadge::y);
+                itemWarningBadge.RegisterMember("width", &TradeRmlModel::ItemWarningBadge::width);
+                c.RegisterArray<std::vector<TradeRmlModel::ItemWarningBadge>>();
+                c.Bind("item_warning_badges", &model.itemWarningBadges);
+
                 c.BindEventCallback("trade_exit_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
@@ -386,11 +394,15 @@ void CTrade::RenderGuildMark()
 
 void CTrade::RenderWarningArrow()
 {
+    // Animated cursor-tracking arrow glyph only -- a texture-atlas crop with a color tint (using an
+    // intentional GL_CLAMP UV overflow past v=1.0 to extend the sprite's bottom edge), genuinely a
+    // rendering technique rather than expressible chrome, so it stays native. The "Warning" text
+    // badge that used to render alongside it is RmlUi now (TradeRmlModel::itemWarningBadges,
+    // item_warning_badges in trade.rml) -- see SyncRmlModel().
     ::EnableAlphaTest();
 
     int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
     ITEM* pYourItemObj;
-    int nWidth;
     float fX, fY;
     POINT ptYourInvenCtrl = m_pYourInvenCtrl->GetPos();
 
@@ -408,14 +420,6 @@ void CTrade::RenderWarningArrow()
             const DWORD warningArrowColor = RGBA(0, 255, 255, 255);
             ::RenderColorBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5, 24.f, 24.f,
                 0.f, 0.4f, 1.f, 1.f, warningArrowColor);
-
-            g_pRenderText->SetFont(g_hFontBold);
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->SetBgColor(210, 0, 0, 255);
-            nWidth = (int)ItemAttribute[pYourItemObj->Type].Width
-                * INVENTORY_SQUARE_WIDTH;
-            g_pRenderText->RenderText((int)fX, (int)fY, I18N::Game::Warning,
-                nWidth, 0, RT3_SORT_CENTER);
         }
     }
 
@@ -551,6 +555,35 @@ void CTrade::SyncRmlModel()
 
     syncWide(&TradeRmlModel::closeTooltip, "close_tooltip", I18N::Game::Close388);
     syncWide(&TradeRmlModel::zenTooltip, "zen_tooltip", I18N::Game::ZenTrade);
+
+    syncWide(&TradeRmlModel::itemWarningText, "item_warning_text", I18N::Game::Warning);
+
+    // Former RenderWarningArrow()'s "Warning" text badge, one per your-side item flagged
+    // ITEM_COLOR_TRADE_WARNING. Coordinates are panel-relative (subtracting m_Pos), matching the
+    // same sinf() wobble the native arrow glyph still animates with, since #panel is itself
+    // positioned at root_x/root_y (m_Pos) -- see RenderWarningArrow() for the native arrow.
+    std::vector<TradeRmlModel::ItemWarningBadge> itemWarningBadges;
+    if (m_pYourInvenCtrl)
+    {
+        const POINT ptYourInvenCtrl = m_pYourInvenCtrl->GetPos();
+        const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+        for (int i = 0; i < nYourItems; ++i)
+        {
+            ITEM* pYourItemObj = m_pYourInvenCtrl->GetItem(i);
+            if (ITEM_COLOR_TRADE_WARNING != pYourItemObj->byColorState) continue;
+
+            const float fX = (float)ptYourInvenCtrl.x + (pYourItemObj->x * INVENTORY_SQUARE_WIDTH);
+            const float fY = (float)ptYourInvenCtrl.y + (pYourItemObj->y * INVENTORY_SQUARE_WIDTH) + sinf(WorldTime * 0.015f);
+            const float fWidth = (float)((int)ItemAttribute[pYourItemObj->Type].Width * INVENTORY_SQUARE_WIDTH);
+
+            itemWarningBadges.push_back({ fX - m_Pos.x, fY - m_Pos.y, fWidth });
+        }
+    }
+    if (m_RmlBinder.GetModel().itemWarningBadges != itemWarningBadges)
+    {
+        m_RmlBinder.GetModel().itemWarningBadges = std::move(itemWarningBadges);
+        m_RmlBinder.MarkDirty("item_warning_badges");
+    }
 }
 
 float CTrade::GetLayerDepth()
