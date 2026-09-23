@@ -104,7 +104,7 @@ for the null rather than read it as zero.
 
 `hotkey` and `click-ui` deliver input to RmlUi first, then to the older
 key/button readers only if the UI did not consume it. They do not move the OS
-pointer or change focus. Use screenshot pixels as `click-ui` coordinates: for
+pointer or change window focus. Use screenshot pixels as `click-ui` coordinates: for
 example, click the Menu button, then take another screenshot to inspect the
 panel. The older `CInput` widgets still hit-test the OS cursor and cannot be
 clicked remotely; use their keyboard navigation instead. Keys are
@@ -130,10 +130,11 @@ held RmlUi click is cleared without activating the pressed element. Independent
 physical input continues to work; a physical press of the same button cancels
 an outstanding scripted click before that press is routed, returning a
 `failed` response naming the physical press; a lost window/UI delivery target
-instead reports `failed` with a target-disappeared message. The UI hover
-position after a *completed or cancelled non-primary* scripted click remains at
-that injected pixel until the next physical mouse motion; the OS pointer itself
-never moves.
+instead reports `failed` with a target-disappeared message. UI hover can remain
+at the injected pixel after a completed click or a cancelled click whose UI
+press did not need clearing (a non-primary click or a primary click the UI did
+not consume). A later physical or scripted motion updates it; the OS pointer
+itself never moves.
 A scripted key also uses the human's current physical modifiers for RmlUi
 navigation; focused portable fields receive the key without those modifiers.
 
