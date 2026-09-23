@@ -1,0 +1,1199 @@
+{
+  "status": "PASS",
+  "complete_shared_part": {
+    "shared_triangles": 174,
+    "maximum_affine_position_error": 0.00013160875318115733,
+    "affine_row_vector_4x3": [
+      [
+        1.0789034961222577,
+        0.23921638618133986,
+        -0.4346233733237641
+      ],
+      [
+        0.34668282959759267,
+        -1.1077012595157394,
+        0.2509289731127501
+      ],
+      [
+        -0.3548680060783539,
+        -0.3548684248081696,
+        -1.0762398518586622
+      ],
+      [
+        0.7398233764554555,
+        -51.75513620268769,
+        45.05987477790537
+      ]
+    ],
+    "matches": [
+      {
+        "object28_triangle": 512,
+        "object30_triangle": 284
+      },
+      {
+        "object28_triangle": 495,
+        "object30_triangle": 267
+      },
+      {
+        "object28_triangle": 494,
+        "object30_triangle": 266
+      },
+      {
+        "object28_triangle": 511,
+        "object30_triangle": 283
+      },
+      {
+        "object28_triangle": 500,
+        "object30_triangle": 272
+      },
+      {
+        "object28_triangle": 491,
+        "object30_triangle": 263
+      },
+      {
+        "object28_triangle": 501,
+        "object30_triangle": 273
+      },
+      {
+        "object28_triangle": 490,
+        "object30_triangle": 262
+      },
+      {
+        "object28_triangle": 505,
+        "object30_triangle": 277
+      },
+      {
+        "object28_triangle": 502,
+        "object30_triangle": 274
+      },
+      {
+        "object28_triangle": 487,
+        "object30_triangle": 259
+      },
+      {
+        "object28_triangle": 489,
+        "object30_triangle": 261
+      },
+      {
+        "object28_triangle": 504,
+        "object30_triangle": 276
+      },
+      {
+        "object28_triangle": 503,
+        "object30_triangle": 275
+      },
+      {
+        "object28_triangle": 506,
+        "object30_triangle": 278
+      },
+      {
+        "object28_triangle": 509,
+        "object30_triangle": 281
+      },
+      {
+        "object28_triangle": 488,
+        "object30_triangle": 260
+      },
+      {
+        "object28_triangle": 475,
+        "object30_triangle": 247
+      },
+      {
+        "object28_triangle": 507,
+        "object30_triangle": 279
+      },
+      {
+        "object28_triangle": 508,
+        "object30_triangle": 280
+      },
+      {
+        "object28_triangle": 480,
+        "object30_triangle": 252
+      },
+      {
+        "object28_triangle": 479,
+        "object30_triangle": 251
+      },
+      {
+        "object28_triangle": 473,
+        "object30_triangle": 245
+      },
+      {
+        "object28_triangle": 472,
+        "object30_triangle": 244
+      },
+      {
+        "object28_triangle": 481,
+        "object30_triangle": 253
+      },
+      {
+        "object28_triangle": 462,
+        "object30_triangle": 234
+      },
+      {
+        "object28_triangle": 474,
+        "object30_triangle": 246
+      },
+      {
+        "object28_triangle": 461,
+        "object30_triangle": 233
+      },
+      {
+        "object28_triangle": 468,
+        "object30_triangle": 240
+      },
+      {
+        "object28_triangle": 464,
+        "object30_triangle": 236
+      },
+      {
+        "object28_triangle": 463,
+        "object30_triangle": 235
+      },
+      {
+        "object28_triangle": 467,
+        "object30_triangle": 239
+      },
+      {
+        "object28_triangle": 466,
+        "object30_triangle": 238
+      },
+      {
+        "object28_triangle": 465,
+        "object30_triangle": 237
+      },
+      {
+        "object28_triangle": 366,
+        "object30_triangle": 162
+      },
+      {
+        "object28_triangle": 362,
+        "object30_triangle": 158
+      },
+      {
+        "object28_triangle": 332,
+        "object30_triangle": 128
+      },
+      {
+        "object28_triangle": 412,
+        "object30_triangle": 208
+      },
+      {
+        "object28_triangle": 333,
+        "object30_triangle": 129
+      },
+      {
+        "object28_triangle": 410,
+        "object30_triangle": 206
+      },
+      {
+        "object28_triangle": 245,
+        "object30_triangle": 41
+      },
+      {
+        "object28_triangle": 244,
+        "object30_triangle": 40
+      },
+      {
+        "object28_triangle": 352,
+        "object30_triangle": 148
+      },
+      {
+        "object28_triangle": 353,
+        "object30_triangle": 149
+      },
+      {
+        "object28_triangle": 261,
+        "object30_triangle": 57
+      },
+      {
+        "object28_triangle": 260,
+        "object30_triangle": 56
+      },
+      {
+        "object28_triangle": 280,
+        "object30_triangle": 76
+      },
+      {
+        "object28_triangle": 281,
+        "object30_triangle": 77
+      },
+      {
+        "object28_triangle": 411,
+        "object30_triangle": 207
+      },
+      {
+        "object28_triangle": 413,
+        "object30_triangle": 209
+      },
+      {
+        "object28_triangle": 416,
+        "object30_triangle": 212
+      },
+      {
+        "object28_triangle": 232,
+        "object30_triangle": 28
+      },
+      {
+        "object28_triangle": 334,
+        "object30_triangle": 130
+      },
+      {
+        "object28_triangle": 417,
+        "object30_triangle": 213
+      },
+      {
+        "object28_triangle": 335,
+        "object30_triangle": 131
+      },
+      {
+        "object28_triangle": 231,
+        "object30_triangle": 27
+      },
+      {
+        "object28_triangle": 247,
+        "object30_triangle": 43
+      },
+      {
+        "object28_triangle": 246,
+        "object30_triangle": 42
+      },
+      {
+        "object28_triangle": 350,
+        "object30_triangle": 146
+      },
+      {
+        "object28_triangle": 351,
+        "object30_triangle": 147
+      },
+      {
+        "object28_triangle": 263,
+        "object30_triangle": 59
+      },
+      {
+        "object28_triangle": 262,
+        "object30_triangle": 58
+      },
+      {
+        "object28_triangle": 275,
+        "object30_triangle": 71
+      },
+      {
+        "object28_triangle": 274,
+        "object30_triangle": 70
+      },
+      {
+        "object28_triangle": 418,
+        "object30_triangle": 214
+      },
+      {
+        "object28_triangle": 414,
+        "object30_triangle": 210
+      },
+      {
+        "object28_triangle": 415,
+        "object30_triangle": 211
+      },
+      {
+        "object28_triangle": 336,
+        "object30_triangle": 132
+      },
+      {
+        "object28_triangle": 419,
+        "object30_triangle": 215
+      },
+      {
+        "object28_triangle": 337,
+        "object30_triangle": 133
+      },
+      {
+        "object28_triangle": 249,
+        "object30_triangle": 45
+      },
+      {
+        "object28_triangle": 248,
+        "object30_triangle": 44
+      },
+      {
+        "object28_triangle": 356,
+        "object30_triangle": 152
+      },
+      {
+        "object28_triangle": 357,
+        "object30_triangle": 153
+      },
+      {
+        "object28_triangle": 265,
+        "object30_triangle": 61
+      },
+      {
+        "object28_triangle": 264,
+        "object30_triangle": 60
+      },
+      {
+        "object28_triangle": 282,
+        "object30_triangle": 78
+      },
+      {
+        "object28_triangle": 283,
+        "object30_triangle": 79
+      },
+      {
+        "object28_triangle": 420,
+        "object30_triangle": 216
+      },
+      {
+        "object28_triangle": 236,
+        "object30_triangle": 32
+      },
+      {
+        "object28_triangle": 338,
+        "object30_triangle": 134
+      },
+      {
+        "object28_triangle": 421,
+        "object30_triangle": 217
+      },
+      {
+        "object28_triangle": 339,
+        "object30_triangle": 135
+      },
+      {
+        "object28_triangle": 235,
+        "object30_triangle": 31
+      },
+      {
+        "object28_triangle": 251,
+        "object30_triangle": 47
+      },
+      {
+        "object28_triangle": 250,
+        "object30_triangle": 46
+      },
+      {
+        "object28_triangle": 354,
+        "object30_triangle": 150
+      },
+      {
+        "object28_triangle": 355,
+        "object30_triangle": 151
+      },
+      {
+        "object28_triangle": 267,
+        "object30_triangle": 63
+      },
+      {
+        "object28_triangle": 266,
+        "object30_triangle": 62
+      },
+      {
+        "object28_triangle": 284,
+        "object30_triangle": 80
+      },
+      {
+        "object28_triangle": 285,
+        "object30_triangle": 81
+      },
+      {
+        "object28_triangle": 367,
+        "object30_triangle": 163
+      },
+      {
+        "object28_triangle": 368,
+        "object30_triangle": 164
+      },
+      {
+        "object28_triangle": 401,
+        "object30_triangle": 197
+      },
+      {
+        "object28_triangle": 406,
+        "object30_triangle": 202
+      },
+      {
+        "object28_triangle": 340,
+        "object30_triangle": 136
+      },
+      {
+        "object28_triangle": 400,
+        "object30_triangle": 196
+      },
+      {
+        "object28_triangle": 399,
+        "object30_triangle": 195
+      },
+      {
+        "object28_triangle": 341,
+        "object30_triangle": 137
+      },
+      {
+        "object28_triangle": 405,
+        "object30_triangle": 201
+      },
+      {
+        "object28_triangle": 404,
+        "object30_triangle": 200
+      },
+      {
+        "object28_triangle": 253,
+        "object30_triangle": 49
+      },
+      {
+        "object28_triangle": 252,
+        "object30_triangle": 48
+      },
+      {
+        "object28_triangle": 358,
+        "object30_triangle": 154
+      },
+      {
+        "object28_triangle": 359,
+        "object30_triangle": 155
+      },
+      {
+        "object28_triangle": 269,
+        "object30_triangle": 65
+      },
+      {
+        "object28_triangle": 268,
+        "object30_triangle": 64
+      },
+      {
+        "object28_triangle": 286,
+        "object30_triangle": 82
+      },
+      {
+        "object28_triangle": 287,
+        "object30_triangle": 83
+      },
+      {
+        "object28_triangle": 402,
+        "object30_triangle": 198
+      },
+      {
+        "object28_triangle": 403,
+        "object30_triangle": 199
+      },
+      {
+        "object28_triangle": 377,
+        "object30_triangle": 173
+      },
+      {
+        "object28_triangle": 376,
+        "object30_triangle": 172
+      },
+      {
+        "object28_triangle": 394,
+        "object30_triangle": 190
+      },
+      {
+        "object28_triangle": 391,
+        "object30_triangle": 187
+      },
+      {
+        "object28_triangle": 223,
+        "object30_triangle": 19
+      },
+      {
+        "object28_triangle": 224,
+        "object30_triangle": 20
+      },
+      {
+        "object28_triangle": 310,
+        "object30_triangle": 106
+      },
+      {
+        "object28_triangle": 311,
+        "object30_triangle": 107
+      },
+      {
+        "object28_triangle": 239,
+        "object30_triangle": 35
+      },
+      {
+        "object28_triangle": 238,
+        "object30_triangle": 34
+      },
+      {
+        "object28_triangle": 326,
+        "object30_triangle": 122
+      },
+      {
+        "object28_triangle": 327,
+        "object30_triangle": 123
+      },
+      {
+        "object28_triangle": 342,
+        "object30_triangle": 138
+      },
+      {
+        "object28_triangle": 343,
+        "object30_triangle": 139
+      },
+      {
+        "object28_triangle": 255,
+        "object30_triangle": 51
+      },
+      {
+        "object28_triangle": 254,
+        "object30_triangle": 50
+      },
+      {
+        "object28_triangle": 345,
+        "object30_triangle": 141
+      },
+      {
+        "object28_triangle": 344,
+        "object30_triangle": 140
+      },
+      {
+        "object28_triangle": 271,
+        "object30_triangle": 67
+      },
+      {
+        "object28_triangle": 270,
+        "object30_triangle": 66
+      },
+      {
+        "object28_triangle": 279,
+        "object30_triangle": 75
+      },
+      {
+        "object28_triangle": 278,
+        "object30_triangle": 74
+      },
+      {
+        "object28_triangle": 382,
+        "object30_triangle": 178
+      },
+      {
+        "object28_triangle": 395,
+        "object30_triangle": 191
+      },
+      {
+        "object28_triangle": 381,
+        "object30_triangle": 177
+      },
+      {
+        "object28_triangle": 226,
+        "object30_triangle": 22
+      },
+      {
+        "object28_triangle": 225,
+        "object30_triangle": 21
+      },
+      {
+        "object28_triangle": 312,
+        "object30_triangle": 108
+      },
+      {
+        "object28_triangle": 396,
+        "object30_triangle": 192
+      },
+      {
+        "object28_triangle": 313,
+        "object30_triangle": 109
+      },
+      {
+        "object28_triangle": 328,
+        "object30_triangle": 124
+      },
+      {
+        "object28_triangle": 329,
+        "object30_triangle": 125
+      },
+      {
+        "object28_triangle": 241,
+        "object30_triangle": 37
+      },
+      {
+        "object28_triangle": 240,
+        "object30_triangle": 36
+      },
+      {
+        "object28_triangle": 348,
+        "object30_triangle": 144
+      },
+      {
+        "object28_triangle": 349,
+        "object30_triangle": 145
+      },
+      {
+        "object28_triangle": 257,
+        "object30_triangle": 53
+      },
+      {
+        "object28_triangle": 256,
+        "object30_triangle": 52
+      },
+      {
+        "object28_triangle": 272,
+        "object30_triangle": 68
+      },
+      {
+        "object28_triangle": 273,
+        "object30_triangle": 69
+      },
+      {
+        "object28_triangle": 384,
+        "object30_triangle": 180
+      },
+      {
+        "object28_triangle": 389,
+        "object30_triangle": 185
+      },
+      {
+        "object28_triangle": 375,
+        "object30_triangle": 171
+      },
+      {
+        "object28_triangle": 373,
+        "object30_triangle": 169
+      },
+      {
+        "object28_triangle": 393,
+        "object30_triangle": 189
+      },
+      {
+        "object28_triangle": 392,
+        "object30_triangle": 188
+      },
+      {
+        "object28_triangle": 330,
+        "object30_triangle": 126
+      },
+      {
+        "object28_triangle": 407,
+        "object30_triangle": 203
+      },
+      {
+        "object28_triangle": 331,
+        "object30_triangle": 127
+      },
+      {
+        "object28_triangle": 374,
+        "object30_triangle": 170
+      },
+      {
+        "object28_triangle": 243,
+        "object30_triangle": 39
+      },
+      {
+        "object28_triangle": 242,
+        "object30_triangle": 38
+      },
+      {
+        "object28_triangle": 346,
+        "object30_triangle": 142
+      },
+      {
+        "object28_triangle": 347,
+        "object30_triangle": 143
+      },
+      {
+        "object28_triangle": 259,
+        "object30_triangle": 55
+      },
+      {
+        "object28_triangle": 258,
+        "object30_triangle": 54
+      },
+      {
+        "object28_triangle": 276,
+        "object30_triangle": 72
+      },
+      {
+        "object28_triangle": 277,
+        "object30_triangle": 73
+      },
+      {
+        "object28_triangle": 408,
+        "object30_triangle": 204
+      },
+      {
+        "object28_triangle": 397,
+        "object30_triangle": 193
+      },
+      {
+        "object28_triangle": 409,
+        "object30_triangle": 205
+      },
+      {
+        "object28_triangle": 398,
+        "object30_triangle": 194
+      }
+    ],
+    "only_object28": [],
+    "only_object30": []
+  },
+  "different_variant": {
+    "shared_triangles": 108,
+    "maximum_affine_position_error": 0.00013136316069393048,
+    "affine_row_vector_4x3": [
+      [
+        -1.1875012135707645,
+        -8.735476311769783e-07,
+        8.237317974683737e-07
+      ],
+      [
+        -1.0002925409572212e-06,
+        -1.1875007598570095,
+        7.044964444879911e-07
+      ],
+      [
+        8.444322394487312e-07,
+        -3.1510357837920063e-07,
+        1.1874997981841213
+      ],
+      [
+        -5.989940123814767,
+        -25.69196309066938,
+        1.5859559759761392e-06
+      ]
+    ],
+    "matches": [
+      {
+        "object28_triangle": 493,
+        "object30_triangle": 265
+      },
+      {
+        "object28_triangle": 499,
+        "object30_triangle": 271
+      },
+      {
+        "object28_triangle": 498,
+        "object30_triangle": 270
+      },
+      {
+        "object28_triangle": 492,
+        "object30_triangle": 264
+      },
+      {
+        "object28_triangle": 496,
+        "object30_triangle": 268
+      },
+      {
+        "object28_triangle": 485,
+        "object30_triangle": 257
+      },
+      {
+        "object28_triangle": 497,
+        "object30_triangle": 269
+      },
+      {
+        "object28_triangle": 486,
+        "object30_triangle": 258
+      },
+      {
+        "object28_triangle": 449,
+        "object30_triangle": 221
+      },
+      {
+        "object28_triangle": 448,
+        "object30_triangle": 220
+      },
+      {
+        "object28_triangle": 451,
+        "object30_triangle": 223
+      },
+      {
+        "object28_triangle": 484,
+        "object30_triangle": 256
+      },
+      {
+        "object28_triangle": 482,
+        "object30_triangle": 254
+      },
+      {
+        "object28_triangle": 450,
+        "object30_triangle": 222
+      },
+      {
+        "object28_triangle": 510,
+        "object30_triangle": 282
+      },
+      {
+        "object28_triangle": 452,
+        "object30_triangle": 224
+      },
+      {
+        "object28_triangle": 483,
+        "object30_triangle": 255
+      },
+      {
+        "object28_triangle": 515,
+        "object30_triangle": 287
+      },
+      {
+        "object28_triangle": 453,
+        "object30_triangle": 225
+      },
+      {
+        "object28_triangle": 454,
+        "object30_triangle": 226
+      },
+      {
+        "object28_triangle": 447,
+        "object30_triangle": 219
+      },
+      {
+        "object28_triangle": 477,
+        "object30_triangle": 249
+      },
+      {
+        "object28_triangle": 476,
+        "object30_triangle": 248
+      },
+      {
+        "object28_triangle": 446,
+        "object30_triangle": 218
+      },
+      {
+        "object28_triangle": 514,
+        "object30_triangle": 286
+      },
+      {
+        "object28_triangle": 513,
+        "object30_triangle": 285
+      },
+      {
+        "object28_triangle": 478,
+        "object30_triangle": 250
+      },
+      {
+        "object28_triangle": 470,
+        "object30_triangle": 242
+      },
+      {
+        "object28_triangle": 471,
+        "object30_triangle": 243
+      },
+      {
+        "object28_triangle": 469,
+        "object30_triangle": 241
+      },
+      {
+        "object28_triangle": 457,
+        "object30_triangle": 229
+      },
+      {
+        "object28_triangle": 460,
+        "object30_triangle": 232
+      },
+      {
+        "object28_triangle": 456,
+        "object30_triangle": 228
+      },
+      {
+        "object28_triangle": 458,
+        "object30_triangle": 230
+      },
+      {
+        "object28_triangle": 459,
+        "object30_triangle": 231
+      },
+      {
+        "object28_triangle": 455,
+        "object30_triangle": 227
+      },
+      {
+        "object28_triangle": 213,
+        "object30_triangle": 9
+      },
+      {
+        "object28_triangle": 212,
+        "object30_triangle": 8
+      },
+      {
+        "object28_triangle": 299,
+        "object30_triangle": 95
+      },
+      {
+        "object28_triangle": 288,
+        "object30_triangle": 84
+      },
+      {
+        "object28_triangle": 300,
+        "object30_triangle": 96
+      },
+      {
+        "object28_triangle": 289,
+        "object30_triangle": 85
+      },
+      {
+        "object28_triangle": 290,
+        "object30_triangle": 86
+      },
+      {
+        "object28_triangle": 229,
+        "object30_triangle": 25
+      },
+      {
+        "object28_triangle": 228,
+        "object30_triangle": 24
+      },
+      {
+        "object28_triangle": 316,
+        "object30_triangle": 112
+      },
+      {
+        "object28_triangle": 315,
+        "object30_triangle": 111
+      },
+      {
+        "object28_triangle": 230,
+        "object30_triangle": 26
+      },
+      {
+        "object28_triangle": 317,
+        "object30_triangle": 113
+      },
+      {
+        "object28_triangle": 215,
+        "object30_triangle": 11
+      },
+      {
+        "object28_triangle": 214,
+        "object30_triangle": 10
+      },
+      {
+        "object28_triangle": 301,
+        "object30_triangle": 97
+      },
+      {
+        "object28_triangle": 302,
+        "object30_triangle": 98
+      },
+      {
+        "object28_triangle": 360,
+        "object30_triangle": 156
+      },
+      {
+        "object28_triangle": 318,
+        "object30_triangle": 114
+      },
+      {
+        "object28_triangle": 319,
+        "object30_triangle": 115
+      },
+      {
+        "object28_triangle": 361,
+        "object30_triangle": 157
+      },
+      {
+        "object28_triangle": 217,
+        "object30_triangle": 13
+      },
+      {
+        "object28_triangle": 216,
+        "object30_triangle": 12
+      },
+      {
+        "object28_triangle": 303,
+        "object30_triangle": 99
+      },
+      {
+        "object28_triangle": 304,
+        "object30_triangle": 100
+      },
+      {
+        "object28_triangle": 233,
+        "object30_triangle": 29
+      },
+      {
+        "object28_triangle": 234,
+        "object30_triangle": 30
+      },
+      {
+        "object28_triangle": 320,
+        "object30_triangle": 116
+      },
+      {
+        "object28_triangle": 321,
+        "object30_triangle": 117
+      },
+      {
+        "object28_triangle": 219,
+        "object30_triangle": 15
+      },
+      {
+        "object28_triangle": 218,
+        "object30_triangle": 14
+      },
+      {
+        "object28_triangle": 305,
+        "object30_triangle": 101
+      },
+      {
+        "object28_triangle": 306,
+        "object30_triangle": 102
+      },
+      {
+        "object28_triangle": 363,
+        "object30_triangle": 159
+      },
+      {
+        "object28_triangle": 364,
+        "object30_triangle": 160
+      },
+      {
+        "object28_triangle": 322,
+        "object30_triangle": 118
+      },
+      {
+        "object28_triangle": 323,
+        "object30_triangle": 119
+      },
+      {
+        "object28_triangle": 324,
+        "object30_triangle": 120
+      },
+      {
+        "object28_triangle": 365,
+        "object30_triangle": 161
+      },
+      {
+        "object28_triangle": 220,
+        "object30_triangle": 16
+      },
+      {
+        "object28_triangle": 308,
+        "object30_triangle": 104
+      },
+      {
+        "object28_triangle": 291,
+        "object30_triangle": 87
+      },
+      {
+        "object28_triangle": 237,
+        "object30_triangle": 33
+      },
+      {
+        "object28_triangle": 369,
+        "object30_triangle": 165
+      },
+      {
+        "object28_triangle": 221,
+        "object30_triangle": 17
+      },
+      {
+        "object28_triangle": 222,
+        "object30_triangle": 18
+      },
+      {
+        "object28_triangle": 325,
+        "object30_triangle": 121
+      },
+      {
+        "object28_triangle": 390,
+        "object30_triangle": 186
+      },
+      {
+        "object28_triangle": 307,
+        "object30_triangle": 103
+      },
+      {
+        "object28_triangle": 309,
+        "object30_triangle": 105
+      },
+      {
+        "object28_triangle": 370,
+        "object30_triangle": 166
+      },
+      {
+        "object28_triangle": 385,
+        "object30_triangle": 181
+      },
+      {
+        "object28_triangle": 386,
+        "object30_triangle": 182
+      },
+      {
+        "object28_triangle": 388,
+        "object30_triangle": 184
+      },
+      {
+        "object28_triangle": 293,
+        "object30_triangle": 89
+      },
+      {
+        "object28_triangle": 387,
+        "object30_triangle": 183
+      },
+      {
+        "object28_triangle": 210,
+        "object30_triangle": 6
+      },
+      {
+        "object28_triangle": 294,
+        "object30_triangle": 90
+      },
+      {
+        "object28_triangle": 292,
+        "object30_triangle": 88
+      },
+      {
+        "object28_triangle": 211,
+        "object30_triangle": 7
+      },
+      {
+        "object28_triangle": 295,
+        "object30_triangle": 91
+      },
+      {
+        "object28_triangle": 378,
+        "object30_triangle": 174
+      },
+      {
+        "object28_triangle": 380,
+        "object30_triangle": 176
+      },
+      {
+        "object28_triangle": 296,
+        "object30_triangle": 92
+      },
+      {
+        "object28_triangle": 298,
+        "object30_triangle": 94
+      },
+      {
+        "object28_triangle": 379,
+        "object30_triangle": 175
+      },
+      {
+        "object28_triangle": 297,
+        "object30_triangle": 93
+      },
+      {
+        "object28_triangle": 372,
+        "object30_triangle": 168
+      },
+      {
+        "object28_triangle": 383,
+        "object30_triangle": 179
+      },
+      {
+        "object28_triangle": 371,
+        "object30_triangle": 167
+      },
+      {
+        "object28_triangle": 314,
+        "object30_triangle": 110
+      },
+      {
+        "object28_triangle": 227,
+        "object30_triangle": 23
+      }
+    ],
+    "only_object28": [],
+    "only_object30": [
+      5,
+      1,
+      2,
+      3,
+      0,
+      4
+    ]
+  },
+  "restriction": "Different variant is not interchangeable; unmatched triangles require preservation/individual design"
+}

@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "triangles": 782,
+  "minimum_area": 0.6675063638113062,
+  "unchanged_legacy_faces": [
+    {
+      "triangle": 768,
+      "baseline_triangle": 0,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 769,
+      "baseline_triangle": 1,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 770,
+      "baseline_triangle": 2,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 771,
+      "baseline_triangle": 3,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 772,
+      "baseline_triangle": 4,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 773,
+      "baseline_triangle": 5,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    }
+  ]
+}

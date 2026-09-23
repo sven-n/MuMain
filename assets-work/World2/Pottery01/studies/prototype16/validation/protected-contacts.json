@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "protected_triangles": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77
+  ],
+  "maximum_protected_corner_normal_error": 3.1906112267110846e-05,
+  "actual_placement_bounds": [
+    {
+      "index": 75,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 518,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 522,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3362,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3363,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3558,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3559,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 3908,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4149,
+      "maximum_placed_bound_error": 1.9073486328125e-06
+    },
+    {
+      "index": 4183,
+      "maximum_placed_bound_error": 0.0
+    },
+    {
+      "index": 4377,
+      "maximum_placed_bound_error": 1.9073486328125e-06
+    }
+  ]
+}

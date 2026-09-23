@@ -1,0 +1,15 @@
+{
+  "file": "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pottery01/Object28/exports/Object28.bmd",
+  "mesh_bindings": [
+    {
+      "mesh": 0,
+      "material": "flower_vase.jpg",
+      "vertex_to_normal_node_mismatch_corner_counts": {}
+    },
+    {
+      "mesh": 1,
+      "material": "deep_wall04.jpg",
+      "vertex_to_normal_node_mismatch_corner_counts": {}
+    }
+  ]
+}

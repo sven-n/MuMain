@@ -1,0 +1,18 @@
+{
+  "status": "DIRECTION_REVIEW_ONLY",
+  "triangles": 782,
+  "sha256": {
+    "Object29/source.blend": "b42a7fa0ab5c336330b5c83f3338031113e18ee78cc1e66ce1809dfa2b6a174b",
+    "Object29/exports/Object29.bmd": "550c2455bd30e45bdc18ee7a0f7f5ad3adf9ef32789bce91f2c4851e8b661daa",
+    "Object29/review/candidate-reverse.png": "20d8cb374625f8d4780535bdd3c9b734588367e18ca2d0614e6e58f2eecd1c80",
+    "Object29/review/candidate-small.png": "1828e5d36d4beca8af43214981c5e4d46e7f6d954531fda1f9b5a39f89734d60",
+    "Object29/review/candidate.png": "0e0b4db5c85d3bcce5b64935fab0fbf8849929166bec94f1614d996c34644d9a",
+    "Object29/review/current-reverse.png": "eebc00500cf9722cf7218a848ed80a0507ca3d64b061a540871e12d35a0d5d73",
+    "Object29/review/current-small.png": "80246ab2a937618f70bffd5f5b52e802086b8fe8be2990a9f8a49ff0b0fc5ca3",
+    "Object29/review/current.png": "f73116b30d78e5e3cf97657d102d49d6447ea5055923bdc7253ec1946a676603",
+    "Object29/review/original-reverse.png": "e03477e8573f69a93aea1bc0f8f7ee08c285cab112a91bebfef0647d703a6028",
+    "Object29/review/original-small.png": "74e538e6f5e15ed679194889ee616274acfbeb2cbfe27ee4f7f7ea00243803c3",
+    "Object29/review/original.png": "a9fa5dbf3857ea47abb9907836c4586e8f556a7ddab138c9ed3e5c9e9108be69",
+    "Object29/review/wireframe.png": "4844acbd48a4a63ed78a023ac48361b4721edef49881dcda946ae5b34b390c90"
+  }
+}

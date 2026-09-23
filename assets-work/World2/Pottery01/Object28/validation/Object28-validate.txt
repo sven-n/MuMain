@@ -1,0 +1,2 @@
+/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pottery01/Object28/validation/new/Object28.smd: bones=1 frames=1 triangles=1476 materials=2
+OK

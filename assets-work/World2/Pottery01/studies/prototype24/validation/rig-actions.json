@@ -1,0 +1,4 @@
+{
+  "status": "PASS",
+  "criterion": "Exact nodes, frames and numeric pose; signed zero equivalent"
+}

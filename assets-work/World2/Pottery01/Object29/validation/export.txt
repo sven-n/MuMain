@@ -1,0 +1,41 @@
+00:00.596  blend            | Read blend: "/Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pottery01/Object29/source.blend"
+skipping reference object 'Object29.001' (REF_ collection or mu_reference)
+
+Blender Source Tools: exporting REF_ORIGINAL
+ ERROR: Nothing in Group "REF_ORIGINAL" is enabled for export
+
+Blender Source Tools: exporting Object29_mu_export
+- Baking...
+- /private/var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_export_05x455yf/Object29_mu_export.smd
+- Exported 1 bones
+- Exported 1 frames
+- Exported 398 polys
+- Exported 2 materials
+   deep_wall04.jpg
+   flower_vase.jpg
+- SMD export took 0.011371135711669922 
+
+
+Blender Source Tools: exporting Object29_skeleton
+- Baking...
+- /private/var/folders/5c/gyglnk2d6mx3v2m0frrgvl2w0000gn/T/mu_export_05x455yf/anims/Object29_a00.smd
+- Exported 1 bones
+- Exported 1 frames
+- SMD export took 0.000743865966796875 
+
+1 Errors and 0 Warnings
+Error: Nothing in Group "REF_ORIGINAL" is enabled for export
+2 files exported in 0.0 seconds with 1 Errors and 0 Warnings
+Info: 2 files exported in 0.0 seconds with 1 Errors and 0 Warnings
+wrote /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pottery01/Object29/exports/Object29.bmd (1 action(s))
+model /Users/lukasmac/Documents/claude-test-mumain/MuMain-q02-furniture/assets-work/World2/Pottery01/Object29/exports/Object29.bmd
+  name field: Data2\Object2\\xc7׾Ƹ\xae02.smd  version: 12
+  meshes: 2  bones: 1  actions: 1  triangles: 398
+  bounds (bind pose): min -18.47 -18.34 0.11  max 18.60 18.74 48.13  size 37.08 37.08 48.02
+  mesh 0: triangles=390 vertices=208 normals=284 uvs=221 texture=flower_vase.jpg
+  mesh 1: triangles=8 vertices=9 normals=9 uvs=10 texture=deep_wall04.jpg
+  bone 0: "Cylinder05" parent=-1
+  action 0: keys=1 lock=0
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit

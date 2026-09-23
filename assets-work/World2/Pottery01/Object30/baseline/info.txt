@@ -1,0 +1,8 @@
+model src/bin/Data/Object2/Object30.bmd
+  name field: Data2\Object2\깨진항아리03.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 288
+  bounds (bind pose): min -34.38 -15.08 -0.19  max 34.05 17.52 26.77  size 68.43 32.60 26.96
+  mesh 0: triangles=218 vertices=142 normals=129 uvs=142 texture=flower_vase.jpg
+  mesh 1: triangles=70 vertices=66 normals=28 uvs=66 texture=deep_wall04.jpg
+  bone 0: "Cylinder04" parent=-1
+  action 0: keys=1 lock=0

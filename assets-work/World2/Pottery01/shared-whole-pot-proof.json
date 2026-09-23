@@ -1,0 +1,1269 @@
+{
+  "status": "PASS",
+  "parts": [
+    {
+      "original_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429
+      ],
+      "affine_row_vector_4x3": [
+        [
+          1.0000005059022474,
+          -3.81944463338836e-07,
+          6.26541705397139e-16
+        ],
+        [
+          5.821840328828333e-09,
+          0.9999993938397399,
+          3.9012921742344586e-16
+        ],
+        [
+          8.133141060860008e-08,
+          -1.3833612517052778e-07,
+          0.9999999999999998
+        ],
+        [
+          -15.23480497349366,
+          8.87978952873856,
+          1.688142492275071e-15
+        ]
+      ],
+      "maximum_position_fit_error": 9.565292142596714e-05,
+      "maximum_uv_error": 0,
+      "material_bone_cyclic_winding": "EXACT",
+      "matches": [
+        {
+          "canonical_triangle": 0,
+          "composite_triangle": 0
+        },
+        {
+          "canonical_triangle": 1,
+          "composite_triangle": 1
+        },
+        {
+          "canonical_triangle": 2,
+          "composite_triangle": 2
+        },
+        {
+          "canonical_triangle": 3,
+          "composite_triangle": 3
+        },
+        {
+          "canonical_triangle": 4,
+          "composite_triangle": 4
+        },
+        {
+          "canonical_triangle": 5,
+          "composite_triangle": 5
+        },
+        {
+          "canonical_triangle": 6,
+          "composite_triangle": 6
+        },
+        {
+          "canonical_triangle": 7,
+          "composite_triangle": 7
+        },
+        {
+          "canonical_triangle": 8,
+          "composite_triangle": 8
+        },
+        {
+          "canonical_triangle": 9,
+          "composite_triangle": 9
+        },
+        {
+          "canonical_triangle": 10,
+          "composite_triangle": 10
+        },
+        {
+          "canonical_triangle": 11,
+          "composite_triangle": 11
+        },
+        {
+          "canonical_triangle": 12,
+          "composite_triangle": 12
+        },
+        {
+          "canonical_triangle": 13,
+          "composite_triangle": 13
+        },
+        {
+          "canonical_triangle": 14,
+          "composite_triangle": 14
+        },
+        {
+          "canonical_triangle": 15,
+          "composite_triangle": 15
+        },
+        {
+          "canonical_triangle": 16,
+          "composite_triangle": 16
+        },
+        {
+          "canonical_triangle": 17,
+          "composite_triangle": 17
+        },
+        {
+          "canonical_triangle": 18,
+          "composite_triangle": 18
+        },
+        {
+          "canonical_triangle": 19,
+          "composite_triangle": 19
+        },
+        {
+          "canonical_triangle": 20,
+          "composite_triangle": 20
+        },
+        {
+          "canonical_triangle": 21,
+          "composite_triangle": 21
+        },
+        {
+          "canonical_triangle": 22,
+          "composite_triangle": 22
+        },
+        {
+          "canonical_triangle": 23,
+          "composite_triangle": 23
+        },
+        {
+          "canonical_triangle": 24,
+          "composite_triangle": 24
+        },
+        {
+          "canonical_triangle": 25,
+          "composite_triangle": 25
+        },
+        {
+          "canonical_triangle": 26,
+          "composite_triangle": 26
+        },
+        {
+          "canonical_triangle": 27,
+          "composite_triangle": 27
+        },
+        {
+          "canonical_triangle": 28,
+          "composite_triangle": 28
+        },
+        {
+          "canonical_triangle": 29,
+          "composite_triangle": 29
+        },
+        {
+          "canonical_triangle": 30,
+          "composite_triangle": 30
+        },
+        {
+          "canonical_triangle": 31,
+          "composite_triangle": 31
+        },
+        {
+          "canonical_triangle": 32,
+          "composite_triangle": 32
+        },
+        {
+          "canonical_triangle": 33,
+          "composite_triangle": 33
+        },
+        {
+          "canonical_triangle": 34,
+          "composite_triangle": 34
+        },
+        {
+          "canonical_triangle": 35,
+          "composite_triangle": 35
+        },
+        {
+          "canonical_triangle": 36,
+          "composite_triangle": 36
+        },
+        {
+          "canonical_triangle": 37,
+          "composite_triangle": 37
+        },
+        {
+          "canonical_triangle": 38,
+          "composite_triangle": 38
+        },
+        {
+          "canonical_triangle": 39,
+          "composite_triangle": 39
+        },
+        {
+          "canonical_triangle": 40,
+          "composite_triangle": 40
+        },
+        {
+          "canonical_triangle": 41,
+          "composite_triangle": 41
+        },
+        {
+          "canonical_triangle": 42,
+          "composite_triangle": 42
+        },
+        {
+          "canonical_triangle": 43,
+          "composite_triangle": 43
+        },
+        {
+          "canonical_triangle": 44,
+          "composite_triangle": 44
+        },
+        {
+          "canonical_triangle": 45,
+          "composite_triangle": 45
+        },
+        {
+          "canonical_triangle": 46,
+          "composite_triangle": 46
+        },
+        {
+          "canonical_triangle": 47,
+          "composite_triangle": 47
+        },
+        {
+          "canonical_triangle": 48,
+          "composite_triangle": 48
+        },
+        {
+          "canonical_triangle": 49,
+          "composite_triangle": 49
+        },
+        {
+          "canonical_triangle": 50,
+          "composite_triangle": 50
+        },
+        {
+          "canonical_triangle": 51,
+          "composite_triangle": 51
+        },
+        {
+          "canonical_triangle": 52,
+          "composite_triangle": 52
+        },
+        {
+          "canonical_triangle": 53,
+          "composite_triangle": 53
+        },
+        {
+          "canonical_triangle": 54,
+          "composite_triangle": 54
+        },
+        {
+          "canonical_triangle": 55,
+          "composite_triangle": 55
+        },
+        {
+          "canonical_triangle": 56,
+          "composite_triangle": 56
+        },
+        {
+          "canonical_triangle": 57,
+          "composite_triangle": 57
+        },
+        {
+          "canonical_triangle": 58,
+          "composite_triangle": 58
+        },
+        {
+          "canonical_triangle": 59,
+          "composite_triangle": 59
+        },
+        {
+          "canonical_triangle": 60,
+          "composite_triangle": 60
+        },
+        {
+          "canonical_triangle": 61,
+          "composite_triangle": 61
+        },
+        {
+          "canonical_triangle": 62,
+          "composite_triangle": 62
+        },
+        {
+          "canonical_triangle": 63,
+          "composite_triangle": 63
+        },
+        {
+          "canonical_triangle": 64,
+          "composite_triangle": 64
+        },
+        {
+          "canonical_triangle": 65,
+          "composite_triangle": 65
+        },
+        {
+          "canonical_triangle": 66,
+          "composite_triangle": 66
+        },
+        {
+          "canonical_triangle": 67,
+          "composite_triangle": 67
+        },
+        {
+          "canonical_triangle": 68,
+          "composite_triangle": 68
+        },
+        {
+          "canonical_triangle": 69,
+          "composite_triangle": 69
+        },
+        {
+          "canonical_triangle": 70,
+          "composite_triangle": 422
+        },
+        {
+          "canonical_triangle": 71,
+          "composite_triangle": 423
+        },
+        {
+          "canonical_triangle": 72,
+          "composite_triangle": 424
+        },
+        {
+          "canonical_triangle": 73,
+          "composite_triangle": 425
+        },
+        {
+          "canonical_triangle": 74,
+          "composite_triangle": 426
+        },
+        {
+          "canonical_triangle": 75,
+          "composite_triangle": 427
+        },
+        {
+          "canonical_triangle": 76,
+          "composite_triangle": 428
+        },
+        {
+          "canonical_triangle": 77,
+          "composite_triangle": 429
+        }
+      ]
+    },
+    {
+      "original_indices": [
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437
+      ],
+      "affine_row_vector_4x3": [
+        [
+          0.6410271389142164,
+          -2.448372330785283e-07,
+          6.26541705397139e-16
+        ],
+        [
+          -1.1359617719167054e-06,
+          0.6410243555454787,
+          3.9012921742344586e-16
+        ],
+        [
+          1.4296503148588384e-07,
+          4.006045664107971e-07,
+          0.9999999999999998
+        ],
+        [
+          -41.134787545379254,
+          41.13531479583854,
+          1.688142492275071e-15
+        ]
+      ],
+      "maximum_position_fit_error": 9.320347995219601e-05,
+      "maximum_uv_error": 0,
+      "material_bone_cyclic_winding": "EXACT",
+      "matches": [
+        {
+          "canonical_triangle": 0,
+          "composite_triangle": 70
+        },
+        {
+          "canonical_triangle": 1,
+          "composite_triangle": 71
+        },
+        {
+          "canonical_triangle": 2,
+          "composite_triangle": 72
+        },
+        {
+          "canonical_triangle": 3,
+          "composite_triangle": 73
+        },
+        {
+          "canonical_triangle": 4,
+          "composite_triangle": 74
+        },
+        {
+          "canonical_triangle": 5,
+          "composite_triangle": 75
+        },
+        {
+          "canonical_triangle": 6,
+          "composite_triangle": 76
+        },
+        {
+          "canonical_triangle": 7,
+          "composite_triangle": 77
+        },
+        {
+          "canonical_triangle": 8,
+          "composite_triangle": 78
+        },
+        {
+          "canonical_triangle": 9,
+          "composite_triangle": 79
+        },
+        {
+          "canonical_triangle": 10,
+          "composite_triangle": 80
+        },
+        {
+          "canonical_triangle": 11,
+          "composite_triangle": 81
+        },
+        {
+          "canonical_triangle": 12,
+          "composite_triangle": 82
+        },
+        {
+          "canonical_triangle": 13,
+          "composite_triangle": 83
+        },
+        {
+          "canonical_triangle": 14,
+          "composite_triangle": 84
+        },
+        {
+          "canonical_triangle": 15,
+          "composite_triangle": 85
+        },
+        {
+          "canonical_triangle": 16,
+          "composite_triangle": 86
+        },
+        {
+          "canonical_triangle": 17,
+          "composite_triangle": 87
+        },
+        {
+          "canonical_triangle": 18,
+          "composite_triangle": 88
+        },
+        {
+          "canonical_triangle": 19,
+          "composite_triangle": 89
+        },
+        {
+          "canonical_triangle": 20,
+          "composite_triangle": 90
+        },
+        {
+          "canonical_triangle": 21,
+          "composite_triangle": 91
+        },
+        {
+          "canonical_triangle": 22,
+          "composite_triangle": 92
+        },
+        {
+          "canonical_triangle": 23,
+          "composite_triangle": 93
+        },
+        {
+          "canonical_triangle": 24,
+          "composite_triangle": 94
+        },
+        {
+          "canonical_triangle": 25,
+          "composite_triangle": 95
+        },
+        {
+          "canonical_triangle": 26,
+          "composite_triangle": 96
+        },
+        {
+          "canonical_triangle": 27,
+          "composite_triangle": 97
+        },
+        {
+          "canonical_triangle": 28,
+          "composite_triangle": 98
+        },
+        {
+          "canonical_triangle": 29,
+          "composite_triangle": 99
+        },
+        {
+          "canonical_triangle": 30,
+          "composite_triangle": 100
+        },
+        {
+          "canonical_triangle": 31,
+          "composite_triangle": 101
+        },
+        {
+          "canonical_triangle": 32,
+          "composite_triangle": 102
+        },
+        {
+          "canonical_triangle": 33,
+          "composite_triangle": 103
+        },
+        {
+          "canonical_triangle": 34,
+          "composite_triangle": 104
+        },
+        {
+          "canonical_triangle": 35,
+          "composite_triangle": 105
+        },
+        {
+          "canonical_triangle": 36,
+          "composite_triangle": 106
+        },
+        {
+          "canonical_triangle": 37,
+          "composite_triangle": 107
+        },
+        {
+          "canonical_triangle": 38,
+          "composite_triangle": 108
+        },
+        {
+          "canonical_triangle": 39,
+          "composite_triangle": 109
+        },
+        {
+          "canonical_triangle": 40,
+          "composite_triangle": 110
+        },
+        {
+          "canonical_triangle": 41,
+          "composite_triangle": 111
+        },
+        {
+          "canonical_triangle": 42,
+          "composite_triangle": 112
+        },
+        {
+          "canonical_triangle": 43,
+          "composite_triangle": 113
+        },
+        {
+          "canonical_triangle": 44,
+          "composite_triangle": 114
+        },
+        {
+          "canonical_triangle": 45,
+          "composite_triangle": 115
+        },
+        {
+          "canonical_triangle": 46,
+          "composite_triangle": 116
+        },
+        {
+          "canonical_triangle": 47,
+          "composite_triangle": 117
+        },
+        {
+          "canonical_triangle": 48,
+          "composite_triangle": 118
+        },
+        {
+          "canonical_triangle": 49,
+          "composite_triangle": 119
+        },
+        {
+          "canonical_triangle": 50,
+          "composite_triangle": 120
+        },
+        {
+          "canonical_triangle": 51,
+          "composite_triangle": 121
+        },
+        {
+          "canonical_triangle": 52,
+          "composite_triangle": 122
+        },
+        {
+          "canonical_triangle": 53,
+          "composite_triangle": 123
+        },
+        {
+          "canonical_triangle": 54,
+          "composite_triangle": 124
+        },
+        {
+          "canonical_triangle": 55,
+          "composite_triangle": 125
+        },
+        {
+          "canonical_triangle": 56,
+          "composite_triangle": 126
+        },
+        {
+          "canonical_triangle": 57,
+          "composite_triangle": 127
+        },
+        {
+          "canonical_triangle": 58,
+          "composite_triangle": 128
+        },
+        {
+          "canonical_triangle": 59,
+          "composite_triangle": 129
+        },
+        {
+          "canonical_triangle": 60,
+          "composite_triangle": 130
+        },
+        {
+          "canonical_triangle": 61,
+          "composite_triangle": 131
+        },
+        {
+          "canonical_triangle": 62,
+          "composite_triangle": 132
+        },
+        {
+          "canonical_triangle": 63,
+          "composite_triangle": 133
+        },
+        {
+          "canonical_triangle": 64,
+          "composite_triangle": 134
+        },
+        {
+          "canonical_triangle": 65,
+          "composite_triangle": 135
+        },
+        {
+          "canonical_triangle": 66,
+          "composite_triangle": 136
+        },
+        {
+          "canonical_triangle": 67,
+          "composite_triangle": 137
+        },
+        {
+          "canonical_triangle": 68,
+          "composite_triangle": 138
+        },
+        {
+          "canonical_triangle": 69,
+          "composite_triangle": 139
+        },
+        {
+          "canonical_triangle": 70,
+          "composite_triangle": 430
+        },
+        {
+          "canonical_triangle": 71,
+          "composite_triangle": 431
+        },
+        {
+          "canonical_triangle": 72,
+          "composite_triangle": 432
+        },
+        {
+          "canonical_triangle": 73,
+          "composite_triangle": 433
+        },
+        {
+          "canonical_triangle": 74,
+          "composite_triangle": 434
+        },
+        {
+          "canonical_triangle": 75,
+          "composite_triangle": 435
+        },
+        {
+          "canonical_triangle": 76,
+          "composite_triangle": 436
+        },
+        {
+          "canonical_triangle": 77,
+          "composite_triangle": 437
+        }
+      ]
+    },
+    {
+      "original_indices": [
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445
+      ],
+      "affine_row_vector_4x3": [
+        [
+          0.6024099852083931,
+          -2.300833080698708e-07,
+          -4.934549742319758e-13
+        ],
+        [
+          -5.1922848085595325e-08,
+          0.6024091397594038,
+          -1.9719139618496223e-08
+        ],
+        [
+          2.674724453285586e-07,
+          -3.882131897668995e-07,
+          0.6024088361184349
+        ],
+        [
+          11.053397554629043,
+          42.49525046249222,
+          1.8273952672077764e-05
+        ]
+      ],
+      "maximum_position_fit_error": 7.696800814687369e-05,
+      "maximum_uv_error": 0,
+      "material_bone_cyclic_winding": "EXACT",
+      "matches": [
+        {
+          "canonical_triangle": 0,
+          "composite_triangle": 140
+        },
+        {
+          "canonical_triangle": 1,
+          "composite_triangle": 141
+        },
+        {
+          "canonical_triangle": 2,
+          "composite_triangle": 142
+        },
+        {
+          "canonical_triangle": 3,
+          "composite_triangle": 143
+        },
+        {
+          "canonical_triangle": 4,
+          "composite_triangle": 144
+        },
+        {
+          "canonical_triangle": 5,
+          "composite_triangle": 145
+        },
+        {
+          "canonical_triangle": 6,
+          "composite_triangle": 146
+        },
+        {
+          "canonical_triangle": 7,
+          "composite_triangle": 147
+        },
+        {
+          "canonical_triangle": 8,
+          "composite_triangle": 148
+        },
+        {
+          "canonical_triangle": 9,
+          "composite_triangle": 149
+        },
+        {
+          "canonical_triangle": 10,
+          "composite_triangle": 150
+        },
+        {
+          "canonical_triangle": 11,
+          "composite_triangle": 151
+        },
+        {
+          "canonical_triangle": 12,
+          "composite_triangle": 152
+        },
+        {
+          "canonical_triangle": 13,
+          "composite_triangle": 153
+        },
+        {
+          "canonical_triangle": 14,
+          "composite_triangle": 154
+        },
+        {
+          "canonical_triangle": 15,
+          "composite_triangle": 155
+        },
+        {
+          "canonical_triangle": 16,
+          "composite_triangle": 156
+        },
+        {
+          "canonical_triangle": 17,
+          "composite_triangle": 157
+        },
+        {
+          "canonical_triangle": 18,
+          "composite_triangle": 158
+        },
+        {
+          "canonical_triangle": 19,
+          "composite_triangle": 159
+        },
+        {
+          "canonical_triangle": 20,
+          "composite_triangle": 160
+        },
+        {
+          "canonical_triangle": 21,
+          "composite_triangle": 161
+        },
+        {
+          "canonical_triangle": 22,
+          "composite_triangle": 162
+        },
+        {
+          "canonical_triangle": 23,
+          "composite_triangle": 163
+        },
+        {
+          "canonical_triangle": 24,
+          "composite_triangle": 164
+        },
+        {
+          "canonical_triangle": 25,
+          "composite_triangle": 165
+        },
+        {
+          "canonical_triangle": 26,
+          "composite_triangle": 166
+        },
+        {
+          "canonical_triangle": 27,
+          "composite_triangle": 167
+        },
+        {
+          "canonical_triangle": 28,
+          "composite_triangle": 168
+        },
+        {
+          "canonical_triangle": 29,
+          "composite_triangle": 169
+        },
+        {
+          "canonical_triangle": 30,
+          "composite_triangle": 170
+        },
+        {
+          "canonical_triangle": 31,
+          "composite_triangle": 171
+        },
+        {
+          "canonical_triangle": 32,
+          "composite_triangle": 172
+        },
+        {
+          "canonical_triangle": 33,
+          "composite_triangle": 173
+        },
+        {
+          "canonical_triangle": 34,
+          "composite_triangle": 174
+        },
+        {
+          "canonical_triangle": 35,
+          "composite_triangle": 175
+        },
+        {
+          "canonical_triangle": 36,
+          "composite_triangle": 176
+        },
+        {
+          "canonical_triangle": 37,
+          "composite_triangle": 177
+        },
+        {
+          "canonical_triangle": 38,
+          "composite_triangle": 178
+        },
+        {
+          "canonical_triangle": 39,
+          "composite_triangle": 179
+        },
+        {
+          "canonical_triangle": 40,
+          "composite_triangle": 180
+        },
+        {
+          "canonical_triangle": 41,
+          "composite_triangle": 181
+        },
+        {
+          "canonical_triangle": 42,
+          "composite_triangle": 182
+        },
+        {
+          "canonical_triangle": 43,
+          "composite_triangle": 183
+        },
+        {
+          "canonical_triangle": 44,
+          "composite_triangle": 184
+        },
+        {
+          "canonical_triangle": 45,
+          "composite_triangle": 185
+        },
+        {
+          "canonical_triangle": 46,
+          "composite_triangle": 186
+        },
+        {
+          "canonical_triangle": 47,
+          "composite_triangle": 187
+        },
+        {
+          "canonical_triangle": 48,
+          "composite_triangle": 188
+        },
+        {
+          "canonical_triangle": 49,
+          "composite_triangle": 189
+        },
+        {
+          "canonical_triangle": 50,
+          "composite_triangle": 190
+        },
+        {
+          "canonical_triangle": 51,
+          "composite_triangle": 191
+        },
+        {
+          "canonical_triangle": 52,
+          "composite_triangle": 192
+        },
+        {
+          "canonical_triangle": 53,
+          "composite_triangle": 193
+        },
+        {
+          "canonical_triangle": 54,
+          "composite_triangle": 194
+        },
+        {
+          "canonical_triangle": 55,
+          "composite_triangle": 195
+        },
+        {
+          "canonical_triangle": 56,
+          "composite_triangle": 196
+        },
+        {
+          "canonical_triangle": 57,
+          "composite_triangle": 197
+        },
+        {
+          "canonical_triangle": 58,
+          "composite_triangle": 198
+        },
+        {
+          "canonical_triangle": 59,
+          "composite_triangle": 199
+        },
+        {
+          "canonical_triangle": 60,
+          "composite_triangle": 200
+        },
+        {
+          "canonical_triangle": 61,
+          "composite_triangle": 201
+        },
+        {
+          "canonical_triangle": 62,
+          "composite_triangle": 202
+        },
+        {
+          "canonical_triangle": 63,
+          "composite_triangle": 203
+        },
+        {
+          "canonical_triangle": 64,
+          "composite_triangle": 204
+        },
+        {
+          "canonical_triangle": 65,
+          "composite_triangle": 205
+        },
+        {
+          "canonical_triangle": 66,
+          "composite_triangle": 206
+        },
+        {
+          "canonical_triangle": 67,
+          "composite_triangle": 207
+        },
+        {
+          "canonical_triangle": 68,
+          "composite_triangle": 208
+        },
+        {
+          "canonical_triangle": 69,
+          "composite_triangle": 209
+        },
+        {
+          "canonical_triangle": 70,
+          "composite_triangle": 438
+        },
+        {
+          "canonical_triangle": 71,
+          "composite_triangle": 439
+        },
+        {
+          "canonical_triangle": 72,
+          "composite_triangle": 440
+        },
+        {
+          "canonical_triangle": 73,
+          "composite_triangle": 441
+        },
+        {
+          "canonical_triangle": 74,
+          "composite_triangle": 442
+        },
+        {
+          "canonical_triangle": 75,
+          "composite_triangle": 443
+        },
+        {
+          "canonical_triangle": 76,
+          "composite_triangle": 444
+        },
+        {
+          "canonical_triangle": 77,
+          "composite_triangle": 445
+        }
+      ]
+    }
+  ],
+  "criterion": "Each whole-pot triangle matches unique canonical material/UV/bone/cyclic topology, then all corners fit one affine transform"
+}

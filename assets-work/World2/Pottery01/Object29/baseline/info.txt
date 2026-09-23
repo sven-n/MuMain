@@ -1,0 +1,8 @@
+model src/bin/Data/Object2/Object29.bmd
+  name field: Data2\Object2\Ç×¾Æ¸®02.smd  version: 10
+  meshes: 2  bones: 1  actions: 1  triangles: 78
+  bounds (bind pose): min -18.47 -18.34 0.11  max 18.60 18.74 48.13  size 37.08 37.08 48.02
+  mesh 0: triangles=70 vertices=40 normals=41 uvs=45 texture=flower_vase.jpg
+  mesh 1: triangles=8 vertices=9 normals=9 uvs=10 texture=deep_wall04.jpg
+  bone 0: "Cylinder05" parent=-1
+  action 0: keys=1 lock=0

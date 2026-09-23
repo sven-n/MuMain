@@ -1,0 +1,35 @@
+{
+  "records": [
+    {
+      "name": "Object28",
+      "index": 265,
+      "position": [
+        200.0,
+        20950.0,
+        216.49676513671875
+      ],
+      "rotation": [
+        -25.0,
+        0.0,
+        300.0
+      ],
+      "scale": 1.0
+    },
+    {
+      "name": "Object28",
+      "index": 266,
+      "position": [
+        250.0,
+        20850.0,
+        206.79400634765625
+      ],
+      "rotation": [
+        -25.0,
+        0.0,
+        450.0
+      ],
+      "scale": 1.0
+    }
+  ],
+  "scale_reference": null
+}

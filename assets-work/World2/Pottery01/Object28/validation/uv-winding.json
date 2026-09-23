@@ -1,0 +1,294 @@
+{
+  "status": "PASS",
+  "triangles": 1476,
+  "minimum_area": 0.0007703065800873486,
+  "unchanged_legacy_faces": [
+    {
+      "triangle": 0,
+      "baseline_triangle": 0,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 1,
+      "baseline_triangle": 1,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 2,
+      "baseline_triangle": 2,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 3,
+      "baseline_triangle": 3,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 4,
+      "baseline_triangle": 4,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 5,
+      "baseline_triangle": 5,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 6,
+      "baseline_triangle": 70,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 7,
+      "baseline_triangle": 71,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 8,
+      "baseline_triangle": 72,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 9,
+      "baseline_triangle": 73,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 10,
+      "baseline_triangle": 74,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 11,
+      "baseline_triangle": 75,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 12,
+      "baseline_triangle": 140,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 13,
+      "baseline_triangle": 141,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 14,
+      "baseline_triangle": 142,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 15,
+      "baseline_triangle": 143,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 16,
+      "baseline_triangle": 144,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 17,
+      "baseline_triangle": 145,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 80,
+      "baseline_triangle": 272,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999997383931689
+    },
+    {
+      "triangle": 81,
+      "baseline_triangle": 273,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.999999519411821
+    },
+    {
+      "triangle": 82,
+      "baseline_triangle": 274,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999995439450644
+    },
+    {
+      "triangle": 83,
+      "baseline_triangle": 275,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999996196618276
+    },
+    {
+      "triangle": 84,
+      "baseline_triangle": 276,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999995194114621
+    },
+    {
+      "triangle": 85,
+      "baseline_triangle": 277,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999999197827802
+    },
+    {
+      "triangle": 86,
+      "baseline_triangle": 278,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.999999738377508
+    },
+    {
+      "triangle": 87,
+      "baseline_triangle": 279,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999997376556169
+    },
+    {
+      "triangle": 88,
+      "baseline_triangle": 280,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999999195936321
+    },
+    {
+      "triangle": 89,
+      "baseline_triangle": 281,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999999195073379
+    },
+    {
+      "triangle": 90,
+      "baseline_triangle": 282,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999995439384506
+    },
+    {
+      "triangle": 91,
+      "baseline_triangle": 283,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999995425149854
+    },
+    {
+      "triangle": 92,
+      "baseline_triangle": 284,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999998661681441
+    },
+    {
+      "triangle": 93,
+      "baseline_triangle": 285,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999998665110625
+    },
+    {
+      "triangle": 94,
+      "baseline_triangle": 286,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999998665109
+    },
+    {
+      "triangle": 95,
+      "baseline_triangle": 287,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 0.9999998913994365
+    },
+    {
+      "triangle": 96,
+      "baseline_triangle": 288,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 97,
+      "baseline_triangle": 289,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 98,
+      "baseline_triangle": 290,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 99,
+      "baseline_triangle": 291,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 100,
+      "baseline_triangle": 292,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 101,
+      "baseline_triangle": 293,
+      "material": "flower_vase.jpg",
+      "uv_area": 0.0,
+      "min_normal_dot": 1.0
+    },
+    {
+      "triangle": 1466,
+      "baseline_triangle": 506,
+      "material": "deep_wall04.jpg",
+      "uv_area": 1.0899999999998792e-06,
+      "min_normal_dot": -0.9999861549306027
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "triangles": 398,
+  "bounds_before": [
+    [
+      -18.47439956665039,
+      -18.337900161743164,
+      0.10689999908208847
+    ],
+    [
+      18.60449981689453,
+      18.74090003967285,
+      48.13090133666992
+    ]
+  ],
+  "bounds_after": [
+    [
+      -18.47439956665039,
+      -18.337900161743164,
+      0.10689999908208847
+    ],
+    [
+      18.60449981689453,
+      18.74090003967285,
+      48.13090133666992
+    ]
+  ],
+  "protected_triangles": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77
+  ],
+  "design": "Continuous ceramic belly/shoulder, thick rolled lip; original octagonal throat and bottom surfaces exact",
+  "actual_placement_support_planes": 66
+}

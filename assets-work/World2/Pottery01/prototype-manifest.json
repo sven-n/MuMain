@@ -1,0 +1,18 @@
+{
+  "status": "DIRECTION_REVIEW_16_SIDE",
+  "triangles": 398,
+  "sha256": {
+    "Object29/source.blend": "1f608ff4d45cc9dfe70d53b33a1e138c03b8ed35f7aa5e36878890a9d8d8b535",
+    "Object29/exports/Object29.bmd": "7ee0c709a4992fdb68df1d3b9e2e326d7c17e70604b19e18d75d364478bedc76",
+    "Object29/review/candidate-reverse.png": "fd733f6b842ce34c15ff0ce22e08f6d1a79fdcd05779fe42e343711189fbdd4c",
+    "Object29/review/candidate-small.png": "abc9d0fd17cb367b6e78c9a4f9e32ffd9abcf29adbfc49a11a83d2584aeabee5",
+    "Object29/review/candidate.png": "bff6304709f05c4aaa7953a3193eabf98262bd43d4bd1b19b2fa9f794cdf09b6",
+    "Object29/review/current-reverse.png": "808b78273c2f3b8e953b98fd7b53cb6eeef65a7d90c934fda81fee6030ac37b9",
+    "Object29/review/current-small.png": "777d9392dbcaf54cb38027d349a040d80b63e127a69a93eaf48808f377064cac",
+    "Object29/review/current.png": "e2d66835bc64448b3e9e373c86d52d72ae48fff35424605c296fe76beb0b6a5f",
+    "Object29/review/original-reverse.png": "af323b1b8d1696bd199486f84aeffc7bd744d3df38d95969b66f792fd3e2a2c4",
+    "Object29/review/original-small.png": "093039e02a253143000946145d5813722b9c8f66e381ff63efc68ce5b0a3842e",
+    "Object29/review/original.png": "d49131790e34a1d2b21b96bff09db3d9621e2ed300daa0c4fc6ba8f300c09337",
+    "Object29/review/wireframe.png": "f5d0321a1fb4991a6c17f1f5ff40113ea3c37904c59062e7e14128af6828fea0"
+  }
+}

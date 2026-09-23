@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "images": [
+    {
+      "texture": "flower_vase.jpg",
+      "size": [
+        64,
+        32
+      ],
+      "packed_payload_sha256": "ede98fb034ac9561a217036ecc70ecc45386192e3f7de6573a9010ef2037a728"
+    },
+    {
+      "texture": "deep_wall04.jpg",
+      "size": [
+        128,
+        128
+      ],
+      "packed_payload_sha256": "306a16f7ed7caa3f6533096ae44a88fa5442e05cf055b08e6b47da31ad664a98"
+    }
+  ],
+  "reference_collection": "REF_ORIGINAL hidden and retained"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "maximum_position_error": 1.066240299940009e-06,
+  "maximum_uv_error": 3.5762786865234375e-07,
+  "triangles": 782,
+  "maximum_position_or_uv_error": 1.066240299940009e-06,
+  "criteria": "Every triangle has same material, winding, bone ownership, positions and UV corners",
+  "position_tolerance": 0.0003,
+  "uv_tolerance": 1e-06,
+  "precision": "Six-decimal SMD Euler roundtrip and float32 coordinates: measured matrix delta 4.733e-7 over a 320-unit asset; bounded 0.0003 world-unit budget"
+}
