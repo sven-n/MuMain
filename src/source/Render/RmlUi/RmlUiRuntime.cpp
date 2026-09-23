@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Input/SyntheticInput.h"
 #include "RmlUiRuntime.h"
 #include "RmlUiRenderInterface.h"
 #include "RmlUiSystemInterface.h"
@@ -133,6 +134,7 @@ void RmlUiRuntime::Destroy()
 {
     if (!m_Context) return;
 
+    Core::Input::Synthetic::CancelDelivery();
     Core::Input::SetUiInputConsumer(nullptr);
     mu::GetRenderer().SetPreSubmitCallback(nullptr);
 
@@ -208,6 +210,22 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
         return m_Context->ProcessMouseMove(static_cast<int>(event.motion.x), static_cast<int>(event.motion.y), RmlSDL::GetKeyModifierState());
 
     return RmlSDL::InputEventHandler(m_Context, window, event);
+}
+
+void RmlUiRuntime::CancelSyntheticMousePress(unsigned char button, SDL_Window* window)
+{
+    if (!m_Context || button != SDL_BUTTON_LEFT)
+        return; // RmlUi retains an active chain only for the primary button.
+    // MouseLeave clears hover before Up, so vendored Context cannot dispatch
+    // Mouseup/Click on the pressed element, but still clears its active chain.
+    m_Context->ProcessMouseLeave();
+    m_Context->ProcessMouseButtonUp(0, RmlSDL::GetKeyModifierState());
+    if (window && SDL_GetMouseFocus() == window)
+    {
+        float x = 0.0f, y = 0.0f;
+        SDL_GetMouseState(&x, &y);
+        m_Context->ProcessMouseMove(static_cast<int>(x), static_cast<int>(y), RmlSDL::GetKeyModifierState());
+    }
 }
 
 bool RmlUiRuntime::IsMouseOverUI() const
