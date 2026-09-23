@@ -24,6 +24,9 @@ namespace Core::Input
         // forward it directly.
         virtual bool ProcessSdlEvent(SDL_Event& event, SDL_Window* window) = 0;
 
+        // Retract this consumer's synthetic press without dispatching a click.
+        virtual void CancelSyntheticMousePress(unsigned char button, SDL_Window* window) = 0;
+
         // True while the mouse is hovering/pressed over any element the registered consumer owns.
         virtual bool IsMouseOverUI() const = 0;
     };
@@ -36,6 +39,8 @@ namespace Core::Input
     // propagating) when no consumer is registered, matching IUiInputConsumer::ProcessSdlEvent's
     // own "not consumed" convention -- callers don't need to null-check.
     bool RouteToUi(SDL_Event& event, SDL_Window* window);
+    IUiInputConsumer* ActiveUiInputConsumer();
+    void CancelSyntheticMousePress(IUiInputConsumer* owner, unsigned char button, SDL_Window* window);
 
     // True if the registered UI consumer reports the mouse is over UI. False if none registered.
     bool IsMouseOverUI();

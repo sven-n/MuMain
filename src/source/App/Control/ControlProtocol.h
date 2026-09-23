@@ -129,10 +129,12 @@ public:
     }
 
     [[nodiscard]] bool Has(std::string_view key) const;
+    [[nodiscard]] bool Contains(std::string_view key) const;
     [[nodiscard]] bool GetString(std::string_view key, std::string& out) const;
     [[nodiscard]] bool GetInt(std::string_view key, int& out) const;
     [[nodiscard]] bool GetDouble(std::string_view key, double& out) const;
     [[nodiscard]] bool GetBool(std::string_view key, bool& out) const;
+    [[nodiscard]] bool GetStrictBool(std::string_view key, bool& out) const;
     [[nodiscard]] bool GetStringMap(std::string_view key, std::map<std::string, std::string>& out) const;
 
 private:
