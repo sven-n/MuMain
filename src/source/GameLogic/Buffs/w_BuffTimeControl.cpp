@@ -42,9 +42,10 @@ eBuffTimeType BuffTimeControl::CheckBuffTimeType(eBuffState bufftype)
         return eBuffTime_None;
     }
 
-    BuffInfo bInfo = g_BuffInfo(bufftype);
-
-    return eBuffTimeType(1005 + bInfo.s_BuffEffectType);
+    // Keyed by the buff itself, not by its BuffEffect_*.bmd effect type: that type is shared
+    // by whole families of buffs (all seals use type 24), so keying by it let only the first
+    // seal have a timer and every further one showed no remaining time at all.
+    return eBuffTimeType(1005 + bufftype);
 }
 
 DWORD BuffTimeControl::GetBuffEventTime(eBuffTimeType bufftimetype)
@@ -100,7 +101,25 @@ void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
         return;
     }
 
-    if (IsBuffTime(bufftimetype)) return;
+    // s_CurBuffTime counts down in milliseconds, so a duration of more than ~49 days would
+    // wrap around. Buffs that long simply stay at the maximum the counter can hold.
+    const DWORD MaxBuffTimeInSeconds = 0xFFFFFFFF / 1000;
+    if (curbufftime > MaxBuffTimeInSeconds)
+    {
+        curbufftime = MaxBuffTimeInSeconds;
+    }
+
+    // The server is the authority on the remaining time: if the buff is already known - it
+    // resends its effects e.g. after a map change - the countdown is corrected instead of
+    // being left at the value the client happened to have.
+    auto existing = m_BuffTimeList.find(bufftimetype);
+    if (existing != m_BuffTimeList.end())
+    {
+        existing->second.s_BuffType = bufftype;
+        existing->second.s_CurBuffTime = curbufftime * 1000;
+        existing->second.s_EventBuffTime = GetTickCount();
+        return;
+    }
 
     BuffTimeInfo  buffinfo;
     buffinfo.s_BuffType = bufftype;

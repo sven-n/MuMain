@@ -2118,11 +2118,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_MuEditorCore.Initialize(g_sdlWindow);
 
     // Check for --editor command line flag
-    if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
+    // lpszCommandLine, not GetCommandLineW(): off Windows the latter is an empty
+    // stub (Core/Platform/WinUser.h), so the flag would never be seen there.
+    if (wcsstr(lpszCommandLine, L"--editor"))
     {
         g_MuEditorCore.SetEnabled(true);
-        fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
-        std::fflush(stderr);
+        MU_LOG_INFO(mu::log::Get("core"), "Editor: starting in editor mode (--editor flag detected)");
     }
 #endif
 

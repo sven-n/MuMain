@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Name" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="Two-Hand" xml:space="preserve">
+    <value>Hai Tay</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Cấp</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>Ô</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Kỹ Năng</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Rộng</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Cao</value>
+  </data>
+  <data name="Min Damage" xml:space="preserve">
+    <value>ST Min</value>
+  </data>
+  <data name="Max Damage" xml:space="preserve">
+    <value>ST Max</value>
+  </data>
+  <data name="Block Rate" xml:space="preserve">
+    <value>Tỷ Lệ Đỡ</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Phòng Thủ</value>
+  </data>
+  <data name="Magic Defense" xml:space="preserve">
+    <value>Phòng Thủ Phép</value>
+  </data>
+  <data name="Attack Speed" xml:space="preserve">
+    <value>Tốc Độ Đánh</value>
+  </data>
+  <data name="Move Speed" xml:space="preserve">
+    <value>Tốc Độ Di Chuyển</value>
+  </data>
+  <data name="Durability" xml:space="preserve">
+    <value>Độ Bền</value>
+  </data>
+  <data name="Magic Durability" xml:space="preserve">
+    <value>Độ Bền Phép</value>
+  </data>
+  <data name="Magic Power" xml:space="preserve">
+    <value>Sức Mạnh Phép</value>
+  </data>
+  <data name="Req Strength" xml:space="preserve">
+    <value>YC Sức Mạnh</value>
+  </data>
+  <data name="Req Dexterity" xml:space="preserve">
+    <value>YC Nhanh Nhẹn</value>
+  </data>
+  <data name="Req Energy" xml:space="preserve">
+    <value>YC Năng Lượng</value>
+  </data>
+  <data name="Req Vitality" xml:space="preserve">
+    <value>YC Thể Lực</value>
+  </data>
+  <data name="Req Leadership" xml:space="preserve">
+    <value>YC Lãnh Đạo</value>
+  </data>
+  <data name="Req Level" xml:space="preserve">
+    <value>YC Cấp</value>
+  </data>
+  <data name="Sell Value" xml:space="preserve">
+    <value>Giá Bán</value>
+  </data>
+  <data name="Buy Price" xml:space="preserve">
+    <value>Giá Mua</value>
+  </data>
+  <data name="Attack Type" xml:space="preserve">
+    <value>Loại Tấn Công</value>
+  </data>
+  <data name="DW/SM" xml:space="preserve">
+    <value>DW/SM</value>
+  </data>
+  <data name="DK/BK" xml:space="preserve">
+    <value>DK/BK</value>
+  </data>
+  <data name="ELF/ME" xml:space="preserve">
+    <value>ELF/ME</value>
+  </data>
+  <data name="MG/DM" xml:space="preserve">
+    <value>MG/DM</value>
+  </data>
+  <data name="DL/LE" xml:space="preserve">
+    <value>DL/LE</value>
+  </data>
+  <data name="SUM/BS" xml:space="preserve">
+    <value>SUM/BS</value>
+  </data>
+  <data name="RF/FM" xml:space="preserve">
+    <value>RF/FM</value>
+  </data>
+  <data name="Ice Resistance" xml:space="preserve">
+    <value>Kháng Băng</value>
+  </data>
+  <data name="Poison Resistance" xml:space="preserve">
+    <value>Kháng Độc</value>
+  </data>
+  <data name="Lightning Resistance" xml:space="preserve">
+    <value>Kháng Sét</value>
+  </data>
+  <data name="Fire Resistance" xml:space="preserve">
+    <value>Kháng Lửa</value>
+  </data>
+  <data name="Earth Resistance" xml:space="preserve">
+    <value>Kháng Đất</value>
+  </data>
+  <data name="Wind Resistance" xml:space="preserve">
+    <value>Kháng Gió</value>
+  </data>
+  <data name="Water Resistance" xml:space="preserve">
+    <value>Kháng Nước</value>
+  </data>
+  <data name="Resistance 7" xml:space="preserve">
+    <value>Kháng 7</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Sát Thương</value>
+  </data>
+  <data name="Mana" xml:space="preserve">
+    <value>Mana</value>
+  </data>
+  <data name="AG Cost" xml:space="preserve">
+    <value>Tiêu Hao AG</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Tầm Đánh</value>
+  </data>
+  <data name="Cooldown" xml:space="preserve">
+    <value>Hồi Chiêu</value>
+  </data>
+  <data name="Mastery Type" xml:space="preserve">
+    <value>Loại Mastery</value>
+  </data>
+  <data name="Use Type" xml:space="preserve">
+    <value>Loại Sử Dụng</value>
+  </data>
+  <data name="Brand" xml:space="preserve">
+    <value>Nhãn Hiệu</value>
+  </data>
+  <data name="Kill Count" xml:space="preserve">
+    <value>Số Kill</value>
+  </data>
+  <data name="Rank" xml:space="preserve">
+    <value>Hạng</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Biểu Tượng</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Loại</value>
+  </data>
+  <data name="Item Skill" xml:space="preserve">
+    <value>Kỹ Năng Item</value>
+  </data>
+  <data name="Is Damage" xml:space="preserve">
+    <value>Gây Sát Thương</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>Hiệu Ứng</value>
+  </data>
+  <data name="Duty 0" xml:space="preserve">
+    <value>Nhiệm Vụ 0</value>
+  </data>
+  <data name="Duty 1" xml:space="preserve">
+    <value>Nhiệm Vụ 1</value>
+  </data>
+  <data name="Duty 2" xml:space="preserve">
+    <value>Nhiệm Vụ 2</value>
+  </data>
+</root>

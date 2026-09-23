@@ -829,7 +829,7 @@ if (DOTNET_EXECUTABLE)
               "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
               "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c Release
               -- --input "${RESX_INPUT_DIR_NATIVE}" --output "${RESX_OUTPUT_DIR_NATIVE}"
-              --wide-groups Game,Dialog
+              --wide-groups Game,Dialog,Items
       DEPENDS ${RESX_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
       COMMENT "ResxGen: regenerating C++ I18N accessors from .resx"
       VERBATIM

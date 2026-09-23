@@ -51,6 +51,51 @@ namespace
         return static_cast<int>(GetMasterSkillValue(firstSkill, secondSkill));
     }
 
+    using SUGGEST_PRESET = SEASON3B::CNewUICharacterInfoWindow::SUGGEST_PRESET;
+
+    // Stat weights per build, in the STAT_* order: str, agi, vit, ene, cmd.
+    // Only the ratio between the weights matters - the free level-up points
+    // are split proportionally, so {4,1,1,0,0} means "4 str for every agi/vit".
+    const SUGGEST_PRESET g_aPresetWizard[] = {
+        { &I18N::Game::PvE,        { 0, 1, 1, 4, 0 } },
+        { &I18N::Game::PvP,        { 0, 2, 2, 3, 0 } },
+        { &I18N::Game::FullEnergy, { 0, 0, 0, 1, 0 } },
+    };
+
+    const SUGGEST_PRESET g_aPresetKnight[] = {
+        { &I18N::Game::PvE,          { 4, 1, 1, 0, 0 } },
+        { &I18N::Game::PvP,          { 3, 2, 2, 0, 0 } },
+        { &I18N::Game::FullStrength, { 1, 0, 0, 0, 0 } },
+    };
+
+    const SUGGEST_PRESET g_aPresetElf[] = {
+        { &I18N::Game::PvE,     { 1, 4, 0, 1, 0 } },
+        { &I18N::Game::PvP,     { 1, 3, 2, 1, 0 } },
+        { &I18N::Game::Support, { 0, 1, 1, 4, 0 } },
+    };
+
+    const SUGGEST_PRESET g_aPresetMagicGladiator[] = {
+        { &I18N::Game::PvE, { 3, 1, 1, 2, 0 } },
+        { &I18N::Game::PvP, { 2, 2, 2, 2, 0 } },
+    };
+
+    const SUGGEST_PRESET g_aPresetDarkLord[] = {
+        { &I18N::Game::PvE,         { 2, 1, 1, 1, 2 } },
+        { &I18N::Game::PvP,         { 2, 2, 2, 1, 2 } },
+        { &I18N::Game::FullCommand, { 0, 0, 0, 0, 1 } },
+    };
+
+    const SUGGEST_PRESET g_aPresetSummoner[] = {
+        { &I18N::Game::PvE,        { 0, 1, 1, 4, 0 } },
+        { &I18N::Game::PvP,        { 0, 2, 2, 3, 0 } },
+        { &I18N::Game::FullEnergy, { 0, 0, 0, 1, 0 } },
+    };
+
+    const SUGGEST_PRESET g_aPresetRageFighter[] = {
+        { &I18N::Game::PvE, { 3, 1, 2, 0, 0 } },
+        { &I18N::Game::PvP, { 2, 2, 3, 0, 0 } },
+    };
+
     float ClampDefenseSuccessRateMultiplier(float multiplier)
     {
         if (multiplier < 1.0f)
@@ -66,6 +111,12 @@ SEASON3B::CNewUICharacterInfoWindow::CNewUICharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
+    m_iSuggestPreset = 0;
+    m_eSuggestPresetClass = CLASS_UNDEFINED;
+    for (int i = 0; i < BTN_STAT_COUNT; ++i)
+    {
+        m_aSuggestPoint[i] = 0;
+    }
 }
 
 SEASON3B::CNewUICharacterInfoWindow::~CNewUICharacterInfoWindow()
@@ -112,20 +163,34 @@ void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
     m_BtnStat[STAT_CHARISMA].ChangeButtonInfo(m_Pos.x + 160, m_Pos.y + HEIGHT_CHARISMA + 2, 16, 15);
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
+    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + HEIGHT_BOTTOM_BTN, 36, 29);
     mu_swprintf(strText, I18N::Game::CloseS, L"C");
     m_BtnExit.ChangeToolTipText(strText, true);
     m_BtnQuest.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_QUEST, false);
-    m_BtnQuest.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
+    m_BtnQuest.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + HEIGHT_BOTTOM_BTN, 36, 29);
     mu_swprintf(strText, L"%ls(%ls)", I18N::Game::Quest, L"T");
     m_BtnQuest.ChangeToolTipText(strText, true);
     m_BtnPet.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_PET, false);
-    m_BtnPet.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
+    m_BtnPet.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + HEIGHT_BOTTOM_BTN, 36, 29);
     m_BtnPet.ChangeToolTipText(&I18N::Game::Pet, true);
 
     m_BtnMasterLevel.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_MASTERLEVEL, false);
-    m_BtnMasterLevel.ChangeButtonInfo(m_Pos.x + 124, m_Pos.y + 392, 36, 29);
+    m_BtnMasterLevel.ChangeButtonInfo(m_Pos.x + 124, m_Pos.y + HEIGHT_BOTTOM_BTN, 36, 29);
     m_BtnMasterLevel.ChangeToolTipText(&I18N::Game::MasterSkillTreeA, true);
+
+    // Suggestion bar, in the gap between the last stat row and the bottom
+    // button strip. The Charisma row above it only exists for the Dark Lord.
+    m_BtnSuggestPreset.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_SUGGEST, true);
+    m_BtnSuggestPreset.ChangeButtonInfo(m_Pos.x + 16, m_Pos.y + HEIGHT_SUGGEST_BAR, 53, 23);
+    m_BtnSuggestPreset.ChangeTextBackColor(RGBA(255, 255, 255, 0));
+    m_BtnSuggestPreset.ChangeText(&I18N::Game::Suggest);
+    m_BtnSuggestPreset.ChangeToolTipText(&I18N::Game::ClickToSwitchBuildPreset, true);
+
+    m_BtnSuggestApply.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_SUGGEST, true);
+    m_BtnSuggestApply.ChangeButtonInfo(m_Pos.x + 121, m_Pos.y + HEIGHT_SUGGEST_BAR, 53, 23);
+    m_BtnSuggestApply.ChangeTextBackColor(RGBA(255, 255, 255, 0));
+    m_BtnSuggestApply.ChangeText(&I18N::Game::Apply);
+    m_BtnSuggestApply.ChangeToolTipText(&I18N::Game::AddAllPointsUsingTheSuggestedBuild, true);
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::Release()
@@ -189,6 +254,23 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
         }
     }
 
+    int iPresetCount = 0;
+    const bool bHasPreset = (GetPresetTable(iPresetCount) != NULL && iPresetCount > 0);
+
+    if (bHasPreset && m_BtnSuggestPreset.UpdateMouseEvent() == true)
+    {
+        CycleSuggestPreset();
+        PlayBuffer(SOUND_CLICK01);
+        return true;
+    }
+
+    if (bHasPreset && m_iSuggestPreset > 0 && m_BtnSuggestApply.UpdateMouseEvent() == true)
+    {
+        ApplySuggestedPoints();
+        PlayBuffer(SOUND_CLICK01);
+        return true;
+    }
+
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHARACTER);
@@ -235,16 +317,203 @@ bool SEASON3B::CNewUICharacterInfoWindow::UpdateKeyEvent()
 
 bool SEASON3B::CNewUICharacterInfoWindow::Update()
 {
+    if (IsVisible() == false)
+    {
+        // Hero/CharacterAttribute are not ours to read outside the game scene.
+        return true;
+    }
+
+    // Switching character (or class) invalidates the preset table the index
+    // points into, so drop the selection instead of reading the wrong row.
+    if (m_eSuggestPresetClass != Hero->Class)
+    {
+        ResetSuggestion();
+        m_eSuggestPresetClass = static_cast<CLASS_TYPE>(Hero->Class);
+    }
+
+    CalcSuggestion();
+
     return true;
+}
+
+int SEASON3B::CNewUICharacterInfoWindow::GetStatCount() const
+{
+    return (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
+        ? BTN_STAT_COUNT
+        : BTN_STAT_COUNT - 1;
+}
+
+const SEASON3B::CNewUICharacterInfoWindow::SUGGEST_PRESET*
+SEASON3B::CNewUICharacterInfoWindow::GetPresetTable(int& iCount) const
+{
+    switch (gCharacterManager.GetBaseClass(Hero->Class))
+    {
+    case CLASS_WIZARD:
+        iCount = static_cast<int>(_countof(g_aPresetWizard));
+        return g_aPresetWizard;
+    case CLASS_KNIGHT:
+        iCount = static_cast<int>(_countof(g_aPresetKnight));
+        return g_aPresetKnight;
+    case CLASS_ELF:
+        iCount = static_cast<int>(_countof(g_aPresetElf));
+        return g_aPresetElf;
+    case CLASS_DARK:
+        iCount = static_cast<int>(_countof(g_aPresetMagicGladiator));
+        return g_aPresetMagicGladiator;
+    case CLASS_DARK_LORD:
+        iCount = static_cast<int>(_countof(g_aPresetDarkLord));
+        return g_aPresetDarkLord;
+    case CLASS_SUMMONER:
+        iCount = static_cast<int>(_countof(g_aPresetSummoner));
+        return g_aPresetSummoner;
+    case CLASS_RAGEFIGHTER:
+        iCount = static_cast<int>(_countof(g_aPresetRageFighter));
+        return g_aPresetRageFighter;
+    default:
+        break;
+    }
+
+    iCount = 0;
+    return NULL;
+}
+
+void SEASON3B::CNewUICharacterInfoWindow::ResetSuggestion()
+{
+    m_iSuggestPreset = 0;
+    m_BtnSuggestPreset.ChangeText(&I18N::Game::Suggest);
+
+    for (int i = 0; i < BTN_STAT_COUNT; ++i)
+    {
+        m_aSuggestPoint[i] = 0;
+    }
+}
+
+void SEASON3B::CNewUICharacterInfoWindow::CycleSuggestPreset()
+{
+    int iPresetCount = 0;
+    const SUGGEST_PRESET* pPresets = GetPresetTable(iPresetCount);
+
+    if (pPresets == NULL || iPresetCount <= 0)
+    {
+        ResetSuggestion();
+        return;
+    }
+
+    // 0 is "no suggestion", so the cycle runs off -> preset 1 -> ... -> off.
+    m_iSuggestPreset = (m_iSuggestPreset + 1) % (iPresetCount + 1);
+
+    if (m_iSuggestPreset == 0)
+    {
+        m_BtnSuggestPreset.ChangeText(&I18N::Game::Suggest);
+    }
+    else
+    {
+        m_BtnSuggestPreset.ChangeText(pPresets[m_iSuggestPreset - 1].s_pNameSlot);
+    }
+}
+
+void SEASON3B::CNewUICharacterInfoWindow::CalcSuggestion()
+{
+    for (int i = 0; i < BTN_STAT_COUNT; ++i)
+    {
+        m_aSuggestPoint[i] = 0;
+    }
+
+    int iPresetCount = 0;
+    const SUGGEST_PRESET* pPresets = GetPresetTable(iPresetCount);
+
+    if (m_iSuggestPreset <= 0 || pPresets == NULL || m_iSuggestPreset > iPresetCount)
+    {
+        return;
+    }
+
+    const int iStatCount = GetStatCount();
+    const int* pWeight = pPresets[m_iSuggestPreset - 1].s_aWeight;
+
+    int iTotalWeight = 0;
+    for (int i = 0; i < iStatCount; ++i)
+    {
+        iTotalWeight += pWeight[i];
+    }
+
+    if (iTotalWeight <= 0)
+    {
+        return;
+    }
+
+    const int iFreePoint = CharacterAttribute->LevelUpPoint;
+    if (iFreePoint <= 0)
+    {
+        return;
+    }
+
+    // Largest remainder: floor each share first, then hand the leftover points
+    // to the stats with the biggest fractional part so the split always adds
+    // up to exactly iFreePoint.
+    int iAssigned = 0;
+    int aRemainder[BTN_STAT_COUNT] = { 0 };
+    for (int i = 0; i < iStatCount; ++i)
+    {
+        m_aSuggestPoint[i] = (iFreePoint * pWeight[i]) / iTotalWeight;
+        aRemainder[i] = (iFreePoint * pWeight[i]) % iTotalWeight;
+        iAssigned += m_aSuggestPoint[i];
+    }
+
+    // At most one extra point per stat can be left over, so a single pass
+    // handing them to the largest remainders exhausts the pool.
+    while (iAssigned < iFreePoint)
+    {
+        int iBest = -1;
+        for (int i = 0; i < iStatCount; ++i)
+        {
+            if (aRemainder[i] > 0 && (iBest < 0 || aRemainder[i] > aRemainder[iBest]))
+            {
+                iBest = i;
+            }
+        }
+
+        if (iBest < 0)
+        {
+            break;
+        }
+
+        ++m_aSuggestPoint[iBest];
+        aRemainder[iBest] = 0;
+        ++iAssigned;
+    }
+}
+
+void SEASON3B::CNewUICharacterInfoWindow::ApplySuggestedPoints()
+{
+    if (m_iSuggestPreset <= 0 || CharacterAttribute->LevelUpPoint <= 0)
+    {
+        return;
+    }
+
+    // One packet per stat instead of one per point: the server adds the whole
+    // amount in one go and answers with a single stat increase response.
+    for (int i = 0; i < BTN_STAT_COUNT; ++i)
+    {
+        if (m_aSuggestPoint[i] <= 0)
+        {
+            continue;
+        }
+
+        SocketClient->ToGameServer()->SendIncreaseCharacterStatPointMultiple(
+            static_cast<CharacterStatAttribute>(i), static_cast<uint16_t>(m_aSuggestPoint[i]));
+    }
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 {
-    RenderImage(IMAGE_CHAINFO_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
+    RenderImage(IMAGE_CHAINFO_BACK, m_Pos.x, m_Pos.y, 190.f, static_cast<float>(CHAINFO_WINDOW_HEIGHT));
     RenderImage(IMAGE_CHAINFO_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_CHAINFO_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CHAINFO_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CHAINFO_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
+    // The side art is 21x320; stretch it over the (slightly taller) gap
+    // between the top and bottom frame pieces instead of repeating it.
+    constexpr float SideHeight = static_cast<float>(CHAINFO_WINDOW_HEIGHT - 64 - 45);
+    RenderImageStretch(IMAGE_CHAINFO_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, SideHeight, 0.f, 0.f, 21.f, 320.f);
+    RenderImageStretch(IMAGE_CHAINFO_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, SideHeight, 0.f, 0.f, 21.f, 320.f);
+    RenderImage(IMAGE_CHAINFO_BOTTOM, m_Pos.x, m_Pos.y + CHAINFO_WINDOW_HEIGHT - 45, 190.f, 45.f);
 
     constexpr unsigned int SummaryBackdropColor = 0x4D000000u;
     RenderColorQuadARGB(m_Pos.x + 12, m_Pos.y + 48, 160, 66, SummaryBackdropColor);
@@ -285,6 +554,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::Render()
     EnableAlphaTest();
     RenderFrame();
     RenderTexts();
+    RenderSuggestion();
     RenderButtons();
     DisableAlphaBlend();
     return true;
@@ -1525,6 +1795,43 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     }
 }
 
+void SEASON3B::CNewUICharacterInfoWindow::RenderSuggestion()
+{
+    if (m_iSuggestPreset <= 0)
+    {
+        return;
+    }
+
+    const int aRowY[BTN_STAT_COUNT] = {
+        HEIGHT_STRENGTH, HEIGHT_DEXTERITY, HEIGHT_VITALITY, HEIGHT_ENERGY, HEIGHT_CHARISMA
+    };
+
+    const int iStatCount = GetStatCount();
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(120, 255, 120, 255);
+    g_pRenderText->SetBgColor(0, 0, 0, 0);
+
+    for (int i = 0; i < iStatCount; ++i)
+    {
+        if (m_aSuggestPoint[i] <= 0)
+        {
+            continue;
+        }
+
+        wchar_t strSuggest[32];
+        mu_swprintf(strSuggest, L"+%d", m_aSuggestPoint[i]);
+
+        // Backdrop: the stat value next to it is centred and can be five
+        // digits wide, so the badge needs to stay readable on top of it.
+        constexpr unsigned int BadgeColor = 0xB0000000u;
+        RenderColorQuadARGB(m_Pos.x + 128, m_Pos.y + aRowY[i] + 4, 30, 14, BadgeColor);
+        g_pRenderText->RenderText(m_Pos.x + 128, m_Pos.y + aRowY[i] + 5, strSuggest, 30, 0, RT3_SORT_CENTER);
+    }
+
+    g_pRenderText->SetTextColor(255, 255, 255, 255);
+}
+
 void SEASON3B::CNewUICharacterInfoWindow::RenderButtons()
 {
     int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -1550,6 +1857,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderButtons()
     m_BtnQuest.Render();
     m_BtnPet.Render();
     m_BtnMasterLevel.Render();
+
+    int iPresetCount = 0;
+    if (GetPresetTable(iPresetCount) != NULL && iPresetCount > 0)
+    {
+        m_BtnSuggestPreset.Render();
+
+        if (m_iSuggestPreset > 0)
+        {
+            m_BtnSuggestApply.Render();
+        }
+    }
 }
 
 float SEASON3B::CNewUICharacterInfoWindow::GetLayerDepth()
@@ -1581,10 +1899,12 @@ void SEASON3B::CNewUICharacterInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_chainfo_btn_quest.tga", IMAGE_CHAINFO_BTN_QUEST, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_chainfo_btn_pet.tga", IMAGE_CHAINFO_BTN_PET, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_chainfo_btn_master.tga", IMAGE_CHAINFO_BTN_MASTERLEVEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_CHAINFO_BTN_SUGGEST, GL_LINEAR);
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::UnloadImages()
 {
+    DeleteBitmap(IMAGE_CHAINFO_BTN_SUGGEST);
     DeleteBitmap(IMAGE_CHAINFO_BTN_MASTERLEVEL);
     DeleteBitmap(IMAGE_CHAINFO_BTN_PET);
     DeleteBitmap(IMAGE_CHAINFO_BTN_QUEST);

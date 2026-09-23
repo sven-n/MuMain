@@ -43,6 +43,7 @@ internal static class CppEmitter
             ["ru"]    = "Русский",
             ["tl"]    = "Tagalog",
             ["uk"]    = "Українська",
+            ["vi"]    = "Tiếng Việt",
             ["zh-TW"] = "繁體中文",
         };
 

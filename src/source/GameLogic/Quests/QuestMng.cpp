@@ -18,6 +18,12 @@
 
 #define	QM_QUESTWORDS_FILE			std::wstring(L"Data\\Local\\"+g_strSelectedML+L"\\QuestWords_"+g_strSelectedML+L".bmd").c_str()
 
+// GetItemName() writes an unbounded item name; MAX_ITEM_NAME is the widest a
+// single name can be and the localized names (I18N::Items) use far more of that
+// budget than the English ones did, so size the scratch buffers for the worst
+// case instead of the 32 wide chars the English names happened to fit in.
+constexpr int QM_ITEM_NAME_BUFFER = MAX_ITEM_NAME;
+
 CQuestMng g_QuestMng;
 
 CQuestMng::CQuestMng()
@@ -486,7 +492,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 break;
             case QUEST_REQUEST_ITEM:
             {
-                wchar_t szItemName[32];
+                wchar_t szItemName[QM_ITEM_NAME_BUFFER];
                 ::GetItemName((int)pRequestInfo->m_pItem->Type,
                     (pRequestInfo->m_pItem->Level, szItemName);
                 ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
@@ -559,7 +565,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            wchar_t szItemName[32];
+            wchar_t szItemName[QM_ITEM_NAME_BUFFER];
             ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
                 szItemName);
             ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
@@ -751,7 +757,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 break;
 
             case QUEST_REWARD_ITEM:
-                wchar_t szItemName[32];
+                wchar_t szItemName[QM_ITEM_NAME_BUFFER];
                 ::GetItemName((int)pRewardInfo->m_pItem->Type, pRewardInfo->m_pItem->Level,
                     szItemName);
                 ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu",

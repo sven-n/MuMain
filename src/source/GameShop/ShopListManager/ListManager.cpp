@@ -62,8 +62,11 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
     this->m_ListManagerInfo.m_Version = Version;
     this->m_ListManagerInfo.m_dwDownloadMaxTime = dwDownloadMaxTime;
 
+    // The caller spells the local path the Windows way. std::filesystem doesn't
+    // treat a backslash as a separator on POSIX, so it would create one directory
+    // with the separators in its name instead of the folder tree.
     std::error_code error;
-    std::filesystem::create_directories(std::filesystem::path(LocalPath), error);
+    std::filesystem::create_directories(std::filesystem::path(mu_narrow_path(LocalPath)), error);
 
     const wchar_t separator = std::filesystem::path::preferred_separator;
     if (!this->m_ListManagerInfo.m_strLocalPath.empty() && this->m_ListManagerInfo.m_strLocalPath.back() != separator)

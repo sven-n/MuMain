@@ -50,6 +50,11 @@ public:
     bool skillVScharactorCheck(const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo);
     bool AreSkillAttributeRequirementsMet(ActionSkillType skilltype);
 
+    // The hero's current stats, and a skill's Skill.bmd requirements, in the
+    // comparable form used by the requirements cache.
+    DemendConditionInfo BuildHeroConditionInfo() const;
+    DemendConditionInfo BuildSkillConditionInfo(ActionSkillType baseSkill);
+
     void InvalidateSkillAttributeRequirementsCache();
     void InitializeSkillAttributeRequirementsCache();
 

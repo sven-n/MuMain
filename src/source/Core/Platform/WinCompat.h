@@ -71,6 +71,18 @@ inline std::string mu_narrow_path(const char* path)
     return result;
 }
 
+// Path for opening a file directly with the C++ standard library, as opposed to
+// one of the Win32 shims. On Windows there is nothing to correct.
+inline std::string mu_open_path(const wchar_t* path)
+{
+    return mu_narrow_path(path);
+}
+
+inline std::string mu_open_path(const std::wstring& path)
+{
+    return mu_narrow_path(path.c_str());
+}
+
 #else // ---- non-Windows: minimal Win32 type shims -------------------------
 
 #include <cstdint>
@@ -78,6 +90,8 @@ inline std::string mu_narrow_path(const char* path)
 #include <cstring> // memset for ZeroMemory
 #include <algorithm>
 #include <string>
+
+#include "Core/Platform/PathResolve.h" // MuResolvePath (Windows-spelled asset paths)
 #include <type_traits> // underlying_type for DEFINE_ENUM_FLAG_OPERATORS
 
 // Fixed-width scalar aliases. Widths match the Windows definitions (DWORD/LONG
@@ -197,6 +211,25 @@ inline std::string mu_narrow_path(const char* path)
     std::string result = path == nullptr ? "" : path;
     std::replace(result.begin(), result.end(), '\\', '/');
     return result;
+}
+
+// Path for opening a file directly with the C++ standard library, as opposed to
+// one of the Win32 shims.
+//
+// mu_narrow_path only flips the separators. The shims additionally correct the
+// case of every component, so a path which GetFileAttributes reports as
+// existing can still fail to open through std::ifstream. Code which mixes both
+// then draws the wrong conclusion - the in-game shop for example took the failed
+// open for a broken download and deleted its script files. Use this for every
+// std::ifstream/std::ofstream path.
+inline std::string mu_open_path(const wchar_t* path)
+{
+    return MuResolvePath(mu_narrow_path(path).c_str());
+}
+
+inline std::string mu_open_path(const std::wstring& path)
+{
+    return mu_open_path(path.c_str());
 }
 
 // MSVC fixed-width keyword aliases (gcc/clang lack these). Defined as macros,

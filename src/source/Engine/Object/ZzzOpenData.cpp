@@ -33,6 +33,7 @@
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/Translation/ItemNames.h"
 #include "Network/Server/SocketSystem.h"
 
 ///////////////////////////////////////////
@@ -5609,6 +5610,12 @@ void OpenBasicData(HDC hDC)
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_ItemDataHandler.Load(Text);
+
+    // Item names come from I18N::Items (src/Localization/Items.*.resx) and
+    // override whatever the .bmd carried, so they follow the Option window's
+    // language dropdown instead of the data file's language. The .bmd stays
+    // the source of every other item attribute.
+    Data::Items::Names::Initialize();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);

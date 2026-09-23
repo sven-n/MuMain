@@ -1,0 +1,441 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Save Items" xml:space="preserve">
+    <value>Lưu Item</value>
+  </data>
+  <data name="Save Skills" xml:space="preserve">
+    <value>Lưu Kỹ Năng</value>
+  </data>
+  <data name="Export as S6E3" xml:space="preserve">
+    <value>Xuất dưới dạng S6E3</value>
+  </data>
+  <data name="Export as CSV" xml:space="preserve">
+    <value>Xuất dưới dạng CSV</value>
+  </data>
+  <data name="Export Skills as CSV" xml:space="preserve">
+    <value>Xuất Kỹ Năng dưới dạng CSV</value>
+  </data>
+  <data name="Columns" xml:space="preserve">
+    <value>Cột</value>
+  </data>
+  <data name="Select All" xml:space="preserve">
+    <value>Chọn Tất Cả</value>
+  </data>
+  <data name="Unselect All" xml:space="preserve">
+    <value>Bỏ Chọn Tất Cả</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Save completed successfully!" xml:space="preserve">
+    <value>Lưu thành công!</value>
+  </data>
+  <data name="Failed to save items!" xml:space="preserve">
+    <value>Lưu Item thất bại!</value>
+  </data>
+  <data name="Skills saved successfully!" xml:space="preserve">
+    <value>Lưu Kỹ Năng thành công!</value>
+  </data>
+  <data name="Failed to save skills!" xml:space="preserve">
+    <value>Lưu Kỹ Năng thất bại!</value>
+  </data>
+  <data name="S6E3 export completed successfully!" xml:space="preserve">
+    <value>Xuất S6E3 thành công!</value>
+  </data>
+  <data name="Failed to export as S6E3 format!" xml:space="preserve">
+    <value>Xuất dưới dạng S6E3 thất bại!</value>
+  </data>
+  <data name="CSV export completed successfully!" xml:space="preserve">
+    <value>Xuất CSV thành công!</value>
+  </data>
+  <data name="Failed to export as CSV!" xml:space="preserve">
+    <value>Xuất CSV thất bại!</value>
+  </data>
+  <data name="Skills exported as CSV successfully!" xml:space="preserve">
+    <value>Xuất Kỹ Năng dưới dạng CSV thành công!</value>
+  </data>
+  <data name="Failed to export skills as CSV!" xml:space="preserve">
+    <value>Xuất Kỹ Năng dưới dạng CSV thất bại!</value>
+  </data>
+  <data name="File not found: {0}" xml:space="preserve">
+    <value>Không tìm thấy file: {0}</value>
+  </data>
+  <data name="Invalid index: {0}" xml:space="preserve">
+    <value>Chỉ số không hợp lệ: {0}</value>
+  </data>
+  <data name="Error: Index {0} already in use!" xml:space="preserve">
+    <value>Lỗi: Chỉ số {0} đã được sử dụng!</value>
+  </data>
+  <data name="Search:" xml:space="preserve">
+    <value>Tìm kiếm:</value>
+  </data>
+  <data name="Freeze Index/Name" xml:space="preserve">
+    <value>Ghim Chỉ Số/Tên</value>
+  </data>
+  <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
+    <value>Chưa chọn cột nào. Nhấn 'Cột' để hiển thị cột.</value>
+  </data>
+  <data name="Index" xml:space="preserve">
+    <value>Chỉ Số</value>
+  </data>
+  <data name="Toggle Column Visibility:" xml:space="preserve">
+    <value>Bật/Tắt Hiển Thị Cột:</value>
+  </data>
+  <data name="Items saved successfully!" xml:space="preserve">
+    <value>Lưu Item thành công!</value>
+  </data>
+  <data name="Exported as legacy format successfully!" xml:space="preserve">
+    <value>Xuất theo định dạng cũ thành công!</value>
+  </data>
+  <data name="Failed to export as legacy format!" xml:space="preserve">
+    <value>Xuất theo định dạng cũ thất bại!</value>
+  </data>
+  <data name="Items exported as CSV successfully!" xml:space="preserve">
+    <value>Xuất Item dưới dạng CSV thành công!</value>
+  </data>
+  <data name="Failed to export item attributes as CSV!" xml:space="preserve">
+    <value>Xuất thuộc tính Item dưới dạng CSV thất bại!</value>
+  </data>
+  <data name="Failed to export skill attributes as CSV!" xml:space="preserve">
+    <value>Xuất thuộc tính Kỹ Năng dưới dạng CSV thất bại!</value>
+  </data>
+  <data name="Skill Editor" xml:space="preserve">
+    <value>Trình Chỉnh Sửa Kỹ Năng</value>
+  </data>
+  <data name="Search Skills:" xml:space="preserve">
+    <value>Tìm Kỹ Năng:</value>
+  </data>
+  <data name="Item Editor" xml:space="preserve">
+    <value>Trình Chỉnh Sửa Item</value>
+  </data>
+  <data name="Dev Editor" xml:space="preserve">
+    <value>Trình Chỉnh Sửa Dev</value>
+  </data>
+  <data name="Scenes" xml:space="preserve">
+    <value>Cảnh</value>
+  </data>
+  <data name="Graphics" xml:space="preserve">
+    <value>Đồ Họa</value>
+  </data>
+  <data name="Login Scene" xml:space="preserve">
+    <value>Cảnh Đăng Nhập</value>
+  </data>
+  <data name="Character Scene" xml:space="preserve">
+    <value>Cảnh Chọn Nhân Vật</value>
+  </data>
+  <data name="Game Scene" xml:space="preserve">
+    <value>Cảnh Trong Game</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="Nothing here yet." xml:space="preserve">
+    <value>Chưa có gì ở đây.</value>
+  </data>
+  <data name="Switch to FreeFly" xml:space="preserve">
+    <value>Chuyển sang FreeFly</value>
+  </data>
+  <data name="Switch to Game Camera" xml:space="preserve">
+    <value>Chuyển sang Camera Game</value>
+  </data>
+  <data name="FreeFly" xml:space="preserve">
+    <value>FreeFly</value>
+  </data>
+  <data name="Spectating" xml:space="preserve">
+    <value>Đang Quan Sát</value>
+  </data>
+  <data name="Snap to Spectated" xml:space="preserve">
+    <value>Bám Theo Đối Tượng Quan Sát</value>
+  </data>
+  <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
+    <value>Mũi Tên/PgUp/PgDn=Di Chuyển  Chuột Phải=Nhìn  Shift=Nhanh</value>
+  </data>
+  <data name="Offset X" xml:space="preserve">
+    <value>Offset X</value>
+  </data>
+  <data name="Offset Y" xml:space="preserve">
+    <value>Offset Y</value>
+  </data>
+  <data name="Offset Z" xml:space="preserve">
+    <value>Offset Z</value>
+  </data>
+  <data name="Pitch" xml:space="preserve">
+    <value>Pitch</value>
+  </data>
+  <data name="Yaw" xml:space="preserve">
+    <value>Yaw</value>
+  </data>
+  <data name="Reset Offsets" xml:space="preserve">
+    <value>Đặt Lại Offset</value>
+  </data>
+  <data name="Resume" xml:space="preserve">
+    <value>Tiếp Tục</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Tạm Dừng</value>
+  </data>
+  <data name="Restart" xml:space="preserve">
+    <value>Khởi Động Lại</value>
+  </data>
+  <data name="Start Tour" xml:space="preserve">
+    <value>Bắt Đầu Tour</value>
+  </data>
+  <data name="Render Distances:" xml:space="preserve">
+    <value>Khoảng Cách Render:</value>
+  </data>
+  <data name="Terrain ViewFar" xml:space="preserve">
+    <value>Tầm Nhìn Xa Địa Hình</value>
+  </data>
+  <data name="Object Distance" xml:space="preserve">
+    <value>Khoảng Cách Vật Thể</value>
+  </data>
+  <data name="Reset Distances" xml:space="preserve">
+    <value>Đặt Lại Khoảng Cách</value>
+  </data>
+  <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
+    <value>Chuyển sang (hoặc quan sát) Default hoặc Orbital để chỉnh sửa override.</value>
+  </data>
+  <data name="Override Default Camera Config" xml:space="preserve">
+    <value>Ghi Đè Cấu Hình Camera Default</value>
+  </data>
+  <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
+    <value>Camera tương đối theo Hero, dùng cắt hình thang 2D được lập trình cứng.</value>
+  </data>
+  <data name="View Frustum" xml:space="preserve">
+    <value>View Frustum</value>
+  </data>
+  <data name="Far Plane" xml:space="preserve">
+    <value>Far Plane</value>
+  </data>
+  <data name="Camera Offset (world units, from hero)" xml:space="preserve">
+    <value>Offset Camera (đơn vị world, tính từ hero)</value>
+  </data>
+  <data name="2D Culling Trapezoid Width" xml:space="preserve">
+    <value>Chiều Rộng Hình Thang Cắt 2D</value>
+  </data>
+  <data name="Bottom (near) x" xml:space="preserve">
+    <value>Đáy (gần) x</value>
+  </data>
+  <data name="Top (far) x" xml:space="preserve">
+    <value>Đỉnh (xa) x</value>
+  </data>
+  <data name="Fog" xml:space="preserve">
+    <value>Sương Mù</value>
+  </data>
+  <data name="Override Fog" xml:space="preserve">
+    <value>Ghi Đè Sương Mù</value>
+  </data>
+  <data name="Fog On" xml:space="preserve">
+    <value>Bật Sương Mù</value>
+  </data>
+  <data name="ON" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="Fog Start %" xml:space="preserve">
+    <value>Fog Start %</value>
+  </data>
+  <data name="Fog End %" xml:space="preserve">
+    <value>Fog End %</value>
+  </data>
+  <data name="Reset to Camera Defaults" xml:space="preserve">
+    <value>Đặt Lại Về Camera Mặc Định</value>
+  </data>
+  <data name="Override Orbital Camera Config" xml:space="preserve">
+    <value>Ghi Đè Cấu Hình Camera Orbital</value>
+  </data>
+  <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
+    <value>Điều chỉnh khối cắt địa hình 2D; không ảnh hưởng FOV / far clip.</value>
+  </data>
+  <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
+    <value>Hình Thang Cắt 2D (đơn vị world)</value>
+  </data>
+  <data name="Far distance" xml:space="preserve">
+    <value>Khoảng Cách Xa</value>
+  </data>
+  <data name="Top (far) width" xml:space="preserve">
+    <value>Chiều Rộng Đỉnh (xa)</value>
+  </data>
+  <data name="Near distance" xml:space="preserve">
+    <value>Khoảng Cách Gần</value>
+  </data>
+  <data name="Bottom (near) width" xml:space="preserve">
+    <value>Chiều Rộng Đáy (gần)</value>
+  </data>
+  <data name="View-aligned: follows camera yaw + pitch (tracks what you look at)." xml:space="preserve">
+    <value>Theo hướng nhìn: bám theo yaw + pitch của camera (theo dõi hướng bạn nhìn).</value>
+  </data>
+  <data name="Reset to Natural Pyramid" xml:space="preserve">
+    <value>Đặt Lại Về Kim Tự Tháp Tự Nhiên</value>
+  </data>
+  <data name="Debug Visualization:" xml:space="preserve">
+    <value>Hiển Thị Debug:</value>
+  </data>
+  <data name="Character Pick Boxes" xml:space="preserve">
+    <value>Hộp Chọn Nhân Vật</value>
+  </data>
+  <data name="Item Pick Boxes" xml:space="preserve">
+    <value>Hộp Chọn Item</value>
+  </data>
+  <data name="Item Cull Sphere" xml:space="preserve">
+    <value>Khối Cầu Cắt Item</value>
+  </data>
+  <data name="Tile Grid" xml:space="preserve">
+    <value>Lưới Ô</value>
+  </data>
+  <data name="Item Cull Radius" xml:space="preserve">
+    <value>Bán Kính Cắt Item</value>
+  </data>
+  <data name="Rendering:" xml:space="preserve">
+    <value>Render:</value>
+  </data>
+  <data name="Terrain" xml:space="preserve">
+    <value>Địa Hình</value>
+  </data>
+  <data name="Static Objects" xml:space="preserve">
+    <value>Vật Thể Tĩnh</value>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>Hiệu Ứng</value>
+  </data>
+  <data name="Dropped Items" xml:space="preserve">
+    <value>Item Rơi</value>
+  </data>
+  <data name="Weather" xml:space="preserve">
+    <value>Thời Tiết</value>
+  </data>
+  <data name="Item Labels" xml:space="preserve">
+    <value>Nhãn Item</value>
+  </data>
+  <data name="All ON" xml:space="preserve">
+    <value>Bật Tất Cả</value>
+  </data>
+  <data name="All OFF" xml:space="preserve">
+    <value>Tắt Tất Cả</value>
+  </data>
+  <data name="TODO - Not Working:" xml:space="preserve">
+    <value>TODO - Chưa Hoạt Động:</value>
+  </data>
+  <data name="Shaders" xml:space="preserve">
+    <value>Shader</value>
+  </data>
+  <data name="Skill Effects" xml:space="preserve">
+    <value>Hiệu Ứng Kỹ Năng</value>
+  </data>
+  <data name="Equipped Items" xml:space="preserve">
+    <value>Item Đang Trang Bị</value>
+  </data>
+  <data name="UI" xml:space="preserve">
+    <value>UI</value>
+  </data>
+  <data name="TODO - Not Implemented:" xml:space="preserve">
+    <value>TODO - Chưa Triển Khai:</value>
+  </data>
+  <data name="Hero" xml:space="preserve">
+    <value>Hero</value>
+  </data>
+  <data name="NPCs" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Monsters" xml:space="preserve">
+    <value>Quái Vật</value>
+  </data>
+  <data name="Graphics Debug Info" xml:space="preserve">
+    <value>Thông Tin Debug Đồ Họa</value>
+  </data>
+  <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
+    <value>CẢNH BÁO: Phát hiện kích thước cửa sổ không khớp!</value>
+  </data>
+  <data name="Copy Debug Info to Clipboard" xml:space="preserve">
+    <value>Sao Chép Thông Tin Debug Vào Clipboard</value>
+  </data>
+  <data name="(Paste in Discord/notepad)" xml:space="preserve">
+    <value>(Dán vào Discord/notepad)</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Mặc Định</value>
+  </data>
+  <data name="Orbital" xml:space="preserve">
+    <value>Orbital</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Không Xác Định</value>
+  </data>
+  <data name="Pos" xml:space="preserve">
+    <value>Vị Trí</value>
+  </data>
+  <data name="Tile" xml:space="preserve">
+    <value>Ô</value>
+  </data>
+  <data name="Tour" xml:space="preserve">
+    <value>Tour</value>
+  </data>
+  <data name="ACTIVE" xml:space="preserve">
+    <value>ĐANG HOẠT ĐỘNG</value>
+  </data>
+  <data name="INACTIVE" xml:space="preserve">
+    <value>KHÔNG HOẠT ĐỘNG</value>
+  </data>
+  <data name=" (PAUSED)" xml:space="preserve">
+    <value> (TẠM DỪNG)</value>
+  </data>
+  <data name="Near" xml:space="preserve">
+    <value>Gần</value>
+  </data>
+  <data name="Far" xml:space="preserve">
+    <value>Xa</value>
+  </data>
+  <data name="ViewFar" xml:space="preserve">
+    <value>ViewFar</value>
+  </data>
+  <data name="ProjFar" xml:space="preserve">
+    <value>ProjFar</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="Orbital Target" xml:space="preserve">
+    <value>Mục Tiêu Orbital</value>
+  </data>
+  <data name="Current Resolution" xml:space="preserve">
+    <value>Độ Phân Giải Hiện Tại</value>
+  </data>
+  <data name="OpenGL Viewport" xml:space="preserve">
+    <value>Viewport OpenGL</value>
+  </data>
+  <data name="Screen Rate" xml:space="preserve">
+    <value>Tần Số Màn Hình</value>
+  </data>
+  <data name="Window Mode" xml:space="preserve">
+    <value>Chế Độ Cửa Sổ</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>Cửa Sổ</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Toàn Màn Hình</value>
+  </data>
+  <data name="Actual Window Client" xml:space="preserve">
+    <value>Kích Thước Client Cửa Sổ Thực Tế</value>
+  </data>
+  <data name="Calculated Scale from Client" xml:space="preserve">
+    <value>Tỷ Lệ Tính Từ Client</value>
+  </data>
+  <data name="Debug info copied to clipboard" xml:space="preserve">
+    <value>Đã sao chép thông tin debug vào clipboard</value>
+  </data>
+</root>

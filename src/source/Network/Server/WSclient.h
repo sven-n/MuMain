@@ -3282,9 +3282,9 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lBuyItemPackageSeq;
-    long				lBuyItemDisplaySeq;
-    long				lBuyItemPriceSeq;
+    int32_t				lBuyItemPackageSeq;
+    int32_t				lBuyItemDisplaySeq;
+    int32_t				lBuyItemPriceSeq;
     WORD				wItemCode;
 }PMSG_CASHSHOP_BUYITEM_REQ, * LPPMSG_CASHSHOP_BUYITEM_REQ;
 
@@ -3296,7 +3296,7 @@ typedef struct
     PBMSG_HEADER2		h;
 
     BYTE				byResultCode;
-    long				lItemLeftCount;
+    int32_t				lItemLeftCount;
 }PMSG_CASHSHOP_BUYITEM_ANS, * LPPMSG_CASHSHOP_BUYITEM_ANS;
 
 
@@ -3308,7 +3308,7 @@ typedef struct
     PBMSG_HEADER2		h;
 
     BYTE				byResultCode;
-    long				lItemLeftCount;
+    int32_t				lItemLeftCount;
     double				dLimitedCash;
 }PMSG_CASHSHOP_GIFTSEND_ANS, * LPPMSG_CASHSHOP_GIFTSEND_ANS;
 
@@ -3341,11 +3341,11 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lStorageIndex;
-    long				lItemSeq;
-    long				lStorageGroupCode;
-    long				lProductSeq;
-    long				lPriceSeq;
+    int32_t				lStorageIndex;
+    int32_t				lItemSeq;
+    int32_t				lStorageGroupCode;
+    int32_t				lProductSeq;
+    int32_t				lPriceSeq;
     double				dCashPoint;
     char				chItemType;
 }PMSG_CASHSHOP_STORAGELIST, * LPPMSG_CASHSHOP_STORAGELIST;
@@ -3357,11 +3357,11 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lStorageIndex;
-    long				lItemSeq;
-    long				lStorageGroupCode;
-    long				lProductSeq;
-    long				lPriceSeq;
+    int32_t				lStorageIndex;
+    int32_t				lItemSeq;
+    int32_t				lStorageGroupCode;
+    int32_t				lProductSeq;
+    int32_t				lPriceSeq;
     double				dCashPoint;
     char				chItemType;
 
@@ -3410,7 +3410,7 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lPackageSeq;
+    int32_t				lPackageSeq;
 }PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ, * LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ;
 
 //----------------------------------------------------------------------------
@@ -3420,8 +3420,8 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lPackageSeq;
-    long				lLeftCount;
+    int32_t				lPackageSeq;
+    int32_t				lLeftCount;
 }PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS, * LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS;
 
 //----------------------------------------------------------------------------
@@ -3431,8 +3431,8 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lStorageSeq;
-    long				lStorageItemSeq;
+    int32_t				lStorageSeq;
+    int32_t				lStorageItemSeq;
     char				chStorageItemType;
 }PMSG_CASHSHOP_STORAGE_ITEM_THROW_REQ, * LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_REQ;
 
@@ -3453,8 +3453,8 @@ typedef struct
 {
     PBMSG_HEADER2		h;
 
-    long				lStorageSeq;
-    long				lStorageItemSeq;
+    int32_t				lStorageSeq;
+    int32_t				lStorageItemSeq;
 
     WORD				wItemCode;
     char				chStorageItemType;
@@ -3489,7 +3489,7 @@ typedef struct
 {
     PBMSG_HEADER2			h;
 
-    long				lEventCategorySeq;
+    int32_t				lEventCategorySeq;
 }PMSG_CASHSHOP_EVENTITEM_REQ, * LPPMSG_CASHSHOP_EVENTITEM_REQ;
 
 //----------------------------------------------------------------------------
@@ -3506,7 +3506,7 @@ typedef struct
 {
     PBMSG_HEADER2			h;
 
-    long				lPackageSeq[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
+    int32_t				lPackageSeq[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
 }PMSG_CASHSHOP_EVENTITEM_LIST, * LPPMSG_CASHSHOP_EVENTITEM_LIST;
 
 typedef struct
@@ -3519,6 +3519,31 @@ typedef struct
 }PMSG_CASHSHOP_BANNER_UPDATE, * LPPMSG_CASHSHOP_BANNER_UPDATE;
 
 #pragma pack(pop)
+
+// Wire size guards for the cash shop packets. These structs originally declared
+// their integer fields as `long`, which is 4 bytes on Windows but 8 on Linux, so
+// every one of them was oversized and decoded its fields at the wrong offsets --
+// the storage list silently dropped every item because it read ItemType past the
+// end of a 33 byte packet. tools/gen_wire_sizes.py can't cover these: it derives
+// its asserts from the published MUnique.OpenMU.Network.Packets NuGet package,
+// which doesn't contain the 0xD2 packets. The numbers below are the <Length> of
+// OpenMU/src/Network/Packets/ServerToClient/ServerToClientPackets.xml.
+static_assert(sizeof(PMSG_CASHSHOP_CASHPOINT_ANS) == 45, "wire size drift: CashShopPointInfo");
+static_assert(sizeof(PMSG_CASHSHOP_SHOPOPEN_ANS) == 5, "wire size drift: CashShopOpenStateResponse");
+static_assert(sizeof(PMSG_CASHSHOP_BUYITEM_ANS) == 9, "wire size drift: CashShopItemBuyResponse");
+static_assert(sizeof(PMSG_CASHSHOP_GIFTSEND_ANS) == 17, "wire size drift: CashShopItemGiftResponse");
+static_assert(sizeof(PMSG_CASHSHOP_STORAGECOUNT) == 12, "wire size drift: CashShopStorageItemCount");
+static_assert(sizeof(PMSG_CASHSHOP_CASHSEND_ANS) == 13, "wire size drift: CashShopCashGiftResponse");
+static_assert(sizeof(PMSG_CASHSHOP_ITEMBUY_CONFIRM_ANS) == 23, "wire size drift: CashShopBuyConfirmResponse");
+static_assert(sizeof(PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS) == 12, "wire size drift: CashShopItemLeftCount");
+static_assert(sizeof(PMSG_CASHSHOP_STORAGE_ITEM_THROW_ANS) == 5, "wire size drift: CashShopStorageItemDeleteResponse");
+static_assert(sizeof(PMSG_CASHSHOP_STORAGE_ITEM_USE_ANS) == 5, "wire size drift: CashShopStorageItemConsumeResponse");
+static_assert(sizeof(PMSG_CASHSHOP_VERSION_UPDATE) == 10, "wire size drift: CashShopVersionUpdate");
+static_assert(sizeof(PMSG_CASHSHOP_STORAGELIST) == 33, "wire size drift: CashShopStorageItem");
+static_assert(sizeof(PMSG_CASHSHOP_GIFTSTORAGELIST) == 244, "wire size drift: CashShopGiftStorageItem");
+static_assert(sizeof(PMSG_CASHSHOP_EVENTITEM_COUNT) == 6, "wire size drift: CashShopEventItemListCount");
+static_assert(sizeof(PMSG_CASHSHOP_EVENTITEM_LIST) == 40, "wire size drift: CashShopEventItemList");
+static_assert(sizeof(PMSG_CASHSHOP_BANNER_UPDATE) == 10, "wire size drift: CashShopBannerUpdate");
 
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
@@ -3537,7 +3562,7 @@ typedef struct
 
     WORD				wItemCode;
     WORD				wItemSlotIndex;
-    long				lExpireDate;
+    int32_t				lExpireDate;
 }PMSG_PERIODITEMEX_ITEMLIST, * LPPMSG_PERIODITEMEX_ITEMLIST;
 
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
