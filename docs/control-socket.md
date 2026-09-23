@@ -128,7 +128,13 @@ pending input rather than delivering it later. Cancellation is not a rollback:
 text or effects already delivered before cancellation remain. An abandoned
 held RmlUi click is cleared without activating the pressed element. Independent
 physical input continues to work; a physical press of the same button cancels
-an outstanding scripted click before that press is routed.
+an outstanding scripted click before that press is routed, returning a
+`failed` response naming the physical press; a lost window/UI delivery target
+instead reports `failed` with a target-disappeared message. The UI hover
+position after a *completed* scripted click remains at that injected pixel
+until the next physical mouse motion; the OS pointer itself never moves.
+A scripted key also uses the human's current physical modifiers for RmlUi
+navigation; focused portable fields receive the key without those modifiers.
 
 ## Events
 

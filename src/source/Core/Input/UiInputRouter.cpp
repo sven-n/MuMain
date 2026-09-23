@@ -23,10 +23,10 @@ namespace Core::Input
         return g_pUiInputConsumer;
     }
 
-    void CancelSyntheticMousePress(IUiInputConsumer* owner)
+    void CancelSyntheticMousePress(IUiInputConsumer* owner, unsigned char button, SDL_Window* window)
     {
         if (owner && owner == g_pUiInputConsumer)
-            owner->CancelSyntheticMousePress();
+            owner->CancelSyntheticMousePress(button, window);
     }
 
     bool IsMouseOverUI()

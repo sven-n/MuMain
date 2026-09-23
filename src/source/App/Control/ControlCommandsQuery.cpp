@@ -326,6 +326,7 @@ public:
         {
             Core::Input::Synthetic::Reset();
         }
+        Core::Input::Synthetic::ForgetOutcome(m_generation);
     }
 
     [[nodiscard]] std::string_view Name() const override
@@ -347,15 +348,18 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        // Once the injector has moved on to another caller's injection, this
-        // one is over: waiting for the injector to be idle would report on a
-        // press that is not ours.
-        if (IsStillMine() && !Core::Input::Synthetic::IsIdle())
+        // A failed owner can be superseded before this reader ticks. Its outcome
+        // survives newer schedules until this act retires.
+        const auto failure = Core::Input::Synthetic::FailureFor(m_generation);
+        if (failure != Core::Input::Synthetic::DeliveryFailure::None)
         {
-            return Status::Running;
+            const char* message = failure == Core::Input::Synthetic::DeliveryFailure::PhysicalOverlap
+                                      ? "physical mouse press cancelled scripted click"
+                                      : "input delivery target disappeared";
+            response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed, message);
         }
-        if (Core::Input::Synthetic::DeliveryFailed() && IsStillMine())
-            response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed, "input delivery target disappeared");
+        else if (IsStillMine() && !Core::Input::Synthetic::IsIdle())
+            return Status::Running;
         else
             response = App::Control::EncodeResult(EncodedId(), m_encodedResult);
         return Status::Finished;
@@ -573,7 +577,7 @@ std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)
 
     if (!Core::Input::Synthetic::PressKey(*virtualKey))
     {
-        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another key or click is still being injected");
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
     }
 
     json result;
@@ -616,7 +620,7 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
 
     if (!Core::Input::Synthetic::Click(static_cast<float>(windowX), static_cast<float>(windowY), *button))
     {
-        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another key or click is still being injected");
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
     }
 
     json result;

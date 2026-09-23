@@ -1354,17 +1354,37 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     MuReapplyVSyncPreference();
 }
 
-// The physical event pump and the rendered-frame injector share UI-first
-// arbitration. The injector owns its legacy held state; it must not mutate
-// device state or acquire the OS pointer.
+// Inspect only the active SDL union member, including for synthetic events.
+SDL_WindowID ActionWindowId(const SDL_Event& event)
+{
+    switch (event.type)
+    {
+    case SDL_EVENT_MOUSE_MOTION:
+        return event.motion.windowID;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        return event.button.windowID;
+    case SDL_EVENT_TEXT_INPUT:
+        return event.text.windowID;
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_UP:
+        return event.key.windowID;
+    default:
+        return 0;
+    }
+}
+
+// Physical and scripted input share UI-first routing. Scripted input owns its
+// own legacy held state; it never acquires the OS pointer or replays SDL events.
 bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
 {
-    if (!g_sdlWindow || (synthetic && event.key.windowID != SDL_GetWindowID(g_sdlWindow)))
+    if (!g_sdlWindow || (synthetic && ActionWindowId(event) != SDL_GetWindowID(g_sdlWindow)))
         return false;
     propagates = true;
     switch (event.type)
     {
     case SDL_EVENT_MOUSE_MOTION:
+        // Motion always reaches physical legacy tracking even when UI hovered.
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
         if (!synthetic)
             HandleMouseMotion(event.motion.x, event.motion.y);
@@ -1383,11 +1403,14 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
             FeedPortableTextInput(event.text.text);
         return true;
     case SDL_EVENT_KEY_UP:
+        // RmlUi needs the release even though legacy has no key-up reader.
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
         return true;
     case SDL_EVENT_KEY_DOWN:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
 #if !defined(_WIN32)
+        // Physical Windows messages already handle these keys; SDL-only paths
+        // (and Windows synthetic events below) must handle them here instead.
         if (event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER)
             SetEnterPressed(true);
         if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)

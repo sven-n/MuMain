@@ -186,8 +186,8 @@ list(APPEND MU_CLIENT_SOURCES
 if(NOT ENABLE_CONTROL_SOCKET)
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]App[/\\]Control[/\\]")
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]LocalSocket\\.cpp$")
-  # The injector is the control socket's hands; its header compiles the two
-  # calls the rest of the client makes to nothing.
+  # The injector is the control socket's hands; its header leaves no-op
+  # call sites for ordinary player builds.
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Input[/\\]SyntheticInput\\.cpp$")
 endif()
 

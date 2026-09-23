@@ -5,6 +5,7 @@
 
 #include "doctest.h"
 
+#include "App/Control/ControlCommands.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Input/UiInputRouter.h"
@@ -46,6 +47,7 @@ bool FakeDelivery(SDL_Event& event, bool& propagates)
 struct FakeConsumer : Core::Input::IUiInputConsumer
 {
     bool pressed = false;
+    bool physicalPrimaryPressed = false;
     int cancellations = 0;
     bool ProcessSdlEvent(SDL_Event& event, SDL_Window*) override
     {
@@ -55,9 +57,12 @@ struct FakeConsumer : Core::Input::IUiInputConsumer
             pressed = false;
         return false;
     }
-    void CancelSyntheticMousePress() override
+    void CancelSyntheticMousePress(unsigned char button, SDL_Window*) override
     {
+        if (button != SDL_BUTTON_LEFT)
+            return;
         pressed = false;
+        physicalPrimaryPressed = false;
         ++cancellations;
     }
     bool IsMouseOverUI() const override
@@ -327,11 +332,19 @@ TEST_CASE("Synthetic delivery arbitrates UI and keeps text before Return [core][
     WindowHeight = 960;
     consume = true;
     MouseLButton = false;
+    MouseX = 51;
+    MouseY = 52;
+    g_fWindowMouseX = 53.0f;
+    g_fWindowMouseY = 54.0f;
     CHECK(Click(100.0f, 200.0f, MouseButton::Left));
     BeginFrame();
     CHECK(delivered == std::vector<SDL_EventType>{SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_BUTTON_DOWN});
     CHECK_FALSE(MouseLButton);
     CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
+    CHECK(MouseX == 51);
+    CHECK(MouseY == 52);
+    CHECK(g_fWindowMouseX == 53.0f);
+    CHECK(g_fWindowMouseY == 54.0f);
     Reset();
     CHECK(IsIdle());
 
@@ -384,7 +397,7 @@ TEST_CASE("Lost delivery target fails instead of reporting release [core][synthe
     SetEventDelivery(nullptr, nullptr);
     BeginFrame();
     CHECK(IsIdle());
-    CHECK(DeliveryFailed());
+    CHECK(FailureFor(CurrentGeneration()) == DeliveryFailure::TargetLost);
     CHECK(delivered.empty());
     CHECK_FALSE(IsKeyHeld(VK_HOME));
 }
@@ -401,13 +414,13 @@ TEST_CASE("Physical button press cancels only its synthetic click [core][synthet
     CHECK_FALSE(IsIdle());
     CancelForPhysicalButton(SDL_BUTTON_LEFT);
     CHECK(IsIdle());
-    CHECK(DeliveryFailed());
+    CHECK(FailureFor(CurrentGeneration()) == DeliveryFailure::PhysicalOverlap);
     CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
     delivered.clear();
     BeginFrame();
     CHECK(delivered.empty());
     CHECK(PressKey(VK_HOME));
-    CHECK_FALSE(DeliveryFailed());
+    CHECK(FailureFor(CurrentGeneration()) == DeliveryFailure::None);
 }
 
 TEST_CASE("Abandoned text never submits its pending Enter [core][synthetic-input]")
@@ -446,7 +459,7 @@ TEST_CASE("Consumer teardown cancels a held click without releasing it [core][sy
     CancelDelivery();
     CHECK_FALSE(consumer.pressed);
     CHECK(consumer.cancellations == 1);
-    CHECK(DeliveryFailed());
+    CHECK(FailureFor(first) == DeliveryFailure::TargetLost);
     CHECK(IsIdle());
     delivered.clear();
     BeginFrame();
@@ -455,5 +468,106 @@ TEST_CASE("Consumer teardown cancels a held click without releasing it [core][sy
     SetEventDelivery(&FakeDelivery, nullptr);
     CHECK(PressKey(VK_HOME));
     CHECK(CurrentGeneration() != first);
-    CHECK_FALSE(DeliveryFailed());
+    CHECK(FailureFor(CurrentGeneration()) == DeliveryFailure::None);
+}
+
+TEST_CASE("A consumed synthetic key does not enter legacy polling [core][synthetic-input]")
+{
+    ResetInjector guard;
+    consume = true;
+    CHECK(PressKey(VK_HOME));
+    BeginFrame();
+    CHECK(delivered == std::vector<SDL_EventType>{SDL_EVENT_KEY_DOWN});
+    CHECK_FALSE(IsKeyHeld(VK_HOME));
+    BeginFrame();
+    CHECK(delivered == std::vector<SDL_EventType>{SDL_EVENT_KEY_DOWN, SDL_EVENT_KEY_UP});
+    CHECK_FALSE(IsKeyHeld(VK_HOME));
+}
+
+TEST_CASE("Cancelling a synthetic right press preserves physical primary ownership [core][synthetic-input]")
+{
+    ResetInjector guard;
+    FakeConsumer consumer;
+    Core::Input::SetUiInputConsumer(&consumer);
+    SetEventDelivery(&UiDelivery, nullptr);
+    WindowWidth = 1280;
+    WindowHeight = 960;
+    consumer.physicalPrimaryPressed = true;
+    CHECK(Click(50.0f, 60.0f, MouseButton::Right));
+    BeginFrame();
+    CHECK(consumer.pressed);
+    CancelDelivery();
+    CHECK(consumer.physicalPrimaryPressed);
+    CHECK(consumer.cancellations == 0);
+    CHECK(FailureFor(CurrentGeneration()) == DeliveryFailure::TargetLost);
+    Core::Input::SetUiInputConsumer(nullptr);
+}
+
+TEST_CASE("Failed owners retain independent outcomes across newer schedules [core][synthetic-input]")
+{
+    ResetInjector guard;
+    using App::Control::Act;
+    using App::Control::Request;
+    std::unique_ptr<Act> click;
+    std::unique_ptr<Act> hotkey;
+    std::unique_ptr<Act> type;
+    const auto clickRequest = Request::Parse(R"({"cmd":"click-ui","id":1,"x":25,"y":30})");
+    const auto hotkeyRequest = Request::Parse(R"({"cmd":"hotkey","id":2,"key":"home"})");
+    const auto typeRequest = Request::Parse(R"({"cmd":"type","id":3,"text":"x"})");
+    REQUIRE(App::Control::Commands::ClickUi(clickRequest, click).empty());
+    REQUIRE(click != nullptr);
+    click->SetEncodedId(clickRequest.EncodedId());
+    const auto clickGeneration = CurrentGeneration();
+    BeginFrame();
+    CancelForPhysicalButton(SDL_BUTTON_LEFT);
+    CHECK(FailureFor(clickGeneration) == DeliveryFailure::PhysicalOverlap);
+
+    REQUIRE(App::Control::Commands::Hotkey(hotkeyRequest, hotkey).empty());
+    REQUIRE(hotkey != nullptr);
+    hotkey->SetEncodedId(hotkeyRequest.EncodedId());
+    const auto hotkeyGeneration = CurrentGeneration();
+    CancelDelivery();
+    REQUIRE(App::Control::Commands::Type(typeRequest, type).empty());
+    REQUIRE(type != nullptr);
+    type->SetEncodedId(typeRequest.EncodedId());
+    CHECK(FailureFor(hotkeyGeneration) == DeliveryFailure::TargetLost);
+
+    std::string response;
+    CHECK(click->Tick(response) == Act::Status::Finished);
+    CHECK(response.find(R"("id":1)") != std::string::npos);
+    CHECK(response.find(R"("ok":false)") != std::string::npos);
+    CHECK(response.find("physical mouse press") != std::string::npos);
+    click.reset();
+    CHECK(FailureFor(clickGeneration) == DeliveryFailure::None);
+    CHECK(hotkey->Tick(response) == Act::Status::Finished);
+    CHECK(response.find(R"("id":2)") != std::string::npos);
+    CHECK(response.find("target disappeared") != std::string::npos);
+    hotkey.reset();
+    CHECK(type->Tick(response) == Act::Status::Running);
+    BeginFrame();
+    BeginFrame();
+    CHECK(type->Tick(response) == Act::Status::Finished);
+    CHECK(response.find(R"("id":3)") != std::string::npos);
+    CHECK(response.find(R"("ok":true)") != std::string::npos);
+}
+
+TEST_CASE("Type handler rejects invalid arguments before scheduling and refuses overlap [core][synthetic-input]")
+{
+    ResetInjector guard;
+    std::unique_ptr<App::Control::Act> act;
+    const auto generation = CurrentGeneration();
+    for (const auto* raw : {R"({"cmd":"type"})", R"({"cmd":"type","text":""})",
+                            R"({"cmd":"type","text":"x","enter":null})",
+                            R"({"cmd":"type","text":"x","enter":1})"})
+    {
+        const auto response = App::Control::Commands::Type(App::Control::Request::Parse(raw), act);
+        CHECK(response.find(R"("error":"bad_request")") != std::string::npos);
+        CHECK(act == nullptr);
+        CHECK(CurrentGeneration() == generation);
+    }
+    CHECK(PressKey(VK_HOME));
+    const auto response = App::Control::Commands::Type(
+        App::Control::Request::Parse(R"({"cmd":"type","text":"x"})"), act);
+    CHECK(response.find(R"("error":"busy")") != std::string::npos);
+    CHECK(act == nullptr);
 }

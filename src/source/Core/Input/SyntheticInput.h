@@ -45,7 +45,14 @@ enum class MouseButton : std::uint8_t
 // frame; setting nullptr retracts pending work before the window is destroyed.
 using EventDelivery = bool (*)(SDL_Event&, bool& propagates);
 void SetEventDelivery(EventDelivery delivery, SDL_Window* window);
-[[nodiscard]] bool DeliveryFailed();
+enum class DeliveryFailure : std::uint8_t
+{
+    None,
+    TargetLost,
+    PhysicalOverlap,
+};
+[[nodiscard]] DeliveryFailure FailureFor(std::uint64_t generation);
+void ForgetOutcome(std::uint64_t generation);
 void CancelDelivery();
 void CancelForPhysicalButton(unsigned char button);
 
@@ -53,8 +60,8 @@ void CancelForPhysicalButton(unsigned char button);
 // answers once this turns true again.
 [[nodiscard]] bool IsIdle();
 
-// Identifies the injection most recently accepted: every `PressKey` or
-// `Click` that returns true gets a value of its own. A command reads it when
+// Identifies the injection most recently accepted: every key, click or text
+// schedule that returns true gets a value of its own. A command reads it when
 // its injection is scheduled and compares later, so it can tell its own
 // injection from the next caller's.
 [[nodiscard]] std::uint64_t CurrentGeneration();
@@ -73,10 +80,8 @@ void BeginFrame();
 // flight, which may belong to another command.
 void Reset();
 #else
-// Without the control socket there is nothing to inject: the two calls the
-// rest of the client makes (the frame advance and the held-key test) compile
-// to nothing, exactly as the control taps do, so no call site needs a
-// conditional and the injector itself is not built into a player client.
+// Without the control socket the frame, routing, teardown and held-key calls
+// compile to nothing; the injector is not built into a player client.
 [[nodiscard]] inline bool IsKeyHeld(int)
 {
     return false;
