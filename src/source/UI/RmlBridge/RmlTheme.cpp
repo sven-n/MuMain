@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <regex>
 #include <sstream>
@@ -200,6 +201,39 @@ namespace UI::RmlBridge
     std::string ThemedDocumentSourceUrl(const char* documentName, const std::string& themeName)
     {
         return std::string("Data/Interface/RmlUi/themes/") + ToLower(themeName) + "/" + documentName;
+    }
+
+    std::vector<std::string> DiscoverAvailableThemes()
+    {
+        std::vector<std::string> themes;
+        std::error_code ec;
+        for (const auto& entry : std::filesystem::directory_iterator("Data/Interface/RmlUi/themes", ec))
+        {
+            if (!entry.is_directory())
+                continue;
+            std::string name = ToLower(entry.path().filename().string());
+            if (ThemeExists(name))
+                themes.push_back(std::move(name));
+        }
+        std::sort(themes.begin(), themes.end());
+        return themes;
+    }
+
+    std::string GetThemeDisplayName(const std::string& themeName)
+    {
+        const std::string iniPath = "Data/Interface/RmlUi/themes/" + ToLower(themeName) + "/theme.ini";
+        wchar_t buffer[128] = {};
+        GetPrivateProfileStringW(L"Meta", L"DisplayName", L"", buffer, static_cast<DWORD>(std::size(buffer)),
+            WidenAscii(iniPath).c_str());
+        std::string displayName = NarrowAscii(buffer);
+        if (!displayName.empty())
+            return displayName;
+
+        // No theme.ini/[Meta]/DisplayName -- fall back to the folder name, capitalized.
+        displayName = themeName;
+        if (!displayName.empty())
+            displayName[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(displayName[0])));
+        return displayName;
     }
 
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath)

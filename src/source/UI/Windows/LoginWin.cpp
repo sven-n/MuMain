@@ -223,22 +223,12 @@ void CLoginWin::SetPosition(int x, int y)
 	m_ptPos.x = x;
 	m_ptPos.y = y;
 
-	// This class draws the real text/hit-testing for the two input boxes; RmlUi's .input-frame
-	// divs are border-only. Offsets branch per theme (legacy/modern position these differently in
-	// RCSS) and are scaled by LoginUIScaleRatio() to track login.rcss's dp values.
-	const bool bModernTheme = (UI::RmlBridge::GetActiveThemeName() == "modern");
-	const float uiScale = LoginUIScaleRatio();
-	const int usernameY = ScaledOffset(bModernTheme ? 72 : 112, uiScale);
-	const int passwordY = ScaledOffset(bModernTheme ? 105 : 137, uiScale);
-
-	if (g_iChatInputType == 1)
-	{
-		// Stores real pixels (not divided by g_fScreenRate_x/y); RenderTextOnTop() forces an
-		// identity transform at render time so the two stay consistent regardless of caller.
-		const int boxX = x + ScaledOffset(115, uiScale);
-		m_pUsernameInputBox->SetPosition(boxX, y + usernameY);
-		m_pPasswordInputBox->SetPosition(boxX, y + passwordY);
-	}
+	// The two native CUITextInputBox overlays are NOT repositioned here -- SyncInputBoxPositions()
+	// (called every frame from UpdateWhileShown()) reads their real screen position live from
+	// login.rml's #input_account_anchor/#input_password_anchor instead. Doing it here would read
+	// RmlUi's layout before the panel's new left/top (set via SetProperty() below) is resolved --
+	// RmlUi doesn't resolve a property change into a real layout synchronously, only on its next
+	// Context::Update() pass (see CharMakeWin.cpp's own comment on this exact hazard).
 
 	// RmlUi panel origin: real window pixels, no scale conversion needed (RmlUi's Context already
 	// operates in real pixels; only the panel's own size/children are dp, scaled by RmlUi itself).
@@ -250,6 +240,29 @@ void CLoginWin::SetPosition(int x, int y)
 			panel->SetProperty("top", std::to_string(y) + "px");
 		}
 	}
+}
+
+void CLoginWin::SyncInputBoxPositions()
+{
+    if (g_iChatInputType != 1 || !m_pRmlDoc)
+        return;
+
+    // #input_account_anchor/#input_password_anchor (login.rml) mark exactly where the native text
+    // should render -- the RmlUi-resolved, per-theme-correct replacement for this class's old
+    // GetActiveThemeName() == "modern" branch (legacy/modern position these differently in RCSS;
+    // see login.rcss's own comments). GetAbsoluteOffset() already returns real screen pixels
+    // (RmlUi resolves `dp` to real device pixels during layout, same contract as
+    // CharMakeWin.cpp's #input_text_anchor), so no further conversion is needed here.
+    if (Rml::Element* accountAnchor = m_pRmlDoc->GetElementById("input_account_anchor"))
+    {
+        const auto offset = accountAnchor->GetAbsoluteOffset();
+        m_pUsernameInputBox->SetPosition(static_cast<int>(offset.x), static_cast<int>(offset.y));
+    }
+    if (Rml::Element* passwordAnchor = m_pRmlDoc->GetElementById("input_password_anchor"))
+    {
+        const auto offset = passwordAnchor->GetAbsoluteOffset();
+        m_pPasswordInputBox->SetPosition(static_cast<int>(offset.x), static_cast<int>(offset.y));
+    }
 }
 
 void CLoginWin::Show(bool bShow)
@@ -385,6 +398,8 @@ bool CLoginWin::UpdateWhileShown()
                 || g_CharMakeWin.IsVisible()
                 || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame()
                 || UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
+
+    SyncInputBoxPositions();
 
     m_pUsernameInputBox->DoAction();
     m_pPasswordInputBox->DoAction();

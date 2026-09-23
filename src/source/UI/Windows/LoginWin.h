@@ -157,6 +157,9 @@ private:
     void SyncRmlModel();
     // Factored out of Create() so ReloadRmlTheme() can re-run it after tearing down the old document.
     void BuildRmlUi();
+    // Repositions the two native CUITextInputBox overlays from login.rml's
+    // #input_account_anchor/#input_password_anchor every frame -- see this method's own comment.
+    void SyncInputBoxPositions();
 };
 
 extern CLoginWin g_LoginWin;

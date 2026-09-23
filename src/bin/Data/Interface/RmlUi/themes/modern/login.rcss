@@ -138,10 +138,20 @@ body {
 	font-effect: shadow(0dp 1dp #000000);
 }
 
-/* Body is a real recessed cavity; broad inset shadow comes from base.rcss's .modern-content-well.
-   top:50dp must stay keyed to LoginWin.cpp::SetPosition()'s hardcoded input overlay Y offsets
-   (usernameY=72, passwordY=105 = 50dp well top + input top 16dp/49dp + a 6dp text-padding baked
-   into that C++). */
+/* #input_account_anchor/#input_password_anchor (login.rml) mark exactly where LoginWin.cpp's
+   native text overlay renders, relative to #panel -- 6dp right/down from each .login-input's own
+   left/top (100/16,49), matching the visible border's inner edge. Keep the two in sync if either
+   changes. */
+.input-text-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#input_account_anchor { left: 115dp; top: 72dp; }
+#input_password_anchor { left: 115dp; top: 105dp; }
+
+/* Body is a real recessed cavity; broad inset shadow comes from base.rcss's .modern-content-well. */
 .login-content {
 	left: 9dp;
 	right: 9dp;

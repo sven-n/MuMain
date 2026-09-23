@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace Rml
 {
@@ -48,6 +49,20 @@ namespace UI::RmlBridge
     // gate (e.g. for the `$theme` command) so an unknown/misspelled name is rejected up front
     // instead of silently rendering every window unstyled.
     bool ThemeExists(const std::string& themeName);
+
+    // Every valid theme (ThemeExists()) found directly under Data/Interface/RmlUi/themes/, sorted
+    // alphabetically by folder name for deterministic, stable ordering across calls (a
+    // std::filesystem::directory_iterator's own enumeration order is unspecified). A folder with
+    // no base.rcss of its own is silently skipped -- not a real theme. This is what lets a newly
+    // installed theme folder (including a modder's own) become selectable in COptionWindow's UI
+    // Theme dropdown with zero C++ changes; see this file's own top comment.
+    std::vector<std::string> DiscoverAvailableThemes();
+
+    // themes/<themeName>/theme.ini's optional [Meta] DisplayName, e.g. "Legacy"/"Modern" for the
+    // two bundled themes. Falls back to `themeName` with its first letter capitalized if the file
+    // or key is missing -- the safe default for a theme that hasn't declared one, including a
+    // modder-supplied theme with no theme.ini at all.
+    std::string GetThemeDisplayName(const std::string& themeName);
 
     // A declared theme capability (C++ must never branch on a theme's NAME -- a theme wanting
     // non-default behavior states that want itself, via an optional themes/<name>/theme.ini,

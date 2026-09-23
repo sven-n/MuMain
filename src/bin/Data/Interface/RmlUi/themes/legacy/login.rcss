@@ -53,8 +53,18 @@ body {
 .label-account { left: 30dp; top: 113dp; }
 .label-password{ left: 30dp; top: 139dp; }
 
-/* LoginWin.cpp::SetPosition() offsets the real text input 6px right / 6px down from this frame's
-   own left/top (112/137 vs 106/131) -- keep the two in sync if either changes. */
+/* #input_account_anchor/#input_password_anchor (login.rml) mark exactly where LoginWin.cpp's
+   native text overlay renders -- 6dp right / 6dp down from this frame's own left/top (109/106,131),
+   matching the visible border's inner edge. Keep the two in sync if either changes. */
+.input-text-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#input_account_anchor { left: 115dp; top: 112dp; }
+#input_password_anchor { left: 115dp; top: 137dp; }
+
 .input-frame {
 	position: absolute;
 	width: 156dp;

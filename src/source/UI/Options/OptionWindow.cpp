@@ -895,7 +895,8 @@ void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
     // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
-    if (index < 0 || index > 1)
+    const std::vector<std::string> themes = UI::RmlBridge::DiscoverAvailableThemes();
+    if (index < 0 || index >= static_cast<int>(themes.size()))
         return;
     if (index == m_iThemeIndex)
         return;
@@ -915,11 +916,16 @@ void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
     m_bPendingThemeSwitch = false;
 
     const int index = m_iPendingThemeIndex;
+    const std::vector<std::string> themes = UI::RmlBridge::DiscoverAvailableThemes();
+    if (index < 0 || index >= static_cast<int>(themes.size()))
+        return;
     m_iThemeIndex = index;
 
-    // Exact sequence `$theme <legacy|modern>` (muConsoleDebug.cpp) already uses at runtime, plus
-    // Save() -- that command is explicitly session-only, this UI control should persist.
-    const std::string themeName = (index == 1) ? "modern" : "legacy";
+    // Same theme this dropdown just discovered, so ThemeExists() below is only a defensive
+    // recheck (e.g. the folder was deleted while this dropdown was open) -- Save() persists it the
+    // exact same way `$theme <name>` (muConsoleDebug.cpp) does at runtime, that command being
+    // explicitly session-only while this UI control should persist.
+    const std::string& themeName = themes[static_cast<size_t>(index)];
     if (!UI::RmlBridge::ThemeExists(themeName))
         return;
 
@@ -1125,7 +1131,14 @@ int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
 
 int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
 {
-    return UI::RmlBridge::GetActiveThemeName() == "modern" ? 1 : 0;
+    const std::vector<std::string> themes = UI::RmlBridge::DiscoverAvailableThemes();
+    const std::string& active = UI::RmlBridge::GetActiveThemeName();
+    for (size_t i = 0; i < themes.size(); ++i)
+    {
+        if (themes[i] == active)
+            return static_cast<int>(i);
+    }
+    return 0;
 }
 
 int mu::ui::window::COptionWindow::FindCurrentUIScaleIndex()
@@ -1347,11 +1360,13 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (model.showFpsCounter != showFpsCounter) { model.showFpsCounter = showFpsCounter; m_RmlBinder.MarkDirty("show_fps_counter"); }
     if (model.showDebugInfo != showDebugInfo) { model.showDebugInfo = showDebugInfo; m_RmlBinder.MarkDirty("show_debug_info"); }
 
-    // Rebuilt every sync, same reasoning as fps_cap_labels above.
-    std::vector<Rml::String> newThemeLabels = {
-        StringUtils::WideToNarrow(I18N::Game::Legacy),
-        StringUtils::WideToNarrow(I18N::Game::Modern),
-    };
+    // Rebuilt every sync, same reasoning as fps_cap_labels above -- also picks up a theme folder
+    // added or removed while this window is open, no restart needed (DiscoverAvailableThemes()
+    // enumerates Data/Interface/RmlUi/themes/ directly rather than assuming a fixed {legacy,
+    // modern} set).
+    std::vector<Rml::String> newThemeLabels;
+    for (const std::string& themeName : UI::RmlBridge::DiscoverAvailableThemes())
+        newThemeLabels.push_back(UI::RmlBridge::GetThemeDisplayName(themeName));
     if (newThemeLabels != model.themeLabels)
     {
         model.themeLabels = std::move(newThemeLabels);

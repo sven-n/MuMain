@@ -8,6 +8,11 @@
 	<!-- Theme-neutral reference login panel; themes/modern/login.rml forks it for modern's
 	     decoration -- keep ids/data-model/event names in sync, LoginWin.cpp binds both by name. -->
 	<div id="panel" data-model="login">
+		<!-- Zero-size markers only -- LoginWin.cpp reads their resolved screen position to place the
+		     native username/password CUITextInputBox overlays instead of a per-theme hardcoded C++
+		     offset (see login.rcss's own comments for each theme's position). -->
+		<div id="input_account_anchor" class="input-text-anchor"></div>
+		<div id="input_password_anchor" class="input-text-anchor"></div>
 		<div class="frame-accent"></div>
 		<div class="login-content"></div>
 		<div class="header-glow"></div>

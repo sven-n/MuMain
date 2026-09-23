@@ -18,7 +18,12 @@
 	     its border to a single tone since box-shadow now carries the depth. -->
 	<div id="panel" class="modern-frame" data-model="login">
 		<!-- Exterior blackened-metal silhouette: outer iron edge, -3dp. -->
-		<div class="modern-shell-edge login-shell-edge"></div>
+		<!-- Zero-size markers only -- LoginWin.cpp reads their resolved screen position to place the
+			     native username/password CUITextInputBox overlays instead of a per-theme hardcoded
+			     C++ offset (see login.rcss's own comments for each theme's position). -->
+			<div id="input_account_anchor" class="input-text-anchor"></div>
+			<div id="input_password_anchor" class="input-text-anchor"></div>
+			<div class="modern-shell-edge login-shell-edge"></div>
 
 		<!-- Inner groove, ~4dp inward. -->
 		<div class="login-groove"></div>
