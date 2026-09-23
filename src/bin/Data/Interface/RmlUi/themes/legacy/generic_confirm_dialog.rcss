@@ -269,7 +269,7 @@
 	height: 10dp;
 	margin-top: 4dp;
 	background-color: token(surface-recessed);
-	border: 1dp token(border-recessed);
+	border: 1dp token(border-inner);
 }
 .gcd-progress-fill {
 	height: 100%;

@@ -235,7 +235,7 @@
 	overflow: hidden;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: token(surface-input);
+	background-color: token(surface-control);
 	border-width: 1dp;
 	border-color: token(border-control);
 	color: token(text-input);
@@ -263,7 +263,7 @@
 	max-height: 90dp;
 	overflow-y: auto;
 	z-index: 1;
-	background-color: token(surface-input);
+	background-color: token(surface-control);
 	border-width: 1dp;
 	border-color: token(border-control);
 	pointer-events: auto;

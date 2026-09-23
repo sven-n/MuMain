@@ -160,7 +160,7 @@
 	font-weight: normal;
 	color: token(text-primary);
 	background-color: token(surface-recessed);
-	border: 1dp token(border-recessed);
+	border: 1dp token(border-inner);
 	padding: 3dp 6dp;
 	pointer-events: none;
 }
