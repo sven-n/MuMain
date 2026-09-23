@@ -265,6 +265,7 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                         c.Bind("root_scale", &model.rootScale);
                         c.Bind("left_offset_x", &model.leftOffsetX);
                         c.Bind("center_offset_x", &model.centerOffsetX);
+                        c.Bind("skill_list_open", &model.skillListOpen);
                     });
                 if (bgModelCreated)
                 {
@@ -426,12 +427,11 @@ void mu::ui::window::CMainFrameWindow::RenderCenterFrame()
         // Panel spans 214-424 (skill icons' 222-416 footprint padded 8px each side, matching
         // RenderLeftFrame()'s potion padding) so the two chrome panels meet flush with no gap.
         // The fill itself lives in main_frame_bg.rml's #bg_center, painted by CManager::Render()'s
-        // centralized RenderBackgroundLayer() call (see RenderLeftFrame()'s comment).
-        //
-        // This highlight overlay stays a legacy quad (dynamic, frame-conditional, not worth
-        // porting) -- modern equivalent of the legacy IMAGE_MENU_2_1 highlight below.
-        if (g_pSkillList->IsSkillListUp())
-            RenderColorQuadARGB(222.0f, kHudTop, 160.0f, 40.0f, 0x40FFFFFFu);
+        // centralized RenderBackgroundLayer() call (see RenderLeftFrame()'s comment). The
+        // skill-list-open highlight that used to draw here as a native quad is also in that same
+        // background document now (#skill_list_highlight, MainFrameBgRmlModel::skillListOpen) --
+        // same paint-order reasoning, and nothing about it depended on the icon atlas, so it moved
+        // as a plain background-context fix, not part of the still-deferred icon-atlas port.
         return;
     }
 
@@ -638,6 +638,14 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             m_BgRmlBinder.MarkDirty("root_scale");
             m_BgRmlBinder.MarkDirty("left_offset_x");
             m_BgRmlBinder.MarkDirty("center_offset_x");
+
+            // Former RenderCenterFrame() highlight quad -- see MainFrameBgRmlModel::skillListOpen.
+            const bool skillListOpen = g_pSkillList->IsSkillListUp();
+            if (bg.skillListOpen != skillListOpen)
+            {
+                bg.skillListOpen = skillListOpen;
+                m_BgRmlBinder.MarkDirty("skill_list_open");
+            }
         }
     }
 
@@ -1262,6 +1270,11 @@ int mu::ui::window::CItemHotKey::GetHotKeyLevel(int iHotKey)
     return 0;
 }
 
+// PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): x=10+i*38/y=443/
+// 20x20 below is the same literal reference-space value both themes' main_frame.rcss hardcode for
+// #item_slot_0..3 -- "kept in sync by hand" per that file's own header comment. If either side
+// changes, update the other; this is deferred (not read live from RmlUi) until the RenderSkillIcon()
+// atlas port needs visual re-verification of these positions anyway.
 void mu::ui::window::CItemHotKey::RenderItems()
 {
     float x, y, width, height;
@@ -1593,6 +1606,12 @@ bool mu::ui::window::CSkillList::Update()
     return true;
 }
 
+// PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): x=190/y=431/
+// width=32 below (compact hotkey row) and x=392/y=437 (current-skill icon) are the same literal
+// reference-space values both themes' main_frame.rcss hardcode for #skill_slot_0..4/
+// #current_skill_slot -- "kept in sync by hand" per that file's own header comment. If either side
+// changes, update the other; this is deferred (not read live from RmlUi) until the RenderSkillIcon()
+// atlas port needs visual re-verification of these positions anyway.
 void mu::ui::window::CSkillList::RenderCurrentSkillAndHotSkillList()
 {
     int i;

@@ -426,6 +426,14 @@ namespace mu::ui::window
             // Same offsets as GetItemHotkeyOffsetX()/GetSkillListOffsetX(), added on top of rootX
             // in main_frame_bg.rml so the two panels track their real anchors.
             float leftOffsetX = 0.f, centerOffsetX = 0.f;
+
+            // Former RenderCenterFrame()'s modern-only translucent skill-list-open highlight
+            // (RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFFu)) -- same paint-order
+            // reasoning as bg_left/bg_center above (must sit behind the still-legacy icons), so it
+            // moves here instead of staying a native quad. Legacy theme has no background document
+            // at all (ThemeProvidesOwnIconChrome() gates its creation), so this is modern-only by
+            // construction, same as the rest of this struct.
+            bool skillListOpen = false;
         };
         RmlModelBinder<MainFrameBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;

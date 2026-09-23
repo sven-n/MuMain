@@ -13,6 +13,10 @@
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="bg_left" data-style-left="left_offset_x + 'px'"></div>
 		<div id="bg_center" data-style-left="center_offset_x + 214 + 'px'"></div>
+		<!-- Former RenderCenterFrame() skill-list-open highlight (a plain native quad, no icon-atlas
+		     involvement) -- same paint-order reasoning as #bg_center above. -->
+		<div id="skill_list_highlight" data-style-left="center_offset_x + 222 + 'px'"
+		     data-class-hidden="!skill_list_open"></div>
 	</div>
 </body>
 </rml>

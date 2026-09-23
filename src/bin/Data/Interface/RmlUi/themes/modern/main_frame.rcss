@@ -308,7 +308,13 @@
 }
 
 /* Same width/height/top as #skill_slot_0..4 (32x38, top:431px), matching the shared background
-   band; left offsets use their own pitch. */
+   band; left offsets use their own pitch.
+
+   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): this is the hit-
+   box/highlight FRAME only, deliberately padded around the real icon -- CItemHotKey::RenderItems()
+   (MainFrameWindow.cpp) is theme-blind and always draws the actual item icon at the legacy-exact
+   x=10+i*38, y=443, 20x20, regardless of this frame's own position. Nothing here currently exposes
+   that icon position live; if it ever needs to move independently of legacy's, C++ must change too. */
 #item_slot_0 { position: absolute; left: 6px;   top: 431px; width: 32px; height: 38px; }
 #item_slot_1 { position: absolute; left: 44px;  top: 431px; width: 32px; height: 38px; }
 #item_slot_2 { position: absolute; left: 82px;  top: 431px; width: 32px; height: 38px; }
@@ -363,7 +369,12 @@
 
 /* Skill slots are contiguous (pitch == width, no gap). border-radius only matters for the
    .selected highlight -- square off touching inner edges so only the strip's outer corners
-   round. */
+   round.
+
+   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): these 5 boxes are
+   the exact frame CSkillList::RenderCurrentSkillAndHotSkillList() (MainFrameWindow.cpp) reconstructs
+   natively (x=190, width=32, x+=width per slot -> 222/254/286/318/350, y=431) before drawing each
+   icon at frame+6/frame+6. If either side changes, update the other. */
 #skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
@@ -377,6 +388,10 @@
 	border: 1px token(accent-gold-hover);
 	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
+/* PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): this is the hit-
+   box/highlight FRAME only, padded 4px around the real icon -- RenderCurrentSkillAndHotSkillList()
+   (MainFrameWindow.cpp) is theme-blind and always draws the actual current-skill icon at the
+   legacy-exact x=392, y=437, 20x28, regardless of this frame's own position. */
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
 /* Expanded grid + pet-command row. Same 78px local-origin shift as #skill_slots above -- cell

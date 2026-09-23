@@ -23,3 +23,16 @@
 	width: 210px; /* 424 - 214, RenderCenterFrame()'s own reference-space span */
 	height: 41px;
 }
+
+/* Former RenderCenterFrame()'s RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFFu) skill-list-
+   open highlight -- same literal geometry/color, now data-driven instead of an unconditional
+   native draw. This document has no base.rcss link, so .hidden is defined locally. */
+.hidden { display: none; }
+#skill_list_highlight {
+	position: absolute;
+	top: 429px;
+	width: 160px;
+	height: 40px;
+	background-color: rgba(255, 255, 255, 64); /* 0x40FFFFFFu */
+	pointer-events: none;
+}

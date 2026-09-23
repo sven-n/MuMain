@@ -151,7 +151,9 @@
 }
 
 /* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
-   (MainFrameWindow.cpp); purely a positioning context, these slots paint nothing of their own. */
+   (MainFrameWindow.cpp); purely a positioning context, these slots paint nothing of their own.
+   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size") -- both sides carry
+   an explicit cross-reference comment now; update together. */
 #skill_slots { position: absolute; left: 0; top: 0; }
 #skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
@@ -161,7 +163,9 @@
 #current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
 
 /* Zero-shift wrapper (legacy has no offset, unlike modern's shifted copy); each slot matches
-   CItemHotKey::RenderItems()'s native icon draw position/size (x = 10 + i*38, y = 443, 20x20). */
+   CItemHotKey::RenderItems()'s native icon draw position/size (x = 10 + i*38, y = 443, 20x20).
+   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size") -- both sides carry
+   an explicit cross-reference comment now; update together. */
 #item_slots { position: absolute; left: 0; top: 0; }
 #item_slot_0 { position: absolute; left: 10px;  top: 443px; width: 20px; height: 20px; }
 #item_slot_1 { position: absolute; left: 48px;  top: 443px; width: 20px; height: 20px; }
