@@ -111,6 +111,7 @@ public:
     // and g_pNewUISystem->CheckMouseUse() (mu::ui::window tier) at Input/Selection.cpp's
     // world-pick check.
     bool IsMouseOverUI() const override;
+    void CancelSyntheticMousePress() override;
 
     Rml::Context* GetContext() const { return m_Context; }
 

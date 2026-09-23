@@ -12,6 +12,8 @@ namespace Core::Input
 
         // Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
         // scancode. Returns SDL_SCANCODE_UNKNOWN for keys we don't translate.
+        } // namespace
+
         SDL_Scancode VkToScancode(int vk)
         {
             // ASCII letters and digits: VK codes equal their ASCII values.
@@ -52,7 +54,6 @@ namespace Core::Input
             default:         return SDL_SCANCODE_UNKNOWN;
             }
         }
-    }
 
     void RecordLeftMouseButtonPressEdge()
     {

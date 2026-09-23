@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/SyntheticInput.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "Core/Text/Utf8.h"
@@ -1353,12 +1354,69 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     MuReapplyVSyncPreference();
 }
 
+// The physical event pump and the rendered-frame injector share UI-first
+// arbitration. The injector owns its legacy held state; it must not mutate
+// device state or acquire the OS pointer.
+bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
+{
+    if (!g_sdlWindow || (synthetic && event.key.windowID != SDL_GetWindowID(g_sdlWindow)))
+        return false;
+    propagates = true;
+    switch (event.type)
+    {
+    case SDL_EVENT_MOUSE_MOTION:
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        if (!synthetic)
+            HandleMouseMotion(event.motion.x, event.motion.y);
+        return true;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        if (!synthetic && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+            Core::Input::Synthetic::CancelForPhysicalButton(event.button.button);
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        if (propagates && !synthetic)
+            HandleMouseButton(event);
+        return true;
+    case SDL_EVENT_TEXT_INPUT:
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        if (propagates)
+            FeedPortableTextInput(event.text.text);
+        return true;
+    case SDL_EVENT_KEY_UP:
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        return true;
+    case SDL_EVENT_KEY_DOWN:
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+#if !defined(_WIN32)
+        if (event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER)
+            SetEnterPressed(true);
+        if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
+            CameraManager::Instance().ToggleZoomLock();
+#else
+        // Synthetic SDL events do not generate the Win32 messages that handle
+        // these system keys for physical input.
+        if (synthetic && event.key.scancode == SDL_SCANCODE_RETURN)
+            SetEnterPressed(true);
+        if (synthetic && event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
+            CameraManager::Instance().ToggleZoomLock();
+#endif
+        if (!propagates)
+            return true;
+        FeedPortableKey(event.key);
+        return true;
+    default:
+        return false;
+    }
+}
+
 MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
     auto precise = timeBeginPeriod(target_resolution);
 
     HandleFocusChange(Core::Platform::HasSDLWindowInputFocus(SDL_GetWindowFlags(g_sdlWindow)));
+    Core::Input::Synthetic::SetEventDelivery([](SDL_Event& event, bool& propagates)
+                                             { return RouteActionInput(event, true, propagates); }, g_sdlWindow);
 
     while (!Destroy)
     {
@@ -1395,21 +1453,13 @@ MSG MainLoop()
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:
-                // Always forwarded and always still applied to legacy position tracking --
-                // motion isn't an "action" to arbitrate, and legacy hit-testing (CManager
-                // etc.) needs MouseX/MouseY current regardless of what's hovered. RmlUi still
-                // needs this call to drive its own :hover state/hit-testing.
-                Core::Input::RouteToUi(event, g_sdlWindow);
-                HandleMouseMotion(event.motion.x, event.motion.y);
-                break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                // First consumer wins. If an RmlUi element
-                // claimed this click (returns false -- "no longer propagating"), don't also let
-                // it reach legacy button-state tracking/click-to-move.
-                if (Core::Input::RouteToUi(event, g_sdlWindow))
-                    HandleMouseButton(event);
+            {
+                bool propagates = true;
+                RouteActionInput(event, false, propagates);
                 break;
+            }
             case SDL_EVENT_MOUSE_WHEEL:
                 if (Core::Input::RouteToUi(event, g_sdlWindow))
                 {
@@ -1440,57 +1490,17 @@ MSG MainLoop()
                 HandleFocusChange(false);
                 break;
             case SDL_EVENT_TEXT_INPUT:
-                // Committed characters for the focused portable text field (#447). Gated the
-                // same way as key-down below -- if an RmlUi text input has focus and consumed
-                // this, don't also feed it into a legacy portable text field.
-                if (Core::Input::RouteToUi(event, g_sdlWindow))
-                    FeedPortableTextInput(event.text.text);
+            case SDL_EVENT_KEY_UP:
+            case SDL_EVENT_KEY_DOWN:
+            {
+                bool propagates = true;
+                RouteActionInput(event, false, propagates);
                 break;
+            }
             case SDL_EVENT_TEXT_EDITING:
-                // IME composition preview for the focused portable field (#447).
                 if (auto* box = CUITextInputBox::GetFocusedPortable())
                     box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
-            case SDL_EVENT_KEY_UP:
-                // Legacy input has no key-up consumer, but RmlUi needs both halves of a
-                // press/release pair for correct modifier-key and held-key state tracking.
-                Core::Input::RouteToUi(event, g_sdlWindow);
-                break;
-            case SDL_EVENT_KEY_DOWN:
-            {
-                // Only the final portable-field delivery below
-                // is gated on this -- the F10/Enter system-hotkey handling right after stays
-                // unconditional (camera zoom lock and the Enter-press latch are not text-editing
-                // concerns, and gating them risks breaking behavior those comments already
-                // carefully explain).
-                const bool rmlUiConsumed = !Core::Input::RouteToUi(event, g_sdlWindow);
-#ifndef _WIN32
-                // These mirror what WndProc does from Win32 messages, for the
-                // SDL-only input path. On Windows WndProc is still driven (via
-                // SDL_SetWindowsMessageHook), so doing them here too would
-                // double-fire - guard them off there.
-                //
-                // Enter is gated through SetEnterPressed: ScanAsyncKeyState
-                // suppresses a VK_RETURN press unless this fired that frame
-                // (WM_CHAR does it on Windows). Without it Enter never reaches
-                // the game (login submit, chat open).
-                if (event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER)
-                {
-                    SetEnterPressed(true);
-                }
-                // F10 toggles the camera zoom lock (WM_SYSKEYDOWN on Windows,
-                // where F10 is a reserved system key). Without it the zoom stays
-                // locked and the mouse wheel can never zoom. Edge-triggered.
-                if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
-                {
-                    CameraManager::Instance().ToggleZoomLock();
-                }
-#endif
-                // Navigation/erase/clipboard for the focused portable field (#447).
-                if (!rmlUiConsumed)
-                    FeedPortableKey(event.key);
-                break;
-            }
             default:
                 break;
             }
@@ -1607,6 +1617,7 @@ MSG MainLoop()
 
     } // while (!Destroy)
 
+    Core::Input::Synthetic::SetEventDelivery(nullptr, nullptr);
     if (precise == TIMERR_NOERROR)
     {
         timeEndPeriod(target_resolution);

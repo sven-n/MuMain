@@ -1,22 +1,14 @@
-// Injected key presses and mouse clicks for scripted control of the client.
-//
-// An injection is applied below the game's own input readers — `IsKeyDown`
-// consults the held key, a click writes the same mouse globals the event
-// loop fills from real SDL events — so every handler reacts exactly as it
-// does to a human. Nothing here touches the window system: no pointer
-// movement, no focus change, no synthetic OS events — which also bounds
-// what a click reaches: the current UI layer and the world read these
-// globals, while the older widget layer hit-tests through CInput, from the
-// operating system's cursor, which nothing here moves.
-//
-// Sequencing follows rendered frames: `BeginFrame()` runs once per rendered
-// frame (before the key-state scan) and advances one injection through
-// press -> hold -> release. At most one injection is in flight at a time.
+// Scripted input is synchronously routed through the game window's UI-first
+// event path once per rendered frame. UI-consumed input does not enter the
+// legacy key/button readers; no SDL queue or OS pointer is changed.
 #pragma once
 
 #include <cstdint>
 #include <optional>
 #include <string_view>
+
+union SDL_Event;
+struct SDL_Window;
 
 namespace Core::Input::Synthetic
 {
@@ -45,6 +37,18 @@ enum class MouseButton : std::uint8_t
 // another injection is still in flight.
 [[nodiscard]] bool Click(float windowX, float windowY, MouseButton button);
 
+// Committed UTF-8 text, optionally followed by a separately framed Return.
+[[nodiscard]] bool TypeText(std::string_view text, bool enter);
+[[nodiscard]] bool ValidText(std::string_view text);
+
+// Main-loop delivery target. Events are delivered synchronously on the rendered
+// frame; setting nullptr retracts pending work before the window is destroyed.
+using EventDelivery = bool (*)(SDL_Event&, bool& propagates);
+void SetEventDelivery(EventDelivery delivery, SDL_Window* window);
+[[nodiscard]] bool DeliveryFailed();
+void CancelDelivery();
+void CancelForPhysicalButton(unsigned char button);
+
 // True while no injection is in flight; the command that scheduled one
 // answers once this turns true again.
 [[nodiscard]] bool IsIdle();
@@ -62,7 +66,7 @@ enum class MouseButton : std::uint8_t
 // rendered frame before the key-state scan.
 void BeginFrame();
 
-// Forgets the in-flight injection, releasing a button it had already pressed.
+// Forgets the in-flight injection, retracting a button it had already pressed.
 // Called when the command that scheduled one gives up on it — a timeout, an
 // interrupt, or a caller that disconnected — and by the tests. Compare
 // `CurrentGeneration()` first: whoever calls this drops whatever is in
@@ -81,5 +85,11 @@ void Reset();
 inline void BeginFrame() {}
 
 inline void Reset() {}
+
+inline void CancelForPhysicalButton(unsigned char) {}
+inline void CancelDelivery() {}
+
+using EventDelivery = bool (*)(SDL_Event&, bool&);
+inline void SetEventDelivery(EventDelivery, SDL_Window*) {}
 #endif
 } // namespace Core::Input::Synthetic

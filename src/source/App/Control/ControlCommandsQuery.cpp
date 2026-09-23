@@ -305,7 +305,7 @@ private:
     std::shared_ptr<ScreenshotState> m_state;
 };
 
-// hotkey / click-ui: answers once the injected press has been released,
+// hotkey / click-ui / type: answers once the injected press has been released,
 // so the caller's next command sees the UI after the game reacted to it.
 class SyntheticInputAct : public Act
 {
@@ -354,7 +354,10 @@ public:
         {
             return Status::Running;
         }
-        response = App::Control::EncodeResult(EncodedId(), m_encodedResult);
+        if (Core::Input::Synthetic::DeliveryFailed() && IsStillMine())
+            response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed, "input delivery target disappeared");
+        else
+            response = App::Control::EncodeResult(EncodedId(), m_encodedResult);
         return Status::Finished;
     }
 
@@ -621,6 +624,26 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     result["y"] = windowY;
     result["button"] = buttonName;
     act = std::make_unique<SyntheticInputAct>("click-ui", result.dump());
+    return {};
+}
+std::string Type(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string text;
+    if (!request.GetString("text", text) || !Core::Input::Synthetic::ValidText(text))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`type` needs printable UTF-8 text (1-256 bytes)");
+
+    bool enter = false;
+    if (request.Contains("enter") && !request.GetStrictBool("enter", enter))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`enter` must be boolean");
+
+    if (!Core::Input::Synthetic::TypeText(text, enter))
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+
+    json result;
+    result["bytes"] = text.size();
+    result["enter"] = enter;
+    act = std::make_unique<SyntheticInputAct>("type", result.dump());
     return {};
 }
 } // namespace App::Control::Commands

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Input/SyntheticInput.h"
 #include "RmlUiRuntime.h"
 #include "RmlUiRenderInterface.h"
 #include "RmlUiSystemInterface.h"
@@ -133,6 +134,7 @@ void RmlUiRuntime::Destroy()
 {
     if (!m_Context) return;
 
+    Core::Input::Synthetic::CancelDelivery();
     Core::Input::SetUiInputConsumer(nullptr);
     mu::GetRenderer().SetPreSubmitCallback(nullptr);
 
@@ -208,6 +210,20 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
         return m_Context->ProcessMouseMove(static_cast<int>(event.motion.x), static_cast<int>(event.motion.y), RmlSDL::GetKeyModifierState());
 
     return RmlSDL::InputEventHandler(m_Context, window, event);
+}
+
+void RmlUiRuntime::CancelSyntheticMousePress()
+{
+    if (!m_Context)
+        return;
+    // Vendored Context::ProcessMouseButtonUp only dispatches Mouseup/Click when hover
+    // is non-null. Leave clears hover; up then clears its active/drag chain without
+    // activating the pressed element. Restore hover only after the up.
+    m_Context->ProcessMouseLeave();
+    m_Context->ProcessMouseButtonUp(0, RmlSDL::GetKeyModifierState());
+    float x = 0.0f, y = 0.0f;
+    SDL_GetMouseState(&x, &y);
+    m_Context->ProcessMouseMove(static_cast<int>(x), static_cast<int>(y), RmlSDL::GetKeyModifierState());
 }
 
 bool RmlUiRuntime::IsMouseOverUI() const
