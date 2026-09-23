@@ -45,6 +45,14 @@
 	height: 300px;
 	overflow: hidden auto;
 }
+/* #server_col is an ID selector, so it always outranks base.rcss's global `.hidden{display:none}`
+   on specificity alone (an ID beats any number of plain classes) -- unlike the many `.foo.hidden`
+   compound overrides elsewhere in this codebase, which only break a same-specificity class-vs-class
+   tie. Without this, data-class-hidden="!server_list_visible" (server_select.rml) never actually
+   hid this column. */
+#server_col.hidden {
+	display: none;
+}
 
 /* Ninepatch border (base.rcss) stretched from its native 108x30 rect; a translucent tint
    decorator layered on top (RmlUi paints the first-listed decorator frontmost) gives the glassy

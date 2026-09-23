@@ -12,9 +12,8 @@
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<span id="title">{{title}}</span>
 
-		<!-- Decorative strip behind the real (native, unmoved) CUITextInputBox -- see
-		     MyShopInventory.cpp's Create() comment for why this piece alone is separable. -->
-		<div id="edit_bg"></div>
+		<!-- #edit_bg moved to my_shop_bg.rml -- this context renders after the native
+		     CUITextInputBox's Render(), so it was covering the input box, not sitting behind it. -->
 
 		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click"></div>
 		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>

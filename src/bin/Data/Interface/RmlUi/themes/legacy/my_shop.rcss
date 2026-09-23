@@ -1,8 +1,8 @@
-/* Legacy theme for CMyShopInventory's chrome (frame/title/edit-box background strip/Open-Close-
-   Exit buttons). #panel's left/top/scale come live from C++ (SyncRmlModel()), so coordinates below
-   are plain reference px, not dp. The nickname/subject CUITextInputBox itself stays fully native
-   (MyShopInventory.cpp's Create()) -- #edit_bg below is only the decorative strip behind it, which
-   was already a separate sprite independent of the input box's own (alpha-0) background fill. */
+/* Legacy theme for CMyShopInventory's chrome (frame/title/Open-Close-Exit buttons). #panel's
+   left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px,
+   not dp. The nickname/subject CUITextInputBox itself stays fully native (MyShopInventory.cpp's
+   Create()) -- its own decorative background strip (#edit_bg) lives in my_shop_bg.rcss instead,
+   since this (foreground) context renders after the native CUITextInputBox's own Render(). */
 
 #panel {
 	position: absolute;
@@ -21,17 +21,6 @@
 	color: #49b0ff;
 	font-weight: bold;
 	font-size: 12px;
-}
-
-@spritesheet shop-edit-bg-sheet { src: "../../../newui_Box_openTitle.tga"; shop-edit-bg: 0px 0px 169px 26px; }
-#edit_bg {
-	position: absolute;
-	left: 12px;
-	top: 49px;
-	width: 169px;
-	height: 26px;
-	decorator: image(shop-edit-bg);
-	pointer-events: none;
 }
 
 /* Buttons: same 36x29 reference-pixel boxes ChangeButtonInfo() used to place them at. */

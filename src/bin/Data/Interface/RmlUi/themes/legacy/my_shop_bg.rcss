@@ -27,3 +27,16 @@
 .bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(shop-bg-left); }
 .bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(shop-bg-right); }
 .bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(shop-bg-bottom); }
+
+/* Relocated from the fg's #edit_bg -- that context renders after the native CUITextInputBox's own
+   Render(), so it was covering the input box instead of sitting behind it. */
+@spritesheet shop-edit-bg-sheet { src: "../../../newui_Box_openTitle.tga"; shop-edit-bg: 0px 0px 169px 26px; }
+#edit_bg {
+	position: absolute;
+	left: 12px;
+	top: 49px;
+	width: 169px;
+	height: 26px;
+	decorator: image(shop-edit-bg);
+	pointer-events: none;
+}

@@ -88,12 +88,31 @@
 /* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
    ordinary flex children, same technique .gcd-item3d-anchor/.btn.gcd-keypad-btn already use in
    generic_confirm_dialog.rcss. 128dp/64dp match native's own two button sizes exactly
-   (MSGBOX_BTN_EMPTY_WIDTH/_SMALL_WIDTH, CommonMessageBox.h). */
+   (MSGBOX_BTN_EMPTY_WIDTH/_SMALL_WIDTH, CommonMessageBox.h); 76dp (.cols-2 below) has no native
+   equivalent (columns==2 is dialog-only).
+
+   decorator: ninepatch(...) replaces .btn's inherited decorator: image(legacy-btn-idle) -- a
+   fixed 108x30px sprite that this engine's image() decorator only ever stretches to fill its box,
+   never tiles/slices (confirmed via DecoratorTiled.cpp) -- with a proper 9-slice scale of the SAME
+   asset, using the sheet's own already-declared `legacy-btn-idle-inner` rect. None of this file's
+   three button widths (128dp/64dp/76dp) matches the sprite's native 108px, so every one of them
+   visibly stretched/squashed the idle art before this -- exactly the technique server_select.rcss's
+   own `.server-row`/`.group-btn` already prove for the same problem. Declared once here rather
+   than per width variant, since a ninepatch decorator scales to whatever box it's given -- the
+   same three rules below cover every .gmd-btn size with no duplication. Unlike background-color/
+   border, a decorator paints independently of the box-model layer the "bordered element with
+   children" bug affects (server_select.rcss's own comment: "the ninepatch decorator paints
+   separately, unaffected"), so this is safe directly on .gmd-btn despite it having children
+   (.gmd-btn-label/.gmd-tooltip) -- no separate childless sibling element needed the way a flat
+   background-color/border would require. */
 .gmd-btn {
 	position: static;
 	width: 128dp;
 	height: 30dp;
+	decorator: ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
 }
+.gmd-btn:hover { decorator: ninepatch(legacy-btn-hover, legacy-btn-hover-inner); }
+.gmd-btn:active { decorator: ninepatch(legacy-btn-active, legacy-btn-active-inner); }
 .gmd-btn.compact { width: 64dp; }
 /* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (decorators
    don't consume box-model space like border/padding do, so this matches the cell exactly, no
@@ -101,26 +120,14 @@
    still looks like a normal button) since a long jewel name (e.g. "Higher Refining Stone") needs
    to wrap onto 2 lines at this width -- .btn's own fixed height:30dp/line-height:30dp assumes a
    single line and would otherwise let the second line spill silently past the button's own box.
-   decorator: ninepatch(...) replaces .btn's inherited decorator: image(legacy-btn-idle) (a fixed
-   108x30px sprite that doesn't stretch/shrink to a mismatched box size in this engine) with a
-   proper 9-slice scale of the SAME asset using the sheet's own already-declared (if previously
-   unused by this file) `legacy-btn-idle-inner` rect -- exactly the technique server_select.rcss's
-   .server-row already proves for this exact problem (see that file's own `.server-row`/
-   `.group-btn` rules). Unlike background-color/border, a decorator paints
-   independently of the box-model layer the "bordered element with children" bug affects
-   (server_select.rcss's own comment: "the ninepatch decorator paints separately, unaffected"), so
-   this can go directly on .gmd-btn.cols-2 despite it having children (.gmd-btn-label/.gmd-tooltip)
-   -- no separate childless sibling element needed the way a flat background-color/border would. */
+   Idle/hover/active decorators are inherited unchanged from the base .gmd-btn rules above. */
 .gmd-btn.cols-2 {
 	width: 76dp;
 	height: auto;
 	min-height: 30dp;
 	line-height: normal;
 	white-space: normal;
-	decorator: ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
 }
-.gmd-btn.cols-2:hover { decorator: ninepatch(legacy-btn-hover, legacy-btn-hover-inner); }
-.gmd-btn.cols-2:active { decorator: ninepatch(legacy-btn-active, legacy-btn-active-inner); }
 /* Text lives in its own element (not raw text directly in .gmd-btn) purely so a decorator change
    here doesn't require touching the shared markup structure again; no stacking-order concerns
    remain now that there's no separate absolutely-positioned fill sibling to compete with (an
