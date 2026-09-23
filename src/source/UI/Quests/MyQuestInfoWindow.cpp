@@ -15,6 +15,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 
@@ -224,7 +225,11 @@ bool mu::ui::window::CMyQuestInfoWindow::UpdateMouseEvent()
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYQUEST))
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, MYQUESTINFO_WINDOW_WIDTH, MYQUESTINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = MYQUESTINFO_WINDOW_WIDTH;
+    float panelHeight = MYQUESTINFO_WINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
 
     return true;

@@ -13,6 +13,7 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -225,7 +226,14 @@ bool CNPCQuest::UpdateMouseEvent()
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCQUEST))
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPCQUEST_WIDTH, NPCQUEST_HEIGHT).Contains(MouseX, MouseY))
+    // Frame chrome (and thus #panel's real size) lives in the background-context doc, not
+    // m_pRmlDoc -- see BuildRmlUi()'s own comment on the fg/bg split this window needs for its
+    // still-native live-3D quest-item preview.
+    float panelWidth = NPCQUEST_WIDTH;
+    float panelHeight = NPCQUEST_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlBgDoc, "panel", panelWidth, panelHeight);
+
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
 
     return true;

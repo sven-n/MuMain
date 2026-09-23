@@ -20,6 +20,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -276,7 +277,13 @@ bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CHARACTER))
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CHAINFO_WINDOW_WIDTH, CHAINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    // #panel's own live RCSS size is the source of truth -- CHAINFO_WINDOW_WIDTH/HEIGHT only cover
+    // the first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = CHAINFO_WINDOW_WIDTH;
+    float panelHeight = CHAINFO_WINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
 
     return true;

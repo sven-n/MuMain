@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
@@ -180,7 +181,11 @@ bool CPetInfoWindow::UpdateMouseEvent()
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PET))
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, PETINFOWINDOW_WIDTH, PETINFOWINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = PETINFOWINDOW_WIDTH;
+    float panelHeight = PETINFOWINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
 
     return true;
