@@ -35,11 +35,14 @@ namespace
 std::vector<SDL_EventType> delivered;
 bool consume = false;
 std::string deliveredText;
+std::vector<SDL_KeyboardEvent> deliveredKeys;
 bool FakeDelivery(SDL_Event& event, bool& propagates)
 {
     delivered.push_back(static_cast<SDL_EventType>(event.type));
     if (event.type == SDL_EVENT_TEXT_INPUT)
         deliveredText = event.text.text;
+    if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+        deliveredKeys.push_back(event.key);
     propagates = !consume;
     return true;
 }
@@ -117,6 +120,7 @@ struct ResetInjector
         delivered.clear();
         consume = false;
         deliveredText.clear();
+        deliveredKeys.clear();
     }
     ~ResetInjector()
     {
@@ -171,6 +175,29 @@ TEST_CASE("A hotkey is down for exactly one frame [core][synthetic-input]")
 
     BeginFrame();
     CHECK(IsIdle());
+}
+
+TEST_CASE("Synthetic navigation keys carry SDL keycodes for RmlSDL [core][synthetic-input]")
+{
+    ResetInjector guard;
+    const struct { int virtualKey; SDL_Scancode scancode; SDL_Keycode keycode; } cases[] = {
+        {VK_TAB, SDL_SCANCODE_TAB, SDLK_TAB},
+        {VK_DOWN, SDL_SCANCODE_DOWN, SDLK_DOWN},
+        {VK_SPACE, SDL_SCANCODE_SPACE, SDLK_SPACE},
+    };
+    for (const auto& key : cases)
+    {
+        REQUIRE(PressKey(key.virtualKey));
+        BeginFrame();
+        BeginFrame();
+        BeginFrame();
+        REQUIRE(deliveredKeys.size() >= 2);
+        CHECK(deliveredKeys[deliveredKeys.size() - 2].type == SDL_EVENT_KEY_DOWN);
+        CHECK(deliveredKeys[deliveredKeys.size() - 1].type == SDL_EVENT_KEY_UP);
+        CHECK(deliveredKeys.back().scancode == key.scancode);
+        CHECK(deliveredKeys.back().key == key.keycode);
+        CHECK(deliveredKeys[deliveredKeys.size() - 2].key == key.keycode);
+    }
 }
 
 TEST_CASE("A second injection is refused while one is in flight [core][synthetic-input]")
