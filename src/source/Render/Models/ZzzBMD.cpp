@@ -545,7 +545,13 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
     // TransformCheap()'s header comment -- same restriction that already applied to it in
     // increment 2). fTransformedSize is intentionally left stale on the lazy path in both Debug
     // and Release builds (see DXP-20-inc4-plan.md) -- its only consumer already floors the result.
-    if (g_LazyCpuSkin && EditFlag != 2)
+    //
+    // Deferring is only safe for a palette the object owns. RenderItems, the inventory preview and
+    // the weapon-effect path all pass the shared global BoneTransform, and the next object's
+    // Animation() overwrites it before the deferred consumer reads it -- the item then skins to
+    // whatever pose happened to be there. Those callers skin eagerly.
+    const bool usesSharedGlobalBoneTransform = BoneMatrix == BoneTransform;
+    if (g_LazyCpuSkin && EditFlag != 2 && !usesSharedGlobalBoneTransform)
         return;
 
     vec3_t BoundingMin;
