@@ -7,6 +7,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemBehavior.h"
 #include "Core/Utilities/KeyGenerator.h"
 #include "Network/Server/ServerListManager.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -298,16 +299,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
             if (wcscmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
             {
                 if (
-                    (
-                        pEquipedHelper->Type == ITEM_HORN_OF_FENRIR
-                        || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT
-                        || pEquipedHelper->Type == ITEM_DARK_HORSE_ITEM
-                        || pEquipedWing->Type == ITEM_CAPE_OF_LORD
-                        || (pEquipedWing->Type >= ITEM_WING_OF_STORM && pEquipedWing->Type <= ITEM_WING_OF_DIMENSION)
-                        || (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WINGS_OF_DARKNESS)
-                        || (ITEM_WING + 130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING + 134)
-                        || (pEquipedWing->Type >= ITEM_CAPE_OF_FIGHTER && pEquipedWing->Type <= ITEM_CAPE_OF_OVERRULE)
-                        || (pEquipedWing->Type == ITEM_WING + 135))
+                    GameLogic::Items::HasFlightEquipment(pEquipedHelper, pEquipedWing)
                     && !(pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA)
                     && (g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false)
                     )

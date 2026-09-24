@@ -1393,6 +1393,11 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         g_pEnterDevilSquare->ClosingProcess();
     }
+    // NOTE: no INTERFACE_KANTURU2ND_ENTERNPC hook here by design. Hide() runs
+    // on the Enter path (BtnProcess hides the dialog before the NPC animation
+    // sends the enter at frame 42); a Close there would make the server drop
+    // the enter. Closes live at the explicit call sites, at the NPC-click
+    // site before SendTalkToNpcRequest, and in the animation-end guard.
     else if (dwKey == INTERFACE_BLOODCASTLE_TIME)
     {
         g_pBloodCastle->ClosingProcess();

@@ -68,6 +68,8 @@ namespace SEASON3B
         void SendRequestKanturu3rdInfo();
         void SendRequestKanturu3rdEnter();
 
+        void ClosingProcess();
+
     private:
         void Initialize();
 
@@ -77,6 +79,10 @@ namespace SEASON3B
         void SetButtonInfo();
 
         bool BtnProcess();
+        void RejectEnterRequest(BYTE btPopup);
+        void ValidateEquipmentForEntry();
+        bool IsRidingUniria(ITEM* pItemHelper);
+        bool HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight);
 
         void RenderFrame();
         void RenderButtons();

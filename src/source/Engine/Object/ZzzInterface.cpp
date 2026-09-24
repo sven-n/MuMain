@@ -54,6 +54,7 @@
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemBehavior.h"
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
@@ -1641,7 +1642,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (M38Kanturu2nd::Is_Kanturu2nd())
 					{
 						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
+						{
+							// Talking to another NPC replaces the gate dialog: release
+							// the server dialog BEFORE the new Talk request so packet
+							// order stays Close(old) then Talk(new). A Close sent later
+							// (e.g. from the new dialog's Show path) would clear the
+							// just-opened dialog instead.
+							if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC))
+							{
+								g_pKanturu2ndEnterNpc->ClosingProcess();
+							}
 							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+						}
 					}
 					else if (gMapManager.IsCursedTemple())
 					{
@@ -2702,15 +2714,7 @@ void CheckGate()
                             g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
-                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM
-                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD
-                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_DINORANT
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_FENRIR
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING_OF_STORM && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING_OF_DIMENSION)
-                                || (ITEM_WING + 130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 134)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
+                            !GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER], &CharacterMachine->Equipment[EQUIPMENT_WING]))
                         {
                             g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_ERROR_MESSAGE);
 

@@ -1242,6 +1242,14 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 
             if (iAnimationFrame >= 50)
             {
+                // Dying in frames 0-42 skips the enter request (see the
+                // Hero->Dead guard above), so the server dialog would stay
+                // open forever. Release it; when the enter was sent the
+                // server response path (ReceiveKanturu3rdEnter) owns the close.
+                if (g_pKanturu2ndEnterNpc->IsEnterRequest() == false)
+                {
+                    g_pKanturu2ndEnterNpc->ClosingProcess();
+                }
                 o->AnimationFrame = 0;
                 SetAction(o, KANTURU2ND_NPC_ANI_STOP);
                 g_pKanturu2ndEnterNpc->SetNpcAnimation(false);
