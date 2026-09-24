@@ -663,7 +663,7 @@ jobs:
   release:
     name: Semantic Release
     needs: [quality, build-windows, build-linux, build-macos]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.repository == 'sven-n/MuMain' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write

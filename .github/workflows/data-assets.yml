@@ -19,6 +19,7 @@ concurrency:
 jobs:
   release-data:
     name: Publish data asset
+    if: github.repository == 'sven-n/MuMain'
     runs-on: ubuntu-latest
 
     steps:
