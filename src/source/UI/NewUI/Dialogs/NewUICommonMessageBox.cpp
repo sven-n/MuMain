@@ -2596,23 +2596,23 @@ bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 
     wchar_t strName[50] = { 0, };
 
-    if (pItem->Type == ITEM_HELPER + 54)
+    if (pItem->Type == ITEM_RESET_FRUIT_STRENGTH)
     {
         mu_swprintf(strName, L"%ls", I18N::Game::STR);
     }
-    else if (pItem->Type == ITEM_HELPER + 55)
+    else if (pItem->Type == ITEM_RESET_FRUIT_QUICKNESS)
     {
         mu_swprintf(strName, L"%ls", I18N::Game::AGI);
     }
-    else if (pItem->Type == ITEM_HELPER + 56)
+    else if (pItem->Type == ITEM_RESET_FRUIT_HEALTH)
     {
         mu_swprintf(strName, L"%ls", I18N::Game::STA);
     }
-    else if (pItem->Type == ITEM_HELPER + 57)
+    else if (pItem->Type == ITEM_RESET_FRUIT_ENERGY)
     {
         mu_swprintf(strName, L"%ls", I18N::Game::ENG);
     }
-    else if (pItem->Type == ITEM_HELPER + 58)
+    else if (pItem->Type == ITEM_RESET_FRUIT_CONTROL)
     {
         mu_swprintf(strName, L"%ls", I18N::Game::Command);
     }

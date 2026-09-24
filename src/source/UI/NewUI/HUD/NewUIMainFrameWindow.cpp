@@ -1035,7 +1035,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
     {
         ITEM* pItem = NULL;
         pItem = g_pMyInventory->FindItem(iIndex);
-        if ((pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82))
+        if ((pItem->Type >= ITEM_ELIXIR_OF_STRENGTH && pItem->Type <= ITEM_ELIXIR_OF_CONTROL))
         {
             std::list<eBuffState> secretPotionbufflist;
             secretPotionbufflist.push_back(eBuff_SecretPotion1);
@@ -1215,18 +1215,18 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
     case ITEM_JACK_OLANTERN_CRY:
     case ITEM_JACK_OLANTERN_FOOD:
     case ITEM_JACK_OLANTERN_DRINK:
-    case ITEM_POTION + 70:
-    case ITEM_POTION + 71:
-    case ITEM_POTION + 78:
-    case ITEM_POTION + 79:
-    case ITEM_POTION + 80:
-    case ITEM_POTION + 81:
-    case ITEM_POTION + 82:
-    case ITEM_POTION + 94:
+    case ITEM_ELITE_HEALING_POTION:
+    case ITEM_ELITE_MANA_POTION:
+    case ITEM_ELIXIR_OF_STRENGTH:
+    case ITEM_ELIXIR_OF_AGILITY:
+    case ITEM_ELIXIR_OF_HEALTH:
+    case ITEM_ELIXIR_OF_ENERGY:
+    case ITEM_ELIXIR_OF_CONTROL:
+    case ITEM_MEDIUM_ELITE_HEALING_POTION:
     case ITEM_CHERRY_BLOSSOM_WINE:
     case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
     case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
-    case ITEM_POTION + 133:
+    case ITEM_ELITE_SD_POTION:
         if (m_iHotKeyItemType[iHotKey] != ITEM_POTION + 20 || m_iHotKeyItemLevel[iHotKey] == 0)
         {
             iStart = iEnd = m_iHotKeyItemType[iHotKey];

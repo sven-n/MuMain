@@ -138,7 +138,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
 
 bool SEASON3B::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
 {
-    if (p->Type == ITEM_HELPER + 61)
+    if (p->Type == ITEM_ILLUSION_TEMPLE_TICKET)
     {
         if (!CheckEnterLevel(enterlevel)) return false;
     }
@@ -172,7 +172,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int enterl
         return true;
     }
 
-    pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_HELPER + 61, -1);
+    pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_ILLUSION_TEMPLE_TICKET, -1);
     if (pos != -1) {
         itempos = pos;
         return true;

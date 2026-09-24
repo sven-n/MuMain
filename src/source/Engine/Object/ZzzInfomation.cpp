@@ -1040,7 +1040,7 @@ void CalcExcellentOptions(ITEM* ip)
             break;
         }
     }
-    if (ip->Type == ITEM_HELPER + 107)
+    if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
     {
         ip->SpecialValue[ip->SpecialNum] = 15;
         ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC_PERCENT; ip->SpecialNum++;
@@ -1878,7 +1878,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
             }
         }
     }
-    else if (ip->Type == ITEM_POTION + 53)
+    else if (ip->Type == ITEM_TALISMAN_OF_LUCK)
     {
         Gold = 0;
     }
@@ -2077,23 +2077,23 @@ int64_t ItemValue(ITEM* ip, int goldType)
 
     switch (ip->Type)
     {
-    case ITEM_POTION + 112:
-    case ITEM_POTION + 113:
-    case ITEM_POTION + 121:
-    case ITEM_POTION + 122:
-    case ITEM_POTION + 123:
-    case ITEM_POTION + 124:
+    case ITEM_SILVER_KEY:
+    case ITEM_GOLD_KEY:
+    case ITEM_SEALED_GOLDEN_BOX:
+    case ITEM_SEALED_SILVER_BOX:
+    case ITEM_GOLDEN_BOX:
+    case ITEM_SILVER_BOX:
     case ITEM_PET_PANDA:
     case ITEM_PANDA_TRANSFORMATION_RING:
     case ITEM_DEMON:
     case ITEM_SPIRIT_OF_GUARDIAN:
-    case ITEM_HELPER + 109:
-    case ITEM_HELPER + 110:
-    case ITEM_HELPER + 111:
-    case ITEM_HELPER + 112:
-    case ITEM_HELPER + 113:
-    case ITEM_HELPER + 114:
-    case ITEM_HELPER + 115:
+    case ITEM_SAPPHIRE_RING:
+    case ITEM_RUBY_RING:
+    case ITEM_TOPAZ_RING:
+    case ITEM_AMETHYST_RING:
+    case ITEM_RUBY_NECKLACE:
+    case ITEM_EMERALD_NECKLACE:
+    case ITEM_SAPPHIRE_NECKLACE:
         Gold = 1000;
         break;
     case ITEM_SKELETON_TRANSFORMATION_RING:
@@ -2125,13 +2125,13 @@ int64_t ItemValue(ITEM* ip, int goldType)
 
     switch (ip->Type)
     {
-    case ITEM_POTION + 112:	goto EXIT_CALCULATE;
+    case ITEM_SILVER_KEY:	goto EXIT_CALCULATE;
         // MODEL_POTION+113
-    case ITEM_POTION + 113:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 121:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 122:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 123:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 124:	goto EXIT_CALCULATE;
+    case ITEM_GOLD_KEY:	goto EXIT_CALCULATE;
+    case ITEM_SEALED_GOLDEN_BOX:	goto EXIT_CALCULATE;
+    case ITEM_SEALED_SILVER_BOX:	goto EXIT_CALCULATE;
+    case ITEM_GOLDEN_BOX:	goto EXIT_CALCULATE;
+    case ITEM_SILVER_BOX:	goto EXIT_CALCULATE;
     case ITEM_WING + 130:
     case ITEM_WING + 131:
     case ITEM_WING + 132:
@@ -2150,19 +2150,19 @@ int64_t ItemValue(ITEM* ip, int goldType)
     case ITEM_DEMON:
     case ITEM_SPIRIT_OF_GUARDIAN:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 109:
+    case ITEM_SAPPHIRE_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 110:
+    case ITEM_RUBY_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 111:
+    case ITEM_TOPAZ_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 112:
+    case ITEM_AMETHYST_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 113:
+    case ITEM_RUBY_NECKLACE:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 114:
+    case ITEM_EMERALD_NECKLACE:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 115:
+    case ITEM_SAPPHIRE_NECKLACE:
         goto EXIT_CALCULATE;
     case ITEM_HELPER + 128:
     case ITEM_HELPER + 129:
@@ -2781,7 +2781,7 @@ void CHARACTER_MACHINE::CalculateDamage()
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 74);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_WRATH);
         Character.AttackDamageMinRight += Item_data.m_byValue1;
         Character.AttackDamageMaxRight += Item_data.m_byValue1;
         Character.AttackDamageMinLeft += Item_data.m_byValue1;
@@ -3005,7 +3005,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 75);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_WIZARDRY);
         Character.MagicDamageMin += Item_data.m_byValue1;
         Character.MagicDamageMax += Item_data.m_byValue1;
     }
@@ -3333,7 +3333,7 @@ void CHARACTER_MACHINE::CalculateDefense()
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2))
     {
-        const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 73);
+        const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_DEFENSE);
         Character.Defense += (WORD)Item_data.m_byValue1;
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3))
@@ -3463,27 +3463,27 @@ void CHARACTER_MACHINE::CalculateBasicState()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_STRENGTH);
         Character.AddStrength += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_AGILITY);
         Character.AddDexterity += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_HEALTH);
         Character.AddVitality += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_ENERGY);
         Character.AddEnergy += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_CONTROL);
         Character.AddCharisma += (WORD)Item_data.m_byValue1;
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
@@ -3504,27 +3504,27 @@ void CHARACTER_MACHINE::getAllAddStateOnlyExValues(int& iAddStrengthExValues, in
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_STRENGTH);
         iAddStrengthExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_AGILITY);
         iAddDexterityExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_HEALTH);
         iAddVitalityExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_ENERGY);
         iAddEnergyExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_CONTROL);
         iAddCharismaExValues += (WORD)Item_data.m_byValue1;
     }
 

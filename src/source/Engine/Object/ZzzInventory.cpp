@@ -481,7 +481,7 @@ bool IsRequireClassRenderItem(const short sType)
     if (
         sType == ITEM_WEAPON_OF_ARCHANGEL
         || sType == ITEM_ARMOR_OF_GUARDSMAN
-        || sType == ITEM_WING + 26
+        || sType == ITEM_GEM_OF_SECRET
         || (sType >= ITEM_PACKED_JEWEL_OF_BLESS && sType <= ITEM_PACKED_JEWEL_OF_SOUL)
         || GameLogic::Items::IsSealType(sType)
         || sType == ITEM_TRANSFORMATION_RING
@@ -497,47 +497,47 @@ bool IsRequireClassRenderItem(const short sType)
     }
 
     if (GameLogic::Items::IsSealType(sType)
-        || (sType >= ITEM_HELPER + 46 && sType <= ITEM_HELPER + 48)
-        || (sType >= ITEM_HELPER + 125 && sType <= ITEM_HELPER + 127)
-        || (sType == ITEM_POTION + 54)
-        || (sType >= ITEM_POTION + 58 && sType <= ITEM_POTION + 62)
-        || (sType == ITEM_POTION + 53)
-        || (sType >= ITEM_POTION + 70 && sType <= ITEM_POTION + 71)
-        || (sType >= ITEM_POTION + 72 && sType <= ITEM_POTION + 77)
+        || (sType >= ITEM_DEVIL_SQUARE_TICKET && sType <= ITEM_KALIMA_TICKET)
+        || (sType >= ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && sType <= ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
+        || (sType == ITEM_CHAOS_CARD)
+        || (sType >= ITEM_RARE_ITEM_TICKET_1 && sType <= ITEM_RARE_ITEM_TICKET_5)
+        || (sType == ITEM_TALISMAN_OF_LUCK)
+        || (sType >= ITEM_ELITE_HEALING_POTION && sType <= ITEM_ELITE_MANA_POTION)
+        || (sType >= ITEM_SCROLL_OF_QUICKNESS && sType <= ITEM_SCROLL_OF_MANA)
         || (sType >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN
             && sType <= ITEM_TYPE_CHARM_MIXWING + EWS_END)
-        || (sType == ITEM_HELPER + 59)
-        || (sType >= ITEM_HELPER + 54 && sType <= ITEM_HELPER + 58)
-        || (sType >= ITEM_POTION + 78 && sType <= ITEM_POTION + 82)
-        || (sType == ITEM_HELPER + 60)
-        || (sType == ITEM_HELPER + 61)
+        || (sType == ITEM_SEAL_OF_MOBILITY)
+        || (sType >= ITEM_RESET_FRUIT_STRENGTH && sType <= ITEM_RESET_FRUIT_CONTROL)
+        || (sType >= ITEM_ELIXIR_OF_STRENGTH && sType <= ITEM_ELIXIR_OF_CONTROL)
+        || (sType == ITEM_INDULGENCE)
+        || (sType == ITEM_ILLUSION_TEMPLE_TICKET)
         || (sType == ITEM_POTION + 91)
-        || (sType == ITEM_POTION + 94)
-        || (sType >= ITEM_POTION + 92 && sType <= ITEM_POTION + 93)
-        || (sType == ITEM_POTION + 95)
-        || (sType >= ITEM_HELPER + 62 && sType <= ITEM_HELPER + 63)
-        || (sType >= ITEM_POTION + 97 && sType <= ITEM_POTION + 98)
-        || (sType == ITEM_POTION + 96)
+        || (sType == ITEM_MEDIUM_ELITE_HEALING_POTION)
+        || (sType >= ITEM_CHAOS_CARD_GOLD && sType <= ITEM_CHAOS_CARD_RARE)
+        || (sType == ITEM_CHAOS_CARD_MINI)
+        || (sType >= ITEM_SEAL_OF_HEALING && sType <= ITEM_SEAL_OF_DIVINITY)
+        || (sType >= ITEM_SCROLL_OF_BATTLE && sType <= ITEM_SCROLL_OF_STRENGTH)
+        || (sType == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
         || (sType == ITEM_DEMON || sType == ITEM_SPIRIT_OF_GUARDIAN)
         || (sType == ITEM_PET_RUDOLF)
         || (sType == ITEM_SNOWMAN_TRANSFORMATION_RING)
         || (sType == ITEM_PANDA_TRANSFORMATION_RING)
         || (sType == ITEM_SKELETON_TRANSFORMATION_RING)
-        || (sType == ITEM_HELPER + 69)
-        || (sType == ITEM_HELPER + 70)
+        || (sType == ITEM_TALISMAN_OF_RESURRECTION)
+        || (sType == ITEM_TALISMAN_OF_MOBILITY)
         || GameLogic::Items::IsGambleItemType(sType)
         || (sType == ITEM_PET_PANDA)
         || (sType == ITEM_PET_UNICORN)
-        || sType == ITEM_HELPER + 81
-        || sType == ITEM_HELPER + 82
-        || sType == ITEM_HELPER + 93
-        || sType == ITEM_HELPER + 94
-        || sType == ITEM_HELPER + 121
-        || (sType >= ITEM_POTION + 145 && sType <= ITEM_POTION + 150)
+        || sType == ITEM_TALISMAN_OF_GUARDIAN
+        || sType == ITEM_TALISMAN_OF_ITEM_PROTECTION
+        || sType == ITEM_MASTER_SEAL_OF_ASCENSION
+        || sType == ITEM_MASTER_SEAL_OF_WEALTH
+        || sType == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE
+        || (sType >= ITEM_RARE_ITEM_TICKET_7 && sType <= ITEM_RARE_ITEM_TICKET_12)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
         || g_pMyInventory->IsInvenItem(sType)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (sType == ITEM_POTION + 133)
+        || (sType == ITEM_ELITE_SD_POTION)
         )
     {
         return false;
@@ -1259,7 +1259,7 @@ void RepairAllGold(void)
             int Level = pItem->Level;
             int maxDurability = CalcMaxDurability(pItem, p, Level);
 
-            if (pItem->Type >= ITEM_POTION + 55 && pItem->Type <= ITEM_POTION + 57)
+            if (pItem->Type >= ITEM_GREEN_CHAOS_BOX && pItem->Type <= ITEM_PURPLE_CHAOS_BOX)
             {
                 continue;
             }
@@ -1277,23 +1277,23 @@ void RepairAllGold(void)
             if (pItem->Type == ITEM_MOONSTONE_PENDANT)
                 continue;
 
-            if (pItem->Type >= ITEM_HELPER + 46 && pItem->Type <= ITEM_HELPER + 48)
+            if (pItem->Type >= ITEM_DEVIL_SQUARE_TICKET && pItem->Type <= ITEM_KALIMA_TICKET)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_HELPER + 125 && pItem->Type <= ITEM_HELPER + 127)
+            if (pItem->Type >= ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && pItem->Type <= ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_POTION + 145 && pItem->Type <= ITEM_POTION + 150)
+            if (pItem->Type >= ITEM_RARE_ITEM_TICKET_7 && pItem->Type <= ITEM_RARE_ITEM_TICKET_12)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_POTION + 58 && pItem->Type <= ITEM_POTION + 62)
+            if (pItem->Type >= ITEM_RARE_ITEM_TICKET_1 && pItem->Type <= ITEM_RARE_ITEM_TICKET_5)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_POTION + 53)
+            if (pItem->Type == ITEM_TALISMAN_OF_LUCK)
             {
                 continue;
             }
@@ -1301,27 +1301,27 @@ void RepairAllGold(void)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
+            if (pItem->Type >= ITEM_ELITE_HEALING_POTION && pItem->Type <= ITEM_ELITE_MANA_POTION)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
+            if (pItem->Type >= ITEM_SCROLL_OF_QUICKNESS && pItem->Type <= ITEM_SCROLL_OF_MANA)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_HELPER + 59)
+            if (pItem->Type == ITEM_SEAL_OF_MOBILITY)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 58)
+            if (pItem->Type >= ITEM_RESET_FRUIT_STRENGTH && pItem->Type <= ITEM_RESET_FRUIT_CONTROL)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_HELPER + 60)
+            if (pItem->Type == ITEM_INDULGENCE)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_HELPER + 61)
+            if (pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET)
             {
                 continue;
             }
@@ -1329,31 +1329,31 @@ void RepairAllGold(void)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_POTION + 92 && pItem->Type <= ITEM_POTION + 93)
+            if (pItem->Type >= ITEM_CHAOS_CARD_GOLD && pItem->Type <= ITEM_CHAOS_CARD_RARE)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_POTION + 95)
+            if (pItem->Type == ITEM_CHAOS_CARD_MINI)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_POTION + 95)
+            if (pItem->Type == ITEM_CHAOS_CARD_MINI)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_HELPER + 62 && pItem->Type <= ITEM_HELPER + 63)
+            if (pItem->Type >= ITEM_SEAL_OF_HEALING && pItem->Type <= ITEM_SEAL_OF_DIVINITY)
             {
                 continue;
             }
-            if (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98)
+            if (pItem->Type >= ITEM_SCROLL_OF_BATTLE && pItem->Type <= ITEM_SCROLL_OF_STRENGTH)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_POTION + 140)
+            if (pItem->Type == ITEM_SCROLL_OF_HEALING)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_POTION + 96)
+            if (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
             {
                 continue;
             }
@@ -1389,27 +1389,27 @@ void RepairAllGold(void)
             {
                 continue;
             }
-            if (pItem->Type == ITEM_HELPER + 69)
+            if (pItem->Type == ITEM_TALISMAN_OF_RESURRECTION)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 70)
+            if (pItem->Type == ITEM_TALISMAN_OF_MOBILITY)
                 continue;
 
             if (pItem->Type == ITEM_HORN_OF_FENRIR)
                 continue;
 
-            if (pItem->Type == ITEM_HELPER + 66)
+            if (pItem->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
                 continue;
 
             if (GameLogic::Items::IsGambleItem(pItem))
                 continue;
 
-            if (pItem->Type == ITEM_HELPER + 81)
+            if (pItem->Type == ITEM_TALISMAN_OF_GUARDIAN)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 82)
+            if (pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 93)
+            if (pItem->Type == ITEM_MASTER_SEAL_OF_ASCENSION)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 94)
+            if (pItem->Type == ITEM_MASTER_SEAL_OF_WEALTH)
                 continue;
 
             if (pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN && pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END)
@@ -1419,7 +1419,7 @@ void RepairAllGold(void)
             if (GameLogic::Items::IsCharacterCard(pItem))
                 continue;
 
-            if (pItem->Type == ITEM_HELPER + 121)
+            if (pItem->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
                 continue;
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -1430,21 +1430,21 @@ void RepairAllGold(void)
 
             if (pItem->Type >= ITEM_WING + 130 && pItem->Type <= ITEM_WING + 134)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 109)
+            if (pItem->Type == ITEM_SAPPHIRE_RING)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 110)
+            if (pItem->Type == ITEM_RUBY_RING)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 111)
+            if (pItem->Type == ITEM_TOPAZ_RING)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 112)
+            if (pItem->Type == ITEM_AMETHYST_RING)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 113)
+            if (pItem->Type == ITEM_RUBY_NECKLACE)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 114)
+            if (pItem->Type == ITEM_EMERALD_NECKLACE)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 115)
+            if (pItem->Type == ITEM_SAPPHIRE_NECKLACE)
                 continue;
-            if (pItem->Type == ITEM_HELPER + 107)
+            if (pItem->Type == ITEM_LETHAL_WIZARDS_RING)
                 continue;
 
             if (Check_ItemAction(pItem, eITEM_REPAIR))	continue;
@@ -2089,7 +2089,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         ip->Type == ITEM_FLAME_OF_CONDOR || ip->Type == ITEM_FEATHER_OF_CONDOR ||
         ip->Type == ITEM_POTION + 100 ||
         (ip->Type >= ITEM_POTION + 141 && ip->Type <= ITEM_POTION + 144) ||
-        (ip->Type >= ITEM_HELPER + 135 && ip->Type <= ITEM_HELPER + 145) ||
+        (ip->Type >= ITEM_FIRST_LUCKY_ARMOR_TICKET && ip->Type <= ITEM_HELPER + 145) ||
         (ip->Type == ITEM_POTION + 160 || ip->Type == ITEM_POTION + 161) ||
         ip->Type == ITEM_JEWEL_OF_LIFE || ip->Type == ITEM_JEWEL_OF_CREATION)
     {
@@ -2360,7 +2360,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         case 3: mu_swprintf(TextList[TextNum], I18N::Game::RingOfGlory); break;
         }
     }
-    else if (ip->Type == ITEM_HELPER + 107)
+    else if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
     {
         Color = TEXT_COLOR_YELLOW;
         mu_swprintf(TextList[TextNum], p->Name);
@@ -2687,14 +2687,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum++;
         }
     }
-    else if (ip->Type >= ITEM_HELPER + 46 && ip->Type <= ITEM_HELPER + 48)
+    else if (ip->Type >= ITEM_DEVIL_SQUARE_TICKET && ip->Type <= ITEM_KALIMA_TICKET)
     {
         int iMap = 0;
-        if (ip->Type == ITEM_HELPER + 46)
+        if (ip->Type == ITEM_DEVIL_SQUARE_TICKET)
             iMap = 39;
-        else if (ip->Type == ITEM_HELPER + 47)
+        else if (ip->Type == ITEM_BLOOD_CASTLE_TICKET)
             iMap = 56;
-        else if (ip->Type == ITEM_HELPER + 48)
+        else if (ip->Type == ITEM_KALIMA_TICKET)
             iMap = 58;
 
         mu_swprintf(TextList[TextNum], I18N::Game::EnablesEntranceIntoS, I18N::Game::Lookup(iMap));
@@ -2711,14 +2711,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextNum++;
     }
 
-    else if (ip->Type >= ITEM_HELPER + 125 && ip->Type <= ITEM_HELPER + 127)
+    else if (ip->Type >= ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && ip->Type <= ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
     {
         int iMap = 0;
-        if (ip->Type == ITEM_HELPER + 125)
+        if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER)
             iMap = 3057;
-        else if (ip->Type == ITEM_HELPER + 126)
+        else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA)
             iMap = 2806;
-        else if (ip->Type == ITEM_HELPER + 127)
+        else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
             iMap = 3107;
 
         mu_swprintf(TextList[TextNum], I18N::Game::EnablesEntranceIntoS, I18N::Game::Lookup(iMap));
@@ -2730,14 +2730,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 54)
+    else if (ip->Type == ITEM_CHAOS_CARD)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type >= ITEM_POTION + 58 && ip->Type <= ITEM_POTION + 62)
+    else if (ip->Type >= ITEM_RARE_ITEM_TICKET_1 && ip->Type <= ITEM_RARE_ITEM_TICKET_5)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::CongratulationsPleaseContactCSTeamAndChangeItToItem);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -2751,14 +2751,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type >= ITEM_POTION + 145 && ip->Type <= ITEM_POTION + 150)
+    else if (ip->Type >= ITEM_RARE_ITEM_TICKET_7 && ip->Type <= ITEM_RARE_ITEM_TICKET_12)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::CongratulationsPleaseContactCSTeamAndChangeItToItem);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 53)
+    else if (ip->Type == ITEM_TALISMAN_OF_LUCK)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::IncreasesTheCombinationRateButOnlyUpToTheMaximumRate);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -2818,25 +2818,25 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type >= ITEM_POTION + 70 && ip->Type <= ITEM_POTION + 71)
+    else if (ip->Type >= ITEM_ELITE_HEALING_POTION && ip->Type <= ITEM_ELITE_MANA_POTION)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        int index = ip->Type - (ITEM_POTION + 70);
+        int index = ip->Type - (ITEM_ELITE_HEALING_POTION);
 
         mu_swprintf(TextList[TextNum], I18N::Game::Lookup(2500 + index));
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type >= ITEM_POTION + 72 && ip->Type <= ITEM_POTION + 77)
+    else if (ip->Type >= ITEM_SCROLL_OF_QUICKNESS && ip->Type <= ITEM_SCROLL_OF_MANA)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
-        mu_swprintf(TextList[TextNum], I18N::Game::Lookup(2503 + (ip->Type - (ITEM_POTION + 72))), Item_data.m_byValue1);
+        mu_swprintf(TextList[TextNum], I18N::Game::Lookup(2503 + (ip->Type - (ITEM_SCROLL_OF_QUICKNESS))), Item_data.m_byValue1);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2846,14 +2846,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 59)
+    else if (ip->Type == ITEM_SEAL_OF_MOBILITY)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouMayFreelyMoveOnward);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type >= ITEM_HELPER + 54 && ip->Type <= ITEM_HELPER + 58)
+    else if (ip->Type >= ITEM_RESET_FRUIT_STRENGTH && ip->Type <= ITEM_RESET_FRUIT_CONTROL)
     {
         DWORD statpoint = 0;
         statpoint = ip->Durability * 10;
@@ -2874,7 +2874,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         mu_swprintf(TextList[TextNum], I18N::Game::ItCanBeUsedWithItemRemoved);
         TextNum++;
 
-        if (ip->Type == ITEM_HELPER + 58)
+        if (ip->Type == ITEM_RESET_FRUIT_CONTROL)
         {
             if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
             {
@@ -2889,9 +2889,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum++;
         }
     }
-    else if (ip->Type >= ITEM_POTION + 78 && ip->Type <= ITEM_POTION + 82)
+    else if (ip->Type >= ITEM_ELIXIR_OF_STRENGTH && ip->Type <= ITEM_ELIXIR_OF_CONTROL)
     {
-        int index = ip->Type - (ITEM_POTION + 78);
+        int index = ip->Type - (ITEM_ELIXIR_OF_STRENGTH);
         DWORD value = 0;
 
         mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
@@ -2915,7 +2915,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
 
-        if (ip->Type == ITEM_POTION + 82)
+        if (ip->Type == ITEM_ELIXIR_OF_CONTROL)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::DarkLordUseOnly);
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
@@ -2935,14 +2935,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 60)
+    else if (ip->Type == ITEM_INDULGENCE)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::ItReducesTheKillingRate);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 62)
+    else if (ip->Type == ITEM_SEAL_OF_HEALING)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
@@ -2963,7 +2963,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 63)
+    else if (ip->Type == ITEM_SEAL_OF_DIVINITY)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
@@ -2980,7 +2980,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 97)
+    else if (ip->Type == ITEM_SCROLL_OF_BATTLE)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
@@ -2994,7 +2994,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 98)
+    else if (ip->Type == ITEM_SCROLL_OF_STRENGTH)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
@@ -3007,7 +3007,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 140)
+    else if (ip->Type == ITEM_SCROLL_OF_HEALING)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3018,7 +3018,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 96)
+    else if (ip->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::Minimum1015LevelItemUpgrade);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3114,35 +3114,35 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 107)
+    else if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::CannotRepair);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 104)
+    else if (ip->Type == ITEM_MAX_AG_BOOST_AURA)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::IncreaseMaxAGLevel);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 105)
+    else if (ip->Type == ITEM_MAX_SD_BOOST_AURA)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::IncreaseMaxSDLevelx10);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 103)
+    else if (ip->Type == ITEM_PARTY_EXP_SCROLL)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::UpToDEXPGainIncreaseDependingOnTheNumberOfMembersInYourParty, 170);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 69)
+    else if (ip->Type == ITEM_TALISMAN_OF_RESURRECTION)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::RememberTheLocationOfOneSDeath);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3160,14 +3160,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum++;
         }
     }
-    else if (ip->Type == ITEM_HELPER + 70)
+    else if (ip->Type == ITEM_TALISMAN_OF_MOBILITY)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::SaveTheApplicationLocation);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 81)
+    else if (ip->Type == ITEM_TALISMAN_OF_GUARDIAN)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::ExpAndItemWillBeSecuredWhenCharacterDies);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3179,7 +3179,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
-    else if (ip->Type == ITEM_HELPER + 82)
+    else if (ip->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::ItemDurabilityWillNotBeDecreaseForACertainPeriod);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3191,7 +3191,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
-    else if (ip->Type == ITEM_HELPER + 93)
+    else if (ip->Type == ITEM_MASTER_SEAL_OF_ASCENSION)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::IncreasesExperienceGained);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3200,7 +3200,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
-    else if (ip->Type == ITEM_HELPER + 94)
+    else if (ip->Type == ITEM_MASTER_SEAL_OF_WEALTH)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::IncreasesExperienceGainedAndItemDropRate);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3209,7 +3209,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
-    else if (ip->Type == ITEM_HELPER + 61)
+    else if (ip->Type == ITEM_ILLUSION_TEMPLE_TICKET)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::EnablesEntranceIntoS, I18N::Game::IllusionTemple);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3231,7 +3231,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 92)
+    else if (ip->Type == ITEM_CHAOS_CARD_GOLD)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3242,7 +3242,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 93)
+    else if (ip->Type == ITEM_CHAOS_CARD_RARE)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3253,7 +3253,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 95)
+    else if (ip->Type == ITEM_CHAOS_CARD_MINI)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3264,7 +3264,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 94)
+    else if (ip->Type == ITEM_MEDIUM_ELITE_HEALING_POTION)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3327,7 +3327,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 88)
+    else if (ip->Type == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3342,7 +3342,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 89)
+    else if (ip->Type == ITEM_RED_CHERRY_BLOSSOM_BRANCH)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3393,7 +3393,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 64)
+    else if (ip->Type == ITEM_CURSED_CASTLE_WATER)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::MobilitySpeedReducesUponAchievement);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3660,7 +3660,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }break;
         }
     }
-    else if (ITEM_HELPER + 109 == ip->Type)
+    else if (ITEM_SAPPHIRE_RING == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3671,7 +3671,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 110 == ip->Type)
+    else if (ITEM_RUBY_RING == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3682,7 +3682,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 111 == ip->Type)
+    else if (ITEM_TOPAZ_RING == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3693,7 +3693,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 112 == ip->Type)
+    else if (ITEM_AMETHYST_RING == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3704,7 +3704,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 113 == ip->Type)
+    else if (ITEM_RUBY_NECKLACE == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3715,7 +3715,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 114 == ip->Type)
+    else if (ITEM_EMERALD_NECKLACE == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3726,7 +3726,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 115 == ip->Type)
+    else if (ITEM_SAPPHIRE_NECKLACE == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::AutomaticHPRecoveryD, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3737,56 +3737,56 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 112 == ip->Type)
+    else if (ITEM_SILVER_KEY == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanDoAGoblinCombination2876);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 113 == ip->Type)
+    else if (ITEM_GOLD_KEY == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanDoAGoblinCombination);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 120)
+    else if (ip->Type == ITEM_GOBLIN_GOLD_COIN)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanAcquireGoblinPointsByUsingTheMUItemShopSStorage);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 121 == ip->Type)
+    else if (ITEM_SEALED_GOLDEN_BOX == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanDoAGoblinCombinationWithAGoldKeyToCreateAGoldenBox);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 122 == ip->Type)
+    else if (ITEM_SEALED_SILVER_BOX == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanDoAGoblinCombinationWithASilverKeyToCreateASilverBox);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 123 == ip->Type)
+    else if (ITEM_GOLDEN_BOX == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanDropItWithAFixedProbabilityOfItTurningIntoARareItem);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 124 == ip->Type)
+    else if (ITEM_SILVER_BOX == ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanDropItWithAFixedProbabilityOfItTurningIntoARareItem);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_POTION + 134 <= ip->Type && ITEM_POTION + 139 >= ip->Type)
+    else if (ITEM_PACKAGE_BOX_A <= ip->Type && ITEM_PACKAGE_BOX_F >= ip->Type)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::ItSABoxContainingVariousItems);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3801,7 +3801,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ITEM_HELPER + 121 == ip->Type)
+    else if (ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE == ip->Type)
     {
         int iMap = 57;
         mu_swprintf(TextList[TextNum], I18N::Game::EnablesEntranceIntoS, I18N::Game::Lookup(iMap));
@@ -3817,7 +3817,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 124)
+    else if (ip->Type == ITEM_PAID_CHANNEL_ACCESS_TICKET)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::YouCanEnterToGoldChannel);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3835,7 +3835,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_POTION + 133)
+    else if (ip->Type == ITEM_ELITE_SD_POTION)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4498,14 +4498,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         && !(ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
         && ip->Type != ITEM_SIEGE_POTION && ip->Type != ITEM_HELPER + 7 && ip->Type != ITEM_LIFE_STONE_ITEM
         && ip->Type != ITEM_FRAGMENT_OF_HORN
-        && !(ip->Type >= ITEM_POTION + 70 && ip->Type <= ITEM_POTION + 71)
-        && !(ip->Type >= ITEM_HELPER + 54 && ip->Type <= ITEM_HELPER + 58)
-        && !(ip->Type >= ITEM_POTION + 78 && ip->Type <= ITEM_POTION + 82)
-        && !(ip->Type == ITEM_HELPER + 66)
+        && !(ip->Type >= ITEM_ELITE_HEALING_POTION && ip->Type <= ITEM_ELITE_MANA_POTION)
+        && !(ip->Type >= ITEM_RESET_FRUIT_STRENGTH && ip->Type <= ITEM_RESET_FRUIT_CONTROL)
+        && !(ip->Type >= ITEM_ELIXIR_OF_STRENGTH && ip->Type <= ITEM_ELIXIR_OF_CONTROL)
+        && !(ip->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
         && !GameLogic::Items::IsGambleItem(ip)
         && !GameLogic::Items::IsCharacterCard(ip)
         && !(ip->Type == ITEM_HELPER + 99)
-        && !(ip->Type == ITEM_POTION + 133)
+        && !(ip->Type == ITEM_ELITE_SD_POTION)
         )
     {
         int Success = false;
@@ -4531,7 +4531,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
             Success = true;
         }
-        else if (ip->Type == ITEM_POTION + 133)
+        else if (ip->Type == ITEM_ELITE_SD_POTION)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
             Success = true;
@@ -4541,7 +4541,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
             Success = true;
         }
-        else if (ip->Type >= ITEM_POTION + 153 && ip->Type <= ITEM_POTION + 156)
+        else if (ip->Type >= ITEM_STARDUST && ip->Type <= ITEM_BURNT_MURDERERS_CLUB)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
             Success = true;
@@ -4594,33 +4594,33 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 Success = true;
             }
         }
-        else if (ip->Type >= ITEM_HELPER + 46 && ip->Type <= ITEM_HELPER + 48)
+        else if (ip->Type >= ITEM_DEVIL_SQUARE_TICKET && ip->Type <= ITEM_KALIMA_TICKET)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
             Success = true;
         }
-        else if (ip->Type >= ITEM_HELPER + 125 && ip->Type <= ITEM_HELPER + 127)
+        else if (ip->Type >= ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && ip->Type <= ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
 
-            if (ip->Type == ITEM_HELPER + 126)
+            if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA)
             {
                 TextNum++;
                 mu_swprintf(TextList[TextNum], I18N::Game::CanEnterTheMondaySaturdayMap);
             }
-            else if (ip->Type == ITEM_HELPER + 127)
+            else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
             {
                 TextNum++;
                 mu_swprintf(TextList[TextNum], I18N::Game::CanEnterTheSundayMap);
             }
             Success = true;
         }
-        else if (ip->Type == ITEM_POTION + 53)
+        else if (ip->Type == ITEM_TALISMAN_OF_LUCK)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::DCombinationSuccessRateIncrease, ip->Durability);
             Success = true;
         }
-        else if (ip->Type == ITEM_HELPER + 61)
+        else if (ip->Type == ITEM_ILLUSION_TEMPLE_TICKET)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
             Success = true;
@@ -4630,7 +4630,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
             Success = true;
         }
-        else if (ip->Type == ITEM_HELPER + 70)
+        else if (ip->Type == ITEM_TALISMAN_OF_MOBILITY)
         {
             if (ip->Durability == 2)
             {
@@ -4651,7 +4651,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 TextNum++;
             }
         }
-        else if (ip->Type >= ITEM_HELPER + 135 && ip->Type <= ITEM_HELPER + 145)
+        else if (ip->Type >= ITEM_FIRST_LUCKY_ARMOR_TICKET && ip->Type <= ITEM_HELPER + 145)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4673,7 +4673,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
             Success = true;
         }
-        else if (ip->Type == ITEM_HELPER + 121)
+        else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
             Success = true;
@@ -4969,10 +4969,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     if (ip->SpecialNum > 0)
     {
         int iModelType = ip->Type;
-        int iStartModelType = ITEM_HELPER + 109;
-        int iEndModelType = ITEM_HELPER + 115;
+        int iStartModelType = ITEM_SAPPHIRE_RING;
+        int iEndModelType = ITEM_SAPPHIRE_NECKLACE;
 
-        if (!(ITEM_HELPER + 109 <= ip->Type && ITEM_HELPER + 115 >= ip->Type))
+        if (!(ITEM_SAPPHIRE_RING <= ip->Type && ITEM_SAPPHIRE_NECKLACE >= ip->Type))
         {
             mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
@@ -5066,7 +5066,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     int iMana;
     for (int i = 0; i < ip->SpecialNum; i++)
     {
-        if (ITEM_HELPER + 109 <= ip->Type && ITEM_HELPER + 115 >= ip->Type)
+        if (ITEM_SAPPHIRE_RING <= ip->Type && ITEM_SAPPHIRE_NECKLACE >= ip->Type)
         {
             break;
         }
@@ -5335,7 +5335,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
     }
-    else if (ip->Type == ITEM_HELPER + 66)
+    else if (ip->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
     {
         TextNum--;
         mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
@@ -5580,83 +5580,83 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         return;
     }
-    if (ip->Type == ITEM_HELPER + 107)
+    if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
     {
         return;
     }
-    if (ip->Type == ITEM_HELPER + 104)
+    if (ip->Type == ITEM_MAX_AG_BOOST_AURA)
     {
         return;
     }
-    if (ip->Type == ITEM_HELPER + 105)
+    if (ip->Type == ITEM_MAX_SD_BOOST_AURA)
     {
         return;
     }
-    if (ip->Type == ITEM_HELPER + 103)
+    if (ip->Type == ITEM_PARTY_EXP_SCROLL)
     {
         return;
     }
-    if (ip->Type == ITEM_POTION + 133)
+    if (ip->Type == ITEM_ELITE_SD_POTION)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 109)
+    if (ip->Type == MODEL_SAPPHIRE_RING)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 110)
+    if (ip->Type == MODEL_RUBY_RING)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 111)
+    if (ip->Type == MODEL_TOPAZ_RING)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 112)
+    if (ip->Type == MODEL_AMETHYST_RING)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 113)
+    if (ip->Type == MODEL_RUBY_NECKLACE)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 114)
+    if (ip->Type == MODEL_EMERALD_NECKLACE)
     {
         return;
     }
-    if (ip->Type == MODEL_HELPER + 115)
+    if (ip->Type == MODEL_SAPPHIRE_NECKLACE)
     {
         return;
     }
-    if (ip->Type == MODEL_POTION + 112)
+    if (ip->Type == MODEL_SILVER_KEY)
     {
         return;
     }
-    if (ip->Type == MODEL_POTION + 113)
+    if (ip->Type == MODEL_GOLD_KEY)
     {
         return;
     }
-    if (ip->Type == ITEM_POTION + 120)
+    if (ip->Type == ITEM_GOBLIN_GOLD_COIN)
     {
         return;
     }
-    if (ip->Type == ITEM_POTION + 121)
+    if (ip->Type == ITEM_SEALED_GOLDEN_BOX)
     {
         return;
     }
-    if (ip->Type == ITEM_POTION + 122)
+    if (ip->Type == ITEM_SEALED_SILVER_BOX)
     {
         return;
     }
-    if (ITEM_POTION + 123 == ip->Type)
+    if (ITEM_GOLDEN_BOX == ip->Type)
     {
         return;
     }
-    if (ITEM_POTION + 124 == ip->Type)
+    if (ITEM_SILVER_BOX == ip->Type)
     {
         return;
     }
-    if (ITEM_POTION + 134 <= ip->Type && ip->Type <= ITEM_POTION + 139)
+    if (ITEM_PACKAGE_BOX_A <= ip->Type && ip->Type <= ITEM_PACKAGE_BOX_F)
     {
         return;
     }
@@ -5666,19 +5666,19 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         return;
     }
 
-    if (ITEM_POTION + 114 <= ip->Type && ip->Type <= ITEM_POTION + 119)
+    if (ITEM_MASTER_SKILL_RESET <= ip->Type && ip->Type <= ITEM_PREMIUM_PACKAGE)
     {
         return;
     }
-    if (ITEM_POTION + 126 <= ip->Type && ip->Type <= ITEM_POTION + 129)
+    if (ITEM_30_DAY_PASS <= ip->Type && ip->Type <= ITEM_90_DAY_PASS_POINTS)
     {
         return;
     }
-    if (ITEM_POTION + 130 <= ip->Type && ip->Type <= ITEM_POTION + 132)
+    if (ITEM_3_HOUR_PASS <= ip->Type && ip->Type <= ITEM_10_HOUR_PASS)
     {
         return;
     }
-    if (ITEM_HELPER + 121 == ip->Type)
+    if (ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE == ip->Type)
     {
         return;
     }
@@ -6030,7 +6030,7 @@ std::unordered_set<int> yellowTextItems = {
     MODEL_OLD_SCROLL,
     MODEL_ILLUSION_SORCERER_COVENANT,
     MODEL_SCROLL_OF_BLOOD,
-    MODEL_POTION + 64,
+    MODEL_CURSED_CASTLE_WATER,
     MODEL_EVENT + 11,
     MODEL_EVENT + 12,
     MODEL_EVENT + 13,
@@ -6047,44 +6047,44 @@ std::unordered_set<int> yellowTextItems = {
     MODEL_COMPLETE_SECROMICON,
     MODEL_POTION + 100,
     MODEL_POTION + 111,
-    MODEL_POTION + 112,
-    MODEL_POTION + 113,
-    MODEL_POTION + 120,
-    MODEL_POTION + 121,
-    MODEL_POTION + 122,
-    MODEL_POTION + 123,
-    MODEL_POTION + 124,
-    MODEL_POTION + 134,
-    MODEL_POTION + 135,
-    MODEL_POTION + 136,
-    MODEL_POTION + 137,
-    MODEL_POTION + 138,
-    MODEL_POTION + 139,
-    MODEL_POTION + 114,
-    MODEL_POTION + 115,
-    MODEL_POTION + 116,
-    MODEL_POTION + 117,
-    MODEL_POTION + 118,
-    MODEL_POTION + 119,
-    MODEL_POTION + 126,
-    MODEL_POTION + 127,
-    MODEL_POTION + 128,
-    MODEL_POTION + 129,
-    MODEL_POTION + 130,
-    MODEL_POTION + 131,
-    MODEL_POTION + 132,
+    MODEL_SILVER_KEY,
+    MODEL_GOLD_KEY,
+    MODEL_GOBLIN_GOLD_COIN,
+    MODEL_SEALED_GOLDEN_BOX,
+    MODEL_SEALED_SILVER_BOX,
+    MODEL_GOLDEN_BOX,
+    MODEL_SILVER_BOX,
+    MODEL_PACKAGE_BOX_A,
+    MODEL_PACKAGE_BOX_B,
+    MODEL_PACKAGE_BOX_C,
+    MODEL_PACKAGE_BOX_D,
+    MODEL_PACKAGE_BOX_E,
+    MODEL_PACKAGE_BOX_F,
+    MODEL_MASTER_SKILL_RESET,
+    MODEL_STAT_ADJUSTMENT,
+    MODEL_CHARACTER_RELOCATION_SERVICE,
+    MODEL_CHARACTER_RENAME_SERVICE,
+    MODEL_SERVER_RELOCATION_SERVICE,
+    MODEL_PREMIUM_PACKAGE,
+    MODEL_30_DAY_PASS,
+    MODEL_90_DAY_PASS,
+    MODEL_30_DAY_PASS_POINTS,
+    MODEL_90_DAY_PASS_POINTS,
+    MODEL_3_HOUR_PASS,
+    MODEL_5_HOUR_PASS,
+    MODEL_10_HOUR_PASS,
     MODEL_HELPER + 91,
     MODEL_HELPER + 97,
     MODEL_HELPER + 98,
     MODEL_HELPER + 99,
-    MODEL_HELPER + 109,
-    MODEL_HELPER + 110,
-    MODEL_HELPER + 111,
-    MODEL_HELPER + 112,
-    MODEL_HELPER + 113,
-    MODEL_HELPER + 114,
-    MODEL_HELPER + 115,
-    MODEL_HELPER + 121,
+    MODEL_SAPPHIRE_RING,
+    MODEL_RUBY_RING,
+    MODEL_TOPAZ_RING,
+    MODEL_AMETHYST_RING,
+    MODEL_RUBY_NECKLACE,
+    MODEL_EMERALD_NECKLACE,
+    MODEL_SAPPHIRE_NECKLACE,
+    MODEL_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE,
     MODEL_WING + 25,
     MODEL_LOST_MAP,
     MODEL_SYMBOL_OF_KUNDUN,
@@ -6114,23 +6114,23 @@ std::unordered_set<int> orangeTextItems = {
     MODEL_HELPER + 43,
     MODEL_HELPER + 44,
     MODEL_HELPER + 45,
-    MODEL_HELPER + 46,
-    MODEL_HELPER + 47,
-    MODEL_HELPER + 48,
-    MODEL_HELPER + 54,
-    MODEL_HELPER + 55,
-    MODEL_HELPER + 56,
-    MODEL_HELPER + 57,
-    MODEL_HELPER + 58,
-    MODEL_HELPER + 59,
-    MODEL_HELPER + 60,
-    MODEL_HELPER + 61,
-    MODEL_HELPER + 62,
-    MODEL_HELPER + 63,
+    MODEL_DEVIL_SQUARE_TICKET,
+    MODEL_BLOOD_CASTLE_TICKET,
+    MODEL_KALIMA_TICKET,
+    MODEL_RESET_FRUIT_STRENGTH,
+    MODEL_RESET_FRUIT_QUICKNESS,
+    MODEL_RESET_FRUIT_HEALTH,
+    MODEL_RESET_FRUIT_ENERGY,
+    MODEL_RESET_FRUIT_CONTROL,
+    MODEL_SEAL_OF_MOBILITY,
+    MODEL_INDULGENCE,
+    MODEL_ILLUSION_TEMPLE_TICKET,
+    MODEL_SEAL_OF_HEALING,
+    MODEL_SEAL_OF_DIVINITY,
     MODEL_HELPER + 116,
-    MODEL_HELPER + 125,
-    MODEL_HELPER + 126,
-    MODEL_HELPER + 127,
+    MODEL_OPEN_ACCESS_TICKET_TO_DOPPELGANGER,
+    MODEL_OPEN_ACCESS_TICKET_TO_VARKA,
+    MODEL_OPEN_ACCESS_TICKET_TO_VARKA_7,
     MODEL_HELPER + 128,
     MODEL_HELPER + 129,
     MODEL_HELPER + 130,
@@ -6138,47 +6138,47 @@ std::unordered_set<int> orangeTextItems = {
     MODEL_HELPER + 132,
     MODEL_HELPER + 133,
     MODEL_HELPER + 134,
-    MODEL_POTION + 53,
-    MODEL_POTION + 54,
-    MODEL_POTION + 58,
-    MODEL_POTION + 59,
-    MODEL_POTION + 60,
-    MODEL_POTION + 61,
-    MODEL_POTION + 62,
-    MODEL_POTION + 70,
-    MODEL_POTION + 71,
-    MODEL_POTION + 72,
-    MODEL_POTION + 73,
-    MODEL_POTION + 74,
-    MODEL_POTION + 75,
-    MODEL_POTION + 76,
-    MODEL_POTION + 77,
-    MODEL_POTION + 78,
-    MODEL_POTION + 79,
-    MODEL_POTION + 80,
-    MODEL_POTION + 81,
-    MODEL_POTION + 82,
+    MODEL_TALISMAN_OF_LUCK,
+    MODEL_CHAOS_CARD,
+    MODEL_RARE_ITEM_TICKET_1,
+    MODEL_RARE_ITEM_TICKET_2,
+    MODEL_RARE_ITEM_TICKET_3,
+    MODEL_RARE_ITEM_TICKET_4,
+    MODEL_RARE_ITEM_TICKET_5,
+    MODEL_ELITE_HEALING_POTION,
+    MODEL_ELITE_MANA_POTION,
+    MODEL_SCROLL_OF_QUICKNESS,
+    MODEL_SCROLL_OF_DEFENSE,
+    MODEL_SCROLL_OF_WRATH,
+    MODEL_SCROLL_OF_WIZARDRY,
+    MODEL_SCROLL_OF_HEALTH,
+    MODEL_SCROLL_OF_MANA,
+    MODEL_ELIXIR_OF_STRENGTH,
+    MODEL_ELIXIR_OF_AGILITY,
+    MODEL_ELIXIR_OF_HEALTH,
+    MODEL_ELIXIR_OF_ENERGY,
+    MODEL_ELIXIR_OF_CONTROL,
     MODEL_POTION + 83,
-    MODEL_POTION + 88,
-    MODEL_POTION + 89,
+    MODEL_WHITE_CHERRY_BLOSSOM_BRANCH,
+    MODEL_RED_CHERRY_BLOSSOM_BRANCH,
     MODEL_POTION + 91,
-    MODEL_POTION + 92,
-    MODEL_POTION + 93,
-    MODEL_POTION + 94,
-    MODEL_POTION + 95,
-    MODEL_POTION + 96,
-    MODEL_POTION + 97,
-    MODEL_POTION + 98,
+    MODEL_CHAOS_CARD_GOLD,
+    MODEL_CHAOS_CARD_RARE,
+    MODEL_MEDIUM_ELITE_HEALING_POTION,
+    MODEL_CHAOS_CARD_MINI,
+    MODEL_TALISMAN_OF_CHAOS_ASSEMBLY,
+    MODEL_SCROLL_OF_BATTLE,
+    MODEL_SCROLL_OF_STRENGTH,
     MODEL_POTION + 141,
     MODEL_POTION + 142,
     MODEL_POTION + 143,
     MODEL_POTION + 144,
-    MODEL_POTION + 145,
-    MODEL_POTION + 146,
-    MODEL_POTION + 147,
-    MODEL_POTION + 148,
-    MODEL_POTION + 149,
-    MODEL_POTION + 150,
+    MODEL_RARE_ITEM_TICKET_7,
+    MODEL_RARE_ITEM_TICKET_8,
+    MODEL_RARE_ITEM_TICKET_9,
+    MODEL_RARE_ITEM_TICKET_10,
+    MODEL_RARE_ITEM_TICKET_11,
+    MODEL_RARE_ITEM_TICKET_12,
     MODEL_WING + 130,
     MODEL_WING + 131,
     MODEL_WING + 132,
@@ -6542,7 +6542,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
         CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
-    else if (o->Type == MODEL_HELPER + 66)
+    else if (o->Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
     {
         SetDescriptorTextColor(descriptor, 0.6f, 0.4f, 1.0f);
     }
@@ -7317,7 +7317,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[1] -= 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 64)
+    else if (Type == MODEL_CURSED_CASTLE_WATER)
     {
         Position[1] += 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -7357,41 +7357,41 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[1] += 0.05f;
         Vector(270.f, 0.f, 2.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 46)
+    else if (Type == MODEL_DEVIL_SQUARE_TICKET)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 47)
+    else if (Type == MODEL_BLOOD_CASTLE_TICKET)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 48)
+    else if (Type == MODEL_KALIMA_TICKET)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 54)
+    else if (Type == MODEL_CHAOS_CARD)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 58)
+    else if (Type == MODEL_RARE_ITEM_TICKET_1)
     {
         Position[1] += 0.07f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 59 || Type == MODEL_POTION + 60)
+    else if (Type == MODEL_RARE_ITEM_TICKET_2 || Type == MODEL_RARE_ITEM_TICKET_3)
     {
         Position[1] += 0.06f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 61 || Type == MODEL_POTION + 62)
+    else if (Type == MODEL_RARE_ITEM_TICKET_4 || Type == MODEL_RARE_ITEM_TICKET_5)
     {
         Position[1] += 0.06f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 53)
+    else if (Type == MODEL_TALISMAN_OF_LUCK)
     {
         Position[1] += 0.042f;
         Vector(180.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -7414,38 +7414,38 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[0] += 0.005f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 70 && Type <= MODEL_POTION + 71)
+    else if (Type >= MODEL_ELITE_HEALING_POTION && Type <= MODEL_ELITE_MANA_POTION)
     {
         Position[0] += 0.01f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 72 && Type <= MODEL_POTION + 77)
+    else if (Type >= MODEL_SCROLL_OF_QUICKNESS && Type <= MODEL_SCROLL_OF_MANA)
     {
         Position[1] += 0.08f;
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 59)
+    else if (Type == MODEL_SEAL_OF_MOBILITY)
     {
         Position[0] += 0.01f;
         Position[1] += 0.02f;
         Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_HELPER + 54 && Type <= MODEL_HELPER + 58)
+    else if (Type >= MODEL_RESET_FRUIT_STRENGTH && Type <= MODEL_RESET_FRUIT_CONTROL)
     {
         Position[1] -= 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 78 && Type <= MODEL_POTION + 82)
+    else if (Type >= MODEL_ELIXIR_OF_STRENGTH && Type <= MODEL_ELIXIR_OF_CONTROL)
     {
         Position[1] += 0.01f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 60)
+    else if (Type == MODEL_INDULGENCE)
     {
         Position[1] -= 0.06f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 61)
+    else if (Type == MODEL_ILLUSION_TEMPLE_TICKET)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -7459,19 +7459,19 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 92)
+    else if (Type == MODEL_CHAOS_CARD_GOLD)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 93)
+    else if (Type == MODEL_CHAOS_CARD_RARE)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 95)
+    else if (Type == MODEL_CHAOS_CARD_MINI)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 94)
+    else if (Type == MODEL_MEDIUM_ELITE_HEALING_POTION)
     {
         Position[0] += 0.01f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -7498,12 +7498,12 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
             Position[1] += 0.01f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
-        else if (Type == MODEL_POTION + 88)
+        else if (Type == MODEL_WHITE_CHERRY_BLOSSOM_BRANCH)
         {
             Position[1] += 0.015f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
-        else if (Type == MODEL_POTION + 89)
+        else if (Type == MODEL_RED_CHERRY_BLOSSOM_BRANCH)
         {
             Position[1] += 0.015f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -7514,24 +7514,24 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
     }
-    else if (Type == MODEL_HELPER + 62)
+    else if (Type == MODEL_SEAL_OF_HEALING)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.03f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 63)
+    else if (Type == MODEL_SEAL_OF_DIVINITY)
     {
         Position[0] += 0.01f;
         Position[1] += 0.082f;
         Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 97 && Type <= MODEL_POTION + 98)
+    else if (Type >= MODEL_SCROLL_OF_BATTLE && Type <= MODEL_SCROLL_OF_STRENGTH)
     {
         Position[1] += 0.09f;
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 96)
+    else if (Type == MODEL_TALISMAN_OF_CHAOS_ASSEMBLY)
     {
         Position[1] -= 0.013f;
         Position[0] += 0.003f;
@@ -7738,24 +7738,24 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[1] -= 0.05f;
         Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 140)
+    else if (Type == MODEL_SCROLL_OF_HEALING)
     {
         Position[1] += 0.09f;
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 145 && Type <= MODEL_POTION + 150)
+    else if (Type >= MODEL_RARE_ITEM_TICKET_7 && Type <= MODEL_RARE_ITEM_TICKET_12)
     {
         Position[0] += 0.010f;
         Position[1] += 0.040f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_HELPER + 125 && Type <= MODEL_HELPER + 127)
+    else if (Type >= MODEL_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && Type <= MODEL_OPEN_ACCESS_TICKET_TO_VARKA_7)
     {
         Position[0] += 0.007f;
         Position[1] -= 0.035f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 124)
+    else if (Type == MODEL_PAID_CHANNEL_ACCESS_TICKET)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -7831,42 +7831,42 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[1] -= 0.053f;
         Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 69)
+    else if (Type == MODEL_TALISMAN_OF_RESURRECTION)
     {
         Position[0] += 0.005f;
         Position[1] -= 0.05f;
         Vector(270.f, -30.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 70)
+    else if (Type == MODEL_TALISMAN_OF_MOBILITY)
     {
         Position[0] += 0.040f;
         Position[1] -= 0.000f;
         Vector(270.f, -0.f, 70.f, ObjectSelect.Angle);
     }
 
-    else if (Type == MODEL_HELPER + 81)
+    else if (Type == MODEL_TALISMAN_OF_GUARDIAN)
     {
         Position[0] += 0.005f;
         Position[1] += 0.035f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 82)
+    else if (Type == MODEL_TALISMAN_OF_ITEM_PROTECTION)
     {
         Position[0] += 0.005f;
         Position[1] += 0.035f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 93)
+    else if (Type == MODEL_MASTER_SEAL_OF_ASCENSION)
     {
         Position[0] += 0.005f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 94)
+    else if (Type == MODEL_MASTER_SEAL_OF_WEALTH)
     {
         Position[0] += 0.005f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 66)
+    else if (Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.05f;
@@ -7955,31 +7955,31 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[0] += 0.01f;
         Position[1] -= 0.02f;
     }
-    else if (Type == MODEL_HELPER + 107)
+    else if (Type == MODEL_LETHAL_WIZARDS_RING)
     {
         Position[0] -= 0.0f;
         Position[1] += 0.0f;
         Vector(90.0f, 225.0f, 45.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 104)
+    else if (Type == MODEL_MAX_AG_BOOST_AURA)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.03f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 105)
+    else if (Type == MODEL_MAX_SD_BOOST_AURA)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.03f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 103)
+    else if (Type == MODEL_PARTY_EXP_SCROLL)
     {
         Position[0] += 0.01f;
         Position[1] += 0.01f;
         Vector(0.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 133)
+    else if (Type == MODEL_ELITE_SD_POTION)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.0f;
@@ -8019,31 +8019,31 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         }break;
         }
     }
-    else if (Type >= MODEL_HELPER + 109 && Type <= MODEL_HELPER + 112)
+    else if (Type >= MODEL_SAPPHIRE_RING && Type <= MODEL_AMETHYST_RING)
     {
         Position[0] += 0.025f;
         Position[1] -= 0.035f;
         Vector(270.0f, 25.0f, 25.0f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_HELPER + 113 && Type <= MODEL_HELPER + 115)
+    else if (Type >= MODEL_RUBY_NECKLACE && Type <= MODEL_SAPPHIRE_NECKLACE)
     {
         Position[0] += 0.005f;
         Position[1] -= 0.00f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 112 && Type <= MODEL_POTION + 113)
+    else if (Type >= MODEL_SILVER_KEY && Type <= MODEL_GOLD_KEY)
     {
         Position[0] += 0.05f;
         Position[1] += 0.009f;
         Vector(270.0f, 180.0f, 45.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 120)
+    else if (Type == MODEL_GOBLIN_GOLD_COIN)
     {
         Position[0] += 0.01f;
         Position[1] += 0.05f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (MODEL_POTION + 134 <= Type && Type <= MODEL_POTION + 139)
+    else if (MODEL_PACKAGE_BOX_A <= Type && Type <= MODEL_PACKAGE_BOX_F)
     {
         Position[0] += 0.00f;
         Position[1] += 0.05f;
@@ -8055,25 +8055,25 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[0] += 0.005f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 114 && Type <= MODEL_POTION + 119)
+    else if (Type >= MODEL_MASTER_SKILL_RESET && Type <= MODEL_PREMIUM_PACKAGE)
     {
         Position[0] += 0.00f;
         Position[1] += 0.06f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 126 && Type <= MODEL_POTION + 129)
+    else if (Type >= MODEL_30_DAY_PASS && Type <= MODEL_90_DAY_PASS_POINTS)
     {
         Position[0] += 0.00f;
         Position[1] += 0.06f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 130 && Type <= MODEL_POTION + 132)
+    else if (Type >= MODEL_3_HOUR_PASS && Type <= MODEL_10_HOUR_PASS)
     {
         Position[0] += 0.00f;
         Position[1] += 0.06f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 121)
+    else if (Type == MODEL_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -8137,7 +8137,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Position[1] += 0.05f;
         Position[0] += 0.005f;
     }
-    else if (Type >= MODEL_HELPER + 135 && Type <= MODEL_HELPER + 145)
+    else if (Type >= MODEL_FIRST_LUCKY_ARMOR_TICKET && Type <= MODEL_HELPER + 145)
     {
         Position[1] += 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -8437,35 +8437,35 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                                 Scale = 0.0018f;
                             else if (Type == MODEL_INVISIBILITY_CLOAK)
                                 Scale = 0.0018f;
-                            else if (Type == MODEL_HELPER + 46)
+                            else if (Type == MODEL_DEVIL_SQUARE_TICKET)
                             {
                                 Scale = 0.0018f;
                             }
-                            else if (Type == MODEL_HELPER + 47)
+                            else if (Type == MODEL_BLOOD_CASTLE_TICKET)
                             {
                                 Scale = 0.0018f;
                             }
-                            else if (Type == MODEL_HELPER + 48)
+                            else if (Type == MODEL_KALIMA_TICKET)
                             {
                                 Scale = 0.0018f;
                             }
-                            else if (Type == MODEL_POTION + 54)
+                            else if (Type == MODEL_CHAOS_CARD)
                             {
                                 Scale = 0.0024f;
                             }
-                            else if (Type == MODEL_POTION + 58)
+                            else if (Type == MODEL_RARE_ITEM_TICKET_1)
                             {
                                 Scale = 0.0012f;
                             }
-                            else if (Type == MODEL_POTION + 59 || Type == MODEL_POTION + 60)
+                            else if (Type == MODEL_RARE_ITEM_TICKET_2 || Type == MODEL_RARE_ITEM_TICKET_3)
                             {
                                 Scale = 0.0010f;
                             }
-                            else if (Type == MODEL_POTION + 61 || Type == MODEL_POTION + 62)
+                            else if (Type == MODEL_RARE_ITEM_TICKET_4 || Type == MODEL_RARE_ITEM_TICKET_5)
                             {
                                 Scale = 0.0009f;
                             }
-                            else if (Type == MODEL_POTION + 53)
+                            else if (Type == MODEL_TALISMAN_OF_LUCK)
                             {
                                 Scale = 0.00078f;
                             }
@@ -8473,31 +8473,31 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                             {
                                 Scale = 0.0021f;
                             }
-                            else if (Type >= MODEL_POTION + 70 && Type <= MODEL_POTION + 71)
+                            else if (Type >= MODEL_ELITE_HEALING_POTION && Type <= MODEL_ELITE_MANA_POTION)
                             {
                                 Scale = 0.0028f;
                             }
-                            else if (Type >= MODEL_POTION + 72 && Type <= MODEL_POTION + 77)
+                            else if (Type >= MODEL_SCROLL_OF_QUICKNESS && Type <= MODEL_SCROLL_OF_MANA)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_HELPER + 59)
+                            else if (Type == MODEL_SEAL_OF_MOBILITY)
                             {
                                 Scale = 0.0008f;
                             }
-                            else if (Type >= MODEL_HELPER + 54 && Type <= MODEL_HELPER + 58)
+                            else if (Type >= MODEL_RESET_FRUIT_STRENGTH && Type <= MODEL_RESET_FRUIT_CONTROL)
                             {
                                 Scale = 0.004f;
                             }
-                            else if (Type >= MODEL_POTION + 78 && Type <= MODEL_POTION + 82)
+                            else if (Type >= MODEL_ELIXIR_OF_STRENGTH && Type <= MODEL_ELIXIR_OF_CONTROL)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_HELPER + 60)
+                            else if (Type == MODEL_INDULGENCE)
                             {
                                 Scale = 0.005f;
                             }
-                            else if (Type == MODEL_HELPER + 61)
+                            else if (Type == MODEL_ILLUSION_TEMPLE_TICKET)
                             {
                                 Scale = 0.0018f;
                             }
@@ -8513,19 +8513,19 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                             {
                                 Scale = 0.0034f;
                             }
-                            else if (Type == MODEL_POTION + 92)
+                            else if (Type == MODEL_CHAOS_CARD_GOLD)
                             {
                                 Scale = 0.0024f;
                             }
-                            else if (Type == MODEL_POTION + 93)
+                            else if (Type == MODEL_CHAOS_CARD_RARE)
                             {
                                 Scale = 0.0024f;
                             }
-                            else if (Type == MODEL_POTION + 95)
+                            else if (Type == MODEL_CHAOS_CARD_MINI)
                             {
                                 Scale = 0.0024f;
                             }
-                            else if (Type == MODEL_POTION + 94)
+                            else if (Type == MODEL_MEDIUM_ELITE_HEALING_POTION)
                             {
                                 Scale = 0.0022f;
                             }
@@ -8545,11 +8545,11 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                             {
                                 Scale = 0.0061f;
                             }
-                            else if (Type == MODEL_POTION + 88)
+                            else if (Type == MODEL_WHITE_CHERRY_BLOSSOM_BRANCH)
                             {
                                 Scale = 0.0035f;
                             }
-                            else if (Type == MODEL_POTION + 89)
+                            else if (Type == MODEL_RED_CHERRY_BLOSSOM_BRANCH)
                             {
                                 Scale = 0.0035f;
                             }
@@ -8557,15 +8557,15 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                             {
                                 Scale = 0.0035f;
                             }
-                            else if (Type >= MODEL_HELPER + 62 && Type <= MODEL_HELPER + 63)
+                            else if (Type >= MODEL_SEAL_OF_HEALING && Type <= MODEL_SEAL_OF_DIVINITY)
                             {
                                 Scale = 0.002f;
                             }
-                            else if (Type >= MODEL_POTION + 97 && Type <= MODEL_POTION + 98)
+                            else if (Type >= MODEL_SCROLL_OF_BATTLE && Type <= MODEL_SCROLL_OF_STRENGTH)
                             {
                                 Scale = 0.003f;
                             }
-                            else if (Type == MODEL_POTION + 96)
+                            else if (Type == MODEL_TALISMAN_OF_CHAOS_ASSEMBLY)
                             {
                                 Scale = 0.0028f;
                             }
@@ -8593,21 +8593,21 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                             {
                                 Scale = 0.0026f;
                             }
-                            else if (Type == MODEL_HELPER + 69)
+                            else if (Type == MODEL_TALISMAN_OF_RESURRECTION)
                             {
                                 Scale = 0.0023f;
                             }
-                            else if (Type == MODEL_HELPER + 70)
+                            else if (Type == MODEL_TALISMAN_OF_MOBILITY)
                             {
                                 Scale = 0.0018f;
                             }
-                            else if (Type == MODEL_HELPER + 81)
+                            else if (Type == MODEL_TALISMAN_OF_GUARDIAN)
                                 Scale = 0.0012f;
-                            else if (Type == MODEL_HELPER + 82)
+                            else if (Type == MODEL_TALISMAN_OF_ITEM_PROTECTION)
                                 Scale = 0.0012f;
-                            else if (Type == MODEL_HELPER + 93)
+                            else if (Type == MODEL_MASTER_SEAL_OF_ASCENSION)
                                 Scale = 0.0021f;
-                            else if (Type == MODEL_HELPER + 94)
+                            else if (Type == MODEL_MASTER_SEAL_OF_WEALTH)
                                 Scale = 0.0021f;
                             else if (Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL)
                             {
@@ -8771,7 +8771,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
                             {
                                 Scale = 0.003f;
                             }
-                            else if (Type == MODEL_POTION + 64)
+                            else if (Type == MODEL_CURSED_CASTLE_WATER)
                             {
                                 Scale = 0.003f;
                             }
@@ -8862,11 +8862,11 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         {
             Scale = 0.0023f;
         }
-        else if (Type == MODEL_HELPER + 66)
+        else if (Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
         {
             Scale = 0.0020f;
         }
-        else if (Type == MODEL_POTION + 140)
+        else if (Type == MODEL_SCROLL_OF_HEALING)
         {
             Scale = 0.0026f;
         }
@@ -8878,11 +8878,11 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         {
             Scale = 0.0009f;
         }
-        else if (Type >= MODEL_POTION + 145 && Type <= MODEL_POTION + 150)
+        else if (Type >= MODEL_RARE_ITEM_TICKET_7 && Type <= MODEL_RARE_ITEM_TICKET_12)
         {
             Scale = 0.0018f;
         }
-        else if (Type >= MODEL_HELPER + 125 && Type <= MODEL_HELPER + 127)
+        else if (Type >= MODEL_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && Type <= MODEL_OPEN_ACCESS_TICKET_TO_VARKA_7)
         {
             Scale = 0.0013f;
         }
@@ -8938,15 +8938,15 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         {
             Scale = 0.004f;
         }
-        else if (Type == MODEL_HELPER + 107)
+        else if (Type == MODEL_LETHAL_WIZARDS_RING)
         {
             Scale = 0.0034f;
         }
-        else if (Type == MODEL_POTION + 133)
+        else if (Type == MODEL_ELITE_SD_POTION)
         {
             Scale = 0.0030f;
         }
-        else if (Type == MODEL_HELPER + 105)
+        else if (Type == MODEL_MAX_SD_BOOST_AURA)
         {
             Scale = 0.002f;
         }
@@ -8985,20 +8985,20 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         {
             Scale = 0.0012f;
         }
-        else if (Type >= MODEL_POTION + 134 && Type <= MODEL_POTION + 139)
+        else if (Type >= MODEL_PACKAGE_BOX_A && Type <= MODEL_PACKAGE_BOX_F)
         {
             Scale = 0.0050f;
         }
-        else if (Type >= MODEL_HELPER + 109 && Type <= MODEL_HELPER + 112)
+        else if (Type >= MODEL_SAPPHIRE_RING && Type <= MODEL_AMETHYST_RING)
         {
             Scale = 0.0045f;
         }
 
-        else if (Type >= MODEL_HELPER + 113 && Type <= MODEL_HELPER + 115)
+        else if (Type >= MODEL_RUBY_NECKLACE && Type <= MODEL_SAPPHIRE_NECKLACE)
         {
             Scale = 0.0018f;
         }
-        else if (Type >= MODEL_POTION + 112 && Type <= MODEL_POTION + 113)
+        else if (Type >= MODEL_SILVER_KEY && Type <= MODEL_GOLD_KEY)
         {
             Scale = 0.0032f;
         }
@@ -9006,24 +9006,24 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         {
             Scale = 0.0021f;
         }
-        else if (Type >= MODEL_POTION + 114 && Type <= MODEL_POTION + 119)
+        else if (Type >= MODEL_MASTER_SKILL_RESET && Type <= MODEL_PREMIUM_PACKAGE)
         {
             Scale = 0.0038f;
         }
-        else if (Type >= MODEL_POTION + 126 && Type <= MODEL_POTION + 129)
+        else if (Type >= MODEL_30_DAY_PASS && Type <= MODEL_90_DAY_PASS_POINTS)
         {
             Scale = 0.0038f;
         }
-        else if (Type >= MODEL_POTION + 130 && Type <= MODEL_POTION + 132)
+        else if (Type >= MODEL_3_HOUR_PASS && Type <= MODEL_10_HOUR_PASS)
         {
             Scale = 0.0038f;
         }
-        else if (Type == MODEL_HELPER + 121)
+        else if (Type == MODEL_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
         {
             Scale = 0.0018f;
             //Scale = 1.f;
         }
-        else if (Type == MODEL_HELPER + 124)
+        else if (Type == MODEL_PAID_CHANNEL_ACCESS_TICKET)
             Scale = 0.0018f;
         else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE)
         {
@@ -9051,7 +9051,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
             Scale = 0.0039f;
         }
         // LEM_TSET  상승의 보석, 연장의 보석 스케일[lem_2010.9.7]
-        else if (Type >= MODEL_HELPER + 135 && Type <= MODEL_HELPER + 145)
+        else if (Type >= MODEL_FIRST_LUCKY_ARMOR_TICKET && Type <= MODEL_HELPER + 145)
         {
             Scale = 0.001f;
         }
@@ -9420,7 +9420,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         sx += Width * 0.5f;
         sy += Height * 0.75f;
     }
-    else if (Type == ITEM_HELPER + 66)
+    else if (Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
     {
         sx += Width * 1.5f;
         sy += Height * 1.5f;

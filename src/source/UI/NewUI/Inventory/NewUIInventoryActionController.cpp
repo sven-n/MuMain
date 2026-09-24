@@ -635,12 +635,12 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     if (isApple || isPotion || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0) ||
         (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK) ||
         (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14) ||
-        (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71) ||
-        (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77) || pItem->Type == ITEM_HELPER + 60 ||
-        pItem->Type == ITEM_POTION + 94 ||
+        (pItem->Type >= ITEM_ELITE_HEALING_POTION && pItem->Type <= ITEM_ELITE_MANA_POTION) ||
+        (pItem->Type >= ITEM_SCROLL_OF_QUICKNESS && pItem->Type <= ITEM_SCROLL_OF_MANA) || pItem->Type == ITEM_INDULGENCE ||
+        pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION ||
         (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL) ||
-        (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98) || pItem->Type == ITEM_HELPER + 81 ||
-        pItem->Type == ITEM_HELPER + 82 || pItem->Type == ITEM_POTION + 133)
+        (pItem->Type >= ITEM_SCROLL_OF_BATTLE && pItem->Type <= ITEM_SCROLL_OF_STRENGTH) || pItem->Type == ITEM_TALISMAN_OF_GUARDIAN ||
+        pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION || pItem->Type == ITEM_ELITE_SD_POTION)
     {
         SendRequestUse(iIndex, 0);
         if (isApple)
@@ -655,7 +655,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82)
+    if (pItem->Type >= ITEM_ELIXIR_OF_STRENGTH && pItem->Type <= ITEM_ELIXIR_OF_CONTROL)
     {
         std::list<eBuffState> secretPotionbufflist;
         secretPotionbufflist.push_back(eBuff_SecretPotion1);
@@ -674,8 +674,8 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if ((pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 57) ||
-        (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
+    if ((pItem->Type >= ITEM_RESET_FRUIT_STRENGTH && pItem->Type <= ITEM_RESET_FRUIT_ENERGY) ||
+        (pItem->Type == ITEM_RESET_FRUIT_CONTROL && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
     {
         WORD point[5] = {
             0,
@@ -691,7 +691,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
             26, 0,  26, 20, 20, 15, 25, 21, 21, 18, 23, 0,  32, 27, 25, 20, 0,
         };
 
-        const int attributeType = pItem->Type - (ITEM_HELPER + 54);
+        const int attributeType = pItem->Type - (ITEM_RESET_FRUIT_STRENGTH);
         const int characterClass = gCharacterManager.GetBaseClass(Hero->Class);
         point[attributeType] -= nStat[characterClass][attributeType];
 
@@ -706,7 +706,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
+    if (pItem->Type == ITEM_RESET_FRUIT_CONTROL && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
     {
         CreateOkMessageBox(I18N::Game::OnlyDarklordCanUseIt);
         return true;
@@ -733,21 +733,21 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 46)
+    if (pItem->Type == ITEM_DEVIL_SQUARE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::DevilSquare, byPossibleLevel);
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 47)
+    if (pItem->Type == ITEM_BLOOD_CASTLE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::BloodCastle, byPossibleLevel);
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 48)
+    if (pItem->Type == ITEM_KALIMA_TICKET)
     {
         if (Hero->SafeZone || gMapManager.InHellas())
         {
@@ -759,14 +759,14 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 61)
+    if (pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::CursedTemple, byPossibleLevel);
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 121)
+    if (pItem->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
     {
         if (Hero->SafeZone == false)
         {
@@ -913,7 +913,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 69)
+    if (pItem->Type == ITEM_TALISMAN_OF_RESURRECTION)
     {
         if (g_PortalMgr.IsRevivePositionSaved())
         {
@@ -931,7 +931,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 70)
+    if (pItem->Type == ITEM_TALISMAN_OF_MOBILITY)
     {
         if (g_PortalMgr.IsPortalUsable())
         {
@@ -961,7 +961,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 66)
+    if (pItem->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
     {
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseSantaInvitationMsgBoxLayout));

@@ -842,7 +842,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             break;
             case AT_SKILL_PARTY_TELEPORT:
                 if (gMapManager.IsCursedTemple()
-                    && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
+                    && !g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true))
                 {
                     return;
                 }
@@ -1404,7 +1404,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         {
         case AT_SKILL_TELEPORT_ALLY:
             if (gMapManager.IsCursedTemple()
-                && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
+                && !g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true))
             {
                 return;
             }

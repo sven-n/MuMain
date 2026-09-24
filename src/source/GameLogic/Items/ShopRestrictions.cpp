@@ -46,14 +46,14 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
             || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
             || pItem->Type == ITEM_PET_SKELETON
-            || (pItem->Type == ITEM_POTION + 96)
-            || pItem->Type == ITEM_HELPER + 109
-            || pItem->Type == ITEM_HELPER + 110
-            || pItem->Type == ITEM_HELPER + 111
-            || pItem->Type == ITEM_HELPER + 112
-            || pItem->Type == ITEM_HELPER + 113
-            || pItem->Type == ITEM_HELPER + 114
-            || pItem->Type == ITEM_HELPER + 115
+            || (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
+            || pItem->Type == ITEM_SAPPHIRE_RING
+            || pItem->Type == ITEM_RUBY_RING
+            || pItem->Type == ITEM_TOPAZ_RING
+            || pItem->Type == ITEM_AMETHYST_RING
+            || pItem->Type == ITEM_RUBY_NECKLACE
+            || pItem->Type == ITEM_EMERALD_NECKLACE
+            || pItem->Type == ITEM_SAPPHIRE_NECKLACE
             )
         {
             return true;
@@ -68,12 +68,12 @@ namespace GameLogic::Items
         int Level = pItem->Level;
 
         if (true == false
-            || pItem->Type == ITEM_POTION + 112
-            || pItem->Type == ITEM_POTION + 113
-            || pItem->Type == ITEM_POTION + 121
-            || pItem->Type == ITEM_POTION + 122
-            || pItem->Type == ITEM_POTION + 123
-            || pItem->Type == ITEM_POTION + 124
+            || pItem->Type == ITEM_SILVER_KEY
+            || pItem->Type == ITEM_GOLD_KEY
+            || pItem->Type == ITEM_SEALED_GOLDEN_BOX
+            || pItem->Type == ITEM_SEALED_SILVER_BOX
+            || pItem->Type == ITEM_GOLDEN_BOX
+            || pItem->Type == ITEM_SILVER_BOX
             || IsSmallWing(pItem)
             || pItem->Type == ITEM_PET_PANDA
             || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
@@ -81,16 +81,16 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_PET_SKELETON
             || pItem->Type == ITEM_DEMON
             || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-            || pItem->Type == ITEM_HELPER + 109
-            || pItem->Type == ITEM_HELPER + 110
-            || pItem->Type == ITEM_HELPER + 111
-            || pItem->Type == ITEM_HELPER + 112
-            || pItem->Type == ITEM_HELPER + 113
-            || pItem->Type == ITEM_HELPER + 114
-            || pItem->Type == ITEM_HELPER + 115
+            || pItem->Type == ITEM_SAPPHIRE_RING
+            || pItem->Type == ITEM_RUBY_RING
+            || pItem->Type == ITEM_TOPAZ_RING
+            || pItem->Type == ITEM_AMETHYST_RING
+            || pItem->Type == ITEM_RUBY_NECKLACE
+            || pItem->Type == ITEM_EMERALD_NECKLACE
+            || pItem->Type == ITEM_SAPPHIRE_NECKLACE
             || ((pItem->Type == ITEM_WIZARDS_RING) && (Level == 0))
             || (pItem->Type == ITEM_PET_UNICORN)
-            || (pItem->Type == ITEM_HELPER + 107)
+            || (pItem->Type == ITEM_LETHAL_WIZARDS_RING)
             )
         {
             if (true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
@@ -113,7 +113,7 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
             || pItem->Type == ITEM_PET_SKELETON
             || (pItem->Type == ITEM_PET_UNICORN)
-            || (pItem->Type == ITEM_HELPER + 107)
+            || (pItem->Type == ITEM_LETHAL_WIZARDS_RING)
             )
         {
             return true;
@@ -135,7 +135,7 @@ namespace GameLogic::Items
             return true;
         }
 
-        if ((pItem->Type >= ITEM_POTION + 55 && pItem->Type <= ITEM_POTION + 57)
+        if ((pItem->Type >= ITEM_GREEN_CHAOS_BOX && pItem->Type <= ITEM_PURPLE_CHAOS_BOX)
             || IsSeal(pItem)
             || (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HORN_OF_DINORANT)
             || pItem->Type == ITEM_BOLT
@@ -157,8 +157,8 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_CHERRY_BLOSSOM_WINE
             || pItem->Type == ITEM_CHERRY_BLOSSOM_RICE_CAKE
             || pItem->Type == ITEM_CHERRY_BLOSSOM_FLOWER_PETAL
-            || pItem->Type == ITEM_POTION + 88
-            || pItem->Type == ITEM_POTION + 89
+            || pItem->Type == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH
+            || pItem->Type == ITEM_RED_CHERRY_BLOSSOM_BRANCH
             || pItem->Type == ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH
             || pItem->Type == ITEM_HELPER + 7
             || pItem->Type == ITEM_TRANSFORMATION_RING
@@ -174,7 +174,7 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_OLD_SCROLL
             || pItem->Type == ITEM_ILLUSION_SORCERER_COVENANT
             || pItem->Type == ITEM_SCROLL_OF_BLOOD
-            || pItem->Type == ITEM_HELPER + 66
+            || pItem->Type == ITEM_INVITATION_TO_SANTA_VILLAGE
             || IsGambleItem(pItem)
             )
         {

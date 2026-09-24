@@ -2674,7 +2674,7 @@ DWORD g_dwLatestZoneMoving = 0;
 
 void CheckGate()
 {
-    if ((g_pMyInventory->IsItem(ITEM_POTION + 64, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_POTION + 64, false)))
+    if ((g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, false)))
     {
         return;
     }

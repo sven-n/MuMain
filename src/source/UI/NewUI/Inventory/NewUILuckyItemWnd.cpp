@@ -432,7 +432,7 @@ bool CNewUILuckyItemWnd::Check_LuckyItem(ITEM* _pItem)
 
 bool CNewUILuckyItemWnd::Check_LuckyItem_Trade(ITEM* _pItem)
 {
-    if (_pItem->Type >= ITEM_HELPER + 135 && _pItem->Type <= ITEM_HELPER + 145)		return true;
+    if (_pItem->Type >= ITEM_FIRST_LUCKY_ARMOR_TICKET && _pItem->Type <= ITEM_HELPER + 145)		return true;
 
     return false;
 }

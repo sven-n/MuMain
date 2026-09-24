@@ -17,7 +17,7 @@ namespace GameLogic::Items
             || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
             || IsSeal(pItem)
             || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
-            || pItem->Type == ITEM_POTION + 64
+            || pItem->Type == ITEM_CURSED_CASTLE_WATER
             || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
             || pItem->Type == ITEM_HORN_OF_HELL_MAINE
             || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
@@ -50,8 +50,8 @@ namespace GameLogic::Items
     bool IsDropBan(const ITEM* pItem)
     {
         if ((!pItem->bPeriodItem) &&
-            (pItem->Type == ITEM_POTION + 96
-                || pItem->Type == ITEM_POTION + 54
+            (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY
+                || pItem->Type == ITEM_CHAOS_CARD
                 || pItem->Type == ITEM_DEMON
                 || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
                 || pItem->Type == ITEM_PET_PANDA
@@ -64,7 +64,7 @@ namespace GameLogic::Items
             return false;
         }
 
-        if (true == false || pItem->Type == ITEM_POTION + 123 || pItem->Type == ITEM_POTION + 124)
+        if (true == false || pItem->Type == ITEM_GOLDEN_BOX || pItem->Type == ITEM_SILVER_BOX)
         {
             return false;
         }
@@ -80,8 +80,8 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
             || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
             || pItem->Type == ITEM_PET_SKELETON
-            || pItem->Type == ITEM_POTION + 121
-            || pItem->Type == ITEM_POTION + 122
+            || pItem->Type == ITEM_SEALED_GOLDEN_BOX
+            || pItem->Type == ITEM_SEALED_SILVER_BOX
             )
         {
             return true;
@@ -99,14 +99,14 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
             || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
             || IsSeal(pItem)
-            || pItem->Type == ITEM_HELPER + 93
-            || pItem->Type == ITEM_HELPER + 94
+            || pItem->Type == ITEM_MASTER_SEAL_OF_ASCENSION
+            || pItem->Type == ITEM_MASTER_SEAL_OF_WEALTH
             || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
             || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
             || pItem->Type == ITEM_HORN_OF_HELL_MAINE
             || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
             || pItem->Type == ITEM_EYE_OF_ABYSSAL
-            || (pItem->Type == ITEM_HELPER + 70 && pItem->Durability == 1)
+            || (pItem->Type == ITEM_TALISMAN_OF_MOBILITY && pItem->Durability == 1)
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
             || (pItem->bPeriodItem == true)
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
