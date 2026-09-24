@@ -198,8 +198,6 @@ bool IsDropBan(ITEM* pItem);
 bool IsStoreBan(ITEM* pItem);
 bool IsSellingBan(ITEM* pItem);
 bool IsRepairBan(ITEM* pItem);
-bool IsWingItem(ITEM* pItem);
-bool IsJewelItem(ITEM* pItem);
 bool IsExcellentItem(ITEM* pItem);
 bool IsAncientItem(ITEM* pItem);
 bool IsMoneyItem(ITEM* pItem);

@@ -25,6 +25,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
 #include "Core/Text/TextLineWrap.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 using namespace SEASON3B;
 
@@ -3270,7 +3271,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::CancelBtnDown(class CNewUIMessag
 
 CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+    if (GameLogic::Items::IsHornMountModel(Hero->Helper.Type))
     {
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Dont_Set_Temple));
     }

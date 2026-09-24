@@ -83,6 +83,7 @@
 #include "Dotnet/Connection.h"
 
 #include "MUHelper/MuHelper.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -2471,10 +2472,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 7:
         if (Data->ItemGroup == 0xFF)
         {
-            if (c->Wing.Type == MODEL_WING_OF_RUIN || c->Wing.Type == MODEL_CAPE_OF_LORD ||
-                c->Wing.Type == MODEL_WING + 130 || c->Wing.Type == MODEL_CAPE_OF_FIGHTER ||
-                c->Wing.Type == MODEL_CAPE_OF_OVERRULE || c->Wing.Type == MODEL_WING + 135 ||
-                c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            if (GameLogic::Items::IsClothWingModel(c->Wing.Type))
             {
                 DeleteCloth(c, o);
             }
@@ -2484,10 +2482,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         {
             c->Wing.Type = MODEL_ITEM + Type;
             c->Wing.Level = 0;
-            if (c->Wing.Type == MODEL_WING_OF_RUIN || c->Wing.Type == MODEL_CAPE_OF_LORD ||
-                c->Wing.Type == MODEL_WING + 130 || c->Wing.Type == MODEL_CAPE_OF_FIGHTER ||
-                c->Wing.Type == MODEL_CAPE_OF_OVERRULE || c->Wing.Type == MODEL_WING + 135 ||
-                c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            if (GameLogic::Items::IsClothWingModel(c->Wing.Type))
             {
                 DeleteCloth(c, o);
             }

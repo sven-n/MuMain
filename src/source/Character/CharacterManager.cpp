@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "CharacterManager.h"
 #include "GameLogic/Items/CSItemOption.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -28,10 +29,6 @@ namespace
         int textIndex;
     };
 
-    constexpr int kThirdGenWingMin = ITEM_WING + 130;
-    constexpr int kThirdGenWingMax = ITEM_WING + 134;
-    constexpr int kSpecialWingType = ITEM_WING + 135;
-
     constexpr int kDefaultClassTextIndex = 2305;
     constexpr int kMasterExperienceUnlockLevel = 400;
 
@@ -55,16 +52,6 @@ namespace
         { CLASS_RAGEFIGHTER, 3150 },
         { CLASS_TEMPLENIGHT, 3151 },
     }};
-
-    constexpr bool IsWingType(int type)
-    {
-        return InRange(type, ITEM_WING, ITEM_WINGS_OF_DARKNESS) ||
-               InRange(type, ITEM_WING_OF_STORM, ITEM_WING_OF_DIMENSION) ||
-               type == ITEM_CAPE_OF_LORD ||
-               InRange(type, kThirdGenWingMin, kThirdGenWingMax) ||
-               InRange(type, ITEM_CAPE_OF_FIGHTER, ITEM_CAPE_OF_OVERRULE) ||
-               type == kSpecialWingType;
-    }
 
     constexpr bool IsBowModel(int type)
     {
@@ -334,8 +321,7 @@ int CCharacterManager::GetEquipedBowType_Skill()
 
 bool CCharacterManager::IsEquipedWing()
 {
-    const ITEM& equippedWing = CharacterMachine->Equipment[EQUIPMENT_WING];
-    return IsWingType(equippedWing.Type);
+    return GameLogic::Items::IsWingItem(&CharacterMachine->Equipment[EQUIPMENT_WING]);
 }
 
 void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* piMaxDamage)

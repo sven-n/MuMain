@@ -15,6 +15,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -1001,7 +1002,7 @@ void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
 
 bool CMonkSystem::IsRideNotUseSkill(int _nSkill, short _Type)
 {
-    if (_Type != MODEL_HORN_OF_FENRIR && _Type != MODEL_HORN_OF_UNIRIA && _Type != MODEL_HORN_OF_DINORANT)
+    if (!GameLogic::Items::IsHornMountModel(_Type))
         return false;
 
     // 탈것타고 있을 경우 사용 불가능한 스킬

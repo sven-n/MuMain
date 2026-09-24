@@ -27,6 +27,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "Core/Time/CTimCheck.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #include "GameShop/InGameShopSystem.h"
@@ -2204,7 +2205,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     {
         bCantSkill = true;
     }
-    auto isSittingOnPet = (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR);
+    auto isSittingOnPet = GameLogic::Items::IsHornMountModel(Hero->Helper.Type);
     if (bySkillType == AT_SKILL_IMPALE && !isSittingOnPet)
     {
         bCantSkill = true;

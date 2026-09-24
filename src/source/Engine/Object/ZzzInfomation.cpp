@@ -21,6 +21,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -680,7 +681,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         ip->Defense += p->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
     }
 
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
     }
@@ -689,8 +690,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
     }
-    else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || (ip->Type == ITEM_CAPE_OF_OVERRULE))
+    else if (GameLogic::Items::IsThirdTierWing(ip))
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 4);	// ~ +9
     }
@@ -698,8 +698,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 3);	// ~ +9
     }
-    if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || ip->Type == ITEM_CAPE_OF_OVERRULE)
+    if (GameLogic::Items::IsThirdTierWing(ip))
     {
         if (ip->Level - 9 > 0)
         {
@@ -732,7 +731,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     int addValue = 4;
 
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
     {
         addValue = 5;
     }
@@ -851,7 +850,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         isExcellent = false;
     }
 
-    if (isExcellent && ip->RequireLevel > 0 && !IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
+    if (isExcellent && ip->RequireLevel > 0 && !GameLogic::Items::IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
     {
         ip->RequireLevel += 20;
     }
@@ -859,7 +858,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
 void CalcWingOptions(ITEM* ip)
 {
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
     {
         if (ip->ExcellentFlags & 0x01)
         {
@@ -916,8 +915,7 @@ void CalcWingOptions(ITEM* ip)
             ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_CHARISMA; ip->SpecialNum++;
         }
     }
-    else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || (ip->Type == ITEM_CAPE_OF_OVERRULE))
+    else if (GameLogic::Items::IsThirdTierWing(ip))
     {
         if (ip->ExcellentFlags & 0x01)
         {
@@ -1154,8 +1152,7 @@ void SetItemAttributes(ITEM* ip)
             ip->Special[ip->SpecialNum] = AT_LUCK;
             ip->SpecialNum++;
         }
-        if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-            || (ip->Type == ITEM_CAPE_OF_OVERRULE))
+        if (GameLogic::Items::IsThirdTierWing(ip))
         {
             ip->Special[ip->SpecialNum] = AT_LUCK;
             ip->SpecialNum++;
@@ -2063,7 +2060,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         Gold = (long long)ip->Durability * 50;
     }
 
-    if (ip->Type == ITEM_HELPER + 71 || ip->Type == ITEM_HELPER + 72 || ip->Type == ITEM_HELPER + 73 || ip->Type == ITEM_HELPER + 74 || ip->Type == ITEM_HELPER + 75)
+    if (GameLogic::Items::IsGambleItem(ip))
     {
         Gold = 2000000;
     }

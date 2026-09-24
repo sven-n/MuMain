@@ -18,6 +18,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "I18N/All.h"
@@ -508,10 +509,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
 
     bool bSuccess = true;
 
-    if (iType > ITEM_WINGS_OF_DARKNESS && iType != ITEM_CAPE_OF_LORD &&
-        !(iType >= ITEM_WING_OF_STORM && iType <= ITEM_WING_OF_DIMENSION) &&
-        !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134) &&
-        !(iType >= ITEM_CAPE_OF_FIGHTER && iType <= ITEM_CAPE_OF_OVERRULE) && (iType != ITEM_WING + 135))
+    if (iType > ITEM_WINGS_OF_DARKNESS && !GameLogic::Items::IsWingItem(pItem))
     {
         bSuccess = false;
     }

@@ -7,7 +7,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "GameLogic/Items/ItemBehavior.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/KeyGenerator.h"
 #include "Network/Server/ServerListManager.h"
 #include "Engine/Object/ZzzOpenData.h"

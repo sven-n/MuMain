@@ -32,6 +32,7 @@ extern bool SelectFlag;
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
@@ -363,7 +364,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
         if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_RAVEN_ITEM) || pItem->Type == ITEM_HORN_OF_FENRIR)
             return false;
     }
-    else if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_HORSE_ITEM || pItem->Type == ITEM_HORN_OF_FENRIR)
+    else if (GameLogic::Items::IsRideableMount(pItem)
         && Hero->Object.CurrentAction >= PLAYER_SIT1 && Hero->Object.CurrentAction <= PLAYER_SIT_FEMALE2)
     {
         return false;
@@ -1051,11 +1052,7 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
             Hero->EtcPart = PARTS_LION;
         }
     }
-    if (pItem->Type == ITEM_WING_OF_RUIN || pItem->Type == ITEM_CAPE_OF_LORD ||
-        pItem->Type == ITEM_WING + 130 ||
-        (pItem->Type >= ITEM_CAPE_OF_FIGHTER && pItem->Type <= ITEM_CAPE_OF_OVERRULE) ||
-        (pItem->Type == ITEM_WING + 135) ||
-        pItem->Type == ITEM_CAPE_OF_EMPEROR)
+    if (GameLogic::Items::IsClothWing(pItem))
     {
         DeleteCloth(Hero, &Hero->Object);
     }
@@ -1068,15 +1065,8 @@ void CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
         ThePetProcess().DeletePet(Hero, pItem->Type);
     }
 
-    switch (pItem->Type)
+    if (GameLogic::Items::IsClothWing(pItem))
     {
-    case ITEM_CAPE_OF_LORD:
-    case ITEM_WING_OF_RUIN:
-    case ITEM_CAPE_OF_EMPEROR:
-    case ITEM_WING + 130:
-    case ITEM_CAPE_OF_FIGHTER:
-    case ITEM_CAPE_OF_OVERRULE:
-    case ITEM_WING + 135:
         DeleteCloth(Hero, &Hero->Object);
         return;
     }
@@ -1489,8 +1479,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                         {
                             bPicked = false;
                         }
-                        else if (((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HORN_OF_DINORANT) || (pEquippedPetItem->Type == ITEM_DARK_HORSE_ITEM) || (pEquippedPetItem->Type == ITEM_HORN_OF_FENRIR)))
-                            )
+                        else if ((m_iPointedSlot == EQUIPMENT_WING) && !GameLogic::Items::IsFlyingMount(pEquippedPetItem))
                         {
                             bPicked = false;
                         }

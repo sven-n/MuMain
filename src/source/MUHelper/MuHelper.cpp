@@ -17,6 +17,7 @@
 #include "GameLogic/Social/PartyManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #include "MuHelper.h"
 
@@ -1268,7 +1269,7 @@ namespace MUHelper
         ITEM* pItem = &pDrop->Item;
 
         if ((m_config.bPickZen && IsMoneyItem(pItem))
-            || (m_config.bPickJewel && IsJewelItem(pItem))
+            || (m_config.bPickJewel && GameLogic::Items::IsJewelItem(pItem))
             || (m_config.bPickAncient && IsAncientItem(pItem))
             || (m_config.bPickExcellent && IsExcellentItem(pItem)))
         {

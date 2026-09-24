@@ -14,6 +14,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
+#include "GameLogic/Items/ItemCategories.h"
 using namespace SEASON3B;
 
 namespace
@@ -405,7 +406,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (IsWingItem(pItem) == true)
+    if (GameLogic::Items::IsWingItem(pItem) == true)
     {
         return true;
     }

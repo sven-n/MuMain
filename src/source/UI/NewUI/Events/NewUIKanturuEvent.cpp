@@ -11,7 +11,7 @@
 #include "I18N/All.h"
 
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "GameLogic/Items/ItemBehavior.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 

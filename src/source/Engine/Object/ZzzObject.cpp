@@ -43,6 +43,7 @@
 #include "Camera/OrbitalCamera.h"
 #include "Engine/Object/CullingConstants.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -5530,7 +5531,7 @@ void ItemAngle(OBJECT* o)
         o->Scale = 0.2f;
         o->Angle[2] = 90.f;
     }
-    else if (o->Type == MODEL_HELPER + 43 || o->Type == MODEL_HELPER + 44 || o->Type == MODEL_HELPER + 45)
+    else if (GameLogic::Items::IsSealModel(o->Type))
     {
         o->Scale = 0.5f;
         o->Angle[0] = 90.f;
@@ -5918,7 +5919,7 @@ void ItemAngle(OBJECT* o)
         o->Scale = 0.5f;
         o->Angle[2] = 90.f;
     }
-    else if (o->Type == MODEL_HELPER + 97 || o->Type == MODEL_HELPER + 98 || o->Type == MODEL_POTION + 91)
+    else if (GameLogic::Items::IsCharacterCardModel(o->Type))
     {
         o->Angle[0] = 270.0f;
         o->Scale = 1.0f;
@@ -6061,7 +6062,7 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
 
     if (isFreshDrop)
     {
-        if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION || Type == ITEM_JEWEL_OF_GUARDIAN)
+        if (GameLogic::Items::IsJewelItem(n))
             PlayBuffer(SOUND_JEWEL01, &ip->Object);
         else if (Type == ITEM_GEMSTONE)
             PlayBuffer(SOUND_JEWEL02, &ip->Object);
@@ -7800,7 +7801,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
 #ifdef PBG_ADD_CHARACTERCARD
-    else if (MODEL_HELPER + 97 == Type || MODEL_HELPER + 98 == Type || MODEL_POTION + 91 == Type)
+    else if (GameLogic::Items::IsCharacterCardModel(Type))
     {
         float fLumi = (sinf(WorldTime * 0.0015f) + 1.2f) * 0.4f;
         int _R_Type = 0;
@@ -8183,7 +8184,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
         b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
     }
-    else if (Type == MODEL_HELPER + 71 || Type == MODEL_HELPER + 72 || Type == MODEL_HELPER + 73 || Type == MODEL_HELPER + 74 || Type == MODEL_HELPER + 75)
+    else if (GameLogic::Items::IsGambleItemModel(Type))
     {
         int _angle = int(b->BodyAngle[1]) % 360;
         float _meshLight1;
@@ -9728,9 +9729,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         if (Level > 0)
             Level = 7;
     }
-    else if ((o->Type >= MODEL_SEED_FIRE && o->Type <= MODEL_SEED_EARTH)
-        || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
-        || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
+    else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
     {
         Level = 0;
     }
