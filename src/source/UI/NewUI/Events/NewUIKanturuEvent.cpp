@@ -11,6 +11,7 @@
 #include "I18N/All.h"
 
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemBehavior.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 
@@ -454,6 +455,51 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RejectEnterRequest(BYTE btPopup)
     ClosingProcess();
 }
 
+bool SEASON3B::CNewUIKanturu2ndEnterNpc::IsRidingUniria(ITEM* pItemHelper)
+{
+    return pItemHelper->Type == ITEM_HORN_OF_UNIRIA;
+}
+
+bool SEASON3B::CNewUIKanturu2ndEnterNpc::HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight)
+{
+    return pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT;
+}
+
+void SEASON3B::CNewUIKanturu2ndEnterNpc::ValidateEquipmentForEntry()
+{
+    ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+    ITEM* pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
+    ITEM* pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
+    ITEM* pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
+
+    if (IsRidingUniria(pItemHelper))
+    {
+        RejectEnterRequest(POPUP_UNIRIA);
+        return;
+    }
+
+    if (g_ChangeRingMgr->CheckMoveMap(pItemRingLeft->Type, pItemRingRight->Type))
+    {
+        RejectEnterRequest(POPUP_CHANGERING);
+        return;
+    }
+
+    if (!GameLogic::Items::HasFlightEquipment(pItemHelper, pItemWing))
+    {
+        RejectEnterRequest(POPUP_NOT_HELPER);
+        return;
+    }
+
+    if (!HasMoonstonePendant(pItemRingLeft, pItemRingRight))
+    {
+        RejectEnterRequest(POPUP_NOT_MUNSTONE);
+        return;
+    }
+
+    SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
+    m_bNpcAnimation = true;
+}
+
 bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 {
     if (m_BtnRefresh.IsLock() == true)
@@ -490,49 +536,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
                 return true;
             }
 
-            ITEM* pItemHelper, * pItemRingLeft, * pItemRingRight, * pItemWing;
-            pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-            pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-            pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-            pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
-
-            if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
-            {
-                RejectEnterRequest(POPUP_UNIRIA);
-                return true;
-            }
-
-            if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type)
-                || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
-            {
-                RejectEnterRequest(POPUP_CHANGERING);
-                return true;
-            }
-
-            if (!((pItemWing->Type >= ITEM_WINGS_OF_ELF && pItemWing->Type <= ITEM_WINGS_OF_DARKNESS)
-                || (pItemWing->Type >= ITEM_WING_OF_STORM && pItemWing->Type <= ITEM_WING_OF_DIMENSION)
-                || (ITEM_WING + 130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING + 134)
-                || pItemHelper->Type == ITEM_HORN_OF_DINORANT
-                || pItemHelper->Type == ITEM_DARK_HORSE_ITEM
-                || pItemWing->Type == ITEM_CAPE_OF_LORD
-                || pItemHelper->Type == ITEM_HORN_OF_FENRIR
-                || (pItemWing->Type >= ITEM_CAPE_OF_FIGHTER && pItemWing->Type <= ITEM_CAPE_OF_OVERRULE)
-                || (pItemWing->Type == ITEM_WING + 135)))
-            {
-                RejectEnterRequest(POPUP_NOT_HELPER);
-                return true;
-            }
-
-            if (pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT)
-            {
-                SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
-                m_bNpcAnimation = true;
-            }
-            else
-            {
-                RejectEnterRequest(POPUP_NOT_MUNSTONE);
-                return true;
-            }
+            ValidateEquipmentForEntry();
         }
 
         return true;

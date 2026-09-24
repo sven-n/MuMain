@@ -80,6 +80,9 @@ namespace SEASON3B
 
         bool BtnProcess();
         void RejectEnterRequest(BYTE btPopup);
+        void ValidateEquipmentForEntry();
+        bool IsRidingUniria(ITEM* pItemHelper);
+        bool HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight);
 
         void RenderFrame();
         void RenderButtons();
