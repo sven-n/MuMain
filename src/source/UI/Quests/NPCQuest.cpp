@@ -16,6 +16,7 @@
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlStyleKeys.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
 
@@ -95,7 +96,7 @@ void CNPCQuest::BuildRmlUi()
 
             c.Bind("show_cost", &model.showCost);
             c.Bind("cost_amount", &model.costAmount);
-            c.Bind("cost_color", &model.costColor);
+            c.Bind("cost_tier", &model.costTier);
 
             auto textLine = c.RegisterStruct<NPCQuestTextLine>();
             textLine.RegisterMember("text", &NPCQuestTextLine::text);
@@ -536,24 +537,14 @@ void CNPCQuest::SyncRmlModel()
     m_RmlBinder.MarkDirty("show_cost");
     if (model.showCost)
     {
-        // getGoldColor() returns an SDL_ttf-packed DWORD (A<<24 | B<<16 | G<<8 | R -- see
-        // PackColorDWORD()), not the ARGB layout UI::Quests::RewardModel::ToEntry() unpacks -- these
-        // are two different packed-color conventions in this codebase, not interchangeable.
         wchar_t szTemp[128];
         ::ConvertGold(g_csQuest.GetNeedZen(), szTemp);
         model.costAmount = StringUtils::WideToNarrow(szTemp);
 
-        const DWORD dwColor = ::getGoldColor(g_csQuest.GetNeedZen());
-        const BYTE r = dwColor & 0xFF;
-        const BYTE g = (dwColor >> 8) & 0xFF;
-        const BYTE b = (dwColor >> 16) & 0xFF;
-        const BYTE a = (dwColor >> 24) & 0xFF;
-        char szColor[48];
-        ::sprintf_s(szColor, "rgba(%d,%d,%d,%d)", r, g, b, a);
-        model.costColor = szColor;
+        model.costTier = UI::RmlBridge::GoldTierKey(GameLogic::Items::ClassifyGoldAmount(g_csQuest.GetNeedZen()));
 
         m_RmlBinder.MarkDirty("cost_amount");
-        m_RmlBinder.MarkDirty("cost_color");
+        m_RmlBinder.MarkDirty("cost_tier");
     }
 
     model.messageLines.clear();

@@ -2,7 +2,7 @@
    illustration pair, logo/deco art, close button, and scrolling credit text -- #panel owns 100%
    of this window's visuals now. Positions are the original 800x600-reference pixel values carried
    over directly as dp. Credit-text colors match the original g_pRenderText colors
-   (CLRDW_BR_GRAY/CLRDW_BR_YELLOW); font is "NanumGothic", not the shared Liberation-Sans
+   (CLRDW_BR_GRAY/CLRDW_BR_YELLOW); font is "NanumGothic", not the theme's shared body font
    convention, since these credit names aren't guaranteed ASCII. */
 
 @spritesheet creditwin-logo-sheet

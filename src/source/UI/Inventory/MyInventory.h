@@ -93,10 +93,11 @@ namespace mu::ui::window
             // Shared transform group for this document, sourced from UI::Scaling::GetActiveTransform()
             // since this window is movable (SetPos()), not HUD-anchored.
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // UI::RmlBridge::SyncNativeTextSize()
 
             Rml::String title;
             Rml::String goldText;
-            Rml::String goldColor; // "rgba(r,g,b,a)" -- mirrors getGoldColor()'s amount-tier color
+            Rml::String goldTier; // UI::RmlBridge::GoldTierKey() of the amount
 
             bool repairVisible = false;
             Rml::String repairTooltip;

@@ -48,7 +48,7 @@ namespace mu::ui::window
             bool titleLocked = false; // legacy-only red/gray title color toggle -- see SyncRmlModel()
 
             Rml::String zenText;
-            Rml::String zenColor; // "rgba(r,g,b,a)" -- mirrors getGoldColor()'s amount-tier color, legacy only
+            Rml::String zenTier; // UI::RmlBridge::GoldTierKey() of the amount, legacy only
             Rml::String feeLabel;
             Rml::String feeValue;
 

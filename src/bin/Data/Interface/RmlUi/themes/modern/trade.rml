@@ -22,13 +22,23 @@
 
 		<span id="your_guild_name" class="guild-name" data-class-hidden="!your_guild_visible">{{your_guild_name}}</span>
 		<span id="your_id_text" class="id-text id-text-your">{{your_id_text}}</span>
-		<span id="your_level_text" class="level-text" data-style-color="your_level_color">{{your_level_text}}</span>
+		<span id="your_level_text" class="level-text"
+		      data-class-level-bucket-10="your_level_bucket == 10"
+		      data-class-level-bucket-50="your_level_bucket == 50"
+		      data-class-level-bucket-100="your_level_bucket == 100"
+		      data-class-level-bucket-200="your_level_bucket == 200"
+		      data-class-level-bucket-300="your_level_bucket == 300"
+		      data-class-level-bucket-400="your_level_bucket == 400">{{your_level_text}}</span>
 
 		<div id="your_gold_bg" class="modern-wallet-px trade-gold-your">
 			<div class="modern-wallet-coin-px"></div>
 			<span class="modern-wallet-label-px">Zen</span>
 		</div>
-		<span id="your_gold_text" class="modern-wallet-value-px trade-gold-your-value" data-style-color="your_gold_color">{{your_gold_text}}</span>
+		<span id="your_gold_text" class="modern-wallet-value-px trade-gold-your-value gold-amount"
+		      data-class-gold-base="your_gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="your_gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="your_gold_tier == 'million'"
+		      data-class-gold-ten-million="your_gold_tier == 'ten-million'">{{your_gold_text}}</span>
 
 		<div id="your_confirm" class="trade-confirm-btn confirm-your" data-class-checked="your_confirm_checked">
 			<span class="confirm-glyph">&#10003;</span>
@@ -42,7 +52,11 @@
 			<div class="modern-wallet-coin-px"></div>
 			<span class="modern-wallet-label-px">Zen</span>
 		</div>
-		<span id="my_gold_text" class="modern-wallet-value-px trade-gold-my-value" data-style-color="my_gold_color">{{my_gold_text}}</span>
+		<span id="my_gold_text" class="modern-wallet-value-px trade-gold-my-value gold-amount"
+		      data-class-gold-base="my_gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="my_gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="my_gold_tier == 'million'"
+		      data-class-gold-ten-million="my_gold_tier == 'ten-million'">{{my_gold_text}}</span>
 
 		<div id="my_confirm" class="trade-confirm-btn confirm-my" data-class-checked="my_confirm_checked"
 		     data-class-waiting="my_confirm_waiting" data-event-click="trade_my_confirm_click">

@@ -38,6 +38,7 @@ extern bool SelectFlag;
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlStyleKeys.h"
 #include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -47,6 +48,15 @@ extern bool SelectFlag;
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <cmath>
+
+namespace
+{
+// Text-area widths the original client gave the Set/Socket option tooltips
+// (CSItemOption::RenderSetOptionList() and CSocketItemMgr::RenderToolTipForSocketSetOption() pass
+// RenderTipTextList() a Tab of 120 and 140 reference pixels, doubled into the width).
+constexpr float kSetOptionTooltipWidth = 240.0f;
+constexpr float kSocketOptionTooltipWidth = 280.0f;
+} // namespace
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -119,10 +129,13 @@ void CMyInventory::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                model.textPx =
+                    UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
+                c.Bind("text_px", &model.textPx);
 
                 c.Bind("title", &model.title);
                 c.Bind("gold_text", &model.goldText);
-                c.Bind("gold_color", &model.goldColor);
+                c.Bind("gold_tier", &model.goldTier);
 
                 c.Bind("repair_visible", &model.repairVisible);
                 c.Bind("repair_tooltip", &model.repairTooltip);
@@ -896,6 +909,7 @@ void CMyInventory::SyncRmlModel()
     if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     auto syncBool = [this](bool MyInventoryRmlModel::* field, const char* boundName, bool value)
     {
@@ -917,12 +931,8 @@ void CMyInventory::SyncRmlModel()
     ConvertGold(dwZen, goldBuf);
     syncWide(&MyInventoryRmlModel::goldText, "gold_text", goldBuf);
 
-    // getGoldColor() packs (A<<24)+(R<<16)+(G<<8)+B -- unpack into an rgba() CSS string.
-    const unsigned int goldArgb = getGoldColor(dwZen);
-    char goldColorBuf[32];
-    snprintf(goldColorBuf, sizeof(goldColorBuf), "rgba(%u,%u,%u,%u)",
-        (goldArgb >> 16) & 0xFF, (goldArgb >> 8) & 0xFF, goldArgb & 0xFF, (goldArgb >> 24) & 0xFF);
-    syncText(&MyInventoryRmlModel::goldColor, "gold_color", Rml::String(goldColorBuf));
+    syncText(&MyInventoryRmlModel::goldTier, "gold_tier",
+             UI::RmlBridge::GoldTierKey(GameLogic::Items::ClassifyGoldAmount(dwZen)));
 
     // One flag now covers both visibility and interactivity via RmlUi's data-class-hidden.
     const bool otherWindowOpen = g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
@@ -1017,6 +1027,7 @@ void CMyInventory::SyncRmlModel()
         config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(m_Pos.y + 40));
         config.centerHorizontally = true;
         config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
+        config.fixedWidth = model.setOptionHovered ? kSetOptionTooltipWidth : kSocketOptionTooltipWidth;
         // Ownerless (like the item-slot tooltip elsewhere in this class): hovering a Set/Socket
         // label and hovering an equipment slot are mutually exclusive by mouse position, so there's
         // no real simultaneous competitor for the shared tooltip here.

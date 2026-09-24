@@ -22,7 +22,7 @@
 
 		<!-- Wallet + action buttons: base.rcss's shared .modern-wallet-px/.modern-icon-btn-px
 		     family (generalized from this window). Fixed warm-gold value color, not bound to
-		     gold_color's native wealth-tier blue/green scheme -- that palette was tuned for
+		     gold_tier's native wealth-tier blue/green scheme -- that palette was tuned for
 		     legacy's dark theme and clashes with modern's warm-iron chrome. -->
 		<div id="gold_bg" class="modern-wallet-px">
 			<div class="modern-wallet-coin-px"></div>

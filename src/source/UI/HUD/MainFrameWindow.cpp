@@ -791,7 +791,8 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         wchar_t szExp[8] = {};
         mu_swprintf(szExp, L"%d", iExp);
         syncWide(&MainFrameRmlModel::expDigit, "exp_digit", szExp);
-        mu_swprintf(szTip, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
+        mu_swprintf(szTip, I18N::Game::EXPI64dI64d, static_cast<unsigned long long>(dwExperience),
+                    static_cast<unsigned long long>(dwNexExperience));
         syncWide(&MainFrameRmlModel::expTooltip, "exp_tooltip", szTip);
     }
 
@@ -915,6 +916,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             // unconditionally -- AboveLeft matches that; Show()'s own clamping now also covers the
             // horizontal/lower-edge cases that CSS-only transform never did.
             config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
+            config.transform = skillTooltipTransform;
             UI::RmlBridge::Tooltip::Show(config, g_pSkillList);
         }
         else

@@ -112,7 +112,7 @@ namespace mu::ui::window
         struct ContentEntry
         {
             Rml::String text;
-            Rml::String color; // "rgba(r,g,b,a)"
+            Rml::String style; // UI::Quests::RewardModel::StyleKey()
             bool bold = false;
             int index = 0; // position within m_ContentRows -- passed back to RmlClickSelectContent
             bool clickable = false; // true for a reward/request-item row (data-event-click target)
