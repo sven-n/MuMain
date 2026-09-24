@@ -19,13 +19,23 @@ namespace GameLogic::Items
 
     bool IsJewelItem(const ITEM* pItem);
     bool IsSocketSeedOrSphere(const ITEM* pItem);
+    bool IsSocketSeedOrSphereType(int itemType);
     bool IsSocketSeedOrSphereModel(int modelType);
 
     bool IsSeal(const ITEM* pItem);
+    bool IsSealType(int itemType);
     bool IsSealModel(int modelType);
     bool IsGambleItem(const ITEM* pItem);
+    bool IsGambleItemType(int itemType);
     bool IsGambleItemModel(int modelType);
     bool IsCharacterCard(const ITEM* pItem);
     bool IsCharacterCardModel(int modelType);
     bool IsDevilSquareItem(const ITEM* pItem);
+    bool IsDevilSquareItemType(int itemType);
+    bool IsDivineArchangelWeapon(const ITEM* pItem);
+    bool IsDivineArchangelWeaponType(int itemType);
+    bool IsDivineArchangelWeaponModel(int modelType);
+
+    bool IsPartChargeItem(const ITEM* pItem);
+    bool IsHighValueItem(const ITEM* pItem);
 }

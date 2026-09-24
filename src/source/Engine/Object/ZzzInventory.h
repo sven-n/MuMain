@@ -190,14 +190,6 @@ void RequireClass(ITEM_ATTRIBUTE* p);
 bool IsRequireClassRenderItem(const short sType);
 unsigned int getGoldColor(DWORD Gold);
 
-bool IsPartChargeItem(ITEM* pItem);
-bool IsHighValueItem(ITEM* pItem);
-bool IsPersonalShopBan(ITEM* pItem);
-bool IsTradeBan(ITEM* pItem);
-bool IsDropBan(ITEM* pItem);
-bool IsStoreBan(ITEM* pItem);
-bool IsSellingBan(ITEM* pItem);
-bool IsRepairBan(ITEM* pItem);
 bool IsExcellentItem(ITEM* pItem);
 bool IsAncientItem(ITEM* pItem);
 bool IsMoneyItem(ITEM* pItem);
@@ -210,7 +202,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
 
-bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType = false);
+bool Check_ItemAction(const ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType = false);
 bool Check_LuckyItem(int _nIndex, int _nType = 0);
 sItemAct Set_ItemActOption(int _nIndex, int _nOption);
 

@@ -36,6 +36,8 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ShopRestrictions.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
@@ -141,25 +143,6 @@ BYTE BuyItem[4];
 static  int iStateNum = 4;
 
 	// ※
-
-static bool IsDivineArchangelWeaponItem(int itemType)
-{
-    return itemType == ITEM_DIVINE_SWORD_OF_ARCHANGEL
-        || itemType == ITEM_DIVINE_CB_OF_ARCHANGEL
-        || itemType == ITEM_DIVINE_STAFF_OF_ARCHANGEL
-        || itemType == ITEM_DIVINE_STICK_OF_ARCHANGEL
-        || itemType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL;
-}
-
-static bool IsDivineArchangelWeaponModel(int modelType)
-{
-    return modelType == MODEL_DIVINE_STAFF_OF_ARCHANGEL
-        || modelType == MODEL_DIVINE_STICK_OF_ARCHANGEL
-        || modelType == MODEL_DIVINE_SWORD_OF_ARCHANGEL
-        || modelType == MODEL_DIVINE_CB_OF_ARCHANGEL
-        || modelType == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL;
-}
-
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
@@ -500,7 +483,7 @@ bool IsRequireClassRenderItem(const short sType)
         || sType == ITEM_ARMOR_OF_GUARDSMAN
         || sType == ITEM_WING + 26
         || (sType >= ITEM_PACKED_JEWEL_OF_BLESS && sType <= ITEM_PACKED_JEWEL_OF_SOUL)
-        || (sType >= ITEM_HELPER + 43 && sType <= ITEM_HELPER + 45)
+        || GameLogic::Items::IsSealType(sType)
         || sType == ITEM_TRANSFORMATION_RING
         || (sType >= ITEM_ELITE_TRANSFER_SKELETON_RING && sType <= ITEM_GAME_MASTER_TRANSFORMATION_RING)
         || sType == ITEM_HORN_OF_FENRIR
@@ -513,7 +496,7 @@ bool IsRequireClassRenderItem(const short sType)
         return false;
     }
 
-    if ((sType >= ITEM_HELPER + 43 && sType <= ITEM_HELPER + 45)
+    if (GameLogic::Items::IsSealType(sType)
         || (sType >= ITEM_HELPER + 46 && sType <= ITEM_HELPER + 48)
         || (sType >= ITEM_HELPER + 125 && sType <= ITEM_HELPER + 127)
         || (sType == ITEM_POTION + 54)
@@ -542,7 +525,7 @@ bool IsRequireClassRenderItem(const short sType)
         || (sType == ITEM_SKELETON_TRANSFORMATION_RING)
         || (sType == ITEM_HELPER + 69)
         || (sType == ITEM_HELPER + 70)
-        || (sType == ITEM_HELPER + 71 || sType == ITEM_HELPER + 72 || sType == ITEM_HELPER + 73 || sType == ITEM_HELPER + 74 || sType == ITEM_HELPER + 75)
+        || GameLogic::Items::IsGambleItemType(sType)
         || (sType == ITEM_PET_PANDA)
         || (sType == ITEM_PET_UNICORN)
         || sType == ITEM_HELPER + 81
@@ -1248,7 +1231,7 @@ void RepairAllGold(void)
             int Level = ip->Level;
             int maxDurability = CalcMaxDurability(ip, p, Level);
 
-            if (IsRepairBan(ip) == true)
+            if (GameLogic::Items::IsRepairBan(ip) == true)
             {
                 continue;
             }
@@ -1566,7 +1549,7 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     }
     else if (ip->ExcellentFlags > 0 &&
         (ip->Type<ITEM_WINGS_OF_SPIRITS || ip->Type>ITEM_WINGS_OF_DARKNESS) &&
-        !IsDivineArchangelWeaponItem(ip->Type)
+        !GameLogic::Items::IsDivineArchangelWeapon(ip)
         && ip->Type != ITEM_CAPE_OF_LORD
         && (ip->Type<ITEM_WING_OF_STORM || ip->Type>ITEM_CAPE_OF_EMPEROR)
         && (ip->Type<ITEM_WINGS_OF_DESPAIR || ip->Type>ITEM_WING_OF_DIMENSION)
@@ -1781,7 +1764,7 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         else
             mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
-    else if (IsDivineArchangelWeaponItem(iType))
+    else if (GameLogic::Items::IsDivineArchangelWeaponType(iType))
     {
         if (iLevel == 0)
             mu_swprintf(Text, L"%ls", p->Name);
@@ -1800,9 +1783,7 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     {
         mu_swprintf(Text, L"%ls +%d", I18N::Game::JewelOfSoul, iLevel + 1);
     }
-    else if ((iType >= ITEM_SEED_FIRE && iType <= ITEM_SEED_EARTH)
-        || (iType >= ITEM_SPHERE_MONO && iType <= ITEM_SPHERE_5)
-        || (iType >= ITEM_SEED_SPHERE_FIRE_1 && iType <= ITEM_SEED_SPHERE_EARTH_5))
+    else if (GameLogic::Items::IsSocketSeedOrSphereType(iType))
     {
         mu_swprintf(Text, L"%ls", p->Name);
     }
@@ -2114,7 +2095,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         Color = TEXT_COLOR_YELLOW;
     }
-    else if (IsDivineArchangelWeaponItem(ip->Type))
+    else if (GameLogic::Items::IsDivineArchangelWeapon(ip))
     {
         Color = TEXT_COLOR_PURPLE;
     }
@@ -2182,7 +2163,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !IsSellingBan(ip))
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !GameLogic::Items::IsSellingBan(ip))
     {
         wchar_t Text[100];
         {
@@ -2208,7 +2189,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
     if ((Inventype == SEASON3B::TOOLTIP_TYPE_MY_SHOP || Inventype == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP)
-        && !IsPersonalShopBan(ip))
+        && !GameLogic::Items::IsPersonalShopBan(ip))
     {
         {
             int price = 0;
@@ -2540,7 +2521,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], L"%ls", p->Name);
         }
     }
-    else if (IsDivineArchangelWeaponItem(ip->Type))
+    else if (GameLogic::Items::IsDivineArchangelWeapon(ip))
     {
         if (Level == 0)
             mu_swprintf(TextList[TextNum], L"%ls", p->Name);
@@ -5591,7 +5572,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
 void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 {
-    if (IsRepairBan(ip) == true)
+    if (GameLogic::Items::IsRepairBan(ip) == true)
     {
         return;
     }
@@ -5721,7 +5702,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         Color = TEXT_COLOR_YELLOW;
     }
-    else if (IsDivineArchangelWeaponItem(ip->Type))
+    else if (GameLogic::Items::IsDivineArchangelWeapon(ip))
     {
         Color = TEXT_COLOR_PURPLE;
     }
@@ -6579,7 +6560,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else
     {
-        if (IsDivineArchangelWeaponModel(o->Type))
+        if (GameLogic::Items::IsDivineArchangelWeaponModel(o->Type))
         {
             SetDescriptorTextColor(descriptor, 1.f, 0.1f, 1.f);
         }
@@ -6928,326 +6909,6 @@ int CompareItem(ITEM item1, ITEM item2)
 bool EquipmentItem = false;
 extern int BuyCost;
 
-bool IsPartChargeItem(ITEM* pItem)
-{
-    if ((pItem->Type >= ITEM_HELPER + 46 && pItem->Type <= ITEM_HELPER + 48)
-        || (pItem->Type == ITEM_POTION + 54)
-        || (pItem->Type >= ITEM_POTION + 58 && pItem->Type <= ITEM_POTION + 62)
-        || (pItem->Type >= ITEM_POTION + 145 && pItem->Type <= ITEM_POTION + 150)
-        || (pItem->Type >= ITEM_HELPER + 125 && pItem->Type <= ITEM_HELPER + 127)
-        || pItem->Type == ITEM_POTION + 53
-        || GameLogic::Items::IsSeal(pItem)
-        || (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
-        || (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
-        || (pItem->Type == ITEM_HELPER + 59)
-        || (pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 58)
-        || (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82)
-        || (pItem->Type == ITEM_HELPER + 60)
-        || (pItem->Type == ITEM_HELPER + 61)
-        || (pItem->Type == ITEM_POTION + 91)
-        || (pItem->Type >= ITEM_POTION + 92 && pItem->Type <= ITEM_POTION + 93)
-        || (pItem->Type == ITEM_POTION + 95)
-        || (pItem->Type == ITEM_POTION + 94)
-        || (pItem->Type >= ITEM_HELPER + 62 && pItem->Type <= ITEM_HELPER + 63)
-        || (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98)
-        || (pItem->Type == ITEM_POTION + 96)
-        || (pItem->Type == ITEM_DEMON || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN)
-        || (pItem->Type == ITEM_HELPER + 69)
-        || (pItem->Type == ITEM_HELPER + 70)
-        || pItem->Type == ITEM_HELPER + 81
-        || pItem->Type == ITEM_HELPER + 82
-        || pItem->Type == ITEM_HELPER + 93
-        || pItem->Type == ITEM_HELPER + 94
-        || pItem->Type == ITEM_HELPER + 107
-        || pItem->Type == ITEM_HELPER + 104
-        || pItem->Type == ITEM_HELPER + 105
-        || pItem->Type == ITEM_HELPER + 103
-        || pItem->Type == ITEM_POTION + 133
-        || pItem->Type == ITEM_HELPER + 109
-        || pItem->Type == ITEM_HELPER + 110
-        || pItem->Type == ITEM_HELPER + 111
-        || pItem->Type == ITEM_HELPER + 112
-        || pItem->Type == ITEM_HELPER + 113
-        || pItem->Type == ITEM_HELPER + 114
-        || pItem->Type == ITEM_HELPER + 115
-        || pItem->Type == ITEM_POTION + 112
-        || pItem->Type == ITEM_POTION + 113
-        || pItem->Type == ITEM_POTION + 120
-        || pItem->Type == ITEM_POTION + 123
-        || pItem->Type == ITEM_POTION + 124
-        || pItem->Type == ITEM_POTION + 134
-        || pItem->Type == ITEM_POTION + 135
-        || pItem->Type == ITEM_POTION + 136
-        || pItem->Type == ITEM_POTION + 137
-        || pItem->Type == ITEM_POTION + 138
-        || pItem->Type == ITEM_POTION + 139
-        || GameLogic::Items::IsSmallWing(pItem)
-        || pItem->Type == ITEM_HELPER + 116
-        || pItem->Type == ITEM_PET_UNICORN
-        || pItem->Type == ITEM_HELPER + 124
-        || pItem->Type == ITEM_POTION + 114
-        || pItem->Type == ITEM_POTION + 115
-        || pItem->Type == ITEM_POTION + 116
-        || pItem->Type == ITEM_POTION + 117
-        || pItem->Type == ITEM_POTION + 118
-        || pItem->Type == ITEM_POTION + 119
-        || pItem->Type == ITEM_POTION + 126
-        || pItem->Type == ITEM_POTION + 127
-        || pItem->Type == ITEM_POTION + 128
-        || pItem->Type == ITEM_POTION + 129
-        || pItem->Type == ITEM_POTION + 130
-        || pItem->Type == ITEM_POTION + 131
-        || pItem->Type == ITEM_POTION + 132
-        || pItem->Type == ITEM_HELPER + 121
-        || pItem->Type == ITEM_POTION + 140
-        )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool IsHighValueItem(ITEM* pItem)
-{
-    int iLevel = pItem->Level;
-
-    if (
-        pItem->Type == ITEM_HORN_OF_DINORANT ||
-        pItem->Type == ITEM_JEWEL_OF_BLESS ||
-        pItem->Type == ITEM_JEWEL_OF_SOUL ||
-        pItem->Type == ITEM_JEWEL_OF_LIFE ||
-        pItem->Type == ITEM_JEWEL_OF_CREATION ||
-        pItem->Type == ITEM_JEWEL_OF_CHAOS ||
-        pItem->Type == ITEM_JEWEL_OF_GUARDIAN ||
-        pItem->Type == ITEM_PACKED_JEWEL_OF_BLESS ||
-        pItem->Type == ITEM_PACKED_JEWEL_OF_SOUL ||
-        (pItem->Type >= ITEM_WING && pItem->Type <= ITEM_WINGS_OF_DARKNESS) ||
-        pItem->Type == ITEM_DARK_HORSE_ITEM ||
-        pItem->Type == ITEM_DARK_RAVEN_ITEM ||
-        pItem->Type == ITEM_CAPE_OF_LORD ||
-        (pItem->Type >= ITEM_WING_OF_STORM && pItem->Type <= ITEM_WING_OF_DIMENSION) ||
-        pItem->AncientDiscriminator > 0 ||
-        IsDivineArchangelWeaponItem(pItem->Type) ||
-        pItem->Type == ITEM_LOCHS_FEATHER ||
-        pItem->Type == ITEM_FRUITS ||
-        pItem->Type == ITEM_WEAPON_OF_ARCHANGEL ||
-        pItem->Type == ITEM_SPIRIT ||
-        (pItem->Type >= ITEM_GEMSTONE && pItem->Type <= ITEM_HIGHER_REFINE_STONE) ||
-        (iLevel > 6 && pItem->Type < ITEM_WING) ||
-        pItem->ExcellentFlags > 0 ||
-        (pItem->Type >= ITEM_CLAW_OF_BEAST && pItem->Type <= ITEM_HORN_OF_FENRIR)
-        || pItem->Type == ITEM_FLAME_OF_CONDOR
-        || pItem->Type == ITEM_FEATHER_OF_CONDOR
-        || pItem->Type == ITEM_POTION + 121
-        || pItem->Type == ITEM_POTION + 122
-        || GameLogic::Items::IsSmallWing(pItem)
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-        || pItem->Type == ITEM_DEMON
-        || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-        || pItem->Type == ITEM_HELPER + 109
-        || pItem->Type == ITEM_HELPER + 110
-        || pItem->Type == ITEM_HELPER + 111
-        || pItem->Type == ITEM_HELPER + 112
-        || pItem->Type == ITEM_HELPER + 113
-        || pItem->Type == ITEM_HELPER + 114
-        || pItem->Type == ITEM_HELPER + 115
-        || pItem->Type == ITEM_POTION + 112
-        || pItem->Type == ITEM_POTION + 113
-        || (pItem->Type == ITEM_WIZARDS_RING && iLevel == 0)
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (pItem->Type >= ITEM_CAPE_OF_FIGHTER && pItem->Type <= ITEM_CAPE_OF_OVERRULE)
-#ifdef KJH_FIX_SELL_LUCKYITEM
-        || (Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0)
-#endif // KJH_FIX_SELL_LUCKYITEM
-        || (COMGEM::isCompiledGem(pItem))
-        )
-    {
-        if (true == pItem->bPeriodItem && false == pItem->bExpiredPeriod)
-        {
-            return false;
-        }
-        else if (pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_DEMON
-            || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
-            )
-        {
-            if (true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
-            {
-                return true;
-            }
-            else
-                return false;
-        }
-        return true;
-    }
-
-    return false;
-}
-
-bool IsPersonalShopBan(ITEM* pItem)
-{
-    if (pItem == NULL)
-    {
-        return false;
-    }
-
-#ifdef KJH_FIX_PERSONALSHOP_BAN_CASHITEM
-    if (pItem->bPeriodItem)
-    {
-        return true;
-    }
-#endif // KJH_FIX_PERSONALSHOP_BAN_CASHITEM
-
-    if ((!pItem->bPeriodItem) &&
-        pItem->Type == ITEM_DEMON
-        || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0)
-        )
-    {
-        return false;
-    }
-
-    if (pItem->Type == ITEM_MOONSTONE_PENDANT
-        || pItem->Type == ITEM_ELITE_TRANSFER_SKELETON_RING
-        || (pItem->Type == ITEM_POTION + 21 && pItem->Level != 3)
-        || (pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
-        || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
-        || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
-        || GameLogic::Items::IsSeal(pItem)
-        || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
-        || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-        || pItem->Type == ITEM_HORN_OF_HELL_MAINE
-        || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
-        || pItem->Type == ITEM_EYE_OF_ABYSSAL
-        || IsPartChargeItem(pItem)
-        || GameLogic::Items::IsCharacterCard(pItem)
-        || pItem->Type == ITEM_HELPER + 99
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-        || (pItem->Type == ITEM_POTION + 96)
-        || pItem->Type == ITEM_HELPER + 109
-        || pItem->Type == ITEM_HELPER + 110
-        || pItem->Type == ITEM_HELPER + 111
-        || pItem->Type == ITEM_HELPER + 112
-        || pItem->Type == ITEM_HELPER + 113
-        || pItem->Type == ITEM_HELPER + 114
-        || pItem->Type == ITEM_HELPER + 115
-#ifdef LDK_MOD_INGAMESHOP_WIZARD_RING_PERSONALSHOPBAN
-        || (pItem->Type == ITEM_WIZARDS_RING && (pItem->Level == 0)
-#endif //LDK_MOD_INGAMESHOP_WIZARD_RING_PERSONALSHOPBAN
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-        || (pItem->Type >= ITEM_POTION + 151 && pItem->Type <= ITEM_POTION + 156)
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || g_pMyInventory->IsInvenItem(pItem->Type)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        )
-    {
-        return true;
-    }
-    if (Check_ItemAction(pItem, eITEM_PERSONALSHOP))	return true;
-
-    return false;
-}
-
-bool IsTradeBan(ITEM* pItem)
-{
-    if (pItem->Type == ITEM_MOONSTONE_PENDANT
-        || pItem->Type == ITEM_ELITE_TRANSFER_SKELETON_RING
-        || (pItem->Type == ITEM_POTION + 21 && pItem->Level != 3)
-        || (pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
-        || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
-        || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
-        || GameLogic::Items::IsSeal(pItem)
-        || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
-        || pItem->Type == ITEM_POTION + 64
-        || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-        || pItem->Type == ITEM_HORN_OF_HELL_MAINE
-        || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
-        || pItem->Type == ITEM_EYE_OF_ABYSSAL
-        || IsPartChargeItem(pItem)
-        || GameLogic::Items::IsCharacterCard(pItem)
-        || pItem->Type == ITEM_HELPER + 99
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-        || (pItem->Type >= ITEM_POTION + 151 && pItem->Type <= ITEM_POTION + 156)
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || g_pMyInventory->IsInvenItem(pItem->Type)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        )
-    {
-        return true;
-    }
-
-    if (pItem->Type == ITEM_GM_GIFT)
-    {
-        if (g_isCharacterBuff((&Hero->Object), eBuff_GMEffect) ||
-            (Hero->CtlCode == CTLCODE_20OPERATOR) || (Hero->CtlCode == CTLCODE_08OPERATOR))
-            return false;
-        else
-            return true;
-    }
-    if (Check_ItemAction(pItem, eITEM_TRADE))	return true;
-
-    return false;
-}
-
-bool IsStoreBan(ITEM* pItem)
-{
-    if ((pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
-        || (pItem->Type == ITEM_POTION + 21 && pItem->Level != 3)
-        || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
-        || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
-        || GameLogic::Items::IsSeal(pItem)
-        || pItem->Type == ITEM_HELPER + 93
-        || pItem->Type == ITEM_HELPER + 94
-        || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
-        || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-        || pItem->Type == ITEM_HORN_OF_HELL_MAINE
-        || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
-        || pItem->Type == ITEM_EYE_OF_ABYSSAL
-        || (pItem->Type == ITEM_HELPER + 70 && pItem->Durability == 1)
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-        || (pItem->Type >= ITEM_POTION + 151 && pItem->Type <= ITEM_POTION + 156)
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-        || (pItem->bPeriodItem == true)
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 254)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        )
-    {
-        return true;
-    }
-
-    if (Check_ItemAction(pItem, eITEM_STORE))	return true;
-
-    return false;
-}
-
 sItemAct Set_ItemActOption(int _nIndex, int _nOption)
 {
     sItemAct	sItem;
@@ -7265,7 +6926,7 @@ sItemAct Set_ItemActOption(int _nIndex, int _nOption)
     return sItem;
 }
 
-bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
+bool Check_ItemAction(const ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
 {
     std::vector<sItemAct>			sItem;
     std::vector<sItemAct>::iterator li;
@@ -7329,189 +6990,6 @@ bool IsLuckySetItem(int iType)
     {
         return true;
     }
-
-    return false;
-}
-
-bool IsDropBan(ITEM* pItem)
-{
-    if ((!pItem->bPeriodItem) &&
-        (pItem->Type == ITEM_POTION + 96
-            || pItem->Type == ITEM_POTION + 54
-            || pItem->Type == ITEM_DEMON
-            || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
-            || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0)
-            ))
-    {
-        return false;
-    }
-
-    if (true == false || pItem->Type == ITEM_POTION + 123 || pItem->Type == ITEM_POTION + 124)
-    {
-        return false;
-    }
-
-    if ((pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
-        || (pItem->Type >= ITEM_FLAME_OF_DEATH_BEAM_KNIGHT && pItem->Type <= ITEM_EYE_OF_ABYSSAL)
-        || IsPartChargeItem(pItem)
-        || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN)
-            && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END))
-        || GameLogic::Items::IsCharacterCard(pItem)
-        || pItem->Type == ITEM_HELPER + 99
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-        || pItem->Type == ITEM_POTION + 121
-        || pItem->Type == ITEM_POTION + 122
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || g_pMyInventory->IsInvenItem(pItem->Type)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        )
-    {
-        return true;
-    }
-
-    if (Check_ItemAction(pItem, eITEM_DROP))	return true;
-
-    return false;
-}
-
-bool IsSellingBan(ITEM* pItem)
-{
-    int Level = pItem->Level;
-
-    if (true == false
-        || pItem->Type == ITEM_POTION + 112
-        || pItem->Type == ITEM_POTION + 113
-        || pItem->Type == ITEM_POTION + 121
-        || pItem->Type == ITEM_POTION + 122
-        || pItem->Type == ITEM_POTION + 123
-        || pItem->Type == ITEM_POTION + 124
-        || GameLogic::Items::IsSmallWing(pItem)
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-        || pItem->Type == ITEM_DEMON
-        || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-        || pItem->Type == ITEM_HELPER + 109
-        || pItem->Type == ITEM_HELPER + 110
-        || pItem->Type == ITEM_HELPER + 111
-        || pItem->Type == ITEM_HELPER + 112
-        || pItem->Type == ITEM_HELPER + 113
-        || pItem->Type == ITEM_HELPER + 114
-        || pItem->Type == ITEM_HELPER + 115
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability != 254)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || ((pItem->Type == ITEM_WIZARDS_RING) && (Level == 0))
-        || (pItem->Type == ITEM_PET_UNICORN)
-        || (pItem->Type == ITEM_HELPER + 107)
-        )
-    {
-        if (true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
-        {
-            return false;
-        }
-    }
-
-    if (pItem->Type == ITEM_BOX_OF_LUCK
-        || (pItem->Type == ITEM_POTION + 21 && Level == 1)
-        || ((pItem->bPeriodItem == true) && (pItem->bExpiredPeriod == false) && (pItem->Type == ITEM_WIZARDS_RING) && (Level == 0))
-        || (pItem->Type == ITEM_WIZARDS_RING && (Level == 1 || Level == 2))
-        || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
-        || (pItem->Type == ITEM_POTION + 20 && Level >= 1 && Level <= 5)
-        || IsPartChargeItem(pItem)
-        || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN)
-            && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END))
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (g_pMyInventory->IsInvenItem(pItem->Type))
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (pItem->Type == ITEM_PET_UNICORN)
-        || (pItem->Type == ITEM_HELPER + 107)
-#ifdef KJH_FIX_SELL_LUCKYITEM
-        || ((IsLuckySetItem(pItem->Type) == true) && (pItem->Durability > 0))
-#endif // KJH_FIX_SELL_LUCKYITEM
-        )
-    {
-        return true;
-    }
-
-    if (Check_ItemAction(pItem, eITEM_SELL))	return true;
-
-    return false;
-}
-
-bool IsRepairBan(ITEM* pItem)
-{
-    if (g_ChangeRingMgr->CheckRepair(pItem->Type) == true)
-    {
-        return true;
-    }
-    if (IsPartChargeItem(pItem) == true || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN) && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END)))
-    {
-        return true;
-    }
-
-    if ((pItem->Type >= ITEM_POTION + 55 && pItem->Type <= ITEM_POTION + 57)
-        || GameLogic::Items::IsSeal(pItem)
-        || (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HORN_OF_DINORANT)
-        || pItem->Type == ITEM_BOLT
-        || pItem->Type == ITEM_ARROWS
-        || pItem->Type >= ITEM_POTION
-        || (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB)
-        || (pItem->Type >= ITEM_LOCHS_FEATHER && pItem->Type <= ITEM_WEAPON_OF_ARCHANGEL)
-        || pItem->Type == ITEM_POTION + 21
-        || pItem->Type == ITEM_DARK_HORSE_ITEM
-        || pItem->Type == ITEM_DARK_RAVEN_ITEM
-        || pItem->Type == ITEM_MOONSTONE_PENDANT
-        || pItem->Type == ITEM_PET_RUDOLF
-        || pItem->Type == ITEM_PET_PANDA
-        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-        || pItem->Type == ITEM_PET_SKELETON
-        || pItem->Type == ITEM_PET_UNICORN
-        || pItem->Type == ITEM_CHERRY_BLOSSOM_PLAYBOX
-        || pItem->Type == ITEM_CHERRY_BLOSSOM_WINE
-        || pItem->Type == ITEM_CHERRY_BLOSSOM_RICE_CAKE
-        || pItem->Type == ITEM_CHERRY_BLOSSOM_FLOWER_PETAL
-        || pItem->Type == ITEM_POTION + 88
-        || pItem->Type == ITEM_POTION + 89
-        || pItem->Type == ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || g_pMyInventory->IsInvenItem(pItem->Type)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || pItem->Type == ITEM_HELPER + 7
-        || pItem->Type == ITEM_TRANSFORMATION_RING
-        || pItem->Type == ITEM_LIFE_STONE_ITEM
-        || pItem->Type == ITEM_WIZARDS_RING
-        || pItem->Type == ITEM_ARMOR_OF_GUARDSMAN
-        || pItem->Type == ITEM_SPLINTER_OF_ARMOR
-        || pItem->Type == ITEM_BLESS_OF_GUARDIAN
-        || pItem->Type == ITEM_CLAW_OF_BEAST
-        || pItem->Type == ITEM_FRAGMENT_OF_HORN
-        || pItem->Type == ITEM_BROKEN_HORN
-        || pItem->Type == ITEM_HORN_OF_FENRIR
-        || pItem->Type == ITEM_OLD_SCROLL
-        || pItem->Type == ITEM_ILLUSION_SORCERER_COVENANT
-        || pItem->Type == ITEM_SCROLL_OF_BLOOD
-        || pItem->Type == ITEM_HELPER + 66
-        || GameLogic::Items::IsGambleItem(pItem)
-        )
-    {
-        return true;
-    }
-
-    if (Check_ItemAction(pItem, eITEM_REPAIR))	return true;
 
     return false;
 }
@@ -9853,7 +9331,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         sx += Width * 0.5f;
         sy += Height * 0.8f;
     }
-    else if (Type == ITEM_DEVILS_EYE || Type == ITEM_DEVILS_KEY || Type == ITEM_DEVILS_INVITATION)
+    else if (GameLogic::Items::IsDevilSquareItemType(Type))
     {
         sx += Width * 0.5f;
         sy += Height * 0.5f;

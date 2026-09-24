@@ -22,6 +22,8 @@
 #include "World/MapInfra/PortalMgr.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ShopRestrictions.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 namespace SEASON3B
 {
@@ -227,7 +229,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
         return false;
     }
 
-    if (IsSellingBan(pItem))
+    if (GameLogic::Items::IsSellingBan(pItem))
     {
         g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, TYPE_ERROR_MESSAGE);
         return true;
@@ -260,7 +262,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
         return false;
     }
 
-    if (IsHighValueItem(pItem))
+    if (GameLogic::Items::IsHighValueItem(pItem))
     {
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CHighValueItemCheckMsgBoxLayout));
         return true;
@@ -420,13 +422,13 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
         return false;
     }
 
-    if (IsHighValueItem(pItem))
+    if (GameLogic::Items::IsHighValueItem(pItem))
     {
         g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
         return true;
     }
 
-    if (IsDropBan(pItem))
+    if (GameLogic::Items::IsDropBan(pItem))
     {
         g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
         return true;
@@ -464,7 +466,7 @@ bool CNewUIInventoryActionController::RepairItemAtMousePoint(CNewUIInventoryCtrl
         return true;
     }
 
-    if (IsRepairBan(pItem))
+    if (GameLogic::Items::IsRepairBan(pItem))
     {
         return true;
     }

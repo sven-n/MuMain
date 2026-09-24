@@ -11,6 +11,7 @@
 
 #include "GameLogic/Items/CComGem.h"
 #include "Audio/DSPlaySound.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 using namespace SEASON3B;
 
@@ -466,7 +467,7 @@ void CNewUITrade::ProcessMyInvenCtrl()
 void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
     int nTradeIndex)
 {
-    if (::IsTradeBan(pItemObj))
+    if (GameLogic::Items::IsTradeBan(pItemObj))
     {
         g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
     }

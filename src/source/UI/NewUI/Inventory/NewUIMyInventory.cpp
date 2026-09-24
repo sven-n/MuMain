@@ -36,6 +36,8 @@ extern bool SelectFlag;
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
+#include "GameLogic/Items/ShopRestrictions.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 using namespace SEASON3B;
 
@@ -496,7 +498,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             ResetMouseLButton();
             return false;
         }
-        if (pItemObj && IsHighValueItem(pItemObj) == true)
+        if (pItemObj && GameLogic::Items::IsHighValueItem(pItemObj) == true)
         {
             g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
@@ -504,7 +506,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             ResetMouseLButton();
             return false;
         }
-        if (pItemObj && IsDropBan(pItemObj))
+        if (pItemObj && GameLogic::Items::IsDropBan(pItemObj))
         {
             g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
@@ -1448,7 +1450,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                     return true;
                 }
 
-                if (IsRepairBan(pEquippedItem) == true)
+                if (GameLogic::Items::IsRepairBan(pEquippedItem) == true)
                 {
                     return true;
                 }

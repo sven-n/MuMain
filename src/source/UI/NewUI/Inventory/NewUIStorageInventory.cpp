@@ -10,6 +10,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
 #include "GameShop/MsgBoxIGSCommon.h"
@@ -349,7 +350,7 @@ void CNewUIStorageInventory::ProcessInventoryCtrl()
         }
         else
         {
-            if (::IsStoreBan(pItemObj))
+            if (GameLogic::Items::IsStoreBan(pItemObj))
             {
                 m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
             }
@@ -458,7 +459,7 @@ void CNewUIStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStora
 
 void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex)
 {
-    if (IsStoreBan(pItemObj))
+    if (GameLogic::Items::IsStoreBan(pItemObj))
     {
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
         // MessageBox
