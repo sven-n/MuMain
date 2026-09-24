@@ -11,24 +11,18 @@ namespace GameLogic::Items
     {
         if (pItem->Type == ITEM_MOONSTONE_PENDANT
             || pItem->Type == ITEM_ELITE_TRANSFER_SKELETON_RING
-            || (pItem->Type == ITEM_POTION + 21 && pItem->Level != 3)
-            || (pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
+            || (pItem->Type == ITEM_RENA && pItem->Level != 3)
+            || IsSecondClassQuestItem(pItem)
             || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
             || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
             || IsSeal(pItem)
             || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
             || pItem->Type == ITEM_CURSED_CASTLE_WATER
-            || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-            || pItem->Type == ITEM_HORN_OF_HELL_MAINE
-            || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
-            || pItem->Type == ITEM_EYE_OF_ABYSSAL
+            || IsThirdClassQuestItem(pItem)
             || IsPartChargeItem(pItem)
             || IsCharacterCard(pItem)
             || pItem->Type == ITEM_HELPER + 99
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
+            || IsPandaOrSkeletonItem(pItem)
             )
         {
             return true;
@@ -52,34 +46,26 @@ namespace GameLogic::Items
         if ((!pItem->bPeriodItem) &&
             (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY
                 || pItem->Type == ITEM_CHAOS_CARD
-                || pItem->Type == ITEM_DEMON
-                || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-                || pItem->Type == ITEM_PET_PANDA
-                || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-                || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-                || pItem->Type == ITEM_PET_SKELETON
+                || IsDemonOrSpiritOfGuardian(pItem)
+                || IsPandaOrSkeletonItem(pItem)
                 || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0)
                 ))
         {
             return false;
         }
 
-        if (true == false || pItem->Type == ITEM_GOLDEN_BOX || pItem->Type == ITEM_SILVER_BOX)
+        if (pItem->Type == ITEM_GOLDEN_BOX || pItem->Type == ITEM_SILVER_BOX)
         {
             return false;
         }
 
-        if ((pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
-            || (pItem->Type >= ITEM_FLAME_OF_DEATH_BEAM_KNIGHT && pItem->Type <= ITEM_EYE_OF_ABYSSAL)
+        if (IsSecondClassQuestItem(pItem)
+            || IsThirdClassQuestItem(pItem)
             || IsPartChargeItem(pItem)
-            || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN)
-                && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END))
+            || IsWingMixCharm(pItem)
             || IsCharacterCard(pItem)
             || pItem->Type == ITEM_HELPER + 99
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
+            || IsPandaOrSkeletonItem(pItem)
             || pItem->Type == ITEM_SEALED_GOLDEN_BOX
             || pItem->Type == ITEM_SEALED_SILVER_BOX
             )
@@ -94,21 +80,18 @@ namespace GameLogic::Items
 
     bool IsStoreBan(const ITEM* pItem)
     {
-        if ((pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
-            || (pItem->Type == ITEM_POTION + 21 && pItem->Level != 3)
+        if (IsSecondClassQuestItem(pItem)
+            || (pItem->Type == ITEM_RENA && pItem->Level != 3)
             || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
             || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
             || IsSeal(pItem)
             || pItem->Type == ITEM_MASTER_SEAL_OF_ASCENSION
             || pItem->Type == ITEM_MASTER_SEAL_OF_WEALTH
             || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
-            || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-            || pItem->Type == ITEM_HORN_OF_HELL_MAINE
-            || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
-            || pItem->Type == ITEM_EYE_OF_ABYSSAL
+            || IsThirdClassQuestItem(pItem)
             || (pItem->Type == ITEM_TALISMAN_OF_MOBILITY && pItem->Durability == 1)
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-            || (pItem->bPeriodItem == true)
+            || pItem->bPeriodItem
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
             )
         {

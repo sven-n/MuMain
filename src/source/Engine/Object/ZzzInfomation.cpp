@@ -480,9 +480,9 @@ bool IsWing(ITEM* ip)
         || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
         || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL
         || ip->Type == ITEM_CAPE_OF_LORD
-        || (ITEM_WING + 130 <= ip->Type && ip->Type <= ITEM_WING + 134)
+        || (ITEM_SMALL_CAPE_OF_LORD <= ip->Type && ip->Type <= ITEM_SMALL_WINGS_OF_SATAN)
         || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE)
-        || (ip->Type == ITEM_WING + 135);
+        || (ip->Type == ITEM_LITTLE_WARRIORS_CLOAK);
 }
 
 int GetDropLevel(ITEM_ATTRIBUTE* p)
@@ -769,7 +769,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     if (p->RequireEnergy)
     {
-        if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
+        if (GameLogic::Items::IsSummonerBook(ip))
         {
             ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 1) * 3 / 100;
         }
@@ -1056,7 +1056,7 @@ void CalcPartType(ITEM* ip)
     //part
     if (ip->Type >= ITEM_BOW && ip->Type < ITEM_CROSSBOW || ip->Type == ITEM_CELESTIAL_BOW)
         ip->Part = EQUIPMENT_WEAPON_LEFT;
-    if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBook(ip))
         ip->Part = EQUIPMENT_WEAPON_LEFT;
     else if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
         ip->Part = EQUIPMENT_WEAPON_RIGHT;
@@ -1135,7 +1135,7 @@ void SetItemAttributes(ITEM* ip)
     {
         if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
         {
-            if (ip->Type != ITEM_BOLT && ip->Type != ITEM_ARROWS)
+            if (!GameLogic::Items::IsAmmunition(ip))
             {
                 ip->Special[ip->SpecialNum] = AT_LUCK;
                 ip->SpecialNum++;
@@ -1184,7 +1184,7 @@ void SetItemAttributes(ITEM* ip)
         {
             if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOW + MAX_ITEM_INDEX)
             {
-                if (ip->Type != ITEM_BOLT && ip->Type != ITEM_ARROWS)
+                if (!GameLogic::Items::IsAmmunition(ip))
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
@@ -1194,7 +1194,7 @@ void SetItemAttributes(ITEM* ip)
             if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
+                if (GameLogic::Items::IsSummonerBook(ip))
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE;
                 else
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
@@ -1617,7 +1617,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         Gold = 33000000;
     }
-    else if (ip->Type == ITEM_SCROLL_OF_ARCHANGEL || ip->Type == ITEM_BLOOD_BONE)
+    else if (GameLogic::Items::IsBloodCastleTicketPart(ip))
     {
         switch (Level)
         {
@@ -1674,7 +1674,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         Gold = 5000;
     }
-    else if (ip->Type == ITEM_POTION + 21)
+    else if (ip->Type == ITEM_RENA)
     {
         if (Level == 0)
             Gold = 9000;
@@ -1716,8 +1716,8 @@ int64_t ItemValue(ITEM* ip, int goldType)
             Gold = 3000 * 3;
         }
     }
-    else if (ip->Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR || ip->Type == ITEM_BROKEN_SWORD_DARK_STONE || ip->Type == ITEM_TEAR_OF_ELF || ip->Type == ITEM_SOUL_SHARD_OF_WIZARD
-        || ip->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT || ip->Type == ITEM_HORN_OF_HELL_MAINE || ip->Type == ITEM_FEATHER_OF_DARK_PHOENIX || ip->Type == ITEM_EYE_OF_ABYSSAL
+    else if (GameLogic::Items::IsSecondClassQuestItem(ip)
+        || GameLogic::Items::IsThirdClassQuestItem(ip)
         )
     {
         Gold = 9000;
@@ -1726,7 +1726,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         Gold = 1000;
     }
-    else if (ip->Type == ITEM_POTION + 20)
+    else if (ip->Type == ITEM_REMEDY_OF_LOVE)
     {
         Gold = 900;
     }
@@ -1758,7 +1758,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         case 1: Gold = (long long)450000 * ip->Durability; break;
         }
     }
-    else if (ip->Type == ITEM_HELPER + 7)
+    else if (ip->Type == ITEM_CONTRACT_SUMMON)
     {
         switch (Level)
         {
@@ -1790,7 +1790,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         }
         Gold *= ip->Durability;
     }
-    else if (ip->Type >= ITEM_SMALL_COMPLEX_POTION && ip->Type <= ITEM_LARGE_COMPLEX_POTION)
+    else if (GameLogic::Items::IsComplexPotion(ip))
     {
         switch (ip->Type)
         {
@@ -2065,7 +2065,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         Gold = 2000000;
     }
 
-    if ((ip->Type == ITEM_DARK_HORSE_ITEM) || (ip->Type == ITEM_DARK_RAVEN_ITEM))
+    if (GameLogic::Items::IsDarkLordPet(ip))
     {
         PET_INFO* pPetInfo = giPetManager::GetPetInfo(ip);
 
@@ -2100,25 +2100,25 @@ int64_t ItemValue(ITEM* ip, int goldType)
     case ITEM_PET_SKELETON:
         Gold = 2000;
         break;
-    case ITEM_WING + 130:
-    case ITEM_WING + 131:
-    case ITEM_WING + 132:
-    case ITEM_WING + 133:
-    case ITEM_WING + 134:
-    case ITEM_WING + 135:
+    case ITEM_SMALL_CAPE_OF_LORD:
+    case ITEM_SMALL_WING_OF_CURSE:
+    case ITEM_SMALL_WINGS_OF_ELF:
+    case ITEM_SMALL_WINGS_OF_HEAVEN:
+    case ITEM_SMALL_WINGS_OF_SATAN:
+    case ITEM_LITTLE_WARRIORS_CLOAK:
         Gold = 80;
         break;
     }
 
     if (ip->Type == ITEM_TRANSFORMATION_RING || ip->Type == ITEM_WIZARDS_RING || ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
         goto EXIT_CALCULATE;
-    if (ip->Type == ITEM_BOLT || ip->Type == ITEM_ARROWS || ip->Type >= ITEM_POTION)
+    if (GameLogic::Items::IsAmmunition(ip) || ip->Type >= ITEM_POTION)
         goto EXIT_CALCULATE;
     if (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_ORB_OF_DEATH_STAB)
         goto EXIT_CALCULATE;
-    if ((ip->Type >= ITEM_LOCHS_FEATHER && ip->Type <= ITEM_WEAPON_OF_ARCHANGEL) || ip->Type == ITEM_POTION + 21)
+    if ((ip->Type >= ITEM_LOCHS_FEATHER && ip->Type <= ITEM_WEAPON_OF_ARCHANGEL) || ip->Type == ITEM_RENA)
         goto EXIT_CALCULATE;
-    if (ip->Type == ITEM_SIEGE_POTION || ip->Type == ITEM_HELPER + 7 || ip->Type == ITEM_LIFE_STONE_ITEM)
+    if (ip->Type == ITEM_SIEGE_POTION || ip->Type == ITEM_CONTRACT_SUMMON || ip->Type == ITEM_LIFE_STONE_ITEM)
         goto EXIT_CALCULATE;
     if ((ip->Type >= ITEM_OLD_SCROLL) && (ip->Type <= ITEM_SCROLL_OF_BLOOD))
         goto EXIT_CALCULATE;
@@ -2132,12 +2132,12 @@ int64_t ItemValue(ITEM* ip, int goldType)
     case ITEM_SEALED_SILVER_BOX:	goto EXIT_CALCULATE;
     case ITEM_GOLDEN_BOX:	goto EXIT_CALCULATE;
     case ITEM_SILVER_BOX:	goto EXIT_CALCULATE;
-    case ITEM_WING + 130:
-    case ITEM_WING + 131:
-    case ITEM_WING + 132:
-    case ITEM_WING + 133:
-    case ITEM_WING + 134:
-    case ITEM_WING + 135:
+    case ITEM_SMALL_CAPE_OF_LORD:
+    case ITEM_SMALL_WING_OF_CURSE:
+    case ITEM_SMALL_WINGS_OF_ELF:
+    case ITEM_SMALL_WINGS_OF_HEAVEN:
+    case ITEM_SMALL_WINGS_OF_SATAN:
+    case ITEM_LITTLE_WARRIORS_CLOAK:
         goto EXIT_CALCULATE;
     case ITEM_SKELETON_TRANSFORMATION_RING:
         goto EXIT_CALCULATE;

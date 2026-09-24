@@ -37,6 +37,96 @@ namespace
             || itemType == ITEM_DARK_LORD_CHARACTER_CARD
             || itemType == ITEM_SUMMONER_CHARACTER_CARD;
     }
+
+    bool IsRefineStoneType(int itemType)
+    {
+        return itemType == ITEM_LOWER_REFINE_STONE
+            || itemType == ITEM_HIGHER_REFINE_STONE;
+    }
+
+    bool IsLuckyItemTicketType(int itemType)
+    {
+        return itemType >= ITEM_FIRST_LUCKY_ARMOR_TICKET && itemType <= ITEM_HELPER + 145;
+    }
+
+    bool IsAccountServiceItemType(int itemType)
+    {
+        return itemType >= ITEM_MASTER_SKILL_RESET && itemType <= ITEM_PREMIUM_PACKAGE;
+    }
+
+    bool IsDayPassType(int itemType)
+    {
+        return itemType >= ITEM_30_DAY_PASS && itemType <= ITEM_90_DAY_PASS_POINTS;
+    }
+
+    bool IsHourPassType(int itemType)
+    {
+        return itemType == ITEM_3_HOUR_PASS
+            || itemType == ITEM_5_HOUR_PASS
+            || itemType == ITEM_10_HOUR_PASS;
+    }
+
+    bool IsPackageBoxType(int itemType)
+    {
+        return itemType >= ITEM_PACKAGE_BOX_A && itemType <= ITEM_PACKAGE_BOX_F;
+    }
+
+    bool IsSilverOrGoldKeyType(int itemType)
+    {
+        return itemType == ITEM_SILVER_KEY
+            || itemType == ITEM_GOLD_KEY;
+    }
+
+    bool IsGemJewelryType(int itemType)
+    {
+        return itemType >= ITEM_SAPPHIRE_RING && itemType <= ITEM_SAPPHIRE_NECKLACE;
+    }
+
+    bool IsPandaOrSkeletonItemType(int itemType)
+    {
+        return itemType == ITEM_PET_PANDA
+            || itemType == ITEM_PANDA_TRANSFORMATION_RING
+            || itemType == ITEM_PET_SKELETON
+            || itemType == ITEM_SKELETON_TRANSFORMATION_RING;
+    }
+
+    bool IsThirdClassQuestItemType(int itemType)
+    {
+        return itemType == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
+            || itemType == ITEM_HORN_OF_HELL_MAINE
+            || itemType == ITEM_FEATHER_OF_DARK_PHOENIX
+            || itemType == ITEM_EYE_OF_ABYSSAL;
+    }
+
+    bool IsSecromiconQuestItemType(int itemType)
+    {
+        return itemType >= ITEM_SUSPICIOUS_SCRAP_OF_PAPER && itemType <= ITEM_COMPLETE_SECROMICON;
+    }
+
+    bool IsSummonerStickType(int itemType)
+    {
+        return itemType >= ITEM_MISTERY_STICK && itemType <= ITEM_ETERNAL_WING_STICK;
+    }
+
+    bool IsSummonerSkillParchmentType(int itemType)
+    {
+        return itemType >= ITEM_CHAIN_LIGHTNING_PARCHMENT && itemType <= ITEM_INNOVATION_PARCHMENT;
+    }
+
+    bool IsRageFighterSkillParchmentType(int itemType)
+    {
+        return itemType >= ITEM_CHAIN_DRIVE_PARCHMENT && itemType <= ITEM_INCREASE_BLOCK_PARCHMENT;
+    }
+
+    bool IsSocketSeedType(int itemType)
+    {
+        return itemType >= ITEM_SEED_FIRE && itemType <= ITEM_SEED_EARTH;
+    }
+
+    bool IsSocketSphereType(int itemType)
+    {
+        return itemType >= ITEM_SPHERE_MONO && itemType <= ITEM_SPHERE_5;
+    }
 }
 
 namespace GameLogic::Items
@@ -140,11 +230,26 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_JEWEL_OF_GUARDIAN;
     }
 
+    bool IsWingMixCharmType(int itemType)
+    {
+        return itemType >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN && itemType <= ITEM_TYPE_CHARM_MIXWING + EWS_END;
+    }
+
+    bool IsWingMixCharm(const ITEM* pItem)
+    {
+        return IsWingMixCharmType(pItem->Type);
+    }
+
+    bool IsWingMixCharmModel(int modelType)
+    {
+        return IsWingMixCharmType(modelType - MODEL_ITEM);
+    }
+
     bool IsSocketSeedOrSphereType(int itemType)
     {
-        return (itemType >= ITEM_SEED_FIRE && itemType <= ITEM_SEED_EARTH)
-            || (itemType >= ITEM_SPHERE_MONO && itemType <= ITEM_SPHERE_5)
-            || (itemType >= ITEM_SEED_SPHERE_FIRE_1 && itemType <= ITEM_SEED_SPHERE_EARTH_5);
+        return IsSocketSeedType(itemType)
+            || IsSocketSphereType(itemType)
+            || IsSocketSeedSphereType(itemType);
     }
 
     bool IsSocketSeedOrSphere(const ITEM* pItem)
@@ -236,30 +341,30 @@ namespace GameLogic::Items
 
     bool IsPartChargeItem(const ITEM* pItem)
     {
-        if ((pItem->Type >= ITEM_DEVIL_SQUARE_TICKET && pItem->Type <= ITEM_KALIMA_TICKET)
-            || (pItem->Type == ITEM_CHAOS_CARD)
-            || (pItem->Type >= ITEM_RARE_ITEM_TICKET_1 && pItem->Type <= ITEM_RARE_ITEM_TICKET_5)
-            || (pItem->Type >= ITEM_RARE_ITEM_TICKET_7 && pItem->Type <= ITEM_RARE_ITEM_TICKET_12)
-            || (pItem->Type >= ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER && pItem->Type <= ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
+        return IsEventTicket(pItem)
+            || pItem->Type == ITEM_CHAOS_CARD
+            || IsRareItemTicket(pItem)
+            || IsDoppelgangerOrVarkaTicket(pItem)
             || pItem->Type == ITEM_TALISMAN_OF_LUCK
             || IsSeal(pItem)
-            || (pItem->Type >= ITEM_ELITE_HEALING_POTION && pItem->Type <= ITEM_ELITE_MANA_POTION)
-            || (pItem->Type >= ITEM_SCROLL_OF_QUICKNESS && pItem->Type <= ITEM_SCROLL_OF_MANA)
-            || (pItem->Type == ITEM_SEAL_OF_MOBILITY)
-            || (pItem->Type >= ITEM_RESET_FRUIT_STRENGTH && pItem->Type <= ITEM_RESET_FRUIT_CONTROL)
-            || (pItem->Type >= ITEM_ELIXIR_OF_STRENGTH && pItem->Type <= ITEM_ELIXIR_OF_CONTROL)
-            || (pItem->Type == ITEM_INDULGENCE)
-            || (pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET)
-            || (pItem->Type == ITEM_POTION + 91)
-            || (pItem->Type >= ITEM_CHAOS_CARD_GOLD && pItem->Type <= ITEM_CHAOS_CARD_RARE)
-            || (pItem->Type == ITEM_CHAOS_CARD_MINI)
-            || (pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION)
-            || (pItem->Type >= ITEM_SEAL_OF_HEALING && pItem->Type <= ITEM_SEAL_OF_DIVINITY)
-            || (pItem->Type >= ITEM_SCROLL_OF_BATTLE && pItem->Type <= ITEM_SCROLL_OF_STRENGTH)
-            || (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
-            || (pItem->Type == ITEM_DEMON || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN)
-            || (pItem->Type == ITEM_TALISMAN_OF_RESURRECTION)
-            || (pItem->Type == ITEM_TALISMAN_OF_MOBILITY)
+            || IsElitePotion(pItem)
+            || IsBuffScroll(pItem)
+            || pItem->Type == ITEM_SEAL_OF_MOBILITY
+            || IsResetFruit(pItem)
+            || IsElixir(pItem)
+            || pItem->Type == ITEM_INDULGENCE
+            || pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET
+            || pItem->Type == ITEM_SUMMONER_CHARACTER_CARD
+            || pItem->Type == ITEM_CHAOS_CARD_GOLD
+            || pItem->Type == ITEM_CHAOS_CARD_RARE
+            || pItem->Type == ITEM_CHAOS_CARD_MINI
+            || pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION
+            || IsHealingOrDivinitySeal(pItem)
+            || IsBattleOrStrengthScroll(pItem)
+            || pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY
+            || IsDemonOrSpiritOfGuardian(pItem)
+            || pItem->Type == ITEM_TALISMAN_OF_RESURRECTION
+            || pItem->Type == ITEM_TALISMAN_OF_MOBILITY
             || pItem->Type == ITEM_TALISMAN_OF_GUARDIAN
             || pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION
             || pItem->Type == ITEM_MASTER_SEAL_OF_ASCENSION
@@ -269,127 +374,491 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_MAX_SD_BOOST_AURA
             || pItem->Type == ITEM_PARTY_EXP_SCROLL
             || pItem->Type == ITEM_ELITE_SD_POTION
-            || pItem->Type == ITEM_SAPPHIRE_RING
-            || pItem->Type == ITEM_RUBY_RING
-            || pItem->Type == ITEM_TOPAZ_RING
-            || pItem->Type == ITEM_AMETHYST_RING
-            || pItem->Type == ITEM_RUBY_NECKLACE
-            || pItem->Type == ITEM_EMERALD_NECKLACE
-            || pItem->Type == ITEM_SAPPHIRE_NECKLACE
-            || pItem->Type == ITEM_SILVER_KEY
-            || pItem->Type == ITEM_GOLD_KEY
+            || IsGemJewelry(pItem)
+            || IsSilverOrGoldKey(pItem)
             || pItem->Type == ITEM_GOBLIN_GOLD_COIN
             || pItem->Type == ITEM_GOLDEN_BOX
             || pItem->Type == ITEM_SILVER_BOX
-            || pItem->Type == ITEM_PACKAGE_BOX_A
-            || pItem->Type == ITEM_PACKAGE_BOX_B
-            || pItem->Type == ITEM_PACKAGE_BOX_C
-            || pItem->Type == ITEM_PACKAGE_BOX_D
-            || pItem->Type == ITEM_PACKAGE_BOX_E
-            || pItem->Type == ITEM_PACKAGE_BOX_F
+            || IsPackageBox(pItem)
             || IsSmallWing(pItem)
             || pItem->Type == ITEM_HELPER + 116
             || pItem->Type == ITEM_PET_UNICORN
             || pItem->Type == ITEM_PAID_CHANNEL_ACCESS_TICKET
-            || pItem->Type == ITEM_MASTER_SKILL_RESET
-            || pItem->Type == ITEM_STAT_ADJUSTMENT
-            || pItem->Type == ITEM_CHARACTER_RELOCATION_SERVICE
-            || pItem->Type == ITEM_CHARACTER_RENAME_SERVICE
-            || pItem->Type == ITEM_SERVER_RELOCATION_SERVICE
-            || pItem->Type == ITEM_PREMIUM_PACKAGE
-            || pItem->Type == ITEM_30_DAY_PASS
-            || pItem->Type == ITEM_90_DAY_PASS
-            || pItem->Type == ITEM_30_DAY_PASS_POINTS
-            || pItem->Type == ITEM_90_DAY_PASS_POINTS
-            || pItem->Type == ITEM_3_HOUR_PASS
-            || pItem->Type == ITEM_5_HOUR_PASS
-            || pItem->Type == ITEM_10_HOUR_PASS
+            || IsAccountServiceItem(pItem)
+            || IsDayPass(pItem)
+            || IsHourPass(pItem)
             || pItem->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE
-            || pItem->Type == ITEM_SCROLL_OF_HEALING
-            )
-        {
-            return true;
-        }
-
-        return false;
+            || pItem->Type == ITEM_SCROLL_OF_HEALING;
     }
 
     bool IsHighValueItem(const ITEM* pItem)
     {
         int iLevel = pItem->Level;
 
-        if (
-            pItem->Type == ITEM_HORN_OF_DINORANT ||
-            pItem->Type == ITEM_JEWEL_OF_BLESS ||
-            pItem->Type == ITEM_JEWEL_OF_SOUL ||
-            pItem->Type == ITEM_JEWEL_OF_LIFE ||
-            pItem->Type == ITEM_JEWEL_OF_CREATION ||
-            pItem->Type == ITEM_JEWEL_OF_CHAOS ||
-            pItem->Type == ITEM_JEWEL_OF_GUARDIAN ||
-            pItem->Type == ITEM_PACKED_JEWEL_OF_BLESS ||
-            pItem->Type == ITEM_PACKED_JEWEL_OF_SOUL ||
-            (pItem->Type >= ITEM_WING && pItem->Type <= ITEM_WINGS_OF_DARKNESS) ||
-            pItem->Type == ITEM_DARK_HORSE_ITEM ||
-            pItem->Type == ITEM_DARK_RAVEN_ITEM ||
-            pItem->Type == ITEM_CAPE_OF_LORD ||
-            (pItem->Type >= ITEM_WING_OF_STORM && pItem->Type <= ITEM_WING_OF_DIMENSION) ||
-            pItem->AncientDiscriminator > 0 ||
-            IsDivineArchangelWeapon(pItem) ||
-            pItem->Type == ITEM_LOCHS_FEATHER ||
-            pItem->Type == ITEM_FRUITS ||
-            pItem->Type == ITEM_WEAPON_OF_ARCHANGEL ||
-            pItem->Type == ITEM_SPIRIT ||
-            (pItem->Type >= ITEM_GEMSTONE && pItem->Type <= ITEM_HIGHER_REFINE_STONE) ||
-            (iLevel > 6 && pItem->Type < ITEM_WING) ||
-            pItem->ExcellentFlags > 0 ||
-            (pItem->Type >= ITEM_CLAW_OF_BEAST && pItem->Type <= ITEM_HORN_OF_FENRIR)
+        if (pItem->Type == ITEM_HORN_OF_DINORANT
+            || IsJewelItem(pItem)
+            || pItem->Type == ITEM_PACKED_JEWEL_OF_BLESS
+            || pItem->Type == ITEM_PACKED_JEWEL_OF_SOUL
+            || IsWingItem(pItem)
+            || IsDarkLordPet(pItem)
+            || pItem->AncientDiscriminator > 0
+            || IsDivineArchangelWeapon(pItem)
+            || pItem->Type == ITEM_LOCHS_FEATHER
+            || pItem->Type == ITEM_FRUITS
+            || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
+            || pItem->Type == ITEM_SPIRIT
+            || (pItem->Type >= ITEM_GEMSTONE && pItem->Type <= ITEM_HIGHER_REFINE_STONE)
+            || (iLevel > 6 && pItem->Type < ITEM_WING)
+            || pItem->ExcellentFlags > 0
+            || (pItem->Type >= ITEM_CLAW_OF_BEAST && pItem->Type <= ITEM_HORN_OF_FENRIR)
             || pItem->Type == ITEM_FLAME_OF_CONDOR
             || pItem->Type == ITEM_FEATHER_OF_CONDOR
             || pItem->Type == ITEM_SEALED_GOLDEN_BOX
             || pItem->Type == ITEM_SEALED_SILVER_BOX
-            || IsSmallWing(pItem)
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
-            || pItem->Type == ITEM_DEMON
-            || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-            || pItem->Type == ITEM_SAPPHIRE_RING
-            || pItem->Type == ITEM_RUBY_RING
-            || pItem->Type == ITEM_TOPAZ_RING
-            || pItem->Type == ITEM_AMETHYST_RING
-            || pItem->Type == ITEM_RUBY_NECKLACE
-            || pItem->Type == ITEM_EMERALD_NECKLACE
-            || pItem->Type == ITEM_SAPPHIRE_NECKLACE
-            || pItem->Type == ITEM_SILVER_KEY
-            || pItem->Type == ITEM_GOLD_KEY
+            || IsPandaOrSkeletonItem(pItem)
+            || IsDemonOrSpiritOfGuardian(pItem)
+            || IsGemJewelry(pItem)
+            || IsSilverOrGoldKey(pItem)
             || (pItem->Type == ITEM_WIZARDS_RING && iLevel == 0)
-            || (pItem->Type >= ITEM_CAPE_OF_FIGHTER && pItem->Type <= ITEM_CAPE_OF_OVERRULE)
-            || (COMGEM::isCompiledGem(pItem))
-            )
+            || COMGEM::isCompiledGem(pItem))
         {
-            if (true == pItem->bPeriodItem && false == pItem->bExpiredPeriod)
+            if (pItem->bPeriodItem && !pItem->bExpiredPeriod)
             {
                 return false;
             }
-            else if (pItem->Type == ITEM_PET_PANDA
-                || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-                || pItem->Type == ITEM_DEMON
-                || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-                || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-                || pItem->Type == ITEM_PET_SKELETON
-                )
+
+            if (IsPandaOrSkeletonItem(pItem) || IsDemonOrSpiritOfGuardian(pItem))
             {
-                if (true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
-                {
-                    return true;
-                }
-                else
-                    return false;
+                return pItem->bPeriodItem && pItem->bExpiredPeriod;
             }
+
             return true;
         }
 
         return false;
+    }
+
+    bool IsHealingPotionType(int itemType)
+    {
+        return itemType >= ITEM_APPLE && itemType <= ITEM_LARGE_HEALING_POTION;
+    }
+
+    bool IsHealingPotion(const ITEM* pItem)
+    {
+        return IsHealingPotionType(pItem->Type);
+    }
+
+    bool IsManaPotionType(int itemType)
+    {
+        return itemType >= ITEM_SMALL_MANA_POTION && itemType <= ITEM_LARGE_MANA_POTION;
+    }
+
+    bool IsComplexPotionType(int itemType)
+    {
+        return itemType >= ITEM_SMALL_COMPLEX_POTION && itemType <= ITEM_LARGE_COMPLEX_POTION;
+    }
+
+    bool IsComplexPotion(const ITEM* pItem)
+    {
+        return IsComplexPotionType(pItem->Type);
+    }
+
+    bool IsElitePotionType(int itemType)
+    {
+        return itemType == ITEM_ELITE_HEALING_POTION
+            || itemType == ITEM_ELITE_MANA_POTION;
+    }
+
+    bool IsElitePotion(const ITEM* pItem)
+    {
+        return IsElitePotionType(pItem->Type);
+    }
+
+    bool IsElitePotionModel(int modelType)
+    {
+        return IsElitePotionType(modelType - MODEL_ITEM);
+    }
+
+    bool IsElixirType(int itemType)
+    {
+        return itemType >= ITEM_ELIXIR_OF_STRENGTH && itemType <= ITEM_ELIXIR_OF_CONTROL;
+    }
+
+    bool IsElixir(const ITEM* pItem)
+    {
+        return IsElixirType(pItem->Type);
+    }
+
+    bool IsElixirModel(int modelType)
+    {
+        return IsElixirType(modelType - MODEL_ITEM);
+    }
+
+    bool IsBuffScrollType(int itemType)
+    {
+        return itemType >= ITEM_SCROLL_OF_QUICKNESS && itemType <= ITEM_SCROLL_OF_MANA;
+    }
+
+    bool IsBuffScroll(const ITEM* pItem)
+    {
+        return IsBuffScrollType(pItem->Type);
+    }
+
+    bool IsBuffScrollModel(int modelType)
+    {
+        return IsBuffScrollType(modelType - MODEL_ITEM);
+    }
+
+    bool IsBattleOrStrengthScrollType(int itemType)
+    {
+        return itemType == ITEM_SCROLL_OF_BATTLE
+            || itemType == ITEM_SCROLL_OF_STRENGTH;
+    }
+
+    bool IsBattleOrStrengthScroll(const ITEM* pItem)
+    {
+        return IsBattleOrStrengthScrollType(pItem->Type);
+    }
+
+    bool IsBattleOrStrengthScrollModel(int modelType)
+    {
+        return IsBattleOrStrengthScrollType(modelType - MODEL_ITEM);
+    }
+
+    bool IsResetFruitType(int itemType)
+    {
+        return itemType >= ITEM_RESET_FRUIT_STRENGTH && itemType <= ITEM_RESET_FRUIT_CONTROL;
+    }
+
+    bool IsResetFruit(const ITEM* pItem)
+    {
+        return IsResetFruitType(pItem->Type);
+    }
+
+    bool IsResetFruitModel(int modelType)
+    {
+        return IsResetFruitType(modelType - MODEL_ITEM);
+    }
+
+    bool IsHealingOrDivinitySealType(int itemType)
+    {
+        return itemType == ITEM_SEAL_OF_HEALING
+            || itemType == ITEM_SEAL_OF_DIVINITY;
+    }
+
+    bool IsHealingOrDivinitySeal(const ITEM* pItem)
+    {
+        return IsHealingOrDivinitySealType(pItem->Type);
+    }
+
+    bool IsHealingOrDivinitySealModel(int modelType)
+    {
+        return IsHealingOrDivinitySealType(modelType - MODEL_ITEM);
+    }
+
+    bool IsRefineStone(const ITEM* pItem)
+    {
+        return IsRefineStoneType(pItem->Type);
+    }
+
+    bool IsRefineStoneModel(int modelType)
+    {
+        return IsRefineStoneType(modelType - MODEL_ITEM);
+    }
+
+    bool IsAmmunitionType(int itemType)
+    {
+        return itemType == ITEM_BOLT
+            || itemType == ITEM_ARROWS;
+    }
+
+    bool IsAmmunition(const ITEM* pItem)
+    {
+        return IsAmmunitionType(pItem->Type);
+    }
+
+    bool IsAmmunitionModel(int modelType)
+    {
+        return IsAmmunitionType(modelType - MODEL_ITEM);
+    }
+
+    bool IsEventTicketType(int itemType)
+    {
+        return itemType == ITEM_DEVIL_SQUARE_TICKET
+            || itemType == ITEM_BLOOD_CASTLE_TICKET
+            || itemType == ITEM_KALIMA_TICKET;
+    }
+
+    bool IsEventTicket(const ITEM* pItem)
+    {
+        return IsEventTicketType(pItem->Type);
+    }
+
+    bool IsEventTicketModel(int modelType)
+    {
+        return IsEventTicketType(modelType - MODEL_ITEM);
+    }
+
+    bool IsDoppelgangerOrVarkaTicketType(int itemType)
+    {
+        return itemType == ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER
+            || itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA
+            || itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7;
+    }
+
+    bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem)
+    {
+        return IsDoppelgangerOrVarkaTicketType(pItem->Type);
+    }
+
+    bool IsDoppelgangerOrVarkaTicketModel(int modelType)
+    {
+        return IsDoppelgangerOrVarkaTicketType(modelType - MODEL_ITEM);
+    }
+
+    bool IsRareItemTicket(const ITEM* pItem)
+    {
+        return (pItem->Type >= ITEM_RARE_ITEM_TICKET_1 && pItem->Type <= ITEM_RARE_ITEM_TICKET_5)
+            || (pItem->Type >= ITEM_RARE_ITEM_TICKET_7 && pItem->Type <= ITEM_RARE_ITEM_TICKET_12);
+    }
+
+    bool IsLuckyItemTicket(const ITEM* pItem)
+    {
+        return IsLuckyItemTicketType(pItem->Type);
+    }
+
+    bool IsLuckyItemTicketModel(int modelType)
+    {
+        return IsLuckyItemTicketType(modelType - MODEL_ITEM);
+    }
+
+    bool IsBloodCastleTicketPartType(int itemType)
+    {
+        return itemType == ITEM_SCROLL_OF_ARCHANGEL
+            || itemType == ITEM_BLOOD_BONE;
+    }
+
+    bool IsBloodCastleTicketPart(const ITEM* pItem)
+    {
+        return IsBloodCastleTicketPartType(pItem->Type);
+    }
+
+    bool IsBloodCastleTicketPartModel(int modelType)
+    {
+        return IsBloodCastleTicketPartType(modelType - MODEL_ITEM);
+    }
+
+    bool IsAccountServiceItem(const ITEM* pItem)
+    {
+        return IsAccountServiceItemType(pItem->Type);
+    }
+
+    bool IsAccountServiceItemModel(int modelType)
+    {
+        return IsAccountServiceItemType(modelType - MODEL_ITEM);
+    }
+
+    bool IsDayPass(const ITEM* pItem)
+    {
+        return IsDayPassType(pItem->Type);
+    }
+
+    bool IsDayPassModel(int modelType)
+    {
+        return IsDayPassType(modelType - MODEL_ITEM);
+    }
+
+    bool IsHourPass(const ITEM* pItem)
+    {
+        return IsHourPassType(pItem->Type);
+    }
+
+    bool IsHourPassModel(int modelType)
+    {
+        return IsHourPassType(modelType - MODEL_ITEM);
+    }
+
+    bool IsPackageBox(const ITEM* pItem)
+    {
+        return IsPackageBoxType(pItem->Type);
+    }
+
+    bool IsPackageBoxModel(int modelType)
+    {
+        return IsPackageBoxType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSilverOrGoldKey(const ITEM* pItem)
+    {
+        return IsSilverOrGoldKeyType(pItem->Type);
+    }
+
+    bool IsSilverOrGoldKeyModel(int modelType)
+    {
+        return IsSilverOrGoldKeyType(modelType - MODEL_ITEM);
+    }
+
+    bool IsGemJewelry(const ITEM* pItem)
+    {
+        return IsGemJewelryType(pItem->Type);
+    }
+
+    bool IsChocolateBoxType(int itemType)
+    {
+        return itemType == ITEM_PINK_CHOCOLATE_BOX
+            || itemType == ITEM_RED_CHOCOLATE_BOX
+            || itemType == ITEM_BLUE_CHOCOLATE_BOX;
+    }
+
+    bool IsChocolateBox(const ITEM* pItem)
+    {
+        return IsChocolateBoxType(pItem->Type);
+    }
+
+    bool IsChocolateBoxModel(int modelType)
+    {
+        return IsChocolateBoxType(modelType - MODEL_ITEM);
+    }
+
+    bool IsRibbonBoxType(int itemType)
+    {
+        return itemType == ITEM_RED_RIBBON_BOX
+            || itemType == ITEM_GREEN_RIBBON_BOX
+            || itemType == ITEM_BLUE_RIBBON_BOX;
+    }
+
+    bool IsRibbonBox(const ITEM* pItem)
+    {
+        return IsRibbonBoxType(pItem->Type);
+    }
+
+    bool IsRibbonBoxModel(int modelType)
+    {
+        return IsRibbonBoxType(modelType - MODEL_ITEM);
+    }
+
+    bool IsDarkLordPetType(int itemType)
+    {
+        return itemType == ITEM_DARK_HORSE_ITEM
+            || itemType == ITEM_DARK_RAVEN_ITEM;
+    }
+
+    bool IsDarkLordPet(const ITEM* pItem)
+    {
+        return IsDarkLordPetType(pItem->Type);
+    }
+
+    bool IsDemonOrSpiritOfGuardianType(int itemType)
+    {
+        return itemType == ITEM_DEMON
+            || itemType == ITEM_SPIRIT_OF_GUARDIAN;
+    }
+
+    bool IsDemonOrSpiritOfGuardian(const ITEM* pItem)
+    {
+        return IsDemonOrSpiritOfGuardianType(pItem->Type);
+    }
+
+    bool IsDemonOrSpiritOfGuardianModel(int modelType)
+    {
+        return IsDemonOrSpiritOfGuardianType(modelType - MODEL_ITEM);
+    }
+
+    bool IsPandaOrSkeletonItem(const ITEM* pItem)
+    {
+        return IsPandaOrSkeletonItemType(pItem->Type);
+    }
+
+    bool IsSecondClassQuestItemType(int itemType)
+    {
+        return itemType == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR
+            || itemType == ITEM_BROKEN_SWORD_DARK_STONE
+            || itemType == ITEM_TEAR_OF_ELF
+            || itemType == ITEM_SOUL_SHARD_OF_WIZARD;
+    }
+
+    bool IsSecondClassQuestItem(const ITEM* pItem)
+    {
+        return IsSecondClassQuestItemType(pItem->Type);
+    }
+
+    bool IsThirdClassQuestItem(const ITEM* pItem)
+    {
+        return IsThirdClassQuestItemType(pItem->Type);
+    }
+
+    bool IsSecromiconQuestItem(const ITEM* pItem)
+    {
+        return IsSecromiconQuestItemType(pItem->Type);
+    }
+
+    bool IsSecromiconQuestItemModel(int modelType)
+    {
+        return IsSecromiconQuestItemType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSummonerBookType(int itemType)
+    {
+        return itemType >= ITEM_BOOK_OF_SAHAMUTT && itemType <= ITEM_STAFF + 29;
+    }
+
+    bool IsSummonerBook(const ITEM* pItem)
+    {
+        return IsSummonerBookType(pItem->Type);
+    }
+
+    bool IsSummonerBookModel(int modelType)
+    {
+        return IsSummonerBookType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSummonerStickModel(int modelType)
+    {
+        return IsSummonerStickType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSummonerSkillParchmentModel(int modelType)
+    {
+        return IsSummonerSkillParchmentType(modelType - MODEL_ITEM);
+    }
+
+    bool IsRageFighterSkillParchmentModel(int modelType)
+    {
+        return IsRageFighterSkillParchmentType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSocketSeed(const ITEM* pItem)
+    {
+        return IsSocketSeedType(pItem->Type);
+    }
+
+    bool IsSocketSeedModel(int modelType)
+    {
+        return IsSocketSeedType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSocketSphere(const ITEM* pItem)
+    {
+        return IsSocketSphereType(pItem->Type);
+    }
+
+    bool IsSocketSphereModel(int modelType)
+    {
+        return IsSocketSphereType(modelType - MODEL_ITEM);
+    }
+
+    bool IsSocketSeedSphereType(int itemType)
+    {
+        return itemType >= ITEM_SEED_SPHERE_FIRE_1 && itemType <= ITEM_SEED_SPHERE_EARTH_5;
+    }
+
+    bool IsSocketSeedSphere(const ITEM* pItem)
+    {
+        return IsSocketSeedSphereType(pItem->Type);
+    }
+
+    bool IsSocketSeedSphereModel(int modelType)
+    {
+        return IsSocketSeedSphereType(modelType - MODEL_ITEM);
     }
 }

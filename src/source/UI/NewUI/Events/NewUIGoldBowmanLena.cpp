@@ -115,10 +115,10 @@ bool CNewUIGoldBowmanLena::UpdateMouseEvent()
     }
 
     if (m_BtnRegister.UpdateMouseEvent()) {
-        int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
+        int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_RENA, 0);
 
         if (registerItem != 0) {
-            int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 21, 0);
+            int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_RENA, 0);
 
             if (index != -1) {
                 SocketClient->ToGameServer()->SendEventChipRegistrationRequest(0, index);
@@ -220,7 +220,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
         RenderText(Text, m_Pos.x, m_Pos.y + 100 + (i * 15), 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     }
 
-    int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
+    int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_RENA, 0);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
     mu_swprintf(Text, L"%ls", I18N::Game::NumberOfRenaYouHaveCollected);
@@ -279,7 +279,7 @@ void CNewUIGoldBowmanLena::Render3D()
     EnableDepthTest();
     EnableDepthMask();
 
-    int Type = ITEM_POTION + 21;
+    int Type = ITEM_RENA;
     int Level = 0;
     float x = (float)REFERENCE_WIDTH - 120.f;
     float y = 200.f;

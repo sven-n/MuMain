@@ -6174,9 +6174,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             int Type = pickedItem->Type;
-            if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE ||
-                Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION || Type == INDEX_COMPILED_CELE ||
-                Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
+            if (GameLogic::Items::IsJewelItem(pickedItem) || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL)
                 PlayBuffer(SOUND_JEWEL01, &Hero->Object);
             else if (Type == ITEM_GEMSTONE)
                 PlayBuffer(SOUND_JEWEL02, &Hero->Object);

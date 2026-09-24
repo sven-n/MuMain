@@ -8,6 +8,7 @@
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "Network/Server/SocketSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 using namespace SEASON3A;
 
@@ -1062,7 +1063,7 @@ BOOL CMixRecipes::IsSourceOfRefiningStone(CMixItem& rSource)
 
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem& rSource)
 {
-    if (rSource.m_sType >= ITEM_SEED_SPHERE_FIRE_1 && rSource.m_sType <= ITEM_SEED_SPHERE_EARTH_5)
+    if (GameLogic::Items::IsSocketSeedSphereType(rSource.m_sType))
     {
         int iSeedSphereType = rSource.m_sType - ITEM_WING;
         if (iSeedSphereType % 2 == 0) return TRUE;
@@ -1072,7 +1073,7 @@ BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem& rSource)
 
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToArmor(CMixItem& rSource)
 {
-    if (rSource.m_sType >= ITEM_SEED_SPHERE_FIRE_1 && rSource.m_sType <= ITEM_SEED_SPHERE_EARTH_5)
+    if (GameLogic::Items::IsSocketSeedSphereType(rSource.m_sType))
     {
         int iSeedSphereType = rSource.m_sType - ITEM_WING;
 

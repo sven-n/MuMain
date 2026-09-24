@@ -1669,7 +1669,7 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     case ITEM_ANTIDOTE:
     case ITEM_ALE:
     case ITEM_TOWN_PORTAL_SCROLL:
-    case ITEM_POTION + 20:
+    case ITEM_REMEDY_OF_LOVE:
     case ITEM_SMALL_SHIELD_POTION:
     case ITEM_MEDIUM_SHIELD_POTION:
     case ITEM_LARGE_SHIELD_POTION:

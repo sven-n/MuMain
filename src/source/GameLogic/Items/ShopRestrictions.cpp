@@ -17,10 +17,7 @@ namespace GameLogic::Items
         if ((!pItem->bPeriodItem) &&
             pItem->Type == ITEM_DEMON
             || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
+            || IsPandaOrSkeletonItem(pItem)
             || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0)
             )
         {
@@ -29,31 +26,19 @@ namespace GameLogic::Items
 
         if (pItem->Type == ITEM_MOONSTONE_PENDANT
             || pItem->Type == ITEM_ELITE_TRANSFER_SKELETON_RING
-            || (pItem->Type == ITEM_POTION + 21 && pItem->Level != 3)
-            || (pItem->Type >= ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR && pItem->Type <= ITEM_SOUL_SHARD_OF_WIZARD)
+            || (pItem->Type == ITEM_RENA && pItem->Level != 3)
+            || IsSecondClassQuestItem(pItem)
             || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
             || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 13)
             || IsSeal(pItem)
             || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level != 0)
-            || pItem->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-            || pItem->Type == ITEM_HORN_OF_HELL_MAINE
-            || pItem->Type == ITEM_FEATHER_OF_DARK_PHOENIX
-            || pItem->Type == ITEM_EYE_OF_ABYSSAL
+            || IsThirdClassQuestItem(pItem)
             || IsPartChargeItem(pItem)
             || IsCharacterCard(pItem)
             || pItem->Type == ITEM_HELPER + 99
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
+            || IsPandaOrSkeletonItem(pItem)
             || (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
-            || pItem->Type == ITEM_SAPPHIRE_RING
-            || pItem->Type == ITEM_RUBY_RING
-            || pItem->Type == ITEM_TOPAZ_RING
-            || pItem->Type == ITEM_AMETHYST_RING
-            || pItem->Type == ITEM_RUBY_NECKLACE
-            || pItem->Type == ITEM_EMERALD_NECKLACE
-            || pItem->Type == ITEM_SAPPHIRE_NECKLACE
+            || IsGemJewelry(pItem)
             )
         {
             return true;
@@ -67,51 +52,35 @@ namespace GameLogic::Items
     {
         int Level = pItem->Level;
 
-        if (true == false
-            || pItem->Type == ITEM_SILVER_KEY
-            || pItem->Type == ITEM_GOLD_KEY
+        if (IsSilverOrGoldKey(pItem)
             || pItem->Type == ITEM_SEALED_GOLDEN_BOX
             || pItem->Type == ITEM_SEALED_SILVER_BOX
             || pItem->Type == ITEM_GOLDEN_BOX
             || pItem->Type == ITEM_SILVER_BOX
             || IsSmallWing(pItem)
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
-            || pItem->Type == ITEM_DEMON
-            || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
-            || pItem->Type == ITEM_SAPPHIRE_RING
-            || pItem->Type == ITEM_RUBY_RING
-            || pItem->Type == ITEM_TOPAZ_RING
-            || pItem->Type == ITEM_AMETHYST_RING
-            || pItem->Type == ITEM_RUBY_NECKLACE
-            || pItem->Type == ITEM_EMERALD_NECKLACE
-            || pItem->Type == ITEM_SAPPHIRE_NECKLACE
+            || IsPandaOrSkeletonItem(pItem)
+            || IsDemonOrSpiritOfGuardian(pItem)
+            || IsGemJewelry(pItem)
             || ((pItem->Type == ITEM_WIZARDS_RING) && (Level == 0))
             || (pItem->Type == ITEM_PET_UNICORN)
             || (pItem->Type == ITEM_LETHAL_WIZARDS_RING)
             )
         {
-            if (true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
+            if (pItem->bPeriodItem && pItem->bExpiredPeriod)
             {
                 return false;
             }
         }
 
         if (pItem->Type == ITEM_BOX_OF_LUCK
-            || (pItem->Type == ITEM_POTION + 21 && Level == 1)
-            || ((pItem->bPeriodItem == true) && (pItem->bExpiredPeriod == false) && (pItem->Type == ITEM_WIZARDS_RING) && (Level == 0))
+            || (pItem->Type == ITEM_RENA && Level == 1)
+            || (pItem->bPeriodItem && !pItem->bExpiredPeriod && pItem->Type == ITEM_WIZARDS_RING && Level == 0)
             || (pItem->Type == ITEM_WIZARDS_RING && (Level == 1 || Level == 2))
             || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
-            || (pItem->Type == ITEM_POTION + 20 && Level >= 1 && Level <= 5)
+            || (pItem->Type == ITEM_REMEDY_OF_LOVE && Level >= 1 && Level <= 5)
             || IsPartChargeItem(pItem)
-            || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN)
-                && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END))
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
+            || IsWingMixCharm(pItem)
+            || IsPandaOrSkeletonItem(pItem)
             || (pItem->Type == ITEM_PET_UNICORN)
             || (pItem->Type == ITEM_LETHAL_WIZARDS_RING)
             )
@@ -126,11 +95,11 @@ namespace GameLogic::Items
 
     bool IsRepairBan(const ITEM* pItem)
     {
-        if (g_ChangeRingMgr->CheckRepair(pItem->Type) == true)
+        if (g_ChangeRingMgr->CheckRepair(pItem->Type))
         {
             return true;
         }
-        if (IsPartChargeItem(pItem) == true || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN) && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END)))
+        if (IsPartChargeItem(pItem) || IsWingMixCharm(pItem))
         {
             return true;
         }
@@ -138,20 +107,15 @@ namespace GameLogic::Items
         if ((pItem->Type >= ITEM_GREEN_CHAOS_BOX && pItem->Type <= ITEM_PURPLE_CHAOS_BOX)
             || IsSeal(pItem)
             || (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HORN_OF_DINORANT)
-            || pItem->Type == ITEM_BOLT
-            || pItem->Type == ITEM_ARROWS
+            || IsAmmunition(pItem)
             || pItem->Type >= ITEM_POTION
             || (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB)
             || (pItem->Type >= ITEM_LOCHS_FEATHER && pItem->Type <= ITEM_WEAPON_OF_ARCHANGEL)
-            || pItem->Type == ITEM_POTION + 21
-            || pItem->Type == ITEM_DARK_HORSE_ITEM
-            || pItem->Type == ITEM_DARK_RAVEN_ITEM
+            || pItem->Type == ITEM_RENA
+            || IsDarkLordPet(pItem)
             || pItem->Type == ITEM_MOONSTONE_PENDANT
             || pItem->Type == ITEM_PET_RUDOLF
-            || pItem->Type == ITEM_PET_PANDA
-            || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
-            || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
-            || pItem->Type == ITEM_PET_SKELETON
+            || IsPandaOrSkeletonItem(pItem)
             || pItem->Type == ITEM_PET_UNICORN
             || pItem->Type == ITEM_CHERRY_BLOSSOM_PLAYBOX
             || pItem->Type == ITEM_CHERRY_BLOSSOM_WINE
@@ -160,7 +124,7 @@ namespace GameLogic::Items
             || pItem->Type == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH
             || pItem->Type == ITEM_RED_CHERRY_BLOSSOM_BRANCH
             || pItem->Type == ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH
-            || pItem->Type == ITEM_HELPER + 7
+            || pItem->Type == ITEM_CONTRACT_SUMMON
             || pItem->Type == ITEM_TRANSFORMATION_RING
             || pItem->Type == ITEM_LIFE_STONE_ITEM
             || pItem->Type == ITEM_WIZARDS_RING

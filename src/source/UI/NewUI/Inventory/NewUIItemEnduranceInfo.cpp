@@ -8,6 +8,7 @@
 #include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #ifdef PJH_FIX_SPRIT
 #include "GameLogic/Pets/GIPetManager.h"
@@ -84,7 +85,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
         int iNextPosY = m_UIStartPos.y;
 
         if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM ||
-            Hero->Helper.Type == MODEL_DEMON || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN ||
+            GameLogic::Items::IsDemonOrSpiritOfGuardianModel(Hero->Helper.Type) ||
             Hero->Helper.Type == MODEL_PET_RUDOLF || Hero->Helper.Type == MODEL_PET_PANDA ||
             Hero->Helper.Type == MODEL_PET_UNICORN || Hero->Helper.Type == MODEL_PET_SKELETON ||
             Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
@@ -380,8 +381,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
 {
     if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
-        || Hero->Helper.Type == MODEL_DEMON
-        || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN
+        || GameLogic::Items::IsDemonOrSpiritOfGuardianModel(Hero->Helper.Type)
         || Hero->Helper.Type == MODEL_PET_RUDOLF
         || Hero->Helper.Type == MODEL_PET_PANDA
         || Hero->Helper.Type == MODEL_PET_UNICORN

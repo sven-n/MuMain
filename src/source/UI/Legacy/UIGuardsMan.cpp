@@ -45,7 +45,7 @@ DWORD CUIGuardsMan::GetMyMarkCount()
     {
         pItem = pNewInventoryCtrl->GetItem(i);
         int nItemLevel = pItem->Level;
-        if (pItem->Type == ITEM_POTION + 21 && nItemLevel == 3)
+        if (pItem->Type == ITEM_RENA && nItemLevel == 3)
         {
             dwResult += pItem->Durability;
         }
@@ -63,7 +63,7 @@ int CUIGuardsMan::GetMyMarkSlotIndex()
     {
         pItem = pNewInventoryCtrl->GetItem(i);
         int nItemLevel = pItem->Level;
-        if (pItem->Type == ITEM_POTION + 21 && nItemLevel == 3)
+        if (pItem->Type == ITEM_RENA && nItemLevel == 3)
         {
             return pItem->y * COLUMN_INVENTORY + pItem->x;
         }

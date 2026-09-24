@@ -9,6 +9,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 using namespace SEASON3B;
 
@@ -126,7 +127,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     int iType = 0;
     int TabSpace = 0;
 
-    if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS)
+    if (GameLogic::Items::IsAmmunitionType(ItemHelp))
     {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
         return true;
@@ -166,7 +167,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         return true;
     }
 
-    if (ItemHelp >= ITEM_BOOK_OF_SAHAMUTT && ItemHelp <= ITEM_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBookType(ItemHelp))
     {
         iType = 6;
         TabSpace += int(800 / iInfoWidth);//20

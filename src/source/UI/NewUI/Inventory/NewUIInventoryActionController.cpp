@@ -490,8 +490,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
 {
     const bool bIsJewelType = pPickItem->Type == ITEM_JEWEL_OF_BLESS || pPickItem->Type == ITEM_JEWEL_OF_SOUL ||
                               pPickItem->Type == ITEM_JEWEL_OF_LIFE || pPickItem->Type == ITEM_JEWEL_OF_HARMONY ||
-                              pPickItem->Type == ITEM_LOWER_REFINE_STONE ||
-                              pPickItem->Type == ITEM_HIGHER_REFINE_STONE || pPickItem->Type == ITEM_POTION + 160 ||
+                              GameLogic::Items::IsRefineStone(pPickItem) || pPickItem->Type == ITEM_POTION + 160 ||
                               pPickItem->Type == ITEM_POTION + 161;
 
     if (!bIsJewelType)
@@ -516,7 +515,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         bSuccess = false;
     }
 
-    if (iType == ITEM_BOLT || iType == ITEM_ARROWS)
+    if (GameLogic::Items::IsAmmunitionType(iType))
     {
         bSuccess = false;
     }
@@ -561,7 +560,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         }
     }
 
-    if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+    if (GameLogic::Items::IsRefineStone(pPickItem))
     {
         if (g_SocketItemMgr.IsSocketItem(pItem))
         {
@@ -632,14 +631,14 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     const auto isPotion = (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_ALE) ||
                           (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
 
-    if (isApple || isPotion || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0) ||
+    if (isApple || isPotion || (pItem->Type == ITEM_REMEDY_OF_LOVE && pItem->Level == 0) ||
         (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK) ||
         (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14) ||
-        (pItem->Type >= ITEM_ELITE_HEALING_POTION && pItem->Type <= ITEM_ELITE_MANA_POTION) ||
-        (pItem->Type >= ITEM_SCROLL_OF_QUICKNESS && pItem->Type <= ITEM_SCROLL_OF_MANA) || pItem->Type == ITEM_INDULGENCE ||
+        GameLogic::Items::IsElitePotion(pItem) ||
+        GameLogic::Items::IsBuffScroll(pItem) || pItem->Type == ITEM_INDULGENCE ||
         pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION ||
         (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL) ||
-        (pItem->Type >= ITEM_SCROLL_OF_BATTLE && pItem->Type <= ITEM_SCROLL_OF_STRENGTH) || pItem->Type == ITEM_TALISMAN_OF_GUARDIAN ||
+        GameLogic::Items::IsBattleOrStrengthScroll(pItem) || pItem->Type == ITEM_TALISMAN_OF_GUARDIAN ||
         pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION || pItem->Type == ITEM_ELITE_SD_POTION)
     {
         SendRequestUse(iIndex, 0);
@@ -655,7 +654,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type >= ITEM_ELIXIR_OF_STRENGTH && pItem->Type <= ITEM_ELIXIR_OF_CONTROL)
+    if (GameLogic::Items::IsElixir(pItem))
     {
         std::list<eBuffState> secretPotionbufflist;
         secretPotionbufflist.push_back(eBuff_SecretPotion1);

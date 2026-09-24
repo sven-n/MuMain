@@ -368,7 +368,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (pItem->Type == ITEM_BOLT || pItem->Type == ITEM_ARROWS)
+    if (GameLogic::Items::IsAmmunition(pItem))
     {
         return false;
     }
@@ -388,10 +388,8 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
 #endif // PJH_ADD_PANDA_CHANGERING
         || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING || pItem->Type == ITEM_PET_PANDA ||
-        pItem->Type == ITEM_DEMON || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN || pItem->Type == ITEM_PET_SKELETON ||
-        pItem->Type == ITEM_LETHAL_WIZARDS_RING || pItem->Type == ITEM_SAPPHIRE_RING || pItem->Type == ITEM_RUBY_RING ||
-        pItem->Type == ITEM_TOPAZ_RING || pItem->Type == ITEM_AMETHYST_RING || pItem->Type == ITEM_RUBY_NECKLACE ||
-        pItem->Type == ITEM_EMERALD_NECKLACE || pItem->Type == ITEM_SAPPHIRE_NECKLACE
+        GameLogic::Items::IsDemonOrSpiritOfGuardian(pItem) || pItem->Type == ITEM_PET_SKELETON ||
+        pItem->Type == ITEM_LETHAL_WIZARDS_RING || GameLogic::Items::IsGemJewelry(pItem)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
         || g_pMyInventory->IsInvenItem(pItem->Type)
 #endif // LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -967,7 +965,7 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
         {
             CreateItemToolTip(pItem);
 
-            if ((pItem->Type == ITEM_DARK_HORSE_ITEM) || (pItem->Type == ITEM_DARK_RAVEN_ITEM))
+            if (GameLogic::Items::IsDarkLordPet(pItem))
             {
                 const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
                 const int iTargetX = m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH +
@@ -1217,8 +1215,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                                 }
                                             }
                                         }
-                                        else if (pPickItem->Type == ITEM_LOWER_REFINE_STONE ||
-                                                 pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+                                        else if (GameLogic::Items::IsRefineStone(pPickItem))
                                         {
                                             if (pTargetItem->Jewel_Of_Harmony_Option != 0)
                                             {
@@ -1556,7 +1553,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_ELITE_HEALING_POTION && pItem->Type <= ITEM_ELITE_MANA_POTION && pItem->Durability > 1)
+        else if (GameLogic::Items::IsElitePotion(pItem) && pItem->Durability > 1)
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
@@ -1564,7 +1561,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_ELIXIR_OF_STRENGTH && pItem->Type <= ITEM_ELIXIR_OF_CONTROL && pItem->Durability > 1)
+        else if (GameLogic::Items::IsElixir(pItem) && pItem->Durability > 1)
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
@@ -1755,8 +1752,8 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if ((iSrcType >= ITEM_SMALL_COMPLEX_POTION && iSrcType <= ITEM_LARGE_COMPLEX_POTION) &&
-        (iTarType >= ITEM_SMALL_COMPLEX_POTION && iTarType <= ITEM_LARGE_COMPLEX_POTION) &&
+    if (GameLogic::Items::IsComplexPotionType(iSrcType) &&
+        GameLogic::Items::IsComplexPotionType(iTarType) &&
         (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
@@ -1897,8 +1894,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTar
 {
     const int iTargetLevel = pTargetItem->Level;
 
-    if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING) && (pTargetItem->Type != ITEM_BOLT) &&
-         (pTargetItem->Type != ITEM_ARROWS)) ||
+    if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING) && !GameLogic::Items::IsAmmunition(pTargetItem)) ||
         (pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WINGS_OF_DARKNESS) ||
         (pTargetItem->Type >= ITEM_WING_OF_STORM && pTargetItem->Type <= ITEM_WING_OF_DIMENSION))
     {
