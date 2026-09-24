@@ -515,7 +515,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
     wchar_t strPoint[128];
 
     mu_swprintf(strLevel, I18N::Game::LevelUResetsU, CharacterAttribute->Level, CharacterAttribute->Resets);
-    mu_swprintf(strExp, I18N::Game::EXPI64dI64d, CharacterAttribute->Experience, CharacterAttribute->NextExperience);
+    mu_swprintf(strExp, I18N::Game::EXPI64dI64d, static_cast<unsigned long long>(CharacterAttribute->Experience),
+                static_cast<unsigned long long>(CharacterAttribute->NextExperience));
 
     if (CharacterAttribute->Level > 9)
     {

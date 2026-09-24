@@ -791,7 +791,8 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         wchar_t szExp[8] = {};
         mu_swprintf(szExp, L"%d", iExp);
         syncWide(&MainFrameRmlModel::expDigit, "exp_digit", szExp);
-        mu_swprintf(szTip, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
+        mu_swprintf(szTip, I18N::Game::EXPI64dI64d, static_cast<unsigned long long>(dwExperience),
+                    static_cast<unsigned long long>(dwNexExperience));
         syncWide(&MainFrameRmlModel::expTooltip, "exp_tooltip", szTip);
     }
 
