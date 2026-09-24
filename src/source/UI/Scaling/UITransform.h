@@ -118,6 +118,9 @@ namespace UI::Scaling
     int MaximumFontPointSize(FontRole role);
     int CachedFontPointSize(FontRole role);
     int FontPointSize(FontRole role, const Transform& transform);
+    // Physical pixel size the native text renderer draws `role` text at under `transform` -- what a
+    // legacy-theme RmlUi text element must use to match it, independent of the panel's own scale.
+    float NativeTextPixelSize(FontRole role, const Transform& transform);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
     float ContentScaleFromMetrics(float displayScale, float pixelDensity);

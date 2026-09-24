@@ -10,7 +10,10 @@
 	<div class="balloon" data-for="balloon : balloons" data-class-hidden="balloon.hidden"
 	     data-style-left="balloon.screen_x + 'px'" data-style-top="balloon.screen_y + 'px'">
 		<div class="balloon-bg"></div>
-		<div class="balloon-name" data-style-color="balloon.name_color">{{balloon.name}}</div>
+		<div class="balloon-name"
+		     data-class-name-blocked-character="balloon.name_status == 'blocked-character'"
+		     data-class-name-blocked-items="balloon.name_status == 'blocked-items'"
+		     data-class-name-operator="balloon.name_status == 'operator'">{{balloon.name}}</div>
 		<div class="balloon-guild">{{balloon.guild}}</div>
 		<div class="balloon-class">{{balloon.klass}}</div>
 	</div>

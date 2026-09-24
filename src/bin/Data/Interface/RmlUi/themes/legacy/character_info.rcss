@@ -6,15 +6,15 @@
    window-specific content lives here now. Coordinates below are plain reference px, not dp, same
    convention as my_quest_info.rcss.
 
-   The summary box's original 8-piece pixel-tiled frame (4 corner sprites + a 1px sprite tiled
-   across each edge, RenderFrame()'s nested for-loops) is reproduced as corner brackets + a flat
-   translucent fill instead of a literal repeating-tile port -- this build has no established,
-   verified pattern for a real 1px-tile repeat, and the brackets alone already read as "framed
-   corners" the way the original intended. This is a
-   simpler, single-fill variant of docked_panel_frame.rcss's own title/content-split group-box
-   technique (no title strip here), so it keeps its own local corner/fill classes rather than the
-   shared .gbox-* ones -- only the corner sprites themselves (docked-corner-tl/tr/bl/br) come from
-   the partial.
+   The summary box reproduces RenderFrame()'s 8-piece frame: the original tiles a 1px-wide (or
+   1px-tall) edge sprite once per pixel along each edge; every tile is identical, so stretching the
+   same sprite across the edge is pixel-equivalent. It keeps its own local corner/fill classes
+   rather than docked_panel_frame.rcss's shared .gbox-* ones -- only the corner sprites themselves
+   (docked-corner-tl/tr/bl/br) come from the partial.
+
+   Text leaves are sized at the native text renderer's physical size and counter-scaled out of
+   #panel's transform from the RML (see character_info.rml's header comment), so no rule here sets
+   a text font-size; transform-origin anchors each leaf to its text alignment.
 
    Attribute extra-line blocks (str/agi/vit/ene) use normal block flow (each line a
    display:block span, line-height 13px) instead of individually positioned lines: the original
@@ -35,18 +35,23 @@
 	top: 12px;
 	width: 190px;
 	text-align: center;
+	transform-origin: center top;
 	font-weight: bold;
-	font-size: 12px;
 	pointer-events: none;
 }
 #classname, #servername { top: 27px; color: token(text-primary); }
+
+@spritesheet chainfo-table-top-sheet    { src: "../../../newui_item_table03(Up).tga"; chainfo-table-top:    0px 0px 1px 14px; }
+@spritesheet chainfo-table-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; chainfo-table-bottom: 0px 0px 1px 14px; }
+@spritesheet chainfo-table-left-sheet   { src: "../../../newui_item_table03(L).tga";  chainfo-table-left:   0px 0px 14px 1px; }
+@spritesheet chainfo-table-right-sheet  { src: "../../../newui_item_table03(R).tga";  chainfo-table-right:  0px 0px 14px 1px; }
 
 .summary-fill {
 	position: absolute;
 	left: 12px;
 	top: 48px;
-	width: 165px;
-	height: 71px;
+	width: 160px;
+	height: 66px;
 	background-color: rgba(0, 0, 0, 77);
 	pointer-events: none;
 }
@@ -56,11 +61,20 @@
 .corner-bl { left: 12px;  top: 105px; decorator: image(docked-corner-bl); }
 .corner-br { left: 163px; top: 105px; decorator: image(docked-corner-br); }
 
+/* Edge spans are RenderFrame()'s loop bounds: x 26..163 for top/bottom, 14..173 for the separator
+   under the level line, y 62..105 for left/right. */
+.summary-edge { position: absolute; pointer-events: none; }
+.edge-top       { left: 26px;  top: 48px;  width: 137px; height: 14px; decorator: image(chainfo-table-top); }
+.edge-bottom    { left: 26px;  top: 105px; width: 137px; height: 14px; decorator: image(chainfo-table-bottom); }
+.edge-separator { left: 14px;  top: 60px;  width: 159px; height: 14px; decorator: image(chainfo-table-bottom); }
+.edge-left      { left: 12px;  top: 62px;  width: 14px;  height: 43px; decorator: image(chainfo-table-left); }
+.edge-right     { left: 163px; top: 62px;  width: 14px;  height: 43px; decorator: image(chainfo-table-right); }
+
 .level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
 	display: block;
 	position: absolute;
 	left: 18px;
-	font-size: 12px;
+	transform-origin: left top;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -87,15 +101,16 @@
 .attr-textbox-ene { top: 295px; }
 .attr-textbox-cmd { top: 350px; }
 
+/* Label and value share the value's color, as RenderAttribute() set one color for both. */
 .attr-label, .attr-value {
 	display: block;
 	position: absolute;
 	text-align: center;
+	transform-origin: center top;
 	font-weight: bold;
-	font-size: 12px;
 	pointer-events: none;
 }
-.attr-label { left: 12px; width: 74px; color: token(text-primary); }
+.attr-label { left: 12px; width: 74px; }
 .attr-value { left: 86px; width: 86px; }
 .attr-label-str, .attr-value-str { top: 126px; }
 .attr-label-agi, .attr-value-agi { top: 181px; }
@@ -103,11 +118,14 @@
 .attr-label-ene, .attr-value-ene { top: 301px; }
 .attr-label-cmd, .attr-value-cmd { top: 356px; }
 
-/* Extra derived-stat lines: normal block flow, one span per line at a fixed 13px line-height --
-   reproduces RenderAttribute()'s iY += 13 stacking without per-line C++ offsets (see header
-   comment). Left/top per block match the original's own RenderText() call sites. */
-.attr-lines { position: absolute; width: 160px; pointer-events: none; }
-.attr-lines span { display: block; line-height: 13px; font-size: 12px; white-space: nowrap; }
+/* Extra derived-stat lines: normal block flow, one span per line with a fixed 13 reference px row
+   height (bound in the RML, since the block is counter-scaled) -- reproduces RenderAttribute()'s
+   iY += 13 stacking without per-line C++ offsets (see header comment). A row height rather than a
+   line-height keeps each glyph at the top of its row, where the original drew it; line-height
+   would split the extra space above and below the text. Left/top per block match the original's
+   own RenderText() call sites. */
+.attr-lines { position: absolute; transform-origin: left top; pointer-events: none; }
+.attr-lines span { display: block; white-space: nowrap; }
 .attr-lines-str { left: 20px; top: 145px; }
 .attr-lines-agi { left: 20px; top: 199px; }
 .attr-lines-vit { left: 20px; top: 264px; }
@@ -158,3 +176,7 @@
 #btn_masterlevel:hover ~ .tooltip-masterlevel {
 	display: block;
 }
+
+/* data-class-hidden on display:block leaves: base.rcss's .hidden has the same specificity as the
+   leaf rules above and loses to them, so it is repeated here with the leaf class. */
+.levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }

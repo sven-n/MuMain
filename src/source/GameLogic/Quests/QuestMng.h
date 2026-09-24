@@ -65,10 +65,22 @@ enum REQUEST_REWARD_CLASSIFY
     RRC_REWARD = 2
 };
 
+// What a requirement/reward text line is, so the UI can style it (the original client colored
+// headings green, unmet requirements red, random rewards violet and everything else gold).
+enum REQUEST_REWARD_TEXT_KIND
+{
+    RRTK_HEADING = 0,
+    RRTK_REQUIREMENT = 1,
+    RRTK_REQUIREMENT_UNMET = 2,
+    RRTK_REWARD = 3,
+    RRTK_RANDOM_REWARD = 4
+};
+
 struct SRequestRewardText
 {
     HFONT m_hFont;
-    DWORD m_dwColor;
+    REQUEST_REWARD_TEXT_KIND m_eKind;
+    DWORD m_dwColor; // m_eKind's color for the native CUIQuestContentsListBox
     wchar_t m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN];
     REQUEST_REWARD_CLASSIFY m_eRequestReward; //
     DWORD m_dwType;

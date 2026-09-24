@@ -1,0 +1,33 @@
+<rml>
+<head>
+	<title>Tooltip</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="tooltip.rcss"/>
+</head>
+<!-- Legacy override: the same document laid out like the original client's RenderTipTextList()
+     -- native text size, row heights and gaps, and box padding/border come from C++ (RmlTooltip.cpp's
+     ApplyNativeMetrics()) in physical pixels, since this document has no parent transform.
+     The one shared tooltip document every window uses (native or RmlUi) -- see RmlTooltip.h's own
+     comment for the full mechanism. #tooltip_panel's children must be exactly the data-for-generated
+     line divs below, in order, with no other sibling before them -- RmlTooltip.cpp's
+     width-measurement pass indexes panel->GetChild(i) against config.lines[i] directly. -->
+<body data-model="tooltip" data-style-left="pos_x + 'px'" data-style-top="pos_y + 'px'">
+	<div id="tooltip_panel" data-class-tt-centered="center_text"
+	     data-style-border-width="border_px + 'px'" data-style-min-width="fixed_width_px + 'px'"
+	     data-style-padding-left="padding_px + 'px'" data-style-padding-right="padding_px + 'px'">
+		<div class="tt-line" data-for="line : lines"
+		     data-class-tt-blue="line.color_blue" data-class-tt-gray="line.color_gray"
+		     data-class-tt-red="line.color_red" data-class-tt-yellow="line.color_yellow"
+		     data-class-tt-green="line.color_green" data-class-tt-purple="line.color_purple"
+		     data-class-tt-redpurple="line.color_redpurple" data-class-tt-violet="line.color_violet"
+		     data-class-tt-orange="line.color_orange" data-class-tt-hl-darkred="line.highlight_darkred"
+		     data-class-tt-hl-darkblue="line.highlight_darkblue" data-class-tt-hl-darkyellow="line.highlight_darkyellow"
+		     data-class-tt-hl-greenblue="line.highlight_greenblue" data-class-bold="line.bold"
+		     data-class-tt-half-spacer="line.is_half_spacer" data-class-tt-full-spacer="line.is_full_spacer"
+		     data-style-font-size="text_px + 'px'"
+		     data-style-height="line.height_px + 'px'" data-style-line-height="line.height_px + 'px'"
+		     data-style-margin-bottom="line.gap_px + 'px'"
+		>{{line.text}}</div>
+	</div>
+</body>
+</rml>

@@ -241,6 +241,33 @@ SIZE CUIRenderTextSDLTtf::MeasureText(const wchar_t* text, int length) const
     return size;
 }
 
+int CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole role)
+{
+    auto& renderer = mu::GetRenderer();
+    TTF_Font* font = nullptr;
+    switch (role)
+    {
+    case UI::Scaling::FontRole::Bold:
+        font = renderer.GetTtfFontBold();
+        break;
+    case UI::Scaling::FontRole::Big:
+        font = renderer.GetTtfFontBig();
+        break;
+    case UI::Scaling::FontRole::Fixed:
+        font = renderer.GetTtfFontFixed();
+        break;
+    case UI::Scaling::FontRole::Normal:
+        break;
+    }
+    if (font == nullptr)
+        font = renderer.GetTtfFont();
+    if (font == nullptr)
+        return 0;
+
+    const ScaledTextMetrics metrics = BuildScaledTextMetrics(role, 0, TTF_GetFontHeight(font), 0, 0);
+    return static_cast<int>(std::lround(metrics.height / metrics.transform.scaleY));
+}
+
 void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxWidth, int boxHeight, int sort,
                                      OUT SIZE* textSize)
 {

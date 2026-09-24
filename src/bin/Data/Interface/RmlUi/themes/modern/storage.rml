@@ -20,7 +20,7 @@
 
 		<!-- Wallet + fee row: base.rcss's shared .modern-wallet-px family, heightened to fit both
 		     the Zen balance and the Storage Fee line CStorageInventory::RenderText() used to draw.
-		     Fixed warm-gold value color, not bound to zen_color's native wealth-tier blue/green
+		     Fixed warm-gold value color, not styled by zen_tier's native wealth-tier blue/green
 		     scheme -- same reasoning as MyInventory's #gold_text (my_inventory.rml). -->
 		<div id="money_bg" class="modern-wallet-px stor-wallet-px">
 			<div class="modern-wallet-coin-px"></div>

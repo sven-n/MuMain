@@ -13,22 +13,35 @@ typedef struct tagITEM ITEM;
 // latter two off CUIQuestContentsListBox doesn't triple this loop.
 namespace UI::Quests::RewardModel
 {
-    // Raw native data a click handler needs (ITEM*/type) -- kept separate from the display-only
-    // Entry pushed into RmlUi, same split CMyQuestInfoWindow's own ContentRowData already used.
-    struct RowData
-    {
-        Rml::String text;
-        DWORD dwColor = 0;
-        DWORD dwType = 0;
-        ITEM* pItem = nullptr;
-    };
+// What a row shows; each theme's .rcss styles it (.row-<StyleKey()>).
+enum class RowStyle
+{
+    Plain,
+    Subject,
+    Summary,
+    Heading,
+    Requirement,
+    RequirementUnmet,
+    Reward,
+    RandomReward,
+};
+
+// Raw native data a click handler needs (ITEM*/type) -- kept separate from the display-only
+// Entry pushed into RmlUi, same split CMyQuestInfoWindow's own ContentRowData already used.
+struct RowData
+{
+    Rml::String text;
+    RowStyle style = RowStyle::Plain;
+    DWORD dwType = 0;
+    ITEM* pItem = nullptr;
+};
 
     // Display-only row for an RmlUi data-for list -- index points back into the RowData vector
     // BuildRows() returned, for a click handler to look up pItem/dwType from.
     struct Entry
     {
         Rml::String text;
-        Rml::String color; // "rgba(r,g,b,a)"
+        Rml::String style; // StyleKey(RowData::style)
         bool bold = false;
         int index = 0;
         bool clickable = false;
@@ -41,7 +54,10 @@ namespace UI::Quests::RewardModel
     // itself before appending these rows.
     std::vector<RowData> BuildRows(DWORD dwQuestIndex, bool& outRequestComplete);
 
-    // DWORD ARGB -> "rgba(r,g,b,a)" string, plus the "is this a clickable reward/request item" rule
-    // -- shared so no caller hand-rolls the conversion.
+    // Key an RML document compares against to pick the theme's style for `style`.
+    const char* StyleKey(RowStyle style);
+
+    // Display row plus the "is this a clickable reward/request item" rule -- shared so no caller
+    // hand-rolls it.
     Entry ToEntry(const RowData& row, int index);
 }

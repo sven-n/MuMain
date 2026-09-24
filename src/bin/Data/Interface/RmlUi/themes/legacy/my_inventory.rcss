@@ -14,18 +14,29 @@
 	font-family: "token(font-body)";
 }
 
+/* Text rendered at the native text renderer's size: font-size and a 1 / root_scale transform come
+   from the RML (see my_inventory.rml), so these leaves lay out in physical pixels and scale back
+   around the edge their text is aligned to. */
+.native-text { white-space: nowrap; pointer-events: none; }
+
 /* Drag handle (MyInventory.cpp Create()) -- pointer-events/drag are force-set in C++ via
-   UI::RmlBridge::MakeDraggable(); cursor here is just discoverability. */
+   UI::RmlBridge::MakeDraggable(); cursor here is just discoverability. The box keeps the native
+   190x15 title area; only its text is counter-scaled. */
 #title {
 	position: absolute;
 	left: 0;
 	top: 12px;
 	width: 190px;
+	height: 15px;
+	cursor: move;
+}
+.title-text {
+	display: block;
+	width: 190px;
 	text-align: center;
+	transform-origin: center top;
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
-	cursor: move;
 }
 
 @spritesheet inv-money-sheet { src: "../../../newui_item_money.tga"; inv-money: 0px 0px 170px 26px; }
@@ -42,10 +53,8 @@
 	position: absolute;
 	left: 50px;
 	top: 371px;
+	transform-origin: left top;
 	font-weight: bold;
-	font-size: 11px;
-	white-space: nowrap;
-	pointer-events: none;
 }
 
 /* Buttons: same 36x29 reference-pixel boxes SetButtonInfo() used to place them at. */
@@ -102,21 +111,29 @@
 	display: block;
 }
 
-/* Set/Socket option header labels -- each spans half of #panel's width (matches the former
-   native hover-rect split), gray by default, yellow when that set/socket bonus is active. */
-.option-label {
+/* Set/Socket option header labels -- one centred line at the native y + 25, gray by default,
+   yellow when that set/socket bonus is active (RenderSetOption()/RenderSocketOption()'s colors). */
+.option-labels {
+	position: absolute;
+	left: 0;
+	top: 25px;
+	width: 190px;
+	text-align: center;
+	transform-origin: center top;
+	font-weight: bold;
+}
+.option-label { color: #646464; }
+.option-label.active { color: #ffcc19; }
+.option-label + .option-label { margin-left: 0.3em; }
+
+/* Hover areas -- each spans half of #panel's width, the former native CheckMouseIn() split. */
+.option-hover {
 	position: absolute;
 	top: 20px;
 	width: 95px;
 	height: 15px;
-	text-align: center;
-	font-family: "token(font-body)";
-	font-weight: bold;
-	font-size: 12px;
-	color: #666666;
 	pointer-events: auto;
 	cursor: default;
 }
-.option-label.active { color: token(text-selected); }
-.option-label-set { left: 0; }
-.option-label-socket { left: 95px; }
+.option-hover-set { left: 0; }
+.option-hover-socket { left: 95px; }

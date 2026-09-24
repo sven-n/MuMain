@@ -74,14 +74,14 @@ namespace mu::ui::window
             bool yourGuildVisible = false;
             Rml::String yourGuildName;
             Rml::String yourLevelText;
-            Rml::String yourLevelColor;
+            int yourLevelBucket = 0; // ConvertYourLevel() -- the theme colors each bucket
             Rml::String yourGoldText;
-            Rml::String yourGoldColor;
+            Rml::String yourGoldTier; // UI::RmlBridge::GoldTierKey() of the amount
             bool yourConfirmChecked = false;
 
             Rml::String myIdText;
             Rml::String myGoldText;
-            Rml::String myGoldColor;
+            Rml::String myGoldTier;
             bool myConfirmChecked = false;
             bool myConfirmWaiting = false;
 
@@ -188,7 +188,8 @@ namespace mu::ui::window
         void ProcessMyInvenCtrl();
         bool ProcessBtns();
 
-        void ConvertYourLevel(int& rnLevel, DWORD& rdwColor);
+        // The trade partner's level rounded down to the bucket the original client showed ("about N").
+        int ConvertYourLevel() const;
 
         void InitTradeInfo();
         void InitYourInvenBackUp();

@@ -199,3 +199,10 @@ body {
 	height: 0;
 	pointer-events: none;
 }
+
+/* Zen amounts by wealth tier (GameLogic::Items::GoldAmountTier; the model binds its key, the RML
+   toggles .gold-<key>). The original client's colors. */
+.gold-amount.gold-base             { color: #ffdc96; }
+.gold-amount.gold-hundred-thousand { color: #00c918; }
+.gold-amount.gold-million          { color: #ff9600; }
+.gold-amount.gold-ten-million      { color: #ff0000; }

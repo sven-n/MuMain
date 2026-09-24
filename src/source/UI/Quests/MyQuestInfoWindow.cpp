@@ -116,7 +116,7 @@ void mu::ui::window::CMyQuestInfoWindow::BuildRmlUi()
 
                 auto content = c.RegisterStruct<ContentEntry>();
                 content.RegisterMember("text", &ContentEntry::text);
-                content.RegisterMember("color", &ContentEntry::color);
+                content.RegisterMember("style", &ContentEntry::style);
                 content.RegisterMember("bold", &ContentEntry::bold);
                 content.RegisterMember("index", &ContentEntry::index);
                 content.RegisterMember("clickable", &ContentEntry::clickable);
@@ -330,12 +330,14 @@ void mu::ui::window::CMyQuestInfoWindow::SetSelQuestSummary()
     if (0 == dwSelQuestIndex)
         return;
 
-    m_ContentRows.push_back({ StringUtils::WideToNarrow(g_QuestMng.GetSubject(dwSelQuestIndex)), 0xff0ab9ff, 0, nullptr });
+    m_ContentRows.push_back({StringUtils::WideToNarrow(g_QuestMng.GetSubject(dwSelQuestIndex)),
+                             UI::Quests::RewardModel::RowStyle::Subject, 0, nullptr});
 
     wchar_t aszSummary[8][64];
     const int nLine = ::DivideStringByPixel(&aszSummary[0][0], 8, 64, g_QuestMng.GetSummary(dwSelQuestIndex), 150);
     for (int i = 0; i < nLine; ++i)
-        m_ContentRows.push_back({ StringUtils::WideToNarrow(aszSummary[i]), 0xffd2e6ff, 0, nullptr });
+        m_ContentRows.push_back(
+            {StringUtils::WideToNarrow(aszSummary[i]), UI::Quests::RewardModel::RowStyle::Summary, 0, nullptr});
 }
 
 void mu::ui::window::CMyQuestInfoWindow::SetSelQuestRequestReward()
@@ -350,7 +352,7 @@ void mu::ui::window::CMyQuestInfoWindow::SetSelQuestRequestReward()
     // This window appends the reward rows after other content already in m_ContentRows (the quest
     // summary, above) -- push the leading spacer here rather than in the shared helper, which
     // CQuestProgress/CQuestProgressByEtc's own reward list (nothing precedes it) don't want.
-    m_ContentRows.push_back({ " ", 0xffffffff, 0, nullptr });
+    m_ContentRows.push_back({" ", UI::Quests::RewardModel::RowStyle::Plain, 0, nullptr});
 
     bool unusedRequestComplete = false;
     std::vector<UI::Quests::RewardModel::RowData> rows =
@@ -552,7 +554,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
     {
         const UI::Quests::RewardModel::Entry entry =
             UI::Quests::RewardModel::ToEntry(m_ContentRows[rowIndex], static_cast<int>(rowIndex));
-        model.contents.push_back({ entry.text, entry.color, entry.bold, entry.index, entry.clickable });
+        model.contents.push_back({entry.text, entry.style, entry.bold, entry.index, entry.clickable});
     }
     m_RmlBinder.MarkDirty("contents");
 

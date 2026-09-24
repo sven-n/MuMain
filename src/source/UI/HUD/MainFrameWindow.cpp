@@ -916,6 +916,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             // unconditionally -- AboveLeft matches that; Show()'s own clamping now also covers the
             // horizontal/lower-edge cases that CSS-only transform never did.
             config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
+            config.transform = skillTooltipTransform;
             UI::RmlBridge::Tooltip::Show(config, g_pSkillList);
         }
         else

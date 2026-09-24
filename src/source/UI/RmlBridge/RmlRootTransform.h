@@ -27,4 +27,18 @@ namespace UI::RmlBridge
         binder.MarkDirty("root_y");
         binder.MarkDirty("root_scale");
     }
+
+    // Legacy-theme text that must match the native text renderer's size (and be rasterised at it)
+    // takes this physical size and counter-scales itself out of the root transform -- see
+    // character_info.rml's header comment. `Model` must expose `float textPx` bound to "text_px".
+    template <typename Model> void SyncNativeTextSize(RmlModelBinder<Model>& binder)
+    {
+        const float textPx =
+            UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
+        Model& model = binder.GetModel();
+        if (model.textPx == textPx)
+            return;
+        model.textPx = textPx;
+        binder.MarkDirty("text_px");
+    }
 }

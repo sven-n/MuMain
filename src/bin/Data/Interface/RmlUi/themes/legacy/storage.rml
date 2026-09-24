@@ -13,7 +13,11 @@
 		<span id="title" data-class-locked="title_locked">{{title}}</span>
 
 		<div id="money_bg"></div>
-		<span id="zen_text" data-style-color="zen_color">{{zen_text}}</span>
+		<span id="zen_text" class="gold-amount"
+		      data-class-gold-base="zen_tier == 'base'"
+		      data-class-gold-hundred-thousand="zen_tier == 'hundred-thousand'"
+		      data-class-gold-million="zen_tier == 'million'"
+		      data-class-gold-ten-million="zen_tier == 'ten-million'">{{zen_text}}</span>
 		<span id="fee_label">{{fee_label}}</span>
 		<span id="fee_value">{{fee_value}}</span>
 

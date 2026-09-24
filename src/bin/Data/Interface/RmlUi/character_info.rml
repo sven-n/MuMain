@@ -9,7 +9,14 @@
 	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
 	     UI::Scaling::GetActiveTransform(), not RmlUi's dp auto-fit -- same convention as
 	     my_quest_info.rml's #panel (this window is collision-shuffled between the same
-	     PanelColumnX() slots). -->
+	     PanelColumnX() slots).
+
+	     Text leaves render at the native text renderer's size: text_px is the physical size the
+	     native client draws at for the active transform (it grows more slowly than the panel), and
+	     1 / root_scale cancels #panel's scale so the glyphs are rasterised at that size instead of
+	     being enlarged -- the same technique as main_frame.rml's bar tooltips. Positions and box
+	     widths stay in reference px; each leaf's transform-origin (character_info.rcss) keeps it
+	     anchored to the edge or centre its text is aligned to. -->
 	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -17,73 +24,79 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="name" data-style-color="name_color">{{name_text}}</span>
+		<!-- The header leaves keep the original's 190-unit centring box: counter-scaled, it must be
+		     root_scale times wider (and shifted back by half the growth), or a long server name
+		     wraps instead of staying centred on one line. -->
+		<span id="name" data-style-width="(190 * root_scale) + 'px'" data-style-margin-left="(95 - 95 * root_scale) + 'px'" data-style-color="name_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{name_text}}</span>
 		<!-- Class name and server name crossfade in place (legacy's sine-wave alpha blend
 		     between the two, RenderSubjectTexts()) -- two stacked spans, opacity-driven. -->
-		<span id="classname" data-style-opacity="classname_opacity">{{classname_text}}</span>
-		<span id="servername" data-style-opacity="servername_opacity">{{servername_text}}</span>
+		<span id="classname" data-style-width="(190 * root_scale) + 'px'" data-style-margin-left="(95 - 95 * root_scale) + 'px'" data-style-opacity="classname_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{classname_text}}</span>
+		<span id="servername" data-style-width="(190 * root_scale) + 'px'" data-style-margin-left="(95 - 95 * root_scale) + 'px'" data-style-opacity="servername_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{servername_text}}</span>
 
-		<!-- Summary backdrop: corner brackets + translucent fill, standing in for the
-		     original's pixel-tiled 8-piece frame (4 corner sprites + repeating 1px edge tiles) --
-		     see character_info.rcss's header comment for why the repeating edges were dropped.
-		     A bordered/backgrounded leaf with child elements can render an incomplete box in this
-		     RmlUi build, so the fill is its own childless leaf, and the corners are unstyled
-		     siblings, not children of it. -->
+		<!-- Summary backdrop: the original's 8-piece frame (RenderFrame()) -- translucent fill, 4
+		     corner sprites, 1px-wide edge sprites stretched across each edge, and the separator
+		     under the level line, in the original's paint order. A bordered/backgrounded leaf with child elements can render an
+		     incomplete box in this RmlUi build, so every piece is its own childless sibling. -->
 		<div class="summary-fill"></div>
 		<div class="summary-corner corner-tl"></div>
 		<div class="summary-corner corner-tr"></div>
 		<div class="summary-corner corner-bl"></div>
 		<div class="summary-corner corner-br"></div>
-		<span class="level-text">{{level_text}}</span>
-		<span class="levelup-point-text" data-class-hidden="!can_level_up">{{levelup_point_text}}</span>
-		<span class="exp-text">{{exp_text}}</span>
-		<span class="point-probability-text">{{point_probability_text}}</span>
-		<span class="point-text">{{point_text}}</span>
+		<div class="summary-edge edge-top"></div>
+		<div class="summary-edge edge-bottom"></div>
+		<div class="summary-edge edge-separator"></div>
+		<div class="summary-edge edge-left"></div>
+		<div class="summary-edge edge-right"></div>
+		<span class="level-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{level_text}}</span>
+		<span class="levelup-point-text" data-class-hidden="!can_level_up" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{levelup_point_text}}</span>
+		<span class="exp-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{exp_text}}</span>
+		<span class="point-probability-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{point_probability_text}}</span>
+		<span class="point-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{point_text}}</span>
 
 		<!-- STR row -->
 		<div class="attr-textbox attr-textbox-str"></div>
-		<span class="attr-label attr-label-str">{{str_label}}</span>
-		<span class="attr-value attr-value-str" data-style-color="str_value_color">{{str_value_text}}</span>
-		<div class="attr-lines attr-lines-str">
-			<span data-for="line : str_lines" data-style-color="line.color">{{line.text}}</span>
+		<span class="attr-label attr-label-str" data-style-color="str_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{str_label}}</span>
+		<span class="attr-value attr-value-str" data-style-color="str_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{str_value_text}}</span>
+		<div class="attr-lines attr-lines-str" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span data-for="line : str_lines" data-style-color="line.color" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(0)"></div>
 
 		<!-- AGI row -->
 		<div class="attr-textbox attr-textbox-agi"></div>
-		<span class="attr-label attr-label-agi">{{agi_label}}</span>
-		<span class="attr-value attr-value-agi" data-style-color="agi_value_color">{{agi_value_text}}</span>
-		<div class="attr-lines attr-lines-agi">
-			<span data-for="line : agi_lines" data-style-color="line.color">{{line.text}}</span>
+		<span class="attr-label attr-label-agi" data-style-color="agi_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{agi_label}}</span>
+		<span class="attr-value attr-value-agi" data-style-color="agi_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{agi_value_text}}</span>
+		<div class="attr-lines attr-lines-agi" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span data-for="line : agi_lines" data-style-color="line.color" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(1)"></div>
 
 		<!-- VIT row -->
 		<div class="attr-textbox attr-textbox-vit"></div>
-		<span class="attr-label attr-label-vit">{{vit_label}}</span>
-		<span class="attr-value attr-value-vit" data-style-color="vit_value_color">{{vit_value_text}}</span>
-		<div class="attr-lines attr-lines-vit">
-			<span data-for="line : vit_lines" data-style-color="line.color">{{line.text}}</span>
+		<span class="attr-label attr-label-vit" data-style-color="vit_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{vit_label}}</span>
+		<span class="attr-value attr-value-vit" data-style-color="vit_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{vit_value_text}}</span>
+		<div class="attr-lines attr-lines-vit" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span data-for="line : vit_lines" data-style-color="line.color" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(2)"></div>
 
 		<!-- ENE row -->
 		<div class="attr-textbox attr-textbox-ene"></div>
-		<span class="attr-label attr-label-ene">{{ene_label}}</span>
-		<span class="attr-value attr-value-ene" data-style-color="ene_value_color">{{ene_value_text}}</span>
-		<div class="attr-lines attr-lines-ene">
-			<span data-for="line : ene_lines" data-style-color="line.color">{{line.text}}</span>
+		<span class="attr-label attr-label-ene" data-style-color="ene_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{ene_label}}</span>
+		<span class="attr-value attr-value-ene" data-style-color="ene_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{ene_value_text}}</span>
+		<div class="attr-lines attr-lines-ene" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span data-for="line : ene_lines" data-style-color="line.color" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(3)"></div>
 
 		<!-- CMD row -- Dark Lord only. -->
 		<div class="attr-textbox attr-textbox-cmd" data-class-hidden="!show_charisma"></div>
-		<span class="attr-label attr-label-cmd" data-class-hidden="!show_charisma">{{cmd_label}}</span>
-		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-style-color="cmd_value_color">{{cmd_value_text}}</span>
+		<span class="attr-label attr-label-cmd" data-class-hidden="!show_charisma" data-style-color="cmd_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{cmd_label}}</span>
+		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-style-color="cmd_value_color" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{cmd_value_text}}</span>
 		<div class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
 		     data-event-click="chainfo_increase_stat(4)"></div>
 

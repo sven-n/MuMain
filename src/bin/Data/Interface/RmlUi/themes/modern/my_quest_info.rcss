@@ -195,3 +195,13 @@
 	color: token(text-primary);
 	font-size: 12px;
 }
+
+/* Requirement/reward rows by kind (UI::Quests::RewardModel::RowStyle; the RML toggles
+   .row-<key>). The original client's colors; they win over the clickable hover colour. */
+.quest-content-row.row-subject, .quest-content-row.row-subject.clickable:hover { color: #ffb90a; }
+.quest-content-row.row-summary, .quest-content-row.row-summary.clickable:hover { color: #ffe6d2; }
+.quest-content-row.row-heading, .quest-content-row.row-heading.clickable:hover { color: #b3e64d; }
+.quest-content-row.row-requirement, .quest-content-row.row-requirement.clickable:hover { color: #dfbf67; }
+.quest-content-row.row-requirement-unmet, .quest-content-row.row-requirement-unmet.clickable:hover { color: #ff1e1e; }
+.quest-content-row.row-reward, .quest-content-row.row-reward.clickable:hover { color: #dfbf67; }
+.quest-content-row.row-random-reward, .quest-content-row.row-random-reward.clickable:hover { color: #6767df; }

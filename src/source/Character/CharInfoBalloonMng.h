@@ -89,9 +89,7 @@ private:
         bool hidden = true;
         int screenX = 0;
         int screenY = 0;
-        // Non-empty default -- an empty string here (before the first SyncRmlModel() call)
-        // makes RmlUi try to parse "color: ;" for data-style-color, logging a syntax warning.
-        Rml::String nameColor = "#ffffff";
+        Rml::String nameStatus = "normal"; // NameStatusKey() in CharInfoBalloonMng.cpp
         Rml::String name;
         Rml::String guild;
         Rml::String klass;

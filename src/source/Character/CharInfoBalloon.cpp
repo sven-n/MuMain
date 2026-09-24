@@ -45,18 +45,18 @@ namespace
         { 255, 488 },
     } };
 
-    DWORD ResolveNameColor(std::uint8_t controlCode)
+    BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
     {
         if (controlCode & CTLCODE_01BLOCKCHAR)
-            return ARGB(255, 0, 255, 255);
+            return BalloonNameStatus::BlockedCharacter;
         if (controlCode & (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
-            return CLRDW_BR_ORANGE;
+            return BalloonNameStatus::BlockedItems;
         if (controlCode & CTLCODE_04FORTV)
-            return CLRDW_WHITE;
+            return BalloonNameStatus::Normal;
         if (controlCode & (CTLCODE_08OPERATOR | CTLCODE_20OPERATOR))
-            return ARGB(255, 255, 0, 0);
+            return BalloonNameStatus::Operator;
 
-        return CLRDW_WHITE;
+        return BalloonNameStatus::Normal;
     }
 
     int ResolveGuildTextIndex(std::uint8_t guildStatus)
@@ -95,7 +95,7 @@ void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
     CSprite::Create(118, 54, BITMAP_LOG_IN + 7, 0, nullptr, 59, 54);
 
     m_pCharInfo = pCharInfo;
-    m_dwNameColor = 0;
+    m_eNameStatus = BalloonNameStatus::Normal;
     std::fill(std::begin(m_szName), std::end(m_szName), L'\0');
     std::fill(std::begin(m_szGuild), std::end(m_szGuild), L'\0');
     std::fill(std::begin(m_szClass), std::end(m_szClass), L'\0');
@@ -137,7 +137,7 @@ void CCharInfoBalloon::SetInfo()
 
     CSprite::m_bShow = true;
 
-    m_dwNameColor = ResolveNameColor(m_pCharInfo->CtlCode);
+    m_eNameStatus = ResolveNameStatus(m_pCharInfo->CtlCode);
 
     CopyWideString(m_szName, m_pCharInfo->ID);
 

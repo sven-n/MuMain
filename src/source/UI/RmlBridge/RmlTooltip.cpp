@@ -4,6 +4,8 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/DataModelHandle.h>
@@ -41,6 +43,9 @@ namespace UI::RmlBridge::Tooltip
             bool bold = false;
             bool isHalfSpacer = false;
             bool isFullSpacer = false;
+            // The native row box and the space to the next row (NativeMetrics()).
+            float heightPx = 0.0f;
+            float gapPx = 0.0f;
         };
 
         struct TooltipRmlModel
@@ -49,7 +54,57 @@ namespace UI::RmlBridge::Tooltip
             float posX = 0.0f;
             float posY = 0.0f;
             bool centerText = false;
+            // What the native text renderer would use under the caller's transform -- the legacy
+            // theme's tooltip.rml binds these to match RenderTipTextList(); others may ignore them.
+            float textPx = 0.0f;
+            float borderPx = 0.0f;
+            float paddingPx = 0.0f;
+            float fixedWidthPx = 0.0f;
         };
+
+        // RenderTipTextList() (ZzzInventory.cpp) layout: each row is one text height tall and the
+        // next row starts 1.1 heights below it (a half spacer: half a height), the box is the
+        // widest line plus 4 units (2 per side) with no vertical padding, framed by a 1-unit border.
+        constexpr float kNativeRowAdvance = 1.1f;
+        constexpr float kNativeHalfSpacerFraction = 0.5f;
+        constexpr float kNativePaddingUnits = 2.0f;
+        constexpr float kNativeBorderUnits = 1.0f;
+
+        // Row heights come from the native text renderer itself (MeasureText's logical height,
+        // as RenderTipTextList() uses), not from RmlUi's font metrics, which round differently.
+        void ApplyNativeMetrics(TooltipRmlModel& model, const Config& config)
+        {
+            const UI::Scaling::Transform transform = config.transform.value_or(UI::Scaling::GetActiveTransform());
+            model.fixedWidthPx = config.fixedWidth * transform.scaleX;
+            model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
+            model.borderPx = kNativeBorderUnits * transform.scaleX;
+            model.paddingPx = kNativePaddingUnits * transform.scaleX;
+
+            // The native line height follows the active transform: measure under the chosen one.
+            float normalHeight = 0.0f;
+            float boldHeight = 0.0f;
+            {
+                const UI::Scaling::ScopedActiveTransform measureScope(transform);
+                normalHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
+                boldHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
+            }
+
+            for (TooltipLineEntry& line : model.lines)
+            {
+                const float rowHeight = (line.bold ? boldHeight : normalHeight) * transform.scaleY;
+                const float advance = rowHeight * kNativeRowAdvance;
+                if (line.isHalfSpacer || line.isFullSpacer)
+                {
+                    line.heightPx = line.isHalfSpacer ? advance * kNativeHalfSpacerFraction : advance;
+                    line.gapPx = 0.0f;
+                }
+                else
+                {
+                    line.heightPx = rowHeight;
+                    line.gapPx = advance - rowHeight;
+                }
+            }
+        }
 
         RmlModelBinder<TooltipRmlModel> s_RmlBinder;
         Rml::ElementDocument* s_pRmlDoc = nullptr;
@@ -110,12 +165,18 @@ namespace UI::RmlBridge::Tooltip
                     line.RegisterMember("bold", &TooltipLineEntry::bold);
                     line.RegisterMember("is_half_spacer", &TooltipLineEntry::isHalfSpacer);
                     line.RegisterMember("is_full_spacer", &TooltipLineEntry::isFullSpacer);
+                    line.RegisterMember("height_px", &TooltipLineEntry::heightPx);
+                    line.RegisterMember("gap_px", &TooltipLineEntry::gapPx);
                     c.RegisterArray<std::vector<TooltipLineEntry>>();
 
                     c.Bind("lines", &model.lines);
                     c.Bind("pos_x", &model.posX);
                     c.Bind("pos_y", &model.posY);
                     c.Bind("center_text", &model.centerText);
+                    c.Bind("text_px", &model.textPx);
+                    c.Bind("border_px", &model.borderPx);
+                    c.Bind("padding_px", &model.paddingPx);
+                    c.Bind("fixed_width_px", &model.fixedWidthPx);
                 });
 
             if (modelCreated)
@@ -152,6 +213,7 @@ namespace UI::RmlBridge::Tooltip
         for (const Line& line : config.lines)
             model.lines.push_back(ToLineEntry(line));
         model.centerText = (config.textAlign == Config::TextAlign::Center);
+        ApplyNativeMetrics(model, config);
 
         // First pass: a reasonable guess so layout has something sane to measure. Growing upward
         // needs the real height to place the bottom edge at anchorY, which isn't known yet -- use
@@ -162,6 +224,10 @@ namespace UI::RmlBridge::Tooltip
         s_RmlBinder.MarkDirty("pos_x");
         s_RmlBinder.MarkDirty("pos_y");
         s_RmlBinder.MarkDirty("center_text");
+        s_RmlBinder.MarkDirty("text_px");
+        s_RmlBinder.MarkDirty("border_px");
+        s_RmlBinder.MarkDirty("padding_px");
+        s_RmlBinder.MarkDirty("fixed_width_px");
 
         s_pRmlDoc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
 
@@ -219,8 +285,20 @@ namespace UI::RmlBridge::Tooltip
         // corner regardless of the (correctly computed) anchor.
         const Rml::Vector2f size = panel ? panel->GetBox().GetSize(Rml::BoxArea::Border) : Rml::Vector2f(0.0f, 0.0f);
 
-        float left = config.centerHorizontally ? (screenAnchorX - size.x * 0.5f) : screenAnchorX;
-        float top = (config.anchor == AnchorPoint::AboveLeft) ? (screenAnchorY - size.y) : screenAnchorY;
+        // The anchor places the panel's inner (padding) box; a theme's frame lies outside it, as
+        // RenderTipTextList() draws its 1-unit frame around the box it anchored.
+        Rml::Vector2f frameTopLeft(0.0f, 0.0f);
+        float frameBottom = 0.0f;
+        if (panel)
+        {
+            const Rml::Box& box = panel->GetBox();
+            frameTopLeft.x = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Left);
+            frameTopLeft.y = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Top);
+            frameBottom = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Bottom);
+        }
+        float left = config.centerHorizontally ? (screenAnchorX - size.x * 0.5f) : (screenAnchorX - frameTopLeft.x);
+        float top = (config.anchor == AnchorPoint::AboveLeft) ? (screenAnchorY - size.y + frameBottom)
+                                                              : (screenAnchorY - frameTopLeft.y);
 
         // Clamp on all four sides -- every prior mechanism clamped at most horizontally; hovering
         // something near any screen edge must not clip the tooltip. Bounds are the real viewport
