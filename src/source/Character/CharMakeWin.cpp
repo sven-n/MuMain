@@ -47,8 +47,8 @@ namespace
     constexpr int kStatLabelBaseId = 1701;
     constexpr int kStatLineSpacing = 17;
     constexpr int kStatYOffset = 10;
-    constexpr int kStatValueOffset = 54;
-    constexpr int kStatTextOffsetX = 22;
+    constexpr int kStatTextOffsetX = 10;
+    constexpr int kStatValueRightPadding = 10;
     constexpr int kDarkLordStatHeight = 96;
     constexpr int kDefaultStatHeight = 80;
     constexpr const wchar_t* kDarkLordLeadershipStatValue = L"25";
@@ -257,8 +257,12 @@ void CCharMakeWin::Show(bool bShow)
         InputTextMax[0] = MAX_USERNAME_SIZE;
         if (g_iChatInputType == 1)
         {
+            // Light text: the default (black) is unreadable on the dark input strip.
             g_pSingleTextInputBox->Configure({
                 .textLimit = 10,
+                .textR = 230,
+                .textG = 220,
+                .textB = 200,
             });
             g_pSingleTextInputBox->GiveFocus();
         }
@@ -402,6 +406,9 @@ void CCharMakeWin::RenderControls()
 
     const auto& stats = kClassStatTable[static_cast<std::size_t>(m_nSelJob)];
     const int statBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + kStatTextOffsetX;
+    // Values are right-aligned against the panel edge so long labels never overlap them.
+    const int statValueBoxWidth = int(
+        (m_asprBack[CMW_SPR_STAT].GetWidth() - kStatTextOffsetX - kStatValueRightPadding) / g_fScreenRate_x);
     for (std::size_t statIndex = 0; statIndex < stats.values.size(); ++statIndex)
     {
         const int statScreenY = int(
@@ -410,9 +417,10 @@ void CCharMakeWin::RenderControls()
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
         g_pRenderText->RenderText(
-            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
+            int(statBaseX / g_fScreenRate_x),
             statScreenY,
-            stats.values[statIndex]);
+            stats.values[statIndex],
+            statValueBoxWidth, 0, RT3_SORT_RIGHT);
 
         g_pRenderText->SetTextColor(CLRDW_WHITE);
         g_pRenderText->RenderText(
@@ -428,9 +436,10 @@ void CCharMakeWin::RenderControls()
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
         g_pRenderText->RenderText(
-            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
+            int(statBaseX / g_fScreenRate_x),
             leadershipY,
-            kDarkLordLeadershipStatValue);
+            kDarkLordLeadershipStatValue,
+            statValueBoxWidth, 0, RT3_SORT_RIGHT);
         g_pRenderText->SetTextColor(CLRDW_WHITE);
         g_pRenderText->RenderText(
             int(statBaseX / g_fScreenRate_x),

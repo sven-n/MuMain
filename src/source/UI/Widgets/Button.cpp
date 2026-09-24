@@ -22,6 +22,7 @@ namespace
 {
 constexpr float kDefaultTextOffset = 0.5f;
 constexpr float kPressedTextOffset = 1.5f;
+constexpr LONG kTextHorizontalPadding = 8;
 
 bool IsValidStateIndex(int state)
 {
@@ -206,7 +207,16 @@ void CButton::Render()
     g_pRenderText->SetFont(g_hFixFont);
 
     const int textLength = static_cast<int>(m_text.length());
-    const SIZE size = g_pRenderText->MeasureText(m_text.c_str(), textLength);
+    SIZE size = g_pRenderText->MeasureText(m_text.c_str(), textLength);
+
+    // The fixed-width face is too wide for long labels ("Magic Gladiator");
+    // fall back to the proportional face so the text stays inside the button.
+    const LONG availableWidth = static_cast<LONG>(CSprite::GetWidth() / g_fScreenRate_x) - kTextHorizontalPadding;
+    if (size.cx > availableWidth)
+    {
+        g_pRenderText->SetFont(g_hFont);
+        size = g_pRenderText->MeasureText(m_text.c_str(), textLength);
+    }
 
     const float textHeight = static_cast<float>(size.cy) * g_fScreenRate_y;
     const float textRelativeYPos = (static_cast<float>(CSprite::GetHeight()) - textHeight) * 0.5f;
