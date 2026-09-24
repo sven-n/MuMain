@@ -9,6 +9,8 @@ namespace
 {
 constexpr int kReferenceWidth = 640;
 constexpr int kReferenceHeight = 480;
+constexpr int kPanelColumnWidth = 190;
+constexpr int kMaximumPanelColumns = 3;
 constexpr float kHudFrameHeight = 51.0f;
 constexpr float kHudContentTop = 429.0f;
 constexpr float kExperienceTop = 470.0f;
@@ -238,6 +240,32 @@ bool UI::Scaling::BottomHudContainsWindowPoint(int windowWidth, int windowHeight
     const Transform right = BottomHudRightTransform(windowWidth, windowHeight);
     return ContainsLogicalRect(right, windowX, windowY, kRightBandStart, kHudContentTop,
                                static_cast<float>(kReferenceWidth), static_cast<float>(kReferenceHeight));
+}
+
+int UI::Scaling::PanelColumnsForWorldWidth(int legacyWorldWidth)
+{
+    const int columns = (kReferenceWidth - legacyWorldWidth) / kPanelColumnWidth;
+    return std::clamp(columns, 0, kMaximumPanelColumns);
+}
+
+bool UI::Scaling::PanelColumnContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY,
+                                                 int openColumns)
+{
+    const int columns = std::clamp(openColumns, 0, kMaximumPanelColumns);
+    if (columns == 0)
+        return false;
+
+    const Transform dock = DockRightTransform(windowWidth, windowHeight);
+    const float left = static_cast<float>(kReferenceWidth - kPanelColumnWidth * columns);
+    return ContainsLogicalRect(dock, windowX, windowY, left, 0.0f, static_cast<float>(kReferenceWidth),
+                               static_cast<float>(DockLogicalBottom));
+}
+
+bool UI::Scaling::GroundDropContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY,
+                                                int openColumns)
+{
+    return !BottomHudContainsWindowPoint(windowWidth, windowHeight, windowX, windowY) &&
+           !PanelColumnContainsWindowPoint(windowWidth, windowHeight, windowX, windowY, openColumns);
 }
 
 UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight)

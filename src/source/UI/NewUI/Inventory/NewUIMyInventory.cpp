@@ -469,9 +469,9 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         return false;
 
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    if (pPickedItem && IsPress(VK_LBUTTON)
-        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
-                                                       g_fWindowMouseX, g_fWindowMouseY))
+    if (pPickedItem && IsPress(VK_LBUTTON) &&
+        UI::Scaling::GroundDropContainsWindowPoint(WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY,
+                                                   UI::Scaling::PanelColumnsForWorldWidth(GetScreenWidth())))
     {
         if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == true
             || g_pNewUISystem->IsVisible(INTERFACE_TRADE) == true

@@ -692,6 +692,52 @@ TEST_CASE("bottom HUD hit-region edges block controls and preserve wide gaps [ui
     CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 640.0f, 720.0f));
 }
 
+TEST_CASE("open panel columns are counted from the legacy world width [ui][scaling]")
+{
+    CHECK(UI::Scaling::PanelColumnsForWorldWidth(640) == 0);
+    CHECK(UI::Scaling::PanelColumnsForWorldWidth(450) == 1);
+    CHECK(UI::Scaling::PanelColumnsForWorldWidth(260) == 2);
+    CHECK(UI::Scaling::PanelColumnsForWorldWidth(70) == 3);
+}
+
+TEST_CASE("a picked item press over an open panel column is not a ground drop [ui][scaling]")
+{
+    const float previousScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(1.0f);
+
+    CHECK(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 500.0f, 460.0f, 2));
+    CHECK(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 416.0f, 300.0f, 2));
+    CHECK_FALSE(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 415.9f, 300.0f, 2));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 500.0f, 460.0f, 2));
+    CHECK(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 100.0f, 300.0f, 2));
+    CHECK_FALSE(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 900.0f, 740.0f, 2));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 900.0f, 740.0f, 2));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 512.0f, 740.0f, 2));
+
+    CHECK(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 800.0f, 300.0f, 1));
+    CHECK_FALSE(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 500.0f, 460.0f, 1));
+    CHECK(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 500.0f, 460.0f, 1));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 800.0f, 300.0f, 1));
+
+    CHECK_FALSE(UI::Scaling::PanelColumnContainsWindowPoint(1024, 768, 900.0f, 300.0f, 0));
+    CHECK(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 900.0f, 300.0f, 0));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1024, 768, 512.0f, 740.0f, 0));
+
+    CHECK(UI::Scaling::PanelColumnContainsWindowPoint(1280, 720, 800.0f, 400.0f, 2));
+    CHECK(UI::Scaling::PanelColumnContainsWindowPoint(1280, 720, 710.0f, 400.0f, 2));
+    CHECK_FALSE(UI::Scaling::PanelColumnContainsWindowPoint(1280, 720, 709.9f, 400.0f, 2));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1280, 720, 800.0f, 400.0f, 2));
+    CHECK(UI::Scaling::GroundDropContainsWindowPoint(1280, 720, 100.0f, 300.0f, 2));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1280, 720, 640.0f, 700.0f, 2));
+    CHECK_FALSE(UI::Scaling::GroundDropContainsWindowPoint(1280, 720, 1200.0f, 700.0f, 2));
+
+    CHECK(UI::Scaling::PanelColumnContainsWindowPoint(1280, 720, 1100.0f, 400.0f, 1));
+    CHECK(UI::Scaling::GroundDropContainsWindowPoint(1280, 720, 800.0f, 400.0f, 1));
+    CHECK(UI::Scaling::GroundDropContainsWindowPoint(1280, 720, 1100.0f, 400.0f, 0));
+
+    UI::Scaling::SetWindowContentScale(previousScale);
+}
+
 TEST_CASE("legacy UI preserves logical input and world-overlay coordinates [ui][scaling]")
 {
     const auto legacy = UI::Scaling::LegacyUiTransform(1280, 720);

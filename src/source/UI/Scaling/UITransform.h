@@ -82,6 +82,11 @@ namespace UI::Scaling
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
     bool BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY);
+    int PanelColumnsForWorldWidth(int legacyWorldWidth);
+    bool PanelColumnContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY,
+                                        int openColumns);
+    bool GroundDropContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY,
+                                       int openColumns);
     Transform TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight);
     float PositionX(const Transform& transform, float x);
     float PositionY(const Transform& transform, float y);
