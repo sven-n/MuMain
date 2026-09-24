@@ -8,6 +8,7 @@
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "Network/Server/SocketSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 using namespace SEASON3A;
 
@@ -87,10 +88,10 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     if (pItem->Type == ITEM_HORN_OF_FENRIR && pItem->ExcellentFlags != 0)
         m_bFenrirAddedItem = TRUE;
 
-    if (pItem->Type == ITEM_POTION + 53)
+    if (pItem->Type == ITEM_TALISMAN_OF_LUCK)
         m_bIsCharmItem = TRUE;
 
-    if (pItem->Type == ITEM_POTION + 96)
+    if (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
         m_bIsChaosCharmItem = TRUE;
 
     if (pItem->Type == ITEM_JEWEL_OF_CHAOS
@@ -162,9 +163,9 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     case ITEM_LARGE_HEALING_POTION:
     case ITEM_SMALL_COMPLEX_POTION:
     case ITEM_MEDIUM_COMPLEX_POTION:
-    case ITEM_POTION + 53:
-    case ITEM_POTION + 88:
-    case ITEM_POTION + 89:
+    case ITEM_TALISMAN_OF_LUCK:
+    case ITEM_WHITE_CHERRY_BLOSSOM_BRANCH:
+    case ITEM_RED_CHERRY_BLOSSOM_BRANCH:
     case ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH:
     case ITEM_POTION + 100:
         m_bCanStack = TRUE;
@@ -1062,7 +1063,7 @@ BOOL CMixRecipes::IsSourceOfRefiningStone(CMixItem& rSource)
 
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem& rSource)
 {
-    if (rSource.m_sType >= ITEM_SEED_SPHERE_FIRE_1 && rSource.m_sType <= ITEM_SEED_SPHERE_EARTH_5)
+    if (GameLogic::Items::IsSocketSeedSphereType(rSource.m_sType))
     {
         int iSeedSphereType = rSource.m_sType - ITEM_WING;
         if (iSeedSphereType % 2 == 0) return TRUE;
@@ -1072,7 +1073,7 @@ BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem& rSource)
 
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToArmor(CMixItem& rSource)
 {
-    if (rSource.m_sType >= ITEM_SEED_SPHERE_FIRE_1 && rSource.m_sType <= ITEM_SEED_SPHERE_EARTH_5)
+    if (GameLogic::Items::IsSocketSeedSphereType(rSource.m_sType))
     {
         int iSeedSphereType = rSource.m_sType - ITEM_WING;
 

@@ -21,6 +21,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -479,9 +480,9 @@ bool IsWing(ITEM* ip)
         || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
         || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL
         || ip->Type == ITEM_CAPE_OF_LORD
-        || (ITEM_WING + 130 <= ip->Type && ip->Type <= ITEM_WING + 134)
+        || (ITEM_SMALL_CAPE_OF_LORD <= ip->Type && ip->Type <= ITEM_SMALL_WINGS_OF_SATAN)
         || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE)
-        || (ip->Type == ITEM_WING + 135);
+        || (ip->Type == ITEM_LITTLE_WARRIORS_CLOAK);
 }
 
 int GetDropLevel(ITEM_ATTRIBUTE* p)
@@ -680,7 +681,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         ip->Defense += p->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
     }
 
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
     }
@@ -689,8 +690,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
     }
-    else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || (ip->Type == ITEM_CAPE_OF_OVERRULE))
+    else if (GameLogic::Items::IsThirdTierWing(ip))
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 4);	// ~ +9
     }
@@ -698,8 +698,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 3);	// ~ +9
     }
-    if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || ip->Type == ITEM_CAPE_OF_OVERRULE)
+    if (GameLogic::Items::IsThirdTierWing(ip))
     {
         if (ip->Level - 9 > 0)
         {
@@ -732,7 +731,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     int addValue = 4;
 
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
     {
         addValue = 5;
     }
@@ -770,7 +769,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     if (p->RequireEnergy)
     {
-        if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
+        if (GameLogic::Items::IsSummonerBook(ip))
         {
             ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 1) * 3 / 100;
         }
@@ -851,7 +850,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         isExcellent = false;
     }
 
-    if (isExcellent && ip->RequireLevel > 0 && !IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
+    if (isExcellent && ip->RequireLevel > 0 && !GameLogic::Items::IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
     {
         ip->RequireLevel += 20;
     }
@@ -859,7 +858,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
 void CalcWingOptions(ITEM* ip)
 {
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
     {
         if (ip->ExcellentFlags & 0x01)
         {
@@ -916,8 +915,7 @@ void CalcWingOptions(ITEM* ip)
             ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_CHARISMA; ip->SpecialNum++;
         }
     }
-    else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || (ip->Type == ITEM_CAPE_OF_OVERRULE))
+    else if (GameLogic::Items::IsThirdTierWing(ip))
     {
         if (ip->ExcellentFlags & 0x01)
         {
@@ -1042,7 +1040,7 @@ void CalcExcellentOptions(ITEM* ip)
             break;
         }
     }
-    if (ip->Type == ITEM_HELPER + 107)
+    if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
     {
         ip->SpecialValue[ip->SpecialNum] = 15;
         ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC_PERCENT; ip->SpecialNum++;
@@ -1058,7 +1056,7 @@ void CalcPartType(ITEM* ip)
     //part
     if (ip->Type >= ITEM_BOW && ip->Type < ITEM_CROSSBOW || ip->Type == ITEM_CELESTIAL_BOW)
         ip->Part = EQUIPMENT_WEAPON_LEFT;
-    if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBook(ip))
         ip->Part = EQUIPMENT_WEAPON_LEFT;
     else if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
         ip->Part = EQUIPMENT_WEAPON_RIGHT;
@@ -1137,7 +1135,7 @@ void SetItemAttributes(ITEM* ip)
     {
         if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
         {
-            if (ip->Type != ITEM_BOLT && ip->Type != ITEM_ARROWS)
+            if (!GameLogic::Items::IsAmmunition(ip))
             {
                 ip->Special[ip->SpecialNum] = AT_LUCK;
                 ip->SpecialNum++;
@@ -1154,8 +1152,7 @@ void SetItemAttributes(ITEM* ip)
             ip->Special[ip->SpecialNum] = AT_LUCK;
             ip->SpecialNum++;
         }
-        if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-            || (ip->Type == ITEM_CAPE_OF_OVERRULE))
+        if (GameLogic::Items::IsThirdTierWing(ip))
         {
             ip->Special[ip->SpecialNum] = AT_LUCK;
             ip->SpecialNum++;
@@ -1187,7 +1184,7 @@ void SetItemAttributes(ITEM* ip)
         {
             if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOW + MAX_ITEM_INDEX)
             {
-                if (ip->Type != ITEM_BOLT && ip->Type != ITEM_ARROWS)
+                if (!GameLogic::Items::IsAmmunition(ip))
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
@@ -1197,7 +1194,7 @@ void SetItemAttributes(ITEM* ip)
             if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
+                if (GameLogic::Items::IsSummonerBook(ip))
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE;
                 else
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
@@ -1620,7 +1617,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         Gold = 33000000;
     }
-    else if (ip->Type == ITEM_SCROLL_OF_ARCHANGEL || ip->Type == ITEM_BLOOD_BONE)
+    else if (GameLogic::Items::IsBloodCastleTicketPart(ip))
     {
         switch (Level)
         {
@@ -1677,7 +1674,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         Gold = 5000;
     }
-    else if (ip->Type == ITEM_POTION + 21)
+    else if (ip->Type == ITEM_RENA)
     {
         if (Level == 0)
             Gold = 9000;
@@ -1719,8 +1716,8 @@ int64_t ItemValue(ITEM* ip, int goldType)
             Gold = 3000 * 3;
         }
     }
-    else if (ip->Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR || ip->Type == ITEM_BROKEN_SWORD_DARK_STONE || ip->Type == ITEM_TEAR_OF_ELF || ip->Type == ITEM_SOUL_SHARD_OF_WIZARD
-        || ip->Type == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT || ip->Type == ITEM_HORN_OF_HELL_MAINE || ip->Type == ITEM_FEATHER_OF_DARK_PHOENIX || ip->Type == ITEM_EYE_OF_ABYSSAL
+    else if (GameLogic::Items::IsSecondClassQuestItem(ip)
+        || GameLogic::Items::IsThirdClassQuestItem(ip)
         )
     {
         Gold = 9000;
@@ -1729,7 +1726,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         Gold = 1000;
     }
-    else if (ip->Type == ITEM_POTION + 20)
+    else if (ip->Type == ITEM_REMEDY_OF_LOVE)
     {
         Gold = 900;
     }
@@ -1761,7 +1758,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         case 1: Gold = (long long)450000 * ip->Durability; break;
         }
     }
-    else if (ip->Type == ITEM_HELPER + 7)
+    else if (ip->Type == ITEM_CONTRACT_SUMMON)
     {
         switch (Level)
         {
@@ -1793,7 +1790,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         }
         Gold *= ip->Durability;
     }
-    else if (ip->Type >= ITEM_SMALL_COMPLEX_POTION && ip->Type <= ITEM_LARGE_COMPLEX_POTION)
+    else if (GameLogic::Items::IsComplexPotion(ip))
     {
         switch (ip->Type)
         {
@@ -1881,7 +1878,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
             }
         }
     }
-    else if (ip->Type == ITEM_POTION + 53)
+    else if (ip->Type == ITEM_TALISMAN_OF_LUCK)
     {
         Gold = 0;
     }
@@ -2063,12 +2060,12 @@ int64_t ItemValue(ITEM* ip, int goldType)
         Gold = (long long)ip->Durability * 50;
     }
 
-    if (ip->Type == ITEM_HELPER + 71 || ip->Type == ITEM_HELPER + 72 || ip->Type == ITEM_HELPER + 73 || ip->Type == ITEM_HELPER + 74 || ip->Type == ITEM_HELPER + 75)
+    if (GameLogic::Items::IsGambleItem(ip))
     {
         Gold = 2000000;
     }
 
-    if ((ip->Type == ITEM_DARK_HORSE_ITEM) || (ip->Type == ITEM_DARK_RAVEN_ITEM))
+    if (GameLogic::Items::IsDarkLordPet(ip))
     {
         PET_INFO* pPetInfo = giPetManager::GetPetInfo(ip);
 
@@ -2080,67 +2077,67 @@ int64_t ItemValue(ITEM* ip, int goldType)
 
     switch (ip->Type)
     {
-    case ITEM_POTION + 112:
-    case ITEM_POTION + 113:
-    case ITEM_POTION + 121:
-    case ITEM_POTION + 122:
-    case ITEM_POTION + 123:
-    case ITEM_POTION + 124:
+    case ITEM_SILVER_KEY:
+    case ITEM_GOLD_KEY:
+    case ITEM_SEALED_GOLDEN_BOX:
+    case ITEM_SEALED_SILVER_BOX:
+    case ITEM_GOLDEN_BOX:
+    case ITEM_SILVER_BOX:
     case ITEM_PET_PANDA:
     case ITEM_PANDA_TRANSFORMATION_RING:
     case ITEM_DEMON:
     case ITEM_SPIRIT_OF_GUARDIAN:
-    case ITEM_HELPER + 109:
-    case ITEM_HELPER + 110:
-    case ITEM_HELPER + 111:
-    case ITEM_HELPER + 112:
-    case ITEM_HELPER + 113:
-    case ITEM_HELPER + 114:
-    case ITEM_HELPER + 115:
+    case ITEM_SAPPHIRE_RING:
+    case ITEM_RUBY_RING:
+    case ITEM_TOPAZ_RING:
+    case ITEM_AMETHYST_RING:
+    case ITEM_RUBY_NECKLACE:
+    case ITEM_EMERALD_NECKLACE:
+    case ITEM_SAPPHIRE_NECKLACE:
         Gold = 1000;
         break;
     case ITEM_SKELETON_TRANSFORMATION_RING:
     case ITEM_PET_SKELETON:
         Gold = 2000;
         break;
-    case ITEM_WING + 130:
-    case ITEM_WING + 131:
-    case ITEM_WING + 132:
-    case ITEM_WING + 133:
-    case ITEM_WING + 134:
-    case ITEM_WING + 135:
+    case ITEM_SMALL_CAPE_OF_LORD:
+    case ITEM_SMALL_WING_OF_CURSE:
+    case ITEM_SMALL_WINGS_OF_ELF:
+    case ITEM_SMALL_WINGS_OF_HEAVEN:
+    case ITEM_SMALL_WINGS_OF_SATAN:
+    case ITEM_LITTLE_WARRIORS_CLOAK:
         Gold = 80;
         break;
     }
 
     if (ip->Type == ITEM_TRANSFORMATION_RING || ip->Type == ITEM_WIZARDS_RING || ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
         goto EXIT_CALCULATE;
-    if (ip->Type == ITEM_BOLT || ip->Type == ITEM_ARROWS || ip->Type >= ITEM_POTION)
+    if (GameLogic::Items::IsAmmunition(ip) || ip->Type >= ITEM_POTION)
         goto EXIT_CALCULATE;
     if (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_ORB_OF_DEATH_STAB)
         goto EXIT_CALCULATE;
-    if ((ip->Type >= ITEM_LOCHS_FEATHER && ip->Type <= ITEM_WEAPON_OF_ARCHANGEL) || ip->Type == ITEM_POTION + 21)
+    if ((ip->Type >= ITEM_LOCHS_FEATHER && ip->Type <= ITEM_WEAPON_OF_ARCHANGEL) || ip->Type == ITEM_RENA)
         goto EXIT_CALCULATE;
-    if (ip->Type == ITEM_SIEGE_POTION || ip->Type == ITEM_HELPER + 7 || ip->Type == ITEM_LIFE_STONE_ITEM)
+    if (ip->Type == ITEM_SIEGE_POTION || ip->Type == ITEM_CONTRACT_SUMMON || ip->Type == ITEM_LIFE_STONE_ITEM)
         goto EXIT_CALCULATE;
     if ((ip->Type >= ITEM_OLD_SCROLL) && (ip->Type <= ITEM_SCROLL_OF_BLOOD))
         goto EXIT_CALCULATE;
 
     switch (ip->Type)
     {
-    case ITEM_POTION + 112:	goto EXIT_CALCULATE;
+    case ITEM_SILVER_KEY:	goto EXIT_CALCULATE;
         // MODEL_POTION+113
-    case ITEM_POTION + 113:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 121:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 122:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 123:	goto EXIT_CALCULATE;
-    case ITEM_POTION + 124:	goto EXIT_CALCULATE;
-    case ITEM_WING + 130:
-    case ITEM_WING + 131:
-    case ITEM_WING + 132:
-    case ITEM_WING + 133:
-    case ITEM_WING + 134:
-    case ITEM_WING + 135:
+    case ITEM_GOLD_KEY:	goto EXIT_CALCULATE;
+    case ITEM_SEALED_GOLDEN_BOX:	goto EXIT_CALCULATE;
+    case ITEM_SEALED_SILVER_BOX:	goto EXIT_CALCULATE;
+    case ITEM_GOLDEN_BOX:	goto EXIT_CALCULATE;
+    case ITEM_SILVER_BOX:	goto EXIT_CALCULATE;
+    case ITEM_SMALL_CAPE_OF_LORD:
+    case ITEM_SMALL_WING_OF_CURSE:
+    case ITEM_SMALL_WINGS_OF_ELF:
+    case ITEM_SMALL_WINGS_OF_HEAVEN:
+    case ITEM_SMALL_WINGS_OF_SATAN:
+    case ITEM_LITTLE_WARRIORS_CLOAK:
         goto EXIT_CALCULATE;
     case ITEM_SKELETON_TRANSFORMATION_RING:
         goto EXIT_CALCULATE;
@@ -2153,19 +2150,19 @@ int64_t ItemValue(ITEM* ip, int goldType)
     case ITEM_DEMON:
     case ITEM_SPIRIT_OF_GUARDIAN:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 109:
+    case ITEM_SAPPHIRE_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 110:
+    case ITEM_RUBY_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 111:
+    case ITEM_TOPAZ_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 112:
+    case ITEM_AMETHYST_RING:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 113:
+    case ITEM_RUBY_NECKLACE:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 114:
+    case ITEM_EMERALD_NECKLACE:
         goto EXIT_CALCULATE;
-    case ITEM_HELPER + 115:
+    case ITEM_SAPPHIRE_NECKLACE:
         goto EXIT_CALCULATE;
     case ITEM_HELPER + 128:
     case ITEM_HELPER + 129:
@@ -2784,7 +2781,7 @@ void CHARACTER_MACHINE::CalculateDamage()
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 74);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_WRATH);
         Character.AttackDamageMinRight += Item_data.m_byValue1;
         Character.AttackDamageMaxRight += Item_data.m_byValue1;
         Character.AttackDamageMinLeft += Item_data.m_byValue1;
@@ -3008,7 +3005,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 75);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_WIZARDRY);
         Character.MagicDamageMin += Item_data.m_byValue1;
         Character.MagicDamageMax += Item_data.m_byValue1;
     }
@@ -3336,7 +3333,7 @@ void CHARACTER_MACHINE::CalculateDefense()
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2))
     {
-        const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 73);
+        const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_DEFENSE);
         Character.Defense += (WORD)Item_data.m_byValue1;
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3))
@@ -3466,27 +3463,27 @@ void CHARACTER_MACHINE::CalculateBasicState()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_STRENGTH);
         Character.AddStrength += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_AGILITY);
         Character.AddDexterity += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_HEALTH);
         Character.AddVitality += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_ENERGY);
         Character.AddEnergy += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
     {
-        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_CONTROL);
         Character.AddCharisma += (WORD)Item_data.m_byValue1;
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
@@ -3507,27 +3504,27 @@ void CHARACTER_MACHINE::getAllAddStateOnlyExValues(int& iAddStrengthExValues, in
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_STRENGTH);
         iAddStrengthExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_AGILITY);
         iAddDexterityExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_HEALTH);
         iAddVitalityExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_ENERGY);
         iAddEnergyExValues += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
+        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_ELIXIR_OF_CONTROL);
         iAddCharismaExValues += (WORD)Item_data.m_byValue1;
     }
 

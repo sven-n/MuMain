@@ -21,6 +21,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Scenes/MainScene.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 using mu::PackABGR;
 
@@ -4261,20 +4262,14 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->SubType == 10)
             {
-                if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA
-                    || c->Helper.Type == MODEL_HORN_OF_DINORANT
-                    || c->Helper.Type == MODEL_DARK_HORSE_ITEM
-                    || c->Helper.Type == MODEL_HORN_OF_FENRIR) && c->SafeZone == false)
+                if (GameLogic::Items::IsRideableMountModel(c->Helper.Type) && c->SafeZone == false)
                 {
                     o->SubType = 11;
                 }
             }
             else if (o->SubType == 11)
             {
-                if ((c->Helper.Type != MODEL_HORN_OF_UNIRIA
-                    && c->Helper.Type != MODEL_HORN_OF_DINORANT
-                    && c->Helper.Type != MODEL_DARK_HORSE_ITEM
-                    && c->Helper.Type != MODEL_HORN_OF_FENRIR) || c->SafeZone == true)
+                if (!GameLogic::Items::IsRideableMountModel(c->Helper.Type) || c->SafeZone == true)
                 {
                     o->SubType = 10;
                 }

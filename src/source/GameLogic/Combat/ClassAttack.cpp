@@ -49,6 +49,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern void SetPlayerBow(CHARACTER* c);
@@ -276,10 +277,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         if (g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow) == false)
         {
             SendRequestMagic(Skill, HeroKey);
-            if ((c->Helper.Type == MODEL_HORN_OF_FENRIR)
-                || (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
-                || (c->Helper.Type == MODEL_HORN_OF_DINORANT)
-                || (c->Helper.Type == MODEL_DARK_HORSE_ITEM))
+            if (GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                 SetPlayerMagic(c);
             else
                 SetAction(o, PLAYER_RUSH1);
@@ -844,7 +842,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             break;
             case AT_SKILL_PARTY_TELEPORT:
                 if (gMapManager.IsCursedTemple()
-                    && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
+                    && !g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true))
                 {
                     return;
                 }
@@ -1406,7 +1404,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         {
         case AT_SKILL_TELEPORT_ALLY:
             if (gMapManager.IsCursedTemple()
-                && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
+                && !g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true))
             {
                 return;
             }

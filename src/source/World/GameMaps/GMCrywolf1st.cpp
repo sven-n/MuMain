@@ -19,6 +19,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "I18N/All.h"
 #include "UI/Scaling/UITransform.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
@@ -2240,10 +2241,7 @@ void M34CryWolf1st::MoveMvp_Interface()
         {
             if (MouseLButton == true)
             {
-                if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA
-                    || Hero->Helper.Type == MODEL_HORN_OF_DINORANT
-                    || Hero->Helper.Type == MODEL_HORN_OF_FENRIR
-                    )
+                if (GameLogic::Items::IsHornMountModel(Hero->Helper.Type))
                 {
                     Set_Message_Box(6, 0, 0);
                 }

@@ -8,6 +8,7 @@
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ShopRestrictions.h"
 
 const int iMAX_SHOPTITLE_MULTI = 26;
 
@@ -289,7 +290,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
 #ifndef KJH_FIX_CHANGE_ITEM_PRICE_IN_PERSONAL_SHOP				// #ifndef
-        if (IsPersonalShopBan(pItemObj))
+        if (GameLogic::Items::IsPersonalShopBan(pItemObj))
             m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
         else
             m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
@@ -302,7 +303,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 
         if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
         {
-            if (IsPersonalShopBan(pItemObj) == true)
+            if (GameLogic::Items::IsPersonalShopBan(pItemObj) == true)
             {
                 g_pSystemLogBox->AddText(I18N::Game::ThisItemIsNotAllowedToUseThePrivateStore, SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
@@ -322,7 +323,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         }
         else if (pPickedItem->GetOwnerInventory() == NULL)
         {
-            if (IsPersonalShopBan(pItemObj) == true)
+            if (GameLogic::Items::IsPersonalShopBan(pItemObj) == true)
             {
                 g_pSystemLogBox->AddText(I18N::Game::ThisItemIsNotAllowedToUseThePrivateStore, SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;

@@ -11,6 +11,8 @@
 #include "Engine/Object/ZzzInventory.h"
 
 #include "GameLogic/Social/GambleSystem.h"
+#include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ShopRestrictions.h"
 
 using namespace SEASON3B;
 
@@ -325,7 +327,7 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     if (!pPickedItem)			return false;
     ITEM* pItem = pPickedItem->GetItem();
 
-    if (IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
+    if (GameLogic::Items::IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
     else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
 
     if (SEASON3B::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true && m_bSellingItem == false)
@@ -343,14 +345,14 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
             return true;
         }
-        if (pItem && IsSellingBan(pItem) == true)
+        if (pItem && GameLogic::Items::IsSellingBan(pItem) == true)
         {
             g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
             m_pNewInventoryCtrl->BackupPickedItem();
 
             return true;
         }
-        if (pItem && IsHighValueItem(pItem) == true)
+        if (pItem && GameLogic::Items::IsHighValueItem(pItem) == true)
         {
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
             pPickedItem->HidePickedItem();

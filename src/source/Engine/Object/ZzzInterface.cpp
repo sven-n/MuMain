@@ -54,7 +54,7 @@
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "GameLogic/Items/ItemBehavior.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
@@ -1829,7 +1829,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 if (Sit)
                 {
-                    if ((!c->SafeZone) && (c->Helper.Type == MODEL_HORN_OF_FENRIR || c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT || c->Helper.Type == MODEL_DARK_HORSE_ITEM))
+                    if ((!c->SafeZone) && GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                         return;
 
                     if (!gCharacterManager.IsFemale(c->Class))
@@ -2674,7 +2674,7 @@ DWORD g_dwLatestZoneMoving = 0;
 
 void CheckGate()
 {
-    if ((g_pMyInventory->IsItem(ITEM_POTION + 64, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_POTION + 64, false)))
+    if ((g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, false)))
     {
         return;
     }
@@ -3100,7 +3100,7 @@ void MoveHero()
             if (!pPickedItem && RightType == -1 &&
                 ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
                     || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !(LeftType >= ITEM_BOOK_OF_SAHAMUTT && LeftType <= ITEM_STAFF + 29)
+                        && !GameLogic::Items::IsSummonerBookType(LeftType)
                         )))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
@@ -4198,8 +4198,7 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     short pEquipedHelperType = (&CharacterMachine->Equipment[EQUIPMENT_HELPER])->Type;
     short pEquipedWingType = (&CharacterMachine->Equipment[EQUIPMENT_WING])->Type;
 
-    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HORN_OF_DINORANT &&
-        pEquipedHelperType != ITEM_HORN_OF_FENRIR && pEquipedHelperType != ITEM_DARK_HORSE_ITEM) ||
+    if ((pEquipedWingType == -1 && !GameLogic::Items::IsFlyingMount(&CharacterMachine->Equipment[EQUIPMENT_HELPER])) ||
         pEquipedHelperType == ITEM_HORN_OF_UNIRIA)
     {
         bCantFly = true;

@@ -51,6 +51,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern MovementSkill g_MovementSkill;
@@ -326,11 +327,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                     || ClassIndex == CLASS_RAGEFIGHTER)
                 {
                     bool bOk = false;
-                    if (c->Helper.Type != MODEL_HORN_OF_UNIRIA
-                        && c->Helper.Type != MODEL_HORN_OF_DINORANT
-                        && c->Helper.Type != MODEL_DARK_HORSE_ITEM
-                        && c->Helper.Type != MODEL_HORN_OF_FENRIR
-                        )
+                    if (!GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                     {
                         bOk = true;
                     }

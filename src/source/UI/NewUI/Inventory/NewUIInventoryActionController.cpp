@@ -18,9 +18,12 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ShopRestrictions.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 namespace SEASON3B
 {
@@ -226,7 +229,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
         return false;
     }
 
-    if (IsSellingBan(pItem))
+    if (GameLogic::Items::IsSellingBan(pItem))
     {
         g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, TYPE_ERROR_MESSAGE);
         return true;
@@ -259,7 +262,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
         return false;
     }
 
-    if (IsHighValueItem(pItem))
+    if (GameLogic::Items::IsHighValueItem(pItem))
     {
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CHighValueItemCheckMsgBoxLayout));
         return true;
@@ -419,13 +422,13 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
         return false;
     }
 
-    if (IsHighValueItem(pItem))
+    if (GameLogic::Items::IsHighValueItem(pItem))
     {
         g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
         return true;
     }
 
-    if (IsDropBan(pItem))
+    if (GameLogic::Items::IsDropBan(pItem))
     {
         g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
         return true;
@@ -463,7 +466,7 @@ bool CNewUIInventoryActionController::RepairItemAtMousePoint(CNewUIInventoryCtrl
         return true;
     }
 
-    if (IsRepairBan(pItem))
+    if (GameLogic::Items::IsRepairBan(pItem))
     {
         return true;
     }
@@ -487,8 +490,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
 {
     const bool bIsJewelType = pPickItem->Type == ITEM_JEWEL_OF_BLESS || pPickItem->Type == ITEM_JEWEL_OF_SOUL ||
                               pPickItem->Type == ITEM_JEWEL_OF_LIFE || pPickItem->Type == ITEM_JEWEL_OF_HARMONY ||
-                              pPickItem->Type == ITEM_LOWER_REFINE_STONE ||
-                              pPickItem->Type == ITEM_HIGHER_REFINE_STONE || pPickItem->Type == ITEM_POTION + 160 ||
+                              GameLogic::Items::IsRefineStone(pPickItem) || pPickItem->Type == ITEM_POTION + 160 ||
                               pPickItem->Type == ITEM_POTION + 161;
 
     if (!bIsJewelType)
@@ -508,15 +510,12 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
 
     bool bSuccess = true;
 
-    if (iType > ITEM_WINGS_OF_DARKNESS && iType != ITEM_CAPE_OF_LORD &&
-        !(iType >= ITEM_WING_OF_STORM && iType <= ITEM_WING_OF_DIMENSION) &&
-        !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134) &&
-        !(iType >= ITEM_CAPE_OF_FIGHTER && iType <= ITEM_CAPE_OF_OVERRULE) && (iType != ITEM_WING + 135))
+    if (iType > ITEM_WINGS_OF_DARKNESS && !GameLogic::Items::IsWingItem(pItem))
     {
         bSuccess = false;
     }
 
-    if (iType == ITEM_BOLT || iType == ITEM_ARROWS)
+    if (GameLogic::Items::IsAmmunitionType(iType))
     {
         bSuccess = false;
     }
@@ -561,7 +560,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         }
     }
 
-    if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+    if (GameLogic::Items::IsRefineStone(pPickItem))
     {
         if (g_SocketItemMgr.IsSocketItem(pItem))
         {
@@ -632,15 +631,15 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     const auto isPotion = (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_ALE) ||
                           (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
 
-    if (isApple || isPotion || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0) ||
+    if (isApple || isPotion || (pItem->Type == ITEM_REMEDY_OF_LOVE && pItem->Level == 0) ||
         (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK) ||
         (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14) ||
-        (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71) ||
-        (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77) || pItem->Type == ITEM_HELPER + 60 ||
-        pItem->Type == ITEM_POTION + 94 ||
+        GameLogic::Items::IsElitePotion(pItem) ||
+        GameLogic::Items::IsBuffScroll(pItem) || pItem->Type == ITEM_INDULGENCE ||
+        pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION ||
         (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL) ||
-        (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98) || pItem->Type == ITEM_HELPER + 81 ||
-        pItem->Type == ITEM_HELPER + 82 || pItem->Type == ITEM_POTION + 133)
+        GameLogic::Items::IsBattleOrStrengthScroll(pItem) || pItem->Type == ITEM_TALISMAN_OF_GUARDIAN ||
+        pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION || pItem->Type == ITEM_ELITE_SD_POTION)
     {
         SendRequestUse(iIndex, 0);
         if (isApple)
@@ -655,7 +654,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82)
+    if (GameLogic::Items::IsElixir(pItem))
     {
         std::list<eBuffState> secretPotionbufflist;
         secretPotionbufflist.push_back(eBuff_SecretPotion1);
@@ -674,8 +673,8 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if ((pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 57) ||
-        (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
+    if ((pItem->Type >= ITEM_RESET_FRUIT_STRENGTH && pItem->Type <= ITEM_RESET_FRUIT_ENERGY) ||
+        (pItem->Type == ITEM_RESET_FRUIT_CONTROL && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
     {
         WORD point[5] = {
             0,
@@ -691,7 +690,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
             26, 0,  26, 20, 20, 15, 25, 21, 21, 18, 23, 0,  32, 27, 25, 20, 0,
         };
 
-        const int attributeType = pItem->Type - (ITEM_HELPER + 54);
+        const int attributeType = pItem->Type - (ITEM_RESET_FRUIT_STRENGTH);
         const int characterClass = gCharacterManager.GetBaseClass(Hero->Class);
         point[attributeType] -= nStat[characterClass][attributeType];
 
@@ -706,7 +705,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
+    if (pItem->Type == ITEM_RESET_FRUIT_CONTROL && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
     {
         CreateOkMessageBox(I18N::Game::OnlyDarklordCanUseIt);
         return true;
@@ -733,21 +732,21 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 46)
+    if (pItem->Type == ITEM_DEVIL_SQUARE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::DevilSquare, byPossibleLevel);
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 47)
+    if (pItem->Type == ITEM_BLOOD_CASTLE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::BloodCastle, byPossibleLevel);
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 48)
+    if (pItem->Type == ITEM_KALIMA_TICKET)
     {
         if (Hero->SafeZone || gMapManager.InHellas())
         {
@@ -759,14 +758,14 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 61)
+    if (pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::CursedTemple, byPossibleLevel);
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 121)
+    if (pItem->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
     {
         if (Hero->SafeZone == false)
         {
@@ -913,7 +912,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 69)
+    if (pItem->Type == ITEM_TALISMAN_OF_RESURRECTION)
     {
         if (g_PortalMgr.IsRevivePositionSaved())
         {
@@ -931,7 +930,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 70)
+    if (pItem->Type == ITEM_TALISMAN_OF_MOBILITY)
     {
         if (g_PortalMgr.IsPortalUsable())
         {
@@ -961,7 +960,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 66)
+    if (pItem->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
     {
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseSantaInvitationMsgBoxLayout));

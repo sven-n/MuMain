@@ -32,9 +32,12 @@ extern bool SelectFlag;
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
+#include "GameLogic/Items/ShopRestrictions.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 using namespace SEASON3B;
 
@@ -363,7 +366,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
         if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_RAVEN_ITEM) || pItem->Type == ITEM_HORN_OF_FENRIR)
             return false;
     }
-    else if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_HORSE_ITEM || pItem->Type == ITEM_HORN_OF_FENRIR)
+    else if (GameLogic::Items::IsRideableMount(pItem)
         && Hero->Object.CurrentAction >= PLAYER_SIT1 && Hero->Object.CurrentAction <= PLAYER_SIT_FEMALE2)
     {
         return false;
@@ -495,7 +498,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             ResetMouseLButton();
             return false;
         }
-        if (pItemObj && IsHighValueItem(pItemObj) == true)
+        if (pItemObj && GameLogic::Items::IsHighValueItem(pItemObj) == true)
         {
             g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
@@ -503,7 +506,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             ResetMouseLButton();
             return false;
         }
-        if (pItemObj && IsDropBan(pItemObj))
+        if (pItemObj && GameLogic::Items::IsDropBan(pItemObj))
         {
             g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
@@ -1051,11 +1054,7 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
             Hero->EtcPart = PARTS_LION;
         }
     }
-    if (pItem->Type == ITEM_WING_OF_RUIN || pItem->Type == ITEM_CAPE_OF_LORD ||
-        pItem->Type == ITEM_WING + 130 ||
-        (pItem->Type >= ITEM_CAPE_OF_FIGHTER && pItem->Type <= ITEM_CAPE_OF_OVERRULE) ||
-        (pItem->Type == ITEM_WING + 135) ||
-        pItem->Type == ITEM_CAPE_OF_EMPEROR)
+    if (GameLogic::Items::IsClothWing(pItem))
     {
         DeleteCloth(Hero, &Hero->Object);
     }
@@ -1068,15 +1067,8 @@ void CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
         ThePetProcess().DeletePet(Hero, pItem->Type);
     }
 
-    switch (pItem->Type)
+    if (GameLogic::Items::IsClothWing(pItem))
     {
-    case ITEM_CAPE_OF_LORD:
-    case ITEM_WING_OF_RUIN:
-    case ITEM_CAPE_OF_EMPEROR:
-    case ITEM_WING + 130:
-    case ITEM_CAPE_OF_FIGHTER:
-    case ITEM_CAPE_OF_OVERRULE:
-    case ITEM_WING + 135:
         DeleteCloth(Hero, &Hero->Object);
         return;
     }
@@ -1458,7 +1450,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                     return true;
                 }
 
-                if (IsRepairBan(pEquippedItem) == true)
+                if (GameLogic::Items::IsRepairBan(pEquippedItem) == true)
                 {
                     return true;
                 }
@@ -1489,8 +1481,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                         {
                             bPicked = false;
                         }
-                        else if (((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HORN_OF_DINORANT) || (pEquippedPetItem->Type == ITEM_DARK_HORSE_ITEM) || (pEquippedPetItem->Type == ITEM_HORN_OF_FENRIR)))
-                            )
+                        else if ((m_iPointedSlot == EQUIPMENT_WING) && !GameLogic::Items::IsFlyingMount(pEquippedPetItem))
                         {
                             bPicked = false;
                         }
@@ -1678,7 +1669,7 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     case ITEM_ANTIDOTE:
     case ITEM_ALE:
     case ITEM_TOWN_PORTAL_SCROLL:
-    case ITEM_POTION + 20:
+    case ITEM_REMEDY_OF_LOVE:
     case ITEM_SMALL_SHIELD_POTION:
     case ITEM_MEDIUM_SHIELD_POTION:
     case ITEM_LARGE_SHIELD_POTION:
@@ -1690,18 +1681,18 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     case ITEM_JACK_OLANTERN_CRY:
     case ITEM_JACK_OLANTERN_FOOD:
     case ITEM_JACK_OLANTERN_DRINK:
-    case ITEM_POTION + 70:
-    case ITEM_POTION + 71:
-    case ITEM_POTION + 78:
-    case ITEM_POTION + 79:
-    case ITEM_POTION + 80:
-    case ITEM_POTION + 81:
-    case ITEM_POTION + 82:
-    case ITEM_POTION + 94:
+    case ITEM_ELITE_HEALING_POTION:
+    case ITEM_ELITE_MANA_POTION:
+    case ITEM_ELIXIR_OF_STRENGTH:
+    case ITEM_ELIXIR_OF_AGILITY:
+    case ITEM_ELIXIR_OF_HEALTH:
+    case ITEM_ELIXIR_OF_ENERGY:
+    case ITEM_ELIXIR_OF_CONTROL:
+    case ITEM_MEDIUM_ELITE_HEALING_POTION:
     case ITEM_CHERRY_BLOSSOM_WINE:
     case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
     case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
-    case ITEM_POTION + 133:
+    case ITEM_ELITE_SD_POTION:
         return true;
     }
 

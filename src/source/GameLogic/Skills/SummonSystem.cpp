@@ -12,6 +12,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "SkillManager.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 CSummonSystem g_SummonSystem;
 
@@ -24,7 +25,7 @@ CSummonSystem::~CSummonSystem()
 
 void CSummonSystem::MoveEquipEffect(CHARACTER* pCharacter, int iItemType, int iItemLevel, int iItemOption1)
 {
-    if (iItemType >= MODEL_BOOK_OF_SAHAMUTT && iItemType <= MODEL_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBookModel(iItemType))
     {
         CreateEquipEffect_WristRing(pCharacter, iItemType, iItemLevel, iItemOption1);
         CreateEquipEffect_Summon(pCharacter, iItemType, iItemLevel, iItemOption1);

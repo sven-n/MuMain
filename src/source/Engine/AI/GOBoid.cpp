@@ -21,6 +21,7 @@
 #include "Camera/CameraMove.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Scenes/MainScene.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 int EnableEvent = 0;
 
@@ -53,8 +54,7 @@ bool IsMount(ITEM* pItem)
         || pItem->Type == ITEM_IMP
         || pItem->Type == ITEM_HORN_OF_UNIRIA
         || pItem->Type == ITEM_HORN_OF_DINORANT
-        || pItem->Type == ITEM_DARK_HORSE_ITEM
-        || pItem->Type == ITEM_DARK_RAVEN_ITEM
+        || GameLogic::Items::IsDarkLordPet(pItem)
         || pItem->Type == ITEM_HORN_OF_FENRIR
         )
     {

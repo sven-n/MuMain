@@ -10,6 +10,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 
 using namespace SEASON3B;
 
@@ -257,7 +258,7 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
         }
         else
         {
-            if (::IsStoreBan(pItemObj))
+            if (GameLogic::Items::IsStoreBan(pItemObj))
             {
                 m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
             }

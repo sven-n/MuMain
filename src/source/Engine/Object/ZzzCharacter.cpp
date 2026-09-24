@@ -45,6 +45,7 @@
 #include "Camera/CameraManager.h"
 #include "Camera/ICamera.h"
 #include "Engine/Object/CullingConstants.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -381,7 +382,7 @@ void SetPlayerStop(CHARACTER* c)
                                     SetAction(&c->Object, PLAYER_STOP_SCYTHE);
                             }
                             // 소환술사 스틱.
-                            else if (c->Weapon[0].Type >= MODEL_MISTERY_STICK && c->Weapon[0].Type <= MODEL_ETERNAL_WING_STICK)
+                            else if (GameLogic::Items::IsSummonerStickModel(c->Weapon[0].Type))
                             {
                                 ::SetAction(&c->Object, PLAYER_STOP_WAND);
                             }
@@ -662,7 +663,7 @@ void SetPlayerWalk(CHARACTER* c)
                                 SetAction(&c->Object, PLAYER_WALK_TWO_HAND_SWORD);
                             }
                         }
-                        else if (c->Weapon[0].Type >= MODEL_MISTERY_STICK && c->Weapon[0].Type <= MODEL_ETERNAL_WING_STICK)
+                        else if (GameLogic::Items::IsSummonerStickModel(c->Weapon[0].Type))
                         {
                             ::SetAction(&c->Object, PLAYER_WALK_WAND);
                         }
@@ -721,7 +722,7 @@ void SetPlayerWalk(CHARACTER* c)
                                 SetAction(&c->Object, PLAYER_RUN_TWO_HAND_SWORD);
                             }
                         }
-                        else if (c->Weapon[0].Type >= MODEL_MISTERY_STICK && c->Weapon[0].Type <= MODEL_ETERNAL_WING_STICK)
+                        else if (GameLogic::Items::IsSummonerStickModel(c->Weapon[0].Type))
                         {
                             ::SetAction(&c->Object, PLAYER_RUN_WAND);
                         }
@@ -6624,11 +6625,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS) return; // 1st and 2nd Wings
         else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
             return;
-        else if (MODEL_WING + 130 >= Type && Type <= MODEL_WING + 135) return; // Small Wings and Capes
+        else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK) return; // Small Wings and Capes
         else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE) return; // Capes
     }
 
-    if (Type >= MODEL_BOOK_OF_SAHAMUTT && Type <= MODEL_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBookModel(Type))
     {
         return;
     }
@@ -8423,10 +8424,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         case MODEL_WING_OF_RUIN:        // Wing of Ruin
         case MODEL_WING_OF_DIMENSION:        // Wing of Dimension
 
-        case MODEL_WING + 131:        // Small Wing of Curse
-        case MODEL_WING + 132:        // Small Wings of Elf
-        case MODEL_WING + 133:        // Small Wings of Heaven
-        case MODEL_WING + 134:        // Small Wings of Satan
+        case MODEL_SMALL_WING_OF_CURSE:        // Small Wing of Curse
+        case MODEL_SMALL_WINGS_OF_ELF:        // Small Wings of Elf
+        case MODEL_SMALL_WINGS_OF_HEAVEN:        // Small Wings of Heaven
+        case MODEL_SMALL_WINGS_OF_SATAN:        // Small Wings of Satan
             b->RenderBodyShadow();
             break;
             
@@ -8434,8 +8435,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         case MODEL_CAPE_OF_FIGHTER:      // Cape of Fighter
         case MODEL_CAPE_OF_EMPEROR:        // Cape of Emperor
         case MODEL_CAPE_OF_OVERRULE:        // Cape of Overrule
-        case MODEL_WING + 130:        // Small Cape of Lord
-        case MODEL_WING + 135:        // Little Warrior's Cloak
+        case MODEL_SMALL_CAPE_OF_LORD:        // Small Cape of Lord
+        case MODEL_LITTLE_WARRIORS_CLOAK:        // Little Warrior's Cloak
             b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
             break;
         default:
@@ -9722,7 +9723,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
                     pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
                 }
-                else if (c->Wing.Type == MODEL_WING + 130)
+                else if (c->Wing.Type == MODEL_SMALL_CAPE_OF_LORD)
                 {
                     pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 100.0f, 100.0f, BITMAP_ROBE + 7, BITMAP_ROBE + 7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
                     pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
@@ -9788,7 +9789,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
                     pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
                 }
-                else if (c->Wing.Type == MODEL_WING + 135)
+                else if (c->Wing.Type == MODEL_LITTLE_WARRIORS_CLOAK)
                 {
                     pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 150.0f, 130.0f, BITMAP_NCCAPE, BITMAP_NCCAPE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
                     pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
@@ -9927,7 +9928,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             {
                 if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
                 {
-                    if (i == 2 && ((c->Wing.Type != MODEL_CAPE_OF_LORD && c->Wing.Type != MODEL_CAPE_OF_EMPEROR && c->Wing.Type != MODEL_WING + 130) && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
+                    if (i == 2 && ((c->Wing.Type != MODEL_CAPE_OF_LORD && c->Wing.Type != MODEL_CAPE_OF_EMPEROR && c->Wing.Type != MODEL_SMALL_CAPE_OF_LORD) && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
                     {
                         continue;
                     }
@@ -9944,7 +9945,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 {
                     if (i == 0 && ((c->Wing.Type != MODEL_CAPE_OF_FIGHTER
                         && c->Wing.Type != MODEL_CAPE_OF_OVERRULE
-                        && c->Wing.Type != MODEL_WING + 135)
+                        && c->Wing.Type != MODEL_LITTLE_WARRIORS_CLOAK)
                         && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
                     {
                         continue;
@@ -10088,7 +10089,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
 
             PART_t* w = &c->Weapon[i];
-            if (w->Type != -1 && w->Type != MODEL_BOLT && w->Type != MODEL_ARROWS && w->Type != MODEL_DARK_RAVEN_ITEM)
+            if (w->Type != -1 && !GameLogic::Items::IsAmmunitionModel(w->Type) && w->Type != MODEL_DARK_RAVEN_ITEM)
             {
                 if (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW || o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW)
                 {
@@ -15227,7 +15228,7 @@ bool IsBackItem(CHARACTER* c, int iType)
         return true;
     }
 
-    if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX && !(iType >= MODEL_BOOK_OF_SAHAMUTT && iType <= MODEL_STAFF + 29))
+    if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX && !GameLogic::Items::IsSummonerBookModel(iType))
     {
         return true;
     }
@@ -15292,7 +15293,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 bBack = true;
             }
 
-            if (iType == MODEL_BOLT || iType == MODEL_ARROWS)
+            if (GameLogic::Items::IsAmmunitionModel(iType))
             {
                 bBack = true;
             }

@@ -18,6 +18,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 using namespace SEASON3B;
 
@@ -1442,7 +1443,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             }
         }
 
-        if (ITEM_BOOK_OF_SAHAMUTT <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF + 29)
+        if (GameLogic::Items::IsSummonerBook(pWeaponLeft))
         {
             float fCursePercent = (float)(pWeaponLeft->MagicPower) / 100;
 

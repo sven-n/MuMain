@@ -48,6 +48,7 @@
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern void SetPlayerBow(CHARACTER* c);
@@ -132,7 +133,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
         || Skill == AT_SKILL_DEATHSTAB
         || Skill == AT_SKILL_DEATHSTAB_STR
-        || (Skill == AT_SKILL_IMPALE && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
+        || (Skill == AT_SKILL_IMPALE && GameLogic::Items::IsRideableMountModel(Hero->Helper.Type))
         || Skill == AT_SKILL_FORCE
         || Skill == AT_SKILL_FORCE_WAVE
         || Skill == AT_SKILL_FORCE_WAVE_STR

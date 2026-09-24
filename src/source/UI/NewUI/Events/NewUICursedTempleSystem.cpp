@@ -475,7 +475,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
 
         if (pickitem)
         {
-            if (pickitem->Type == ITEM_POTION + 64)
+            if (pickitem->Type == ITEM_CURSED_CASTLE_WATER)
             {
                 return true;
             }
@@ -484,7 +484,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
 
     if (c == Hero)
     {
-        return g_pMyInventory->IsItem(ITEM_POTION + 64);
+        return g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER);
     }
     else
     {

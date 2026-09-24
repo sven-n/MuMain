@@ -14,6 +14,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
+#include "GameLogic/Items/ItemCategories.h"
 using namespace SEASON3B;
 
 namespace
@@ -367,7 +368,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (pItem->Type == ITEM_BOLT || pItem->Type == ITEM_ARROWS)
+    if (GameLogic::Items::IsAmmunition(pItem))
     {
         return false;
     }
@@ -387,10 +388,8 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
 #endif // PJH_ADD_PANDA_CHANGERING
         || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING || pItem->Type == ITEM_PET_PANDA ||
-        pItem->Type == ITEM_DEMON || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN || pItem->Type == ITEM_PET_SKELETON ||
-        pItem->Type == ITEM_HELPER + 107 || pItem->Type == ITEM_HELPER + 109 || pItem->Type == ITEM_HELPER + 110 ||
-        pItem->Type == ITEM_HELPER + 111 || pItem->Type == ITEM_HELPER + 112 || pItem->Type == ITEM_HELPER + 113 ||
-        pItem->Type == ITEM_HELPER + 114 || pItem->Type == ITEM_HELPER + 115
+        GameLogic::Items::IsDemonOrSpiritOfGuardian(pItem) || pItem->Type == ITEM_PET_SKELETON ||
+        pItem->Type == ITEM_LETHAL_WIZARDS_RING || GameLogic::Items::IsGemJewelry(pItem)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
         || g_pMyInventory->IsInvenItem(pItem->Type)
 #endif // LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -405,7 +404,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (IsWingItem(pItem) == true)
+    if (GameLogic::Items::IsWingItem(pItem) == true)
     {
         return true;
     }
@@ -966,7 +965,7 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
         {
             CreateItemToolTip(pItem);
 
-            if ((pItem->Type == ITEM_DARK_HORSE_ITEM) || (pItem->Type == ITEM_DARK_RAVEN_ITEM))
+            if (GameLogic::Items::IsDarkLordPet(pItem))
             {
                 const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
                 const int iTargetX = m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH +
@@ -1216,8 +1215,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                                 }
                                             }
                                         }
-                                        else if (pPickItem->Type == ITEM_LOWER_REFINE_STONE ||
-                                                 pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+                                        else if (GameLogic::Items::IsRefineStone(pPickItem))
                                         {
                                             if (pTargetItem->Jewel_Of_Harmony_Option != 0)
                                             {
@@ -1555,15 +1553,15 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71 && pItem->Durability > 1)
+        else if (GameLogic::Items::IsElitePotion(pItem) && pItem->Durability > 1)
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type == ITEM_POTION + 94 && pItem->Durability > 1)
+        else if (pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION && pItem->Durability > 1)
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82 && pItem->Durability > 1)
+        else if (GameLogic::Items::IsElixir(pItem) && pItem->Durability > 1)
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
@@ -1572,7 +1570,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type == ITEM_POTION + 133 && pItem->Durability > 1)
+        else if (pItem->Type == ITEM_ELITE_SD_POTION && pItem->Durability > 1)
         {
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
@@ -1754,8 +1752,8 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if ((iSrcType >= ITEM_SMALL_COMPLEX_POTION && iSrcType <= ITEM_LARGE_COMPLEX_POTION) &&
-        (iTarType >= ITEM_SMALL_COMPLEX_POTION && iTarType <= ITEM_LARGE_COMPLEX_POTION) &&
+    if (GameLogic::Items::IsComplexPotionType(iSrcType) &&
+        GameLogic::Items::IsComplexPotionType(iTarType) &&
         (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
@@ -1789,42 +1787,42 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 70 && iTarType == ITEM_POTION + 70 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_ELITE_HEALING_POTION && iTarType == ITEM_ELITE_HEALING_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 71 && iTarType == ITEM_POTION + 71 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_ELITE_MANA_POTION && iTarType == ITEM_ELITE_MANA_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 78 && iTarType == ITEM_POTION + 78 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_STRENGTH && iTarType == ITEM_ELIXIR_OF_STRENGTH && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 79 && iTarType == ITEM_POTION + 79 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_AGILITY && iTarType == ITEM_ELIXIR_OF_AGILITY && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 80 && iTarType == ITEM_POTION + 80 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_HEALTH && iTarType == ITEM_ELIXIR_OF_HEALTH && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 81 && iTarType == ITEM_POTION + 81 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_ENERGY && iTarType == ITEM_ELIXIR_OF_ENERGY && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 82 && iTarType == ITEM_POTION + 82 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_CONTROL && iTarType == ITEM_ELIXIR_OF_CONTROL && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 94 && iTarType == ITEM_POTION + 94 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_MEDIUM_ELITE_HEALING_POTION && iTarType == ITEM_MEDIUM_ELITE_HEALING_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
@@ -1847,12 +1845,12 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 88 && iTarType == ITEM_POTION + 88 && (iSrcDurability < 10 && iTarDurability < 10))
+    if (iSrcType == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH && iTarType == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH && (iSrcDurability < 10 && iTarDurability < 10))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 89 && iTarType == ITEM_POTION + 89 && (iSrcDurability < 30 && iTarDurability < 30))
+    if (iSrcType == ITEM_RED_CHERRY_BLOSSOM_BRANCH && iTarType == ITEM_RED_CHERRY_BLOSSOM_BRANCH && (iSrcDurability < 30 && iTarDurability < 30))
     {
         return true;
     }
@@ -1879,7 +1877,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 133 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_ELITE_SD_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
@@ -1896,8 +1894,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTar
 {
     const int iTargetLevel = pTargetItem->Level;
 
-    if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING) && (pTargetItem->Type != ITEM_BOLT) &&
-         (pTargetItem->Type != ITEM_ARROWS)) ||
+    if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING) && !GameLogic::Items::IsAmmunition(pTargetItem)) ||
         (pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WINGS_OF_DARKNESS) ||
         (pTargetItem->Type >= ITEM_WING_OF_STORM && pTargetItem->Type <= ITEM_WING_OF_DIMENSION))
     {
