@@ -60,9 +60,37 @@ pattern later but are not part of this work.
 | Models and textures | `OpenItems()` / `OpenItemTextures()` in `Engine/Object/ZzzOpenData.cpp` | Around 600 hardcoded lines mapping `MODEL_*` to `Data\Item\<File><n>.bmd`. The model id is always `MODEL_ITEM + itemType`, so every item slot already has a model slot. |
 | Item id space | `MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX` (16 groups × 512) | Same limits as the network protocol, so new items must fit into free slots. |
 | Data files in the repo | `src/bin/Data/` (e.g. `src/bin/Data/Local/Eng/item_eng.bmd`), copied beside `Main` at build time | Game data is versioned with the code, so data changes already go through PRs. |
-| Other item data | `ItemAddOption.bmd`, `SocketItem_<lang>.bmd`, `Mix.bmd`, `pet.bmd`, set options (`ItemSetType.bmd`, `ItemSetOption_<lang>.bmd`, loaded by `CSItemOption`) | Out of scope for the first phases; listed so they are not forgotten. The repo also contains `ItemTooltip*_<lang>.bmd` and `ItemLevelTooltip_<lang>.bmd`, which no code loads (probably unused). |
+| Other item data | `ItemAddOption.bmd`, `SocketItem_<lang>.bmd`, `Mix.bmd`, `pet.bmd`, set options (`ItemSetType.bmd`, `ItemSetOption_<lang>.bmd`, loaded by `CSItemOption`) | Out of scope for the first phases; listed so they are not forgotten. **Item sets may have to move together with items** if items cannot be made fully data-driven without them; we decide that when we get there. |
+| Tooltips | `RenderItemInfo()` in `Engine/Object/ZzzInventory.cpp` | Which lines an item's tooltip shows is hardcoded. |
+| Unused item files | See "Unused item files in the repo" below | Loaded by no code. |
 | Editor | `src/MuEditor/UI/ItemEditor/` (only in `_EDITOR` builds) | Table editor for the bmd fields; save to bmd, export to S6E3 bmd and CSV. |
 | UI translations | `.resx` → generated `I18N::*` (`docs/translation-system.md`) | Good for UI strings; item names are not part of it yet. |
+
+### Unused item files in the repo
+
+No code in the repo loads these files, and `git log -S` finds no loader
+in the history either. They use the usual bmd encoding (`BuxConvert` XOR
+`FC CF AB`, restarted for every record), followed by a 4-byte trailer
+(probably a checksum). They exist for `Eng`, `Por` and `Spn`.
+
+| File | Layout | Content |
+|---|---|---|
+| `ItemTooltip_<lang>.bmd` | 8192 records × 124 bytes; 906 used | Per item: `u16 group`, `u16 number`, `char name[64]`, then a list of up to about 12 tooltip lines as `(u16 textId, u16 style)` pairs (`0xFFFF` = no line). Example: *Kris* (0,0) shows lines 6, 8, 11, 12, 13, 14. Names are translated in the `Por`/`Spn` files ("Espada curta", "Espada corta"). |
+| `ItemTooltipText_<lang>.bmd` | 512 records × 260 bytes; 351 used | Tooltip line texts: `u16 id`, `char text[256]`, `u16 valueKind`. Examples: "One handed attack power: %d~%d", "Armor: %d", "Available HP: %d", "Increases damage by %d%%". `valueKind` looks like the value that fills the `%d` (0 = damage, 8 = HP, 2xx = options). |
+| `ItemLevelTooltip_<lang>.bmd` | 128 records × 102 bytes; 105 used | Items whose name and tooltip change with the item level: `u16 id`, `char name[64]`, then header words and `(textId, style)` pairs. Examples: "Box of Kundun +1" … "+5", "Scroll of Emperor", "Box of Heaven". |
+
+Our reading of the layout is taken from the bytes, not from a loader, so
+field meanings (especially the style and header words) are guesses.
+
+This is exactly the data a data-driven tooltip needs (which lines, which
+texts, which values, per item and item level), and it comes with names in
+three languages. Options: use it as the starting point when tooltips become
+data-driven, use it only as a reference, or delete it (see Q2).
+
+The repo also has extra item bmd copies that no code loads:
+`Data/Local/Item.bmd`, `Eng/item.bmd`, `Eng/item_eng_old.bmd`,
+`Eng/item_eng_orig.bmd`, `Por/item.bmd`, `Por/item_eng_old.bmd`,
+`Spn/item.bmd` (the game only loads `Item_<lang>.bmd`).
 
 ### Server (OpenMU)
 
@@ -378,3 +406,6 @@ OpenMU PRs (in parallel, separate repo):
   example: never send it to that client (hide it in shops, drops and
   views), block such items on servers set up for the original client, or
   show a placeholder item.
+- **Q2: Unused tooltip and item files.** Keep `ItemTooltip*` /
+  `ItemLevelTooltip` as input for data-driven tooltips, keep them only as a
+  reference, or delete them? Delete the unused extra item bmd copies?
