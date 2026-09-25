@@ -39,6 +39,13 @@ pattern later but are not part of this work.
 | D4 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
 | D5 | Editors | Several focused editors instead of one big table. |
 | D6 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
+| D7 | File layout | One JSON file per item group. |
+| D8 | Target version | Season 6 only for now. Other versions are easier to add once the data-driven setup exists. |
+| D9 | Identity | `(group, number)` only, no readable string key. Logs always show the English name next to it. Once rules read data instead of hardcoded ids, a readable key has no extra benefit. |
+| D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. |
+| D11 | Exchange scope | Item sets and drop settings are separate exchange files, not part of the item file. |
+| D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 6). |
+| D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 
 ## Current state
 
@@ -177,6 +184,8 @@ Each field belongs to one of two groups:
   even in editor mode.
 - One **exchange file format** (JSON, with a format version) keyed by
   `(Group, Number)`, containing only the shared fields.
+- Item sets and drop settings get their own exchange files later (D11).
+  Whether the item file contains the item's possible options is open (Q1).
 - **Client → server:** MuEditor exports the file; the admin imports it in a
   new OpenMU admin panel import page.
 - **Server → client:** a new OpenMU admin panel export page writes the same
@@ -202,6 +211,18 @@ Each field belongs to one of two groups:
   present in the last OpenMU import.
 - Limit: new items must fit into free slots of the 16 × 512 id space, the
   same as the network protocol.
+
+**Custom items and the original client (D12):**
+
+- Official Season 6 items keep their official `(group, number)`, so the
+  original client and this client agree on them.
+- Custom items take any free slot; there are no reserved ranges. The data
+  marks them as custom, so nothing depends on where their number lies.
+- OpenMU must keep working with the original Season 6 client. That client
+  does not know custom items, so the server has to handle them for it
+  (see Q2). OpenMU already knows which client a server is for
+  (`GameClientDefinition`: season, episode, language, version), which is a
+  possible hook.
 
 **Server (OpenMU):** the admin panel can already add and delete item
 definitions. New items also arrive through the import (section 5).
@@ -239,8 +260,9 @@ name, missing model file), and undo for the current session.
 1. **Item database**: flat tables loaded from the existing `Item_<lang>.bmd`;
    `ItemAttribute[]` filled from them. No behavior change. Add the log-name
    helper. Measure lookup and load performance.
-2. **Data file format**: JSON files per group, plus a converter from the
-   bmd. Decide whether bmd stays as a fallback.
+2. **Data file format**: JSON files per group become the only item source
+   for the game. MuEditor gets "Import from bmd" and "Export as bmd"; the
+   game stops reading `Item_<lang>.bmd`.
 3. **Rules and categories into data**: flags and tags replace the hardcoded
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
    Item sets are verified to be identical. Includes the client ↔ OpenMU
@@ -260,27 +282,19 @@ OpenMU PRs (in parallel, separate repo):
 
 ## Open questions
 
-- **Q1: One file or several?** A single `items.json`, or one file per item
-  group (smaller diffs, easier to review)? *Proposal:* one file per group.
-- **Q2: Target version.** OpenMU ships separate item data sets per game
-  version (`Version075`, `Version095d`, `VersionSeasonSix`), and a server
-  database is set up from one of them. They differ in which items exist and
-  in their values. MuMain is a Season 6 Episode 3 client, so its data
-  matches OpenMU's Season 6 set. Question: is Season 6 the only target, or
-  should the client data and the exchange file also work with servers set
-  up from the older versions? *Proposal:* Season 6 only.
-- **Q3: Stable string key.** Is `(group, number)` enough as identity, or do
-  we also want a readable key (e.g. `potion.apple`) in data files and logs?
-  A readable key makes files and logs easier to read, but has to stay
-  unique and must be kept when an item is renamed. *Proposal:*
-  `(group, number)` only; logs show the English name next to it.
-- **Q4: bmd fallback.** Keep reading `Item_<lang>.bmd` as a fallback after
-  phase 2, or remove it once the JSON files exist?
-- **Q5: Exchange file scope.** Only item definitions, or already include
-  the linked data OpenMU needs for a complete item (item options, set
-  groups, drop settings)?
-- **Q6: Custom items beyond Season 6.** Should custom items get their own
-  number range (e.g. high numbers per group) so they do not collide with
-  future official items?
-- **Q7: Other item files.** When do `ItemAddOption`, `SocketItem`, `Mix`,
-  `pet` and the set options follow, and in which order?
+- **Q1: Item options in the item file.** In OpenMU, each item has
+  `PossibleItemOptions`: links to shared option definitions such as
+  *Luck*, the *additional option* (+4 … +28, Jewel of Life), *excellent*
+  options, *wing* options, *harmony*, *guardian* (380) and *socket*
+  options. Whether an item can have a skill is a separate field
+  (`ItemDefinition.Skill`) and is part of the item file anyway.
+  *Proposal:* the item file contains only the **links** (which option
+  groups an item can have, e.g. "Luck, additional option, excellent
+  physical attack options"). The option definitions themselves (values,
+  chances, levels) get their own exchange file later, like sets.
+- **Q2: Custom items on the original client.** What should OpenMU do with a
+  custom item when the player uses the original Season 6 client? For
+  example: never send it to that client (hide it in shops, drops and
+  views), block such items on servers set up for the original client, or
+  show a placeholder item. This needs to be decided before custom items
+  are used on a server with original clients.
