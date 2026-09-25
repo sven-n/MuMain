@@ -8,11 +8,6 @@
 	<!-- Theme-neutral reference login panel; themes/modern/login.rml forks it for modern's
 	     decoration -- keep ids/data-model/event names in sync, LoginWin.cpp binds both by name. -->
 	<div id="panel" data-model="login">
-		<!-- Zero-size markers only -- LoginWin.cpp reads their resolved screen position to place the
-		     native username/password CUITextInputBox overlays instead of a per-theme hardcoded C++
-		     offset (see login.rcss's own comments for each theme's position). -->
-		<div id="input_account_anchor" class="input-text-anchor"></div>
-		<div id="input_password_anchor" class="input-text-anchor"></div>
 		<div class="frame-accent"></div>
 		<div class="login-content"></div>
 		<div class="header-glow"></div>
@@ -22,6 +17,19 @@
 
 		<div class="input-frame input-account"></div>
 		<div class="input-frame input-password"></div>
+		<!-- Username/password. Stock RmlUi <input>s bound two-way to LoginRmlModel::username/
+		     password; the password one is type="password" so RmlUi masks it. Each theme places
+		     these over its own frame art. Tab/Shift+Tab between them is RmlUi's own document-level
+		     navigation, which replaces the native boxes' reciprocal SetTabTarget() pair. maxlength
+		     comes from C++ (ApplyCredentialLimits()).
+
+		     Declared AFTER the frame art above on purpose: RmlUi paints siblings in document order,
+		     so a field sitting where the old zero-size anchors were rendered behind the frame, which
+		     hid its own text and caret. -->
+		<input id="input_account" type="text" class="text-field login-field login-field-account"
+		       data-value="username"/>
+		<input id="input_password" type="password" class="text-field login-field login-field-password"
+		       data-value="password"/>
 
 		<div class="checkbox-row checkbox-remember-me" data-event-click="login_toggle_remember_me">
 			<div class="checkbox-box" data-class-checked="remember_me_checked">

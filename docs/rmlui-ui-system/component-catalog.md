@@ -87,8 +87,21 @@ each other.
 
 Use a **stock RmlUi `<input>`**. There is no custom element, no C++ text widget and no wrapper
 framework — the vendored engine already provides the editable buffer, caret, selection, clipboard,
-`maxlength`, tab focus, `change` events and IME composition, and `CMyShopInventory`'s shop-name
-field is the proving consumer (`themes/*/my_shop.rml`).
+`maxlength`, tab focus, `change` events and IME composition. Consumers today: `CMyShopInventory`'s
+shop name, `CCharMakeWin`'s character name, `CGenericConfirmDialog`'s `Mode::Text` field, and
+`CLoginWin`'s username/password pair (the last also proving `type="password"` and Tab navigation).
+
+**Two rules that are invisible at compile time and will silently break a field:**
+
+1. **Never call `ElementDocument::Show()` per frame on a document containing an `<input>`.** It
+   defaults to `FocusFlag::Auto`, which focuses the document and blurs the field — one frame after
+   every click, so the field looks focusable but swallows every keystroke. Use
+   `UI::RmlBridge::SyncDocumentVisibility()` (`UI/RmlBridge/RmlDocumentVisibility.h`), which only
+   acts on an actual visibility transition. This caused the original failure *and* a later
+   regression in `CLoginWin::Render()`.
+2. **Declare the field after any frame art that overlaps it.** RmlUi paints siblings in document
+   order, so a field placed where an old zero-size position anchor sat renders *behind* the frame —
+   no visible text or caret, which reads as "can't focus" even though hover and focus are correct.
 
 Division of ownership:
 
@@ -96,17 +109,28 @@ Division of ownership:
   clipping/scrolling and hit testing. Bind the value two-way with `data-value="<model field>"`; do
   not poll the element each frame.
 - **RCSS** owns appearance. `.text-field` is the shared primitive in both themes' `base.rcss`
-  (`.text-field`, `:focus`, `.error`, `:disabled`, and the `selection` child for the selection
-  range). It deliberately carries **no** position or size — each consumer adds a local class for its
-  own box, the way `.my-shop-title-field` does.
+  (`.text-field`, `.error`, `:disabled`, and the `selection` child for the selection range). It
+  deliberately carries **no** position or size — each consumer adds a local class for its own box,
+  the way `.my-shop-title-field` does. There is deliberately **no `:focus` rule**: the native fields
+  these replaced drew no focus outline, so the blinking caret is the only focus cue. `:focus` works
+  if a screen ever wants one, but add it per consumer rather than to the shared class.
 - **C++** owns the semantic value and the rules about it: the length cap (set the `maxlength`
   attribute from code, as `ApplyShopTitleLimit()` does, so the limit can't drift per theme), any
   character filtering, and what counts as valid. Surface an invalid value as model state that
   toggles `.error` — never set a colour from C++.
 
 Notes for later consumers: use `type="password"` for masked input (the same `.text-field` styling
-applies); `autofocus` on the element makes `ElementDocument::Show()`'s own `FocusFlag::Auto` focus
-it on open, which is the declarative replacement for a native `GiveFocus()` call. SDL3 IME is
+applies), and set `type` from C++ when one field serves both (see `ApplyInputFieldConfig()` — changing
+`type` rebuilds the element's `InputType` and drops its value, so set type and limit *before* the
+value). `autofocus` makes `ElementDocument::Show()`'s `FocusFlag::Auto` focus the field on open — the
+declarative replacement for a native `GiveFocus()`, but **only for genuinely modal screens**: on an
+ordinary window it swallows every hotkey the moment the window opens, so My Shop deliberately omits
+it and is click-to-focus. Filtering that RmlUi has no equivalent for (digits-only) belongs in C++;
+enforce it by rejecting the keystroke, not by correcting the value afterwards: a capture-phase
+`textinput` listener on the document runs before the focused widget's own listener, and
+`StopPropagation()` there leaves the caret untouched (see `DigitOnlyInputFilter`). Writing a
+filtered value back onto the element instead re-enters `OnValueAttributeChanged()` and resets the
+caret to index 0. Clipboard paste raises no `textinput`, so filter on read as well. SDL3 IME is
 handled once, centrally, by `RmlUiRuntime`'s installed `TextInputMethodEditor_SDL` plus
 `RmlUiSystemInterface::ActivateKeyboard()` — a consumer needs no IME code of its own.
 

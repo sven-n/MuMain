@@ -466,27 +466,20 @@ void mu::ui::window::CMyShopInventory::ApplyShopTitleLimit()
         field->SetAttribute("maxlength", iMAX_SHOPTITLE_MULTI - 1);
 }
 
-// Drops keyboard focus from the shop-title <input> unless the cursor is inside it, reading the
-// field's position/size live from RCSS (same contract as this window's WindowGeometry hit-box) so
-// a theme is free to move or resize it without a matching C++ edit.
+// Drops keyboard focus from the shop-title <input> unless the cursor is actually over it. Uses
+// RmlUi's own hover hit-test rather than comparing the mouse against a rect derived from
+// GetAbsoluteOffset()/GetBox(): #panel carries a CSS transform: scale(), which those two report
+// inconsistently, so a hand-rolled rect blurred the field even on clicks inside it.
 void mu::ui::window::CMyShopInventory::BlurShopTitleOnOutsideClick()
 {
     if (!m_pRmlDoc) return;
 
     Rml::Element* field = m_pRmlDoc->GetElementById("shop_title");
-    if (field == nullptr || field->IsPseudoClassSet("focus") == false) return;
-
-    float fieldX = 0.f, fieldY = 0.f;
-    float fieldWidth = 0.f, fieldHeight = 0.f;
-    if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "shop_title", GetLayoutMode(), fieldX, fieldY)
-        && UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "shop_title", fieldWidth, fieldHeight)
-        && CheckMouseIn(static_cast<int>(fieldX), static_cast<int>(fieldY),
-                        static_cast<int>(fieldWidth), static_cast<int>(fieldHeight)))
-    {
+    if (field == nullptr)
         return;
-    }
 
-    field->Blur();
+    if (field->IsPseudoClassSet("focus") && !field->IsPseudoClassSet("hover"))
+        field->Blur();
 }
 
 void mu::ui::window::CMyShopInventory::GetTitle(wchar_t* titletext)

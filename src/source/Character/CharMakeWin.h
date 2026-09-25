@@ -34,10 +34,8 @@ namespace Rml { class ElementDocument; }
 // renders via RmlUi; m_aJobState below holds only the checked/enabled state RmlUi's job-list
 // binding reads, no rendering or click-detection of its own.
 //
-// The name input text itself stays on the legacy CUITextInputBox/RenderInputText path (matching
-// CLoginWin's precedent, not RmlUi's native <input>) -- drawn via RenderTextOnTop(), called from
-// Winmain.cpp's SetPostRmlUiCallback (already registered for CHARACTER_SCENE) so it's guaranteed
-// to render after RmlUi's own input-frame background regardless of theme.
+// The name field is a stock RmlUi <input> in the same document (see CharMakeRmlModel::charName), so
+// nothing about it is drawn natively and there is no post-RmlUi render seam for this window.
 //
 // m_sprBg is a real, visible full-screen dimming overlay, rendered first in Render() --
 // UpdateMouseEvent() unconditionally claims the click while shown, matching that genuine full-
@@ -84,12 +82,6 @@ public:
     void RmlClickOk() { SubmitCreateCharacter(); }
     void RmlClickCancel() { CloseDialog(); }
 
-    // Draws the legacy name-input text on top of RmlUi's input-frame background. Called from
-    // Winmain.cpp's SetPostRmlUiCallback (already registered for CHARACTER_SCENE) so it renders
-    // after RmlUi's own pass, guaranteed correct regardless of theme -- same pattern as
-    // CLoginWin::RenderTextOnTop().
-    void RenderTextOnTop();
-
     // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
@@ -123,6 +115,7 @@ protected:
 private:
     void BuildRmlUi();
     void ReloadRmlTheme();
+    void ApplyNameLimit();
 
     struct JobButtonEntry
     {
@@ -154,20 +147,16 @@ private:
         // OK/Cancel a visual identity, see themes/legacy/char_make.rcss's `color: transparent`).
         // Same I18N::Game::OK/Cancel + {{ok_label}}/{{cancel_label}} pattern as LoginWin.cpp.
         Rml::String okLabel, cancelLabel;
+
+        // The typed character name, two-way bound to char_make.rml's <input data-value="char_name">.
+        // RmlUi owns the edit buffer/caret/selection/IME; this is only the committed value, copied
+        // into the legacy InputText[0] buffer at submit time so CheckSpecialText()/
+        // SendCreateCharacter() keep their existing contract. Length cap comes from C++
+        // (ApplyNameLimit()).
+        Rml::String charName;
     };
     RmlModelBinder<CharMakeRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
-
-    // Resolved from #input_text_anchor (char_make.rml) every frame in Update() -- RmlUi's own
-    // resolved position is the single source of truth for where the legacy-drawn name text
-    // starts, read via GetElementById+GetAbsoluteOffset (same pattern as MainFrameWindow.cpp's
-    // item-hotkey/skill-list anchors), replacing the old hardcoded kInputSpriteOffsetY/
-    // kInputTextOffsetX/kInputTextOffsetY constants. Deliberately NOT resolved once in
-    // SetPosition() -- see Update()'s own comment for why that read pre-layout garbage on this
-    // dialog's very first frame. Consumed by both Update() (g_pSingleTextInputBox) and
-    // RenderTextOnTop() (the IME-fallback ::RenderInputText() path).
-    float m_fInputTextX = 0.f;
-    float m_fInputTextY = 0.f;
 
     int m_nOriginX = 0;
     int m_nOriginY = 0;

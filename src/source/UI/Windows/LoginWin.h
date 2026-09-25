@@ -10,22 +10,17 @@
 #include <atomic>
 #include <thread>
 
-class CUITextInputBox;
-
 namespace Rml { class ElementDocument; }
 
-// The login dialog: RmlUi (login.rml) renders the panel chrome, checkboxes, buttons, labels, and
-// trust warning. Username/password text entry deliberately stays on legacy CUITextInputBox objects
-// (m_pUsernameInputBox/m_pPasswordInputBox) rather than native RmlUi <input> elements, since
-// external code calls GetUsernameInputBox()/GetPasswordInputBox()->GiveFocus() directly for
-// error-recovery focus redirection.
+// The login dialog: RmlUi (login.rml) renders everything, username/password entry included -- the
+// two fields are stock <input> elements (#input_account/#input_password) bound to
+// LoginRmlModel::username/password. External error-recovery code asks for focus through
+// FocusUsername()/FocusPassword() rather than reaching in for a widget pointer.
 class CLoginWin : public mu::ui::window::CObject
 {
 protected:
     bool m_bRememberMeChecked = false;
     bool m_bSavePasswordChecked = false;
-    CUITextInputBox* m_pUsernameInputBox;
-    CUITextInputBox* m_pPasswordInputBox;
 
     // Snapshot used to detect that the player edited the username/password, so stored
     // credentials can be dropped.
@@ -61,14 +56,11 @@ public:
     // what the player typed; automation calls it directly.
     void SubmitCredentials(const wchar_t* pszUsername, const wchar_t* pszPassword);
 
-    CUITextInputBox* GetUsernameInputBox() const
-    {
-        return m_pUsernameInputBox;
-    }
-    CUITextInputBox* GetPasswordInputBox() const
-    {
-        return m_pPasswordInputBox;
-    }
+    // Error-recovery focus redirection (WSclient.cpp on connect, MsgWin.cpp per login-failure
+    // reason). selectAll reproduces the native GiveFocus(TRUE) that pre-selected the text so a
+    // retry overwrites it in one keystroke.
+    void FocusUsername(bool selectAll = false);
+    void FocusPassword(bool selectAll = false);
     int GetWidth() const
     {
         return m_Size.cx;
@@ -77,10 +69,6 @@ public:
     {
         return m_Size.cy;
     }
-
-    // Draws the actual username/password text, called from Winmain.cpp's SetPostRmlUiCallback and
-    // also inline from Render() for the legacy theme's transparent panel.
-    void RenderTextOnTop();
 
     // Bound to the RmlUi login document's click callbacks. Act immediately rather than setting a
     // flag for UpdateWhileActive() to consume later: this fires from the SDL event pump, always
@@ -150,6 +138,12 @@ private:
         Rml::String trustWarning;
         Rml::String okLabel;
         Rml::String cancelLabel;
+
+        // Two-way bound to #input_account/#input_password. RmlUi owns the edit buffers, caret,
+        // selection, masking and IME; these carry the committed values that SubmitCredentials()
+        // and the edit-detection snapshot read.
+        Rml::String username;
+        Rml::String password;
     };
     RmlModelBinder<LoginRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -157,9 +151,11 @@ private:
     void SyncRmlModel();
     // Factored out of Create() so ReloadRmlTheme() can re-run it after tearing down the old document.
     void BuildRmlUi();
-    // Repositions the two native CUITextInputBox overlays from login.rml's
-    // #input_account_anchor/#input_password_anchor every frame -- see this method's own comment.
-    void SyncInputBoxPositions();
+    // Pushes MAX_USERNAME_SIZE/MAX_PASSWORD_SIZE onto the two fields, so the caps stay one C++ rule
+    // rather than a literal duplicated per theme.
+    void ApplyCredentialLimits();
+    // Shared by FocusUsername()/FocusPassword().
+    void FocusCredentialField(const char* elementId, bool selectAll);
 };
 
 extern CLoginWin g_LoginWin;

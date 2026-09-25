@@ -2266,25 +2266,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {
                 BeginBitmap();
-                // Also gated on !g_CreditWin.IsVisible()/!g_SysMenuWin.IsVisible() -- these are
-                // raw CUITextInputBox pixels drawn directly, not RmlUi content, so they'd
-                // otherwise paint over both regardless of which one is currently covering the
-                // login dialog (found via user testing; see CLoginWin::Render()'s own,
-                // more detailed comment on this same condition).
-                if (g_LoginWin.IsVisible() && !g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible())
-                    g_LoginWin.RenderTextOnTop();
-                if (g_CharMakeWin.IsVisible())
-                    g_CharMakeWin.RenderTextOnTop();
                 if (g_MsgWin.IsVisible())
                     g_MsgWin.RenderTextOnTop();
-                // CGenericConfirmDialog's own Mode::Text widget -- same seam, same reason. Guarded
-                // internally on the dialog's own active state (see RenderTextOnTop()'s own
-                // comment), so calling it unconditionally whenever this scene-gated block runs is
-                // safe and cheap the rest of the time. item3D has no equivalent call here -- it
-                // still renders via the older Render3D()/I3DRenderObj path (see
-                // GenericConfirmDialog.h's class comment for the known gap and why).
-                if (mu::ui::window::g_pGenericConfirmDialog)
-                    mu::ui::window::g_pGenericConfirmDialog->RenderTextOnTop();
                 RenderCursor();
                 EndBitmap();
             }

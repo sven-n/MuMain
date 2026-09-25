@@ -45,13 +45,17 @@
 		     the art. Static text, not {{...}}-bound, matching other hardcoded captions. -->
 		<span id="input_label" class="input-label">Name</span>
 
-		<!-- Background art only -- name text is drawn on top afterward by legacy code. -->
+		<!-- Frame art behind the field; each theme positions/sizes both to agree. -->
 		<div id="input_frame" class="input-frame"></div>
 
-		<!-- Zero-size position marker, not decorative -- CharMakeWin.cpp reads its resolved offset
-		     (GetElementById + GetAbsoluteOffset) to place legacy-drawn name text per-theme, instead
-		     of hardcoding a pixel offset in C++. -->
-		<div id="input_text_anchor" class="input-text-anchor"></div>
+		<!-- Character name. Stock RmlUi <input>: owns the edit buffer, caret, selection and IME, and
+		     two-way binds the committed value to CharMakeRmlModel::charName (copied into the legacy
+		     InputText[0] buffer only at submit time). autofocus replaces the old
+		     g_pSingleTextInputBox->GiveFocus() -- ElementDocument::Show()'s FocusFlag::Auto picks it
+		     up. maxlength comes from C++ (ApplyNameLimit()). Replaces #input_text_anchor, which only
+		     existed so C++ could position a native widget over this frame. -->
+		<input id="char_name" type="text" class="text-field char-make-name-field"
+		       data-value="char_name" autofocus/>
 
 		<div id="btn_ok" class="btn btn-ok" data-event-click="charmake_ok_click">{{ok_label}}</div>
 		<div id="btn_cancel" class="btn btn-cancel" data-event-click="charmake_cancel_click">{{cancel_label}}</div>

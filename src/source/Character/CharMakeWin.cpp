@@ -10,11 +10,11 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Network/Server/WSclient.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Scenes/SceneCore.h"
-#include "UI/Widgets/UIControls.h"
 #include "I18N/All.h"
 #include "Core/Globals/_enum.h"
 
@@ -31,7 +31,6 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
-#include "UI/Scaling/UITransform.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
@@ -125,9 +124,12 @@ namespace
             return kRageFighterDescriptionTextId;
         return kDefaultDescriptionBase + selectedClass;
     }
-}
 
-extern int g_iChatInputType;
+    // Character-name length cap, the same limit the native CUITextInputBox was configured with
+    // (textLimit = 10). Set on the <input> from ApplyNameLimit() rather than written into each
+    // theme's .rml, and reused when copying into the legacy InputText[0] buffer.
+    constexpr int kCharNameMaxLength = 10;
+}
 
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle);
 
@@ -222,6 +224,7 @@ void CCharMakeWin::BuildRmlUi()
             c.Bind("desc_line2", &model.descLine2);
             c.Bind("ok_label", &model.okLabel);
             c.Bind("cancel_label", &model.cancelLabel);
+            c.Bind("char_name", &model.charName);
 
             c.BindEventCallback("charmake_select_job",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -236,7 +239,20 @@ void CCharMakeWin::BuildRmlUi()
         });
 
     if (modelCreated)
+    {
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
+        ApplyNameLimit();
+    }
+}
+
+// Caps the <input>'s own edit buffer at the same limit the native CUITextInputBox was configured
+// with. Set from here rather than written into each theme's .rml so it can't drift per theme.
+void CCharMakeWin::ApplyNameLimit()
+{
+    if (!m_pRmlDoc) return;
+
+    if (Rml::Element* field = m_pRmlDoc->GetElementById("char_name"))
+        field->SetAttribute("maxlength", kCharNameMaxLength);
 }
 
 void CCharMakeWin::ReloadRmlTheme()
@@ -266,9 +282,9 @@ void CCharMakeWin::Release()
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 
-    // Base-class visibility reset, NOT the full CCharMakeWin::Show(false) override -- that touches
-    // g_pSingleTextInputBox, which isn't guaranteed constructed yet the first time this runs
-    // (CreateLoginScene() calls Release() on every window up front, including this one, even though
+    // Base-class visibility reset, NOT the full CCharMakeWin::Show(false) override -- that override
+    // touches this window's RmlUi model/document, which aren't guaranteed built the first time this
+    // runs (CreateLoginScene() calls Release() on every window up front, including this one, even though
     // it only ever Create()s/Shows this window later, in CreateCharacterScene()). Every other
     // window's Create() ends with an unconditional Show(false) (see CCreditWin::Create()'s own
     // comment on this), which is what normally keeps CObject's IsVisible() correct before the first
@@ -354,28 +370,12 @@ void CCharMakeWin::Show(bool bShow)
         InputEnable = true;
         InputNumber = 1;
         InputTextMax[0] = MAX_USERNAME_SIZE;
-        if (g_iChatInputType == 1)
-        {
-            // Text color left at InputBoxConfig's default (opaque black) rendered nearly invisible
-            // against the input-frame's dark fill -- matches LoginWin.cpp's own m_pUsernameInputBox/
-            // m_pPasswordInputBox light-cream convention (SetTextColor(255,255,230,210)) instead.
-            g_pSingleTextInputBox->Configure({
-                .textLimit = 10,
-                .textAlpha = 255,
-                .textR = 255,
-                .textG = 230,
-                .textB = 210,
-            });
-            g_pSingleTextInputBox->GiveFocus();
-        }
-    }
-    else
-    {
-        if (g_iChatInputType == 1)
-        {
-            g_pSingleTextInputBox->SetText(nullptr);
-            g_pSingleTextInputBox->SetState(UISTATE_HIDE);
-        }
+
+        // The name field is a stock RmlUi <input> now (char_make.rml). It starts empty on every
+        // open, and focus comes from its own autofocus attribute via m_pRmlDoc->Show() below --
+        // no explicit Configure()/GiveFocus() pair, and no native widget to position or hide.
+        m_RmlBinder.GetModel().charName.clear();
+        m_RmlBinder.MarkDirty("char_name");
     }
 
     if (m_pRmlDoc)
@@ -450,47 +450,6 @@ bool CCharMakeWin::Update()
     if (!IsVisible())
         return true;
 
-    // RmlUi's own resolved position for #input_text_anchor (char_make.rml/.rcss, both themes) is
-    // the single source of truth for where the legacy-drawn name text starts -- same
-    // GetElementById+GetAbsoluteOffset pattern as MainFrameWindow.cpp's item-hotkey/skill-list
-    // anchors, replacing the old kInputSpriteOffsetY/kInputTextOffsetX/kInputTextOffsetY hardcoded
-    // constants and the vestigial m_asprBack[CMW_SPR_INPUT] sprite that only ever existed to hold
-    // that math (it was never rendered).
-    //
-    // Re-read every frame here, NOT once in SetPosition() -- SetPosition() pushes #panel's new
-    // left/top via SetProperty(), but RmlUi doesn't resolve that into a real layout synchronously
-    // (it resolves on this context's next Update() pass); a same-call GetAbsoluteOffset() right
-    // after Create()+SetPosition() (the dialog's very first frame) reads pre-layout garbage, and
-    // since SetPosition() is otherwise only called once more on an explicit resolution change,
-    // that stale reading would otherwise never self-correct (this was a real bug, found via live
-    // testing: the caret rendered in the wrong spot until a resolution change forced a second
-    // SetPosition() call, long after RmlUi had since caught up). Reading here instead means at
-    // worst a one-frame-late position on the very first frame this dialog opens, self-correcting
-    // immediately after -- imperceptible, and this dialog's layout is otherwise static.
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("input_text_anchor"))
-        {
-            m_fInputTextX = pAnchor->GetAbsoluteOffset().x;
-            m_fInputTextY = pAnchor->GetAbsoluteOffset().y;
-        }
-    }
-
-    if (g_iChatInputType == 1)
-    {
-        // Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::Render() rescales the
-        // position it's given via ConvertPositionX/Y using *whatever transform is active when
-        // Render() runs* (see RenderTextOnTop()'s own comment), a fundamentally different contract
-        // than CSprite's "store real pixels, ignore the transform entirely". Dividing here relied
-        // on a later multiply landing under the exact same ambient transform to cancel it back
-        // out -- exactly the bug LoginWin.cpp's own SetPosition() already found and fixed for its
-        // m_pUsernameInputBox/m_pPasswordInputBox (same class, same contract). GetAbsoluteOffset()
-        // already returns real pixels (char_make.rcss is plain px, not dp -- RmlUi's
-        // DensityIndependentPixelRatio only touches dp/ppi units, confirmed via
-        // ElementStyle.cpp's ComputeLength), so no conversion at all is needed here.
-        g_pSingleTextInputBox->SetPosition(int(m_fInputTextX), int(m_fInputTextY));
-    }
-
     // A CMsgWin validation-error dialog (name too short/invalid/special) can be shown on top of
     // this one without hiding it first (see GetLayerDepth()'s own comment) -- skip this window's
     // own click/key consequences while that's up, same reasoning as CCharSelMainWin's modal gate.
@@ -510,18 +469,16 @@ bool CCharMakeWin::Update()
 
     UpdateCreateCharacter();
 
-    // Input polling, moved here from RenderControls() (matches CLoginWin's own DoAction()
-    // placement) -- RenderTextOnTop() below now only draws, called from the post-RmlUi seam.
-    if (g_iChatInputType == 1)
-        g_pSingleTextInputBox->DoAction();
-
     return true;
 }
 
 void CCharMakeWin::RequestCreateCharacter()
 {
-    if (g_iChatInputType == 1)
-        g_pSingleTextInputBox->GetText(InputText[0]);
+    // Hand the RmlUi-owned value to the legacy buffer the validation/submit path below still reads,
+    // so CheckSpecialText()/SendCreateCharacter() keep their existing contract.
+    const std::wstring typedName = StringUtils::NarrowToWide(m_RmlBinder.GetModel().charName);
+    wcsncpy(InputText[0], typedName.c_str(), kCharNameMaxLength);
+    InputText[0][kCharNameMaxLength] = L'\0';
 
     CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
 
@@ -555,31 +512,13 @@ bool CCharMakeWin::Render()
     // composites correctly underneath RmlUi's later render pass without any changes here.
     RenderCreateCharacter();
 
-    // All 2D chrome (job buttons, stat/description panels, input-frame background, OK/Cancel)
-    // now renders via the RmlUi overlay -- see char_make.rml/.rcss. SyncRmlModel() is the only
-    // thing this override still needs to do; RenderTextOnTop() (the actual input text) is called
-    // from Winmain.cpp's SetPostRmlUiCallback instead of here, so it isn't drawn twice.
+    // All 2D chrome (job buttons, stat/description panels, input frame, name field, OK/Cancel) now
+    // renders via the RmlUi overlay -- see char_make.rml/.rcss. SyncRmlModel() is the only thing
+    // this override still needs to do; the name field is a stock <input> in that same document, so
+    // there's no native text left to draw after RmlUi (the post-RmlUi RenderTextOnTop() seam this
+    // window used to need is gone -- CLoginWin/CMsgWin still use it for their own native fields).
     SyncRmlModel();
     return true;
-}
-
-void CCharMakeWin::RenderTextOnTop()
-{
-    // Force identity so this agrees with Update()'s now-real-pixel m_fInputTextX/Y regardless of
-    // which context runs this call (this window's own Render(), under whatever transform
-    // CManager::Render() applies for its LayoutMode::Legacy, or Winmain.cpp's completely unscoped
-    // post-RmlUi callback -- see this class's header comment on RenderTextOnTop() for why it's
-    // called from there) -- same fix as CLoginWin::RenderTextOnTop()/CMsgWin's resident-password
-    // gotcha. LayoutMode::Legacy resolves to a genuine identity transform (UITransform.h's own
-    // comment), matching RenderCreateCharacter()'s BeginOpengl() call just above, which relies on
-    // this same identity for the same reason.
-    const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
-    UI::Scaling::ScopedActiveTransform identity(transform);
-
-    if (g_iChatInputType == 1)
-        g_pSingleTextInputBox->Render();
-    else if (g_iChatInputType == 0)
-        ::RenderInputText(int(m_fInputTextX), int(m_fInputTextY), 0);
 }
 
 void CCharMakeWin::SyncRmlModel()

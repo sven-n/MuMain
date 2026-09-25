@@ -210,15 +210,23 @@
 	font-size: 10px;
 }
 
-/* Marks where the legacy-drawn name text starts -- CharMakeWin.cpp reads this via
-   GetAbsoluteOffset(). left:74px = .input-frame's left edge (68px) + 6px inset; top:332px
-   vertically centers within the row's 25px height. */
-#input_text_anchor { left: 74px; top: 332px; }
-.input-text-anchor {
+/* Name field: placement/size only -- appearance comes from base.rcss's shared .text-field, with the
+   fill/border dropped here because .input-frame above already draws this row's recessed well.
+   Fills that frame (left 68 + 246 wide, top 327 + 25 tall) with the same 6px text inset the old
+   #input_text_anchor used, so the caret starts exactly where the native text did. */
+.char-make-name-field {
 	position: absolute;
-	width: 0;
-	height: 0;
-	pointer-events: none;
+	left: 68px;
+	top: 327px;
+	width: 246px;
+	height: 25px;
+	padding: 0 6px;
+	line-height: 25px;
+	font-size: 11px;
+	background-color: transparent;
+	decorator: none;
+	border-width: 0;
+	box-shadow: none;
 }
 
 /* Only width genuinely needs to differ from base.rcss's .btn. Do NOT add a `border` shorthand

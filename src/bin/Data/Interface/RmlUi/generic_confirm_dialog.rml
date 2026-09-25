@@ -47,9 +47,8 @@
 				</div>
 				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
 				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit
-				     buttons, anti-shoulder-surfing); Text is a real keyboard field, hosted by the
-				     native g_pSingleTextInputBox widget positioned from #gcd_input_anchor -- this
-				     div renders nothing itself in Text mode, the widget draws on top of it. -->
+				     buttons, anti-shoulder-surfing, deliberately NOT an <input type="number">);
+				     Text is a stock RmlUi <input> below. -->
 				<div class="gcd-input-row" data-class-hidden="!has_input">
 					<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
 					<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
@@ -65,8 +64,12 @@
 						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
 						<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
 					</div>
-					<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
-					     data-class-hidden="input_is_keypad"></div>
+					<!-- Text mode: a stock RmlUi <input>. Its type (text/password), maxlength and
+					     seeded value are set per Show() from C++ (ApplyInputFieldConfig()), since
+					     this dialog is shared and reconfigured per caller. Numeric-only filtering
+					     is an application rule, enforced in C++ (DigitOnlyInputFilter). -->
+					<input id="gcd_input" type="text" class="text-field gcd-input-field"
+					       data-value="input_value" data-class-hidden="input_is_keypad"/>
 				</div>
 				<!-- Optional progress bar -- fraction pushed from C++ every frame while active,
 				     same `x_fraction * 100 + '%'` technique main_frame.rml's own gauges use. -->

@@ -254,12 +254,15 @@
 	margin: 1dp;
 	font-size: 10dp;
 }
-/* Position reference only, same idea as .gcd-item3d-anchor -- the native g_pSingleTextInputBox
-   widget draws on top of this natively, nothing renders through RmlUi here for Mode::Text. */
-.gcd-input-anchor {
+/* Text-mode field: takes the same flow slot the old native-widget position reference occupied, so
+   the column layout is unchanged. Sizing only -- fill/border/focus/selection come from base.rcss's
+   shared .text-field. */
+.gcd-input-field {
 	position: static;
 	width: 150dp;
 	height: 18dp;
+	padding: 0 3dp;
+	font-size: 10dp;
 }
 
 /* Optional progress bar -- same `x_fraction * 100 + '%'` fill technique main_frame.rml's own

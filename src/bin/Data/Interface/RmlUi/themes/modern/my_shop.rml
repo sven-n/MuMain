@@ -20,13 +20,14 @@
 		</div>
 
 		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and
-		     two-way binds the committed value to MyShopRmlModel::shopTitle. autofocus is what
-		     reproduces the old native GiveFocus()-on-open -- ElementDocument::Show()'s own
-		     FocusFlag::Auto picks it up, so no C++ focus call is needed. maxlength comes from C++
-		     (ApplyShopTitleLimit()). Owns its own background now, so the separate #edit_bg strip
-		     this window used to need in the background document is gone. -->
+		     two-way binds the committed value to MyShopRmlModel::shopTitle. Deliberately NOT
+		     autofocus: this is an ordinary non-modal window, so opening it must leave the keyboard
+		     with the game (an auto-focused field would swallow every hotkey the moment the shop
+		     opens). Click the field to type. maxlength comes from C++ (ApplyShopTitleLimit()). Owns
+		     its own background now, so the separate #edit_bg strip this window used to need in the
+		     background document is gone. -->
 		<input id="shop_title" type="text" class="text-field my-shop-title-field"
-		       data-value="shop_title" autofocus/>
+		       data-value="shop_title"/>
 
 		<div id="btn_exit" class="modern-icon-btn-px shop-btn-exit" data-event-click="my_shop_exit_click">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>

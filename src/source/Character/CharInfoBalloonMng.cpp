@@ -6,6 +6,7 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
@@ -165,11 +166,7 @@ bool CCharInfoBalloonMng::Render()
     // permanent explicit toggle is still the only fix (same reasoning as CLoginWin's own
     // credits/sysmenu render-side gates -- see its Render()'s comment).
     const bool shouldHide = g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
-    if (m_pRmlDoc)
-    {
-        if (shouldHide) m_pRmlDoc->Hide();
-        else            m_pRmlDoc->Show();
-    }
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, !shouldHide);
     if (shouldHide)
         return true;
 

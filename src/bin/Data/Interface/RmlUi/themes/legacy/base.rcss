@@ -139,9 +139,8 @@ body {
 	border: 1px token(border-control);
 	border-radius: token(radius-sm)px;
 }
-.text-field:focus {
-	border-color: token(accent-gold);
-}
+/* No :focus rule on purpose -- the native fields these replaced drew no focus outline, so the blinking
+   caret stays the only focus cue. Add one per consumer if a screen ever wants it. */
 /* Semantic state pushed from the model (data-class-error), never a colour set from C++. */
 .text-field.error {
 	border-color: token(semantic-danger);

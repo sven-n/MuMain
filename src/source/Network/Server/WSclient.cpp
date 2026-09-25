@@ -581,7 +581,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             if (!ReconnectManager::Instance().IsActive())
             {
                 g_LoginWin.Show(true);
-                g_LoginWin.GetUsernameInputBox()->GiveFocus();
+                g_LoginWin.FocusUsername();
             }
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;

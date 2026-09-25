@@ -138,18 +138,27 @@ body {
 	font-effect: shadow(0dp 1dp #000000);
 }
 
-/* #input_account_anchor/#input_password_anchor (login.rml) mark exactly where LoginWin.cpp's
-   native text overlay renders, relative to #panel -- 6dp right/down from each .login-input's own
-   left/top (100/16,49), matching the visible border's inner edge. Keep the two in sync if either
-   changes. */
-.input-text-anchor {
+/* Username/password fields. Placement/size only -- appearance comes from base.rcss's shared
+   .text-field, minus the fill/border, since .login-input's recessed well already draws each field's visual. Box sits
+   where the native CUITextInputBox overlay did (the old anchor position at its Init()'d 140x14),
+   and the text colour matches its SetTextColor(255, 230, 210). */
+.login-field {
 	position: absolute;
-	width: 0;
-	height: 0;
-	pointer-events: none;
+	width: 140dp;
+	height: 16dp;
+	padding: 0;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
 }
-#input_account_anchor { left: 115dp; top: 72dp; }
-#input_password_anchor { left: 115dp; top: 105dp; }
+/* Relative to .login-content, this field's parent -- each .login-input's own left/top (100/16, 49)
+   plus the 6dp inset that puts the caret at the frame's inner edge. NOT the #panel-relative 115/72
+   the old anchors used: those were #panel children, these are not. */
+.login-field-account  { left: 106dp; top: 22dp; }
+.login-field-password { left: 106dp; top: 55dp; }
 
 /* Body is a real recessed cavity; broad inset shadow comes from base.rcss's .modern-content-well. */
 .login-content {

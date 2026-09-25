@@ -136,15 +136,21 @@
 	display: none;
 }
 
-/* Exactly the old kInputTextOffsetX=78/kInputTextOffsetY=21 (relative to kInputSpriteOffsetY=317),
-   expressed as RCSS instead of a C++ constant; CharMakeWin.cpp now reads this element's resolved
-   position. */
-#input_text_anchor { left: 78px; top: 338px; }
-.input-text-anchor {
+/* Name field: placement/size only -- appearance comes from base.rcss's shared .text-field, with the
+   fill/border dropped here because cha_id.tga's own baked art (#input_frame above) already provides
+   them. Box matches where the native CUITextInputBox sat: the old kInputTextOffsetX=78/
+   kInputTextOffsetY=21 (relative to kInputSpriteOffsetY=317) origin at its Init()'d 200x20 size.
+   Text colour matches the old Configure({textR 255, textG 230, textB 210}). */
+.char-make-name-field {
 	position: absolute;
-	width: 0;
-	height: 0;
-	pointer-events: none;
+	left: 78px;
+	top: 338px;
+	width: 200px;
+	height: 20px;
+	padding: 0;
+	color: token(text-narrative);
+	background-color: transparent;
+	border-width: 0;
 }
 
 .btn {

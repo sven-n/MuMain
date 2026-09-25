@@ -536,13 +536,13 @@ void CMsgWin::ManageOKClick()
     case RECEIVE_LOG_IN_FAIL_INVALID_IP:
     case RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL:
         g_LoginWin.Show(true);
-        g_LoginWin.GetUsernameInputBox()->GiveFocus(TRUE);
+        g_LoginWin.FocusUsername(/*selectAll=*/true);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_INPUT_PASSWORD:
     case RECEIVE_LOG_IN_FAIL_PASSWORD:
         g_LoginWin.Show(true);
-        g_LoginWin.GetPasswordInputBox()->GiveFocus(TRUE);
+        g_LoginWin.FocusPassword(/*selectAll=*/true);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:

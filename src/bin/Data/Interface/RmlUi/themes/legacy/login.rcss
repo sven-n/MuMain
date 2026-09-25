@@ -53,17 +53,24 @@ body {
 .label-account { left: 30dp; top: 113dp; }
 .label-password{ left: 30dp; top: 139dp; }
 
-/* #input_account_anchor/#input_password_anchor (login.rml) mark exactly where LoginWin.cpp's
-   native text overlay renders -- 6dp right / 6dp down from this frame's own left/top (109/106,131),
-   matching the visible border's inner edge. Keep the two in sync if either changes. */
-.input-text-anchor {
+/* Username/password fields. Placement/size only -- appearance comes from base.rcss's shared
+   .text-field, minus the fill/border, since .input-frame's sprite art already draws each field's visual. Box sits
+   where the native CUITextInputBox overlay did (the old anchor position at its Init()'d 140x14),
+   and the text colour matches its SetTextColor(255, 230, 210). */
+.login-field {
 	position: absolute;
-	width: 0;
-	height: 0;
-	pointer-events: none;
+	width: 140dp;
+	height: 16dp;
+	padding: 0;
+	font-family: "token(font-body)";
+	color: token(text-narrative);
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
 }
-#input_account_anchor { left: 115dp; top: 112dp; }
-#input_password_anchor { left: 115dp; top: 137dp; }
+.login-field-account  { left: 115dp; top: 112dp; }
+.login-field-password { left: 115dp; top: 137dp; }
 
 .input-frame {
 	position: absolute;
