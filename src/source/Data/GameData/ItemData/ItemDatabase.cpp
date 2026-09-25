@@ -34,23 +34,22 @@ void ItemDatabase::Build(std::span<const ITEM_ATTRIBUTE> attributes, std::span<c
     const bool hasEnglishNames = englishNames.size() == attributes.size();
     const size_t itemCount = std::min(attributes.size(), static_cast<size_t>(MAX_ITEM));
 
-    std::fill(m_definitions.begin(), m_definitions.end(), ItemDefinition{});
     m_existingItemCount = 0;
-
     for (size_t itemType = 0; itemType < itemCount; ++itemType)
     {
         ItemDefinition& definition = m_definitions[itemType];
         definition = ToItemDefinition(attributes[itemType], static_cast<int>(itemType));
-        if (hasEnglishNames && !englishNames[itemType].empty())
+        if (!definition.Exists())
         {
-            definition.englishName = englishNames[itemType];
+            continue;
         }
 
-        if (definition.Exists())
-        {
-            ++m_existingItemCount;
-        }
+        const bool hasEnglishName = hasEnglishNames && !englishNames[itemType].empty();
+        definition.englishName = hasEnglishName ? englishNames[itemType] : mu_wchar_to_utf8(definition.name.c_str());
+        ++m_existingItemCount;
     }
+
+    std::fill(m_definitions.begin() + itemCount, m_definitions.end(), ItemDefinition{});
 }
 
 const ItemDefinition* ItemDatabase::Find(int group, int number) const

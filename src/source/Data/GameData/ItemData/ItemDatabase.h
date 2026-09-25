@@ -21,12 +21,13 @@ public:
     ItemDatabase();
 
     // Rebuilds all definitions from the given attributes (one per item type).
-    // englishNames is either empty, then the attribute names are used as
-    // English names, or holds one UTF-8 name per item type.
+    // englishNames is either empty or holds one UTF-8 name per item type.
+    // Items without an English name use their loaded name for logs.
     void Build(std::span<const ITEM_ATTRIBUTE> attributes, std::span<const std::string> englishNames = {});
 
     // Returns nullptr for invalid ids and for empty item slots. Defined here
-    // so it can be inlined on hot paths.
+    // so it can be inlined on hot paths. The table never moves, so returned
+    // pointers stay valid, but Build() overwrites what they point to.
     const ItemDefinition* Find(int itemType) const
     {
         if (!IsValidItemType(itemType))

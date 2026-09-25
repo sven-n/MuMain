@@ -99,7 +99,6 @@ ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     definition.name = ReadName(attribute);
-    definition.englishName = mu_wchar_to_utf8(definition.name.c_str());
     CopyStats(attribute, definition);
     CopyRequirements(attribute, definition);
     return definition;
