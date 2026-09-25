@@ -24,7 +24,7 @@
 	text-align: center;
 	color: token(text-title);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .tab-row {
@@ -41,7 +41,7 @@
 	height: 22px;
 	text-align: center;
 	line-height: 22px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-muted);
 	cursor: pointer;
 	pointer-events: auto;
@@ -74,7 +74,7 @@
 	width: 140px;
 	color: token(text-heading);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	text-align: left;
 }
 .quest-empty-msg span { display: block; }
@@ -94,7 +94,7 @@
 	line-height: 18px;
 	padding-left: 4px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 	cursor: pointer;
 	pointer-events: auto;
 	white-space: nowrap;
@@ -135,7 +135,7 @@
 	display: block;
 	width: 100%;
 	padding: 1px 4px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-info);
 }
 .quest-content-row.bold { font-weight: bold; }
@@ -177,7 +177,7 @@
 	width: 172px;
 	color: token(accent-teal);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	margin-bottom: 8px;
 }
 .jobchange-contents, .jobchange-state {
@@ -185,7 +185,7 @@
 	text-align: center;
 	width: 172px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 }
 .jobchange-contents span, .jobchange-state span { display: block; }
 .jobchange-state { color: token(text-heading); font-weight: bold; margin-top: 12px; }
@@ -196,7 +196,7 @@
 	width: 172px;
 	color: token(text-heading);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	margin-top: 6px;
 }
 .castle-line, .temple-line {
@@ -204,7 +204,7 @@
 	text-align: center;
 	width: 172px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 }
 
 /* Requirement/reward rows by kind (UI::Quests::RewardModel::RowStyle; the RML toggles

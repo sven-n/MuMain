@@ -25,7 +25,7 @@
 	text-align: center;
 	color: token(accent-cyan);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 /* Gens contribute-point banner (NPC 543/544 only) -- see RenderContributePoint()'s own gate,
@@ -41,7 +41,7 @@
 	height: 18px;
 	text-align: center;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
 	line-height: 18px;
 	decorator: image(nd-contribute-img);
 }
@@ -55,7 +55,8 @@
 .nd-line {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
+	line-height: 15px; /* native ND_TEXT_GAP */
 	white-space: nowrap;
 }
 
@@ -94,11 +95,11 @@
 .nd-answer-row {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
+	line-height: 15px; /* native ND_TEXT_GAP */
 	white-space: pre-line;
 	cursor: pointer;
 	pointer-events: auto;
-	margin-bottom: 2px;
 }
 .nd-answer-row:hover { background-color: token(surface-hover); }
 

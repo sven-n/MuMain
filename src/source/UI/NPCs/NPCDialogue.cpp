@@ -11,11 +11,13 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
 
+#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -95,6 +97,7 @@ void CNPCDialogue::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
 
             c.Bind("npc_name", &model.npcName);
 
@@ -272,6 +275,21 @@ void CNPCDialogue::SetContents(DWORD dwDlgIndex)
     m_nSelSelText = 0;
 }
 
+namespace
+{
+    // Wrap budget, in native logical units, for text drawn inside `container` (see
+    // ResolveDialogueWrapGeometry()); `fallback` when the container is not laid out yet.
+    float NativeWrapWidth(Rml::Element& container, const UI::Scaling::Transform& panelTransform, float fallback)
+    {
+        const float nativeTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, panelTransform);
+        const float width = container.GetBox().GetSize(Rml::BoxArea::Border).x;
+        const float drawnTextPx = container.GetComputedValues().font_size() * panelTransform.scaleX;
+        if (width <= 0.0f || drawnTextPx <= 0.0f)
+            return fallback;
+        return width * nativeTextPx / drawnTextPx;
+    }
+}
+
 void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLinesPerPage,
     float& answerWrapWidth, int& answerLinesPerPage) const
 {
@@ -287,26 +305,17 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
         return;
 
-    // DivideStringByPixel() wraps using g_pRenderText's own (native/GDI-driven) pixel metrics, a
-    // different measurement system than RmlUi's font rendering -- reading the RmlUi container's
-    // live real-pixel width and normalizing it back to this window's own logical/reference-space
-    // units (same convention m_Pos/WindowGeometry already use) is the closest equivalent "wrap
-    // budget" available without replacing the wrap algorithm itself.
+    // DivideStringByPixel() wraps using g_pRenderText's own native pixel metrics (in this window's
+    // logical units, at the native text size), a different measurement system than RmlUi's font
+    // rendering. The RmlUi container's box width is in #panel's own layout units (a transform does
+    // not change box sizes), and its text is drawn at its own font-size there: scaling the width
+    // by native text size / drawn text size gives the budget that fills the container.
     Rml::Element* npcContainer = m_pRmlDoc->GetElementById("npc_lines_container");
     Rml::Element* answerContainer = m_pRmlDoc->GetElementById("answers_container");
-
     if (npcContainer)
-    {
-        const float containerWidthPx = npcContainer->GetBox().GetSize(Rml::BoxArea::Border).x;
-        if (containerWidthPx > 0.0f)
-            npcWrapWidth = containerWidthPx / transform.scaleX;
-    }
+        npcWrapWidth = NativeWrapWidth(*npcContainer, transform, npcWrapWidth);
     if (answerContainer)
-    {
-        const float containerWidthPx = answerContainer->GetBox().GetSize(Rml::BoxArea::Border).x;
-        if (containerWidthPx > 0.0f)
-            answerWrapWidth = containerWidthPx / transform.scaleX;
-    }
+        answerWrapWidth = NativeWrapWidth(*answerContainer, transform, answerWrapWidth);
 
     // One physical text line's real rendered height -- shared below by both the NPC-words area and
     // the answers area (both use the same font-size in npc_dialogue.rcss), sampled from .nd-line
@@ -361,6 +370,10 @@ void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
     else
         pszSrc = g_QuestMng.GetNPCDlgNPCWords(m_dwCurDlgIndex);
 
+    // Wrap in this window's own layout space: the budget below is in its logical units, and there
+    // MeasureText() reports the width the text is drawn at (the native text size).
+    const UI::Scaling::ScopedActiveTransform wrapSpace(
+        UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight));
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -388,6 +401,10 @@ void CNPCDialogue::SetCurSelTexts()
 
     g_pRenderText->SetFont(g_hFont);
 
+    // Wrap in this window's own layout space: the budget below is in its logical units, and there
+    // MeasureText() reports the width the text is drawn at (the native text size).
+    const UI::Scaling::ScopedActiveTransform wrapSpace(
+        UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight));
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -454,6 +471,10 @@ void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
     ::memset(m_aszSelTexts[0], 0, sizeof(wchar_t) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
 
+    // Wrap in this window's own layout space: the budget below is in its logical units, and there
+    // MeasureText() reports the width the text is drawn at (the native text size).
+    const UI::Scaling::ScopedActiveTransform wrapSpace(
+        UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight));
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -763,6 +784,7 @@ void CNPCDialogue::SyncRmlModel()
         m_RmlBinder.MarkDirty("root_y");
         m_RmlBinder.MarkDirty("root_scale");
     }
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     model.npcName = StringUtils::WideToNarrow(g_QuestMng.GetNPCName());
     m_RmlBinder.MarkDirty("npc_name");

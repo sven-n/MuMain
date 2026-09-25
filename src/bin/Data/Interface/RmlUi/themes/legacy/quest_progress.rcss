@@ -27,7 +27,7 @@
 	text-align: center;
 	color: token(text-title);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .qp-subject {
@@ -38,7 +38,7 @@
 	width: 190px;
 	text-align: center;
 	color: token(accent-teal);
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .qp-npc-name {
@@ -47,7 +47,7 @@
 	left: 13px;
 	top: 51px;
 	color: #ffff0a;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .qp-npc-lines {
@@ -60,7 +60,8 @@
 .qp-line {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
+	line-height: 15px; /* native QP_TEXT_GAP */
 	white-space: nowrap;
 }
 
@@ -104,7 +105,7 @@
 	left: 13px;
 	top: 207px;
 	color: #ffb90a;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .qp-answers {
@@ -117,16 +118,16 @@
 .qp-player-words {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
 	margin-bottom: 15px;
 }
 .qp-answer-row {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
+	line-height: 15px; /* native QP_TEXT_GAP */
 	cursor: pointer;
 	pointer-events: auto;
-	margin-bottom: 2px;
 }
 .qp-answer-row:hover { background-color: token(surface-hover); }
 
@@ -162,7 +163,7 @@
 	width: 100%;
 	text-align: center;
 	padding: 1px 4px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 }
 .qp-reward-row.bold { font-weight: bold; }
@@ -179,7 +180,7 @@
 	vertical-align: middle;
 	line-height: 29px;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
 	cursor: pointer;
 	pointer-events: auto;
 	decorator: image(qp-btn-complete-idle);

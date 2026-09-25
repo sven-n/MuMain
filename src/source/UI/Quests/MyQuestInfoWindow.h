@@ -130,6 +130,7 @@ namespace mu::ui::window
         {
             // Movable window (SetPos()), not HUD-anchored -- sourced from UI::Scaling::GetActiveTransform().
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             int activeTab = TAB_QUEST;
             Rml::String tabQuestLabel, tabJobChangeLabel, tabCastleTempleLabel;

@@ -15,7 +15,8 @@
 	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
 	     UI::Scaling::GetActiveTransform(), same convention as my_quest_info.rml's #panel. -->
 	<div id="panel" data-model="quest_progress" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>

@@ -82,6 +82,7 @@ void CNPCQuest::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
 
             c.Bind("npc_name", &model.npcName);
             c.Bind("quest_title", &model.questTitle);
@@ -500,6 +501,7 @@ void CNPCQuest::SyncRmlModel()
         m_RmlBinder.MarkDirty("root_y");
         m_RmlBinder.MarkDirty("root_scale");
     }
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     const BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     const BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));

@@ -20,7 +20,8 @@
      npc_quest.rcss, matching where npc_quest_bg.rml's own frame graphics actually sit. -->
 <body>
 	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{npc_name}}</span>
 		<div class="nq-quest-title" data-class-hidden="!show_quest_title">{{quest_title}}</div>
 
