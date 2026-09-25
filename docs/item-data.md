@@ -120,85 +120,8 @@ broken item data fails its checks.
 
 ## Changing names and translations
 
-### In the JSON files
-
-Each item's `name` lists its names by language code:
-
-```json
-"name": {
-  "en": "Blade",
-  "es": "Espada",
-  "pt": "Lâmina"
-},
-```
-
-- **Change a name:** edit the text.
-- **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"de": "Klinge"`.
-- **Remove a translation:** delete its line; the game then shows the English
-  name for that language.
-- `en` is required and must stay. A translation that is the same as the
-  English name is not needed.
-- The order of the lines does not matter when editing by hand; the item
-  editor's **Save Items** writes English first and the rest sorted by code.
-- Write the files as UTF-8. Accented and non-Latin letters can be typed as
-  they are.
-- Names must not contain `||`, and names longer than 49 characters are cut
-  in the game (a warning at startup).
-
-The game reads `Data/Items` next to `Main`. The build copies
-`src/bin/Data/Items` there, so after editing the files in `src/bin`, build
-again (or edit the copy in the build folder and copy it back before
-committing).
-
-### In the item editor
-
-Item names in the item editor are shown and edited in the current UI
-language:
-
-1. Switch the language: in the game's options window, or in the editor's
-   language menu.
-2. Edit the name in the item table. The change is stored for that language
-   only; to change the English name, switch to English first.
-3. Clearing a translated name removes the translation; the English name is
-   shown again.
-4. **Save Items** writes the files.
-
-### Translating items into a language the game already has
-
-The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
-`tl`, `uk` and `zh-TW`. Items currently have Portuguese (`pt`) and Spanish
-(`es`) names. To translate items into another of these languages, add names
-with that code (by hand or in the item editor); nothing else is needed. The
-names show as soon as a player picks that language.
-
-### Adding a new language
-
-Item names follow the UI language, so a new language has to exist as a UI
-language first:
-
-1. Add the UI language as described in
-   [translation-system.md → Adding a new locale](translation-system.md#adding-a-new-locale)
-   (the `.resx` files and the language's display name).
-2. Add it to the game's language dropdown: the `s_Languages` list in
-   `src/source/UI/NewUI/Options/NewUIOptionWindow.cpp`. The editor's
-   language menu lists new languages by itself.
-3. Add item names with the same code.
-
-Item names for a code that is not a UI language load without errors, but
-are never shown. Import from bmd and Export as bmd only cover English,
-Portuguese and Spanish (`Data/Local/Eng`, `Por`, `Spn`); names in other
-languages exist only in the JSON files.
-
-### Checking your changes
-
-Start the game: problems in the item data stop the start with a message
-that names the file, the item and the field, and all problems are in
-`MuError.log`. With a test build (`-DBUILD_TESTING=ON`), the item data tests
-also check the files in `src/bin/Data/Items` without starting the game:
-
-```bash
-ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
-```
+How to change item names, translate items and add a language is described
+in [translation-system.md → Item names](translation-system.md#item-names).
 
 ## Editing items (MuEditor)
 
