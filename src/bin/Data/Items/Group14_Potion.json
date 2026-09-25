@@ -1,0 +1,1679 @@
+{
+  "formatVersion": 1,
+  "group": 14,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Apple",
+        "es": "Manzana",
+        "pt": "Maçã"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "sellValue": 5
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Small Healing Potion",
+        "es": "Pócima de Curación Pequeña",
+        "pt": "Pequena poção de cura"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 10,
+      "sellValue": 10
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Healing Potion",
+        "es": "Pócima de Curación",
+        "pt": "Poção de cura"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 20
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Large Healing Potion",
+        "es": "Pócima de Curación Grande",
+        "pt": "Grande poção de cura"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 40,
+      "sellValue": 30
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Small Mana Potion",
+        "es": "Pócima de Maná Pequeña",
+        "pt": "Pequena poção de mana"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 10,
+      "sellValue": 10
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Mana Potion",
+        "es": "Pócima de Maná",
+        "pt": "Poção de mana"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 20
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Large Mana Potion",
+        "es": "Pócima de Maná Grande",
+        "pt": "Grande poção de mana"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 40,
+      "sellValue": 30
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Siege Potion",
+        "es": "Pócima de Asedio",
+        "pt": "Poção de sítio"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 30
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Antidote",
+        "es": "Antídoto",
+        "pt": "Antídoto"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 10,
+      "sellValue": 10
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Ale",
+        "es": "Cerveza",
+        "pt": "Cerveja"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 15,
+      "sellValue": 30
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Town Portal Scroll",
+        "es": "Rollo del Portal del Pueblo",
+        "pt": "Perg. de Portal para a Cidade"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 30,
+      "sellValue": 30
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Box of Luck",
+        "es": "Caja de la Suerte",
+        "pt": "Caixa da sorte"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Heart",
+        "es": "Corazón",
+        "pt": "Coração"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Jewel of Bless",
+        "es": "Joya de Bendición",
+        "pt": "Joia da bênção"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Jewel of Soul",
+        "es": "Joya de Alma",
+        "pt": "Joia da alma"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 30,
+      "sellValue": 150
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Zen"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Jewel of Life",
+        "es": "Joya de Vida",
+        "pt": "Joia da vida"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 72
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Devil's Eye",
+        "es": "Ojo del Diablo",
+        "pt": "Olho do diabo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Devil's Key",
+        "es": "Llave del Diablo",
+        "pt": "Chave do diabo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Devil's Invitation",
+        "es": "Invitación del Diablo",
+        "pt": "Convite do diabo"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Remedy of Love",
+        "es": "Remedio de Amor",
+        "pt": "Remédio do amor"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Rena"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Jewel of Creation",
+        "es": "Joya de la Creación",
+        "pt": "Joia da criação"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 78
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Scroll of the Emperor",
+        "es": "Rollo del Emperador",
+        "pt": "Pergaminho do Imperador"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Broken Sword",
+        "es": "Espada Quebrada",
+        "pt": "Espada quebrada"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Tear of Elf",
+        "es": "Lágrima de Elfa",
+        "pt": "Lágrima do elfo"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Soul Shard of Wizard",
+        "es": "Fragmento de Alma de Mago",
+        "pt": "Fragmento da alma do Mago"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Lost Map",
+        "es": "Mapa Perdido",
+        "pt": "Mapa perdido"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Symbol of Kundun",
+        "es": "Símbolo de Kundun",
+        "pt": "Símbolo de Kundun"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Jewel of Guardian",
+        "es": "Joya de Guardián",
+        "pt": "Joia do guardião"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 75
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Pink Chocolate Box",
+        "es": "Caja de Chocolate Rosa",
+        "pt": "Caixa de chocolate rosa"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Red Chocolate Box",
+        "es": "Caja de Chocolate Roja",
+        "pt": "Caixa de chocolate vermelha"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Blue Chocolate Box",
+        "es": "Caja de Chocolate Azul",
+        "pt": "Caixa de chocolate azul"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Small SD Potion",
+        "es": "Pócima de SD Pequeña",
+        "pt": "Pequena poção de SD"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 50
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "SD Potion",
+        "es": "Pócima de SD",
+        "pt": "Poção de SD"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 80
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Large SD Potion",
+        "es": "Pócima de SD Grande",
+        "pt": "Grande poção de SD"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 100
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Small Complex Potion",
+        "es": "Pócima Compleja Pequeña",
+        "pt": "Pequena poção complexa"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 68,
+      "sellValue": 20
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Complex Potion",
+        "es": "Pócima Compleja",
+        "pt": "Poção complexa"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 96,
+      "sellValue": 40
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Large Complex Potion",
+        "es": "Pócima Compleja Grande",
+        "pt": "Grande poção complexa"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 118,
+      "sellValue": 60
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Gemstone",
+        "es": "Gema",
+        "pt": "Pedra preciosa"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Jewel of Harmony",
+        "es": "Joya de la Armonía",
+        "pt": "Joia da harmonia"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Lower refining stone",
+        "es": "Piedra de Más Baja Refinación",
+        "pt": "Pedra refinada inferior"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Higher refining stone",
+        "es": "Piedra de Más Alta Refinación",
+        "pt": "Pedra refinada superior"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Pumpkin of Luck",
+        "es": "Calabaza de la Suerte",
+        "pt": "Abóbora da sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Jack O'Lantern Blessings",
+        "es": "Bendiciones de Jack O'Lantern",
+        "pt": "Bênçãos do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Jack O'Lantern Wrath",
+        "es": "Ira de Jack O'Lantern",
+        "pt": "Ira do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Jack O'Lantern Cry",
+        "es": "Grito de Jack O'Lantern",
+        "pt": "Grito do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Jack O'Lantern Food",
+        "es": "Alimento de Jack O'Lantern",
+        "pt": "Comida do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Jack O'Lantern Drink",
+        "es": "Trago de Jack O'Lantern",
+        "pt": "Bebida do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Chistmas Star",
+        "es": "Estrella de Navidad",
+        "pt": "Estrela de Natal"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "GM Gift",
+        "es": "Regalo de GM",
+        "pt": "Presente de GM"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 53,
+      "name": {
+        "en": "Talisman of Luck",
+        "es": "Talismán de la Suerte",
+        "pt": "Talismã da sorte"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 54,
+      "name": {
+        "en": "Chaos Card",
+        "es": "Tarjeta de Caos",
+        "pt": "Cartão do caos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 55,
+      "name": {
+        "en": "Green Chaos Box",
+        "es": "Caja de Caos Verde",
+        "pt": "Caixa do caos verde"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 56,
+      "name": {
+        "en": "Red Chaos Box",
+        "es": "Caja de Caos Roja",
+        "pt": "Caixa do caos vermelha"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 57,
+      "name": {
+        "en": "Purple Chaos Box",
+        "es": "Caja de Caos Púrpura",
+        "pt": "Caixa do caos roxa"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 58,
+      "name": {
+        "en": "Rare Item Ticket1",
+        "es": "Boleto de Ítem Raro1",
+        "pt": "Bilhete de item raro1"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Rare Item Ticket2",
+        "es": "Boleto de Ítem Raro2",
+        "pt": "Bilhete de item raro2"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Rare Item Ticket3",
+        "es": "Boleto de Ítem Raro3",
+        "pt": "Bilhete de item raro3"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Rare Item Ticket4",
+        "es": "Boleto de Ítem Raro4",
+        "pt": "Bilhete de item raro4"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Rare Item Ticket5",
+        "es": "Boleto de Ítem Raro5",
+        "pt": "Bilhete de item raro5"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Firecracker",
+        "es": "Petardo",
+        "pt": "Fogos de artifício"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Cursed Castle Water",
+        "es": "Agua de Castillo Maldito",
+        "pt": "Água do Castelo Amaldiçoado"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Death-beam Knight Flame",
+        "es": "Llama Caballero Haz Mortal",
+        "pt": "Chama do Cav. Raio da Morte"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Hell-Miner Horn",
+        "es": "Cuerno de Minero Infiernal",
+        "pt": "Chifre do Mineiro do Inferno"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dark Phoenix Feather",
+        "es": "Pluma de Fénix Oscuro",
+        "pt": "Pena de fênix negra"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Abyssal Eye",
+        "es": "Ojo Abismal",
+        "pt": "Olho abissal"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Elite Healing Potion",
+        "es": "Pócima de Curación de Élite",
+        "pt": "Poção de cura de elite"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Elite Mana Potion",
+        "es": "Pócima de Maná de Élite",
+        "pt": "Poção de mana de elite"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Scroll of Quickness",
+        "es": "Rollo de Rapidez",
+        "pt": "Pergaminho da rapidez"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Scroll of Defense",
+        "es": "Rollo de Defensa",
+        "pt": "Pergaminho da defesa"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 74,
+      "name": {
+        "en": "Scroll of Wrath",
+        "es": "Rollo de Ira",
+        "pt": "Pergaminho da ira"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 75,
+      "name": {
+        "en": "Scroll of Wizardry",
+        "es": "Rollo de Magia",
+        "pt": "Pergaminho do poder de magia"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 76,
+      "name": {
+        "en": "Scroll of Health",
+        "es": "Rollo de Salud",
+        "pt": "Pergaminho de vida"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 77,
+      "name": {
+        "en": "Scroll of Mana",
+        "es": "Rollo de Maná",
+        "pt": "Pergaminho de mana"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 78,
+      "name": {
+        "en": "Elixir of Strength",
+        "es": "Elixir de Fuerza",
+        "pt": "Elixir da força"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 79,
+      "name": {
+        "en": "Elixir of Agility",
+        "es": "Elixir de Agilidad",
+        "pt": "Elixir da agilidade"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 80,
+      "name": {
+        "en": "Elixir of Health",
+        "es": "Elixir de Salud",
+        "pt": "Elixir da vida"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 81,
+      "name": {
+        "en": "Elixir of Energy",
+        "es": "Elixir de Energía",
+        "pt": "Elixir da energia"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 82,
+      "name": {
+        "en": "Elixir of Control",
+        "es": "Elixir de Control",
+        "pt": "Elixir do controle"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 83,
+      "name": {
+        "en": "Rare Item Ticket",
+        "es": "Boleto de Ítem Raro",
+        "pt": "Bilhete de item raro"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 84,
+      "name": {
+        "en": "Cherry Blossom Play-Box",
+        "es": "Caja Juegos Flor de Cerezo",
+        "pt": "Cx. de Brinq. Flor de Cereja"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 85,
+      "name": {
+        "en": "Cherry Blossom Wine",
+        "es": "Vino de Flor de Cerezo",
+        "pt": "Vinho de flor de cereja"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 86,
+      "name": {
+        "en": "Cherry Blossom Rice Cake",
+        "es": "Pastel Arroz Flor de Cerezo",
+        "pt": "Bolo de Arroz Flor de Cereja"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 87,
+      "name": {
+        "en": "Cherry Blossom Flower Petal",
+        "es": "Pétalo de Flor de Cerezo",
+        "pt": "Pétala da flor de cereja"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 88,
+      "name": {
+        "en": "White Cherry Blossom Branch",
+        "es": "Rama Blanca Flor de Cerezo",
+        "pt": "Galho de cereja branco"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 89,
+      "name": {
+        "en": "Red Cherry Blossom Branch",
+        "es": "Rama Roja de Flor de Cerezo",
+        "pt": "Galho de cereja vermelho"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 90,
+      "name": {
+        "en": "Golden Cherry Blossom Branch",
+        "es": "Rama Dorada Flor de Cerezo",
+        "pt": "Galho de cereja dourado"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 91,
+      "name": {
+        "en": "Summoner Character Card",
+        "es": "Tarjeta Personaje Invocador",
+        "pt": "Cartão do Pers. Invocador"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 92,
+      "name": {
+        "en": "Chaos Card Gold",
+        "es": "Tarjeta de Caos Oro",
+        "pt": "Cartão dourado do caos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 93,
+      "name": {
+        "en": "Chaos Card Rare",
+        "es": "Tarjeta de Caos Rara",
+        "pt": "Cartão raro do caos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 94,
+      "name": {
+        "en": "Medium Elite Healing Potion",
+        "es": "Pócima Curación Élite Media",
+        "pt": "Poção média de cura de elite"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 95,
+      "name": {
+        "en": "Chaos Card  Mini",
+        "es": "Tarjeta de Caos Mini",
+        "pt": "Mini cartão do caos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 96,
+      "name": {
+        "en": "Talisman of Chaos Assembly",
+        "es": "Ensamble Talismán del Caos",
+        "pt": "Talismã do Agrup. do Caos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 97,
+      "name": {
+        "en": "Scroll of Battle",
+        "es": "Rollo de Batalla",
+        "pt": "Pergaminho da batalha"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 98,
+      "name": {
+        "en": "Scroll of Strength",
+        "es": "Rollo de Fuerza",
+        "pt": "Pergaminho da força"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 99,
+      "name": {
+        "en": "Christmas Firecracker",
+        "es": "Petardo de Navidad",
+        "pt": "Fogos de artifício de Natal"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 100,
+      "name": {
+        "en": "Lucky Coin",
+        "es": "Moneda de la Suerte",
+        "pt": "Moeda da sorte"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 101,
+      "name": {
+        "en": "Suspicious Scrap of Paper",
+        "es": "Trozo de Papel Sospechoso",
+        "pt": "Pedaço de papel suspeito"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 32
+    },
+    {
+      "number": 102,
+      "name": {
+        "en": "Gaion's Order",
+        "es": "Órden de Gaion",
+        "pt": "Ordem de Gaion"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 103,
+      "name": {
+        "en": "First Secromicon Fragment",
+        "es": "1er Fragmento de Secromicon",
+        "pt": "Prim. Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 104,
+      "name": {
+        "en": "Second Secromicon Fragment",
+        "es": "2do Fragmento de Secromicon",
+        "pt": "Seg. Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 105,
+      "name": {
+        "en": "Third Secromicon Fragment",
+        "es": "3er Fragmento de Secromicon",
+        "pt": "Ter. Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 106,
+      "name": {
+        "en": "Fourth Secromicon Fragment",
+        "es": "4to Fragmento de Secromicon",
+        "pt": "Quarto Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 107,
+      "name": {
+        "en": "Fifth Secromicon Fragment",
+        "es": "5to Fragmento de Secromicon",
+        "pt": "Quinto Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 108,
+      "name": {
+        "en": "Sixth Secromicon Fragment",
+        "es": "6to Fragmento de Secromicon",
+        "pt": "Sexto Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 109,
+      "name": {
+        "en": "Complete Secromicon",
+        "es": "Secromicon Completo",
+        "pt": "Secromicon completo"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 110,
+      "name": {
+        "en": "Sign of Dimensions",
+        "es": "Signo de Dimensiones",
+        "pt": "Sinal das dimensões"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 32
+    },
+    {
+      "number": 111,
+      "name": {
+        "en": "Mirror of Dimensions",
+        "es": "Espejo de Dimensiones",
+        "pt": "Espelho das dimensões"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 112,
+      "name": {
+        "en": "Silver Key",
+        "es": "Llave de Plata",
+        "pt": "Chave prateada"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 113,
+      "name": {
+        "en": "Gold Key",
+        "es": "Llave de Oro",
+        "pt": "Chave dourada"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 114,
+      "name": {
+        "en": "Master Skill Reset",
+        "es": "Reinicio de Habilidad Maestra",
+        "pt": "Reinic. de Habilidade Mestre"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 115,
+      "name": {
+        "en": "Stat Adjustment",
+        "es": "Ajuste de Estadísticas",
+        "pt": "Ajuste de atributos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 116,
+      "name": {
+        "en": "Character Relocation Service",
+        "es": "Cuarto Fragmento Secromicon",
+        "pt": "Serviço Nova Local. de Pers."
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 117,
+      "name": {
+        "en": "Character Rename Service",
+        "es": "Servicio Renombrar Personaje",
+        "pt": "Serviço Novo Nome do Pers."
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 118,
+      "name": {
+        "en": "Server Relocation Service",
+        "es": "Servicio Reubicar Servidor",
+        "pt": "Serviço Nova Local. de Serv."
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 119,
+      "name": {
+        "en": "Premium Package",
+        "es": "Paquete Premium",
+        "pt": "Pacote Premium"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 120,
+      "name": {
+        "en": "Goblin Gold Coin",
+        "es": "Moneda de Oro de Duendes",
+        "pt": "Moeda dourada do goblin"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 121,
+      "name": {
+        "en": "Sealed Golden Box",
+        "es": "Caja Dorada Sellada",
+        "pt": "Caixa dourada lacrada"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 122,
+      "name": {
+        "en": "Sealed Silver Box",
+        "es": "Caja Plateada Sellada",
+        "pt": "Caixa prateada lacrada"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 123,
+      "name": {
+        "en": "Golden Box",
+        "es": "Caja Dorada",
+        "pt": "Caixa dourada"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 124,
+      "name": {
+        "en": "Silver Box",
+        "es": "Caja Plateada",
+        "pt": "Caixa prateada"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 125,
+      "name": {
+        "en": "Package Box",
+        "es": "Caja de Paquete",
+        "pt": "Caixa de pacote"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 126,
+      "name": {
+        "en": "30-Day Pass",
+        "es": "Pase por 30 días",
+        "pt": "Passe de 30 dias"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 127,
+      "name": {
+        "en": "90-Day Pass",
+        "es": "Pase por 90 días",
+        "pt": "Passe de 90 dias"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 128,
+      "name": {
+        "en": "30-Day Pass - Points",
+        "es": "Puntos - Pase por 30 días",
+        "pt": "Passe de 30 dias - Pontos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 129,
+      "name": {
+        "en": "90-Day Pass - Points",
+        "es": "Puntos - Pase por 90 días",
+        "pt": "Passe de 90 dias - Pontos"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 130,
+      "name": {
+        "en": "3-Hour Pass",
+        "es": "Pase por 3 horas",
+        "pt": "Passe de 3 horas"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 131,
+      "name": {
+        "en": "5-Hour Pass",
+        "es": "Pase por 5 horas",
+        "pt": "Passe de 5 horas"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 132,
+      "name": {
+        "en": "10-Hour Pass",
+        "es": "Pase por 10 horas",
+        "pt": "Passe de 10 horas"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 133,
+      "name": {
+        "en": "Elite SD Potion",
+        "es": "Pócima de SD de Élite",
+        "pt": "Poção de SD de elite"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 134,
+      "name": {
+        "en": "Package Box A",
+        "es": "Caja de Paquete A",
+        "pt": "Caixa de pacote A"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 135,
+      "name": {
+        "en": "Package Box B",
+        "es": "Caja de Paquete B",
+        "pt": "Caixa de pacote B"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 136,
+      "name": {
+        "en": "Package Box C",
+        "es": "Caja de Paquete C",
+        "pt": "Caixa de pacote C"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 137,
+      "name": {
+        "en": "Package Box D",
+        "es": "Caja de Paquete D",
+        "pt": "Caixa de pacote D"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 138,
+      "name": {
+        "en": "Package Box E",
+        "es": "Caja de Paquete E",
+        "pt": "Caixa de pacote E"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 139,
+      "name": {
+        "en": "Package Box F",
+        "es": "Caja de Paquete F",
+        "pt": "Caixa de pacote F"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 140,
+      "name": {
+        "en": "Scroll of Healing",
+        "es": "Rollo de Curación",
+        "pt": "Pergaminho da cura"
+      },
+      "width": 2,
+      "height": 2
+    },
+    {
+      "number": 141,
+      "name": {
+        "en": "Shining Jewelry Case",
+        "es": "Joyero Brillante",
+        "pt": "Estojo de joias brilhante"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 142,
+      "name": {
+        "en": "Elegant Jewelry Case",
+        "es": "Joyero Elegante",
+        "pt": "Estojo de joias elegante"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 143,
+      "name": {
+        "en": "Steel Jewelry Case",
+        "es": "Joyero de Acero",
+        "pt": "Estojo de joias de aço"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 144,
+      "name": {
+        "en": "Old Jewelry Case",
+        "es": "Joyero Antiguo",
+        "pt": "Estojo de joias antigo"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 145,
+      "name": {
+        "en": "Rare Item Ticket 7",
+        "es": "Boleto de Ítem Raro 7",
+        "pt": "Bilhete de item raro7"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 146,
+      "name": {
+        "en": "Rare Item Ticket 8",
+        "es": "Boleto de Ítem Raro 8",
+        "pt": "Bilhete de item raro8"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 147,
+      "name": {
+        "en": "Rare Item Ticket 9",
+        "es": "Boleto de Ítem Raro 9",
+        "pt": "Bilhete de item raro9"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 148,
+      "name": {
+        "en": "Rare Item Ticket 10",
+        "es": "Boleto de Ítem Raro 10",
+        "pt": "Bilhete de item raro10"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 149,
+      "name": {
+        "en": "Rare Item Ticket 11",
+        "es": "Boleto de Ítem Raro 11",
+        "pt": "Bilhete de item raro11"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 150,
+      "name": {
+        "en": "Rare Item Ticket 12",
+        "es": "Boleto de Ítem Raro 12",
+        "pt": "Bilhete de item raro12"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 151,
+      "name": {
+        "en": "Lv. 1 Letter of Request",
+        "es": "Nivel 1 Carta de Petición",
+        "pt": "Nvl. 1Carta de Requisição"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 152,
+      "name": {
+        "en": "Lv. 1 Completion Certificate",
+        "es": "Nivel 1 Certificado",
+        "pt": "Nvl. 1 Completada"
+      },
+      "width": 1,
+      "height": 2
+    },
+    {
+      "number": 153,
+      "name": {
+        "en": "Stardust",
+        "es": "Polvo estelar",
+        "pt": "Poeira estelar"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 60
+    },
+    {
+      "number": 154,
+      "name": {
+        "en": "Kalt Stone",
+        "es": "Piedra Kalt",
+        "pt": "Pedra Kalt"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 60
+    },
+    {
+      "number": 155,
+      "name": {
+        "en": "Tantalos's Armor",
+        "es": "Armadura de Tantalos",
+        "pt": "Armadura de Tântalos"
+      },
+      "width": 2,
+      "height": 2,
+      "sellValue": 60
+    },
+    {
+      "number": 156,
+      "name": {
+        "en": "Burnt Murderer's Club",
+        "es": "Garrote de Asesinos Calcinados",
+        "pt": "Porrete de Assassino Queimado"
+      },
+      "width": 1,
+      "height": 3,
+      "sellValue": 60
+    },
+    {
+      "number": 157,
+      "name": {
+        "en": "Green Box",
+        "es": "Caja verde",
+        "pt": "Caixa verde"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 190
+    },
+    {
+      "number": 158,
+      "name": {
+        "en": "Red Box",
+        "es": "Caja roja",
+        "pt": "Caixa vermelha"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 190
+    },
+    {
+      "number": 159,
+      "name": {
+        "en": "Purple Box",
+        "es": "Caja púrpura",
+        "pt": "Caixa roxa"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 190
+    },
+    {
+      "number": 160,
+      "name": {
+        "en": "Jewel of Extension",
+        "es": "Joya de Extensión",
+        "pt": "Jóia de Extensão"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 161,
+      "name": {
+        "en": "Jewel of Elevation",
+        "es": "Joya de Elevación",
+        "pt": "Jóia de Elevação"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 162,
+      "name": {
+        "en": "Magic Backpack",
+        "es": "Morral Mágico",
+        "pt": "Mochila Mágica"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 163,
+      "name": {
+        "en": "Vault Expansion Certificate",
+        "es": "Certificado de Expansión de Bóveda",
+        "pt": "Certificado de Expansão de Cofre"
+      },
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 169,
+      "name": {
+        "en": "RageFighter Character Card",
+        "es": "Tarjeta - Peleador Feroz",
+        "pt": "Carta de Person-RageFighter"
+      },
+      "width": 1,
+      "height": 1
+    }
+  ]
+}

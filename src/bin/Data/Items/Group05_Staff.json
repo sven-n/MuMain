@@ -1,0 +1,800 @@
+{
+  "formatVersion": 1,
+  "group": 5,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Skull Staff",
+        "es": "Báculo Calavera",
+        "pt": "Bastão da caveira"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 6,
+      "magicDurability": 20,
+      "damageMin": 3,
+      "damageMax": 4,
+      "attackSpeed": 20,
+      "magicPower": 6,
+      "attackType": 3,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Angelic Staff",
+        "es": "Báculo Angelical",
+        "pt": "Bastão angelical"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 18,
+      "magicDurability": 38,
+      "damageMin": 10,
+      "damageMax": 12,
+      "attackSpeed": 25,
+      "magicPower": 20,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Serpent Staff",
+        "es": "Báculo Serpiente",
+        "pt": "Bastão da serpente"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 30,
+      "magicDurability": 50,
+      "damageMin": 17,
+      "damageMax": 18,
+      "attackSpeed": 25,
+      "magicPower": 34,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Thunder Staff",
+        "es": "Báculo Trueno",
+        "pt": "Bastão do trovão"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 42,
+      "magicDurability": 60,
+      "damageMin": 23,
+      "damageMax": 25,
+      "attackSpeed": 25,
+      "magicPower": 46,
+      "attackType": 3,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Gorgon Staff",
+        "es": "Báculo Gorgon",
+        "pt": "Bastão da górgone"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 52,
+      "magicDurability": 65,
+      "damageMin": 29,
+      "damageMax": 32,
+      "attackSpeed": 25,
+      "magicPower": 58,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Legendary Staff",
+        "es": "Báculo Legendario",
+        "pt": "Bastão lendário"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 59,
+      "magicDurability": 66,
+      "damageMin": 29,
+      "damageMax": 31,
+      "attackSpeed": 25,
+      "magicPower": 59,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Staff of Resurrection",
+        "es": "Báculo de la Resurrección",
+        "pt": "Bastão da ressurreição"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 70,
+      "magicDurability": 70,
+      "damageMin": 35,
+      "damageMax": 39,
+      "attackSpeed": 25,
+      "magicPower": 70,
+      "attackType": 3,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Chaos Lighting Staff",
+        "es": "Báculo Relámpago de Caos",
+        "pt": "Bastão do relâmpago do caos"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 75,
+      "magicDurability": 70,
+      "damageMin": 47,
+      "damageMax": 48,
+      "attackSpeed": 30,
+      "magicPower": 94,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Staff of Destruction",
+        "es": "Báculo de la Destrucción",
+        "pt": "Bastão da destruição"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 90,
+      "magicDurability": 85,
+      "damageMin": 50,
+      "damageMax": 54,
+      "attackSpeed": 30,
+      "magicPower": 101,
+      "attackType": 3,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Dragon Soul Staff",
+        "es": "Báculo Alma de Dragón",
+        "pt": "Bastão da alma do dragão"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 100,
+      "magicDurability": 91,
+      "damageMin": 46,
+      "damageMax": 48,
+      "attackSpeed": 30,
+      "magicPower": 92,
+      "attackType": 3,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Divine Staff of Archangel",
+        "es": "Báculo Divino de Arcángel",
+        "pt": "Bastão divino do arcanjo"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 104,
+      "magicDurability": 182,
+      "damageMin": 153,
+      "damageMax": 165,
+      "attackSpeed": 30,
+      "magicPower": 156,
+      "requirements": {
+        "strength": 36,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Staff of Kundun",
+        "es": "Báculo de Kundun",
+        "pt": "Bastão de Kundun"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 140,
+      "magicDurability": 95,
+      "damageMin": 55,
+      "damageMax": 61,
+      "attackSpeed": 30,
+      "magicPower": 110,
+      "requirements": {
+        "strength": 45,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkWizard": 2,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Grand Viper Staff",
+        "es": "Gran Báculo Víbora",
+        "pt": "Grande bastão da víbora"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 147,
+      "magicDurability": 100,
+      "damageMin": 66,
+      "damageMax": 74,
+      "attackSpeed": 30,
+      "magicPower": 130,
+      "requirements": {
+        "level": 380,
+        "strength": 39,
+        "dexterity": 13
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Platina Staff",
+        "es": "Báculo Platina",
+        "pt": "Bastão de platina"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 110,
+      "magicDurability": 78,
+      "damageMin": 51,
+      "damageMax": 53,
+      "attackSpeed": 30,
+      "magicPower": 120,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Mystery Stick",
+        "es": "Vara del Misterio",
+        "pt": "Cajado misterioso"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 28,
+      "magicDurability": 50,
+      "damageMin": 17,
+      "damageMax": 18,
+      "attackSpeed": 25,
+      "magicPower": 34,
+      "requirements": {
+        "strength": 34,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Violent Wind Stick",
+        "es": "Vara Viento Violento",
+        "pt": "Cajado do vento violento"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 42,
+      "magicDurability": 60,
+      "damageMin": 23,
+      "damageMax": 25,
+      "attackSpeed": 25,
+      "magicPower": 46,
+      "requirements": {
+        "strength": 33,
+        "dexterity": 17
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Red Wing Stick",
+        "es": "Vara Ala Roja",
+        "pt": "Cajado da asa vermelha"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 59,
+      "magicDurability": 65,
+      "damageMin": 29,
+      "damageMax": 31,
+      "attackSpeed": 25,
+      "magicPower": 59,
+      "requirements": {
+        "strength": 36,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Ancient Stick",
+        "es": "Vara Antigua",
+        "pt": "Cajado ancestral"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 78,
+      "magicDurability": 81,
+      "damageMin": 38,
+      "damageMax": 40,
+      "attackSpeed": 25,
+      "magicPower": 76,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 19
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Demonic Stick",
+        "es": "Vara Demoníaca",
+        "pt": "Cajado demoníaco"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 100,
+      "magicDurability": 91,
+      "damageMin": 46,
+      "damageMax": 48,
+      "attackSpeed": 30,
+      "magicPower": 92,
+      "requirements": {
+        "strength": 54,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Storm Blitz Stick",
+        "es": "Vara Ráfaga Tormentosa",
+        "pt": "Caj. Relâmpago de Tempestade"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 110,
+      "magicDurability": 95,
+      "damageMin": 51,
+      "damageMax": 53,
+      "attackSpeed": 30,
+      "magicPower": 110,
+      "requirements": {
+        "level": 380,
+        "strength": 64,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Eternal Wing Stick",
+        "es": "Vara Ala Eterna",
+        "pt": "Cajado da asa eterna"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 147,
+      "magicDurability": 100,
+      "damageMin": 66,
+      "damageMax": 74,
+      "attackSpeed": 30,
+      "magicPower": 106,
+      "requirements": {
+        "level": 380,
+        "strength": 57,
+        "dexterity": 13
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Book of Samut",
+        "es": "Libro de Samut",
+        "pt": "Livro de Samut"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 1,
+      "skill": 223,
+      "level": 52,
+      "magicDurability": 60,
+      "attackSpeed": 25,
+      "magicPower": 46,
+      "requirements": {
+        "dexterity": 20,
+        "energy": 135
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Book of Neil",
+        "es": "Libro de Neil",
+        "pt": "Livro de Neil"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 1,
+      "skill": 224,
+      "level": 59,
+      "magicDurability": 65,
+      "attackSpeed": 25,
+      "magicPower": 59,
+      "requirements": {
+        "dexterity": 25,
+        "energy": 168
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Book of Lagle",
+        "es": "Libro de Lagle",
+        "pt": "Livro de Lagle"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 1,
+      "skill": 225,
+      "level": 65,
+      "magicDurability": 50,
+      "attackSpeed": 25,
+      "magicPower": 72,
+      "requirements": {
+        "dexterity": 30,
+        "energy": 201
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Deadly Staff",
+        "es": "Báculo Mortal",
+        "pt": "Bastão letal"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 138,
+      "magicDurability": 91,
+      "damageMin": 57,
+      "damageMax": 59,
+      "attackSpeed": 30,
+      "magicPower": 126,
+      "attackType": 3,
+      "requirements": {
+        "level": 380,
+        "strength": 47,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Inberial Staff",
+        "es": "Báculo Inberial",
+        "pt": "Bastão inberial"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 137,
+      "magicDurability": 182,
+      "damageMin": 57,
+      "damageMax": 61,
+      "attackSpeed": 30,
+      "magicPower": 124,
+      "requirements": {
+        "level": 380,
+        "strength": 48,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Chromatic Staff",
+        "es": "Báculo Cromático",
+        "pt": "Bastão cromático"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 147,
+      "magicDurability": 78,
+      "damageMin": 55,
+      "damageMax": 57,
+      "attackSpeed": 30,
+      "magicPower": 124,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 2,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Raven Stick",
+        "es": "Vara Cuervo",
+        "pt": "Cajado do corvo"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 147,
+      "magicDurability": 98,
+      "damageMin": 70,
+      "damageMax": 78,
+      "attackSpeed": 30,
+      "magicPower": 130,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Divine Stick of the Archangel",
+        "es": "Bastón Divino de Arcángel",
+        "pt": "Bastão Divino do Arcanjo"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 104,
+      "magicDurability": 182,
+      "damageMin": 153,
+      "damageMax": 165,
+      "attackSpeed": 30,
+      "magicPower": 146,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 13
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Legendary Staff-J",
+        "es": "Báculo Legendario-J",
+        "pt": "Bastão lendário-J"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 59,
+      "magicDurability": 66,
+      "damageMin": 29,
+      "damageMax": 31,
+      "attackSpeed": 30,
+      "magicPower": 59,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Red Wing Stick-J",
+        "es": "Vara Ala Roja-J",
+        "pt": "Cajado da asa vermelha-J"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "level": 59,
+      "magicDurability": 65,
+      "damageMin": 29,
+      "damageMax": 31,
+      "attackSpeed": 30,
+      "magicPower": 59,
+      "requirements": {
+        "strength": 36,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Book of Neil-J",
+        "es": "Libro de Lagle-J",
+        "pt": "Livro de Neil-J"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 1,
+      "skill": 224,
+      "level": 59,
+      "magicDurability": 65,
+      "attackSpeed": 30,
+      "magicPower": 59,
+      "requirements": {
+        "dexterity": 25,
+        "energy": 168
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    }
+  ]
+}

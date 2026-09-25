@@ -1,0 +1,950 @@
+{
+  "formatVersion": 1,
+  "group": 0,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Kris"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 0,
+      "level": 6,
+      "durability": 20,
+      "damageMin": 6,
+      "damageMax": 11,
+      "attackSpeed": 50,
+      "attackType": 1,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Short Sword",
+        "es": "Espada Corta",
+        "pt": "Espada curta"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 3,
+      "durability": 22,
+      "damageMin": 3,
+      "damageMax": 7,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 60
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Rapier",
+        "es": "Estoque"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 9,
+      "durability": 23,
+      "damageMin": 9,
+      "damageMax": 15,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Katana",
+        "pt": "Cataná"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 20,
+      "level": 16,
+      "durability": 27,
+      "damageMin": 16,
+      "damageMax": 26,
+      "attackSpeed": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Sword of Assassin",
+        "es": "Espada de Asesino",
+        "pt": "Espada do assassino"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 21,
+      "level": 12,
+      "durability": 24,
+      "damageMin": 12,
+      "damageMax": 18,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Blade",
+        "es": "Espada",
+        "pt": "Lâmina"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 22,
+      "level": 36,
+      "durability": 39,
+      "damageMin": 36,
+      "damageMax": 47,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Gladius"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 20,
+      "level": 20,
+      "durability": 30,
+      "damageMin": 20,
+      "damageMax": 30,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Falchion",
+        "es": "Cimitarra",
+        "pt": "Cimitarra"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 21,
+      "level": 24,
+      "durability": 34,
+      "damageMin": 24,
+      "damageMax": 34,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Serpent Sword",
+        "es": "Espada Serpiente",
+        "pt": "Espada da serpente"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 21,
+      "level": 30,
+      "durability": 36,
+      "damageMin": 30,
+      "damageMax": 40,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Sword of Salamander",
+        "es": "Espada de Salamandra",
+        "pt": "Espada da salamandra"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 20,
+      "level": 32,
+      "durability": 40,
+      "damageMin": 32,
+      "damageMax": 46,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 103
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Light Saber",
+        "es": "Sable de Luz",
+        "pt": "Sabre de luz"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 40,
+      "durability": 50,
+      "damageMin": 47,
+      "damageMax": 61,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Legendary Sword",
+        "es": "Espada Legendaria",
+        "pt": "Espada lendária"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 20,
+      "level": 44,
+      "durability": 54,
+      "damageMin": 56,
+      "damageMax": 72,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Heliacal Sword",
+        "es": "Espada Helíaca",
+        "pt": "Espada helíaca"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 56,
+      "durability": 66,
+      "damageMin": 73,
+      "damageMax": 98,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 140
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Double Blade",
+        "es": "Doble Hoja",
+        "pt": "Lâmina dupla"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 22,
+      "level": 48,
+      "durability": 43,
+      "damageMin": 48,
+      "damageMax": 56,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Lighting Sword",
+        "es": "Espada Lumínica",
+        "pt": "Espada de luz"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 22,
+      "level": 59,
+      "durability": 50,
+      "damageMin": 59,
+      "damageMax": 67,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Giant Sword",
+        "es": "Espada Gigante",
+        "pt": "Espada gigante"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 23,
+      "level": 52,
+      "durability": 60,
+      "damageMin": 60,
+      "damageMax": 85,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 140
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Sword of Destruction",
+        "es": "Espada de Destrucción",
+        "pt": "Espada da destruição"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 22,
+      "level": 82,
+      "durability": 84,
+      "damageMin": 82,
+      "damageMax": 90,
+      "attackSpeed": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Breaker",
+        "es": "Quebrantador Oscuro",
+        "pt": "Destruidora Negra"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 23,
+      "level": 104,
+      "durability": 89,
+      "damageMin": 128,
+      "damageMax": 153,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 180,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Thunder Blade",
+        "es": "Espada del Trueno",
+        "pt": "Lâmina do trovão"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 23,
+      "level": 105,
+      "durability": 86,
+      "damageMin": 140,
+      "damageMax": 168,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 180,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Sword of Archangel",
+        "es": "Espada Divina de Arcángel",
+        "pt": "Espada divina do arcanjo"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 22,
+      "level": 86,
+      "durability": 168,
+      "damageMin": 220,
+      "damageMax": 230,
+      "attackSpeed": 45,
+      "requirements": {
+        "strength": 140,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Knight Blade",
+        "es": "Espada de Caballero",
+        "pt": "Lâmina do cavaleiro"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 22,
+      "level": 140,
+      "durability": 90,
+      "damageMin": 107,
+      "damageMax": 115,
+      "attackSpeed": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 116,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Dark Reign Blade",
+        "es": "Espada del Reino Oscuro",
+        "pt": "Lâmina do Império negro"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 56,
+      "level": 140,
+      "durability": 100,
+      "damageMin": 115,
+      "damageMax": 142,
+      "attackSpeed": 40,
+      "magicPower": 115,
+      "attackType": 1,
+      "requirements": {
+        "strength": 116,
+        "dexterity": 53,
+        "energy": 9
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Bone Blade",
+        "es": "Espada de Hueso",
+        "pt": "Lâmina de osso"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 22,
+      "level": 147,
+      "durability": 95,
+      "damageMin": 122,
+      "damageMax": 135,
+      "attackSpeed": 40,
+      "requirements": {
+        "level": 380,
+        "strength": 100,
+        "dexterity": 35
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Explosion Blade",
+        "es": "Espada Explosiva",
+        "pt": "Lâmina da explosão"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 56,
+      "level": 147,
+      "durability": 110,
+      "damageMin": 127,
+      "damageMax": 155,
+      "attackSpeed": 45,
+      "magicPower": 134,
+      "requirements": {
+        "level": 380,
+        "strength": 98,
+        "dexterity": 48,
+        "energy": 7
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Daybreak",
+        "es": "Albor",
+        "pt": "Aurora"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 115,
+      "durability": 90,
+      "damageMin": 182,
+      "damageMax": 218,
+      "attackSpeed": 40,
+      "requirements": {
+        "strength": 192,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Sword Dancer",
+        "es": "Oscilador de Espadas",
+        "pt": "Dançarino da espada"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 56,
+      "level": 115,
+      "durability": 90,
+      "damageMin": 109,
+      "damageMax": 136,
+      "attackSpeed": 40,
+      "magicPower": 108,
+      "requirements": {
+        "strength": 136,
+        "dexterity": 57,
+        "energy": 9
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Flameberge"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 22,
+      "level": 137,
+      "durability": 90,
+      "damageMin": 115,
+      "damageMax": 126,
+      "attackSpeed": 40,
+      "requirements": {
+        "level": 380,
+        "strength": 193,
+        "dexterity": 53
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Sword Breaker",
+        "es": "Quebrantador de Espadas",
+        "pt": "Destruidora de Espadas"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 22,
+      "level": 133,
+      "durability": 90,
+      "damageMin": 91,
+      "damageMax": 99,
+      "attackSpeed": 35,
+      "requirements": {
+        "level": 380,
+        "strength": 53,
+        "dexterity": 176
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Rune Bastard Sword",
+        "es": "Espada Runa Bastarda",
+        "pt": "Espada bastarda das runas"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 56,
+      "level": 139,
+      "durability": 90,
+      "damageMin": 98,
+      "damageMax": 122,
+      "attackSpeed": 45,
+      "magicPower": 109,
+      "requirements": {
+        "level": 380,
+        "strength": 91,
+        "dexterity": 73,
+        "energy": 17
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Rune Blade",
+        "es": "Espada Runa",
+        "pt": "Lâmina das runas"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 56,
+      "level": 100,
+      "durability": 93,
+      "damageMin": 104,
+      "damageMax": 130,
+      "attackSpeed": 35,
+      "magicPower": 104,
+      "attackType": 3,
+      "requirements": {
+        "strength": 135,
+        "dexterity": 62,
+        "energy": 9
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Sacred Glove",
+        "es": "Guantes Sagrados",
+        "pt": "Luvas Sagradas"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 0,
+      "skill": 260,
+      "level": 52,
+      "durability": 65,
+      "damageMin": 52,
+      "damageMax": 58,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 85,
+        "dexterity": 35
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Holy Storm Claw",
+        "es": "Garra de Tormenta Sagrada",
+        "pt": "Garra de Tempestade Sagrada"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 0,
+      "skill": 261,
+      "level": 82,
+      "durability": 77,
+      "damageMin": 82,
+      "damageMax": 88,
+      "attackSpeed": 30,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Piercing Blade Glove",
+        "es": "Guantes de Cuchillas Perforadoras",
+        "pt": "Luvas de Lâmina Perfurante"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 0,
+      "skill": 260,
+      "level": 105,
+      "durability": 86,
+      "damageMin": 95,
+      "damageMax": 101,
+      "attackSpeed": 35,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Phoenix Soul Star",
+        "es": "Estrella de Alma de Fénix",
+        "pt": "Estrela de Alma de Fênix"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 0,
+      "skill": 270,
+      "level": 147,
+      "durability": 98,
+      "damageMin": 122,
+      "damageMax": 128,
+      "attackSpeed": 40,
+      "requirements": {
+        "level": 380,
+        "strength": 101,
+        "dexterity": 51
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Lighting Sword-J",
+        "es": "Espada Lumínica-J",
+        "pt": "Espada de luz-J"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 22,
+      "level": 59,
+      "durability": 50,
+      "damageMin": 59,
+      "damageMax": 67,
+      "attackSpeed": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Sacred Glove-J",
+        "es": "Guantes Sagrados-J",
+        "pt": "Luvas Sagradas-J"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 0,
+      "skill": 260,
+      "level": 52,
+      "durability": 65,
+      "damageMin": 52,
+      "damageMax": 58,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 85,
+        "dexterity": 35
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    }
+  ]
+}

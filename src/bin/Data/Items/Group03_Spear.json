@@ -1,0 +1,331 @@
+{
+  "formatVersion": 1,
+  "group": 3,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Light Spear",
+        "es": "Jabalina de Luz",
+        "pt": "Lança de luz"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 42,
+      "durability": 56,
+      "damageMin": 50,
+      "damageMax": 63,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Spear",
+        "es": "Jabalina",
+        "pt": "Lança"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 23,
+      "durability": 42,
+      "damageMin": 30,
+      "damageMax": 41,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Dragon Lance",
+        "es": "Lanza Dragón",
+        "pt": "Lança do dragão"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 15,
+      "durability": 34,
+      "damageMin": 21,
+      "damageMax": 33,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Giant Trident",
+        "es": "Tridente Gigante",
+        "pt": "Tridente gigante"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 29,
+      "durability": 44,
+      "damageMin": 35,
+      "damageMax": 43,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Serpent Spear",
+        "es": "Jabalina Serpiente",
+        "pt": "Lança da serpente"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 20,
+      "level": 46,
+      "durability": 58,
+      "damageMin": 58,
+      "damageMax": 80,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Double Poleaxe",
+        "es": "Hacha Doble de Mástil",
+        "pt": "Gadanha dupla"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 13,
+      "durability": 38,
+      "damageMin": 19,
+      "damageMax": 31,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Halberd",
+        "es": "Alabarda",
+        "pt": "Alabarda"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "level": 19,
+      "durability": 40,
+      "damageMin": 25,
+      "damageMax": 35,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Berdysh",
+        "es": "Berdiche"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 37,
+      "durability": 54,
+      "damageMin": 42,
+      "damageMax": 54,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Great Scythe",
+        "es": "Gran Guadaña",
+        "pt": "Grande foice"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 54,
+      "durability": 68,
+      "damageMin": 71,
+      "damageMax": 92,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Bill of Balrog",
+        "es": "Pico de Balrog",
+        "pt": "Gancho de Balrog"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 63,
+      "durability": 74,
+      "damageMin": 76,
+      "damageMax": 102,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Dragon Spear",
+        "es": "Jabalina Dragón",
+        "pt": "Lança do dragão"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 92,
+      "durability": 85,
+      "damageMin": 112,
+      "damageMax": 140,
+      "attackSpeed": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Brova"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 22,
+      "level": 147,
+      "durability": 90,
+      "damageMin": 190,
+      "damageMax": 226,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 152,
+        "dexterity": 25
+      },
+      "classRequirements": {
+        "darkKnight": 2,
+        "magicGladiator": 1
+      }
+    }
+  ]
+}

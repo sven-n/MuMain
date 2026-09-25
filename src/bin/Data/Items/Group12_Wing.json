@@ -1,0 +1,1834 @@
+{
+  "formatVersion": 1,
+  "group": 12,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Wings of Elf",
+        "es": "Alas de Elfa",
+        "pt": "Asas do elfo"
+      },
+      "width": 3,
+      "height": 2,
+      "slot": 7,
+      "level": 100,
+      "durability": 200,
+      "defense": 10,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Wings of Heaven",
+        "es": "Alas de Cielo",
+        "pt": "Asas do paraíso"
+      },
+      "width": 5,
+      "height": 3,
+      "slot": 7,
+      "level": 100,
+      "durability": 200,
+      "defense": 10,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Wings of Satan",
+        "es": "Alas de Satán",
+        "pt": "Asas de Satã"
+      },
+      "width": 5,
+      "height": 2,
+      "slot": 7,
+      "level": 100,
+      "durability": 200,
+      "defense": 20,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Wings of Spirits",
+        "es": "Alas de Espíritus",
+        "pt": "Asas dos espíritos"
+      },
+      "width": 5,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 200,
+      "defense": 30,
+      "requirements": {
+        "level": 215
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Wings of Soul",
+        "es": "Alas de Alma",
+        "pt": "Asas da alma"
+      },
+      "width": 5,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 200,
+      "defense": 30,
+      "requirements": {
+        "level": 215
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Wings of Dragon",
+        "es": "Alas de Dragón",
+        "pt": "Asas do dragão"
+      },
+      "width": 3,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 200,
+      "defense": 45,
+      "requirements": {
+        "level": 215
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Wings of Darkness",
+        "es": "Alas de Oscuridad",
+        "pt": "Asas da escuridão"
+      },
+      "width": 4,
+      "height": 2,
+      "slot": 7,
+      "level": 150,
+      "durability": 200,
+      "defense": 40,
+      "requirements": {
+        "level": 215
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Orb of Twisting Slash",
+        "es": "Orbe de Azote Tornado",
+        "pt": "Orbe de golpe torcido"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 47,
+      "buyPrice": 29000,
+      "requirements": {
+        "level": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Healing Orb",
+        "es": "Orbe de Curación",
+        "pt": "Orbe de cura"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 8,
+      "buyPrice": 800,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Orb of Greater Fortitude",
+        "es": "Orbe de Mayor Fortaleza",
+        "pt": "Orbe da sorte maior"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 13,
+      "buyPrice": 3000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Orb of Greater Damage",
+        "es": "Orbe de Mayor Daño",
+        "pt": "Orbe do dano maior"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 18,
+      "buyPrice": 7000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Orb of Summoning",
+        "es": "Orbe de Invocación",
+        "pt": "Orbe da invocação"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 150,
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Orb of Rageful Blow",
+        "es": "Orbe de Golpe Furioso",
+        "pt": "Orbe do golpe raivoso"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 78,
+      "buyPrice": 150000,
+      "requirements": {
+        "level": 170
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Orb of Impale",
+        "es": "Orbe para Atravesar",
+        "pt": "Orbe de empalar"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 20,
+      "buyPrice": 10000,
+      "requirements": {
+        "level": 28
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Orb of Greater Fortitude",
+        "es": "Orbe de Mayor Fortaleza",
+        "pt": "Orbe da sorte maior"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 60,
+      "buyPrice": 43000,
+      "requirements": {
+        "level": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Jewel of Chaos",
+        "es": "Joya de Caos",
+        "pt": "Joia do caos"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 12,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Orb of Fire Slash",
+        "es": "Orbe de Azote de Fuego",
+        "pt": "Orbe do golpe de fogo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 60,
+      "buyPrice": 51000,
+      "requirements": {
+        "strength": 320
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Orb of Penetration",
+        "es": "Orbe de Penetración",
+        "pt": "Orbe da penetração"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 64,
+      "buyPrice": 72000,
+      "requirements": {
+        "level": 130
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Orb of Ice Arrow",
+        "es": "Orbe de Flecha de Hielo",
+        "pt": "Orbe da flecha de gelo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 81,
+      "buyPrice": 195000,
+      "requirements": {
+        "dexterity": 258
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Orb of Death Stab",
+        "es": "Orbe de Puñalada de la Muerte",
+        "pt": "Orbe da facada mortal"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 72,
+      "buyPrice": 85000,
+      "requirements": {
+        "level": 160
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Scroll of FireBurst",
+        "es": "Rollo de Explosión de Fuego",
+        "pt": "Pergaminho Explosão de Fogo"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 74,
+      "buyPrice": 115000,
+      "requirements": {
+        "energy": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Scroll of Summon",
+        "es": "Rollo de Invocación",
+        "pt": "Pergaminho de invocação"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 98,
+      "buyPrice": 375000,
+      "requirements": {
+        "energy": 34,
+        "leadership": 400
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Scroll of Critical Damage",
+        "es": "Rollo de Daño Crítico",
+        "pt": "Pergaminho de dano crítico"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 82,
+      "buyPrice": 220000,
+      "requirements": {
+        "energy": 25,
+        "leadership": 300
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Scroll of Electric Spark",
+        "es": "Rollo de Chispa Eléctrica",
+        "pt": "Pergaminho Centelha Elétrica"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 92,
+      "buyPrice": 295000,
+      "requirements": {
+        "energy": 29,
+        "leadership": 340
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "gem of secret",
+        "es": "gema del secreto",
+        "pt": "gema do segredo"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "bundle of Jewel of Bless",
+        "es": "manojo de Joyas de Bendición",
+        "pt": "feixe da Joia da bênção"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "budle of Jewel of Soul",
+        "es": "manojo de Joyas de Alma",
+        "pt": "feixe da Joia da alma"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 30,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "box of red ribbon",
+        "es": "caja de moño rojo",
+        "pt": "caixa de fita vermelha"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "box of green ribbon",
+        "es": "caja de moño verde",
+        "pt": "caixa de fita verde"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "box of blue ribbon",
+        "es": "caja de moño azul",
+        "pt": "caixa de fita azul"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Scroll of Fire Scream",
+        "es": "Rollo de Alarido de Fuego",
+        "pt": "Pergaminho de grito de fogo"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 102,
+      "buyPrice": 300000,
+      "requirements": {
+        "energy": 32,
+        "leadership": 70
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Wing of Storm",
+        "es": "Ala de Tormenta",
+        "pt": "Asa da Tempestade"
+      },
+      "width": 4,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 60,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "darkKnight": 3
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Wing of Eternal",
+        "es": "Ala de Eternidad",
+        "pt": "Asa da eternidade"
+      },
+      "width": 4,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 45,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "darkWizard": 3
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Wing of Illusion",
+        "es": "Ala de Ilusión",
+        "pt": "Asa da ilusão"
+      },
+      "width": 4,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 45,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "fairyElf": 3
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Wing of Ruin",
+        "es": "Ala de Ruina",
+        "pt": "Asa da ruína"
+      },
+      "width": 4,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 55,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "magicGladiator": 3
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Cape of Emperor",
+        "es": "Capa de Emperador",
+        "pt": "Capa do Imperador"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 45,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "darkLord": 3
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Wing of Curse",
+        "es": "Ala de Maldición",
+        "pt": "Asa da maldição"
+      },
+      "width": 4,
+      "height": 2,
+      "slot": 7,
+      "level": 100,
+      "durability": 200,
+      "defense": 10,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Wind of Despair",
+        "es": "Viento de Desesperación",
+        "pt": "Asa do desespero"
+      },
+      "width": 4,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 200,
+      "defense": 30,
+      "requirements": {
+        "level": 215
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Wing of Dimension",
+        "es": "Ala de Dimensión",
+        "pt": "Asa da dimensão"
+      },
+      "width": 4,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 45,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "summoner": 3
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Crystal of Destruction",
+        "es": "Cristal de Destrucción",
+        "pt": "Cristal da destruição"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 100,
+      "buyPrice": 380000,
+      "requirements": {
+        "level": 220
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Crystal of Multi-Shot",
+        "es": "Cristal de Disparo Múltiple",
+        "pt": "Cristal de multidisparo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 100,
+      "buyPrice": 380000,
+      "requirements": {
+        "level": 220
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Crystal of Recovery",
+        "es": "Cristal de Recuperación",
+        "pt": "Cristal da recuperação"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 100,
+      "buyPrice": 250000,
+      "requirements": {
+        "level": 220,
+        "energy": 37
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Crystal of Flame Strike",
+        "es": "Cristal de Ataque con Llamas",
+        "pt": "Cristal do golpe de chamas"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 100,
+      "buyPrice": 380000,
+      "requirements": {
+        "level": 220
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Scroll of Chaotic Diseier",
+        "es": "Rollo de Diseier Caótico",
+        "pt": "Pergaminho Diseier Caótico"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 100,
+      "buyPrice": 380000,
+      "requirements": {
+        "level": 220,
+        "energy": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Cape of Fighter",
+        "es": "¹«ÀÎÀÇ¸ÁÅä",
+        "pt": "Manto do Guerreiro"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 7,
+      "level": 180,
+      "durability": 200,
+      "defense": 15,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Cape of Overrule",
+        "es": "±º¸²ÀÇ¸ÁÅä",
+        "pt": "Manto Reinante"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 7,
+      "level": 150,
+      "durability": 220,
+      "defense": 45,
+      "requirements": {
+        "level": 400
+      },
+      "classRequirements": {
+        "rageFighter": 3
+      }
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Seed (Fire)",
+        "es": "Simiente (Fuego)",
+        "pt": "Semente (Fogo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 150,
+      "buyPrice": 500000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Seed (Water)",
+        "es": "Simiente (Agua)",
+        "pt": "Semente (Água)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 150,
+      "buyPrice": 500000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Seed (Ice)",
+        "es": "Simiente (Hielo)",
+        "pt": "Semente (Gelo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 150,
+      "buyPrice": 500000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Seed (Wind)",
+        "es": "Simiente (Viento)",
+        "pt": "Semente (Vento)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 150,
+      "buyPrice": 500000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Seed (Lightning)",
+        "es": "Simiente (Relámpago)",
+        "pt": "Semente (Relâmpago)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 150,
+      "buyPrice": 500000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Seed (Earth)",
+        "es": "Simiente (Tierra)",
+        "pt": "Semente (Terra)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 150,
+      "buyPrice": 500000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Sphere (Mono)",
+        "es": "Esfera (Mono)",
+        "pt": "Esfera (Mono)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 102,
+      "buyPrice": 100000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Sphere (Di)",
+        "es": "Esfera (Di)",
+        "pt": "Esfera (Di)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 122,
+      "buyPrice": 150000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Sphere (Tri)",
+        "es": "Esfera (Tri)",
+        "pt": "Esfera (Tri)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 132,
+      "buyPrice": 200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 100,
+      "name": {
+        "en": "Seed Sphere (Fire)",
+        "es": "Esfera Simiente (Fuego)",
+        "pt": "Esfera de semente (Fogo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "buyPrice": 1050000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 101,
+      "name": {
+        "en": "Seed Sphere (Water)",
+        "es": "Esfera Simiente (Agua)",
+        "pt": "Esfera de semente (Água)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "buyPrice": 1050000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 102,
+      "name": {
+        "en": "Seed Sphere (Ice)",
+        "es": "Esfera Simiente (Hielo)",
+        "pt": "Esfera de semente (Gelo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "buyPrice": 1050000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 103,
+      "name": {
+        "en": "Seed Sphere (Wind)",
+        "es": "Esfera Simiente (Viento)",
+        "pt": "Esfera de semente (Vento)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "buyPrice": 1050000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 104,
+      "name": {
+        "en": "Seed Sphere (Lightning)",
+        "es": "Esfera Simiente (Relámpago)",
+        "pt": "Esfera Semente (Relâmpago)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "buyPrice": 1050000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 105,
+      "name": {
+        "en": "Seed Sphere (Earth)",
+        "es": "Esfera Simiente (Tierra)",
+        "pt": "Esfera de semente (Terra)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "buyPrice": 1050000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 106,
+      "name": {
+        "en": "Seed Sphere (Fire)",
+        "es": "Esfera Simiente (Fuego)",
+        "pt": "Esfera de semente (Fogo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 2,
+      "buyPrice": 1125000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 107,
+      "name": {
+        "en": "Seed Sphere (Water)",
+        "es": "Esfera Simiente (Agua)",
+        "pt": "Esfera de semente (Água)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 2,
+      "buyPrice": 1125000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 108,
+      "name": {
+        "en": "Seed Sphere (Ice)",
+        "es": "Esfera Simiente (Hielo)",
+        "pt": "Esfera de semente (Gelo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 2,
+      "buyPrice": 1125000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 109,
+      "name": {
+        "en": "Seed Sphere (Wind)",
+        "es": "Esfera Simiente (Viento)",
+        "pt": "Esfera de semente (Vento)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 2,
+      "buyPrice": 1125000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 110,
+      "name": {
+        "en": "Seed Sphere (Lightning)",
+        "es": "Esfera Simiente (Relámpago)",
+        "pt": "Esfera Semente (Relâmpago)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 2,
+      "buyPrice": 1125000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 111,
+      "name": {
+        "en": "Seed Sphere (Earth)",
+        "es": "Esfera Simiente (Tierra)",
+        "pt": "Esfera de semente (Terra)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 2,
+      "buyPrice": 1125000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 112,
+      "name": {
+        "en": "Seed Sphere (Fire)",
+        "es": "Esfera Simiente (Fuego)",
+        "pt": "Esfera de semente (Fogo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 1200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 113,
+      "name": {
+        "en": "Seed Sphere (Water)",
+        "es": "Esfera Simiente (Agua)",
+        "pt": "Esfera de semente (Água)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 1200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 114,
+      "name": {
+        "en": "Seed Sphere (Ice)",
+        "es": "Esfera Simiente (Hielo)",
+        "pt": "Esfera de semente (Gelo)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 1200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 115,
+      "name": {
+        "en": "Seed Sphere (Wind)",
+        "es": "Esfera Simiente (Viento)",
+        "pt": "Esfera de semente (Vento)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 1200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 116,
+      "name": {
+        "en": "Seed Sphere (Lightning)",
+        "es": "Esfera Simiente (Relámpago)",
+        "pt": "Esfera Semente (Relâmpago)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 1200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 117,
+      "name": {
+        "en": "Seed Sphere (Earth)",
+        "es": "Esfera Simiente (Tierra)",
+        "pt": "Esfera de semente (Terra)"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 3,
+      "buyPrice": 1200000,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 118,
+      "name": {
+        "en": "Seed Sphere (Fire)",
+        "es": "Esfera Simiente (Fuego)",
+        "pt": "Esfera de semente (Fogo)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 119,
+      "name": {
+        "en": "Seed Sphere (Water)",
+        "es": "Esfera Simiente (Agua)",
+        "pt": "Esfera de semente (Água)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 120,
+      "name": {
+        "en": "Seed Sphere (Ice)",
+        "es": "Esfera Simiente (Hielo)",
+        "pt": "Esfera de semente (Gelo)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 121,
+      "name": {
+        "en": "Seed Sphere (Wind)",
+        "es": "Esfera Simiente (Viento)",
+        "pt": "Esfera de semente (Vento)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 122,
+      "name": {
+        "en": "Seed Sphere (Lightning)",
+        "es": "Esfera Simiente (Relámpago)",
+        "pt": "Esfera Semente (Relâmpago)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 123,
+      "name": {
+        "en": "Seed Sphere (Earth)",
+        "es": "Esfera Simiente (Tierra)",
+        "pt": "Esfera de semente (Terra)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 124,
+      "name": {
+        "en": "Seed Sphere (Fire)",
+        "es": "Esfera Simiente (Fuego)",
+        "pt": "Esfera de semente (Fogo)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 125,
+      "name": {
+        "en": "Seed Sphere (Water)",
+        "es": "Esfera Simiente (Agua)",
+        "pt": "Esfera de semente (Água)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 126,
+      "name": {
+        "en": "Seed Sphere (Ice)",
+        "es": "Esfera Simiente (Hielo)",
+        "pt": "Esfera de semente (Gelo)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 127,
+      "name": {
+        "en": "Seed Sphere (Wind)",
+        "es": "Esfera Simiente (Viento)",
+        "pt": "Esfera de semente (Vento)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 128,
+      "name": {
+        "en": "Seed Sphere (Lightning)",
+        "es": "Esfera Simiente (Relámpago)",
+        "pt": "Esfera Semente (Relâmpago)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 129,
+      "name": {
+        "en": "Seed Sphere (Earth)",
+        "es": "Esfera Simiente (Tierra)",
+        "pt": "Esfera de semente (Terra)"
+      },
+      "slot": 0
+    },
+    {
+      "number": 130,
+      "name": {
+        "en": "Small Cape of Lord",
+        "es": "Capa de Señor Pequeña",
+        "pt": "Pequena capa do Lorde"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 7,
+      "level": 1,
+      "durability": 200,
+      "defense": 15,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 131,
+      "name": {
+        "en": "Small Wing of Curse",
+        "es": "Ala de Maldición Pequeña",
+        "pt": "Pequenas asas da maldição"
+      },
+      "width": 3,
+      "height": 2,
+      "slot": 7,
+      "level": 1,
+      "durability": 200,
+      "defense": 10,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 132,
+      "name": {
+        "en": "Small Wings of Elf",
+        "es": "Alas de Elfa Pequeñas",
+        "pt": "Pequenas asas do elfo"
+      },
+      "width": 3,
+      "height": 2,
+      "slot": 7,
+      "level": 1,
+      "durability": 200,
+      "defense": 10,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 133,
+      "name": {
+        "en": "Small Wings of Heaven",
+        "es": "Alas de Cielo Pequeñas",
+        "pt": "Pequenas asas do paraíso"
+      },
+      "width": 3,
+      "height": 2,
+      "slot": 7,
+      "level": 1,
+      "durability": 200,
+      "defense": 10,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 134,
+      "name": {
+        "en": "Small Wings of Satan",
+        "es": "Alas de Satán Pequeñas",
+        "pt": "Pequenas asas de Satã"
+      },
+      "width": 3,
+      "height": 2,
+      "slot": 7,
+      "level": 1,
+      "durability": 200,
+      "defense": 20,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 135,
+      "name": {
+        "en": "Little Warrior's Cloak",
+        "es": "Capa del Pequeño Guerrero",
+        "pt": "Manto de Pequeno Guerreiro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 7,
+      "level": 1,
+      "durability": 200,
+      "defense": 15,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 136,
+      "name": {
+        "en": "Jewel of Life Bundle",
+        "es": "Fardo de Joyas de la Vida",
+        "pt": "Joia do Lote da Vida"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 72,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 137,
+      "name": {
+        "en": "Jewel of Creation Bundle",
+        "es": "Fardo de Joyas de la Creación",
+        "pt": "Joia do Lote da Criação"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 78,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 138,
+      "name": {
+        "en": "Jewel of Guardian Bundle",
+        "es": "Fardo de Joyas Guardián",
+        "pt": "Joia do Lote Guardião"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 75,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 139,
+      "name": {
+        "en": "Gemstone Bundle",
+        "es": "Fardo de Gemas",
+        "pt": "Lote de Pedra Preciosa"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 140,
+      "name": {
+        "en": "Jewel of Harmony Bundle",
+        "es": "Fardo de Joyas de la Armonía",
+        "pt": "Joia do Lote da Harmonia"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 141,
+      "name": {
+        "en": "Jewel of Chaos Bundle",
+        "es": "Fardo de Joyas del Caos",
+        "pt": "Joia do Lote do Caos"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 12,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 142,
+      "name": {
+        "en": "Lower Refining Stone Bundle",
+        "es": "Fardo de Joyas de Bajo Pulido",
+        "pt": "Lote de Joias de Baixo Polimento"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 143,
+      "name": {
+        "en": "Higher Refining Stone Bundle",
+        "es": "Fardo de Joyas de Alto Pulido",
+        "pt": "Lote de Joias de Alto Polimento"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,656 @@
+{
+  "formatVersion": 1,
+  "group": 4,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Short Bow",
+        "es": "Arco Corto",
+        "pt": "Arco curto"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 2,
+      "durability": 20,
+      "damageMin": 3,
+      "damageMax": 5,
+      "attackSpeed": 30,
+      "attackType": 2,
+      "requirements": {
+        "strength": 20,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Bow",
+        "es": "Arco",
+        "pt": "Arco"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 8,
+      "durability": 24,
+      "damageMin": 9,
+      "damageMax": 13,
+      "attackSpeed": 30,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Elven Bow",
+        "es": "Arco de los Elfos",
+        "pt": "Arco élfico"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 16,
+      "durability": 28,
+      "damageMin": 17,
+      "damageMax": 24,
+      "attackSpeed": 30,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Battle Bow",
+        "es": "Arco de Batalla",
+        "pt": "Arco de batalha"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 26,
+      "durability": 36,
+      "damageMin": 28,
+      "damageMax": 37,
+      "attackSpeed": 30,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Tiger Bow",
+        "es": "Arco Tigre",
+        "pt": "Arco do tigre"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 40,
+      "durability": 43,
+      "damageMin": 42,
+      "damageMax": 52,
+      "attackSpeed": 30,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Silver Bow",
+        "es": "Arco Plateado",
+        "pt": "Arco de prata"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 56,
+      "durability": 48,
+      "damageMin": 59,
+      "damageMax": 71,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Chaos Nature Bow",
+        "es": "Arco Naturaleza del Caos",
+        "pt": "Arco da natureza do caos"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 75,
+      "durability": 68,
+      "damageMin": 88,
+      "damageMax": 106,
+      "attackSpeed": 35,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Bolt",
+        "es": "Rayo",
+        "pt": "Dardo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 1,
+      "durability": 255,
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Crossbow",
+        "es": "Ballesta",
+        "pt": "Besta"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 4,
+      "durability": 22,
+      "damageMin": 5,
+      "damageMax": 8,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 20,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Golden Crossbow",
+        "es": "Ballesta Dorada",
+        "pt": "Besta dourada"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 12,
+      "durability": 26,
+      "damageMin": 13,
+      "damageMax": 19,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Arquebus",
+        "es": "Arcabuz"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 20,
+      "durability": 31,
+      "damageMin": 22,
+      "damageMax": 30,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Light Crossbow",
+        "es": "Ballesta de Luz",
+        "pt": "Besta leve"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 32,
+      "durability": 40,
+      "damageMin": 35,
+      "damageMax": 44,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 90
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Serpent Crossbow",
+        "es": "Ballesta Serpiente",
+        "pt": "Besta da serpente"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 48,
+      "durability": 45,
+      "damageMin": 50,
+      "damageMax": 61,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Bluewing Crossbow",
+        "es": "Ballesta Ala Azul",
+        "pt": "Besta Bluewing"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 68,
+      "durability": 56,
+      "damageMin": 68,
+      "damageMax": 82,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Aquagold Crossbow",
+        "es": "Ballesta Acuadorada",
+        "pt": "Besta Aquagold"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 72,
+      "durability": 60,
+      "damageMin": 78,
+      "damageMax": 92,
+      "attackSpeed": 30,
+      "attackType": 2,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 130
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Arrow",
+        "es": "Flecha",
+        "pt": "Flecha"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 0,
+      "durability": 255,
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Saint Crossbow",
+        "es": "Ballesta de Santo",
+        "pt": "Besta do santo"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 84,
+      "durability": 72,
+      "damageMin": 102,
+      "damageMax": 127,
+      "attackSpeed": 35,
+      "attackType": 2,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 160
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Celestial Bow",
+        "es": "Arco Celestial",
+        "pt": "Arco celestial"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 92,
+      "durability": 76,
+      "damageMin": 127,
+      "damageMax": 155,
+      "attackSpeed": 35,
+      "attackType": 2,
+      "requirements": {
+        "strength": 54,
+        "dexterity": 198
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Divine Crossbow of Archangel",
+        "es": "Ballesta Divina de Arcángel",
+        "pt": "Besta divina do arcanjo"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 100,
+      "durability": 200,
+      "damageMin": 224,
+      "damageMax": 246,
+      "attackSpeed": 45,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Great Reign Crossbow",
+        "es": "Ballesta del Gran Reino",
+        "pt": "Grande besta do Império"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 100,
+      "durability": 80,
+      "damageMin": 150,
+      "damageMax": 172,
+      "attackSpeed": 40,
+      "attackType": 2,
+      "requirements": {
+        "strength": 61,
+        "dexterity": 285
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Arrow Viper Bow",
+        "es": "Arco Flecha Víbora",
+        "pt": "Arco víbora de flecha"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 135,
+      "durability": 86,
+      "damageMin": 166,
+      "damageMax": 190,
+      "attackSpeed": 45,
+      "attackType": 2,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 245
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Sylph Wind Bow",
+        "es": "Arco Viento Sílfide",
+        "pt": "Arco vento da silfe"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 147,
+      "durability": 93,
+      "damageMin": 177,
+      "damageMax": 200,
+      "attackSpeed": 45,
+      "requirements": {
+        "level": 380,
+        "strength": 46,
+        "dexterity": 210
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Albatross Bow",
+        "es": "Arco Albatros",
+        "pt": "Arco do albatroz"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 110,
+      "durability": 70,
+      "damageMin": 155,
+      "damageMax": 177,
+      "attackSpeed": 45,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 265
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Dark Stinger",
+        "es": "Punzón Oscuro",
+        "pt": "Golpeador negro"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 134,
+      "durability": 80,
+      "damageMin": 162,
+      "damageMax": 184,
+      "attackSpeed": 45,
+      "attackType": 2,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 209
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Aileen Bowr",
+        "es": "Arco Aileen",
+        "pt": "Arco do Aileen"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 147,
+      "durability": 88,
+      "damageMin": 170,
+      "damageMax": 194,
+      "attackSpeed": 45,
+      "requirements": {
+        "strength": 49,
+        "dexterity": 226
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Silver Bow-J",
+        "es": "Arco Plateado-J",
+        "pt": "Arco de prata-J"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 1,
+      "twoHanded": true,
+      "skill": 24,
+      "level": 56,
+      "durability": 48,
+      "damageMin": 59,
+      "damageMax": 71,
+      "attackSpeed": 45,
+      "attackType": 2,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    }
+  ]
+}
