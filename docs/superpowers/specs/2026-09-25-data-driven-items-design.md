@@ -47,6 +47,8 @@ pattern later but are not part of this work.
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
+| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Probably a follow-up after the item work; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
+| D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 
 ## Current state
 
@@ -84,13 +86,13 @@ field meanings (especially the style and header words) are guesses.
 
 This is exactly the data a data-driven tooltip needs (which lines, which
 texts, which values, per item and item level), and it comes with names in
-three languages. Options: use it as the starting point when tooltips become
-data-driven, use it only as a reference, or delete it (see Q2).
+three languages. The files are kept as the input for data-driven tooltips
+(D15).
 
-The repo also has extra item bmd copies that no code loads:
-`Data/Local/Item.bmd`, `Eng/item.bmd`, `Eng/item_eng_old.bmd`,
-`Eng/item_eng_orig.bmd`, `Por/item.bmd`, `Por/item_eng_old.bmd`,
-`Spn/item.bmd` (the game only loads `Item_<lang>.bmd`).
+Extra item bmd copies that no code loaded (`Data/Local/Item.bmd`,
+`Eng/item.bmd`, `Eng/item_eng_old.bmd`, `Eng/item_eng_orig.bmd`,
+`Por/item.bmd`, `Por/item_eng_old.bmd`, `Spn/item.bmd`) were removed on
+this branch (D16).
 
 ### Server (OpenMU)
 
@@ -392,6 +394,10 @@ name, missing model file), and undo for the current session.
 6. **Editors**: the MuEditor tools from section 9, including add/remove.
 7. **Sync**: client import/export and diff.
 
+Follow-up (or earlier, if the item work needs it): **data-driven tooltips**
+from JSON, converted from the `ItemTooltip*` / `ItemLevelTooltip` files
+(D15).
+
 OpenMU PRs (in parallel, separate repo):
 
 - A. New rule fields/tables with migration, initialization, update plug-in
@@ -406,6 +412,3 @@ OpenMU PRs (in parallel, separate repo):
   example: never send it to that client (hide it in shops, drops and
   views), block such items on servers set up for the original client, or
   show a placeholder item.
-- **Q2: Unused tooltip and item files.** Keep `ItemTooltip*` /
-  `ItemLevelTooltip` as input for data-driven tooltips, keep them only as a
-  reference, or delete them? Delete the unused extra item bmd copies?
