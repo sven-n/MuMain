@@ -29,7 +29,7 @@ public:
 
         const BYTE* GetRecord(int itemType) const
         {
-            return records.get() + itemType * recordSize;
+            return &records[static_cast<size_t>(itemType) * recordSize];
         }
     };
 
