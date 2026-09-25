@@ -33,7 +33,7 @@ pattern later but are not part of this work.
 
 | # | Topic | Decision |
 |---|---|---|
-| D1 | Data format | JSON files as the source of truth, loaded once at startup into flat tables. Runtime speed must be as close to hardcoded as possible; a binary cache is added only if startup parsing is measurably too slow. |
+| D1 | Data format | JSON files as the source of truth, loaded once at startup into flat tables. Runtime speed must be as close to hardcoded as possible; a binary cache is added only if startup parsing is measurably too slow. Chosen over a database or SQL text files; see section 2. |
 | D2 | Exchange format with OpenMU | JSON keyed by `(Group, Number)`, not SQL `UPDATE` statements (SQL would break whenever OpenMU's database schema changes). |
 | D3 | Server rules | Check what OpenMU already enforces (see "Server-side checks today"), then extend OpenMU's tables or add new ones following OpenMU's usual workflow. |
 | D4 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
@@ -44,7 +44,7 @@ pattern later but are not part of this work.
 | D9 | Identity | `(group, number)` only, no readable string key. Logs always show the English name next to it. Once rules read data instead of hardcoded ids, a readable key has no extra benefit. |
 | D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. |
 | D11 | Exchange scope | Item sets and drop settings are separate exchange files, not part of the item file. |
-| D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 6). |
+| D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
 
@@ -59,7 +59,8 @@ pattern later but are not part of this work.
 | Categories and rules | `GameLogic/Items/ItemCategories`, `TradeRestrictions`, `ShopRestrictions` (from PR sven-n/MuMain#625) | Now one source of truth, but still hardcoded item lists in C++. |
 | Models and textures | `OpenItems()` / `OpenItemTextures()` in `Engine/Object/ZzzOpenData.cpp` | Around 600 hardcoded lines mapping `MODEL_*` to `Data\Item\<File><n>.bmd`. The model id is always `MODEL_ITEM + itemType`, so every item slot already has a model slot. |
 | Item id space | `MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX` (16 groups × 512) | Same limits as the network protocol, so new items must fit into free slots. |
-| Other item data | `ItemAddOption.bmd`, `SocketItem_<lang>.bmd`, `Mix.bmd`, `pet.bmd`, set options (`CSItemOption`) | Out of scope for the first phases; listed so they are not forgotten. |
+| Data files in the repo | `src/bin/Data/` (e.g. `src/bin/Data/Local/Eng/item_eng.bmd`), copied beside `Main` at build time | Game data is versioned with the code, so data changes already go through PRs. |
+| Other item data | `ItemAddOption.bmd`, `SocketItem_<lang>.bmd`, `Mix.bmd`, `pet.bmd`, set options (`ItemSetType.bmd`, `ItemSetOption_<lang>.bmd`, loaded by `CSItemOption`) | Out of scope for the first phases; listed so they are not forgotten. The repo also contains `ItemTooltip*_<lang>.bmd` and `ItemLevelTooltip_<lang>.bmd`, which no code loads (probably unused). |
 | Editor | `src/MuEditor/UI/ItemEditor/` (only in `_EDITOR` builds) | Table editor for the bmd fields; save to bmd, export to S6E3 bmd and CSV. |
 | UI translations | `.resx` → generated `I18N::*` (`docs/translation-system.md`) | Good for UI strings; item names are not part of it yet. |
 
@@ -138,8 +139,94 @@ The data is loaded once at startup and then works like a hardcoded table:
   first and are removed step by step.
 - Startup: measure the JSON load time. If it is noticeably slow, generate a
   binary cache from the JSON (rebuilt when the JSON changes).
+- The rule code only talks to these tables, never to the storage format, so
+  the storage can change later without touching rules.
 
-### 2. Data fields
+### 2. Storage, loading and validation
+
+#### Why JSON (D1)
+
+At runtime every option ends up as the same in-memory tables (section 1);
+the choice is only about how the data is stored, reviewed and exchanged.
+
+| Option | Why not chosen |
+|---|---|
+| Binary database file (e.g. SQLite `.db`) | A blob in git: changes cannot be reviewed, and parallel branches cannot be merged. |
+| SQL text files (schema + `INSERT`s) loaded into SQLite | Diffable, and the database checks links and uniqueness itself. But one item is spread over several tables, a changed value shows up as a long changed `INSERT` line, the player build needs SQLite as a new dependency, and the SQL cannot be run on OpenMU anyway (PostgreSQL via Entity Framework, GUID keys, different tables), so a second format for the exchange would still be needed. |
+| Editing in a database and exporting JSON for git | Two sources of truth that drift apart. |
+
+JSON gives readable diffs with related data kept together (D14), the same
+format as the OpenMU exchange (D2), and no new dependency: the client
+already bundles nlohmann JSON (`src/ThirdParty/json.hpp`). The cost is that
+the checks a database would do (unique ids, valid links) must be done by
+our own loader; see "Validation" below.
+
+#### Files
+
+- Location: `src/bin/Data/Items/`, next to the other game data in the repo.
+  It is copied beside `Main` like the rest of `Data` (`MU_COPY_RUNTIME_ASSETS`).
+- One file per item group (D7), e.g. `Group14_Potions.json`. Files for other
+  data (option definitions, sets, …) follow the same rules when they come.
+- Every file starts with a `formatVersion` and the `group` it contains.
+- Encoding UTF-8, LF line endings.
+
+#### Writing (editor, bmd import, OpenMU import)
+
+- **Deterministic output** so diffs only show real changes: items sorted by
+  number, fixed key order, fixed indentation, one field per line.
+- **Safe save**: write to a temporary file, then replace the old file, so a
+  crash never leaves a half-written file.
+- Only valid data is saved: the editor runs the validation below first and
+  refuses to save while there are errors.
+
+#### Loading (game and editor)
+
+1. Read and parse all item files once at startup.
+2. Check `formatVersion`: a newer version than the client understands is an
+   error; older versions are upgraded in memory.
+3. Missing optional fields get their default value, so adding a field never
+   breaks older files. Unknown fields are ignored by the game and shown as a
+   warning in the editor.
+4. Run the validation below.
+5. Build the flat tables from section 1, then release the parsed JSON.
+6. Log the load time and item count (used for the performance check in
+   phase 1).
+
+#### Validation
+
+The same validation code runs in the game loader, in the editor before
+saving, and in an automated test.
+
+Errors (data cannot be used):
+
+- invalid JSON, or a file whose `group` does not match its items
+- `group` outside 0–15 or `number` outside 0–511
+- duplicate `(group, number)`
+- missing English name
+- a value outside its type's range (e.g. width 0, a byte field above 255)
+- a link to something that does not exist: unknown tag or flag, unknown
+  option group, unknown skill, and later unknown set or option definition
+
+Warnings (data works, but is probably wrong):
+
+- the model file or texture folder does not exist
+- a translation is missing for a supported language
+- an item has no model link
+- an equippable item without an item slot, or similar combinations that
+  do not make sense
+
+Behavior:
+
+- **Game**: errors stop the start with a clear message naming the file, the
+  item `(group, number)` and English name, and the field. The game never
+  runs with half-loaded item data. Warnings are logged.
+- **Editor**: errors and warnings are listed and clickable (they jump to the
+  item and field); saving is blocked while errors exist.
+- **Automated test**: a doctest test in `tests/` loads all item files in
+  `src/bin/Data/Items/` and runs the validation, so broken data fails the
+  PR checks before it is merged.
+
+### 3. Data fields
 
 Each field belongs to one of two groups:
 
@@ -158,7 +245,7 @@ Each field belongs to one of two groups:
 | Model | model folder, file name, file index, texture folder | client-only |
 | Rendering | inventory scale, rotation, offsets, glow/effects hooks | client-only (later phase) |
 
-### 3. Rule code on top of data
+### 4. Rule code on top of data
 
 - Keep behavior in code and move item lists into data. Example:
   `IsTradeBan(item)` stays, but reads the `tradable` flag and the item's
@@ -168,7 +255,7 @@ Each field belongs to one of two groups:
 - Named enum constants remain for items that code must refer to directly
   (special behavior); lists of items become data.
 
-### 4. Names, translations and logging
+### 5. Names, translations and logging
 
 - Item names are stored as OpenMU-style `LocalizedString`, so names from the
   server can be taken over directly.
@@ -179,7 +266,7 @@ Each field belongs to one of two groups:
 - Stats are no longer duplicated per language: one data set, only names are
   translated.
 
-### 5. OpenMU sync (file-based, both sides)
+### 6. OpenMU sync (file-based, both sides)
 
 - **Server is authoritative.** The client never writes to the server, not
   even in editor mode.
@@ -198,7 +285,7 @@ Each field belongs to one of two groups:
   fail if characters still own the item (existing OpenMU behavior).
 - The OpenMU import/export pages are a separate OpenMU PR.
 
-### 6. Adding and removing items
+### 7. Adding and removing items
 
 **Client (MuEditor):**
 
@@ -227,9 +314,9 @@ Each field belongs to one of two groups:
   possible hook.
 
 **Server (OpenMU):** the admin panel can already add and delete item
-definitions. New items also arrive through the import (section 5).
+definitions. New items also arrive through the import (section 6).
 
-### 7. Build gating
+### 8. Build gating
 
 - Editors, add/remove, import and export exist only in `_EDITOR` builds,
   like MuEditor today. Player release builds only contain the loader and the
@@ -237,7 +324,7 @@ definitions. New items also arrive through the import (section 5).
 - Editing client data can never affect the server; server-side validation
   stays independent.
 
-### 8. MuEditor item tools
+### 9. MuEditor item tools
 
 Several focused editors that share one item selection, instead of one big
 table:
@@ -263,8 +350,9 @@ name, missing model file), and undo for the current session.
    `ItemAttribute[]` filled from them. No behavior change. Add the log-name
    helper. Measure lookup and load performance.
 2. **Data file format**: JSON files per group become the only item source
-   for the game. MuEditor gets "Import from bmd" and "Export as bmd"; the
-   game stops reading `Item_<lang>.bmd`.
+   for the game, with the loading, writing and validation rules from
+   section 2 and the automated data test. MuEditor gets "Import from bmd"
+   and "Export as bmd"; the game stops reading `Item_<lang>.bmd`.
 3. **Rules and categories into data**: flags and tags replace the hardcoded
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
    Item sets are verified to be identical. Includes the client ↔ OpenMU
@@ -273,7 +361,7 @@ name, missing model file), and undo for the current session.
    the model fields.
 5. **Translations**: `LocalizedString` names and fallback; one stat data set
    for all languages.
-6. **Editors**: the MuEditor tools from section 8, including add/remove.
+6. **Editors**: the MuEditor tools from section 9, including add/remove.
 7. **Sync**: client import/export and diff.
 
 OpenMU PRs (in parallel, separate repo):
