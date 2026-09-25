@@ -44,8 +44,11 @@
 			<div class="modern-wallet-coin-px"></div>
 			<span class="modern-wallet-label-px">{{repair_all_label}}</span>
 		</div>
-		<span id="repair_gold_text" class="modern-wallet-value-px shop-repair-value" data-class-hidden="!repair_visible"
-		      data-style-color="repair_gold_color">{{repair_gold_text}}</span>
+		<span id="repair_gold_text" class="modern-wallet-value-px shop-repair-value gold-amount" data-class-hidden="!repair_visible"
+		      data-class-gold-base="repair_gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="repair_gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="repair_gold_tier == 'million'"
+		      data-class-gold-ten-million="repair_gold_tier == 'ten-million'">{{repair_gold_text}}</span>
 	</div>
 </body>
 </rml>

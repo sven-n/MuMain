@@ -34,7 +34,7 @@
 }
 .balloon-name {
 	top: 6px;
-	/* color pushed per-instance (data-style-color). */
+	color: token(text-primary);
 }
 .balloon-guild {
 	top: 22px;
@@ -44,3 +44,9 @@
 	top: 38px;
 	color: #ffd927;
 }
+
+/* Name by control status (BalloonNameStatus; the RML toggles .name-<key>). The original
+   client's colors; a normal name keeps the .balloon-name color. */
+.balloon-name.name-blocked-character { color: #00ffff; }
+.balloon-name.name-blocked-items     { color: #ffd927; }
+.balloon-name.name-operator          { color: #ff0000; }

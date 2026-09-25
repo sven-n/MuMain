@@ -28,7 +28,11 @@
 
 		<div class="nq-cost" data-class-hidden="!show_cost">
 			<span class="nq-cost-label">{{cost_label}}</span>
-			<span class="nq-cost-amount" data-style-color="cost_color">{{cost_amount}}</span>
+			<span class="nq-cost-amount gold-amount"
+			      data-class-gold-base="cost_tier == 'base'"
+			      data-class-gold-hundred-thousand="cost_tier == 'hundred-thousand'"
+			      data-class-gold-million="cost_tier == 'million'"
+			      data-class-gold-ten-million="cost_tier == 'ten-million'">{{cost_amount}}</span>
 		</div>
 
 		<div class="nq-dialogue" data-style-top="dialogue_top + 'px'">

@@ -18,19 +18,22 @@ CCharInfoBalloonMng g_CharInfoBalloonMng;
 
 namespace
 {
-    // ARGB(a,r,g,b)-packed DWORD (this engine's convention, UI/Widgets/UIBaseDef.h) -> a CSS hex
-    // color string RmlUi's data-style-color can bind directly. Alpha is dropped -- every color
-    // CCharInfoBalloon::GetNameColor() ever returns is fully opaque (see ResolveNameColor() in
-    // CharInfoBalloon.cpp).
-    Rml::String ColorToCssHex(DWORD color)
+// Key char_info_balloon.rml compares against; the theme's .rcss styles each (.name-<key>).
+const char* NameStatusKey(BalloonNameStatus status)
+{
+    switch (status)
     {
-        char buf[8];
-        std::snprintf(buf, sizeof(buf), "#%02x%02x%02x",
-            (unsigned)((color >> 16) & 0xFF),
-            (unsigned)((color >> 8) & 0xFF),
-            (unsigned)(color & 0xFF));
-        return Rml::String(buf);
+    case BalloonNameStatus::BlockedCharacter:
+        return "blocked-character";
+    case BalloonNameStatus::BlockedItems:
+        return "blocked-items";
+    case BalloonNameStatus::Operator:
+        return "operator";
+    case BalloonNameStatus::Normal:
+        break;
     }
+    return "normal";
+}
 }
 
 CCharInfoBalloonMng::~CCharInfoBalloonMng()
@@ -89,7 +92,7 @@ void CCharInfoBalloonMng::BuildRmlUi()
             entry.RegisterMember("hidden", &BalloonEntry::hidden);
             entry.RegisterMember("screen_x", &BalloonEntry::screenX);
             entry.RegisterMember("screen_y", &BalloonEntry::screenY);
-            entry.RegisterMember("name_color", &BalloonEntry::nameColor);
+            entry.RegisterMember("name_status", &BalloonEntry::nameStatus);
             entry.RegisterMember("name", &BalloonEntry::name);
             entry.RegisterMember("guild", &BalloonEntry::guild);
             entry.RegisterMember("klass", &BalloonEntry::klass);
@@ -206,7 +209,7 @@ void CCharInfoBalloonMng::SyncRmlModel()
         // off to the upper-left of every character instead of centered above it.
         entry.screenX = balloon.GetXPos();
         entry.screenY = balloon.GetYPos();
-        entry.nameColor = ColorToCssHex(balloon.GetNameColor());
+        entry.nameStatus = NameStatusKey(balloon.GetNameStatus());
         entry.name = StringUtils::WideToNarrow(balloon.GetName());
         entry.guild = StringUtils::WideToNarrow(balloon.GetGuildText());
         entry.klass = StringUtils::WideToNarrow(balloon.GetClassText());

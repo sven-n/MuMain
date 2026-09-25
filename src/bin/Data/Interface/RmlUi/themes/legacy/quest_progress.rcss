@@ -166,8 +166,8 @@
 	color: token(text-primary);
 }
 .qp-reward-row.bold { font-weight: bold; }
+/* A clickable row keeps its colour on hover, as the original list box does. */
 .qp-reward-row.clickable { cursor: pointer; pointer-events: auto; }
-.qp-reward-row.clickable:hover { color: token(text-hover); }
 
 .qp-btn-complete {
 	position: absolute;
@@ -195,3 +195,11 @@
 /* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
    label span is redundant (same convention my_quest_info.rcss's own .btn-exit-label uses). */
 .btn-exit-label { display: none; }
+
+/* Requirement/reward rows by kind (UI::Quests::RewardModel::RowStyle; the RML toggles
+   .row-<key>). The original client's colors. */
+.qp-reward-row.row-heading           { color: #b3e64d; }
+.qp-reward-row.row-requirement       { color: #dfbf67; }
+.qp-reward-row.row-requirement-unmet { color: #ff1e1e; }
+.qp-reward-row.row-reward            { color: #dfbf67; }
+.qp-reward-row.row-random-reward     { color: #6767df; }

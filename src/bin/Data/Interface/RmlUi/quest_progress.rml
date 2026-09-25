@@ -50,7 +50,12 @@
 		<div class="qp-reward" data-class-hidden="active_view != 2">
 			<div class="qp-reward-list">
 				<span class="qp-reward-row" data-for="r : reward_rows" data-class-bold="r.bold"
-				      data-class-clickable="r.clickable" data-style-color="r.color"
+				      data-class-clickable="r.clickable"
+				      data-class-row-heading="r.style == 'heading'"
+				      data-class-row-requirement="r.style == 'requirement'"
+				      data-class-row-requirement-unmet="r.style == 'requirement-unmet'"
+				      data-class-row-reward="r.style == 'reward'"
+				      data-class-row-random-reward="r.style == 'random-reward'"
 				      data-event-click="questprogress_select_reward(r.index)">{{r.text}}</span>
 			</div>
 			<!-- Zero-size marker read live by QuestProgress.cpp's Render() -- where the selected

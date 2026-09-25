@@ -15,6 +15,7 @@
 
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlStyleKeys.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Scaling/UITransform.h"
@@ -100,7 +101,7 @@ void mu::ui::window::CNPCShop::BuildRmlUi()
                 c.Bind("repair_all_tooltip", &model.repairAllTooltip);
                 c.Bind("repair_all_label", &model.repairAllLabel);
                 c.Bind("repair_gold_text", &model.repairGoldText);
-                c.Bind("repair_gold_color", &model.repairGoldColor);
+                c.Bind("repair_gold_tier", &model.repairGoldTier);
 
                 c.BindEventCallback("npc_shop_repair_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ToggleState(); });
@@ -383,12 +384,8 @@ void mu::ui::window::CNPCShop::SyncRmlModel()
     ConvertGold(AllRepairGold, goldBuf);
     syncWide(&NPCShopRmlModel::repairGoldText, "repair_gold_text", goldBuf);
 
-    // getGoldColor() packs (A<<24)+(R<<16)+(G<<8)+B -- unpack into an rgba() CSS string.
-    const unsigned int goldArgb = getGoldColor(AllRepairGold);
-    char goldColorBuf[32];
-    snprintf(goldColorBuf, sizeof(goldColorBuf), "rgba(%u,%u,%u,%u)",
-        (goldArgb >> 16) & 0xFF, (goldArgb >> 8) & 0xFF, goldArgb & 0xFF, (goldArgb >> 24) & 0xFF);
-    syncText(&NPCShopRmlModel::repairGoldColor, "repair_gold_color", Rml::String(goldColorBuf));
+    syncText(&NPCShopRmlModel::repairGoldTier, "repair_gold_tier",
+             UI::RmlBridge::GoldTierKey(GameLogic::Items::ClassifyGoldAmount(AllRepairGold)));
 }
 
 float mu::ui::window::CNPCShop::GetLayerDepth()

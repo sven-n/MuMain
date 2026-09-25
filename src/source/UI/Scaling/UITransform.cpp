@@ -384,6 +384,14 @@ int UI::Scaling::FontPointSize(FontRole role, const Transform& transform)
     return static_cast<int>(std::lround(pointSize));
 }
 
+float UI::Scaling::NativeTextPixelSize(FontRole role, const Transform& transform)
+{
+    // CUIRenderTextSDLTtf opens every font at CachedFontPointSize() and draws it at
+    // FontPointSize() / MaximumFontPointSize() of that (FontScaleForBounds() without a box).
+    return static_cast<float>(CachedFontPointSize(role)) * static_cast<float>(FontPointSize(role, transform)) /
+           static_cast<float>(MaximumFontPointSize(role));
+}
+
 float UI::Scaling::FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth,
                                       float measuredHeight, float boxWidth, float boxHeight)
 {

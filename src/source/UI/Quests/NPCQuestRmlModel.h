@@ -38,7 +38,7 @@ namespace mu::ui::window
 
         bool showCost = false; // QUEST_NO
         Rml::String costAmount;
-        Rml::String costColor; // "rgba(r,g,b,a)", from getGoldColor() -- see SyncRmlModel()'s comment
+        Rml::String costTier; // UI::RmlBridge::GoldTierKey() of the cost
 
         std::vector<NPCQuestTextLine> messageLines; // g_lpszMessageBoxCustom
         std::vector<NPCQuestAnswerEntry> answers;    // g_lpszDialogAnswer (NUM_LINE_DA == 1 in this

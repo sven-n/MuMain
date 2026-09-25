@@ -6530,7 +6530,7 @@
     <comment>legacy_id=1747</comment>
   </data>
   <data name="EXP:%I64d / %I64d" xml:space="preserve">
-    <value>Опыт:%I64d / %I64d</value>
+    <value>Опыт:%llu / %llu</value>
     <comment>legacy_id=1748</comment>
   </data>
   <data name="Master skill tree (A)" xml:space="preserve">

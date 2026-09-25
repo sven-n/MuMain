@@ -80,7 +80,7 @@ namespace mu::ui::window
             // AllRepairGold (the cost to repair everything) instead of the character's own gold.
             Rml::String repairAllLabel;
             Rml::String repairGoldText;
-            Rml::String repairGoldColor; // "rgba(r,g,b,a)" -- mirrors getGoldColor()'s amount-tier color
+            Rml::String repairGoldTier; // UI::RmlBridge::GoldTierKey() of the amount
         };
         RmlModelBinder<NPCShopRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

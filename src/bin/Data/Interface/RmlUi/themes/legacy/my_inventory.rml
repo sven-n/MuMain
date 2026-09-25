@@ -10,10 +10,20 @@
 	     behind the native 3D icons this document never overlaps. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
-		<span id="title">{{title}}</span>
+		<!-- Text leaves marked native-text render at the native text renderer's size: text_px is the
+		     physical size, and 1 / root_scale cancels #panel's scale so glyphs rasterise at it (same
+		     technique as main_frame.rml's bar tooltips). #title stays full size as the drag handle. -->
+		<div id="title"><span class="native-text title-text" data-style-font-size="text_px + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span></div>
 
 		<div id="gold_bg"></div>
-		<span id="gold_text" data-style-color="gold_color">{{gold_text}}</span>
+		<span id="gold_text" class="native-text gold-amount"
+		      data-class-gold-base="gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="gold_tier == 'million'"
+		      data-class-gold-ten-million="gold_tier == 'ten-million'"
+		      data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{gold_text}}</span>
 
 		<div id="btn_exit" class="inv-btn inv-btn-exit" data-event-click="my_inventory_exit_click"></div>
 		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
@@ -30,12 +40,18 @@
 		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click"></div>
 		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
 
-		<!-- Set/Socket option header labels, each spanning half of #panel's width to match the
-		     former native hover-rect split. -->
-		<div id="set_option_label" class="option-label option-label-set" data-class-active="set_option_active"
-		     data-event-mouseover="my_inventory_set_option_hover" data-event-mouseout="my_inventory_set_option_unhover">{{set_option_label}}</div>
-		<div id="socket_option_label" class="option-label option-label-socket" data-class-active="socket_option_active"
-		     data-event-mouseover="my_inventory_socket_option_hover" data-event-mouseout="my_inventory_socket_option_unhover">{{socket_option_label}}</div>
+		<!-- Set/Socket option header: one centred line with both labels at the same size (the native
+		     client shrank each label into its own narrow box, so a long label came out smaller -- not
+		     reproduced). Hover areas stay the former native half-width split, as empty boxes. -->
+		<div class="option-labels native-text" data-style-font-size="text_px + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span class="option-label" data-class-active="set_option_active">{{set_option_label}}</span>
+			<span class="option-label" data-class-active="socket_option_active">{{socket_option_label}}</span>
+		</div>
+		<div id="set_option_label" class="option-hover option-hover-set"
+		     data-event-mouseover="my_inventory_set_option_hover" data-event-mouseout="my_inventory_set_option_unhover"></div>
+		<div id="socket_option_label" class="option-hover option-hover-socket"
+		     data-event-mouseover="my_inventory_socket_option_hover" data-event-mouseout="my_inventory_socket_option_unhover"></div>
 	</div>
 </body>
 </rml>

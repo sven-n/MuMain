@@ -2,6 +2,9 @@
 
 #include "stdafx.h"
 
+#include "UI/Scaling/UITransform.h"
+
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -114,6 +117,16 @@ namespace UI::RmlBridge::Tooltip
         // CSS never set text-align (so it was already effectively Left), hence the differing default.
         enum class TextAlign { Left, Center };
         TextAlign textAlign = TextAlign::Left;
+
+        // Reference-pixel width the original client gave this tooltip's text area regardless of its
+        // content (RenderTipTextList()'s `Tab * 2`), 0 for "widest line". Only a theme that
+        // reproduces the original layout applies it (legacy tooltip.rml, as a minimum width).
+        float fixedWidth = 0.0f;
+
+        // The transform the caller converted its anchor with, when it is not the ambient
+        // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's BottomHudCenterTransform).
+        // Show() takes the native text size and row metrics from it.
+        std::optional<UI::Scaling::Transform> transform;
     };
 
     // Show()'s edge-clamping always wins over `anchor`/`centerHorizontally`'s preferred direction:

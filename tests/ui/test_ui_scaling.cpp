@@ -907,6 +907,29 @@ TEST_CASE("scoped active transform restores transform and logical mouse [ui][sca
     g_fWindowMouseY = previousWindowMouseY;
 }
 
+TEST_CASE("native text pixel size follows the native renderer's typography curve [ui][scaling]")
+{
+    const float previousContentScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(1.0f);
+
+    // Measured on the native client's docked inventory/character windows: 13 px at 1024x768 and
+    // 14 px at 1280x800, while the panel itself scales by 1.6 and 1.67.
+    CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Normal, UI::Scaling::DockRightTransform(1024, 768))
+          == doctest::Approx(13.0f));
+    CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Bold, UI::Scaling::DockRightTransform(1280, 800))
+          == doctest::Approx(14.0f));
+    CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Normal, UI::Scaling::PanelTransform(640, 480))
+          == doctest::Approx(11.0f));
+
+    // The renderer opens fonts at a rounded point size, so a fractional content scale follows that
+    // rounding: 16 pt * 1.1 opens at 18 pt, drawn at 11/16 of it.
+    UI::Scaling::SetWindowContentScale(1.1f);
+    const auto reference = UI::Scaling::PanelTransform(640, 480);
+    CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Normal, reference) == doctest::Approx(18.0f * 11.0f / 16.0f));
+
+    UI::Scaling::SetWindowContentScale(previousContentScale);
+}
+
 TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scaling]")
 {
     const auto reference = UI::Scaling::PanelTransform(640, 480);

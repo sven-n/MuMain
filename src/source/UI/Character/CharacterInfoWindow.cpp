@@ -21,6 +21,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -136,6 +137,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                model.textPx =
+                    UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
+                c.Bind("text_px", &model.textPx);
 
                 c.Bind("can_level_up", &model.canLevelUp);
                 c.Bind("show_charisma", &model.showCharisma);
@@ -459,13 +463,8 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
     auto& model = m_RmlBinder.GetModel();
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-    model.rootScale = transform.scaleX;
-    m_RmlBinder.MarkDirty("root_x");
-    m_RmlBinder.MarkDirty("root_y");
-    m_RmlBinder.MarkDirty("root_scale");
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     model.canLevelUp = CharacterAttribute->LevelUpPoint > 0;
     m_RmlBinder.MarkDirty("can_level_up");
@@ -515,7 +514,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
     wchar_t strPoint[128];
 
     mu_swprintf(strLevel, I18N::Game::LevelUResetsU, CharacterAttribute->Level, CharacterAttribute->Resets);
-    mu_swprintf(strExp, I18N::Game::EXPI64dI64d, CharacterAttribute->Experience, CharacterAttribute->NextExperience);
+    mu_swprintf(strExp, I18N::Game::EXPI64dI64d, static_cast<unsigned long long>(CharacterAttribute->Experience),
+                static_cast<unsigned long long>(CharacterAttribute->NextExperience));
 
     if (CharacterAttribute->Level > 9)
     {

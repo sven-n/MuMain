@@ -42,7 +42,14 @@
 
 			<div class="quest-contents">
 				<span class="quest-content-row" data-for="c : contents" data-class-bold="c.bold"
-				      data-class-clickable="c.clickable" data-style-color="c.color"
+				      data-class-clickable="c.clickable"
+				      data-class-row-subject="c.style == 'subject'"
+				      data-class-row-summary="c.style == 'summary'"
+				      data-class-row-heading="c.style == 'heading'"
+				      data-class-row-requirement="c.style == 'requirement'"
+				      data-class-row-requirement-unmet="c.style == 'requirement-unmet'"
+				      data-class-row-reward="c.style == 'reward'"
+				      data-class-row-random-reward="c.style == 'random-reward'"
 				      data-event-click="myquest_select_content(c.index)">{{c.text}}</span>
 			</div>
 		</div>

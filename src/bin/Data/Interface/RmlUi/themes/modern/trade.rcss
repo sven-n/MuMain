@@ -221,3 +221,12 @@
 	pointer-events: none;
 	font-family: "token(font-body)";
 }
+
+/* Trade partner's level by bucket (CTrade::ConvertYourLevel(); the RML toggles
+   .level-bucket-<N>). The original client's colors. */
+.level-text.level-bucket-10  { color: #ff0000; }
+.level-text.level-bucket-50  { color: #ff9600; }
+.level-text.level-bucket-100 { color: #00c918; }
+.level-text.level-bucket-200 { color: #d2e6ff; }
+.level-text.level-bucket-300 { color: #ff99ff; }
+.level-text.level-bucket-400 { color: #ff9999; }
