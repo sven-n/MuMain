@@ -421,6 +421,15 @@ server with original clients (after phases 6 and B).
    flow turns around: JSON → database → `ItemAttribute[]` (compatibility
    view), and the item editor edits the database instead of
    `ItemAttribute[]`.
+
+   Before code reads the database (from phase 3 on): in phase 1 the editor
+   edits `ItemAttribute[]` and the database is only rebuilt after a
+   successful save, so unsaved or failed edits leave the two out of sync.
+   `Build()` also rewrites definitions in place, so an `ItemDefinition*`
+   kept across a rebuild sees changed content. Moving the editor onto the
+   database in this phase removes the first problem; code that keeps
+   pointers must not rely on them staying unchanged while the editor is
+   used.
 3. **Rules and categories into data**: flags and tags replace the hardcoded
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
    The resulting item lists are verified to be identical. Includes the
