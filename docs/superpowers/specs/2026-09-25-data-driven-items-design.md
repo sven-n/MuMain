@@ -46,6 +46,7 @@ pattern later but are not part of this work.
 | D11 | Exchange scope | Item sets and drop settings are separate exchange files, not part of the item file. |
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 6). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
+| D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
 
 ## Current state
 
@@ -184,8 +185,9 @@ Each field belongs to one of two groups:
   even in editor mode.
 - One **exchange file format** (JSON, with a format version) keyed by
   `(Group, Number)`, containing only the shared fields.
-- Item sets and drop settings get their own exchange files later (D11).
-  Whether the item file contains the item's possible options is open (Q1).
+- Item sets, drop settings and option definitions get their own exchange
+  files later (D11, D14). The item file only links to the option groups an
+  item can have.
 - **Client → server:** MuEditor exports the file; the admin imports it in a
   new OpenMU admin panel import page.
 - **Server → client:** a new OpenMU admin panel export page writes the same
@@ -220,7 +222,7 @@ Each field belongs to one of two groups:
   marks them as custom, so nothing depends on where their number lies.
 - OpenMU must keep working with the original Season 6 client. That client
   does not know custom items, so the server has to handle them for it
-  (see Q2). OpenMU already knows which client a server is for
+  (see Q1). OpenMU already knows which client a server is for
   (`GameClientDefinition`: season, episode, language, version), which is a
   possible hook.
 
@@ -282,19 +284,9 @@ OpenMU PRs (in parallel, separate repo):
 
 ## Open questions
 
-- **Q1: Item options in the item file.** In OpenMU, each item has
-  `PossibleItemOptions`: links to shared option definitions such as
-  *Luck*, the *additional option* (+4 … +28, Jewel of Life), *excellent*
-  options, *wing* options, *harmony*, *guardian* (380) and *socket*
-  options. Whether an item can have a skill is a separate field
-  (`ItemDefinition.Skill`) and is part of the item file anyway.
-  *Proposal:* the item file contains only the **links** (which option
-  groups an item can have, e.g. "Luck, additional option, excellent
-  physical attack options"). The option definitions themselves (values,
-  chances, levels) get their own exchange file later, like sets.
-- **Q2: Custom items on the original client.** What should OpenMU do with a
+- **Q1: Custom items on the original client** *(deferred; must be
+  discussed before the related PR lands).* What should OpenMU do with a
   custom item when the player uses the original Season 6 client? For
   example: never send it to that client (hide it in shops, drops and
   views), block such items on servers set up for the original client, or
-  show a placeholder item. This needs to be decided before custom items
-  are used on a server with original clients.
+  show a placeholder item.
