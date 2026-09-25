@@ -27,7 +27,10 @@ public:
         int recordSize = 0;
         bool isLegacyFormat = false;
 
-        const BYTE* GetRecord(int itemType) const { return records.get() + itemType * recordSize; }
+        const BYTE* GetRecord(int itemType) const
+        {
+            return records.get() + itemType * recordSize;
+        }
     };
 
     // Reads, checks and decrypts an item.bmd file without converting it.

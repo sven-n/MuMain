@@ -117,12 +117,14 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
 
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 {
-    definition.name = definition.Exists() ? Core::Text::FromUtf8(definition.names.Get(m_displayLocale)) : std::wstring();
+    definition.name =
+        definition.Exists() ? Core::Text::FromUtf8(definition.names.Get(m_displayLocale)) : std::wstring();
 }
 
 void ItemDatabase::CountExistingItems()
 {
-    m_existingItemCount = static_cast<int>(
-        std::count_if(m_definitions.begin(), m_definitions.end(), [](const ItemDefinition& definition) { return definition.Exists(); }));
+    m_existingItemCount =
+        static_cast<int>(std::count_if(m_definitions.begin(), m_definitions.end(),
+                                       [](const ItemDefinition& definition) { return definition.Exists(); }));
 }
 } // namespace Data::Items

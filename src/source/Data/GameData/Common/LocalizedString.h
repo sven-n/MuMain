@@ -23,7 +23,10 @@ public:
     // result is the same for the same content.
     std::string Serialize() const;
 
-    const std::string& GetNeutral() const { return m_neutral; }
+    const std::string& GetNeutral() const
+    {
+        return m_neutral;
+    }
 
     // The text for the locale, or the neutral text if it has no translation.
     const std::string& Get(std::string_view locale) const;
@@ -32,9 +35,15 @@ public:
     // the translation.
     void Set(std::string_view locale, std::string text);
 
-    bool IsEmpty() const { return m_neutral.empty() && m_translations.empty(); }
+    bool IsEmpty() const
+    {
+        return m_neutral.empty() && m_translations.empty();
+    }
 
-    const std::map<std::string, std::string, std::less<>>& GetTranslations() const { return m_translations; }
+    const std::map<std::string, std::string, std::less<>>& GetTranslations() const
+    {
+        return m_translations;
+    }
 
     bool operator==(const LocalizedString& other) const = default;
 

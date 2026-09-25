@@ -31,8 +31,9 @@ struct FieldLayout
 template <typename TFileFormat> std::vector<FieldLayout> BuildFieldLayouts()
 {
     std::vector<FieldLayout> fields;
-#define ADD_ITEM_FIELD(name, type, arraySize, width, i18nName) \
-    fields.push_back({#name, offsetof(TFileFormat, name), offsetof(ITEM_ATTRIBUTE, name), sizeof(ITEM_ATTRIBUTE::name)});
+#define ADD_ITEM_FIELD(name, type, arraySize, width, i18nName)                                                         \
+    fields.push_back(                                                                                                  \
+        {#name, offsetof(TFileFormat, name), offsetof(ITEM_ATTRIBUTE, name), sizeof(ITEM_ATTRIBUTE::name)});
     ITEM_FIELDS_SIMPLE(ADD_ITEM_FIELD)
 #undef ADD_ITEM_FIELD
 
@@ -68,7 +69,10 @@ struct LanguageRecord
     size_t nameEnd = 0;
     bool reencoded = false;
 
-    bool NameRanOn() const { return nameEnd >= file->nameFieldSize; }
+    bool NameRanOn() const
+    {
+        return nameEnd >= file->nameFieldSize;
+    }
 
     // True when the name (or its terminating null byte) overwrote the field.
     bool IsDamaged(const FieldLayout& field) const
@@ -79,20 +83,47 @@ struct LanguageRecord
 
 // ------------------------------------------------------------ name decoding
 
+// Number of bytes of the UTF-8 sequence that starts with `lead`, or 0 when
+// `lead` cannot start one.
+size_t GetUtf8SequenceLength(unsigned char lead)
+{
+    if (lead < 0x80)
+    {
+        return 1;
+    }
+    if ((lead & 0xE0) == 0xC0)
+    {
+        return 2;
+    }
+    if ((lead & 0xF0) == 0xE0)
+    {
+        return 3;
+    }
+    if ((lead & 0xF8) == 0xF0)
+    {
+        return 4;
+    }
+    return 0;
+}
+
+bool IsUtf8ContinuationByte(char character)
+{
+    return (static_cast<unsigned char>(character) & 0xC0) == 0x80;
+}
+
 bool IsValidUtf8(std::string_view text)
 {
     size_t i = 0;
     while (i < text.size())
     {
-        const auto lead = static_cast<unsigned char>(text[i]);
-        const size_t length = lead < 0x80 ? 1 : (lead >> 5) == 0x6 ? 2 : (lead >> 4) == 0xE ? 3 : (lead >> 3) == 0x1E ? 4 : 0;
+        const size_t length = GetUtf8SequenceLength(static_cast<unsigned char>(text[i]));
         if (length == 0 || i + length > text.size())
         {
             return false;
         }
         for (size_t j = 1; j < length; ++j)
         {
-            if ((static_cast<unsigned char>(text[i + j]) & 0xC0) != 0x80)
+            if (!IsUtf8ContinuationByte(text[i + j]))
             {
                 return false;
             }
@@ -176,7 +207,8 @@ std::optional<LanguageRecord> ReadRecord(const LanguageFile& file, int itemType)
 
     const auto* nameEnd = static_cast<const BYTE*>(std::memchr(record.bytes, 0, file.raw.recordSize));
     record.nameEnd = nameEnd != nullptr ? static_cast<size_t>(nameEnd - record.bytes) : file.raw.recordSize;
-    record.name = DecodeName(std::string_view(reinterpret_cast<const char*>(record.bytes), record.nameEnd), record.reencoded);
+    record.name =
+        DecodeName(std::string_view(reinterpret_cast<const char*>(record.bytes), record.nameEnd), record.reencoded);
     return record;
 }
 
@@ -190,7 +222,8 @@ long long ReadFieldValue(const LanguageRecord& record, const FieldLayout& field)
 // The values of an item that sets nothing (e.g. slot "not equippable").
 const ITEM_ATTRIBUTE& GetDefaultAttribute()
 {
-    static const ITEM_ATTRIBUTE Defaults = [] {
+    static const ITEM_ATTRIBUTE Defaults = []
+    {
         ITEM_ATTRIBUTE attribute{};
         ToItemAttribute(ItemDefinition{}, attribute);
         return attribute;
@@ -209,8 +242,9 @@ void CopyField(const LanguageRecord* source, const FieldLayout& sourceField, con
                ITEM_ATTRIBUTE& target)
 {
     auto* targetBytes = reinterpret_cast<BYTE*>(&target) + targetField.attributeOffset;
-    const BYTE* sourceBytes = source != nullptr ? source->bytes + sourceField.fileOffset
-                                                : reinterpret_cast<const BYTE*>(&GetDefaultAttribute()) + targetField.attributeOffset;
+    const BYTE* sourceBytes = source != nullptr
+                                  ? source->bytes + sourceField.fileOffset
+                                  : reinterpret_cast<const BYTE*>(&GetDefaultAttribute()) + targetField.attributeOffset;
     std::memcpy(targetBytes, sourceBytes, targetField.size);
 }
 
@@ -246,7 +280,8 @@ ITEM_ATTRIBUTE MergeStats(const std::vector<LanguageRecord>& records, int itemTy
         repair.number = GetItemNumber(itemType);
         repair.field = referenceField.name;
         repair.oldValue = ReadFieldValue(reference, referenceField);
-        repair.newValue = source ? ReadFieldValue(*source, source->file->fields[fieldIndex]) : ReadDefaultValue(referenceField);
+        repair.newValue =
+            source ? ReadFieldValue(*source, source->file->fields[fieldIndex]) : ReadDefaultValue(referenceField);
         repair.fromLocale = source ? source->file->language->locale : "";
         repairs.push_back(std::move(repair));
     }

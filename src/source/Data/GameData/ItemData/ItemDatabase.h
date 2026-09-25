@@ -28,7 +28,10 @@ public:
     // Fills ItemDefinition::name from the names for this UI locale, falling
     // back to English.
     void SetDisplayLocale(std::string_view locale);
-    const std::string& GetDisplayLocale() const { return m_displayLocale; }
+    const std::string& GetDisplayLocale() const
+    {
+        return m_displayLocale;
+    }
 
     // Returns nullptr for invalid ids and for empty item slots. Defined here
     // so it can be inlined on hot paths. The table never moves, so returned
@@ -48,7 +51,10 @@ public:
     const ItemDefinition* Find(int group, int number) const;
 
     // All MAX_ITEM slots, indexed by item type, including empty ones.
-    std::span<const ItemDefinition> GetAllSlots() const { return m_definitions; }
+    std::span<const ItemDefinition> GetAllSlots() const
+    {
+        return m_definitions;
+    }
 
     // Stable, language-neutral name for logs: "<English name> (<group>,<number>)".
     std::string GetLogName(int itemType) const;

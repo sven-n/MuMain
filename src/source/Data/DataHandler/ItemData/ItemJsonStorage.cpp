@@ -20,7 +20,7 @@ constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
 
 // Same order as the ITEM_GROUP_* constants.
 constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
-    "Sword", "Axe", "Mace", "Spear", "Bow", "Staff", "Shield", "Helm",
+    "Sword", "Axe",   "Mace",   "Spear", "Bow",  "Staff",  "Shield", "Helm",
     "Armor", "Pants", "Gloves", "Boots", "Wing", "Helper", "Potion", "Etc"};
 
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)

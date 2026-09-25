@@ -64,6 +64,9 @@ struct ItemDefinition
     BYTE sellValue = 0;
     int buyPrice = 0;
 
-    bool Exists() const { return !names.IsEmpty(); }
+    bool Exists() const
+    {
+        return !names.IsEmpty();
+    }
 };
 } // namespace Data::Items

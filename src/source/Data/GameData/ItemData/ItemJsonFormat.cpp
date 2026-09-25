@@ -55,13 +55,13 @@ constexpr const char* Resistances = "resistances";
 } // namespace Keys
 
 // Same order as ITEM_ATTRIBUTE::RequireClass.
-constexpr std::array<const char*, MAX_CLASS> ClassKeys = {
-    "darkWizard", "darkKnight", "fairyElf", "magicGladiator", "darkLord", "summoner", "rageFighter"};
+constexpr std::array<const char*, MAX_CLASS> ClassKeys = {"darkWizard", "darkKnight", "fairyElf",   "magicGladiator",
+                                                          "darkLord",   "summoner",   "rageFighter"};
 
 // Same order as ITEM_ATTRIBUTE::Resistance. The last one is unused by the
 // Season 6 data.
-constexpr std::array<const char*, MAX_RESISTANCE + 1> ResistanceKeys = {
-    "ice", "poison", "lightning", "fire", "earth", "wind", "water", "unknown"};
+constexpr std::array<const char*, MAX_RESISTANCE + 1> ResistanceKeys = {"ice",   "poison", "lightning", "fire",
+                                                                        "earth", "wind",   "water",     "unknown"};
 
 // The single list of item fields and their defaults, used for reading and
 // writing. TDefinition is ItemDefinition or const ItemDefinition.
@@ -88,7 +88,8 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("buyPrice", definition.buyPrice, 0);
 }
 
-template <typename TRequirements, typename TVisitor> void VisitRequirementFields(TRequirements& requirements, TVisitor&& visit)
+template <typename TRequirements, typename TVisitor>
+void VisitRequirementFields(TRequirements& requirements, TVisitor&& visit)
 {
     visit("level", requirements.level, WORD{0});
     visit("strength", requirements.strength, WORD{0});
@@ -136,8 +137,10 @@ OrderedJson WriteItem(const ItemDefinition& definition)
     item[Keys::Number] = definition.number;
     item[Keys::Name] = WriteNames(definition.names);
 
-    const auto writeIfNotDefault = [](OrderedJson& target) {
-        return [&target](const char* key, const auto& value, const auto& defaultValue) {
+    const auto writeIfNotDefault = [](OrderedJson& target)
+    {
+        return [&target](const char* key, const auto& value, const auto& defaultValue)
+        {
             if (value != defaultValue)
             {
                 target[key] = value;
@@ -243,7 +246,8 @@ bool ItemReader::ReadIdentity(const OrderedJson& json, ItemDefinition& definitio
 
     if (!ReadWholeNumber(*number, itemNumber) || itemNumber < 0 || itemNumber >= MAX_ITEM_INDEX)
     {
-        AddIssue(ItemDataIssueSeverity::Error, Keys::Number, "must be between 0 and " + std::to_string(MAX_ITEM_INDEX - 1));
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Number,
+                 "must be between 0 and " + std::to_string(MAX_ITEM_INDEX - 1));
         return false;
     }
     m_number = static_cast<int>(itemNumber);
@@ -293,13 +297,15 @@ bool ItemReader::ReadNames(const OrderedJson& json, LocalizedString& names)
 
 void ItemReader::ReadStats(const OrderedJson& json, ItemDefinition& definition)
 {
-    VisitStatFields(definition, [&](const char* key, auto& value, const auto&) {
-        const auto field = json.find(key);
-        if (field != json.end())
-        {
-            ReadValue(*field, key, value);
-        }
-    });
+    VisitStatFields(definition,
+                    [&](const char* key, auto& value, const auto&)
+                    {
+                        const auto field = json.find(key);
+                        if (field != json.end())
+                        {
+                            ReadValue(*field, key, value);
+                        }
+                    });
 }
 
 void ItemReader::ReadRequirements(const OrderedJson& json, ItemDefinition& definition)
@@ -316,14 +322,16 @@ void ItemReader::ReadRequirements(const OrderedJson& json, ItemDefinition& defin
     }
 
     std::set<std::string, std::less<>> knownKeys;
-    VisitRequirementFields(definition.requirements, [&](const char* key, auto& value, const auto&) {
-        knownKeys.insert(key);
-        const auto field = requirements->find(key);
-        if (field != requirements->end())
-        {
-            ReadValue(*field, std::string(Keys::Requirements) + "." + key, value);
-        }
-    });
+    VisitRequirementFields(definition.requirements,
+                           [&](const char* key, auto& value, const auto&)
+                           {
+                               knownKeys.insert(key);
+                               const auto field = requirements->find(key);
+                               if (field != requirements->end())
+                               {
+                                   ReadValue(*field, std::string(Keys::Requirements) + "." + key, value);
+                               }
+                           });
     WarnAboutUnknownKeys(*requirements, knownKeys, std::string(Keys::Requirements) + ".");
 }
 

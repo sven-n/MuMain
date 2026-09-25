@@ -30,9 +30,9 @@ bool ContainsSeparator(const std::string& text)
 // break the LocalizedString format used for the OpenMU exchange.
 bool IsValidLocaleCode(const std::string& locale)
 {
-    return !locale.empty() && std::all_of(locale.begin(), locale.end(), [](char character) {
-        return std::isalnum(static_cast<unsigned char>(character)) || character == '-';
-    });
+    return !locale.empty() &&
+           std::all_of(locale.begin(), locale.end(), [](char character)
+                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
 }
 
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
@@ -49,7 +49,8 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English name is missing");
     }
 
-    const auto check = [&](const std::string& locale, const std::string& text) {
+    const auto check = [&](const std::string& locale, const std::string& text)
+    {
         if (ContainsSeparator(text))
         {
             AddIssue(issues, ItemDataIssueSeverity::Error, definition,
