@@ -625,24 +625,32 @@ TEST_CASE("experience transform spans the window with HUD vertical scale [ui][sc
     CHECK(UI::Scaling::PositionY(experience, 480.0f) == doctest::Approx(1200.0f));
 }
 
-TEST_CASE("world viewport spans the window while docks remain at the rounded HUD top [ui][scaling]")
+TEST_CASE("world viewport ends at the rounded HUD top that the docks align to [ui][scaling]")
 {
+    const auto reference = UI::Scaling::WorldViewport(640, 480, false);
+    CHECK(reference.width == 640);
+    CHECK(reference.height == 429);
+
     const auto hd = UI::Scaling::WorldViewport(1280, 720, false);
     CHECK(hd.width == 1280);
-    CHECK(hd.height == 720);
-    CHECK(UI::Scaling::WorldViewportAspect(1280, 720, false) == doctest::Approx(1280.0f / 720.0f));
+    CHECK(hd.height == 644);
+    CHECK(UI::Scaling::WorldViewportAspect(1280, 720, false) == doctest::Approx(1280.0f / 644.0f));
     const auto hdDock = UI::Scaling::DockLeftTransform(1280, 720);
     CHECK(UI::Scaling::PositionY(hdDock, 432.0f) == doctest::Approx(644.0f));
 
     const auto sxga = UI::Scaling::WorldViewport(1280, 1024, false);
     CHECK(sxga.width == 1280);
-    CHECK(sxga.height == 1024);
+    CHECK(sxga.height == 922);
     const auto sxgaDock = UI::Scaling::DockLeftTransform(1280, 1024);
     CHECK(UI::Scaling::PositionY(sxgaDock, 432.0f) == doctest::Approx(922.0f));
+
+    const auto wide = UI::Scaling::WorldViewport(1920, 1200, false);
+    CHECK(wide.height == 1098);
 
     const auto topView = UI::Scaling::WorldViewport(1920, 1200, true);
     CHECK(topView.width == 1920);
     CHECK(topView.height == 1200);
+    CHECK(UI::Scaling::WorldViewportAspect(1920, 1200, true) == doctest::Approx(1920.0f / 1200.0f));
 }
 
 TEST_CASE("world viewport clamps zero and tiny dimensions before deriving aspect [ui][scaling]")
