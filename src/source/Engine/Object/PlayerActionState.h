@@ -15,6 +15,36 @@ namespace Engine::Object
         return currentAction >= PLAYER_ATTACK_FIST && currentAction <= PLAYER_RIDE_SKILL;
     }
 
+    // True while a player is firing an equipped bow or crossbow. Elves shoot from
+    // four different poses - on foot, on wings, on a Uniria/Dinorant mount and on a
+    // Fenrir - and each pose has a separate animation track per weapon type (see
+    // SetPlayerBow in WSclient.cpp), so the set is not contiguous in the enum.
+    inline bool IsBowAttackAction(int currentAction)
+    {
+        switch (currentAction)
+        {
+        case PLAYER_ATTACK_BOW:
+        case PLAYER_ATTACK_CROSSBOW:
+        case PLAYER_ATTACK_FLY_BOW:
+        case PLAYER_ATTACK_FLY_CROSSBOW:
+        case PLAYER_ATTACK_RIDE_BOW:
+        case PLAYER_ATTACK_RIDE_CROSSBOW:
+        case PLAYER_FENRIR_ATTACK_BOW:
+        case PLAYER_FENRIR_ATTACK_CROSSBOW:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    // True while a player is firing an equipped bow or crossbow in the raised-shot
+    // pose (see SetPlayerHighBow in WSclient.cpp). Same four poses as
+    // IsBowAttackAction, on the contiguous "_UP" animation tracks.
+    inline bool IsRaisedBowAttackAction(int currentAction)
+    {
+        return currentAction >= PLAYER_ATTACK_BOW_UP && currentAction <= PLAYER_ATTACK_RIDE_CROSSBOW_UP;
+    }
+
     // True while a player is sitting or holding a pose (PLAYER_SIT1 ..
     // PLAYER_POSE_FEMALE1). Used to keep these animations from being reset to the
     // stand pose when equipment or class changes.
