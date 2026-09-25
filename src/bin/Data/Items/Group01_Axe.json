@@ -1,0 +1,250 @@
+{
+  "formatVersion": 1,
+  "group": 1,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Small Axe",
+        "es": "Hacha Pequeña",
+        "pt": "Machado pequeno"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 1,
+      "durability": 18,
+      "damageMin": 1,
+      "damageMax": 6,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Hand Axe",
+        "es": "Hacha de Mano",
+        "pt": "Machado de mão"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 4,
+      "durability": 20,
+      "damageMin": 4,
+      "damageMax": 9,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Double Axe",
+        "es": "Hacha Doble",
+        "pt": "Machado duplo"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 19,
+      "level": 14,
+      "durability": 26,
+      "damageMin": 14,
+      "damageMax": 24,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Tomahawk"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 19,
+      "level": 18,
+      "durability": 28,
+      "damageMin": 18,
+      "damageMax": 28,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Elven Axe",
+        "es": "Hacha de los Elfos",
+        "pt": "Machado élfico"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 26,
+      "durability": 32,
+      "damageMin": 26,
+      "damageMax": 38,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Battle Axe",
+        "es": "Hacha de Batalla",
+        "pt": "Machado de batalha"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 30,
+      "durability": 36,
+      "damageMin": 36,
+      "damageMax": 44,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Nikea Axe",
+        "es": "Hacha Nikea",
+        "pt": "Machado de Nikea"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 34,
+      "durability": 44,
+      "damageMin": 38,
+      "damageMax": 50,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Larkan Axe",
+        "es": "Hacha Larkan",
+        "pt": "Machado de Larkan"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 46,
+      "durability": 55,
+      "damageMin": 54,
+      "damageMax": 67,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 140
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Crescent Axe",
+        "es": "Hacha Medialuna",
+        "pt": "Machado crescente"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 54,
+      "durability": 65,
+      "damageMin": 69,
+      "damageMax": 89,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    }
+  ]
+}

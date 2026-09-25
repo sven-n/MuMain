@@ -11,6 +11,9 @@
 *.spv binary
 *.dxil binary
 src/shaders/compiled/*.msl text eol=lf whitespace=-blank-at-eof
+# Item data is written by the item editor with LF; keep checkouts identical
+# so saving unchanged data does not change the files.
+src/bin/Data/Items/**/*.json text eol=lf
 
 # Binary game assets: never apply text detection or EOL normalization.
 # Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`

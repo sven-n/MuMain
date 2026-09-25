@@ -38,6 +38,11 @@ build-linux/
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
+# Item data (JSON, written by the item editor) is source-controlled.
+!src/bin/Data/
+!src/bin/Data/Items/
+!src/bin/Data/Items/**
+src/bin/Data/Items/**/*.tmp
 **/obj/
 *.user
 *.suo

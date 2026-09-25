@@ -15,9 +15,13 @@ constexpr int SwordGroup = 0;
 constexpr int PotionGroup = 14;
 constexpr int LargeHealingPotionNumber = 3;
 
-std::vector<ITEM_ATTRIBUTE> MakeEmptyAttributes()
+ItemDefinition MakeItem(int group, int number, const std::string& names)
 {
-    return std::vector<ITEM_ATTRIBUTE>(MAX_ITEM, ITEM_ATTRIBUTE{});
+    ItemDefinition definition;
+    definition.group = group;
+    definition.number = number;
+    definition.names = Data::LocalizedString::Parse(names);
+    return definition;
 }
 
 void SetName(ITEM_ATTRIBUTE& attribute, const std::wstring& name)
@@ -75,6 +79,7 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
     CHECK(definition.group == PotionGroup);
     CHECK(definition.number == LargeHealingPotionNumber);
     CHECK(definition.name == L"Kris");
+    CHECK(definition.names.GetNeutral() == "Kris");
 
     ITEM_ATTRIBUTE converted{};
     ToItemAttribute(definition, converted);
@@ -106,12 +111,13 @@ TEST_CASE("Item names longer than the bmd field are cut [data][items]")
 
 TEST_CASE("Item database finds existing items only [data][items]")
 {
-    auto attributes = MakeEmptyAttributes();
-    SetName(attributes[MakeItemType(SwordGroup, 0)], L"Kris");
-    SetName(attributes[MakeItemType(PotionGroup, LargeHealingPotionNumber)], L"Large Healing Potion");
+    const std::vector<ItemDefinition> items = {
+        MakeItem(SwordGroup, 0, "Kris"),
+        MakeItem(PotionGroup, LargeHealingPotionNumber, "Large Healing Potion"),
+    };
 
     ItemDatabase database;
-    database.Build(attributes);
+    database.Build(items);
 
     CHECK(database.GetExistingItemCount() == 2);
 
@@ -127,51 +133,80 @@ TEST_CASE("Item database finds existing items only [data][items]")
     CHECK(database.Find(MAX_ITEM_TYPE, 0) == nullptr);
 }
 
-TEST_CASE("Item log names use English names and the item id [data][items]")
+TEST_CASE("Item names follow the display locale with English fallback [data][items]")
 {
-    auto attributes = MakeEmptyAttributes();
-    const int potionType = MakeItemType(PotionGroup, LargeHealingPotionNumber);
-    SetName(attributes[MakeItemType(SwordGroup, 0)], L"Kris");
-    SetName(attributes[potionType], L"Großer Heiltrank");
-
-    std::vector<std::string> englishNames(MAX_ITEM);
-    englishNames[potionType] = "Large Healing Potion";
+    const std::vector<ItemDefinition> items = {
+        MakeItem(PotionGroup, LargeHealingPotionNumber, "Large Healing Potion||pt=Po\xC3\xA7\xC3\xA3o de Cura Grande"),
+    };
 
     ItemDatabase database;
-    database.Build(attributes, englishNames);
+    database.Build(items);
+    const ItemDefinition* potion = database.Find(PotionGroup, LargeHealingPotionNumber);
+    REQUIRE(potion != nullptr);
+    CHECK(potion->name == L"Large Healing Potion");
 
-    CHECK(database.GetLogName(potionType) == "Large Healing Potion (14,3)");
-    CHECK(database.Find(potionType)->name == L"Großer Heiltrank");
+    database.SetDisplayLocale("pt");
+    CHECK(potion->name == L"Poção de Cura Grande");
 
-    // No English name for this item: the loaded name is used instead.
+    database.SetDisplayLocale("de");
+    CHECK(potion->name == L"Large Healing Potion");
+}
+
+TEST_CASE("Item log names use English names and the item id [data][items]")
+{
+    const std::vector<ItemDefinition> items = {
+        MakeItem(SwordGroup, 0, "Kris||pt=Cris"),
+    };
+
+    ItemDatabase database;
+    database.SetDisplayLocale("pt");
+    database.Build(items);
+
     CHECK(database.GetLogName(MakeItemType(SwordGroup, 0)) == "Kris (0,0)");
-
     CHECK(database.GetLogName(MakeItemType(SwordGroup, 1)) == "<unknown item> (0,1)");
     CHECK(database.GetLogName(-1) == "<invalid item type -1>");
 }
 
-TEST_CASE("Item log names fall back to the loaded names as UTF-8 [data][items]")
-{
-    auto attributes = MakeEmptyAttributes();
-    const int potionType = MakeItemType(PotionGroup, LargeHealingPotionNumber);
-    SetName(attributes[potionType], L"Großer Heiltrank");
-
-    ItemDatabase database;
-    database.Build(attributes);
-
-    CHECK(database.GetLogName(potionType) == "Gro" "\xC3\x9F" "er Heiltrank (14,3)");
-}
-
 TEST_CASE("Rebuilding the item database replaces old items [data][items]")
 {
-    auto attributes = MakeEmptyAttributes();
-    SetName(attributes[MakeItemType(SwordGroup, 0)], L"Kris");
-
     ItemDatabase database;
-    database.Build(attributes);
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
     REQUIRE(database.Find(SwordGroup, 0) != nullptr);
 
-    database.Build(MakeEmptyAttributes());
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 1, "Short Sword")});
     CHECK(database.Find(SwordGroup, 0) == nullptr);
+    CHECK(database.Find(SwordGroup, 1) != nullptr);
+    CHECK(database.GetExistingItemCount() == 1);
+}
+
+TEST_CASE("Editor changes update single items [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
+
+    ItemDefinition changed = *database.Find(SwordGroup, 0);
+    changed.width = 2;
+    database.Set(changed);
+    CHECK(database.Find(SwordGroup, 0)->width == 2);
+
+    // An item without names does not exist, but keeps its values.
+    changed.names = {};
+    database.Set(changed);
+    CHECK(database.Find(SwordGroup, 0) == nullptr);
+    CHECK(database.GetAllSlots()[MakeItemType(SwordGroup, 0)].width == 2);
     CHECK(database.GetExistingItemCount() == 0);
+}
+
+TEST_CASE("Swapping items moves them with their ids [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
+
+    database.Swap(MakeItemType(SwordGroup, 0), MakeItemType(SwordGroup, 5));
+
+    CHECK(database.Find(SwordGroup, 0) == nullptr);
+    const ItemDefinition* moved = database.Find(SwordGroup, 5);
+    REQUIRE(moved != nullptr);
+    CHECK(moved->number == 5);
+    CHECK(moved->names.GetNeutral() == "Kris");
 }

@@ -1,0 +1,748 @@
+{
+  "formatVersion": 1,
+  "group": 15,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Scroll of Poison",
+        "es": "Rollo de Veneno",
+        "pt": "Pergaminho de veneno"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 30,
+      "damageMin": 30,
+      "damageMax": 45,
+      "buyPrice": 17000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Scroll of Meteorite",
+        "es": "Rollo de Meteorito",
+        "pt": "Pergaminho de meteorito"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 21,
+      "damageMin": 21,
+      "damageMax": 31,
+      "buyPrice": 11000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Scroll of Lighting",
+        "es": "Rollo de Relámpago",
+        "pt": "Pergaminho de relâmpago"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 13,
+      "damageMin": 13,
+      "damageMax": 19,
+      "buyPrice": 3000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Scroll of Fire Ball",
+        "es": "Rollo de Bola de Fuego",
+        "pt": "Pergaminho de bola de fogo"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 5,
+      "damageMin": 5,
+      "damageMax": 7,
+      "buyPrice": 300,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Scroll of Flame",
+        "es": "Rollo de Llama",
+        "pt": "Pergaminho de chama"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 35,
+      "damageMin": 35,
+      "damageMax": 52,
+      "buyPrice": 21000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Scroll of Teleport",
+        "es": "Rollo de Telepuerto",
+        "pt": "Pergaminho de teletransporte"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 17,
+      "damageMin": 17,
+      "damageMax": 25,
+      "buyPrice": 5000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scroll of Ice",
+        "es": "Rollo de Hielo",
+        "pt": "Pergaminho de gelo"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 25,
+      "damageMin": 25,
+      "damageMax": 37,
+      "buyPrice": 14000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Scroll of Twister",
+        "es": "Rollo de Tornado",
+        "pt": "Pergaminho de ciclone"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 40,
+      "damageMin": 40,
+      "damageMax": 60,
+      "buyPrice": 25000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Scroll of Evil Spirit",
+        "es": "Rollo de Espíritu Maligno",
+        "pt": "Pergaminho Espírito Diabólico"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 50,
+      "damageMin": 50,
+      "damageMax": 75,
+      "buyPrice": 35000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Scroll of Hellfire",
+        "es": "Rollo de Fuego Infernal",
+        "pt": "Pergaminho de fogo infernal"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 60,
+      "damageMin": 60,
+      "damageMax": 90,
+      "buyPrice": 60000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Scroll of Power Wave",
+        "es": "Rollo de Onda de Poder",
+        "pt": "Pergaminho de onda poderosa"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 9,
+      "damageMin": 9,
+      "damageMax": 13,
+      "buyPrice": 1150,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Scroll of Aqua Beam",
+        "es": "Rollo de Columna de Agua",
+        "pt": "Pergaminho de raio de água"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 74,
+      "damageMin": 74,
+      "damageMax": 111,
+      "buyPrice": 100000,
+      "requirements": {
+        "energy": 110
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Scroll of Cometfall",
+        "es": "Rollo de Caída de Cometa",
+        "pt": "Pergaminho de queda de cometa"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 80,
+      "damageMin": 80,
+      "damageMax": 120,
+      "buyPrice": 175000,
+      "requirements": {
+        "energy": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Scroll of Inferno",
+        "es": "Rollo del Infierno",
+        "pt": "Pergaminho de inferno"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 88,
+      "damageMin": 88,
+      "damageMax": 132,
+      "buyPrice": 265000,
+      "requirements": {
+        "energy": 200
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Scroll of Teleport Ally",
+        "es": "Rollo de Telepuerto Aliado",
+        "pt": "Pergaminho Teletr. De Aliado"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 83,
+      "damageMin": 83,
+      "damageMax": 124,
+      "buyPrice": 245000,
+      "requirements": {
+        "energy": 188
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Scroll of Soul Barrier",
+        "es": "Rollo de Barrera de Almas",
+        "pt": "Pergaminho Barr. da Alma"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 77,
+      "damageMin": 77,
+      "damageMax": 115,
+      "buyPrice": 135000,
+      "requirements": {
+        "energy": 126
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Scroll of Decay",
+        "es": "Rollo de Decadencia",
+        "pt": "Pergaminho de apodrecimento"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 96,
+      "damageMin": 96,
+      "damageMax": 144,
+      "buyPrice": 345000,
+      "requirements": {
+        "energy": 243
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Scroll of Ice Storm",
+        "es": "Rollo de Tormenta de Hielo",
+        "pt": "Pergaminho Tempestade de Gelo"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 93,
+      "damageMin": 93,
+      "damageMax": 139,
+      "buyPrice": 315000,
+      "requirements": {
+        "energy": 223
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Scroll of Nova",
+        "es": "Rollo de Nova",
+        "pt": "Pergaminho de nova"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 100,
+      "damageMin": 100,
+      "damageMax": 150,
+      "buyPrice": 410000,
+      "requirements": {
+        "energy": 258
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Chain Lightning Parchment",
+        "es": "Pergamino Cadena Relámpagos",
+        "pt": "Pergaminho de raio em cadeia"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 75,
+      "damageMin": 75,
+      "damageMax": 112,
+      "buyPrice": 175000,
+      "requirements": {
+        "energy": 75
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Drain Life Parchment",
+        "es": "Pergamino de Drenaje de Vida",
+        "pt": "Pergaminho de drenar vida"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 35,
+      "damageMin": 35,
+      "damageMax": 52,
+      "buyPrice": 100000,
+      "requirements": {
+        "energy": 93
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Lightning Shock Parchment",
+        "es": "Pergamino Descarga Relámpago",
+        "pt": "Pergaminho Choque Relâmpago"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 93,
+      "damageMin": 93,
+      "damageMax": 139,
+      "buyPrice": 315000,
+      "requirements": {
+        "energy": 216
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Damage Reflection Parchment",
+        "es": "Pergamino Reflejo de Daños",
+        "pt": "Pergaminho Reflexo de Dano"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 80,
+      "damageMin": 80,
+      "damageMax": 120,
+      "buyPrice": 245000,
+      "requirements": {
+        "energy": 111
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Berserker Parchment",
+        "es": "Pergamino de Energúmeno",
+        "pt": "Pergaminho de berserker"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 83,
+      "damageMin": 83,
+      "damageMax": 124,
+      "buyPrice": 265000,
+      "requirements": {
+        "energy": 181
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Sleep Parchment",
+        "es": "Pergamino de Sueño",
+        "pt": "Pergaminho de dormir"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 40,
+      "damageMin": 40,
+      "damageMax": 60,
+      "buyPrice": 135000,
+      "requirements": {
+        "energy": 100
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Weakness Parchment",
+        "es": "Pergamino de Debilidad",
+        "pt": "Pergaminho de fraqueza"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 93,
+      "damageMin": 93,
+      "damageMax": 139,
+      "buyPrice": 410000,
+      "requirements": {
+        "energy": 173
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Innovation Parchment",
+        "es": "Pergamino de Innovación",
+        "pt": "Pergaminho de inovação"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 111,
+      "damageMin": 111,
+      "damageMax": 166,
+      "buyPrice": 450000,
+      "requirements": {
+        "energy": 201
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Scroll of Wizardry Enhance",
+        "es": "Rollo de Mejora de Magia",
+        "pt": "Perg. Aum. Poder de Magia"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 100,
+      "damageMin": 100,
+      "damageMax": 150,
+      "buyPrice": 425000,
+      "requirements": {
+        "level": 220,
+        "energy": 118
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Scroll of Gigantic Storm",
+        "es": "Rollo de Tormenta Gigantesca",
+        "pt": "Perg. Tempestade Gigante"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 100,
+      "damageMin": 100,
+      "damageMax": 150,
+      "buyPrice": 380000,
+      "requirements": {
+        "level": 220,
+        "energy": 118
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Chain Drive Parchment",
+        "es": "Pergamino Acción por Cadena",
+        "pt": "Pergaminho de Correia"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 70,
+      "damageMin": 70,
+      "damageMax": 105,
+      "buyPrice": 100000,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Dark Side Parchment",
+        "es": "Pergamino Lado Oscuro",
+        "pt": "Pergaminho do Lado Negro"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 80,
+      "damageMin": 80,
+      "damageMax": 120,
+      "buyPrice": 175000,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Dragon Roar Parchment",
+        "es": "Pergamino Rugido de Dragón",
+        "pt": "Pergaminho do Rugido do Dragão"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 70,
+      "damageMin": 70,
+      "damageMax": 105,
+      "buyPrice": 100000,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Dragon Slasher Parchment",
+        "es": "Pergamino Aniquilador de Dragón",
+        "pt": "Pergaminho Retalhador de Dragões"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 90,
+      "damageMin": 90,
+      "damageMax": 135,
+      "buyPrice": 265000,
+      "requirements": {
+        "level": 200
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ignore Defense Parchment",
+        "es": "Pergamino ignorar Defensa",
+        "pt": "Pergaminho de Ignorar Defesa"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 80,
+      "damageMin": 80,
+      "damageMax": 120,
+      "buyPrice": 175000,
+      "requirements": {
+        "level": 120,
+        "energy": 80
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Increase Health Parchment",
+        "es": "Pergamino aumento de Salud",
+        "pt": "Pergaminho de Aumento de Vida"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 50,
+      "damageMin": 50,
+      "damageMax": 75,
+      "buyPrice": 35000,
+      "requirements": {
+        "level": 80,
+        "energy": 35
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Increase Block Parchment",
+        "es": "Pergamino aumento de Bloqueo",
+        "pt": "Pergaminho de Aumento de Bloqueio"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 40,
+      "damageMin": 40,
+      "damageMax": 60,
+      "buyPrice": 25000,
+      "requirements": {
+        "level": 50,
+        "energy": 30
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    }
+  ]
+}

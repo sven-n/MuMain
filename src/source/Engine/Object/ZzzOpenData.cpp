@@ -33,6 +33,7 @@
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Core/Text/Utf8.h"
 #include "Network/Server/SocketSystem.h"
 
 ///////////////////////////////////////////
@@ -5143,6 +5144,21 @@ void ReleaseCharacterSceneData()
     ClearCharacters();
 }
 
+// Item data errors stop the start: the game must not run with half-loaded items.
+static void OpenItemData()
+{
+    std::string errorMessage;
+    if (g_ItemDataHandler.Load(errorMessage))
+    {
+        return;
+    }
+
+    const std::wstring message = Core::Text::FromUtf8(errorMessage);
+    g_ErrorReport.Write(L"%ls\r\n", message.c_str());
+    MessageBox(g_hWnd, message.c_str(), L"Item data error", MB_OK);
+    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+}
+
 void OpenBasicData(HDC hDC)
 {
     CUIMng& rUIMng = CUIMng::Instance();
@@ -5607,7 +5623,7 @@ void OpenBasicData(HDC hDC)
     // GameLogic::Quests::Dialog::GetEntry, so there is nothing to load at
     // runtime any more.
 
-    g_ItemDataHandler.Load(g_strSelectedML);
+    OpenItemData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);

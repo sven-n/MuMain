@@ -1,0 +1,530 @@
+{
+  "formatVersion": 1,
+  "group": 2,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Mace",
+        "es": "Maza",
+        "pt": "Maça"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 7,
+      "durability": 21,
+      "damageMin": 7,
+      "damageMax": 13,
+      "attackSpeed": 15,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Morning Star",
+        "es": "Estrella del Alba",
+        "pt": "Estrela da manhã"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 19,
+      "level": 13,
+      "durability": 25,
+      "damageMin": 13,
+      "damageMax": 22,
+      "attackSpeed": 15,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Flail",
+        "es": "Mayal",
+        "pt": "Mangual"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 22,
+      "durability": 32,
+      "damageMin": 22,
+      "damageMax": 32,
+      "attackSpeed": 15,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Great Hammer",
+        "es": "Gran Martillo",
+        "pt": "Martelo grande"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 38,
+      "durability": 50,
+      "damageMin": 45,
+      "damageMax": 56,
+      "attackSpeed": 15,
+      "attackType": 1,
+      "requirements": {
+        "strength": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Crystal Morning Star",
+        "es": "Estrella del Alba de Cristal",
+        "pt": "Estrela da manhã de cristal"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 19,
+      "level": 66,
+      "durability": 72,
+      "damageMin": 78,
+      "damageMax": 107,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Crystal Sword",
+        "es": "Espada de Cristal",
+        "pt": "Espada de cristal"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 23,
+      "level": 72,
+      "durability": 76,
+      "damageMin": 89,
+      "damageMax": 120,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 130,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Chaos Dragon Axe",
+        "es": "Hacha Dragón del Caos",
+        "pt": "Machado do dragão do caos"
+      },
+      "width": 2,
+      "height": 4,
+      "slot": 0,
+      "twoHanded": true,
+      "skill": 23,
+      "level": 75,
+      "durability": 80,
+      "damageMin": 102,
+      "damageMax": 130,
+      "attackSpeed": 35,
+      "requirements": {
+        "strength": 140,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Elemental Mace",
+        "es": "Maza Elemental",
+        "pt": "Maça elemental"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 90,
+      "durability": 50,
+      "damageMin": 62,
+      "damageMax": 80,
+      "attackSpeed": 50,
+      "attackType": 1,
+      "requirements": {
+        "strength": 15,
+        "dexterity": 42
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Battle Scepter",
+        "es": "Cetro de Batalla",
+        "pt": "Cetro de batalha"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 66,
+      "level": 54,
+      "durability": 40,
+      "damageMin": 41,
+      "damageMax": 52,
+      "attackSpeed": 45,
+      "magicPower": 3,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 17
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Master Scepter",
+        "es": "Cetro Maestro",
+        "pt": "Cetro do mestre"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 66,
+      "level": 72,
+      "durability": 45,
+      "damageMin": 57,
+      "damageMax": 68,
+      "attackSpeed": 45,
+      "magicPower": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 87,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Great Scepter",
+        "es": "Gran Cetro",
+        "pt": "Grande cetro"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 82,
+      "durability": 65,
+      "damageMin": 74,
+      "damageMax": 85,
+      "attackSpeed": 45,
+      "magicPower": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Lord Scepter",
+        "es": "Cetro del Señor",
+        "pt": "Cetro do Lorde"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 98,
+      "durability": 72,
+      "damageMin": 91,
+      "damageMax": 102,
+      "attackSpeed": 40,
+      "magicPower": 52,
+      "attackType": 1,
+      "requirements": {
+        "strength": 105,
+        "dexterity": 23
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Great Lord Scepter",
+        "es": "Gran Cetro del Señor",
+        "pt": "Grande cetro do Lorde"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 140,
+      "durability": 84,
+      "damageMin": 108,
+      "damageMax": 120,
+      "attackSpeed": 40,
+      "magicPower": 67,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Divine Scepter of Archangel",
+        "es": "Cetro Divino de Arcángel",
+        "pt": "Cetro divino do arcanjo"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 150,
+      "durability": 90,
+      "damageMin": 200,
+      "damageMax": 223,
+      "attackSpeed": 45,
+      "magicPower": 138,
+      "attackType": 1,
+      "requirements": {
+        "strength": 75,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Soleil Sceptor",
+        "es": "Cetro Soleil",
+        "pt": "Cetro Soleil"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 146,
+      "durability": 95,
+      "damageMin": 130,
+      "damageMax": 153,
+      "attackSpeed": 40,
+      "magicPower": 84,
+      "requirements": {
+        "level": 380,
+        "strength": 80,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Shining Scepter",
+        "es": "Cetro Brillante",
+        "pt": "Cetro brilhante"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 110,
+      "durability": 78,
+      "damageMin": 99,
+      "damageMax": 111,
+      "attackSpeed": 40,
+      "magicPower": 60,
+      "requirements": {
+        "strength": 108,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Frost Mace",
+        "es": "Mazo Congelado",
+        "pt": "Maça de gelo"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "level": 121,
+      "durability": 80,
+      "damageMin": 106,
+      "damageMax": 146,
+      "attackSpeed": 50,
+      "attackType": 1,
+      "requirements": {
+        "level": 380,
+        "strength": 27,
+        "dexterity": 19
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Absolute Scepter",
+        "es": "Cetro Absoluto",
+        "pt": "Cetro absoluto"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 135,
+      "durability": 90,
+      "damageMin": 114,
+      "damageMax": 132,
+      "attackSpeed": 40,
+      "magicPower": 72,
+      "requirements": {
+        "level": 380,
+        "strength": 119,
+        "dexterity": 24
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Striker Scepter",
+        "es": "Cero Ariete",
+        "pt": "Cetro golpeador"
+      },
+      "width": 1,
+      "height": 4,
+      "slot": 0,
+      "skill": 66,
+      "level": 147,
+      "durability": 86,
+      "damageMin": 112,
+      "damageMax": 124,
+      "attackSpeed": 40,
+      "magicPower": 70,
+      "requirements": {
+        "strength": 87,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Master Scepter-J",
+        "es": "Cetro Maestro-J",
+        "pt": "Cetro do mestre-J"
+      },
+      "width": 1,
+      "height": 3,
+      "slot": 0,
+      "skill": 66,
+      "level": 72,
+      "durability": 45,
+      "damageMin": 57,
+      "damageMax": 68,
+      "attackSpeed": 50,
+      "magicPower": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 87,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    }
+  ]
+}

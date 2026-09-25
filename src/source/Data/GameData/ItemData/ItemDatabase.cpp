@@ -1,9 +1,10 @@
 #include "stdafx.h"
 
 #include "ItemDatabase.h"
-#include "ItemAttributeConversion.h"
+#include "Core/Text/Utf8.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace Data::Items
 {
@@ -29,27 +30,31 @@ ItemDatabase::ItemDatabase()
 {
 }
 
-void ItemDatabase::Build(std::span<const ITEM_ATTRIBUTE> attributes, std::span<const std::string> englishNames)
+void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 {
-    const bool hasEnglishNames = englishNames.size() == attributes.size();
-    const size_t itemCount = std::min(attributes.size(), static_cast<size_t>(MAX_ITEM));
-
-    m_existingItemCount = 0;
-    for (size_t itemType = 0; itemType < itemCount; ++itemType)
+    std::fill(m_definitions.begin(), m_definitions.end(), ItemDefinition{});
+    for (const ItemDefinition& definition : definitions)
     {
-        ItemDefinition& definition = m_definitions[itemType];
-        definition = ToItemDefinition(attributes[itemType], static_cast<int>(itemType));
-        if (!definition.Exists())
+        if (!IsValidItemId(definition.group, definition.number))
         {
             continue;
         }
 
-        const bool hasEnglishName = hasEnglishNames && !englishNames[itemType].empty();
-        definition.englishName = hasEnglishName ? englishNames[itemType] : mu_wchar_to_utf8(definition.name.c_str());
-        ++m_existingItemCount;
+        ItemDefinition& slot = m_definitions[MakeItemType(definition.group, definition.number)];
+        slot = definition;
+        UpdateDisplayName(slot);
     }
 
-    std::fill(m_definitions.begin() + itemCount, m_definitions.end(), ItemDefinition{});
+    CountExistingItems();
+}
+
+void ItemDatabase::SetDisplayLocale(std::string_view locale)
+{
+    m_displayLocale = std::string(locale);
+    for (ItemDefinition& definition : m_definitions)
+    {
+        UpdateDisplayName(definition);
+    }
 }
 
 const ItemDefinition* ItemDatabase::Find(int group, int number) const
@@ -76,6 +81,50 @@ std::string ItemDatabase::GetLogName(int itemType) const
         return UnknownItemLogName + itemId;
     }
 
-    return definition->englishName + itemId;
+    return definition->names.GetNeutral() + itemId;
+}
+
+void ItemDatabase::Set(const ItemDefinition& definition)
+{
+    if (!IsValidItemId(definition.group, definition.number))
+    {
+        return;
+    }
+
+    // Stats are kept even without names, so an item whose name is cleared
+    // and typed again in the editor keeps its values.
+    ItemDefinition& slot = m_definitions[MakeItemType(definition.group, definition.number)];
+    slot = definition;
+    UpdateDisplayName(slot);
+    CountExistingItems();
+}
+
+void ItemDatabase::Swap(int firstItemType, int secondItemType)
+{
+    if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    ItemDefinition& first = m_definitions[firstItemType];
+    ItemDefinition& second = m_definitions[secondItemType];
+    std::swap(first, second);
+    first.group = GetItemGroup(firstItemType);
+    first.number = GetItemNumber(firstItemType);
+    second.group = GetItemGroup(secondItemType);
+    second.number = GetItemNumber(secondItemType);
+}
+
+void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
+{
+    definition.name =
+        definition.Exists() ? Core::Text::FromUtf8(definition.names.Get(m_displayLocale)) : std::wstring();
+}
+
+void ItemDatabase::CountExistingItems()
+{
+    m_existingItemCount =
+        static_cast<int>(std::count_if(m_definitions.begin(), m_definitions.end(),
+                                       [](const ItemDefinition& definition) { return definition.Exists(); }));
 }
 } // namespace Data::Items

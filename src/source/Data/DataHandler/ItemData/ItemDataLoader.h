@@ -2,32 +2,37 @@
 
 #include <stdio.h>
 
+#include <memory>
+
 #include "Data/GameData/ItemData/ItemStructs.h"
 
-// Item Data Loading Operations
+// Reads legacy item.bmd files. The game itself reads its items from
+// Data/Items (JSON); this is only used by the item editor's bmd import.
 class ItemDataLoader
 {
 public:
-    // Quiet is for optional files: a missing file is not reported as an error
-    // and nothing is written to the editor console. A corrupted file is still
-    // reported.
+    // Quiet is for optional files: a missing file is not reported as an
+    // error. A corrupted file is still reported.
     enum class Reporting
     {
         Normal,
         Quiet,
     };
 
-    // Loads MAX_ITEM records from an item.bmd file into destination.
-    static bool Load(const wchar_t* fileName, ITEM_ATTRIBUTE* destination, Reporting reporting = Reporting::Normal);
+    // The decrypted records of an item.bmd file: MAX_ITEM records of
+    // ITEM_ATTRIBUTE_FILE_LEGACY (30-byte names) or ITEM_ATTRIBUTE_FILE.
+    struct RawItemFile
+    {
+        std::unique_ptr<BYTE[]> records;
+        int recordSize = 0;
+        bool isLegacyFormat = false;
 
-private:
-#ifdef _EDITOR
-    static void LogLoadedItems(const wchar_t* fileName, const ITEM_ATTRIBUTE* items, bool isLegacyFormat);
-#endif
+        const BYTE* GetRecord(int itemType) const
+        {
+            return &records[static_cast<size_t>(itemType) * recordSize];
+        }
+    };
 
-    static bool LoadLegacyFormat(FILE* fp, ITEM_ATTRIBUTE* destination);
-    static bool LoadNewFormat(FILE* fp, ITEM_ATTRIBUTE* destination);
-
-    // Template for loading item data with different format structures
-    template <typename TFileFormat> static bool LoadFormat(FILE* fp, const wchar_t* formatName, ITEM_ATTRIBUTE* destination);
+    // Reads, checks and decrypts an item.bmd file without converting it.
+    static bool ReadRawFile(const wchar_t* fileName, RawItemFile& file, Reporting reporting = Reporting::Normal);
 };

@@ -439,4 +439,28 @@
   <data name="Debug info copied to clipboard" xml:space="preserve">
     <value>Debug info copied to clipboard</value>
   </data>
+  <data name="Import from bmd" xml:space="preserve">
+    <value>Import from bmd</value>
+  </data>
+  <data name="Export as bmd" xml:space="preserve">
+    <value>Export as bmd</value>
+  </data>
+  <data name="Items imported from bmd" xml:space="preserve">
+    <value>Items imported from the bmd files. Check the console, then save.</value>
+  </data>
+  <data name="Failed to import items from bmd" xml:space="preserve">
+    <value>Failed to import the items from the bmd files. See the console.</value>
+  </data>
+  <data name="Items exported as bmd" xml:space="preserve">
+    <value>Items exported as bmd files.</value>
+  </data>
+  <data name="Failed to export items as bmd" xml:space="preserve">
+    <value>Failed to export the items as bmd files.</value>
+  </data>
+  <data name="Item data has errors" xml:space="preserve">
+    <value>The item data has errors and was not saved. See the console.</value>
+  </data>
+  <data name="Item data could not be written" xml:space="preserve">
+    <value>The item data files could not be written. See the console.</value>
+  </data>
 </root>

@@ -2,12 +2,16 @@
 
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_define.h"
+#include "Data/GameData/Common/LocalizedString.h"
 
 #include <array>
 #include <string>
 
 namespace Data::Items
 {
+// Item slot value of items that cannot be equipped.
+constexpr BYTE ItemSlotNone = 255;
+
 struct ItemRequirements
 {
     WORD level = 0;
@@ -16,23 +20,27 @@ struct ItemRequirements
     WORD energy = 0;
     WORD vitality = 0;
     WORD leadership = 0;
+
+    bool operator==(const ItemRequirements& other) const = default;
 };
 
 // One item as the client knows it. Filled once at startup and read-only
-// afterwards; see ItemDatabase.
+// afterwards, except for the item editor; see ItemDatabase.
 struct ItemDefinition
 {
     int group = 0;
     int number = 0;
 
-    // Name in the selected language, shown to the player.
+    // All names of the item, English first. Logs always use the English
+    // name (names.GetNeutral()), never a translation.
+    LocalizedString names;
+    // The name in the current UI locale, shown to the player. Filled by
+    // ItemDatabase from names.
     std::wstring name;
-    // English name as UTF-8. Logs always use this one, never the translation.
-    std::string englishName;
 
     BYTE width = 0;
     BYTE height = 0;
-    BYTE slot = 0;
+    BYTE slot = ItemSlotNone;
     bool twoHanded = false;
     WORD skill = 0;
     WORD level = 0;
@@ -56,6 +64,9 @@ struct ItemDefinition
     BYTE sellValue = 0;
     int buyPrice = 0;
 
-    bool Exists() const { return !name.empty(); }
+    bool Exists() const
+    {
+        return !names.IsEmpty();
+    }
 };
 } // namespace Data::Items

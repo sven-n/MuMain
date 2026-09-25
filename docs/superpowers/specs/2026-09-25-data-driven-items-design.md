@@ -39,7 +39,7 @@ pattern later but are not part of this work.
 | D4 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
 | D5 | Editors | Several focused editors instead of one big table. |
 | D6 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
-| D7 | File layout | One JSON file per item group. |
+| D7 | File layout | One JSON file per item group. Splitting the mixed groups 12–15 into category files was dropped: with new groups (D21) the group *is* the category, so the file layout is decided together with phase 12. |
 | D8 | Target version | Season 6 only for now. Other versions are easier to add once the data-driven setup exists. |
 | D9 | Identity | `(group, number)` only, no readable string key. Logs always show the English name next to it. Once rules read data instead of hardcoded ids, a readable key has no extra benefit. |
 | D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. |
@@ -49,6 +49,10 @@ pattern later but are not part of this work.
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
 | D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
+| D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
+| D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
+| D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
+| D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
 
@@ -195,7 +199,9 @@ our own loader; see "Validation" below.
 
 - Location: `src/bin/Data/Items/`, next to the other game data in the repo.
   It is copied beside `Main` like the rest of `Data` (`MU_COPY_RUNTIME_ASSETS`).
-- One file per item group (D7), e.g. `Group14_Potions.json`. Files for other
+- One file per item group (D7): `Group00_Sword.json` … `Group15_Etc.json`,
+  named after the `ITEM_GROUP_*` constants; each item's names in all
+  languages are part of the item (D17). Files for other
   data (option definitions, sets, …) follow the same rules when they come.
 - Every file starts with a `formatVersion` and the `group` it contains.
 - Encoding UTF-8, LF line endings.
@@ -229,21 +235,22 @@ saving, and in an automated test.
 
 Errors (data cannot be used):
 
-- invalid JSON, or a file whose `group` does not match its items
+- invalid JSON, a missing or newer `formatVersion`, an invalid `group`
 - `group` outside 0–15 or `number` outside 0–511
 - duplicate `(group, number)`
 - missing English name
-- a value outside its type's range (e.g. width 0, a byte field above 255)
-- a link to something that does not exist: unknown tag or flag, unknown
-  option group, unknown skill, and later unknown set or option definition
+- a value outside its type's range (e.g. a byte field above 255); width
+  and height 0 are allowed, 12 Season 6 items have them
+- a name containing `||`
+- later phases: a link to something that does not exist (unknown tag or
+  flag, option group, skill, set or option definition)
 
 Warnings (data works, but is probably wrong):
 
-- the model file or texture folder does not exist
-- a translation is missing for a supported language
-- an item has no model link
-- an equippable item without an item slot, or similar combinations that
-  do not make sense
+- unknown fields (ignored by the game)
+- a name longer than 49 characters (cut in the game)
+- later phases: missing model files or model links (phase 4), missing
+  translations (phase 5), combinations that do not make sense
 
 Behavior:
 
@@ -287,8 +294,10 @@ Each field belongs to one of two groups:
 
 ### 5. Names, translations and logging
 
-- Item names are stored as OpenMU-style `LocalizedString`, so names from the
-  server can be taken over directly.
+- In memory, item names are OpenMU-style `LocalizedString`s, so names from
+  the server can be taken over directly. On disk, `name` is an object of
+  names by language in the item files (D17); the OpenMU exchange writes it
+  in the `LocalizedString` format.
 - The name in the selected language is shown; missing translations fall back
   to English.
 - Logs always use `<English name> (<group>,<number>)`, never the translated
@@ -382,11 +391,11 @@ in both repos (as separate PRs, one per repo).
 |---|---|---|---|---|---|
 | 0 | Design document | Both | MuMain | – | Agree on the design (this document). |
 | 1 | Item database | Client | MuMain | 0 | `ItemDefinition` model and flat in-memory table, built from the loaded `Item_<lang>.bmd` data; English names for logs; log-name helper; load-time log. No behavior change. |
-| 2 | Data file format | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; loading, writing and validation rules; automated data test; bmd import/export in MuEditor. |
+| 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | `OpenItems()` / `OpenItemTextures()` driven by the model fields. |
-| 5 | Translations | Client | MuMain | 2 | `LocalizedString` names with fallback; one stat data set for all languages. |
+| 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9), including add/remove items. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
@@ -395,7 +404,9 @@ in both repos (as separate PRs, one per repo).
 | 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
 | 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
-| 12 | Cleanup | Client | MuMain | all | Remove this document. |
+| 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, A | Move items into new groups for the new client; legacy ids for the original client (D21). |
+| D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
+| 13 | Cleanup | Client | MuMain | all | Remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -419,17 +430,20 @@ server with original clients (after phases 6 and B).
    section 2 and the automated data test. MuEditor gets "Import from bmd"
    and "Export as bmd"; the game stops reading `Item_<lang>.bmd`. The data
    flow turns around: JSON → database → `ItemAttribute[]` (compatibility
-   view), and the item editor edits the database instead of
-   `ItemAttribute[]`.
+   view).
 
-   Before code reads the database (from phase 3 on): in phase 1 the editor
-   edits `ItemAttribute[]` and the database is only rebuilt after a
-   successful save, so unsaved or failed edits leave the two out of sync.
-   `Build()` also rewrites definitions in place, so an `ItemDefinition*`
-   kept across a rebuild sees changed content. Moving the editor onto the
-   database in this phase removes the first problem; code that keeps
-   pointers must not rely on them staying unchanged while the editor is
-   used.
+   As built: names are `LocalizedString`s from all three bmd files and
+   follow the UI locale (D17); the import repairs the legacy data (D18);
+   every editor change is copied into the database at once (D19), which
+   closes the phase 1 sync gap. Save writes only valid data and only
+   changed files. Loading the 16 files takes about 11 ms in a Release
+   build (bmd: about 2 ms), so no binary cache is needed. Usage is
+   documented in `docs/item-data.md`.
+
+   Still true: `Build()` and the editor rewrite definitions in place, so an
+   `ItemDefinition*` kept across an editor change sees changed content.
+   Code that keeps pointers must not rely on them staying unchanged while
+   the editor is used.
 3. **Rules and categories into data**: flags and tags replace the hardcoded
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
    The resulting item lists are verified to be identical. Includes the
@@ -439,8 +453,9 @@ server with original clients (after phases 6 and B).
    update plug-in and server enforcement, based on the phase 3 mapping.
 4. **Models into data**: `OpenItems()` / `OpenItemTextures()` are driven by
    the model fields.
-5. **Translations**: `LocalizedString` names and fallback; one stat data set
-   for all languages.
+5. **Translation tooling**: a translations editor (items × languages, with
+   a filter for missing translations) and missing-translation warnings.
+   The names themselves are part of phase 2 (D17).
 6. **Editors**: the MuEditor tools from section 9, including add/remove.
 7. **Item sync, client side**: MuEditor import/export of the item exchange
    file and diff.
@@ -491,7 +506,50 @@ server with original clients (after phases 6 and B).
 11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
     `pet` and drop settings, one phase each. Order decided when we get
     there. Each one gets OpenMU work where the server has matching data.
-12. **Cleanup**: remove this document once the work has landed.
+12. **New item groups** (D21) — *to discuss again when we get here.*
+    Groups 12–15 mix unrelated items. The new client may get new groups
+    (e.g. 16 = jewels, 17 = orbs, 18 = scrolls) so the group means
+    something again, and room beyond 16 × 512 items; original Season 6
+    clients keep today's ids.
+
+    - Moved items keep their original id as a **legacy id** in the item
+      data. Items that are not moved need none: their id is the same for
+      both clients. Items without a legacy id are new; they are not sent
+      to original clients (answers Q1 for those items).
+    - Client: more groups (`MAX_ITEM_TYPE`), the item editor shows and
+      edits the legacy id, a new item encoding in the protocol for groups
+      above 15, and the new client identifies itself to OpenMU with its
+      own client version.
+    - Cost: every hardcoded item id has to follow a move (client `ITEM_*`
+      constants and ranges, about 113 group/number checks in OpenMU), and
+      the model ids (`MODEL_ITEM + type`) must not depend on the item type.
+      That is why this comes after phases 3 and 4 and OpenMU PR A, which
+      remove most of these dependencies.
+
+    **D (OpenMU):**
+    - legacy group and number on `ItemDefinition` (optional), filled by the
+      exchange file and editable in the admin panel;
+    - a **mapping tool**: checks that every moved item has a legacy id, that
+      legacy ids are unique and fit the Season 6 range (group 0–15, number
+      0–511), and builds the old ↔ new lookup at startup and after a config
+      reload;
+    - the Season 6 item serializer (`ItemSerializer`) writes the legacy id;
+      a new serializer for the new client version (`[MinimumClient]`) writes
+      the new id. The serializer is chosen once per connection, so there is
+      no extra layer: the new client pays nothing, and for original
+      clients the serializer reads a different field of the definition it
+      already reads;
+    - the few requests from original clients that name an item by id look
+      up old → new once;
+    - game logic only uses the new ids.
+
+    With the new groups, the mixed groups 12–15 are split up, so the item
+    files (one per group) become category files by themselves (D7).
+
+    Questions for then: the exact new groups and which items move; whether
+    the legacy id lives only in OpenMU or also in the client data; the
+    protocol change for the new item encoding.
+13. **Cleanup**: remove this document once the work has landed.
 
 ## Open questions
 
@@ -500,4 +558,5 @@ server with original clients (after phases 6 and B).
   custom item when the player uses the original Season 6 client? For
   example: never send it to that client (hide it in shops, drops and
   views), block such items on servers set up for the original client, or
-  show a placeholder item.
+  show a placeholder item. Phase 12 (D21) would settle it for items
+  without a legacy id: they are not sent to original clients.

@@ -2,6 +2,8 @@ mu_add_test(
     NAME test_item_database
     SOURCES
         test_item_database.cpp
+        test_item_json.cpp
+        test_localized_string.cpp
     LINK_LIBS
         MuClient
 )

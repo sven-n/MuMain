@@ -1,0 +1,1635 @@
+{
+  "formatVersion": 1,
+  "group": 9,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Bronze Pants",
+        "es": "Pantalones de Bronce",
+        "pt": "Calças de bronze"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 15,
+      "durability": 34,
+      "defense": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Dragon Pants",
+        "es": "Pantalones Dragón",
+        "pt": "Calças do dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 55,
+      "durability": 68,
+      "defense": 26,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Pad Pants",
+        "es": "Pantalones Rellenos",
+        "pt": "Calças acolchoadas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 8,
+      "durability": 28,
+      "defense": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Legendary Pants",
+        "es": "Pantalones Legendarios",
+        "pt": "Calças lendárias"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 53,
+      "durability": 42,
+      "defense": 20,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Bone Pants",
+        "es": "Pantalones de Hueso",
+        "pt": "Calças de osso"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 20,
+      "durability": 30,
+      "defense": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Leather Pants",
+        "es": "Pantalones de Cuero",
+        "pt": "Calças de couro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 8,
+      "durability": 30,
+      "defense": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scale Pants",
+        "es": "Pantalones de Escamas",
+        "pt": "Calças de escamas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 25,
+      "durability": 40,
+      "defense": 14,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Sphinx Pants",
+        "es": "Pantalones Esfinge",
+        "pt": "Calças da esfinge"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 34,
+      "durability": 36,
+      "defense": 15,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Brass Pants",
+        "es": "Pantalones de Metal",
+        "pt": "Calças de latão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 35,
+      "durability": 44,
+      "defense": 18,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Pants",
+        "es": "Pantalones de Plata",
+        "pt": "Calças de placa"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 45,
+      "durability": 50,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Vine Pants",
+        "es": "Pantalones Vid",
+        "pt": "Calças da vinha"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 8,
+      "durability": 22,
+      "defense": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Silk Pants",
+        "es": "Pantalones de Seda",
+        "pt": "Calças de seda"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 18,
+      "durability": 26,
+      "defense": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Wind Pants",
+        "es": "Pantalones Viento",
+        "pt": "Calças do vento"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 30,
+      "durability": 32,
+      "defense": 14,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Spirit Pants",
+        "es": "Pantalones Espíritu",
+        "pt": "Calças do espírito"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 42,
+      "durability": 38,
+      "defense": 18,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Guardian Pants",
+        "es": "Pantalones Guardián",
+        "pt": "Calças do guardião"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 54,
+      "durability": 45,
+      "defense": 25,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Storm Crow Pants",
+        "es": "Pantalones Cuervo de Tormenta",
+        "pt": "Calças do corvo da tempestade"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 74,
+      "durability": 80,
+      "defense": 34,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Black Dragon Pants",
+        "es": "Pantalones Dragón Negro",
+        "pt": "Calças do dragão negro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 84,
+      "durability": 74,
+      "defense": 40,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Phoenix Pants",
+        "es": "Pantalones Fénix Oscuro",
+        "pt": "Calças da fênix negra"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 96,
+      "durability": 80,
+      "defense": 54,
+      "attackType": 4,
+      "requirements": {
+        "strength": 207,
+        "dexterity": 63
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Grand Soul Pants",
+        "es": "Pantalones Gran Alma",
+        "pt": "Calças da grande alma"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 86,
+      "durability": 67,
+      "defense": 30,
+      "attackType": 4,
+      "requirements": {
+        "strength": 59,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Pants",
+        "es": "Pantalones Divinos",
+        "pt": "Calças divinas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 88,
+      "durability": 74,
+      "defense": 39,
+      "attackType": 4,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Thunder Hawk Pants",
+        "es": "Pantalones Halcón de Trueno",
+        "pt": "Calças de Thunder Hawk"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 99,
+      "durability": 82,
+      "defense": 49,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Great Dragon Pants",
+        "es": "Pantalones Gran Dragón",
+        "pt": "Calças do grande dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 113,
+      "durability": 86,
+      "defense": 65,
+      "attackType": 4,
+      "requirements": {
+        "strength": 200,
+        "dexterity": 58
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Dark Soul Pants",
+        "es": "Pantalones Alma Oscura",
+        "pt": "Calças da alma negra"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 117,
+      "durability": 75,
+      "defense": 39,
+      "attackType": 4,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Hurricane Pants",
+        "es": "Pantalones Huracán",
+        "pt": "Calças do furacão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 122,
+      "durability": 90,
+      "defense": 61,
+      "attackType": 4,
+      "requirements": {
+        "strength": 162,
+        "dexterity": 66
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Red Spirit Pants",
+        "es": "Pantalones Espíritu Rojo",
+        "pt": "Calças do espírito vermelho"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 100,
+      "durability": 80,
+      "defense": 48,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 115
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Light Plate Pants",
+        "es": "Pantalones Plata de Luz",
+        "pt": "Calças de placa Leve"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 50,
+      "durability": 42,
+      "defense": 21,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Adamantine Pants",
+        "es": "Pantalones Adamantinos",
+        "pt": "Calças de adamantina"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 70,
+      "durability": 56,
+      "defense": 26,
+      "attackType": 4,
+      "requirements": {
+        "strength": 77,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Dark Steel Pants",
+        "es": "Pantalones Acero Oscuro",
+        "pt": "Calças de aço negro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 92,
+      "durability": 70,
+      "defense": 31,
+      "attackType": 4,
+      "requirements": {
+        "strength": 84,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Dark Master Pants",
+        "es": "Pantalones Amo Oscuro",
+        "pt": "Calças do Mestre negro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 110,
+      "durability": 78,
+      "defense": 39,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Dragon Knight Pants",
+        "es": "Pantalones Caballero Dragón",
+        "pt": "Calças do cavaleiro dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 134,
+      "durability": 90,
+      "defense": 78,
+      "requirements": {
+        "level": 380,
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Venom Mist Pants",
+        "es": "Pantalones Bruma de Veneno",
+        "pt": "Calças da névoa de veneno"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 135,
+      "durability": 86,
+      "defense": 55,
+      "requirements": {
+        "level": 380,
+        "strength": 44,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Sylphid Ray Pants",
+        "es": "Pantalones Rayo de Sílfide",
+        "pt": "Calças do raio silfídico"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 135,
+      "durability": 86,
+      "defense": 61,
+      "requirements": {
+        "level": 380,
+        "strength": 38,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Volcano Pants",
+        "es": "Pantalones Volcán",
+        "pt": "Calças do vulcão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 135,
+      "durability": 95,
+      "defense": 74,
+      "requirements": {
+        "level": 380,
+        "strength": 145,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Sunlight Pants",
+        "es": "Pantalones Luz Solar",
+        "pt": "Calças da luz do sol"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 140,
+      "durability": 82,
+      "defense": 52,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ashcrow Pants",
+        "es": "Pantalones Cuervo Ceniza",
+        "pt": "Calças de Ashcrow"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 69,
+      "durability": 72,
+      "defense": 33,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Eclipse Pants",
+        "es": "Pantalones Eclipse",
+        "pt": "Calças do eclipse"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 69,
+      "durability": 54,
+      "defense": 25,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Iris Pants",
+        "es": "Pantalones Iris",
+        "pt": "Calças de Iris"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 69,
+      "durability": 59,
+      "defense": 32,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Valiant Pants",
+        "es": "Pantalones Valientes",
+        "pt": "Calças do valor"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 101,
+      "durability": 81,
+      "defense": 41,
+      "requirements": {
+        "strength": 155,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Glorious Pants",
+        "es": "Pantalones Gloriosos",
+        "pt": "Calças gloriosas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 101,
+      "durability": 74,
+      "defense": 35,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Violent Wind Pants",
+        "es": "Pantalones Viento Violento",
+        "pt": "Calças do vento violento"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 30,
+      "durability": 36,
+      "defense": 16,
+      "attackType": 4,
+      "requirements": {
+        "strength": 36
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Red Wing Pants",
+        "es": "Pantalones Ala Roja",
+        "pt": "Calças da asa vermelha"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 53,
+      "durability": 42,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 35,
+        "dexterity": 7
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Ancient Pants",
+        "es": "Pantalones Antiguo",
+        "pt": "Calças antigas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 72,
+      "durability": 54,
+      "defense": 28,
+      "attackType": 4,
+      "requirements": {
+        "strength": 49,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Demonic Pants",
+        "es": "Pantalones Demoníacos",
+        "pt": "Calças demoníacas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 86,
+      "durability": 67,
+      "defense": 37,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Storm Blitz Pants",
+        "es": "Pantalones Ráfaga Tormentosa",
+        "pt": "Calças Relâmpago de Tempest."
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 117,
+      "durability": 75,
+      "defense": 49,
+      "requirements": {
+        "level": 380,
+        "strength": 57,
+        "dexterity": 19
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Eternal Wing Pants",
+        "es": "Pantalones Ala Eterna",
+        "pt": "Calças da asa eterna"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 122,
+      "durability": 86,
+      "defense": 41,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 20,
+        "energy": 170
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Titan  Pants",
+        "es": "Pantalones Titán",
+        "pt": "Calças do titã"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 116,
+      "durability": 86,
+      "defense": 74,
+      "requirements": {
+        "level": 380,
+        "strength": 222,
+        "dexterity": 32
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Brave Pants",
+        "es": "Pantalones Valerosos",
+        "pt": "Calças da coragem"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 112,
+      "durability": 86,
+      "defense": 58,
+      "requirements": {
+        "level": 380,
+        "strength": 74,
+        "dexterity": 162
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Phantom  Pants",
+        "es": "Pantalones Fantasma",
+        "pt": "Calças do fantasma"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 115,
+      "durability": 86,
+      "defense": 66,
+      "requirements": {
+        "level": 380,
+        "strength": 212,
+        "dexterity": 57
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Destroy Pants",
+        "es": "Pantalones Destructores",
+        "pt": "Calças da destruição"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 113,
+      "durability": 86,
+      "defense": 51,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 19,
+        "energy": 165
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Seraphim Pants",
+        "es": "Pantalones Serafín",
+        "pt": "Calças do serafim"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 116,
+      "durability": 86,
+      "defense": 53,
+      "requirements": {
+        "level": 380,
+        "strength": 55,
+        "dexterity": 197
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Divine Pants",
+        "es": "Pantalones Divinos",
+        "pt": "Calças divinas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 109,
+      "durability": 86,
+      "defense": 46,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 29,
+        "energy": 138
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Royal Pants",
+        "es": "Pantalones Reales",
+        "pt": "Calças reais"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 116,
+      "durability": 86,
+      "defense": 46,
+      "requirements": {
+        "level": 380,
+        "strength": 105,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Hades Pants",
+        "es": "Pantalones Hades",
+        "pt": "Calças de Hades"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 114,
+      "durability": 86,
+      "defense": 44,
+      "requirements": {
+        "level": 380,
+        "strength": 60,
+        "dexterity": 15,
+        "energy": 181
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Sacred Fire Pants",
+        "es": "Pantalones de Fuego Sagrado",
+        "pt": "Calças de Fogo Sagrado"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 62,
+      "durability": 52,
+      "defense": 33,
+      "attackType": 2,
+      "requirements": {
+        "strength": 85,
+        "vitality": 75
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Storm Jahad Pants",
+        "es": "Pantalones de Tormenta Zahard",
+        "pt": "Calças de  Tempestade Zahard"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 78,
+      "durability": 68,
+      "defense": 41,
+      "requirements": {
+        "strength": 100,
+        "vitality": 90
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Piercing Groove Pants",
+        "es": "Pantalones de Tallo Perforador",
+        "pt": "Calças de Entalhe Perfurante"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 95,
+      "durability": 82,
+      "defense": 49,
+      "requirements": {
+        "strength": 115,
+        "vitality": 100
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Scale Pants",
+        "es": "Pantalones de Escamas",
+        "pt": "Calças de escamas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 25,
+      "durability": 255,
+      "defense": 18,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Silk Pants",
+        "es": "Pantalones de Seda",
+        "pt": "Calças de seda"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 18,
+      "durability": 255,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Sphinx Pants",
+        "es": "Pantalones Esfinge",
+        "pt": "Calças de Esfinge"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 34,
+      "durability": 255,
+      "defense": 19,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Violent Wind Pants",
+        "es": "Pantalones Viento Violento",
+        "pt": "Calças do vento violento"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 30,
+      "durability": 255,
+      "defense": 20,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Dark Soul Pants",
+        "es": "Pantalones Adamantinos",
+        "pt": "Calças de adamantina"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 70,
+      "durability": 255,
+      "defense": 31,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dragon Pants",
+        "es": "Pantalones Dragón",
+        "pt": "Calças de Dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 55,
+      "durability": 255,
+      "defense": 28,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Guardian Pants",
+        "es": "Pantalones Guardián",
+        "pt": "Calças de Guardião"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 54,
+      "durability": 255,
+      "defense": 30,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Legendary Pants",
+        "es": "Pantalones Legendarios",
+        "pt": "Calças Lendárias"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 53,
+      "durability": 255,
+      "defense": 25,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Red Wing Pants",
+        "es": "Pantalones Ala Roja",
+        "pt": "Calças da asa vermelha"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 53,
+      "durability": 255,
+      "defense": 26,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Atlans Pants",
+        "es": "Pantalones Cuervo de Tormenta",
+        "pt": "Calças do corvo da tempestade"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 74,
+      "durability": 255,
+      "defense": 39,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Storm Jahad Pants",
+        "es": "Pantalones de Tormenta Zahard",
+        "pt": "Calças de  Tempestade Zahard"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 78,
+      "durability": 255,
+      "defense": 33,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Phoenix Soul Pants",
+        "es": "Pantalones de Alma de Fénix",
+        "pt": "Calças de Alma de Fogo"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 134,
+      "durability": 88,
+      "defense": 68,
+      "requirements": {
+        "level": 380,
+        "strength": 97,
+        "vitality": 85
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 78,
+      "name": {
+        "en": "Dragon Pants-J",
+        "es": "Pantalones Dragón-J",
+        "pt": "Calças do dragão-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 55,
+      "durability": 68,
+      "defense": 28,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 79,
+      "name": {
+        "en": "Legendary Pants-J",
+        "es": "Pantalones Legendario-J",
+        "pt": "Calças lendário-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 53,
+      "durability": 42,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 80,
+      "name": {
+        "en": "Guardian Pants-J",
+        "es": "Pantalones Guardián-J",
+        "pt": "Calças do guardião-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 54,
+      "durability": 45,
+      "defense": 27,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 81,
+      "name": {
+        "en": "Light Plate Pants-J",
+        "es": "Pantalones Plata de Luz-J",
+        "pt": "Calças de placa leve-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 50,
+      "durability": 42,
+      "defense": 23,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 82,
+      "name": {
+        "en": "Red Wing Pants-J",
+        "es": "Pantalones Ala Roja-J",
+        "pt": "Calças da asa vermelha-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 53,
+      "durability": 42,
+      "defense": 24,
+      "attackType": 4,
+      "requirements": {
+        "strength": 35,
+        "dexterity": 7
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 83,
+      "name": {
+        "en": "Sacred Fire Pants-J",
+        "es": "Pantalones de Fuego Sagrado-J",
+        "pt": "Calças de Fogo Sagrado-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 4,
+      "level": 62,
+      "durability": 52,
+      "defense": 35,
+      "attackType": 2,
+      "requirements": {
+        "strength": 85,
+        "vitality": 75
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    }
+  ]
+}

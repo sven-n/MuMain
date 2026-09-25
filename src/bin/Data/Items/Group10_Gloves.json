@@ -1,0 +1,1562 @@
+{
+  "formatVersion": 1,
+  "group": 10,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Bronze Gloves",
+        "es": "Guantes de Bronce",
+        "pt": "Luvas de bronze"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 13,
+      "durability": 34,
+      "defense": 4,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Dragon Gloves",
+        "es": "Guantes Dragón",
+        "pt": "Luvas do dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 52,
+      "durability": 68,
+      "defense": 14,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Pad Gloves",
+        "es": "Guantes Rellenos",
+        "pt": "Luvas acolchoadas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 3,
+      "durability": 28,
+      "defense": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Legendary Gloves",
+        "es": "Guantes Legendarios",
+        "pt": "Luvas lendárias"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 44,
+      "durability": 42,
+      "defense": 11,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Bone Gloves",
+        "es": "Guantes de Hueso",
+        "pt": "Luvas de osso"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 14,
+      "durability": 30,
+      "defense": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Leather Gloves",
+        "es": "Guantes de Cuero",
+        "pt": "Luvas de couro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 4,
+      "durability": 30,
+      "defense": 2,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scale Gloves",
+        "es": "Guantes de Escamas",
+        "pt": "Luvas de escamas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 22,
+      "durability": 40,
+      "defense": 7,
+      "attackSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Sphinx Gloves",
+        "es": "Guantes Esfinge",
+        "pt": "Luvas da esfinge"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 28,
+      "durability": 36,
+      "defense": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Brass Gloves",
+        "es": "Guantes de Metal",
+        "pt": "Luvas de latão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 32,
+      "durability": 44,
+      "defense": 9,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Gloves",
+        "es": "Guantes de Plata",
+        "pt": "Luvas de placa"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 42,
+      "durability": 50,
+      "defense": 12,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Vine Gloves",
+        "es": "Guantes Vid",
+        "pt": "Luvas da vinha"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 4,
+      "durability": 22,
+      "defense": 2,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Silk Gloves",
+        "es": "Guantes de Seda",
+        "pt": "Luvas de seda"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 14,
+      "durability": 26,
+      "defense": 4,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Wind Gloves",
+        "es": "Guantes Viento",
+        "pt": "Luvas do vento"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 26,
+      "durability": 32,
+      "defense": 6,
+      "attackSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Spirit Gloves",
+        "es": "Guantes Espíritu",
+        "pt": "Luvas do espírito"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 38,
+      "durability": 38,
+      "defense": 9,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Guardian Gloves",
+        "es": "Guantes Guardián",
+        "pt": "Luvas do guardião"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 50,
+      "durability": 45,
+      "defense": 15,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Storm Crow Gloves",
+        "es": "Guantes Cuervo de Tormenta",
+        "pt": "Luvas do corvo da tempestade"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 70,
+      "durability": 80,
+      "defense": 20,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Black Dragon Gloves",
+        "es": "Guantes Dragón Negro",
+        "pt": "Luvas do dragão negro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 76,
+      "durability": 74,
+      "defense": 22,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Phoenix Gloves",
+        "es": "Guantes Fénix Oscuro",
+        "pt": "Luvas da fênix negra"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 86,
+      "durability": 80,
+      "defense": 37,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 205,
+        "dexterity": 63
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Grand Soul Gloves",
+        "es": "Guantes Gran Alma",
+        "pt": "Luvas da grande alma"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 70,
+      "durability": 67,
+      "defense": 20,
+      "attackSpeed": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 49,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Gloves",
+        "es": "Guantes Divinos",
+        "pt": "Luvas divinas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 72,
+      "durability": 74,
+      "defense": 29,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Thunder Hawk Gloves",
+        "es": "Guantes Halcón de Trueno",
+        "pt": "Luvas de Thunder Hawk"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 88,
+      "durability": 82,
+      "defense": 34,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Great Dragon Gloves",
+        "es": "Guantes Gran Dragón",
+        "pt": "Luvas do grande dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 94,
+      "durability": 86,
+      "defense": 48,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 200,
+        "dexterity": 58
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Dark Soul Gloves",
+        "es": "Guantes Alma Oscura",
+        "pt": "Luvas da alma negra"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 87,
+      "durability": 75,
+      "defense": 30,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Hurricane Gloves",
+        "es": "Guantes Huracán",
+        "pt": "Luvas do furacão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 102,
+      "durability": 90,
+      "defense": 45,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 162,
+        "dexterity": 66
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Red Spirit Gloves",
+        "es": "Guantes Espíritu Rojo",
+        "pt": "Luvas do espírito vermelho"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 84,
+      "durability": 80,
+      "defense": 38,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 115
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Light Plate Gloves",
+        "es": "Guantes Plata de Luz",
+        "pt": "Luvas de placa leve"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 42,
+      "durability": 42,
+      "defense": 12,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Adamantine Gloves",
+        "es": "Guantes Adamantinos",
+        "pt": "Luvas de adamantina"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 57,
+      "durability": 56,
+      "defense": 18,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 77,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Dark Steel Gloves",
+        "es": "Guantes Acero Oscuro",
+        "pt": "Luvas de aço negro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 75,
+      "durability": 70,
+      "defense": 21,
+      "attackSpeed": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 84,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Dark Master Gloves",
+        "es": "Guantes Amo Oscuro",
+        "pt": "Luvas do Mestre negro"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 89,
+      "durability": 78,
+      "defense": 29,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Dragon Knight Gloves",
+        "es": "Guantes Caballero Dragón",
+        "pt": "Luvas do cavaleiro dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 114,
+      "durability": 90,
+      "defense": 60,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Venom Mist Gloves",
+        "es": "Guantes Bruma de Veneno",
+        "pt": "Luvas da névoa de veneno"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 111,
+      "durability": 86,
+      "defense": 44,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 44,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Sylphid Ray Gloves",
+        "es": "Guantes Rayo de Sílfide",
+        "pt": "Luvas do raio silfídico"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 111,
+      "durability": 86,
+      "defense": 50,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 38,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Volcano Gloves",
+        "es": "Guantes Volcán",
+        "pt": "Luvas do vulcão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 127,
+      "durability": 95,
+      "defense": 55,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 145,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Sunlight Gloves",
+        "es": "Guantes Luz Solar",
+        "pt": "Luvas da luz do sol"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 110,
+      "durability": 82,
+      "defense": 40,
+      "attackSpeed": 5,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ashcrow Gloves",
+        "es": "Guantes Cuervo Ceniza",
+        "pt": "Luvas de Ashcrow"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 61,
+      "durability": 72,
+      "defense": 18,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Eclipse Gloves",
+        "es": "Guantes Eclipse",
+        "pt": "Luvas do eclipse"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 61,
+      "durability": 54,
+      "defense": 15,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Iris Gloves",
+        "es": "Guantes Iris",
+        "pt": "Luvas de Iris"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 61,
+      "durability": 59,
+      "defense": 22,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Valiant Gloves",
+        "es": "Guantes Valientes",
+        "pt": "Luvas do valor"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 91,
+      "durability": 81,
+      "defense": 27,
+      "attackSpeed": 7,
+      "requirements": {
+        "strength": 155,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Glorious Gloves",
+        "es": "Guantes Gloriosos",
+        "pt": "Luvas gloriosas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 91,
+      "durability": 74,
+      "defense": 25,
+      "attackSpeed": 5,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Violent Wind Gloves",
+        "es": "Guantes Viento Violento",
+        "pt": "Luvas do vento violento"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 24,
+      "durability": 36,
+      "defense": 9,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 22
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Red Wing Gloves",
+        "es": "Guantes Ala Roja",
+        "pt": "Luvas da asa vermelha"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 44,
+      "durability": 42,
+      "defense": 13,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 18,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Ancient Gloves",
+        "es": "Guantes Antiguos",
+        "pt": "Luvas antigas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 61,
+      "durability": 54,
+      "defense": 19,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Demonic Gloves",
+        "es": "Guantes Demoníacos",
+        "pt": "Luvas demoníacas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 70,
+      "durability": 67,
+      "defense": 26,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Storm Blitz Gloves",
+        "es": "Guantes Ráfaga Tormentosa",
+        "pt": "Luvas Relâmpago de Tempest."
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 87,
+      "durability": 75,
+      "defense": 34,
+      "attackSpeed": 6,
+      "requirements": {
+        "level": 380,
+        "strength": 56,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Eternal Wing Gloves",
+        "es": "Guantes Ala Eterna",
+        "pt": "Luvas da asa eterna"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 102,
+      "durability": 86,
+      "defense": 29,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 20,
+        "energy": 170
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Titan  Gloves",
+        "es": "Guantes Titán",
+        "pt": "Luvas do titã"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 100,
+      "durability": 86,
+      "defense": 56,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 222,
+        "dexterity": 32
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Brave Gloves",
+        "es": "Guantes Valerosos",
+        "pt": "Luvas da coragem"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 97,
+      "durability": 86,
+      "defense": 42,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 74,
+        "dexterity": 162
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Phantom  Gloves",
+        "es": "Guantes Fantasma",
+        "pt": "Luvas do fantasma"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 101,
+      "durability": 86,
+      "defense": 49,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 212,
+        "dexterity": 57
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Destroy Gloves",
+        "es": "Guantes Destructores",
+        "pt": "Luvas da destruição"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 99,
+      "durability": 86,
+      "defense": 40,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 19,
+        "energy": 165
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Seraphim Gloves",
+        "es": "Guantes Serafín",
+        "pt": "Luvas do serafim"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 100,
+      "durability": 86,
+      "defense": 43,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 55,
+        "dexterity": 197
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Divine Gloves",
+        "es": "Guantes Divinos",
+        "pt": "Luvas divinas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 95,
+      "durability": 86,
+      "defense": 36,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 29,
+        "energy": 138
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Royal Gloves",
+        "es": "Guantes Reales",
+        "pt": "Luvas reais"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 101,
+      "durability": 86,
+      "defense": 34,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 105,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Hades Gloves",
+        "es": "Guantes Hades",
+        "pt": "Luvas de Hades"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 100,
+      "durability": 86,
+      "defense": 31,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 60,
+        "dexterity": 15,
+        "energy": 181
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Scale Gloves",
+        "es": "Guantes de Escamas",
+        "pt": "Luvas de escamas"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 22,
+      "durability": 255,
+      "defense": 10,
+      "attackSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Silk Gloves",
+        "es": "Guantes de Seda",
+        "pt": "Luvas de seda"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 14,
+      "durability": 255,
+      "defense": 6,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Sphinx Gloves",
+        "es": "Guantes Esfinge",
+        "pt": "Luvas de Esfinge"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 28,
+      "durability": 255,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Violent Wind Gloves",
+        "es": "Guantes Viento Violento",
+        "pt": "Luvas do vento violento"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 24,
+      "durability": 255,
+      "defense": 13,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Dark Soul Gloves",
+        "es": "Guantes Adamantinos",
+        "pt": "Luvas de adamantina"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 57,
+      "durability": 255,
+      "defense": 20,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dragon Gloves",
+        "es": "Guantes Dragón",
+        "pt": "Luvas de Dragão"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 52,
+      "durability": 255,
+      "defense": 19,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Guardian Gloves",
+        "es": "Guantes Guardián",
+        "pt": "Luvas de Guardião"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 50,
+      "durability": 255,
+      "defense": 20,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Legendary Gloves",
+        "es": "Guantes Legendarios",
+        "pt": "Luvas Lendárias"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 44,
+      "durability": 255,
+      "defense": 16,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Red Wing Gloves",
+        "es": "Guantes Ala Roja",
+        "pt": "Luvas da asa vermelha"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 44,
+      "durability": 255,
+      "defense": 18,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Atlans Gloves",
+        "es": "Guantes Cuervo de Tormenta",
+        "pt": "Luvas do corvo da tempestade"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 70,
+      "durability": 255,
+      "defense": 25,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 78,
+      "name": {
+        "en": "Dragon Gloves-J",
+        "es": "Guantes Dragón-J",
+        "pt": "Luvas do dragão-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 52,
+      "durability": 68,
+      "defense": 16,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 79,
+      "name": {
+        "en": "Legendary Gloves-J",
+        "es": "Guantes Legendario-J",
+        "pt": "Luvas lendário-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 44,
+      "durability": 42,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 80,
+      "name": {
+        "en": "Guardian Gloves-J",
+        "es": "Guantes Guardián-J",
+        "pt": "Luvas do guardião-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 50,
+      "durability": 45,
+      "defense": 17,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 81,
+      "name": {
+        "en": "Light Plate Gloves-J",
+        "es": "Guantes Plata de Luz-J",
+        "pt": "Luvas de placa leve-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 42,
+      "durability": 42,
+      "defense": 14,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 82,
+      "name": {
+        "en": "Red Wing Gloves-J",
+        "es": "Guantes Ala Roja-J",
+        "pt": "Luvas da asa vermelha-J"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 5,
+      "level": 44,
+      "durability": 42,
+      "defense": 15,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 18,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    }
+  ]
+}

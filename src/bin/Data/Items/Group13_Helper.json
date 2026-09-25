@@ -1,0 +1,2886 @@
+{
+  "formatVersion": 1,
+  "group": 13,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Guardian Angel",
+        "es": "Angel Guardián",
+        "pt": "Anjo guardião"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 23,
+      "durability": 255,
+      "requirements": {
+        "level": 23
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Imp",
+        "es": "Diablillo",
+        "pt": "Diabrete"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 28,
+      "durability": 255,
+      "requirements": {
+        "level": 28
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Horn of Uniria",
+        "es": "Cuerno de Uniria",
+        "pt": "Chifre de Uniria"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 25,
+      "durability": 255,
+      "requirements": {
+        "level": 25
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Horn of Dinorant",
+        "es": "Cuerno de Dinorant",
+        "pt": "Chifre de Dinorant"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "skill": 49,
+      "level": 110,
+      "durability": 255,
+      "requirements": {
+        "level": 110
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Dark Horse",
+        "es": "Caballo Oscuro",
+        "pt": "Cavalo negro"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "skill": 62,
+      "level": 218,
+      "durability": 255,
+      "requirements": {
+        "level": 218
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Dark Raven",
+        "es": "Cuervo Oscuro",
+        "pt": "Corvo negro"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Contract (Summon)",
+        "es": "Contrato (Invocación)",
+        "pt": "Contrato (Invocação)"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Ring of Ice",
+        "es": "Anillo de Hielo",
+        "pt": "Anel de gelo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 20,
+      "durability": 50,
+      "attackType": 2,
+      "requirements": {
+        "level": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "ice": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Ring of Poison",
+        "es": "Anillo de Veneno",
+        "pt": "Anel do veneno"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 17,
+      "durability": 50,
+      "attackType": 4,
+      "requirements": {
+        "level": 17
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "poison": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Transformation Ring",
+        "es": "Anillo de Transformación",
+        "pt": "Anel de Transformação"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 200,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Order (Guardian/Life Stone)",
+        "es": "Orden (Guardián/Roca de Vida)",
+        "pt": "Ordem (Guard./Pedra da Vida)"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Pendant of Lighting",
+        "es": "Pendiente de Luz",
+        "pt": "Pingente da luz"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "level": 21,
+      "durability": 50,
+      "attackType": 3,
+      "requirements": {
+        "level": 21
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "lightning": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Pendant of Fire",
+        "es": "Pendiente de Fuego",
+        "pt": "Pingente do fogo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "level": 13,
+      "durability": 50,
+      "attackType": 1,
+      "requirements": {
+        "level": 13
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "fire": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Loch's Feather",
+        "es": "Pluma de Loch",
+        "pt": "Pena de Loch"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 78,
+      "requirements": {
+        "level": 78
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Fruits",
+        "es": "Fruto",
+        "pt": "Fruta"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Scroll of Archangel",
+        "es": "Rollo de Arcángel",
+        "pt": "Pergaminho do arcanjo"
+      },
+      "width": 1,
+      "height": 2,
+      "durability": 128,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Blood Bone",
+        "es": "Hueso Sangriento",
+        "pt": "Osso de sangue"
+      },
+      "width": 1,
+      "height": 2,
+      "durability": 128,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Invisibility Cloak",
+        "es": "Manto de Invisibilidad",
+        "pt": "Manto da invisibilidade"
+      },
+      "width": 2,
+      "height": 2,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Absolute Weapon of Archangel",
+        "es": "Arma Absoluta de Arcángel",
+        "pt": "Arma absoluta do arcanjo"
+      },
+      "width": 1,
+      "height": 2,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Wizards Ring",
+        "es": "Anillo de los Magos",
+        "pt": "Anel dos magos"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 30,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Ring of Fire",
+        "es": "Anillo del Fuego",
+        "pt": "Anel do fogo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 30,
+      "durability": 50,
+      "attackType": 3,
+      "requirements": {
+        "level": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "fire": 1
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Ring of Earth",
+        "es": "Anillo de la Tierra",
+        "pt": "Anel da terra"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 38,
+      "durability": 50,
+      "attackType": 1,
+      "requirements": {
+        "level": 38
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "earth": 1
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Ring of Wind",
+        "es": "Anillo del Viento",
+        "pt": "Anel do vento"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 44,
+      "durability": 50,
+      "attackType": 2,
+      "requirements": {
+        "level": 44
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "wind": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Ring of Magic",
+        "es": "Anillo de lo Mágico",
+        "pt": "Anel da magia"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 47,
+      "durability": 50,
+      "attackType": 3,
+      "requirements": {
+        "level": 47
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Pendant of Ice",
+        "es": "Pendiente del Hielo",
+        "pt": "Pingente do gelo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "level": 34,
+      "durability": 50,
+      "attackType": 1,
+      "requirements": {
+        "level": 34
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "ice": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Pendant of Wind",
+        "es": "Pendiente del Viento",
+        "pt": "Pingente do vento"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "level": 42,
+      "durability": 50,
+      "attackType": 2,
+      "requirements": {
+        "level": 42
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "wind": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Pendant of Water",
+        "es": "Pendiente del Agua",
+        "pt": "Pingente da água"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "level": 46,
+      "durability": 50,
+      "attackType": 4,
+      "requirements": {
+        "level": 46
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "water": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Pendant of Ability",
+        "es": "Pendiente de la Destreza",
+        "pt": "Pingente da habilidade"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "level": 50,
+      "durability": 50,
+      "requirements": {
+        "level": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Armor of Guardsman",
+        "es": "Armadura de Guardia",
+        "pt": "Armadura do guarda"
+      },
+      "width": 2,
+      "height": 2,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Cape of Lord",
+        "es": "Capa de Señor",
+        "pt": "Capa do Lorde"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 7,
+      "level": 180,
+      "durability": 200,
+      "requirements": {
+        "level": 180
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Spirit",
+        "es": "Espíritu",
+        "pt": "Espírito"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Splinter of Armor",
+        "es": "Astilla de Armadura",
+        "pt": "Estilhaço da armadura"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Bless of Guardian",
+        "es": "Bendición de Guardián",
+        "pt": "Bênção do guardião"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Claw of Beast",
+        "es": "Garra de Bestia",
+        "pt": "Garra da besta"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Fragment of Horn",
+        "es": "Fragmento de Cuerno",
+        "pt": "Fragmento de chifre"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Broken Horn",
+        "es": "Cuerno Partido",
+        "pt": "Chifre quebrado"
+      },
+      "width": 2,
+      "height": 2,
+      "durability": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Horn of Fenrir",
+        "es": "Cuerno de Fenrir",
+        "pt": "Chifre de Fenrir"
+      },
+      "width": 2,
+      "height": 2,
+      "slot": 8,
+      "level": 300,
+      "durability": 255,
+      "requirements": {
+        "level": 300
+      },
+      "classRequirements": {
+        "darkWizard": 2,
+        "darkKnight": 2,
+        "fairyElf": 2,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 2,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Moonstone Pendant",
+        "es": "Pendiente de Piedra Lunar",
+        "pt": "Pingente da pedra da lua"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 21,
+      "durability": 120,
+      "attackType": 3,
+      "requirements": {
+        "level": 21
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Eilte Transfer Skeleton Ring",
+        "es": "Aro Esqueleto Traslado Élite",
+        "pt": "Anel Esqueleto Transf. Acel."
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 10,
+      "durability": 255,
+      "requirements": {
+        "level": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Jack Olantern Ring",
+        "es": "Anillo de Jack O'Lantern",
+        "pt": "Anel do Jack Olantern"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 10,
+      "durability": 100,
+      "requirements": {
+        "level": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Transfer Christmas Ring",
+        "es": "Aro de Traslado de Navidad",
+        "pt": "Anel do Natal de Transf."
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 1,
+      "durability": 100,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Ring of GM",
+        "es": "Anillo de GM",
+        "pt": "Anel de GM"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      },
+      "resistances": {
+        "ice": 255,
+        "poison": 255,
+        "lightning": 255,
+        "fire": 255,
+        "earth": 255,
+        "wind": 255,
+        "water": 255
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Seal of Ascension",
+        "es": "Sello de Ascensión",
+        "pt": "Selo da ascensão"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Seal of Wealth",
+        "es": "Sello de Riqueza",
+        "pt": "Selo da riqueza"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Seal of Sustenance",
+        "es": "Sello de Sustento",
+        "pt": "Selo do sustento"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Devil Square Ticket",
+        "es": "Boleto de la Plaza del Diablo",
+        "pt": "Bilhete da Praça do Diabo"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Blood Castle Ticket",
+        "es": "Boleto al Castillo Sangriento",
+        "pt": "Bilhete do Castelo de Sangue"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Kalima Ticket",
+        "es": "Boleto de Kalima",
+        "pt": "Bilhete de Kalima"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Old Scroll",
+        "es": "Antiguo Rollo",
+        "pt": "Pergaminho antigo"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Illusion Sorcerer Covenant",
+        "es": "Pacto Ilusión de Hechicero",
+        "pt": "Pacto Feiticeiro da Ilusão"
+      },
+      "width": 1,
+      "height": 2,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Scroll of Blood",
+        "es": "Rollo de Sangre",
+        "pt": "Pergaminho de sangue"
+      },
+      "width": 2,
+      "height": 2,
+      "durability": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Condor Flame",
+        "es": "Llama de Cóndor",
+        "pt": "Chama do Condor"
+      },
+      "width": 1,
+      "height": 2,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 53,
+      "name": {
+        "en": "Condor Feather",
+        "es": "Pluma de Cóndor",
+        "pt": "Pena do Condor"
+      },
+      "width": 1,
+      "height": 2,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 54,
+      "name": {
+        "en": "Reset Fruit Strength",
+        "es": "Reiniciar Fruto de Fuerza",
+        "pt": "Reiniciar força da fruta"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 100,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 55,
+      "name": {
+        "en": "Reset Fruit Quickness",
+        "es": "Reiniciar Fruto de Rapidez",
+        "pt": "Reiniciar rapidez da fruta"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 100,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 56,
+      "name": {
+        "en": "Reset Fruit Health",
+        "es": "Reiniciar Fruto de Salud",
+        "pt": "Reiniciar saúde da Fruta"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 100,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 57,
+      "name": {
+        "en": "Reset Fruit Energy",
+        "es": "Reiniciar Fruto de Energía",
+        "pt": "Reiniciar energia da fruta"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 100,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 58,
+      "name": {
+        "en": "Reset Fruit Control",
+        "es": "Reiniciar Fruto de Control",
+        "pt": "Reiniciar controle da fruta"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 100,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Seal of Mobility",
+        "es": "Sello de Movilidad",
+        "pt": "Selo da mobilidade"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Indulgence",
+        "es": "Indulgencia",
+        "pt": "Indulgência"
+      },
+      "width": 1,
+      "height": 2,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Illusion Temple Ticket",
+        "es": "Boleto al Templo de Ilusión",
+        "pt": "Bilhete do Templo da Ilusão"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Seal of Healing",
+        "es": "Sello de Curación",
+        "pt": "Selo da cura"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Seal of Divinity",
+        "es": "Sello de Divinidad",
+        "pt": "Selo da divindade"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Demon",
+        "es": "Demonio",
+        "pt": "Demônio"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 1,
+      "durability": 255,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Spirit of Guardian",
+        "es": "Espír. Guardián",
+        "pt": "Espír. Guardião"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 1,
+      "durability": 255,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Invitation to Santa Village",
+        "es": "Invitación a Aldea de Santa",
+        "pt": "Conv. p/ Vila do Papai Noel"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Pet Rudolf",
+        "es": "Mascota Rudolf",
+        "pt": "Animal de estimação Rodolfo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 28,
+      "durability": 255,
+      "requirements": {
+        "level": 28
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Snowman Transformation Ring",
+        "es": "Aro Mutación Hombre de Nieve",
+        "pt": "Anel Transf. Homem da Neve"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 10,
+      "durability": 100,
+      "requirements": {
+        "level": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Talisman of Resurrection",
+        "es": "Talismán de Resurrección",
+        "pt": "Talismã da ressurreição"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Talisman of Mobility",
+        "es": "Talismán de Movilidad",
+        "pt": "Talismã da mobilidade"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 2,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Sword/Mace/Spear",
+        "es": "Espada/Maza/Jabalina",
+        "pt": "Espada/Maça/Lança"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 8,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Staff",
+        "es": "Báculo",
+        "pt": "Bastão"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 8,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Bow/Crossbow",
+        "es": "Arco/Ballesta",
+        "pt": "Arco/Besta"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 8,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 74,
+      "name": {
+        "en": "Scepter",
+        "es": "Cetro",
+        "pt": "Cetro"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 8,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 75,
+      "name": {
+        "en": "Stick",
+        "es": "Vara",
+        "pt": "Cajado"
+      },
+      "width": 2,
+      "height": 3,
+      "slot": 8,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 76,
+      "name": {
+        "en": "Panda Ring",
+        "es": "Anillo Panda",
+        "pt": "Anel do Panda"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 1,
+      "durability": 255,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 80,
+      "name": {
+        "en": "Pet Panda",
+        "es": "Mascota Panda",
+        "pt": "Animal de estimação Panda"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 1,
+      "durability": 255,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 81,
+      "name": {
+        "en": "Talisman of Guardian",
+        "es": "Talismán de Guardián",
+        "pt": "Talismã do Guardião"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 82,
+      "name": {
+        "en": "Talisman of Item Protection",
+        "es": "Talismán Protección de Ítems",
+        "pt": "Talismã de Proteção de Item"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 83,
+      "name": {
+        "en": "Talisman of Wings of Satan",
+        "es": "Talismán de Alas de Satán",
+        "pt": "Talismã das Asas de Satã"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 84,
+      "name": {
+        "en": "Talisman of Wings of Heaven",
+        "es": "Talismán de Alas de Cielo",
+        "pt": "Talismã das Asas do Paraíso"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 85,
+      "name": {
+        "en": "Talisman of Wings of Elf",
+        "es": "Talismán de Alas de Elfo",
+        "pt": "Talismã das Asas do Elfo"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 86,
+      "name": {
+        "en": "Talisman of Wing of Curse",
+        "es": "Talismán de Alas de Maldición",
+        "pt": "Talismã da Asa da Maldição"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 87,
+      "name": {
+        "en": "Talisman of Cape of Emperor",
+        "es": "Talismán de Capa de Emperador",
+        "pt": "Talismã da Capa do Imperador"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 88,
+      "name": {
+        "en": "Talisman of Wings of Dragon",
+        "es": "Talismán de Alas de Dragón",
+        "pt": "Talismã das Asas do Dragão"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 89,
+      "name": {
+        "en": "Talisman of Wings of Soul",
+        "es": "Talismán de Alas del Alma",
+        "pt": "Talismã das Asas da Alma"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 90,
+      "name": {
+        "en": "Talisman of Wings of Spirits",
+        "es": "Talismán de Alas de Espíritus",
+        "pt": "Talismã das Asas dos Esp."
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 91,
+      "name": {
+        "en": "Talisman of Wing of Despair",
+        "es": "Talismán Alas de Desolación",
+        "pt": "Talismã da Asa do Desespero"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 92,
+      "name": {
+        "en": "Talisman of Wings of Darkness",
+        "es": "Talismán de Alas de Oscuridad",
+        "pt": "Talismã das Asas da Escuridão"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 93,
+      "name": {
+        "en": "Master Seal of Ascension",
+        "es": "Sello Maestro de Ascensión",
+        "pt": "Selo Mestre da Ascensão"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 94,
+      "name": {
+        "en": "Master Seal of Wealth",
+        "es": "Sello Maestro de Riqueza",
+        "pt": "Selo Mestre da Riqueza"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 95,
+      "name": {
+        "en": "Gladiator's Honor",
+        "es": "Honor de Gladiador",
+        "pt": "Honra do Gladiador"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 96,
+      "name": {
+        "en": "Seal of Strength",
+        "es": "Sello de Fuerza",
+        "pt": "Selo da Força"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 97,
+      "name": {
+        "en": "Magic Gladiator Character Card",
+        "pt": "Carta de Personagem - Gladiador Mágico"
+      }
+    },
+    {
+      "number": 98,
+      "name": {
+        "en": "Dark Lord Character Card",
+        "pt": "Carta de Personagem - Lorde Sombrio"
+      }
+    },
+    {
+      "number": 99,
+      "name": {
+        "en": "Character Slot Key",
+        "pt": "Fenda de Chave de Personagem"
+      },
+      "slot": 0
+    },
+    {
+      "number": 103,
+      "name": {
+        "en": "Party EXP Scroll",
+        "es": "Rollo EXP de Participación",
+        "pt": "Pergaminho de EXP de grupo"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 104,
+      "name": {
+        "en": "Max AG Boost Aura",
+        "es": "Aura de Aumento de Máx AG",
+        "pt": "Aura de aumento de AG máx"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 105,
+      "name": {
+        "en": "Max SD Boost Aura",
+        "es": "Aura de Aumento de Máx SD",
+        "pt": "Aura de aumento de SD máx"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 106,
+      "name": {
+        "en": "Pet Unicorn",
+        "es": "Unicornio",
+        "pt": "Unic. Est."
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 28,
+      "durability": 255,
+      "requirements": {
+        "level": 28
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 107,
+      "name": {
+        "en": "Lethal Wizard's Ring",
+        "es": "Anillo Letal de Mago",
+        "pt": "Anel do Mago Letal"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 100,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 109,
+      "name": {
+        "en": "Sapphire Ring",
+        "es": "Anillo de Zafiro",
+        "pt": "Anel de safira"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 110,
+      "name": {
+        "en": "Ruby Ring",
+        "es": "Anillo de Rubí",
+        "pt": "Anel de rubi"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 111,
+      "name": {
+        "en": "Topaz Ring",
+        "es": "Anillo de Topacio",
+        "pt": "Anel de topázio"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 112,
+      "name": {
+        "en": "Amethyst Ring",
+        "es": "Anillo de Amatista",
+        "pt": "Anel de ametista"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 113,
+      "name": {
+        "en": "Ruby Necklace",
+        "es": "Collar de Rubíes",
+        "pt": "Colar de rubi"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 114,
+      "name": {
+        "en": "Emerald Necklace",
+        "es": "Collar de Esmeraldas",
+        "pt": "Colar de esmeralda"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 115,
+      "name": {
+        "en": "Sapphire Necklace",
+        "es": "Collar de Zafiros",
+        "pt": "Colar de safira"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 9,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 116,
+      "name": {
+        "en": "Seal of Wealth",
+        "es": "Sello de Riqueza",
+        "pt": "Selo da riqueza"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 117,
+      "name": {
+        "en": "Minimum Vitality Potion",
+        "es": "Pócima de Vitalidad Mínima",
+        "pt": "Poção de vitalidade mínima"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 118,
+      "name": {
+        "en": "Low Vitality Potion",
+        "es": "Pócima de Vitalidad Baja",
+        "pt": "Poção de vitalidade baixa"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 119,
+      "name": {
+        "en": "Medium Vitality Potion",
+        "es": "Pócima de Vitalidad Media",
+        "pt": "Poção de vitalidade média"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 120,
+      "name": {
+        "en": "High Vitality Potion",
+        "es": "Pócima de Vitalidad Alta",
+        "pt": "Poção de vitalidade alta"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 121,
+      "name": {
+        "en": "Open Access Ticket to Chaos Castle",
+        "es": "Boleto Abierto; Castillo Caos",
+        "pt": "Bilhete Ac. Livre Cast. Caos"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 122,
+      "name": {
+        "en": "Skeleton Transformation Ring",
+        "es": "Aro Mutación de Esqueleto",
+        "pt": "Anel Transf. de Esqueleto"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "level": 1,
+      "durability": 255,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 123,
+      "name": {
+        "en": "Pet Skeleton",
+        "es": "Mascota Esqueleto",
+        "pt": "Mascote esqueleto"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 8,
+      "level": 1,
+      "durability": 255,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 124,
+      "name": {
+        "en": "Paid Channel Access Ticket",
+        "es": "Boleto Canal de Acceso Pago",
+        "pt": "Bilhete Ac. a Canal Pago"
+      },
+      "width": 1,
+      "height": 1,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 125,
+      "name": {
+        "en": "Open Access Ticket to Doppelganger",
+        "es": "Boleto Acceso a Doppenganger",
+        "pt": "Bilhete Ac. Livre Doppeganger"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 126,
+      "name": {
+        "en": "Open Access Ticket to Varka",
+        "es": "Boleto Acceso a Varka",
+        "pt": "Bilhete Ac. Livre Varka"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 10,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 127,
+      "name": {
+        "en": "Open Access Ticket to Varka Map 7",
+        "es": "Boleto Acceso Mapa 7 de Varka",
+        "pt": "Bil. Ac. Livre Mapa 7 Varka"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 3,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 128,
+      "name": {
+        "en": "Hawk Figurine",
+        "es": "Figura de Halcón",
+        "pt": "Estatueta de falcão"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 129,
+      "name": {
+        "en": "Goat Figurine",
+        "es": "Figura de Cabra",
+        "pt": "Estatueta de bode"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 130,
+      "name": {
+        "en": "Oak Charm",
+        "es": "Amuleto de Roble",
+        "pt": "Amuleto de carvalho"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 131,
+      "name": {
+        "en": "Maple Charm",
+        "es": "Amuleto de Arce",
+        "pt": "Amuleto de bordo"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 132,
+      "name": {
+        "en": "Golden Oak Charm",
+        "es": "Amuleto Dorado de Roble",
+        "pt": "Amuleto de carvalho dourado"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 133,
+      "name": {
+        "en": "Golden Maple Charm",
+        "es": "Amuleto Dorado de Arce",
+        "pt": "Amuleto de bordo dourado"
+      },
+      "width": 1,
+      "height": 2,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 134,
+      "name": {
+        "en": "Worn Horseshoe",
+        "es": "Herradura usada",
+        "pt": "Ferradura gasta"
+      },
+      "width": 1,
+      "height": 1,
+      "slot": 10,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 135,
+      "name": {
+        "en": "1st Lucky Armor Ticket",
+        "es": "1er Boleto Armadura de la Suerte",
+        "pt": "1º Bilhete de Armadura da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 136,
+      "name": {
+        "en": "1st Lucky Pants Ticket",
+        "es": "1er Boleto Pantalones de la Suerte",
+        "pt": "1º Bilhete de Calças da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 137,
+      "name": {
+        "en": "1st Lucky Helm Ticket",
+        "es": "1er Boleto Yelmo de la Suerte",
+        "pt": "1º Bilhete de Elmo da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 138,
+      "name": {
+        "en": "1st Lucky Gloves Ticket",
+        "es": "1er Boleto Guantes de la Suerte",
+        "pt": "1º Bilhete de Luvas da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 139,
+      "name": {
+        "en": "1st Lucky Boots Ticket",
+        "es": "1er Boleto Botas de la Suerte",
+        "pt": "1º Bilhete de Botas da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 140,
+      "name": {
+        "en": "2nd Lucky Armor Ticket",
+        "es": "2º Boleto Armadura de la Suerte",
+        "pt": "2º Bilhete de Armadura da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 141,
+      "name": {
+        "en": "2nd Lucky Pants Ticket",
+        "es": "2º Boleto Pantalones de la Suerte",
+        "pt": "2º Bilhete de Calças da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 142,
+      "name": {
+        "en": "2nd Lucky Helm Ticket",
+        "es": "2º Boleto Yelmo de la Suerte",
+        "pt": "2º Bilhete de Elmo da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 143,
+      "name": {
+        "en": "2nd Lucky Gloves Ticket",
+        "es": "2º Boleto Guantes de la Suerte",
+        "pt": "2º Bilhete de Luvas da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 144,
+      "name": {
+        "en": "2nd Lucky Boots Ticket",
+        "es": "2º Boleto Botas de la Suerte",
+        "pt": "2º Bilhete de Botas da Sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "durability": 255,
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    }
+  ]
+}

@@ -19,9 +19,6 @@
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"
 
-// External references
-extern ITEM_ATTRIBUTE* ItemAttribute;
-
 // Comparison function - uses field metadata (NO MACROS!)
 static void CompareItems(const ITEM_ATTRIBUTE& oldItem, const ITEM_ATTRIBUTE& newItem,
                         std::stringstream& changes, bool& changed)
@@ -49,26 +46,29 @@ static void CompareItems(const ITEM_ATTRIBUTE& oldItem, const ITEM_ATTRIBUTE& ne
                                changes, changed);
 }
 
-bool ItemDataSaver::Save(const wchar_t* fileName, std::string* outChangeLog)
+constexpr DWORD ItemFileChecksumKey = 0xE2F1;
+
+static void ToFileRecord(ITEM_ATTRIBUTE_FILE& dest, const ITEM_ATTRIBUTE& src)
+{
+    CopyItemAttributeToDestination(dest, src);
+}
+
+static void FromFileRecord(ITEM_ATTRIBUTE& dest, const ITEM_ATTRIBUTE_FILE& src)
+{
+    CopyItemAttributeFromSource(dest, src);
+}
+
+static std::string GetItemNameUtf8(int index, const ITEM_ATTRIBUTE& item)
+{
+    return ChangeTracker::GetNameUtf8(index, item, MAX_ITEM_NAME);
+}
+
+bool ItemDataSaver::Save(const wchar_t* fileName, const ITEM_ATTRIBUTE* items, std::string* outChangeLog)
 {
     // Create standard save config with item-specific parameters
     auto config = CreateStandardSaveConfig<ITEM_ATTRIBUTE, ITEM_ATTRIBUTE_FILE>(
-        fileName,
-        MAX_ITEM,
-        ItemAttribute,
-        [](ITEM_ATTRIBUTE_FILE& dest, const ITEM_ATTRIBUTE& src) {
-            CopyItemAttributeToDestination(dest, src);
-        },
-        [](ITEM_ATTRIBUTE& dest, const ITEM_ATTRIBUTE_FILE& src) {
-            CopyItemAttributeFromSource(dest, src);
-        },
-        CompareItems,
-        [](int index, const ITEM_ATTRIBUTE& item) {
-            return ChangeTracker::GetNameUtf8(index, item, MAX_ITEM_NAME);
-        },
-        0xE2F1,  // Item-specific checksum key
-        outChangeLog
-    );
+        fileName, MAX_ITEM, items, ToFileRecord, FromFileRecord, CompareItems, GetItemNameUtf8, ItemFileChecksumKey,
+        outChangeLog);
 
     // Add legacy format support for backwards compatibility with old Item.bmd files
     config.legacyFileStructSize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);

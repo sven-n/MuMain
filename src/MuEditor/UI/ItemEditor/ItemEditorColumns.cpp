@@ -4,6 +4,7 @@
 
 #include "ItemEditorColumns.h"
 #include "ItemEditorTable.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/ItemData/ItemFieldDefs.h"
 #include "I18N/All.h"
@@ -43,8 +44,11 @@ static std::string GetItemNameUtf8(int itemIndex)
     return nameBuf;
 }
 
-static void LogItemFieldChange(int itemIndex, const char* columnName, const std::string& newValue)
+// Every edit of an item field goes through here: it is logged and copied
+// into the item database, so the database always matches the editor.
+static void OnItemFieldChanged(int itemIndex, const char* columnName, const std::string& newValue)
 {
+    g_ItemDataHandler.OnItemEdited(itemIndex);
     g_MuEditorConsoleUI.LogEditor(
         "Changed item " + std::to_string(itemIndex) +
         " (" + GetItemNameUtf8(itemIndex) + ") " +
@@ -68,7 +72,7 @@ void CItemEditorColumns::RenderByteColumn(
         if (intValue >= 0 && intValue <= 255)
         {
             value = (BYTE)intValue;
-            LogItemFieldChange(itemIndex, columnName, std::to_string(intValue));
+            OnItemFieldChanged(itemIndex, columnName, std::to_string(intValue));
         }
     }
 
@@ -92,7 +96,7 @@ void CItemEditorColumns::RenderWordColumn(
         if (intValue >= 0 && intValue <= 65535)
         {
             value = (WORD)intValue;
-            LogItemFieldChange(itemIndex, columnName, std::to_string(intValue));
+            OnItemFieldChanged(itemIndex, columnName, std::to_string(intValue));
         }
     }
 
@@ -112,7 +116,7 @@ void CItemEditorColumns::RenderIntColumn(
 
     if (ImGui::InputInt("##input", &value, 0, 0))
     {
-        LogItemFieldChange(itemIndex, columnName, std::to_string(value));
+        OnItemFieldChanged(itemIndex, columnName, std::to_string(value));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -132,7 +136,7 @@ void CItemEditorColumns::RenderDWordColumn(
     // DWORD is unsigned, range 0 to 4294967295
     if (ImGui::InputScalar("##input", ImGuiDataType_U32, &value, nullptr, nullptr, "%u"))
     {
-        LogItemFieldChange(itemIndex, columnName, std::to_string(value));
+        OnItemFieldChanged(itemIndex, columnName, std::to_string(value));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -151,7 +155,7 @@ void CItemEditorColumns::RenderBoolColumn(
 
     if (ImGui::Checkbox("##checkbox", &value))
     {
-        LogItemFieldChange(itemIndex, columnName, value ? "true" : "false");
+        OnItemFieldChanged(itemIndex, columnName, value ? "true" : "false");
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -174,7 +178,7 @@ void CItemEditorColumns::RenderWCharArrayColumn(
     if (ImGui::InputText("##input", editableBuffer, sizeof(editableBuffer)))
     {
         MultiByteToWideChar(CP_UTF8, 0, editableBuffer, -1, value, arraySize);
-        LogItemFieldChange(itemIndex, columnName, std::string(editableBuffer));
+        OnItemFieldChanged(itemIndex, columnName, std::string(editableBuffer));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -208,6 +212,7 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
             ITEM_ATTRIBUTE temp = ItemAttribute[itemIndex];
             ItemAttribute[itemIndex] = ItemAttribute[newIndex];
             ItemAttribute[newIndex] = temp;
+            g_ItemDataHandler.OnItemsSwapped(itemIndex, newIndex);
 
             g_MuEditorConsoleUI.LogEditor("Moved item from index " + std::to_string(itemIndex) + " to " + std::to_string(newIndex));
 
