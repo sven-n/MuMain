@@ -22,23 +22,6 @@ enum _COLUMN_TYPE
     _COLUMN_TYPE_REQNLV
 };
 
-enum ITEMSETOPTION
-{
-    eITEM_PERSONALSHOP = 0,
-    eITEM_STORE,
-    eITEM_TRADE,
-    eITEM_DROP,
-    eITEM_SELL,
-    eITEM_REPAIR,
-    eITEM_END
-};
-
-struct sItemAct
-{
-    int		s_nItemIndex;
-    bool	s_bType[eITEM_END];
-};
-
 enum SKILL_TOOLTIP_RENDER_POINT
 {
     STRP_NONE = 0,
@@ -202,9 +185,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
 
-bool Check_ItemAction(const ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType = false);
 bool Check_LuckyItem(int _nIndex, int _nType = 0);
-sItemAct Set_ItemActOption(int _nIndex, int _nOption);
 
 bool IsLuckySetItem(int iType);
 

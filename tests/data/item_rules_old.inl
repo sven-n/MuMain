@@ -1,5 +1,29 @@
 // One-time copy of the item rule code before phase 3 (see test_item_rules_equivalence.cpp).
-// Copy of Check_ItemAction from ZzzInventory.cpp.
+// Copy of Check_ItemAction from ZzzInventory.cpp, with the definitions it used.
+enum ITEMSETOPTION
+{
+    eITEM_PERSONALSHOP = 0,
+    eITEM_STORE,
+    eITEM_TRADE,
+    eITEM_DROP,
+    eITEM_SELL,
+    eITEM_REPAIR,
+    eITEM_END
+};
+
+struct sItemAct
+{
+    int		s_nItemIndex;
+    bool	s_bType[eITEM_END];
+};
+
+constexpr int RESTRICTED_SPECIAL_MISC_START_INDEX = 135;
+constexpr int RESTRICTED_SPECIAL_MISC_COUNT = 12;  // 135..146
+constexpr int RESTRICTED_SPECIAL_JEWEL_START_INDEX = 160;
+constexpr int RESTRICTED_SPECIAL_JEWEL_COUNT = 2;   // 160..161
+constexpr int ITEM_ACTION_BLOCK_STORAGE_TRADE = 0;  // 0,1,1,0,0,0 - Blocks storage & trade
+constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell only
+
 sItemAct OldSet_ItemActOption(int _nIndex, int _nOption)
 {
     sItemAct	sItem;
