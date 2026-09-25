@@ -32,7 +32,7 @@
 	width: 352dp;
 	height: 113dp;
 	font-family: "token(font-body)";
-	font-size: 12dp;
+	font-size: 1rem;
 	decorator: image(msgwin-back-image);
 }
 
@@ -92,7 +92,7 @@
 	height: 15dp;
 	padding: 0;
 	color: token(text-narrative);
-	font-size: 11dp;
+	font-size: 1rem;
 	background-color: transparent;
 	border-width: 0;
 	box-shadow: none;

@@ -37,7 +37,7 @@
 	width: 207dp;
 	height: 25dp;
 	font-family: "token(font-body)";
-	font-size: 11dp;
+	font-size: 1rem;
 }
 
 #seg_a {
@@ -68,12 +68,12 @@
 	pointer-events: none;
 }
 
-/* Match the original normal-font readout, not the panel's oversized 11dp font.
-   dp rasterizes at the displayed size directly (this panel has no scale transform). */
+/* The original normal-font readout: 1rem is the native text size (RmlNativeText.h); this panel has
+   no scale transform, so it rasterizes at the displayed size directly. */
 #text {
 	position: absolute;
 	font-family: "DejaVu Sans";
-	font-size: 8dp;
+	font-size: 1rem;
 	line-height: 9dp;
 	left: 10dp;
 	top: 5dp;
@@ -123,7 +123,7 @@
 	padding: 1px 2px;
 	border-radius: 0px;
 	font-family: "DejaVu Sans";
-	font-size: 8.5dp;
+	font-size: 1rem;
 	pointer-events: none;
 }
 .tooltip-config { left: 90dp; }

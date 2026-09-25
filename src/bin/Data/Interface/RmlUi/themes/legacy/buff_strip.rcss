@@ -197,7 +197,7 @@
 	top: 15dp;
 	width: 200dp;
 	font-family: "token(font-body)";
-	font-size: 11dp;
+	font-size: 1rem;
 	pointer-events: none;
 }
 
@@ -231,7 +231,7 @@
 	padding: 3dp 5dp;
 	border-radius: token(radius-sm)dp;
 	font-family: "token(font-body)";
-	font-size: 11dp;
+	font-size: 1rem;
 	pointer-events: none;
 }
 .buff-slot:hover .tooltip {

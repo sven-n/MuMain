@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="msg_win.rcss"/>
 </head>
-<body data-model="msg_win">
+<body class="native-text" data-model="msg_win">
 	<!-- Theme-neutral reference dialog; themes/modern/msg_win.rml forks it for modern's decoration
 	     -- keep ids/data-model in sync, MsgWin.cpp binds both by name. mode-* classes select which
 	     of the five MSG_WIN_TYPE variants is active. -->

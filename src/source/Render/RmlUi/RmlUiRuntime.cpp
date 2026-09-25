@@ -9,6 +9,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlNativeText.h"
 #include "Core/Utilities/FrameProfiler.h"
 
 namespace
@@ -39,6 +40,7 @@ namespace
         const float autoFit =
             UI::Scaling::ViewportFitScale(windowWidth, windowHeight, UI::Scaling::MaximumPanelScale);
         context->SetDensityIndependentPixelRatio((static_cast<float>(percent) / 100.0f) * autoFit);
+        UI::RmlBridge::ApplyNativeTextSize(context);
     }
 }
 

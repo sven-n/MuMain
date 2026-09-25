@@ -15,7 +15,7 @@
 	width: 230dp;
 	height: 160dp;
 	font-family: "token(font-body)";
-	font-size: 12dp;
+	font-size: 1rem;
 	color: token(text-primary);
 }
 /* Optional taller variant (GenericDialogConfig::tallPanel) -- .gcd-body's own top/bottom insets
@@ -216,7 +216,7 @@
 	bottom: 2dp;
 	text-align: center;
 	font-weight: bold;
-	font-size: 9dp;
+	font-size: 0.75rem;
 	color: token(text-heading);
 	font-effect: shadow(0dp 1dp #000000);
 }
@@ -252,7 +252,7 @@
 	width: 26dp;
 	height: 18dp;
 	margin: 1dp;
-	font-size: 10dp;
+	font-size: 0.85rem;
 }
 /* Text-mode field: takes the same flow slot the old native-widget position reference occupied, so
    the column layout is unchanged. Sizing only -- fill/border/focus/selection come from base.rcss's
@@ -262,7 +262,7 @@
 	width: 150dp;
 	height: 18dp;
 	padding: 0 3dp;
-	font-size: 10dp;
+	font-size: 0.85rem;
 }
 
 /* Optional progress bar -- same `x_fraction * 100 + '%'` fill technique main_frame.rml's own

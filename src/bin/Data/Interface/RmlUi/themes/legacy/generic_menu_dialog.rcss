@@ -14,7 +14,7 @@
 	width: 230dp;
 	height: 260dp;
 	font-family: "token(font-body)";
-	font-size: 12dp;
+	font-size: 1rem;
 	color: token(text-primary);
 }
 
@@ -156,7 +156,7 @@
 	width: 140dp;
 	white-space: normal;
 	text-align: center;
-	font-size: 10dp;
+	font-size: 1rem;
 	font-weight: normal;
 	color: token(text-primary);
 	background-color: token(surface-recessed);

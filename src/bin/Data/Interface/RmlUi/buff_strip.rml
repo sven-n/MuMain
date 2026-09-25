@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="buff_strip.rcss"/>
 </head>
-<body data-model="buff_strip">
+<body class="native-text" data-model="buff_strip">
 	<!-- Buff icon strip, centered; each .buff-slot is positioned via C++-computed slot_left/slot_top (dp). -->
 	<div id="panel" class="center-x">
 		<div class="buff-slot" data-for="buff : buffs"

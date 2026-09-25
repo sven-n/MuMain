@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="generic_confirm_dialog.rcss"/>
 </head>
-<body>
+<body class="native-text">
 	<!-- This is legacy's own markup in practice -- modern has its own complete fork
 	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy. Keep ids/
 	     data-model/event names in sync with the modern fork, GenericConfirmDialog.cpp binds both

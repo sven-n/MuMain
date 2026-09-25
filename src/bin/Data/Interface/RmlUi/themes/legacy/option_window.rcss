@@ -44,7 +44,7 @@
 	width: 230dp;
 	height: 276dp;
 	font-family: "token(font-body)";
-	font-size: 10dp;
+	font-size: 1rem;
 	color: token(text-input);
 }
 
@@ -88,7 +88,7 @@
 	height: 22dp;
 	line-height: 22dp;
 	text-align: center;
-	font-size: 9dp;
+	font-size: 1rem;
 	white-space: nowrap;
 	overflow: hidden;
 	cursor: pointer;
@@ -348,7 +348,7 @@
 	border-color: token(border-control);
 	border-radius: token(radius-sm)dp;
 	color: token(text-primary);
-	font-size: 9dp;
+	font-size: 1rem;
 	pointer-events: none;
 }
 .option-row-tipped:hover .option-row-tip {
