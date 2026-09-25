@@ -98,8 +98,25 @@ four independent pieces still keeping this file alive:
      reciprocal `SetTabTarget()` pair just went away); select-all-on-error-recovery maps to
      `ElementFormControlInput::Select()`, reached through `CLoginWin::FocusUsername()`/
      `FocusPassword()` which replaced the widget-pointer accessors external code used to call.
+   - ~~`CMsgWin`~~ — **migrated.** Its resident-password prompt (`MESSAGE_DELETE_CHARACTER_RESIDENT`)
+     is `#msgwin_input`, a stock `<input type="password">` inside the existing `#input_frame`, so the
+     layout is unchanged. Deliberately *not* folded into `CGenericConfirmDialog` even though that
+     dialog can express the same content (two lines + masked field + OK/Cancel): `CMsgWin`'s panel is
+     352x113dp with its own art against the dialog's 230x160dp, so consolidating would visibly
+     restyle this one prompt and leave it inconsistent with every other message box. Worth revisiting
+     as a deliberate UX decision, not as a port.
    - Chat (`CUIChatInputBox`), `CGuildMakeWindow`, `CGoldBowmanWindow`, `WindowMuHelper`,
-     `MsgBoxIGSSendGift` — multiline/history/numeric variants, unscoped.
+     `MsgBoxIGSSendGift`, `UIWindows`' friend/mail, `UIGuildMaster` — **migrate each when its own
+     host screen moves to RmlUi, not before.** These are all still-native screens; porting just
+     their text field would mean positioning an RmlUi `<input>` against native sprite coordinates,
+     which is the coupling this whole effort removes. `CUITextInputBox` retires when the last one
+     is gone, and not by a dedicated retirement pass.
+
+     `LoginScene.cpp`'s free `DeleteCharacter()` reads the value through
+     `CMsgWin::GetResidentPasswordInput()` now, but appears to have **no callers** —
+     `CharSelMainWin.cpp:324`'s unqualified call resolves to the member
+     `CCharSelMainWin::DeleteCharacter()`, and `CMsgWin::RequestDeleteCharacter()` is the live path.
+     Suspected dead, not verified to the standard `CWin`/`::CButton`/`CSlider` got before deletion.
 2. **`CUITextListBox<T>`** (~18 subclasses in `UIControls.h`) — no rule named this class before
    2026-09-13 (only `CUIButton` was named), which is exactly why it kept gaining consumers even on
    windows already on `mu::ui::window::CObject`. Confirmed live consumers found this session:

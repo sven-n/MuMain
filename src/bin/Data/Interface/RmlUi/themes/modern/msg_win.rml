@@ -20,7 +20,15 @@
 		<div id="msg_line2" class="msg-line" data-class-hidden="line2_hidden">{{line2}}</div>
 
 		<!-- Background art only for the resident-password re-entry step; live text drawn on top by legacy code. -->
+		<!-- Background art only -- the field itself is the <input> below. -->
 		<div id="input_frame"></div>
+
+		<!-- Resident-password entry (MWT_STR_INPUT / MESSAGE_DELETE_CHARACTER_RESIDENT). Stock RmlUi
+		     <input type="password">, bound to MsgWinRmlModel::residentPassword; maxlength comes from
+		     C++ (InitResidentNumInput()). Declared after #input_frame so it paints on top of it --
+		     RmlUi draws siblings in document order. -->
+		<input id="msgwin_input" type="password" class="text-field msgwin-input-field"
+		       data-value="password_input" data-class-hidden="!mode_input"/>
 
 		<!-- Raised footer band (base.rcss) for structural separation only -- no title text here
 		     so it gets a footer, not .modern-header, avoiding an empty raised strip that would

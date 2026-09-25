@@ -7,6 +7,8 @@
 #include "Render/Sprites/Sprite.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
+#include <string>
+
 #define MW_MSG_LINE_MAX 2
 #define MW_MSG_ROW_MAX 52
 
@@ -27,7 +29,6 @@ protected:
     };
 
     CSprite m_sprBack;
-    CSprite m_sprInput;
     wchar_t m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
     int m_nMsgLine;
     int m_nMsgCode;
@@ -47,10 +48,6 @@ public:
     // Set by RmlUi click bindings; polled and cleared in Update().
     void RmlClickOk() { m_bRmlOkClicked = true; }
     void RmlClickCancel() { m_bRmlCancelClicked = true; }
-
-    // Draws the resident-password (MWT_STR_INPUT) live text over RmlUi's input-frame background.
-    // No-op outside MWT_STR_INPUT.
-    void RenderTextOnTop();
 
     // mu::ui::window::IObject
     bool Render() override;
@@ -89,6 +86,13 @@ protected:
     void ManageOKClick();
     void ManageCancelClick();
     void InitResidentNumInput();
+
+public:
+    // The resident password the player typed, for the delete-character request. Empty unless the
+    // MESSAGE_DELETE_CHARACTER_RESIDENT prompt is (or just was) open.
+    std::wstring GetResidentPasswordInput() const;
+
+private:
     void RequestDeleteCharacter();
 
 private:
@@ -103,6 +107,11 @@ private:
         bool modeBoth = false;
         bool modeInput = false;
         Rml::String okLabel, cancelLabel;
+
+        // MWT_STR_INPUT's resident-password entry, two-way bound to #msgwin_input. RmlUi owns the
+        // edit buffer/caret/masking; this carries the committed value that RequestDeleteCharacter()
+        // and CCharSelMainWin's delete flow read.
+        Rml::String residentPassword;
     };
     RmlModelBinder<MsgWinRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;

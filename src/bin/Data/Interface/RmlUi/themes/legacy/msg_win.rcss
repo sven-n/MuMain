@@ -80,6 +80,25 @@
 }
 .mode-input #input_frame { display: block; }
 
+/* Resident-password field: sizing/placement only -- fill/border come from #input_frame above, so
+   this one is transparent and borderless. Sits inside that frame (32,76 / 171x23dp) with the same
+   10dp/8dp inset the native overlay used (SetCtrlPosition()'s m_sprInput + 10,+8), height chosen to
+   centre within the frame rather than overflow it as the native 20dp box did. */
+.msgwin-input-field {
+	position: absolute;
+	left: 42dp;
+	top: 80dp;
+	width: 151dp;
+	height: 15dp;
+	padding: 0;
+	color: token(text-narrative);
+	font-size: 11dp;
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
+}
+
 .btn {
 	display: none;
 	position: absolute;

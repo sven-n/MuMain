@@ -34,7 +34,12 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
-extern int g_iChatInputType;
+namespace
+{
+    // Same cap the native password box was given (SetTextLimit(20)). Set on #msgwin_input from C++
+    // so it stays one rule rather than a literal duplicated per theme.
+    constexpr int kResidentPasswordMaxLength = 20;
+}
 
 CMsgWin g_MsgWin;
 
@@ -53,7 +58,6 @@ void CMsgWin::Create()
 
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
 
-    m_sprInput.Create(171, 23, BITMAP_MSG_WIN_INPUT);
 
     memset(m_aszMsg[0], 0, sizeof(char) * MW_MSG_LINE_MAX * MW_MSG_ROW_MAX);
 
@@ -89,6 +93,7 @@ void CMsgWin::BuildRmlUi()
             c.Bind("mode_input", &model.modeInput);
             c.Bind("ok_label", &model.okLabel);
             c.Bind("cancel_label", &model.cancelLabel);
+            c.Bind("password_input", &model.residentPassword);
 
             c.BindEventCallback("msgwin_ok_click",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
@@ -117,7 +122,6 @@ void CMsgWin::ReloadRmlTheme()
 
 void CMsgWin::Release()
 {
-    m_sprInput.Release();
     m_sprBack.Release();
 
     // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
@@ -144,15 +148,8 @@ void CMsgWin::SetCtrlPosition()
     if (m_eType != MWT_STR_INPUT)
         return;
 
-    int nBaseXPos = m_sprBack.GetXPos();
-    int nBtnYPos = m_sprBack.GetYPos() + 72;
-
-    m_sprInput.SetPosition(nBaseXPos + 32, nBtnYPos + 4);
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
-        if (g_iChatInputType == 1)
-            // Stores real pixels (not divided by g_fScreenRate_x/y); RenderTextOnTop() forces an
-            // identity transform at render time so the two stay consistent regardless of caller.
-            g_pSinglePasswdInputBox->SetPosition(m_sprInput.GetXPos() + 10, m_sprInput.GetYPos() + 8);
+    // Nothing left to position here: the resident-password field is an RmlUi element placed by each
+    // theme's own .msgwin-input-field rule, inside #input_frame.
 }
 
 void CMsgWin::Show(bool bShow)
@@ -160,7 +157,6 @@ void CMsgWin::Show(bool bShow)
     mu::ui::window::CObject::Show(bShow);
 
     m_sprBack.Show(bShow);
-    m_sprInput.Show(bShow && m_eType == MWT_STR_INPUT);
 
     if (m_pRmlDoc)
     {
@@ -173,12 +169,6 @@ bool CMsgWin::Update()
 {
     if (!IsVisible())
         return true;
-
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
-        g_pSinglePasswdInputBox != nullptr && g_pSinglePasswdInputBox->GetState() == UISTATE_NORMAL)
-    {
-        g_pSinglePasswdInputBox->DoAction();
-    }
 
     CInput& rInput = CInput::Instance();
 
@@ -251,32 +241,10 @@ bool CMsgWin::Update()
 
 bool CMsgWin::Render()
 {
-    // RmlUi's #panel owns this dialog's visuals; m_sprBack/m_sprInput only track position for the
-    // still-native resident-password input, drawn separately by RenderTextOnTop().
+    // RmlUi's #panel owns this dialog's visuals, the resident-password field included; m_sprBack
+    // only tracks this window's position.
     SyncRmlModel();
     return true;
-}
-
-void CMsgWin::RenderTextOnTop()
-{
-    if (m_nMsgCode != MESSAGE_DELETE_CHARACTER_RESIDENT)
-        return;
-
-    if (g_iChatInputType == 1)
-    {
-        // Forces identity transform to match SetCtrlPosition()'s real-pixel coordinates.
-        const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
-        UI::Scaling::ScopedActiveTransform identity(transform);
-        g_pSinglePasswdInputBox->Render();
-    }
-    else if (g_iChatInputType == 0)
-    {
-        InputTextWidth = 100;
-        ::RenderInputText(
-            int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-            int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y), 0, 0);
-        InputTextWidth = 256;
-    }
 }
 
 void CMsgWin::SyncRmlModel()
@@ -557,11 +525,10 @@ void CMsgWin::ManageOKClick()
 
 void CMsgWin::ManageCancelClick()
 {
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
-        g_pSinglePasswdInputBox != nullptr)
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
     {
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
+        m_RmlBinder.GetModel().residentPassword.clear();
+        m_RmlBinder.MarkDirty("password_input");
     }
 
     m_nMsgCode = -1;
@@ -576,25 +543,34 @@ void CMsgWin::InitResidentNumInput()
     InputTextMax[0] = g_iLengthAuthorityCode;
     InputTextHide[0] = 1;
 
-    if (g_iChatInputType == 1)
+    m_RmlBinder.GetModel().residentPassword.clear();
+    m_RmlBinder.MarkDirty("password_input");
+
+    if (m_pRmlDoc)
     {
-        g_pSinglePasswdInputBox->SetState(UISTATE_NORMAL);
-        g_pSinglePasswdInputBox->SetOption(UIOPTION_NULL);
-        g_pSinglePasswdInputBox->SetBackColor(0, 0, 0, 0);
-        g_pSinglePasswdInputBox->SetTextLimit(20);
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->GiveFocus();
+        if (Rml::Element* field = m_pRmlDoc->GetElementById("msgwin_input"))
+        {
+            field->SetAttribute("maxlength", kResidentPasswordMaxLength);
+            // Explicit focus, not an autofocus attribute: this document is reused by every other
+            // MSG_WIN_TYPE, and only this one mode has a field to focus.
+            field->Focus();
+        }
     }
+}
+
+std::wstring CMsgWin::GetResidentPasswordInput() const
+{
+    return StringUtils::NarrowToWide(m_RmlBinder.GetModel().residentPassword);
 }
 
 void CMsgWin::RequestDeleteCharacter()
 {
-    if (g_iChatInputType == 1)
-    {
-        g_pSinglePasswdInputBox->GetText(InputText[0]);
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
-    }
+    const std::wstring typed = GetResidentPasswordInput();
+    wcsncpy(InputText[0], typed.c_str(), kResidentPasswordMaxLength);
+    InputText[0][kResidentPasswordMaxLength] = L'\0';
+    m_RmlBinder.GetModel().residentPassword.clear();
+    m_RmlBinder.MarkDirty("password_input");
+
     InputEnable = false;
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[SelectedHero].ID), MU_C16(InputText[0]));

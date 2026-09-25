@@ -89,7 +89,8 @@ Use a **stock RmlUi `<input>`**. There is no custom element, no C++ text widget 
 framework — the vendored engine already provides the editable buffer, caret, selection, clipboard,
 `maxlength`, tab focus, `change` events and IME composition. Consumers today: `CMyShopInventory`'s
 shop name, `CCharMakeWin`'s character name, `CGenericConfirmDialog`'s `Mode::Text` field, and
-`CLoginWin`'s username/password pair (the last also proving `type="password"` and Tab navigation).
+`CLoginWin`'s username/password pair (also proving `type="password"` and Tab navigation), and
+`CMsgWin`'s resident-password prompt.
 
 **Two rules that are invisible at compile time and will silently break a field:**
 

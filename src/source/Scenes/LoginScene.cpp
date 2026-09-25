@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "LoginScene.h"
+#include "UI/Windows/MsgWin.h"
 #include "Camera/CameraUtility.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMove.h"
@@ -112,12 +113,10 @@ void DeleteCharacter()
     int characterToDelete = SelectedHero;
     SelectedHero = -1;
 
-    if (g_iChatInputType == 1)
-    {
-        g_pSinglePasswdInputBox->GetText(InputText[0]);
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
-    }
+    // CMsgWin owns the resident-password field (#msgwin_input) that this request reads.
+    const std::wstring residentPassword = g_MsgWin.GetResidentPasswordInput();
+    wcsncpy(InputText[0], residentPassword.c_str(), _countof(InputText[0]) - 1);
+    InputText[0][_countof(InputText[0]) - 1] = L'\0';
 
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[characterToDelete].ID), MU_C16(InputText[0]));

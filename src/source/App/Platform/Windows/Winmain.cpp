@@ -2266,8 +2266,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {
                 BeginBitmap();
-                if (g_MsgWin.IsVisible())
-                    g_MsgWin.RenderTextOnTop();
                 RenderCursor();
                 EndBitmap();
             }
