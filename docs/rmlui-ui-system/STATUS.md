@@ -10,7 +10,8 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 
 - **Login/character-select scene (`CWin` tier)** — fully migrated, no remaining
   legacy-`CWin`-rendered chrome: `CLoginWin`, `CLoginMainWin`, `CSysMenuWin`,
-  `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`.
+  `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`,
+  and `CCreditWin` (`credit_win.rml`).
   `COptionWin` (the `CWin`-tier options window) was confirmed unreachable in live play — its
   RmlUi port was never wired up, and the class was later deleted outright as confirmed-dead code
   (see `README.md`'s Coexistence patterns); `CSysMenuWin`'s Option button opens
@@ -100,12 +101,13 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   count for free. `LoadImages()`/`UnloadImages()` are kept even though this window no longer
   renders through the legacy bitmap-atlas system: `CGensRanking` and `CUIMuHelper`'s own hunt/
   pick-range "+" buttons alias their own `IMAGE_LIST` entries onto these same texture slots (same
-  reason `CMyQuestInfoWindow` keeps its own `LoadImages()`). One deliberate simplification: the
-  summary box's original 8-piece pixel-tiled frame (4 corner sprites + a 1px sprite tiled across
-  each edge, nested per-pixel `for` loops) is reproduced as the 4 corner sprites plus a flat
-  translucent fill rather than a literal repeating-tile port — this build has no established,
-  verified pattern for a real 1px-tile repeat (see "Findings" below), and the corners alone already
-  read as "framed." **Modern theme, corrected same day**: the first pass gave this window its own
+  reason `CMyQuestInfoWindow` keeps its own `LoadImages()`). The legacy summary box follows the original `RenderFrame()`: its translucent fill,
+  the 4 corner sprites, each 1px edge sprite stretched across its edge, and the separator line
+  (2026-09-24, #623; the corners-plus-flat-fill simplification it replaced is gone). The same
+  change sizes every legacy text leaf to the native text renderer's physical size
+  (`UI::Scaling::NativeTextPixelSize`, bound as `text_px`, counter-scaled out of the panel
+  transform) and keeps the header's original 190-unit centring box, because RmlUi left-aligns
+  centred text that overflows its box. **Modern theme, corrected same day**: the first pass gave this window its own
   independent `.modern-frame`/`.modern-frame-crimson` redesign (matching `CMyQuestInfoWindow`, the
   nearest *technical-tier* sibling — no `C3DRenderMng`, no live-3D icon, so nothing forced a native
   frame). That was consistent with `CMyQuestInfoWindow` in isolation but visually broke from
@@ -403,7 +405,7 @@ for "the full architecture is in place":
   native and not yet a distinct port target (a real, unrelated visibility bug in it was found and
   fixed along the way, see its own ledger row — not a port). Conversely,
   `CCreditWin` turned out to already be a real, shipped RmlUi port (`credit_win.rml`) that was never
-  logged in this file's own "What's migrated" list above — worth adding there if confirmed.
+  logged in this file's own "What's migrated" list above — now listed there.
 - ~~`MuPlatform::Initialize()`/`CreatePlatformWindow()`/`GetWindow()`/`Shutdown()`/
   `SetFullscreen()`/`SetMouseGrab()`/`GetDisplaySize()`, and the `IPlatformWindow`/`SDLWindow`
   classes they own, show zero external callers.~~ **Investigated and fixed 2026-09-04.** Root
