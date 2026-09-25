@@ -72,6 +72,9 @@ bool WriteFileIfChanged(const std::filesystem::path& path, const std::string& te
     {
         std::ofstream file(temporaryPath, std::ios::binary | std::ios::trunc);
         file << text;
+        // Closing flushes; checking only afterwards also catches a failing
+        // final write (e.g. a full disk) before the old file is replaced.
+        file.close();
         if (!file)
         {
             AddError(issues, temporaryPath.string(), "could not be written");
@@ -128,8 +131,8 @@ ItemDataLoadResult LoadItemDataDirectory(const std::filesystem::path& directory)
     return result;
 }
 
-bool SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
-                           std::vector<ItemDataIssue>& issues)
+ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
+                                         std::vector<ItemDataIssue>& issues)
 {
     std::vector<ItemDefinition> existingItems;
     std::copy_if(items.begin(), items.end(), std::back_inserter(existingItems),
@@ -138,7 +141,7 @@ bool SaveItemDataDirectory(const std::filesystem::path& directory, std::span<con
     ValidateItems(existingItems, issues);
     if (HasErrors(issues))
     {
-        return false;
+        return ItemDataSaveResult::InvalidData;
     }
 
     std::error_code error;
@@ -150,6 +153,6 @@ bool SaveItemDataDirectory(const std::filesystem::path& directory, std::span<con
         const std::string text = WriteItemGroupJson(group, existingItems);
         success = WriteFileIfChanged(directory / GetItemGroupFileName(group), text, issues) && success;
     }
-    return success;
+    return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
 }
 } // namespace Data::Items

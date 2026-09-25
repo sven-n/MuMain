@@ -133,17 +133,22 @@ void CItemEditorActions::RenderSaveButton()
     if (ImGui::Button(I18N::Editor::SaveItems))
     {
         std::vector<Data::Items::ItemDataIssue> issues;
-        const bool saved = g_ItemDataHandler.Save(issues);
+        const Data::Items::ItemDataSaveResult result = g_ItemDataHandler.Save(issues);
         LogIssues(issues);
-        if (saved)
+        switch (result)
         {
+        case Data::Items::ItemDataSaveResult::Saved:
             g_MuEditorConsoleUI.LogEditor("Items saved to " + Data::Items::GetItemDataDirectory().string());
             ImGui::OpenPopup("Save Success");
-        }
-        else
-        {
+            break;
+        case Data::Items::ItemDataSaveResult::InvalidData:
             g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemDataHasErrors);
             ImGui::OpenPopup("Save Failed");
+            break;
+        case Data::Items::ItemDataSaveResult::WriteFailed:
+            g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemDataCouldNotBeWritten);
+            ImGui::OpenPopup("Save Write Failed");
+            break;
         }
     }
 
@@ -223,6 +228,14 @@ void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult&
                                       std::to_string(repair.number) + ") " + repair.field + ": " +
                                       std::to_string(repair.oldValue) + " -> " + std::to_string(repair.newValue) +
                                       " (" + source + ")");
+    }
+
+    g_MuEditorConsoleUI.LogEditor(std::to_string(result.keptEnglishNameCount) +
+                                  " items the English file lacks kept their current English name");
+    LogIssues(result.validationIssues);
+    if (Data::Items::HasErrors(result.validationIssues))
+    {
+        g_MuEditorConsoleUI.LogEditor("Fix the errors above before saving; Save refuses data with errors.");
     }
 }
 

@@ -4,6 +4,8 @@
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
@@ -93,6 +95,12 @@ private:
     std::filesystem::path m_directory;
 };
 
+std::string ReadWholeFile(const std::filesystem::path& path)
+{
+    std::ifstream file(path, std::ios::binary);
+    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+}
+
 const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int itemType)
 {
     const auto found = std::find_if(items.begin(), items.end(), [&](const ItemDefinition& item) {
@@ -152,7 +160,7 @@ TEST_CASE("Saved item data loads back the same [data][items]")
     const std::filesystem::path savedDirectory = folder.Directory() / GetItemDataDirectory();
 
     std::vector<ItemDataIssue> issues;
-    REQUIRE(SaveItemDataDirectory(savedDirectory, shipped.items, issues));
+    REQUIRE(SaveItemDataDirectory(savedDirectory, shipped.items, issues) == ItemDataSaveResult::Saved);
 
     const ItemDataLoadResult saved = LoadItemDataDirectory(savedDirectory);
     CHECK(saved.issues.empty());
@@ -200,6 +208,19 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
+TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    TemporaryClientFolder folder;
+    // A file where the item folder should be: nothing can be written there.
+    const std::filesystem::path blocked = folder.Directory() / "blocked";
+    std::ofstream(blocked) << "not a folder";
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
+    CHECK_FALSE(issues.empty());
+}
+
 #ifdef _EDITOR
 TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 {
@@ -239,6 +260,21 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.Find(KrisType)->names.GetTranslations().empty());
     }
 
+    SUBCASE("a value change keeps a name longer than ITEM_ATTRIBUTE can hold")
+    {
+        const std::string longName(MAX_ITEM_NAME + 10, 'x');
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.names.Set("en", longName);
+        g_ItemDatabase.Set(kris);
+        ToItemAttribute(*g_ItemDatabase.Find(KrisType), ItemAttribute[KrisType]);
+
+        ItemAttribute[KrisType].Width = 2;
+        g_ItemDataHandler.OnItemEdited(KrisType);
+
+        CHECK(g_ItemDatabase.Find(KrisType)->names.GetNeutral() == longName);
+        CHECK(g_ItemDatabase.Find(KrisType)->width == 2);
+    }
+
     SUBCASE("a moved item keeps all its names")
     {
         const int emptyType = MakeItemType(0, 100);
@@ -251,5 +287,47 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(moved->names.Get("pt") == "L\xC3\xA2mina");
         CHECK(g_ItemDatabase.Find(BladeType) == nullptr);
     }
+}
+
+TEST_CASE("Importing the bmd files over the shipped data gives the shipped data [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+
+    // (13,97)-(13,99) exist only in the Portuguese file; they keep the
+    // English names the shipped data gives them.
+    CHECK(result.keptEnglishNameCount == 3);
+    CHECK(result.validationIssues.empty());
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        INFO(GetItemGroupFileName(group));
+        CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
+              ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
+    }
+}
+
+TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    std::filesystem::copy(DataDirectory / "Items", folder.Directory() / GetItemDataDirectory(),
+                          std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+    for (const ItemBmdLanguage& language : GetItemBmdLanguages())
+    {
+        std::filesystem::create_directories(folder.Directory() / "Data" / "Local" / language.folder);
+    }
+    ClientDataScope client(folder.Directory());
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+
+    std::string firstChangeLog;
+    CHECK(g_ItemDataHandler.ExportAsBmd(firstChangeLog));
+
+    std::string secondChangeLog;
+    CHECK(g_ItemDataHandler.ExportAsBmd(secondChangeLog));
 }
 #endif

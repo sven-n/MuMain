@@ -49,7 +49,14 @@ struct ItemBmdImportResult
     int recoveredNameCount = 0;
     // Names that were not UTF-8 and were read as Windows-1252.
     int reencodedNameCount = 0;
+    // Problems reading the files; with errors nothing was imported.
     std::vector<ItemDataIssue> issues;
+
+    // Filled by CItemDataHandler::ImportFromBmd: English names kept from the
+    // current data for items the English file lacks, and the problems the
+    // imported data still has (Save refuses it while they are errors).
+    int keptEnglishNameCount = 0;
+    std::vector<ItemDataIssue> validationIssues;
 };
 
 // Reads Data/Local/<folder>/Item_<folder>.bmd for every language, relative

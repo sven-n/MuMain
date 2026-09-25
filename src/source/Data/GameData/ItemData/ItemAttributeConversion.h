@@ -14,6 +14,9 @@ namespace Data::Items
 {
 std::wstring ReadItemAttributeName(const ITEM_ATTRIBUTE& attribute);
 
+// The name as ITEM_ATTRIBUTE holds it: cut to MAX_ITEM_NAME - 1 characters.
+std::wstring CutToItemAttributeName(const std::wstring& name);
+
 // Copies everything except the name.
 void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition);
 

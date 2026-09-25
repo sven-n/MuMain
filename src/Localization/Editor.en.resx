@@ -460,4 +460,7 @@
   <data name="Item data has errors" xml:space="preserve">
     <value>The item data has errors and was not saved. See the console.</value>
   </data>
+  <data name="Item data could not be written" xml:space="preserve">
+    <value>The item data files could not be written. See the console.</value>
+  </data>
 </root>

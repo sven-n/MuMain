@@ -14,6 +14,8 @@
 #include <memory>
 
 #ifdef _EDITOR
+#include "Data/DataHandler/CommonDataSaver.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "ItemDataSaver.h"
 #include "ItemDataExportS6E3.h"
 #include "ItemDataExportAsCSV.h"
@@ -196,9 +198,11 @@ void CItemDataHandler::OnItemEdited(int itemType)
     CopyItemAttributeStats(attribute, definition);
 
     // Only a changed name is stored; otherwise every stat edit would turn the
-    // shown English fallback into a translation.
+    // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
+    // name, so compare against the cut name, or a stat edit would store the
+    // cut version of a long name.
     const std::wstring editedName = ReadItemAttributeName(attribute);
-    if (editedName != definition.name)
+    if (editedName != CutToItemAttributeName(definition.name))
     {
         const std::string editedNameUtf8 = Core::Text::ToUtf8(editedName.c_str());
         definition.names.Set(g_ItemDatabase.GetDisplayLocale(), editedNameUtf8);
@@ -213,7 +217,7 @@ void CItemDataHandler::OnItemEdited(int itemType)
 
     // A removed translation shows the English name again.
     const ItemDefinition* updated = g_ItemDatabase.Find(itemType);
-    if (updated != nullptr && updated->name != editedName)
+    if (updated != nullptr && CutToItemAttributeName(updated->name) != editedName)
     {
         ToItemAttribute(*updated, attribute);
     }
@@ -224,7 +228,7 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
     g_ItemDatabase.Swap(firstItemType, secondItemType);
 }
 
-bool CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
+ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 {
     return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
 }
@@ -237,9 +241,28 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
         return result;
     }
 
+    result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
+    ValidateItems(result.items, result.validationIssues);
+
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     return result;
+}
+
+int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items)
+{
+    int keptCount = 0;
+    for (ItemDefinition& item : items)
+    {
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        if (!item.names.GetNeutral().empty() || current == nullptr || current->names.GetNeutral().empty())
+        {
+            continue;
+        }
+        item.names.Set(Data::LocalizedString::NeutralLocale, current->names.GetNeutral());
+        ++keptCount;
+    }
+    return keptCount;
 }
 
 bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
@@ -249,7 +272,11 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
     {
         const auto attributes = BuildItemAttributes(language.locale);
         std::string languageChangeLog;
-        success = ItemDataSaver::Save(GetItemFilePath(language.folder).c_str(), attributes.get(), &languageChangeLog) && success;
+        const bool saved =
+            ItemDataSaver::Save(GetItemFilePath(language.folder).c_str(), attributes.get(), &languageChangeLog);
+        // An unchanged file is not a failure.
+        const bool unchanged = !saved && languageChangeLog == CommonDataSaver::NoChangesMessage;
+        success = (saved || unchanged) && success;
         changeLog += languageChangeLog;
     }
     return success;

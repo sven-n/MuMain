@@ -82,11 +82,16 @@ void CopyRequirements(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribut
 
 void CopyName(const std::wstring& name, ITEM_ATTRIBUTE& attribute)
 {
-    const size_t length = std::min(name.size(), static_cast<size_t>(MAX_ITEM_NAME - 1));
+    const std::wstring cutName = CutToItemAttributeName(name);
     std::fill(std::begin(attribute.Name), std::end(attribute.Name), L'\0');
-    name.copy(attribute.Name, length);
+    cutName.copy(attribute.Name, cutName.size());
 }
 } // namespace
+
+std::wstring CutToItemAttributeName(const std::wstring& name)
+{
+    return name.substr(0, static_cast<size_t>(MAX_ITEM_NAME - 1));
+}
 
 std::wstring ReadItemAttributeName(const ITEM_ATTRIBUTE& attribute)
 {
