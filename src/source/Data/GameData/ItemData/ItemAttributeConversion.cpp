@@ -14,7 +14,7 @@ void CopyStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition)
 {
     definition.width = attribute.Width;
     definition.height = attribute.Height;
-    definition.slot = attribute.m_byItemSlot;
+    definition.slot = static_cast<ItemSlot>(attribute.m_byItemSlot);
     definition.twoHanded = attribute.TwoHand;
     definition.skill = attribute.m_wSkillIndex;
     definition.level = attribute.Level;
@@ -49,7 +49,7 @@ void CopyStats(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribute)
 {
     attribute.Width = definition.width;
     attribute.Height = definition.height;
-    attribute.m_byItemSlot = definition.slot;
+    attribute.m_byItemSlot = static_cast<BYTE>(definition.slot);
     attribute.TwoHand = definition.twoHanded;
     attribute.m_wSkillIndex = definition.skill;
     attribute.Level = definition.level;
@@ -103,6 +103,18 @@ void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& def
 {
     CopyStats(attribute, definition);
     CopyRequirements(attribute, definition);
+}
+
+void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target)
+{
+    target.tags = source.tags;
+    target.wingTier = source.wingTier;
+    target.tradable = source.tradable;
+    target.droppable = source.droppable;
+    target.storable = source.storable;
+    target.sellable = source.sellable;
+    target.personalShopSellable = source.personalShopSellable;
+    target.repairable = source.repairable;
 }
 
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)

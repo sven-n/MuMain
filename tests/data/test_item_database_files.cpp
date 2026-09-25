@@ -190,7 +190,7 @@ TEST_CASE("Bmd import recovers long names and repairs the fields they overwrote 
     CHECK(ticket->names.GetNeutral() == "Open Access Ticket to Chaos Castle");
     CHECK_FALSE(ticket->twoHanded);
     CHECK(ticket->level == 0);
-    CHECK(ticket->slot == ItemSlotNone);
+    CHECK(ticket->slot == ItemSlot::None);
 }
 
 TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][items]")
@@ -303,6 +303,8 @@ TEST_CASE("Importing the bmd files over the shipped data gives the shipped data 
     // English names the shipped data gives them.
     CHECK(result.keptEnglishNameCount == 3);
     CHECK(result.validationIssues.empty());
+    // Tags, wing tiers and rule flags are not in the bmd files; the items keep
+    // the ones they have, so the files below match.
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
         INFO(GetItemGroupFileName(group));

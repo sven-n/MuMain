@@ -25,10 +25,7 @@ ItemDatabase& ItemDatabase::GetInstance()
     return instance;
 }
 
-ItemDatabase::ItemDatabase()
-    : m_definitions(MAX_ITEM)
-{
-}
+ItemDatabase::ItemDatabase() : m_definitions(MAX_ITEM), m_ruleData(MAX_ITEM) {}
 
 void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 {
@@ -45,6 +42,10 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
         UpdateDisplayName(slot);
     }
 
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        UpdateRuleData(itemType);
+    }
     CountExistingItems();
 }
 
@@ -93,9 +94,11 @@ void ItemDatabase::Set(const ItemDefinition& definition)
 
     // Stats are kept even without names, so an item whose name is cleared
     // and typed again in the editor keeps its values.
-    ItemDefinition& slot = m_definitions[MakeItemType(definition.group, definition.number)];
+    const int itemType = MakeItemType(definition.group, definition.number);
+    ItemDefinition& slot = m_definitions[itemType];
     slot = definition;
     UpdateDisplayName(slot);
+    UpdateRuleData(itemType);
     CountExistingItems();
 }
 
@@ -113,12 +116,36 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
     first.number = GetItemNumber(firstItemType);
     second.group = GetItemGroup(secondItemType);
     second.number = GetItemNumber(secondItemType);
+    UpdateRuleData(firstItemType);
+    UpdateRuleData(secondItemType);
 }
 
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 {
     definition.name =
         definition.Exists() ? Core::Text::FromUtf8(definition.names.Get(m_displayLocale)) : std::wstring();
+}
+
+void ItemDatabase::UpdateRuleData(int itemType)
+{
+    const ItemDefinition& definition = m_definitions[itemType];
+    RuleData& ruleData = m_ruleData[itemType];
+    ruleData = RuleData{};
+    if (!definition.Exists())
+    {
+        return;
+    }
+
+    ruleData.tags = definition.tags;
+    ruleData.slot = definition.slot;
+    ruleData.wingTier = definition.wingTier;
+    for (int action = 0; action < static_cast<int>(ItemAction::Count); ++action)
+    {
+        if (!definition.IsAllowed(static_cast<ItemAction>(action)))
+        {
+            ruleData.blockedActions |= ActionBit(static_cast<ItemAction>(action));
+        }
+    }
 }
 
 void ItemDatabase::CountExistingItems()

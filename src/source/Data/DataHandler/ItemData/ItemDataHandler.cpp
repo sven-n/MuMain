@@ -242,6 +242,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
+    KeepFieldsNotInBmd(result.items);
     ValidateItems(result.items, result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
@@ -263,6 +264,17 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
         ++keptCount;
     }
     return keptCount;
+}
+
+void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items)
+{
+    for (ItemDefinition& item : items)
+    {
+        if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
+        {
+            CopyFieldsNotInItemAttribute(*current, item);
+        }
+    }
 }
 
 bool CItemDataHandler::ExportAsBmd(std::string& changeLog)

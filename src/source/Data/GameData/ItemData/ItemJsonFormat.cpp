@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemJsonFormat.h"
+#include "ItemEnumNames.h"
 #include "ItemType.h"
 
 #include "json.hpp"
@@ -49,6 +50,7 @@ constexpr const char* Group = "group";
 constexpr const char* Items = "items";
 constexpr const char* Number = "number";
 constexpr const char* Name = "name";
+constexpr const char* Tags = "tags";
 constexpr const char* Requirements = "requirements";
 constexpr const char* ClassRequirements = "classRequirements";
 constexpr const char* Resistances = "resistances";
@@ -69,7 +71,8 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
 {
     visit("width", definition.width, BYTE{0});
     visit("height", definition.height, BYTE{0});
-    visit("slot", definition.slot, ItemSlotNone);
+    visit("slot", definition.slot, ItemSlot::None);
+    visit("wingTier", definition.wingTier, WingTier::None);
     visit("twoHanded", definition.twoHanded, false);
     visit("skill", definition.skill, WORD{0});
     visit("level", definition.level, WORD{0});
@@ -86,6 +89,25 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("attackType", definition.attackType, BYTE{0});
     visit("sellValue", definition.sellValue, BYTE{0});
     visit("buyPrice", definition.buyPrice, 0);
+    visit("tradable", definition.tradable, true);
+    visit("droppable", definition.droppable, true);
+    visit("storable", definition.storable, true);
+    visit("sellable", definition.sellable, true);
+    visit("personalShopSellable", definition.personalShopSellable, true);
+    visit("repairable", definition.repairable, true);
+}
+
+// Lists the names of an enum for error messages: "a", "b" or "c".
+template <typename TEnum> std::string JoinEnumNames()
+{
+    std::string text;
+    const auto names = GetEnumNames(TEnum{});
+    for (size_t i = 0; i < names.size(); ++i)
+    {
+        text += i == 0 ? "" : (i + 1 == names.size() ? " or " : ", ");
+        text += std::string("\"") + names[i].name + "\"";
+    }
+    return text;
 }
 
 template <typename TRequirements, typename TVisitor>
@@ -119,6 +141,35 @@ void WriteByteTable(OrderedJson& item, const char* key, const std::array<BYTE, C
     }
 }
 
+// Enums are written by name. A value without a name (only possible for
+// data that failed validation) is written as its number.
+template <typename T> OrderedJson WriteValue(const T& value)
+{
+    if constexpr (std::is_enum_v<T>)
+    {
+        const char* name = FindEnumName(value);
+        return name != nullptr ? OrderedJson(name) : OrderedJson(static_cast<int>(value));
+    }
+    else
+    {
+        return OrderedJson(value);
+    }
+}
+
+// Tags in the order of ItemTag.
+OrderedJson WriteTags(const ItemTagSet& tags)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const EnumName<ItemTag>& tag : GetEnumNames(ItemTag{}))
+    {
+        if (tags.Has(tag.value))
+        {
+            json.push_back(tag.name);
+        }
+    }
+    return json;
+}
+
 // English first, then the translations sorted by locale.
 OrderedJson WriteNames(const LocalizedString& names)
 {
@@ -136,6 +187,10 @@ OrderedJson WriteItem(const ItemDefinition& definition)
     OrderedJson item;
     item[Keys::Number] = definition.number;
     item[Keys::Name] = WriteNames(definition.names);
+    if (!definition.tags.IsEmpty())
+    {
+        item[Keys::Tags] = WriteTags(definition.tags);
+    }
 
     const auto writeIfNotDefault = [](OrderedJson& target)
     {
@@ -143,7 +198,7 @@ OrderedJson WriteItem(const ItemDefinition& definition)
         {
             if (value != defaultValue)
             {
-                target[key] = value;
+                target[key] = WriteValue(value);
             }
         };
     };
@@ -179,6 +234,7 @@ private:
     void AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message);
     bool ReadIdentity(const OrderedJson& json, ItemDefinition& definition);
     bool ReadNames(const OrderedJson& json, LocalizedString& names);
+    void ReadTags(const OrderedJson& json, ItemTagSet& tags);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
     template <size_t Count>
@@ -204,7 +260,14 @@ void ItemReader::AddIssue(ItemDataIssueSeverity severity, const std::string& fie
 
 template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const std::string& field, T& value)
 {
-    if constexpr (std::is_same_v<T, bool>)
+    if constexpr (std::is_enum_v<T>)
+    {
+        if (!json.is_string() || !FindEnumValue(json.get<std::string>(), value))
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be " + JoinEnumNames<T>());
+        }
+    }
+    else if constexpr (std::is_same_v<T, bool>)
     {
         if (!json.is_boolean())
         {
@@ -295,6 +358,32 @@ bool ItemReader::ReadNames(const OrderedJson& json, LocalizedString& names)
     return true;
 }
 
+void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
+{
+    const auto list = json.find(Keys::Tags);
+    if (list == json.end())
+    {
+        return;
+    }
+    if (!list->is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Tags, "must be a list of tag names");
+        return;
+    }
+
+    for (const OrderedJson& entry : *list)
+    {
+        ItemTag tag{};
+        if (!entry.is_string() || !FindEnumValue(entry.get<std::string>(), tag))
+        {
+            AddIssue(ItemDataIssueSeverity::Error, Keys::Tags,
+                     entry.dump() + " is not a tag; tags are " + JoinEnumNames<ItemTag>());
+            continue;
+        }
+        tags.Set(tag);
+    }
+}
+
 void ItemReader::ReadStats(const OrderedJson& json, ItemDefinition& definition)
 {
     VisitStatFields(definition,
@@ -376,8 +465,8 @@ void ItemReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<st
 
 std::set<std::string, std::less<>> GetKnownItemKeys()
 {
-    std::set<std::string, std::less<>> keys{Keys::Number, Keys::Name, Keys::Requirements, Keys::ClassRequirements,
-                                            Keys::Resistances};
+    std::set<std::string, std::less<>> keys{
+        Keys::Number, Keys::Name, Keys::Tags, Keys::Requirements, Keys::ClassRequirements, Keys::Resistances};
     ItemDefinition unused;
     VisitStatFields(unused, [&](const char* key, auto&, const auto&) { keys.insert(key); });
     return keys;
@@ -395,6 +484,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
         return false;
     }
 
+    ReadTags(json, definition.tags);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadByteTable(json, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
@@ -464,6 +554,39 @@ bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, s
     group = static_cast<int>(groupNumber);
     return true;
 }
+// The JSON writer puts every list entry on its own line. Tag lists are short,
+// so they are easier to read on one line: "tags": ["jewel", "valuable"].
+std::string PutTagListsOnOneLine(const std::string& text)
+{
+    const std::string listStart = std::string("\"") + Keys::Tags + "\": [";
+    std::string result;
+    size_t position = 0;
+    while (true)
+    {
+        const size_t start = text.find(listStart, position);
+        const size_t end = start == std::string::npos ? std::string::npos : text.find(']', start);
+        if (end == std::string::npos)
+        {
+            result.append(text, position, std::string::npos);
+            return result;
+        }
+
+        result.append(text, position, start + listStart.size() - position);
+        // Tag names have no spaces, so every newline and indentation can go;
+        // only the space after each comma stays.
+        for (size_t i = start + listStart.size(); i < end; ++i)
+        {
+            const char character = text[i];
+            const bool afterComma = !result.empty() && result.back() == ',';
+            if (character != '\n' && (character != ' ' || afterComma))
+            {
+                result += character;
+            }
+        }
+        result += ']';
+        position = end + 1;
+    }
+}
 } // namespace
 
 void ReadItemGroupJson(std::string_view text, const std::string& source, std::vector<ItemDefinition>& items,
@@ -528,6 +651,6 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
 
     // Names are UTF-8 already; replace (instead of throwing on) anything that
     // is not, so a bad name can never stop a save half-way.
-    return root.dump(JsonIndent, ' ', false, OrderedJson::error_handler_t::replace) + "\n";
+    return PutTagListsOnOneLine(root.dump(JsonIndent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
 }
 } // namespace Data::Items

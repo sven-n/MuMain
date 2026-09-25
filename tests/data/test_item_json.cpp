@@ -46,7 +46,7 @@ ItemDefinition MakeKris()
     kris.names = Data::LocalizedString::Parse("Kris||pt=Cris");
     kris.width = 1;
     kris.height = 2;
-    kris.slot = 0;
+    kris.slot = ItemSlot::MainHand;
     kris.level = 6;
     kris.damageMin = 6;
     kris.damageMax = 11;
@@ -101,7 +101,7 @@ TEST_CASE("Item JSON leaves out default values [data][items]")
 
     const ReadResult result = Read(text);
     REQUIRE(result.items.size() == 1);
-    CHECK(result.items.front().slot == ItemSlotNone);
+    CHECK(result.items.front().slot == ItemSlot::None);
 }
 
 TEST_CASE("Item JSON output is sorted and stable [data][items]")
@@ -253,5 +253,83 @@ TEST_CASE("Item name language codes must be codes [data][items]")
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{valid}, issues);
+    CHECK_FALSE(HasErrors(issues));
+}
+
+TEST_CASE("Item tags, wing tier and rule flags are kept through write and read [data][items]")
+{
+    ItemDefinition wing = MakeKris();
+    wing.slot = ItemSlot::Wings;
+    wing.wingTier = WingTier::Third;
+    wing.tags.Set(ItemTag::Valuable);
+    wing.tags.Set(ItemTag::CashShop);
+    wing.tradable = false;
+    wing.repairable = false;
+
+    const ReadResult result = Read(WriteItemGroupJson(0, std::vector<ItemDefinition>{wing}));
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+
+    const ItemDefinition& read = result.items.front();
+    CHECK(read.slot == ItemSlot::Wings);
+    CHECK(read.wingTier == WingTier::Third);
+    CHECK(read.tags == wing.tags);
+    CHECK_FALSE(read.tradable);
+    CHECK_FALSE(read.repairable);
+    CHECK(read.droppable);
+    CHECK(read.sellable);
+}
+
+TEST_CASE("Item slots, wing tiers and tags are written by name [data][items]")
+{
+    ItemDefinition wing = MakeKris();
+    wing.slot = ItemSlot::Wings;
+    wing.wingTier = WingTier::Second;
+    wing.tags.Set(ItemTag::Valuable);
+    wing.tags.Set(ItemTag::Jewel);
+    wing.sellable = false;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{wing});
+
+    CHECK(text.find(R"("slot": "wings")") != std::string::npos);
+    CHECK(text.find(R"("wingTier": "second")") != std::string::npos);
+    // In the order of ItemTag, on one line.
+    CHECK(text.find(R"("tags": ["jewel", "valuable"],)") != std::string::npos);
+    CHECK(text.find(R"("sellable": false)") != std::string::npos);
+    // Allowed actions are the default and left out.
+    CHECK(text.find("\"tradable\"") == std::string::npos);
+}
+
+TEST_CASE("Unknown slots, wing tiers and tags are errors [data][items]")
+{
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": 7})")).issues,
+                   ItemDataIssueSeverity::Error, "slot"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": "tail"})")).issues,
+                   ItemDataIssueSeverity::Error, "slot"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "wingTier": "fifth"})")).issues,
+                   ItemDataIssueSeverity::Error, "wingTier"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tags": ["jewl"]})")).issues,
+                   ItemDataIssueSeverity::Error, "tags"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tags": "jewel"})")).issues,
+                   ItemDataIssueSeverity::Error, "tags"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tradable": 0})")).issues,
+                   ItemDataIssueSeverity::Error, "tradable"));
+}
+
+TEST_CASE("Item validation checks slots and wing tiers [data][items]")
+{
+    ItemDefinition unnamedSlot = MakeKris();
+    unnamedSlot.slot = static_cast<ItemSlot>(11);
+    ItemDefinition wingTierWithoutWingSlot = MakeKris();
+    wingTierWithoutWingSlot.number = 1;
+    wingTierWithoutWingSlot.wingTier = WingTier::First;
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{unnamedSlot}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "slot"));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{wingTierWithoutWingSlot}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "wingTier"));
     CHECK_FALSE(HasErrors(issues));
 }

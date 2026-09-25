@@ -11,7 +11,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 23,
       "durability": 255,
       "requirements": {
@@ -36,7 +36,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 28,
       "durability": 255,
       "requirements": {
@@ -61,7 +61,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 25,
       "durability": 255,
       "requirements": {
@@ -86,7 +86,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "skill": 49,
       "level": 110,
       "durability": 255,
@@ -112,7 +112,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "skill": 62,
       "level": 218,
       "durability": 255,
@@ -132,7 +132,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 1,
+      "slot": "offHand",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -171,7 +171,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 20,
       "durability": 50,
       "attackType": 2,
@@ -200,7 +200,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 17,
       "durability": 50,
       "attackType": 4,
@@ -229,7 +229,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 200,
       "classRequirements": {
         "darkWizard": 1,
@@ -270,7 +270,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 21,
       "durability": 50,
       "attackType": 3,
@@ -299,7 +299,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 13,
       "durability": 50,
       "attackType": 1,
@@ -450,7 +450,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 30,
       "classRequirements": {
         "darkWizard": 1,
@@ -471,7 +471,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 30,
       "durability": 50,
       "attackType": 3,
@@ -500,7 +500,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 38,
       "durability": 50,
       "attackType": 1,
@@ -529,7 +529,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 44,
       "durability": 50,
       "attackType": 2,
@@ -558,7 +558,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 47,
       "durability": 50,
       "attackType": 3,
@@ -584,7 +584,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 34,
       "durability": 50,
       "attackType": 1,
@@ -613,7 +613,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 42,
       "durability": 50,
       "attackType": 2,
@@ -642,7 +642,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 46,
       "durability": 50,
       "attackType": 4,
@@ -671,7 +671,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 50,
       "durability": 50,
       "requirements": {
@@ -715,7 +715,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 180,
       "durability": 200,
       "requirements": {
@@ -847,7 +847,7 @@
       },
       "width": 2,
       "height": 2,
-      "slot": 8,
+      "slot": "pet",
       "level": 300,
       "durability": 255,
       "requirements": {
@@ -872,7 +872,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 21,
       "durability": 120,
       "attackType": 3,
@@ -898,7 +898,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 10,
       "durability": 255,
       "requirements": {
@@ -923,7 +923,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 10,
       "durability": 100,
       "requirements": {
@@ -948,7 +948,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 1,
       "durability": 100,
       "requirements": {
@@ -973,7 +973,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -1003,7 +1003,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1023,7 +1023,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1043,7 +1043,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1415,7 +1415,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
       "requirements": {
@@ -1440,7 +1440,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
       "requirements": {
@@ -1485,7 +1485,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 28,
       "durability": 255,
       "requirements": {
@@ -1510,7 +1510,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 10,
       "durability": 100,
       "requirements": {
@@ -1574,7 +1574,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -1595,7 +1595,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -1616,7 +1616,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -1637,7 +1637,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -1658,7 +1658,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -1679,7 +1679,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 1,
       "durability": 255,
       "requirements": {
@@ -1704,7 +1704,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
       "requirements": {
@@ -2045,7 +2045,7 @@
         "en": "Character Slot Key",
         "pt": "Fenda de Chave de Personagem"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 103,
@@ -2113,7 +2113,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 28,
       "durability": 255,
       "requirements": {
@@ -2138,7 +2138,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 100,
       "classRequirements": {
         "darkWizard": 1,
@@ -2159,7 +2159,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2179,7 +2179,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2199,7 +2199,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2219,7 +2219,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2239,7 +2239,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2259,7 +2259,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2279,7 +2279,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2299,7 +2299,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2415,7 +2415,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 1,
       "durability": 255,
       "requirements": {
@@ -2440,7 +2440,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
       "requirements": {
@@ -2544,7 +2544,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2565,7 +2565,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2586,7 +2586,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2607,7 +2607,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2628,7 +2628,7 @@
       },
       "width": 1,
       "height": 2,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2649,7 +2649,7 @@
       },
       "width": 1,
       "height": 2,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2670,7 +2670,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,

@@ -210,3 +210,51 @@ TEST_CASE("Swapping items moves them with their ids [data][items]")
     CHECK(moved->number == 5);
     CHECK(moved->names.GetNeutral() == "Kris");
 }
+
+TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
+{
+    ItemDefinition wing = MakeItem(12, 0, "Wings of Elf");
+    wing.slot = ItemSlot::Wings;
+    wing.wingTier = WingTier::First;
+    wing.tags.Set(ItemTag::Valuable);
+    wing.tradable = false;
+
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{wing});
+    const int wingType = MakeItemType(12, 0);
+
+    CHECK(database.HasTag(wingType, ItemTag::Valuable));
+    CHECK_FALSE(database.HasTag(wingType, ItemTag::Jewel));
+    CHECK(database.GetSlot(wingType) == ItemSlot::Wings);
+    CHECK(database.GetWingTier(wingType) == WingTier::First);
+    CHECK_FALSE(database.IsAllowed(wingType, ItemAction::Trade));
+    CHECK(database.IsAllowed(wingType, ItemAction::Drop));
+
+    // Empty slots and invalid ids have no tags and allow everything.
+    for (int itemType : {MakeItemType(12, 1), -1, MAX_ITEM})
+    {
+        CHECK_FALSE(database.HasTag(itemType, ItemTag::Valuable));
+        CHECK(database.GetSlot(itemType) == ItemSlot::None);
+        CHECK(database.IsAllowed(itemType, ItemAction::Trade));
+    }
+}
+
+TEST_CASE("Item database rule data follows editor changes [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
+    const int krisType = MakeItemType(SwordGroup, 0);
+
+    ItemDefinition changed = *database.Find(krisType);
+    changed.tags.Set(ItemTag::Valuable);
+    changed.droppable = false;
+    database.Set(changed);
+    CHECK(database.HasTag(krisType, ItemTag::Valuable));
+    CHECK_FALSE(database.IsAllowed(krisType, ItemAction::Drop));
+
+    database.Swap(krisType, MakeItemType(SwordGroup, 5));
+    CHECK_FALSE(database.HasTag(krisType, ItemTag::Valuable));
+    CHECK(database.IsAllowed(krisType, ItemAction::Drop));
+    CHECK(database.HasTag(MakeItemType(SwordGroup, 5), ItemTag::Valuable));
+    CHECK_FALSE(database.IsAllowed(MakeItemType(SwordGroup, 5), ItemAction::Drop));
+}

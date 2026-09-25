@@ -11,7 +11,7 @@
       },
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -31,7 +31,7 @@
       },
       "width": 5,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -52,7 +52,7 @@
       },
       "width": 5,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 100,
       "durability": 200,
       "defense": 20,
@@ -73,7 +73,7 @@
       },
       "width": 5,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -93,7 +93,7 @@
       },
       "width": 5,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -113,7 +113,7 @@
       },
       "width": 3,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 200,
       "defense": 45,
@@ -133,7 +133,7 @@
       },
       "width": 4,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 200,
       "defense": 40,
@@ -590,7 +590,7 @@
       },
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 60,
@@ -610,7 +610,7 @@
       },
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -630,7 +630,7 @@
       },
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -650,7 +650,7 @@
       },
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 55,
@@ -670,7 +670,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -690,7 +690,7 @@
       },
       "width": 4,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -710,7 +710,7 @@
       },
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -730,7 +730,7 @@
       },
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -842,7 +842,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 180,
       "durability": 200,
       "defense": 15,
@@ -862,7 +862,7 @@
       },
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -1447,7 +1447,7 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 119,
@@ -1456,7 +1456,7 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 120,
@@ -1465,7 +1465,7 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 121,
@@ -1474,7 +1474,7 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 122,
@@ -1483,7 +1483,7 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 123,
@@ -1492,7 +1492,7 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 124,
@@ -1501,7 +1501,7 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 125,
@@ -1510,7 +1510,7 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 126,
@@ -1519,7 +1519,7 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 127,
@@ -1528,7 +1528,7 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 128,
@@ -1537,7 +1537,7 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 129,
@@ -1546,7 +1546,7 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
-      "slot": 0
+      "slot": "mainHand"
     },
     {
       "number": 130,
@@ -1557,7 +1557,7 @@
       },
       "width": 2,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 1,
       "durability": 200,
       "defense": 15,
@@ -1577,7 +1577,7 @@
       },
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 1,
       "durability": 200,
       "defense": 10,
@@ -1597,7 +1597,7 @@
       },
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 1,
       "durability": 200,
       "defense": 10,
@@ -1617,7 +1617,7 @@
       },
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 1,
       "durability": 200,
       "defense": 10,
@@ -1638,7 +1638,7 @@
       },
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 1,
       "durability": 200,
       "defense": 20,
@@ -1659,7 +1659,7 @@
       },
       "width": 2,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
       "level": 1,
       "durability": 200,
       "defense": 15,

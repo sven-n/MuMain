@@ -50,6 +50,29 @@ public:
 
     const ItemDefinition* Find(int group, int number) const;
 
+    // Fast checks for the rule code. They read a small table next to the
+    // definitions. Invalid ids and empty slots have no tags, no slot and
+    // allow everything.
+    bool HasTag(int itemType, ItemTag tag) const
+    {
+        return IsValidItemType(itemType) && m_ruleData[itemType].tags.Has(tag);
+    }
+
+    bool IsAllowed(int itemType, ItemAction action) const
+    {
+        return !IsValidItemType(itemType) || (m_ruleData[itemType].blockedActions & ActionBit(action)) == 0;
+    }
+
+    ItemSlot GetSlot(int itemType) const
+    {
+        return IsValidItemType(itemType) ? m_ruleData[itemType].slot : ItemSlot::None;
+    }
+
+    WingTier GetWingTier(int itemType) const
+    {
+        return IsValidItemType(itemType) ? m_ruleData[itemType].wingTier : WingTier::None;
+    }
+
     // All MAX_ITEM slots, indexed by item type, including empty ones.
     std::span<const ItemDefinition> GetAllSlots() const
     {
@@ -68,10 +91,26 @@ public:
     void Swap(int firstItemType, int secondItemType);
 
 private:
+    // The part of a definition the rule code reads on hot paths.
+    struct RuleData
+    {
+        ItemTagSet tags;
+        BYTE blockedActions = 0;
+        ItemSlot slot = ItemSlot::None;
+        WingTier wingTier = WingTier::None;
+    };
+
+    static constexpr BYTE ActionBit(ItemAction action)
+    {
+        return static_cast<BYTE>(1u << static_cast<int>(action));
+    }
+
     void UpdateDisplayName(ItemDefinition& definition) const;
+    void UpdateRuleData(int itemType);
     void CountExistingItems();
 
     std::vector<ItemDefinition> m_definitions;
+    std::vector<RuleData> m_ruleData;
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
 };
