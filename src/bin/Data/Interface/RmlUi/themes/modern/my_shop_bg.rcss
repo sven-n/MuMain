@@ -100,18 +100,3 @@
 		transparent);
 }
 
-/* Relocated from the fg's #edit_bg -- that context renders after the native CUITextInputBox's own
-   Render(), so it was covering the input box instead of sitting behind it. */
-#edit_bg {
-	position: absolute;
-	left: 12px;
-	top: 49px;
-	width: 169px;
-	height: 26px;
-	pointer-events: none;
-	background-color: token(metal-dark);
-	decorator: linear-gradient(to bottom, rgba(0, 0, 0, 140), rgba(0, 0, 0, 60));
-	border: 1px token(border-frame);
-	border-radius: token(radius-sm)px;
-	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 200);
-}

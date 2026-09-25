@@ -1,8 +1,6 @@
-/* Legacy theme for CMyShopInventory's chrome (frame/title/Open-Close-Exit buttons). #panel's
-   left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px,
-   not dp. The nickname/subject CUITextInputBox itself stays fully native (MyShopInventory.cpp's
-   Create()) -- its own decorative background strip (#edit_bg) lives in my_shop_bg.rcss instead,
-   since this (foreground) context renders after the native CUITextInputBox's own Render(). */
+/* Legacy theme for CMyShopInventory's chrome (frame/title/shop-name field/Open-Close-Exit buttons).
+   #panel's left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are plain
+   reference px, not dp. */
 
 #panel {
 	position: absolute;
@@ -21,6 +19,27 @@
 	color: token(accent-blue);
 	font-weight: bold;
 	font-size: 12px;
+}
+
+/* Shop-name field: only placement/size plus this window's own bespoke strip art -- every other
+   visual comes from base.rcss's shared .text-field. Box is the exact 169x26 @ (12,49) the
+   newui_Box_openTitle strip occupied as #edit_bg; padding-left puts the first glyph at x=50, the
+   same place the native CUITextInputBox drew it (SetPosition(m_Pos.x + 50, m_Pos.y + 55)), clearing
+   the label baked into the left of that sprite. Text colour matches the old
+   SetTextColor(255, 255, 230, 210). */
+@spritesheet shop-edit-bg-sheet { src: "../../../newui_Box_openTitle.tga"; shop-edit-bg: 0px 0px 169px 26px; }
+.my-shop-title-field {
+	position: absolute;
+	left: 12px;
+	top: 49px;
+	width: 169px;
+	height: 26px;
+	padding: 6px 6px 0 38px;
+	font-size: 12px;
+	color: token(text-narrative);
+	background-color: transparent;
+	border-width: 0;
+	decorator: image(shop-edit-bg);
 }
 
 /* Buttons: same 36x29 reference-pixel boxes ChangeButtonInfo() used to place them at. */

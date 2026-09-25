@@ -71,10 +71,12 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `.modern-icon-btn-px` families give every window in this tier the same header/wallet/button
   chrome instead of a one-off per window. This is also the trigger condition the "Known gaps"
   entry below names for generalizing `RenderBackgroundLayer()` — see that entry for what changed.
-  `CMyShopInventory`/`CPurchaseShopInventory` keep their native `CUITextInputBox` subject-line field
-  exactly where `building-new-ui.md` says a Type-2 companion widget belongs — only its decorative
-  background sprite moved to RmlUi (and, after a visual bug, from the fg document to the bg one, so
-  it doesn't cover the real input box). **Update, 2026-09-23**: the remaining ordinary native text
+  `CMyShopInventory`'s shop-name field is a **stock RmlUi `<input>`** now — the first consumer moved
+  off the native `CUITextInputBox` companion, and the proving case for the shared `.text-field`
+  primitive (see `component-catalog.md`'s "Text field"). Its decorative `#edit_bg` strip is gone
+  with it: the field owns its own background in the foreground document, so the fg/bg paint-order
+  workaround that strip existed for no longer applies. `CPurchaseShopInventory` has no text input at
+  all (its shop-owner line is a read-only label), so nothing there to migrate. **Update, 2026-09-23**: the remaining ordinary native text
   blocks in this tier are also ported now — `CMixInventory`'s recipe/success-rate/source/advice/
   per-mixtype description text, `CMyShopInventory`'s static instructional lines (former
   `RenderTextInfo()`), `CLuckyItemWnd`'s result/description text (former `Render_Frame()`'s

@@ -83,6 +83,38 @@ each other.
 `.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label`, both themes' `base.rcss`
 — same shared-contract shape as Button.
 
+## Text field
+
+Use a **stock RmlUi `<input>`**. There is no custom element, no C++ text widget and no wrapper
+framework — the vendored engine already provides the editable buffer, caret, selection, clipboard,
+`maxlength`, tab focus, `change` events and IME composition, and `CMyShopInventory`'s shop-name
+field is the proving consumer (`themes/*/my_shop.rml`).
+
+Division of ownership:
+
+- **RML/RmlUi** owns the edit buffer, focus, caret, selection, IME composition display, text
+  clipping/scrolling and hit testing. Bind the value two-way with `data-value="<model field>"`; do
+  not poll the element each frame.
+- **RCSS** owns appearance. `.text-field` is the shared primitive in both themes' `base.rcss`
+  (`.text-field`, `:focus`, `.error`, `:disabled`, and the `selection` child for the selection
+  range). It deliberately carries **no** position or size — each consumer adds a local class for its
+  own box, the way `.my-shop-title-field` does.
+- **C++** owns the semantic value and the rules about it: the length cap (set the `maxlength`
+  attribute from code, as `ApplyShopTitleLimit()` does, so the limit can't drift per theme), any
+  character filtering, and what counts as valid. Surface an invalid value as model state that
+  toggles `.error` — never set a colour from C++.
+
+Notes for later consumers: use `type="password"` for masked input (the same `.text-field` styling
+applies); `autofocus` on the element makes `ElementDocument::Show()`'s own `FocusFlag::Auto` focus
+it on open, which is the declarative replacement for a native `GiveFocus()` call. SDL3 IME is
+handled once, centrally, by `RmlUiRuntime`'s installed `TextInputMethodEditor_SDL` plus
+`RmlUiSystemInterface::ActivateKeyboard()` — a consumer needs no IME code of its own.
+
+`CUITextInputBox` remains **transitional infrastructure for unmigrated consumers only**
+(`CLoginWin`, `CCharMakeWin`, `CGenericConfirmDialog::Mode::Text`, chat). It is not a permanent
+RmlUi companion primitive and is not globally retired — see `tracked-deferrals.md` for what each
+remaining consumer still needs.
+
 ## Layout utilities
 
 Not named in §20's own list, but the closest thing to a real cross-window primitive that exists
@@ -294,7 +326,9 @@ per-window, or entirely unbuilt:
   the closest thing to a "grid" concept in the codebase, and it hasn't been abstracted either (see
   `tracked-deferrals.md`'s pilots-to-revisit entry for why its icon art stayed legacy 2D). **List
   moved out of this bucket 2026-09-13** — see the "List / repeated rows" section above; `data-for`
-  already proves the pattern, it just isn't fully adopted yet.
+  already proves the pattern, it just isn't fully adopted yet. **Text field also moved out of this
+  bucket** — see the "Text field" section above; stock `<input>` plus a shared `.text-field` class
+  is the convention now, proven by `CMyShopInventory`.
 
 ## Tab / TabBar
 

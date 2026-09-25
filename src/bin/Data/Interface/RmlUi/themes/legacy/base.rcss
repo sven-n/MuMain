@@ -124,6 +124,41 @@ body {
 	cursor: default;
 }
 
+/* Shared editable-text primitive for stock RmlUi <input type="text"/"password"> -- the same tier as
+   .btn/.checkbox-* above. Owns appearance only (typography, fill, border, states); every consumer
+   supplies its own position/size through a local class, since no two fields share a box. Length
+   limits and value validation stay in C++ (the owning window sets maxlength and decides what a
+   valid value is) -- this layer only reflects the outcome, via .error below. */
+.text-field {
+	box-sizing: border-box;
+	cursor: text;
+	pointer-events: auto;
+	text-align: left;
+	color: token(text-input);
+	background-color: token(surface-control);
+	border: 1px token(border-control);
+	border-radius: token(radius-sm)px;
+}
+.text-field:focus {
+	border-color: token(accent-gold);
+}
+/* Semantic state pushed from the model (data-class-error), never a colour set from C++. */
+.text-field.error {
+	border-color: token(semantic-danger);
+	color: token(semantic-danger);
+}
+.text-field:disabled {
+	pointer-events: none;
+	color: token(text-disabled);
+	background-color: token(surface-recessed);
+}
+/* RmlUi styles the selection range through the widget's own <selection> child element, which reads
+   exactly these two properties (ElementTextSelection::OnPropertyChange). */
+.text-field selection {
+	color: token(surface-control);
+	background-color: token(text-selected);
+}
+
 .hidden {
 	display: none;
 }

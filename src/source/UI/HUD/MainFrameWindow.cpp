@@ -32,6 +32,7 @@
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
@@ -2549,16 +2550,10 @@ void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
 {
     const bool show = IsVisible() && sceneAllowsShow;
 
-    if (m_pRmlDoc)
-    {
-        if (show) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
-    }
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, show);
 
     // m_pRmlBgDoc needs the same gate: CManager::Render()'s centralized RenderBackgroundLayer()
     // call replays whatever's Show()n in the shared background context every frame, regardless of
     // whether this window itself is visible.
-    if (m_pRmlBgDoc)
-    {
-        if (show) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
-    }
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, show);
 }

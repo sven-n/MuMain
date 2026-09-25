@@ -57,9 +57,8 @@ See `ui-target-architecture.md` Section H item 15 for the full reasoning behind 
    the same way every other window in this tier does — see any file in `UI/HUD/`, `UI/Inventory/`,
    etc. for the pattern, or `newui-tier-adapter.md`'s "adapter shape" section for the full method
    contract (`Render()`/`Update()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`/`GetLayerDepth()`).
-3. **Widgets:** see the cheat sheet below. Default to the `mu::ui::window` widget family; drop to
-   `CUITextInputBox` only for single-line text entry, since nothing in this tier's own widget set
-   fills that need yet.
+3. **Widgets:** see the cheat sheet below. Default to the `mu::ui::window` widget family; for text
+   entry use a stock RmlUi `<input>` with the shared `.text-field` class, not `CUITextInputBox`.
 4. **Folder: by feature domain, not by toolkit.** `UI/Combat/`, `UI/Inventory/`, `UI/Events/`,
    `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Quests/`, `UI/Character/`, `UI/Options/`. `UI/Widgets/`
    is for genuinely generic, feature-agnostic controls only (not a catch-all). `UI/Dialogs/` is for
@@ -88,7 +87,7 @@ instead.
 | Scroll bar | `mu::ui::window::CScrollBar` | `UI/Widgets/Window/ScrollBar.h` | — |
 | Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/Window/TextBox.h` | — |
 | Chat input | `mu::ui::window::CChatInputBox` | `UI/Widgets/Window/ChatInputBox.h` | Internally still uses `CUITextInputBox` for the actual entry field — that's expected, not a bug |
-| Single-line text entry | `CUITextInputBox` | `UI/Widgets/UIControls.h` | Sanctioned exception — no equivalent exists yet in the `mu::ui::window` tier |
+| Single-line text entry | **stock RmlUi `<input>`** + shared `.text-field` | `themes/*/base.rcss`, `themes/*/my_shop.rml` | The convention for new UI — bind with `data-value`, style with `.text-field`, keep `maxlength`/validation in C++. See `component-catalog.md`'s "Text field". `CUITextInputBox` is the fallback for **unmigrated** windows only, not a choice for new ones |
 | Progress/gauge bar | *(none yet as a reusable wrapper — `CGaugeBar` is sprite-toolkit-only, closed)* | — | RmlUi's own built-in `<progress>` element (`RmlUi/Core/Elements/ElementProgress.h`, registered by `Factory.cpp` with no extra setup) is a real, proven option now — `title_scene.rml`'s loading bar uses it, with `SetValue()`/`SetMax()` called directly from C++. `main_frame.rcss`/`server_select.rcss`'s own gauges predate that and still use a plain div + `data-style-width`, not retrofitted — check `component-catalog.md`'s "doesn't exist yet" list before inventing a third pattern |
 | Scrollable list of rows | *(no native-tier wrapper — don't build one)* | — | `CUITextListBox<T>` (`UI/Widgets/UIControls.h`, `CUIControl` family) is the legacy answer and is closed to new consumers (`ui-target-architecture.md` Rule 11) — including from a window already on `mu::ui::window::CObject`, which doesn't exempt it. The real answer is RmlUi's `data-for` binding: `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list (ported off `CUICurQuestListBox`/`CUIQuestContentsListBox`) are the two proven references |
 | MU Helper bot-engine window | `mu::ui::window::CUIMuHelper` | `UI/Core/WindowMuHelper.h` | Deliberately kept its `UI` — the plain-stripped `CMuHelper` would collide with `MUHelper::CMuHelper`, the actual bot-logic engine this window displays/controls (a real, unrelated class, not a duplicate) |

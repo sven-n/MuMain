@@ -13,9 +13,6 @@
 		<div class="bg-left"></div>
 		<div class="bg-right"></div>
 		<div class="bg-bottom"></div>
-		<!-- Edit-box background strip, relocated from my_shop.rml's foreground document --
-		     see my_shop_bg.rcss's #edit_bg comment for why. -->
-		<div id="edit_bg"></div>
 	</div>
 </body>
 </rml>

@@ -16,6 +16,10 @@ namespace
     const std::chrono::steady_clock::time_point g_StartTime = std::chrono::steady_clock::now();
 }
 
+RmlUiSystemInterface::RmlUiSystemInterface(SDL_Window* window) : m_Window(window)
+{
+}
+
 double RmlUiSystemInterface::GetElapsedTime()
 {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - g_StartTime).count();
@@ -50,4 +54,27 @@ void RmlUiSystemInterface::GetClipboardText(Rml::String& text)
     char* clipboard = SDL_GetClipboardText();
     text = clipboard ? clipboard : "";
     if (clipboard) SDL_free(clipboard);
+}
+
+void RmlUiSystemInterface::ActivateKeyboard(Rml::Vector2f caret_position, float line_height)
+{
+    // Same call shape as the vendored sample's SystemInterface_SDL::ActivateKeyboard
+    // (RmlUi_Platform_SDL.cpp) -- caret_position/line_height already arrive in real window-pixel
+    // space (WidgetTextInput::SetKeyboardActive() derives them from GetAbsoluteOffset(), and this
+    // engine's RmlUi context is created directly from real window pixel dimensions, see
+    // RmlUiRuntime::Create()'s own ApplyUIScale comment), so no coordinate transform is needed
+    // here -- unlike CUITextInputBox::GetCaretArea(), which is in the legacy reference-resolution
+    // space and needs Winmain.cpp's own UI::Scaling::TransformForLayout() call.
+    m_TextInputActive = true;
+    if (!m_Window) return;
+    const SDL_Rect rect = {static_cast<int>(caret_position.x), static_cast<int>(caret_position.y), 1, static_cast<int>(line_height)};
+    SDL_SetTextInputArea(m_Window, &rect, 0);
+    SDL_StartTextInput(m_Window);
+}
+
+void RmlUiSystemInterface::DeactivateKeyboard()
+{
+    m_TextInputActive = false;
+    if (!m_Window) return;
+    SDL_StopTextInput(m_Window);
 }

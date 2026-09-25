@@ -5,15 +5,21 @@
 	<link type="text/rcss" href="my_shop.rcss"/>
 </head>
 <body data-model="my_shop">
-	<!-- Window frame/title/edit-box background strip/Open-Close-Exit buttons only -- inventory grid
-	     and the nickname/subject CUITextInputBox stay native (MyShopInventory.h). Background lives
-	     in my_shop_bg.rml instead, since it must paint behind the native 3D icons. -->
+	<!-- Window frame/title/shop-name field/Open-Close-Exit buttons only -- the inventory grid stays
+	     native (MyShopInventory.h). Frame background lives in my_shop_bg.rml instead, since it must
+	     paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<span id="title">{{title}}</span>
 
-		<!-- #edit_bg moved to my_shop_bg.rml -- this context renders after the native
-		     CUITextInputBox's Render(), so it was covering the input box, not sitting behind it. -->
+		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and
+		     two-way binds the committed value to MyShopRmlModel::shopTitle. autofocus is what
+		     reproduces the old native GiveFocus()-on-open -- ElementDocument::Show()'s own
+		     FocusFlag::Auto picks it up, so no C++ focus call is needed. maxlength comes from C++
+		     (ApplyShopTitleLimit()). Owns its own background now, so the separate #edit_bg strip
+		     this window used to need in the background document is gone. -->
+		<input id="shop_title" type="text" class="text-field my-shop-title-field"
+		       data-value="shop_title" autofocus/>
 
 		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click"></div>
 		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>

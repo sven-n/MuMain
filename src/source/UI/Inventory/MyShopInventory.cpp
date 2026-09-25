@@ -13,6 +13,7 @@
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -220,7 +221,6 @@ mu::ui::window::CMyShopInventory::CMyShopInventory() : m_SourceIndex(-1), m_Targ
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
     m_Pos.x = m_Pos.y = 0;
-    m_EditBox = NULL;
     m_bIsEnableInputValueTextBox = false;
     m_bOpenLocked = false;
     m_bOpenApplyTooltip = false;
@@ -250,15 +250,6 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
 
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_MY_SHOP);
 
-    m_EditBox = new CUITextInputBox;
-
-    m_EditBox->Init(g_hWnd, 200, 14, iMAX_SHOPTITLE_MULTI - 1);
-    m_EditBox->SetPosition(m_Pos.x + 50, m_Pos.y + 55);
-    m_EditBox->SetTextColor(255, 255, 230, 210);
-    m_EditBox->SetBackColor(0, 0, 0, 25);
-    m_EditBox->SetFont(g_hFont);
-
-    ChangeEditBox(UISTATE_NORMAL);
     ChangePersonal(m_EnablePersonalShop);
 
     BuildRmlUi();
@@ -282,6 +273,7 @@ void mu::ui::window::CMyShopInventory::BuildRmlUi()
                 c.Bind("root_scale", &model.rootScale);
 
                 c.Bind("title", &model.title);
+                c.Bind("shop_title", &model.shopTitle);
                 c.Bind("exit_tooltip", &model.exitTooltip);
 
                 c.Bind("open_locked", &model.openLocked);
@@ -374,6 +366,7 @@ void mu::ui::window::CMyShopInventory::BuildRmlUi()
             model.stillOpeningText = StringUtils::WideToNarrow(I18N::Game::StillOpening);
 
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_shop.rml");
+            ApplyShopTitleLimit();
         }
 
         // Frame background panel uses the background context -- see MyShopBgRmlModel (MyShopInventory.h).
@@ -403,6 +396,11 @@ void mu::ui::window::CMyShopInventory::ReloadRmlTheme()
 {
     if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
 
+    // The typed shop name lives in the data model, which is destroyed below -- carry it across the
+    // rebuild so switching theme mid-edit doesn't silently clear the field (the native
+    // CUITextInputBox this replaced was theme-independent and never lost it).
+    const Rml::String preservedShopTitle = m_RmlBinder.GetModel().shopTitle;
+
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
@@ -419,13 +417,18 @@ void mu::ui::window::CMyShopInventory::ReloadRmlTheme()
     }
 
     BuildRmlUi();
+
+    if (m_pRmlDoc)
+    {
+        m_RmlBinder.GetModel().shopTitle = preservedShopTitle;
+        m_RmlBinder.MarkDirty("shop_title");
+    }
     // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
 }
 
 void mu::ui::window::CMyShopInventory::Release()
 {
     SAFE_DELETE(m_pNewInventoryCtrl);
-    SAFE_DELETE(m_EditBox);
 
     if (m_pNewUIMng)
     {
@@ -452,14 +455,53 @@ void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
     }
 }
 
+// Caps the <input>'s own edit buffer at the same length the native CUITextInputBox was given
+// (Init()'s iMAX_SHOPTITLE_MULTI - 1). Set from here rather than written into each theme's .rml so
+// the limit stays a single C++ rule that can't drift per theme.
+void mu::ui::window::CMyShopInventory::ApplyShopTitleLimit()
+{
+    if (!m_pRmlDoc) return;
+
+    if (Rml::Element* field = m_pRmlDoc->GetElementById("shop_title"))
+        field->SetAttribute("maxlength", iMAX_SHOPTITLE_MULTI - 1);
+}
+
+// Drops keyboard focus from the shop-title <input> unless the cursor is inside it, reading the
+// field's position/size live from RCSS (same contract as this window's WindowGeometry hit-box) so
+// a theme is free to move or resize it without a matching C++ edit.
+void mu::ui::window::CMyShopInventory::BlurShopTitleOnOutsideClick()
+{
+    if (!m_pRmlDoc) return;
+
+    Rml::Element* field = m_pRmlDoc->GetElementById("shop_title");
+    if (field == nullptr || field->IsPseudoClassSet("focus") == false) return;
+
+    float fieldX = 0.f, fieldY = 0.f;
+    float fieldWidth = 0.f, fieldHeight = 0.f;
+    if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "shop_title", GetLayoutMode(), fieldX, fieldY)
+        && UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "shop_title", fieldWidth, fieldHeight)
+        && CheckMouseIn(static_cast<int>(fieldX), static_cast<int>(fieldY),
+                        static_cast<int>(fieldWidth), static_cast<int>(fieldHeight)))
+    {
+        return;
+    }
+
+    field->Blur();
+}
+
 void mu::ui::window::CMyShopInventory::GetTitle(wchar_t* titletext)
 {
-     m_EditBox->GetText(titletext, iMAX_SHOPTITLE_MULTI);
+    if (titletext == nullptr) return;
+
+    const std::wstring title = StringUtils::NarrowToWide(m_RmlBinder.GetModel().shopTitle);
+    wcsncpy(titletext, title.c_str(), iMAX_SHOPTITLE_MULTI - 1);
+    titletext[iMAX_SHOPTITLE_MULTI - 1] = L'\0';
 }
 
 void mu::ui::window::CMyShopInventory::SetTitle(wchar_t* titletext)
 {
-    m_EditBox->SetText(titletext);
+    m_RmlBinder.GetModel().shopTitle = (titletext != nullptr) ? StringUtils::WideToNarrow(titletext) : Rml::String();
+    m_RmlBinder.MarkDirty("shop_title");
 }
 
 bool mu::ui::window::CMyShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -523,17 +565,6 @@ void mu::ui::window::CMyShopInventory::OpenButtonUnLock()
 const bool mu::ui::window::CMyShopInventory::IsEnablePersonalShop() const
 {
     return m_EnablePersonalShop;
-}
-
-void mu::ui::window::CMyShopInventory::ChangeEditBox(const UISTATES type)
-{
-    m_EditBox->SetState(type);
-
-    if (type == UISTATE_NORMAL)
-    {
-        m_EditBox->GiveFocus();
-    }
-
 }
 
 bool mu::ui::window::CMyShopInventory::UpdateKeyEvent()
@@ -686,21 +717,15 @@ bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
             return false;
         }
 
-        if (mu::ui::window::IsRelease(VK_LBUTTON)
-            && CheckMouseIn(m_EditBox->GetPosition_x(), m_EditBox->GetPosition_y(), m_EditBox->GetWidth(), m_EditBox->GetHeight()))
-        {
-            ChangeEditBox(UISTATE_NORMAL);
-        }
-
-        if (mu::ui::window::IsRelease(VK_LBUTTON)
-            && CheckMouseIn(m_EditBox->GetPosition_x(), m_EditBox->GetPosition_y(), m_EditBox->GetWidth(), m_EditBox->GetHeight()) == false)
-        {
-            SetFocus(g_hWnd);
-            CUITextInputBox::ReleaseFocus();
-        }
+        // Click-to-focus is RmlUi's own (the <input> is the hovered element, so
+        // Context::ProcessMouseButtonDown focuses it). Only the release half needs help: RmlUi
+        // leaves focus alone when the click lands on a non-focusable element, so clicking the world
+        // or the panel chrome would otherwise keep the field focused -- and with it every hotkey
+        // suppressed (CHotKey::CanUpdateKeyEvent()). Mirror the native box's own blur-on-
+        // outside-click using the field's live RCSS rect, so no offset is duplicated here.
+        if (mu::ui::window::IsRelease(VK_LBUTTON))
+            BlurShopTitleOnOutsideClick();
     }
-
-    m_EditBox->DoAction();
 
     // The 3 real buttons (Exit/Open/Close) are handled by RmlUi's data-event-click (see Create()).
 
@@ -751,11 +776,11 @@ void mu::ui::window::CMyShopInventory::SyncRmlModel()
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
     }
 
     if (!m_pRmlDoc) return;
-    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
 
@@ -789,12 +814,8 @@ bool mu::ui::window::CMyShopInventory::Render()
     // Frame background panel is RmlUi, routed through the background context (see
     // MyShopBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer() call
     // before this window's own Render()/Render3D() run. The former RenderTextInfo() instructional
-    // text is RmlUi now too (MyShopRmlModel), driven by SyncRmlModel()/my_shop.rml.
-
-    if (m_EditBox)
-    {
-        m_EditBox->Render();
-    }
+    // text is RmlUi now too (MyShopRmlModel), driven by SyncRmlModel()/my_shop.rml. The shop-title
+    // field is a stock RmlUi <input> in that same document, so it needs no native render pass here.
 
     if (m_pNewInventoryCtrl)
     {
@@ -810,8 +831,10 @@ void mu::ui::window::CMyShopInventory::ClosingProcess()
 {
     CInventoryCtrl::BackupPickedItem();
     g_pMyInventory->ChangeMyShopButtonStateOpen();
-    SetFocus(g_hWnd);
-    CUITextInputBox::ReleaseFocus();
+    // The shop-title field is blurred by m_pRmlDoc->Hide() itself (ElementDocument::Hide() calls
+    // Context::UnfocusDocument()), which is what releases SDL text input -- no explicit release
+    // here, and notably not CUITextInputBox::ReleaseFocus(), which would now blur some other
+    // window's still-native field rather than this one's.
 }
 
 int mu::ui::window::CMyShopInventory::GetPointedItemIndex()
@@ -826,10 +849,7 @@ int mu::ui::window::CMyShopInventory::GetItemInventoryIndex(ITEM* pItem)
 
 void mu::ui::window::CMyShopInventory::ResetSubject()
 {
-    if (m_EditBox)
-    {
-        m_EditBox->SetText(NULL);
-    }
+    SetTitle(nullptr);
 }
 
 bool mu::ui::window::CMyShopInventory::IsEnableInputValueTextBox()

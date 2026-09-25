@@ -1,7 +1,6 @@
-/* Modern theme for CMyShopInventory's chrome -- header/edit-strip/buttons are vector forged-metal
-   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Inventory grid
-   and the nickname/subject CUITextInputBox stay fully native, same as legacy -- no RmlUi
-   involvement there. */
+/* Modern theme for CMyShopInventory's chrome -- header/shop-name field/buttons are vector
+   forged-metal chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language).
+   Only the inventory grid stays native, same as legacy -- no RmlUi involvement there. */
 
 #panel {
 	position: absolute;
@@ -14,7 +13,19 @@
 /* No .modern-header-rail-px override -- the default (top:7/height:38) already clears this
    window's grid start (`m_Pos.y + 90`) and the edit-box strip below it. */
 
-/* #edit_bg moved to my_shop_bg.rcss (background context) -- see that file's own comment. */
+/* Shop-name field: placement/size only -- the forged-metal fill, border and focus/error/disabled
+   states all come from base.rcss's shared .text-field. Same 169x26 @ (12,49) box the #edit_bg strip
+   occupied before the field itself became RmlUi; padding-left keeps the first glyph where the native
+   CUITextInputBox drew it (SetPosition(m_Pos.x + 50, ...)). */
+.my-shop-title-field {
+	position: absolute;
+	left: 12px;
+	top: 49px;
+	width: 169px;
+	height: 26px;
+	padding: 6px 6px 0 38px;
+	font-size: 12px;
+}
 
 /* Buttons: base.rcss's shared .modern-icon-btn-px family at its default 37x26/top:392 geometry --
    only left offsets differ (13/53/93, this window's own native spacing). */

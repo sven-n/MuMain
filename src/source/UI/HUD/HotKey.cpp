@@ -26,6 +26,7 @@
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MUHelper/MuHelper.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -411,7 +412,11 @@ bool mu::ui::window::CHotKey::CanUpdateKeyEventRelatedMyInventory()
 
 bool mu::ui::window::CHotKey::CanUpdateKeyEvent()
 {
-    if (CUITextInputBox::IsAnyInputBoxFocused())
+    // Two independent "is a text field currently editing" signals -- the legacy native
+    // CUITextInputBox companion (Login/CharMake/GenericConfirmDialog::Mode::Text) and a focused
+    // RmlUi <input> on any migrated consumer. Neither flag observes the other, so hotkeys must be
+    // suppressed on either being true.
+    if (CUITextInputBox::IsAnyInputBoxFocused() || RmlUiRuntime::Instance().IsTextInputActive())
     {
         return false;
     }

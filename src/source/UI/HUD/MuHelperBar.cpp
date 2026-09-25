@@ -9,6 +9,7 @@
 #include "MUHelper/MuHelper.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -186,12 +187,7 @@ float CMuHelperBar::GetLayerDepth()
 
 void CMuHelperBar::SyncDocVisibility(bool sceneAllowsShow)
 {
-    if (!m_pRmlDoc) return;
-
-    if (IsVisible() && sceneAllowsShow)
-        m_pRmlDoc->Show();
-    else
-        m_pRmlDoc->Hide();
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && sceneAllowsShow);
 }
 
 void CMuHelperBar::OpenningProcess()

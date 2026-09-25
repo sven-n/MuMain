@@ -7,6 +7,7 @@
 
 class RmlUiRenderInterface;
 class RmlUiSystemInterface;
+class TextInputMethodEditor_SDL; // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.h
 union SDL_Event;
 struct SDL_Window;
 
@@ -115,6 +116,23 @@ public:
 
     Rml::Context* GetContext() const { return m_Context; }
 
+    // True from the moment any RmlUi <input> across any of the three contexts is focused until
+    // it's blurred (RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard, which
+    // WidgetTextInput::SetKeyboardActive() already calls on every real Focus/Blur -- no polling,
+    // no heuristics). This is the single ownership signal Winmain.cpp's SDL_EVENT_TEXT_EDITING
+    // routing and its per-frame native SDL_StartTextInput/StopTextInput/SetTextInputArea block
+    // both key off: RmlUi wins whenever this is true, CUITextInputBox::GetFocusedPortable() is the
+    // fallback otherwise. Until an RmlUi <input> exists on a migrated screen, this is always
+    // false and every existing native-only screen's behavior is unchanged.
+    bool IsTextInputActive() const;
+
+    // Forwards one SDL_EVENT_TEXT_EDITING event to the installed Rml::TextInputHandler (the
+    // vendored TextInputMethodEditor_SDL -- see m_TextInputMethodEditor's own comment). Caller
+    // (Winmain.cpp) is expected to only call this when IsTextInputActive() is true; harmless
+    // no-op otherwise since TextInputMethodEditor_SDL::HandleEdit() itself no-ops with no active
+    // TextInputContext.
+    void ProcessTextEditing(const SDL_Event& event);
+
 private:
     RmlUiRuntime() = default;
     ~RmlUiRuntime();
@@ -124,6 +142,16 @@ private:
 
     std::unique_ptr<RmlUiRenderInterface> m_RenderInterface;
     std::unique_ptr<RmlUiSystemInterface> m_SystemInterface;
+
+    // Installed globally via Rml::SetTextInputHandler() in Create() -- global, not per-Context,
+    // per TextInputHandler.h's own doc comment, so one instance covers all three contexts below.
+    // Same class the vendored SDL_GPU/GL/DX/VK sample backends all install (grep
+    // ThirdParty/RmlUi/Backends for "text_input_method_editor"); this engine's own RmlUiRuntime
+    // never had an equivalent until now. Outlives every Rml::Context (reset only after
+    // Rml::Shutdown() in Destroy(), same contract as m_RenderInterface/m_SystemInterface above) --
+    // a live WidgetTextInputContext can call back into it during document/element teardown.
+    std::unique_ptr<TextInputMethodEditor_SDL> m_TextInputMethodEditor;
+
     Rml::Context* m_Context = nullptr; // owned by Rml::Core, released via Rml::Shutdown()
 
     // Background-only companion to m_Context -- see RenderBackgroundLayer()'s own comment. Never

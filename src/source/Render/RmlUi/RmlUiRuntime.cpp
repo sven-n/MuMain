@@ -67,7 +67,7 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     }
 
     m_RenderInterface = std::make_unique<RmlUiRenderInterface>(device, window);
-    m_SystemInterface = std::make_unique<RmlUiSystemInterface>();
+    m_SystemInterface = std::make_unique<RmlUiSystemInterface>(window);
 
     Rml::SetRenderInterface(m_RenderInterface.get());
     Rml::SetSystemInterface(m_SystemInterface.get());
@@ -78,6 +78,12 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
         m_SystemInterface.reset();
         return;
     }
+
+    // See m_TextInputMethodEditor's own header comment -- installs RmlUi's own vendored SDL IME
+    // bridge globally, once, for the lifetime of this runtime. Must run after Rml::Initialise()
+    // (matches every vendored sample backend's own ordering).
+    m_TextInputMethodEditor = std::make_unique<TextInputMethodEditor_SDL>();
+    Rml::SetTextInputHandler(m_TextInputMethodEditor.get());
 
     // Reuses the same bundled fonts this engine already ships for its portable text shim
     // (fonts/LiberationSans-*.ttf, copied next to the exe by the same asset-copy step as
@@ -138,6 +144,15 @@ void RmlUiRuntime::Destroy()
     Core::Input::SetUiInputConsumer(nullptr);
     mu::GetRenderer().SetPreSubmitCallback(nullptr);
 
+    // Clears RmlUi's global registration before Shutdown() tears down contexts/documents/elements
+    // -- matches the vendored Win32 backends' own teardown guard (RmlUi_Backend_Win32_*.cpp:
+    // "if (Rml::GetTextInputHandler() == &data->text_input_method_editor) SetTextInputHandler
+    // (nullptr)"). A live WidgetTextInputContext already holds its own captured handler pointer
+    // from focus time, not a live lookup, so this alone doesn't protect m_TextInputMethodEditor
+    // from being called during Shutdown() -- it must still stay alive until after that call
+    // returns (see below), same as m_RenderInterface/m_SystemInterface.
+    Rml::SetTextInputHandler(nullptr);
+
     // Rml::Shutdown() releases every context it owns, including m_Context -- do not call
     // Rml::RemoveContext/delete it separately first. It also releases every outstanding
     // compiled-geometry/texture handle via RmlUiRenderInterface, which must still be able to
@@ -150,9 +165,12 @@ void RmlUiRuntime::Destroy()
 
     // Per RenderInterface.h/SystemInterface.h's own contract: the application must keep these
     // alive until after Rml::Shutdown() and destroy them itself afterward -- RmlUi never takes
-    // ownership.
+    // ownership. Same contract applies to m_TextInputMethodEditor (TextInputHandler.h has no
+    // explicit statement of this, but WidgetTextInputContext's teardown path calls back into it
+    // during element/document destruction, i.e. during the Shutdown() call above).
     m_RenderInterface.reset();
     m_SystemInterface.reset();
+    m_TextInputMethodEditor.reset();
 }
 
 void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
@@ -231,6 +249,17 @@ void RmlUiRuntime::CancelSyntheticMousePress(unsigned char button, SDL_Window* w
 bool RmlUiRuntime::IsMouseOverUI() const
 {
     return m_Context && m_Context->IsMouseInteracting();
+}
+
+bool RmlUiRuntime::IsTextInputActive() const
+{
+    return m_SystemInterface && m_SystemInterface->IsTextInputActive();
+}
+
+void RmlUiRuntime::ProcessTextEditing(const SDL_Event& event)
+{
+    if (m_TextInputMethodEditor)
+        m_TextInputMethodEditor->HandleEdit(event.edit);
 }
 
 void RmlUiRuntime::Render()

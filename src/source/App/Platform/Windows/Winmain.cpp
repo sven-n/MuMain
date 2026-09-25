@@ -1521,7 +1521,14 @@ MSG MainLoop()
                 break;
             }
             case SDL_EVENT_TEXT_EDITING:
-                if (auto* box = CUITextInputBox::GetFocusedPortable())
+                // RmlUi first (whenever an RmlUi <input> is focused -- IsTextInputActive() is
+                // driven by RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard, which
+                // WidgetTextInput's own Focus/Blur handling already calls), CUITextInputBox
+                // fallback otherwise -- same precedence SDL_EVENT_TEXT_INPUT already uses via
+                // RouteActionInput()'s Core::Input::RouteToUi()-then-FeedPortableTextInput() order.
+                if (RmlUiRuntime::Instance().IsTextInputActive())
+                    RmlUiRuntime::Instance().ProcessTextEditing(event);
+                else if (auto* box = CUITextInputBox::GetFocusedPortable())
                     box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
             default:
@@ -1537,15 +1544,24 @@ MSG MainLoop()
 
         // Start/stop SDL text input as a portable text field gains or loses
         // focus, so SDL only emits SDL_EVENT_TEXT_INPUT while one is active (#447).
+        //
+        // RmlUi owns SDL's text-input state itself whenever an RmlUi <input> is focused (see
+        // RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard) -- this block must not also
+        // call SDL_StartTextInput/StopTextInput in that case, or the two would race the same
+        // frame's transition (RmlUi's own Focus/Blur handling already ran earlier this frame,
+        // inside the SDL_PollEvent loop above). wantTextInput below is false whenever RmlUi
+        // currently owns it, so the Start branch never double-starts; the Stop branch is further
+        // guarded so it never undoes a Start that RmlUi itself just issued this same frame.
         {
             static bool s_textInputActive = false;
             auto* focusedField = CUITextInputBox::GetFocusedPortable();
-            const bool wantTextInput = focusedField != nullptr;
+            const bool rmlOwnsTextInput = RmlUiRuntime::Instance().IsTextInputActive();
+            const bool wantTextInput = !rmlOwnsTextInput && focusedField != nullptr;
             if (wantTextInput != s_textInputActive && g_sdlWindow != nullptr)
             {
                 if (wantTextInput)
                     SDL_StartTextInput(g_sdlWindow);
-                else
+                else if (!rmlOwnsTextInput)
                     SDL_StopTextInput(g_sdlWindow);
                 s_textInputActive = wantTextInput;
             }

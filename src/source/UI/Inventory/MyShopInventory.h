@@ -40,15 +40,19 @@ namespace mu::ui::window
         CInventoryCtrl* m_pNewInventoryCtrl;
         POINT m_Pos;
 
-        // Window frame/title/edit-box background strip/Open-Close-Exit buttons/instructional text
-        // (former RenderTextInfo()) are RmlUi; the inventory grid stays native since its icons are
-        // live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt). The
-        // nickname/subject CUITextInputBox (m_EditBox below) also stays fully native -- it has no
-        // RmlUi equivalent yet.
+        // Window frame/title/shop-title field/Open-Close-Exit buttons/instructional text (former
+        // RenderTextInfo()) are RmlUi; the inventory grid stays native since its icons are live 3D
+        // model renders (same reasoning as CMyInventory/CStorageInventoryExt).
         struct MyShopRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             Rml::String title;
+
+            // The editable shop name, two-way bound to my_shop.rml's <input data-value="shop_title">.
+            // RmlUi owns the edit buffer/caret/selection/IME; this is only the committed value, read
+            // back by GetTitle() and written by SetTitle()/ResetSubject(). Length is capped by the
+            // input's own maxlength, set from iMAX_SHOPTITLE_MULTI in BuildRmlUi().
+            Rml::String shopTitle;
 
             Rml::String exitTooltip;
 
@@ -97,6 +101,8 @@ namespace mu::ui::window
 
         void BuildRmlUi();
         void SyncRmlModel();
+        void ApplyShopTitleLimit();
+        void BlurShopTitleOnOutsideClick();
 
     public:
         CMyShopInventory();
@@ -121,7 +127,6 @@ namespace mu::ui::window
         const int GetTargetIndex();
         ITEM* FindItem(int iLinealPos);
         int GetItemInventoryIndex(ITEM* pItem);
-        void ChangeEditBox(const UISTATES type);
         void ChangeTitle(wchar_t* titletext);
         void GetTitle(wchar_t* titletext);
         void SetTitle(wchar_t* titletext);
@@ -148,14 +153,12 @@ namespace mu::ui::window
         int					m_SourceIndex;
         bool				m_EnablePersonalShop;
         bool				m_bIsEnableInputValueTextBox;
-
-        CUITextInputBox* m_EditBox;
     };
 
     inline
         void CMyShopInventory::ChangeTitle(wchar_t* titletext)
     {
-        m_EditBox->SetText(titletext);
+        SetTitle(titletext);
     }
 
     inline

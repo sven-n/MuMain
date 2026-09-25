@@ -166,10 +166,24 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
 
     auto vecUI = m_vecUI;
 
-    // Portable text fields don't take Win32 focus, so GetFocus() can't identify them;
-    // use the focused field's own identity instead, so hotkeys don't fire while typing.
+    // Portable text fields don't take Win32 focus, so GetFocus() can't identify them; use the
+    // focused field's own identity instead (an address no real window's GetRelatedWnd() will ever
+    // equal), so every window whose GetRelatedWnd() doesn't match -- i.e. every window, since
+    // nothing registers this fake identity as its own -- gets skipped below, suspending hotkeys/
+    // window-level key handling globally while typing. A focused RmlUi <input> needs the exact
+    // same treatment: it never takes Win32 focus either, and
+    // CUITextInputBox::GetFocusedPortable() knows nothing about it, so without
+    // this it would fall through to GetFocus() (== g_hWnd) and every window would run normally
+    // while the user is typing into an RmlUi field -- reusing RmlUiRuntime::Instance()'s own
+    // stable address as an equally "orphan" identity, same trick, same guarantee.
     CUITextInputBox* pFocusedField = CUITextInputBox::GetFocusedPortable();
-    const HWND hFocus = pFocusedField ? reinterpret_cast<HWND>(pFocusedField) : GetFocus();
+    HWND hFocus;
+    if (pFocusedField)
+        hFocus = reinterpret_cast<HWND>(pFocusedField);
+    else if (RmlUiRuntime::Instance().IsTextInputActive())
+        hFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
+    else
+        hFocus = GetFocus();
 
     auto vi = vecUI.begin();
     for (; vi != vecUI.end(); vi++)

@@ -80,9 +80,29 @@ checklist (`ui-target-architecture.md` item 17's "concrete instance"). Found and
 wouldn't — Friend/Mail (`CUIWindowMgr`/`CUIBaseWindow`, `UI/Party/UIWindows.cpp`) is only one of
 four independent pieces still keeping this file alive:
 
-1. **`CUITextInputBox`** — permanent until RmlUi gets native `<input>`/`<textarea>` (Section E's
-   Type-2 companion; IME composition through RmlUi's DOM is the open design question, no target
-   date). Not part of this checklist's "close it out" scope — this piece stays regardless.
+1. **`CUITextInputBox`** — **transitional now, not permanent.** The old framing ("permanent until
+   RmlUi gets native `<input>`") was wrong on both halves: the vendored RmlUi already ships
+   `<input>`, and the IME question is answered — `RmlUiRuntime` installs the vendored
+   `TextInputMethodEditor_SDL` and `RmlUiSystemInterface::ActivateKeyboard()` drives
+   `SDL_SetTextInputArea`/`SDL_StartTextInput`, so composition and candidate placement are handled
+   centrally. `CMyShopInventory` is migrated (stock `<input>` + shared `.text-field`, see
+   `component-catalog.md`). **Not globally retired** — remaining consumers, each with its own extra
+   requirement beyond My Shop's:
+   - `CGenericConfirmDialog::Mode::Text` — needs dynamic per-`Show()` configuration (`textLimit`,
+     `masked`, `numericOnly` from `GenericDialogConfig::InputField`), i.e. attributes set from C++
+     per invocation rather than baked into markup, plus the shared-widget/IME release its
+     `g_pSingleTextInputBox` teardown currently does. Its **`Mode::NumericKeypad` is a separate
+     interaction, not text input** — the shuffled on-screen keypad is deliberate anti-keylogger
+     behaviour and must not become `<input type="number">`.
+   - `CLoginWin` — two fields with reciprocal Tab order (`SetTabTarget()` both ways), masked
+     password, external focus callers (`WSclient.cpp` on connect, `Render()`'s `FirstLoad`), and
+     select-all-on-error-recovery (`MsgWin.cpp`'s `GiveFocus(TRUE)`) — the last maps to
+     `ElementFormControlInput::Select()`, which exists. Also still carries the hardcoded per-theme
+     input Y-offsets and the `GetActiveThemeName() == "modern"` branch, which a real `<input>`
+     would delete outright.
+   - `CCharMakeWin` — 10-character name limit and focus-on-open; smallest remaining case.
+   - Chat (`CUIChatInputBox`), `CGuildMakeWindow`, `CGoldBowmanWindow`, `WindowMuHelper`,
+     `MsgBoxIGSSendGift` — multiline/history/numeric variants, unscoped.
 2. **`CUITextListBox<T>`** (~18 subclasses in `UIControls.h`) — no rule named this class before
    2026-09-13 (only `CUIButton` was named), which is exactly why it kept gaining consumers even on
    windows already on `mu::ui::window::CObject`. Confirmed live consumers found this session:
