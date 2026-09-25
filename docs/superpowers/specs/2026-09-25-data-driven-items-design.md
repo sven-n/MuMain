@@ -407,6 +407,30 @@ name, missing model file), and undo for the current session.
     JSON, matching OpenMU's `ItemSetGroup`, with their own exchange file and
     editor. Moved earlier if items cannot be made fully data-driven without
     them.
+
+    **Starting point:** branch
+    [`Mosch0512/MuMain:item-set-editor`](https://github.com/Mosch0512/MuMain/tree/item-set-editor)
+    (one commit, `e8194a1c`, April 2026, still bmd-based). When we reach
+    this phase, rebase it onto the current branch and use it as the base,
+    or as a reference if the rebase is not worth it. It contains:
+
+    - an ImGui item set editor modeled on the item editor (search,
+      hide-empty toggle, option combobox per row) that saves back to
+      `ItemSetOption_<lang>.bmd`
+    - `CSItemOption` access for editor tools, and option labels built
+      from the text template without `printf`, so options whose texts
+      expect more arguments cannot crash the editor
+    - a fallback so tooltips also show set options for **unequipped**
+      ancient items (a behavior fix)
+    - a CMake change to copy runtime assets with
+      `copy_directory_if_different` (faster incremental builds)
+
+    Expected rework: the branch is about 1060 commits behind `main`.
+    `CSItemOption` moved to `GameLogic/Items/`, `GlobalText` and
+    `Translations/*.json` were replaced by the generated `I18N::*` texts,
+    and loading and saving bmd files has to become JSON (phase 2 rules).
+    The tooltip fix and the CMake change are unrelated to the data
+    format and could be split into their own small PRs.
 11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
     `pet` and drop settings, one phase each. Order decided when we get
     there.
