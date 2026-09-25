@@ -47,7 +47,7 @@ pattern later but are not part of this work.
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
-| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Probably a follow-up after the item work; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
+| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 
 ## Current state
@@ -385,24 +385,40 @@ name, missing model file), and undo for the current session.
    and "Export as bmd"; the game stops reading `Item_<lang>.bmd`.
 3. **Rules and categories into data**: flags and tags replace the hardcoded
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
-   Item sets are verified to be identical. Includes the client ↔ OpenMU
-   rule mapping.
+   The resulting item lists are verified to be identical. Includes the
+   client ↔ OpenMU rule mapping.
 4. **Models into data**: `OpenItems()` / `OpenItemTextures()` are driven by
    the model fields.
 5. **Translations**: `LocalizedString` names and fallback; one stat data set
    for all languages.
 6. **Editors**: the MuEditor tools from section 9, including add/remove.
 7. **Sync**: client import/export and diff.
-
-Follow-up (or earlier, if the item work needs it): **data-driven tooltips**
-from JSON, converted from the `ItemTooltip*` / `ItemLevelTooltip` files
-(D15).
+8. **Data-driven tooltips** (D15): convert `ItemTooltip_<lang>`,
+   `ItemTooltipText_<lang>` and `ItemLevelTooltip_<lang>` into JSON (line
+   texts as `LocalizedString`, like item names), and let `RenderItemInfo()`
+   build tooltips from that data instead of hardcoded lines. Adds a tooltip
+   editor to MuEditor. The tooltip bmd files are deleted afterwards.
+   Moved earlier if the item phases need it.
+9. **Item option definitions** (D14): the option groups items link to
+   (Luck, additional option, excellent, wing, harmony, guardian, socket, …)
+   get their own JSON files, matching OpenMU's `ItemOptionDefinition`, with
+   their own exchange file and editor.
+10. **Item sets** (D11): `ItemSetType.bmd` / `ItemSetOption_<lang>.bmd` into
+    JSON, matching OpenMU's `ItemSetGroup`, with their own exchange file and
+    editor. Moved earlier if items cannot be made fully data-driven without
+    them.
+11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
+    `pet` and drop settings, one phase each. Order decided when we get
+    there.
+12. **Cleanup**: remove this document once the work has landed.
 
 OpenMU PRs (in parallel, separate repo):
 
 - A. New rule fields/tables with migration, initialization, update plug-in
   and server enforcement (from the phase 3 mapping).
-- B. Admin panel import and export pages for the exchange file.
+- B. Admin panel import and export pages for the item exchange file.
+- C. Import and export for the option definition and item set exchange
+  files (with phases 9 and 10), and for later files as needed.
 
 ## Open questions
 
