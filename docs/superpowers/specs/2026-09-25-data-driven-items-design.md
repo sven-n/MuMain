@@ -375,6 +375,34 @@ name, missing model file), and undo for the current session.
 
 ## Phases (one PR each)
 
+**Side:** *Client* = MuMain only, *Server* = OpenMU only, *Both* = changes
+in both repos (as separate PRs, one per repo).
+
+| Phase | Name | Side | Repo / PR | Depends on | Summary |
+|---|---|---|---|---|---|
+| 0 | Design document | Both | MuMain | – | Agree on the design (this document). |
+| 1 | Item database | Client | MuMain | 0 | Flat in-memory tables, still filled from `Item_<lang>.bmd`; log-name helper; performance measurement. No behavior change. |
+| 2 | Data file format | Client | MuMain | 1 | JSON per group becomes the only item source; loading, writing and validation rules; automated data test; bmd import/export in MuEditor. |
+| 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
+| A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
+| 4 | Models into data | Client | MuMain | 2 | `OpenItems()` / `OpenItemTextures()` driven by the model fields. |
+| 5 | Translations | Client | MuMain | 2 | `LocalizedString` names with fallback; one stat data set for all languages. |
+| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9), including add/remove items. |
+| 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
+| B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
+| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
+| 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
+| 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
+| C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
+| 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
+| 12 | Cleanup | Client | MuMain | all | Remove this document. |
+
+The deferred question Q1 (custom items on the original client) is a
+**Server** topic and must be decided before custom items are used on a
+server with original clients (after phases 6 and B).
+
+### Phase details
+
 0. **This document**: agree on the design.
 1. **Item database**: flat tables loaded from the existing `Item_<lang>.bmd`;
    `ItemAttribute[]` filled from them. No behavior change. Add the log-name
@@ -387,12 +415,19 @@ name, missing model file), and undo for the current session.
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
    The resulting item lists are verified to be identical. Includes the
    client ↔ OpenMU rule mapping.
+
+   **A (OpenMU):** new rule fields/tables with migration, initialization,
+   update plug-in and server enforcement, based on the phase 3 mapping.
 4. **Models into data**: `OpenItems()` / `OpenItemTextures()` are driven by
    the model fields.
 5. **Translations**: `LocalizedString` names and fallback; one stat data set
    for all languages.
 6. **Editors**: the MuEditor tools from section 9, including add/remove.
-7. **Sync**: client import/export and diff.
+7. **Item sync, client side**: MuEditor import/export of the item exchange
+   file and diff.
+
+   **B (OpenMU):** admin panel import and export pages for the item
+   exchange file, with diff.
 8. **Data-driven tooltips** (D15): convert `ItemTooltip_<lang>`,
    `ItemTooltipText_<lang>` and `ItemLevelTooltip_<lang>` into JSON (line
    texts as `LocalizedString`, like item names), and let `RenderItemInfo()`
@@ -431,18 +466,13 @@ name, missing model file), and undo for the current session.
     and loading and saving bmd files has to become JSON (phase 2 rules).
     The tooltip fix and the CMake change are unrelated to the data
     format and could be split into their own small PRs.
+
+    **C (OpenMU):** import and export for the option definition (phase 9)
+    and item set (phase 10) exchange files.
 11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
     `pet` and drop settings, one phase each. Order decided when we get
-    there.
+    there. Each one gets OpenMU work where the server has matching data.
 12. **Cleanup**: remove this document once the work has landed.
-
-OpenMU PRs (in parallel, separate repo):
-
-- A. New rule fields/tables with migration, initialization, update plug-in
-  and server enforcement (from the phase 3 mapping).
-- B. Admin panel import and export pages for the item exchange file.
-- C. Import and export for the option definition and item set exchange
-  files (with phases 9 and 10), and for later files as needed.
 
 ## Open questions
 
