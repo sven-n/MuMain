@@ -19,7 +19,7 @@
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 /* Former RenderFrame()/RenderMixDescriptions() native text block (SyncMixContentModel(),
@@ -35,7 +35,7 @@
 	text-align: center;
 	color: token(text-label);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 .mix-content {
 	position: absolute;
@@ -51,7 +51,7 @@
 	text-align: center;
 	margin-bottom: 3px;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-info);
 }
 .mix-socket-prompt { color: #c8c8c8; }
@@ -88,7 +88,7 @@
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 1em;
 	pointer-events: none;
 	z-index: 1;
 }

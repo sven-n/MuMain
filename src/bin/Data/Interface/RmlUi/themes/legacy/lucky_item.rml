@@ -13,7 +13,8 @@
 	     real runtime floats (LuckyItemWnd.h). -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{title}}</span>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-event-click="lucky_item_mix_click"></div>

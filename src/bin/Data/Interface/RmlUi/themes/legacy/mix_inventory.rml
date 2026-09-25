@@ -10,7 +10,8 @@
 	     (a real interactive widget, not presentation) stay fully native. Background lives in
 	     mix_inventory_bg.rml instead, since it must paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{title}}</span>
 
 		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate">{{tax_rate_text}}</div>
