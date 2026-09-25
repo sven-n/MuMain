@@ -1368,7 +1368,8 @@ void RenderFace_After(int Texture, int mx, int my)
 
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    DisableDepthTest();
+    // Keep the depth test on: EnableAlphaBlend3() turns depth writes off, so the overlay blends over its coplanar
+    // base (equal depth passes) while nearer terrain still hides it.
     EnableAlphaBlend3();
     BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
@@ -1382,7 +1383,6 @@ void RenderFaceAlpha(int Texture, int mx, int my)
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4], TerrainMappingAlpha[TerrainIndex4]);
     const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
-    EnableDepthTest();
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
