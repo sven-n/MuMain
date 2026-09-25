@@ -34,12 +34,11 @@ pattern later but are not part of this work.
 | # | Topic | Decision |
 |---|---|---|
 | D1 | Data format | JSON files as the source of truth, loaded once at startup into flat tables. Runtime speed must be as close to hardcoded as possible; a binary cache is added only if startup parsing is measurably too slow. |
-| D2 | File layout | One file per item group. |
+| D2 | Exchange format with OpenMU | JSON keyed by `(Group, Number)`, not SQL `UPDATE` statements (SQL would break whenever OpenMU's database schema changes). |
 | D3 | Server rules | Check what OpenMU already enforces (see "Server-side checks today"), then extend OpenMU's tables or add new ones following OpenMU's usual workflow. |
-| D4 | Target version | Season 6, because MuMain is a Season 6 Episode 3 client (see Q5 note). |
-| D5 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
-| D6 | Editors | Several focused editors instead of one big table. |
-| D7 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
+| D4 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
+| D5 | Editors | Several focused editors instead of one big table. |
+| D6 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
 
 ## Current state
 
@@ -261,13 +260,27 @@ OpenMU PRs (in parallel, separate repo):
 
 ## Open questions
 
-- **Q1: bmd fallback.** Keep reading `Item_<lang>.bmd` as a fallback after
+- **Q1: One file or several?** A single `items.json`, or one file per item
+  group (smaller diffs, easier to review)? *Proposal:* one file per group.
+- **Q2: Target version.** OpenMU ships separate item data sets per game
+  version (`Version075`, `Version095d`, `VersionSeasonSix`), and a server
+  database is set up from one of them. They differ in which items exist and
+  in their values. MuMain is a Season 6 Episode 3 client, so its data
+  matches OpenMU's Season 6 set. Question: is Season 6 the only target, or
+  should the client data and the exchange file also work with servers set
+  up from the older versions? *Proposal:* Season 6 only.
+- **Q3: Stable string key.** Is `(group, number)` enough as identity, or do
+  we also want a readable key (e.g. `potion.apple`) in data files and logs?
+  A readable key makes files and logs easier to read, but has to stay
+  unique and must be kept when an item is renamed. *Proposal:*
+  `(group, number)` only; logs show the English name next to it.
+- **Q4: bmd fallback.** Keep reading `Item_<lang>.bmd` as a fallback after
   phase 2, or remove it once the JSON files exist?
-- **Q2: Exchange file scope.** Only item definitions, or already include
+- **Q5: Exchange file scope.** Only item definitions, or already include
   the linked data OpenMU needs for a complete item (item options, set
   groups, drop settings)?
-- **Q3: Custom items beyond Season 6.** Should custom items get their own
+- **Q6: Custom items beyond Season 6.** Should custom items get their own
   number range (e.g. high numbers per group) so they do not collide with
   future official items?
-- **Q4: Other item files.** When do `ItemAddOption`, `SocketItem`, `Mix`,
+- **Q7: Other item files.** When do `ItemAddOption`, `SocketItem`, `Mix`,
   `pet` and the set options follow, and in which order?
