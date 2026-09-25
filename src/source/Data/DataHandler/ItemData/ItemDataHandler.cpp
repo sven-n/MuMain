@@ -30,6 +30,33 @@ double MillisecondsSince(std::chrono::steady_clock::time_point start)
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - start;
     return elapsed.count();
 }
+
+// Returns one UTF-8 name per item type, or nothing when the loaded language
+// is English already or the English file is missing. Then the loaded names
+// are used for logs.
+std::vector<std::string> LoadEnglishNames(const std::wstring& loadedLanguage)
+{
+    if (_wcsicmp(loadedLanguage.c_str(), EnglishLanguage) == 0)
+    {
+        return {};
+    }
+
+    const std::wstring englishFile = CItemDataHandler::GetItemFilePath(EnglishLanguage);
+    auto englishAttributes = std::make_unique<ITEM_ATTRIBUTE[]>(MAX_ITEM);
+    if (!ItemDataLoader::Load(englishFile.c_str(), englishAttributes.get(), ItemDataLoader::Reporting::Quiet))
+    {
+        MU_LOG_WARN(mu::log::Get("data"), "English item names not available ({}); logs use the loaded names.",
+                    mu_wchar_to_utf8(englishFile.c_str()));
+        return {};
+    }
+
+    std::vector<std::string> englishNames(MAX_ITEM);
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        englishNames[itemType] = mu_wchar_to_utf8(englishAttributes[itemType].Name);
+    }
+    return englishNames;
+}
 } // namespace
 
 CItemDataHandler::CItemDataHandler()
@@ -64,56 +91,42 @@ std::wstring CItemDataHandler::GetItemFilePath(const std::wstring& language)
     return L"Data\\Local\\" + language + L"\\Item_" + language + L".bmd";
 }
 
-bool CItemDataHandler::Load(const wchar_t* fileName)
+bool CItemDataHandler::Load(const std::wstring& language)
 {
+    const std::wstring fileName = GetItemFilePath(language);
     const auto loadStart = std::chrono::steady_clock::now();
-    if (!ItemDataLoader::Load(fileName, ItemAttribute))
+    if (!ItemDataLoader::Load(fileName.c_str(), ItemAttribute))
     {
         return false;
     }
+    const double loadMilliseconds = MillisecondsSince(loadStart);
 
-    LoadEnglishNames();
+    const auto englishNamesStart = std::chrono::steady_clock::now();
+    std::vector<std::string> englishNames = LoadEnglishNames(language);
+    const double englishNamesMilliseconds = MillisecondsSince(englishNamesStart);
 
     const auto buildStart = std::chrono::steady_clock::now();
-    RebuildItemDatabase();
+    g_ItemDatabase.Build(std::span<const ITEM_ATTRIBUTE>(ItemAttribute, MAX_ITEM), englishNames);
+    const double buildMilliseconds = MillisecondsSince(buildStart);
 
-    MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
-                g_ItemDatabase.GetExistingItemCount(), mu_wchar_to_utf8(fileName), MillisecondsSince(loadStart),
-                MillisecondsSince(buildStart));
+    MU_LOG_INFO(mu::log::Get("data"),
+                "Loaded {} items from {} in {:.1f} ms (English names {:.1f} ms, item database build {:.2f} ms)",
+                g_ItemDatabase.GetExistingItemCount(), mu_wchar_to_utf8(fileName.c_str()), loadMilliseconds,
+                englishNamesMilliseconds, buildMilliseconds);
+
+#ifdef _EDITOR
+    m_englishNames = std::move(englishNames);
+#endif
     return true;
 }
 
-void CItemDataHandler::LoadEnglishNames()
-{
-    m_englishNames.clear();
-    if (_wcsicmp(g_strSelectedML.c_str(), EnglishLanguage) == 0)
-    {
-        return;
-    }
-
-    const std::wstring englishFile = GetItemFilePath(EnglishLanguage);
-    auto englishAttributes = std::make_unique<ITEM_ATTRIBUTE[]>(MAX_ITEM);
-    if (!ItemDataLoader::Load(englishFile.c_str(), englishAttributes.get()))
-    {
-        MU_LOG_WARN(mu::log::Get("data"), "English item names not available ({}); logs use the loaded names.",
-                    mu_wchar_to_utf8(englishFile.c_str()));
-        return;
-    }
-
-    m_englishNames.resize(MAX_ITEM);
-    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
-    {
-        m_englishNames[itemType] = mu_wchar_to_utf8(englishAttributes[itemType].Name);
-    }
-}
-
+#ifdef _EDITOR
 void CItemDataHandler::RebuildItemDatabase()
 {
     g_ItemDatabase.Build(std::span<const ITEM_ATTRIBUTE>(ItemAttribute, MAX_ITEM), m_englishNames);
 }
 
-#ifdef _EDITOR
-bool CItemDataHandler::Save(wchar_t* fileName, std::string* outChangeLog)
+bool CItemDataHandler::Save(const wchar_t* fileName, std::string* outChangeLog)
 {
     if (!ItemDataSaver::Save(fileName, outChangeLog))
     {

@@ -5607,7 +5607,7 @@ void OpenBasicData(HDC hDC)
     // GameLogic::Quests::Dialog::GetEntry, so there is nothing to load at
     // runtime any more.
 
-    g_ItemDataHandler.Load(CItemDataHandler::GetItemFilePath(g_strSelectedML).c_str());
+    g_ItemDataHandler.Load(g_strSelectedML);
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
