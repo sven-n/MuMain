@@ -99,6 +99,8 @@ Run from `build-linux/src` so the client finds its assets, `config.ini`, and
 `MUnique.Client.Library.so` (loaded from the working directory). Set the server
 in `config.ini` (`ServerIP` / `ServerPort`).
 
+SDL diagnostics are also written to `MuError.log`; set `SDL_LOGGING` to control their verbosity.
+
 ### Hardware OpenGL under WSLg
 
 If you build inside WSL, the default GL driver is Mesa software rendering
