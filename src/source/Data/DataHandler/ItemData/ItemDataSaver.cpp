@@ -19,9 +19,6 @@
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"
 
-// External references
-extern ITEM_ATTRIBUTE* ItemAttribute;
-
 // Comparison function - uses field metadata (NO MACROS!)
 static void CompareItems(const ITEM_ATTRIBUTE& oldItem, const ITEM_ATTRIBUTE& newItem,
                         std::stringstream& changes, bool& changed)
@@ -49,13 +46,13 @@ static void CompareItems(const ITEM_ATTRIBUTE& oldItem, const ITEM_ATTRIBUTE& ne
                                changes, changed);
 }
 
-bool ItemDataSaver::Save(const wchar_t* fileName, std::string* outChangeLog)
+bool ItemDataSaver::Save(const wchar_t* fileName, const ITEM_ATTRIBUTE* items, std::string* outChangeLog)
 {
     // Create standard save config with item-specific parameters
     auto config = CreateStandardSaveConfig<ITEM_ATTRIBUTE, ITEM_ATTRIBUTE_FILE>(
         fileName,
         MAX_ITEM,
-        ItemAttribute,
+        items,
         [](ITEM_ATTRIBUTE_FILE& dest, const ITEM_ATTRIBUTE& src) {
             CopyItemAttributeToDestination(dest, src);
         },

@@ -531,9 +531,9 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb"
-  # nlohmann/json backs the control socket's request/response encoding. Only
-  # the App/Control sources include it, so a player build does not see it.
-  $<$<BOOL:${ENABLE_CONTROL_SOCKET}>:${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty>
+  # nlohmann/json (json.hpp) reads the item data files (Data/Items) in every
+  # build and backs the control socket's request/response encoding.
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 

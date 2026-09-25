@@ -25,11 +25,17 @@ void CItemEditorPopups::RenderAll()
 {
     // Save popups
     RenderSimplePopup("Save Success", I18N::Editor::ItemsSavedSuccessfully);
-    RenderSimplePopup("Save Failed", I18N::Editor::FailedToSaveItems);
+    RenderSimplePopup("Save Failed", I18N::Editor::ItemDataHasErrors);
 
     // CSV Export popups
     RenderSimplePopup("Export CSV Success", I18N::Editor::ItemsExportedAsCSVSuccessfully);
     RenderSimplePopup("Export CSV Failed", I18N::Editor::FailedToExportItemAttributesAsCSV);
+
+    // bmd import/export popups
+    RenderSimplePopup("Import Bmd Success", I18N::Editor::ItemsImportedFromBmd);
+    RenderSimplePopup("Import Bmd Failed", I18N::Editor::FailedToImportItemsFromBmd);
+    RenderSimplePopup("Export Bmd Success", I18N::Editor::ItemsExportedAsBmd);
+    RenderSimplePopup("Export Bmd Failed", I18N::Editor::FailedToExportItemsAsBmd);
 
     // S6E3 Export popups
     RenderSimplePopup("Export S6E3 Success", I18N::Editor::ExportedAsLegacyFormatSuccessfully);

@@ -2,6 +2,7 @@
 
 #include "ItemAttributeConversion.h"
 #include "ItemType.h"
+#include "Core/Text/Utf8.h"
 
 #include <algorithm>
 
@@ -79,12 +80,6 @@ void CopyRequirements(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribut
     std::copy(definition.resistances.begin(), definition.resistances.end(), std::begin(attribute.Resistance));
 }
 
-std::wstring ReadName(const ITEM_ATTRIBUTE& attribute)
-{
-    const wchar_t* nameEnd = std::find(std::begin(attribute.Name), std::end(attribute.Name), L'\0');
-    return std::wstring(std::begin(attribute.Name), nameEnd);
-}
-
 void CopyName(const std::wstring& name, ITEM_ATTRIBUTE& attribute)
 {
     const size_t length = std::min(name.size(), static_cast<size_t>(MAX_ITEM_NAME - 1));
@@ -93,14 +88,26 @@ void CopyName(const std::wstring& name, ITEM_ATTRIBUTE& attribute)
 }
 } // namespace
 
+std::wstring ReadItemAttributeName(const ITEM_ATTRIBUTE& attribute)
+{
+    const wchar_t* nameEnd = std::find(std::begin(attribute.Name), std::end(attribute.Name), L'\0');
+    return std::wstring(std::begin(attribute.Name), nameEnd);
+}
+
+void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition)
+{
+    CopyStats(attribute, definition);
+    CopyRequirements(attribute, definition);
+}
+
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)
 {
     ItemDefinition definition;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
-    definition.name = ReadName(attribute);
-    CopyStats(attribute, definition);
-    CopyRequirements(attribute, definition);
+    definition.name = ReadItemAttributeName(attribute);
+    definition.names.Set(LocalizedString::NeutralLocale, Core::Text::ToUtf8(definition.name.c_str()));
+    CopyItemAttributeStats(attribute, definition);
     return definition;
 }
 

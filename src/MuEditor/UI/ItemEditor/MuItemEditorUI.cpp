@@ -143,8 +143,11 @@ void CMuItemEditorUI::Render(bool& showEditor)
             g_MuEditorCore.SetHoveringUI(true);
         }
 
-        // Render action buttons (Save, Export S6E3, Export CSV)
-        CItemEditorActions::RenderAllButtons();;
+        // Render action buttons (Save, Import/Export bmd, Export S6E3, Export CSV)
+        if (CItemEditorActions::RenderAllButtons() && m_pTable)
+        {
+            m_pTable->InvalidateFilter();
+        }
         ImGui::Separator();
         
         RenderSearchBar();

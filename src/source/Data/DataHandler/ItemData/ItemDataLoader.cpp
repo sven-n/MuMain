@@ -15,50 +15,114 @@
 #include "Core/Utilities/StringUtils.h"
 #endif
 
+namespace
+{
+constexpr DWORD ItemFileChecksumKey = 0xE2F1;
+
+void ReportFileError(const wchar_t* fileName, const wchar_t* problem)
+{
+    std::wstringstream ss;
+    ss << fileName << L" - " << problem;
+    DataFileIO::ReportError(ss.str().c_str());
+}
+
+long GetFileSize(FILE* fp)
+{
+    fseek(fp, 0, SEEK_END);
+    const long fileSize = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    return fileSize;
+}
+
+bool ReadRecords(FILE* fp, const wchar_t* fileName, ItemDataLoader::RawItemFile& file)
+{
+    DataFileIO::IOConfig config;
+    config.itemSize = file.recordSize;
+    config.itemCount = MAX_ITEM;
+    config.checksumKey = ItemFileChecksumKey;
+    config.decryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
+
+    DWORD checksum;
+    auto buffer = DataFileIO::ReadBuffer(fp, config, &checksum);
+    if (!buffer)
+    {
+        ReportFileError(fileName, L"Failed to read item file.");
+        return false;
+    }
+
+    if (!DataFileIO::VerifyChecksum(buffer.get(), config, checksum))
+    {
+        ReportFileError(fileName, L"Item file corrupted.");
+        return false;
+    }
+
+    DataFileIO::DecryptBuffer(buffer.get(), config);
+    file.records = std::move(buffer);
+    return true;
+}
+
+template <typename TFileFormat> void CopyRecordsAs(const ItemDataLoader::RawItemFile& file, ITEM_ATTRIBUTE* destination)
+{
+    for (int i = 0; i < MAX_ITEM; i++)
+    {
+        TFileFormat source;
+        memcpy(&source, file.GetRecord(i), sizeof(source));
+        CopyItemAttributeFromSource(destination[i], source);
+    }
+}
+} // namespace
+
 bool ItemDataLoader::Load(const wchar_t* fileName, ITEM_ATTRIBUTE* destination, Reporting reporting)
+{
+    RawItemFile file;
+    if (!ReadRawFile(fileName, file, reporting))
+    {
+        return false;
+    }
+
+    CopyRecords(file, destination);
+
+#ifdef _EDITOR
+    if (reporting == Reporting::Normal)
+    {
+        LogLoadedItems(fileName, destination, file.isLegacyFormat);
+    }
+#endif
+
+    return true;
+}
+
+bool ItemDataLoader::ReadRawFile(const wchar_t* fileName, RawItemFile& file, Reporting reporting)
 {
     FILE* fp = _wfopen(fileName, L"rb");
     if (fp == NULL)
     {
         if (reporting == Reporting::Normal)
         {
-            std::wstringstream ss;
-            ss << fileName << L" - File not exist.";
-            DataFileIO::ReportError(ss.str().c_str());
+            ReportFileError(fileName, L"File not exist.");
         }
         return false;
     }
 
-    // Get file size to determine structure version
-    fseek(fp, 0, SEEK_END);
-    long fileSize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    const long expectedLegacySize = static_cast<long>(sizeof(ITEM_ATTRIBUTE_FILE_LEGACY)) * MAX_ITEM + sizeof(DWORD);
+    file.isLegacyFormat = GetFileSize(fp) == expectedLegacySize;
+    file.recordSize = file.isLegacyFormat ? sizeof(ITEM_ATTRIBUTE_FILE_LEGACY) : sizeof(ITEM_ATTRIBUTE_FILE);
 
-    const int LegacySize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
-    const long expectedLegacySize = LegacySize * MAX_ITEM + sizeof(DWORD);
+    const bool success = ReadRecords(fp, fileName, file);
+    fclose(fp);
+    return success;
+}
 
-    bool isLegacyFormat = (fileSize == expectedLegacySize);
-    bool success = false;
-
-    if (isLegacyFormat)
+void ItemDataLoader::CopyRecords(const RawItemFile& file, ITEM_ATTRIBUTE* destination)
+{
+    if (file.isLegacyFormat)
     {
-        success = LoadLegacyFormat(fp, destination);
+        CopyRecordsAs<ITEM_ATTRIBUTE_FILE_LEGACY>(file, destination);
     }
     else
     {
-        success = LoadNewFormat(fp, destination);
+        CopyRecordsAs<ITEM_ATTRIBUTE_FILE>(file, destination);
     }
-
-    fclose(fp);
-
-#ifdef _EDITOR
-    if (success && reporting == Reporting::Normal)
-    {
-        LogLoadedItems(fileName, destination, isLegacyFormat);
-    }
-#endif
-
-    return success;
 }
 
 #ifdef _EDITOR
@@ -84,61 +148,3 @@ void ItemDataLoader::LogLoadedItems(const wchar_t* fileName, const ITEM_ATTRIBUT
     g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
 }
 #endif
-
-template<typename TFileFormat>
-bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName, ITEM_ATTRIBUTE* destination)
-{
-    const int Size = sizeof(TFileFormat);
-
-    // Configure I/O
-    DataFileIO::IOConfig config;
-    config.itemSize = Size;
-    config.itemCount = MAX_ITEM;
-    config.checksumKey = 0xE2F1;
-    config.decryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
-
-    // Read buffer and checksum
-    DWORD dwCheckSum;
-    auto buffer = DataFileIO::ReadBuffer(fp, config, &dwCheckSum);
-    if (!buffer)
-    {
-        std::wstringstream ss;
-        ss << L"Failed to read item file (" << formatName << L").";
-        DataFileIO::ReportError(ss.str().c_str());
-        return false;
-    }
-
-    // Verify checksum
-    if (!DataFileIO::VerifyChecksum(buffer.get(), config, dwCheckSum))
-    {
-        std::wstringstream ss;
-        ss << L"Item file corrupted (" << formatName << L").";
-        DataFileIO::ReportError(ss.str().c_str());
-        return false;
-    }
-
-    // Decrypt buffer
-    DataFileIO::DecryptBuffer(buffer.get(), config);
-
-    // Copy items
-    BYTE* pSeek = buffer.get();
-    for (int i = 0; i < MAX_ITEM; i++)
-    {
-        TFileFormat source;
-        memcpy(&source, pSeek, sizeof(source));
-        CopyItemAttributeFromSource(destination[i], source);
-        pSeek += Size;
-    }
-
-    return true;
-}
-
-bool ItemDataLoader::LoadLegacyFormat(FILE* fp, ITEM_ATTRIBUTE* destination)
-{
-    return LoadFormat<ITEM_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format", destination);
-}
-
-bool ItemDataLoader::LoadNewFormat(FILE* fp, ITEM_ATTRIBUTE* destination)
-{
-    return LoadFormat<ITEM_ATTRIBUTE_FILE>(fp, L"new format", destination);
-}

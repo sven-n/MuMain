@@ -1,0 +1,500 @@
+#include "stdafx.h"
+
+#include "ItemJsonFormat.h"
+#include "ItemType.h"
+
+#include "json.hpp"
+
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <set>
+#include <type_traits>
+
+namespace Data::Items
+{
+namespace
+{
+using OrderedJson = nlohmann::ordered_json;
+
+constexpr int JsonIndent = 2;
+
+namespace Keys
+{
+constexpr const char* FormatVersion = "formatVersion";
+constexpr const char* Group = "group";
+constexpr const char* Items = "items";
+constexpr const char* Number = "number";
+constexpr const char* Name = "name";
+constexpr const char* Requirements = "requirements";
+constexpr const char* ClassRequirements = "classRequirements";
+constexpr const char* Resistances = "resistances";
+} // namespace Keys
+
+// Same order as ITEM_ATTRIBUTE::RequireClass.
+constexpr std::array<const char*, MAX_CLASS> ClassKeys = {
+    "darkWizard", "darkKnight", "fairyElf", "magicGladiator", "darkLord", "summoner", "rageFighter"};
+
+// Same order as ITEM_ATTRIBUTE::Resistance. The last one is unused by the
+// Season 6 data.
+constexpr std::array<const char*, MAX_RESISTANCE + 1> ResistanceKeys = {
+    "ice", "poison", "lightning", "fire", "earth", "wind", "water", "unknown"};
+
+// The single list of item fields and their defaults, used for reading and
+// writing. TDefinition is ItemDefinition or const ItemDefinition.
+template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinition& definition, TVisitor&& visit)
+{
+    visit("width", definition.width, BYTE{0});
+    visit("height", definition.height, BYTE{0});
+    visit("slot", definition.slot, ItemSlotNone);
+    visit("twoHanded", definition.twoHanded, false);
+    visit("skill", definition.skill, WORD{0});
+    visit("level", definition.level, WORD{0});
+    visit("durability", definition.durability, BYTE{0});
+    visit("magicDurability", definition.magicDurability, BYTE{0});
+    visit("damageMin", definition.damageMin, BYTE{0});
+    visit("damageMax", definition.damageMax, BYTE{0});
+    visit("blockRate", definition.blockRate, BYTE{0});
+    visit("defense", definition.defense, BYTE{0});
+    visit("magicDefense", definition.magicDefense, BYTE{0});
+    visit("attackSpeed", definition.attackSpeed, BYTE{0});
+    visit("walkSpeed", definition.walkSpeed, BYTE{0});
+    visit("magicPower", definition.magicPower, BYTE{0});
+    visit("attackType", definition.attackType, BYTE{0});
+    visit("sellValue", definition.sellValue, BYTE{0});
+    visit("buyPrice", definition.buyPrice, 0);
+}
+
+template <typename TRequirements, typename TVisitor> void VisitRequirementFields(TRequirements& requirements, TVisitor&& visit)
+{
+    visit("level", requirements.level, WORD{0});
+    visit("strength", requirements.strength, WORD{0});
+    visit("dexterity", requirements.dexterity, WORD{0});
+    visit("energy", requirements.energy, WORD{0});
+    visit("vitality", requirements.vitality, WORD{0});
+    visit("leadership", requirements.leadership, WORD{0});
+}
+
+// ---------------------------------------------------------------- writing
+
+template <size_t Count>
+void WriteByteTable(OrderedJson& item, const char* key, const std::array<BYTE, Count>& values,
+                    const std::array<const char*, Count>& keys)
+{
+    OrderedJson table = OrderedJson::object();
+    for (size_t i = 0; i < Count; ++i)
+    {
+        if (values[i] != 0)
+        {
+            table[keys[i]] = values[i];
+        }
+    }
+    if (!table.empty())
+    {
+        item[key] = std::move(table);
+    }
+}
+
+// English first, then the translations sorted by locale.
+OrderedJson WriteNames(const LocalizedString& names)
+{
+    OrderedJson json = OrderedJson::object();
+    json[std::string(LocalizedString::NeutralLocale)] = names.GetNeutral();
+    for (const auto& [locale, text] : names.GetTranslations())
+    {
+        json[locale] = text;
+    }
+    return json;
+}
+
+OrderedJson WriteItem(const ItemDefinition& definition)
+{
+    OrderedJson item;
+    item[Keys::Number] = definition.number;
+    item[Keys::Name] = WriteNames(definition.names);
+
+    const auto writeIfNotDefault = [](OrderedJson& target) {
+        return [&target](const char* key, const auto& value, const auto& defaultValue) {
+            if (value != defaultValue)
+            {
+                target[key] = value;
+            }
+        };
+    };
+
+    VisitStatFields(definition, writeIfNotDefault(item));
+
+    OrderedJson requirements = OrderedJson::object();
+    VisitRequirementFields(definition.requirements, writeIfNotDefault(requirements));
+    if (!requirements.empty())
+    {
+        item[Keys::Requirements] = std::move(requirements);
+    }
+
+    WriteByteTable(item, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
+    WriteByteTable(item, Keys::Resistances, definition.resistances, ResistanceKeys);
+    return item;
+}
+
+// ---------------------------------------------------------------- reading
+
+// Reads the item currently being read and collects its problems.
+class ItemReader
+{
+public:
+    ItemReader(const std::string& source, int group, std::vector<ItemDataIssue>& issues)
+        : m_source(source), m_group(group), m_issues(issues)
+    {
+    }
+
+    bool Read(const OrderedJson& json, ItemDefinition& definition);
+
+private:
+    void AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message);
+    bool ReadIdentity(const OrderedJson& json, ItemDefinition& definition);
+    bool ReadNames(const OrderedJson& json, LocalizedString& names);
+    void ReadStats(const OrderedJson& json, ItemDefinition& definition);
+    void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
+    template <size_t Count>
+    void ReadByteTable(const OrderedJson& json, const char* key, std::array<BYTE, Count>& values,
+                       const std::array<const char*, Count>& keys);
+    void WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys,
+                              const std::string& prefix);
+
+    template <typename T> void ReadValue(const OrderedJson& json, const std::string& field, T& value);
+
+    const std::string& m_source;
+    int m_group;
+    int m_number = ItemDataIssue::NoItem;
+    bool m_hasErrors = false;
+    std::vector<ItemDataIssue>& m_issues;
+};
+
+void ItemReader::AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
+{
+    m_issues.push_back({severity, m_source, m_group, m_number, field, message});
+    m_hasErrors = m_hasErrors || severity == ItemDataIssueSeverity::Error;
+}
+
+template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const std::string& field, T& value)
+{
+    if constexpr (std::is_same_v<T, bool>)
+    {
+        if (!json.is_boolean())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be true or false");
+            return;
+        }
+        value = json.get<bool>();
+    }
+    else
+    {
+        constexpr long long Minimum = std::numeric_limits<T>::min();
+        constexpr long long Maximum = std::numeric_limits<T>::max();
+        if (!json.is_number_integer())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be a whole number");
+            return;
+        }
+
+        const long long number = json.get<long long>();
+        if (number < Minimum || number > Maximum)
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field,
+                     "must be between " + std::to_string(Minimum) + " and " + std::to_string(Maximum));
+            return;
+        }
+        value = static_cast<T>(number);
+    }
+}
+
+bool ItemReader::ReadIdentity(const OrderedJson& json, ItemDefinition& definition)
+{
+    const auto number = json.find(Keys::Number);
+    if (number == json.end() || !number->is_number_integer())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Number, "missing or not a whole number");
+        return false;
+    }
+
+    m_number = number->get<int>();
+    if (!IsValidItemId(m_group, m_number))
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Number, "must be between 0 and " + std::to_string(MAX_ITEM_INDEX - 1));
+        return false;
+    }
+
+    const auto name = json.find(Keys::Name);
+    if (name == json.end())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Name, "missing");
+        return false;
+    }
+    if (!ReadNames(*name, definition.names))
+    {
+        return false;
+    }
+
+    definition.group = m_group;
+    definition.number = m_number;
+    return true;
+}
+
+bool ItemReader::ReadNames(const OrderedJson& json, LocalizedString& names)
+{
+    // A plain text is the English name only; handy for items written by hand.
+    if (json.is_string())
+    {
+        names.Set(LocalizedString::NeutralLocale, json.get<std::string>());
+        return true;
+    }
+
+    if (!json.is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Name, "must be an object of \"<locale>\": \"<name>\" pairs");
+        return false;
+    }
+
+    for (const auto& [locale, text] : json.items())
+    {
+        if (!text.is_string())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, std::string(Keys::Name) + "." + locale, "must be a text");
+            return false;
+        }
+        names.Set(locale, text.get<std::string>());
+    }
+    return true;
+}
+
+void ItemReader::ReadStats(const OrderedJson& json, ItemDefinition& definition)
+{
+    VisitStatFields(definition, [&](const char* key, auto& value, const auto&) {
+        const auto field = json.find(key);
+        if (field != json.end())
+        {
+            ReadValue(*field, key, value);
+        }
+    });
+}
+
+void ItemReader::ReadRequirements(const OrderedJson& json, ItemDefinition& definition)
+{
+    const auto requirements = json.find(Keys::Requirements);
+    if (requirements == json.end())
+    {
+        return;
+    }
+    if (!requirements->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Requirements, "must be an object");
+        return;
+    }
+
+    std::set<std::string, std::less<>> knownKeys;
+    VisitRequirementFields(definition.requirements, [&](const char* key, auto& value, const auto&) {
+        knownKeys.insert(key);
+        const auto field = requirements->find(key);
+        if (field != requirements->end())
+        {
+            ReadValue(*field, std::string(Keys::Requirements) + "." + key, value);
+        }
+    });
+    WarnAboutUnknownKeys(*requirements, knownKeys, std::string(Keys::Requirements) + ".");
+}
+
+template <size_t Count>
+void ItemReader::ReadByteTable(const OrderedJson& json, const char* key, std::array<BYTE, Count>& values,
+                               const std::array<const char*, Count>& keys)
+{
+    const auto table = json.find(key);
+    if (table == json.end())
+    {
+        return;
+    }
+    if (!table->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, key, "must be an object");
+        return;
+    }
+
+    std::set<std::string, std::less<>> knownKeys(keys.begin(), keys.end());
+    for (size_t i = 0; i < Count; ++i)
+    {
+        const auto field = table->find(keys[i]);
+        if (field != table->end())
+        {
+            ReadValue(*field, std::string(key) + "." + keys[i], values[i]);
+        }
+    }
+    WarnAboutUnknownKeys(*table, knownKeys, std::string(key) + ".");
+}
+
+void ItemReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys,
+                                      const std::string& prefix)
+{
+    for (const auto& [key, value] : json.items())
+    {
+        if (!knownKeys.contains(key))
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, prefix + key, "unknown field, ignored");
+        }
+    }
+}
+
+std::set<std::string, std::less<>> GetKnownItemKeys()
+{
+    std::set<std::string, std::less<>> keys{Keys::Number, Keys::Name, Keys::Requirements, Keys::ClassRequirements,
+                                            Keys::Resistances};
+    ItemDefinition unused;
+    VisitStatFields(unused, [&](const char* key, auto&, const auto&) { keys.insert(key); });
+    return keys;
+}
+
+bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
+{
+    if (!json.is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, "", "an item must be an object");
+        return false;
+    }
+    if (!ReadIdentity(json, definition))
+    {
+        return false;
+    }
+
+    ReadStats(json, definition);
+    ReadRequirements(json, definition);
+    ReadByteTable(json, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
+    ReadByteTable(json, Keys::Resistances, definition.resistances, ResistanceKeys);
+
+    static const std::set<std::string, std::less<>> KnownItemKeys = GetKnownItemKeys();
+    WarnAboutUnknownKeys(json, KnownItemKeys, "");
+    return !m_hasErrors;
+}
+
+void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
+                  const std::string& message)
+{
+    issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
+}
+
+bool TryParse(std::string_view text, const std::string& source, OrderedJson& root, std::vector<ItemDataIssue>& issues)
+{
+    try
+    {
+        root = OrderedJson::parse(text);
+        return true;
+    }
+    catch (const OrderedJson::parse_error& error)
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, "", std::string("invalid JSON: ") + error.what());
+        return false;
+    }
+}
+
+bool ReadFormatVersion(const OrderedJson& root, const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    const auto version = root.find(Keys::FormatVersion);
+    if (version == root.end() || !version->is_number_integer())
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion, "missing or not a whole number");
+        return false;
+    }
+
+    const int formatVersion = version->get<int>();
+    if (formatVersion < 1 || formatVersion > ItemJsonFormatVersion)
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion,
+                     "version " + std::to_string(formatVersion) + " is not supported (this client reads up to " +
+                         std::to_string(ItemJsonFormatVersion) + ")");
+        return false;
+    }
+    return true;
+}
+
+bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, std::vector<ItemDataIssue>& issues)
+{
+    const auto groupField = root.find(Keys::Group);
+    if (groupField == root.end() || !groupField->is_number_integer())
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group, "missing or not a whole number");
+        return false;
+    }
+
+    group = groupField->get<int>();
+    if (group < 0 || group >= MAX_ITEM_TYPE)
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group,
+                     "must be between 0 and " + std::to_string(MAX_ITEM_TYPE - 1));
+        return false;
+    }
+    return true;
+}
+} // namespace
+
+void ReadItemGroupJson(std::string_view text, const std::string& source, std::vector<ItemDefinition>& items,
+                       std::vector<ItemDataIssue>& issues)
+{
+    OrderedJson root;
+    if (!TryParse(text, source, root, issues))
+    {
+        return;
+    }
+    if (!root.is_object())
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the file must contain a JSON object");
+        return;
+    }
+
+    int group = 0;
+    if (!ReadFormatVersion(root, source, issues) || !ReadGroup(root, source, group, issues))
+    {
+        return;
+    }
+
+    const auto itemList = root.find(Keys::Items);
+    if (itemList == root.end() || !itemList->is_array())
+    {
+        AddFileIssue(issues, source, group, Keys::Items, "missing or not a list");
+        return;
+    }
+
+    for (const OrderedJson& json : *itemList)
+    {
+        ItemDefinition definition;
+        ItemReader reader(source, group, issues);
+        if (reader.Read(json, definition))
+        {
+            items.push_back(std::move(definition));
+        }
+    }
+}
+
+std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
+{
+    std::vector<const ItemDefinition*> groupItems;
+    for (const ItemDefinition& definition : items)
+    {
+        if (definition.group == group && definition.Exists())
+        {
+            groupItems.push_back(&definition);
+        }
+    }
+    std::sort(groupItems.begin(), groupItems.end(),
+              [](const ItemDefinition* left, const ItemDefinition* right) { return left->number < right->number; });
+
+    OrderedJson root;
+    root[Keys::FormatVersion] = ItemJsonFormatVersion;
+    root[Keys::Group] = group;
+    root[Keys::Items] = OrderedJson::array();
+    for (const ItemDefinition* definition : groupItems)
+    {
+        root[Keys::Items].push_back(WriteItem(*definition));
+    }
+
+    // Names are UTF-8 already; replace (instead of throwing on) anything that
+    // is not, so a bad name can never stop a save half-way.
+    return root.dump(JsonIndent, ' ', false, OrderedJson::error_handler_t::replace) + "\n";
+}
+} // namespace Data::Items
