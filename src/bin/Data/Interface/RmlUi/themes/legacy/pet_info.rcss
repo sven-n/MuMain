@@ -28,7 +28,7 @@
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	pointer-events: none;
 }
 
@@ -40,7 +40,7 @@
 	height: 22px;
 	text-align: center;
 	line-height: 22px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-muted);
 	cursor: pointer;
 	pointer-events: auto;
@@ -62,7 +62,7 @@
 	width: 160px;
 	color: #0000ff;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	text-align: center;
 }
 
@@ -73,7 +73,7 @@
 	top: 25px;
 	width: 70px;
 	text-align: center;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	pointer-events: none;
 }
@@ -108,7 +108,7 @@
 	display: block;
 	position: absolute;
 	left: 22px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	white-space: nowrap;
 	pointer-events: none;
@@ -177,7 +177,7 @@
 	left: 14px;
 	width: 100px;
 	text-align: center;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	pointer-events: none;
 }

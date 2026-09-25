@@ -10,7 +10,8 @@
 	     same convention as character_info.rml's #panel (this window is collision-shuffled between the
 	     same PanelColumnX() slots, and force-paired with Character -- see WindowSystem.cpp). -->
 	<div id="panel" data-model="pet_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>

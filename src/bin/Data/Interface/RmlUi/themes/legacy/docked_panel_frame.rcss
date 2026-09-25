@@ -56,7 +56,7 @@
 	position: absolute;
 	text-align: center;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-heading);
 	pointer-events: none;
 }
@@ -87,7 +87,7 @@
 	color: token(text-primary);
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
-	font-size: 11px;
+	font-size: 1em;
 	text-align: center;
 	pointer-events: none;
 	z-index: 1;
