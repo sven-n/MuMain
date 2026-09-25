@@ -8,6 +8,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
@@ -431,7 +432,12 @@ bool CStorageInventory::UpdateMouseEvent()
     if (ProcessBtns())
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, STORAGE_WIDTH, STORAGE_HEIGHT).Contains(MouseX, MouseY))
+    // #panel's own live RCSS size is the source of truth -- STORAGE_WIDTH/HEIGHT only cover the
+    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = STORAGE_WIDTH;
+    float panelHeight = STORAGE_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_RBUTTON))
         {

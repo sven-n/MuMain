@@ -59,6 +59,11 @@ namespace mu::ui::window
         };
 
     private:
+        // Pre-layout fallback only -- WindowGeometry's real hit-box comes from #panel's own live
+        // RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at each call site), not these
+        // constants. Used solely to seed that call before RmlUi's first layout pass has run
+        // (Create()/Show(true)/ReloadRmlTheme()'s first frame); never referenced by the native
+        // paperdoll/grid rendering, which has its own separate, still-native offset.
         static constexpr float INVENTORY_WIDTH  = 190.0f;
         static constexpr float INVENTORY_HEIGHT = 429.0f;
 

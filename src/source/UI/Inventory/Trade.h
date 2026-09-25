@@ -28,6 +28,11 @@ namespace mu::ui::window
         };
 
     private:
+        // TRADE_WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real hit-box
+        // comes from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at
+        // its UpdateMouseEvent() call site), seeded with these only for the first frame before
+        // RmlUi's layout has run. Never referenced by the native trade-grid rendering, which has
+        // its own separate, still-native offset.
         enum
         {
             TRADE_WIDTH = 190,

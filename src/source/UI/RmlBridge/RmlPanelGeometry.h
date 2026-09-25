@@ -11,9 +11,14 @@ namespace UI::Scaling
 }
 
 // Lets native hit-testing (WindowGeometry, CManager::UpdateMouseEvent()) follow a theme's actual
-// panel size instead of a hardcoded width/height literal duplicated per window -- see the docked-
-// family windows (character_info/pet_info/party_info/my_quest_info/quest_progress/
-// quest_progress_etc/npc_dialogue/npc_quest) whose #panel comes from docked_panel_frame.rcss.
+// panel size instead of a hardcoded width/height literal duplicated per window. Two independent
+// families use this today: the docked-family windows (character_info/pet_info/party_info/
+// my_quest_info/quest_progress/quest_progress_etc/npc_dialogue/npc_quest) whose #panel comes from
+// docked_panel_frame.rcss, and the inventory-family windows (my_inventory/trade/storage/
+// storage_ext/mix_inventory/npc_shop/my_shop/purchase_shop/inventory_extension) whose #panel is
+// each window's own foreground document's frame/chrome root (the paired *_bg.rml's #bg_root is a
+// decorative-only duplicate, never the authoritative one). Same function either way -- callers
+// just point it at whichever document/id is that window's own real #panel.
 namespace UI::RmlBridge
 {
     // Looks up `panelId` in `doc`, reads its live resolved border-box size (RmlUi's own real

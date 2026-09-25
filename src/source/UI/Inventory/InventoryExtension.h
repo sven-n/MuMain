@@ -22,6 +22,12 @@ namespace mu::ui::window
         };
 
     private:
+        // WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real hit-box comes
+        // from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at each
+        // of UpdateMouseEvent()/InventoryProcess()'s own call sites), seeded with these only for the
+        // first frame before RmlUi's layout has run. Distinct from HEIGHT_PER_EXT/EXT_BORDER below,
+        // which size the native per-page item grid/table art and are NOT part of this fallback --
+        // those stay native until the grid itself is separately migrated.
         static constexpr float WIDTH = 190.0f;
         static constexpr float HEIGHT = 429.0f;
         static constexpr float HEIGHT_PER_EXT = 87.0f;

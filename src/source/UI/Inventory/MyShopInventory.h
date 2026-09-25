@@ -25,6 +25,11 @@ namespace mu::ui::window
         };
 
     private:
+        // INVENTORY_WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real
+        // hit-box comes from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(),
+        // read at each of MyShopInventoryProcess()/UpdateMouseEvent()/WindowProcess()'s own call
+        // sites), seeded with these only for the first frame before RmlUi's layout has run. Never
+        // referenced by the native shop-grid rendering, which has its own separate offset.
         enum
         {
             INVENTORY_WIDTH = 190,

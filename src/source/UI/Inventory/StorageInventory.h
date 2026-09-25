@@ -19,6 +19,10 @@ namespace mu::ui::window
     class CStorageInventory : public CObject
     {
     private:
+        // Pre-layout fallback only -- WindowGeometry's real hit-box comes from #panel's own live
+        // RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at the UpdateMouseEvent() call
+        // site), seeded with these only for the first frame before RmlUi's layout has run. Never
+        // referenced by the native storage-grid rendering, which has its own separate offset.
         static constexpr float STORAGE_WIDTH = 190.0f;
         static constexpr float STORAGE_HEIGHT = 429.0f;
 

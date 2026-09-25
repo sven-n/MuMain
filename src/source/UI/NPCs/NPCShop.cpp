@@ -6,6 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -265,7 +266,12 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
 
 bool mu::ui::window::CNPCShop::WindowProcess()
 {
-    return mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT).Contains(MouseX, MouseY);
+    // #panel's own live RCSS size is the source of truth -- NPCSHOP_WIDTH/HEIGHT only cover the
+    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = NPCSHOP_WIDTH;
+    float panelHeight = NPCSHOP_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    return mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY);
 }
 
 bool mu::ui::window::CNPCShop::UpdateKeyEvent()

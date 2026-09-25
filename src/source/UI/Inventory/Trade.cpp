@@ -5,6 +5,7 @@
 #include "UI/Inventory/Trade.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 
@@ -296,7 +297,12 @@ bool CTrade::UpdateMouseEvent()
     if (ProcessBtns())
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, TRADE_WIDTH, TRADE_HEIGHT).Contains(MouseX, MouseY))
+    // #panel's own live RCSS size is the source of truth -- TRADE_WIDTH/HEIGHT only cover the
+    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = TRADE_WIDTH;
+    float panelHeight = TRADE_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

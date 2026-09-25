@@ -4,6 +4,7 @@
 
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -201,7 +202,12 @@ bool CInventoryExtension::UpdateMouseEvent()
         }
     }
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WIDTH, HEIGHT).Contains(MouseX, MouseY))
+    // #panel's own live RCSS size is the source of truth -- WIDTH/HEIGHT only cover the first
+    // frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = WIDTH;
+    float panelHeight = HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_RBUTTON))
         {
@@ -222,7 +228,12 @@ bool CInventoryExtension::UpdateMouseEvent()
 
 bool CInventoryExtension::InventoryProcess()
 {
-    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WIDTH, HEIGHT).Contains(MouseX, MouseY))
+    // #panel's own live RCSS size is the source of truth -- WIDTH/HEIGHT only cover the first
+    // frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = WIDTH;
+    float panelHeight = HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
     }
