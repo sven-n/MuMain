@@ -8,7 +8,7 @@
 class ItemDataSaver
 {
 public:
-    static bool Save(wchar_t* fileName, std::string* outChangeLog = nullptr);
+    static bool Save(const wchar_t* fileName, std::string* outChangeLog = nullptr);
 };
 
 #endif // _EDITOR

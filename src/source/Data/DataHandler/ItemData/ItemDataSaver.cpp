@@ -49,7 +49,7 @@ static void CompareItems(const ITEM_ATTRIBUTE& oldItem, const ITEM_ATTRIBUTE& ne
                                changes, changed);
 }
 
-bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
+bool ItemDataSaver::Save(const wchar_t* fileName, std::string* outChangeLog)
 {
     // Create standard save config with item-specific parameters
     auto config = CreateStandardSaveConfig<ITEM_ATTRIBUTE, ITEM_ATTRIBUTE_FILE>(

@@ -15,17 +15,17 @@
 #include "Core/Utilities/StringUtils.h"
 #endif
 
-// External references
-extern ITEM_ATTRIBUTE* ItemAttribute;
-
-bool ItemDataLoader::Load(wchar_t* fileName)
+bool ItemDataLoader::Load(const wchar_t* fileName, ITEM_ATTRIBUTE* destination, Reporting reporting)
 {
     FILE* fp = _wfopen(fileName, L"rb");
     if (fp == NULL)
     {
-        std::wstringstream ss;
-        ss << fileName << L" - File not exist.";
-        DataFileIO::ReportError(ss.str().c_str());
+        if (reporting == Reporting::Normal)
+        {
+            std::wstringstream ss;
+            ss << fileName << L" - File not exist.";
+            DataFileIO::ReportError(ss.str().c_str());
+        }
         return false;
     }
 
@@ -40,48 +40,53 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     bool isLegacyFormat = (fileSize == expectedLegacySize);
     bool success = false;
 
-#ifdef _EDITOR
     if (isLegacyFormat)
     {
-        g_MuEditorConsoleUI.LogEditor("Detected legacy item format (30-byte names)");
-    }
-#endif
-
-    if (isLegacyFormat)
-    {
-        success = LoadLegacyFormat(fp, fileSize);
+        success = LoadLegacyFormat(fp, destination);
     }
     else
     {
-        success = LoadNewFormat(fp, fileSize);
+        success = LoadNewFormat(fp, destination);
     }
 
     fclose(fp);
 
 #ifdef _EDITOR
-    if (success)
+    if (success && reporting == Reporting::Normal)
     {
-        // Count non-empty items (items with names)
-        int itemCount = 0;
-        for (int i = 0; i < MAX_ITEM; i++)
-        {
-            if (ItemAttribute[i].Name[0] != L'\0')
-            {
-                itemCount++;
-            }
-        }
-
-        wchar_t successMsg[256];
-        mu_swprintf(successMsg, L"Loaded %d items from %ls", itemCount, fileName);
-        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
+        LogLoadedItems(fileName, destination, isLegacyFormat);
     }
 #endif
 
     return success;
 }
 
+#ifdef _EDITOR
+void ItemDataLoader::LogLoadedItems(const wchar_t* fileName, const ITEM_ATTRIBUTE* items, bool isLegacyFormat)
+{
+    if (isLegacyFormat)
+    {
+        g_MuEditorConsoleUI.LogEditor("Detected legacy item format (30-byte names)");
+    }
+
+    // Count non-empty items (items with names)
+    int itemCount = 0;
+    for (int i = 0; i < MAX_ITEM; i++)
+    {
+        if (items[i].Name[0] != L'\0')
+        {
+            itemCount++;
+        }
+    }
+
+    wchar_t successMsg[256];
+    mu_swprintf(successMsg, L"Loaded %d items from %ls", itemCount, fileName);
+    g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
+}
+#endif
+
 template<typename TFileFormat>
-bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
+bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName, ITEM_ATTRIBUTE* destination)
 {
     const int Size = sizeof(TFileFormat);
 
@@ -121,19 +126,19 @@ bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
     {
         TFileFormat source;
         memcpy(&source, pSeek, sizeof(source));
-        CopyItemAttributeFromSource(ItemAttribute[i], source);
+        CopyItemAttributeFromSource(destination[i], source);
         pSeek += Size;
     }
 
     return true;
 }
 
-bool ItemDataLoader::LoadLegacyFormat(FILE* fp, long fileSize)
+bool ItemDataLoader::LoadLegacyFormat(FILE* fp, ITEM_ATTRIBUTE* destination)
 {
-    return LoadFormat<ITEM_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format");
+    return LoadFormat<ITEM_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format", destination);
 }
 
-bool ItemDataLoader::LoadNewFormat(FILE* fp, long fileSize)
+bool ItemDataLoader::LoadNewFormat(FILE* fp, ITEM_ATTRIBUTE* destination)
 {
-    return LoadFormat<ITEM_ATTRIBUTE_FILE>(fp, L"new format");
+    return LoadFormat<ITEM_ATTRIBUTE_FILE>(fp, L"new format", destination);
 }
