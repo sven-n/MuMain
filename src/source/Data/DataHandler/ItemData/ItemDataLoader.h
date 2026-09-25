@@ -6,13 +6,13 @@
 
 #include "Data/GameData/ItemData/ItemStructs.h"
 
-// Reads item.bmd files (the legacy item data format).
+// Reads legacy item.bmd files. The game itself reads its items from
+// Data/Items (JSON); this is only used by the item editor's bmd import.
 class ItemDataLoader
 {
 public:
-    // Quiet is for optional files: a missing file is not reported as an error
-    // and nothing is written to the editor console. A corrupted file is still
-    // reported.
+    // Quiet is for optional files: a missing file is not reported as an
+    // error. A corrupted file is still reported.
     enum class Reporting
     {
         Normal,
@@ -30,16 +30,6 @@ public:
         const BYTE* GetRecord(int itemType) const { return records.get() + itemType * recordSize; }
     };
 
-    // Loads MAX_ITEM records from an item.bmd file into destination.
-    static bool Load(const wchar_t* fileName, ITEM_ATTRIBUTE* destination, Reporting reporting = Reporting::Normal);
-
     // Reads, checks and decrypts an item.bmd file without converting it.
     static bool ReadRawFile(const wchar_t* fileName, RawItemFile& file, Reporting reporting = Reporting::Normal);
-
-private:
-    static void CopyRecords(const RawItemFile& file, ITEM_ATTRIBUTE* destination);
-
-#ifdef _EDITOR
-    static void LogLoadedItems(const wchar_t* fileName, const ITEM_ATTRIBUTE* items, bool isLegacyFormat);
-#endif
 };
