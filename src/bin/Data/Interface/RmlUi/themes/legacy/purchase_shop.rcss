@@ -17,7 +17,7 @@
 	width: 190px;
 	text-align: center;
 	color: token(accent-blue);
-	font-size: 12px;
+	font-size: 1em;
 }
 
 /* Same sprite as CMyShopInventory's own subject-box background (newui_Box_openTitle.tga) --
@@ -40,7 +40,7 @@
 	text-align: center;
 	color: #00ff00;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	pointer-events: none;
 }
 
@@ -51,7 +51,7 @@
 	left: 30px;
 	color: #ff2d2f;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -60,7 +60,7 @@
 	position: absolute;
 	left: 30px;
 	color: token(text-notice);
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }

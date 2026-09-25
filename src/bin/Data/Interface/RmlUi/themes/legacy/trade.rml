@@ -13,7 +13,8 @@
 	     "Warning" text badge (item_warning_badges below) is RmlUi now, positioned per-frame from
 	     C++ since it tracks a live, variable-length set of flagged item grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{title}}</span>
 
 		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>

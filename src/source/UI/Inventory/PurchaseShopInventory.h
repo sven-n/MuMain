@@ -79,6 +79,7 @@ namespace mu::ui::window
         struct PurchaseShopRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
             Rml::String title;			// static "Personal Store" label
             Rml::String shopOwnerText;	// dynamic shop-owner name (m_TitleText, via ChangeTitleText())
             Rml::String warningLabel;

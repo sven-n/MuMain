@@ -11,7 +11,8 @@
 	     generic frame-corner "X" hit-test (BtnProcess()'s HandleFrameCornerClose() call), untouched
 	     by this migration. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{title}}</span>
 		<span id="tax_rate">{{tax_rate_text}}</span>
 

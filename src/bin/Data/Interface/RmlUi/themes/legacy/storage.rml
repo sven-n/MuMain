@@ -9,7 +9,8 @@
 	     (StorageInventory.h). Background lives in storage_bg.rml instead, since it must paint
 	     behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title" data-class-locked="title_locked">{{title}}</span>
 
 		<div id="money_bg"></div>

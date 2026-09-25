@@ -9,7 +9,8 @@
 	     native (PurchaseShopInventory.h). Background lives in purchase_shop_bg.rml instead, since
 	     it must paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{title}}</span>
 
 		<!-- Reproduces IMAGE_MYSHOPINVENTORY_EDIT (newui_Box_openTitle.tga), the same sprite

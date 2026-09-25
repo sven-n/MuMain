@@ -9,7 +9,8 @@
 	     native (MyShopInventory.h). Frame background lives in my_shop_bg.rml instead, since it must
 	     paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span id="title">{{title}}</span>
 
 		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and

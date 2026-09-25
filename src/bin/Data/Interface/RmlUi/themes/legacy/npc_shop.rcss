@@ -20,7 +20,7 @@
 	text-align: center;
 	color: token(text-label);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 #tax_rate {
 	position: absolute;
@@ -30,7 +30,7 @@
 	text-align: center;
 	color: token(text-label);
 	font-weight: bold;
-	font-size: 11px;
+	font-size: 1em;
 }
 
 /* Both buttons share one sprite -- NPCShop.cpp's former SetButtonInfo() pointed both
@@ -68,7 +68,7 @@
 	position: absolute;
 	top: 362px;
 	font-weight: bold;
-	font-size: 11px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -87,7 +87,7 @@
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 1em;
 	pointer-events: none;
 	z-index: 1;
 }
