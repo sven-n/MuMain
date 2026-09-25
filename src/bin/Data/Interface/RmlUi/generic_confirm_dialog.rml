@@ -89,6 +89,7 @@
 		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary"
 		     data-class-solo="!has_secondary &amp;&amp; !show_cancel"
 		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-stock-ok="primary_is_stock_ok"
 		     data-class-hidden="has_progress" data-event-click="gcd_primary_click">{{primary_label}}</div>
 		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary"
 		     data-class-triple="has_secondary &amp;&amp; show_cancel"
@@ -96,6 +97,7 @@
 		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
 		<div id="gcd_btn_cancel" class="btn gcd-btn-cancel"
 		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-stock-cancel="cancel_is_stock_cancel"
 		     data-class-hidden="!show_cancel || has_progress"
 		     data-event-click="gcd_cancel_click">{{cancel_label}}</div>
 	</div>

@@ -221,17 +221,25 @@ namespace mu::ui::window
         // #panel can't be found.
         Rml::Vector2f PanelTranslateCorrection() const;
 
+        // The bg document paints the frame the fg document's text sits in; a theme may size the fg
+        // #panel by its content (legacy grows it per line, like native), so the bg #panel follows
+        // the fg one's laid-out height every frame the dialog is open.
+        void SyncBackgroundPanelHeight();
+
         struct LineEntry { Rml::String text; bool bold = false; };
         struct GenericDialogRmlModel
         {
             std::vector<LineEntry> lines;
             Rml::String primaryLabel;
+            // The label is the stock "OK"/"Cancel": a theme may draw native's lettered button art.
+            bool primaryIsStockOk = false;
 
             bool hasSecondary = false;
             Rml::String secondaryLabel;
 
             bool showCancel = false;
             Rml::String cancelLabel;
+            bool cancelIsStockCancel = false;
 
             bool hasTitle = false;
             Rml::String title;
