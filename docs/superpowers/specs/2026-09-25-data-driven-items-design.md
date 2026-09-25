@@ -381,8 +381,8 @@ in both repos (as separate PRs, one per repo).
 | Phase | Name | Side | Repo / PR | Depends on | Summary |
 |---|---|---|---|---|---|
 | 0 | Design document | Both | MuMain | – | Agree on the design (this document). |
-| 1 | Item database | Client | MuMain | 0 | Flat in-memory tables, still filled from `Item_<lang>.bmd`; log-name helper; performance measurement. No behavior change. |
-| 2 | Data file format | Client | MuMain | 1 | JSON per group becomes the only item source; loading, writing and validation rules; automated data test; bmd import/export in MuEditor. |
+| 1 | Item database | Client | MuMain | 0 | `ItemDefinition` model and flat in-memory table, built from the loaded `Item_<lang>.bmd` data; English names for logs; log-name helper; load-time log. No behavior change. |
+| 2 | Data file format | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; loading, writing and validation rules; automated data test; bmd import/export in MuEditor. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | `OpenItems()` / `OpenItemTextures()` driven by the model fields. |
@@ -404,13 +404,23 @@ server with original clients (after phases 6 and B).
 ### Phase details
 
 0. **This document**: agree on the design.
-1. **Item database**: flat tables loaded from the existing `Item_<lang>.bmd`;
-   `ItemAttribute[]` filled from them. No behavior change. Add the log-name
-   helper. Measure lookup and load performance.
+1. **Item database**: an `ItemDefinition` model (clean field names, lossless
+   conversion to and from `ITEM_ATTRIBUTE`) and a flat table indexed by item
+   type (`Data::Items::ItemDatabase`). In this phase the database is built
+   **from** the loaded `ItemAttribute[]`, because the item editor still
+   edits `ItemAttribute[]` directly; saving in the editor rebuilds it.
+   English names are loaded from the `Eng` item file when another language
+   is selected, and `GetLogName()` returns `<English name> (<group>,<number>)`.
+   The load and build times are logged. No behavior change.
+   Hot/cold splitting of the table comes with the first hot data (flags and
+   tags, phase 3).
 2. **Data file format**: JSON files per group become the only item source
    for the game, with the loading, writing and validation rules from
    section 2 and the automated data test. MuEditor gets "Import from bmd"
-   and "Export as bmd"; the game stops reading `Item_<lang>.bmd`.
+   and "Export as bmd"; the game stops reading `Item_<lang>.bmd`. The data
+   flow turns around: JSON → database → `ItemAttribute[]` (compatibility
+   view), and the item editor edits the database instead of
+   `ItemAttribute[]`.
 3. **Rules and categories into data**: flags and tags replace the hardcoded
    lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
    The resulting item lists are verified to be identical. Includes the
