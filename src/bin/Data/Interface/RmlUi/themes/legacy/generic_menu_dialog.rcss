@@ -4,26 +4,46 @@
    shared with any future consumer -- not exclusive to this dialog (see that file's own comment).
    This file supplies only this document's own content layout (lines/buttons), not the shell.
 
-   #panel is centered via .center-both; dp throughout (LayoutMode::Dialog window, same category
-   as generic_confirm_dialog.rcss). 230dp matches native's own MSGBOX_WIDTH and
-   generic_confirm_dialog.rcss's own panel width, for visual consistency between the two
-   sibling primitives. Fixed 260dp height comfortably fits the largest native consumer (5
-   buttons + a few lines of text) with .gmd-button-row's own scrollbar (below) as the safety
-   valve, not pixel-exact math. */
+   #panel is placed like native's menu boxes (see #panel below); dp throughout (LayoutMode::Dialog
+   window, same category as generic_confirm_dialog.rcss), text in rem (RmlNativeText.h). 230dp
+   matches native's own MSGBOX_WIDTH and generic_confirm_dialog.rcss's own panel width. The height
+   follows the content, as native's per-menu fixed heights were sized to theirs. */
 #panel {
+	/* Native menu boxes (CChaosMixMenuMsgBox, CTrainerMenuMsgBox, CSeedMasterMenuMsgBox...) sit
+	   centred with their top edge at y=60 and are as tall as their content: no centering transform
+	   and no fixed height here -- the shell's content box flows (below) and sizes the panel. A
+	   consumer that passes its own position (.window-shell-positioned) keeps it. */
+	top: 60dp;
+	left: 50%;
+	margin-left: -115dp;
+	transform: none;
 	width: 230dp;
-	height: 260dp;
+	height: auto; /* #panel is the document body, which base.rcss makes full-screen */
+	min-height: 117dp;
 	font-family: "token(font-body)";
 	font-size: 1rem;
 	color: token(text-primary);
 }
+#panel.window-shell-positioned { margin-left: 0; }
+/* The shell's content box in flow (window_shell.rcss places it absolutely inside a fixed-height
+   panel), with native's text width: MSGBOX_WIDTH less ~16 each side. */
+#panel .window-shell-content {
+	position: relative;
+	top: auto;
+	bottom: auto;
+	left: auto;
+	right: auto;
+	margin: 20dp 16dp 28dp 16dp;
+	z-index: 1; /* above the shell's absolutely positioned sprite layers */
+}
+#panel .window-shell-content.has-title { margin-top: 0; }
 
 .gmd-line {
 	display: block;
 	width: 100%;
 	text-align: center;
 	white-space: normal;
-	color: token(text-prompt);
+	color: token(text-primary); /* native menu text is white */
 	margin-bottom: 4dp;
 }
 .gmd-line.bold { font-weight: bold; }
@@ -43,7 +63,8 @@
 	flex-wrap: wrap;
 	justify-content: center;
 	width: 100%;
-	max-height: 100%;
+	/* No max-height: the panel grows with its content (see #panel), so a percentage cap would
+	   resolve against an auto height and hide the whole row. */
 	overflow: hidden auto;
 	pointer-events: auto;
 }
@@ -75,6 +96,8 @@
 /* A button with its own description lines needs a bit more breathing room below it than a plain
    one, so it doesn't read as crowded against whatever's next in the stack. */
 .gmd-button-cell.has-lines { margin-bottom: 10dp; }
+/* Native draws a button's description lines across the whole box, not the button's width. */
+.gmd-button-cell.has-lines:not(.cols-2) { width: 100%; }
 /* GenericMenuConfig::columns == 2 -- sized to fit exactly 2 per row within .gmd-body's own content
    width, accounting for the WORST case where .gmd-button-row's own vertical scrollbar appears
    (10 buttons in 2 columns = 5 rows, tall enough to need it): 230dp panel - 32dp*2 margins = 166dp,
@@ -91,29 +114,35 @@
    (MSGBOX_BTN_EMPTY_WIDTH/_SMALL_WIDTH, CommonMessageBox.h); 76dp (.cols-2 below) has no native
    equivalent (columns==2 is dialog-only).
 
-   decorator: ninepatch(...) replaces .btn's inherited decorator: image(legacy-btn-idle) -- a
-   fixed 108x30px sprite that this engine's image() decorator only ever stretches to fill its box,
-   never tiles/slices (confirmed via DecoratorTiled.cpp) -- with a proper 9-slice scale of the SAME
-   asset, using the sheet's own already-declared `legacy-btn-idle-inner` rect. None of this file's
-   three button widths (128dp/64dp/76dp) matches the sprite's native 108px, so every one of them
-   visibly stretched/squashed the idle art before this -- exactly the technique server_select.rcss's
-   own `.server-row`/`.group-btn` already prove for the same problem. Declared once here rather
-   than per width variant, since a ninepatch decorator scales to whatever box it's given -- the
-   same three rules below cover every .gmd-btn size with no duplication. Unlike background-color/
-   border, a decorator paints independently of the box-model layer the "bordered element with
-   children" bug affects (server_select.rcss's own comment: "the ninepatch decorator paints
-   separately, unaffected"), so this is safe directly on .gmd-btn despite it having children
-   (.gmd-btn-label/.gmd-tooltip) -- no separate childless sibling element needed the way a flat
-   background-color/border would require. */
+   The decorator is native's own button art (sheets below), stretched to each width as native
+   stretches it. */
+/* Native menu buttons draw newui_btn_empty(_small).tga -- three 29px-tall states stacked, the
+   108/64px-wide art stretched to the button -- not the options window's op1_b_all art. */
+@spritesheet msgbox-btn-empty-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	msgbox-btn-empty-idle:   0px  0px 108px 29px;
+	msgbox-btn-empty-hover:  0px 29px 108px 29px;
+	msgbox-btn-empty-active: 0px 58px 108px 29px;
+}
+@spritesheet msgbox-btn-empty-small-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	msgbox-btn-empty-small-idle:   0px  0px 64px 29px;
+	msgbox-btn-empty-small-hover:  0px 29px 64px 29px;
+	msgbox-btn-empty-small-active: 0px 58px 64px 29px;
+}
 .gmd-btn {
 	position: static;
 	width: 128dp;
 	height: 30dp;
-	decorator: ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
+	decorator: image(msgbox-btn-empty-idle);
 }
-.gmd-btn:hover { decorator: ninepatch(legacy-btn-hover, legacy-btn-hover-inner); }
-.gmd-btn:active { decorator: ninepatch(legacy-btn-active, legacy-btn-active-inner); }
-.gmd-btn.compact { width: 64dp; }
+.gmd-btn:hover { decorator: image(msgbox-btn-empty-hover); }
+.gmd-btn:active { decorator: image(msgbox-btn-empty-active); }
+.gmd-btn.compact { width: 64dp; decorator: image(msgbox-btn-empty-small-idle); }
+.gmd-btn.compact:hover { decorator: image(msgbox-btn-empty-small-hover); }
+.gmd-btn.compact:active { decorator: image(msgbox-btn-empty-small-active); }
 /* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (decorators
    don't consume box-model space like border/padding do, so this matches the cell exactly, no
    subtraction needed). height switches to auto (with a min-height floor so a short 1-line label
