@@ -15,10 +15,7 @@
 #include "Core/Utilities/StringUtils.h"
 #endif
 
-// External references
-extern ITEM_ATTRIBUTE* ItemAttribute;
-
-bool ItemDataLoader::Load(wchar_t* fileName)
+bool ItemDataLoader::Load(const wchar_t* fileName, ITEM_ATTRIBUTE* destination)
 {
     FILE* fp = _wfopen(fileName, L"rb");
     if (fp == NULL)
@@ -49,11 +46,11 @@ bool ItemDataLoader::Load(wchar_t* fileName)
 
     if (isLegacyFormat)
     {
-        success = LoadLegacyFormat(fp, fileSize);
+        success = LoadLegacyFormat(fp, destination);
     }
     else
     {
-        success = LoadNewFormat(fp, fileSize);
+        success = LoadNewFormat(fp, destination);
     }
 
     fclose(fp);
@@ -65,7 +62,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
         int itemCount = 0;
         for (int i = 0; i < MAX_ITEM; i++)
         {
-            if (ItemAttribute[i].Name[0] != L'\0')
+            if (destination[i].Name[0] != L'\0')
             {
                 itemCount++;
             }
@@ -81,7 +78,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
 }
 
 template<typename TFileFormat>
-bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
+bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName, ITEM_ATTRIBUTE* destination)
 {
     const int Size = sizeof(TFileFormat);
 
@@ -121,19 +118,19 @@ bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
     {
         TFileFormat source;
         memcpy(&source, pSeek, sizeof(source));
-        CopyItemAttributeFromSource(ItemAttribute[i], source);
+        CopyItemAttributeFromSource(destination[i], source);
         pSeek += Size;
     }
 
     return true;
 }
 
-bool ItemDataLoader::LoadLegacyFormat(FILE* fp, long fileSize)
+bool ItemDataLoader::LoadLegacyFormat(FILE* fp, ITEM_ATTRIBUTE* destination)
 {
-    return LoadFormat<ITEM_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format");
+    return LoadFormat<ITEM_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format", destination);
 }
 
-bool ItemDataLoader::LoadNewFormat(FILE* fp, long fileSize)
+bool ItemDataLoader::LoadNewFormat(FILE* fp, ITEM_ATTRIBUTE* destination)
 {
-    return LoadFormat<ITEM_ATTRIBUTE_FILE>(fp, L"new format");
+    return LoadFormat<ITEM_ATTRIBUTE_FILE>(fp, L"new format", destination);
 }
