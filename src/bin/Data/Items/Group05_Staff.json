@@ -269,6 +269,7 @@
         "es": "Báculo Divino de Arcángel",
         "pt": "Bastão divino do arcanjo"
       },
+      "tags": ["divineArchangelWeapon", "valuable"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -538,6 +539,7 @@
         "es": "Libro de Samut",
         "pt": "Livro de Samut"
       },
+      "tags": ["summonerBook"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -561,6 +563,7 @@
         "es": "Libro de Neil",
         "pt": "Livro de Neil"
       },
+      "tags": ["summonerBook"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -584,6 +587,7 @@
         "es": "Libro de Lagle",
         "pt": "Livro de Lagle"
       },
+      "tags": ["summonerBook"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -707,6 +711,7 @@
         "es": "Bastón Divino de Arcángel",
         "pt": "Bastão Divino do Arcanjo"
       },
+      "tags": ["divineArchangelWeapon", "valuable"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",

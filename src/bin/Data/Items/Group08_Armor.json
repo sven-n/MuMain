@@ -1253,6 +1253,11 @@
       "durability": 255,
       "defense": 21,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 1
       },
@@ -1277,6 +1282,11 @@
       "durability": 255,
       "defense": 14,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 1
       },
@@ -1298,6 +1308,11 @@
       "durability": 255,
       "defense": 19,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 1
       },
@@ -1320,6 +1335,11 @@
       "durability": 255,
       "defense": 26,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 1
       },
@@ -1341,6 +1361,11 @@
       "durability": 255,
       "defense": 39,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -1362,6 +1387,11 @@
       "durability": 255,
       "defense": 42,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -1384,6 +1414,11 @@
       "durability": 255,
       "defense": 29,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -1405,6 +1440,11 @@
       "durability": 255,
       "defense": 24,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -1427,6 +1467,11 @@
       "durability": 255,
       "defense": 31,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -1448,6 +1493,11 @@
       "durability": 255,
       "defense": 47,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -1469,6 +1519,11 @@
       "durability": 255,
       "defense": 43,
       "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 150
       },

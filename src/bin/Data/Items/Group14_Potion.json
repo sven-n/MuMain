@@ -9,10 +9,12 @@
         "es": "Manzana",
         "pt": "Maçã"
       },
+      "tags": ["healingPotion"],
       "width": 1,
       "height": 1,
       "level": 1,
-      "sellValue": 5
+      "sellValue": 5,
+      "repairable": false
     },
     {
       "number": 1,
@@ -21,10 +23,12 @@
         "es": "Pócima de Curación Pequeña",
         "pt": "Pequena poção de cura"
       },
+      "tags": ["healingPotion"],
       "width": 1,
       "height": 1,
       "level": 10,
-      "sellValue": 10
+      "sellValue": 10,
+      "repairable": false
     },
     {
       "number": 2,
@@ -33,10 +37,12 @@
         "es": "Pócima de Curación",
         "pt": "Poção de cura"
       },
+      "tags": ["healingPotion"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 20
+      "sellValue": 20,
+      "repairable": false
     },
     {
       "number": 3,
@@ -45,10 +51,12 @@
         "es": "Pócima de Curación Grande",
         "pt": "Grande poção de cura"
       },
+      "tags": ["healingPotion"],
       "width": 1,
       "height": 1,
       "level": 40,
-      "sellValue": 30
+      "sellValue": 30,
+      "repairable": false
     },
     {
       "number": 4,
@@ -57,10 +65,12 @@
         "es": "Pócima de Maná Pequeña",
         "pt": "Pequena poção de mana"
       },
+      "tags": ["manaPotion"],
       "width": 1,
       "height": 1,
       "level": 10,
-      "sellValue": 10
+      "sellValue": 10,
+      "repairable": false
     },
     {
       "number": 5,
@@ -69,10 +79,12 @@
         "es": "Pócima de Maná",
         "pt": "Poção de mana"
       },
+      "tags": ["manaPotion"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 20
+      "sellValue": 20,
+      "repairable": false
     },
     {
       "number": 6,
@@ -81,10 +93,12 @@
         "es": "Pócima de Maná Grande",
         "pt": "Grande poção de mana"
       },
+      "tags": ["manaPotion"],
       "width": 1,
       "height": 1,
       "level": 40,
-      "sellValue": 30
+      "sellValue": 30,
+      "repairable": false
     },
     {
       "number": 7,
@@ -95,7 +109,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 30
+      "sellValue": 30,
+      "repairable": false
     },
     {
       "number": 8,
@@ -107,7 +122,8 @@
       "width": 1,
       "height": 1,
       "level": 10,
-      "sellValue": 10
+      "sellValue": 10,
+      "repairable": false
     },
     {
       "number": 9,
@@ -119,7 +135,8 @@
       "width": 1,
       "height": 2,
       "level": 15,
-      "sellValue": 30
+      "sellValue": 30,
+      "repairable": false
     },
     {
       "number": 10,
@@ -131,7 +148,8 @@
       "width": 1,
       "height": 2,
       "level": 30,
-      "sellValue": 30
+      "sellValue": 30,
+      "repairable": false
     },
     {
       "number": 11,
@@ -141,7 +159,9 @@
         "pt": "Caixa da sorte"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "sellable": false,
+      "repairable": false
     },
     {
       "number": 12,
@@ -151,7 +171,8 @@
         "pt": "Coração"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 13,
@@ -160,10 +181,12 @@
         "es": "Joya de Bendición",
         "pt": "Joia da bênção"
       },
+      "tags": ["jewel", "valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 150
+      "sellValue": 150,
+      "repairable": false
     },
     {
       "number": 14,
@@ -172,10 +195,12 @@
         "es": "Joya de Alma",
         "pt": "Joia da alma"
       },
+      "tags": ["jewel", "valuable"],
       "width": 1,
       "height": 1,
       "level": 30,
-      "sellValue": 150
+      "sellValue": 150,
+      "repairable": false
     },
     {
       "number": 15,
@@ -183,7 +208,8 @@
         "en": "Zen"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 16,
@@ -192,9 +218,11 @@
         "es": "Joya de Vida",
         "pt": "Joia da vida"
       },
+      "tags": ["jewel", "valuable"],
       "width": 1,
       "height": 1,
-      "level": 72
+      "level": 72,
+      "repairable": false
     },
     {
       "number": 17,
@@ -205,7 +233,8 @@
       },
       "width": 1,
       "height": 1,
-      "level": 1
+      "level": 1,
+      "repairable": false
     },
     {
       "number": 18,
@@ -216,7 +245,8 @@
       },
       "width": 1,
       "height": 1,
-      "level": 1
+      "level": 1,
+      "repairable": false
     },
     {
       "number": 19,
@@ -226,7 +256,8 @@
         "pt": "Convite do diabo"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 20,
@@ -236,7 +267,8 @@
         "pt": "Remédio do amor"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 21,
@@ -244,7 +276,11 @@
         "en": "Rena"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 22,
@@ -253,9 +289,11 @@
         "es": "Joya de la Creación",
         "pt": "Joia da criação"
       },
+      "tags": ["jewel", "valuable"],
       "width": 1,
       "height": 1,
-      "level": 78
+      "level": 78,
+      "repairable": false
     },
     {
       "number": 23,
@@ -264,8 +302,14 @@
         "es": "Rollo del Emperador",
         "pt": "Pergaminho do Imperador"
       },
+      "tags": ["secondClassQuestItem"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 24,
@@ -274,8 +318,14 @@
         "es": "Espada Quebrada",
         "pt": "Espada quebrada"
       },
+      "tags": ["secondClassQuestItem"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 25,
@@ -284,8 +334,14 @@
         "es": "Lágrima de Elfa",
         "pt": "Lágrima do elfo"
       },
+      "tags": ["secondClassQuestItem"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 26,
@@ -294,8 +350,14 @@
         "es": "Fragmento de Alma de Mago",
         "pt": "Fragmento da alma do Mago"
       },
+      "tags": ["secondClassQuestItem"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 28,
@@ -305,7 +367,8 @@
         "pt": "Mapa perdido"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 29,
@@ -315,7 +378,8 @@
         "pt": "Símbolo de Kundun"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 31,
@@ -324,9 +388,11 @@
         "es": "Joya de Guardián",
         "pt": "Joia do guardião"
       },
+      "tags": ["jewel", "valuable"],
       "width": 1,
       "height": 1,
-      "sellValue": 75
+      "sellValue": 75,
+      "repairable": false
     },
     {
       "number": 32,
@@ -336,7 +402,8 @@
         "pt": "Caixa de chocolate rosa"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 33,
@@ -346,7 +413,8 @@
         "pt": "Caixa de chocolate vermelha"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 34,
@@ -356,7 +424,8 @@
         "pt": "Caixa de chocolate azul"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 35,
@@ -367,7 +436,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 50
+      "sellValue": 50,
+      "repairable": false
     },
     {
       "number": 36,
@@ -378,7 +448,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 80
+      "sellValue": 80,
+      "repairable": false
     },
     {
       "number": 37,
@@ -389,7 +460,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 100
+      "sellValue": 100,
+      "repairable": false
     },
     {
       "number": 38,
@@ -398,10 +470,12 @@
         "es": "Pócima Compleja Pequeña",
         "pt": "Pequena poção complexa"
       },
+      "tags": ["complexPotion"],
       "width": 1,
       "height": 1,
       "level": 68,
-      "sellValue": 20
+      "sellValue": 20,
+      "repairable": false
     },
     {
       "number": 39,
@@ -410,10 +484,12 @@
         "es": "Pócima Compleja",
         "pt": "Poção complexa"
       },
+      "tags": ["complexPotion"],
       "width": 1,
       "height": 1,
       "level": 96,
-      "sellValue": 40
+      "sellValue": 40,
+      "repairable": false
     },
     {
       "number": 40,
@@ -422,10 +498,12 @@
         "es": "Pócima Compleja Grande",
         "pt": "Grande poção complexa"
       },
+      "tags": ["complexPotion"],
       "width": 1,
       "height": 1,
       "level": 118,
-      "sellValue": 60
+      "sellValue": 60,
+      "repairable": false
     },
     {
       "number": 41,
@@ -434,10 +512,12 @@
         "es": "Gema",
         "pt": "Pedra preciosa"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 150
+      "sellValue": 150,
+      "repairable": false
     },
     {
       "number": 42,
@@ -446,10 +526,12 @@
         "es": "Joya de la Armonía",
         "pt": "Joia da harmonia"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 150
+      "sellValue": 150,
+      "repairable": false
     },
     {
       "number": 43,
@@ -458,10 +540,12 @@
         "es": "Piedra de Más Baja Refinación",
         "pt": "Pedra refinada inferior"
       },
+      "tags": ["refineStone", "valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 150
+      "sellValue": 150,
+      "repairable": false
     },
     {
       "number": 44,
@@ -470,10 +554,12 @@
         "es": "Piedra de Más Alta Refinación",
         "pt": "Pedra refinada superior"
       },
+      "tags": ["refineStone", "valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
-      "sellValue": 150
+      "sellValue": 150,
+      "repairable": false
     },
     {
       "number": 45,
@@ -484,7 +570,8 @@
       },
       "width": 1,
       "height": 1,
-      "level": 1
+      "level": 1,
+      "repairable": false
     },
     {
       "number": 46,
@@ -494,7 +581,8 @@
         "pt": "Bênçãos do Jack O'Lantern"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 47,
@@ -504,7 +592,8 @@
         "pt": "Ira do Jack O'Lantern"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 48,
@@ -514,7 +603,8 @@
         "pt": "Grito do Jack O'Lantern"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 49,
@@ -524,7 +614,8 @@
         "pt": "Comida do Jack O'Lantern"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 50,
@@ -534,7 +625,8 @@
         "pt": "Bebida do Jack O'Lantern"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 51,
@@ -544,7 +636,8 @@
         "pt": "Estrela de Natal"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 52,
@@ -554,7 +647,9 @@
         "pt": "Presente de GM"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "repairable": false
     },
     {
       "number": 53,
@@ -563,8 +658,14 @@
         "es": "Talismán de la Suerte",
         "pt": "Talismã da sorte"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 54,
@@ -573,8 +674,13 @@
         "es": "Tarjeta de Caos",
         "pt": "Cartão do caos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 55,
@@ -584,7 +690,8 @@
         "pt": "Caixa do caos verde"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 56,
@@ -594,7 +701,8 @@
         "pt": "Caixa do caos vermelha"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 57,
@@ -604,7 +712,8 @@
         "pt": "Caixa do caos roxa"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 58,
@@ -613,8 +722,14 @@
         "es": "Boleto de Ítem Raro1",
         "pt": "Bilhete de item raro1"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 59,
@@ -623,8 +738,14 @@
         "es": "Boleto de Ítem Raro2",
         "pt": "Bilhete de item raro2"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 60,
@@ -633,8 +754,14 @@
         "es": "Boleto de Ítem Raro3",
         "pt": "Bilhete de item raro3"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 61,
@@ -643,8 +770,14 @@
         "es": "Boleto de Ítem Raro4",
         "pt": "Bilhete de item raro4"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 62,
@@ -653,8 +786,14 @@
         "es": "Boleto de Ítem Raro5",
         "pt": "Bilhete de item raro5"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 63,
@@ -664,7 +803,8 @@
         "pt": "Fogos de artifício"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 64,
@@ -674,7 +814,9 @@
         "pt": "Água do Castelo Amaldiçoado"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "repairable": false
     },
     {
       "number": 65,
@@ -683,8 +825,14 @@
         "es": "Llama Caballero Haz Mortal",
         "pt": "Chama do Cav. Raio da Morte"
       },
+      "tags": ["thirdClassQuestItem"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 66,
@@ -693,8 +841,14 @@
         "es": "Cuerno de Minero Infiernal",
         "pt": "Chifre do Mineiro do Inferno"
       },
+      "tags": ["thirdClassQuestItem"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 67,
@@ -703,8 +857,14 @@
         "es": "Pluma de Fénix Oscuro",
         "pt": "Pena de fênix negra"
       },
+      "tags": ["thirdClassQuestItem"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 68,
@@ -713,8 +873,14 @@
         "es": "Ojo Abismal",
         "pt": "Olho abissal"
       },
+      "tags": ["thirdClassQuestItem"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 70,
@@ -723,8 +889,14 @@
         "es": "Pócima de Curación de Élite",
         "pt": "Poção de cura de elite"
       },
+      "tags": ["elitePotion", "cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 71,
@@ -733,8 +905,14 @@
         "es": "Pócima de Maná de Élite",
         "pt": "Poção de mana de elite"
       },
+      "tags": ["elitePotion", "cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 72,
@@ -743,8 +921,14 @@
         "es": "Rollo de Rapidez",
         "pt": "Pergaminho da rapidez"
       },
+      "tags": ["buffScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 73,
@@ -753,8 +937,14 @@
         "es": "Rollo de Defensa",
         "pt": "Pergaminho da defesa"
       },
+      "tags": ["buffScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 74,
@@ -763,8 +953,14 @@
         "es": "Rollo de Ira",
         "pt": "Pergaminho da ira"
       },
+      "tags": ["buffScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 75,
@@ -773,8 +969,14 @@
         "es": "Rollo de Magia",
         "pt": "Pergaminho do poder de magia"
       },
+      "tags": ["buffScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 76,
@@ -783,8 +985,14 @@
         "es": "Rollo de Salud",
         "pt": "Pergaminho de vida"
       },
+      "tags": ["buffScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 77,
@@ -793,8 +1001,14 @@
         "es": "Rollo de Maná",
         "pt": "Pergaminho de mana"
       },
+      "tags": ["buffScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 78,
@@ -803,8 +1017,14 @@
         "es": "Elixir de Fuerza",
         "pt": "Elixir da força"
       },
+      "tags": ["elixir", "cashShop"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 79,
@@ -813,8 +1033,14 @@
         "es": "Elixir de Agilidad",
         "pt": "Elixir da agilidade"
       },
+      "tags": ["elixir", "cashShop"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 80,
@@ -823,8 +1049,14 @@
         "es": "Elixir de Salud",
         "pt": "Elixir da vida"
       },
+      "tags": ["elixir", "cashShop"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 81,
@@ -833,8 +1065,14 @@
         "es": "Elixir de Energía",
         "pt": "Elixir da energia"
       },
+      "tags": ["elixir", "cashShop"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 82,
@@ -843,8 +1081,14 @@
         "es": "Elixir de Control",
         "pt": "Elixir do controle"
       },
+      "tags": ["elixir", "cashShop"],
       "width": 1,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 83,
@@ -854,7 +1098,8 @@
         "pt": "Bilhete de item raro"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 84,
@@ -864,7 +1109,8 @@
         "pt": "Cx. de Brinq. Flor de Cereja"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 85,
@@ -874,7 +1120,8 @@
         "pt": "Vinho de flor de cereja"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 86,
@@ -884,7 +1131,8 @@
         "pt": "Bolo de Arroz Flor de Cereja"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 87,
@@ -894,7 +1142,8 @@
         "pt": "Pétala da flor de cereja"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 88,
@@ -904,7 +1153,8 @@
         "pt": "Galho de cereja branco"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 89,
@@ -914,7 +1164,8 @@
         "pt": "Galho de cereja vermelho"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 90,
@@ -924,7 +1175,8 @@
         "pt": "Galho de cereja dourado"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 91,
@@ -933,8 +1185,14 @@
         "es": "Tarjeta Personaje Invocador",
         "pt": "Cartão do Pers. Invocador"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 92,
@@ -943,8 +1201,14 @@
         "es": "Tarjeta de Caos Oro",
         "pt": "Cartão dourado do caos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 93,
@@ -953,8 +1217,14 @@
         "es": "Tarjeta de Caos Rara",
         "pt": "Cartão raro do caos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 94,
@@ -963,8 +1233,14 @@
         "es": "Pócima Curación Élite Media",
         "pt": "Poção média de cura de elite"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 95,
@@ -973,8 +1249,14 @@
         "es": "Tarjeta de Caos Mini",
         "pt": "Mini cartão do caos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 96,
@@ -983,8 +1265,13 @@
         "es": "Ensamble Talismán del Caos",
         "pt": "Talismã do Agrup. do Caos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 97,
@@ -993,8 +1280,14 @@
         "es": "Rollo de Batalla",
         "pt": "Pergaminho da batalha"
       },
+      "tags": ["battleOrStrengthScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 98,
@@ -1003,8 +1296,14 @@
         "es": "Rollo de Fuerza",
         "pt": "Pergaminho da força"
       },
+      "tags": ["battleOrStrengthScroll", "cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 99,
@@ -1014,7 +1313,8 @@
         "pt": "Fogos de artifício de Natal"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 100,
@@ -1024,7 +1324,8 @@
         "pt": "Moeda da sorte"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 101,
@@ -1035,7 +1336,8 @@
       },
       "width": 1,
       "height": 1,
-      "level": 32
+      "level": 32,
+      "repairable": false
     },
     {
       "number": 102,
@@ -1045,7 +1347,8 @@
         "pt": "Ordem de Gaion"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 103,
@@ -1055,7 +1358,8 @@
         "pt": "Prim. Frag. de Secromicon"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 104,
@@ -1065,7 +1369,8 @@
         "pt": "Seg. Frag. de Secromicon"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 105,
@@ -1075,7 +1380,8 @@
         "pt": "Ter. Frag. de Secromicon"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 106,
@@ -1085,7 +1391,8 @@
         "pt": "Quarto Frag. de Secromicon"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 107,
@@ -1095,7 +1402,8 @@
         "pt": "Quinto Frag. de Secromicon"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 108,
@@ -1105,7 +1413,8 @@
         "pt": "Sexto Frag. de Secromicon"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 109,
@@ -1115,7 +1424,8 @@
         "pt": "Secromicon completo"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 110,
@@ -1126,7 +1436,8 @@
       },
       "width": 1,
       "height": 1,
-      "level": 32
+      "level": 32,
+      "repairable": false
     },
     {
       "number": 111,
@@ -1136,7 +1447,8 @@
         "pt": "Espelho das dimensões"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 112,
@@ -1145,8 +1457,14 @@
         "es": "Llave de Plata",
         "pt": "Chave prateada"
       },
+      "tags": ["cashShop", "valuable"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 113,
@@ -1155,8 +1473,14 @@
         "es": "Llave de Oro",
         "pt": "Chave dourada"
       },
+      "tags": ["cashShop", "valuable"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 114,
@@ -1165,8 +1489,14 @@
         "es": "Reinicio de Habilidad Maestra",
         "pt": "Reinic. de Habilidade Mestre"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 115,
@@ -1175,8 +1505,14 @@
         "es": "Ajuste de Estadísticas",
         "pt": "Ajuste de atributos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 116,
@@ -1185,8 +1521,14 @@
         "es": "Cuarto Fragmento Secromicon",
         "pt": "Serviço Nova Local. de Pers."
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 117,
@@ -1195,8 +1537,14 @@
         "es": "Servicio Renombrar Personaje",
         "pt": "Serviço Novo Nome do Pers."
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 118,
@@ -1205,8 +1553,14 @@
         "es": "Servicio Reubicar Servidor",
         "pt": "Serviço Nova Local. de Serv."
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 119,
@@ -1215,8 +1569,14 @@
         "es": "Paquete Premium",
         "pt": "Pacote Premium"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 120,
@@ -1225,8 +1585,14 @@
         "es": "Moneda de Oro de Duendes",
         "pt": "Moeda dourada do goblin"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 121,
@@ -1235,8 +1601,11 @@
         "es": "Caja Dorada Sellada",
         "pt": "Caixa dourada lacrada"
       },
+      "tags": ["valuable"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "droppable": false,
+      "repairable": false
     },
     {
       "number": 122,
@@ -1245,8 +1614,11 @@
         "es": "Caja Plateada Sellada",
         "pt": "Caixa prateada lacrada"
       },
+      "tags": ["valuable"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "droppable": false,
+      "repairable": false
     },
     {
       "number": 123,
@@ -1255,8 +1627,13 @@
         "es": "Caja Dorada",
         "pt": "Caixa dourada"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 124,
@@ -1265,8 +1642,13 @@
         "es": "Caja Plateada",
         "pt": "Caixa prateada"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 125,
@@ -1276,7 +1658,8 @@
         "pt": "Caixa de pacote"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 126,
@@ -1285,8 +1668,14 @@
         "es": "Pase por 30 días",
         "pt": "Passe de 30 dias"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 127,
@@ -1295,8 +1684,14 @@
         "es": "Pase por 90 días",
         "pt": "Passe de 90 dias"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 128,
@@ -1305,8 +1700,14 @@
         "es": "Puntos - Pase por 30 días",
         "pt": "Passe de 30 dias - Pontos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 129,
@@ -1315,8 +1716,14 @@
         "es": "Puntos - Pase por 90 días",
         "pt": "Passe de 90 dias - Pontos"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 130,
@@ -1325,8 +1732,14 @@
         "es": "Pase por 3 horas",
         "pt": "Passe de 3 horas"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 131,
@@ -1335,8 +1748,14 @@
         "es": "Pase por 5 horas",
         "pt": "Passe de 5 horas"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 132,
@@ -1345,8 +1764,14 @@
         "es": "Pase por 10 horas",
         "pt": "Passe de 10 horas"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 133,
@@ -1355,8 +1780,14 @@
         "es": "Pócima de SD de Élite",
         "pt": "Poção de SD de elite"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 134,
@@ -1365,8 +1796,14 @@
         "es": "Caja de Paquete A",
         "pt": "Caixa de pacote A"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 135,
@@ -1375,8 +1812,14 @@
         "es": "Caja de Paquete B",
         "pt": "Caixa de pacote B"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 136,
@@ -1385,8 +1828,14 @@
         "es": "Caja de Paquete C",
         "pt": "Caixa de pacote C"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 137,
@@ -1395,8 +1844,14 @@
         "es": "Caja de Paquete D",
         "pt": "Caixa de pacote D"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 138,
@@ -1405,8 +1860,14 @@
         "es": "Caja de Paquete E",
         "pt": "Caixa de pacote E"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 139,
@@ -1415,8 +1876,14 @@
         "es": "Caja de Paquete F",
         "pt": "Caixa de pacote F"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 140,
@@ -1425,8 +1892,14 @@
         "es": "Rollo de Curación",
         "pt": "Pergaminho da cura"
       },
+      "tags": ["cashShop"],
       "width": 2,
-      "height": 2
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 141,
@@ -1436,7 +1909,8 @@
         "pt": "Estojo de joias brilhante"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 142,
@@ -1446,7 +1920,8 @@
         "pt": "Estojo de joias elegante"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 143,
@@ -1456,7 +1931,8 @@
         "pt": "Estojo de joias de aço"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 144,
@@ -1466,7 +1942,8 @@
         "pt": "Estojo de joias antigo"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 145,
@@ -1475,8 +1952,14 @@
         "es": "Boleto de Ítem Raro 7",
         "pt": "Bilhete de item raro7"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 146,
@@ -1485,8 +1968,14 @@
         "es": "Boleto de Ítem Raro 8",
         "pt": "Bilhete de item raro8"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 147,
@@ -1495,8 +1984,14 @@
         "es": "Boleto de Ítem Raro 9",
         "pt": "Bilhete de item raro9"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 148,
@@ -1505,8 +2000,14 @@
         "es": "Boleto de Ítem Raro 10",
         "pt": "Bilhete de item raro10"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 149,
@@ -1515,8 +2016,14 @@
         "es": "Boleto de Ítem Raro 11",
         "pt": "Bilhete de item raro11"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 150,
@@ -1525,8 +2032,14 @@
         "es": "Boleto de Ítem Raro 12",
         "pt": "Bilhete de item raro12"
       },
+      "tags": ["cashShop"],
       "width": 1,
-      "height": 1
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 151,
@@ -1536,7 +2049,8 @@
         "pt": "Nvl. 1Carta de Requisição"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 152,
@@ -1546,7 +2060,8 @@
         "pt": "Nvl. 1 Completada"
       },
       "width": 1,
-      "height": 2
+      "height": 2,
+      "repairable": false
     },
     {
       "number": 153,
@@ -1557,7 +2072,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 60
+      "sellValue": 60,
+      "repairable": false
     },
     {
       "number": 154,
@@ -1568,7 +2084,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 60
+      "sellValue": 60,
+      "repairable": false
     },
     {
       "number": 155,
@@ -1579,7 +2096,8 @@
       },
       "width": 2,
       "height": 2,
-      "sellValue": 60
+      "sellValue": 60,
+      "repairable": false
     },
     {
       "number": 156,
@@ -1590,7 +2108,8 @@
       },
       "width": 1,
       "height": 3,
-      "sellValue": 60
+      "sellValue": 60,
+      "repairable": false
     },
     {
       "number": 157,
@@ -1601,7 +2120,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 190
+      "sellValue": 190,
+      "repairable": false
     },
     {
       "number": 158,
@@ -1612,7 +2132,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 190
+      "sellValue": 190,
+      "repairable": false
     },
     {
       "number": 159,
@@ -1623,7 +2144,8 @@
       },
       "width": 1,
       "height": 1,
-      "sellValue": 190
+      "sellValue": 190,
+      "repairable": false
     },
     {
       "number": 160,
@@ -1633,7 +2155,11 @@
         "pt": "Jóia de Extensão"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 161,
@@ -1643,7 +2169,11 @@
         "pt": "Jóia de Elevação"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
     },
     {
       "number": 162,
@@ -1653,7 +2183,8 @@
         "pt": "Mochila Mágica"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 163,
@@ -1663,7 +2194,8 @@
         "pt": "Certificado de Expansão de Cofre"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     },
     {
       "number": 169,
@@ -1673,7 +2205,8 @@
         "pt": "Carta de Person-RageFighter"
       },
       "width": 1,
-      "height": 1
+      "height": 1,
+      "repairable": false
     }
   ]
 }

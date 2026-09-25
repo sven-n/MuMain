@@ -1,218 +1,86 @@
 #include "stdafx.h"
 #include "GameLogic/Items/ItemCategories.h"
 
-#include "GameLogic/Items/CComGem.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 
+// The categories come from the item data (tags, slot and wing tier in
+// Data/Items/*.json); see docs/item-data.md. The lists that are only used for
+// drawing items and for tooltips are still hardcoded, in
+// ItemDisplayCategories.cpp.
 namespace
 {
-    bool IsClothWingType(int itemType)
-    {
-        return itemType == ITEM_CAPE_OF_LORD
-            || itemType == ITEM_WING_OF_RUIN
-            || itemType == ITEM_CAPE_OF_EMPEROR
-            || itemType == ITEM_CAPE_OF_FIGHTER
-            || itemType == ITEM_CAPE_OF_OVERRULE
-            || itemType == ITEM_SMALL_CAPE_OF_LORD
-            || itemType == ITEM_LITTLE_WARRIORS_CLOAK;
-    }
+using Data::Items::ItemSlot;
+using Data::Items::ItemTag;
+using Data::Items::WingTier;
 
-    bool IsRideableMountType(int itemType)
-    {
-        return itemType == ITEM_HORN_OF_UNIRIA
-            || itemType == ITEM_HORN_OF_DINORANT
-            || itemType == ITEM_DARK_HORSE_ITEM
-            || itemType == ITEM_HORN_OF_FENRIR;
-    }
-
-    bool IsHornMountType(int itemType)
-    {
-        return itemType == ITEM_HORN_OF_UNIRIA
-            || itemType == ITEM_HORN_OF_DINORANT
-            || itemType == ITEM_HORN_OF_FENRIR;
-    }
-
-    bool IsCharacterCardType(int itemType)
-    {
-        return itemType == ITEM_MAGIC_GLADIATOR_CHARACTER_CARD
-            || itemType == ITEM_DARK_LORD_CHARACTER_CARD
-            || itemType == ITEM_SUMMONER_CHARACTER_CARD;
-    }
-
-    bool IsRefineStoneType(int itemType)
-    {
-        return itemType == ITEM_LOWER_REFINE_STONE
-            || itemType == ITEM_HIGHER_REFINE_STONE;
-    }
-
-    bool IsLuckyItemTicketType(int itemType)
-    {
-        return itemType >= ITEM_FIRST_LUCKY_ARMOR_TICKET && itemType <= ITEM_HELPER + 145;
-    }
-
-    bool IsAccountServiceItemType(int itemType)
-    {
-        return itemType >= ITEM_MASTER_SKILL_RESET && itemType <= ITEM_PREMIUM_PACKAGE;
-    }
-
-    bool IsDayPassType(int itemType)
-    {
-        return itemType >= ITEM_30_DAY_PASS && itemType <= ITEM_90_DAY_PASS_POINTS;
-    }
-
-    bool IsHourPassType(int itemType)
-    {
-        return itemType == ITEM_3_HOUR_PASS
-            || itemType == ITEM_5_HOUR_PASS
-            || itemType == ITEM_10_HOUR_PASS;
-    }
-
-    bool IsPackageBoxType(int itemType)
-    {
-        return itemType >= ITEM_PACKAGE_BOX_A && itemType <= ITEM_PACKAGE_BOX_F;
-    }
-
-    bool IsSilverOrGoldKeyType(int itemType)
-    {
-        return itemType == ITEM_SILVER_KEY
-            || itemType == ITEM_GOLD_KEY;
-    }
-
-    bool IsGemJewelryType(int itemType)
-    {
-        return itemType >= ITEM_SAPPHIRE_RING && itemType <= ITEM_SAPPHIRE_NECKLACE;
-    }
-
-    bool IsPandaOrSkeletonItemType(int itemType)
-    {
-        return itemType == ITEM_PET_PANDA
-            || itemType == ITEM_PANDA_TRANSFORMATION_RING
-            || itemType == ITEM_PET_SKELETON
-            || itemType == ITEM_SKELETON_TRANSFORMATION_RING;
-    }
-
-    bool IsThirdClassQuestItemType(int itemType)
-    {
-        return itemType == ITEM_FLAME_OF_DEATH_BEAM_KNIGHT
-            || itemType == ITEM_HORN_OF_HELL_MAINE
-            || itemType == ITEM_FEATHER_OF_DARK_PHOENIX
-            || itemType == ITEM_EYE_OF_ABYSSAL;
-    }
-
-    bool IsSecromiconQuestItemType(int itemType)
-    {
-        return itemType >= ITEM_SUSPICIOUS_SCRAP_OF_PAPER && itemType <= ITEM_COMPLETE_SECROMICON;
-    }
-
-    bool IsSummonerStickType(int itemType)
-    {
-        return itemType >= ITEM_MISTERY_STICK && itemType <= ITEM_ETERNAL_WING_STICK;
-    }
-
-    bool IsSummonerSkillParchmentType(int itemType)
-    {
-        return itemType >= ITEM_CHAIN_LIGHTNING_PARCHMENT && itemType <= ITEM_INNOVATION_PARCHMENT;
-    }
-
-    bool IsRageFighterSkillParchmentType(int itemType)
-    {
-        return itemType >= ITEM_CHAIN_DRIVE_PARCHMENT && itemType <= ITEM_INCREASE_BLOCK_PARCHMENT;
-    }
-
-    bool IsSocketSeedType(int itemType)
-    {
-        return itemType >= ITEM_SEED_FIRE && itemType <= ITEM_SEED_EARTH;
-    }
-
-    bool IsSocketSphereType(int itemType)
-    {
-        return itemType >= ITEM_SPHERE_MONO && itemType <= ITEM_SPHERE_5;
-    }
+bool HasTag(int itemType, ItemTag tag)
+{
+    return g_ItemDatabase.HasTag(itemType, tag);
 }
+
+bool HasTag(const ITEM* pItem, ItemTag tag)
+{
+    return HasTag(pItem->Type, tag);
+}
+
+int ToItemType(int modelType)
+{
+    return modelType - MODEL_ITEM;
+}
+
+bool HasWingTier(const ITEM* pItem, WingTier tier)
+{
+    return g_ItemDatabase.GetWingTier(pItem->Type) == tier;
+}
+
+bool IsHornMountType(int itemType)
+{
+    return HasTag(itemType, ItemTag::Mount) && !HasTag(itemType, ItemTag::DarkLordPet);
+}
+} // namespace
 
 namespace GameLogic::Items
 {
     bool IsWingItem(const ITEM* pItem)
     {
-        switch (pItem->Type)
-        {
-        case ITEM_WING:
-        case ITEM_WINGS_OF_HEAVEN:
-        case ITEM_WINGS_OF_SATAN:
-        case ITEM_WINGS_OF_SPIRITS:
-        case ITEM_WINGS_OF_SOUL:
-        case ITEM_WINGS_OF_DRAGON:
-        case ITEM_WINGS_OF_DARKNESS:
-        case ITEM_CAPE_OF_LORD:
-        case ITEM_WING_OF_STORM:
-        case ITEM_WING_OF_ETERNAL:
-        case ITEM_WING_OF_ILLUSION:
-        case ITEM_WING_OF_RUIN:
-        case ITEM_CAPE_OF_EMPEROR:
-        case ITEM_WING_OF_CURSE:
-        case ITEM_WINGS_OF_DESPAIR:
-        case ITEM_WING_OF_DIMENSION:
-        case ITEM_SMALL_CAPE_OF_LORD:
-        case ITEM_SMALL_WING_OF_CURSE:
-        case ITEM_SMALL_WINGS_OF_ELF:
-        case ITEM_SMALL_WINGS_OF_HEAVEN:
-        case ITEM_SMALL_WINGS_OF_SATAN:
-        case ITEM_CAPE_OF_FIGHTER:
-        case ITEM_CAPE_OF_OVERRULE:
-        case ITEM_LITTLE_WARRIORS_CLOAK:
-            return true;
-        }
-
-        return false;
+        return g_ItemDatabase.GetSlot(pItem->Type) == ItemSlot::Wings;
     }
 
+    // The capes of the second tier have their own formulas.
     bool IsSecondTierWingExceptCape(const ITEM* pItem)
     {
-        return (pItem->Type >= ITEM_WINGS_OF_SPIRITS && pItem->Type <= ITEM_WINGS_OF_DARKNESS)
-            || pItem->Type == ITEM_WINGS_OF_DESPAIR;
+        return HasWingTier(pItem, WingTier::Second) && pItem->Type != ITEM_CAPE_OF_LORD &&
+               pItem->Type != ITEM_CAPE_OF_FIGHTER;
     }
 
     bool IsThirdTierWing(const ITEM* pItem)
     {
-        return (pItem->Type >= ITEM_WING_OF_STORM && pItem->Type <= ITEM_CAPE_OF_EMPEROR)
-            || pItem->Type == ITEM_WING_OF_DIMENSION
-            || pItem->Type == ITEM_CAPE_OF_OVERRULE;
+        return HasWingTier(pItem, WingTier::Third);
     }
 
     bool IsSmallWing(const ITEM* pItem)
     {
-        return pItem->Type >= ITEM_SMALL_CAPE_OF_LORD && pItem->Type <= ITEM_LITTLE_WARRIORS_CLOAK;
-    }
-
-    bool IsClothWing(const ITEM* pItem)
-    {
-        return IsClothWingType(pItem->Type);
-    }
-
-    bool IsClothWingModel(int modelType)
-    {
-        return IsClothWingType(modelType - MODEL_ITEM);
+        return HasWingTier(pItem, WingTier::Small);
     }
 
     bool IsRideableMount(const ITEM* pItem)
     {
-        return IsRideableMountType(pItem->Type);
+        return HasTag(pItem, ItemTag::Mount);
     }
 
     bool IsRideableMountModel(int modelType)
     {
-        return IsRideableMountType(modelType - MODEL_ITEM);
+        return HasTag(ToItemType(modelType), ItemTag::Mount);
     }
 
     bool IsHornMountModel(int modelType)
     {
-        return IsHornMountType(modelType - MODEL_ITEM);
+        return IsHornMountType(ToItemType(modelType));
     }
 
     bool IsFlyingMount(const ITEM* pItem)
     {
-        return pItem->Type == ITEM_HORN_OF_DINORANT
-            || pItem->Type == ITEM_DARK_HORSE_ITEM
-            || pItem->Type == ITEM_HORN_OF_FENRIR;
+        return HasTag(pItem, ItemTag::Flying);
     }
 
     bool HasFlightEquipment(const ITEM* pItemHelper, const ITEM* pItemWing)
@@ -220,36 +88,55 @@ namespace GameLogic::Items
         return IsWingItem(pItemWing) || IsFlyingMount(pItemHelper);
     }
 
+    bool IsDarkLordPet(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::DarkLordPet);
+    }
+
+    bool IsDarkLordPetType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::DarkLordPet);
+    }
+
+    bool IsDemonOrSpiritOfGuardian(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::GuardianPet);
+    }
+
+    bool IsDemonOrSpiritOfGuardianType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::GuardianPet);
+    }
+
+    bool IsDemonOrSpiritOfGuardianModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::GuardianPet);
+    }
+
+    bool IsPandaOrSkeletonItem(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::PandaOrSkeleton);
+    }
+
     bool IsJewelItem(const ITEM* pItem)
     {
-        return pItem->Type == ITEM_JEWEL_OF_BLESS
-            || pItem->Type == ITEM_JEWEL_OF_SOUL
-            || pItem->Type == ITEM_JEWEL_OF_LIFE
-            || pItem->Type == ITEM_JEWEL_OF_CHAOS
-            || pItem->Type == ITEM_JEWEL_OF_CREATION
-            || pItem->Type == ITEM_JEWEL_OF_GUARDIAN;
+        return HasTag(pItem, ItemTag::Jewel);
     }
 
-    bool IsWingMixCharmType(int itemType)
+    bool IsRefineStone(const ITEM* pItem)
     {
-        return itemType >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN && itemType <= ITEM_TYPE_CHARM_MIXWING + EWS_END;
+        return HasTag(pItem, ItemTag::RefineStone);
     }
 
-    bool IsWingMixCharm(const ITEM* pItem)
+    bool IsRefineStoneModel(int modelType)
     {
-        return IsWingMixCharmType(pItem->Type);
-    }
-
-    bool IsWingMixCharmModel(int modelType)
-    {
-        return IsWingMixCharmType(modelType - MODEL_ITEM);
+        return HasTag(ToItemType(modelType), ItemTag::RefineStone);
     }
 
     bool IsSocketSeedOrSphereType(int itemType)
     {
-        return IsSocketSeedType(itemType)
-            || IsSocketSphereType(itemType)
-            || IsSocketSeedSphereType(itemType);
+        return HasTag(itemType, ItemTag::SocketSeed) || HasTag(itemType, ItemTag::SocketSphere) ||
+               HasTag(itemType, ItemTag::SocketSeedSphere);
     }
 
     bool IsSocketSeedOrSphere(const ITEM* pItem)
@@ -259,606 +146,261 @@ namespace GameLogic::Items
 
     bool IsSocketSeedOrSphereModel(int modelType)
     {
-        return IsSocketSeedOrSphereType(modelType - MODEL_ITEM);
-    }
-
-    bool IsSealType(int itemType)
-    {
-        return itemType == ITEM_SEAL_OF_ASCENSION
-            || itemType == ITEM_SEAL_OF_WEALTH
-            || itemType == ITEM_SEAL_OF_SUSTENANCE;
-    }
-
-    bool IsSeal(const ITEM* pItem)
-    {
-        return IsSealType(pItem->Type);
-    }
-
-    bool IsSealModel(int modelType)
-    {
-        return IsSealType(modelType - MODEL_ITEM);
-    }
-
-    bool IsGambleItemType(int itemType)
-    {
-        return itemType == ITEM_GAMBLE_SWORD_MACE_SPEAR
-            || itemType == ITEM_GAMBLE_STAFF
-            || itemType == ITEM_GAMBLE_BOW_CROSSBOW
-            || itemType == ITEM_GAMBLE_SCEPTER
-            || itemType == ITEM_GAMBLE_STICK;
-    }
-
-    bool IsGambleItem(const ITEM* pItem)
-    {
-        return IsGambleItemType(pItem->Type);
-    }
-
-    bool IsGambleItemModel(int modelType)
-    {
-        return IsGambleItemType(modelType - MODEL_ITEM);
-    }
-
-    bool IsCharacterCard(const ITEM* pItem)
-    {
-        return IsCharacterCardType(pItem->Type);
-    }
-
-    bool IsCharacterCardModel(int modelType)
-    {
-        return IsCharacterCardType(modelType - MODEL_ITEM);
-    }
-
-    bool IsDevilSquareItemType(int itemType)
-    {
-        return itemType == ITEM_DEVILS_EYE
-            || itemType == ITEM_DEVILS_KEY
-            || itemType == ITEM_DEVILS_INVITATION;
-    }
-
-    bool IsDevilSquareItem(const ITEM* pItem)
-    {
-        return IsDevilSquareItemType(pItem->Type);
-    }
-
-    bool IsDivineArchangelWeapon(const ITEM* pItem)
-    {
-        return IsDivineArchangelWeaponType(pItem->Type);
-    }
-
-    bool IsDivineArchangelWeaponType(int itemType)
-    {
-        return itemType == ITEM_DIVINE_SWORD_OF_ARCHANGEL
-            || itemType == ITEM_DIVINE_CB_OF_ARCHANGEL
-            || itemType == ITEM_DIVINE_STAFF_OF_ARCHANGEL
-            || itemType == ITEM_DIVINE_STICK_OF_ARCHANGEL
-            || itemType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL;
-    }
-
-    bool IsDivineArchangelWeaponModel(int modelType)
-    {
-        return IsDivineArchangelWeaponType(modelType - MODEL_ITEM);
-    }
-
-    bool IsPartChargeItem(const ITEM* pItem)
-    {
-        return IsEventTicket(pItem)
-            || pItem->Type == ITEM_CHAOS_CARD
-            || IsRareItemTicket(pItem)
-            || IsDoppelgangerOrVarkaTicket(pItem)
-            || pItem->Type == ITEM_TALISMAN_OF_LUCK
-            || IsSeal(pItem)
-            || IsElitePotion(pItem)
-            || IsBuffScroll(pItem)
-            || pItem->Type == ITEM_SEAL_OF_MOBILITY
-            || IsResetFruit(pItem)
-            || IsElixir(pItem)
-            || pItem->Type == ITEM_INDULGENCE
-            || pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET
-            || pItem->Type == ITEM_SUMMONER_CHARACTER_CARD
-            || pItem->Type == ITEM_CHAOS_CARD_GOLD
-            || pItem->Type == ITEM_CHAOS_CARD_RARE
-            || pItem->Type == ITEM_CHAOS_CARD_MINI
-            || pItem->Type == ITEM_MEDIUM_ELITE_HEALING_POTION
-            || IsHealingOrDivinitySeal(pItem)
-            || IsBattleOrStrengthScroll(pItem)
-            || pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY
-            || IsDemonOrSpiritOfGuardian(pItem)
-            || pItem->Type == ITEM_TALISMAN_OF_RESURRECTION
-            || pItem->Type == ITEM_TALISMAN_OF_MOBILITY
-            || pItem->Type == ITEM_TALISMAN_OF_GUARDIAN
-            || pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION
-            || pItem->Type == ITEM_MASTER_SEAL_OF_ASCENSION
-            || pItem->Type == ITEM_MASTER_SEAL_OF_WEALTH
-            || pItem->Type == ITEM_LETHAL_WIZARDS_RING
-            || pItem->Type == ITEM_MAX_AG_BOOST_AURA
-            || pItem->Type == ITEM_MAX_SD_BOOST_AURA
-            || pItem->Type == ITEM_PARTY_EXP_SCROLL
-            || pItem->Type == ITEM_ELITE_SD_POTION
-            || IsGemJewelry(pItem)
-            || IsSilverOrGoldKey(pItem)
-            || pItem->Type == ITEM_GOBLIN_GOLD_COIN
-            || pItem->Type == ITEM_GOLDEN_BOX
-            || pItem->Type == ITEM_SILVER_BOX
-            || IsPackageBox(pItem)
-            || IsSmallWing(pItem)
-            || pItem->Type == ITEM_HELPER + 116
-            || pItem->Type == ITEM_PET_UNICORN
-            || pItem->Type == ITEM_PAID_CHANNEL_ACCESS_TICKET
-            || IsAccountServiceItem(pItem)
-            || IsDayPass(pItem)
-            || IsHourPass(pItem)
-            || pItem->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE
-            || pItem->Type == ITEM_SCROLL_OF_HEALING;
-    }
-
-    bool IsHighValueItem(const ITEM* pItem)
-    {
-        int iLevel = pItem->Level;
-
-        if (pItem->Type == ITEM_HORN_OF_DINORANT
-            || IsJewelItem(pItem)
-            || pItem->Type == ITEM_PACKED_JEWEL_OF_BLESS
-            || pItem->Type == ITEM_PACKED_JEWEL_OF_SOUL
-            || IsWingItem(pItem)
-            || IsDarkLordPet(pItem)
-            || pItem->AncientDiscriminator > 0
-            || IsDivineArchangelWeapon(pItem)
-            || pItem->Type == ITEM_LOCHS_FEATHER
-            || pItem->Type == ITEM_FRUITS
-            || pItem->Type == ITEM_WEAPON_OF_ARCHANGEL
-            || pItem->Type == ITEM_SPIRIT
-            || (pItem->Type >= ITEM_GEMSTONE && pItem->Type <= ITEM_HIGHER_REFINE_STONE)
-            || (iLevel > 6 && pItem->Type < ITEM_WING)
-            || pItem->ExcellentFlags > 0
-            || (pItem->Type >= ITEM_CLAW_OF_BEAST && pItem->Type <= ITEM_HORN_OF_FENRIR)
-            || pItem->Type == ITEM_FLAME_OF_CONDOR
-            || pItem->Type == ITEM_FEATHER_OF_CONDOR
-            || pItem->Type == ITEM_SEALED_GOLDEN_BOX
-            || pItem->Type == ITEM_SEALED_SILVER_BOX
-            || IsPandaOrSkeletonItem(pItem)
-            || IsDemonOrSpiritOfGuardian(pItem)
-            || IsGemJewelry(pItem)
-            || IsSilverOrGoldKey(pItem)
-            || (pItem->Type == ITEM_WIZARDS_RING && iLevel == 0)
-            || COMGEM::isCompiledGem(pItem))
-        {
-            if (pItem->bPeriodItem && !pItem->bExpiredPeriod)
-            {
-                return false;
-            }
-
-            if (IsPandaOrSkeletonItem(pItem) || IsDemonOrSpiritOfGuardian(pItem))
-            {
-                return pItem->bPeriodItem && pItem->bExpiredPeriod;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    bool IsHealingPotionType(int itemType)
-    {
-        return itemType >= ITEM_APPLE && itemType <= ITEM_LARGE_HEALING_POTION;
-    }
-
-    bool IsHealingPotion(const ITEM* pItem)
-    {
-        return IsHealingPotionType(pItem->Type);
-    }
-
-    bool IsManaPotionType(int itemType)
-    {
-        return itemType >= ITEM_SMALL_MANA_POTION && itemType <= ITEM_LARGE_MANA_POTION;
-    }
-
-    bool IsComplexPotionType(int itemType)
-    {
-        return itemType >= ITEM_SMALL_COMPLEX_POTION && itemType <= ITEM_LARGE_COMPLEX_POTION;
-    }
-
-    bool IsComplexPotion(const ITEM* pItem)
-    {
-        return IsComplexPotionType(pItem->Type);
-    }
-
-    bool IsElitePotionType(int itemType)
-    {
-        return itemType == ITEM_ELITE_HEALING_POTION
-            || itemType == ITEM_ELITE_MANA_POTION;
-    }
-
-    bool IsElitePotion(const ITEM* pItem)
-    {
-        return IsElitePotionType(pItem->Type);
-    }
-
-    bool IsElitePotionModel(int modelType)
-    {
-        return IsElitePotionType(modelType - MODEL_ITEM);
-    }
-
-    bool IsElixirType(int itemType)
-    {
-        return itemType >= ITEM_ELIXIR_OF_STRENGTH && itemType <= ITEM_ELIXIR_OF_CONTROL;
-    }
-
-    bool IsElixir(const ITEM* pItem)
-    {
-        return IsElixirType(pItem->Type);
-    }
-
-    bool IsElixirModel(int modelType)
-    {
-        return IsElixirType(modelType - MODEL_ITEM);
-    }
-
-    bool IsBuffScrollType(int itemType)
-    {
-        return itemType >= ITEM_SCROLL_OF_QUICKNESS && itemType <= ITEM_SCROLL_OF_MANA;
-    }
-
-    bool IsBuffScroll(const ITEM* pItem)
-    {
-        return IsBuffScrollType(pItem->Type);
-    }
-
-    bool IsBuffScrollModel(int modelType)
-    {
-        return IsBuffScrollType(modelType - MODEL_ITEM);
-    }
-
-    bool IsBattleOrStrengthScrollType(int itemType)
-    {
-        return itemType == ITEM_SCROLL_OF_BATTLE
-            || itemType == ITEM_SCROLL_OF_STRENGTH;
-    }
-
-    bool IsBattleOrStrengthScroll(const ITEM* pItem)
-    {
-        return IsBattleOrStrengthScrollType(pItem->Type);
-    }
-
-    bool IsBattleOrStrengthScrollModel(int modelType)
-    {
-        return IsBattleOrStrengthScrollType(modelType - MODEL_ITEM);
-    }
-
-    bool IsResetFruitType(int itemType)
-    {
-        return itemType >= ITEM_RESET_FRUIT_STRENGTH && itemType <= ITEM_RESET_FRUIT_CONTROL;
-    }
-
-    bool IsResetFruit(const ITEM* pItem)
-    {
-        return IsResetFruitType(pItem->Type);
-    }
-
-    bool IsResetFruitModel(int modelType)
-    {
-        return IsResetFruitType(modelType - MODEL_ITEM);
-    }
-
-    bool IsHealingOrDivinitySealType(int itemType)
-    {
-        return itemType == ITEM_SEAL_OF_HEALING
-            || itemType == ITEM_SEAL_OF_DIVINITY;
-    }
-
-    bool IsHealingOrDivinitySeal(const ITEM* pItem)
-    {
-        return IsHealingOrDivinitySealType(pItem->Type);
-    }
-
-    bool IsHealingOrDivinitySealModel(int modelType)
-    {
-        return IsHealingOrDivinitySealType(modelType - MODEL_ITEM);
-    }
-
-    bool IsRefineStone(const ITEM* pItem)
-    {
-        return IsRefineStoneType(pItem->Type);
-    }
-
-    bool IsRefineStoneModel(int modelType)
-    {
-        return IsRefineStoneType(modelType - MODEL_ITEM);
-    }
-
-    bool IsAmmunitionType(int itemType)
-    {
-        return itemType == ITEM_BOLT
-            || itemType == ITEM_ARROWS;
-    }
-
-    bool IsAmmunition(const ITEM* pItem)
-    {
-        return IsAmmunitionType(pItem->Type);
-    }
-
-    bool IsAmmunitionModel(int modelType)
-    {
-        return IsAmmunitionType(modelType - MODEL_ITEM);
-    }
-
-    bool IsEventTicketType(int itemType)
-    {
-        return itemType == ITEM_DEVIL_SQUARE_TICKET
-            || itemType == ITEM_BLOOD_CASTLE_TICKET
-            || itemType == ITEM_KALIMA_TICKET;
-    }
-
-    bool IsEventTicket(const ITEM* pItem)
-    {
-        return IsEventTicketType(pItem->Type);
-    }
-
-    bool IsEventTicketModel(int modelType)
-    {
-        return IsEventTicketType(modelType - MODEL_ITEM);
-    }
-
-    bool IsDoppelgangerOrVarkaTicketType(int itemType)
-    {
-        return itemType == ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER
-            || itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA
-            || itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7;
-    }
-
-    bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem)
-    {
-        return IsDoppelgangerOrVarkaTicketType(pItem->Type);
-    }
-
-    bool IsDoppelgangerOrVarkaTicketModel(int modelType)
-    {
-        return IsDoppelgangerOrVarkaTicketType(modelType - MODEL_ITEM);
-    }
-
-    bool IsRareItemTicket(const ITEM* pItem)
-    {
-        return (pItem->Type >= ITEM_RARE_ITEM_TICKET_1 && pItem->Type <= ITEM_RARE_ITEM_TICKET_5)
-            || (pItem->Type >= ITEM_RARE_ITEM_TICKET_7 && pItem->Type <= ITEM_RARE_ITEM_TICKET_12);
-    }
-
-    bool IsLuckyItemTicket(const ITEM* pItem)
-    {
-        return IsLuckyItemTicketType(pItem->Type);
-    }
-
-    bool IsLuckyItemTicketModel(int modelType)
-    {
-        return IsLuckyItemTicketType(modelType - MODEL_ITEM);
-    }
-
-    bool IsBloodCastleTicketPartType(int itemType)
-    {
-        return itemType == ITEM_SCROLL_OF_ARCHANGEL
-            || itemType == ITEM_BLOOD_BONE;
-    }
-
-    bool IsBloodCastleTicketPart(const ITEM* pItem)
-    {
-        return IsBloodCastleTicketPartType(pItem->Type);
-    }
-
-    bool IsBloodCastleTicketPartModel(int modelType)
-    {
-        return IsBloodCastleTicketPartType(modelType - MODEL_ITEM);
-    }
-
-    bool IsAccountServiceItem(const ITEM* pItem)
-    {
-        return IsAccountServiceItemType(pItem->Type);
-    }
-
-    bool IsAccountServiceItemModel(int modelType)
-    {
-        return IsAccountServiceItemType(modelType - MODEL_ITEM);
-    }
-
-    bool IsDayPass(const ITEM* pItem)
-    {
-        return IsDayPassType(pItem->Type);
-    }
-
-    bool IsDayPassModel(int modelType)
-    {
-        return IsDayPassType(modelType - MODEL_ITEM);
-    }
-
-    bool IsHourPass(const ITEM* pItem)
-    {
-        return IsHourPassType(pItem->Type);
-    }
-
-    bool IsHourPassModel(int modelType)
-    {
-        return IsHourPassType(modelType - MODEL_ITEM);
-    }
-
-    bool IsPackageBox(const ITEM* pItem)
-    {
-        return IsPackageBoxType(pItem->Type);
-    }
-
-    bool IsPackageBoxModel(int modelType)
-    {
-        return IsPackageBoxType(modelType - MODEL_ITEM);
-    }
-
-    bool IsSilverOrGoldKey(const ITEM* pItem)
-    {
-        return IsSilverOrGoldKeyType(pItem->Type);
-    }
-
-    bool IsSilverOrGoldKeyModel(int modelType)
-    {
-        return IsSilverOrGoldKeyType(modelType - MODEL_ITEM);
-    }
-
-    bool IsGemJewelry(const ITEM* pItem)
-    {
-        return IsGemJewelryType(pItem->Type);
-    }
-
-    bool IsChocolateBoxType(int itemType)
-    {
-        return itemType == ITEM_PINK_CHOCOLATE_BOX
-            || itemType == ITEM_RED_CHOCOLATE_BOX
-            || itemType == ITEM_BLUE_CHOCOLATE_BOX;
-    }
-
-    bool IsChocolateBox(const ITEM* pItem)
-    {
-        return IsChocolateBoxType(pItem->Type);
-    }
-
-    bool IsChocolateBoxModel(int modelType)
-    {
-        return IsChocolateBoxType(modelType - MODEL_ITEM);
-    }
-
-    bool IsRibbonBoxType(int itemType)
-    {
-        return itemType == ITEM_RED_RIBBON_BOX
-            || itemType == ITEM_GREEN_RIBBON_BOX
-            || itemType == ITEM_BLUE_RIBBON_BOX;
-    }
-
-    bool IsRibbonBox(const ITEM* pItem)
-    {
-        return IsRibbonBoxType(pItem->Type);
-    }
-
-    bool IsRibbonBoxModel(int modelType)
-    {
-        return IsRibbonBoxType(modelType - MODEL_ITEM);
-    }
-
-    bool IsDarkLordPetType(int itemType)
-    {
-        return itemType == ITEM_DARK_HORSE_ITEM
-            || itemType == ITEM_DARK_RAVEN_ITEM;
-    }
-
-    bool IsDarkLordPet(const ITEM* pItem)
-    {
-        return IsDarkLordPetType(pItem->Type);
-    }
-
-    bool IsDemonOrSpiritOfGuardianType(int itemType)
-    {
-        return itemType == ITEM_DEMON
-            || itemType == ITEM_SPIRIT_OF_GUARDIAN;
-    }
-
-    bool IsDemonOrSpiritOfGuardian(const ITEM* pItem)
-    {
-        return IsDemonOrSpiritOfGuardianType(pItem->Type);
-    }
-
-    bool IsDemonOrSpiritOfGuardianModel(int modelType)
-    {
-        return IsDemonOrSpiritOfGuardianType(modelType - MODEL_ITEM);
-    }
-
-    bool IsPandaOrSkeletonItem(const ITEM* pItem)
-    {
-        return IsPandaOrSkeletonItemType(pItem->Type);
-    }
-
-    bool IsSecondClassQuestItemType(int itemType)
-    {
-        return itemType == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR
-            || itemType == ITEM_BROKEN_SWORD_DARK_STONE
-            || itemType == ITEM_TEAR_OF_ELF
-            || itemType == ITEM_SOUL_SHARD_OF_WIZARD;
-    }
-
-    bool IsSecondClassQuestItem(const ITEM* pItem)
-    {
-        return IsSecondClassQuestItemType(pItem->Type);
-    }
-
-    bool IsThirdClassQuestItem(const ITEM* pItem)
-    {
-        return IsThirdClassQuestItemType(pItem->Type);
-    }
-
-    bool IsSecromiconQuestItem(const ITEM* pItem)
-    {
-        return IsSecromiconQuestItemType(pItem->Type);
-    }
-
-    bool IsSecromiconQuestItemModel(int modelType)
-    {
-        return IsSecromiconQuestItemType(modelType - MODEL_ITEM);
-    }
-
-    bool IsSummonerBookType(int itemType)
-    {
-        return itemType >= ITEM_BOOK_OF_SAHAMUTT && itemType <= ITEM_STAFF + 29;
-    }
-
-    bool IsSummonerBook(const ITEM* pItem)
-    {
-        return IsSummonerBookType(pItem->Type);
-    }
-
-    bool IsSummonerBookModel(int modelType)
-    {
-        return IsSummonerBookType(modelType - MODEL_ITEM);
-    }
-
-    bool IsSummonerStickModel(int modelType)
-    {
-        return IsSummonerStickType(modelType - MODEL_ITEM);
-    }
-
-    bool IsSummonerSkillParchmentModel(int modelType)
-    {
-        return IsSummonerSkillParchmentType(modelType - MODEL_ITEM);
-    }
-
-    bool IsRageFighterSkillParchmentModel(int modelType)
-    {
-        return IsRageFighterSkillParchmentType(modelType - MODEL_ITEM);
+        return IsSocketSeedOrSphereType(ToItemType(modelType));
     }
 
     bool IsSocketSeed(const ITEM* pItem)
     {
-        return IsSocketSeedType(pItem->Type);
+        return HasTag(pItem, ItemTag::SocketSeed);
     }
 
     bool IsSocketSeedModel(int modelType)
     {
-        return IsSocketSeedType(modelType - MODEL_ITEM);
+        return HasTag(ToItemType(modelType), ItemTag::SocketSeed);
     }
 
     bool IsSocketSphere(const ITEM* pItem)
     {
-        return IsSocketSphereType(pItem->Type);
+        return HasTag(pItem, ItemTag::SocketSphere);
     }
 
     bool IsSocketSphereModel(int modelType)
     {
-        return IsSocketSphereType(modelType - MODEL_ITEM);
-    }
-
-    bool IsSocketSeedSphereType(int itemType)
-    {
-        return itemType >= ITEM_SEED_SPHERE_FIRE_1 && itemType <= ITEM_SEED_SPHERE_EARTH_5;
+        return HasTag(ToItemType(modelType), ItemTag::SocketSphere);
     }
 
     bool IsSocketSeedSphere(const ITEM* pItem)
     {
-        return IsSocketSeedSphereType(pItem->Type);
+        return HasTag(pItem, ItemTag::SocketSeedSphere);
+    }
+
+    bool IsSocketSeedSphereType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::SocketSeedSphere);
     }
 
     bool IsSocketSeedSphereModel(int modelType)
     {
-        return IsSocketSeedSphereType(modelType - MODEL_ITEM);
+        return HasTag(ToItemType(modelType), ItemTag::SocketSeedSphere);
+    }
+
+    bool IsHealingPotion(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::HealingPotion);
+    }
+
+    bool IsHealingPotionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::HealingPotion);
+    }
+
+    bool IsManaPotionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::ManaPotion);
+    }
+
+    bool IsComplexPotion(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::ComplexPotion);
+    }
+
+    bool IsComplexPotionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::ComplexPotion);
+    }
+
+    bool IsElitePotion(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::ElitePotion);
+    }
+
+    bool IsElitePotionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::ElitePotion);
+    }
+
+    bool IsElitePotionModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::ElitePotion);
+    }
+
+    bool IsElixir(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::Elixir);
+    }
+
+    bool IsElixirType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::Elixir);
+    }
+
+    bool IsElixirModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::Elixir);
+    }
+
+    bool IsBuffScroll(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::BuffScroll);
+    }
+
+    bool IsBuffScrollType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::BuffScroll);
+    }
+
+    bool IsBuffScrollModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::BuffScroll);
+    }
+
+    bool IsBattleOrStrengthScroll(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::BattleOrStrengthScroll);
+    }
+
+    bool IsBattleOrStrengthScrollType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::BattleOrStrengthScroll);
+    }
+
+    bool IsBattleOrStrengthScrollModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::BattleOrStrengthScroll);
+    }
+
+    bool IsAmmunition(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::Ammunition);
+    }
+
+    bool IsAmmunitionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::Ammunition);
+    }
+
+    bool IsAmmunitionModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::Ammunition);
+    }
+
+    bool IsLuckyItemTicket(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::LuckyItemTicket);
+    }
+
+    bool IsLuckyItemTicketModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::LuckyItemTicket);
+    }
+
+    bool IsCashShopItem(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::CashShop);
+    }
+
+    bool IsGemJewelry(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::GemJewelry);
+    }
+
+    bool IsGambleItem(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::GambleItem);
+    }
+
+    bool IsGambleItemType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::GambleItem);
+    }
+
+    bool IsGambleItemModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::GambleItem);
+    }
+
+    bool IsBloodCastleTicketPart(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::BloodCastleTicketPart);
+    }
+
+    bool IsBloodCastleTicketPartType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::BloodCastleTicketPart);
+    }
+
+    bool IsBloodCastleTicketPartModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::BloodCastleTicketPart);
+    }
+
+    bool IsSecondClassQuestItem(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::SecondClassQuestItem);
+    }
+
+    bool IsSecondClassQuestItemType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::SecondClassQuestItem);
+    }
+
+    bool IsThirdClassQuestItem(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::ThirdClassQuestItem);
+    }
+
+    bool IsDivineArchangelWeapon(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::DivineArchangelWeapon);
+    }
+
+    bool IsDivineArchangelWeaponType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::DivineArchangelWeapon);
+    }
+
+    bool IsDivineArchangelWeaponModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::DivineArchangelWeapon);
+    }
+
+    bool IsSummonerBook(const ITEM* pItem)
+    {
+        return HasTag(pItem, ItemTag::SummonerBook);
+    }
+
+    bool IsSummonerBookType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::SummonerBook);
+    }
+
+    bool IsSummonerBookModel(int modelType)
+    {
+        return HasTag(ToItemType(modelType), ItemTag::SummonerBook);
+    }
+
+    bool IsHighValueItem(const ITEM* pItem)
+    {
+        const bool isValuable = HasTag(pItem, ItemTag::Valuable) || pItem->AncientDiscriminator > 0 ||
+                                pItem->ExcellentFlags > 0 || (pItem->Level > 6 && pItem->Type < ITEM_WING) ||
+                                (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0);
+        if (!isValuable)
+        {
+            return false;
+        }
+
+        // Rented items are not valuable while the rental time runs; rented
+        // pets only once it ran out.
+        if (pItem->bPeriodItem && !pItem->bExpiredPeriod)
+        {
+            return false;
+        }
+
+        if (IsPandaOrSkeletonItem(pItem) || IsDemonOrSpiritOfGuardian(pItem))
+        {
+            return pItem->bPeriodItem && pItem->bExpiredPeriod;
+        }
+
+        return true;
     }
 }

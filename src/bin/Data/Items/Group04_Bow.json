@@ -190,10 +190,12 @@
         "es": "Rayo",
         "pt": "Dardo"
       },
+      "tags": ["ammunition"],
       "width": 1,
       "height": 1,
       "slot": "offHand",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "fairyElf": 1
       }
@@ -386,10 +388,12 @@
         "es": "Flecha",
         "pt": "Flecha"
       },
+      "tags": ["ammunition"],
       "width": 1,
       "height": 1,
       "slot": "mainHand",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "fairyElf": 1
       }
@@ -453,6 +457,7 @@
         "es": "Ballesta Divina de Arcángel",
         "pt": "Besta divina do arcanjo"
       },
+      "tags": ["divineArchangelWeapon", "valuable"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",

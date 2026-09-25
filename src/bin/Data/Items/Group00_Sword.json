@@ -516,6 +516,7 @@
         "es": "Espada Divina de Arcángel",
         "pt": "Espada divina do arcanjo"
       },
+      "tags": ["divineArchangelWeapon", "valuable"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",

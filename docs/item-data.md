@@ -1,9 +1,9 @@
 # Item data
 
-All item definitions (names, size, slot, stats, requirements) live in JSON
-files in `src/bin/Data/Items/`, one file per item group. The client loads
-them once at startup into an in-memory item database; `Item_<lang>.bmd` is
-no longer read by the game.
+All item definitions (names, size, slot, stats, requirements, tags and
+rules) live in JSON files in `src/bin/Data/Items/`, one file per item
+group. The client loads them once at startup into an in-memory item
+database; `Item_<lang>.bmd` is no longer read by the game.
 
 The data matches OpenMU's `ItemDefinition` where both sides have the same
 fields, so it can later be exchanged with the server.
@@ -32,7 +32,7 @@ The file name is only a convention; the group comes from the file content.
       },
       "width": 1,
       "height": 3,
-      "slot": 0,
+      "slot": "mainHand",
       "skill": 22,
       "level": 36,
       "durability": 39,
@@ -50,8 +50,8 @@ The file name is only a convention; the group comes from the file content.
 - An item is identified by its group and `number` (0–511), the same as
   on the server.
 - **Fields with their default value are left out.** Missing fields get the
-  default: `0`/`false`, except `slot`, whose default is `255` (not
-  equippable).
+  default: `0`/`false`, no slot (not equippable), no wing tier, no tags,
+  and every action allowed (`tradable`, `droppable`, … are `true`).
 - Items are sorted by number and the fields always come in the same order,
   so saving unchanged data gives the same file.
 - Files are UTF-8 with LF line endings.
@@ -73,8 +73,10 @@ read as the English name only; saving writes the object form.
 
 | Field | Meaning |
 |---|---|
+| `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
 | `width`, `height` | Size in inventory slots |
-| `slot` | Equipment slot; `255` = not equippable |
+| `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
+| `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, damage increase, absorption) depend on it |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -87,6 +89,66 @@ read as the English name only; saving writes the object form.
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership` |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
+| `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
+
+### Tags
+
+A tag puts an item into a category that the game code asks for. An item
+can have several tags; the file lists them in the order below.
+
+| Tag | Meaning |
+|---|---|
+| `mount` | Can be ridden (Uniria, Dinorant, Dark Horse, Fenrir) |
+| `flying` | A mount that can fly, needed for maps like Icarus |
+| `darkLordPet` | Dark Horse and Dark Raven |
+| `guardianPet` | Demon and Spirit of Guardian |
+| `pandaOrSkeleton` | The panda and skeleton pets and transformation rings |
+| `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian |
+| `refineStone` | Lower and Higher Refine Stone |
+| `socketSeed`, `socketSphere`, `socketSeedSphere` | Socket system items |
+| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for |
+| `elitePotion`, `elixir`, `buffScroll`, `battleOrStrengthScroll` | Cash shop potions and scrolls |
+| `ammunition` | Arrows and bolts |
+| `bloodCastleTicketPart` | Scroll of Archangel and Blood Bone |
+| `secondClassQuestItem`, `thirdClassQuestItem` | Class change quest items |
+| `summonerBook` | Summoner books |
+| `divineArchangelWeapon` | The Divine weapons of the Archangel |
+| `cashShop` | Items from the cash shop |
+| `gambleItem` | Gamble items |
+| `gemJewelry` | The gem rings and necklaces from the cash shop |
+| `luckyItemTicket` | Lucky item tickets |
+| `valuable` | The game asks for confirmation before the item is sold or dropped |
+
+Wings need no tag: an item is a wing when its `slot` is `wings`.
+
+A tag name that does not exist is an error, so a typo cannot silently
+remove an item from a category. New tags need code that uses them; they
+are added in `ItemTag` (`ItemDefinition.h`) and `ItemEnumNames.cpp`.
+
+### Rules
+
+`tradable`, `droppable`, `storable`, `sellable` (to an NPC),
+`personalShopSellable` and `repairable` say what a player may do with the
+item. They are `true` unless the file says `false`.
+
+A few exceptions depend on the state of one particular item and are in the
+code (`GameLogic/Items/TradeRestrictions.cpp`, `ShopRestrictions.cpp`):
+
+- **Item level:** some items are a different item at each level. Rena +3
+  (Sign of Lord) can be traded, stored and sold in a personal shop; Box
+  of Luck +13 (Heart of Dark Lord) cannot. The Wizard's Ring above +0
+  cannot be traded, stored or sold in a personal shop, and at +1 and +2
+  not sold to an NPC. Rena +1 and Remedy of Love +1 to +5 cannot be sold
+  to an NPC. A later phase makes these level variants items of their own,
+  with their own flags.
+- **Rented items** (items with a rental time) cannot be stored. Some
+  cannot be dropped or sold in a personal shop while rented, and some can
+  be sold to an NPC once the rental time ran out.
+- **Durability:** a Talisman of Mobility with durability 1 cannot be stored.
+- **GM Gift:** only a game master can trade it.
+
+These checks only decide what the client allows. The server has its own
+checks; the design document lists how the flags map to OpenMU.
 
 ---
 
@@ -107,11 +169,13 @@ the field. All problems are also written to `MuError.log`. Errors are:
 - a name that is not a text, e.g. `"pt": 5`
 - a language code that is empty or has other characters than letters,
   digits and `-` (e.g. `"p=t"`)
+- a `slot`, `wingTier` or tag name that does not exist
 
 **Warnings** are logged, and the game starts anyway:
 
 - unknown fields (they are ignored)
 - names longer than 49 characters (the game shows them cut)
+- a `wingTier` on an item whose slot is not `wings`
 
 An automated test loads the shipped item data, so a pull request with
 broken item data fails its checks.
@@ -148,14 +212,15 @@ To keep your changes, copy the changed files from
   `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd`: English provides the values,
   Portuguese and Spanish add their names (a translation equal to the
   English name is not stored). Items the English file does not have keep
-  the English name they have now, so importing over the shipped data gives
-  the shipped data again. Save afterwards to keep the result. The console
+  the English name they have now, and every item keeps its tags, wing tier
+  and rule flags (the bmd format has none), so importing over the shipped
+  data gives the shipped data again. Save afterwards to keep the result. The console
   lists what the import had to fix (see below) and any problem the
   imported data still has; Save refuses it until those are fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
   Files that already have the data stay as they are. Values that the bmd
-  format does not have are left out.
+  format does not have (tags, wing tier, rule flags) are left out.
 
 ### How the bmd import repairs the legacy files
 

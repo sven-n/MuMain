@@ -354,6 +354,7 @@
         "es": "Cetro Divino de Arcángel",
         "pt": "Cetro divino do arcanjo"
       },
+      "tags": ["divineArchangelWeapon", "valuable"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",

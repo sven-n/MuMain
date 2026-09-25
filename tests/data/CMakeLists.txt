@@ -22,3 +22,16 @@ mu_add_test(
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+
+# One-time check for phase 3 (item rules into data); see the file header.
+mu_add_test(
+    NAME test_item_rules_equivalence
+    SOURCES
+        test_item_rules_equivalence.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(test_item_rules_equivalence PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
