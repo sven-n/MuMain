@@ -9,8 +9,6 @@
 #include "Core/Globals/_crypt.h"            // BuxConvert
 #include "UI/Console/MuEditorConsoleUI.h"
 
-#include <commdlg.h>   // GetOpenFileNameW (server base picker)
-
 #include <cstdio>
 #include <memory>
 #include <vector>
@@ -157,18 +155,9 @@ bool SaveClientAtt(int world, int mapNumber)
 
 bool PickServerBaseAtt(std::wstring& outPath)
 {
-    wchar_t file[MAX_PATH] = { 0 };
-    OPENFILENAMEW ofn = { 0 };
-    ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFilter = L"Server TerrainData (*.att)\0*.att\0All Files\0*.*\0";
-    ofn.lpstrFile = file;
-    ofn.nMaxFile = MAX_PATH;
-    ofn.lpstrTitle = L"Select the server's current TerrainData (downloaded from the Admin Panel)";
-    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
-    if (!GetOpenFileNameW(&ofn))
-        return false;
-    outPath = file;
-    return true;
+    return Editor::Files::PickFileToOpen(L"Server TerrainData (*.att)\0*.att\0All Files\0*.*\0",
+                                         L"Select the server's current TerrainData (downloaded from the Admin Panel)",
+                                         outPath);
 }
 
 bool LoadServerBaseAtt(const std::wstring& path, std::vector<BYTE>& outBase, std::string& outError)

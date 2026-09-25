@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MapTextureImport.h"
+#include "MapEditorFileUtil.h"
 
 #include "Core/Globals/_TextureIndex.h"     // BITMAP_MAPTILE
 #include "Render/Sprites/GlobalBitmap.h"     // GL_LINEAR / GL_REPEAT
@@ -14,9 +15,6 @@
 #include <cwctype>
 #include <filesystem>
 #include <vector>
-
-#include <windows.h>
-#include <commdlg.h>
 
 namespace fs = std::filesystem;
 
@@ -175,18 +173,8 @@ int UseTextureFile(int world, const std::wstring& sourcePath)
 
 bool PickImageFile(std::wstring& outPath)
 {
-    wchar_t file[MAX_PATH] = { 0 };
-    OPENFILENAMEW ofn = { 0 };
-    ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFilter = L"Textures (*.jpg;*.jpeg;*.ozj)\0*.jpg;*.jpeg;*.ozj\0All Files\0*.*\0";
-    ofn.lpstrFile = file;
-    ofn.nMaxFile = MAX_PATH;
-    ofn.lpstrTitle = L"Select a texture to import (JPEG or OZJ)";
-    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
-    if (!GetOpenFileNameW(&ofn))
-        return false;
-    outPath = file;
-    return true;
+    return Editor::Files::PickFileToOpen(L"Textures (*.jpg;*.jpeg;*.ozj)\0*.jpg;*.jpeg;*.ozj\0All Files\0*.*\0",
+                                         L"Select a texture to import (JPEG or OZJ)", outPath);
 }
 
 } // namespace Editor::TextureImport
