@@ -36,8 +36,8 @@ namespace GameLogic::Items
             return false;
         }
 
-        // A rented Demon cannot be sold in a personal shop.
-        if (pItem->bPeriodItem && pItem->Type == ITEM_DEMON)
+        // Rented pets cannot be sold in a personal shop.
+        if (pItem->bPeriodItem && (IsDemonOrSpiritOfGuardian(pItem) || IsPandaOrSkeletonItem(pItem)))
         {
             return true;
         }

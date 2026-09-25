@@ -1148,11 +1148,14 @@ namespace
             return false;
         }
 
+        // Fixed on purpose: the missing brackets applied !bPeriodItem only to
+        // the Demon, so rented Spirits of Guardian, pandas and skeletons could
+        // be sold in a personal shop.
         if ((!pItem->bPeriodItem) &&
-            pItem->Type == ITEM_DEMON
+            (pItem->Type == ITEM_DEMON
             || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
             || IsPandaOrSkeletonItem(pItem)
-            || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0)
+            || (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 0))
             )
         {
             return false;
