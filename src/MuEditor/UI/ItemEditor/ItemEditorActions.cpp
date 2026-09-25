@@ -131,11 +131,10 @@ void CItemEditorActions::RenderSaveButton()
 
     if (ImGui::Button(I18N::Editor::SaveItems))
     {
-        wchar_t fileName[256];
-        swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        std::wstring fileName = CItemDataHandler::GetItemFilePath(g_strSelectedML);
 
         std::string changeLog;
-        if (g_ItemDataHandler.Save(fileName, &changeLog))
+        if (g_ItemDataHandler.Save(fileName.data(), &changeLog))
         {
             // Log change details first, then save completion message
             g_MuEditorConsoleUI.LogEditor(changeLog);
