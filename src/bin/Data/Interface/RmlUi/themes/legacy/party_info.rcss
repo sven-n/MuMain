@@ -23,7 +23,7 @@
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	pointer-events: none;
 }
 
@@ -33,7 +33,7 @@
 	top: 60px;
 	width: 160px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 	text-align: left;
 }
 .party-empty-msg span { display: block; line-height: 15px; }
@@ -59,7 +59,7 @@
 	width: 70px;
 	text-align: center;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	pointer-events: none;
 }
 .party-flag {
@@ -78,7 +78,7 @@
 	top: 26px;
 	width: 70px;
 	text-align: left;
-	font-size: 12px;
+	font-size: 1em;
 	color: rgba(194, 194, 194, 255);
 	pointer-events: none;
 }
@@ -89,7 +89,7 @@
 	top: 26px;
 	width: 60px;
 	text-align: left;
-	font-size: 12px;
+	font-size: 1em;
 	color: rgba(194, 194, 194, 255);
 	pointer-events: none;
 }
@@ -119,7 +119,7 @@
 	top: 51px;
 	width: 70px;
 	text-align: right;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	pointer-events: none;
 }
