@@ -105,6 +105,8 @@ the field. All problems are also written to `MuError.log`. Errors are:
 - an item without an English name
 - a name containing `||`
 - a name that is not a text, e.g. `"pt": 5`
+- a language code that is empty or has other characters than letters,
+  digits and `-` (e.g. `"p=t"`)
 
 **Warnings** are logged, and the game starts anyway:
 
@@ -127,7 +129,9 @@ The item editor (editor builds, F12) edits the items of the running game:
   switch to English.
 - **Save Items** checks the data and writes `Data/Items` next to the game.
   With errors nothing is written, and the errors are listed in the
-  editor console. Only files whose content changed are rewritten.
+  editor console. If a file cannot be written (read-only folder, file
+  open in another program), the popup says so and the console names the
+  file. Only files whose content changed are rewritten.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
@@ -138,11 +142,15 @@ To keep your changes, copy the changed files from
 - **Import from bmd** replaces all items with
   `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd`: English provides the values,
   Portuguese and Spanish add their names (a translation equal to the
-  English name is not stored). Save afterwards to keep the
-  result. The console lists what the import had to fix (see below).
+  English name is not stored). Items the English file does not have keep
+  the English name they have now, so importing over the shipped data gives
+  the shipped data again. Save afterwards to keep the result. The console
+  lists what the import had to fix (see below) and any problem the
+  imported data still has; Save refuses it until those are fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
-  Values that the bmd format does not have are left out.
+  Files that already have the data stay as they are. Values that the bmd
+  format does not have are left out.
 
 ### How the bmd import repairs the legacy files
 
