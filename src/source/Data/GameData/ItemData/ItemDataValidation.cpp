@@ -4,6 +4,8 @@
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
+#include <algorithm>
+#include <cctype>
 #include <set>
 #include <string>
 
@@ -22,6 +24,15 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
 bool ContainsSeparator(const std::string& text)
 {
     return text.find(LocalizedString::Separator) != std::string::npos;
+}
+
+// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
+// break the LocalizedString format used for the OpenMU exchange.
+bool IsValidLocaleCode(const std::string& locale)
+{
+    return !locale.empty() && std::all_of(locale.begin(), locale.end(), [](char character) {
+        return std::isalnum(static_cast<unsigned char>(character)) || character == '-';
+    });
 }
 
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
@@ -55,6 +66,12 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     check(std::string(LocalizedString::NeutralLocale), names.GetNeutral());
     for (const auto& [locale, text] : names.GetTranslations())
     {
+        if (!IsValidLocaleCode(locale))
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
+            continue;
+        }
         check(locale, text);
     }
 }

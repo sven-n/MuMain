@@ -19,6 +19,29 @@ using OrderedJson = nlohmann::ordered_json;
 
 constexpr int JsonIndent = 2;
 
+// Reads a whole number without narrowing it, so a huge value cannot wrap
+// around to a valid one. False when it is not a whole number or does not
+// fit in a long long.
+bool ReadWholeNumber(const OrderedJson& json, long long& number)
+{
+    if (json.is_number_unsigned())
+    {
+        const auto value = json.get<unsigned long long>();
+        if (value > static_cast<unsigned long long>(std::numeric_limits<long long>::max()))
+        {
+            return false;
+        }
+        number = static_cast<long long>(value);
+        return true;
+    }
+    if (json.is_number_integer())
+    {
+        number = json.get<long long>();
+        return true;
+    }
+    return false;
+}
+
 namespace Keys
 {
 constexpr const char* FormatVersion = "formatVersion";
@@ -191,14 +214,14 @@ template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const 
     {
         constexpr long long Minimum = std::numeric_limits<T>::min();
         constexpr long long Maximum = std::numeric_limits<T>::max();
+        long long number = 0;
         if (!json.is_number_integer())
         {
             AddIssue(ItemDataIssueSeverity::Error, field, "must be a whole number");
             return;
         }
 
-        const long long number = json.get<long long>();
-        if (number < Minimum || number > Maximum)
+        if (!ReadWholeNumber(json, number) || number < Minimum || number > Maximum)
         {
             AddIssue(ItemDataIssueSeverity::Error, field,
                      "must be between " + std::to_string(Minimum) + " and " + std::to_string(Maximum));
@@ -211,18 +234,19 @@ template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const 
 bool ItemReader::ReadIdentity(const OrderedJson& json, ItemDefinition& definition)
 {
     const auto number = json.find(Keys::Number);
+    long long itemNumber = 0;
     if (number == json.end() || !number->is_number_integer())
     {
         AddIssue(ItemDataIssueSeverity::Error, Keys::Number, "missing or not a whole number");
         return false;
     }
 
-    m_number = number->get<int>();
-    if (!IsValidItemId(m_group, m_number))
+    if (!ReadWholeNumber(*number, itemNumber) || itemNumber < 0 || itemNumber >= MAX_ITEM_INDEX)
     {
         AddIssue(ItemDataIssueSeverity::Error, Keys::Number, "must be between 0 and " + std::to_string(MAX_ITEM_INDEX - 1));
         return false;
     }
+    m_number = static_cast<int>(itemNumber);
 
     const auto name = json.find(Keys::Name);
     if (name == json.end())
@@ -402,11 +426,11 @@ bool ReadFormatVersion(const OrderedJson& root, const std::string& source, std::
         return false;
     }
 
-    const int formatVersion = version->get<int>();
-    if (formatVersion < 1 || formatVersion > ItemJsonFormatVersion)
+    long long formatVersion = 0;
+    if (!ReadWholeNumber(*version, formatVersion) || formatVersion < 1 || formatVersion > ItemJsonFormatVersion)
     {
         AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion,
-                     "version " + std::to_string(formatVersion) + " is not supported (this client reads up to " +
+                     "version " + version->dump() + " is not supported (this client reads up to " +
                          std::to_string(ItemJsonFormatVersion) + ")");
         return false;
     }
@@ -422,13 +446,14 @@ bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, s
         return false;
     }
 
-    group = groupField->get<int>();
-    if (group < 0 || group >= MAX_ITEM_TYPE)
+    long long groupNumber = 0;
+    if (!ReadWholeNumber(*groupField, groupNumber) || groupNumber < 0 || groupNumber >= MAX_ITEM_TYPE)
     {
         AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group,
                      "must be between 0 and " + std::to_string(MAX_ITEM_TYPE - 1));
         return false;
     }
+    group = static_cast<int>(groupNumber);
     return true;
 }
 } // namespace

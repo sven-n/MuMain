@@ -219,3 +219,39 @@ TEST_CASE("Item names must be texts [data][items]")
     CHECK(result.items.empty());
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "name.pt"));
 }
+
+TEST_CASE("Numbers too large for their field do not wrap around [data][items]")
+{
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 4294967297, "name": "X"})")).issues, ItemDataIssueSeverity::Error,
+                   "number"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "buyPrice": 18446744073709551615})")).issues,
+                   ItemDataIssueSeverity::Error, "buyPrice"));
+    CHECK(HasIssue(Read(R"({"formatVersion": 4294967297, "group": 0, "items": []})").issues,
+                   ItemDataIssueSeverity::Error, "formatVersion"));
+    CHECK(HasIssue(Read(R"({"formatVersion": 1, "group": 4294967296, "items": []})").issues,
+                   ItemDataIssueSeverity::Error, "group"));
+}
+
+TEST_CASE("Item name language codes must be codes [data][items]")
+{
+    ItemDefinition kris = MakeKris();
+    kris.names.Set("p=t", "x");
+    ItemDefinition empty = MakeKris();
+    empty.number = 1;
+    empty.names.Set("", "x");
+    ItemDefinition valid = MakeKris();
+    valid.number = 2;
+    valid.names.Set("zh-TW", "x");
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{kris}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "name"));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{empty}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "name"));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{valid}, issues);
+    CHECK_FALSE(HasErrors(issues));
+}
