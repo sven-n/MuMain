@@ -109,7 +109,7 @@
 
 /* Text floats transparently over the sprite composite below it (painted by the background
    document), matching native (no separate boxed "well"). left/right/top match native's own text
-   metrics (~25dp side margin, 35dp top blank); bottom leaves a gap above the buttons.
+   metrics (~23dp side margin, 35dp top blank); bottom leaves a gap above the buttons.
 
    top+bottom (not top+height) deliberately -- this engine's box model is content-box only (no
    box-sizing support anywhere in this codebase), so an explicit height combined with a bordered/
@@ -120,8 +120,10 @@
    The title banner is NOT a child of this box -- it overlays #panel's own top edge instead. */
 .gcd-body {
 	/* In flow (not absolute) so the panel grows with it: native's 35 top blank and the 56 kept
-	   for the buttons below. */
-	margin: 35dp 25dp 56dp 25dp;
+	   for the buttons below. Native wraps message text at MSGBOX_TEXT_MAXWIDTH (180); this
+	   renderer's glyphs run about 2% wider than native's, so the text column gets 184 (23 each
+	   side) to break lines where native does. */
+	margin: 35dp 23dp 56dp 23dp;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
