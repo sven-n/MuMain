@@ -32,9 +32,7 @@ void CItemEditorPopups::RenderAll()
     RenderSimplePopup("Export CSV Success", I18N::Editor::ItemsExportedAsCSVSuccessfully);
     RenderSimplePopup("Export CSV Failed", I18N::Editor::FailedToExportItemAttributesAsCSV);
 
-    // bmd import/export popups
-    RenderSimplePopup("Import Bmd Success", I18N::Editor::ItemsImportedFromBmd);
-    RenderSimplePopup("Import Bmd Failed", I18N::Editor::FailedToImportItemsFromBmd);
+    // bmd export popups
     RenderSimplePopup("Export Bmd Success", I18N::Editor::ItemsExportedAsBmd);
     RenderSimplePopup("Export Bmd Failed", I18N::Editor::FailedToExportItemsAsBmd);
 

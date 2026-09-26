@@ -155,27 +155,6 @@ void CItemEditorActions::RenderSaveButton()
     ImGui::PopStyleColor(2);
 }
 
-bool CItemEditorActions::RenderImportBmdButton()
-{
-    if (!ImGui::Button(I18N::Editor::ImportFromBmd))
-    {
-        return false;
-    }
-
-    const Data::Items::ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-    LogIssues(result.issues);
-    if (Data::Items::HasErrors(result.issues))
-    {
-        g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToImportItemsFromBmd);
-        ImGui::OpenPopup("Import Bmd Failed");
-        return false;
-    }
-
-    LogImportResult(result);
-    ImGui::OpenPopup("Import Bmd Success");
-    return true;
-}
-
 void CItemEditorActions::RenderExportBmdButton()
 {
     if (!ImGui::Button(I18N::Editor::ExportAsBmd))
@@ -203,39 +182,6 @@ void CItemEditorActions::LogIssues(const std::vector<Data::Items::ItemDataIssue>
     for (const Data::Items::ItemDataIssue& issue : issues)
     {
         g_MuEditorConsoleUI.LogEditor(issue.ToString());
-    }
-}
-
-void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult& result)
-{
-    std::string locales;
-    for (const std::string& locale : result.importedLocales)
-    {
-        locales += (locales.empty() ? "" : ", ") + locale;
-    }
-
-    g_MuEditorConsoleUI.LogEditor("Imported " + std::to_string(result.items.size()) + " items from the bmd files (" +
-                                  locales + ")");
-    g_MuEditorConsoleUI.LogEditor(std::to_string(result.recoveredNameCount) +
-                                  " names were longer than the bmd name field and were recovered");
-    g_MuEditorConsoleUI.LogEditor(std::to_string(result.reencodedNameCount) +
-                                  " names were read as Windows-1252 instead of UTF-8");
-
-    for (const Data::Items::ItemBmdRepair& repair : result.repairs)
-    {
-        const std::string source = repair.fromLocale.empty() ? "no language had it, set to the default" : "taken from " + repair.fromLocale;
-        g_MuEditorConsoleUI.LogEditor("Repaired item (" + std::to_string(repair.group) + "," +
-                                      std::to_string(repair.number) + ") " + repair.field + ": " +
-                                      std::to_string(repair.oldValue) + " -> " + std::to_string(repair.newValue) +
-                                      " (" + source + ")");
-    }
-
-    g_MuEditorConsoleUI.LogEditor(std::to_string(result.keptEnglishNameCount) +
-                                  " items the English file lacks kept their current English name");
-    LogIssues(result.validationIssues);
-    if (Data::Items::HasErrors(result.validationIssues))
-    {
-        g_MuEditorConsoleUI.LogEditor("Fix the errors above before saving; Save refuses data with errors.");
     }
 }
 
@@ -291,18 +237,15 @@ void CItemEditorActions::RenderExportCSVButton()
     ImGui::PopStyleColor(2);
 }
 
-bool CItemEditorActions::RenderAllButtons()
+void CItemEditorActions::RenderAllButtons()
 {
     RenderSaveButton();
-    ImGui::SameLine();
-    const bool itemsReplaced = RenderImportBmdButton();
     ImGui::SameLine();
     RenderExportBmdButton();
     ImGui::SameLine();
     RenderExportS6E3Button();
     ImGui::SameLine();
     RenderExportCSVButton();
-    return itemsReplaced;
 }
 
 #endif // _EDITOR

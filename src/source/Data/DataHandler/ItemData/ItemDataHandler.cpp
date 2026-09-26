@@ -15,7 +15,7 @@
 
 #ifdef _EDITOR
 #include "Data/DataHandler/CommonDataSaver.h"
-#include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "ItemBmdLanguages.h"
 #include "ItemDataSaver.h"
 #include "ItemDataExportS6E3.h"
 #include "ItemDataExportAsCSV.h"
@@ -231,50 +231,6 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 {
     return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
-}
-
-ItemBmdImportResult CItemDataHandler::ImportFromBmd()
-{
-    ItemBmdImportResult result = ImportItemBmdFiles();
-    if (HasErrors(result.issues))
-    {
-        return result;
-    }
-
-    result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
-    KeepFieldsNotInBmd(result.items);
-    ValidateItems(result.items, result.validationIssues);
-
-    g_ItemDatabase.Build(result.items);
-    FillItemAttributes();
-    return result;
-}
-
-int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items)
-{
-    int keptCount = 0;
-    for (ItemDefinition& item : items)
-    {
-        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
-        if (!item.names.GetNeutral().empty() || current == nullptr || current->names.GetNeutral().empty())
-        {
-            continue;
-        }
-        item.names.Set(Data::LocalizedString::NeutralLocale, current->names.GetNeutral());
-        ++keptCount;
-    }
-    return keptCount;
-}
-
-void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items)
-{
-    for (ItemDefinition& item : items)
-    {
-        if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
-        {
-            CopyFieldsNotInItemAttribute(*current, item);
-        }
-    }
 }
 
 bool CItemDataHandler::ExportAsBmd(std::string& changeLog)

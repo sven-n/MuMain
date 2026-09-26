@@ -1,16 +1,14 @@
 #include "doctest.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
-#include "Data/DataHandler/ItemData/ItemBmdImport.h"
+#include "Data/DataHandler/ItemData/ItemBmdLanguages.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
-#include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -29,12 +27,10 @@ const std::filesystem::path ShippedClientDirectory = DataDirectory.parent_path()
 
 constexpr int KrisType = MakeItemType(0, 0);
 constexpr int BladeType = MakeItemType(0, 5);
-constexpr int ChaosCastleTicketType = MakeItemType(13, 121);
-constexpr int GaionsOrderType = MakeItemType(14, 102);
 
-// CItemDataHandler::Load and the bmd import read Data\... relative to the
-// working directory; Load also fills the global ItemAttribute, like the game
-// does at startup. This points both at test-owned state and restores them.
+// CItemDataHandler::Load reads Data\... relative to the working directory
+// and fills the global ItemAttribute, like the game does at startup. This
+// points both at test-owned state and restores them.
 class ClientDataScope
 {
 public:
@@ -94,20 +90,6 @@ public:
 private:
     std::filesystem::path m_directory;
 };
-
-std::string ReadWholeFile(const std::filesystem::path& path)
-{
-    std::ifstream file(path, std::ios::binary);
-    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-}
-
-const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int itemType)
-{
-    const auto found = std::find_if(items.begin(), items.end(), [&](const ItemDefinition& item) {
-        return MakeItemType(item.group, item.number) == itemType;
-    });
-    return found != items.end() ? &*found : nullptr;
-}
 } // namespace
 
 TEST_CASE("Shipped item data loads without problems [data][items]")
@@ -175,37 +157,6 @@ TEST_CASE("Saved item data loads back the same [data][items]")
         INFO(fileName);
         CHECK(savedText == shippedText);
     }
-}
-
-TEST_CASE("Bmd import recovers long names and repairs the fields they overwrote [data][items]")
-{
-    ClientDataScope client(ShippedClientDirectory);
-
-    const ItemBmdImportResult result = ImportItemBmdFiles();
-    REQUIRE_FALSE(HasErrors(result.issues));
-    CHECK(result.importedLocales == std::vector<std::string>{"en", "pt", "es"});
-
-    const ItemDefinition* ticket = FindItem(result.items, ChaosCastleTicketType);
-    REQUIRE(ticket != nullptr);
-    CHECK(ticket->names.GetNeutral() == "Open Access Ticket to Chaos Castle");
-    CHECK_FALSE(ticket->twoHanded);
-    CHECK(ticket->level == 0);
-    CHECK(ticket->slot == ItemSlot::None);
-}
-
-TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][items]")
-{
-    ClientDataScope client(ShippedClientDirectory);
-
-    const ItemBmdImportResult result = ImportItemBmdFiles();
-
-    const ItemDefinition* blade = FindItem(result.items, BladeType);
-    REQUIRE(blade != nullptr);
-    CHECK(blade->names.Get("pt") == "L\xC3\xA2mina");
-
-    const ItemDefinition* gaionsOrder = FindItem(result.items, GaionsOrderType);
-    REQUIRE(gaionsOrder != nullptr);
-    CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
@@ -286,30 +237,6 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         REQUIRE(moved != nullptr);
         CHECK(moved->names.Get("pt") == "L\xC3\xA2mina");
         CHECK(g_ItemDatabase.Find(BladeType) == nullptr);
-    }
-}
-
-TEST_CASE("Importing the bmd files over the shipped data gives the shipped data [data][items][editor]")
-{
-    ClientDataScope client(ShippedClientDirectory);
-    I18N::SetLocale("en");
-    std::string errorMessage;
-    REQUIRE(g_ItemDataHandler.Load(errorMessage));
-
-    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-    REQUIRE_FALSE(HasErrors(result.issues));
-
-    // (13,97)-(13,99) exist only in the Portuguese file; they keep the
-    // English names the shipped data gives them.
-    CHECK(result.keptEnglishNameCount == 3);
-    CHECK(result.validationIssues.empty());
-    // Tags, wing tiers and rule flags are not in the bmd files; the items keep
-    // the ones they have, so the files below match.
-    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
-    {
-        INFO(GetItemGroupFileName(group));
-        CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
-              ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
     }
 }
 

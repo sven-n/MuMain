@@ -342,7 +342,7 @@ language first:
 2. Add item names with the same code.
 
 Item names for a code that is not a UI language load without errors, but
-are never shown. Import from bmd and Export as bmd only cover English,
+are never shown. Export as bmd only covers English,
 Portuguese and Spanish (`Data/Local/Eng`, `Por`, `Spn`); names in other
 languages exist only in the JSON files.
 
