@@ -110,6 +110,8 @@ void CMixInventory::BuildRmlUi()
                 auto mixLine = c.RegisterStruct<MixLine>();
                 mixLine.RegisterMember("text", &MixLine::text);
                 mixLine.RegisterMember("color", &MixLine::color);
+                mixLine.RegisterMember("top", &MixLine::top);
+                mixLine.RegisterMember("align_left", &MixLine::alignLeft);
                 c.RegisterArray<std::vector<MixLine>>();
                 c.Bind("source_lines", &model.sourceLines);
                 c.Bind("status_lines", &model.statusLines);
@@ -757,51 +759,63 @@ void CMixInventory::SyncMixContentModel()
     }
     syncLines(&MixInventoryRmlModel::adviceLines, "advice_lines", adviceLines);
 
-    // Former RenderMixDescriptions() -- static per-mix-type instructional text. Placed in normal
-    // document flow after the advice block above (mix_inventory.rcss), rather than at
-    // RenderFrame()'s own independent fixed fPos_y+250/+270/+280 offsets, which could in principle
-    // overlap the advice/source content above depending on how many lines it produced.
+    // Former RenderMixDescriptions() -- static per-mix-type instructional text, with the native
+    // position of every line (a theme may place them there or simply flow them).
     std::vector<MixLine> descriptionLines;
     bool showSocketPrompt = false;
     wchar_t socketPromptText[128] = {};
+    const Rml::String white = makeColor(255, 255, 255, 255);
+    const Rml::String warning = makeColor(255, 40, 20, 255);
+    constexpr float kDescriptionTop = 250.f;         // RenderMixDescriptions()'s fPos_y + 250 block
+    constexpr float kCastleSeniorDescriptionTop = 270.f;
+    constexpr float kDescriptionRow = 13.f;
+    auto describeAt = [&](float blockTop, const wchar_t* text, const Rml::String& color, int row, bool alignLeft)
+    {
+        const float top = blockTop + static_cast<float>(row) * kDescriptionRow;
+        descriptionLines.push_back({ StringUtils::WideToNarrow(text), color, top, alignLeft });
+    };
+    auto describe = [&](const wchar_t* text, const Rml::String& color, int row, bool alignLeft = false)
+    {
+        describeAt(kDescriptionTop, text, color, row, alignLeft);
+    };
     switch (mixType)
     {
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
         for (int i = 0; i < 6; ++i)
-            descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Lookup(1644 + i)), makeColor(200, 200, 200, 255) });
+            describeAt(kCastleSeniorDescriptionTop, I18N::Game::Lookup(1644 + i), makeColor(200, 200, 200, 255), i, false);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::RefineTheItemToCreate), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::TheRefiningStone), makeColor(255, 255, 255, 255) });
+        describe(I18N::Game::RefineTheItemToCreate, white, 0);
+        describe(I18N::Game::TheRefiningStone, white, 1);
         mu_swprintf(szText, I18N::Game::SForOnlyS, I18N::Game::Refine, I18N::Game::WeaponsOrShields);
-        descriptionLines.push_back({ StringUtils::WideToNarrow(szText), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Allowed), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ItemWillDisappearWhenFailed), makeColor(255, 0, 0, 255) });
+        describe(szText, white, 2);
+        describe(I18N::Game::Allowed, white, 3);
+        describe(I18N::Game::ItemWillDisappearWhenFailed, makeColor(255, 0, 0, 255), 4);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::RestorationIsDeletingThe), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ReinforcementOption), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::OfTheWeapons), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ForRestoringReinforcedItem), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ReinforcementOptionHasToBe), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::DeletedThroughRestoration), makeColor(255, 255, 255, 255) });
+        describe(I18N::Game::RestorationIsDeletingThe, white, 0);
+        describe(I18N::Game::ReinforcementOption, white, 1);
+        describe(I18N::Game::OfTheWeapons, white, 2);
+        describe(I18N::Game::ForRestoringReinforcedItem, white, 3);
+        describe(I18N::Game::ReinforcementOptionHasToBe, white, 4);
+        describe(I18N::Game::DeletedThroughRestoration, white, 5);
         break;
     case SEASON3A::MIXTYPE_ELPIS:
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::GettingThroughRefiningProcess), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::OfJewelOfHarmonyOrignal), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::GemstoneWillGiveMorePower), makeColor(255, 255, 255, 255) });
+        describe(I18N::Game::GettingThroughRefiningProcess, white, 0);
+        describe(I18N::Game::OfJewelOfHarmonyOrignal, white, 1);
+        describe(I18N::Game::GemstoneWillGiveMorePower, white, 2);
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Warning2223), makeColor(255, 40, 20, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::CombinationsCanBeUsedOnceAtATime), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::YouCanAchieveSpecialItemsWithCombinations), makeColor(255, 255, 255, 255) });
+        describe(I18N::Game::Warning2223, warning, 4);
+        describe(I18N::Game::CombinationsCanBeUsedOnceAtATime, white, 6, true);
+        describe(I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded, white, 7, true);
+        describe(I18N::Game::YouCanAchieveSpecialItemsWithCombinations, white, 8, true);
         break;
     case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::Warning2223), makeColor(255, 40, 20, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::_255GoldenCherryBlossomBranches), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::OnlyTheSameTypeOfCherryBlossomsBranchesCanBeUploaded), makeColor(255, 255, 255, 255) });
-        descriptionLines.push_back({ StringUtils::WideToNarrow(I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded), makeColor(255, 255, 255, 255) });
+        describe(I18N::Game::Warning2223, warning, 0);
+        describe(I18N::Game::_255GoldenCherryBlossomBranches, white, 2, true);
+        describe(I18N::Game::OnlyTheSameTypeOfCherryBlossomsBranchesCanBeUploaded, white, 3, true);
+        describe(I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded, white, 4, true);
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
         showSocketPrompt = true;

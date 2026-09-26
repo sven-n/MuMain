@@ -49,6 +49,12 @@ namespace mu::ui::window
         {
             Rml::String text;
             Rml::String color; // "rgba(r,g,b,a)"
+            // Where native RenderMixDescriptions() drew a description line: its top in reference
+            // px from the window's top (fixed per mix type, with rows skipped between some lines)
+            // and whether it was left-aligned rather than centred. Unused (0/false) for the other
+            // line lists.
+            float top = 0.f;
+            bool alignLeft = false;
             bool operator==(const MixLine&) const = default;
         };
         struct MixInventoryRmlModel

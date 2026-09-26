@@ -11,50 +11,101 @@
 	font-family: "token(font-body)";
 }
 
+/* Native RenderFrame() draws every text line bold, the title and tax rate in (220,220,220). */
 #title {
 	position: absolute;
 	left: 0;
-	top: 11px;
+	top: 13px;
 	width: 190px;
 	text-align: center;
-	color: token(text-primary);
+	color: #dcdcdc;
 	font-weight: bold;
 	font-size: 1em;
 }
+#title.low { top: 18px; } /* mix types without the tax line */
 
-/* Former RenderFrame()/RenderMixDescriptions() native text block (SyncMixContentModel(),
-   MixInventory.cpp) -- .mix-content's children stack via normal block flow instead of
-   RenderFrame()'s own hand-accumulated fLine_y stepping; per-line color still comes from C++
-   (data-style-color) since it's a live gameplay signal (ready/not-ready, source-satisfied/missing),
-   not a theme choice. */
 .mix-tax-rate {
 	position: absolute;
 	left: 15px;
 	top: 25px;
 	width: 160px;
 	text-align: center;
-	color: token(text-label);
+	color: #dcdcdc;
 	font-weight: bold;
 	font-size: 1em;
 }
-.mix-content {
+
+/* Recipe name (two 10px rows, the second kept even when empty), then success rate and required
+   zen (20px each, when shown) -- left-aligned at native's fPos_x, over a translucent band. */
+.mix-head {
 	position: absolute;
 	left: 15px;
 	top: 49px;
 	width: 160px;
-	bottom: 40px;
-	overflow: hidden auto;
 }
-.mix-line {
+.mix-row {
 	display: block;
-	width: 100%;
-	text-align: center;
-	margin-bottom: 3px;
+	height: 10px;
+	white-space: nowrap;
 	font-weight: bold;
 	font-size: 1em;
-	color: token(text-info);
+	color: #d2e6ff;
 }
-.mix-socket-prompt { color: #c8c8c8; }
+.mix-row.mix-row-wide { height: 20px; }
+.mix-row.hidden { display: none; }
+.mix-text { background-color: rgba(40, 40, 40, 128); }
+
+/* Prediction / source checklist / status (fixed top 203, 15px rows, wrapping like native's
+   CutStr() at ~156px), then the advice after one blank row. */
+.mix-list {
+	position: absolute;
+	left: 15px;
+	top: 203px;
+	width: 156px;
+}
+.mix-list.hidden, .mix-head.hidden, .mix-descriptions.hidden { display: none; }
+.mix-list-line {
+	display: block;
+	line-height: 15px;
+	font-weight: bold;
+	font-size: 1em;
+	color: #dcdcdc;
+}
+.mix-list-line.hidden { display: none; }
+/* Native cuts only the prediction and source lines (CutStr); status and advice run on. */
+.mix-unwrapped { white-space: nowrap; }
+.mix-advice { display: block; margin-top: 15px; }
+
+/* RenderMixDescriptions(): each line at its own native top (d.top), centred in 160px at x=15 or
+   left-aligned from x=5 across 200px, no band. */
+.mix-descriptions {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 190px;
+}
+.mix-description {
+	position: absolute;
+	left: 15px;
+	width: 160px;
+	text-align: center;
+	white-space: nowrap;
+	font-weight: bold;
+	font-size: 1em;
+}
+.mix-description.left { left: 5px; width: 200px; text-align: left; }
+
+.mix-socket-prompt {
+	position: absolute;
+	left: 15px;
+	top: 280px;
+	width: 160px;
+	text-align: center;
+	color: #c8c8c8;
+	font-weight: bold;
+	font-size: 1em;
+}
+.mix-socket-prompt.hidden { display: none; }
 
 /* 44x35 crop of the top-left ("up") frame of the native 2-frame vertical button sheet
    (CMixInventory::Create()'s former ChangeButtonInfo(..., 44.f, 35.f)) -- hover uses a CSS

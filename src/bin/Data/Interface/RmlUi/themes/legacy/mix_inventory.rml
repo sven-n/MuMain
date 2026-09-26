@@ -12,29 +12,45 @@
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
-		<span id="title">{{title}}</span>
+		<!-- Text laid out where native RenderFrame()/RenderMixDescriptions() drew it: the title a
+		     little lower when there is no tax line, the recipe block at 49, the prediction/source/
+		     status list at 203 (15 apart, advice after one blank line), the descriptions at their own
+		     native offsets (d.top). -->
+		<span id="title" data-class-low="!show_tax_rate">{{title}}</span>
 
 		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate">{{tax_rate_text}}</div>
 
-		<div class="mix-content" data-class-hidden="!show_recipe">
-			<div class="mix-line mix-recipe-line" data-style-color="recipe_color">{{recipe_line1}}</div>
-			<div class="mix-line mix-recipe-line" data-style-color="recipe_color"
-			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</div>
-
-			<div class="mix-line mix-success-rate" data-class-hidden="!show_success_rate"
-			     data-style-color="success_rate_color">{{success_rate_text}}</div>
-
-			<div class="mix-line mix-required-zen" data-class-hidden="!show_required_zen">{{required_zen_text}}</div>
-
-			<div class="mix-line mix-prediction" data-class-hidden="!show_prediction">{{prediction_text}}</div>
-
-			<div class="mix-line" data-for="s : source_lines" data-style-color="s.color">{{s.text}}</div>
-			<div class="mix-line" data-for="s : status_lines" data-style-color="s.color">{{s.text}}</div>
-			<div class="mix-line" data-for="a : advice_lines" data-style-color="a.color">{{a.text}}</div>
-			<div class="mix-line" data-for="d : description_lines" data-style-color="d.color">{{d.text}}</div>
-
-			<div class="mix-line mix-socket-prompt" data-class-hidden="!show_socket_prompt">{{socket_prompt_text}}</div>
+		<div class="mix-head" data-class-hidden="!show_recipe">
+			<div class="mix-row"><span class="mix-text" data-style-color="recipe_color">{{recipe_line1}}</span></div>
+			<div class="mix-row"><span class="mix-text" data-style-color="recipe_color"
+			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</span></div>
+			<div class="mix-row mix-row-wide" data-class-hidden="!show_success_rate"><span class="mix-text"
+			     data-style-color="success_rate_color">{{success_rate_text}}</span></div>
+			<!-- Native leaves the recipe colour set for the zen line unless a success line reset it. -->
+			<div class="mix-row mix-row-wide mix-required-zen" data-class-hidden="!show_required_zen"><span
+			     class="mix-text" data-style-color="show_success_rate ? 'rgba(210,230,255,255)' : recipe_color"
+			     >{{required_zen_text}}</span></div>
 		</div>
+
+		<div class="mix-list" data-class-hidden="!show_recipe">
+			<div class="mix-list-line mix-prediction" data-class-hidden="!show_prediction"><span
+			     class="mix-text">{{prediction_text}}</span></div>
+			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text"
+			     data-style-color="s.color">{{s.text}}</span></div>
+			<div class="mix-list-line mix-unwrapped" data-for="s : status_lines"><span class="mix-text"
+			     data-style-color="s.color">{{s.text}}</span></div>
+			<div class="mix-advice">
+				<div class="mix-list-line mix-unwrapped" data-for="a : advice_lines"><span class="mix-text"
+				     data-style-color="a.color">{{a.text}}</span></div>
+			</div>
+		</div>
+
+		<div class="mix-descriptions" data-class-hidden="!show_recipe">
+			<div class="mix-description" data-for="d : description_lines" data-style-top="d.top + 'px'"
+			     data-class-left="d.align_left" data-style-color="d.color">{{d.text}}</div>
+		</div>
+
+		<div class="mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt">{{socket_prompt_text}}</div>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-class-locked="mix_locked"
 		     data-event-click="mix_inventory_mix_click"></div>
