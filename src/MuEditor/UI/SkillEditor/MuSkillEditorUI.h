@@ -13,6 +13,8 @@ class CMuSkillEditorUI
 public:
     static CMuSkillEditorUI& GetInstance();
 
+    static bool HasInstance();
+
     void Render(bool& showEditor);
     void ClearSearch() { m_szSkillSearchBuffer[0] = '\0'; }
     void SaveColumnPreferences();

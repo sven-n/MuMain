@@ -63,10 +63,21 @@ CMuSkillEditorUI::~CMuSkillEditorUI()
     }
 }
 
+namespace
+{
+bool g_CMuSkillEditorUICreated = false;
+}
+
 CMuSkillEditorUI& CMuSkillEditorUI::GetInstance()
 {
     static CMuSkillEditorUI instance;
+    g_CMuSkillEditorUICreated = true;
     return instance;
+}
+
+bool CMuSkillEditorUI::HasInstance()
+{
+    return g_CMuSkillEditorUICreated;
 }
 
 void CMuSkillEditorUI::Render(bool& showEditor)
