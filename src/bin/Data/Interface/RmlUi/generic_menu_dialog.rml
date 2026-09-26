@@ -21,7 +21,8 @@
       data-class-native-frame="native_height > 0"
       data-style-margin-top="native_top > 0 ? (native_top - 60) + 'dp' : '0dp'"
       data-style-height="native_height > 0 ? native_height + 'dp' : 'auto'">
-	<!-- Inline styles bound below always carry a value ('auto', '0dp', 'normal' when unused): an
+	<!-- Inline styles bound below always carry a value ('auto', '0dp', '1.2' -- RmlUi's default
+	     line-height, it has no 'normal' keyword -- when unused): an
 	     empty inline value does not clear the one a previous menu set on the same element. -->
 	<!-- The menu's own lines. With a described native layout (GenericMenuConfig::nativeFrame) they
 	     sit where the native box's RenderTexts() drew them: native_text_top is the first line's text
@@ -31,7 +32,7 @@
 	     data-style-top="native_text_top > 0 ? (native_text_top - (native_line_advance - 9) / 2) + 'dp' : 'auto'"
 	     data-style-left="native_text_inset > 0 ? native_text_inset + 'dp' : '0dp'"
 	     data-style-right="native_text_inset > 0 ? native_text_inset + 'dp' : '0dp'"
-	     data-style-line-height="native_line_advance > 0 ? native_line_advance + 'dp' : 'normal'">
+	     data-style-line-height="native_line_advance > 0 ? native_line_advance + 'dp' : '1.2'">
 		<div class="gmd-line" data-for="line : lines" data-class-bold="line.bold"
 		     data-style-color="line.color == '' ? '#ffffff' : line.color">{{line.text}}</div>
 	</div>
