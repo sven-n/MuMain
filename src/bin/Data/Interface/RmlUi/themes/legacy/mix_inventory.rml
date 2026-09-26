@@ -18,7 +18,8 @@
 		     native offsets (d.top). -->
 		<span id="title" data-class-low="!show_tax_rate">{{title}}</span>
 
-		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate">{{tax_rate_text}}</div>
+		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate"
+		     data-style-transform="'scale(' + tax_rate_fit + ')'">{{tax_rate_text}}</div>
 
 		<div class="mix-head" data-class-hidden="!show_recipe">
 			<div class="mix-row"><span class="mix-text" data-style-color="recipe_color">{{recipe_line1}}</span></div>
@@ -47,7 +48,8 @@
 
 		<div class="mix-descriptions" data-class-hidden="!show_recipe">
 			<div class="mix-description" data-for="d : description_lines" data-style-top="d.top + 'px'"
-			     data-class-left="d.align_left" data-style-color="d.color">{{d.text}}</div>
+			     data-class-left="d.align_left" data-style-color="d.color"
+			     data-style-transform="'scale(' + d.fit + ')'">{{d.text}}</div>
 		</div>
 
 		<div class="mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt">{{socket_prompt_text}}</div>

@@ -27,9 +27,24 @@
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/ElementUtilities.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+    // Native RenderText(x, y, text, boxWidth, ...) scales a line down to fit boxWidth
+    // (UI::Scaling::FontScaleForBounds). The factor for a line measured in `probe`'s font (a bold
+    // 1em element of this window, in the window's own layout units); 1 = fits or no probe.
+    float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth)
+    {
+        if (probe == nullptr || text == nullptr || text[0] == L'\0')
+            return 1.f;
+        const float width = static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(text)));
+        return width <= boxWidth ? 1.f : boxWidth / width;
+    }
+}
 
 CMixInventory::CMixInventory()
 {
@@ -90,6 +105,7 @@ void CMixInventory::BuildRmlUi()
 
                 c.Bind("show_tax_rate", &model.showTaxRate);
                 c.Bind("tax_rate_text", &model.taxRateText);
+                c.Bind("tax_rate_fit", &model.taxRateFit);
 
                 c.Bind("show_recipe", &model.showRecipe);
                 c.Bind("recipe_line1", &model.recipeLine1);
@@ -112,6 +128,7 @@ void CMixInventory::BuildRmlUi()
                 mixLine.RegisterMember("color", &MixLine::color);
                 mixLine.RegisterMember("top", &MixLine::top);
                 mixLine.RegisterMember("align_left", &MixLine::alignLeft);
+                mixLine.RegisterMember("fit", &MixLine::fit);
                 c.RegisterArray<std::vector<MixLine>>();
                 c.Bind("source_lines", &model.sourceLines);
                 c.Bind("status_lines", &model.statusLines);
@@ -539,6 +556,8 @@ void CMixInventory::SyncMixContentModel()
     if (!m_pRmlDoc)
         return;
 
+    // The bold title measures lines in the window's own text font (the theme sizes it 1em).
+    Rml::Element* fitProbe = m_pRmlDoc->GetElementById("title");
     auto& model = m_RmlBinder.GetModel();
     auto syncWide = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
     {
@@ -586,7 +605,16 @@ void CMixInventory::SyncMixContentModel()
     }
     syncBool(&MixInventoryRmlModel::showTaxRate, "show_tax_rate", showTax);
     if (showTax)
+    {
+        constexpr float kTaxRateBoxWidth = 160.f; // native RenderText(..., 160.0f, ...)
         syncWide(&MixInventoryRmlModel::taxRateText, "tax_rate_text", szText);
+        const float fit = TextFitScale(fitProbe, szText, kTaxRateBoxWidth);
+        if (model.taxRateFit != fit)
+        {
+            model.taxRateFit = fit;
+            m_RmlBinder.MarkDirty("tax_rate_fit");
+        }
+    }
 
     // Recipe result name onward -- hidden entirely once MIX_FINISHED, mirroring RenderFrame()'s own
     // early return (nothing past that point ever rendered either).
@@ -769,10 +797,15 @@ void CMixInventory::SyncMixContentModel()
     constexpr float kDescriptionTop = 250.f;         // RenderMixDescriptions()'s fPos_y + 250 block
     constexpr float kCastleSeniorDescriptionTop = 270.f;
     constexpr float kDescriptionRow = 13.f;
+    // Native boxes: 160 centred at x+15, or 200 left-aligned from x+5 -- which runs 15 past the
+    // 190-wide window; the left box is kept inside it (180) so no line overflows the frame.
+    constexpr float kCentredDescriptionWidth = 160.f;
+    constexpr float kLeftDescriptionWidth = 180.f;
     auto describeAt = [&](float blockTop, const wchar_t* text, const Rml::String& color, int row, bool alignLeft)
     {
         const float top = blockTop + static_cast<float>(row) * kDescriptionRow;
-        descriptionLines.push_back({ StringUtils::WideToNarrow(text), color, top, alignLeft });
+        const float fit = TextFitScale(fitProbe, text, alignLeft ? kLeftDescriptionWidth : kCentredDescriptionWidth);
+        descriptionLines.push_back({ StringUtils::WideToNarrow(text), color, top, alignLeft, fit });
     };
     auto describe = [&](const wchar_t* text, const Rml::String& color, int row, bool alignLeft = false)
     {

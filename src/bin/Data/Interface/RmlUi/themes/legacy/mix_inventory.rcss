@@ -24,15 +24,18 @@
 }
 #title.low { top: 18px; } /* mix types without the tax line */
 
+/* Native shrinks the tax line to its 160 box (tax_rate_fit, a transform) rather than wrapping it. */
 .mix-tax-rate {
 	position: absolute;
 	left: 15px;
 	top: 25px;
 	width: 160px;
+	white-space: nowrap;
 	text-align: center;
 	color: #dcdcdc;
 	font-weight: bold;
 	font-size: 1em;
+	transform-origin: center top;
 }
 
 /* Recipe name (two 10px rows, the second kept even when empty), then success rate and required
@@ -77,7 +80,9 @@
 .mix-advice { display: block; margin-top: 15px; }
 
 /* RenderMixDescriptions(): each line at its own native top (d.top), centred in 160px at x=15 or
-   left-aligned from x=5 across 200px, no band. */
+   left-aligned from x=5, no band, shrunk to fit its box like native (d.fit, as a transform: this
+   window's text is laid out at ~8px, where a font-size step is 12%). Native's left box is 200
+   wide and runs past the window; here it stays inside it (180). */
 .mix-descriptions {
 	position: absolute;
 	left: 0;
@@ -92,8 +97,9 @@
 	white-space: nowrap;
 	font-weight: bold;
 	font-size: 1em;
+	transform-origin: center top;
 }
-.mix-description.left { left: 5px; width: 200px; text-align: left; }
+.mix-description.left { left: 5px; width: 180px; text-align: left; transform-origin: left top; }
 
 .mix-socket-prompt {
 	position: absolute;

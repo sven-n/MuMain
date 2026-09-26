@@ -55,6 +55,10 @@ namespace mu::ui::window
             // line lists.
             float top = 0.f;
             bool alignLeft = false;
+            // Native RenderText() shrinks a line to its box (FontScaleForBounds); this is that
+            // factor for description lines, against a box kept inside the window (measured in the
+            // window's own RmlUi font). 1 = fits.
+            float fit = 1.f;
             bool operator==(const MixLine&) const = default;
         };
         struct MixInventoryRmlModel
@@ -71,6 +75,7 @@ namespace mu::ui::window
             // field's source condition/color.
             bool showTaxRate = false;
             Rml::String taxRateText;
+            float taxRateFit = 1.f; // MixLine::fit for the tax line (native 160 box)
 
             bool showRecipe = false;
             Rml::String recipeLine1, recipeLine2;
