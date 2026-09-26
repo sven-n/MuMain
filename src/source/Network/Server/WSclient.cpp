@@ -3106,8 +3106,9 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
 
             // The localized text carries both placeholders, so a language can order the
             // monster and its owner the way its grammar needs, with its own separator.
+            // _TRUNCATE: swprintf_s would abort the MSVC client on a long name.
             wchar_t OwnedName[MAX_MONSTER_NAME + 1]{};
-            mu_swprintf_s(OwnedName, I18N::Game::SummonedMonsterOwner, c->ID, Temp);
+            _snwprintf_s(OwnedName, std::size(OwnedName), _TRUNCATE, I18N::Game::SummonedMonsterOwner, c->ID, Temp);
             wcscpy(c->ID, OwnedName);
 
             CMultiLanguage::ConvertFromUtf8(c->OwnerID, Data2->ID, MAX_USERNAME_SIZE);
