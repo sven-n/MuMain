@@ -178,6 +178,30 @@ positions those objects must be derived from the *same* math as the CSS, not jus
 at the reference resolution" — verify by actually clicking through create/delete/connect-style
 flows post-retrofit at more than one resolution, not just eyeballing a screenshot.
 
+## Reading a live RCSS box back into native hit-test space
+
+`UI::RmlBridge::RefreshLogicalPanelSize()` (`RmlPanelGeometry.h`) is how a native `WindowGeometry`
+hit box follows its theme's own `#panel` instead of a hardcoded constant. **Its result needs no
+scale conversion, and applying one is a bug.** Every `#panel` it reads is sized in plain `px` and
+scaled only at paint time, by `transform: scale(root_scale)` (`SyncRootTransform`); RmlUi's layout
+box ignores a render-time transform, so `GetBox()` already returns reference-space extents. An
+earlier version divided by the active transform, which shrank each hit box by the UI scale — at the
+usual capped 2.0 only the panel's top-left quarter stayed clickable, and every click outside it fell
+through to the world, walking the character (which in the vault's case also closed the window). It
+hit all 17 call sites: the 9 inventory-family windows and the 8 docked-family ones.
+
+The trap is that `px` in an RmlUi document means different things depending on whether the scale
+lives in a `transform` or was pre-multiplied in C++ before being handed to RCSS. `RmlTooltip.cpp`'s
+`#tooltip_panel` read genuinely *is* in screen pixels — that document carries no root transform and
+its C++ pre-multiplies the scale into the width it sets. Don't generalize from one to the other;
+check which of the two a document is before converting anything read out of its boxes.
+
+The same asymmetry applies within a single element tree, which is why
+`RefreshLogicalAnchorPosition()` still has this defect: `GetAbsoluteOffset()` returns
+`root_x + childLocalOffset`, where `root_x` was pre-multiplied by the scale but the child's own
+offset was not, so un-mapping the whole sum through the transform wrongly divides the child half.
+See `tracked-deferrals.md`.
+
 ## Deferred (not part of this policy yet)
 
 - A formal multi-resolution automated visual-regression test matrix — see `tracked-deferrals.md`

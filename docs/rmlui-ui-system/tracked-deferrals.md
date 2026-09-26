@@ -33,6 +33,25 @@ one of the trigger initiatives on the right.
 | ~~All modern-theme `.rcss` files~~ | **Superseded 2026-09-10**: the entire modern-theme token layer was renamed and revalued a second time (cool-steel → blackened-iron/dark-forged-metal, a real design-system consolidation, not just a value refresh — see `modern-theme-visual-direction.md`'s "Second generation" note). Real duplication was also consolidated: `login.rcss`'s own-copy `.btn`/`.btn-ok`/`.checkbox-box` and `login_main.rcss`/`char_sel_main.rcss`'s independent `.btn-icon` copies were deleted in favor of `base.rcss`'s shared versions. New shared primitives added: `.btn-icon`, structured tooltip BEM classes, `.slot`/`.slot--filled`/`.slot--selected`. HUD gauge colors promoted from literal hex to `resource-hp`/`-mp`/`-sd`/`-ag` tokens (layout unchanged — see the next row). | Resolved — no further action, unless the tokens change again. |
 | HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The 2026-09-10 iron-palette migration deliberately retinted `main_frame.rcss`'s existing rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors, interacts with `main_frame_bg.rcss`'s paint-order mechanism and `BottomHudScale()`), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs via real octant geometry, layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated, focused pass scoped just to this, once explicitly prioritized — see `modern-theme-visual-direction.md`'s "Known follow-up" section. |
 
+## Tracked deferral: `RefreshLogicalAnchorPosition()`'s scale conversion
+
+`UI::RmlBridge::RefreshLogicalAnchorPosition()` (`RmlPanelGeometry.h`) reads an anchor element's
+`GetAbsoluteOffset()` and un-maps it through the window's transform to get a native reference-space
+position. That sum is mixed-space: `root_x`/`root_y` were already pre-multiplied by the scale
+(`SyncRootTransform`), while the anchor's own offset inside `#panel` was not, so un-mapping the whole
+sum wrongly divides the child half. `QuestProgress.cpp` wants `m_Pos.x + 95` and gets
+`m_Pos.x + 95/scale`. Same misconception as the `RefreshLogicalPanelSize()` bug that shrank all 17
+native hit boxes (`layout-and-scaling.md`, "Reading a live RCSS box back into native hit-test
+space"), but a cosmetic symptom rather than a dead click: the quest reward-item popup sits pulled
+toward the panel's top-left at any scale above 1.0.
+
+Not fixed alongside the hit-box bug because the correct form needs a different signature — the
+offset relative to `#panel` (`anchorAbs - panelAbs`, both unscaled), which the caller adds to its own
+`m_Pos` — and it visibly moves the popup in all three callers (`MyQuestInfoWindow`,
+`QuestProgress`, `QuestProgressByEtc`), so it wants its own verification pass at more than one
+resolution. The three call sites still fall back to their historical hardcoded offsets, which are
+correct at scale 1.0.
+
 ## Tracked deferral: C++ adapter classes still on the `mu::ui::window::CObject` tier
 
 Both `mu::ui::window::CObject`-tier pilots (`CMuHelperBar`, `CBuffStrip`) were renamed at port time — class

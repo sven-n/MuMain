@@ -21,13 +21,16 @@ namespace UI::Scaling
 // just point it at whichever document/id is that window's own real #panel.
 namespace UI::RmlBridge
 {
-    // Looks up `panelId` in `doc`, reads its live resolved border-box size (RmlUi's own real
-    // screen-pixel space -- confirmed via RmlTooltip.cpp's own #tooltip_panel read), and converts
-    // it into the logical/reference-space units WindowGeometry/MouseX/MouseY use, via whichever
-    // transform is active at the call site (UI::Scaling::GetActiveTransform() -- CManager pushes
-    // the exact same TransformForLayout(GetLayoutMode(), ...) result before UpdateMouseEvent() as
-    // it does before Update(), where these windows compute root_x/root_y with the identical
-    // transform, so the two always agree).
+    // Looks up `panelId` in `doc` and reads its live resolved border-box size, which is already in
+    // the logical/reference-space units WindowGeometry/MouseX/MouseY use: every #panel read here is
+    // sized in plain `px` and scaled only at paint time, by `transform: scale(root_scale)` (see
+    // SyncRootTransform, RmlRootTransform.h). RmlUi's layout box ignores a render-time transform,
+    // so no scale conversion applies -- dividing by the active transform here shrinks the hit box
+    // by that scale, which at the usual capped 2.0 leaves only the panel's top-left quarter
+    // clickable and walks the character on every click outside it. (RmlTooltip.cpp's own
+    // #tooltip_panel read genuinely is in screen pixels, but only because that document carries no
+    // root transform and its C++ pre-multiplies the scale into the width it sets -- not a
+    // precedent for this family.)
     //
     // Leaves `width`/`height` unchanged and returns false if `doc` is null, `panelId` isn't found,
     // the active transform is degenerate, or the element hasn't been laid out yet (zero size --

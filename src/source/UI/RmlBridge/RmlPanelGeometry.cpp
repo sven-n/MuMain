@@ -20,12 +20,12 @@ bool UI::RmlBridge::RefreshLogicalPanelSize(Rml::ElementDocument* doc, const cha
     if (size.x <= 0.0f || size.y <= 0.0f)
         return false;
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
-        return false;
-
-    width = size.x / transform.scaleX;
-    height = size.y / transform.scaleY;
+    // No transform conversion: the box is already in logical/reference units. Every #panel this
+    // reads is sized in plain `px` and scaled at paint time by `transform: scale(root_scale)`
+    // (SyncRootTransform), and RmlUi's layout box does not reflect a render-time transform -- so
+    // size.x/y are exactly the reference-space extents WindowGeometry wants.
+    width = size.x;
+    height = size.y;
     return true;
 }
 
