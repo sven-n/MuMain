@@ -93,7 +93,10 @@
 	left: 30px;
 	font-family: "token(font-body)";
 	font-size: 1em;
-	white-space: nowrap; /* one native line each; the text layer has no width of its own */
+	white-space: nowrap; /* one native line each */
+	/* Cut at the frame's inner edge (x 182, width bound in my_shop.rml): native runs a long line
+	   on under the inventory, which covers it; here nothing covers it. */
+	overflow: hidden;
 }
 .myshop-line-still-opening {
 	left: 0;
