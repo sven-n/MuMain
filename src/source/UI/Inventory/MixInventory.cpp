@@ -27,6 +27,7 @@
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ComputedValues.h>
+#include <algorithm>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementUtilities.h>
 
@@ -39,15 +40,17 @@ namespace
 // (UI::Scaling::FontScaleForBounds). The factor for a line measured in `probe`'s font (a bold
 // 1em element of this window); 1 = fits or no probe. `probeUnitsPerLayoutUnit` converts the
 // probe's measurement to the window's own layout units, in which boxWidth is given (a theme may
-// lay its text out in physical pixels inside a counter-scaled layer).
-float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, float probeUnitsPerLayoutUnit)
+// lay its text out in physical pixels inside a counter-scaled layer). Like native, a line never
+// shrinks below the minimum font size (`minimumFit` of the current one); longer lines overflow.
+float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, float probeUnitsPerLayoutUnit,
+                   float minimumFit)
 {
     if (probe == nullptr || text == nullptr || text[0] == L'\0' || probeUnitsPerLayoutUnit <= 0.f)
         return 1.f;
     const float width =
         static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(text))) /
         probeUnitsPerLayoutUnit;
-    return width <= boxWidth ? 1.f : boxWidth / width;
+    return width <= boxWidth ? 1.f : std::max(boxWidth / width, minimumFit);
 }
 } // namespace
 
@@ -567,6 +570,9 @@ void CMixInventory::SyncMixContentModel()
     float probeUnitsPerLayoutUnit = 1.f;
     if (fitProbe != nullptr && fitProbe->GetComputedValues().has_local_transform())
         probeUnitsPerLayoutUnit = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight).scaleX;
+    const auto layout = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    const float minimumFit = static_cast<float>(UI::Scaling::MinimumFontPointSize(UI::Scaling::FontRole::Normal)) /
+                             static_cast<float>(UI::Scaling::FontPointSize(UI::Scaling::FontRole::Normal, layout));
     auto& model = m_RmlBinder.GetModel();
     auto syncWide = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
     {
@@ -617,7 +623,7 @@ void CMixInventory::SyncMixContentModel()
     {
         constexpr float kTaxRateBoxWidth = 160.f; // native RenderText(..., 160.0f, ...)
         syncWide(&MixInventoryRmlModel::taxRateText, "tax_rate_text", szText);
-        const float fit = TextFitScale(fitProbe, szText, kTaxRateBoxWidth, probeUnitsPerLayoutUnit);
+        const float fit = TextFitScale(fitProbe, szText, kTaxRateBoxWidth, probeUnitsPerLayoutUnit, minimumFit);
         if (model.taxRateFit != fit)
         {
             model.taxRateFit = fit;
@@ -814,7 +820,7 @@ void CMixInventory::SyncMixContentModel()
     {
         const float top = blockTop + static_cast<float>(row) * kDescriptionRow;
         const float fit = TextFitScale(fitProbe, text, alignLeft ? kLeftDescriptionWidth : kCentredDescriptionWidth,
-                                       probeUnitsPerLayoutUnit);
+                                       probeUnitsPerLayoutUnit, minimumFit);
         descriptionLines.push_back({StringUtils::WideToNarrow(text), color, top, alignLeft, fit});
     };
     auto describe = [&](const wchar_t* text, const Rml::String& color, int row, bool alignLeft = false)
