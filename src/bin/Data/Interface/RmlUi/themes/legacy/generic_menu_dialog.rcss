@@ -40,6 +40,10 @@
 	justify-content: flex-start;
 }
 #panel.native-frame .window-shell-content.has-title { top: 0; }
+/* A native box never scrolls: its buttons sit at fixed offsets inside the fixed frame. */
+#panel.native-frame .gmd-button-row { overflow: visible; }
+/* CSystemMenuMsgBox: first button 23 below the top edge. */
+#panel.system-menu.native-frame .window-shell-content { top: 23dp; }
 #panel.native-frame .gmd-button-cell.compact {
 	position: absolute;
 	left: 0;
