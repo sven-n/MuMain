@@ -52,6 +52,14 @@ translation has a glyph with each selectable family. Japanese (`ja`) is the
 known exception: some Japanese kanji forms need Noto Sans JP, and Simplified
 Chinese would need Noto Sans SC.
 
+SDL_ttf places every glyph at the ascent of the font it comes from. Each
+fallback is therefore opened with the ascent of the role font it backs, so its
+glyphs share that font's baseline. The layout was tuned for DejaVu Sans
+(ascent 0.93 em); a selected family with a taller ascent (Noto Sans TC,
+1.16 em) is opened with its ascent limited to that, so its text does not sit
+lower in every text box. The font files stay unchanged; the ascent is rewritten
+while SDL_ttf reads the file.
+
 Missing or corrupt packaged roles abort Release renderer startup. Windows also
 requires private GDI registration of every packaged role; partial registration
 is rolled back.

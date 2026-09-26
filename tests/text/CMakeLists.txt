@@ -17,6 +17,17 @@ target_compile_definitions(sdl_ttf_text_cache_tests PRIVATE
     MU_TEST_FONT_PATH="${CMAKE_SOURCE_DIR}/src/bin/fonts/DejaVuSans.ttf"
 )
 
+mu_add_test(
+    NAME sdl_ttf_font_ascent_tests
+    SOURCES
+        test_sdl_ttf_font_ascent.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Text/SdlTtfFontAscent.cpp
+    LINK_LIBS SDL3_ttf::SDL3_ttf SDL3::SDL3
+)
+target_compile_definitions(sdl_ttf_font_ascent_tests PRIVATE
+    MU_TEST_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
+
 FetchContent_GetProperties(SDL3_ttf SOURCE_DIR SDL3_TTF_SOURCE)
 add_test(
     NAME sdl_ttf_fetchcontent_patch
