@@ -45,9 +45,16 @@ private:
     using RoleSizes = std::array<float, kRoleCount>;
 
     [[nodiscard]] bool Open(std::string_view configuredFamily, const RoleSizes& pointSizes);
-    [[nodiscard]] bool OpenFallbacks(const BundledFont& fallbackFont, RoleFonts& fallbacks);
+    [[nodiscard]] bool OpenFallbacks(const BundledFont& fallbackFont, const char* const (&rolePaths)[kRoleCount],
+                                     RoleFonts& fallbacks);
 
     RoleFonts m_primary{};
     std::array<RoleFonts, std::size(kBundledFallbackFonts)> m_fallbacks{};
 };
+// SDL property of each role font: how many pixels higher its text is drawn so
+// that it sits where DejaVu Sans text would. The layout was tuned for DejaVu
+// Sans; the value is 0 unless the selected family has a taller ascent.
+inline constexpr const char* kLayoutLiftProperty = "MuMain.SDL_ttf.font.layout_lift";
+
+[[nodiscard]] int LayoutLift(TTF_Font* font);
 } // namespace Render::Text

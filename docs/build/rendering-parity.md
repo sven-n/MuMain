@@ -32,7 +32,7 @@ Release builds resolve every text role from files beside the executable:
 | Bold | Selected family bold file |
 | Big bold | Selected family bold file |
 | Fixed | `fonts/Cousine-Regular.ttf` |
-| Missing glyph fallbacks | `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf`, `fonts/DejaVuSans*.ttf` |
+| Missing glyph fallbacks | `fonts/DejaVuSans*.ttf`, `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf` |
 
 Selectable families are DejaVu Sans, Liberation Sans and Noto Sans TC. Empty
 or unknown configuration selects DejaVu Sans. SDL_ttf, Windows GDI, and the
@@ -40,25 +40,22 @@ non-Windows GDI shim use the same registry.
 
 SDL_ttf attaches three fallbacks to every role at startup, tried in this order:
 
-1. Noto Sans TC: Traditional Chinese (`zh-TW`), kana and CJK punctuation.
-   Bold roles use its bold file.
-2. Nanum Gothic: Hangul. Bold roles use SDL_ttf's synthetic bold style.
-3. DejaVu Sans: Latin, Greek and Cyrillic letters the selected family or
+1. DejaVu Sans: Latin, Greek and Cyrillic letters the selected family or
    Cousine lack.
+2. Noto Sans TC: Traditional Chinese (`zh-TW`), kana and CJK punctuation.
+   Bold roles use its bold file.
+3. Nanum Gothic: Hangul. Bold roles use SDL_ttf's synthetic bold style.
 
-This keeps the selected family for the text it covers and draws the rest
-instead of missing-glyph boxes. A test checks that every character of every
-translation has a glyph with each selectable family. Japanese (`ja`) is the
-known exception: some Japanese kanji forms need Noto Sans JP, and Simplified
-Chinese would need Noto Sans SC.
+A fallback that is the role's own font file is skipped. This keeps the
+selected family for the text it covers and draws the rest instead of
+missing-glyph boxes. A test checks that every character of every translation
+has a glyph with each selectable family. Japanese (`ja`) is the known
+exception: some Japanese kanji forms need Noto Sans JP, and Simplified Chinese
+would need Noto Sans SC.
 
-SDL_ttf places every glyph at the ascent of the font it comes from. Each
-fallback is therefore opened with the ascent of the role font it backs, so its
-glyphs share that font's baseline. The layout was tuned for DejaVu Sans
-(ascent 0.93 em); a selected family with a taller ascent (Noto Sans TC,
-1.16 em) is opened with its ascent limited to that, so its text does not sit
-lower in every text box. The font files stay unchanged; the ascent is rewritten
-while SDL_ttf reads the file.
+Characters from a fallback font sit on the same baseline as the rest of the
+line. With Noto Sans TC as the UI font, text is drawn at the height DejaVu
+Sans text would have, so it does not sit lower in its boxes.
 
 Missing or corrupt packaged roles abort Release renderer startup. Windows also
 requires private GDI registration of every packaged role; partial registration
@@ -81,6 +78,11 @@ update's missing glyphs into one copy pass and command submission. It exposes
 the upload count through the custom text property
 `MuMain.SDL_ttf.gpu_text.uploaded_glyphs`. The client consumes that property
 once and reports it as `GlyphUploads`.
+
+The patch `cmake/patches/sdl_ttf-3.2.2-fallback-baseline.patch` places glyphs
+from a fallback font at the ascent of the font they back instead of their own,
+so they share its baseline. Without it, Han characters from Noto Sans TC
+(ascent 1.16 em) sat 3 to 4 px below DejaVu Sans text (0.93 em).
 
 ## Capture procedure
 

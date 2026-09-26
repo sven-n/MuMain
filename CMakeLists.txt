@@ -203,6 +203,11 @@ FetchContent_Declare(SDL3_ttf
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-batch-glyph-uploads.patch"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
+    COMMAND
+        "${CMAKE_COMMAND}"
+        "-DSOURCE_DIR=<SOURCE_DIR>"
+        "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-fallback-baseline.patch"
+        -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
 )
 
 add_subdirectory("src")

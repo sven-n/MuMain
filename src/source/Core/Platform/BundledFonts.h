@@ -34,15 +34,18 @@ inline constexpr std::string_view kDefaultBundledFontFamily = "DejaVu Sans";
 inline constexpr BundledFont kBundledFixedFont{
     "Cousine", "fonts/Cousine-Regular.ttf", "fonts/Cousine-Regular.ttf"};
 // Missing-glyph fallbacks behind every SDL_ttf role, in the order SDL_ttf tries
-// them. Noto Sans TC (Han, kana, CJK punctuation) comes first; it has no Hangul
-// syllables, so Korean text still comes from Nanum Gothic. DejaVu Sans comes last
-// for the Latin, Greek and Cyrillic letters the other families lack (Polish and
-// Ukrainian letters under Noto Sans TC, Liberation Sans and Cousine).
+// them; it takes a glyph from the first one that has it.
+// - DejaVu Sans: the Latin, Greek and Cyrillic letters Liberation Sans, Noto
+//   Sans TC and Cousine lack. It has no CJK, so it takes nothing from the others.
+// - Noto Sans TC: Han, kana and CJK punctuation. It comes before Nanum Gothic so
+//   that Chinese text keeps its centered punctuation (，。「」) instead of the
+//   Korean forms. It also has the Hangul jamo (ㅋ), but no Hangul syllables.
+// - Nanum Gothic: Hangul syllables.
 // ponytail: one Hangul face; SDL_ttf synthesizes bold, bundle NanumGothic-Bold if metric parity requires it.
 inline constexpr BundledFont kBundledFallbackFonts[] = {
+    kDejaVuSansFont,
     kNotoSansTcFont,
     {"Nanum Gothic", "fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Regular.ttf"},
-    kDejaVuSansFont,
 };
 
 [[nodiscard]] inline std::filesystem::path ResolveBundledFontPath(const std::filesystem::path& relativePath)

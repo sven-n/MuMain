@@ -1,12 +1,11 @@
 #include "SdlTtfFontSet.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
-#include "Render/Text/SdlTtfFontAscent.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include <cmath>
+#include <algorithm>
 #include <filesystem>
 #include <string>
 
@@ -19,11 +18,6 @@ inline constexpr bool kAllowSystemFontFallback = false;
 #else
 inline constexpr bool kAllowSystemFontFallback = true;
 #endif
-
-// The UI layout was tuned for DejaVu Sans, whose ascent is 1901/2048 em. A
-// selected family with a taller ascent (Noto Sans TC: 1.16 em) is opened with
-// its ascent limited to this, or its text would sit low in every text box.
-inline constexpr float kLayoutAscentEm = 1901.0f / 2048.0f;
 
 constexpr std::size_t RoleIndex(SdlTtfFontRole role)
 {
@@ -39,11 +33,6 @@ constexpr std::string_view RoleName(std::size_t role)
 constexpr bool IsBoldRole(std::size_t role)
 {
     return role == RoleIndex(SdlTtfFontRole::Bold) || role == RoleIndex(SdlTtfFontRole::Big);
-}
-
-[[nodiscard]] int LayoutAscentPixels(float pointSize)
-{
-    return static_cast<int>(std::ceil(kLayoutAscentEm * pointSize));
 }
 
 [[nodiscard]] std::string BundledFontPath(const char* relativePath)
@@ -114,7 +103,7 @@ void CloseTtfFont(TTF_Font*& font)
                                         float pointSize)
 {
     const std::string packagedPath = BundledFontPath(relativePath);
-    if (TTF_Font* font = OpenFontWithAscentAtMost(packagedPath.c_str(), pointSize, LayoutAscentPixels(pointSize)))
+    if (TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize))
     {
         mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role, packagedPath);
         return font;
@@ -125,14 +114,15 @@ void CloseTtfFont(TTF_Font*& font)
     return OpenDeveloperFont(family, role, pointSize);
 }
 
-// Opens a fallback with the ascent of the font it backs, so its glyphs share
-// that font's baseline (see SdlTtfFontAscent.h).
+[[nodiscard]] const char* FallbackPath(const BundledFont& fallbackFont, std::size_t role)
+{
+    return IsBoldRole(role) ? fallbackFont.bold : fallbackFont.regular;
+}
+
 [[nodiscard]] TTF_Font* OpenTtfFallbackRole(const BundledFont& fallbackFont, std::size_t role, TTF_Font* primary)
 {
-    const bool bold = IsBoldRole(role);
-    const std::string packagedPath = BundledFontPath(bold ? fallbackFont.bold : fallbackFont.regular);
-    const int ascentPx = TTF_GetFontAscent(primary);
-    TTF_Font* font = OpenFontWithAscent(packagedPath.c_str(), TTF_GetFontSize(primary), ascentPx);
+    const std::string packagedPath = BundledFontPath(FallbackPath(fallbackFont, role));
+    TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), TTF_GetFontSize(primary));
     if (!font)
     {
         mu::log::Get("render")->error("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}' failed: {}",
@@ -141,16 +131,31 @@ void CloseTtfFont(TTF_Font*& font)
     }
 
     // A family without a bold file uses SDL_ttf's synthetic bold.
-    if (bold && std::string_view(fallbackFont.bold) == fallbackFont.regular)
+    if (IsBoldRole(role) && std::string_view(fallbackFont.bold) == fallbackFont.regular)
         TTF_SetFontStyle(font, TTF_STYLE_BOLD);
-    if (TTF_GetFontAscent(font) != ascentPx)
-    {
-        mu::log::Get("render")->warn("SDL_ttf -- fallback family='{}' role='{}' ascent {} does not match {}",
-                                     fallbackFont.family, RoleName(role), TTF_GetFontAscent(font), ascentPx);
-    }
     mu::log::Get("render")->info("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}'", fallbackFont.family,
                                  RoleName(role), packagedPath);
     return font;
+}
+
+// The UI layout was tuned for DejaVu Sans. A role font with a taller ascent
+// (Noto Sans TC: 1.16 em against 0.93 em) would sit low in every text box, so
+// its text is drawn higher by the difference.
+[[nodiscard]] int MeasureLayoutLift(TTF_Font* font, const char* relativePath, std::size_t role)
+{
+    const char* referencePath = FallbackPath(kDejaVuSansFont, role);
+    if (std::string_view(relativePath) == referencePath)
+        return 0;
+
+    TTF_Font* reference = TTF_OpenFont(BundledFontPath(referencePath).c_str(), TTF_GetFontSize(font));
+    if (!reference)
+    {
+        mu::log::Get("render")->warn("SDL_ttf -- layout reference '{}' failed: {}", referencePath, SDL_GetError());
+        return 0;
+    }
+    const int lift = std::max(0, TTF_GetFontAscent(font) - TTF_GetFontAscent(reference));
+    TTF_CloseFont(reference);
+    return lift;
 }
 
 [[nodiscard]] bool AttachTtfFallback(TTF_Font* font, TTF_Font* fallback, std::string_view role)
@@ -207,25 +212,40 @@ bool SdlTtfFontSet::Open(std::string_view configuredFamily, const RoleSizes& poi
         m_primary[role] = OpenTtfFontRole(familyName, RoleName(role), rolePaths[role], pointSizes[role]);
         if (!m_primary[role])
             return false;
+
+        const int lift = MeasureLayoutLift(m_primary[role], rolePaths[role], role);
+        SDL_SetNumberProperty(TTF_GetFontProperties(m_primary[role]), kLayoutLiftProperty, lift);
     }
 
     // SDL_ttf tries the fallbacks in the order they were attached.
     for (std::size_t i = 0; i < std::size(kBundledFallbackFonts); ++i)
     {
-        if (!OpenFallbacks(kBundledFallbackFonts[i], m_fallbacks[i]))
+        if (!OpenFallbacks(kBundledFallbackFonts[i], rolePaths, m_fallbacks[i]))
             return false;
     }
     return true;
 }
 
-bool SdlTtfFontSet::OpenFallbacks(const BundledFont& fallbackFont, RoleFonts& fallbacks)
+bool SdlTtfFontSet::OpenFallbacks(const BundledFont& fallbackFont, const char* const (&rolePaths)[kRoleCount],
+                                  RoleFonts& fallbacks)
 {
     for (std::size_t role = 0; role < kRoleCount; ++role)
     {
+        // The role font itself can never supply a glyph it lacks.
+        if (std::string_view(FallbackPath(fallbackFont, role)) == rolePaths[role])
+            continue;
+
         fallbacks[role] = OpenTtfFallbackRole(fallbackFont, role, m_primary[role]);
         if (!fallbacks[role] || !AttachTtfFallback(m_primary[role], fallbacks[role], RoleName(role)))
             return false;
     }
     return true;
+}
+
+int LayoutLift(TTF_Font* font)
+{
+    if (font == nullptr)
+        return 0;
+    return static_cast<int>(SDL_GetNumberProperty(TTF_GetFontProperties(font), kLayoutLiftProperty, 0));
 }
 } // namespace Render::Text
