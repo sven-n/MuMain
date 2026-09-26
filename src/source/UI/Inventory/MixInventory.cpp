@@ -26,6 +26,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementUtilities.h>
 
@@ -36,12 +37,15 @@ namespace
 {
     // Native RenderText(x, y, text, boxWidth, ...) scales a line down to fit boxWidth
     // (UI::Scaling::FontScaleForBounds). The factor for a line measured in `probe`'s font (a bold
-    // 1em element of this window, in the window's own layout units); 1 = fits or no probe.
-    float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth)
+    // 1em element of this window); 1 = fits or no probe. `probeUnitsPerLayoutUnit` converts the
+    // probe's measurement to the window's own layout units, in which boxWidth is given (a theme may
+    // lay its text out in physical pixels inside a counter-scaled layer).
+    float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, float probeUnitsPerLayoutUnit)
     {
-        if (probe == nullptr || text == nullptr || text[0] == L'\0')
+        if (probe == nullptr || text == nullptr || text[0] == L'\0' || probeUnitsPerLayoutUnit <= 0.f)
             return 1.f;
-        const float width = static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(text)));
+        const float width = static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(text)))
+            / probeUnitsPerLayoutUnit;
         return width <= boxWidth ? 1.f : boxWidth / width;
     }
 }
@@ -556,8 +560,12 @@ void CMixInventory::SyncMixContentModel()
     if (!m_pRmlDoc)
         return;
 
-    // The bold title measures lines in the window's own text font (the theme sizes it 1em).
+    // The bold title measures lines in the window's own text font (the theme sizes it 1em). A
+    // counter-scaled title (legacy .sharp-text) measures in physical pixels.
     Rml::Element* fitProbe = m_pRmlDoc->GetElementById("title");
+    float probeUnitsPerLayoutUnit = 1.f;
+    if (fitProbe != nullptr && fitProbe->GetComputedValues().has_local_transform())
+        probeUnitsPerLayoutUnit = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight).scaleX;
     auto& model = m_RmlBinder.GetModel();
     auto syncWide = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
     {
@@ -608,7 +616,7 @@ void CMixInventory::SyncMixContentModel()
     {
         constexpr float kTaxRateBoxWidth = 160.f; // native RenderText(..., 160.0f, ...)
         syncWide(&MixInventoryRmlModel::taxRateText, "tax_rate_text", szText);
-        const float fit = TextFitScale(fitProbe, szText, kTaxRateBoxWidth);
+        const float fit = TextFitScale(fitProbe, szText, kTaxRateBoxWidth, probeUnitsPerLayoutUnit);
         if (model.taxRateFit != fit)
         {
             model.taxRateFit = fit;
@@ -804,7 +812,8 @@ void CMixInventory::SyncMixContentModel()
     auto describeAt = [&](float blockTop, const wchar_t* text, const Rml::String& color, int row, bool alignLeft)
     {
         const float top = blockTop + static_cast<float>(row) * kDescriptionRow;
-        const float fit = TextFitScale(fitProbe, text, alignLeft ? kLeftDescriptionWidth : kCentredDescriptionWidth);
+        const float fit = TextFitScale(fitProbe, text, alignLeft ? kLeftDescriptionWidth : kCentredDescriptionWidth,
+            probeUnitsPerLayoutUnit);
         descriptionLines.push_back({ StringUtils::WideToNarrow(text), color, top, alignLeft, fit });
     };
     auto describe = [&](const wchar_t* text, const Rml::String& color, int row, bool alignLeft = false)

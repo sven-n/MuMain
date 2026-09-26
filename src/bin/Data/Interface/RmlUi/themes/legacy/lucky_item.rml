@@ -15,13 +15,17 @@
 	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
-		<span id="title">{{title}}</span>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		     data-style-width="(root_width * root_scale) + 'px'">{{title}}</span>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-event-click="lucky_item_mix_click"></div>
-		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-mix"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{mix_tooltip}}</span>
 
 		<!-- Former Render_Frame()'s m_sText[]/AddText() result/description block. -->
-		<div id="text_lines">
+		<div class="sharp-text" id="text_lines"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="((root_width - 20) * root_scale) + 'px'" data-style-line-height="(11 * root_scale) + 'px'">
 			<div class="lucky-line" data-for="t : text_lines" data-style-color="t.color"
 			     data-style-text-align="t.align">{{t.text}}</div>
 		</div>

@@ -35,8 +35,11 @@
 	color: #dcdcdc;
 	font-weight: bold;
 	font-size: 1em;
-	transform-origin: center top;
 }
+/* The tax line and the descriptions are text layers (.sharp-text, mix_inventory.rml); inside them
+   .mix-fit shrinks the line to its box around the box's centre (left edge when left-aligned). */
+.mix-fit { display: block; transform-origin: center top; }
+.mix-description.left .mix-fit { transform-origin: left top; }
 
 /* Recipe name (two 10px rows, the second kept even when empty), then success rate and required
    zen (20px each, when shown) -- left-aligned at native's fPos_x, over a translucent band. */
@@ -46,15 +49,14 @@
 	top: 49px;
 	width: 160px;
 }
+/* Row heights (10px, 20px wide) are bound in mix_inventory.rml: .mix-head is a text layer. */
 .mix-row {
 	display: block;
-	height: 10px;
 	white-space: nowrap;
 	font-weight: bold;
 	font-size: 1em;
 	color: #d2e6ff;
 }
-.mix-row.mix-row-wide { height: 20px; }
 .mix-row.hidden { display: none; }
 .mix-text { background-color: rgba(40, 40, 40, 128); }
 
@@ -69,7 +71,7 @@
 .mix-list.hidden, .mix-head.hidden, .mix-descriptions.hidden { display: none; }
 .mix-list-line {
 	display: block;
-	line-height: 15px;
+	line-height: inherit; /* 15px, bound on the .mix-list text layer */
 	font-weight: bold;
 	font-size: 1em;
 	color: #dcdcdc;
@@ -77,11 +79,11 @@
 .mix-list-line.hidden { display: none; }
 /* Native cuts only the prediction and source lines (CutStr); status and advice run on. */
 .mix-unwrapped { white-space: nowrap; }
-.mix-advice { display: block; margin-top: 15px; }
+.mix-advice { display: block; } /* margin-top 15px, bound (text layer) */
 
 /* RenderMixDescriptions(): each line at its own native top (d.top), centred in 160px at x=15 or
-   left-aligned from x=5, no band, shrunk to fit its box like native (d.fit, as a transform: this
-   window's text is laid out at ~8px, where a font-size step is 12%). Native's left box is 200
+   left-aligned from x=5, no band, shrunk to fit its box like native (d.fit, as a transform on
+   .mix-fit: a continuous scale, where font-size steps would be coarse). Native's left box is 200
    wide and runs past the window; here it stays inside it (180). */
 .mix-descriptions {
 	position: absolute;
@@ -97,9 +99,8 @@
 	white-space: nowrap;
 	font-weight: bold;
 	font-size: 1em;
-	transform-origin: center top;
 }
-.mix-description.left { left: 5px; width: 180px; text-align: left; transform-origin: left top; }
+.mix-description.left { left: 5px; width: 180px; text-align: left; }
 
 .mix-socket-prompt {
 	position: absolute;
