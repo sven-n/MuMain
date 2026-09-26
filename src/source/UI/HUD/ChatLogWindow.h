@@ -270,6 +270,16 @@ namespace mu::ui::window
         void AddFilterWord(const type_string& strWord);
     };
 
+    // Top-left system/error overlay. Reuses ChatLogLineEntry (its `hasId` is simply never set --
+    // these lines have no sender), so both log windows share one line shape.
+    struct SystemLogRmlModel
+    {
+        // Native applies the user's transparency setting to every line's own background quad, so
+        // this is a per-line colour, not a panel fill.
+        Rml::String backColor = "rgba(0,0,0,153)";
+        Rml::Vector<ChatLogLineEntry> lines;
+    };
+
     class CSystemLogWindow : public CObject
     {
     private:
@@ -302,12 +312,20 @@ namespace mu::ui::window
 
         void Init();
 
-        bool RenderMessages();
+        void BuildRmlUi();
+        void SyncRmlModel();
+        void RebuildLineModel();
+
+        RmlModelBinder<SystemLogRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        bool m_bLinesDirty = true;
 
         void RemoveFrontLine();
         int GetCurrentRenderEndLine() const;
 
     public:
+        void ReloadRmlTheme();
+
         CSystemLogWindow();
         ~CSystemLogWindow() override;
 

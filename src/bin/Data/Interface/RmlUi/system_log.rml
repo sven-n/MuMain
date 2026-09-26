@@ -1,0 +1,20 @@
+<rml>
+<head>
+	<title>System Log</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="system_log.rcss"/>
+</head>
+<body data-model="system_log">
+	<!-- Passive top-left overlay: at most 6 lines, no chrome, no scrolling and no interaction at
+	     all (native's UpdateMouseEvent/UpdateKeyEvent are stubs). Nothing here opts into
+	     pointer-events, so world clicks pass straight through -- see system_log.rcss. -->
+	<div id="panel">
+		<!-- Per-line background rather than one panel fill: native called RenderText() with the
+		     alpha set per message and no box width, so each line gets its own quad sized to its
+		     own text. back_color carries the user's transparency setting. -->
+		<div data-for="line : lines"
+		     data-attr-class="'syslog-line syslog-line--' + line.kind"
+		     data-style-background-color="back_color">{{line.text}}</div>
+	</div>
+</body>
+</rml>

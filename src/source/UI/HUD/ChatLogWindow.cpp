@@ -1086,59 +1086,6 @@ void mu::ui::window::CSystemLogWindow::Init()
 }
 
 
-bool mu::ui::window::CSystemLogWindow::RenderMessages()
-{
-    if (!m_bShowMessages)
-    {
-        return true;
-    }
-
-    int fRenderPosX = m_WndPos.x + FONT_LEADING;
-    int fRenderPosY = m_WndPos.y - m_WndSize.cy;
-
-    if (m_vecAllMsgs.empty())
-    {
-        return true;
-    }
-
-    int iRenderStartLine = 0;
-    if (GetCurrentRenderEndLine() >= m_nShowingLines)
-    {
-        iRenderStartLine = GetCurrentRenderEndLine() - m_nShowingLines + 1;
-    }
-    else
-    {
-        fRenderPosY += FONT_LEADING;
-    }
-
-    g_pRenderText->SetFont(g_hFont);
-    const int rowHeight = std::max(1, static_cast<int>(g_pRenderText->MeasureText(L"Q", 1).cy * 1.2f));
-
-    EnableAlphaTest();
-    for (int i = iRenderStartLine; i <= GetCurrentRenderEndLine(); i++)
-    {
-        if (i < 0 && i >= static_cast<int>(m_vecAllMsgs.size())) break;
-
-        auto const message = m_vecAllMsgs[i];
-        const auto backgroundAlpha = static_cast<BYTE>(255.f * m_fBackAlpha);
-        g_pRenderText->SetBgColor(0, 0, 0, backgroundAlpha);
-        if (message->GetType() == TYPE_SYSTEM_MESSAGE)
-        {
-            g_pRenderText->SetTextColor(100, 150, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(255, 30, 0, 255);
-        }
-
-        g_pRenderText->RenderText(fRenderPosX, fRenderPosY + rowHeight * i, message->GetText().c_str());
-    }
-
-    DisableAlphaBlend();
-
-    return true;
-}
-
 bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     Release();
@@ -1155,6 +1102,7 @@ bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CSystemLogWindow::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
     ClearAll();
 
     if (m_pNewUIMng)
@@ -1174,6 +1122,7 @@ void mu::ui::window::CSystemLogWindow::SetPosition(int x, int y)
 
 void mu::ui::window::CSystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)
 {
+    m_bLinesDirty = true;
     if (strText.empty())
     {
         return;
@@ -1205,6 +1154,7 @@ void mu::ui::window::CSystemLogWindow::AddText(const type_string& strText, MESSA
 
 void mu::ui::window::CSystemLogWindow::RemoveFrontLine()
 {
+    m_bLinesDirty = true;
     auto vi = m_vecAllMsgs.begin();
     if (vi != m_vecAllMsgs.end())
     {
@@ -1230,11 +1180,105 @@ bool mu::ui::window::CSystemLogWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CSystemLogWindow::Update()
 {
+    BuildRmlUi();
+    SyncRmlModel();
+
     return true;
 }
+
 bool mu::ui::window::CSystemLogWindow::Render()
 {
-    return RenderMessages();
+    // RmlUi's own document draws every line now; kept because CObject requires the override.
+    return true;
+}
+
+void mu::ui::window::CSystemLogWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "system_log",
+        [this](Rml::DataModelConstructor& c, SystemLogRmlModel& model)
+        {
+            // Re-registered in full on every call, including from ReloadRmlTheme() -- same reason
+            // CCharMakeWin::BuildRmlUi() documents. Registering ChatLogLineEntry here as well as
+            // in the chat log's own model is fine: each RmlModelBinder owns its own
+            // DataTypeRegister.
+            auto line = c.RegisterStruct<ChatLogLineEntry>();
+            line.RegisterMember("text", &ChatLogLineEntry::text);
+            line.RegisterMember("kind", &ChatLogLineEntry::kind);
+            line.RegisterMember("has_id", &ChatLogLineEntry::hasId);
+            c.RegisterArray<Rml::Vector<ChatLogLineEntry>>();
+
+            c.Bind("lines", &model.lines);
+            c.Bind("back_color", &model.backColor);
+        });
+
+    if (modelCreated)
+    {
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                     "Data/Interface/RmlUi/system_log.rml");
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
+}
+
+void mu::ui::window::CSystemLogWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    m_bLinesDirty = true;
+}
+
+void mu::ui::window::CSystemLogWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    // m_bShowMessages is the input box's own "system messages" toggle; IsVisible() is the window's.
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowMessages);
+
+    SystemLogRmlModel& model = m_RmlBinder.GetModel();
+
+    char backColor[48] = { 0, };
+    const int alpha = static_cast<int>(std::clamp(m_fBackAlpha, 0.0f, 1.0f) * 255.0f);
+    snprintf(backColor, sizeof(backColor), "rgba(0,0,0,%d)", alpha);
+    if (model.backColor != backColor)
+    {
+        model.backColor = backColor;
+        m_RmlBinder.MarkDirty("back_color");
+    }
+
+    if (m_bLinesDirty)
+    {
+        m_bLinesDirty = false;
+        RebuildLineModel();
+        m_RmlBinder.MarkDirty("lines");
+    }
+}
+
+void mu::ui::window::CSystemLogWindow::RebuildLineModel()
+{
+    SystemLogRmlModel& model = m_RmlBinder.GetModel();
+    model.lines.clear();
+    model.lines.reserve(m_vecAllMsgs.size());
+
+    for (const CMessageText* pMsgText : m_vecAllMsgs)
+    {
+        if (pMsgText == nullptr)
+            continue;
+
+        ChatLogLineEntry entry;
+        // Native's own two-way split: system messages blue, EVERYTHING else the error red -- not a
+        // per-type mapping like the chat log's.
+        entry.kind = (pMsgText->GetType() == TYPE_SYSTEM_MESSAGE) ? "system" : "error";
+        entry.text = StringUtils::WideToNarrow(pMsgText->GetText().c_str());
+        model.lines.push_back(std::move(entry));
+    }
 }
 
 float mu::ui::window::CSystemLogWindow::GetLayerDepth()
@@ -1249,6 +1293,7 @@ float mu::ui::window::CSystemLogWindow::GetKeyEventOrder()
 
 void mu::ui::window::CSystemLogWindow::ClearAll()
 {
+    m_bLinesDirty = true;
     auto vi_msg = m_vecAllMsgs.begin();
     for (; vi_msg != m_vecAllMsgs.end(); vi_msg++)
         delete (*vi_msg);

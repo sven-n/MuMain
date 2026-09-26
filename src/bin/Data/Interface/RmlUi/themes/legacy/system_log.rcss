@@ -1,0 +1,43 @@
+/* Legacy theme for CSystemLogWindow -- the top-left system/error message overlay, distinct from
+   CChatLogWindow's own bottom-left panel despite sharing a source file.
+
+   Geometry is native's, and it is entirely static: Create() places it at (0, 80) and nothing ever
+   calls SetPosition(), while m_WndSize.cy is left at 0 and never recomputed. So the first line's
+   origin is simply m_WndPos + FONT_LEADING on both axes -- (4, 84) -- and the block grows
+   downward, the opposite of the chat log, which grows up from its bottom edge. */
+
+#panel {
+	position: absolute;
+	left: 4dp;
+	top: 84dp;
+	/* CLIENT_WIDTH: WND_WIDTH(281) - WND_LEFT_RIGHT_EDGE(4) * 2. */
+	width: 273dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+
+	/* Nothing in this window is interactive, so it must never claim the cursor: any
+	   pointer-events:auto element under the pointer makes Core::Input::IsMouseOverUI() true and
+	   blocks click-to-move, even without a click. Inherited from base.rcss's body reset; stated
+	   here because this overlay sits over open world where walking matters. */
+	pointer-events: none;
+
+	/* Lines hug their own text: native passed no box width to RenderText(), so the renderer fell
+	   back to the measured width for each line's background quad. Flex defaults to
+	   align-items:stretch, which would make every line a full-width bar instead. */
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+/* line-height is deliberately not set: RCSS already defaults to 1.2 relative to font-size, which
+   is exactly native's own `MeasureText(L"Q").cy * 1.2` row pitch. */
+.syslog-line {
+	display: block;
+	white-space: nowrap;
+	padding: 0 2dp;
+}
+
+/* Native's two colours: system messages blue, everything else the error red. The shared black
+   background comes from C++ (the user's transparency setting) via data-style-background-color. */
+.syslog-line--system { color: rgb(100, 150, 255); }
+.syslog-line--error  { color: rgb(255, 30, 0); }

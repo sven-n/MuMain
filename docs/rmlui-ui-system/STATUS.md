@@ -158,8 +158,21 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 - **`COptionWindow`** — done, both themes, verified live against a real server; grew into a 6-tab
   settings window. Full history in `migration-ledger.md`'s own row rather than repeated here.
 
-- **`CChatLogWindow`** — **done, both themes (2026-09-27)**. `CSystemLogWindow`, which shares its
-  file, and `CChatInputBox`, its companion, are **not** ported — see `migration-ledger.md`.
+- **`CChatLogWindow`** and **`CSystemLogWindow`** — **done, both themes (2026-09-27)**.
+  `CChatInputBox`, their companion, is **not** ported and stays fully native — it is the largest
+  remaining `CUITextInputBox` consumer and the reason that class cannot retire yet
+  (`migration-ledger.md`).
+
+  `CSystemLogWindow` was deliberately ported second, and the point of doing it that way is that it
+  is *not* a smaller copy of its file-mate: it grows downward from a fully static origin, has two
+  colours rather than nine, needs no scrolling or interaction at all (so the whole panel is
+  `pointer-events: none`), and takes its row pitch from the font — which RCSS's own `line-height`
+  default of `1.2` already reproduces, so the faithful port sets nothing. Copying the chat log's
+  shape onto it would have been wrong in all four respects. Both share `ChatLogLineEntry`; each
+  `RmlModelBinder` owns its own `DataTypeRegister`, so registering that struct in two models is
+  safe.
+
+  The rest of this entry is about `CChatLogWindow`.
 
   The decision worth recording is the scroll model. Native kept a line *window* (`m_nShowingLines`
   plus `m_iCurrentRenderEndLine`) and drew only those lines; RmlUi scrolls DOM content. Going DOM

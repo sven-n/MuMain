@@ -1,0 +1,35 @@
+/* Modern theme for CSystemLogWindow. Geometry, the click-through rule and the text-width line
+   backgrounds are identical to legacy's and traced to native there -- see legacy/system_log.rcss
+   rather than repeating the derivation. Only the palette differs. */
+
+#panel {
+	position: absolute;
+	left: 4dp;
+	top: 84dp;
+	width: 273dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	pointer-events: none;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.syslog-line {
+	display: block;
+	white-space: nowrap;
+	padding: 0 4dp;
+	border-left: 2dp transparent;
+	border-radius: token(radius-sm)px;
+}
+
+/* Same two semantic states as legacy, restated in this theme's language: a left-edge accent plus
+   a softened text colour, matching how chat_log.rcss distinguishes its own message types. */
+.syslog-line--system {
+	border-left-color: rgb(100, 150, 255);
+	color: rgb(150, 185, 255);
+}
+.syslog-line--error {
+	border-left-color: rgb(255, 60, 40);
+	color: rgb(255, 120, 100);
+}
