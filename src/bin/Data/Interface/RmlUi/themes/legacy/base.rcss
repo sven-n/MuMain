@@ -158,6 +158,16 @@ body {
 	background-color: token(text-selected);
 }
 
+/* Text drawn sharp inside a panel scaled by transform: scale(root_scale): a .sharp-text layer is
+   laid out in physical pixels (font-size text_px; its own width, height and line height multiplied
+   by root_scale -- all bound in the window's RML) and scaled back by 1 / root_scale around its
+   top-left corner, so its glyphs are rasterised at the size they are shown instead of a small
+   raster stretched by the panel's scale. Its position stays in the panel's units; lengths inside
+   it are physical. RmlUi rasterises text at the computed font-size and ignores transforms. */
+.sharp-text { transform-origin: left top; }
+/* A layer anchored by its right edge (right: N, auto width) scales back around that edge. */
+.sharp-text.sharp-right { transform-origin: right top; }
+
 .hidden {
 	display: none;
 }

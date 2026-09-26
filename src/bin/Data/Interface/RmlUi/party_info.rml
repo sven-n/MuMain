@@ -16,10 +16,13 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title">{{window_title}}</span>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(72 * root_scale) + 'px'">{{window_title}}</span>
 
-		<div class="party-empty-msg" data-class-hidden="has_party">
-			<span data-for="line : empty_state_lines">{{line.text}}</span>
+		<div class="sharp-text party-empty-msg" data-class-hidden="has_party"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+			<span data-for="line : empty_state_lines"
+			      data-style-margin-top="it_index == 3 ? (5 * root_scale) + 'px' : '0px'">{{line.text}}</span>
 		</div>
 
 		<div class="party-list" data-class-hidden="!has_party">
@@ -32,21 +35,26 @@
 				<div class="gbox-title-fill"></div>
 				<div class="gbox-content-fill"></div>
 
-				<span class="party-name" data-style-color="m.name_color">{{m.name}}</span>
+				<span class="sharp-text party-name" data-style-color="m.name_color"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{m.name}}</span>
 				<div class="party-flag" data-class-hidden="!m.is_leader"></div>
-				<span class="party-map">{{m.map_text}}</span>
-				<span class="party-coord">{{m.coord_text}}</span>
+				<span class="sharp-text party-map"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{m.map_text}}</span>
+				<span class="sharp-text party-coord"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(60 * root_scale) + 'px'">{{m.coord_text}}</span>
 				<div class="party-hp-bar">
 					<div class="party-hp-fill" data-style-width="m.hp_percent + '%'"></div>
 				</div>
-				<span class="party-hp-text">{{m.hp_text}}</span>
+				<span class="sharp-text party-hp-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{m.hp_text}}</span>
 				<div class="party-kick-btn" data-class-hidden="!m.show_kick"
 				     data-event-click="party_kick_member(m.index)"></div>
 			</div>
 		</div>
 
 		<div id="btn_exit" data-event-click="party_click_exit"></div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

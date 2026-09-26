@@ -15,12 +15,7 @@
 @spritesheet nd-line-sheet  { src: "../../../newui_myquest_Line.tga"; nd-line-img: 0px 0px 188px 21px; }
 @spritesheet nd-contribute-sheet { src: "../../../Gens_point.tga"; nd-contribute-img: 0px 0px 168px 18px; }
 
-/* Text drawn sharp inside the scaled #panel: each .sharp-text layer is laid out in physical pixels
-   (font-size text_px, width and line height multiplied by root_scale, bound in npc_dialogue.rml)
-   and scaled back by 1 / root_scale around its top-left corner, so its glyphs are rasterised at
-   the size they are shown instead of a small raster stretched by #panel's own scale. Positions
-   stay in #panel's units. */
-.sharp-text { transform-origin: left top; }
+/* Text layers (.sharp-text, base.rcss) are bound in npc_dialogue.rml. */
 
 /* NPC name doubles as this window's title -- dynamic (g_QuestMng.GetNPCName()), unlike the other
    docked windows' own static #title text. */

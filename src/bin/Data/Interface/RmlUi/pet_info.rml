@@ -17,20 +17,23 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title">{{window_title}}</span>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{window_title}}</span>
 
 		<div class="tab-row">
-			<div class="tab-btn tab-btn-darkhorse" data-class-active="active_tab == 0"
+			<div class="sharp-text tab-btn tab-btn-darkhorse" data-class-active="active_tab == 0" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(56 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
 			     data-event-click="petinfo_select_tab(0)">{{tab_darkhorse_label}}</div>
-			<div class="tab-btn tab-btn-darkspirit" data-class-active="active_tab == 1"
+			<div class="sharp-text tab-btn tab-btn-darkspirit" data-class-active="active_tab == 1" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(56 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
 			     data-event-click="petinfo_select_tab(1)">{{tab_darkspirit_label}}</div>
 		</div>
 
 		<!-- Dark Horse tab -->
 		<div class="pet-tab" data-class-hidden="active_tab != 0">
-			<span class="pet-no-pet-msg" data-class-hidden="dh_has_pet">{{dh_no_pet_text}}</span>
+			<span class="sharp-text pet-no-pet-msg" data-class-hidden="dh_has_pet"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-height="(27 * root_scale) + 'px'" data-style-padding-top="(3 * root_scale) + 'px'">{{dh_no_pet_text}}</span>
 			<div class="pet-info-block" data-class-hidden="!dh_has_pet">
-				<span class="pet-subtitle">{{tab_darkhorse_label}}</span>
+				<span class="sharp-text pet-subtitle"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{tab_darkhorse_label}}</span>
 
 				<div class="gbox-corner gbox-dh-corner-tl"></div>
 				<div class="gbox-corner gbox-dh-corner-tr"></div>
@@ -38,23 +41,30 @@
 				<div class="gbox-corner gbox-dh-corner-br"></div>
 				<div class="gbox-title-fill gbox-dh-title-fill"></div>
 				<div class="gbox-content-fill gbox-dh-content-fill"></div>
-				<span class="gbox-title-text gbox-dh-title-text">{{dh_level_text}}</span>
+				<span class="sharp-text gbox-title-text gbox-dh-title-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(56 * root_scale) + 'px'">{{dh_level_text}}</span>
 
-				<span class="pet-stat-text pet-dh-life-text">{{dh_life_text}}</span>
+				<span class="sharp-text pet-stat-text pet-dh-life-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{dh_life_text}}</span>
 				<div class="hp-bar hp-bar-dh">
 					<div class="hp-bar-fill" data-style-width="dh_hp_percent + '%'"></div>
 				</div>
-				<span class="pet-stat-text pet-dh-exp-text">{{dh_exp_text}}</span>
-				<span class="pet-stat-text pet-dh-dmg-text">{{dh_dmg_text}}</span>
-				<span class="pet-stat-text pet-dh-atkspeed-text">{{dh_atkspeed_text}}</span>
+				<span class="sharp-text pet-stat-text pet-dh-exp-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{dh_exp_text}}</span>
+				<span class="sharp-text pet-stat-text pet-dh-dmg-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{dh_dmg_text}}</span>
+				<span class="sharp-text pet-stat-text pet-dh-atkspeed-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{dh_atkspeed_text}}</span>
 			</div>
 		</div>
 
 		<!-- Dark Spirit tab -->
 		<div class="pet-tab" data-class-hidden="active_tab != 1">
-			<span class="pet-no-pet-msg" data-class-hidden="ds_has_pet">{{ds_no_pet_text}}</span>
+			<span class="sharp-text pet-no-pet-msg" data-class-hidden="ds_has_pet"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-height="(27 * root_scale) + 'px'" data-style-padding-top="(3 * root_scale) + 'px'">{{ds_no_pet_text}}</span>
 			<div class="pet-info-block" data-class-hidden="!ds_has_pet">
-				<span class="pet-subtitle">{{tab_darkspirit_label}}</span>
+				<span class="sharp-text pet-subtitle"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{tab_darkspirit_label}}</span>
 
 				<div class="gbox-corner gbox-ds1-corner-tl"></div>
 				<div class="gbox-corner gbox-ds1-corner-tr"></div>
@@ -62,16 +72,22 @@
 				<div class="gbox-corner gbox-ds1-corner-br"></div>
 				<div class="gbox-title-fill gbox-ds1-title-fill"></div>
 				<div class="gbox-content-fill gbox-ds1-content-fill"></div>
-				<span class="gbox-title-text gbox-ds1-title-text">{{ds_level_text}}</span>
+				<span class="sharp-text gbox-title-text gbox-ds1-title-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(56 * root_scale) + 'px'">{{ds_level_text}}</span>
 
-				<span class="pet-stat-text pet-ds-life-text">{{ds_life_text}}</span>
+				<span class="sharp-text pet-stat-text pet-ds-life-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{ds_life_text}}</span>
 				<div class="hp-bar hp-bar-ds">
 					<div class="hp-bar-fill" data-style-width="ds_hp_percent + '%'"></div>
 				</div>
-				<span class="pet-stat-text pet-ds-exp-text">{{ds_exp_text}}</span>
-				<span class="pet-stat-text pet-ds-dmg-text">{{ds_dmg_text}}</span>
-				<span class="pet-stat-text pet-ds-atkspeed-text">{{ds_atkspeed_text}}</span>
-				<span class="pet-stat-text pet-ds-charisma-text">{{ds_charisma_text}}</span>
+				<span class="sharp-text pet-stat-text pet-ds-exp-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{ds_exp_text}}</span>
+				<span class="sharp-text pet-stat-text pet-ds-dmg-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{ds_dmg_text}}</span>
+				<span class="sharp-text pet-stat-text pet-ds-atkspeed-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{ds_atkspeed_text}}</span>
+				<span class="sharp-text pet-stat-text pet-ds-charisma-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'">{{ds_charisma_text}}</span>
 
 				<div class="gbox-corner gbox-ds2-corner-tl"></div>
 				<div class="gbox-corner gbox-ds2-corner-tr"></div>
@@ -79,25 +95,31 @@
 				<div class="gbox-corner gbox-ds2-corner-br"></div>
 				<div class="gbox-title-fill gbox-ds2-title-fill"></div>
 				<div class="gbox-content-fill gbox-ds2-content-fill"></div>
-				<span class="gbox-title-text gbox-ds2-title-text">{{commands_label}}</span>
+				<span class="sharp-text gbox-title-text gbox-ds2-title-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(56 * root_scale) + 'px'">{{commands_label}}</span>
 
 				<div class="skill-slot skill-slot-0"></div>
 				<div class="skill-icon skill-icon-0"></div>
-				<span class="skill-label skill-label-0">{{skill_basicaction_label}}</span>
+				<span class="sharp-text skill-label skill-label-0"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(100 * root_scale) + 'px'">{{skill_basicaction_label}}</span>
 				<div class="skill-slot skill-slot-1"></div>
 				<div class="skill-icon skill-icon-1"></div>
-				<span class="skill-label skill-label-1">{{skill_randomattack_label}}</span>
+				<span class="sharp-text skill-label skill-label-1"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(100 * root_scale) + 'px'">{{skill_randomattack_label}}</span>
 				<div class="skill-slot skill-slot-2"></div>
 				<div class="skill-icon skill-icon-2"></div>
-				<span class="skill-label skill-label-2">{{skill_attackwithowner_label}}</span>
+				<span class="sharp-text skill-label skill-label-2"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(100 * root_scale) + 'px'">{{skill_attackwithowner_label}}</span>
 				<div class="skill-slot skill-slot-3"></div>
 				<div class="skill-icon skill-icon-3"></div>
-				<span class="skill-label skill-label-3">{{skill_attacktarget_label}}</span>
+				<span class="sharp-text skill-label skill-label-3"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(100 * root_scale) + 'px'">{{skill_attacktarget_label}}</span>
 			</div>
 		</div>
 
 		<div id="btn_exit" data-event-click="petinfo_click_exit"></div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>
