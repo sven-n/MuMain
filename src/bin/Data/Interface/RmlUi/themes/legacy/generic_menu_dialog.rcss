@@ -25,6 +25,7 @@
 	color: token(text-primary);
 }
 #panel.window-shell-positioned { margin-left: 0; }
+#panel.system-menu { top: 100dp; } /* CSystemMenuMsgBox sits at y=100, not 60 */
 /* The shell's content box in flow (window_shell.rcss places it absolutely inside a fixed-height
    panel), with native's text width: MSGBOX_WIDTH less ~16 each side. */
 #panel .window-shell-content {
@@ -89,15 +90,14 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	width: 128dp;
-	margin: 0 3dp 6dp 3dp;
+	width: 100%; /* one button per row, as native stacks them; lines span the box */
+	margin: 0 0 6dp 0; /* native NPC menus step their buttons 35 apart */
 }
-.gmd-button-cell.compact { width: 64dp; }
+#panel.system-menu .gmd-button-cell { margin-bottom: 1dp; } /* CSystemMenuMsgBox: 30 apart */
+.gmd-button-cell.compact { width: 100%; }
 /* A button with its own description lines needs a bit more breathing room below it than a plain
    one, so it doesn't read as crowded against whatever's next in the stack. */
 .gmd-button-cell.has-lines { margin-bottom: 10dp; }
-/* Native draws a button's description lines across the whole box, not the button's width. */
-.gmd-button-cell.has-lines:not(.cols-2) { width: 100%; }
 /* GenericMenuConfig::columns == 2 -- sized to fit exactly 2 per row within .gmd-body's own content
    width, accounting for the WORST case where .gmd-button-row's own vertical scrollbar appears
    (10 buttons in 2 columns = 5 rows, tall enough to need it): 230dp panel - 32dp*2 margins = 166dp,
@@ -134,8 +134,9 @@
 }
 .gmd-btn {
 	position: static;
-	width: 128dp;
-	height: 30dp;
+	width: 108dp; /* native MSGBOX_BTN_EMPTY_WIDTH */
+	height: 29dp; /* MSGBOX_BTN_EMPTY_HEIGHT */
+	line-height: 29dp;
 	decorator: image(msgbox-btn-empty-idle);
 }
 .gmd-btn:hover { decorator: image(msgbox-btn-empty-hover); }
@@ -165,8 +166,9 @@
 .gmd-btn-label {
 	display: block;
 	width: 100%;
+	white-space: nowrap; /* native draws a label on one line, even past the art's edge */
 }
-.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; }
+.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; white-space: normal; }
 /* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
    data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
 

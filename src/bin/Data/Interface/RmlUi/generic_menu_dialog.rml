@@ -16,7 +16,7 @@
 
      Frame/border/header chrome now lives entirely in window_shell.rml (see its own comment) --
      this document supplies only its own content, spliced into that template's #content slot. -->
-<body template="window_shell" data-model="generic_menu_dialog">
+<body template="window_shell" data-model="generic_menu_dialog" data-class-system-menu="is_system_menu">
 	<div class="gmd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
 	<!-- No explicit column count -- .gmd-button-row's own flex-wrap lets the button count/width
 	     and the row's available space determine layout, same technique the numeric-keypad grid in

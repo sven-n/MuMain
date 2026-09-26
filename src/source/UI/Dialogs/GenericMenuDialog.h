@@ -123,6 +123,7 @@ namespace mu::ui::window
         struct GenericMenuRmlModel
         {
             bool hasTitle = false;
+            bool isSystemMenu = false; // Purpose::SystemMenu: a theme may place it like native
             Rml::String title;
             std::vector<LineEntry> lines;
             std::vector<MenuButtonEntry> buttons;
