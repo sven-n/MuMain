@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -64,6 +65,7 @@ void CPetInfoWindow::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                c.Bind("text_px", &model.textPx);
 
                 c.Bind("active_tab", &model.activeTab);
                 c.Bind("window_title", &model.windowTitle);
@@ -298,6 +300,7 @@ void CPetInfoWindow::SyncRmlModel()
     m_RmlBinder.MarkDirty("root_x");
     m_RmlBinder.MarkDirty("root_y");
     m_RmlBinder.MarkDirty("root_scale");
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     // Dark Horse tab
     {

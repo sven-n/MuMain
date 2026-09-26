@@ -4,24 +4,26 @@
 
    dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
    dialog is a LayoutMode::Dialog window, so it centers via plain CSS instead of a data-bound
-   root_x/root_y/root_scale transform. Same 230x160dp size as the fg document's own #panel, so the
-   two align exactly.
+   root_x/root_y/root_scale transform. Same placement as the fg document's own #panel, whose
+   laid-out height GenericConfirmDialog.cpp copies here, so the two align exactly.
 
    body's own width/height must be set explicitly here -- normally comes from base.rcss (not linked
-   in bg documents), and #panel's left:50%/top:50% has nothing to resolve against otherwise. */
+   in bg documents), and #panel's left:50% has nothing to resolve against otherwise. */
 
 body {
 	width: 100%;
 	height: 100%;
 }
 
+/* Same native placement as the fg #panel (top edge at y=100); its height is copied from the fg
+   #panel's laid-out height each frame (GenericConfirmDialog.cpp), 117dp until then. */
 #panel {
 	position: absolute;
 	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
+	top: 100dp;
+	margin-left: -115dp;
 	width: 230dp;
-	height: 160dp;
+	height: 117dp;
 	pointer-events: none;
 }
 /* Mirrors the fg document's own #panel.tall (GenericDialogConfig::tallPanel) -- kept in sync via

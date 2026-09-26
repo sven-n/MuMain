@@ -21,7 +21,7 @@
 	text-align: center;
 	color: token(text-secondary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	pointer-events: none;
 }
 
@@ -48,8 +48,8 @@
 }
 
 .id-text { position: absolute; color: token(text-info); white-space: nowrap; pointer-events: none; }
-.id-text-your { left: 32px; top: 43px; font-size: 14px; font-weight: bold; }
-.id-text-my   { left: 20px; top: 253px; font-size: 12px; font-weight: bold; }
+.id-text-your { left: 32px; top: 43px; font-weight: bold; } /* native g_hFontBig: twice the normal point size, bound in trade.rml (text layer) */
+.id-text-my   { left: 20px; top: 253px; font-size: 1em; font-weight: bold; }
 
 .guild-name {
 	position: absolute;
@@ -57,7 +57,7 @@
 	top: 30px;
 	color: token(text-secondary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -67,7 +67,7 @@
 	left: 134px;
 	top: 48px;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -78,7 +78,7 @@
 	width: 159px;
 	text-align: right;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -138,7 +138,7 @@
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 1em;
 	pointer-events: none;
 	z-index: 1;
 }
@@ -157,7 +157,7 @@
 	top: 185px;
 	color: #d20000;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -166,7 +166,7 @@
 	left: 20px;
 	color: token(text-hint);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -184,7 +184,7 @@
 	background-color: rgba(210, 0, 0, 255);
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	text-align: center;
 	white-space: nowrap;
 	pointer-events: none;

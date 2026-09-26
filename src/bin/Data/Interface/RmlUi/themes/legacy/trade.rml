@@ -13,13 +13,17 @@
 	     "Warning" text badge (item_warning_badges below) is RmlUi now, positioned per-frame from
 	     C++ since it tracks a live, variable-length set of flagged item grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
-		<span id="title">{{title}}</span>
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
 		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>
-		<span id="your_guild_name" class="guild-name" data-class-hidden="!your_guild_visible">{{your_guild_name}}</span>
-		<span id="your_id_text" class="id-text id-text-your">{{your_id_text}}</span>
-		<span id="your_level_text" class="level-text"
+		<span id="your_guild_name" class="sharp-text guild-name" data-class-hidden="!your_guild_visible"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{your_guild_name}}</span>
+		<span id="your_id_text" class="sharp-text id-text id-text-your"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="(2 * text_px) + 'px'">{{your_id_text}}</span>
+		<span id="your_level_text" class="sharp-text level-text" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		      data-class-level-bucket-10="your_level_bucket == 10"
 		      data-class-level-bucket-50="your_level_bucket == 50"
 		      data-class-level-bucket-100="your_level_bucket == 100"
@@ -28,7 +32,7 @@
 		      data-class-level-bucket-400="your_level_bucket == 400">{{your_level_text}}</span>
 
 		<div id="your_gold_bg" class="gold-bg gold-bg-your"></div>
-		<span id="your_gold_text" class="gold-text gold-text-your gold-amount"
+		<span id="your_gold_text" class="sharp-text gold-text gold-text-your gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(159 * root_scale) + 'px'"
 		      data-class-gold-base="your_gold_tier == 'base'"
 		      data-class-gold-hundred-thousand="your_gold_tier == 'hundred-thousand'"
 		      data-class-gold-million="your_gold_tier == 'million'"
@@ -41,10 +45,11 @@
 		<div id="divider"></div>
 
 		<div id="my_nick_bg" class="nick-bg nick-bg-my"></div>
-		<span id="my_id_text" class="id-text id-text-my">{{my_id_text}}</span>
+		<span id="my_id_text" class="sharp-text id-text id-text-my"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{my_id_text}}</span>
 
 		<div id="my_gold_bg" class="gold-bg gold-bg-my"></div>
-		<span id="my_gold_text" class="gold-text gold-text-my gold-amount"
+		<span id="my_gold_text" class="sharp-text gold-text gold-text-my gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(159 * root_scale) + 'px'"
 		      data-class-gold-base="my_gold_tier == 'base'"
 		      data-class-gold-hundred-thousand="my_gold_tier == 'hundred-thousand'"
 		      data-class-gold-million="my_gold_tier == 'million'"
@@ -56,19 +61,26 @@
 		</div>
 
 		<div id="btn_exit" class="trade-btn trade-btn-exit" data-event-click="trade_exit_click"></div>
-		<span class="tooltip tooltip-exit">{{close_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{close_tooltip}}</span>
 
 		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click"></div>
-		<span class="tooltip tooltip-zen">{{zen_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-zen"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{zen_tooltip}}</span>
 
-		<span id="warning_label" class="warning-label" data-style-opacity="warning_opacity">{{warning_label}}</span>
-		<span id="notice_line1" class="notice-line notice-line1">{{notice_line1}}</span>
-		<span id="notice_line2" class="notice-line notice-line2">{{notice_line2}}</span>
-		<span id="notice_line3" class="notice-line notice-line3">{{notice_line3}}</span>
+		<span id="warning_label" class="sharp-text warning-label" data-style-opacity="warning_opacity"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
+		<span id="notice_line1" class="sharp-text notice-line notice-line1"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{notice_line1}}</span>
+		<span id="notice_line2" class="sharp-text notice-line notice-line2"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{notice_line2}}</span>
+		<span id="notice_line3" class="sharp-text notice-line notice-line3"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{notice_line3}}</span>
 
 		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
-		<div class="item-warning-badge" data-for="w : item_warning_badges"
-		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="w.width + 'px'">{{item_warning_text}}</div>
+		<div class="sharp-text item-warning-badge" data-for="w : item_warning_badges"
+		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="(w.width * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{item_warning_text}}</div>
 	</div>
 </body>
 </rml>

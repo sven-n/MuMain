@@ -20,7 +20,7 @@
 	text-align: center;
 	color: rgb(216, 216, 216);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 /* Matches CStorageInventory::RenderText()'s former red title when locked (m_bLock). */
 #title.locked { color: rgb(240, 32, 32); }
@@ -40,7 +40,7 @@
 	right: 22px;
 	top: 350px;
 	font-weight: bold;
-	font-size: 11px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -50,7 +50,7 @@
 	top: 371px;
 	color: rgb(240, 64, 64);
 	font-weight: bold;
-	font-size: 11px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -60,7 +60,7 @@
 	top: 371px;
 	color: rgb(255, 220, 150);
 	font-weight: bold;
-	font-size: 11px;
+	font-size: 1em;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -103,7 +103,7 @@
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 1em;
 	pointer-events: none;
 	z-index: 1;
 }

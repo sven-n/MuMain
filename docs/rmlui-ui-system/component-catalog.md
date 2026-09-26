@@ -154,6 +154,19 @@ wrapper every migrated window uses: owns the `Model` instance, creates the `Rml:
 once, exposes `MarkDirty()` so packet-handler/action-controller code doesn't need to know RmlUi's
 binding API directly.
 
+## Semantic colours
+
+Where a value's colour depends on what it means, C++ binds the meaning and each theme's RCSS holds
+the colour: a `data-class-*` binding toggles a class, and the legacy theme uses the original values.
+Examples:
+- Zen wealth tier: `GameLogic::Items::ClassifyGoldAmount()`, `.gold-*`;
+- trade partner level bucket: `.level-bucket-*`;
+- quest row kind: reported by `CQuestMng::GetRequestRewardText()`, `.row-*`;
+- character-select balloon name status: `.name-*`.
+
+Do not unpack the engine's packed text colours into CSS: they are `A<<24 | B<<16 | G<<8 | R`, and
+reading them as RGB swaps red and blue.
+
 ## Theming
 
 `UI::RmlBridge` (`RmlTheme.h`): `LoadThemedDocument()` (the one entry point every migrated window
@@ -296,6 +309,22 @@ unchanged, only what happens internally moved), the skill-hotkey tooltip (`MainF
 `g_pSkillList`'s own hover slot), the inventory Set/Socket option tooltip (`MyInventory.cpp` — its
 old embedded RmlUi implementation was deleted outright, not left running as a second mechanism),
 and two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`).
+
+**Legacy theme layout (2026-09-24, #623).** The legacy theme overrides `tooltip.rml`
+(`themes/legacy/tooltip.rml`) to follow the original `RenderTipTextList()`:
+- native text size;
+- rows one native text height tall, each starting 1.1 heights below the previous one, so
+  highlight bars keep their gaps;
+- the widest line plus 2 units of side padding;
+- a 1-unit opaque frame around an 80% fill.
+
+RmlUi's own FreeType metrics round to whole pixels, which accumulates over many rows. So
+`Show()` reads the row height from the native text renderer
+(`CUIRenderTextSDLTtf::LineHeight()`), without selecting a font on the shared renderer.
+It measures under `Config::transform` when a caller anchors with a non-ambient transform (the
+skill-hotkey tooltip's `BottomHudCenterTransform`), otherwise under the ambient transform.
+`Config::fixedWidth` keeps a fixed text width where the original had one (the inventory Set and
+Socket option tooltips). The anchor places the inner (padding) box; the frame sits outside it.
 
 `UI::Skills::Tooltip::Render()`/`BuildModelForSlot()`/`ToRmlBridgeLines()`
 (`UI/HUD/Skills/SkillTooltip.h`/`.cpp`) is the shared skill/pet-command tooltip *content* builder —

@@ -6,28 +6,53 @@
    `.gcd-header-rail`'s own sprite decorator below (an ordinary opaque foreground image, not a
    compositing-order concern the way item3D is).
 
-   #panel is centered via the .center-both utility class (generic_confirm_dialog.rml); every
-   dimension is dp -- a LayoutMode::Dialog window (no transform:scale(root_scale)), not one of the
-   root_scale-tracking inventory-family windows. 230x160 matches native's own MSGBOX_WIDTH=230 and
-   base 2-line height (67+50=117) plus room to grow. No background-color/border here -- the sprite
-   composite lives in generic_confirm_dialog_bg.rcss's own same-sized #panel instead. */
+   #panel is placed like native's box (see #panel below, overriding the markup's .center-both);
+   every dimension is dp -- a LayoutMode::Dialog window (no transform:scale(root_scale)), not one
+   of the root_scale-tracking inventory-family windows -- and text is rem (native text size,
+   RmlNativeText.h). No background-color/border here -- the sprite composite lives in
+   generic_confirm_dialog_bg.rcss's own #panel, which follows this one's height. */
 #panel {
+	/* Native CCommonMessageBox: centred horizontally, top edge at y=100, 117 tall for up to two
+	   lines and growing with each further line -- so no centering transform and no fixed height:
+	   the flowing .gcd-body below sizes it (GenericConfirmDialog.cpp copies the result to the bg
+	   document's own #panel). */
+	top: 100dp;
+	left: 50%;
+	margin-left: -115dp;
+	transform: none;
 	width: 230dp;
-	height: 160dp;
+	min-height: 117dp;
 	font-family: "token(font-body)";
-	font-size: 12dp;
+	font-size: 1rem;
 	color: token(text-primary);
 }
-/* Optional taller variant (GenericDialogConfig::tallPanel) -- .gcd-body's own top/bottom insets
-   are fixed dp offsets from #panel's edges, so this alone grows .gcd-body/.gcd-text-col's
-   available content height for free; the OK/Cancel buttons below need their own .tall override
-   since they're positioned via a fixed `top` from #panel's TOP edge. 240dp grows the ~69dp
-   content well to ~149dp -- enough for a grown .gcd-portrait2d (100x93dp) + up to 3 lines, or the
-   numeric-keypad input row, without .gcd-text-col's own scrollbar. Mirrored onto the bg
-   document's own #panel imperatively (GenericConfirmDialog.cpp's Show()/ShowNext()) since that
-   document has no data model of its own to bind a class through. */
+/* Optional taller variant (GenericDialogConfig::tallPanel) -- a larger minimum for the flowing
+   content (a grown .gcd-portrait2d, the numeric-keypad input row); the bottom-anchored buttons
+   follow on their own, and the bg #panel follows the laid-out height. */
 #panel.tall {
-	height: 240dp;
+	min-height: 240dp;
+}
+/* The overlay-portrait box is native's CDuelMsgBox/CDuelResultMsgBox: top edge at y=70, 67 + 7*15 +
+   50 = 222 tall, the 148x138 crest drawn at y+15 behind the text. The text block ends right
+   above the buttons (last line at y+151 in both boxes), with the bold caption one 20 row above
+   its first line (y+100 over three lines, y+115 over two), lines 16 apart. */
+#panel.portrait {
+	top: 70dp;
+	min-height: 222dp;
+}
+#panel.portrait .gcd-body {
+	height: 131dp; /* 222 - 35 top - 56 button blank: ends just above the buttons */
+	align-items: stretch;
+}
+#panel.portrait .gcd-text-col {
+	justify-content: flex-end;
+	overflow: visible; /* a fixed native box never scrolls */
+}
+/* Positioned so they paint above the (positioned) crest, which comes first in the markup. */
+#panel.portrait .gcd-line {
+	position: relative;
+	line-height: 16dp;
+	min-height: 16dp; /* an empty line keeps its row, as native draws every row at its own y */
 }
 
 /* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) -- a title-banner variant
@@ -84,7 +109,7 @@
 
 /* Text floats transparently over the sprite composite below it (painted by the background
    document), matching native (no separate boxed "well"). left/right/top match native's own text
-   metrics (~25dp side margin, 35dp top blank); bottom leaves a gap above the buttons.
+   metrics (~23dp side margin, 35dp top blank); bottom leaves a gap above the buttons.
 
    top+bottom (not top+height) deliberately -- this engine's box model is content-box only (no
    box-sizing support anywhere in this codebase), so an explicit height combined with a bordered/
@@ -94,11 +119,11 @@
    display:flex row: #gcd_item3d_anchor (item icon, left) + .gcd-text-col (fills the rest, right).
    The title banner is NOT a child of this box -- it overlays #panel's own top edge instead. */
 .gcd-body {
-	position: absolute;
-	left: 25dp;
-	right: 25dp;
-	top: 35dp;
-	bottom: 56dp;
+	/* In flow (not absolute) so the panel grows with it: native's 35 top blank and the 56 kept
+	   for the buttons below. Native wraps message text at MSGBOX_TEXT_MAXWIDTH (180); this
+	   renderer's glyphs run about 2% wider than native's, so the text column gets 184 (23 each
+	   side) to break lines where native does. */
+	margin: 35dp 23dp 56dp 23dp;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -120,9 +145,9 @@
 .gcd-text-col {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: flex-start;
 	align-items: center;
-	height: 100%;
+	max-height: 320dp;
 	flex: 1 1 auto;
 	overflow: hidden auto;
 	pointer-events: auto;
@@ -152,12 +177,15 @@
 .gcd-text-col scrollbarhorizontal {
 	height: 0;
 }
+/* Native draws message lines white by default, each advancing its text height + 4. */
 .gcd-line {
 	display: block;
 	width: 100%;
 	text-align: center;
 	white-space: normal;
-	color: token(text-prompt);
+	line-height: 1.6;
+	min-height: 1.6em; /* a blank line (" ") keeps its row, as native's AddMsg(L" ") does */
+	color: token(text-primary);
 }
 .gcd-line.bold { font-weight: bold; }
 
@@ -180,17 +208,15 @@
    40dp-wide empty slot. */
 .gcd-item3d-anchor.hidden { display: none; }
 
-/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a
-   static flex child INSIDE .gcd-text-col (icon-top/text-below) rather than a sibling like
-   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). .gcd-text-col's own
-   align-items:center centers it horizontally with no extra margin math needed. 100x93dp keeps
-   the current art's 148:138 aspect ratio. */
+/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a direct
+   #panel child at native's fixed crest position (x+41, y+15, 148x138), behind the text, unlike
+   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). */
 .gcd-portrait2d {
-	position: relative;
-	width: 100dp;
-	height: 93dp;
-	flex-shrink: 0;
-	margin-bottom: 4dp;
+	position: absolute;
+	left: 41dp; /* (230 - 148) / 2 */
+	top: 15dp;
+	width: 148dp;
+	height: 138dp;
 	decorator: image(portrait2d-image);
 }
 /* Same cascade-tie fix as .gcd-item3d-anchor above. */
@@ -207,19 +233,19 @@
 	margin-bottom: 0;
 	decorator: image(portrait2d-image);
 }
-/* Overlaid directly on the sprite (native draws this ON TOP of the art, not below it) -- matches
-   native's own bold yellow; font-effect:shadow keeps it legible over the sprite's bright areas. */
+/* The caption row over the crest (native draws it ON TOP of the art): native's bold yellow, first
+   row of .gcd-text-col, positioned so it paints above the (positioned) crest. */
 .gcd-portrait2d-text {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 2dp;
+	position: relative;
+	display: block;
+	width: 100%;
+	line-height: 20dp;
 	text-align: center;
 	font-weight: bold;
-	font-size: 9dp;
+	font-size: 1rem;
 	color: token(text-heading);
-	font-effect: shadow(0dp 1dp #000000);
 }
+.gcd-portrait2d-text.hidden { display: none; } /* display: block above outranks .hidden */
 
 /* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
    `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
@@ -252,7 +278,7 @@
 	width: 26dp;
 	height: 18dp;
 	margin: 1dp;
-	font-size: 10dp;
+	font-size: 0.85rem;
 }
 /* Text-mode field: takes the same flow slot the old native-widget position reference occupied, so
    the column layout is unchanged. Sizing only -- fill/border/focus/selection come from base.rcss's
@@ -262,7 +288,7 @@
 	width: 150dp;
 	height: 18dp;
 	padding: 0 3dp;
-	font-size: 10dp;
+	font-size: 0.85rem;
 }
 
 /* Optional progress bar -- same `x_fraction * 100 + '%'` fill technique main_frame.rml's own
@@ -286,11 +312,35 @@
    comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
    Cancel; `.gcd-btn-cancel` is the always-Cancel/Close slot. Every existing Ok/OkCancel consumer
    always renders solo or paired (primary+cancel), never triple. */
+/* Bottom-anchored (native MSGBOX_BTN_BOTTOM_BLANK 20) so they follow the growing panel. */
 .btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
-	top: 110dp;
+	bottom: 20dp;
 	width: 54dp;
 	height: 30dp;
 }
+
+/* The stock OK/Cancel buttons use native's own lettered art (newui_button_ok/cancel.tga: three
+   54x30 states stacked), with the label text hidden; any other label keeps the plain button. */
+@spritesheet msgbox-ok-sheet
+{
+	src: "../../../newui_button_ok.tga";
+	msgbox-ok-idle:   0px  0px 54px 30px;
+	msgbox-ok-hover:  0px 30px 54px 30px;
+	msgbox-ok-active: 0px 60px 54px 30px;
+}
+@spritesheet msgbox-cancel-sheet
+{
+	src: "../../../newui_button_cancel.tga";
+	msgbox-cancel-idle:   0px  0px 54px 30px;
+	msgbox-cancel-hover:  0px 30px 54px 30px;
+	msgbox-cancel-active: 0px 60px 54px 30px;
+}
+.btn.gcd-btn-primary.stock-ok { decorator: image(msgbox-ok-idle); color: rgba(0, 0, 0, 0); }
+.btn.gcd-btn-primary.stock-ok:hover { decorator: image(msgbox-ok-hover); }
+.btn.gcd-btn-primary.stock-ok:active { decorator: image(msgbox-ok-active); }
+.btn.gcd-btn-cancel.stock-cancel { decorator: image(msgbox-cancel-idle); color: rgba(0, 0, 0, 0); }
+.btn.gcd-btn-cancel.stock-cancel:hover { decorator: image(msgbox-cancel-hover); }
+.btn.gcd-btn-cancel.stock-cancel:active { decorator: image(msgbox-cancel-active); }
 .gcd-btn-primary   { left: 30dp; }
 .gcd-btn-primary.solo { left: 88dp; }
 /* Paired: whichever of secondary/cancel is the sole second button sits in this one slot -- both
@@ -304,6 +354,4 @@
 .gcd-btn-cancel.triple { left: 165dp; }
 /* #panel.tall's buttons keep the same 20dp bottom margin the default 160dp panel already has
    (110 + 30 + 20 = 160). */
-#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary, #panel.tall .btn.gcd-btn-cancel {
-	top: 190dp;
-}
+

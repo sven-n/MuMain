@@ -24,7 +24,7 @@
 	text-align: center;
 	color: token(text-title);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .tab-row {
@@ -41,7 +41,7 @@
 	height: 22px;
 	text-align: center;
 	line-height: 22px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-muted);
 	cursor: pointer;
 	pointer-events: auto;
@@ -70,31 +70,30 @@
 .quest-empty-msg {
 	position: absolute;
 	left: 14px;
-	top: 30px;
+	top: 32px; /* native glyph tops at y+96, 18 apart (bound in my_quest_info.rml); tab at y+60 */
 	width: 140px;
 	color: token(text-heading);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	text-align: left;
 }
-.quest-empty-msg span { display: block; }
+.quest-empty-msg span { display: block; line-height: inherit; }
 
 .quest-list {
 	position: absolute;
 	left: 0;
 	top: 0;
 	width: 172px;
-	height: 130px;
+	height: 100px;
 	overflow: auto hidden;
 }
+/* Inside the .quest-list text layer (physical px): height, line height and padding are bound in
+   my_quest_info.rml (18px, 18px, 4px times root_scale). */
 .quest-row {
 	display: block;
 	width: 100%;
-	height: 18px;
-	line-height: 18px;
-	padding-left: 4px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 	cursor: pointer;
 	pointer-events: auto;
 	white-space: nowrap;
@@ -102,10 +101,12 @@
 .quest-row:hover { color: token(text-hover); }
 .quest-row.selected { color: token(text-selected); font-weight: bold; }
 
+/* Native CNewUIMyQuestInfoWindow draws its divider (newui_myquest_Line) at y+160 on the quest tab,
+   y+182 on the job-change tab and y+210 on the castle/temple tab; the tabs start at y+60. */
 .quest-divider {
 	position: absolute;
 	left: 0;
-	top: 130px;
+	top: 100px;
 	width: 172px;
 	height: 21px;
 	decorator: image(myquest-line);
@@ -114,9 +115,9 @@
 .quest-contents {
 	position: absolute;
 	left: 0;
-	top: 151px;
+	top: 121px;
 	width: 172px;
-	height: 169px;
+	height: 199px;
 	overflow: auto hidden;
 }
 
@@ -133,9 +134,8 @@
 #reward_popup_anchor { left: 95px; top: 230px; }
 .quest-content-row {
 	display: block;
-	width: 100%;
-	padding: 1px 4px;
-	font-size: 12px;
+	width: 100%; /* padding 1px 4px, bound in my_quest_info.rml (text layer) */
+	font-size: 1em;
 	color: token(text-info);
 }
 .quest-content-row.bold { font-weight: bold; }
@@ -177,34 +177,50 @@
 	width: 172px;
 	color: token(accent-teal);
 	font-weight: bold;
-	font-size: 12px;
-	margin-bottom: 8px;
+	font-size: 1em;
+	/* Text layers (line heights bound in my_quest_info.rml): native title at y+58, contents from
+	   y+76 in 16px rows; the tab starts at y+60. */
+	position: absolute;
+	top: -3px;
 }
 .jobchange-contents, .jobchange-state {
 	display: block;
 	text-align: center;
 	width: 172px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 }
-.jobchange-contents span, .jobchange-state span { display: block; }
-.jobchange-state { color: token(text-heading); font-weight: bold; margin-top: 12px; }
-
-.castle-title, .temple-title {
-	display: block;
-	text-align: center;
-	width: 172px;
+.jobchange-contents { position: absolute; top: 15px; }
+.jobchange-contents span { display: block; line-height: inherit; }
+/* Native: status rows left-aligned at x+23 from y+283, 18 apart. */
+.jobchange-state {
+	position: absolute;
+	top: 220px;
+	left: 14px;
+	text-align: left;
 	color: token(text-heading);
 	font-weight: bold;
-	font-size: 12px;
-	margin-top: 6px;
+}
+.jobchange-state span { display: block; line-height: inherit; }
+.jobchange-divider { top: 122px; }
+.castletemple-divider { top: 150px; }
+
+/* Native: Blood Castle at y+105 with lines at +125/+145, Illusion Temple at y+285 with lines at
+   +305/+325 (text tops; 20px rows, bound on the text layers in my_quest_info.rml, put the glyphs
+   there; the tab starts at y+60). */
+.castle-block, .temple-block { position: absolute; left: 0; text-align: center; }
+.castle-block { top: 40px; }
+.temple-block { top: 220px; }
+.castle-title, .temple-title {
+	display: block;
+	color: token(text-heading);
+	font-weight: bold;
+	font-size: 1em;
 }
 .castle-line, .temple-line {
 	display: block;
-	text-align: center;
-	width: 172px;
 	color: token(text-primary);
-	font-size: 12px;
+	font-size: 1em;
 }
 
 /* Requirement/reward rows by kind (UI::Quests::RewardModel::RowStyle; the RML toggles

@@ -28,8 +28,16 @@ namespace mu::ui::window
     struct GenericMenuConfig
     {
         std::wstring title; // optional heading row above `lines`. Empty = no title row.
+        // The native box drew its title in its highlight colour instead of plain white (the
+        // chaos-mix method menu); a theme may style it so.
+        bool highlightTitle = false;
 
-        struct Line { std::wstring text; bool bold = false; };
+        struct Line
+        {
+            std::wstring text;
+            bool bold = false;
+            unsigned long color = 0; // native RGBA() line colour; 0 = the theme's own
+        };
         std::vector<Line> lines; // optional description text above the buttons
 
         struct MenuButton
@@ -47,6 +55,9 @@ namespace mu::ui::window
                                             // but it's a one-bool add worth reserving
             bool compact = false;           // true = native's smaller "Cancel/Exit" button style;
                                             // false = the larger action-button style
+            int nativeTop = 0;              // native box's button y offset (with nativeFrame);
+                                            // 0 = flow
+            bool linesBelow = false;        // `lines` sit under the button (CTrainerRecoverMsgBox)
             std::function<void()> onClick;  // fires, then the dialog closes -- every native
                                             // button in this family destroys its own box on click,
                                             // none need a KeepOpen()-style veto
@@ -63,6 +74,23 @@ namespace mu::ui::window
         // only consumer so far); add a new `.cols-N` CSS class + a same-named MenuButtonEntry flag
         // in GenericMenuDialog.cpp the same way if a future consumer needs a different count.
         int columns = 0;
+
+        // The native box this menu replaces (CNewUIMessageBoxBase::Create): its top edge and the
+        // number of 15px middle strips between its 67px top and 50px bottom caps, and where its
+        // RenderTexts() draws `lines`. Data only -- a theme may reproduce the native layout
+        // (legacy does); 0 = not described / flow.
+        struct NativeFrame
+        {
+            int top = 0;
+            int middleCount = 0;
+            int textTop = 0;     // y offset of the first line's text
+            int lineAdvance = 0; // y step between lines
+            int textInset = 0;   // left/right inset of left-aligned text (0 = centred)
+            int dividerTop = 0;  // y offset of a newui_Message_Line divider (CElpisMsgBox)
+        };
+        NativeFrame nativeFrame;
+        // The in-game system menu (native CSystemMenuMsgBox): a theme may lay it out like native.
+        bool systemMenu = false;
 
         // Optional, fires on Esc. Decoupled from `buttons` (not "whichever button is last") so a
         // caller can't accidentally rely on button order for cancel semantics.
@@ -104,11 +132,19 @@ namespace mu::ui::window
     private:
         void BuildRmlUi();
         void SyncRmlModel();
+        void SyncNativeFrame();
         void ShowNext();           // pops m_Queue (if non-empty) and opens the document
         void Resolve(int buttonIndex); // -1 = cancel/no button; hides the document, invokes the
                                        // chosen callback, then ShowNext()
 
-        struct LineEntry { Rml::String text; bool bold = false; };
+        struct LineEntry
+        {
+            Rml::String text;
+            bool bold = false;
+            Rml::String color; // CSS colour of Line::color, empty for the theme's own
+        };
+        static LineEntry ToLineEntry(const GenericMenuConfig::Line& line);
+        static bool SameLine(const LineEntry& a, const LineEntry& b);
         struct MenuButtonEntry
         {
             Rml::String label;
@@ -119,10 +155,20 @@ namespace mu::ui::window
             bool enabled = true;
             bool compact = false;
             bool cols2 = false;     // GenericMenuConfig::columns == 2 && !compact -- see its comment
+            float nativeTop = 0.f;  // MenuButton::nativeTop
+            bool linesBelow = false;
         };
         struct GenericMenuRmlModel
         {
             bool hasTitle = false;
+            bool isSystemMenu = false; // GenericMenuConfig::systemMenu
+            bool highlightTitle = false;
+            float nativeTop = 0.f; // GenericMenuConfig::nativeFrame, in reference pixels
+            float nativeHeight = 0.f;
+            float nativeTextTop = 0.f;
+            float nativeLineAdvance = 0.f;
+            float nativeTextInset = 0.f;
+            float nativeDividerTop = 0.f;
             Rml::String title;
             std::vector<LineEntry> lines;
             std::vector<MenuButtonEntry> buttons;

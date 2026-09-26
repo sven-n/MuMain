@@ -16,9 +16,9 @@
 	top: 15px;
 	width: 190px;
 	text-align: center;
-	color: token(accent-blue);
-	font-weight: bold;
-	font-size: 12px;
+	/* Native draws it in the normal font, 0xFF49B0FF -- an ABGR DWORD, i.e. (255,176,73). */
+	color: #ffb049;
+	font-size: 1em;
 }
 
 /* Shop-name field: only placement/size plus this window's own bespoke strip art -- every other
@@ -35,7 +35,7 @@
 	width: 169px;
 	height: 26px;
 	padding: 6px 6px 0 38px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-narrative);
 	background-color: transparent;
 	border-width: 0;
@@ -73,7 +73,7 @@
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 1em;
 	pointer-events: none;
 	z-index: 1;
 }
@@ -92,7 +92,8 @@
 	position: absolute;
 	left: 30px;
 	font-family: "token(font-body)";
-	font-size: 12px;
+	font-size: 1em;
+	white-space: nowrap; /* one native line each; the text layer has no width of its own */
 }
 .myshop-line-still-opening {
 	left: 0;

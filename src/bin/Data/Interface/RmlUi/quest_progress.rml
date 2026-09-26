@@ -15,17 +15,22 @@
 	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
 	     UI::Scaling::GetActiveTransform(), same convention as my_quest_info.rml's #panel. -->
 	<div id="panel" data-model="quest_progress" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title">Quest</span>
-		<div class="qp-subject">{{subject}}</div>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">Quest</span>
+		<div class="sharp-text qp-subject"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{subject}}</div>
 
-		<div class="qp-npc-name">{{npc_name}}</div>
-		<div class="qp-npc-lines">
+		<div class="sharp-text qp-npc-name"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(164 * root_scale) + 'px'">{{npc_name}}</div>
+		<div class="sharp-text qp-npc-lines"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(164 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
 			<span class="qp-line" data-for="l : npc_lines">{{l.text}}</span>
 		</div>
 
@@ -39,17 +44,21 @@
 		<!-- Shown for both NON_PLAYER_WORDS_MODE (active_view 0, still paging NPC text) and
 		     PLAYER_WORDS_MODE (1) -- hidden only once the reward view (2) is reached. Matches the
 		     original's own `if (REQUEST_REWARD_MODE != m_eLowerView)` guard on this exact line. -->
-		<div class="qp-player-name" data-class-hidden="active_view == 2">{{player_name}}</div>
+		<div class="sharp-text qp-player-name" data-class-hidden="active_view == 2"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(164 * root_scale) + 'px'">{{player_name}}</div>
 
-		<div class="qp-answers" data-class-hidden="active_view != 1">
-			<div class="qp-player-words">{{player_words_text}}</div>
+		<div class="sharp-text qp-answers" data-class-hidden="active_view != 1"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(164 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+			<div class="qp-player-words" data-style-margin-bottom="(15 * root_scale) + 'px'">{{player_words_text}}</div>
 			<div class="qp-answer-row" data-for="a : answers"
 			     data-event-click="questprogress_select_answer(a.index)">{{a.text}}</div>
 		</div>
 
 		<div class="qp-reward" data-class-hidden="active_view != 2">
-			<div class="qp-reward-list">
+			<div class="sharp-text qp-reward-list"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(174 * root_scale) + 'px'" data-style-height="(150 * root_scale) + 'px'">
 				<span class="qp-reward-row" data-for="r : reward_rows" data-class-bold="r.bold"
+				      data-style-padding="(1 * root_scale) + 'px ' + (4 * root_scale) + 'px'"
 				      data-class-clickable="r.clickable"
 				      data-class-row-heading="r.style == 'heading'"
 				      data-class-row-requirement="r.style == 'requirement'"
@@ -63,14 +72,15 @@
 			     offset. .qp-reward has zero left/top of its own, so this resolves to the same
 			     panel-relative coordinates the old offset did. -->
 			<div id="reward_popup_anchor" class="qp-popup-anchor"></div>
-			<div id="btn_complete" class="qp-btn-complete" data-class-disabled="!request_complete"
+			<div id="btn_complete" class="sharp-text qp-btn-complete" data-class-disabled="!request_complete" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(108 * root_scale) + 'px'" data-style-height="(29 * root_scale) + 'px'" data-style-line-height="(29 * root_scale) + 'px'"
 			     data-event-click="questprogress_complete">{{ok_label}}</div>
 		</div>
 
 		<div id="btn_exit" class="qp-btn-exit" data-event-click="questprogress_click_close">
 			<span class="btn-exit-label">×</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

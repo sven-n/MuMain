@@ -63,7 +63,7 @@
      renders this panel full-screen rather than just losing the -50%/-50% shift.
      data-class-* is the same proven toggle mechanism every other
      conditional class here already uses (data-class-hidden, data-class-checked, etc). -->
-<body id="panel" class="center-both"
+<body id="panel" class="center-both native-text"
       data-style-left="positioned ? (root_x + 'px') : ''"
       data-style-top="positioned ? (root_y + 'px') : ''"
       data-class-window-shell-positioned="positioned">

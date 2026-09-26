@@ -15,6 +15,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -86,6 +87,7 @@ void mu::ui::window::CMyQuestInfoWindow::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                c.Bind("text_px", &model.textPx);
 
                 c.Bind("active_tab", &model.activeTab);
                 c.Bind("tab_quest_label", &model.tabQuestLabel);
@@ -523,6 +525,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("root_y");
         m_RmlBinder.MarkDirty("root_scale");
     }
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     const bool bEmpty = m_QuestIndices.empty();
     if (model.questListEmpty != bEmpty)

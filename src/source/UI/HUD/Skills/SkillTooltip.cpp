@@ -89,6 +89,13 @@ std::vector<UI::RmlBridge::Tooltip::Line> ToRmlBridgeLines(const Model& model)
     {
         const Line& src = model.lines[i];
         UI::RmlBridge::Tooltip::Line line;
+        if (src.isBlank)
+        {
+            // The model's "\n" rows are RenderTipTextList()'s half-height spacers, not text.
+            line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
+            lines.push_back(std::move(line));
+            continue;
+        }
         line.text = StringUtils::WideToNarrow(src.text);
         line.bold = src.isBold;
         switch (src.color)

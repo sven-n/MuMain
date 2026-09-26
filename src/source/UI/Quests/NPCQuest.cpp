@@ -21,6 +21,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
 
+#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -82,6 +83,7 @@ void CNPCQuest::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
 
             c.Bind("npc_name", &model.npcName);
             c.Bind("quest_title", &model.questTitle);
@@ -111,6 +113,8 @@ void CNPCQuest::BuildRmlUi()
             c.Bind("answers", &model.answers);
 
             c.Bind("dialogue_top", &model.dialogueTop);
+            c.Bind("message_top", &model.messageTop);
+            c.Bind("answers_top", &model.answersTop);
 
             c.Bind("complete_label", &model.completeLabel);
             c.Bind("cost_label", &model.costLabel);
@@ -303,11 +307,16 @@ void CNPCQuest::RenderItem3D()
                 x = UI::Scaling::LogicalX(transform, offset.x) - 22.f;
                 y = UI::Scaling::LogicalY(transform, offset.y) - 9.f;
 
+                // A row's box height is in the panel's own (logical) units -- a transform does not
+                // change box sizes -- unless a theme lays the rows out in physical pixels inside a
+                // counter-scaled text layer (legacy .sharp-text): then it is divided back.
                 if (Rml::Element* firstRow = conditionsEl->GetChild(0))
                 {
-                    const float rowHeightPx = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
-                    if (rowHeightPx > 0.0f)
-                        rowStep = rowHeightPx / transform.scaleY;
+                    float rowHeight = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
+                    if (conditionsEl->GetComputedValues().has_local_transform())
+                        rowHeight /= transform.scaleY;
+                    if (rowHeight > 0.0f)
+                        rowStep = rowHeight;
                 }
             }
         }
@@ -500,6 +509,7 @@ void CNPCQuest::SyncRmlModel()
         m_RmlBinder.MarkDirty("root_y");
         m_RmlBinder.MarkDirty("root_scale");
     }
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     const BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     const BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
@@ -565,14 +575,16 @@ void CNPCQuest::SyncRmlModel()
     // Same vertical-centering formula RenderText() used natively; the QUEST_ING branch depends on
     // how many message+answer lines are present this instance (a real per-instance value), the other
     // branch is a fixed lower anchor (room for the cost banner above it).
-    if (QUEST_ING == byCurQuestState)
-    {
-        const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
-        model.dialogueTop = 66.f + (NUM_LINE_CMB - iTotalLine) * 18.f / 2.f;
-    }
-    else
-    {
-        model.dialogueTop = 250.f;
-    }
+    constexpr float kLineAdvance = 18.f;
+    constexpr float kAnswersAnchorTop = 250.f;
+    const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
+    model.messageTop = 66.f + static_cast<float>(NUM_LINE_CMB - iTotalLine) * kLineAdvance / 2.f;
+    const bool questInProgress = QUEST_ING == byCurQuestState;
+    model.answersTop = questInProgress
+                           ? model.messageTop + static_cast<float>(g_iNumLineMessageBoxCustom) * kLineAdvance
+                           : kAnswersAnchorTop;
+    model.dialogueTop = questInProgress ? model.messageTop : kAnswersAnchorTop;
     m_RmlBinder.MarkDirty("dialogue_top");
+    m_RmlBinder.MarkDirty("message_top");
+    m_RmlBinder.MarkDirty("answers_top");
 }

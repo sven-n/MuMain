@@ -20,31 +20,42 @@
      npc_quest.rcss, matching where npc_quest_bg.rml's own frame graphics actually sit. -->
 <body>
 	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
-		<span id="title">{{npc_name}}</span>
-		<div class="nq-quest-title" data-class-hidden="!show_quest_title">{{quest_title}}</div>
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{npc_name}}</span>
+		<div class="sharp-text nq-quest-title" data-class-hidden="!show_quest_title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{quest_title}}</div>
 
 		<div class="nq-divider" data-class-hidden="!show_conditions"></div>
 		<!-- id read live by NPCQuest.cpp's RenderItem3D() -- its own resolved position/child-row
 		     height replace a hardcoded m_Pos+235/32px-step, so the still-native quest-item icon
 		     preview stays aligned with these RmlUi-rendered rows across a theme change. -->
-		<div id="conditions_anchor" class="nq-conditions" data-class-hidden="!show_conditions">
+		<div id="conditions_anchor" class="sharp-text nq-conditions" data-class-hidden="!show_conditions"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(128 * root_scale) + 'px'" data-style-line-height="(32 * root_scale) + 'px'">
 			<div class="nq-condition-row" data-for="c : conditions" data-style-color="c.color">{{c.text}}</div>
 		</div>
-		<div id="btn_complete" class="nq-btn-complete" data-class-hidden="!show_conditions"
+		<div id="btn_complete" class="sharp-text nq-btn-complete" data-class-hidden="!show_conditions" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(108 * root_scale) + 'px'" data-style-height="(29 * root_scale) + 'px'" data-style-line-height="(29 * root_scale) + 'px'"
 		     data-class-disabled="!complete_enabled" data-event-click="npcquest_complete">{{complete_label}}</div>
 
 		<div class="nq-cost" data-class-hidden="!show_cost">
-			<span class="nq-cost-label">{{cost_label}}</span>
-			<span class="nq-cost-amount gold-amount"
+			<span class="sharp-text nq-cost-label"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cost_label}}</span>
+			<span class="sharp-text nq-cost-amount gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(150 * root_scale) + 'px'"
 			      data-class-gold-base="cost_tier == 'base'"
 			      data-class-gold-hundred-thousand="cost_tier == 'hundred-thousand'"
 			      data-class-gold-million="cost_tier == 'million'"
 			      data-class-gold-ten-million="cost_tier == 'ten-million'">{{cost_amount}}</span>
 		</div>
 
-		<div class="nq-dialogue" data-style-top="dialogue_top + 'px'">
+		<!-- Messages and answers are positioned separately, as native draws them (message_top /
+		     answers_top, NPCQuestRmlModel.h). -->
+		<div class="sharp-text nq-dialogue" data-style-top="message_top + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
 			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
+		</div>
+		<div class="sharp-text nq-dialogue" data-style-top="answers_top + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
 			<div class="nq-answer-row" data-for="a : answers"
 			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
 		</div>
@@ -52,7 +63,8 @@
 		<div id="btn_exit" data-event-click="npcquest_click_close">
 			<span class="btn-exit-label">×</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

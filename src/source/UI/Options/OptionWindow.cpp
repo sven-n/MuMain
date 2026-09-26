@@ -27,6 +27,7 @@
 #include <RmlUi/Core/Elements/ElementFormControl.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
+#include <RmlUi/Core/ScrollTypes.h>
 #include <functional>
 
 extern int m_MusicOnOff;
@@ -599,7 +600,37 @@ bool mu::ui::window::COptionWindow::Update()
     ApplyPendingThemeSwitch();
     ApplyPendingUIScale();
     SyncRmlModel();
+    ScrollOpenDropdownToSelection();
     return true;
+}
+
+void mu::ui::window::COptionWindow::ScrollOpenDropdownToSelection()
+{
+    if (!m_bScrollDropdownPending || !m_pRmlDoc)
+        return;
+    if (m_iOpenDropdown == -1)
+    {
+        m_bScrollDropdownPending = false;
+        return;
+    }
+
+    // The click that opened it runs before the data model shows the list: wait for a frame in
+    // which the list is no longer hidden.
+    m_pRmlDoc->UpdateDocument();
+    Rml::ElementList lists;
+    m_pRmlDoc->GetElementsByClassName(lists, "option-dropdown-list");
+    for (Rml::Element* list : lists)
+    {
+        if (list->IsClassSet("hidden"))
+            continue;
+        m_bScrollDropdownPending = false;
+        Rml::ElementList selected;
+        list->GetElementsByClassName(selected, "selected");
+        if (!selected.empty())
+            selected.front()->ScrollIntoView(
+                Rml::ScrollIntoViewOptions(Rml::ScrollAlignment::Center, Rml::ScrollAlignment::Nearest,
+                                           Rml::ScrollBehavior::Instant, Rml::ScrollParentage::Closest));
+    }
 }
 
 bool mu::ui::window::COptionWindow::Render()
@@ -696,6 +727,7 @@ void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
     // was open as a side effect -- see model.openDropdown's own comment for why a single field
     // gives exclusivity for free.
     m_iOpenDropdown = (m_iOpenDropdown == dropdownId) ? -1 : dropdownId;
+    m_bScrollDropdownPending = (m_iOpenDropdown != -1);
     PlayBuffer(SOUND_CLICK01);
 }
 

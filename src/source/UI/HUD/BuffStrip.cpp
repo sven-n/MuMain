@@ -9,10 +9,13 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <algorithm>
+#include <iterator>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -149,32 +152,52 @@ namespace
         return "image(" + Rml::String(isAtlas1 ? "atlas1-" : "atlas2-") + std::to_string(tileIndex) + ")";
     }
 
-    // One plain newline-joined block, not the original's per-line bold/white/purple coloring.
-    Rml::String BuildTooltipText(eBuffState buff)
+    std::wstring JoinLines(std::list<std::wstring>::const_iterator first, std::list<std::wstring>::const_iterator last)
     {
-        std::list<std::wstring> tooltipinfo;
-        g_BuffToolTipString(tooltipinfo, buff);
-
         std::wstring combined;
-        for (const std::wstring& line : tooltipinfo)
+        for (auto it = first; it != last; ++it)
         {
             if (!combined.empty())
                 combined += L"\n";
-            combined += line;
+            combined += *it;
         }
+        return combined;
+    }
+
+    // The original's tooltip rows (RenderBuffTooltip()): the first line is the buff's name, then
+    // its description lines, then the remaining duration if it has one.
+    struct TooltipTexts
+    {
+        Rml::String title, body, duration, combined;
+    };
+
+    TooltipTexts BuildTooltip(eBuffState buff)
+    {
+        TooltipTexts entry;
+        std::list<std::wstring> tooltipinfo;
+        g_BuffToolTipString(tooltipinfo, buff);
 
         std::wstring bufftime;
         g_BuffStringTime(buff, bufftime);
+        std::wstring duration;
         if (!bufftime.empty())
         {
             wchar_t durLine[128] = {};
             mu_swprintf(durLine, I18N::Game::DurationPeriodS, bufftime.c_str());
-            if (!combined.empty())
-                combined += L"\n";
-            combined += durLine;
+            duration = durLine;
         }
 
-        return StringUtils::WideToNarrow(combined.c_str());
+        const auto body = tooltipinfo.empty() ? tooltipinfo.cend() : std::next(tooltipinfo.cbegin());
+        entry.title = tooltipinfo.empty() ? Rml::String() : StringUtils::WideToNarrow(tooltipinfo.front().c_str());
+        entry.body = StringUtils::WideToNarrow(JoinLines(body, tooltipinfo.cend()).c_str());
+        entry.duration = StringUtils::WideToNarrow(duration.c_str());
+
+        // One plain newline-joined block, for a theme that draws it as one.
+        std::wstring combined = JoinLines(tooltipinfo.cbegin(), tooltipinfo.cend());
+        if (!duration.empty())
+            combined += (combined.empty() ? L"" : L"\n") + duration;
+        entry.combined = StringUtils::WideToNarrow(combined.c_str());
+        return entry;
     }
 }
 
@@ -221,9 +244,14 @@ void CBuffStrip::BuildRmlUi()
             buff.RegisterMember("slot_top", &BuffEntry::slotTop);
             buff.RegisterMember("decorator", &BuffEntry::decorator);
             buff.RegisterMember("tooltip", &BuffEntry::tooltip);
+            buff.RegisterMember("tooltip_title", &BuffEntry::tooltipTitle);
+            buff.RegisterMember("tooltip_body", &BuffEntry::tooltipBody);
+            buff.RegisterMember("tooltip_duration", &BuffEntry::tooltipDuration);
             c.RegisterArray<std::vector<BuffEntry>>();
 
             c.Bind("buffs", &model.buffs);
+            c.Bind("strip_center", &model.stripCenter);
+            c.Bind("tooltip_line_px", &model.tooltipLinePx);
         });
 
     if (modelCreated)
@@ -304,7 +332,11 @@ void CBuffStrip::SyncRmlModel()
         entry.slotTop = static_cast<float>(buffheightcount) * (BUFF_IMG_HEIGHT + BUFF_IMG_SPACE);
 
         entry.decorator = BuildIconDecorator(buff);
-        entry.tooltip = BuildTooltipText(buff);
+        TooltipTexts tooltip = BuildTooltip(buff);
+        entry.tooltip = std::move(tooltip.combined);
+        entry.tooltipTitle = std::move(tooltip.title);
+        entry.tooltipBody = std::move(tooltip.body);
+        entry.tooltipDuration = std::move(tooltip.duration);
 
         model.buffs.push_back(entry);
 
@@ -316,6 +348,41 @@ void CBuffStrip::SyncRmlModel()
     }
 
     m_RmlBinder.MarkDirty("buffs");
+    SyncStripCenter();
+    SyncTooltipLineHeight();
+}
+
+void CBuffStrip::SyncTooltipLineHeight()
+{
+    constexpr float kNativeRowAdvance = 1.1f;
+    const auto transform = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    float lineHeight = 0.0f;
+    {
+        const UI::Scaling::ScopedActiveTransform measureScope(transform);
+        lineHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
+    }
+    const float advance = lineHeight * transform.scaleY * kNativeRowAdvance;
+
+    auto& model = m_RmlBinder.GetModel();
+    if (model.tooltipLinePx == advance)
+        return;
+    model.tooltipLinePx = advance;
+    m_RmlBinder.MarkDirty("tooltip_line_px");
+}
+
+void CBuffStrip::SyncStripCenter()
+{
+    // Docked panels sit at the right edge through the dock transform, so the free area ends where
+    // the leftmost of them begins.
+    const auto dock = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::DockRight, WindowWidth, WindowHeight);
+    const float freeWidth = UI::Scaling::PositionX(dock, static_cast<float>(m_iFreeScreenWidth));
+    const float center = freeWidth * 0.5f;
+
+    auto& model = m_RmlBinder.GetModel();
+    if (model.stripCenter == center)
+        return;
+    model.stripCenter = center;
+    m_RmlBinder.MarkDirty("strip_center");
 }
 
 float CBuffStrip::GetLayerDepth()

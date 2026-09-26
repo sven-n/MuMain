@@ -15,6 +15,8 @@
 @spritesheet nd-line-sheet  { src: "../../../newui_myquest_Line.tga"; nd-line-img: 0px 0px 188px 21px; }
 @spritesheet nd-contribute-sheet { src: "../../../Gens_point.tga"; nd-contribute-img: 0px 0px 168px 18px; }
 
+/* Text layers (.sharp-text, base.rcss) are bound in npc_dialogue.rml. */
+
 /* NPC name doubles as this window's title -- dynamic (g_QuestMng.GetNPCName()), unlike the other
    docked windows' own static #title text. */
 #title {
@@ -25,7 +27,6 @@
 	text-align: center;
 	color: token(accent-cyan);
 	font-weight: bold;
-	font-size: 12px;
 }
 
 /* Gens contribute-point banner (NPC 543/544 only) -- see RenderContributePoint()'s own gate,
@@ -41,21 +42,19 @@
 	height: 18px;
 	text-align: center;
 	color: token(text-narrative);
-	font-size: 12px;
-	line-height: 18px;
 	decorator: image(nd-contribute-img);
 }
 
 .nd-npc-lines {
 	position: absolute;
-	left: 13px;
-	top: 59px;
-	width: 164px;
+	left: 15.5px; /* native 13 + the native renderer's own glyph inset */
+	top: 56.5px; /* native 59 is the glyph top; our rows centre the glyphs in the 15px gap */
+	width: 160px; /* native DivideStringByPixel budget (wrap width, see NPCDialogue.cpp) */
 }
 .nd-line {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	line-height: inherit; /* native ND_TEXT_GAP, from .nd-npc-lines (npc_dialogue.rml) */
 	white-space: nowrap;
 }
 
@@ -80,25 +79,23 @@
 .nd-btn-npc { top: 165px; }
 .nd-btn-ans { top: 372px; }
 .nd-btn-l:hover, .nd-btn-r:hover { filter: brightness(1.25); }
-/* No pointer-events:none -- the RmlClickNpc/AnsPrev/NextPage() handlers already guard on
-   npc_prev_enabled/npc_next_enabled/ans_prev_enabled/ans_next_enabled, so a locked click is a safe
-   no-op (same convention quest_progress.rcss's own .qp-btn-l.locked comment documents). */
-.nd-btn-l.locked, .nd-btn-r.locked { filter: brightness(0.6); }
+/* Native renders a locked pager button not at all (Render() skips IsLock() buttons), so a page
+   arrow only shows while there is another page that way. */
+.nd-btn-l.locked, .nd-btn-r.locked { display: none; }
 
 .nd-answers {
 	position: absolute;
-	left: 13px;
-	top: 207px;
-	width: 164px;
+	left: 15.5px;
+	top: 204.5px; /* native 207, as .nd-npc-lines */
+	width: 160px;
 }
 .nd-answer-row {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	line-height: inherit; /* native ND_TEXT_GAP, from .nd-answers (npc_dialogue.rml) */
 	white-space: pre-line;
 	cursor: pointer;
 	pointer-events: auto;
-	margin-bottom: 2px;
 }
 .nd-answer-row:hover { background-color: token(surface-hover); }
 

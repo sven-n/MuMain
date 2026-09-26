@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="mu_helper_bar.rcss"/>
 </head>
-<body data-model="mu_helper_bar">
+<body class="native-text" data-model="mu_helper_bar">
 	<!-- MU Helper mini control bar + hero position readout. Fixed dp size, anchored top-left. -->
 	<div id="panel" class="anchor-top-left">
 		<div id="seg_a"></div>

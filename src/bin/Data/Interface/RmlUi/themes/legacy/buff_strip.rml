@@ -1,0 +1,26 @@
+<rml>
+<head>
+	<title>Buff Strip</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="buff_strip.rcss"/>
+</head>
+<!-- Legacy markup override of ../../buff_strip.rml (keep ids/data-model names in sync). Native
+     CNewUIBuffWindow: the strip is centred on the screen area the docked panels leave free
+     (strip_center), and each hover tooltip is RenderTipTextList() centred on its icon: the name
+     in bold blue, the description in white and the remaining duration in purple, centred. -->
+<body class="native-text" data-model="buff_strip">
+	<div id="panel" class="center-x" data-style-left="strip_center + 'px'">
+		<div class="buff-slot" data-for="buff : buffs"
+		     data-style-left="buff.slot_left + 'dp'" data-style-top="buff.slot_top + 'dp'">
+			<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
+			<div class="tooltip">
+				<div class="tooltip-box" data-style-line-height="tooltip_line_px + 'px'">
+					<div class="tooltip-title">{{buff.tooltip_title}}</div>
+					<div class="tooltip-body">{{buff.tooltip_body}}</div>
+					<div class="tooltip-duration" data-class-hidden="buff.tooltip_duration == ''">{{buff.tooltip_duration}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

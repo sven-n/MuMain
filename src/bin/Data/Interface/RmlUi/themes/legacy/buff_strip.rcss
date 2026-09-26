@@ -197,7 +197,7 @@
 	top: 15dp;
 	width: 200dp;
 	font-family: "token(font-body)";
-	font-size: 11dp;
+	font-size: 1rem;
 	pointer-events: none;
 }
 
@@ -217,23 +217,34 @@
 	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
 
-/* Below the icon; width is explicit because this build's shrink-to-fit undersizes a multi-line
-   pre-line box to its longest word. */
+/* Native RenderTipTextList() anchored at the icon's centre (x + 10) and 20 below its top: a box
+   as wide as the widest line + 4, black at 0.8 alpha with a 1px border, lines centred and 1.1
+   text heights apart. The row is centred on the icon (it is wider than any tooltip) and the box
+   inside it shrinks to its content. */
 .tooltip {
 	display: none;
 	position: absolute;
-	top: 32dp;
-	left: 0dp;
-	width: 160dp;
-	white-space: pre-line;
-	background-color: token(surface-tooltip);
-	color: token(text-primary);
-	padding: 3dp 5dp;
-	border-radius: token(radius-sm)dp;
-	font-family: "token(font-body)";
-	font-size: 11dp;
+	top: 20dp;
+	left: -140dp;
+	width: 300dp;
+	text-align: center;
 	pointer-events: none;
 }
+.tooltip-box {
+	display: inline-block;
+	padding: 0 2dp;
+	border: 1dp #000000;
+	background-color: rgba(0, 0, 0, 204);
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	/* line-height: the native row advance, bound in buff_strip.rml */
+	white-space: pre-line;
+	text-align: center;
+}
+.tooltip-title { font-weight: bold; color: #80b3ff; }
+.tooltip-body { color: #ffffff; }
+.tooltip-duration { color: #ff1aff; }
+.tooltip-duration.hidden { display: none; }
 .buff-slot:hover .tooltip {
 	display: block;
 }

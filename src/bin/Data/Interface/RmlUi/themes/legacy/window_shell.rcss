@@ -98,9 +98,12 @@
 	right: 0;
 	top: 10dp;
 	text-align: center;
-	font-family: "token(font-body)";
+	/* No token() here: design tokens are only substituted in a document's own linked stylesheets,
+	   not in a template's, so an unresolved font-family left this text with no font (height 0,
+	   never drawn). The font is inherited from the consumer's #panel; native's menu titles are
+	   white (a few boxes, e.g. the chaos-mix menu, draw theirs orange). */
 	font-weight: bold;
-	color: token(accent-gold);
+	color: #ffffff;
 	pointer-events: none;
 }
 .window-shell-header-title.hidden { display: none; }
