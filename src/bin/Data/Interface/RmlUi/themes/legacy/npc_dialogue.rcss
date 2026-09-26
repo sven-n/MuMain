@@ -81,10 +81,9 @@
 .nd-btn-npc { top: 165px; }
 .nd-btn-ans { top: 372px; }
 .nd-btn-l:hover, .nd-btn-r:hover { filter: brightness(1.25); }
-/* No pointer-events:none -- the RmlClickNpc/AnsPrev/NextPage() handlers already guard on
-   npc_prev_enabled/npc_next_enabled/ans_prev_enabled/ans_next_enabled, so a locked click is a safe
-   no-op (same convention quest_progress.rcss's own .qp-btn-l.locked comment documents). */
-.nd-btn-l.locked, .nd-btn-r.locked { filter: brightness(0.6); }
+/* Native renders a locked pager button not at all (Render() skips IsLock() buttons), so a page
+   arrow only shows while there is another page that way. */
+.nd-btn-l.locked, .nd-btn-r.locked { display: none; }
 
 .nd-answers {
 	position: absolute;

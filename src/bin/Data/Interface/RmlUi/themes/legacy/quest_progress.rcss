@@ -89,10 +89,9 @@
 .qp-btn-l { left: 131px; decorator: image(qp-btn-l); }
 .qp-btn-r { left: 153px; decorator: image(qp-btn-r); }
 .qp-btn-l:hover, .qp-btn-r:hover { filter: brightness(1.25); }
-/* No pointer-events:none -- the RmlClickPrevPage()/RmlClickNextPage() handlers already guard on
-   prev_enabled/next_enabled, so a locked click is a safe no-op; dimming alone is enough (same
-   convention my_quest_info.rcss's own .quest-btn.locked comment documents). */
-.qp-btn-l.locked, .qp-btn-r.locked { filter: brightness(0.6); }
+/* Native CNewUIQuestProgress(ByEtc)::Render() skips a locked pager button entirely, so a page
+   arrow only shows while there is another page that way. */
+.qp-btn-l.locked, .qp-btn-r.locked { display: none; }
 
 /* Player-name label -- CQuestProgress's own document only (quest_progress_etc.rml has no such
    element at all). Shown for active_view 0 and 1, hidden only in reward view (2).
