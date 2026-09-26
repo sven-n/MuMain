@@ -1,0 +1,110 @@
+/* Modern theme for CChatLogWindow. Same geometry as legacy (native's own 281 width / 15 line
+   pitch / 4 side edges / 5 top inset -- see legacy/chat_log.rcss for where those come from), but
+   the per-type colours are restated in this theme's token palette instead of native's saturated
+   RGBA pairs.
+
+   The message TYPES are semantic, so they keep distinct hues here too -- a player has to tell a
+   whisper from a guild message at a glance, which is behaviour, not decoration. What changes is
+   the treatment: flat token-driven left-edge accents on a common recessed ground, rather than
+   nine fully-saturated fills. */
+
+#panel {
+	position: absolute;
+	left: 0;
+	bottom: 97dp;
+	width: 281dp;
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	pointer-events: none;
+	border-radius: token(radius-sm)px;
+}
+
+/* Fill is bound from C++ (frame state + the user's transparency setting composed into one
+   string) -- see legacy/chat_log.rcss's note. */
+
+#resize_handle {
+	position: absolute;
+	left: 0;
+	top: -10dp;
+	width: 281dp;
+	height: 6dp;
+	background-color: token(metal-rail-dark);
+	border-radius: token(radius-sm)px;
+	cursor: move;
+	pointer-events: auto;
+}
+#resize_handle:hover { background-color: token(metal-edge); }
+#resize_handle:active { background-color: token(metal-highlight); }
+
+/* Bottom-up stacking and the frame-gated scrollbar -- see legacy/chat_log.rcss for why each is
+   shaped this way (both trace to native's RenderMessages()/RenderFrame()). Behaviour is identical
+   in both themes; only the scrollbar's own width differs, matching each theme's chrome. */
+#lines {
+	position: absolute;
+	left: 4dp;
+	top: 5dp;
+	right: 4dp;
+	font-size: 11dp;
+	display: flex;
+	flex-direction: column;
+	/* Lines hug their own text rather than stretching to the pane: native passed no box width to
+	   RenderText(), so the text renderer fell back to the MEASURED width for its background quad
+	   (CUIRenderTextSDLTtf.cpp -- `if (layout.boxWidth == 0) boxWidth = measuredWidth`). Flex
+	   defaults to align-items:stretch, which made every line a full-width bar instead. */
+	align-items: flex-start;
+}
+.chat-line:first-child { margin-top: auto; }
+
+/* The message well must NOT be a hover target. Core::Input::IsMouseOverUI() gates click-to-move
+   on Rml::Context::IsMouseInteracting(), which is true for ANY pointer-events:auto element under
+   the cursor -- clicked or not -- so leaving .scroll-pane's own `pointer-events: auto` in place
+   here turned the whole chat area into a wall the player could not walk through. Native let world
+   clicks pass straight through this window (its UpdateMouseEvent() only consumed on the single
+   hover-transition frame), so nothing here may claim the cursor except the two controls that
+   genuinely need it. */
+#lines { pointer-events: none; }
+.chat-line { pointer-events: none; }
+
+/* The scrollbar is the exception, and it has to opt back in explicitly at every level: its
+   generated children inherit pointer-events from #lines, which is now `none`. */
+#lines scrollbarvertical,
+#lines scrollbarvertical slidertrack,
+#lines scrollbarvertical sliderbar { pointer-events: auto; }
+
+/* Native's RenderFrame() draws the scrollbar AND the resize handle only while the frame is
+   shown, so hiding the frame (F5) takes the scrollbar with it. Width 0 rather than
+   overflow:hidden: native still scrolls on the wheel with the frame hidden. */
+#lines scrollbarvertical { width: 0; }
+#panel.framed #lines scrollbarvertical { width: 8dp; }
+
+.chat-line {
+	display: block;
+	line-height: 15dp;
+	white-space: nowrap;
+	padding: 0 4dp;
+	border-left: 2dp transparent;
+	background-color: rgba(0, 0, 0, 130);
+	color: token(text-primary);
+}
+
+/* Left-edge accent carries the type; the ground stays common. Hues track the same semantics
+   native encodes in its fills (gold whisper, cyan party, green guild, yellow union, olive gens,
+   blue system, red error, gold-on-dark GM). */
+.chat-line--chat    { border-left-color: transparent; }
+.chat-line--whisper { border-left-color: rgb(255, 200, 50);  color: rgb(255, 214, 120); }
+.chat-line--system  { border-left-color: rgb(100, 150, 255); color: rgb(150, 185, 255); }
+.chat-line--error   { border-left-color: rgb(255, 60, 40);   color: rgb(255, 120, 100); }
+.chat-line--party   { border-left-color: rgb(0, 200, 255);   color: rgb(130, 225, 255); }
+.chat-line--guild   { border-left-color: rgb(0, 255, 150);   color: rgb(130, 255, 200); }
+.chat-line--union   { border-left-color: rgb(200, 200, 0);   color: rgb(230, 230, 130); }
+.chat-line--gens    { border-left-color: rgb(150, 200, 100); color: rgb(200, 230, 170); }
+.chat-line--gm      { border-left-color: token(accent-gold); color: token(accent-gold); font-weight: bold; }
+
+/* Legacy drops chat-line alpha while the frame is shown so the frame fill reads through; the same
+   need exists here, stated against this theme's own ground. */
+#panel.framed .chat-line { background-color: rgba(0, 0, 0, 80); }
+
+.chat-line--pointed {
+	background-color: token(surface-control);
+	color: token(text-primary);
+}

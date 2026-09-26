@@ -6,10 +6,16 @@
 #include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Widgets/Window/ChatInputBox.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 
 #pragma warning(disable : 4786)
 #include <string>
 #include <vector>
+
+namespace Rml
+{
+    class ElementDocument;
+}
 
 namespace mu::ui::window
 {
@@ -70,6 +76,34 @@ namespace mu::ui::window
 
     typedef TMessageText<wchar_t> CMessageText;
 
+    // One rendered chat line. `kind` is the lowercase message-type slug the RCSS builds its
+    // .chat-line--<kind> class from; `hasId` marks a line whose sender can be right-clicked to
+    // target a whisper (and which therefore gets the hover highlight).
+    struct ChatLogLineEntry
+    {
+        Rml::String text;
+        Rml::String kind;
+        bool hasId = false;
+    };
+
+    // RmlUi owns this window's whole presentation now: the background fill, every message line,
+    // and -- via base.rcss's .scroll-pane on #lines -- the scroll position, mouse wheel and
+    // scrollbar drag. C++ keeps the message vectors, the filters and the 3-line-step resize, and
+    // pins the view to the bottom when a new message arrives.
+    struct ChatLogRmlModel
+    {
+        float panelHeight = 100.0f;  // dp -- 15 * showing lines + 10, native's own UpdateWndSize()
+        float clientHeight = 90.0f;  // dp -- the scrolling well inside it
+        // Frame state and the user's transparency setting composed into one CSS colour, so no
+        // static RCSS rule competes with either -- see legacy/chat_log.rcss.
+        Rml::String backColor = "rgba(0,0,0,0)";
+        bool showFrame = false;
+        // Index of the line under the cursor, or -1. Drives .chat-line--pointed; C++ resolves it
+        // because the lines themselves are pointer-events:none (see chat_log.rcss).
+        int pointedIndex = -1;
+        Rml::Vector<ChatLogLineEntry> lines;
+    };
+
     class CChatLogWindow : public CObject
     {
     public:
@@ -95,17 +129,13 @@ namespace mu::ui::window
         static constexpr float SCROLL_BAR_WIDTH = 7.0f;
         static constexpr float SCROLL_TOP_BOTTOM_PART_HEIGHT = 3.0f;
         static constexpr float SCROLL_MIDDLE_PART_HEIGHT = 15.0f;
-        static constexpr float SCROLL_BTN_WIDTH = 15.0f;
-        static constexpr float SCROLL_BTN_HEIGHT = 30.0f;
         static constexpr float CLIENT_WIDTH = WND_WIDTH - SCROLL_BAR_WIDTH * 2.0f - (WND_LEFT_RIGHT_EDGE * 2.0f);
+        // Only the resize drag is still a C++ interaction; hover, wheel and scrollbar dragging
+        // all belong to RmlUi now, so the states that tracked them are gone.
         enum EVENT_STATE
         {
             EVENT_NONE = 0,
-            EVENT_CLIENT_WND_HOVER,
-            EVENT_SCROLL_BTN_DOWN,
-            EVENT_RESIZING_BTN_HOVER,
             EVENT_RESIZING_BTN_DOWN,
-            EVENT_RESIZING_BTN_UP,
         };
 
         typedef std::wstring type_string;
@@ -126,31 +156,61 @@ namespace mu::ui::window
         type_vector_msgs	m_vecGMMsgs;
         type_vector_filters	m_vecFilters;
 
-        POINT	m_WndPos, m_ScrollBtnPos;
+        POINT	m_WndPos;
         SIZE	m_WndSize;
         int		m_nShowingLines;
 
         MESSAGE_TYPE		m_CurrentRenderMsgType;
         bool				m_bShowChatLog;
         int		m_iCurrentRenderEndLine;
-        int		m_iGrapRelativePosY;
         float	m_fBackAlpha;
 
         EVENT_STATE			m_EventState;
 
         bool m_bShowFrame;
-        bool m_bPointedMessage;
-        int m_iPointedMessageIndex;
 
         void Init();
-        void LoadImages();
-        void UnloadImages();
 
-        bool RenderBackground();
-        bool RenderMessages();
-        bool RenderFrame();
+        void BuildRmlUi();
+        void SyncRmlModel();
+        // Rebuilds the bound line list from the currently-selected message vector. Kept
+        // index-aligned with that vector (undrawable entries become blanks rather than being
+        // skipped) because chat_line_rightclick() resolves a sender by array index.
+        void RebuildLineModel();
+        // Pins #lines to the bottom after the model's line list changes, so a new message scrolls
+        // into view exactly as native's own "follow the tail" behaviour did. Skipped while the
+        // user has scrolled up, same as native.
+        void ScrollToBottomIfFollowing();
+        bool IsScrolledToBottom() const;
+        // Resolves which rendered line the cursor is over and acts on a right-click, replacing
+        // native's own per-line loop in UpdateMouseEvent(). Compares raw window pixels against
+        // RmlUi's own element boxes -- both are already in screen space, so no transform
+        // conversion enters anywhere (that conversion is the bug class RmlPanelGeometry.h warns
+        // about).
+        void UpdatePointedLine();
+        // Pushes m_iCurrentRenderEndLine into RmlUi's scroll offset (native's own fPosRate math),
+        // and, when no request is pending, reads it back the other way so the logical cursor
+        // tracks wherever the user dragged or scrolled to.
+        void ApplyLogicalScroll();
+        void SyncLogicalScrollFromView();
+
+        RmlModelBinder<ChatLogRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        bool m_bLinesDirty = true;
+        bool m_bFollowTail = true;
+        // One-shot, set when the line list changes and consumed on the next frame once RmlUi has
+        // laid the new lines out. Never pin outside this latch -- doing so re-clamps the view
+        // every frame and makes the scrollbar and wheel look broken.
+        bool m_bScrollPending = false;
+        // Set by Scrolling()/UpdateScrollPos() -- the logical scroll position still has external
+        // drivers (CChatInputBox's PageUp/PageDown and its resize buttons), so those requests are
+        // latched and applied to RmlUi's own scroll offset on the next sync rather than fighting
+        // it every frame.
+        bool m_bScrollRequest = false;
 
     public:
+        void ReloadRmlTheme();
+
         CChatLogWindow();
         ~CChatLogWindow() override;
 

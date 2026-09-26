@@ -9,6 +9,14 @@
 #include "UI/Widgets/UIControls.h"
 #include "Engine/Object/ZzzInterface.h"
 
+// RmlUi migration -- see ChatLogRmlModel (ChatLogWindow.h).
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -28,7 +36,6 @@ void mu::ui::window::CChatLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
     m_WndPos.x = m_WndPos.y = 0;
-    m_ScrollBtnPos.x = m_ScrollBtnPos.y = 0;
     m_WndSize.cx = WND_WIDTH; m_WndSize.cy = 0;
     m_nShowingLines = 6;
     m_iCurrentRenderEndLine = -1;
@@ -41,195 +48,6 @@ void mu::ui::window::CChatLogWindow::Init()
     m_CurrentRenderMsgType = TYPE_ALL_MESSAGE;
     m_bShowChatLog = true;
 
-    m_bPointedMessage = false;
-    m_iPointedMessageIndex = 0;
-}
-
-void mu::ui::window::CChatLogWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_SCROLL_MIDDLE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", IMAGE_SCROLL_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_SCROLLBAR_OFF, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scrollbar_stretch.jpg", IMAGE_DRAG_BTN, GL_LINEAR);
-}
-
-void mu::ui::window::CChatLogWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_SCROLL_TOP);
-    DeleteBitmap(IMAGE_SCROLL_MIDDLE);
-    DeleteBitmap(IMAGE_SCROLL_BOTTOM);
-    DeleteBitmap(IMAGE_SCROLLBAR_ON);
-    DeleteBitmap(IMAGE_SCROLLBAR_OFF);
-    DeleteBitmap(IMAGE_DRAG_BTN);
-}
-
-bool mu::ui::window::CChatLogWindow::RenderBackground()
-{
-    if (m_bShowFrame)
-    {
-        float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
-
-        EnableAlphaTest();
-        const unsigned int backgroundAlpha = static_cast<unsigned int>(std::clamp(GetBackAlpha(), 0.f, 1.f) * 255.f);
-        RenderColorQuadARGB(fRenderPosX, fRenderPosY, (float)m_WndSize.cx, (float)m_WndSize.cy,
-            backgroundAlpha << 24);
-        DisableAlphaBlend();
-    }
-    return true;
-}
-
-bool mu::ui::window::CChatLogWindow::RenderMessages()
-{
-    float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
-
-    type_vector_msgs* pvecMsgs = GetMsgs(GetCurrentMsgType());
-
-    if (pvecMsgs == nullptr)
-    {
-        assert(!"empty chat!");
-        return false;
-    }
-
-    int iRenderStartLine = 0;
-    if (GetCurrentRenderEndLine() >= m_nShowingLines)
-    {
-        iRenderStartLine = GetCurrentRenderEndLine() - m_nShowingLines + 1;
-    }
-    else
-    {
-        fRenderPosY = fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * (m_nShowingLines - GetCurrentRenderEndLine() - 1));
-    }
-
-    BYTE byAlpha = 150;
-    if (m_bShowFrame) byAlpha = 100;
-
-    EnableAlphaTest();
-    for (int i = iRenderStartLine, s = 0; i <= GetCurrentRenderEndLine(); i++, s++)
-    {
-        if (i < 0 && i >= (int)pvecMsgs->size()) break;
-
-        bool bRenderMessage = true;
-        g_pRenderText->SetFont(g_hFont);
-
-        auto const pMsgText = (*pvecMsgs)[i];
-
-        if (pMsgText->GetType() == TYPE_WHISPER_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(255, 200, 50, 150);
-            g_pRenderText->SetTextColor(0, 0, 0, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_SYSTEM_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(0, 0, 0, 150);
-            g_pRenderText->SetTextColor(100, 150, 255, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_ERROR_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(0, 0, 0, 150);
-            g_pRenderText->SetTextColor(255, 30, 0, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_CHAT_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(0, 0, 0, byAlpha);
-            g_pRenderText->SetTextColor(205, 220, 239, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_PARTY_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(0, 200, 255, 150);
-            g_pRenderText->SetTextColor(0, 0, 0, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_GUILD_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(0, 255, 150, 200);
-            g_pRenderText->SetTextColor(0, 0, 0, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_UNION_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(200, 200, 0, 200);
-            g_pRenderText->SetTextColor(0, 0, 0, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_GENS_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(150, 200, 100, 200);
-            g_pRenderText->SetTextColor(0, 0, 0, 255);
-        }
-        else if (pMsgText->GetType() == TYPE_GM_MESSAGE)
-        {
-            g_pRenderText->SetBgColor(30, 30, 30, 200);
-            g_pRenderText->SetTextColor(250, 200, 50, 255);
-            g_pRenderText->SetFont(g_hFontBold);
-        }
-        else
-        {
-            bRenderMessage = false;
-        }
-
-        if (bRenderMessage && !pMsgText->GetText().empty())
-        {
-            POINT ptRenderPos = {
-                static_cast<LONG>(fRenderPosX + WND_LEFT_RIGHT_EDGE),
-                static_cast<LONG>(fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * s))
-            };
-            if (!pMsgText->GetID().empty())
-            {
-                if (m_bPointedMessage == true && m_iPointedMessageIndex == i)
-                {
-                    g_pRenderText->SetBgColor(30, 30, 30, 180);
-                    g_pRenderText->SetTextColor(255, 128, 255, 255);
-                }
-
-                type_string strLine = std::wstring( pMsgText->GetID()) + L" : " + pMsgText->GetText();
-                g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, strLine.c_str());
-            }
-            else
-            {
-                g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, pMsgText->GetText().c_str());
-            }
-        }
-    }
-    DisableAlphaBlend();
-
-    return true;
-}
-
-bool mu::ui::window::CChatLogWindow::RenderFrame()
-{
-    if (m_bShowFrame)
-    {
-        float const fRenderPosX = m_WndPos.x;
-        float const fRenderPosY = m_WndPos.y - m_WndSize.cy;
-
-        EnableAlphaTest();
-        const DWORD resizeButtonColor = m_EventState == EVENT_RESIZING_BTN_DOWN
-            ? RGBA(179, 179, 179, 255)
-            : RGBA(255, 255, 255, 255);
-        RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY - (float)RESIZING_BTN_HEIGHT,
-            RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT, 0.f, 0.f, resizeButtonColor);
-        DisableAlphaBlend();
-
-        RenderImage(IMAGE_SCROLL_TOP, fRenderPosX + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE, fRenderPosY + WND_TOP_BOTTOM_EDGE, SCROLL_BAR_WIDTH, WND_TOP_BOTTOM_EDGE);
-
-        for (int i = 0; i < (int)GetNumberOfShowingLines(); i++)
-        {
-            RenderImage(IMAGE_SCROLL_MIDDLE, fRenderPosX + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE,
-                fRenderPosY + WND_TOP_BOTTOM_EDGE + (float)(i * SCROLL_MIDDLE_PART_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT), SCROLL_BAR_WIDTH, SCROLL_MIDDLE_PART_HEIGHT);
-        }
-
-        RenderImage(IMAGE_SCROLL_BOTTOM, fRenderPosX + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE,
-            m_WndPos.y - WND_TOP_BOTTOM_EDGE - SCROLL_TOP_BOTTOM_PART_HEIGHT, SCROLL_BAR_WIDTH, SCROLL_TOP_BOTTOM_PART_HEIGHT);
-
-        EnableAlphaTest();
-        const DWORD scrollButtonColor = m_EventState == EVENT_SCROLL_BTN_DOWN
-            ? RGBA(179, 179, 179, 255)
-            : RGBA(255, 255, 255, 255);
-        RenderImage(IMAGE_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH,
-            SCROLL_BTN_HEIGHT, 0.f, 0.f, scrollButtonColor);
-        DisableAlphaBlend();
-    }
-
-    return true;
 }
 
 bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, int nShowingLines /* = 6 */)
@@ -243,13 +61,16 @@ bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, i
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHATLOGWINDOW, this);
     m_WndPos.x = x; m_WndPos.y = y;
     SetNumberOfShowingLines(nShowingLines);
-    LoadImages();
+    // No LoadImages() any more: every sprite this window used is referenced by chat_log.rcss and
+    // loaded through RmlUi's own exclusive-slot path instead. CGuildInfoWindow/CGuardWindow alias
+    // this class's IMAGE_LIST values but load their own copies, so nothing depended on it -- the
+    // enum itself stays in the header for those aliases.
     return true;
 }
 
 void mu::ui::window::CChatLogWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
     ResetFilter();
     ClearAll();
 
@@ -309,6 +130,7 @@ void mu::ui::window::CChatLogWindow::AddText(const type_string& strID, const typ
 
 void mu::ui::window::CChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
 {
+    m_bLinesDirty = true;
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
     {
@@ -465,6 +287,7 @@ void mu::ui::window::CChatLogWindow::ProcessAddText(const type_string& strID, co
 
 void mu::ui::window::CChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 {
+    m_bLinesDirty = true;
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 
     if (pvecMsgs == nullptr)
@@ -488,6 +311,7 @@ void mu::ui::window::CChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 
 void mu::ui::window::CChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 {
+    m_bLinesDirty = true;
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
     {
@@ -545,10 +369,15 @@ void mu::ui::window::CChatLogWindow::Scrolling(int nRenderEndLine)
         else
             m_iCurrentRenderEndLine = nRenderEndLine;
     }
+
+    // Nothing renders from m_iCurrentRenderEndLine any more, so a caller that moves it (the chat
+    // input box's PageUp/PageDown) has to have it pushed into RmlUi's own scroll offset.
+    m_bScrollRequest = true;
 }
 
 void mu::ui::window::CChatLogWindow::SetFilterText(const type_string& strFilterText)
 {
+    m_bLinesDirty = true;
     bool bPrevFilter = false;
 
     if (!m_vecFilters.empty())
@@ -588,6 +417,7 @@ void mu::ui::window::CChatLogWindow::SetFilterText(const type_string& strFilterT
 
 void mu::ui::window::CChatLogWindow::ResetFilter()
 {
+    m_bLinesDirty = true;
     m_vecFilters.clear();
 }
 
@@ -663,190 +493,63 @@ bool mu::ui::window::CChatLogWindow::IsShowFrame()
 
 bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
 {
-    
+    // Almost everything this used to do now belongs to RmlUi: the mouse wheel, the scrollbar drag
+    // and the per-line hover/right-click hit test are all handled by #lines (base.rcss's
+    // .scroll-pane) and the line elements themselves. What survives is the part RmlUi has no
+    // concept of -- native's 3-line-step window resize, which is driven by the pointer's absolute
+    // Y against the whole screen, not by any element's own box.
 
-    if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-        mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY))
-    {
-        m_EventState = EVENT_CLIENT_WND_HOVER;
-        return false;
-    }
-    if (false == MouseLButtonPush && m_EventState == EVENT_CLIENT_WND_HOVER &&
-        false == mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY))
+    if (!m_bShowFrame)
     {
         m_EventState = EVENT_NONE;
         return true;
     }
 
-    if (m_EventState == EVENT_CLIENT_WND_HOVER)
+    if (m_EventState != EVENT_RESIZING_BTN_DOWN)
+        return true;
+
+    // Armed by #resize_handle's data-event-mousedown (chat_resize_begin).
+    if (false == MouseLButtonPush || true == MouseLButtonPop)
     {
-        if (MouseWheel > 0)
-            Scrolling(GetCurrentRenderEndLine() - 1);
-        if (MouseWheel < 0)
-            Scrolling(GetCurrentRenderEndLine() + 1);
-        if (MouseWheel != 0)
-            MouseWheel = 0;
+        m_EventState = EVENT_NONE;
+        return true;
     }
 
-    m_bPointedMessage = false;
-    if (mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY))
+    // Native's own stepping, unchanged: the screen is divided into 3-line bands above and below
+    // the handle's resting position, and the pointer's band picks the new line count.
+    const LONG resizeTop = (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT);
+    const int nTopSections = (15 - (int)GetNumberOfShowingLines()) / 3;
+    const int nBottomSections = ((int)GetNumberOfShowingLines() - 3) / 3;
+
+    for (int i = 0; i < nTopSections; i++)
     {
-        int iRenderStartLine = 0;
-        if (GetCurrentRenderEndLine() >= m_nShowingLines)
-            iRenderStartLine = GetCurrentRenderEndLine() - m_nShowingLines + 1;
-
-        for (int i = iRenderStartLine, s = 0; i <= GetCurrentRenderEndLine(); i++, s++)
+        if (mu::ui::window::CheckMouseIn(0, resizeTop - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
+            REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
         {
-            type_vector_msgs* pvecMsgs = GetMsgs(GetCurrentMsgType());
-            if (pvecMsgs == nullptr)
-            {
-                return false;
-            }
-
-            CMessageText* pMsgText = (*pvecMsgs)[i];
-
-            if (pMsgText->GetType() == TYPE_WHISPER_MESSAGE
-                || pMsgText->GetType() == TYPE_CHAT_MESSAGE
-                || pMsgText->GetType() == TYPE_PARTY_MESSAGE
-                || pMsgText->GetType() == TYPE_GUILD_MESSAGE
-                || pMsgText->GetType() == TYPE_UNION_MESSAGE
-                || pMsgText->GetType() == TYPE_GENS_MESSAGE
-                || pMsgText->GetType() == TYPE_GM_MESSAGE
-                )
-            {
-                float fRenderPosX = m_WndPos.x;
-                float fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
-                if (GetCurrentRenderEndLine() < m_nShowingLines)
-                {
-                    fRenderPosY = fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * (m_nShowingLines - GetCurrentRenderEndLine() - 1));
-                }
-
-                POINT ptRenderPos;
-                ptRenderPos.x = fRenderPosX + WND_LEFT_RIGHT_EDGE;
-                ptRenderPos.y = fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * s);
-
-                if (mu::ui::window::CheckMouseIn(ptRenderPos.x, ptRenderPos.y, WND_WIDTH, SCROLL_MIDDLE_PART_HEIGHT))
-                {
-                    m_bPointedMessage = true;
-                    m_iPointedMessageIndex = i;
-
-                    std::wstring strID = pMsgText->GetID();
-                    if (mu::ui::window::IsPress(VK_RBUTTON) && strID.empty() == false)
-                    {
-                        g_pChatInputBox->SetWhsprID(strID.c_str());
-                    }
-                }
-            }
+            SetNumberOfShowingLines((int)GetNumberOfShowingLines() + (i + 1) * 3);
+            return false;
         }
     }
-
-    if (m_bShowFrame)
+    for (int i = 0; i < nBottomSections; i++)
     {
-        if (m_EventState == EVENT_CLIENT_WND_HOVER && MouseLButtonPush &&
-            mu::ui::window::CheckMouseIn(m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT))
+        if (mu::ui::window::CheckMouseIn(0, resizeTop + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
+            REFERENCE_WIDTH, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
         {
-            extern int MouseY;
-
-            m_EventState = EVENT_SCROLL_BTN_DOWN;
-            m_iGrapRelativePosY = MouseY - m_ScrollBtnPos.y;
+            SetNumberOfShowingLines((int)GetNumberOfShowingLines() - (i + 1) * 3);
             return false;
-        }
-        if (m_EventState == EVENT_SCROLL_BTN_DOWN)
-        {
-            if (mu::ui::window::IsRepeat(VK_LBUTTON))
-            {
-                if (GetNumberOfLines(GetCurrentMsgType()) > GetNumberOfShowingLines())
-                {
-                    extern int MouseY;
-                    if (MouseY - m_iGrapRelativePosY < m_WndPos.y - m_WndSize.cy + WND_TOP_BOTTOM_EDGE)
-                    {
-                        Scrolling(GetNumberOfShowingLines() - 1);
-                        m_ScrollBtnPos.y = m_WndPos.y - m_WndSize.cy + WND_TOP_BOTTOM_EDGE;
-                    }
-                    else if (MouseY - m_iGrapRelativePosY > m_WndPos.y - SCROLL_BTN_HEIGHT - WND_TOP_BOTTOM_EDGE)
-                    {
-                        Scrolling(GetNumberOfLines(GetCurrentMsgType()) - 1);
-                        m_ScrollBtnPos.y = m_WndPos.y - SCROLL_BTN_HEIGHT - WND_TOP_BOTTOM_EDGE;
-                    }
-                    else
-                    {
-                        float fScrollRate = (float)((MouseY - m_iGrapRelativePosY) - (m_WndPos.y - m_WndSize.cy + WND_TOP_BOTTOM_EDGE)) / (float)(m_WndSize.cy - WND_TOP_BOTTOM_EDGE * 2 - SCROLL_BTN_HEIGHT);
-                        Scrolling(GetNumberOfShowingLines() + (float)(GetNumberOfLines(GetCurrentMsgType()) - GetNumberOfShowingLines()) * fScrollRate);
-
-                        m_ScrollBtnPos.y = MouseY - m_iGrapRelativePosY;
-                    }
-                }
-                return false;
-            }
-            if (mu::ui::window::IsRelease(VK_LBUTTON))
-            {
-                m_EventState = EVENT_NONE;
-                return true;
-            }
-        }
-
-        POINT ptResizingBtn = { m_WndPos.x, (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT) };
-        if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-            mu::ui::window::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
-        {
-            m_EventState = EVENT_RESIZING_BTN_HOVER;
-            return false;
-        }
-        if (false == MouseLButtonPush && m_EventState == EVENT_RESIZING_BTN_HOVER &&
-            false == mu::ui::window::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
-        {
-            m_EventState = EVENT_NONE;
-            return true;
-        }
-        if (m_EventState == EVENT_RESIZING_BTN_HOVER && MouseLButtonPush &&
-            mu::ui::window::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
-        {
-            m_EventState = EVENT_RESIZING_BTN_DOWN;
-            return false;
-        }
-        if (m_EventState == EVENT_RESIZING_BTN_DOWN)
-        {
-            if (MouseLButtonPush)
-            {
-                int nTopSections = (15 - GetNumberOfShowingLines()) / 3;
-                int nBottomSections = (GetNumberOfShowingLines() - 3) / 3;
-                for (int i = 0; i < nTopSections; i++)
-                {
-                    if (mu::ui::window::CheckMouseIn(0, ptResizingBtn.y - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
-                        REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
-                    {
-                        SetNumberOfShowingLines(GetNumberOfShowingLines() + (i + 1) * 3);
-                        return false;
-                    }
-                }
-                for (int i = 0; i < nBottomSections; i++)
-                {
-                    if (mu::ui::window::CheckMouseIn(0, ptResizingBtn.y + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
-                        REFERENCE_WIDTH, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
-                    {
-                        SetNumberOfShowingLines(GetNumberOfShowingLines() - (i + 1) * 3);
-                        return false;
-                    }
-                }
-                if (mu::ui::window::CheckMouseIn(0, 0, REFERENCE_WIDTH, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
-                {
-                    SetNumberOfShowingLines(15);
-                }
-                if (mu::ui::window::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
-                    REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
-                {
-                    SetNumberOfShowingLines(3);
-                }
-                return false;
-            }
-            if (false == MouseLButtonPush || true == MouseLButtonPop)
-            {
-                m_EventState = EVENT_NONE;
-                return true;
-            }
         }
     }
-    return true;
+    if (mu::ui::window::CheckMouseIn(0, 0, REFERENCE_WIDTH,
+        m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
+    {
+        SetNumberOfShowingLines(15);
+    }
+    if (mu::ui::window::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
+        REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
+    {
+        SetNumberOfShowingLines(3);
+    }
+    return false;
 }
 
 bool mu::ui::window::CChatLogWindow::UpdateKeyEvent()
@@ -854,33 +557,338 @@ bool mu::ui::window::CChatLogWindow::UpdateKeyEvent()
     return true;
 }
 
+namespace
+{
+    // Lowercase slug per message type -- the RCSS builds .chat-line--<slug> from it. Types native
+    // refuses to draw at all never reach the model; they become empty placeholder entries so a
+    // line's array index keeps matching its index in the message vector.
+    const char* MessageTypeSlug(mu::ui::window::MESSAGE_TYPE type)
+    {
+        switch (type)
+        {
+        case mu::ui::window::TYPE_CHAT_MESSAGE:    return "chat";
+        case mu::ui::window::TYPE_WHISPER_MESSAGE: return "whisper";
+        case mu::ui::window::TYPE_SYSTEM_MESSAGE:  return "system";
+        case mu::ui::window::TYPE_ERROR_MESSAGE:   return "error";
+        case mu::ui::window::TYPE_PARTY_MESSAGE:   return "party";
+        case mu::ui::window::TYPE_GUILD_MESSAGE:   return "guild";
+        case mu::ui::window::TYPE_UNION_MESSAGE:   return "union";
+        case mu::ui::window::TYPE_GENS_MESSAGE:    return "gens";
+        case mu::ui::window::TYPE_GM_MESSAGE:      return "gm";
+        default:                                   return nullptr;
+        }
+    }
+}
+
 bool mu::ui::window::CChatLogWindow::Update()
 {
-    UpdateScrollPos();
+    BuildRmlUi();
+    SyncRmlModel();
 
     return true;
 }
+
 bool mu::ui::window::CChatLogWindow::Render()
 {
-    if (RenderBackground() == false)
+    // Nothing native left to draw -- RmlUi owns the fill, every message line and the scrollbar.
+    // Kept because CObject requires the override.
+    return true;
+}
+
+void mu::ui::window::CChatLogWindow::BuildRmlUi()
+{
+    // Guarded so document/model are created once, even though Update() runs every frame.
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "chat_log",
+        [this](Rml::DataModelConstructor& c, ChatLogRmlModel& model)
+        {
+            // Must re-run in full on every call, including from ReloadRmlTheme() -- same reason
+            // CCharMakeWin::BuildRmlUi() documents, so no guard here.
+            auto line = c.RegisterStruct<ChatLogLineEntry>();
+            line.RegisterMember("text", &ChatLogLineEntry::text);
+            line.RegisterMember("kind", &ChatLogLineEntry::kind);
+            line.RegisterMember("has_id", &ChatLogLineEntry::hasId);
+            c.RegisterArray<Rml::Vector<ChatLogLineEntry>>();
+
+            c.Bind("lines", &model.lines);
+            c.Bind("panel_height", &model.panelHeight);
+            c.Bind("client_height", &model.clientHeight);
+            c.Bind("back_color", &model.backColor);
+            c.Bind("show_frame", &model.showFrame);
+            c.Bind("pointed_index", &model.pointedIndex);
+
+            // Drag the handle above the window to resize it in native's own 3-line steps. The
+            // stepping stays in UpdateMouseEvent() where the pointer's absolute Y already lives;
+            // this only arms it.
+            c.BindEventCallback("chat_resize_begin",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    m_EventState = EVENT_RESIZING_BTN_DOWN;
+                });
+        });
+
+    if (modelCreated)
     {
-        return false;
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                     "Data/Interface/RmlUi/chat_log.rml");
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
+}
+
+void mu::ui::window::CChatLogWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never built -- BuildRmlUi() picks the new theme up whenever it first is
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    m_bLinesDirty = true; // next SyncRmlModel() repopulates the fresh document
+}
+
+void mu::ui::window::CChatLogWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowChatLog);
+
+    ChatLogRmlModel& model = m_RmlBinder.GetModel();
+
+    // Native's own UpdateWndSize(): 15 per line, plus the 3+3 scroll caps and the 2+2 edges.
+    const float clientHeight = SCROLL_MIDDLE_PART_HEIGHT * static_cast<float>(m_nShowingLines);
+    const float panelHeight = clientHeight + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2.0f
+                            + WND_TOP_BOTTOM_EDGE * 2.0f;
+    if (model.clientHeight != clientHeight)
+    {
+        model.clientHeight = clientHeight;
+        m_RmlBinder.MarkDirty("client_height");
+    }
+    if (model.panelHeight != panelHeight)
+    {
+        model.panelHeight = panelHeight;
+        m_RmlBinder.MarkDirty("panel_height");
+    }
+    if (model.showFrame != m_bShowFrame)
+    {
+        model.showFrame = m_bShowFrame;
+        m_RmlBinder.MarkDirty("show_frame");
     }
 
-    if (m_bShowChatLog == true)
+    // Frame state and the transparency setting composed into one colour: native only fills the
+    // background while the frame is shown, and the alpha is the user's own cycled setting.
+    const int alpha = m_bShowFrame
+        ? static_cast<int>(std::clamp(GetBackAlpha(), 0.0f, 1.0f) * 255.0f)
+        : 0;
+    char backColor[48] = { 0, };
+    snprintf(backColor, sizeof(backColor), "rgba(0,0,0,%d)", alpha);
+    if (model.backColor != backColor)
     {
-        if (RenderMessages() == false)
+        model.backColor = backColor;
+        m_RmlBinder.MarkDirty("back_color");
+    }
+
+    if (m_bLinesDirty)
+    {
+        // Native's own rule, restated against scroll position: follow the tail while the frame is
+        // hidden, or while the user is already at the bottom. ProcessAddText() expressed it as
+        // "within 3 lines of the end" because it drove a line index; the DOM equivalent is
+        // "scrolled to the bottom", and it has to be sampled HERE, against the pre-append layout,
+        // not after the new lines exist.
+        m_bFollowTail = !m_bShowFrame || IsScrolledToBottom();
+
+        m_bLinesDirty = false;
+        RebuildLineModel();
+        m_RmlBinder.MarkDirty("lines");
+
+        // Arms a ONE-SHOT pin, consumed next frame. It must be a latch, not a per-frame call:
+        // the new lines only have a resolved scroll height after RmlUi lays them out, so the pin
+        // has to happen a frame later -- but pinning on every frame in between re-clamps the view
+        // to the bottom continuously, which silently defeats the user's own scrollbar drag and
+        // mouse wheel.
+        m_bScrollPending = true;
+    }
+
+    if (m_bScrollPending)
+    {
+        m_bScrollPending = false;
+        ScrollToBottomIfFollowing();
+    }
+
+    // A pending request wins for one frame; otherwise the logical cursor follows the view, so the
+    // next PageUp/PageDown starts from wherever the user actually scrolled to.
+    if (m_bScrollRequest)
+    {
+        m_bScrollRequest = false;
+        ApplyLogicalScroll();
+    }
+    else
+    {
+        SyncLogicalScrollFromView();
+    }
+
+    UpdatePointedLine();
+}
+
+void mu::ui::window::CChatLogWindow::RebuildLineModel()
+{
+    ChatLogRmlModel& model = m_RmlBinder.GetModel();
+    model.lines.clear();
+
+    type_vector_msgs* pvecMsgs = GetMsgs(GetCurrentMsgType());
+    if (pvecMsgs == nullptr)
+        return;
+
+    model.lines.reserve(pvecMsgs->size());
+    for (const CMessageText* pMsgText : *pvecMsgs)
+    {
+        const char* slug = pMsgText ? MessageTypeSlug(pMsgText->GetType()) : nullptr;
+        if (slug == nullptr || pMsgText->GetText().empty())
         {
-            return false;
+            // Native skipped drawing these (bRenderMessage stayed false), but an entry still has
+            // to exist: chat_line_rightclick() looks its sender up by array index, so the model
+            // and the message vector must stay index-aligned.
+            model.lines.push_back(ChatLogLineEntry{});
+            continue;
+        }
+
+        ChatLogLineEntry entry;
+        entry.kind = slug;
+        entry.hasId = !pMsgText->GetID().empty();
+        const type_string composed = entry.hasId
+            ? pMsgText->GetID() + L" : " + pMsgText->GetText()
+            : pMsgText->GetText();
+        entry.text = StringUtils::WideToNarrow(composed.c_str());
+        model.lines.push_back(std::move(entry));
+    }
+}
+
+bool mu::ui::window::CChatLogWindow::IsScrolledToBottom() const
+{
+    if (!m_pRmlDoc)
+        return true;
+
+    Rml::Element* lines = m_pRmlDoc->GetElementById("lines");
+    if (lines == nullptr)
+        return true;
+
+    // One line of slack, so a partially-scrolled last row still counts as "at the bottom" -- the
+    // same forgiveness native's own 3-line window gave.
+    const float slack = SCROLL_MIDDLE_PART_HEIGHT;
+    return lines->GetScrollTop() + lines->GetClientHeight() >= lines->GetScrollHeight() - slack;
+}
+
+void mu::ui::window::CChatLogWindow::UpdatePointedLine()
+{
+    ChatLogRmlModel& model = m_RmlBinder.GetModel();
+    int pointed = -1;
+
+    Rml::Element* lines = m_pRmlDoc ? m_pRmlDoc->GetElementById("lines") : nullptr;
+    if (lines != nullptr && IsVisible() && m_bShowChatLog)
+    {
+        // Raw window pixels, the same space GetAbsoluteOffset() reports in -- deliberately NOT
+        // MouseX/MouseY, which CManager has already remapped into this window's layout space.
+        // Comparing the two directly is what keeps this immune to the UI scale.
+        const float px = g_fWindowMouseX;
+        const float py = g_fWindowMouseY;
+
+        // Clip to the scrolling well first, so a line scrolled out of view is never pointed.
+        const Rml::Vector2f wellPos = lines->GetAbsoluteOffset();
+        const float wellW = lines->GetClientWidth();
+        const float wellH = lines->GetClientHeight();
+        if (px >= wellPos.x && px < wellPos.x + wellW && py >= wellPos.y && py < wellPos.y + wellH)
+        {
+            for (int i = 0; i < lines->GetNumChildren(); i++)
+            {
+                Rml::Element* child = lines->GetChild(i);
+                if (child == nullptr)
+                    continue;
+
+                const Rml::Vector2f pos = child->GetAbsoluteOffset();
+                const float h = child->GetOffsetHeight();
+                if (py >= pos.y && py < pos.y + h)
+                {
+                    // Only a line carrying a sender is a target, matching native -- an
+                    // unattributed system line has nothing to whisper to.
+                    if (i < (int)model.lines.size() && model.lines[i].hasId)
+                        pointed = i;
+                    break;
+                }
+            }
         }
     }
 
-    if (RenderFrame() == false)
+    if (model.pointedIndex != pointed)
     {
-        return false;
+        model.pointedIndex = pointed;
+        m_RmlBinder.MarkDirty("pointed_index");
     }
 
-    return true;
+    if (pointed >= 0 && mu::ui::window::IsPress(VK_RBUTTON))
+    {
+        type_vector_msgs* pvecMsgs = GetMsgs(GetCurrentMsgType());
+        if (pvecMsgs != nullptr && pointed < (int)pvecMsgs->size())
+        {
+            const type_string& strID = (*pvecMsgs)[pointed]->GetID();
+            if (!strID.empty() && g_pChatInputBox)
+                g_pChatInputBox->SetWhsprID(strID.c_str());
+        }
+    }
+}
+
+void mu::ui::window::CChatLogWindow::ApplyLogicalScroll()
+{
+    Rml::Element* lines = m_pRmlDoc ? m_pRmlDoc->GetElementById("lines") : nullptr;
+    if (lines == nullptr)
+        return;
+
+    // Native's own fPosRate, unchanged -- the fraction of the way down the list the current end
+    // line represents.
+    float fPosRate = 1.0f;
+    const int total = (int)GetNumberOfLines(GetCurrentMsgType());
+    const int showing = (int)GetNumberOfShowingLines();
+    if (total > showing)
+    {
+        if (showing > GetCurrentRenderEndLine())
+            fPosRate = 0.0f;
+        else
+            fPosRate = (float)(GetCurrentRenderEndLine() + 1 - showing) / (float)(total - showing);
+    }
+
+    const float range = lines->GetScrollHeight() - lines->GetClientHeight();
+    if (range > 0.0f)
+        lines->SetScrollTop(std::clamp(fPosRate, 0.0f, 1.0f) * range);
+}
+
+void mu::ui::window::CChatLogWindow::SyncLogicalScrollFromView()
+{
+    Rml::Element* lines = m_pRmlDoc ? m_pRmlDoc->GetElementById("lines") : nullptr;
+    if (lines == nullptr)
+        return;
+
+    const int total = (int)GetNumberOfLines(GetCurrentMsgType());
+    const int showing = (int)GetNumberOfShowingLines();
+    if (total <= showing)
+    {
+        m_iCurrentRenderEndLine = total - 1;
+        return;
+    }
+
+    const float range = lines->GetScrollHeight() - lines->GetClientHeight();
+    const float fPosRate = range > 0.0f ? std::clamp(lines->GetScrollTop() / range, 0.0f, 1.0f) : 1.0f;
+    m_iCurrentRenderEndLine = showing - 1 + (int)(fPosRate * (float)(total - showing) + 0.5f);
+}
+
+void mu::ui::window::CChatLogWindow::ScrollToBottomIfFollowing()
+{
+    if (!m_bFollowTail || !m_pRmlDoc)
+        return;
+
+    if (Rml::Element* lines = m_pRmlDoc->GetElementById("lines"))
+        lines->SetScrollTop(lines->GetScrollHeight());
 }
 
 float mu::ui::window::CChatLogWindow::GetLayerDepth()
@@ -956,24 +964,10 @@ void mu::ui::window::CChatLogWindow::UpdateWndSize()
 
 void mu::ui::window::CChatLogWindow::UpdateScrollPos()
 {
-    float fPosRate = 1.f;
-
-    if (GetNumberOfLines(GetCurrentMsgType()) > GetNumberOfShowingLines())
-    {
-        if ((int)GetNumberOfShowingLines() > GetCurrentRenderEndLine())
-        {
-            fPosRate = 0.f;
-        }
-        else
-        {
-            fPosRate = (float)(GetCurrentRenderEndLine() + 1 - GetNumberOfShowingLines()) / (float)(GetNumberOfLines(GetCurrentMsgType()) - GetNumberOfShowingLines());
-        }
-    }
-    if (m_EventState != EVENT_SCROLL_BTN_DOWN)
-    {
-        m_ScrollBtnPos.x = m_WndPos.x + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE - 4;
-        m_ScrollBtnPos.y = m_WndPos.y - m_WndSize.cy + WND_TOP_BOTTOM_EDGE + ((float)(m_WndSize.cy - SCROLL_BTN_HEIGHT - WND_TOP_BOTTOM_EDGE * 2) * fPosRate);
-    }
+    // Used to place the native scroll thumb. RmlUi owns the scrollbar now, so this just asks for
+    // the logical position to be re-applied -- which is what its callers (CChatInputBox, right
+    // after resizing the window) actually want.
+    m_bScrollRequest = true;
 }
 
 void mu::ui::window::CChatLogWindow::AddFilterWord(const type_string& strWord)
@@ -995,6 +989,7 @@ void mu::ui::window::CChatLogWindow::AddFilterWord(const type_string& strWord)
 
 void mu::ui::window::CChatLogWindow::ClearAll()
 {
+    m_bLinesDirty = true;
     for (int i = TYPE_ALL_MESSAGE; i < NUMBER_OF_TYPES; i++)
     {
         Clear((MESSAGE_TYPE)i);
@@ -1034,6 +1029,7 @@ mu::ui::window::CChatLogWindow::type_vector_msgs* mu::ui::window::CChatLogWindow
 
 void mu::ui::window::CChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 {
+    m_bLinesDirty = true;
     m_CurrentRenderMsgType = MsgType;
 
     type_vector_msgs* pvecMsgs = GetMsgs(GetCurrentMsgType());

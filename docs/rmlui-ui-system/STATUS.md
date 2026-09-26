@@ -158,6 +158,48 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 - **`COptionWindow`** — done, both themes, verified live against a real server; grew into a 6-tab
   settings window. Full history in `migration-ledger.md`'s own row rather than repeated here.
 
+- **`CChatLogWindow`** — **done, both themes (2026-09-27)**. `CSystemLogWindow`, which shares its
+  file, and `CChatInputBox`, its companion, are **not** ported — see `migration-ledger.md`.
+
+  The decision worth recording is the scroll model. Native kept a line *window* (`m_nShowingLines`
+  plus `m_iCurrentRenderEndLine`) and drew only those lines; RmlUi scrolls DOM content. Going DOM
+  meant putting all 200 lines in the document, which was only defensible once
+  `DataViewFor::Update()` was read rather than assumed: it is **incremental**, creating elements
+  only past the current count and destroying only past the new size, never re-parsing existing
+  ones. An ordinary append is therefore one new element, not a 200-line rebuild. The cost is that
+  a front-removal (the 200-line cap) shifts every index and so re-runs every line's text binding —
+  acceptable, and batchable later if it ever shows up.
+
+  Four behaviours had to be *mapped* rather than copied, each found by testing against the original
+  rather than by reading it:
+  - **Bottom-up stacking.** Native pushed text down by `(showingLines - endLine - 1)` line heights
+    when under-full, so the first message sits on the bottom row. Reproduced with a flex column and
+    `margin-top: auto` on the first line — *not* `justify-content: flex-end`, which keeps pushing
+    once the list overflows and shoves the earliest lines out of the scrollable area.
+  - **Text-width backgrounds.** Native passed no box width to `RenderText()`, so the text renderer
+    fell back to the measured width (`CUIRenderTextSDLTtf.cpp`). Flex defaults to
+    `align-items: stretch`, which turned every line into a full-width bar; `align-items: flex-start`
+    restores the ragged per-line strips.
+  - **Click-through.** `Core::Input::IsMouseOverUI()` gates click-to-move on
+    `Context::IsMouseInteracting()`, which is true for any `pointer-events: auto` element *hovered*,
+    not clicked — so `.scroll-pane`'s own `pointer-events: auto` turned the whole chat area into a
+    wall the player could not walk through. Native passed world clicks straight through (it consumed
+    only on the single hover-transition frame). The well and the lines are now `pointer-events:
+    none`, with the scrollbar opting back in at **every** level, since its generated
+    `slidertrack`/`sliderbar` inherit from the pane.
+  - **Hover highlight and right-click-to-whisper**, which `pointer-events: none` then killed, moved
+    into C++ (`UpdatePointedLine()`) — where native had them anyway. It compares `g_fWindowMouseX/Y`
+    against the line elements' own `GetAbsoluteOffset()`, both already in screen pixels, so no
+    transform conversion enters anywhere; using `MouseX/MouseY` there would have reintroduced the
+    mixed-space bug class `RmlPanelGeometry.h` documents.
+
+  Two self-inflicted bugs worth not repeating: pinning the view to the bottom on *every* frame
+  (rather than as a one-shot latch after the line list changes) silently defeats the user's own
+  scrollbar drag and wheel; and `Scrolling()` kept compiling happily after nothing rendered from
+  `m_iCurrentRenderEndLine` any more, quietly breaking PageUp/PageDown until the dead-member audit
+  caught it. Both now latch through `m_bScrollPending`/`m_bScrollRequest`, and the logical cursor
+  reads back from the live scroll offset so external callers start from where the user actually is.
+
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
 1. **Layout intent documented and traceable to the original code's actual computed behavior**,
@@ -515,6 +557,24 @@ for "the full architecture is in place":
   verified against a real build (`RelWithDebInfo`); in-engine smoke test (`$theme modern`/
   `$theme legacy` at the login/character-select screens, no live server needed) still pending —
   the `MAIN_SCENE` HUD tier additionally needs a live server to exercise.
+- **`LayoutMode::Legacy` (`UI/Scaling/UITransform.h`/`.cpp`, applied via
+  `UI::Layout::ForInterface()` in `UILayoutPolicy.cpp`) papers over windows whose own rendering
+  still assumes a fixed resolution, on windows the migration ledger already marks "done."** The
+  mode exists (correctly) to give an identity transform to windows that compute real screen pixels
+  themselves — `CSprite`/`g_pRenderText` calls — so the reference-space rescale doesn't double-
+  transform them and break mouse hit-testing (found live via `COptionWindow`'s history). But its own
+  header comment names `CCreditWin` as an example of *why* it's needed: that window's native
+  rendering "assumes... 800x600." `CCreditWin`, `CLoginMainWin`, `CSysMenuWin`, `COptionWindow`,
+  `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, and `CLoginWin` all use this mode
+  (`UILayoutPolicy.cpp`'s `INTERFACE_CREDITS`/`INTERFACE_LOGIN_MAIN`/etc. case), and several of them
+  are listed as fully-shipped RmlUi ports above — meaning a "done" port can still carry a
+  fixed-resolution native rendering path underneath its RmlUi shell, which is exactly what §4/§23/§28
+  say a properly migrated window shouldn't do. Not a bug in `LayoutMode::Legacy` itself (removing it
+  would reintroduce the double-transform/hit-testing bug it fixes) — the gap is that no windows in
+  this list have been individually audited for which of their native draws are still
+  resolution-fixed, and none of that is tracked per-window today. Auditing `CCreditWin`'s 800x600
+  assumption specifically (and any sibling in this list with the same pattern) is the concrete next
+  step, not a change to the transform system.
 
 ## Pilots to revisit, and tracked deferrals
 

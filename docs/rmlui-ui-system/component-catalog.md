@@ -140,6 +140,58 @@ handled once, centrally, by `RmlUiRuntime`'s installed `TextInputMethodEditor_SD
 RmlUi companion primitive and is not globally retired — see `tracked-deferrals.md` for what each
 remaining consumer still needs.
 
+## Scrolling pane
+
+`.scroll-pane` (both themes' `base.rcss`). Put it on whatever element owns scrollable content and
+RmlUi generates the scrollbar itself, as real child elements the theme styles. Consumers:
+`CGenericConfirmDialog`'s `.gcd-text-col` — the case this was generalized from — and
+`CChatLogWindow`'s `#lines`, which is where it is actually *visible* (the dialog only scrolls when
+its content outgrows the panel, which is hard to provoke).
+
+The pane needs a bounded height to scroll within (explicit `height`, `max-height`, or a stretched
+flex child). That stays the consumer's own layout; `.scroll-pane` sets only the two rules below.
+
+**Two requirements it exists to stop you rediscovering.** Both cost a debugging round the first
+time, and both fail silently:
+
+- `overflow: hidden auto` is `overflow-x, overflow-y` in that order. This engine only instantiates
+  a `scrollbarvertical` when **overflow-y** is Auto/Scroll (`Layout/ContainerBox.cpp`). Write
+  `auto hidden` and no scrollbar is ever created, at any content length.
+- `pointer-events: auto` is mandatory. `base.rcss`'s `body { pointer-events: none; }` inherits
+  down, and `slidertrack`/`sliderbar` are children of the pane — without it the scrollbar renders
+  but cannot be dragged.
+
+These are generated elements, not pseudo-elements, so ordinary selectors reach them
+(`scrollbarvertical`, `slidertrack`, `sliderbar`, `sliderarrowdec`/`inc`, `scrollbarhorizontal`).
+
+**Theme chrome.** `legacy` uses native's own art — the track is `newui_scrollbar_m` as a ninepatch
+and the thumb is `newui_scroll_on`, with `filter: brightness(0.7)` on `:active` matching the
+`RGBA(179,179,179)` tint `CChatLogWindow::RenderFrame()` applies while the thumb is held.
+`modern` states the same affordance as a flat rail in its metal-rail palette.
+
+Two deliberate simplifications on the legacy side, the same class as `character_info.rcss`'s
+summary-box frame: the 3-slice track (7x3 / 7x15 / 7x3) is drawn as one ninepatch of the middle
+slice rather than cap/tile/cap, because this build has no verified repeat-tiling pattern; and
+native's thumb overhang (15-wide thumb over a 7-wide track) is not reproduced, because that needs
+the track narrower than the scrollbar element and RmlUi sizes `slidertrack` itself.
+
+**Two traps a consumer has to handle itself**, both found the hard way in `CChatLogWindow`:
+
+- **`pointer-events: auto` on the pane blocks click-to-move.** `Core::Input::IsMouseOverUI()` gates
+  world clicks on `Context::IsMouseInteracting()`, which is true for any auto element *hovered*, not
+  clicked. A pane overlaying the world must set `pointer-events: none` on itself and its content,
+  then opt the scrollbar back in at **every** level (`scrollbarvertical`, `slidertrack`,
+  `sliderbar`) — they inherit from the pane, so one `none` above silently disables the drag.
+  Anything the pane then loses to `none` (hover styling, per-element clicks) has to move to C++.
+- **Never pin the scroll position per frame.** Applying `SetScrollTop` every frame — to follow new
+  content, say — overrides the user's own drag and wheel continuously and reads as a dead
+  scrollbar. Use a one-shot latch consumed on the frame after the content changed.
+
+**What it does not cover.** RmlUi scrolls *DOM content*, so a window keeping its own line-window
+model in C++ is not a drop-in consumer: it has to put the lines in the DOM and let RmlUi own the
+scroll position. `CChatLogWindow` did exactly that — see `STATUS.md` for why that was safe
+(`DataViewFor::Update()` is incremental) and what it cost.
+
 ## Layout utilities
 
 Not named in §20's own list, but the closest thing to a real cross-window primitive that exists

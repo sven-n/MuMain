@@ -60,7 +60,8 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | `CCommandWindow` | `CObject`-tier | Not started | TBD | |
 | `CQuickCommandWindow` | `CObject`-tier | Not started | TBD | |
 | `CMoveCommandWindow` | `CObject`-tier | Not started | TBD | |
-| `CChatLogWindow` / `CSystemLogWindow` | `CObject`-tier | Not started | TBD | Same header, two classes |
+| `CChatLogWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `chat_log.rml` + both themes. First consumer of `base.rcss`'s `.scroll-pane`, and the first list in this codebase bound with `data-attr-class` (a per-line class composed in the model, instead of nine `data-class-*` attributes). RmlUi owns the fill, the lines, the wheel and the scrollbar; C++ keeps the message vectors, the filters, the 3-line-step resize, and the pointed-line hit test. `AddText()`'s 333 call sites are untouched -- it was always a data API. See `STATUS.md` for the DOM-scroll decision and what it cost. |
+| `CSystemLogWindow` | `CObject`-tier | Not started | TBD | Shares `ChatLogWindow.h`/`.cpp` with the now-ported `CChatLogWindow` but is a separate, still fully native class -- its own `RenderMessages()` is the only native draw left in that file. Simplest remaining port in the pair: no chrome, no scrolling, no interaction (its `UpdateMouseEvent`/`UpdateKeyEvent` are stubs), and it can reuse `CChatLogWindow`'s line model wholesale. |
 | `CMiniMap` | `CObject`-tier | Not started | TBD | |
 | `CMasterLevel` | `CObject`-tier | Not started | TBD | Already a `CGenericConfirmDialog` *caller* for one confirm popup — the window's own chrome is still fully native |
 | `CUIMuHelper` (+ `CMuHelperSkillList`, `CMuHelperExt`) | `CObject`-tier | Not started | TBD | The MU Helper bot *configuration* window — distinct from the always-visible `CMuHelperBar`, which is done |
@@ -169,7 +170,10 @@ C++ hover callback, see `layout-and-scaling.md`'s "Global UI scale" section). Th
 `C3DCamera` and `CGroup` (`UI/Core/`) are `CManager` plumbing, not ported windows. `CTextBox`,
 `CSlideWindow`, `CScrollBar`, `CChatInputBox` (`UI/Widgets/Window/`) are low-level composable
 widgets used *by* several windows above, not top-level components with their own migration status —
-they retire implicitly as their host windows port. `CMessageBoxMng` (`UI/Dialogs/MessageBox.h`) is
+they retire implicitly as their host windows port. **`CChatInputBox` is the exception worth naming**:
+its host (`CChatLogWindow`) is now ported but it is not, so it remains fully native — two
+`CUITextInputBox` fields, ten buttons and a 256-line `UpdateKeyEvent`. It is the largest
+remaining `CUITextInputBox` consumer, and the reason that class cannot retire yet. `CMessageBoxMng` (`UI/Dialogs/MessageBox.h`) is
 the manager/plumbing class underlying the whole `TMsgBoxLayout<T>` mechanism the Dialog family below
 uses, not a dialog itself.
 

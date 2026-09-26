@@ -1,0 +1,37 @@
+<rml>
+<head>
+	<title>Chat Log</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="chat_log.rcss"/>
+</head>
+<body data-model="chat_log">
+	<!-- Bottom-left HUD panel, anchored above the chat input box. Sized in dp like its already-
+	     ported HUD siblings (buff_strip, mu_helper_bar), not via a root-transform scale: this tier
+	     has no live-3D content to paint behind, so nothing forces the px + transform:scale pattern
+	     the inventory family needs.
+
+	     #lines carries base.rcss's .scroll-pane, so RmlUi owns the scroll position, the wheel and
+	     the scrollbar drag. C++ keeps the message vectors and only pins the view to the bottom on
+	     a new message (CChatLogWindow::SyncRmlModel). -->
+	<div id="panel" data-class-framed="show_frame" data-style-height="panel_height + 'dp'"
+	     data-style-background-color="back_color">
+		<!-- Drag to resize in 3-line steps; only exists with the frame shown, matching native. -->
+		<div id="resize_handle" data-class-hidden="!show_frame"
+		     data-event-mousedown="chat_resize_begin"></div>
+
+		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'">
+			<!-- data-attr-class replaces the whole class attribute, so every class this line needs
+			     is composed here -- there is no static class= to merge with. `kind` is the
+			     lowercase message-type slug C++ pushes (chat/whisper/party/...), and `has-id`
+			     marks a line whose sender can be right-clicked to target a whisper.
+
+			     No event binding and no :hover: these lines are pointer-events:none so world
+			     clicks pass through the chat window the way they did natively, which also means
+			     they never receive mouse events at all. C++ resolves both the pointed line and
+			     the right-click itself (CChatLogWindow::UpdatePointedLine). -->
+			<div data-for="line : lines"
+			     data-attr-class="'chat-line chat-line--' + line.kind + (line.has_id ? ' chat-line--has-id' : '') + (it_index == pointed_index ? ' chat-line--pointed' : '')">{{line.text}}</div>
+		</div>
+	</div>
+</body>
+</rml>
