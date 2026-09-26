@@ -16,18 +16,33 @@ struct BundledFont
     const char* bold;
 };
 
+// Traditional Chinese (zh-TW): selectable as the UI font and the first
+// missing-glyph fallback. Simplified Chinese (zh-CN) would need Noto Sans SC,
+// because the glyph forms differ.
+inline constexpr BundledFont kNotoSansTcFont{
+    "Noto Sans TC", "fonts/NotoSansTC-Regular.otf", "fonts/NotoSansTC-Bold.otf"};
+
+inline constexpr BundledFont kDejaVuSansFont{"DejaVu Sans", "fonts/DejaVuSans.ttf", "fonts/DejaVuSans-Bold.ttf"};
+
 inline constexpr BundledFont kBundledFonts[] = {
     { "Liberation Sans", "fonts/LiberationSans-Regular.ttf", "fonts/LiberationSans-Bold.ttf" },
-    { "DejaVu Sans",     "fonts/DejaVuSans.ttf",             "fonts/DejaVuSans-Bold.ttf" },
+    kDejaVuSansFont,
+    kNotoSansTcFont,
 };
 
 inline constexpr std::string_view kDefaultBundledFontFamily = "DejaVu Sans";
 inline constexpr BundledFont kBundledFixedFont{
     "Cousine", "fonts/Cousine-Regular.ttf", "fonts/Cousine-Regular.ttf"};
-// Missing-glyph fallbacks behind every SDL_ttf role, in the order SDL_ttf tries them.
+// Missing-glyph fallbacks behind every SDL_ttf role, in the order SDL_ttf tries
+// them. Noto Sans TC (Han, kana, CJK punctuation) comes first; it has no Hangul
+// syllables, so Korean text still comes from Nanum Gothic. DejaVu Sans comes last
+// for the Latin, Greek and Cyrillic letters the other families lack (Polish and
+// Ukrainian letters under Noto Sans TC, Liberation Sans and Cousine).
 // ponytail: one Hangul face; SDL_ttf synthesizes bold, bundle NanumGothic-Bold if metric parity requires it.
 inline constexpr BundledFont kBundledFallbackFonts[] = {
+    kNotoSansTcFont,
     { "Nanum Gothic", "fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Regular.ttf" },
+    kDejaVuSansFont,
 };
 
 [[nodiscard]] inline std::filesystem::path ResolveBundledFontPath(const std::filesystem::path& relativePath)

@@ -32,15 +32,25 @@ Release builds resolve every text role from files beside the executable:
 | Bold | Selected family bold file |
 | Big bold | Selected family bold file |
 | Fixed | `fonts/Cousine-Regular.ttf` |
-| Missing glyph fallback | `fonts/NanumGothic-Regular.ttf` |
+| Missing glyph fallbacks | `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf`, `fonts/DejaVuSans*.ttf` |
 
-Selectable families are DejaVu Sans and Liberation Sans. Empty or unknown
-configuration selects DejaVu Sans. SDL_ttf, Windows GDI, and the non-Windows
-GDI shim use the same registry.
+Selectable families are DejaVu Sans, Liberation Sans and Noto Sans TC. Empty
+or unknown configuration selects DejaVu Sans. SDL_ttf, Windows GDI, and the
+non-Windows GDI shim use the same registry.
 
-SDL_ttf attaches Nanum Gothic to every role at startup. This preserves the
-selected Latin family while rendering Hangul labels instead of missing-glyph
-boxes; bold roles use SDL_ttf's synthetic bold style for the fallback face.
+SDL_ttf attaches three fallbacks to every role at startup, tried in this order:
+
+1. Noto Sans TC: Traditional Chinese (`zh-TW`), kana and CJK punctuation.
+   Bold roles use its bold file.
+2. Nanum Gothic: Hangul. Bold roles use SDL_ttf's synthetic bold style.
+3. DejaVu Sans: Latin, Greek and Cyrillic letters the selected family or
+   Cousine lack.
+
+This keeps the selected family for the text it covers and draws the rest
+instead of missing-glyph boxes. A test checks that every character of every
+translation has a glyph with each selectable family. Japanese (`ja`) is the
+known exception: some Japanese kanji forms need Noto Sans JP, and Simplified
+Chinese would need Noto Sans SC.
 
 Missing or corrupt packaged roles abort Release renderer startup. Windows also
 requires private GDI registration of every packaged role; partial registration

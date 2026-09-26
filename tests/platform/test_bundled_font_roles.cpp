@@ -21,9 +21,13 @@ TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]
           std::string_view("fonts/LiberationSans-Bold.ttf"));
     CHECK(std::string_view(kBundledFixedFont.family) == "Cousine");
     CHECK(std::string_view(kBundledFixedFont.regular) == "fonts/Cousine-Regular.ttf");
-    REQUIRE(std::size(kBundledFallbackFonts) == 1);
-    CHECK(std::string_view(kBundledFallbackFonts[0].family) == "Nanum Gothic");
-    CHECK(std::string_view(kBundledFallbackFonts[0].regular) == "fonts/NanumGothic-Regular.ttf");
+    CHECK(ResolveBundledFont("Noto Sans TC").regular == std::string_view("fonts/NotoSansTC-Regular.otf"));
+    CHECK(ResolveBundledFont("Noto Sans TC").bold == std::string_view("fonts/NotoSansTC-Bold.otf"));
+    REQUIRE(std::size(kBundledFallbackFonts) == 3);
+    CHECK(std::string_view(kBundledFallbackFonts[0].family) == "Noto Sans TC");
+    CHECK(std::string_view(kBundledFallbackFonts[1].family) == "Nanum Gothic");
+    CHECK(std::string_view(kBundledFallbackFonts[1].regular) == "fonts/NanumGothic-Regular.ttf");
+    CHECK(std::string_view(kBundledFallbackFonts[2].family) == "DejaVu Sans");
 }
 
 TEST_CASE("bundled font paths follow the normalized runtime directory [platform][bundled_font]")
@@ -45,7 +49,7 @@ TEST_CASE("bundled fallback font covers Hangul and Latin accents [platform][bund
 {
     REQUIRE(TTF_Init());
     const std::filesystem::path fallbackPath =
-        std::filesystem::path(MU_TEST_ASSET_SOURCE) / kBundledFallbackFonts[0].regular;
+        std::filesystem::path(MU_TEST_ASSET_SOURCE) / kBundledFallbackFonts[1].regular;
     const std::filesystem::path basePath =
         std::filesystem::path(MU_TEST_ASSET_SOURCE) / ResolveBundledFont("DejaVu Sans").regular;
     TTF_Font* base = TTF_OpenFont(basePath.string().c_str(), 16.0f);
