@@ -652,6 +652,19 @@ BOOL CMixRecipes::GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
 
 namespace
 {
+/// Appends formatted text to a recipe ingredient name, truncating it to the buffer.
+/// Appends in place instead of formatting szName from itself: reading and writing the
+/// same buffer in one swprintf is undefined and glibc does interleave the bytes.
+template <size_t N, typename... Args>
+void AppendRecipeText(wchar_t (&szName)[N], const wchar_t* pszFormat, Args... args)
+{
+    const size_t nUsed = wcslen(szName);
+    if (nUsed + 1 >= N)
+        return;
+
+    _snwprintf_s(szName + nUsed, N - nUsed, _TRUNCATE, pszFormat, args...);
+}
+
 /// Appends a localized detail (required level, option or quantity) to a recipe
 /// ingredient name, separated by a space. The localized text carries the
 /// placeholders, so every language can put the number where its grammar needs
@@ -659,18 +672,8 @@ namespace
 template <size_t N, typename... Args>
 void AppendRecipeDetail(wchar_t (&szName)[N], const wchar_t* pszFormat, Args... args)
 {
-    wchar_t szDetail[64]{};
-    mu_swprintf_s(szDetail, pszFormat, args...);
-
-    // Append in place instead of formatting szName from itself: reading and writing the same
-    // buffer in one swprintf is undefined and glibc does interleave the bytes.
-    const size_t nUsed = wcslen(szName);
-    if (nUsed + 2 >= N)
-        return;
-
-    szName[nUsed] = L' ';
-    szName[nUsed + 1] = L'\0';
-    wcsncat(szName, szDetail, N - nUsed - 2);
+    AppendRecipeText(szName, L" ");
+    AppendRecipeText(szName, pszFormat, args...);
 }
 }
 
@@ -692,7 +695,7 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
         (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax || (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255)))
     {
         if (pMixRecipeItem->m_iDurabilityMin == pMixRecipeItem->m_iDurabilityMax)
-            mu_swprintf(szTempName, L"%ls(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
+            AppendRecipeText(szTempName, L"(%d)", pMixRecipeItem->m_iDurabilityMin);
     }
     else
     {
@@ -734,17 +737,17 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
                 if (szTempName[iNameLen - j] == '+') szTempName[iNameLen - j - 1] = '\0';
         }
         if (pMixRecipeItem->m_iDurabilityMin == pMixRecipeItem->m_iDurabilityMax)
-            mu_swprintf(szTempName, L"%ls(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
+            AppendRecipeText(szTempName, L"(%d)", pMixRecipeItem->m_iDurabilityMin);
 
         if (pMixRecipeItem->m_iLevelMin == 0 && pMixRecipeItem->m_iLevelMax == 255);
         else if (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax)
-            mu_swprintf(szTempName, L"%ls +%d", szTempName, pMixRecipeItem->m_iLevelMin);
+            AppendRecipeDetail(szTempName, I18N::Game::MixLevel, pMixRecipeItem->m_iLevelMin);
         else if (pMixRecipeItem->m_iLevelMin == 0)
             AppendRecipeDetail(szTempName, I18N::Game::MixLevelAtMost, pMixRecipeItem->m_iLevelMax);
         else if (pMixRecipeItem->m_iLevelMax == 255)
             AppendRecipeDetail(szTempName, I18N::Game::MixLevelAtLeast, pMixRecipeItem->m_iLevelMin);
         else
-            mu_swprintf(szTempName, L"%ls +%d~%d", szTempName, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
+            AppendRecipeDetail(szTempName, I18N::Game::MixLevelRange, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
 
         if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
         else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
@@ -758,7 +761,7 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
     }
 
     if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)
-        mu_swprintf(szTempName, L"%ls (%ls)", szTempName, I18N::Game::RateIncrease);
+        AppendRecipeText(szTempName, L" (%ls)", I18N::Game::RateIncrease);
     else if (pMixRecipeItem->m_iCountMin == pMixRecipeItem->m_iCountMax)
         AppendRecipeDetail(szTempName, I18N::Game::MixCount, pMixRecipeItem->m_iCountMin);
     else if (pMixRecipeItem->m_iCountMin == 0)

@@ -13016,4 +13016,10 @@
   <data name="BloodCastleQuestFailed" xml:space="preserve">
     <value>不幸的是，你失敗了完成血色城堡任務。</value>
   </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
 </root>

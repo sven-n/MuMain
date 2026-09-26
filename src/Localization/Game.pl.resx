@@ -13037,4 +13037,10 @@
   <data name="BloodCastleQuestFailed" xml:space="preserve">
     <value>Niestety, nie udało Ci się ukończyć zadania Blood Castle.</value>
   </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
 </root>

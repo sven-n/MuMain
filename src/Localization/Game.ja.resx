@@ -11094,4 +11094,10 @@
   <data name="BloodCastleQuestFailed" xml:space="preserve">
     <value>残念！ブラッドキャッスルクエストに失敗しました。</value>
   </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
 </root>
