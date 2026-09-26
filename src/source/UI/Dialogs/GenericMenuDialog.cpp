@@ -10,6 +10,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h" // CManager::AddUIObj
+#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -42,6 +43,7 @@ void CGenericMenuDialog::BuildRmlUi()
             auto line = c.RegisterStruct<LineEntry>();
             line.RegisterMember("text", &LineEntry::text);
             line.RegisterMember("bold", &LineEntry::bold);
+            line.RegisterMember("color", &LineEntry::color);
             c.RegisterArray<std::vector<LineEntry>>();
             c.Bind("lines", &model.lines);
 
@@ -61,6 +63,7 @@ void CGenericMenuDialog::BuildRmlUi()
             c.Bind("buttons", &model.buttons);
 
             c.Bind("has_title", &model.hasTitle);
+            c.Bind("highlight_title", &model.highlightTitle);
             c.Bind("is_system_menu", &model.isSystemMenu);
             c.Bind("native_top", &model.nativeTop);
             c.Bind("native_height", &model.nativeHeight);
@@ -220,6 +223,16 @@ bool CGenericMenuDialog::UpdateKeyEvent()
     return !IsVisible();
 }
 
+CGenericMenuDialog::LineEntry CGenericMenuDialog::ToLineEntry(const GenericMenuConfig::Line& line)
+{
+    return { StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color) };
+}
+
+bool CGenericMenuDialog::SameLine(const LineEntry& a, const LineEntry& b)
+{
+    return a.text == b.text && a.bold == b.bold && a.color == b.color;
+}
+
 void CGenericMenuDialog::SyncNativeFrame()
 {
     auto& model = m_RmlBinder.GetModel();
@@ -257,6 +270,11 @@ void CGenericMenuDialog::SyncRmlModel()
         model.hasTitle = hasTitle;
         m_RmlBinder.MarkDirty("has_title");
     }
+    if (model.highlightTitle != m_Active.highlightTitle)
+    {
+        model.highlightTitle = m_Active.highlightTitle;
+        m_RmlBinder.MarkDirty("highlight_title");
+    }
     const bool isSystemMenu = m_Active.purpose == GenericMenuConfig::Purpose::SystemMenu;
     if (model.isSystemMenu != isSystemMenu)
     {
@@ -274,10 +292,10 @@ void CGenericMenuDialog::SyncRmlModel()
     std::vector<LineEntry> newLines;
     newLines.reserve(m_Active.lines.size());
     for (const auto& line : m_Active.lines)
-        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold });
+        newLines.push_back(ToLineEntry(line));
     bool linesChanged = newLines.size() != model.lines.size();
     for (size_t i = 0; i < newLines.size() && !linesChanged; ++i)
-        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold;
+        linesChanged = !SameLine(newLines[i], model.lines[i]);
     if (linesChanged)
     {
         model.lines = std::move(newLines);
@@ -293,7 +311,7 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.tooltip = StringUtils::WideToNarrow(button.tooltip.c_str());
         entry.lines.reserve(button.lines.size());
         for (const auto& line : button.lines)
-            entry.lines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold });
+            entry.lines.push_back(ToLineEntry(line));
         entry.hasTooltip = !button.tooltip.empty();
         entry.hasLines = !button.lines.empty();
         entry.enabled = button.enabled;
@@ -310,7 +328,7 @@ void CGenericMenuDialog::SyncRmlModel()
             || a.hasTooltip != b.hasTooltip || a.enabled != b.enabled || a.compact != b.compact
             || a.cols2 != b.cols2 || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
-            buttonsChanged = a.lines[j].text != b.lines[j].text || a.lines[j].bold != b.lines[j].bold;
+            buttonsChanged = !SameLine(a.lines[j], b.lines[j]);
     }
     if (buttonsChanged)
     {

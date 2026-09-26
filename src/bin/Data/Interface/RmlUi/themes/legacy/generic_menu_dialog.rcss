@@ -230,3 +230,6 @@
 .gmd-btn:hover .gmd-tooltip.hidden {
 	display: none;
 }
+
+/* GenericMenuConfig::highlightTitle: native's highlight orange (CChaosMixMenuMsgBox's title). */
+#panel.highlight-title .window-shell-header-title { color: #ff8000; }

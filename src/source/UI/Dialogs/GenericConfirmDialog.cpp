@@ -14,6 +14,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"       // g_pNewUI3DRenderMng macro resolves through CSystem
+#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -203,15 +204,6 @@ void CGenericConfirmDialog::Release()
 
 namespace
 {
-    // GenericDialogConfig::Line::color (RGBA(), red in the low byte) as a CSS colour.
-    Rml::String LineColorCss(unsigned long rgba)
-    {
-        if (rgba == 0)
-            return {};
-        return "rgba(" + std::to_string(GetRed(rgba)) + ", " + std::to_string(GetGreen(rgba)) + ", " +
-               std::to_string(GetBlue(rgba)) + ", " + std::to_string(GetAlpha(rgba)) + ")";
-    }
-
     // 20 random adjacent swaps over 0..9 -- the shuffled keypad-digit mapping.
     std::vector<int> ShuffledDigits()
     {
@@ -613,7 +605,7 @@ void CGenericConfirmDialog::SyncRmlModel()
     std::vector<LineEntry> newLines;
     newLines.reserve(m_Active.lines.size());
     for (const auto& line : m_Active.lines)
-        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold, LineColorCss(line.color) });
+        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color) });
 
     bool linesChanged = newLines.size() != model.lines.size();
     for (size_t i = 0; i < newLines.size() && !linesChanged; ++i)

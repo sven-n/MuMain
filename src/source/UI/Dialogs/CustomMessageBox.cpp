@@ -854,6 +854,7 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     GenericMenuConfig cfg;
     cfg.nativeFrame = { 60, 13 };
     cfg.title = I18N::Game::SelectMethodOfCombination;
+    cfg.highlightTitle = true;
     // No shared summary lines -- native interleaves each recipe's own blurb directly above its
     // button instead of grouping all the body text above the whole list; see MenuButton::lines.
 
@@ -1379,7 +1380,7 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
 {
     GenericMenuConfig cfg;
     cfg.nativeFrame = { 100, 5 };
-    cfg.lines.push_back({ I18N::Game::JewelCombination, true });
+    cfg.lines.push_back({ I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255) });
     cfg.lines.push_back({ I18N::Game::YouCanCombineOrDissolve, false });
     cfg.lines.push_back({ I18N::Game::VariousJewels, false });
 
@@ -1429,7 +1430,7 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
 void mu::ui::window::ShowGemIntegrationJewelDialog()
 {
     GenericMenuConfig cfg;
-    cfg.lines.push_back({ I18N::Game::JewelCombination, true });
+    cfg.lines.push_back({ I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255) });
     cfg.lines.push_back({ I18N::Game::SelectAJewelToCombine, false });
     // 2-column grid instead of `compact` -- some jewel names ("Higher Refining Stone") don't fit
     // compact's 64dp width even wrapped onto 2 lines; `columns` is a general per-dialog knob (see
@@ -1464,7 +1465,7 @@ void mu::ui::window::ShowGemIntegrationJewelDialog()
 void mu::ui::window::ShowGemIntegrationMixDialog()
 {
     GenericMenuConfig cfg;
-    cfg.lines.push_back({ I18N::Game::JewelCombination, true });
+    cfg.lines.push_back({ I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255) });
     cfg.lines.push_back({ I18N::Game::ChooseANumberButtonToCombine, false });
 
     wchar_t szTemp[256] = { 0, };

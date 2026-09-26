@@ -28,8 +28,16 @@ namespace mu::ui::window
     struct GenericMenuConfig
     {
         std::wstring title; // optional heading row above `lines`. Empty = no title row.
+        // The native box drew its title in its highlight colour instead of plain white (the
+        // chaos-mix method menu); a theme may style it so.
+        bool highlightTitle = false;
 
-        struct Line { std::wstring text; bool bold = false; };
+        struct Line
+        {
+            std::wstring text;
+            bool bold = false;
+            unsigned long color = 0; // native RGBA() line colour; 0 = the theme's own
+        };
         std::vector<Line> lines; // optional description text above the buttons
 
         struct MenuButton
@@ -119,7 +127,14 @@ namespace mu::ui::window
         void Resolve(int buttonIndex); // -1 = cancel/no button; hides the document, invokes the
                                        // chosen callback, then ShowNext()
 
-        struct LineEntry { Rml::String text; bool bold = false; };
+        struct LineEntry
+        {
+            Rml::String text;
+            bool bold = false;
+            Rml::String color; // CSS colour of Line::color, empty for the theme's own
+        };
+        static LineEntry ToLineEntry(const GenericMenuConfig::Line& line);
+        static bool SameLine(const LineEntry& a, const LineEntry& b);
         struct MenuButtonEntry
         {
             Rml::String label;
@@ -135,6 +150,7 @@ namespace mu::ui::window
         {
             bool hasTitle = false;
             bool isSystemMenu = false; // Purpose::SystemMenu: a theme may place it like native
+            bool highlightTitle = false;
             float nativeTop = 0.f;     // GenericMenuConfig::nativeFrame, in reference pixels
             float nativeHeight = 0.f;
             Rml::String title;

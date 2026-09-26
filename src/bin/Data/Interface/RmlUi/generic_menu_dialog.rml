@@ -17,10 +17,12 @@
      Frame/border/header chrome now lives entirely in window_shell.rml (see its own comment) --
      this document supplies only its own content, spliced into that template's #content slot. -->
 <body template="window_shell" data-model="generic_menu_dialog" data-class-system-menu="is_system_menu"
+      data-class-highlight-title="highlight_title"
       data-class-native-frame="native_height > 0"
       data-style-margin-top="native_top > 0 ? (native_top - 60) + 'dp' : ''"
       data-style-height="native_height > 0 ? native_height + 'dp' : ''">
-	<div class="gmd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+	<div class="gmd-line" data-for="line : lines" data-class-bold="line.bold"
+			     data-style-color="line.color == '' ? '#ffffff' : line.color">{{line.text}}</div>
 	<!-- No explicit column count -- .gmd-button-row's own flex-wrap lets the button count/width
 	     and the row's available space determine layout, same technique the numeric-keypad grid in
 	     generic_confirm_dialog.rcss already proves. Every native consumer's own fixed 128dp button
@@ -35,7 +37,8 @@
 		     text that describes one specific button (e.g. CChaosMixMenuMsgBox's per-recipe blurb)
 		     renders directly above that button instead of bunched into the shared summary above. -->
 		<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines" data-class-cols-2="button.cols2">
-			<div class="gmd-line" data-for="line : button.lines" data-class-bold="line.bold">{{line.text}}</div>
+			<div class="gmd-line" data-for="line : button.lines" data-class-bold="line.bold"
+			     data-style-color="line.color == '' ? '#ffffff' : line.color">{{line.text}}</div>
 			<div class="btn gmd-btn" data-class-compact="button.compact" data-class-cols-2="button.cols2" data-class-disabled="!button.enabled"
 			     data-event-click="gmd_button_click(it_index)">
 				<!-- Label text lives in its own element rather than raw text directly in
