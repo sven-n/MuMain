@@ -307,7 +307,7 @@ static void SetupItemUseStateMessage(int num, int index, int message)
     }
 
     if (message == MESSAGE_USE_STATE2)
-        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls%ls )", Name, I18N::Game::Fruit);
+        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, I18N::Game::FruitCaption, Name);
     else
         swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls )", Name);
 

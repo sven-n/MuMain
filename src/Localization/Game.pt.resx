@@ -13022,4 +13022,7 @@
   <data name="MixLevelRange" xml:space="preserve">
     <value>+%d~%d</value>
   </data>
+  <data name="FruitCaption" xml:space="preserve">
+    <value>( fruta %ls )</value>
+  </data>
 </root>
