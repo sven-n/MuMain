@@ -104,12 +104,14 @@ public:
     const std::filesystem::path& Directory() const { return m_directory; }
 
     // Data/Local/<language>/Item_<language>.bmd in this folder; creates the
-    // language folder.
+    // language folder. CItemDataHandler::GetItemFilePath uses backslashes,
+    // which only the game's file functions turn into folders on Linux and
+    // macOS, so the path is built from its parts here.
     std::filesystem::path LegacyItemFilePath(const std::wstring& language) const
     {
-        const std::filesystem::path path = m_directory / CItemDataHandler::GetItemFilePath(language);
-        std::filesystem::create_directories(path.parent_path());
-        return path;
+        const std::filesystem::path folder = m_directory / "Data" / "Local" / language;
+        std::filesystem::create_directories(folder);
+        return folder / (L"Item_" + language + L".bmd");
     }
 
     // The shipped Data/Items, and empty folders for the bmd export.
