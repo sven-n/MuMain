@@ -12887,4 +12887,148 @@
   <data name="DefaultFont" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="MixLevelAtLeast" xml:space="preserve">
+    <value>+%d Minimum</value>
+  </data>
+  <data name="MixLevelAtMost" xml:space="preserve">
+    <value>+%d Maksimum</value>
+  </data>
+  <data name="MixOption" xml:space="preserve">
+    <value>+%d Pilihan</value>
+  </data>
+  <data name="MixOptionAtLeast" xml:space="preserve">
+    <value>+%d Pilihan Minimum</value>
+  </data>
+  <data name="MixOptionAtMost" xml:space="preserve">
+    <value>+%d Pilihan Maksimum</value>
+  </data>
+  <data name="MixOptionRange" xml:space="preserve">
+    <value>+%d~%d Pilihan</value>
+  </data>
+  <data name="MixCount" xml:space="preserve">
+    <value>%d Kuantitas</value>
+  </data>
+  <data name="MixCountAtLeast" xml:space="preserve">
+    <value>%d Kuantitas Minimum</value>
+  </data>
+  <data name="MixCountAtMost" xml:space="preserve">
+    <value>%d Kuantitas Maksimum</value>
+  </data>
+  <data name="MixCountRange" xml:space="preserve">
+    <value>%d~%d Kuantitas</value>
+  </data>
+  <data name="SummonedMonsterOwner" xml:space="preserve">
+    <value>%ls Dari %ls</value>
+  </data>
+  <data name="CancelSkillQuestion" xml:space="preserve">
+    <value>%ls Apakah Anda ingin membatalkan?</value>
+  </data>
+  <data name="JewelCombinationSucceeded" xml:space="preserve">
+    <value>Kombinasi permata berhasil.</value>
+  </data>
+  <data name="JewelCombinationFailed" xml:space="preserve">
+    <value>Kombinasi permata telah gagal.</value>
+  </data>
+  <data name="JewelDismantlingSucceeded" xml:space="preserve">
+    <value>Bongkar permata berhasil.</value>
+  </data>
+  <data name="JewelDismantlingFailed" xml:space="preserve">
+    <value>Bongkar permata telah gagal.</value>
+  </data>
+  <data name="ZoneDCleared" xml:space="preserve">
+    <value>%d Zona Dibersihkan</value>
+  </data>
+  <data name="QuestRewardBuffBonus" xml:space="preserve">
+    <value>Bonus: %ls x %lu Menit</value>
+  </data>
+  <data name="CrownSwitchD" xml:space="preserve">
+    <value>Saklar mahkota %d</value>
+  </data>
+  <data name="FruitStatIncreased" xml:space="preserve">
+    <value>(%s buah) stat Poin %d telah menjadi Membuat.</value>
+  </data>
+  <data name="FruitStatDecreased" xml:space="preserve">
+    <value>(%s buah) stat Poin %d telah menjadi Mengurangi.</value>
+  </data>
+  <data name="FruitStatCannotIncrease" xml:space="preserve">
+    <value>Stat ini tidak bisa lagi menjadi Membuat.</value>
+  </data>
+  <data name="FruitStatCannotDecrease" xml:space="preserve">
+    <value>Stat ini tidak bisa lagi menjadi Mengurangi.</value>
+  </data>
+  <data name="StatPointsAdded" xml:space="preserve">
+    <value>Membuat</value>
+  </data>
+  <data name="StatPointsRemoved" xml:space="preserve">
+    <value>Mengurangi</value>
+  </data>
+  <data name="QuestCompletedSuccessfully" xml:space="preserve">
+    <value>Anda telah berhasil menyelesaikan misi.</value>
+  </data>
+  <data name="QuestFailedUnfortunately" xml:space="preserve">
+    <value>Pencarian Sayangnya, Anda telah gagal</value>
+  </data>
+  <data name="RequestHasFailed" xml:space="preserve">
+    <value>Sayangnya, Anda telah gagal</value>
+  </data>
+  <data name="QuestRequirementMonster" xml:space="preserve">
+    <value>Mon.: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementItem" xml:space="preserve">
+    <value>Item: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementLevel" xml:space="preserve">
+    <value>Level: %lu Minimum</value>
+  </data>
+  <data name="QuestRequirementZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardExp" xml:space="preserve">
+    <value>Exp.: %lu</value>
+  </data>
+  <data name="QuestRewardZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardItem" xml:space="preserve">
+    <value>Item: %ls x %lu</value>
+  </data>
+  <data name="OperationRefining" xml:space="preserve">
+    <value>Menyaring</value>
+  </data>
+  <data name="OperationRestoring" xml:space="preserve">
+    <value>Memulihkan</value>
+  </data>
+  <data name="OperationChaosCardCombination" xml:space="preserve">
+    <value>Kombinasi kartu kekacauan</value>
+  </data>
+  <data name="OperationCherryBlossomAssembly" xml:space="preserve">
+    <value>Perakitan cabang Bunga Sakura</value>
+  </data>
+  <data name="OperationRegistration" xml:space="preserve">
+    <value>Daftar</value>
+  </data>
+  <data name="OperationResurrecting" xml:space="preserve">
+    <value>Kebangkitan</value>
+  </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Selamat! Anda telah berhasil menyelesaikan Quest Kastil Darah!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Sayangnya, Anda telah gagal untuk menyelesaikan Quest Kastil Darah.</value>
+  </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
+  <data name="FruitCaption" xml:space="preserve">
+    <value>( %ls buah )</value>
+  </data>
+  <data name="QuestRequirementSkill" xml:space="preserve">
+    <value>Skill: %ls</value>
+  </data>
+  <data name="QuestRequirementBuff" xml:space="preserve">
+    <value>Bonus: %ls</value>
+  </data>
 </root>

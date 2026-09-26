@@ -478,13 +478,13 @@ void CNewUIMixInventory::RenderFrame()
                 mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_TRAINER:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Resurrection, g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationResurrecting, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_OSBOURNE:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationRefining, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_ELPIS:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationRefining, g_MixRecipeMgr.GetSuccessRate());
                 break;
             }
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
@@ -695,7 +695,7 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         mu_swprintf(szText, I18N::Game::TheRefiningStone);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::SForOnlyS, I18N::Game::Refine, I18N::Game::WeaponsOrShields);
+        mu_swprintf(szText, I18N::Game::SForOnlyS, I18N::Game::OperationRefining, I18N::Game::WeaponsOrShields);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         mu_swprintf(szText, I18N::Game::Allowed);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);

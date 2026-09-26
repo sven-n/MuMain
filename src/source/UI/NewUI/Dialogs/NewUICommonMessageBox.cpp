@@ -1511,7 +1511,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    mu_swprintf(strText, L"%ls%ls", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, I18N::Game::WouldYouLikeToCancel);
+    mu_swprintf(strText, I18N::Game::CancelSkillQuestion, SkillAttribute[AT_SKILL_INFINITY_ARROW].Name);
     g_iCancelSkillTarget = AT_SKILL_INFINITY_ARROW; // todo: is considering master skill required here?
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1555,7 +1555,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    mu_swprintf(strText, L"%ls%ls", SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY].Name, I18N::Game::WouldYouLikeToCancel);
+    mu_swprintf(strText, I18N::Game::CancelSkillQuestion, SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY].Name);
     g_iCancelSkillTarget = AT_SKILL_EXPANSION_OF_WIZARDRY;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1639,9 +1639,7 @@ bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    wchar_t strText[256] = { 0, };
-    mu_swprintf(strText, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
-    pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
+    pMsgBox->AddMsg(I18N::Game::JewelCombinationSucceeded, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     return true;
@@ -1705,9 +1703,7 @@ bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    wchar_t strText[256] = { 0, };
-    mu_swprintf(strText, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
-    pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
+    pMsgBox->AddMsg(I18N::Game::JewelDismantlingSucceeded, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return true;
 }
@@ -2338,7 +2334,7 @@ bool SEASON3B::CGatemanFailMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    pMsgBox->AddMsg(I18N::Game::UnfortunatelyYouHaveFailed, RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
+    pMsgBox->AddMsg(I18N::Game::RequestHasFailed, RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
 
     pMsgBox->AddCallbackFunc(CGatemanFailMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
@@ -3467,7 +3463,7 @@ bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
         return FALSE;
 
     wchar_t szText[100] = { 0, };
-    mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Register);
+    mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::OperationRegistration);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddCallbackFunc(CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return TRUE;

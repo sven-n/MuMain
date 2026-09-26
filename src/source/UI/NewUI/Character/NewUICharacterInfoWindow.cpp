@@ -348,12 +348,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
         iMaxMinus = -CharacterAttribute->wMaxMinusPoint;
 
         mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d",
-            I18N::Game::Create, CharacterAttribute->AddPoint, CharacterAttribute->MaxAddPoint,
-            I18N::Game::Decrease, iMinus, iMaxMinus);
+            I18N::Game::StatPointsAdded, CharacterAttribute->AddPoint, CharacterAttribute->MaxAddPoint,
+            I18N::Game::StatPointsRemoved, iMinus, iMaxMinus);
     }
     else
     {
-        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::Create, 0, 0, I18N::Game::Decrease, 0, 0);
+        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::StatPointsAdded, 0, 0, I18N::Game::StatPointsRemoved, 0, 0);
     }
 
     g_pRenderText->SetFont(g_hFontBold);

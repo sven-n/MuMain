@@ -11,6 +11,7 @@
 #include "Audio/DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
+#include "UI/Legacy/UIControls.h"
 
 using namespace SEASON3B;
 
@@ -137,20 +138,22 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
 
     wchar_t lpszStr[256] = {};
 
-    if (m_iNumResult)
+    // One sentence per outcome, wrapped to the width of the result box, so every
+    // language keeps its own word order across the two lines.
+    constexpr int ResultLineLength = 128;
+    wchar_t szResultLines[2][ResultLineLength]{};
+    const int iResultLines = CutStr(m_iNumResult ? I18N::Game::BloodCastleQuestCompleted : I18N::Game::BloodCastleQuestFailed,
+        szResultLines[0], 210, 2, ResultLineLength);
+    for (int i = 0; i < iResultLines; ++i)
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CongratulationsYouHaveSuccessfully, 0, 0, RT3_WRITE_CENTER);
-    }
-    else
-    {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::UnfortunatelyYouHaveFailed, 0, 0, RT3_WRITE_CENTER);
+        // CutStr breaks before the space, so a continued line starts with it.
+        const wchar_t* pszLine = szResultLines[i];
+        while (*pszLine == L' ')
+            ++pszLine;
+        g_pRenderText->RenderText(x, yPos + i * 16, pszLine, 0, 0, RT3_WRITE_CENTER);
     }
 
-    yPos += 30;
+    yPos += 16 + 30;
 
     MatchResult* pResult = &m_MatchResult[0];
 

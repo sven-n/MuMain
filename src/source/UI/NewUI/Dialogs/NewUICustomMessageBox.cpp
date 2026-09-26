@@ -877,7 +877,7 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
     }
 
     wchar_t strText[128] = { 0, };
-    mu_swprintf(strText, L"( %ls%ls )", strName, I18N::Game::Fruit);
+    mu_swprintf(strText, I18N::Game::FruitCaption, strName);
     AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
     AddMsg(I18N::Game::Choose, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 

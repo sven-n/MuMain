@@ -186,13 +186,11 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     {
         g_pRenderText->RenderText(x, yPos, I18N::Game::TheSpiritOfTheGuardHasBeenPurified, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
-        mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::CongratulationsYouHaveSuccessfully);
-        g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, I18N::Game::QuestCompletedSuccessfully, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::UnfortunatelyYouHaveFailed);
-        g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, I18N::Game::QuestFailedUnfortunately, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
         g_pRenderText->RenderText(x, yPos, I18N::Game::TryAgainNextTime, 0, 0, RT3_WRITE_CENTER);
     }

@@ -12887,4 +12887,148 @@
   <data name="DefaultFont" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="MixLevelAtLeast" xml:space="preserve">
+    <value>+%d pinakamababa</value>
+  </data>
+  <data name="MixLevelAtMost" xml:space="preserve">
+    <value>+%d Pinakamataas</value>
+  </data>
+  <data name="MixOption" xml:space="preserve">
+    <value>+%d Pagpipilian</value>
+  </data>
+  <data name="MixOptionAtLeast" xml:space="preserve">
+    <value>+%d Pagpipilian pinakamababa</value>
+  </data>
+  <data name="MixOptionAtMost" xml:space="preserve">
+    <value>+%d Pagpipilian Pinakamataas</value>
+  </data>
+  <data name="MixOptionRange" xml:space="preserve">
+    <value>+%d~%d Pagpipilian</value>
+  </data>
+  <data name="MixCount" xml:space="preserve">
+    <value>%d Dami</value>
+  </data>
+  <data name="MixCountAtLeast" xml:space="preserve">
+    <value>%d Dami pinakamababa</value>
+  </data>
+  <data name="MixCountAtMost" xml:space="preserve">
+    <value>%d Dami Pinakamataas</value>
+  </data>
+  <data name="MixCountRange" xml:space="preserve">
+    <value>%d~%d Dami</value>
+  </data>
+  <data name="SummonedMonsterOwner" xml:space="preserve">
+    <value>%ls Ng %ls</value>
+  </data>
+  <data name="CancelSkillQuestion" xml:space="preserve">
+    <value>%ls Gusto mo bang kanselahin?</value>
+  </data>
+  <data name="JewelCombinationSucceeded" xml:space="preserve">
+    <value>Matagumpay ang kumbinasyon ng hiyas.</value>
+  </data>
+  <data name="JewelCombinationFailed" xml:space="preserve">
+    <value>Nabigo ang kumbinasyon ng hiyas.</value>
+  </data>
+  <data name="JewelDismantlingSucceeded" xml:space="preserve">
+    <value>Matagumpay ang Tanggalin ang hiyas.</value>
+  </data>
+  <data name="JewelDismantlingFailed" xml:space="preserve">
+    <value>Nabigo ang Tanggalin ang hiyas.</value>
+  </data>
+  <data name="ZoneDCleared" xml:space="preserve">
+    <value>%d Na-clear ang Zone</value>
+  </data>
+  <data name="QuestRewardBuffBonus" xml:space="preserve">
+    <value>Bonus: %ls x %lu minuto</value>
+  </data>
+  <data name="CrownSwitchD" xml:space="preserve">
+    <value>switch ng korona %d</value>
+  </data>
+  <data name="FruitStatIncreased" xml:space="preserve">
+    <value>(%s fruit) stat %d puntos ay Lumikha.</value>
+  </data>
+  <data name="FruitStatDecreased" xml:space="preserve">
+    <value>(%s fruit) stat %d puntos ay Bawasan.</value>
+  </data>
+  <data name="FruitStatCannotIncrease" xml:space="preserve">
+    <value>Hindi na maaaring Lumikha ang stat na ito.</value>
+  </data>
+  <data name="FruitStatCannotDecrease" xml:space="preserve">
+    <value>Hindi na maaaring Bawasan ang stat na ito.</value>
+  </data>
+  <data name="StatPointsAdded" xml:space="preserve">
+    <value>Lumikha</value>
+  </data>
+  <data name="StatPointsRemoved" xml:space="preserve">
+    <value>Bawasan</value>
+  </data>
+  <data name="QuestCompletedSuccessfully" xml:space="preserve">
+    <value>Matagumpay mong nakumpleto ang paghahanap.</value>
+  </data>
+  <data name="QuestFailedUnfortunately" xml:space="preserve">
+    <value>Ang paghahanap Sa kasamaang palad, nabigo ka</value>
+  </data>
+  <data name="RequestHasFailed" xml:space="preserve">
+    <value>Sa kasamaang palad, nabigo ka</value>
+  </data>
+  <data name="QuestRequirementMonster" xml:space="preserve">
+    <value>Mon.: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementItem" xml:space="preserve">
+    <value>Item: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementLevel" xml:space="preserve">
+    <value>Level: %lu pinakamababa</value>
+  </data>
+  <data name="QuestRequirementZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardExp" xml:space="preserve">
+    <value>Exp.: %lu</value>
+  </data>
+  <data name="QuestRewardZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardItem" xml:space="preserve">
+    <value>Item: %ls x %lu</value>
+  </data>
+  <data name="OperationRefining" xml:space="preserve">
+    <value>Pinuhin</value>
+  </data>
+  <data name="OperationRestoring" xml:space="preserve">
+    <value>Ibalik</value>
+  </data>
+  <data name="OperationChaosCardCombination" xml:space="preserve">
+    <value>Chaos card na kumbinasyon</value>
+  </data>
+  <data name="OperationCherryBlossomAssembly" xml:space="preserve">
+    <value>Pagpupulong ng mga sanga ng Cherry Blossoms</value>
+  </data>
+  <data name="OperationRegistration" xml:space="preserve">
+    <value>Magrehistro</value>
+  </data>
+  <data name="OperationResurrecting" xml:space="preserve">
+    <value>Muling Pagkabuhay</value>
+  </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Binabati kita! Naging matagumpay ka natapos ang Blood Castle Quest!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Sa kasamaang palad, nabigo ka para makumpleto ang Blood Castle Quest.</value>
+  </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
+  <data name="FruitCaption" xml:space="preserve">
+    <value>( %ls fruit )</value>
+  </data>
+  <data name="QuestRequirementSkill" xml:space="preserve">
+    <value>Skill: %ls</value>
+  </data>
+  <data name="QuestRequirementBuff" xml:space="preserve">
+    <value>Bonus: %ls</value>
+  </data>
 </root>
