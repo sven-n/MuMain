@@ -1,0 +1,89 @@
+/* Modern theme for CChatInputBox. Geometry is identical to legacy's and traced to native's own
+   constants there -- see legacy/chat_input.rcss rather than repeating the derivation. What differs
+   is that this theme draws no sprite art at all: legacy's background bitmap carries every button's
+   OFF state, so an unlit button is invisible-but-present there, whereas here each button needs a
+   visible resting state of its own. */
+
+#panel {
+	position: absolute;
+	left: 0;
+	bottom: 51dp;
+	width: 281dp;
+	height: 47dp;
+	background-color: token(surface-panel);
+	border: 1dp token(metal-edge);
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	pointer-events: none;
+}
+
+/* Unlike legacy, the resting state is drawn here -- there is no background art underneath to
+   supply it. `.on` is the lit state, not the only state. */
+.cib-btn {
+	position: absolute;
+	top: 3dp;
+	width: 24dp;
+	height: 20dp;
+	background-color: token(metal-rail-dark);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+.cib-btn:hover { background-color: token(metal-edge); }
+.cib-btn.on { background-color: token(accent-gold); }
+.cib-btn:active { filter: brightness(0.75); }
+
+.cib-btn-normal  { left: 2dp; }
+.cib-btn-party   { left: 29dp; }
+.cib-btn-guild   { left: 56dp; }
+.cib-btn-gens    { left: 83dp; }
+.cib-btn-whisper { left: 116dp; }
+.cib-btn-system  { left: 143dp; }
+.cib-btn-chatlog { left: 170dp; }
+.cib-btn-frame   { left: 203dp; }
+.cib-btn-size    { left: 230dp; }
+.cib-btn-alpha   { left: 257dp; }
+
+#tooltip {
+	position: absolute;
+	top: -16dp;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	padding: 1dp 4dp;
+	background-color: token(surface-tooltip);
+	color: token(text-primary);
+	border-radius: token(radius-sm)px;
+	font-size: 11dp;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.cib-whisper-field {
+	position: absolute;
+	left: 5dp;
+	top: 30dp;
+	width: 50dp;
+	height: 14dp;
+	font-size: 11dp;
+}
+.cib-chat-field {
+	position: absolute;
+	left: 72dp;
+	top: 30dp;
+	width: 176dp;
+	height: 14dp;
+	font-size: 11dp;
+}
+
+.cib-whisper-field.blocked { color: token(text-disabled); }
+#whisper_block {
+	position: absolute;
+	left: 2dp;
+	top: 28dp;
+	width: 61dp;
+	height: 17dp;
+	background-color: rgba(128, 51, 51, 51);
+	border-radius: token(radius-sm)px;
+	pointer-events: none;
+}

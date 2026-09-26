@@ -17,6 +17,14 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
+// RmlUi migration -- see ChatInputRmlModel (ChatInputBox.h).
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Elements/ElementFormControlInput.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -36,8 +44,6 @@ void mu::ui::window::CChatInputBox::Init()
     m_pNewUIMng = nullptr;
     m_pNewUIChatLogWnd = nullptr;
     m_pNewUISystemLogWnd = nullptr;
-    m_pChatInputBox = nullptr;
-    m_pWhsprIDInputBox = nullptr;
     m_WndPos = {};
     m_WndSize = {};
     m_WndPos.x = m_WndPos.y = 0;
@@ -53,36 +59,6 @@ void mu::ui::window::CChatInputBox::Init()
     m_bWhisperSend = true;
 
     m_bShowMessageElseNormal = false;
-}
-
-void mu::ui::window::CChatInputBox::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_chat_back.jpg", IMAGE_INPUTBOX_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_normal_on.jpg", IMAGE_INPUTBOX_NORMAL_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_party_on.jpg", IMAGE_INPUTBOX_PARTY_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_guild_on.jpg", IMAGE_INPUTBOX_GUILD_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_gens_on.jpg", IMAGE_INPUTBOX_GENS_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_whisper_on.jpg", IMAGE_INPUTBOX_WHISPER_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_system_on.jpg", IMAGE_INPUTBOX_SYSTEM_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_chat_on.jpg", IMAGE_INPUTBOX_CHATLOG_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_frame_on.jpg", IMAGE_INPUTBOX_FRAME_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_btn_size.jpg", IMAGE_INPUTBOX_BTN_SIZE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chat_btn_alpha.jpg", IMAGE_INPUTBOX_BTN_TRANSPARENCY, GL_LINEAR);
-}
-
-void mu::ui::window::CChatInputBox::UnloadImages()
-{
-    DeleteBitmap(IMAGE_INPUTBOX_BTN_TRANSPARENCY);
-    DeleteBitmap(IMAGE_INPUTBOX_BTN_SIZE);
-    DeleteBitmap(IMAGE_INPUTBOX_FRAME_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_SYSTEM_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_CHATLOG_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_WHISPER_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_GUILD_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_GENS_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_PARTY_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_NORMAL_ON);
-    DeleteBitmap(IMAGE_INPUTBOX_BACK);
 }
 
 bool mu::ui::window::CChatInputBox::Create(
@@ -104,31 +80,9 @@ bool mu::ui::window::CChatInputBox::Create(
     m_pNewUISystemLogWnd = pNewUISystemLogWnd;
     SetWndPos(x, y);
 
-    m_pChatInputBox = new CUITextInputBox;
-    m_pChatInputBox->Init(g_hWnd, 176, 14, MAX_CHAT_SIZE - 1);
-    m_pChatInputBox->SetPosition(m_WndPos.x + 72, m_WndPos.y + 32);
-    m_pChatInputBox->SetTextColor(255, 255, 230, 210);
-    m_pChatInputBox->SetBackColor(0, 0, 0, 25);
-    m_pChatInputBox->SetFont(g_hFont);
-    m_pChatInputBox->SetState(UISTATE_HIDE);
-
-    m_pWhsprIDInputBox = new CUITextInputBox;
-    m_pWhsprIDInputBox->Init(g_hWnd, 50, 14, 10);
-    m_pWhsprIDInputBox->SetPosition(m_WndPos.x + 5, m_WndPos.y + 32);
-    m_pWhsprIDInputBox->SetSize(50, 14);
-    m_pWhsprIDInputBox->SetTextColor(255, 200, 200, 200);
-    m_pWhsprIDInputBox->SetBackColor(0, 0, 0, 25);
-    m_pWhsprIDInputBox->SetFont(g_hFont);
-    m_pWhsprIDInputBox->SetState(UISTATE_HIDE);
-
-    m_pChatInputBox->SetTabTarget(m_pWhsprIDInputBox);
-    m_pWhsprIDInputBox->SetTabTarget(m_pChatInputBox);
-
-    LoadImages();
-
+    // Both text fields, their tab pairing, their colours/limits and every button's hit box now
+    // come from chat_input.rml/.rcss -- nothing to construct here.
     SetInputMsgType(INPUT_CHAT_MESSAGE);
-
-    SetButtonInfo();
 
     Show(false);
 
@@ -137,42 +91,22 @@ bool mu::ui::window::CChatInputBox::Create(
 
 void mu::ui::window::CChatInputBox::Release()
 {
-    UnloadImages();
-
-    RemoveAllChatHIstory();
-    RemoveAllWhsprIDHIstory();
-
-    SAFE_DELETE(m_pChatInputBox);
-    SAFE_DELETE(m_pWhsprIDInputBox);
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        m_pNewUIMng = nullptr;
     }
 
     Init();
 }
 
-void mu::ui::window::CChatInputBox::SetButtonInfo()
-{
-    m_BtnSize.ChangeButtonImgState(true, IMAGE_INPUTBOX_BTN_SIZE, false);
-    m_BtnSize.ChangeButtonInfo(m_WndPos.x + FRAME_RESIZE_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-    m_BtnTransparency.ChangeButtonImgState(true, IMAGE_INPUTBOX_BTN_TRANSPARENCY, false);
-    m_BtnTransparency.ChangeButtonInfo(m_WndPos.x + TRANSPARENCY_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
-}
-
 void mu::ui::window::CChatInputBox::SetWndPos(int x, int y)
 {
+    // Still tracked for the native hit test in UpdateMouseEvent(); the fields position themselves
+    // from RCSS now.
     m_WndPos.x = x; m_WndPos.y = y;
     m_WndSize.cx = CHATBOX_WIDTH; m_WndSize.cy = CHATBOX_HEIGHT;
-
-    if (m_pChatInputBox && m_pWhsprIDInputBox)
-    {
-        m_pChatInputBox->SetPosition(m_WndPos.x + 72, m_WndPos.y + 32);
-        m_pWhsprIDInputBox->SetPosition(m_WndPos.x + 5, m_WndPos.y + 32);
-    }
 }
 
 void mu::ui::window::CChatInputBox::SetInputMsgType(int iInputMsgType)
@@ -185,15 +119,9 @@ int mu::ui::window::CChatInputBox::GetInputMsgType() const
     return m_iInputMsgType;
 }
 
-void mu::ui::window::CChatInputBox::SetFont(HFONT hFont)
-{
-    m_pChatInputBox->SetFont(hFont);
-    m_pWhsprIDInputBox->SetFont(hFont);
-}
-
 bool mu::ui::window::CChatInputBox::HaveFocus()
 {
-    return (m_pChatInputBox->HaveFocus() || m_pWhsprIDInputBox->HaveFocus());
+    return IsFieldFocused("chat_field") || IsFieldFocused("whisper_field");
 }
 
 void mu::ui::window::CChatInputBox::AddChatHistory(const type_string& strText)
@@ -257,130 +185,11 @@ bool mu::ui::window::CChatInputBox::UpdateMouseEvent()
         return true;
     }
 
-    auto const releaseMouse = mu::ui::window::IsRelease(VK_LBUTTON);
-
+    // Every button hit test, the hover tooltip and the whole button row moved to chat_input.rml's
+    // own elements (data-event-click / data-event-mouseover). What is left is the two things RmlUi
+    // has no part in: retargeting a whisper from a right-click elsewhere on screen, and claiming
+    // the bar's own rectangle so a click on it does not fall through to the world.
     UpdateWhisperTargetFromRightClick();
-
-    m_iTooltipType = INPUT_TOOLTIP_NOTHING;
-
-    int iSelectedInputType = -1;
-    for (int i = 0; i < INPUT_MESSAGE_TYPE_COUNT; ++i)
-    {
-        if (CheckMouseIn(m_WndPos.x + (i * BUTTON_WIDTH), m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-        {
-            iSelectedInputType = i;
-            m_iTooltipType = INPUT_TOOLTIP_NORMAL + i;
-        }
-    }
-
-    if (iSelectedInputType > -1 && releaseMouse)
-    {
-        SetInputMsgType(INPUT_CHAT_MESSAGE + iSelectedInputType);
-        PlayBuffer(SOUND_CLICK01);
-        return false;
-    }
-
-    if (CheckMouseIn(m_WndPos.x + BLOCK_WHISPER_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-    {
-        m_iTooltipType = INPUT_TOOLTIP_WHISPER;
-        if (releaseMouse)
-        {
-            m_bBlockWhisper = !m_bBlockWhisper;
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-    }
-
-
-    if (CheckMouseIn(m_WndPos.x + SYSTEM_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-    {
-        m_iTooltipType = INPUT_TOOLTIP_SYSTEM;
-        if (releaseMouse)
-        {
-            m_bShowSystemMessages = !m_bShowSystemMessages;
-
-            if (m_bShowSystemMessages)
-            {
-                m_pNewUISystemLogWnd->ShowMessages();
-            }
-            else
-            {
-                m_pNewUISystemLogWnd->HideMessages();
-            }
-
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-    }
-
-    if (CheckMouseIn(m_WndPos.x + CHATLOG_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-    {
-        m_iTooltipType = INPUT_TOOLTIP_CHAT;
-        if (releaseMouse)
-        {
-            m_bShowChatLog = !m_bShowChatLog;
-
-            if (m_bShowChatLog)
-            {
-                m_pNewUIChatLogWnd->ShowChatLog();
-            }
-            else
-            {
-                m_pNewUIChatLogWnd->HideChatLog();
-            }
-
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-    }
-
-    if (CheckMouseIn(m_WndPos.x + FRAME_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-    {
-        m_iTooltipType = INPUT_TOOLTIP_FRAME;
-        if (releaseMouse)
-        {
-            if (m_pNewUIChatLogWnd->IsShowFrame())
-            {
-                m_pNewUIChatLogWnd->HideFrame();
-            }
-            else
-            {
-                m_pNewUIChatLogWnd->ShowFrame();
-            }
-
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-    }
-
-    if (CheckMouseIn(m_WndPos.x + FRAME_RESIZE_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-    {
-        m_iTooltipType = INPUT_TOOLTIP_SIZE;
-    }
-
-    if (CheckMouseIn(m_WndPos.x + TRANSPARENCY_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
-    {
-        m_iTooltipType = INPUT_TOOLTIP_TRANSPARENCY;
-    }
-
-    if (m_pNewUIChatLogWnd->IsShowFrame())
-    {
-        if (m_BtnSize.UpdateMouseEvent())
-        {
-            m_pNewUIChatLogWnd->SetSizeAuto();
-            m_pNewUIChatLogWnd->UpdateWndSize();
-            m_pNewUIChatLogWnd->UpdateScrollPos();
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-
-        if (m_BtnTransparency.UpdateMouseEvent())
-        {
-            m_pNewUIChatLogWnd->SetBackAlphaAuto();
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-    }
 
     return !mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY);
 }
@@ -409,15 +218,15 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
         if (m_bWhisperSend == false)
         {
             m_bWhisperSend = true;
-            m_pWhsprIDInputBox->SetState(UISTATE_NORMAL);
         }
         else
         {
             m_bWhisperSend = false;
-            m_pWhsprIDInputBox->SetState(UISTATE_HIDE);
+            // The field stays in the DOM (greyed, under the blocked wash -- see chat_input.rcss),
+            // so focus has to be moved off it explicitly.
             if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHATINPUTBOX))
             {
-                m_pChatInputBox->GiveFocus();
+                FocusField("chat_field");
             }
         }
 
@@ -503,8 +312,15 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
         wchar_t	szChatText[MAX_CHAT_SIZE + 1] = { '\0' };
         wchar_t	szWhisperID[MAX_USERNAME_SIZE + 1] = { '\0' };
 
-        m_pChatInputBox->GetText(szChatText, MAX_CHAT_SIZE);
-        m_pWhsprIDInputBox->GetText(szWhisperID, MAX_USERNAME_SIZE + 1);
+        {
+            type_string strChat, strWhisper;
+            GetChatText(strChat);
+            GetWhsprID(strWhisper);
+            wcsncpy(szChatText, strChat.c_str(), MAX_CHAT_SIZE);
+            szChatText[MAX_CHAT_SIZE] = L'\0';
+            wcsncpy(szWhisperID, strWhisper.c_str(), MAX_USERNAME_SIZE);
+            szWhisperID[MAX_USERNAME_SIZE] = L'\0';
+        }
 
         //for (int i = 0; i < MAX_CHAT_SIZE; i++)
         //    szReceivedChat[i] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szReceivedChat[i]);
@@ -539,7 +355,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
                     //    wstrText = I18N::Game::PwnedByTheFilter;
                     //}
 
-                    if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
+                    if (m_bWhisperSend && wcslen(szChatText) && wcslen(szWhisperID) > 0)
                     {
                         SocketClient->ToGameServer()->SendWhisperMessage(MU_C16(szWhisperID), MU_C16(wstrText.c_str()));
                         g_pChatListBox->AddText(Hero->ID, szChatText, mu::ui::window::TYPE_WHISPER_MESSAGE);
@@ -570,7 +386,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
                 }
             }
         }
-        m_pChatInputBox->SetText(L"");
+        SetFieldText("chat_field", L"");
         m_iCurChatHistory = m_iCurWhisperIDHistory = 0;
 
         SaveIMEStatus();
@@ -578,14 +394,14 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHATINPUTBOX);
         return false;
     }
-    if (IsVisible() && m_pChatInputBox->HaveFocus())
+    if (IsVisible() && IsFieldFocused("chat_field"))
     {
         if (mu::ui::window::IsPress(VK_UP) && false == m_vecChatHistory.empty())
         {
             m_iCurChatHistory--;
             if (m_iCurChatHistory < 0)
                 m_iCurChatHistory = m_vecChatHistory.size() - 1;
-            m_pChatInputBox->SetText(m_vecChatHistory[m_iCurChatHistory].c_str());
+            SetFieldText("chat_field", m_vecChatHistory[m_iCurChatHistory]);
 
             return false;
         }
@@ -596,21 +412,20 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
             if (m_iCurChatHistory >= (int)m_vecChatHistory.size())
                 m_iCurChatHistory = 0;
 
-            m_pChatInputBox->SetText(m_vecChatHistory[m_iCurChatHistory].c_str());
+            SetFieldText("chat_field", m_vecChatHistory[m_iCurChatHistory]);
 
             return false;
         }
     }
 
-    if (IsVisible() && m_pWhsprIDInputBox->HaveFocus()
-        && m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL)
+    if (IsVisible() && IsFieldFocused("whisper_field") && m_bWhisperSend)
     {
         if (mu::ui::window::IsPress(VK_UP) && false == m_vecWhsprIDHistory.empty())
         {
             m_iCurWhisperIDHistory--;
             if (m_iCurWhisperIDHistory < 0)
                 m_iCurWhisperIDHistory = m_vecWhsprIDHistory.size() - 1;
-            m_pWhsprIDInputBox->SetText(m_vecWhsprIDHistory[m_iCurWhisperIDHistory].c_str());
+            SetFieldText("whisper_field", m_vecWhsprIDHistory[m_iCurWhisperIDHistory]);
 
             return false;
         }
@@ -621,7 +436,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
             if (m_iCurWhisperIDHistory >= (int)m_vecWhsprIDHistory.size())
                 m_iCurWhisperIDHistory = 0;
 
-            m_pWhsprIDInputBox->SetText(m_vecWhsprIDHistory[m_iCurWhisperIDHistory].c_str());
+            SetFieldText("whisper_field", m_vecWhsprIDHistory[m_iCurWhisperIDHistory]);
 
             return false;
         }
@@ -643,36 +458,23 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
 
 bool mu::ui::window::CChatInputBox::Update()
 {
-    if (m_pChatInputBox->HaveFocus() && GetRelatedWnd() != m_pChatInputBox->GetHandle())
+    BuildRmlUi();
+    SyncRmlModel();
+
+    // CManager::UpdateKeyEvent() only dispatches to a window whose GetRelatedWnd() matches the
+    // currently-focused handle, and it reports a focused RmlUi <input> as RmlUiRuntime's own
+    // address. Claiming that address here is what keeps THIS window receiving keys while the
+    // player is typing -- exactly the role the focused CUITextInputBox's HWND used to play. Get it
+    // wrong and Enter/Escape/history simply never arrive.
+    HWND hRmlFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
+    if (HaveFocus())
     {
-        SetRelatedWnd(m_pChatInputBox->GetHandle());
+        if (GetRelatedWnd() != hRmlFocus)
+            SetRelatedWnd(hRmlFocus);
     }
-    if (m_pWhsprIDInputBox->HaveFocus() && GetRelatedWnd() != m_pWhsprIDInputBox->GetHandle())
-    {
-        SetRelatedWnd(m_pWhsprIDInputBox->GetHandle());
-    }
-    if (!HaveFocus() && GetRelatedWnd() != g_hWnd)
+    else if (GetRelatedWnd() != g_hWnd)
     {
         SetRelatedWnd(g_hWnd);
-    }
-
-    if (IsVisible() == false)
-    {
-        return true;
-    }
-
-    m_pChatInputBox->DoAction();
-
-    if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL)
-    {
-        m_pWhsprIDInputBox->DoAction();
-    }
-
-    m_pChatInputBox->DoAction();
-
-    if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL)
-    {
-        m_pWhsprIDInputBox->DoAction();
     }
 
     return true;
@@ -680,101 +482,218 @@ bool mu::ui::window::CChatInputBox::Update()
 
 bool mu::ui::window::CChatInputBox::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-    RenderButtons();
-    RenderTooltip();
-    m_pChatInputBox->Render();
-    m_pWhsprIDInputBox->Render();
-
-    if (m_bWhisperSend == false)
-    {
-        wchar_t szWhisperID[32];
-        m_pWhsprIDInputBox->GetText(szWhisperID, 32);
-        g_pRenderText->SetTextColor(255, 255, 255, 100);
-        g_pRenderText->RenderText(m_pWhsprIDInputBox->GetPosition_x(), m_pWhsprIDInputBox->GetPosition_y(), szWhisperID);
-
-        EnableAlphaTest();
-        constexpr unsigned int BlockedWhisperColor = 0x33803333u;
-        RenderColorQuadARGB(m_WndPos.x + 2, m_WndPos.y + 28, 61, 17, BlockedWhisperColor);
-    }
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the bar art, the buttons, the tooltip and both fields are all RmlUi.
+    // Kept because CObject requires the override.
     return true;
 }
 
-bool mu::ui::window::CChatInputBox::RenderFrame()
+void mu::ui::window::CChatInputBox::BuildRmlUi()
 {
-    RenderImage(IMAGE_INPUTBOX_BACK, m_WndPos.x, m_WndPos.y, CHATBOX_WIDTH, CHATBOX_HEIGHT);
-
-    return true;
-}
-
-void mu::ui::window::CChatInputBox::RenderButtons()
-{
-    auto windowX = static_cast<float>(m_WndPos.x);
-    auto windowY = static_cast<float>(m_WndPos.y);
-
-    RenderImage(IMAGE_INPUTBOX_NORMAL_ON + m_iInputMsgType, windowX + BUTTON_WIDTH * m_iInputMsgType, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-    if (m_bBlockWhisper)
-    {
-        RenderImage(IMAGE_INPUTBOX_WHISPER_ON, windowX + BLOCK_WHISPER_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-    }
-
-    if (m_bShowSystemMessages)
-    {
-        RenderImage(IMAGE_INPUTBOX_SYSTEM_ON, windowX + SYSTEM_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-    }
-
-    if (m_bShowChatLog)
-    {
-        RenderImage(IMAGE_INPUTBOX_CHATLOG_ON, windowX + CHATLOG_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-    }
-
-    if (m_pNewUIChatLogWnd->IsShowFrame())
-    {
-        RenderImage(IMAGE_INPUTBOX_FRAME_ON, windowX + FRAME_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-        m_BtnSize.Render();
-        m_BtnTransparency.Render();
-    }
-}
-
-void mu::ui::window::CChatInputBox::RenderTooltip()
-{
-    if (m_iTooltipType == INPUT_TOOLTIP_NOTHING)
-    {
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
         return;
-    }
 
-    wchar_t strTooltip[256];
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "chat_input",
+        [this](Rml::DataModelConstructor& c, ChatInputRmlModel& model)
+        {
+            c.Bind("chat_text", &model.chatText);
+            c.Bind("whisper_id", &model.whisperId);
+            c.Bind("input_msg_type", &model.inputMsgType);
+            c.Bind("block_whisper", &model.blockWhisper);
+            c.Bind("show_system", &model.showSystem);
+            c.Bind("show_chat_log", &model.showChatLog);
+            c.Bind("show_frame", &model.showFrame);
+            c.Bind("whisper_send", &model.whisperSend);
+            c.Bind("tooltip_index", &model.tooltipIndex);
+            c.Bind("tooltip_left", &model.tooltipLeft);
+            c.Bind("tooltip_text", &model.tooltipText);
 
-    const int iTextIndex[10] = {
-        1681, 1682, 1683, 3321,
-        1684, 1685, 750, 1686, 751, 752 };
+            c.BindEventCallback("chat_set_type",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                {
+                    if (args.empty()) return;
+                    SetInputMsgType(INPUT_CHAT_MESSAGE + args[0].Get<int>(0));
+                    PlayBuffer(SOUND_CLICK01);
+                });
 
-    mu_swprintf(strTooltip, L"%ls", I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
+            c.BindEventCallback("chat_toggle_whisper_block",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    m_bBlockWhisper = !m_bBlockWhisper;
+                    PlayBuffer(SOUND_CLICK01);
+                });
 
-    g_pRenderText->SetFont(g_hFont);
-    const SIZE fontsize = g_pRenderText->MeasureText(strTooltip, wcslen(strTooltip));
+            c.BindEventCallback("chat_toggle_system",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    m_bShowSystemMessages = !m_bShowSystemMessages;
+                    if (m_bShowSystemMessages)
+                        m_pNewUISystemLogWnd->ShowMessages();
+                    else
+                        m_pNewUISystemLogWnd->HideMessages();
+                    PlayBuffer(SOUND_CLICK01);
+                });
 
-    int x = m_WndPos.x
-        + (m_iTooltipType * BUTTON_WIDTH)
-        + (m_iTooltipType / 3 * GROUP_SEPARATING_WIDTH)
-        + 10 - (fontsize.cx / 2);
-    if (x < 0)
+            c.BindEventCallback("chat_toggle_chatlog",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    m_bShowChatLog = !m_bShowChatLog;
+                    if (m_bShowChatLog)
+                        m_pNewUIChatLogWnd->ShowChatLog();
+                    else
+                        m_pNewUIChatLogWnd->HideChatLog();
+                    PlayBuffer(SOUND_CLICK01);
+                });
+
+            c.BindEventCallback("chat_toggle_frame",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    if (m_pNewUIChatLogWnd->IsShowFrame())
+                        m_pNewUIChatLogWnd->HideFrame();
+                    else
+                        m_pNewUIChatLogWnd->ShowFrame();
+                    PlayBuffer(SOUND_CLICK01);
+                });
+
+            c.BindEventCallback("chat_size_step",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    m_pNewUIChatLogWnd->SetSizeAuto();
+                    m_pNewUIChatLogWnd->UpdateWndSize();
+                    m_pNewUIChatLogWnd->UpdateScrollPos();
+                    PlayBuffer(SOUND_CLICK01);
+                });
+
+            c.BindEventCallback("chat_alpha_step",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                {
+                    m_pNewUIChatLogWnd->SetBackAlphaAuto();
+                    PlayBuffer(SOUND_CLICK01);
+                });
+
+            c.BindEventCallback("chat_tooltip",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                {
+                    m_iTooltipType = args.empty() ? INPUT_TOOLTIP_NOTHING : args[0].Get<int>(-1);
+                });
+        });
+
+    if (modelCreated)
     {
-        x = 0;
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                     "Data/Interface/RmlUi/chat_input.rml");
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+    }
+}
+
+void mu::ui::window::CChatInputBox::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CChatInputBox::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+
+    // Deliberately after the line above: the field can only take focus once its document is
+    // showing, and SyncDocumentVisibility()'s Show() would blur it if the order were reversed.
+    if (m_bFocusPending && m_pRmlDoc->IsVisible())
+    {
+        m_bFocusPending = false;
+        FocusField("chat_field");
     }
 
-    int y = m_WndPos.y - (fontsize.cy + 1);
+    ChatInputRmlModel& model = m_RmlBinder.GetModel();
 
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 180);
-    g_pRenderText->RenderText(x, y, strTooltip, fontsize.cx + 6, 0, RT3_SORT_CENTER);
+    auto syncBool = [&](bool ChatInputRmlModel::* field, const char* name, bool value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(name); }
+    };
+
+    syncBool(&ChatInputRmlModel::blockWhisper, "block_whisper", m_bBlockWhisper);
+    syncBool(&ChatInputRmlModel::showSystem, "show_system", m_bShowSystemMessages);
+    syncBool(&ChatInputRmlModel::showChatLog, "show_chat_log", m_bShowChatLog);
+    syncBool(&ChatInputRmlModel::whisperSend, "whisper_send", m_bWhisperSend);
+    syncBool(&ChatInputRmlModel::showFrame, "show_frame",
+             m_pNewUIChatLogWnd && m_pNewUIChatLogWnd->IsShowFrame());
+
+    const int typeIndex = GetInputMsgType() - INPUT_CHAT_MESSAGE;
+    if (model.inputMsgType != typeIndex)
+    {
+        model.inputMsgType = typeIndex;
+        m_RmlBinder.MarkDirty("input_msg_type");
+    }
+
+    if (model.tooltipIndex != m_iTooltipType)
+    {
+        model.tooltipIndex = m_iTooltipType;
+        m_RmlBinder.MarkDirty("tooltip_index");
+
+        if (m_iTooltipType != INPUT_TOOLTIP_NOTHING)
+        {
+            // Native's own string table and x formula (RenderTooltip()), kept verbatim -- the
+            // formula's own group stepping is /3, which does not match the button row's /4
+            // grouping, but it is what ships, so it is reproduced rather than "corrected".
+            static const int iTextIndex[10] = {
+                1681, 1682, 1683, 3321,
+                1684, 1685, 750, 1686, 751, 752 };
+            if (m_iTooltipType >= 0 && m_iTooltipType < 10)
+            {
+                model.tooltipText = StringUtils::WideToNarrow(I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
+                m_RmlBinder.MarkDirty("tooltip_text");
+
+                // Native then subtracted half the measured text width; the RCSS centres on this
+                // point instead, so no measurement is needed here.
+                model.tooltipLeft = (float)m_iTooltipType * BUTTON_WIDTH
+                                  + (float)(m_iTooltipType / 3) * GROUP_SEPARATING_WIDTH + 10.0f;
+                m_RmlBinder.MarkDirty("tooltip_left");
+            }
+        }
+    }
+}
+
+Rml::Element* mu::ui::window::CChatInputBox::GetField(const char* id) const
+{
+    return m_pRmlDoc ? m_pRmlDoc->GetElementById(id) : nullptr;
+}
+
+bool mu::ui::window::CChatInputBox::IsFieldFocused(const char* id) const
+{
+    Rml::Element* field = GetField(id);
+    return field != nullptr && field->IsPseudoClassSet("focus");
+}
+
+void mu::ui::window::CChatInputBox::SetFieldText(const char* id, const type_string& text)
+{
+    ChatInputRmlModel& model = m_RmlBinder.GetModel();
+    const Rml::String narrow = StringUtils::WideToNarrow(text.c_str());
+
+    if (strcmp(id, "chat_field") == 0)
+    {
+        if (model.chatText == narrow) return;
+        model.chatText = narrow;
+        m_RmlBinder.MarkDirty("chat_text");
+    }
+    else
+    {
+        if (model.whisperId == narrow) return;
+        model.whisperId = narrow;
+        m_RmlBinder.MarkDirty("whisper_id");
+    }
+}
+
+void mu::ui::window::CChatInputBox::FocusField(const char* id)
+{
+    if (Rml::Element* field = GetField(id))
+        field->Focus();
 }
 
 float mu::ui::window::CChatInputBox::GetLayerDepth()
@@ -789,47 +708,37 @@ float mu::ui::window::CChatInputBox::GetKeyEventOrder()
 
 void mu::ui::window::CChatInputBox::OpenningProcess()
 {
-    // Must set state before focusing -- a hidden field ignores GiveFocus().
-    m_pChatInputBox->SetState(UISTATE_NORMAL);
-    m_pChatInputBox->GiveFocus();
-    m_pChatInputBox->SetText(L"");
-
-    if (m_bWhisperSend == true)
-    {
-        m_pWhsprIDInputBox->SetState(UISTATE_NORMAL);
-    }
-    else
-    {
-        m_pWhsprIDInputBox->SetState(UISTATE_HIDE);
-    }
+    // Only clears the field and arms the focus latch -- see m_bFocusPending. The document is not
+    // visible yet at this point, so focusing here would be silently dropped.
+    BuildRmlUi();
+    SetFieldText("chat_field", L"");
+    m_bFocusPending = true;
 }
 
 void mu::ui::window::CChatInputBox::ClosingProcess()
 {
     m_pNewUIChatLogWnd->HideFrame();
 
-    m_pChatInputBox->SetState(UISTATE_HIDE);
-    m_pWhsprIDInputBox->SetState(UISTATE_HIDE);
+    m_bFocusPending = false;
+    if (Rml::Element* field = GetField("chat_field")) field->Blur();
+    if (Rml::Element* field = GetField("whisper_field")) field->Blur();
 
     SetFocus(g_hWnd);
 }
 
 void mu::ui::window::CChatInputBox::GetChatText(type_string& strText)
 {
-    wchar_t szChatText[256];
-    m_pChatInputBox->GetText(szChatText, 256);
-    strText = szChatText;
+    strText = StringUtils::NarrowToWide(m_RmlBinder.GetModel().chatText);
 }
+
 void mu::ui::window::CChatInputBox::GetWhsprID(type_string& strWhsprID)
 {
-    wchar_t szWhisperID[32];
-    m_pWhsprIDInputBox->GetText(szWhisperID, 32);
-    strWhsprID = szWhisperID;
+    strWhsprID = StringUtils::NarrowToWide(m_RmlBinder.GetModel().whisperId);
 }
 
 void mu::ui::window::CChatInputBox::SetWhsprID(const wchar_t* strWhsprID)
 {
-    m_pWhsprIDInputBox->SetText(strWhsprID);
+    SetFieldText("whisper_field", strWhsprID ? strWhsprID : L"");
 }
 
 void mu::ui::window::CChatInputBox::UpdateWhisperTargetFromRightClick()
@@ -858,14 +767,4 @@ void mu::ui::window::CChatInputBox::UpdateWhisperTargetFromRightClick()
     }
 
     SetWhsprID(character->ID);
-}
-
-void mu::ui::window::CChatInputBox::SetTextPosition(int x, int y)
-{
-    m_pChatInputBox->SetPosition(x, y);
-}
-
-void mu::ui::window::CChatInputBox::SetBuddyPosition(int x, int y)
-{
-    m_pWhsprIDInputBox->SetPosition(x, y);
 }

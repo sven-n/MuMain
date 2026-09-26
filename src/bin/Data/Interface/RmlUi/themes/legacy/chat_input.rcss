@@ -1,0 +1,123 @@
+/* Legacy theme for CChatInputBox -- the bottom-left chat bar.
+
+   Geometry is native's own, from the class's constants: the bar is CHATBOX_WIDTH x CHATBOX_HEIGHT
+   (281x47) placed at (0, 480 - 51 - 47), buttons are 27x26 laid out left to right with a 6-unit
+   gap between groups (BUTTON_WIDTH / GROUP_SEPARATING_WIDTH), and the two fields sit at
+   (5, 32) 50x14 and (72, 32) 176x14. */
+
+@spritesheet cib-back-sheet   { src: "../../../newui_chat_back.jpg";       cib-back:   0px 0px 281px 47px; }
+@spritesheet cib-normal-sheet { src: "../../../newui_chat_normal_on.jpg";  cib-normal: 0px 0px 27px 26px; }
+@spritesheet cib-party-sheet  { src: "../../../newui_chat_party_on.jpg";   cib-party:  0px 0px 27px 26px; }
+@spritesheet cib-guild-sheet  { src: "../../../newui_chat_guild_on.jpg";   cib-guild:  0px 0px 27px 26px; }
+@spritesheet cib-gens-sheet   { src: "../../../newui_chat_gens_on.jpg";    cib-gens:   0px 0px 27px 26px; }
+@spritesheet cib-whisper-sheet{ src: "../../../newui_chat_whisper_on.jpg"; cib-whisper:0px 0px 27px 26px; }
+@spritesheet cib-system-sheet { src: "../../../newui_chat_system_on.jpg";  cib-system: 0px 0px 27px 26px; }
+@spritesheet cib-chatlog-sheet{ src: "../../../newui_chat_chat_on.jpg";    cib-chatlog:0px 0px 27px 26px; }
+@spritesheet cib-frame-sheet  { src: "../../../newui_chat_frame_on.jpg";   cib-frame:  0px 0px 27px 26px; }
+@spritesheet cib-size-sheet   { src: "../../../newui_chat_btn_size.jpg";   cib-size:   0px 0px 27px 26px; }
+@spritesheet cib-alpha-sheet  { src: "../../../newui_chat_btn_alpha.jpg";  cib-alpha:  0px 0px 27px 26px; }
+
+#panel {
+	position: absolute;
+	left: 0;
+	/* 51 = 480 - (382 + 47): the reference-space gap under native's own bottom edge. */
+	bottom: 51dp;
+	width: 281dp;
+	height: 47dp;
+	decorator: image(cib-back);
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	pointer-events: none;
+}
+
+/* The hit area always exists; only the lit sprite is conditional, because the background art
+   already carries every button's OFF state. Collapsing the two into one element would make an
+   unlit button unclickable. */
+.cib-btn {
+	position: absolute;
+	top: 0;
+	width: 27dp;
+	height: 26dp;
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+.cib-btn-normal  { left: 0; }
+.cib-btn-party   { left: 27dp; }
+.cib-btn-guild   { left: 54dp; }
+.cib-btn-gens    { left: 81dp; }
+/* BLOCK_WHISPER_START_X: 4 * 27 + 6. */
+.cib-btn-whisper { left: 114dp; }
+.cib-btn-system  { left: 141dp; }
+.cib-btn-chatlog { left: 168dp; }
+/* FRAME_ON_START_X: the second group gap. */
+.cib-btn-frame   { left: 201dp; }
+.cib-btn-size    { left: 228dp; }
+.cib-btn-alpha   { left: 255dp; }
+
+.cib-btn-normal.on  { decorator: image(cib-normal); }
+.cib-btn-party.on   { decorator: image(cib-party); }
+.cib-btn-guild.on   { decorator: image(cib-guild); }
+.cib-btn-gens.on    { decorator: image(cib-gens); }
+.cib-btn-whisper.on { decorator: image(cib-whisper); }
+.cib-btn-system.on  { decorator: image(cib-system); }
+.cib-btn-chatlog.on { decorator: image(cib-chatlog); }
+.cib-btn-frame.on   { decorator: image(cib-frame); }
+.cib-btn-size.on    { decorator: image(cib-size); }
+.cib-btn-alpha.on   { decorator: image(cib-alpha); }
+
+/* Native tints a held button down; brightness() is the one filter family this render interface
+   implements (engine-findings.md). */
+.cib-btn:active { filter: brightness(0.75); }
+
+/* Sits above the bar. left is bound from C++ using native's own index formula, and the element
+   centres itself on that point -- native did the centring by subtracting half the measured text
+   width, which CSS does without needing the measurement. */
+#tooltip {
+	position: absolute;
+	top: -15dp;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	padding: 0 3dp;
+	background-color: rgba(0, 0, 0, 180);
+	color: rgb(255, 255, 255);
+	font-size: 11dp;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.cib-whisper-field {
+	position: absolute;
+	left: 5dp;
+	top: 32dp;
+	width: 50dp;
+	height: 14dp;
+	font-size: 11dp;
+	color: rgb(200, 200, 200);
+	background-color: rgba(0, 0, 0, 25);
+	border: 0 transparent;
+}
+.cib-chat-field {
+	position: absolute;
+	left: 72dp;
+	top: 32dp;
+	width: 176dp;
+	height: 14dp;
+	font-size: 11dp;
+	color: rgb(255, 230, 210);
+	background-color: rgba(0, 0, 0, 25);
+	border: 0 transparent;
+}
+
+/* Whispering off: native stops rendering the widget and repaints its text at alpha 100 under a
+   red wash, so the target stays readable but obviously inactive. */
+.cib-whisper-field.blocked { color: rgba(255, 255, 255, 100); }
+#whisper_block {
+	position: absolute;
+	left: 2dp;
+	top: 28dp;
+	width: 61dp;
+	height: 17dp;
+	background-color: rgba(128, 51, 51, 51);
+	pointer-events: none;
+}

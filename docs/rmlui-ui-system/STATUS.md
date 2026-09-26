@@ -158,10 +158,30 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 - **`COptionWindow`** — done, both themes, verified live against a real server; grew into a 6-tab
   settings window. Full history in `migration-ledger.md`'s own row rather than repeated here.
 
-- **`CChatLogWindow`** and **`CSystemLogWindow`** — **done, both themes (2026-09-27)**.
-  `CChatInputBox`, their companion, is **not** ported and stays fully native — it is the largest
-  remaining `CUITextInputBox` consumer and the reason that class cannot retire yet
-  (`migration-ledger.md`).
+- **`CChatLogWindow`**, **`CSystemLogWindow`** and **`CChatInputBox`** — **done, both themes
+  (2026-09-27)**. The whole chat surface is RmlUi now; no native draw call remains in either file.
+
+  `CChatInputBox` is the one to read before porting another window that owns a text field, because
+  two of its problems are invisible until a user types:
+  - **The keyboard only reaches a window that claims the right related-window handle.**
+    `CManager::UpdateKeyEvent()` dispatches only to windows whose `GetRelatedWnd()` matches the
+    focused handle, and reports a focused RmlUi `<input>` as `&RmlUiRuntime::Instance()`. Native
+    claimed the focused `CUITextInputBox`'s own `HWND` for exactly this reason; the port claims
+    RmlUiRuntime's address instead. Without it Enter, Escape and history navigation simply never
+    arrive, while everything looks correct.
+  - **Focus has to be latched, not called.** `CSystem::Show()` runs `OpenningProcess()` *before*
+    `ShowInterface()`, so the window is still invisible there and `Focus()` is dropped; and the
+    focus must also land *after* `SyncDocumentVisibility()`'s `Show()`, which defaults to
+    `FocusFlag::Auto` and re-blurs the field. Arm in `OpenningProcess()`, consume in the sync.
+
+  That makes three one-shot latches across this one surface — scroll pin, scroll request, focus —
+  all the same shape: *do it once, on the frame after the view caught up*. Treat a per-frame
+  `SetScrollTop`/`Focus()` as a bug by default.
+
+  Also worth copying: the button row keeps its hit area and its lit sprite as **separate concerns**.
+  Legacy's background art already contains every button's off state, so an unlit button must still
+  be clickable; collapsing the two into one element makes half the row dead. Modern, having no
+  background art, draws the resting state itself.
 
   `CSystemLogWindow` was deliberately ported second, and the point of doing it that way is that it
   is *not* a smaller copy of its file-mate: it grows downward from a fully static origin, has two

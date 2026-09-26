@@ -4,19 +4,43 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 
 #pragma warning(disable : 4786)
 #include <string>
 #include <vector>
 
-class CUITextInputBox;
+namespace Rml
+{
+    class ElementDocument;
+}
 
 namespace mu::ui::window
 {
     class CManager;
     class CChatLogWindow;
     class CSystemLogWindow;
+
+    // Every piece of this window's presentation is RmlUi's now: the bar art, all ten buttons, the
+    // tooltip and both text fields. C++ keeps the chat/whisper history, the send logic and the
+    // keyboard handling -- which still has to run while a field is focused, see
+    // CChatInputBox::Update()'s SetRelatedWnd() note.
+    struct ChatInputRmlModel
+    {
+        Rml::String chatText;
+        Rml::String whisperId;
+
+        int inputMsgType = 0;   // INPUT_CHAT_MESSAGE..INPUT_GENS_MESSAGE, as a 0-based index
+        bool blockWhisper = false;
+        bool showSystem = true;
+        bool showChatLog = true;
+        bool showFrame = false;
+        bool whisperSend = true;
+
+        int tooltipIndex = -1;  // INPUT_TOOLTIP_* of the hovered button, or -1
+        float tooltipLeft = 0.0f;
+        Rml::String tooltipText;
+    };
 
     class CChatInputBox : public CObject
     {
@@ -55,42 +79,12 @@ namespace mu::ui::window
             INPUT_TOOLTIP_TRANSPARENCY,
         };
 
-        enum IMAGE_LIST
-        {
-            IMAGE_INPUTBOX_BACK = BITMAP_INTERFACE_NEW_CHATINPUTBOX_BEGIN,
-            IMAGE_INPUTBOX_NORMAL_ON,
-            IMAGE_INPUTBOX_PARTY_ON,
-            IMAGE_INPUTBOX_GUILD_ON,
-            IMAGE_INPUTBOX_GENS_ON,
-            IMAGE_INPUTBOX_WHISPER_ON,
-            IMAGE_INPUTBOX_SYSTEM_ON,
-            IMAGE_INPUTBOX_CHATLOG_ON,
-            IMAGE_INPUTBOX_FRAME_ON,
-            IMAGE_INPUTBOX_BTN_SIZE,
-            IMAGE_INPUTBOX_BTN_TRANSPARENCY,
-        };
-
     private:
-        static constexpr int INPUT_MESSAGE_TYPE_COUNT = 4;
+        // Both survive the port only because RenderTooltip()'s x formula, reproduced verbatim
+        // in SyncRmlModel(), is expressed in them.
         static constexpr float BUTTON_WIDTH = 27.0f;
-        static constexpr float BUTTON_HEIGHT = 26.0f;
 
         static constexpr float GROUP_SEPARATING_WIDTH = 6.0f;
-
-        static constexpr float INPUT_TYPE_START_X = 0.0f;
-        static constexpr float BLOCK_WHISPER_START_X = INPUT_MESSAGE_TYPE_COUNT * BUTTON_WIDTH + GROUP_SEPARATING_WIDTH;
-        static constexpr float SYSTEM_ON_START_X = BLOCK_WHISPER_START_X + BUTTON_WIDTH;
-        static constexpr float CHATLOG_ON_START_X = SYSTEM_ON_START_X + BUTTON_WIDTH;
-
-        static constexpr float FRAME_ON_START_X = CHATLOG_ON_START_X + BUTTON_WIDTH + GROUP_SEPARATING_WIDTH;
-        static constexpr float FRAME_RESIZE_START_X = FRAME_ON_START_X + BUTTON_WIDTH;
-        static constexpr float TRANSPARENCY_START_X = FRAME_RESIZE_START_X + BUTTON_WIDTH;
-
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_CLIENT_WND_HOVER,
-        };
 
         typedef std::wstring type_string;
         typedef std::vector<type_string>	type_vec_history;
@@ -104,7 +98,6 @@ namespace mu::ui::window
         POINT	m_WndPos{};
         SIZE	m_WndSize{};
 
-        CUITextInputBox* m_pChatInputBox, * m_pWhsprIDInputBox;
         type_vec_history	m_vecChatHistory, m_vecWhsprIDHistory;
 
         int m_iCurChatHistory, m_iCurWhisperIDHistory;
@@ -117,21 +110,28 @@ namespace mu::ui::window
         bool m_bWhisperSend;
         bool m_bShowMessageElseNormal;
 
-        CButton m_BtnSize;
-        CButton m_BtnTransparency;
-
         void Init();
 
-        void LoadImages();
-        void UnloadImages();
-
-        void SetButtonInfo();
         void SetInputMsgType(int iInputMsgType);
         int GetInputMsgType() const;
 
-        bool RenderFrame();
-        void RenderButtons();
-        void RenderTooltip();
+        void BuildRmlUi();
+        void SyncRmlModel();
+        // Focus/value access for the two <input>s, so the key handler below never has to know they
+        // are RmlUi elements.
+        Rml::Element* GetField(const char* id) const;
+        bool IsFieldFocused(const char* id) const;
+        void SetFieldText(const char* id, const type_string& text);
+        void FocusField(const char* id);
+
+        RmlModelBinder<ChatInputRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        // Set by OpenningProcess(), consumed once the document is actually visible. CSystem::Show()
+        // runs OpenningProcess() BEFORE ShowInterface(), so IsVisible() is still false there and
+        // focusing the field at that point lands on a hidden document and is lost. It also has to
+        // happen after SyncDocumentVisibility()'s own Show(), which defaults to FocusFlag::Auto and
+        // would blur the field again.
+        bool m_bFocusPending = false;
 
     public:
         CChatInputBox();
@@ -146,9 +146,8 @@ namespace mu::ui::window
 
         void SetWndPos(int x, int y);
 
-        void SetFont(HFONT hFont);
+        void ReloadRmlTheme();
 
-        // Recreate the internal text-input DCs at the current g_fScreenRate.
         bool HaveFocus();
 
         void AddChatHistory(const type_string& strText);
@@ -178,9 +177,6 @@ namespace mu::ui::window
     protected:
         void GetChatText(type_string& strText);
         void GetWhsprID(type_string& strWhsprID);
-
-        void SetTextPosition(int x, int y);
-        void SetBuddyPosition(int x, int y);
 
         void UpdateWhisperTargetFromRightClick();
     };

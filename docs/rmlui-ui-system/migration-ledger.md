@@ -170,10 +170,12 @@ C++ hover callback, see `layout-and-scaling.md`'s "Global UI scale" section). Th
 `C3DCamera` and `CGroup` (`UI/Core/`) are `CManager` plumbing, not ported windows. `CTextBox`,
 `CSlideWindow`, `CScrollBar`, `CChatInputBox` (`UI/Widgets/Window/`) are low-level composable
 widgets used *by* several windows above, not top-level components with their own migration status —
-they retire implicitly as their host windows port. **`CChatInputBox` is the exception worth naming**:
-its host (`CChatLogWindow`) is now ported but it is not, so it remains fully native — two
-`CUITextInputBox` fields, ten buttons and a 256-line `UpdateKeyEvent`. It is the largest
-remaining `CUITextInputBox` consumer, and the reason that class cannot retire yet. `CMessageBoxMng` (`UI/Dialogs/MessageBox.h`) is
+they retire implicitly as their host windows port. **`CChatInputBox` was ported directly
+(2026-09-27)** rather than waiting for a host, since it *is* the chat bar: `chat_input.rml` + both
+themes, with the bar art, all ten buttons, the tooltip and both text fields now RmlUi. Its two
+`CUITextInputBox` fields became stock `<input>`s (`.text-field`), and RmlUi's built-in document Tab
+navigation replaced `SetTabTarget()`. C++ keeps the history, the send logic and the keyboard
+handling. See `STATUS.md` for the focus/dispatch detail that makes the keyboard half work at all. `CMessageBoxMng` (`UI/Dialogs/MessageBox.h`) is
 the manager/plumbing class underlying the whole `TMsgBoxLayout<T>` mechanism the Dialog family below
 uses, not a dialog itself.
 

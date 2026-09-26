@@ -89,8 +89,24 @@ Use a **stock RmlUi `<input>`**. There is no custom element, no C++ text widget 
 framework — the vendored engine already provides the editable buffer, caret, selection, clipboard,
 `maxlength`, tab focus, `change` events and IME composition. Consumers today: `CMyShopInventory`'s
 shop name, `CCharMakeWin`'s character name, `CGenericConfirmDialog`'s `Mode::Text` field, and
-`CLoginWin`'s username/password pair (also proving `type="password"` and Tab navigation), and
-`CMsgWin`'s resident-password prompt.
+`CLoginWin`'s username/password pair (also proving `type="password"` and Tab navigation),
+`CMsgWin`'s resident-password prompt, and `CChatInputBox`'s chat/whisper-target pair.
+
+**Two things a field inside a window that opens and closes has to get right**, both learned from
+`CChatInputBox`:
+
+1. **Focus after the document is visible, not before.** `CSystem::Show()` runs a window's
+   `OpenningProcess()` *before* `ShowInterface()`, so `IsVisible()` is still false there and
+   `Element::Focus()` lands on a hidden document and is lost. It must also happen after
+   `SyncDocumentVisibility()`'s own `Show()`, which defaults to `FocusFlag::Auto` and would blur the
+   field again. Arm a one-shot latch in `OpenningProcess()`; consume it in the sync, immediately
+   after the visibility call.
+2. **A window whose field is focused must claim `RmlUiRuntime`'s address as its related window.**
+   `CManager::UpdateKeyEvent()` dispatches only to windows whose `GetRelatedWnd()` matches the
+   focused handle, and it reports a focused RmlUi `<input>` as `&RmlUiRuntime::Instance()`. Without
+   `SetRelatedWnd()` matching that, the owning window stops receiving keys the moment the player
+   starts typing — Enter, Escape and history all silently never arrive. This is the exact role the
+   focused `CUITextInputBox`'s `HWND` used to play.
 
 **Two rules that are invisible at compile time and will silently break a field:**
 
