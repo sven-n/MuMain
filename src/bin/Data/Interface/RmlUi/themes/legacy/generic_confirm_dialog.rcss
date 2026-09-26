@@ -130,18 +130,11 @@
 	align-items: center;
 }
 /* Holds lines/input-row/progress-track. Fills .gcd-body's full height explicitly (rather than
-   relying on align-items, which wouldn't stretch under align-items:center) so its own
-   overflow:auto has a real bound to scroll within once content grows taller than the panel.
-
-   overflow is `overflow-x, overflow-y` (CSS shorthand order) -- `hidden auto`, NOT `auto hidden`:
-   this engine only ever instantiates a scrollbarvertical element when overflow-y is Auto/Scroll,
-   never Hidden (Layout/ContainerBox.cpp) -- getting this order backwards silently means no
-   scrollbar is ever created, regardless of text length.
-
-   pointer-events: auto is required here too -- base.rcss's `body { pointer-events: none; }`
-   inherits down to every descendant that doesn't explicitly opt back in, and the scrollbar's
-   generated slidertrack/sliderbar are real DOM children of THIS element, so they inherit whatever
-   this element's own computed value is -- without this, the scrollbar can't receive mouse events. */
+   relying on align-items, which wouldn't stretch under align-items:center) so the .scroll-pane
+   class it also carries has a real bound to scroll within once content grows taller than the
+   panel. The overflow/pointer-events rules and the whole scrollbar chrome now come from
+   base.rcss's .scroll-pane -- this element was the case they were generalized from, so only its
+   own layout stays here. */
 .gcd-text-col {
 	display: flex;
 	flex-direction: column;
@@ -149,33 +142,6 @@
 	align-items: center;
 	max-height: 320dp;
 	flex: 1 1 auto;
-	overflow: hidden auto;
-	pointer-events: auto;
-}
-/* Minimal flat-color scrollbar -- RmlUi generates real child elements for these
-   (scrollbarvertical/slidertrack/sliderbar), not pseudo-elements. Arrow buttons collapsed to 0
-   size -- drag-only, simplest usable affordance for a narrow well. */
-.gcd-text-col scrollbarvertical {
-	width: 6dp;
-	margin: 0;
-}
-.gcd-text-col scrollbarvertical slidertrack {
-	background-color: token(surface-recessed);
-}
-.gcd-text-col scrollbarvertical sliderbar {
-	background-color: token(control-thumb);
-}
-.gcd-text-col scrollbarvertical sliderbar:hover,
-.gcd-text-col scrollbarvertical sliderbar:active {
-	background-color: token(control-thumb-hover);
-}
-.gcd-text-col scrollbarvertical sliderarrowdec,
-.gcd-text-col scrollbarvertical sliderarrowinc {
-	width: 0;
-	height: 0;
-}
-.gcd-text-col scrollbarhorizontal {
-	height: 0;
 }
 /* Native draws message lines white by default, each advancing its text height + 4. */
 .gcd-line {

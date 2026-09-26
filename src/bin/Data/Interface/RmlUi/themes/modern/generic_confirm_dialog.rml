@@ -42,7 +42,7 @@
 				<!-- See ../../generic_confirm_dialog.rml's own comment for Portrait2D's Beside
 				     layout -- keep both fork copies' structure in sync. -->
 				<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
-				<div class="gcd-text-col">
+				<div class="gcd-text-col scroll-pane">
 					<!-- See ../../generic_confirm_dialog.rml's own comment for what this
 					     reproduces and why it nests inside .gcd-text-col instead of beside it
 					     like #gcd_item3d_anchor -- keep both fork copies' structure in sync. -->

@@ -512,6 +512,45 @@ body {
 	background-color: token(accent-gold);
 }
 
+/* Scrolling content pane -- see legacy/base.rcss's copy for the two engine requirements baked in
+   here (the `hidden auto` shorthand order, and why pointer-events must be opted back in). The
+   container half is identical in both themes by design; only the scrollbar chrome below differs.
+
+   The pane needs a bounded height to scroll within (explicit height, max-height, or a stretched
+   flex child) -- the consumer's own layout, deliberately not set here. */
+.scroll-pane {
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+
+/* Flat rail in the metal-rail palette rather than the gold accent, tying the scrollbar to the
+   header hardware -- where legacy uses native's real sprite art, this theme states the same
+   affordance in its own language. */
+.scroll-pane scrollbarvertical {
+	width: 8dp;
+	margin: 0;
+}
+.scroll-pane scrollbarvertical slidertrack {
+	background-color: token(metal-rail-dark);
+}
+.scroll-pane scrollbarvertical sliderbar {
+	background-color: token(metal-edge);
+	border-radius: token(radius-sm)px;
+}
+.scroll-pane scrollbarvertical sliderbar:hover,
+.scroll-pane scrollbarvertical sliderbar:active {
+	background-color: token(metal-highlight);
+}
+/* Drag-only, matching legacy -- native has no arrow buttons on this scrollbar. */
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.scroll-pane scrollbarhorizontal {
+	height: 0;
+}
+
 .hidden {
 	display: none;
 }

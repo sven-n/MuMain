@@ -45,9 +45,9 @@
 
 /* Message well -- layout only (position/overflow/flex); the recessed fill lives in
    generic_confirm_dialog_bg.rcss's .gcd-bg-content-fill instead (same left/right/top/bottom, so
-   the fill still lines up exactly behind this box). Text sits directly on it, scrolling
-   (overflow: hidden auto) rather than
-   growing the panel by default.
+   the fill still lines up exactly behind this box). Text sits directly on it, scrolling (via
+   base.rcss's .scroll-pane, which .gcd-text-col carries) rather than growing the panel by
+   default.
 
    top+bottom (not top+height) deliberately -- this element also has flex centering below, and
    this engine's box model is content-box only (no box-sizing support anywhere in this codebase);
@@ -211,19 +211,11 @@
 	flex: 1 1 auto;
 }
 /* Holds lines/input-row/progress-track, alongside #gcd_item3d_anchor within .gcd-content-row.
-   Fills .gcd-content-row's full
-   height explicitly (rather than relying on align-items, which wouldn't stretch under
-   align-items:center) so its own overflow:auto has a real bound to scroll within.
-
-   overflow is `overflow-x, overflow-y` (CSS shorthand order) -- `hidden auto`, NOT `auto hidden`:
-   this engine only ever instantiates a scrollbarvertical element when overflow-y is Auto/Scroll,
-   never Hidden (Layout/ContainerBox.cpp) -- getting this order backwards silently means no
-   scrollbar is ever created, regardless of text length.
-
-   pointer-events: auto is required here too -- base.rcss's `body { pointer-events: none; }`
-   inherits down to every descendant that doesn't explicitly opt back in, and the scrollbar's
-   generated slidertrack/sliderbar are real DOM children of THIS element, so they inherit whatever
-   this element's own computed value is -- without this, the scrollbar can't receive mouse events. */
+   Fills .gcd-content-row's full height explicitly (rather than relying on align-items, which
+   wouldn't stretch under align-items:center) so the .scroll-pane class it also carries has a real
+   bound to scroll within. The overflow/pointer-events rules and the whole scrollbar chrome now
+   come from base.rcss's .scroll-pane -- this element was the case they were generalized from, so
+   only its own layout stays here. */
 .gcd-text-col {
 	display: flex;
 	flex-direction: column;
@@ -231,35 +223,6 @@
 	align-items: center;
 	height: 100%;
 	flex: 1 1 auto;
-	overflow: hidden auto;
-	pointer-events: auto;
-}
-/* Minimal flat-color scrollbar -- RmlUi generates real child elements for these
-   (scrollbarvertical/slidertrack/sliderbar), not pseudo-elements. Arrow buttons collapsed to 0
-   size -- drag-only, simplest usable affordance for a narrow well. */
-.gcd-text-col scrollbarvertical {
-	width: 6dp;
-	margin: 0;
-}
-.gcd-text-col scrollbarvertical slidertrack {
-	background-color: token(metal-rail-dark);
-}
-/* Steel gray, matching .gcd-header-rail's own metal-rail palette rather than the gold accent used
-   elsewhere in this dialog -- ties the scrollbar to the header hardware. */
-.gcd-text-col scrollbarvertical sliderbar {
-	background-color: token(metal-edge);
-}
-.gcd-text-col scrollbarvertical sliderbar:hover,
-.gcd-text-col scrollbarvertical sliderbar:active {
-	background-color: token(metal-highlight);
-}
-.gcd-text-col scrollbarvertical sliderarrowdec,
-.gcd-text-col scrollbarvertical sliderarrowinc {
-	width: 0;
-	height: 0;
-}
-.gcd-text-col scrollbarhorizontal {
-	height: 0;
 }
 /* font-size/line-height explicit and smaller than #panel's own 12dp default -- deliberately
    subtler than the header title. */

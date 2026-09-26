@@ -42,7 +42,7 @@
 			     (icon-left/text-right). Mutually exclusive with the Overlay slot inside
 			     .gcd-text-col below; no dialog uses both. -->
 			<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
-			<div class="gcd-text-col">
+			<div class="gcd-text-col scroll-pane">
 				<!-- Portrait2D's Overlay caption: the bold row right above the lines, over the crest. -->
 				<div class="gcd-portrait2d-text" data-class-hidden="!has_portrait2d_overlay">{{portrait2d_text}}</div>
 				<!-- A line's own colour (GenericDialogConfig::Line::color), else the legacy theme's
