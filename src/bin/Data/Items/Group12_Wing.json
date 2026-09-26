@@ -9,9 +9,11 @@
         "es": "Alas de Elfa",
         "pt": "Asas do elfo"
       },
+      "tags": ["valuable"],
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "first",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -29,9 +31,11 @@
         "es": "Alas de Cielo",
         "pt": "Asas do paraíso"
       },
+      "tags": ["valuable"],
       "width": 5,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "first",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -50,9 +54,11 @@
         "es": "Alas de Satán",
         "pt": "Asas de Satã"
       },
+      "tags": ["valuable"],
       "width": 5,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "first",
       "level": 100,
       "durability": 200,
       "defense": 20,
@@ -71,9 +77,11 @@
         "es": "Alas de Espíritus",
         "pt": "Asas dos espíritos"
       },
+      "tags": ["valuable"],
       "width": 5,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -91,9 +99,11 @@
         "es": "Alas de Alma",
         "pt": "Asas da alma"
       },
+      "tags": ["valuable"],
       "width": 5,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -111,9 +121,11 @@
         "es": "Alas de Dragón",
         "pt": "Asas do dragão"
       },
+      "tags": ["valuable"],
       "width": 3,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 150,
       "durability": 200,
       "defense": 45,
@@ -131,9 +143,11 @@
         "es": "Alas de Oscuridad",
         "pt": "Asas da escuridão"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 150,
       "durability": 200,
       "defense": 40,
@@ -155,6 +169,7 @@
       "height": 1,
       "level": 47,
       "buyPrice": 29000,
+      "repairable": false,
       "requirements": {
         "level": 80
       },
@@ -174,6 +189,7 @@
       "height": 1,
       "level": 8,
       "buyPrice": 800,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -192,6 +208,7 @@
       "height": 1,
       "level": 13,
       "buyPrice": 3000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -210,6 +227,7 @@
       "height": 1,
       "level": 18,
       "buyPrice": 7000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -228,6 +246,7 @@
       "height": 1,
       "level": 3,
       "buyPrice": 150,
+      "repairable": false,
       "classRequirements": {
         "fairyElf": 1
       }
@@ -243,6 +262,7 @@
       "height": 1,
       "level": 78,
       "buyPrice": 150000,
+      "repairable": false,
       "requirements": {
         "level": 170
       },
@@ -261,6 +281,7 @@
       "height": 1,
       "level": 20,
       "buyPrice": 10000,
+      "repairable": false,
       "requirements": {
         "level": 28
       },
@@ -280,6 +301,7 @@
       "height": 1,
       "level": 60,
       "buyPrice": 43000,
+      "repairable": false,
       "requirements": {
         "level": 120
       },
@@ -294,9 +316,11 @@
         "es": "Joya de Caos",
         "pt": "Joia do caos"
       },
+      "tags": ["jewel", "valuable"],
       "width": 1,
       "height": 1,
       "level": 12,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -316,6 +340,7 @@
       "height": 1,
       "level": 60,
       "buyPrice": 51000,
+      "repairable": false,
       "requirements": {
         "strength": 320
       },
@@ -334,6 +359,7 @@
       "height": 1,
       "level": 64,
       "buyPrice": 72000,
+      "repairable": false,
       "requirements": {
         "level": 130
       },
@@ -352,6 +378,7 @@
       "height": 1,
       "level": 81,
       "buyPrice": 195000,
+      "repairable": false,
       "requirements": {
         "dexterity": 258
       },
@@ -370,6 +397,7 @@
       "height": 1,
       "level": 72,
       "buyPrice": 85000,
+      "repairable": false,
       "requirements": {
         "level": 160
       },
@@ -477,6 +505,7 @@
         "es": "manojo de Joyas de Bendición",
         "pt": "feixe da Joia da bênção"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -496,6 +525,7 @@
         "es": "manojo de Joyas de Alma",
         "pt": "feixe da Joia da alma"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 30,
@@ -588,9 +618,11 @@
         "es": "Ala de Tormenta",
         "pt": "Asa da Tempestade"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 60,
@@ -608,9 +640,11 @@
         "es": "Ala de Eternidad",
         "pt": "Asa da eternidade"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -628,9 +662,11 @@
         "es": "Ala de Ilusión",
         "pt": "Asa da ilusão"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -648,9 +684,11 @@
         "es": "Ala de Ruina",
         "pt": "Asa da ruína"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 55,
@@ -668,9 +706,11 @@
         "es": "Capa de Emperador",
         "pt": "Capa do Imperador"
       },
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -688,9 +728,11 @@
         "es": "Ala de Maldición",
         "pt": "Asa da maldição"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "first",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -708,9 +750,11 @@
         "es": "Viento de Desesperación",
         "pt": "Asa do desespero"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -728,9 +772,11 @@
         "es": "Ala de Dimensión",
         "pt": "Asa da dimensão"
       },
+      "tags": ["valuable"],
       "width": 4,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -840,9 +886,11 @@
         "es": "¹«ÀÎÀÇ¸ÁÅä",
         "pt": "Manto do Guerreiro"
       },
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 180,
       "durability": 200,
       "defense": 15,
@@ -860,9 +908,11 @@
         "es": "±º¸²ÀÇ¸ÁÅä",
         "pt": "Manto Reinante"
       },
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "third",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -880,6 +930,7 @@
         "es": "Simiente (Fuego)",
         "pt": "Semente (Fogo)"
       },
+      "tags": ["socketSeed"],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -901,6 +952,7 @@
         "es": "Simiente (Agua)",
         "pt": "Semente (Água)"
       },
+      "tags": ["socketSeed"],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -922,6 +974,7 @@
         "es": "Simiente (Hielo)",
         "pt": "Semente (Gelo)"
       },
+      "tags": ["socketSeed"],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -943,6 +996,7 @@
         "es": "Simiente (Viento)",
         "pt": "Semente (Vento)"
       },
+      "tags": ["socketSeed"],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -964,6 +1018,7 @@
         "es": "Simiente (Relámpago)",
         "pt": "Semente (Relâmpago)"
       },
+      "tags": ["socketSeed"],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -985,6 +1040,7 @@
         "es": "Simiente (Tierra)",
         "pt": "Semente (Terra)"
       },
+      "tags": ["socketSeed"],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1006,6 +1062,7 @@
         "es": "Esfera (Mono)",
         "pt": "Esfera (Mono)"
       },
+      "tags": ["socketSphere"],
       "width": 1,
       "height": 1,
       "level": 102,
@@ -1027,6 +1084,7 @@
         "es": "Esfera (Di)",
         "pt": "Esfera (Di)"
       },
+      "tags": ["socketSphere"],
       "width": 1,
       "height": 1,
       "level": 122,
@@ -1048,6 +1106,7 @@
         "es": "Esfera (Tri)",
         "pt": "Esfera (Tri)"
       },
+      "tags": ["socketSphere"],
       "width": 1,
       "height": 1,
       "level": 132,
@@ -1069,6 +1128,7 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1090,6 +1150,7 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1111,6 +1172,7 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1132,6 +1194,7 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1153,6 +1216,7 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1174,6 +1238,7 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1195,6 +1260,7 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1216,6 +1282,7 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1237,6 +1304,7 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1258,6 +1326,7 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1279,6 +1348,7 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1300,6 +1370,7 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1321,6 +1392,7 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1342,6 +1414,7 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1363,6 +1436,7 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1384,6 +1458,7 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1405,6 +1480,7 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1426,6 +1502,7 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
+      "tags": ["socketSeedSphere"],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1447,7 +1524,8 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 119,
@@ -1456,7 +1534,8 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 120,
@@ -1465,7 +1544,8 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 121,
@@ -1474,7 +1554,8 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 122,
@@ -1483,7 +1564,8 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 123,
@@ -1492,7 +1574,8 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 124,
@@ -1501,7 +1584,8 @@
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 125,
@@ -1510,7 +1594,8 @@
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 126,
@@ -1519,7 +1604,8 @@
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 127,
@@ -1528,7 +1614,8 @@
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 128,
@@ -1537,7 +1624,8 @@
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 129,
@@ -1546,7 +1634,8 @@
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
-      "slot": 0
+      "tags": ["socketSeedSphere"],
+      "slot": "mainHand"
     },
     {
       "number": 130,
@@ -1555,12 +1644,20 @@
         "es": "Capa de Señor Pequeña",
         "pt": "Pequena capa do Lorde"
       },
+      "tags": ["cape", "cashShop", "valuable"],
       "width": 2,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "small",
       "level": 1,
       "durability": 200,
       "defense": 15,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1575,12 +1672,20 @@
         "es": "Ala de Maldición Pequeña",
         "pt": "Pequenas asas da maldição"
       },
+      "tags": ["cashShop", "valuable"],
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "small",
       "level": 1,
       "durability": 200,
       "defense": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1595,12 +1700,20 @@
         "es": "Alas de Elfa Pequeñas",
         "pt": "Pequenas asas do elfo"
       },
+      "tags": ["cashShop", "valuable"],
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "small",
       "level": 1,
       "durability": 200,
       "defense": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1615,12 +1728,20 @@
         "es": "Alas de Cielo Pequeñas",
         "pt": "Pequenas asas do paraíso"
       },
+      "tags": ["cashShop", "valuable"],
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "small",
       "level": 1,
       "durability": 200,
       "defense": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1636,12 +1757,20 @@
         "es": "Alas de Satán Pequeñas",
         "pt": "Pequenas asas de Satã"
       },
+      "tags": ["cashShop", "valuable"],
       "width": 3,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "small",
       "level": 1,
       "durability": 200,
       "defense": 20,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1657,12 +1786,20 @@
         "es": "Capa del Pequeño Guerrero",
         "pt": "Manto de Pequeno Guerreiro"
       },
+      "tags": ["cape", "cashShop", "valuable"],
       "width": 2,
       "height": 2,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "small",
       "level": 1,
       "durability": 200,
       "defense": 15,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1677,6 +1814,7 @@
         "es": "Fardo de Joyas de la Vida",
         "pt": "Joia do Lote da Vida"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -1697,6 +1835,7 @@
         "es": "Fardo de Joyas de la Creación",
         "pt": "Joia do Lote da Criação"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -1717,6 +1856,7 @@
         "es": "Fardo de Joyas Guardián",
         "pt": "Joia do Lote Guardião"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 75,
@@ -1737,6 +1877,7 @@
         "es": "Fardo de Gemas",
         "pt": "Lote de Pedra Preciosa"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1757,6 +1898,7 @@
         "es": "Fardo de Joyas de la Armonía",
         "pt": "Joia do Lote da Harmonia"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1777,6 +1919,7 @@
         "es": "Fardo de Joyas del Caos",
         "pt": "Joia do Lote do Caos"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 12,
@@ -1797,6 +1940,7 @@
         "es": "Fardo de Joyas de Bajo Pulido",
         "pt": "Lote de Joias de Baixo Polimento"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1817,6 +1961,7 @@
         "es": "Fardo de Joyas de Alto Pulido",
         "pt": "Lote de Joias de Alto Polimento"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "level": 25,

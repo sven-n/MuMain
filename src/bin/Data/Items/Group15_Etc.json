@@ -15,6 +15,7 @@
       "damageMin": 30,
       "damageMax": 45,
       "buyPrice": 17000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -36,6 +37,7 @@
       "damageMin": 21,
       "damageMax": 31,
       "buyPrice": 11000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -58,6 +60,7 @@
       "damageMin": 13,
       "damageMax": 19,
       "buyPrice": 3000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -79,6 +82,7 @@
       "damageMin": 5,
       "damageMax": 7,
       "buyPrice": 300,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -101,6 +105,7 @@
       "damageMin": 35,
       "damageMax": 52,
       "buyPrice": 21000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -122,6 +127,7 @@
       "damageMin": 17,
       "damageMax": 25,
       "buyPrice": 5000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -142,6 +148,7 @@
       "damageMin": 25,
       "damageMax": 37,
       "buyPrice": 14000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -164,6 +171,7 @@
       "damageMin": 40,
       "damageMax": 60,
       "buyPrice": 25000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -185,6 +193,7 @@
       "damageMin": 50,
       "damageMax": 75,
       "buyPrice": 35000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -206,6 +215,7 @@
       "damageMin": 60,
       "damageMax": 90,
       "buyPrice": 60000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -227,6 +237,7 @@
       "damageMin": 9,
       "damageMax": 13,
       "buyPrice": 1150,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -249,6 +260,7 @@
       "damageMin": 74,
       "damageMax": 111,
       "buyPrice": 100000,
+      "repairable": false,
       "requirements": {
         "energy": 110
       },
@@ -270,6 +282,7 @@
       "damageMin": 80,
       "damageMax": 120,
       "buyPrice": 175000,
+      "repairable": false,
       "requirements": {
         "energy": 150
       },
@@ -291,6 +304,7 @@
       "damageMin": 88,
       "damageMax": 132,
       "buyPrice": 265000,
+      "repairable": false,
       "requirements": {
         "energy": 200
       },
@@ -312,6 +326,7 @@
       "damageMin": 83,
       "damageMax": 124,
       "buyPrice": 245000,
+      "repairable": false,
       "requirements": {
         "energy": 188
       },
@@ -332,6 +347,7 @@
       "damageMin": 77,
       "damageMax": 115,
       "buyPrice": 135000,
+      "repairable": false,
       "requirements": {
         "energy": 126
       },
@@ -352,6 +368,7 @@
       "damageMin": 96,
       "damageMax": 144,
       "buyPrice": 345000,
+      "repairable": false,
       "requirements": {
         "energy": 243
       },
@@ -372,6 +389,7 @@
       "damageMin": 93,
       "damageMax": 139,
       "buyPrice": 315000,
+      "repairable": false,
       "requirements": {
         "energy": 223
       },
@@ -392,6 +410,7 @@
       "damageMin": 100,
       "damageMax": 150,
       "buyPrice": 410000,
+      "repairable": false,
       "requirements": {
         "energy": 258
       },
@@ -412,6 +431,7 @@
       "damageMin": 75,
       "damageMax": 112,
       "buyPrice": 175000,
+      "repairable": false,
       "requirements": {
         "energy": 75
       },
@@ -432,6 +452,7 @@
       "damageMin": 35,
       "damageMax": 52,
       "buyPrice": 100000,
+      "repairable": false,
       "requirements": {
         "energy": 93
       },
@@ -452,6 +473,7 @@
       "damageMin": 93,
       "damageMax": 139,
       "buyPrice": 315000,
+      "repairable": false,
       "requirements": {
         "energy": 216
       },
@@ -472,6 +494,7 @@
       "damageMin": 80,
       "damageMax": 120,
       "buyPrice": 245000,
+      "repairable": false,
       "requirements": {
         "energy": 111
       },
@@ -492,6 +515,7 @@
       "damageMin": 83,
       "damageMax": 124,
       "buyPrice": 265000,
+      "repairable": false,
       "requirements": {
         "energy": 181
       },
@@ -512,6 +536,7 @@
       "damageMin": 40,
       "damageMax": 60,
       "buyPrice": 135000,
+      "repairable": false,
       "requirements": {
         "energy": 100
       },
@@ -532,6 +557,7 @@
       "damageMin": 93,
       "damageMax": 139,
       "buyPrice": 410000,
+      "repairable": false,
       "requirements": {
         "energy": 173
       },
@@ -552,6 +578,7 @@
       "damageMin": 111,
       "damageMax": 166,
       "buyPrice": 450000,
+      "repairable": false,
       "requirements": {
         "energy": 201
       },
@@ -572,6 +599,7 @@
       "damageMin": 100,
       "damageMax": 150,
       "buyPrice": 425000,
+      "repairable": false,
       "requirements": {
         "level": 220,
         "energy": 118
@@ -593,6 +621,7 @@
       "damageMin": 100,
       "damageMax": 150,
       "buyPrice": 380000,
+      "repairable": false,
       "requirements": {
         "level": 220,
         "energy": 118
@@ -614,6 +643,7 @@
       "damageMin": 70,
       "damageMax": 105,
       "buyPrice": 100000,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -634,6 +664,7 @@
       "damageMin": 80,
       "damageMax": 120,
       "buyPrice": 175000,
+      "repairable": false,
       "requirements": {
         "level": 180
       },
@@ -654,6 +685,7 @@
       "damageMin": 70,
       "damageMax": 105,
       "buyPrice": 100000,
+      "repairable": false,
       "requirements": {
         "level": 150
       },
@@ -674,6 +706,7 @@
       "damageMin": 90,
       "damageMax": 135,
       "buyPrice": 265000,
+      "repairable": false,
       "requirements": {
         "level": 200
       },
@@ -694,6 +727,7 @@
       "damageMin": 80,
       "damageMax": 120,
       "buyPrice": 175000,
+      "repairable": false,
       "requirements": {
         "level": 120,
         "energy": 80
@@ -715,6 +749,7 @@
       "damageMin": 50,
       "damageMax": 75,
       "buyPrice": 35000,
+      "repairable": false,
       "requirements": {
         "level": 80,
         "energy": 35
@@ -736,6 +771,7 @@
       "damageMin": 40,
       "damageMax": 60,
       "buyPrice": 25000,
+      "repairable": false,
       "requirements": {
         "level": 50,
         "energy": 30

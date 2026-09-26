@@ -154,27 +154,27 @@ int getLevelGeneration(int level, unsigned int* color)
     if (level >= 300)
     {
         lvl = 300;
-        *color = (255 << 24) + (255 << 16) + (153 << 8) + (255);
+        *color = (255u << 24) + (255 << 16) + (153 << 8) + (255);
     }
     else if (level >= 200)
     {
         lvl = 200;
-        *color = (255 << 24) + (255 << 16) + (230 << 8) + (210);
+        *color = (255u << 24) + (255 << 16) + (230 << 8) + (210);
     }
     else if (level >= 100)
     {
         lvl = 100;
-        *color = (255 << 24) + (24 << 16) + (201 << 8) + (0);
+        *color = (255u << 24) + (24 << 16) + (201 << 8) + (0);
     }
     else if (level >= 50)
     {
         lvl = 50;
-        *color = (255 << 24) + (0 << 16) + (150 << 8) + (255);
+        *color = (255u << 24) + (0 << 16) + (150 << 8) + (255);
     }
     else
     {
         lvl = 10;
-        *color = (255 << 24) + (0 << 16) + (0 << 8) + (255);
+        *color = (255u << 24) + (0 << 16) + (0 << 8) + (255);
     }
     return lvl;
 }
@@ -1037,18 +1037,18 @@ unsigned int getGoldColor(DWORD Gold)
 {
     if (Gold >= 10000000)
     {
-        return  (255 << 24) + (0 << 16) + (0 << 8) + (255);
+        return (255u << 24) + (0 << 16) + (0 << 8) + (255);
     }
     else if (Gold >= 1000000)
     {
-        return  (255 << 24) + (0 << 16) + (150 << 8) + (255);
+        return (255u << 24) + (0 << 16) + (150 << 8) + (255);
     }
     else if (Gold >= 100000)
     {
-        return  (255 << 24) + (24 << 16) + (201 << 8) + (0);
+        return (255u << 24) + (24 << 16) + (201 << 8) + (0);
     }
 
-    return  (255 << 24) + (150 << 16) + (220 << 8) + (255);
+    return (255u << 24) + (150 << 16) + (220 << 8) + (255);
 }
 
 void ConvertGold(double dGold, wchar_t* szText, int iDecimals /*= 0*/)
@@ -1256,195 +1256,10 @@ void RepairAllGold(void)
             int Level = pItem->Level;
             int maxDurability = CalcMaxDurability(pItem, p, Level);
 
-            if (pItem->Type >= ITEM_GREEN_CHAOS_BOX && pItem->Type <= ITEM_PURPLE_CHAOS_BOX)
+            if (GameLogic::Items::IsRepairBan(pItem))
             {
                 continue;
             }
-            //. item filtering
-            if ((pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_DARK_RAVEN_ITEM) || pItem->Type == ITEM_TRANSFORMATION_RING || pItem->Type == ITEM_SPIRIT)
-                continue;
-            if (GameLogic::Items::IsAmmunition(pItem) || pItem->Type >= ITEM_POTION)
-                continue;
-            if (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB)
-                continue;
-            if ((pItem->Type >= ITEM_LOCHS_FEATHER && pItem->Type <= ITEM_WEAPON_OF_ARCHANGEL) || pItem->Type == ITEM_RENA)
-                continue;
-            if (pItem->Type == ITEM_WIZARDS_RING)
-                continue;
-            if (pItem->Type == ITEM_MOONSTONE_PENDANT)
-                continue;
-
-            if (GameLogic::Items::IsEventTicket(pItem))
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsDoppelgangerOrVarkaTicket(pItem))
-            {
-                continue;
-            }
-            if (pItem->Type >= ITEM_RARE_ITEM_TICKET_7 && pItem->Type <= ITEM_RARE_ITEM_TICKET_12)
-            {
-                continue;
-            }
-            if (pItem->Type >= ITEM_RARE_ITEM_TICKET_1 && pItem->Type <= ITEM_RARE_ITEM_TICKET_5)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_TALISMAN_OF_LUCK)
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsSeal(pItem))
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsElitePotion(pItem))
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsBuffScroll(pItem))
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_SEAL_OF_MOBILITY)
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsResetFruit(pItem))
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_INDULGENCE)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_ILLUSION_TEMPLE_TICKET)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_SUMMONER_CHARACTER_CARD)
-            {
-                continue;
-            }
-            if (pItem->Type >= ITEM_CHAOS_CARD_GOLD && pItem->Type <= ITEM_CHAOS_CARD_RARE)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_CHAOS_CARD_MINI)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_CHAOS_CARD_MINI)
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsHealingOrDivinitySeal(pItem))
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsBattleOrStrengthScroll(pItem))
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_SCROLL_OF_HEALING)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsDemonOrSpiritOfGuardian(pItem))
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_PET_RUDOLF)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_PET_PANDA)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_PET_UNICORN)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_PET_SKELETON)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_SNOWMAN_TRANSFORMATION_RING)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_PANDA_TRANSFORMATION_RING)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING)
-            {
-                continue;
-            }
-            if (pItem->Type == ITEM_TALISMAN_OF_RESURRECTION)
-                continue;
-            if (pItem->Type == ITEM_TALISMAN_OF_MOBILITY)
-                continue;
-
-            if (pItem->Type == ITEM_HORN_OF_FENRIR)
-                continue;
-
-            if (pItem->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
-                continue;
-
-            if (GameLogic::Items::IsGambleItem(pItem))
-                continue;
-
-            if (pItem->Type == ITEM_TALISMAN_OF_GUARDIAN)
-                continue;
-            if (pItem->Type == ITEM_TALISMAN_OF_ITEM_PROTECTION)
-                continue;
-            if (pItem->Type == ITEM_MASTER_SEAL_OF_ASCENSION)
-                continue;
-            if (pItem->Type == ITEM_MASTER_SEAL_OF_WEALTH)
-                continue;
-
-            if (GameLogic::Items::IsWingMixCharm(pItem))
-            {
-                continue;
-            }
-            if (GameLogic::Items::IsCharacterCard(pItem))
-                continue;
-
-            if (pItem->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
-                continue;
-
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-            if (g_pMyInventory->IsInvenItem(pItem->Type))
-                continue;
-
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-
-            if (pItem->Type >= ITEM_SMALL_CAPE_OF_LORD && pItem->Type <= ITEM_SMALL_WINGS_OF_SATAN)
-                continue;
-            if (pItem->Type == ITEM_SAPPHIRE_RING)
-                continue;
-            if (pItem->Type == ITEM_RUBY_RING)
-                continue;
-            if (pItem->Type == ITEM_TOPAZ_RING)
-                continue;
-            if (pItem->Type == ITEM_AMETHYST_RING)
-                continue;
-            if (pItem->Type == ITEM_RUBY_NECKLACE)
-                continue;
-            if (pItem->Type == ITEM_EMERALD_NECKLACE)
-                continue;
-            if (pItem->Type == ITEM_SAPPHIRE_NECKLACE)
-                continue;
-            if (pItem->Type == ITEM_LETHAL_WIZARDS_RING)
-                continue;
-
-            if (Check_ItemAction(pItem, eITEM_REPAIR))	continue;
 
             //. check durability
             if (pItem->Durability < maxDurability)
@@ -5572,112 +5387,6 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         return;
     }
-    if (GameLogic::Items::IsWingMixCharm(ip))
-    {
-        return;
-    }
-    if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_MAX_AG_BOOST_AURA)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_MAX_SD_BOOST_AURA)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_PARTY_EXP_SCROLL)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_ELITE_SD_POTION)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_SAPPHIRE_RING)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_RUBY_RING)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_TOPAZ_RING)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_AMETHYST_RING)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_RUBY_NECKLACE)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_EMERALD_NECKLACE)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_SAPPHIRE_NECKLACE)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_SILVER_KEY)
-    {
-        return;
-    }
-    if (ip->Type == MODEL_GOLD_KEY)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_GOBLIN_GOLD_COIN)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_SEALED_GOLDEN_BOX)
-    {
-        return;
-    }
-    if (ip->Type == ITEM_SEALED_SILVER_BOX)
-    {
-        return;
-    }
-    if (ITEM_GOLDEN_BOX == ip->Type)
-    {
-        return;
-    }
-    if (ITEM_SILVER_BOX == ip->Type)
-    {
-        return;
-    }
-    if (GameLogic::Items::IsPackageBox(ip))
-    {
-        return;
-    }
-
-    if (GameLogic::Items::IsSmallWing(ip))
-    {
-        return;
-    }
-
-    if (GameLogic::Items::IsAccountServiceItem(ip))
-    {
-        return;
-    }
-    if (GameLogic::Items::IsDayPass(ip))
-    {
-        return;
-    }
-    if (GameLogic::Items::IsHourPass(ip))
-    {
-        return;
-    }
-    if (ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE == ip->Type)
-    {
-        return;
-    }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
     TextNum = 0;
@@ -6903,61 +6612,6 @@ int CompareItem(ITEM item1, ITEM item2)
 
 bool EquipmentItem = false;
 extern int BuyCost;
-
-sItemAct Set_ItemActOption(int _nIndex, int _nOption)
-{
-    sItemAct	sItem;
-    // eITEM_PERSONALSHOP = 개인상점, eITEM_STORE = 창고, eITEM_TRADE = 거래, eITEM_DROP = 버리기, eITEM_SELL = 판매, eITEM_REPAIR = 수리
-    int	nItemOption[][eITEM_END] = { 0, 1, 1, 0, 0, 0,
-                                        0, 0, 0, 0, 1, 0,
-        -1 };
-
-    sItem.s_nItemIndex = _nIndex;
-
-    for (int i = 0; i < eITEM_END; i++)
-    {
-        sItem.s_bType[i] = nItemOption[_nOption][i];
-    }
-    return sItem;
-}
-
-bool Check_ItemAction(const ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
-{
-    std::vector<sItemAct>			sItem;
-    std::vector<sItemAct>::iterator li;
-    int		i = 0;
-
-    // Restricted ITEM_HELPER special items starting at local index 135.
-    for (i = 0; i < RESTRICTED_SPECIAL_MISC_COUNT; i++)
-    {
-        sItem.push_back(Set_ItemActOption(ITEM_HELPER + RESTRICTED_SPECIAL_MISC_START_INDEX + i, ITEM_ACTION_BLOCK_STORAGE_TRADE));
-    }
-    // Restricted ITEM_POTION special jewels starting at local index 160.
-    for (i = 0; i < RESTRICTED_SPECIAL_JEWEL_COUNT; i++)
-    {
-        sItem.push_back(Set_ItemActOption(ITEM_POTION + RESTRICTED_SPECIAL_JEWEL_START_INDEX + i, ITEM_ACTION_BLOCK_STORAGE_TRADE));
-    }
-    for (i = 0; i < LUCKY_SET_ARMOR_COUNT; i++)
-    {
-        sItem.push_back(Set_ItemActOption(ITEM_ARMOR + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
-        sItem.push_back(Set_ItemActOption(ITEM_HELM + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
-        sItem.push_back(Set_ItemActOption(ITEM_BOOTS + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
-        sItem.push_back(Set_ItemActOption(ITEM_GLOVES + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
-        sItem.push_back(Set_ItemActOption(ITEM_PANTS + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
-    }
-
-    for (li = sItem.begin(); li != sItem.end(); li++)
-    {
-        if (li->s_nItemIndex == _pItem->Type)
-        {
-            _bType = (li->s_bType[_eAction]) ^ (!_bType);
-            return _bType;
-        }
-    }
-
-    // 등록되지 않은 아이템은 무시.
-    return false;
-}
 
 bool Check_LuckyItem(int _nIndex, int _nType)
 {
@@ -10175,21 +9829,51 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         switch (i)
         {
         case 0:MarkColor[i] = (alpha << 24) + (0 << 16) + (0 << 8) + (0); break;
-        case 1:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (0); break;
-        case 2:MarkColor[i] = (255 << 24) + (128 << 16) + (128 << 8) + (128); break;
-        case 3:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (255); break;
-        case 4:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (255); break;
-        case 5:MarkColor[i] = (255 << 24) + (0 << 16) + (128 << 8) + (255); break;
-        case 6:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (255); break;
-        case 7:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (128); break;
-        case 8:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (0); break;
-        case 9:MarkColor[i] = (255 << 24) + (128 << 16) + (255 << 8) + (0); break;
-        case 10:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (0); break;
-        case 11:MarkColor[i] = (255 << 24) + (255 << 16) + (128 << 8) + (0); break;
-        case 12:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (0); break;
-        case 13:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (128); break;
-        case 14:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (255); break;
-        case 15:MarkColor[i] = (255 << 24) + (128 << 16) + (0 << 8) + (255); break;
+        case 1:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (0 << 8) + (0);
+            break;
+        case 2:
+            MarkColor[i] = (255u << 24) + (128 << 16) + (128 << 8) + (128);
+            break;
+        case 3:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (255 << 8) + (255);
+            break;
+        case 4:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (0 << 8) + (255);
+            break;
+        case 5:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (128 << 8) + (255);
+            break;
+        case 6:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (255);
+            break;
+        case 7:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (128);
+            break;
+        case 8:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (0);
+            break;
+        case 9:
+            MarkColor[i] = (255u << 24) + (128 << 16) + (255 << 8) + (0);
+            break;
+        case 10:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (255 << 8) + (0);
+            break;
+        case 11:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (128 << 8) + (0);
+            break;
+        case 12:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (0);
+            break;
+        case 13:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (128);
+            break;
+        case 14:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (255);
+            break;
+        case 15:
+            MarkColor[i] = (255u << 24) + (128 << 16) + (0 << 8) + (255);
+            break;
         }
     }
     BYTE* MarkBuffer = GuildMark[nMarkIndex].Mark;
@@ -10232,21 +9916,51 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
         switch (i)
         {
         case 0:MarkColor[i] = (alpha << 24) + (0 << 16) + (0 << 8) + (0); break;
-        case 1:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (0); break;
-        case 2:MarkColor[i] = (255 << 24) + (128 << 16) + (128 << 8) + (128); break;
-        case 3:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (255); break;
-        case 4:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (255); break;//빨
-        case 5:MarkColor[i] = (255 << 24) + (0 << 16) + (128 << 8) + (255); break;//
-        case 6:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (255); break;//노
-        case 7:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (128); break;//
-        case 8:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (0); break;//초
-        case 9:MarkColor[i] = (255 << 24) + (128 << 16) + (255 << 8) + (0); break;//
-        case 10:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (0); break;//청
-        case 11:MarkColor[i] = (255 << 24) + (255 << 16) + (128 << 8) + (0); break;//
-        case 12:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (0); break;//파
-        case 13:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (128); break;//
-        case 14:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (255); break;//보
-        case 15:MarkColor[i] = (255 << 24) + (128 << 16) + (0 << 8) + (255); break;//
+        case 1:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (0 << 8) + (0);
+            break;
+        case 2:
+            MarkColor[i] = (255u << 24) + (128 << 16) + (128 << 8) + (128);
+            break;
+        case 3:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (255 << 8) + (255);
+            break;
+        case 4:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (0 << 8) + (255);
+            break; // 빨
+        case 5:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (128 << 8) + (255);
+            break; //
+        case 6:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (255);
+            break; // 노
+        case 7:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (128);
+            break; //
+        case 8:
+            MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (0);
+            break; // 초
+        case 9:
+            MarkColor[i] = (255u << 24) + (128 << 16) + (255 << 8) + (0);
+            break; //
+        case 10:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (255 << 8) + (0);
+            break; // 청
+        case 11:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (128 << 8) + (0);
+            break; //
+        case 12:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (0);
+            break; // 파
+        case 13:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (128);
+            break; //
+        case 14:
+            MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (255);
+            break; // 보
+        case 15:
+            MarkColor[i] = (255u << 24) + (128 << 16) + (0 << 8) + (255);
+            break; //
         }
     }
     BYTE MarkBuffer[32 * 32];
@@ -10276,11 +9990,13 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             }
             else if (j<3 || j>(Width - 4) || i<10 || i>(Height - 10))
             {
-                *((unsigned int*)(Buffer + offset)) = (255 << 24) + (0 << 16) + ((int)(50 + i / 100.f * 160) << 8) + (50 + i / 100.f * 255);
+                *((unsigned int*)(Buffer + offset)) = (255u << 24) + (0u << 16) +
+                                                      ((unsigned int)(50 + i / 100.f * 160) << 8) +
+                                                      (unsigned int)(50 + i / 100.f * 255);
             }
             else
             {
-                *((unsigned int*)(Buffer + offset)) = (255 << 24) + (i << 16) + (i << 8) + (i);
+                *((unsigned int*)(Buffer + offset)) = (255u << 24) + (i << 16) + (i << 8) + (i);
             }
             offset += 4;
         }

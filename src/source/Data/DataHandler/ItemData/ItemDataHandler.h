@@ -71,6 +71,9 @@ private:
     // Gives imported items without an English name the one the item has now.
     // Returns how many names were kept.
     static int KeepCurrentEnglishNames(std::vector<Data::Items::ItemDefinition>& items);
+    // Gives imported items the current values of the fields item.bmd does
+    // not have (tags, wing tier, rule flags).
+    static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items);
 #endif
 
     bool m_localeObserverRegistered = false;

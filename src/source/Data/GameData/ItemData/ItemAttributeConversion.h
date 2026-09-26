@@ -20,6 +20,10 @@ std::wstring CutToItemAttributeName(const std::wstring& name);
 // Copies everything except the name.
 void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition);
 
+// Copies the fields ITEM_ATTRIBUTE (and so item.bmd) does not have: tags,
+// wing tier and rule flags.
+void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target);
+
 // The attribute's name becomes the neutral (English) name.
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType);
 

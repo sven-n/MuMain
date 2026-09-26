@@ -11,9 +11,10 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 23,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 23
       },
@@ -36,9 +37,10 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 28,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 28
       },
@@ -59,11 +61,13 @@
         "es": "Cuerno de Uniria",
         "pt": "Chifre de Uniria"
       },
+      "tags": ["mount", "hornMount"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 25,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 25
       },
@@ -84,12 +88,14 @@
         "es": "Cuerno de Dinorant",
         "pt": "Chifre de Dinorant"
       },
+      "tags": ["mount", "hornMount", "flying", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "skill": 49,
       "level": 110,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 110
       },
@@ -110,12 +116,14 @@
         "es": "Caballo Oscuro",
         "pt": "Cavalo negro"
       },
+      "tags": ["mount", "flying", "darkLordPet", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "skill": 62,
       "level": 218,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 218
       },
@@ -130,10 +138,12 @@
         "es": "Cuervo Oscuro",
         "pt": "Corvo negro"
       },
+      "tags": ["darkLordPet", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 1,
+      "slot": "offHand",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -152,6 +162,7 @@
       "width": 1,
       "height": 1,
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -171,7 +182,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 20,
       "durability": 50,
       "attackType": 2,
@@ -200,7 +211,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 17,
       "durability": 50,
       "attackType": 4,
@@ -229,8 +240,9 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 200,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -251,6 +263,7 @@
       "width": 1,
       "height": 1,
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -270,7 +283,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 21,
       "durability": 50,
       "attackType": 3,
@@ -299,7 +312,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 13,
       "durability": 50,
       "attackType": 1,
@@ -326,9 +339,11 @@
         "es": "Pluma de Loch",
         "pt": "Pena de Loch"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 2,
       "level": 78,
+      "repairable": false,
       "requirements": {
         "level": 78
       },
@@ -349,8 +364,10 @@
         "es": "Fruto",
         "pt": "Fruta"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -368,9 +385,11 @@
         "es": "Rollo de Arcángel",
         "pt": "Pergaminho do arcanjo"
       },
+      "tags": ["bloodCastleTicketPart"],
       "width": 1,
       "height": 2,
       "durability": 128,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -388,9 +407,11 @@
         "es": "Hueso Sangriento",
         "pt": "Osso de sangue"
       },
+      "tags": ["bloodCastleTicketPart"],
       "width": 1,
       "height": 2,
       "durability": 128,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -411,6 +432,7 @@
       "width": 2,
       "height": 2,
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -428,9 +450,15 @@
         "es": "Arma Absoluta de Arcángel",
         "pt": "Arma absoluta do arcanjo"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 2,
       "durability": 255,
+      "tradable": false,
+      "storable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -450,8 +478,9 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 30,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -471,7 +500,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 30,
       "durability": 50,
       "attackType": 3,
@@ -500,7 +529,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 38,
       "durability": 50,
       "attackType": 1,
@@ -529,7 +558,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 44,
       "durability": 50,
       "attackType": 2,
@@ -558,7 +587,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 47,
       "durability": 50,
       "attackType": 3,
@@ -584,7 +613,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 34,
       "durability": 50,
       "attackType": 1,
@@ -613,7 +642,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 42,
       "durability": 50,
       "attackType": 2,
@@ -642,7 +671,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 46,
       "durability": 50,
       "attackType": 4,
@@ -671,7 +700,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
       "level": 50,
       "durability": 50,
       "requirements": {
@@ -696,6 +725,7 @@
       },
       "width": 2,
       "height": 2,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -713,9 +743,11 @@
         "es": "Capa de Señor",
         "pt": "Capa do Lorde"
       },
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
-      "slot": 7,
+      "slot": "wings",
+      "wingTier": "second",
       "level": 180,
       "durability": 200,
       "requirements": {
@@ -732,6 +764,7 @@
         "es": "Espíritu",
         "pt": "Espírito"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -748,6 +781,7 @@
       "width": 1,
       "height": 1,
       "durability": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -768,6 +802,7 @@
       "width": 1,
       "height": 1,
       "durability": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -785,9 +820,11 @@
         "es": "Garra de Bestia",
         "pt": "Garra da besta"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "durability": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -805,9 +842,11 @@
         "es": "Fragmento de Cuerno",
         "pt": "Fragmento de chifre"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 1,
       "durability": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -825,9 +864,11 @@
         "es": "Cuerno Partido",
         "pt": "Chifre quebrado"
       },
+      "tags": ["valuable"],
       "width": 2,
       "height": 2,
       "durability": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -845,11 +886,13 @@
         "es": "Cuerno de Fenrir",
         "pt": "Chifre de Fenrir"
       },
+      "tags": ["mount", "hornMount", "flying", "valuable"],
       "width": 2,
       "height": 2,
-      "slot": 8,
+      "slot": "pet",
       "level": 300,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 300
       },
@@ -872,10 +915,13 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 21,
       "durability": 120,
       "attackType": 3,
+      "tradable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 21
       },
@@ -898,9 +944,12 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 10,
       "durability": 255,
+      "tradable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "requirements": {
         "level": 10
       },
@@ -923,9 +972,10 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 10,
       "durability": 100,
+      "repairable": false,
       "requirements": {
         "level": 10
       },
@@ -948,9 +998,10 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 1,
       "durability": 100,
+      "repairable": false,
       "requirements": {
         "level": 1
       },
@@ -973,8 +1024,9 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1001,9 +1053,16 @@
         "es": "Sello de Ascensión",
         "pt": "Selo da ascensão"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1021,9 +1080,16 @@
         "es": "Sello de Riqueza",
         "pt": "Selo da riqueza"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1041,9 +1107,16 @@
         "es": "Sello de Sustento",
         "pt": "Selo do sustento"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1061,9 +1134,15 @@
         "es": "Boleto de la Plaza del Diablo",
         "pt": "Bilhete da Praça do Diabo"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1081,9 +1160,15 @@
         "es": "Boleto al Castillo Sangriento",
         "pt": "Bilhete do Castelo de Sangue"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1101,9 +1186,15 @@
         "es": "Boleto de Kalima",
         "pt": "Bilhete de Kalima"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1123,6 +1214,7 @@
       },
       "width": 1,
       "height": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1142,6 +1234,7 @@
       },
       "width": 1,
       "height": 2,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1162,6 +1255,7 @@
       "width": 2,
       "height": 2,
       "durability": 1,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1179,6 +1273,7 @@
         "es": "Llama de Cóndor",
         "pt": "Chama do Condor"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 2,
       "classRequirements": {
@@ -1198,6 +1293,7 @@
         "es": "Pluma de Cóndor",
         "pt": "Pena do Condor"
       },
+      "tags": ["valuable"],
       "width": 1,
       "height": 2,
       "classRequirements": {
@@ -1217,9 +1313,15 @@
         "es": "Reiniciar Fruto de Fuerza",
         "pt": "Reiniciar força da fruta"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 100,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1237,9 +1339,15 @@
         "es": "Reiniciar Fruto de Rapidez",
         "pt": "Reiniciar rapidez da fruta"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 100,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1257,9 +1365,15 @@
         "es": "Reiniciar Fruto de Salud",
         "pt": "Reiniciar saúde da Fruta"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 100,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1277,9 +1391,15 @@
         "es": "Reiniciar Fruto de Energía",
         "pt": "Reiniciar energia da fruta"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 100,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1297,9 +1417,15 @@
         "es": "Reiniciar Fruto de Control",
         "pt": "Reiniciar controle da fruta"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 100,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1317,8 +1443,14 @@
         "es": "Sello de Movilidad",
         "pt": "Selo da mobilidade"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1336,8 +1468,14 @@
         "es": "Indulgencia",
         "pt": "Indulgência"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1355,9 +1493,15 @@
         "es": "Boleto al Templo de Ilusión",
         "pt": "Bilhete do Templo da Ilusão"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1375,8 +1519,14 @@
         "es": "Sello de Curación",
         "pt": "Selo da cura"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1394,8 +1544,14 @@
         "es": "Sello de Divinidad",
         "pt": "Selo da divindade"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1413,11 +1569,18 @@
         "es": "Demonio",
         "pt": "Demônio"
       },
+      "tags": ["guardianPet", "cashShop", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
+      "tradable": false,
+      "sellable": false,
+      "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1438,11 +1601,18 @@
         "es": "Espír. Guardián",
         "pt": "Espír. Guardião"
       },
+      "tags": ["guardianPet", "cashShop", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
+      "tradable": false,
+      "sellable": false,
+      "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1466,6 +1636,7 @@
       "width": 1,
       "height": 1,
       "durability": 10,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1485,9 +1656,10 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 28,
       "durability": 255,
+      "repairable": false,
       "requirements": {
         "level": 28
       },
@@ -1510,9 +1682,10 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 10,
       "durability": 100,
+      "repairable": false,
       "requirements": {
         "level": 10
       },
@@ -1533,8 +1706,14 @@
         "es": "Talismán de Resurrección",
         "pt": "Talismã da ressurreição"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1552,9 +1731,15 @@
         "es": "Talismán de Movilidad",
         "pt": "Talismã da mobilidade"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1572,10 +1757,12 @@
         "es": "Espada/Maza/Jabalina",
         "pt": "Espada/Maça/Lança"
       },
+      "tags": ["gambleItem"],
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1593,10 +1780,12 @@
         "es": "Báculo",
         "pt": "Bastão"
       },
+      "tags": ["gambleItem"],
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1614,10 +1803,12 @@
         "es": "Arco/Ballesta",
         "pt": "Arco/Besta"
       },
+      "tags": ["gambleItem"],
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1635,10 +1826,12 @@
         "es": "Cetro",
         "pt": "Cetro"
       },
+      "tags": ["gambleItem"],
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1656,10 +1849,12 @@
         "es": "Vara",
         "pt": "Cajado"
       },
+      "tags": ["gambleItem"],
       "width": 2,
       "height": 3,
-      "slot": 8,
+      "slot": "pet",
       "durability": 255,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1677,11 +1872,18 @@
         "es": "Anillo Panda",
         "pt": "Anel do Panda"
       },
+      "tags": ["pandaOrSkeleton", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 1,
       "durability": 255,
+      "tradable": false,
+      "sellable": false,
+      "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1702,11 +1904,18 @@
         "es": "Mascota Panda",
         "pt": "Animal de estimação Panda"
       },
+      "tags": ["pandaOrSkeleton", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
+      "tradable": false,
+      "sellable": false,
+      "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1727,8 +1936,14 @@
         "es": "Talismán de Guardián",
         "pt": "Talismã do Guardião"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1746,8 +1961,14 @@
         "es": "Talismán Protección de Ítems",
         "pt": "Talismã de Proteção de Item"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1767,6 +1988,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1786,6 +2010,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1805,6 +2032,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1824,6 +2054,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1843,6 +2076,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1862,6 +2098,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1881,6 +2120,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1900,6 +2142,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1919,6 +2164,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1938,6 +2186,9 @@
       },
       "width": 1,
       "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1955,8 +2206,15 @@
         "es": "Sello Maestro de Ascensión",
         "pt": "Selo Mestre da Ascensão"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1974,8 +2232,15 @@
         "es": "Sello Maestro de Riqueza",
         "pt": "Selo Mestre da Riqueza"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2030,14 +2295,20 @@
       "name": {
         "en": "Magic Gladiator Character Card",
         "pt": "Carta de Personagem - Gladiador Mágico"
-      }
+      },
+      "tradable": false,
+      "droppable": false,
+      "personalShopSellable": false
     },
     {
       "number": 98,
       "name": {
         "en": "Dark Lord Character Card",
         "pt": "Carta de Personagem - Lorde Sombrio"
-      }
+      },
+      "tradable": false,
+      "droppable": false,
+      "personalShopSellable": false
     },
     {
       "number": 99,
@@ -2045,7 +2316,10 @@
         "en": "Character Slot Key",
         "pt": "Fenda de Chave de Personagem"
       },
-      "slot": 0
+      "slot": "mainHand",
+      "tradable": false,
+      "droppable": false,
+      "personalShopSellable": false
     },
     {
       "number": 103,
@@ -2054,8 +2328,14 @@
         "es": "Rollo EXP de Participación",
         "pt": "Pergaminho de EXP de grupo"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2073,8 +2353,14 @@
         "es": "Aura de Aumento de Máx AG",
         "pt": "Aura de aumento de AG máx"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2092,8 +2378,14 @@
         "es": "Aura de Aumento de Máx SD",
         "pt": "Aura de aumento de SD máx"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2111,11 +2403,18 @@
         "es": "Unicornio",
         "pt": "Unic. Est."
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 28,
       "durability": 255,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 28
       },
@@ -2136,10 +2435,17 @@
         "es": "Anillo Letal de Mago",
         "pt": "Anel do Mago Letal"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 100,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2157,9 +2463,16 @@
         "es": "Anillo de Zafiro",
         "pt": "Anel de safira"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2177,9 +2490,16 @@
         "es": "Anillo de Rubí",
         "pt": "Anel de rubi"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2197,9 +2517,16 @@
         "es": "Anillo de Topacio",
         "pt": "Anel de topázio"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2217,9 +2544,16 @@
         "es": "Anillo de Amatista",
         "pt": "Anel de ametista"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2237,9 +2571,16 @@
         "es": "Collar de Rubíes",
         "pt": "Colar de rubi"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2257,9 +2598,16 @@
         "es": "Collar de Esmeraldas",
         "pt": "Colar de esmeralda"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2277,9 +2625,16 @@
         "es": "Collar de Zafiros",
         "pt": "Colar de safira"
       },
+      "tags": ["cashShop", "gemJewelry", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 9,
+      "slot": "pendant",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2297,9 +2652,15 @@
         "es": "Sello de Riqueza",
         "pt": "Selo da riqueza"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2393,9 +2754,15 @@
         "es": "Boleto Abierto; Castillo Caos",
         "pt": "Bilhete Ac. Livre Cast. Caos"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2413,11 +2780,18 @@
         "es": "Aro Mutación de Esqueleto",
         "pt": "Anel Transf. de Esqueleto"
       },
+      "tags": ["pandaOrSkeleton", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "level": 1,
       "durability": 255,
+      "tradable": false,
+      "sellable": false,
+      "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -2438,11 +2812,18 @@
         "es": "Mascota Esqueleto",
         "pt": "Mascote esqueleto"
       },
+      "tags": ["pandaOrSkeleton", "valuable"],
       "width": 1,
       "height": 1,
-      "slot": 8,
+      "slot": "pet",
       "level": 1,
       "durability": 255,
+      "tradable": false,
+      "sellable": false,
+      "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -2463,8 +2844,14 @@
         "es": "Boleto Canal de Acceso Pago",
         "pt": "Bilhete Ac. a Canal Pago"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2482,9 +2869,15 @@
         "es": "Boleto Acceso a Doppenganger",
         "pt": "Bilhete Ac. Livre Doppeganger"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2502,9 +2895,15 @@
         "es": "Boleto Acceso a Varka",
         "pt": "Bilhete Ac. Livre Varka"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 10,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2522,9 +2921,15 @@
         "es": "Boleto Acceso Mapa 7 de Varka",
         "pt": "Bil. Ac. Livre Mapa 7 Varka"
       },
+      "tags": ["cashShop"],
       "width": 1,
       "height": 1,
       "durability": 3,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2544,7 +2949,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2565,7 +2970,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2586,7 +2991,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2607,7 +3012,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2628,7 +3033,7 @@
       },
       "width": 1,
       "height": 2,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2649,7 +3054,7 @@
       },
       "width": 1,
       "height": 2,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2670,7 +3075,7 @@
       },
       "width": 1,
       "height": 1,
-      "slot": 10,
+      "slot": "ring",
       "durability": 255,
       "classRequirements": {
         "darkWizard": 1,
@@ -2689,9 +3094,14 @@
         "es": "1er Boleto Armadura de la Suerte",
         "pt": "1º Bilhete de Armadura da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2709,9 +3119,14 @@
         "es": "1er Boleto Pantalones de la Suerte",
         "pt": "1º Bilhete de Calças da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2729,9 +3144,14 @@
         "es": "1er Boleto Yelmo de la Suerte",
         "pt": "1º Bilhete de Elmo da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2749,9 +3169,14 @@
         "es": "1er Boleto Guantes de la Suerte",
         "pt": "1º Bilhete de Luvas da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2769,9 +3194,14 @@
         "es": "1er Boleto Botas de la Suerte",
         "pt": "1º Bilhete de Botas da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2789,9 +3219,14 @@
         "es": "2º Boleto Armadura de la Suerte",
         "pt": "2º Bilhete de Armadura da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2809,9 +3244,14 @@
         "es": "2º Boleto Pantalones de la Suerte",
         "pt": "2º Bilhete de Calças da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2829,9 +3269,14 @@
         "es": "2º Boleto Yelmo de la Suerte",
         "pt": "2º Bilhete de Elmo da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2849,9 +3294,14 @@
         "es": "2º Boleto Guantes de la Suerte",
         "pt": "2º Bilhete de Luvas da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2869,9 +3319,14 @@
         "es": "2º Boleto Botas de la Suerte",
         "pt": "2º Bilhete de Botas da Sorte"
       },
+      "tags": ["luckyItemTicket"],
       "width": 1,
       "height": 1,
       "durability": 255,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,

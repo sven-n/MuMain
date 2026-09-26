@@ -25,26 +25,21 @@ ItemDatabase& ItemDatabase::GetInstance()
     return instance;
 }
 
-ItemDatabase::ItemDatabase()
-    : m_definitions(MAX_ITEM)
-{
-}
+ItemDatabase::ItemDatabase() : m_definitions(MAX_ITEM), m_ruleData(MAX_ITEM) {}
 
 void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 {
-    std::fill(m_definitions.begin(), m_definitions.end(), ItemDefinition{});
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        Store(itemType, ItemDefinition{});
+    }
     for (const ItemDefinition& definition : definitions)
     {
-        if (!IsValidItemId(definition.group, definition.number))
+        if (IsValidItemId(definition.group, definition.number))
         {
-            continue;
+            Store(MakeItemType(definition.group, definition.number), definition);
         }
-
-        ItemDefinition& slot = m_definitions[MakeItemType(definition.group, definition.number)];
-        slot = definition;
-        UpdateDisplayName(slot);
     }
-
     CountExistingItems();
 }
 
@@ -93,9 +88,7 @@ void ItemDatabase::Set(const ItemDefinition& definition)
 
     // Stats are kept even without names, so an item whose name is cleared
     // and typed again in the editor keeps its values.
-    ItemDefinition& slot = m_definitions[MakeItemType(definition.group, definition.number)];
-    slot = definition;
-    UpdateDisplayName(slot);
+    Store(MakeItemType(definition.group, definition.number), definition);
     CountExistingItems();
 }
 
@@ -106,19 +99,42 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
         return;
     }
 
-    ItemDefinition& first = m_definitions[firstItemType];
-    ItemDefinition& second = m_definitions[secondItemType];
-    std::swap(first, second);
-    first.group = GetItemGroup(firstItemType);
-    first.number = GetItemNumber(firstItemType);
-    second.group = GetItemGroup(secondItemType);
-    second.number = GetItemNumber(secondItemType);
+    ItemDefinition first = m_definitions[firstItemType];
+    ItemDefinition second = m_definitions[secondItemType];
+    Store(firstItemType, std::move(second));
+    Store(secondItemType, std::move(first));
 }
 
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 {
     definition.name =
         definition.Exists() ? Core::Text::FromUtf8(definition.names.Get(m_displayLocale)) : std::wstring();
+}
+
+void ItemDatabase::Store(int itemType, ItemDefinition definition)
+{
+    definition.group = GetItemGroup(itemType);
+    definition.number = GetItemNumber(itemType);
+    UpdateDisplayName(definition);
+
+    RuleData ruleData;
+    if (definition.Exists())
+    {
+        ruleData.tags = definition.tags;
+        ruleData.slot = definition.slot;
+        ruleData.wingTier = definition.wingTier;
+        ruleData.blockedActions = 0;
+        for (int action = 0; action < static_cast<int>(ItemAction::Count); ++action)
+        {
+            if (!definition.IsAllowed(static_cast<ItemAction>(action)))
+            {
+                ruleData.blockedActions |= ActionBit(static_cast<ItemAction>(action));
+            }
+        }
+    }
+
+    m_definitions[itemType] = std::move(definition);
+    m_ruleData[itemType] = ruleData;
 }
 
 void ItemDatabase::CountExistingItems()

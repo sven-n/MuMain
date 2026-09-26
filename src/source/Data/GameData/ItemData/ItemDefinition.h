@@ -3,14 +3,58 @@
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemTagSet.h"
 
 #include <array>
 #include <string>
 
 namespace Data::Items
 {
-// Item slot value of items that cannot be equipped.
-constexpr BYTE ItemSlotNone = 255;
+// Where an item can be equipped. The values are the equipment indexes
+// (EQUIPMENT_*) and the values of ITEM_ATTRIBUTE::m_byItemSlot.
+enum class ItemSlot : BYTE
+{
+    MainHand = 0,
+    OffHand = 1,
+    Helm = 2,
+    Armor = 3,
+    Pants = 4,
+    Gloves = 5,
+    Boots = 6,
+    Wings = 7,
+    Pet = 8,
+    Pendant = 9,
+    Ring = 10,
+    None = 255,
+};
+
+// The wing generation; the wing formulas (defense, damage increase and
+// absorption) depend on it.
+enum class WingTier : BYTE
+{
+    None,
+    Small,
+    First,
+    Second,
+    Third,
+};
+
+// What a player may do with an item. See the rule flags in ItemDefinition.
+enum class ItemAction : BYTE
+{
+    Trade,
+    Drop,
+    Store,
+    Sell,
+    SellInPersonalShop,
+    Repair,
+    // Rented items (items with a rental time)
+    DropWhileRented,
+    SellInPersonalShopWhileRented,
+    SellWhenRentalExpired,
+
+    Count
+};
 
 struct ItemRequirements
 {
@@ -38,9 +82,12 @@ struct ItemDefinition
     // ItemDatabase from names.
     std::wstring name;
 
+    ItemTagSet tags;
+
     BYTE width = 0;
     BYTE height = 0;
-    BYTE slot = ItemSlotNone;
+    ItemSlot slot = ItemSlot::None;
+    WingTier wingTier = WingTier::None;
     bool twoHanded = false;
     WORD skill = 0;
     WORD level = 0;
@@ -64,9 +111,51 @@ struct ItemDefinition
     BYTE sellValue = 0;
     int buyPrice = 0;
 
+    // Rule flags. The exceptions that depend on the item level, durability
+    // or the player are in the rule code (GameLogic/Items/TradeRestrictions
+    // and ShopRestrictions).
+    bool tradable = true;
+    bool droppable = true;
+    bool storable = true;
+    bool sellable = true;
+    bool personalShopSellable = true;
+    bool repairable = true;
+    // Rented items cannot be stored. These say what else changes for them.
+    bool droppableWhileRented = true;
+    bool personalShopSellableWhileRented = true;
+    // Sellable to an NPC once the rental time ran out, even when sellable is false.
+    bool sellableWhenRentalExpired = false;
+
     bool Exists() const
     {
         return !names.IsEmpty();
+    }
+
+    bool IsAllowed(ItemAction action) const
+    {
+        switch (action)
+        {
+        case ItemAction::Trade:
+            return tradable;
+        case ItemAction::Drop:
+            return droppable;
+        case ItemAction::Store:
+            return storable;
+        case ItemAction::Sell:
+            return sellable;
+        case ItemAction::SellInPersonalShop:
+            return personalShopSellable;
+        case ItemAction::Repair:
+            return repairable;
+        case ItemAction::DropWhileRented:
+            return droppableWhileRented;
+        case ItemAction::SellInPersonalShopWhileRented:
+            return personalShopSellableWhileRented;
+        case ItemAction::SellWhenRentalExpired:
+            return sellableWhenRentalExpired;
+        default:
+            return true;
+        }
     }
 };
 } // namespace Data::Items

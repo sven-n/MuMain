@@ -404,7 +404,7 @@ in both repos (as separate PRs, one per repo).
 | 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
 | 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
-| 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, A | Move items into new groups for the new client; legacy ids for the original client (D21). |
+| 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, A | Move items into new groups for the new client; level variants become items of their own; legacy ids for the original client (D21). |
 | D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
 | 13 | Cleanup | Client | MuMain | all | Remove this document. |
 
@@ -449,8 +449,69 @@ server with original clients (after phases 6 and B).
    The resulting item lists are verified to be identical. Includes the
    client ↔ OpenMU rule mapping.
 
+   As built:
+   - Item fields: `tags` (a list of names, a bitmask in memory),
+     `wingTier` (`small`/`first`/`second`/`third`), the rule flags
+     `tradable`, `droppable`, `storable`, `sellable`,
+     `personalShopSellable`, `repairable` (default `true`, only `false`
+     is written), the rental rules `droppableWhileRented`,
+     `personalShopSellableWhileRented`, `sellableWhenRentalExpired`, and
+     `slot` written by name (`mainHand`, …, `wings`, …; numbers from
+     phase 2 files are still read, with a warning). Wings need no tag: a
+     wing is an item with the slot `wings`.
+   - Items without a definition allow no action.
+   - The rule functions stay and read the data through a small table next
+     to the definitions (`ItemDatabase::HasTag`, `IsAllowed`, `GetSlot`,
+     `GetWingTier`): one array read plus a bit test.
+   - What stays in code: exceptions that depend on the item level, the
+     durability or the player, with named constants, see
+     `docs/item-data.md` → Rules; and the lists that are only used for
+     drawing and tooltips (`ItemDisplayCategories.cpp`), which phases 4
+     and 8 replace with model and tooltip data.
+   - `IsPartChargeItem` became the tag `cashShop`, flattened. Only the
+     old rules used it, so no client code reads the tag now; it stays as
+     information for the editors and the OpenMU exchange.
+     `IsRareItemTicket` was only part of it and is gone.
+   - `Check_ItemAction` and the separate repair lists in `RepairAllGold`
+     and `RenderRepairInfo` became the rule flags too.
+   - Verified with a one-time test (in the PR history, then removed) that
+     compares the old and the new code for all 949 items, every category
+     function (also with out-of-range and model ids), and every rule for
+     item levels 0–15, bought/rented/expired, durability 0–2, ancient and
+     excellent, and GM or not. The only differences are the two
+     intended behavior changes in their own commits: the personal shop
+     rule for rented pets (the old condition only applied to the Demon),
+     and "repair all" now counting the same items as single repairs (it
+     added a price for damaged items that cannot be repaired one by one,
+     e.g. transformation rings and the Little Warrior's Cloak).
+   - Level variants (Box of Luck +13 = Heart of Dark Lord, Rena +3 = Sign
+     of Lord, Wizard's Ring levels) stay code exceptions; phase 12 makes
+     them items of their own.
+   - Not moved in this phase (other hardcoded lists found on the way):
+     the right-click use list (`TryConsumeItem`), price exceptions
+     (`ItemValue`), the transformation ring lists (`ChangeRingManager`),
+     the packed jewel list (`COMGEM`) and the tooltip class requirement
+     list (`IsRequireClassRenderItem`, phase 8).
+
+   Client ↔ OpenMU mapping (input for A):
+
+   | Client data | OpenMU today | For PR A |
+   |---|---|---|
+   | `slot` | `ItemDefinition.ItemSlot` (an `ItemSlotType` with its slot numbers) | Exchange maps the names to slot types: `mainHand` ↔ types containing 0, `offHand` ↔ 1, …, `ring` ↔ 10/11 |
+   | `wingTier` | None; wing values are power-ups and options per wing | Client-only for now; phase 9 (options) may replace it |
+   | `tradable`, `storable`, `personalShopSellable`, `sellable` = false | Only `IsBoundToCharacter`, which blocks all four at once (sell with a durability exception) | Separate rules, e.g. one `[Flags] ItemRestrictions` column with the six names; enforce in `MoveItemAction` (trade, vault, personal shop) and `SellItemToNpcAction`; `IsBoundToCharacter` stays for "only the owner can pick it up" |
+   | `droppable` = false | None (`DropItemAction` drops everything) | Enforce in `DropItemAction` |
+   | `repairable` = false | None (`ItemRepairAction` repairs any item below its maximum durability) | Enforce in `ItemRepairAction` |
+   | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | None; OpenMU has no rental items | Client-only until OpenMU has rentals |
+   | Code exceptions (level, durability, GM) | Levels: none | Level variants move with phase 12/D |
+   | `ammunition` | `IsAmmunition` | 1:1 |
+   | `secondClassQuestItem`, `thirdClassQuestItem` | `IsQuestItem` (+ `StorageLimitPerCharacter` 1) | Both map to `IsQuestItem` |
+   | `flying` | `Stats.CanFly` power-up on wings, Dinorant and Fenrir | Compare: the client also counts the Dark Horse |
+   | `jewel`, `mount`, `darkLordPet`, `guardianPet`, potions, socket items, … | Hardcoded `ItemConstants` checks | Client-only; OpenMU can take them over item by item |
+   | `cashShop`, `valuable`, `gemJewelry`, `luckyItemTicket`, … | None | Client-only (UI) |
+
    **A (OpenMU):** new rule fields/tables with migration, initialization,
-   update plug-in and server enforcement, based on the phase 3 mapping.
+   update plug-in and server enforcement, based on the mapping above.
 4. **Models into data**: `OpenItems()` / `OpenItemTextures()` are driven by
    the model fields.
 5. **Translation tooling**: a translations editor (items × languages, with
@@ -545,6 +606,15 @@ server with original clients (after phases 6 and B).
 
     With the new groups, the mixed groups 12–15 are split up, so the item
     files (one per group) become category files by themselves (D7).
+
+    **Level variants** become items of their own at the same time: items
+    that are a different item at each item level (Box of Luck +13 = Heart
+    of Dark Lord, Rena +1–3, Wizard's Ring +1–3, …; see `ItemLevelTooltip`
+    and `GetItemName`) get their own entries with their own names, flags
+    and tooltips. Their legacy id is then (group, number, level): the
+    Season 6 serializer sends the old item with that level, and requests
+    from original clients are mapped back. Until then the rule code checks
+    them by level (`GameLogic/Items/ItemLevelVariants.h`).
 
     Questions for then: the exact new groups and which items move; whether
     the legacy id lives only in OpenMU or also in the client data; the

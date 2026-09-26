@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemDataValidation.h"
+#include "ItemEnumNames.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -16,9 +17,9 @@ namespace
 constexpr const char* NameField = "name";
 
 void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const ItemDefinition& definition,
-              const std::string& message)
+              const std::string& message, const char* field = NameField)
 {
-    issues.push_back({severity, "", definition.group, definition.number, NameField, message});
+    issues.push_back({severity, "", definition.group, definition.number, field, message});
 }
 
 bool ContainsSeparator(const std::string& text)
@@ -76,6 +77,20 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
+// The item files store slots by name, so every slot needs one.
+void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (definition.slot != ItemSlot::None && FindEnumName(definition.slot) == nullptr)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                 "slot " + std::to_string(static_cast<int>(definition.slot)) + " is not an equipment slot", "slot");
+    }
+    if (definition.wingTier != WingTier::None && definition.slot != ItemSlot::Wings)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a wing tier, but its slot is not \"wings\"",
+                 "wingTier");
+    }
+}
 } // namespace
 
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
@@ -97,6 +112,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         }
 
         ValidateName(definition, issues);
+        ValidateSlot(definition, issues);
     }
 }
 } // namespace Data::Items
