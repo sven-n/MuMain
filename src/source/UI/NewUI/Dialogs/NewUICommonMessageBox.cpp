@@ -2333,7 +2333,7 @@ bool SEASON3B::CGatemanFailMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    pMsgBox->AddMsg(I18N::Game::UnfortunatelyYouHaveFailed, RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
+    pMsgBox->AddMsg(I18N::Game::RequestHasFailed, RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
 
     pMsgBox->AddCallbackFunc(CGatemanFailMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
