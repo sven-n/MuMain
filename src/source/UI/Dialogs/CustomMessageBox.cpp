@@ -1850,9 +1850,11 @@ void mu::ui::window::ShowTrainerRecoverDialog()
 void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 {
     GenericMenuConfig cfg;
-    // Native CElpisMsgBox: bold gold text from y+43 (the "about" texts left-aligned, wrapped
-    // 30 in from each side), a divider at y+120, buttons at y+145/175/205.
-    constexpr int kAboutTextInset = 30;
+    // Native CElpisMsgBox: bold gold text from y+43 (the "about" texts left-aligned), a divider at
+    // y+120, buttons at y+145/175/205. Native wraps the about texts 30 in from each side and
+    // scrolls them; shown whole here, they wrap 16 in (the frame's inner edge) so they stay above
+    // the divider at every size, also where the text is relatively larger (800x600, 1280x720).
+    constexpr int kAboutTextInset = 16;
     const unsigned long textColor = RGBA(220, 183, 131, 255);
     cfg.nativeFrame = {60, 12, 43, 18, 0, 120};
     cfg.title = I18N::Game::Elpis;
