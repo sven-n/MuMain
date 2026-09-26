@@ -10831,10 +10831,8 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         break;
 
     case 0x02:
-    {
         SEASON3B::CreateOkMessageBox(I18N::Game::FruitStatCannotIncrease);
-    }
-    break;
+        break;
     case 0x03:
         if (fruit >= 0 && fruit <= 4)
         {
@@ -10881,11 +10879,8 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         break;
 
     case 0x05:
-    {
-        wchar_t strText[128];
         SEASON3B::CreateOkMessageBox(I18N::Game::FruitStatCannotDecrease);
-    }
-    break;
+        break;
     case 0x06:
         if (fruit >= 0 && fruit <= 4)
         {
