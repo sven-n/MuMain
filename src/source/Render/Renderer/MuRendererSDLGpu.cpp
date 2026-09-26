@@ -31,6 +31,7 @@
 #define MU_HAS_SDL_TTF 0
 #endif
 
+#include "BitmapUpload.h"
 #include "D3D12Diagnostics.h"
 #include "DrawCommandHistory.h"
 #include "MuRenderer.h"
@@ -237,6 +238,7 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 // ---------------------------------------------------------------------------
 
 static SDL_GPUDevice* s_device = nullptr;
+static Render::Renderer::BitmapGpuResources s_bitmapGpuResources;
 static SDL_Window* s_window = nullptr;
 
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
@@ -1541,6 +1543,15 @@ public:
         }
 #endif
 
+        if (!s_bitmapGpuResources.Initialize(s_device))
+        {
+            mu::log::Get("render")->error("SDL_gpu -- bitmap uploader initialization failed at {}: {} (driver {})",
+                                          s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError(),
+                                          SDL_GetGPUDeviceDriver(s_device));
+            Shutdown();
+            return false;
+        }
+
         mu::log::Get("render")->info("SDL_gpu -- Init complete");
         return true;
     }
@@ -1583,6 +1594,12 @@ public:
         s_textureUpdates.clear();
         ReleaseOwnedTextures();
         ClearTextureRegistry();
+        ClearSamplerRegistry();
+        if (!s_bitmapGpuResources.Shutdown())
+        {
+            mu::log::Get("render")->error("SDL_gpu -- bitmap uploader shutdown failed at {}: {}",
+                                          s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+        }
 
         // Release the independently owned white fallback texture.
         if (s_whiteTexture)
@@ -4891,6 +4908,23 @@ private:
 {
     static MuRendererSDLGpu s_instance;
     return s_instance;
+}
+
+Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const std::uint8_t> pixels, int width,
+                                                                int height, SDL_GPUFilter filter,
+                                                                SDL_GPUSamplerAddressMode wrap)
+{
+    return s_bitmapGpuResources.Upload(pixels, width, height, filter, wrap);
+}
+
+void ReleaseBitmapTexture(SDL_GPUDevice* device, SDL_GPUTexture* texture)
+{
+    SDL_ReleaseGPUTexture(device, texture);
+}
+
+const char* BitmapUploadDriverName()
+{
+    return s_device ? SDL_GetGPUDeviceDriver(s_device) : "no device";
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
