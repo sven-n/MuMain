@@ -866,7 +866,7 @@ void CNPCDialogue::SyncRmlModel()
     if (showContribute)
     {
         wchar_t szContribute[32];
-        ::wprintf(szContribute, I18N::Game::GainContributionU, m_dwContributePoint);
+        mu_swprintf(szContribute, I18N::Game::GainContributionU, m_dwContributePoint);
         model.contributeText = StringUtils::WideToNarrow(szContribute);
     }
     else
