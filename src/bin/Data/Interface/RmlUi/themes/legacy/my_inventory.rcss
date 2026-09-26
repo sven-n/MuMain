@@ -103,6 +103,9 @@
 	padding: 0 2px;
 	background-color: rgba(0, 0, 0, 180);
 }
+/* The hints are text layers (.sharp-text, my_inventory.rml) anchored by their bottom edge: they
+   scale back around it. The span padding (0 2px) is bound there too. */
+.tooltip.sharp-text { transform-origin: left bottom; }
 /* Button centres (x + 18) less half the row. */
 .tooltip-exit   { left: -49px; }
 .tooltip-repair { left: -12px; }

@@ -11,10 +11,12 @@
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
-		<span id="title">{{title}}</span>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
 		<div id="btn_exit" class="ext-btn" data-event-click="inventory_extension_exit_click"></div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 
 		<!-- Locked (not-yet-purchased) pages' numbered lock glyph -- flat decorative overlay,
 		     no live 3D content underneath. Table/empty-slot backing art behind this stays native
