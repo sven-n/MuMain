@@ -1,0 +1,217 @@
+# Extra checks that sven-n/MuMain does not run automatically, to save its
+# Actions minutes: ci.yml builds Windows only on pushes to main and never
+# builds the editor. This workflow covers the rest:
+#
+#   Windows x64 Release   editor OFF and ON
+#   Linux x64 Release     editor ON  (editor OFF: ci.yml)
+#   macOS arm64 Release   editor ON  (editor OFF: ci.yml)
+#
+# On forks, which use their own minutes, it runs on every pull request. On
+# sven-n/MuMain it only runs when started by hand ("Run workflow").
+#
+# Editor ON also enables the control socket, like the *-mueditor presets.
+# The jobs only build and run the tests; they upload nothing. The workflow
+# uses GitHub's own actions only, so it runs under a repository setting that
+# allows no other actions.
+name: Fork CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: fork-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows x64 Release, editor ${{ matrix.editor }}
+    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        editor: ['OFF', 'ON']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Activate Visual Studio developer environment
+        shell: pwsh
+        run: |
+          # Loads vcvars64.bat and passes every variable it changes on to the
+          # following steps.
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installation = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $installation) {
+            throw "No Visual Studio installation with the x64 C++ tools found."
+          }
+          $vcvars = Join-Path $installation "VC\Auxiliary\Build\vcvars64.bat"
+          # vcvars64.bat looks for vswhere.exe on PATH itself.
+          $env:PATH = "$(Split-Path $vswhere);$env:PATH"
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "`"$vcvars`" >nul && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$' -and $before[$Matches[1]] -ne $Matches[2]) {
+              "$($Matches[1])=$($Matches[2])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            }
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "vcvars64.bat failed."
+          }
+
+      - name: Cache FetchContent and NuGet dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/fork-ci-windows/_deps
+            .nuget
+          key: fork-windows-x64-editor-${{ matrix.editor }}-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-windows-x64-editor-${{ matrix.editor }}-deps-
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:/vcpkg/installed
+            C:/vcpkg/packages
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-windows-x64-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset windows-x64
+          -B out/build/fork-ci-windows
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
+          -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
+          -DVCPKG_MANIFEST_MODE=ON
+          -DENABLE_EDITOR=${{ matrix.editor }}
+          -DENABLE_CONTROL_SOCKET=${{ matrix.editor }}
+          -DMU_ENABLE_SHADER_COMPILATION=ON
+          -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
+          -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
+          -DDXC_EXE=C:/vcpkg/installed/x64-windows/tools/directx-dxc/dxc.exe
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build out/build/fork-ci-windows --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/fork-ci-windows --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+  linux-editor:
+    name: Linux x64 Release, editor ON
+    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build gcc g++ \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols \
+            libasound2-dev libpulse-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
+            glslang-tools spirv-cross \
+            pkg-config
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/fork-ci-linux-editor/_deps
+            .nuget
+          key: fork-linux-x64-editor-ON-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-linux-x64-editor-ON-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset linux-x64
+          -B out/build/fork-ci-linux-editor
+          -DENABLE_EDITOR=ON
+          -DENABLE_CONTROL_SOCKET=ON
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build out/build/fork-ci-linux-editor --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/fork-ci-linux-editor --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+  macos-editor:
+    name: macOS arm64 Release, editor ON
+    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/fork-ci-macos-editor/_deps
+            .nuget
+          key: fork-macos-arm64-editor-ON-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-macos-arm64-editor-ON-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset macos-arm64
+          -B out/build/fork-ci-macos-editor
+          -DENABLE_EDITOR=ON
+          -DENABLE_CONTROL_SOCKET=ON
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+          -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+
+      - name: Build
+        run: cmake --build out/build/fork-ci-macos-editor --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/fork-ci-macos-editor --build-config Release
+          --output-on-failure
+          --no-tests=error
