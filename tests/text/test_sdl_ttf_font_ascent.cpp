@@ -22,7 +22,10 @@ constexpr Uint8 kInkAlpha = 32;
 
 struct TtfSession
 {
-    TtfSession() { initialized = TTF_Init(); }
+    TtfSession()
+    {
+        initialized = TTF_Init();
+    }
     ~TtfSession()
     {
         if (initialized)

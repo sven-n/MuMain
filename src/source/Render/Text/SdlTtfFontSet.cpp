@@ -114,8 +114,7 @@ void CloseTtfFont(TTF_Font*& font)
                                         float pointSize)
 {
     const std::string packagedPath = BundledFontPath(relativePath);
-    if (TTF_Font* font =
-            OpenFontWithAscentAtMost(packagedPath.c_str(), pointSize, LayoutAscentPixels(pointSize)))
+    if (TTF_Font* font = OpenFontWithAscentAtMost(packagedPath.c_str(), pointSize, LayoutAscentPixels(pointSize)))
     {
         mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role, packagedPath);
         return font;

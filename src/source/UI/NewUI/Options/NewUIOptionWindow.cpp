@@ -117,11 +117,17 @@ static const wchar_t* const* GetLanguageLabels()
 // family value ([UI] Font); empty = the platform default (so the look is
 // unchanged). The curated entries are bundled in the client's ./fonts directory
 // (see Core/Platform/GdiText.cpp), so they resolve even without a system install.
-static const struct { const wchar_t* name; const wchar_t* label; } s_Fonts[] = {
-    { L"",                L"Default" },
-    { L"Liberation Sans", L"Liberation Sans" },
-    { L"DejaVu Sans",     L"DejaVu Sans" },
-    { L"Noto Sans TC",    L"Noto Sans TC" },
+struct FontOption
+{
+    const wchar_t* name;
+    const wchar_t* label;
+};
+
+static const FontOption s_Fonts[] = {
+    {L"", L"Default"},
+    {L"Liberation Sans", L"Liberation Sans"},
+    {L"DejaVu Sans", L"DejaVu Sans"},
+    {L"Noto Sans TC", L"Noto Sans TC"},
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 

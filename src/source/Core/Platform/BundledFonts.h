@@ -19,13 +19,13 @@ struct BundledFont
 // Traditional Chinese (zh-TW): selectable as the UI font and the first
 // missing-glyph fallback. Simplified Chinese (zh-CN) would need Noto Sans SC,
 // because the glyph forms differ.
-inline constexpr BundledFont kNotoSansTcFont{
-    "Noto Sans TC", "fonts/NotoSansTC-Regular.otf", "fonts/NotoSansTC-Bold.otf"};
+inline constexpr BundledFont kNotoSansTcFont{"Noto Sans TC", "fonts/NotoSansTC-Regular.otf",
+                                             "fonts/NotoSansTC-Bold.otf"};
 
 inline constexpr BundledFont kDejaVuSansFont{"DejaVu Sans", "fonts/DejaVuSans.ttf", "fonts/DejaVuSans-Bold.ttf"};
 
 inline constexpr BundledFont kBundledFonts[] = {
-    { "Liberation Sans", "fonts/LiberationSans-Regular.ttf", "fonts/LiberationSans-Bold.ttf" },
+    {"Liberation Sans", "fonts/LiberationSans-Regular.ttf", "fonts/LiberationSans-Bold.ttf"},
     kDejaVuSansFont,
     kNotoSansTcFont,
 };
@@ -41,7 +41,7 @@ inline constexpr BundledFont kBundledFixedFont{
 // ponytail: one Hangul face; SDL_ttf synthesizes bold, bundle NanumGothic-Bold if metric parity requires it.
 inline constexpr BundledFont kBundledFallbackFonts[] = {
     kNotoSansTcFont,
-    { "Nanum Gothic", "fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Regular.ttf" },
+    {"Nanum Gothic", "fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Regular.ttf"},
     kDejaVuSansFont,
 };
 

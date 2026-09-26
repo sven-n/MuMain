@@ -903,7 +903,8 @@ static void WarmTtfFonts()
     static constexpr const char* k_WarmupGlyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
                                                   "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\한글";
     using Render::Text::SdlTtfFontRole;
-    for (SdlTtfFontRole role : {SdlTtfFontRole::Normal, SdlTtfFontRole::Bold, SdlTtfFontRole::Big, SdlTtfFontRole::Fixed})
+    for (SdlTtfFontRole role :
+         {SdlTtfFontRole::Normal, SdlTtfFontRole::Bold, SdlTtfFontRole::Big, SdlTtfFontRole::Fixed})
     {
         TTF_Font* font = s_ttfFonts.Get(role);
         TTF_Text* warmup = TTF_CreateText(s_textEngine, font, k_WarmupGlyphs, 0);
