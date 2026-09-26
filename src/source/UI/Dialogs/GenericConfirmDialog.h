@@ -47,7 +47,14 @@ namespace mu::ui::window
         bool showCancel = false;
         std::wstring cancelLabel = L"Cancel";
 
-        struct Line { std::wstring text; bool bold = false; };
+        struct Line
+        {
+            std::wstring text;
+            bool bold = false;
+            // The native message box's per-line colour (RGBA(), as AddMsg() took it); 0 = the
+            // theme's own line colour.
+            unsigned long color = 0;
+        };
         std::vector<Line> lines;
 
         // Optional bold title row above `lines`, fixed position/font, never wrapped. Empty = no
@@ -227,7 +234,12 @@ namespace mu::ui::window
         // the dialog is open.
         void SyncBackgroundPanel();
 
-        struct LineEntry { Rml::String text; bool bold = false; };
+        struct LineEntry
+        {
+            Rml::String text;
+            bool bold = false;
+            Rml::String color; // CSS colour of Line::color, empty for the theme's own
+        };
         struct GenericDialogRmlModel
         {
             std::vector<LineEntry> lines;

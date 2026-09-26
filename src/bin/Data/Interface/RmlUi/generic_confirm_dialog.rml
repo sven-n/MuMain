@@ -46,7 +46,10 @@
 				<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
 					<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
 				</div>
-				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+				<!-- A line's own colour (GenericDialogConfig::Line::color), else the legacy theme's
+				     text-primary: an empty inline value would not clear a previous dialog's colour. -->
+				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold"
+				     data-style-color="line.color == '' ? '#ffffff' : line.color">{{line.text}}</div>
 				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit
 				     buttons, anti-shoulder-surfing, deliberately NOT an <input type="number">);
 				     Text is a stock RmlUi <input> below. -->

@@ -71,6 +71,7 @@ void CGenericConfirmDialog::BuildRmlUi()
             auto line = c.RegisterStruct<LineEntry>();
             line.RegisterMember("text", &LineEntry::text);
             line.RegisterMember("bold", &LineEntry::bold);
+            line.RegisterMember("color", &LineEntry::color);
             c.RegisterArray<std::vector<LineEntry>>();
             c.Bind("lines", &model.lines);
 
@@ -202,6 +203,15 @@ void CGenericConfirmDialog::Release()
 
 namespace
 {
+    // GenericDialogConfig::Line::color (RGBA(), red in the low byte) as a CSS colour.
+    Rml::String LineColorCss(unsigned long rgba)
+    {
+        if (rgba == 0)
+            return {};
+        return "rgba(" + std::to_string(GetRed(rgba)) + ", " + std::to_string(GetGreen(rgba)) + ", " +
+               std::to_string(GetBlue(rgba)) + ", " + std::to_string(GetAlpha(rgba)) + ")";
+    }
+
     // 20 random adjacent swaps over 0..9 -- the shuffled keypad-digit mapping.
     std::vector<int> ShuffledDigits()
     {
@@ -603,11 +613,12 @@ void CGenericConfirmDialog::SyncRmlModel()
     std::vector<LineEntry> newLines;
     newLines.reserve(m_Active.lines.size());
     for (const auto& line : m_Active.lines)
-        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold });
+        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold, LineColorCss(line.color) });
 
     bool linesChanged = newLines.size() != model.lines.size();
     for (size_t i = 0; i < newLines.size() && !linesChanged; ++i)
-        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold;
+        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold
+            || newLines[i].color != model.lines[i].color;
     if (linesChanged)
     {
         model.lines = std::move(newLines);

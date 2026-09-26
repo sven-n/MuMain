@@ -167,6 +167,7 @@
 	text-align: center;
 	white-space: normal;
 	line-height: 1.6;
+	min-height: 1.6em; /* a blank line (" ") keeps its row, as native's AddMsg(L" ") does */
 	color: token(text-primary);
 }
 .gcd-line.bold { font-weight: bold; }
