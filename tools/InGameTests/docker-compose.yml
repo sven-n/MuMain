@@ -1,0 +1,28 @@
+# The server for the in-game tests (docs/in-game-tests.md): OpenMU in demo mode.
+#
+# -demo keeps the data in memory and creates OpenMU's test data on every start,
+# so each test run starts from the same accounts, characters and items. Restart
+# the container to reset it.
+#
+# It listens on OpenMU's default ports, so stop any other local OpenMU first:
+#   podman compose -f tools/InGameTests/docker-compose.yml up -d
+#   podman compose -f tools/InGameTests/docker-compose.yml restart
+#   podman compose -f tools/InGameTests/docker-compose.yml down
+# (docker compose works the same way.)
+name: mumain-in-game-tests
+
+services:
+  openmu:
+    image: docker.io/munique/openmu:latest
+    container_name: mumain-in-game-tests-openmu
+    # The image starts with -autostart; -demo is added to it.
+    command: ["-demo"]
+    environment:
+      # The game server address the connect server hands out; the clients run
+      # on this machine and reach the published ports through the loopback.
+      RESOLVE_IP: "127.0.0.1"
+    ports:
+      - "44405:44405"
+      - "44406:44406"
+      - "55901-55906:55901-55906"
+      - "55980:55980"

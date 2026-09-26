@@ -82,3 +82,6 @@ src/graphify-out/
 
 # Local-only files
 docs/reviews/
+
+# In-game test runner output (docs/in-game-tests.md)
+in-game-test-results/
