@@ -223,8 +223,9 @@ namespace mu::ui::window
 
         // The bg document paints the frame the fg document's text sits in; a theme may size the fg
         // #panel by its content (legacy grows it per line, like native), so the bg #panel follows
-        // the fg one's laid-out height every frame the dialog is open.
-        void SyncBackgroundPanelHeight();
+        // the fg one's laid-out height (and, for an untransformed panel, its top edge) every frame
+        // the dialog is open.
+        void SyncBackgroundPanel();
 
         struct LineEntry { Rml::String text; bool bold = false; };
         struct GenericDialogRmlModel

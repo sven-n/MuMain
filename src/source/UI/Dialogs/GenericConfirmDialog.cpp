@@ -430,7 +430,7 @@ Rml::Vector2f CGenericConfirmDialog::PanelTranslateCorrection() const
     return { -size.x * 0.5f, -size.y * 0.5f };
 }
 
-void CGenericConfirmDialog::SyncBackgroundPanelHeight()
+void CGenericConfirmDialog::SyncBackgroundPanel()
 {
     Rml::Element* pPanel = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
     Rml::Element* pBgPanel = m_pRmlBgDoc ? m_pRmlBgDoc->GetElementById("panel") : nullptr;
@@ -438,9 +438,15 @@ void CGenericConfirmDialog::SyncBackgroundPanelHeight()
         return;
 
     const float height = pPanel->GetBox().GetSize(Rml::BoxArea::Border).y;
-    if (height <= 0.f || height == pBgPanel->GetBox().GetSize(Rml::BoxArea::Border).y)
+    if (height > 0.f && height != pBgPanel->GetBox().GetSize(Rml::BoxArea::Border).y)
+        pBgPanel->SetProperty(Rml::PropertyId::Height, Rml::Property(height, Rml::Unit::PX));
+
+    // Only a panel placed without the centering transform reports its real top edge.
+    if (pPanel->GetComputedValues().has_local_transform())
         return;
-    pBgPanel->SetProperty(Rml::PropertyId::Height, Rml::Property(height, Rml::Unit::PX));
+    const float top = pPanel->GetAbsoluteOffset(Rml::BoxArea::Border).y;
+    if (top != pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border).y)
+        pBgPanel->SetProperty(Rml::PropertyId::Top, Rml::Property(top, Rml::Unit::PX));
 }
 
 void CGenericConfirmDialog::UpdateProgress()
@@ -474,7 +480,7 @@ bool CGenericConfirmDialog::Update()
     if (!m_bActive)
         return true;
 
-    SyncBackgroundPanelHeight();
+    SyncBackgroundPanel();
 
     if (m_Active.progress)
     {

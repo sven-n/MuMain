@@ -14,7 +14,8 @@
 	     bottom cap) moved to generic_confirm_dialog_bg.rml -- a background-context document
 	     rendered BEFORE the 3D pass that draws item3D each frame, so the item shows through this
 	     now-paint-less #panel instead of being painted over by it. See that file's own comment. -->
-	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel">
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel"
+	     data-class-portrait="has_portrait2d_overlay">
 		<!-- Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) swapped in for the
 		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives here, not
 		     in generic_confirm_dialog_bg.rml -- unlike item3D, a title banner has no compositing-

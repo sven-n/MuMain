@@ -32,6 +32,13 @@
 #panel.tall {
 	min-height: 240dp;
 }
+/* The overlay-portrait box is native's CDuelMsgBox/CDuelResultMsgBox: top edge at y=70, 67 + 7*15 +
+   50 = 222 tall, the 148x138 crest drawn at y+15 behind the text, the bold heading at y+100 and
+   the message lines from y+120. */
+#panel.portrait {
+	top: 70dp;
+	min-height: 222dp;
+}
 
 /* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) -- a title-banner variant
    of the plain top-cap art (newui_msgbox_top.tga, .gcd-bg-sprite-top in
@@ -190,10 +197,11 @@
    the current art's 148:138 aspect ratio. */
 .gcd-portrait2d {
 	position: relative;
-	width: 100dp;
-	height: 93dp;
+	width: 148dp;
+	height: 138dp;
 	flex-shrink: 0;
-	margin-bottom: 4dp;
+	margin-top: -20dp;    /* .gcd-body starts 35 down; the crest starts 15 down */
+	margin-bottom: -33dp; /* message lines start at y+120, inside the crest's lower part */
 	decorator: image(portrait2d-image);
 }
 /* Same cascade-tie fix as .gcd-item3d-anchor above. */
@@ -216,12 +224,11 @@
 	position: absolute;
 	left: 0;
 	right: 0;
-	bottom: 2dp;
+	top: 85dp; /* y+100 */
 	text-align: center;
 	font-weight: bold;
-	font-size: 0.75rem;
+	font-size: 1rem;
 	color: token(text-heading);
-	font-effect: shadow(0dp 1dp #000000);
 }
 
 /* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
