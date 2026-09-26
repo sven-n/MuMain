@@ -35,20 +35,21 @@ using namespace mu::ui::window;
 
 namespace
 {
-    // Native RenderText(x, y, text, boxWidth, ...) scales a line down to fit boxWidth
-    // (UI::Scaling::FontScaleForBounds). The factor for a line measured in `probe`'s font (a bold
-    // 1em element of this window); 1 = fits or no probe. `probeUnitsPerLayoutUnit` converts the
-    // probe's measurement to the window's own layout units, in which boxWidth is given (a theme may
-    // lay its text out in physical pixels inside a counter-scaled layer).
-    float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, float probeUnitsPerLayoutUnit)
-    {
-        if (probe == nullptr || text == nullptr || text[0] == L'\0' || probeUnitsPerLayoutUnit <= 0.f)
-            return 1.f;
-        const float width = static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(text)))
-            / probeUnitsPerLayoutUnit;
-        return width <= boxWidth ? 1.f : boxWidth / width;
-    }
+// Native RenderText(x, y, text, boxWidth, ...) scales a line down to fit boxWidth
+// (UI::Scaling::FontScaleForBounds). The factor for a line measured in `probe`'s font (a bold
+// 1em element of this window); 1 = fits or no probe. `probeUnitsPerLayoutUnit` converts the
+// probe's measurement to the window's own layout units, in which boxWidth is given (a theme may
+// lay its text out in physical pixels inside a counter-scaled layer).
+float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, float probeUnitsPerLayoutUnit)
+{
+    if (probe == nullptr || text == nullptr || text[0] == L'\0' || probeUnitsPerLayoutUnit <= 0.f)
+        return 1.f;
+    const float width =
+        static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(text))) /
+        probeUnitsPerLayoutUnit;
+    return width <= boxWidth ? 1.f : boxWidth / width;
 }
+} // namespace
 
 CMixInventory::CMixInventory()
 {
@@ -802,7 +803,7 @@ void CMixInventory::SyncMixContentModel()
     wchar_t socketPromptText[128] = {};
     const Rml::String white = makeColor(255, 255, 255, 255);
     const Rml::String warning = makeColor(255, 40, 20, 255);
-    constexpr float kDescriptionTop = 250.f;         // RenderMixDescriptions()'s fPos_y + 250 block
+    constexpr float kDescriptionTop = 250.f; // RenderMixDescriptions()'s fPos_y + 250 block
     constexpr float kCastleSeniorDescriptionTop = 270.f;
     constexpr float kDescriptionRow = 13.f;
     // Native boxes: 160 centred at x+15, or 200 left-aligned from x+5 -- which runs 15 past the
@@ -813,18 +814,17 @@ void CMixInventory::SyncMixContentModel()
     {
         const float top = blockTop + static_cast<float>(row) * kDescriptionRow;
         const float fit = TextFitScale(fitProbe, text, alignLeft ? kLeftDescriptionWidth : kCentredDescriptionWidth,
-            probeUnitsPerLayoutUnit);
-        descriptionLines.push_back({ StringUtils::WideToNarrow(text), color, top, alignLeft, fit });
+                                       probeUnitsPerLayoutUnit);
+        descriptionLines.push_back({StringUtils::WideToNarrow(text), color, top, alignLeft, fit});
     };
     auto describe = [&](const wchar_t* text, const Rml::String& color, int row, bool alignLeft = false)
-    {
-        describeAt(kDescriptionTop, text, color, row, alignLeft);
-    };
+    { describeAt(kDescriptionTop, text, color, row, alignLeft); };
     switch (mixType)
     {
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
         for (int i = 0; i < 6; ++i)
-            describeAt(kCastleSeniorDescriptionTop, I18N::Game::Lookup(1644 + i), makeColor(200, 200, 200, 255), i, false);
+            describeAt(kCastleSeniorDescriptionTop, I18N::Game::Lookup(1644 + i), makeColor(200, 200, 200, 255), i,
+                       false);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         describe(I18N::Game::RefineTheItemToCreate, white, 0);

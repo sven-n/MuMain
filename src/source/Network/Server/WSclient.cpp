@@ -6533,9 +6533,9 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
         mu::ui::window::GenericDialogConfig cfg;
         cfg.lines = {
-            { I18N::Game::Warning2223, true, RGBA(255, 0, 0, 255) },
-            { L" ", false },
-            { I18N::Game::RefineryHasStartedRefineryIsA, true, RGBA(223, 191, 103, 255) },
+            {I18N::Game::Warning2223, true, RGBA(255, 0, 0, 255)},
+            {L" ", false},
+            {I18N::Game::RefineryHasStartedRefineryIsA, true, RGBA(223, 191, 103, 255)},
         };
         cfg.onPrimary = []
         {

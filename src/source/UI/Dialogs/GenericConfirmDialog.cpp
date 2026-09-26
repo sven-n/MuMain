@@ -427,7 +427,7 @@ Rml::Vector2f CGenericConfirmDialog::PanelTranslateCorrection() const
         return { 0.f, 0.f };
     // A theme may place #panel without the centering transform (legacy anchors it like native).
     if (!pPanel->GetComputedValues().has_local_transform())
-        return { 0.f, 0.f };
+        return {0.f, 0.f};
     const Rml::Vector2f size = pPanel->GetBox().GetSize();
     return { -size.x * 0.5f, -size.y * 0.5f };
 }
@@ -605,12 +605,13 @@ void CGenericConfirmDialog::SyncRmlModel()
     std::vector<LineEntry> newLines;
     newLines.reserve(m_Active.lines.size());
     for (const auto& line : m_Active.lines)
-        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color) });
+        newLines.push_back(
+            {StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color)});
 
     bool linesChanged = newLines.size() != model.lines.size();
     for (size_t i = 0; i < newLines.size() && !linesChanged; ++i)
-        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold
-            || newLines[i].color != model.lines[i].color;
+        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold ||
+                       newLines[i].color != model.lines[i].color;
     if (linesChanged)
     {
         model.lines = std::move(newLines);

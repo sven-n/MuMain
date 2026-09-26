@@ -83,10 +83,10 @@ namespace mu::ui::window
         {
             int top = 0;
             int middleCount = 0;
-            int textTop = 0;       // y offset of the first line's text
-            int lineAdvance = 0;   // y step between lines
-            int textInset = 0;     // left/right inset of left-aligned text (0 = centred)
-            int dividerTop = 0;    // y offset of a newui_Message_Line divider (CElpisMsgBox)
+            int textTop = 0;     // y offset of the first line's text
+            int lineAdvance = 0; // y step between lines
+            int textInset = 0;   // left/right inset of left-aligned text (0 = centred)
+            int dividerTop = 0;  // y offset of a newui_Message_Line divider (CElpisMsgBox)
         };
         NativeFrame nativeFrame;
         // The in-game system menu (native CSystemMenuMsgBox): a theme may lay it out like native.
@@ -163,7 +163,7 @@ namespace mu::ui::window
             bool hasTitle = false;
             bool isSystemMenu = false; // GenericMenuConfig::systemMenu
             bool highlightTitle = false;
-            float nativeTop = 0.f;     // GenericMenuConfig::nativeFrame, in reference pixels
+            float nativeTop = 0.f; // GenericMenuConfig::nativeFrame, in reference pixels
             float nativeHeight = 0.f;
             float nativeTextTop = 0.f;
             float nativeLineAdvance = 0.f;

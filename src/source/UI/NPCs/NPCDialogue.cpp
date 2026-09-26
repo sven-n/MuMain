@@ -277,20 +277,20 @@ void CNPCDialogue::SetContents(DWORD dwDlgIndex)
 
 namespace
 {
-    // Wrap budget, in native logical units, for text drawn inside `container` (see
-    // ResolveDialogueWrapGeometry()); `fallback` when the container is not laid out yet.
-    float NativeWrapWidth(Rml::Element& container, const UI::Scaling::Transform& panelTransform, float fallback)
-    {
-        const float nativeTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, panelTransform);
-        const float width = container.GetBox().GetSize(Rml::BoxArea::Border).x;
-        // A counter-scaled container (legacy .sharp-text) is laid out in physical pixels: its
-        // width and font-size are both multiplied by the panel scale, so the ratio is unchanged.
-        const float drawnTextPx = container.GetComputedValues().font_size() * panelTransform.scaleX;
-        if (width <= 0.0f || drawnTextPx <= 0.0f)
-            return fallback;
-        return width * nativeTextPx / drawnTextPx;
-    }
+// Wrap budget, in native logical units, for text drawn inside `container` (see
+// ResolveDialogueWrapGeometry()); `fallback` when the container is not laid out yet.
+float NativeWrapWidth(Rml::Element& container, const UI::Scaling::Transform& panelTransform, float fallback)
+{
+    const float nativeTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, panelTransform);
+    const float width = container.GetBox().GetSize(Rml::BoxArea::Border).x;
+    // A counter-scaled container (legacy .sharp-text) is laid out in physical pixels: its
+    // width and font-size are both multiplied by the panel scale, so the ratio is unchanged.
+    const float drawnTextPx = container.GetComputedValues().font_size() * panelTransform.scaleX;
+    if (width <= 0.0f || drawnTextPx <= 0.0f)
+        return fallback;
+    return width * nativeTextPx / drawnTextPx;
 }
+} // namespace
 
 void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLinesPerPage,
     float& answerWrapWidth, int& answerLinesPerPage) const

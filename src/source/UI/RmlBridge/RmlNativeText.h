@@ -2,9 +2,9 @@
 
 namespace Rml
 {
-    class Context;
-    class ElementDocument;
-}
+class Context;
+class ElementDocument;
+} // namespace Rml
 
 // Native-sized text for the legacy theme. The original client draws almost all of its UI text in
 // one font whose size grows about half as fast as the rest of the UI (UI::Scaling::FontPointSize),
@@ -18,11 +18,11 @@ namespace Rml
 // root size a second time; those counter-scale text leaves instead (RmlRootTransform.h).
 namespace UI::RmlBridge
 {
-    // Applies the size to one document if it opted in, for its context's (the window's) size; call
-    // when a document is loaded.
-    void ApplyNativeTextSize(Rml::ElementDocument* document);
+// Applies the size to one document if it opted in, for its context's (the window's) size; call
+// when a document is loaded.
+void ApplyNativeTextSize(Rml::ElementDocument* document);
 
-    // Re-applies it to every opted-in document of a context; call after the context was resized
-    // or its UI scale changed.
-    void ApplyNativeTextSize(Rml::Context* context);
-}
+// Re-applies it to every opted-in document of a context; call after the context was resized
+// or its UI scale changed.
+void ApplyNativeTextSize(Rml::Context* context);
+} // namespace UI::RmlBridge

@@ -428,7 +428,7 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderButtons()
 void mu::ui::window::ShowSystemMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 100, 5 };
+    cfg.nativeFrame = {100, 5};
     cfg.systemMenu = true;
 
     GenericMenuConfig::MenuButton btnGameOver;
@@ -853,7 +853,7 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     wchar_t szText[256] = { 0, };
 
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 13 };
+    cfg.nativeFrame = {60, 13};
     cfg.title = I18N::Game::SelectMethodOfCombination;
     cfg.highlightTitle = true;
     // No shared summary lines -- native interleaves each recipe's own blurb directly above its
@@ -1341,7 +1341,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()
 void mu::ui::window::ShowCherryBlossomMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 8 };
+    cfg.nativeFrame = {60, 8};
 
     wchar_t title[256];
     mu_swprintf(title, L"%ls", MonsterScript[450].Name);
@@ -1380,8 +1380,8 @@ void mu::ui::window::ShowCherryBlossomMenuDialog()
 void mu::ui::window::ShowGemIntegrationMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 100, 5 };
-    cfg.lines.push_back({ I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255) });
+    cfg.nativeFrame = {100, 5};
+    cfg.lines.push_back({I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255)});
     cfg.lines.push_back({ I18N::Game::YouCanCombineOrDissolve, false });
     cfg.lines.push_back({ I18N::Game::VariousJewels, false });
 
@@ -1431,7 +1431,7 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
 void mu::ui::window::ShowGemIntegrationJewelDialog()
 {
     GenericMenuConfig cfg;
-    cfg.lines.push_back({ I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255) });
+    cfg.lines.push_back({I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255)});
     cfg.lines.push_back({ I18N::Game::SelectAJewelToCombine, false });
     // 2-column grid instead of `compact` -- some jewel names ("Higher Refining Stone") don't fit
     // compact's 64dp width even wrapped onto 2 lines; `columns` is a general per-dialog knob (see
@@ -1466,7 +1466,7 @@ void mu::ui::window::ShowGemIntegrationJewelDialog()
 void mu::ui::window::ShowGemIntegrationMixDialog()
 {
     GenericMenuConfig cfg;
-    cfg.lines.push_back({ I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255) });
+    cfg.lines.push_back({I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255)});
     cfg.lines.push_back({ I18N::Game::ChooseANumberButtonToCombine, false });
 
     wchar_t szTemp[256] = { 0, };
@@ -1731,7 +1731,7 @@ bool mu::ui::window::CCursedTempleHolicItemSaveLayout::SetLayout()
 void mu::ui::window::ShowLuckyTradeMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 43, 18 };
+    cfg.nativeFrame = {60, 7, 43, 18};
     // Hardcoded Korean, no I18N constant -- faithfully carried over from native's own literal.
     cfg.title = L"럭키아이템 교환NPC"; // "LuckyItem Trade NPC"
     cfg.lines.push_back({ L"럭키아이템으로 교환하거나 제련할 수 있습니?", false });
@@ -1765,7 +1765,7 @@ void mu::ui::window::ShowLuckyTradeMenuDialog()
 void mu::ui::window::ShowTrainerMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 43, 18 };
+    cfg.nativeFrame = {60, 7, 43, 18};
     cfg.title = I18N::Game::Trainer;
     cfg.lines.push_back({ I18N::Game::Hi, false });
 
@@ -1803,7 +1803,7 @@ void mu::ui::window::ShowTrainerMenuDialog()
 void mu::ui::window::ShowTrainerRecoverDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 43, 18 };
+    cfg.nativeFrame = {60, 7, 43, 18};
     cfg.title = I18N::Game::Trainer;
     cfg.lines.push_back({ I18N::Game::SelectThePetToRecoverLife, false });
 
@@ -1817,7 +1817,7 @@ void mu::ui::window::ShowTrainerRecoverDialog()
     GenericMenuConfig::MenuButton btnDarkHorse;
     btnDarkHorse.label = I18N::Game::DarkHorse;
     npcBreeder::CalcRecoveryZen(REVIVAL_DARKHORSE, costText);
-    btnDarkHorse.lines.push_back({ costText, false, statusColor });
+    btnDarkHorse.lines.push_back({costText, false, statusColor});
     btnDarkHorse.linesBelow = true;
     btnDarkHorse.nativeTop = 65;
     btnDarkHorse.onClick = [] { npcBreeder::RecoverPet(REVIVAL_DARKHORSE); SocketClient->ToGameServer()->SendCloseNpcRequest(); };
@@ -1826,7 +1826,7 @@ void mu::ui::window::ShowTrainerRecoverDialog()
     GenericMenuConfig::MenuButton btnDarkSpirit;
     btnDarkSpirit.label = I18N::Game::DarkRaven;
     npcBreeder::CalcRecoveryZen(REVIVAL_DARKSPIRIT, costText);
-    btnDarkSpirit.lines.push_back({ costText, false, statusColor });
+    btnDarkSpirit.lines.push_back({costText, false, statusColor});
     btnDarkSpirit.linesBelow = true;
     btnDarkSpirit.nativeTop = 115;
     btnDarkSpirit.onClick = [] { npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT); SocketClient->ToGameServer()->SendCloseNpcRequest(); };
@@ -1854,21 +1854,21 @@ void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
     // 30 in from each side), a divider at y+120, buttons at y+145/175/205.
     constexpr int kAboutTextInset = 30;
     const unsigned long textColor = RGBA(220, 183, 131, 255);
-    cfg.nativeFrame = { 60, 12, 43, 18, 0, 120 };
+    cfg.nativeFrame = {60, 12, 43, 18, 0, 120};
     cfg.title = I18N::Game::Elpis;
 
     switch (iMessageType)
     {
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY:
-        cfg.lines.push_back({ I18N::Game::GemstoneOfJewelOfHarmonyHas, true, textColor });
+        cfg.lines.push_back({I18N::Game::GemstoneOfJewelOfHarmonyHas, true, textColor});
         cfg.nativeFrame.textInset = kAboutTextInset;
         break;
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY:
-        cfg.lines.push_back({ I18N::Game::NewPowerCanBeGrantedTo, true, textColor });
+        cfg.lines.push_back({I18N::Game::NewPowerCanBeGrantedTo, true, textColor});
         cfg.nativeFrame.textInset = kAboutTextInset;
         break;
     default:
-        cfg.lines.push_back({ I18N::Game::WhatWouldYouLikeToKnow, true, textColor });
+        cfg.lines.push_back({I18N::Game::WhatWouldYouLikeToKnow, true, textColor});
         break;
     }
 
@@ -1908,7 +1908,7 @@ void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 void mu::ui::window::ShowSeedMasterMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 43, 18 };
+    cfg.nativeFrame = {60, 7, 43, 18};
     cfg.title = I18N::Game::SeedMaster;
     cfg.lines.push_back({ I18N::Game::ExtractTheSeedOrTheSeedSphere, false });
     cfg.lines.push_back({ I18N::Game::YouMayAssemblyThemTogether, false });
@@ -1947,7 +1947,7 @@ void mu::ui::window::ShowSeedMasterMenuDialog()
 void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 43, 18 };
+    cfg.nativeFrame = {60, 7, 43, 18};
     cfg.title = I18N::Game::SeedResearcher;
     cfg.lines.push_back({ I18N::Game::EitherApplyTheSeedSphere, false });
     cfg.lines.push_back({ I18N::Game::OrDestroyTheSeedSphereAccordingly, false });
@@ -1986,7 +1986,7 @@ void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 void mu::ui::window::ShowResetCharacterPointDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 53, 18 };
+    cfg.nativeFrame = {60, 7, 53, 18};
     cfg.title = I18N::Game::ReInitializationHelper;
     cfg.lines.push_back({ I18N::Game::ClickOnTheButtonToReinitializeAllStatPoints, false });
 
@@ -2312,7 +2312,7 @@ bool mu::ui::window::CGuild_ToPerson_PositionLayout::SetLayout()
 void mu::ui::window::ShowDelgardoMainMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7, 48, 12 };
+    cfg.nativeFrame = {60, 7, 48, 12};
     cfg.title = I18N::Game::Delgado;
     cfg.lines.push_back({ I18N::Game::RegisterYourLuckyCoinsOr, false });
     cfg.lines.push_back({ I18N::Game::UseTheLuckyCoinsYouAlreadyHave, false });

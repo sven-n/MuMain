@@ -2309,10 +2309,10 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
 // the current skill and hotkeys, cell x + 15 in the expanded list) and ends it 10 above the icon.
 namespace
 {
-    constexpr float kSlotTooltipOffsetX = 10.f;
-    constexpr float kGridTooltipOffsetX = 15.f;
-    constexpr float kTooltipGapAbove = 10.f;
-}
+constexpr float kSlotTooltipOffsetX = 10.f;
+constexpr float kGridTooltipOffsetX = 15.f;
+constexpr float kTooltipGapAbove = 10.f;
+} // namespace
 
 void mu::ui::window::CSkillList::QueueTooltip(int iSkillIndex, float x, float y)
 {

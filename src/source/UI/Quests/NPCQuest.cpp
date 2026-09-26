@@ -581,8 +581,8 @@ void CNPCQuest::SyncRmlModel()
     model.messageTop = 66.f + static_cast<float>(NUM_LINE_CMB - iTotalLine) * kLineAdvance / 2.f;
     const bool questInProgress = QUEST_ING == byCurQuestState;
     model.answersTop = questInProgress
-        ? model.messageTop + static_cast<float>(g_iNumLineMessageBoxCustom) * kLineAdvance
-        : kAnswersAnchorTop;
+                           ? model.messageTop + static_cast<float>(g_iNumLineMessageBoxCustom) * kLineAdvance
+                           : kAnswersAnchorTop;
     model.dialogueTop = questInProgress ? model.messageTop : kAnswersAnchorTop;
     m_RmlBinder.MarkDirty("dialogue_top");
     m_RmlBinder.MarkDirty("message_top");

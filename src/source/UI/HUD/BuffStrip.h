@@ -29,7 +29,10 @@ namespace mu::ui::window
         // The original centres the strip on the screen width its docked panels leave free
         // (GetScreenWidth(), reference units); this keeps that width so the model can expose the
         // free area's centre (strip_center) for a theme that follows it.
-        void SetPos(int iScreenWidth) { m_iFreeScreenWidth = iScreenWidth; }
+        void SetPos(int iScreenWidth)
+        {
+            m_iFreeScreenWidth = iScreenWidth;
+        }
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

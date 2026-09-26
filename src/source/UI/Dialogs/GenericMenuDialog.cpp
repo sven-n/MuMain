@@ -231,7 +231,7 @@ bool CGenericMenuDialog::UpdateKeyEvent()
 
 CGenericMenuDialog::LineEntry CGenericMenuDialog::ToLineEntry(const GenericMenuConfig::Line& line)
 {
-    return { StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color) };
+    return {StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color)};
 }
 
 bool CGenericMenuDialog::SameLine(const LineEntry& a, const LineEntry& b)
@@ -249,9 +249,10 @@ void CGenericMenuDialog::SyncNativeFrame()
 
     const auto& frame = m_Active.nativeFrame;
     const float top = static_cast<float>(frame.top);
-    const float height = frame.middleCount > 0
-        ? kTopCapHeight + static_cast<float>(frame.middleCount) * kMiddleStripHeight + kBottomCapHeight
-        : 0.f;
+    const float height =
+        frame.middleCount > 0
+            ? kTopCapHeight + static_cast<float>(frame.middleCount) * kMiddleStripHeight + kBottomCapHeight
+            : 0.f;
     if (model.nativeTop != top)
     {
         model.nativeTop = top;
@@ -345,10 +346,9 @@ void CGenericMenuDialog::SyncRmlModel()
     {
         const auto& a = newButtons[i];
         const auto& b = model.buttons[i];
-        buttonsChanged = a.label != b.label || a.tooltip != b.tooltip
-            || a.hasTooltip != b.hasTooltip || a.enabled != b.enabled || a.compact != b.compact
-            || a.cols2 != b.cols2 || a.nativeTop != b.nativeTop || a.linesBelow != b.linesBelow
-            || a.lines.size() != b.lines.size();
+        buttonsChanged = a.label != b.label || a.tooltip != b.tooltip || a.hasTooltip != b.hasTooltip ||
+                         a.enabled != b.enabled || a.compact != b.compact || a.cols2 != b.cols2 ||
+                         a.nativeTop != b.nativeTop || a.linesBelow != b.linesBelow || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
             buttonsChanged = !SameLine(a.lines[j], b.lines[j]);
     }
