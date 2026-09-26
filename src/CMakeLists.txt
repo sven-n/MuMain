@@ -360,6 +360,29 @@ if (MSVC)
   )
 endif()
 
+# Dead-code evidence from the real build: /OPT:REF discards every COMDAT nothing
+# references, and /MAP then lists exactly what survived. A function defined in
+# MuClient.lib but absent from Main.map had no caller. Off by default -- it
+# forces /INCREMENTAL:NO (mutually exclusive with /OPT:REF), so it's a
+# deliberate investigation pass, not normal iteration.
+#
+# Deliberately not /VERBOSE:REF, which names each discarded COMDAT directly but
+# writes to the linker's stdout -- CMake wraps MSVC links in `cmake -E
+# vs_link_exe` (manifest handling) and that wrapper swallows it, so the report
+# never reaches the build log. The map file survives the wrapper.
+#
+# Reads as evidence only at COMDAT granularity: a function reachable solely
+# through a vtable slot still counts as referenced, so a discarded symbol is
+# proof of death while a surviving one is not proof of life.
+option(MU_REPORT_DEAD_SYMBOLS "Link with /OPT:REF + /MAP to expose unreferenced functions" OFF)
+if (MSVC AND MU_REPORT_DEAD_SYMBOLS)
+  target_link_options(Main PRIVATE
+    /INCREMENTAL:NO
+    /OPT:REF
+    $<$<NOT:$<CONFIG:Release>>:/MAP:$<TARGET_FILE_DIR:Main>/Main.map>
+  )
+endif()
+
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
   if (APPLE)
