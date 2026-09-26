@@ -523,10 +523,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
             {
                 auto text = getMonsterName(int(pRequestInfo->m_wIndex));
-                mu_swprintf(aDest[nLine].m_szText, L"Mon.: %ls x %lu/%lu",
+                mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementMonster,
                     text,
-                    MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
-                    pRequestInfo->m_dwValue);
+                    static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
             }
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
@@ -544,7 +544,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::mu_swprintf(aDest[nLine].m_szText, L"Skill: %ls",
+            ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementSkill,
                 SkillAttribute[pRequestInfo->m_wIndex].Name);
             break;
 
@@ -618,7 +618,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
             const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRequestInfo->m_wIndex);
-            ::mu_swprintf(aDest[nLine].m_szText, L"Bonus: %ls", buffinfo.s_BuffName);
+            ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementBuff, buffinfo.s_BuffName);
         }
         break;
 
