@@ -429,6 +429,7 @@ void mu::ui::window::ShowSystemMenuDialog()
 {
     GenericMenuConfig cfg;
     cfg.nativeFrame = { 100, 5 };
+    cfg.systemMenu = true;
 
     GenericMenuConfig::MenuButton btnGameOver;
     btnGameOver.label = I18N::Game::ExitGame;

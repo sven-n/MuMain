@@ -294,7 +294,7 @@ void CGenericMenuDialog::SyncRmlModel()
         model.highlightTitle = m_Active.highlightTitle;
         m_RmlBinder.MarkDirty("highlight_title");
     }
-    const bool isSystemMenu = m_Active.purpose == GenericMenuConfig::Purpose::SystemMenu;
+    const bool isSystemMenu = m_Active.systemMenu;
     if (model.isSystemMenu != isSystemMenu)
     {
         model.isSystemMenu = isSystemMenu;
