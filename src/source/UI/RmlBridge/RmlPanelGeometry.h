@@ -40,18 +40,21 @@ namespace UI::RmlBridge
     // own historical hardcoded constant) rather than treating a false return as an error.
     bool RefreshLogicalPanelSize(Rml::ElementDocument* doc, const char* panelId, float& width, float& height);
 
-    // Looks up `anchorId` in `doc`, reads its live resolved screen position (GetAbsoluteOffset()),
-    // and converts it into the logical/reference-space units a native renderer/hit-test caller
-    // expects (m_Pos, WindowGeometry, ::RenderItemInfo()/::RenderItem3D()'s own x/y contract) --
-    // the same conversion CManager::Render()/UpdateMouseEvent() apply via
-    // TransformForLayout(layoutMode, ...), computed explicitly here rather than trusting whatever
-    // transform happens to be ambient at the call site (safe from any call point, including a
-    // separate I3DRenderObj::Render3D() pass that may not share CManager's own ScopedActiveTransform
-    // scope).
+    // Gives `anchorId`'s position in the logical/reference-space units a native renderer expects
+    // (m_Pos, ::RenderItemInfo()/::RenderItem3D()'s own x/y contract), as `panelPos` plus the
+    // anchor's own offset inside `panelId`. Both the theme's declared offset and `panelPos` are
+    // already reference-space, so nothing is converted -- see RefreshLogicalPanelSize() above for
+    // why a scale conversion is wrong for this document family.
     //
-    // Leaves `x`/`y` unchanged and returns false if `doc` is null, `anchorId` isn't found, or the
-    // computed transform is degenerate. Callers should pre-seed x/y with the window's own historical
-    // hardcoded offset as a fallback, same convention as RefreshLogicalPanelSize() above.
-    bool RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* anchorId,
-        UI::Scaling::LayoutMode layoutMode, float& x, float& y);
+    // The delta against `#panel` is what makes that true: an anchor's raw GetAbsoluteOffset() is
+    // mixed-space (the panel's own left/top were pre-multiplied by the scale in SyncRootTransform,
+    // the anchor's offset inside it was not), so un-mapping the whole sum through the transform
+    // divides the child half and drags the result toward the panel's top-left. Take the delta, add
+    // the caller's own position; don't reintroduce a transform here.
+    //
+    // Leaves `x`/`y` unchanged and returns false if `doc` is null or either id isn't found. Callers
+    // should pre-seed x/y with the window's own historical hardcoded offset as a fallback, same
+    // convention as RefreshLogicalPanelSize() above.
+    bool RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* panelId,
+        const char* anchorId, const POINT& panelPos, float& x, float& y);
 }

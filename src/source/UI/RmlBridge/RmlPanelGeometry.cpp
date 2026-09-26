@@ -29,22 +29,23 @@ bool UI::RmlBridge::RefreshLogicalPanelSize(Rml::ElementDocument* doc, const cha
     return true;
 }
 
-bool UI::RmlBridge::RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* anchorId,
-    UI::Scaling::LayoutMode layoutMode, float& x, float& y)
+bool UI::RmlBridge::RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* panelId,
+    const char* anchorId, const POINT& panelPos, float& x, float& y)
 {
     if (!doc)
         return false;
 
+    Rml::Element* panel = doc->GetElementById(panelId);
     Rml::Element* anchor = doc->GetElementById(anchorId);
-    if (!anchor)
+    if (!panel || !anchor)
         return false;
 
-    const auto transform = UI::Scaling::TransformForLayout(layoutMode, WindowWidth, WindowHeight);
-    if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
-        return false;
-
-    const Rml::Vector2f offset = anchor->GetAbsoluteOffset();
-    x = UI::Scaling::LogicalX(transform, offset.x);
-    y = UI::Scaling::LogicalY(transform, offset.y);
+    // The anchor's offset *within* #panel is plain reference px -- the root transform's scale is a
+    // paint-time `transform`, which layout doesn't see. So the anchor's logical position is the
+    // window's own position plus that raw delta; no conversion enters anywhere. Taking the delta is
+    // also what keeps the panel's own pre-multiplied root_x/root_y out of the result.
+    const Rml::Vector2f local = anchor->GetAbsoluteOffset() - panel->GetAbsoluteOffset();
+    x = static_cast<float>(panelPos.x) + local.x;
+    y = static_cast<float>(panelPos.y) + local.y;
     return true;
 }

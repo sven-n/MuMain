@@ -142,14 +142,14 @@ are no longer special cases — both free-function modules register with the sam
 the in-memory value, so a relaunch still picks up whatever `config.ini` says. Use it for quickly
 A/B-ing themes; edit `config.ini` (previous section) for a change that should survive a restart.
 
-**Only two themes are currently built: `legacy` and `modern`.** These two exist to *validate* that
-the architecture actually supports arbitrary themes, not because two is the intended ceiling —
-`architecture-principles.md` §25/§28 envisions a Custom/Test theme beyond these two, specifically
-because a theme that looks substantially different from `legacy` is what would expose accidental
-coupling between a component's implementation and one particular visual design. A third (or
-fourth, or user-authored) theme is expected eventually; see `STATUS.md` for current sequencing.
-Keep `legacy` and `modern` updated together for any window content change in the meantime — don't
-let one lag.
+**Two themes are built, and two is the intended set: `legacy` and `modern`.** The mechanism stays
+theme-name-agnostic (a theme is a folder, see above) so a *user-authored* theme remains possible,
+but no third first-party theme is planned — the project owner ruled one out. `architecture-
+principles.md` §25/§28 envisions a Custom/Test theme specifically to expose accidental coupling
+between a component and one visual design; that concern is real, but it is met by `modern`'s own
+structural divergence plus the drift checker rather than by a third theme. See `STATUS.md`'s
+Custom/Test-theme entry. Keep `legacy` and `modern` updated together for any window content
+change — don't let one lag.
 
 ### `#backdrop` usage
 

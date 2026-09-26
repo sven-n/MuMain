@@ -145,6 +145,14 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `ninepatch()` decorator instead of `.btn`'s plain `image()` at the new width (see "Findings"
   below); modern's stays a flat fill/border since its `.btn` has no fixed-pixel sprite to 9-slice.
 
+- **`CCreditWin`** — **done** (`mu::ui::window::CObject` tier, `credit_win.rml` + both themes'
+  `.rcss`). Logged here 2026-09-26 after `migration-ledger.md`'s audit flagged it as an apparently-
+  shipped port that had never been recorded; confirmed by direct inspection — `LoadThemedDocument`,
+  a theme-reload registration, and zero native `RenderImage`/`RenderText`/`CSprite` calls left in
+  `CreditWin.cpp`. Nothing to do, the record was just missing.
+- **`COptionWindow`** — done, both themes, verified live against a real server; grew into a 6-tab
+  settings window. Full history in `migration-ledger.md`'s own row rather than repeated here.
+
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
 1. **Layout intent documented and traceable to the original code's actual computed behavior**,
@@ -207,10 +215,11 @@ for "the full architecture is in place":
   hardcoded directories (`themes/legacy/`, `themes/modern/`) selected by `GameConfig`'s theme
   name — no "user override on top of a theme" layer, no documented precedence order, no tooling
   for a third party to ship a partial theme that inherits the rest from a base theme. Not
-  speculative — §18/§19 have called for this since the governing doc was written, and arbitrary
-  future themes are a real, stated want (see the Custom/Test-theme entry below), not just legacy
-  and modern. Correctly *sequenced* behind other work (nobody's shipping a mod today), but it's a
-  stated requirement waiting on priority, not an open question about whether to build it.
+  speculative — §18/§19 have called for this since the governing doc was written. Note this is
+  about *user-authored* themes/mods, which stay a real want; it is not an argument for a third
+  first-party theme, which was ruled out (see the Custom/Test-theme entry below). Correctly
+  *sequenced* behind other work (nobody's shipping a mod today), but it's a stated requirement
+  waiting on priority, not an open question about whether to build it.
 - ~~No design-token/shared-variable layer for `legacy`; `modern`'s own layer is a naming
   convention, not a real mechanism.~~ **Fixed 2026-09-04 for `modern`.**
   [`modern-theme-visual-direction.md`](modern-theme-visual-direction.md) defines the palette/
@@ -349,15 +358,31 @@ for "the full architecture is in place":
     one themed document. `MainFrameWindow.cpp` now owns two (`main_frame`,
     `main_frame_bg`); fixed by scoping each call to whichever `RmlModelBinder::Create()`/document
     pointer it's textually associated with, not the whole file.
-- **No Custom/Test theme yet.** §25/§28 want a Custom/Test theme that looks substantially
-  different from Legacy, specifically to surface accidental component/presentation coupling.
-  **Legacy and Modern exist to validate that the architecture supports arbitrary themes, not as
-  the intended ceiling** — a third theme is genuinely wanted eventually; it's simply not scheduled
-  ahead of other work today. This is an ordinary sequencing decision, not an open policy conflict
-  — check with the user on *timing*, not on whether it should happen at all.
-- **No systematic resolution × UI-scale × theme × drag-state validation matrix** (§25).
-  Verification so far has been ad hoc per window. No test plan artifact exists that a future
-  session could run through mechanically.
+- **No Custom/Test theme, and none is wanted.** §25/§28 want a Custom/Test theme that looks
+  substantially different from Legacy, specifically to surface accidental component/presentation
+  coupling. **The project owner has since ruled this out: `legacy` and `modern` are the only two
+  themes wanted, and a third is not to be built** — do not propose one, and do not read §25/§28 as
+  a standing request. Earlier revisions of this entry said the opposite ("genuinely wanted
+  eventually... check on *timing*, not on whether"), which sent more than one session looking for a
+  slot to schedule it in.
+  The *underlying* concern §25/§28 raise — that accidental component/presentation coupling goes
+  unnoticed with only two themes — is real and now has to be met another way: `modern` is already
+  structurally divergent enough (forked RML for several windows, its own token layer) to surface
+  most coupling, and the drift checker (`tools/check_rml_rcss_drift.py`) catches the contract half.
+  Treat a third theme as a testing technique that was considered and rejected, not a gap.
+- **Partially addressed 2026-09-26: the UI-scale axis of §25's validation matrix now has a runnable
+  artifact** — [`validation-matrix.md`](validation-matrix.md), a scale-sweep click-through over the
+  17 windows whose native hit boxes are derived from live RCSS. Deliberately narrow: it covers the
+  one axis that has actually shipped bugs, twice. `RefreshLogicalPanelSize()` divided each `#panel`
+  box by the UI scale — exactly correct at 1.0, so every single-scale verification passed, while at
+  the usual capped 2.0 it shrank all 17 hit boxes to a quarter and clicks fell through to the world
+  and walked the character. `RefreshLogicalAnchorPosition()` had the same defect on its own three
+  callers. **The generalizable lesson: a window's native bookkeeping and its RCSS agree trivially at
+  scale 1.0 and can disagree at every other scale**, so verifying at one scale is the check that
+  structurally cannot catch this class. `layout-and-scaling.md`'s `CCharSelMainWin` retrofit is the
+  same bug from a different direction. Resolution, drag-state-across-scale-change, and
+  theme-change-while-open remain uncovered — named in the artifact's own "deliberately not covered"
+  section so the partial isn't mistaken for the whole.
 - **The existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has not
   been explicitly audited for windows other than `CMyInventory` (below)** — does a dragged position
   survive a UI-scale change sensibly on other windows once they gain dragging? A theme change?

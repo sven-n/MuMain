@@ -55,6 +55,9 @@ to revisit" table (also split out of `STATUS.md`, 2026-09-16). **[Migration Ledg
 — a flat, per-class table of every legacy window/dialog/list-widget component and its migration
 status (2026-09-16) — check here for "is `X` done?" instead of grepping the tree, including what's
 left of the `CommonMessageBox`/`CustomMessageBox` dialog family.
+**[Validation Matrix](validation-matrix.md)** — the runnable UI-scale sweep for windows whose native
+hit boxes come from live RCSS; run it after touching anything that converts between RCSS geometry
+and native `m_Pos`/`WindowGeometry` space, because that class of bug is invisible at 100 % scale.
 
 This directory also holds the wider C++ UI-kit story `architecture-principles.md` sits inside:
 **[UI Target Architecture](ui-target-architecture.md)** — the C++ object-layer companion to
@@ -108,7 +111,10 @@ it:
   the command buffer but before submit. `RmlUiRuntime` registers this once in `Create()`; this is
   where the "main" context's `Rml::Context::Render()` actually happens.
 - **`SetPostRmlUiCallback`** — fires after RmlUi's own pass, for content that must render even
-  later than RmlUi itself (the cursor, `CLoginWin::RenderTextOnTop()`'s input-box text). By the
+  later than RmlUi itself (the game cursor; historically also the login/char-make input-box text,
+  until those fields became stock RmlUi `<input>`s and their `RenderTextOnTop()` overrides went
+  away — the seam itself is still load-bearing for the cursor and for any remaining
+  `CUITextInputBox` consumer). By the
   time RmlUi's pass is recorded its render pass is already closed, so drawing more content after
   it needs its own seam: a fresh render pass targeting the same swapchain texture with
   `LOAD_OP_LOAD` (preserve what's already there), plus re-staging any newly queued vertex data.
@@ -129,12 +135,14 @@ uses. It never receives input — no `IUiInputConsumer` registration; every docu
 is `pointer-events: none`. Proven end-to-end in `MainFrameWindow.cpp`'s
 `CMainFrameWindow::RenderLeftFrame()`/`RenderCenterFrame()`: the modern theme's background panel
 behind the still-legacy, 3D-composited potion/skill icons is now a real RmlUi document
-(`main_frame_bg.rml`) instead of a hand-matched-color legacy quad. **Not yet generalized** —
-folding this into a single automatic insertion point inside `mu::ui::window::CManager::Render()`'s
-own z-sorted loop (Phase 2) is deliberately deferred until the first still-unported
-inventory-family window (everything on `mu::ui::window::C3DRenderMng`: inventory, shops, trade, vault, chaos
-machine, several message/quest/duel windows) actually needs it — until then, each caller wires its
-own `RenderBackgroundLayer()` call, the way `MainFrameWindow.cpp` does today.
+(`main_frame_bg.rml`) instead of a hand-matched-color legacy quad. **Since generalized (Phase 2,
+2026-09-13)** — the call is centralized in `mu::ui::window::CManager::Render()`'s own z-sorted loop
+(`WindowManager.cpp`), gated on `CManager::SetDrivesBackgroundLayer(true)` so only `CSystem`'s
+app-lifetime manager fires it, never `CSceneUICoordinator`'s scene-scoped one. **A new window that
+loads a background document does not wire its own `RenderBackgroundLayer()` call** — it just has to
+gate that document's own visibility off its own `IsVisible()`, since the centralized call now fires
+every frame regardless of which window is first in z-order. See `STATUS.md` for the full mechanism
+and the login-scene regression that produced the opt-in gate.
 
 **A same-frame update-order gotcha worth knowing for any similar modal**: `CWin::Update()` always
 calls `UpdateWhileShow()` before `UpdateWhileActive()` in the same frame. A dialog that resolves
@@ -170,9 +178,10 @@ for the full policy, known debt, and the drift-check tooling a forked theme stil
 
 **Two themes are currently built: `legacy`** (real sprite art, pixel-parity with the original
 look) **and `modern`** (flat/programmatic) — whenever a window's RmlUi content changes or a bug is
-fixed in one, update the other's RCSS in the same pass, not as a follow-up. These two exist to
-*validate* the architecture supports arbitrary themes, not as a permanent ceiling — see
-`STATUS.md`. Shared cross-window rules live in `themes/<name>/base.rcss` (`.btn`, `.checkbox-box`,
+fixed in one, update the other's RCSS in the same pass, not as a follow-up. **These two are the
+intended set** — a third theme was considered and ruled out by the project owner; don't propose
+one, and see `STATUS.md`'s Custom/Test-theme entry before reading `architecture-principles.md`
+§25/§28 as a standing request. Shared cross-window rules live in `themes/<name>/base.rcss` (`.btn`, `.checkbox-box`,
 `#backdrop`, `.hidden`, the mandatory `body { pointer-events: none; }` reset — see
 [Gotchas](#gotchas) below).
 

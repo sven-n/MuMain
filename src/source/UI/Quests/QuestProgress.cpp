@@ -235,7 +235,7 @@ bool CQuestProgress::Render()
         // ambient transform (same convention every other caller uses).
         float anchorX = static_cast<float>(m_Pos.x + 95);
         float anchorY = static_cast<float>(m_Pos.y + 360);
-        UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "reward_popup_anchor", GetLayoutMode(), anchorX, anchorY);
+        UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", "reward_popup_anchor", m_Pos, anchorX, anchorY);
         ::RenderItemInfo(static_cast<int>(anchorX), static_cast<int>(anchorY), m_pSelectedRewardItem, false, 0, true);
     }
 
