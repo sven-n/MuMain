@@ -13025,4 +13025,10 @@
   <data name="FruitCaption" xml:space="preserve">
     <value>( fruta %ls )</value>
   </data>
+  <data name="QuestRequirementSkill" xml:space="preserve">
+    <value>Skill: %ls</value>
+  </data>
+  <data name="QuestRequirementBuff" xml:space="preserve">
+    <value>Bonus: %ls</value>
+  </data>
 </root>
