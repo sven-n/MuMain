@@ -15,6 +15,13 @@
 @spritesheet nd-line-sheet  { src: "../../../newui_myquest_Line.tga"; nd-line-img: 0px 0px 188px 21px; }
 @spritesheet nd-contribute-sheet { src: "../../../Gens_point.tga"; nd-contribute-img: 0px 0px 168px 18px; }
 
+/* Text drawn sharp inside the scaled #panel: each .sharp-text layer is laid out in physical pixels
+   (font-size text_px, width and line height multiplied by root_scale, bound in npc_dialogue.rml)
+   and scaled back by 1 / root_scale around its top-left corner, so its glyphs are rasterised at
+   the size they are shown instead of a small raster stretched by #panel's own scale. Positions
+   stay in #panel's units. */
+.sharp-text { transform-origin: left top; }
+
 /* NPC name doubles as this window's title -- dynamic (g_QuestMng.GetNPCName()), unlike the other
    docked windows' own static #title text. */
 #title {
@@ -25,7 +32,6 @@
 	text-align: center;
 	color: token(accent-cyan);
 	font-weight: bold;
-	font-size: 1em;
 }
 
 /* Gens contribute-point banner (NPC 543/544 only) -- see RenderContributePoint()'s own gate,
@@ -41,22 +47,19 @@
 	height: 18px;
 	text-align: center;
 	color: token(text-narrative);
-	font-size: 1em;
-	line-height: 18px;
 	decorator: image(nd-contribute-img);
 }
 
 .nd-npc-lines {
 	position: absolute;
-	left: 13px;
-	top: 59px;
-	width: 164px;
+	left: 15.5px; /* native 13 + the native renderer's own glyph inset */
+	top: 56.5px; /* native 59 is the glyph top; our rows centre the glyphs in the 15px gap */
+	width: 160px; /* native DivideStringByPixel budget (wrap width, see NPCDialogue.cpp) */
 }
 .nd-line {
 	display: block;
 	color: token(text-narrative);
-	font-size: 1em;
-	line-height: 15px; /* native ND_TEXT_GAP */
+	line-height: inherit; /* native ND_TEXT_GAP, from .nd-npc-lines (npc_dialogue.rml) */
 	white-space: nowrap;
 }
 
@@ -87,15 +90,14 @@
 
 .nd-answers {
 	position: absolute;
-	left: 13px;
-	top: 207px;
-	width: 164px;
+	left: 15.5px;
+	top: 204.5px; /* native 207, as .nd-npc-lines */
+	width: 160px;
 }
 .nd-answer-row {
 	display: block;
 	color: token(text-narrative);
-	font-size: 1em;
-	line-height: 15px; /* native ND_TEXT_GAP */
+	line-height: inherit; /* native ND_TEXT_GAP, from .nd-answers (npc_dialogue.rml) */
 	white-space: pre-line;
 	cursor: pointer;
 	pointer-events: auto;

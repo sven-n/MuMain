@@ -283,6 +283,8 @@ namespace
     {
         const float nativeTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, panelTransform);
         const float width = container.GetBox().GetSize(Rml::BoxArea::Border).x;
+        // A counter-scaled container (legacy .sharp-text) is laid out in physical pixels: its
+        // width and font-size are both multiplied by the panel scale, so the ratio is unchanged.
         const float drawnTextPx = container.GetComputedValues().font_size() * panelTransform.scaleX;
         if (width <= 0.0f || drawnTextPx <= 0.0f)
             return fallback;
@@ -330,6 +332,10 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     {
         if (Rml::Element* firstLine = npcContainer->GetChild(0))
             linePitchPx = firstLine->GetBox().GetSize(Rml::BoxArea::Border).y;
+        // A theme may lay the text out in physical pixels and scale it back (a counter-scaled
+        // layer, legacy's .sharp-text): its line pitch is then in those units, not #panel's.
+        if (npcContainer->GetComputedValues().has_local_transform())
+            linePitchPx /= transform.scaleX;
     }
 
     if (linePitchPx <= 0.0f)

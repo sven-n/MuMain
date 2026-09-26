@@ -22,13 +22,15 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title">{{npc_name}}</span>
-		<div class="nd-contribute" data-class-hidden="!show_contribute">{{contribute_text}}</div>
+		<span id="title" class="sharp-text" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{npc_name}}</span>
+		<div class="nd-contribute sharp-text" data-class-hidden="!show_contribute"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(168 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">{{contribute_text}}</div>
 
 		<!-- id read live by NPCDialogue.cpp's ResolveDialogueWrapGeometry() -- its own resolved
 		     width plus the vertical gap to #btn_npc_next below replace hardcoded wrap-width/
 		     lines-per-page constants, so a theme resizing this area doesn't need a C++ change. -->
-		<div id="npc_lines_container" class="nd-npc-lines">
+		<div id="npc_lines_container" class="nd-npc-lines sharp-text"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
 			<span class="nd-line" data-for="l : npc_lines">{{l.text}}</span>
 		</div>
 
@@ -41,7 +43,8 @@
 
 		<!-- id read live by NPCDialogue.cpp's ResolveDialogueWrapGeometry() -- same reasoning as
 		     #npc_lines_container above, using #btn_ans_next as this area's lower boundary. -->
-		<div id="answers_container" class="nd-answers" data-class-hidden="!show_answers">
+		<div id="answers_container" class="nd-answers sharp-text" data-class-hidden="!show_answers"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
 			<div class="nd-answer-row" data-for="a : answers"
 			     data-event-click="npcdialogue_select_answer(a.index)">{{a.text}}</div>
 		</div>
