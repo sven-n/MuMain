@@ -117,9 +117,18 @@ namespace SEASON3B
         void ProcessClosing();
 
         void GetYourID(wchar_t* pszYourID);
-        int GetYourLevel() const { return m_nYourLevel; }
-        bool IsMyConfirmed() const { return m_bMyConfirm; }
-        bool IsYourConfirmed() const { return m_bYourConfirm; }
+        int GetYourLevel() const
+        {
+            return m_nYourLevel;
+        }
+        bool IsMyConfirmed() const
+        {
+            return m_bMyConfirm;
+        }
+        bool IsYourConfirmed() const
+        {
+            return m_bYourConfirm;
+        }
         // My confirm button in window-local coordinates.
         RECT GetMyConfirmRect() const
         {

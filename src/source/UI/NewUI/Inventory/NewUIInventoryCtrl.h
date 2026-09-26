@@ -190,7 +190,10 @@ namespace SEASON3B
         void Release();
 
         // The slot number of the grid's first square (e.g. 12 for the inventory).
-        int GetIndexOffset() const { return m_nIndexOffset; }
+        int GetIndexOffset() const
+        {
+            return m_nIndexOffset;
+        }
 
         bool AddItem(int iLinealPos, std::span<const BYTE> pbyItemPacket);
         bool AddItem(int iColumnX, int iRowY, std::span<const BYTE> pbyItemPacket);

@@ -33,14 +33,10 @@ struct NamedWindow
 
 // The windows `ui` reports when they are open.
 constexpr NamedWindow Windows[] = {
-    {"inventory", SEASON3B::INTERFACE_INVENTORY},
-    {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
-    {"character", SEASON3B::INTERFACE_CHARACTER},
-    {"trade", SEASON3B::INTERFACE_TRADE},
-    {"storage", SEASON3B::INTERFACE_STORAGE},
-    {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
-    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},
-    {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
+    {"inventory", SEASON3B::INTERFACE_INVENTORY},     {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
+    {"character", SEASON3B::INTERFACE_CHARACTER},     {"trade", SEASON3B::INTERFACE_TRADE},
+    {"storage", SEASON3B::INTERFACE_STORAGE},         {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
+    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},        {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
     {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND},
 };
 

@@ -253,4 +253,3 @@ TEST_CASE("Control events describe the steps of a trade [network][control-events
     CHECK(FieldsOf(recorded[2])["change"] == "closed");
     CHECK(FieldsOf(recorded[2])["result"] == "completed");
 }
-
