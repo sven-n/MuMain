@@ -374,3 +374,9 @@
 	bottom: 0;
 	transform: translateX(-50%);
 }
+
+/* The original's options window has no title banner, only the plain top cap: the shell's title
+   (bound to "Option" for the modern theme) is not shown here. It used to be invisible by accident
+   (its font was an unsubstituted token in window_shell.rcss). */
+.window-shell-header-rail,
+.window-shell-header-title { display: none; }

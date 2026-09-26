@@ -64,6 +64,16 @@ namespace mu::ui::window
         // in GenericMenuDialog.cpp the same way if a future consumer needs a different count.
         int columns = 0;
 
+        // The native box this menu replaces (CNewUIMessageBoxBase::Create): its top edge and the
+        // number of 15px middle strips between its 67px top and 50px bottom caps. Data only -- a
+        // theme may reproduce the native frame (legacy does); 0 = not described.
+        struct NativeFrame
+        {
+            int top = 0;
+            int middleCount = 0;
+        };
+        NativeFrame nativeFrame;
+
         // Optional, fires on Esc. Decoupled from `buttons` (not "whichever button is last") so a
         // caller can't accidentally rely on button order for cancel semantics.
         std::function<void()> onCancel;
@@ -104,6 +114,7 @@ namespace mu::ui::window
     private:
         void BuildRmlUi();
         void SyncRmlModel();
+        void SyncNativeFrame();
         void ShowNext();           // pops m_Queue (if non-empty) and opens the document
         void Resolve(int buttonIndex); // -1 = cancel/no button; hides the document, invokes the
                                        // chosen callback, then ShowNext()
@@ -124,6 +135,8 @@ namespace mu::ui::window
         {
             bool hasTitle = false;
             bool isSystemMenu = false; // Purpose::SystemMenu: a theme may place it like native
+            float nativeTop = 0.f;     // GenericMenuConfig::nativeFrame, in reference pixels
+            float nativeHeight = 0.f;
             Rml::String title;
             std::vector<LineEntry> lines;
             std::vector<MenuButtonEntry> buttons;

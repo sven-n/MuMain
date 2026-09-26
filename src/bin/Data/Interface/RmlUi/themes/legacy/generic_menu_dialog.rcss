@@ -25,7 +25,27 @@
 	color: token(text-primary);
 }
 #panel.window-shell-positioned { margin-left: 0; }
-#panel.system-menu { top: 100dp; } /* CSystemMenuMsgBox sits at y=100, not 60 */
+/* A menu that describes its native box (GenericMenuConfig::nativeFrame) gets that box's top edge
+   (margin-top offsets the default 60dp) and its fixed height (both bound in
+   generic_menu_dialog.rml, as native's frames are fixed); the shell's content box is then placed
+   inside it as window_shell.rcss does, and its compact Close button sits where native's does, 20
+   above the bottom edge. */
+#panel.native-frame .window-shell-content {
+	position: absolute;
+	top: 20dp;
+	bottom: 28dp;
+	left: 16dp;
+	right: 16dp;
+	margin: 0;
+	justify-content: flex-start;
+}
+#panel.native-frame .window-shell-content.has-title { top: 0; }
+#panel.native-frame .gmd-button-cell.compact {
+	position: absolute;
+	left: 0;
+	bottom: -8dp; /* content box ends 28dp above the panel bottom; native Close is 20dp above it */
+	margin: 0;
+}
 /* The shell's content box in flow (window_shell.rcss places it absolutely inside a fixed-height
    panel), with native's text width: MSGBOX_WIDTH less ~16 each side. */
 #panel .window-shell-content {
@@ -94,6 +114,7 @@
 	margin: 0 0 6dp 0; /* native NPC menus step their buttons 35 apart */
 }
 #panel.system-menu .gmd-button-cell { margin-bottom: 1dp; } /* CSystemMenuMsgBox: 30 apart */
+#panel.system-menu .gmd-btn { width: 108dp; } /* CSystemMenuMsgBox: MSGBOX_BTN_EMPTY_WIDTH */
 .gmd-button-cell.compact { width: 100%; }
 /* A button with its own description lines needs a bit more breathing room below it than a plain
    one, so it doesn't read as crowded against whatever's next in the stack. */
@@ -134,7 +155,7 @@
 }
 .gmd-btn {
 	position: static;
-	width: 108dp; /* native MSGBOX_BTN_EMPTY_WIDTH */
+	width: 128dp; /* native menus: MSGBOX_BTN_EMPTY_WIDTH + 20 */
 	height: 29dp; /* MSGBOX_BTN_EMPTY_HEIGHT */
 	line-height: 29dp;
 	decorator: image(msgbox-btn-empty-idle);

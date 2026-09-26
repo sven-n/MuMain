@@ -62,6 +62,8 @@ void CGenericMenuDialog::BuildRmlUi()
 
             c.Bind("has_title", &model.hasTitle);
             c.Bind("is_system_menu", &model.isSystemMenu);
+            c.Bind("native_top", &model.nativeTop);
+            c.Bind("native_height", &model.nativeHeight);
             c.Bind("title", &model.title);
 
             // window_shell's positioning/dragging extension -- unused here, this dialog stays
@@ -218,6 +220,31 @@ bool CGenericMenuDialog::UpdateKeyEvent()
     return !IsVisible();
 }
 
+void CGenericMenuDialog::SyncNativeFrame()
+{
+    auto& model = m_RmlBinder.GetModel();
+    // Native CNewUIMessageBoxBase frame heights: 67 top cap + n * 15 middle strips + 50 bottom cap.
+    constexpr float kTopCapHeight = 67.f;
+    constexpr float kMiddleStripHeight = 15.f;
+    constexpr float kBottomCapHeight = 50.f;
+
+    const auto& frame = m_Active.nativeFrame;
+    const float top = static_cast<float>(frame.top);
+    const float height = frame.middleCount > 0
+        ? kTopCapHeight + static_cast<float>(frame.middleCount) * kMiddleStripHeight + kBottomCapHeight
+        : 0.f;
+    if (model.nativeTop != top)
+    {
+        model.nativeTop = top;
+        m_RmlBinder.MarkDirty("native_top");
+    }
+    if (model.nativeHeight != height)
+    {
+        model.nativeHeight = height;
+        m_RmlBinder.MarkDirty("native_height");
+    }
+}
+
 void CGenericMenuDialog::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
@@ -236,6 +263,7 @@ void CGenericMenuDialog::SyncRmlModel()
         model.isSystemMenu = isSystemMenu;
         m_RmlBinder.MarkDirty("is_system_menu");
     }
+    SyncNativeFrame();
     const std::string title = StringUtils::WideToNarrow(m_Active.title.c_str());
     if (model.title != title)
     {
