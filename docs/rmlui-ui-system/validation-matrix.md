@@ -44,6 +44,24 @@ For each window below, at **50 %** and at **200 %**, in **both themes** (`$theme
 A window fails if any click lands in the world, any hit region stops short of the drawn art, or a
 popup is visibly offset from what it belongs to.
 
+## The static half is already done
+
+Every `GetAbsoluteOffset()`/`GetBox()` read in UI code was audited for this bug class; three
+instances existed and all three are fixed (`RefreshLogicalPanelSize`, `RefreshLogicalAnchorPosition`,
+`CNPCQuest`'s condition icons). Four other sites read RmlUi geometry correctly, each for a different
+reason — worth knowing, because "does this need a scale conversion?" has no single answer:
+
+| Site | Why it's correct |
+|---|---|
+| `CGenericConfirmDialog` | `dp`-sized `.center-both` panel, no root transform — its box genuinely *is* screen px, so `LogicalX` is right |
+| `CMainFrameWindow` | takes the delta against `centerTransform.offsetX`, then multiplies the scale back in at the point of use |
+| `CNPCDialogue` | subtracts two siblings' offsets and divides by a pitch — units cancel |
+| `RmlTooltip` | no root transform, and its C++ pre-multiplies the scale into the width it sets |
+| `COptionWindow` | compares a screen-px rect against `MouseX/MouseY`, which is only safe because `INTERFACE_OPTION` maps to `LayoutMode::Legacy` (identity) in `UILayoutPolicy.cpp` — deliberately, after the same click-through was found live |
+
+**So what's left is the part static analysis can't do**: confirming the fixes are right in the
+running client, and catching anything that diverges for a reason no grep would reveal.
+
 ## Scope: the windows whose native geometry is derived from live RCSS
 
 These are the `RefreshLogicalPanelSize()` / `RefreshLogicalAnchorPosition()` callers — every window
@@ -68,7 +86,7 @@ exempt in principle, they simply have no such conversion to get wrong.
 | `CQuestProgress` | docked | pager L/R, answer rows, **reward popup anchor** |
 | `CQuestProgressByEtc` | docked | pager L/R, answer rows, **reward popup anchor** |
 | `CNPCDialogue` | docked | both pagers, sel-text rows |
-| `CNPCQuest` | docked | answer rows (bg-document `#panel`) |
+| `CNPCQuest` | docked | answer rows (bg-document `#panel`); **condition item icons sit against their text rows** — these were misplaced by the same bug class, so this is the sharpest single check in the table |
 
 ## Axes deliberately not covered yet
 

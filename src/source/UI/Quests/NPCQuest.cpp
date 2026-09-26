@@ -303,13 +303,28 @@ void CNPCQuest::RenderItem3D()
                 // Icon sits 22px left / 9px above the row's own text origin -- a native rendering
                 // choice, not theme geometry, so it stays a fixed offset from whatever the anchor's
                 // live position resolves to.
-                const auto offset = conditionsEl->GetAbsoluteOffset();
-                x = UI::Scaling::LogicalX(transform, offset.x) - 22.f;
-                y = UI::Scaling::LogicalY(transform, offset.y) - 9.f;
+                //
+                // Goes through the #content_root delta rather than converting the anchor's raw
+                // GetAbsoluteOffset(): that offset is mixed-space (the root's left/top were
+                // pre-multiplied by the scale, the anchor's own 52/244 inside it were not, and
+                // .sharp-text keeps a layer's POSITION in panel units even though its lengths are
+                // physical), so mapping the whole sum back through the transform divides the child
+                // half -- m_Pos + 52/scale where m_Pos + 52 is wanted.
+                // Only applied on a successful lookup: x/y are pre-seeded with the historical
+                // m_Pos+30/+235, which already has the 22/9 taken off.
+                float anchorX = 0.f, anchorY = 0.f;
+                if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "content_root",
+                                                                "conditions_anchor", m_Pos,
+                                                                anchorX, anchorY))
+                {
+                    x = anchorX - 22.f;
+                    y = anchorY - 9.f;
+                }
 
                 // A row's box height is in the panel's own (logical) units -- a transform does not
                 // change box sizes -- unless a theme lays the rows out in physical pixels inside a
-                // counter-scaled text layer (legacy .sharp-text): then it is divided back.
+                // counter-scaled text layer (legacy .sharp-text): then it is divided back. Lengths
+                // genuinely are physical there, unlike the position above.
                 if (Rml::Element* firstRow = conditionsEl->GetChild(0))
                 {
                     float rowHeight = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
