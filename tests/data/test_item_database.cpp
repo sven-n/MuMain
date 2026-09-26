@@ -230,13 +230,25 @@ TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
     CHECK_FALSE(database.IsAllowed(wingType, ItemAction::Trade));
     CHECK(database.IsAllowed(wingType, ItemAction::Drop));
 
-    // Empty slots and invalid ids have no tags and allow everything.
+    // Empty slots and invalid ids have no tags and allow no action.
     for (int itemType : {MakeItemType(12, 1), -1, MAX_ITEM})
     {
         CHECK_FALSE(database.HasTag(itemType, ItemTag::Valuable));
         CHECK(database.GetSlot(itemType) == ItemSlot::None);
-        CHECK(database.IsAllowed(itemType, ItemAction::Trade));
+        CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Trade));
+        CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Repair));
     }
+}
+
+TEST_CASE("Item tag sets test several tags at once [data][items]")
+{
+    const ItemTagSet socketItems{ItemTag::SocketSeed, ItemTag::SocketSphere};
+    ItemTagSet seed;
+    seed.Set(ItemTag::SocketSeed);
+
+    CHECK(seed.HasAny(socketItems));
+    CHECK_FALSE(ItemTagSet{ItemTag::Jewel}.HasAny(socketItems));
+    CHECK_FALSE(ItemTagSet{}.HasAny(socketItems));
 }
 
 TEST_CASE("Item database rule data follows editor changes [data][items]")
@@ -254,7 +266,7 @@ TEST_CASE("Item database rule data follows editor changes [data][items]")
 
     database.Swap(krisType, MakeItemType(SwordGroup, 5));
     CHECK_FALSE(database.HasTag(krisType, ItemTag::Valuable));
-    CHECK(database.IsAllowed(krisType, ItemAction::Drop));
+    CHECK(database.IsAllowed(MakeItemType(SwordGroup, 5), ItemAction::Trade));
     CHECK(database.HasTag(MakeItemType(SwordGroup, 5), ItemTag::Valuable));
     CHECK_FALSE(database.IsAllowed(MakeItemType(SwordGroup, 5), ItemAction::Drop));
 }

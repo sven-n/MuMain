@@ -706,7 +706,7 @@
         "es": "Capa de Emperador",
         "pt": "Capa do Imperador"
       },
-      "tags": ["valuable"],
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -886,7 +886,7 @@
         "es": "¹«ÀÎÀÇ¸ÁÅä",
         "pt": "Manto do Guerreiro"
       },
-      "tags": ["valuable"],
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -908,7 +908,7 @@
         "es": "±º¸²ÀÇ¸ÁÅä",
         "pt": "Manto Reinante"
       },
-      "tags": ["valuable"],
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -1644,7 +1644,7 @@
         "es": "Capa de Señor Pequeña",
         "pt": "Pequena capa do Lorde"
       },
-      "tags": ["cashShop", "valuable"],
+      "tags": ["cape", "cashShop", "valuable"],
       "width": 2,
       "height": 2,
       "slot": "wings",
@@ -1657,6 +1657,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1684,6 +1685,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1711,6 +1713,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1738,6 +1741,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1766,6 +1770,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1781,7 +1786,7 @@
         "es": "Capa del Pequeño Guerrero",
         "pt": "Manto de Pequeno Guerreiro"
       },
-      "tags": ["cashShop", "valuable"],
+      "tags": ["cape", "cashShop", "valuable"],
       "width": 2,
       "height": 2,
       "slot": "wings",
@@ -1794,6 +1799,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },

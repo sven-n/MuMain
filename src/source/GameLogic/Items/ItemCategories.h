@@ -65,7 +65,6 @@ namespace GameLogic::Items
     // Tickets and cash shop items
     bool IsLuckyItemTicket(const ITEM* pItem);
     bool IsLuckyItemTicketModel(int modelType);
-    bool IsCashShopItem(const ITEM* pItem);
     bool IsGemJewelry(const ITEM* pItem);
     bool IsGambleItem(const ITEM* pItem);
     bool IsGambleItemType(int itemType);

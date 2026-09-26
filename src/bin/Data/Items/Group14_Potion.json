@@ -680,7 +680,8 @@
       "tradable": false,
       "sellable": false,
       "personalShopSellable": false,
-      "repairable": false
+      "repairable": false,
+      "droppableWhileRented": false
     },
     {
       "number": 55,
@@ -1271,7 +1272,8 @@
       "tradable": false,
       "sellable": false,
       "personalShopSellable": false,
-      "repairable": false
+      "repairable": false,
+      "droppableWhileRented": false
     },
     {
       "number": 97,
@@ -1464,7 +1466,8 @@
       "droppable": false,
       "sellable": false,
       "personalShopSellable": false,
-      "repairable": false
+      "repairable": false,
+      "sellableWhenRentalExpired": true
     },
     {
       "number": 113,
@@ -1480,7 +1483,8 @@
       "droppable": false,
       "sellable": false,
       "personalShopSellable": false,
-      "repairable": false
+      "repairable": false,
+      "sellableWhenRentalExpired": true
     },
     {
       "number": 114,
@@ -1633,7 +1637,8 @@
       "tradable": false,
       "sellable": false,
       "personalShopSellable": false,
-      "repairable": false
+      "repairable": false,
+      "sellableWhenRentalExpired": true
     },
     {
       "number": 124,
@@ -1648,7 +1653,8 @@
       "tradable": false,
       "sellable": false,
       "personalShopSellable": false,
-      "repairable": false
+      "repairable": false,
+      "sellableWhenRentalExpired": true
     },
     {
       "number": 125,

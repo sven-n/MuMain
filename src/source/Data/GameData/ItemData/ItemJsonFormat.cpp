@@ -95,6 +95,9 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("sellable", definition.sellable, true);
     visit("personalShopSellable", definition.personalShopSellable, true);
     visit("repairable", definition.repairable, true);
+    visit("droppableWhileRented", definition.droppableWhileRented, true);
+    visit("personalShopSellableWhileRented", definition.personalShopSellableWhileRented, true);
+    visit("sellableWhenRentalExpired", definition.sellableWhenRentalExpired, false);
 }
 
 // Lists the names of an enum for error messages: "a", "b" or "c".
@@ -262,7 +265,18 @@ template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const 
 {
     if constexpr (std::is_enum_v<T>)
     {
-        if (!json.is_string() || !FindEnumValue(json.get<std::string>(), value))
+        // Files saved before phase 3 have the slot as a number. A number that
+        // has a name is still read, so those files load; saving writes the name.
+        long long number = 0;
+        if (json.is_number_integer() && ReadWholeNumber(json, number) && number >= 0 &&
+            number <= std::numeric_limits<std::underlying_type_t<T>>::max() &&
+            FindEnumName(static_cast<T>(number)) != nullptr)
+        {
+            value = static_cast<T>(number);
+            AddIssue(ItemDataIssueSeverity::Warning, field,
+                     std::string("is a number; saving writes it as \"") + FindEnumName(value) + "\"");
+        }
+        else if (!json.is_string() || !FindEnumValue(json.get<std::string>(), value))
         {
             AddIssue(ItemDataIssueSeverity::Error, field, "must be " + JoinEnumNames<T>());
         }

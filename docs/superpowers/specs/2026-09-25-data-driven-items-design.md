@@ -454,18 +454,24 @@ server with original clients (after phases 6 and B).
      `wingTier` (`small`/`first`/`second`/`third`), the rule flags
      `tradable`, `droppable`, `storable`, `sellable`,
      `personalShopSellable`, `repairable` (default `true`, only `false`
-     is written), and `slot` written by name (`mainHand`, …, `wings`, …).
-     Wings need no tag: a wing is an item with the slot `wings`.
+     is written), the rental rules `droppableWhileRented`,
+     `personalShopSellableWhileRented`, `sellableWhenRentalExpired`, and
+     `slot` written by name (`mainHand`, …, `wings`, …; numbers from
+     phase 2 files are still read, with a warning). Wings need no tag: a
+     wing is an item with the slot `wings`.
+   - Items without a definition allow no action.
    - The rule functions stay and read the data through a small table next
      to the definitions (`ItemDatabase::HasTag`, `IsAllowed`, `GetSlot`,
      `GetWingTier`): one array read plus a bit test.
-   - What stays in code: exceptions that depend on one item's state
-     (item level, rental time, durability, GM) with named constants, see
+   - What stays in code: exceptions that depend on the item level, the
+     durability or the player, with named constants, see
      `docs/item-data.md` → Rules; and the lists that are only used for
      drawing and tooltips (`ItemDisplayCategories.cpp`), which phases 4
      and 8 replace with model and tooltip data.
-   - `IsPartChargeItem` is now `IsCashShopItem` (tag `cashShop`),
-     flattened; `IsRareItemTicket` was only part of it and is gone.
+   - `IsPartChargeItem` became the tag `cashShop`, flattened. Only the
+     old rules used it, so no client code reads the tag now; it stays as
+     information for the editors and the OpenMU exchange.
+     `IsRareItemTicket` was only part of it and is gone.
    - `Check_ItemAction` and the separate repair lists in `RepairAllGold`
      and `RenderRepairInfo` became the rule flags too.
    - Verified with a one-time test (in the PR history, then removed) that
@@ -496,7 +502,8 @@ server with original clients (after phases 6 and B).
    | `tradable`, `storable`, `personalShopSellable`, `sellable` = false | Only `IsBoundToCharacter`, which blocks all four at once (sell with a durability exception) | Separate rules, e.g. one `[Flags] ItemRestrictions` column with the six names; enforce in `MoveItemAction` (trade, vault, personal shop) and `SellItemToNpcAction`; `IsBoundToCharacter` stays for "only the owner can pick it up" |
    | `droppable` = false | None (`DropItemAction` drops everything) | Enforce in `DropItemAction` |
    | `repairable` = false | None (`ItemRepairAction` repairs any item below its maximum durability) | Enforce in `ItemRepairAction` |
-   | State exceptions (level, rental, durability, GM) | Levels: none; rentals: OpenMU has no rental items | Level variants move with phase 12/D; rentals need nothing until OpenMU has them |
+   | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | None; OpenMU has no rental items | Client-only until OpenMU has rentals |
+   | Code exceptions (level, durability, GM) | Levels: none | Level variants move with phase 12/D |
    | `ammunition` | `IsAmmunition` | 1:1 |
    | `secondClassQuestItem`, `thirdClassQuestItem` | `IsQuestItem` (+ `StorageLimitPerCharacter` 1) | Both map to `IsQuestItem` |
    | `flying` | `Stats.CanFly` power-up on wings, Dinorant and Fenrir | Compare: the client also counts the Dark Horse |

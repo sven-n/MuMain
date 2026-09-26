@@ -23,6 +23,8 @@ bool HasTag(const ITEM* pItem, ItemTag tag)
     return HasTag(pItem->Type, tag);
 }
 
+constexpr Data::Items::ItemTagSet SocketItemTags{ItemTag::SocketSeed, ItemTag::SocketSphere, ItemTag::SocketSeedSphere};
+
 int ToItemType(int modelType)
 {
     return modelType - MODEL_ITEM;
@@ -33,10 +35,6 @@ bool HasWingTier(const ITEM* pItem, WingTier tier)
     return g_ItemDatabase.GetWingTier(pItem->Type) == tier;
 }
 
-bool IsHornMountType(int itemType)
-{
-    return HasTag(itemType, ItemTag::Mount) && !HasTag(itemType, ItemTag::DarkLordPet);
-}
 } // namespace
 
 namespace GameLogic::Items
@@ -49,8 +47,7 @@ namespace GameLogic::Items
     // The capes of the second tier have their own formulas.
     bool IsSecondTierWingExceptCape(const ITEM* pItem)
     {
-        return HasWingTier(pItem, WingTier::Second) && pItem->Type != ITEM_CAPE_OF_LORD &&
-               pItem->Type != ITEM_CAPE_OF_FIGHTER;
+        return HasWingTier(pItem, WingTier::Second) && !HasTag(pItem, ItemTag::Cape);
     }
 
     bool IsThirdTierWing(const ITEM* pItem)
@@ -75,7 +72,7 @@ namespace GameLogic::Items
 
     bool IsHornMountModel(int modelType)
     {
-        return IsHornMountType(ToItemType(modelType));
+        return HasTag(ToItemType(modelType), ItemTag::HornMount);
     }
 
     bool IsFlyingMount(const ITEM* pItem)
@@ -135,8 +132,7 @@ namespace GameLogic::Items
 
     bool IsSocketSeedOrSphereType(int itemType)
     {
-        return HasTag(itemType, ItemTag::SocketSeed) || HasTag(itemType, ItemTag::SocketSphere) ||
-               HasTag(itemType, ItemTag::SocketSeedSphere);
+        return g_ItemDatabase.HasAnyTag(itemType, SocketItemTags);
     }
 
     bool IsSocketSeedOrSphere(const ITEM* pItem)
@@ -292,11 +288,6 @@ namespace GameLogic::Items
     bool IsLuckyItemTicketModel(int modelType)
     {
         return HasTag(ToItemType(modelType), ItemTag::LuckyItemTicket);
-    }
-
-    bool IsCashShopItem(const ITEM* pItem)
-    {
-        return HasTag(pItem, ItemTag::CashShop);
     }
 
     bool IsGemJewelry(const ITEM* pItem)

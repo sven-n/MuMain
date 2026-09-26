@@ -31,7 +31,9 @@ constexpr std::array<EnumName<WingTier>, 4> WingTierNames = {{
 }};
 
 constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> ItemTagNames = {{
+    {ItemTag::Cape, "cape"},
     {ItemTag::Mount, "mount"},
+    {ItemTag::HornMount, "hornMount"},
     {ItemTag::Flying, "flying"},
     {ItemTag::DarkLordPet, "darkLordPet"},
     {ItemTag::GuardianPet, "guardianPet"},

@@ -3,9 +3,9 @@
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemTagSet.h"
 
 #include <array>
-#include <cstdint>
 #include <string>
 
 namespace Data::Items
@@ -39,86 +39,7 @@ enum class WingTier : BYTE
     Third,
 };
 
-// Item categories the rule code asks for. Stored as a bitmask, so a check is
-// one bit test. The JSON names are in ItemEnumNames.cpp.
-enum class ItemTag : BYTE
-{
-    // Mounts and pets
-    Mount,
-    Flying,
-    DarkLordPet,
-    GuardianPet,
-    PandaOrSkeleton,
-    // Crafting materials
-    Jewel,
-    RefineStone,
-    SocketSeed,
-    SocketSphere,
-    SocketSeedSphere,
-    // Consumables
-    HealingPotion,
-    ManaPotion,
-    ComplexPotion,
-    ElitePotion,
-    Elixir,
-    BuffScroll,
-    BattleOrStrengthScroll,
-    Ammunition,
-    // Event and quest items
-    BloodCastleTicketPart,
-    SecondClassQuestItem,
-    ThirdClassQuestItem,
-    // Class equipment
-    SummonerBook,
-    DivineArchangelWeapon,
-    // Cash shop
-    CashShop,
-    GambleItem,
-    GemJewelry,
-    LuckyItemTicket,
-    // Asked for confirmation before selling or dropping
-    Valuable,
-
-    Count
-};
-
-class ItemTagSet
-{
-public:
-    static_assert(static_cast<int>(ItemTag::Count) <= 64, "ItemTagSet holds up to 64 tags");
-
-    bool Has(ItemTag tag) const
-    {
-        return (m_bits & Bit(tag)) != 0;
-    }
-
-    void Set(ItemTag tag, bool value = true)
-    {
-        m_bits = value ? (m_bits | Bit(tag)) : (m_bits & ~Bit(tag));
-    }
-
-    bool IsEmpty() const
-    {
-        return m_bits == 0;
-    }
-
-    uint64_t GetBits() const
-    {
-        return m_bits;
-    }
-
-    bool operator==(const ItemTagSet& other) const = default;
-
-private:
-    static constexpr uint64_t Bit(ItemTag tag)
-    {
-        return uint64_t{1} << static_cast<int>(tag);
-    }
-
-    uint64_t m_bits = 0;
-};
-
-// What a player may do with an item. Everything is allowed by default.
+// What a player may do with an item. See the rule flags in ItemDefinition.
 enum class ItemAction : BYTE
 {
     Trade,
@@ -127,6 +48,10 @@ enum class ItemAction : BYTE
     Sell,
     SellInPersonalShop,
     Repair,
+    // Rented items (items with a rental time)
+    DropWhileRented,
+    SellInPersonalShopWhileRented,
+    SellWhenRentalExpired,
 
     Count
 };
@@ -186,15 +111,20 @@ struct ItemDefinition
     BYTE sellValue = 0;
     int buyPrice = 0;
 
-    // Rule flags. Some items have exceptions that depend on the item's
-    // state (level, rental time, durability); those are in the rule code
-    // (GameLogic/Items/TradeRestrictions and ShopRestrictions).
+    // Rule flags. The exceptions that depend on the item level, durability
+    // or the player are in the rule code (GameLogic/Items/TradeRestrictions
+    // and ShopRestrictions).
     bool tradable = true;
     bool droppable = true;
     bool storable = true;
     bool sellable = true;
     bool personalShopSellable = true;
     bool repairable = true;
+    // Rented items cannot be stored. These say what else changes for them.
+    bool droppableWhileRented = true;
+    bool personalShopSellableWhileRented = true;
+    // Sellable to an NPC once the rental time ran out, even when sellable is false.
+    bool sellableWhenRentalExpired = false;
 
     bool Exists() const
     {
@@ -217,6 +147,12 @@ struct ItemDefinition
             return personalShopSellable;
         case ItemAction::Repair:
             return repairable;
+        case ItemAction::DropWhileRented:
+            return droppableWhileRented;
+        case ItemAction::SellInPersonalShopWhileRented:
+            return personalShopSellableWhileRented;
+        case ItemAction::SellWhenRentalExpired:
+            return sellableWhenRentalExpired;
         default:
             return true;
         }

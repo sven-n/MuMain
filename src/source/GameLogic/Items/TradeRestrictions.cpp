@@ -6,9 +6,8 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemLevelVariants.h"
 
-// The flags tradable, droppable and storable come from the item data; the
-// exceptions below depend on the item's state (level, rental time,
-// durability) or on the player.
+// The rule flags come from the item data; the exceptions below depend on the
+// item level, the durability or the player.
 namespace
 {
 using Data::Items::ItemAction;
@@ -22,13 +21,6 @@ bool IsGameMaster()
 {
     return g_isCharacterBuff((&Hero->Object), eBuff_GMEffect) || Hero->CtlCode == CTLCODE_20OPERATOR ||
            Hero->CtlCode == CTLCODE_08OPERATOR;
-}
-
-// These items can be dropped when bought, but not while rented.
-bool IsDropBannedWhileRented(const ITEM* pItem)
-{
-    return pItem->Type == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY || pItem->Type == ITEM_CHAOS_CARD ||
-           GameLogic::Items::IsDemonOrSpiritOfGuardian(pItem) || GameLogic::Items::IsPandaOrSkeletonItem(pItem);
 }
 } // namespace
 
@@ -54,7 +46,7 @@ namespace GameLogic::Items
 
     bool IsDropBan(const ITEM* pItem)
     {
-        if (pItem->bPeriodItem && IsDropBannedWhileRented(pItem))
+        if (pItem->bPeriodItem && !IsAllowed(pItem, ItemAction::DropWhileRented))
         {
             return true;
         }

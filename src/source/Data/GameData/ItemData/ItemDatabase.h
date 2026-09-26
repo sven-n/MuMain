@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
+#include <cstdint>
 #include <span>
 #include <string>
 #include <string_view>
@@ -51,16 +52,22 @@ public:
     const ItemDefinition* Find(int group, int number) const;
 
     // Fast checks for the rule code. They read a small table next to the
-    // definitions. Invalid ids and empty slots have no tags, no slot and
-    // allow everything.
+    // definitions. Invalid ids and empty slots have no tags and no slot, and
+    // allow no action: an item the client does not know cannot be traded,
+    // dropped, stored, sold or repaired.
     bool HasTag(int itemType, ItemTag tag) const
     {
         return IsValidItemType(itemType) && m_ruleData[itemType].tags.Has(tag);
     }
 
+    bool HasAnyTag(int itemType, const ItemTagSet& tags) const
+    {
+        return IsValidItemType(itemType) && m_ruleData[itemType].tags.HasAny(tags);
+    }
+
     bool IsAllowed(int itemType, ItemAction action) const
     {
-        return !IsValidItemType(itemType) || (m_ruleData[itemType].blockedActions & ActionBit(action)) == 0;
+        return IsValidItemType(itemType) && (m_ruleData[itemType].blockedActions & ActionBit(action)) == 0;
     }
 
     ItemSlot GetSlot(int itemType) const
@@ -91,22 +98,28 @@ public:
     void Swap(int firstItemType, int secondItemType);
 
 private:
-    // The part of a definition the rule code reads on hot paths.
+    // The part of a definition the rule code reads on hot paths. Derived
+    // from m_definitions by Store(), the only function that changes them.
     struct RuleData
     {
         ItemTagSet tags;
-        BYTE blockedActions = 0;
+        uint16_t blockedActions = AllActions;
         ItemSlot slot = ItemSlot::None;
         WingTier wingTier = WingTier::None;
     };
 
-    static constexpr BYTE ActionBit(ItemAction action)
+    static constexpr uint16_t ActionBit(ItemAction action)
     {
-        return static_cast<BYTE>(1u << static_cast<int>(action));
+        return static_cast<uint16_t>(1u << static_cast<int>(action));
     }
 
+    static constexpr uint16_t AllActions = static_cast<uint16_t>((1u << static_cast<int>(ItemAction::Count)) - 1);
+    static_assert(static_cast<int>(ItemAction::Count) <= 16, "RuleData::blockedActions holds up to 16 actions");
+
+    // Puts the definition into the slot of itemType (with that group and
+    // number) and updates its display name and rule data.
+    void Store(int itemType, ItemDefinition definition);
     void UpdateDisplayName(ItemDefinition& definition) const;
-    void UpdateRuleData(int itemType);
     void CountExistingItems();
 
     std::vector<ItemDefinition> m_definitions;

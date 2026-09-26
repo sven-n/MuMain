@@ -302,7 +302,7 @@ TEST_CASE("Item slots, wing tiers and tags are written by name [data][items]")
 
 TEST_CASE("Unknown slots, wing tiers and tags are errors [data][items]")
 {
-    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": 7})")).issues,
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": 11})")).issues,
                    ItemDataIssueSeverity::Error, "slot"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": "tail"})")).issues,
                    ItemDataIssueSeverity::Error, "slot"));
@@ -332,4 +332,34 @@ TEST_CASE("Item validation checks slots and wing tiers [data][items]")
     ValidateItems(std::vector<ItemDefinition>{wingTierWithoutWingSlot}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "wingTier"));
     CHECK_FALSE(HasErrors(issues));
+}
+
+TEST_CASE("Rental rules are kept through write and read [data][items]")
+{
+    ItemDefinition demon = MakeKris();
+    demon.droppableWhileRented = false;
+    demon.personalShopSellableWhileRented = false;
+    demon.sellableWhenRentalExpired = true;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{demon});
+    CHECK(text.find(R"("sellableWhenRentalExpired": true)") != std::string::npos);
+
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK_FALSE(result.items.front().droppableWhileRented);
+    CHECK_FALSE(result.items.front().personalShopSellableWhileRented);
+    CHECK(result.items.front().sellableWhenRentalExpired);
+    CHECK_FALSE(result.items.front().IsAllowed(ItemAction::DropWhileRented));
+    CHECK(result.items.front().IsAllowed(ItemAction::SellWhenRentalExpired));
+}
+
+TEST_CASE("A slot saved as a number before phase 3 still loads [data][items]")
+{
+    const ReadResult result = Read(GroupFile(0, R"({"number": 0, "name": "Kris", "slot": 7})"));
+
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().slot == ItemSlot::Wings);
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "slot"));
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(0, result.items).find(R"("slot": "wings")") != std::string::npos);
 }

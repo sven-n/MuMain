@@ -51,7 +51,7 @@ The file name is only a convention; the group comes from the file content.
   on the server.
 - **Fields with their default value are left out.** Missing fields get the
   default: `0`/`false`, no slot (not equippable), no wing tier, no tags,
-  and every action allowed (`tradable`, `droppable`, … are `true`).
+  and the rule flags at their defaults (see [Rules](#rules)).
 - Items are sorted by number and the fields always come in the same order,
   so saving unchanged data gives the same file.
 - Files are UTF-8 with LF line endings.
@@ -90,6 +90,7 @@ read as the English name only; saving writes the object form.
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
+| `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | What changes for a rented item; see [Rules](#rules) |
 
 ### Tags
 
@@ -98,7 +99,9 @@ can have several tags; the file lists them in the order below.
 
 | Tag | Meaning |
 |---|---|
+| `cape` | A cape (Cape of Lord, Cape of Fighter, …); second tier capes have their own wing formulas |
 | `mount` | Can be ridden (Uniria, Dinorant, Dark Horse, Fenrir) |
+| `hornMount` | A mount summoned by a horn (Uniria, Dinorant, Fenrir) |
 | `flying` | A mount that can fly, needed for maps like Icarus |
 | `darkLordPet` | Dark Horse and Dark Raven |
 | `guardianPet` | Demon and Spirit of Guardian |
@@ -113,7 +116,7 @@ can have several tags; the file lists them in the order below.
 | `secondClassQuestItem`, `thirdClassQuestItem` | Class change quest items |
 | `summonerBook` | Summoner books |
 | `divineArchangelWeapon` | The Divine weapons of the Archangel |
-| `cashShop` | Items from the cash shop |
+| `cashShop` | Items from the cash shop. Only information for now (for the editors and the OpenMU exchange); no client code reads it |
 | `gambleItem` | Gamble items |
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
@@ -123,7 +126,7 @@ Wings need no tag: an item is a wing when its `slot` is `wings`.
 
 A tag name that does not exist is an error, so a typo cannot silently
 remove an item from a category. New tags need code that uses them; they
-are added in `ItemTag` (`ItemDefinition.h`) and `ItemEnumNames.cpp`.
+are added in `ItemTag` (`ItemTagSet.h`) and `ItemEnumNames.cpp`.
 
 ### Rules
 
@@ -131,19 +134,28 @@ are added in `ItemTag` (`ItemDefinition.h`) and `ItemEnumNames.cpp`.
 `personalShopSellable` and `repairable` say what a player may do with the
 item. They are `true` unless the file says `false`.
 
-A few exceptions depend on the state of one particular item and are in the
-code (`GameLogic/Items/TradeRestrictions.cpp`, `ShopRestrictions.cpp`):
+Rented items (items with a rental time) can never be stored. For the rest:
+
+| Field | Default | Meaning |
+|---|---|---|
+| `droppableWhileRented` | `true` | `false`: the item cannot be dropped while it is rented |
+| `personalShopSellableWhileRented` | `true` | `false`: the item cannot be sold in a personal shop while it is rented |
+| `sellableWhenRentalExpired` | `false` | `true`: the item can be sold to an NPC once its rental time ran out, even when `sellable` is `false` |
+
+An item the client does not know (no definition for its group and number)
+allows no action.
+
+A few exceptions depend on the item level, the durability or the player
+and are in the code (`GameLogic/Items/TradeRestrictions.cpp`,
+`ShopRestrictions.cpp`):
 
 - **Item level:** some items are a different item at each level. Rena +3
   (Sign of Lord) can be traded, stored and sold in a personal shop; Box
   of Luck +13 (Heart of Dark Lord) cannot. The Wizard's Ring above +0
   cannot be traded, stored or sold in a personal shop, and at +1 and +2
-  not sold to an NPC. Rena +1 and Remedy of Love +1 to +5 cannot be sold
-  to an NPC. A later phase makes these level variants items of their own,
-  with their own flags.
-- **Rented items** (items with a rental time) cannot be stored. Some
-  cannot be dropped or sold in a personal shop while rented, and some can
-  be sold to an NPC once the rental time ran out.
+  not sold to an NPC (+0 not while it is rented). Rena +1 and Remedy of
+  Love +1 to +5 cannot be sold to an NPC. A later phase makes these level
+  variants items of their own, with their own flags.
 - **Durability:** a Talisman of Mobility with durability 1 cannot be stored.
 - **GM Gift:** only a game master can trade it.
 
@@ -176,6 +188,8 @@ the field. All problems are also written to `MuError.log`. Errors are:
 - unknown fields (they are ignored)
 - names longer than 49 characters (the game shows them cut)
 - a `wingTier` on an item whose slot is not `wings`
+- a `slot` written as a number, as files saved before tags existed have
+  it; the number is read, and saving writes the name
 
 An automated test loads the shipped item data, so a pull request with
 broken item data fails its checks.

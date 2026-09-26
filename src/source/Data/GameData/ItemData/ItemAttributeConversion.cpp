@@ -115,6 +115,9 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.sellable = source.sellable;
     target.personalShopSellable = source.personalShopSellable;
     target.repairable = source.repairable;
+    target.droppableWhileRented = source.droppableWhileRented;
+    target.personalShopSellableWhileRented = source.personalShopSellableWhileRented;
+    target.sellableWhenRentalExpired = source.sellableWhenRentalExpired;
 }
 
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)

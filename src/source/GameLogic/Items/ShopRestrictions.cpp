@@ -5,8 +5,8 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemLevelVariants.h"
 
-// The flags personalShopSellable, sellable and repairable come from the item
-// data; the exceptions below depend on the item's state (level, rental time).
+// The rule flags come from the item data; the exceptions below depend on the
+// item level.
 namespace
 {
 using Data::Items::ItemAction;
@@ -14,16 +14,6 @@ using Data::Items::ItemAction;
 bool IsAllowed(const ITEM* pItem, ItemAction action)
 {
     return g_ItemDatabase.IsAllowed(pItem->Type, action);
-}
-
-// Rented items that can be sold to an NPC once their rental time ran out.
-bool IsSellableOnceExpired(const ITEM* pItem)
-{
-    return GameLogic::Items::IsSilverOrGoldKey(pItem) || pItem->Type == ITEM_GOLDEN_BOX ||
-           pItem->Type == ITEM_SILVER_BOX || GameLogic::Items::IsSmallWing(pItem) ||
-           GameLogic::Items::IsPandaOrSkeletonItem(pItem) || GameLogic::Items::IsDemonOrSpiritOfGuardian(pItem) ||
-           GameLogic::Items::IsGemJewelry(pItem) || pItem->Type == ITEM_PET_UNICORN ||
-           pItem->Type == ITEM_LETHAL_WIZARDS_RING;
 }
 } // namespace
 
@@ -36,8 +26,7 @@ namespace GameLogic::Items
             return false;
         }
 
-        // Rented pets cannot be sold in a personal shop.
-        if (pItem->bPeriodItem && (IsDemonOrSpiritOfGuardian(pItem) || IsPandaOrSkeletonItem(pItem)))
+        if (pItem->bPeriodItem && !IsAllowed(pItem, ItemAction::SellInPersonalShopWhileRented))
         {
             return true;
         }
@@ -57,7 +46,7 @@ namespace GameLogic::Items
     {
         const int Level = pItem->Level;
 
-        if (pItem->bPeriodItem && pItem->bExpiredPeriod && IsSellableOnceExpired(pItem))
+        if (pItem->bPeriodItem && pItem->bExpiredPeriod && IsAllowed(pItem, ItemAction::SellWhenRentalExpired))
         {
             return false;
         }

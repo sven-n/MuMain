@@ -61,7 +61,7 @@
         "es": "Cuerno de Uniria",
         "pt": "Chifre de Uniria"
       },
-      "tags": ["mount"],
+      "tags": ["mount", "hornMount"],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -88,7 +88,7 @@
         "es": "Cuerno de Dinorant",
         "pt": "Chifre de Dinorant"
       },
-      "tags": ["mount", "flying", "valuable"],
+      "tags": ["mount", "hornMount", "flying", "valuable"],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -743,7 +743,7 @@
         "es": "Capa de Señor",
         "pt": "Capa do Lorde"
       },
-      "tags": ["valuable"],
+      "tags": ["cape", "valuable"],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -886,7 +886,7 @@
         "es": "Cuerno de Fenrir",
         "pt": "Chifre de Fenrir"
       },
-      "tags": ["mount", "flying", "valuable"],
+      "tags": ["mount", "hornMount", "flying", "valuable"],
       "width": 2,
       "height": 2,
       "slot": "pet",
@@ -1578,6 +1578,9 @@
       "tradable": false,
       "sellable": false,
       "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1607,6 +1610,9 @@
       "tradable": false,
       "sellable": false,
       "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1875,6 +1881,9 @@
       "tradable": false,
       "sellable": false,
       "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -1904,6 +1913,9 @@
       "tradable": false,
       "sellable": false,
       "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -2402,6 +2414,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 28
       },
@@ -2432,6 +2445,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2458,6 +2472,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2484,6 +2499,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2510,6 +2526,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2536,6 +2553,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2562,6 +2580,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2588,6 +2607,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2614,6 +2634,7 @@
       "sellable": false,
       "personalShopSellable": false,
       "repairable": false,
+      "sellableWhenRentalExpired": true,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -2768,6 +2789,9 @@
       "tradable": false,
       "sellable": false,
       "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
@@ -2797,6 +2821,9 @@
       "tradable": false,
       "sellable": false,
       "repairable": false,
+      "droppableWhileRented": false,
+      "personalShopSellableWhileRented": false,
+      "sellableWhenRentalExpired": true,
       "requirements": {
         "level": 1
       },
