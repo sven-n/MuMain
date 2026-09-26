@@ -75,6 +75,7 @@
 			<div class="jobchange-contents">
 				<span data-for="line : jobchange_lines">{{line.text}}</span>
 			</div>
+			<div class="quest-divider jobchange-divider"></div>
 			<div class="jobchange-state">
 				<span data-for="line : jobchange_state_lines">{{line.text}}</span>
 			</div>
@@ -88,6 +89,7 @@
 			<div class="temple-title">{{temple_title}}</div>
 			<div class="temple-line">{{temple_line0}}</div>
 			<div class="temple-line">{{temple_line1}}</div>
+			<div class="quest-divider castletemple-divider"></div>
 		</div>
 
 		<!-- Shared close button for both themes; the label span is legacy-hidden (not omitted) so

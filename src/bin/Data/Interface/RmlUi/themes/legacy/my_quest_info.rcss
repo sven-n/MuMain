@@ -84,7 +84,7 @@
 	left: 0;
 	top: 0;
 	width: 172px;
-	height: 130px;
+	height: 100px;
 	overflow: auto hidden;
 }
 .quest-row {
@@ -102,10 +102,12 @@
 .quest-row:hover { color: token(text-hover); }
 .quest-row.selected { color: token(text-selected); font-weight: bold; }
 
+/* Native CNewUIMyQuestInfoWindow draws its divider (newui_myquest_Line) at y+160 on the quest tab,
+   y+182 on the job-change tab and y+210 on the castle/temple tab; the tabs start at y+60. */
 .quest-divider {
 	position: absolute;
 	left: 0;
-	top: 130px;
+	top: 100px;
 	width: 172px;
 	height: 21px;
 	decorator: image(myquest-line);
@@ -114,9 +116,9 @@
 .quest-contents {
 	position: absolute;
 	left: 0;
-	top: 151px;
+	top: 121px;
 	width: 172px;
-	height: 169px;
+	height: 199px;
 	overflow: auto hidden;
 }
 
@@ -178,7 +180,9 @@
 	color: token(accent-teal);
 	font-weight: bold;
 	font-size: 1em;
-	margin-bottom: 8px;
+	line-height: 16px;
+	margin-top: -3px; /* native: title at y+58, contents from y+76 in 16px rows */
+	margin-bottom: 2px;
 }
 .jobchange-contents, .jobchange-state {
 	display: block;
@@ -187,8 +191,19 @@
 	color: token(text-primary);
 	font-size: 1em;
 }
-.jobchange-contents span, .jobchange-state span { display: block; }
-.jobchange-state { color: token(text-heading); font-weight: bold; margin-top: 12px; }
+.jobchange-contents span { display: block; line-height: 16px; }
+/* Native: status rows left-aligned at x+23 from y+283, 18 apart. */
+.jobchange-state {
+	position: absolute;
+	top: 220px;
+	left: 14px;
+	text-align: left;
+	color: token(text-heading);
+	font-weight: bold;
+}
+.jobchange-state span { display: block; line-height: 18px; }
+.jobchange-divider { top: 122px; }
+.castletemple-divider { top: 150px; }
 
 .castle-title, .temple-title {
 	display: block;
@@ -197,14 +212,19 @@
 	color: token(text-heading);
 	font-weight: bold;
 	font-size: 1em;
-	margin-top: 6px;
+	line-height: 20px;
 }
+/* Native: Blood Castle at y+105 with lines at +125/+145, Illusion Temple at y+285 with lines at
+   +305/+325 (text tops; 20px rows here put the glyphs there). */
+.castle-title { margin-top: 42px; }
+.temple-title { margin-top: 120px; }
 .castle-line, .temple-line {
 	display: block;
 	text-align: center;
 	width: 172px;
 	color: token(text-primary);
 	font-size: 1em;
+	line-height: 20px;
 }
 
 /* Requirement/reward rows by kind (UI::Quests::RewardModel::RowStyle; the RML toggles
