@@ -13016,4 +13016,10 @@
   <data name="BloodCastleQuestFailed" xml:space="preserve">
     <value>Infelizmente você falhou para completar a missão do Castelo de Sangue.</value>
   </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
 </root>

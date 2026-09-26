@@ -13016,4 +13016,10 @@
   <data name="BloodCastleQuestFailed" xml:space="preserve">
     <value>К сожалению, вы потерпели неудачу чтобы завершить квест «Кровавый замок».</value>
   </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
 </root>
