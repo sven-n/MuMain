@@ -117,6 +117,15 @@ namespace SEASON3B
         void ProcessClosing();
 
         void GetYourID(wchar_t* pszYourID);
+        int GetYourLevel() const { return m_nYourLevel; }
+        bool IsMyConfirmed() const { return m_bMyConfirm; }
+        bool IsYourConfirmed() const { return m_bYourConfirm; }
+        // My confirm button in window-local coordinates.
+        RECT GetMyConfirmRect() const
+        {
+            return {m_posMyConfirm.x, m_posMyConfirm.y, m_posMyConfirm.x + CONFIRM_WIDTH,
+                    m_posMyConfirm.y + CONFIRM_HEIGHT};
+        }
         void SetYourTradeGold(int nGold) { m_nYourTradeGold = nGold; }
 
         void SendRequestMyGoldInput(int nInputGold);

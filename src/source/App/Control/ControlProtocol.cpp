@@ -24,7 +24,7 @@ struct ErrorCodeEntry
     std::string_view name;
 };
 
-constexpr std::array<ErrorCodeEntry, 21> ErrorCodeNames = {{
+constexpr std::array<ErrorCodeEntry, 22> ErrorCodeNames = {{
     {App::Control::ErrorCode::BadRequest, "bad_request"},
     {App::Control::ErrorCode::UnknownCommand, "unknown_command"},
     {App::Control::ErrorCode::WrongScene, "wrong_scene"},
@@ -45,6 +45,7 @@ constexpr std::array<ErrorCodeEntry, 21> ErrorCodeNames = {{
     {App::Control::ErrorCode::NotPickable, "not_pickable"},
     {App::Control::ErrorCode::EmptySlot, "empty_slot"},
     {App::Control::ErrorCode::MoveRefused, "move_refused"},
+    {App::Control::ErrorCode::NotOpen, "not_open"},
     {App::Control::ErrorCode::Failed, "failed"},
 }};
 
@@ -194,7 +195,8 @@ const std::vector<std::string>& CommandNames()
     static const std::vector<std::string> names = {
         "ping",   "scene", "state",   "nearby", "events",   "wait-for", "screenshot", "login",  "select-char",
         "logout", "quit",  "move",    "warp",   "teleport", "attack",   "skill",      "pickup", "use",
-        "equip",  "say",   "whisper", "party",  "halt",     "hotkey",   "click-ui",
+        "equip",  "say",   "whisper", "party",  "halt",     "hotkey",   "click-ui",   "ui",     "slot-pixel",
+        "trade",
     };
     return names;
 }

@@ -58,7 +58,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 `interrupted`, `timeout`, `not_connected`, `login_failed`, `no_such_character`,
 `no_such_skill`, `not_in_view`, `not_attackable`, `no_path`, `not_allowed`,
 `warp_refused`, `skill_refused`, `insufficient_mana`, `not_pickable`,
-`empty_slot`, `move_refused`, `failed`.
+`empty_slot`, `move_refused`, `not_open`, `failed`.
 
 ## Commands
 
@@ -73,6 +73,8 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `screenshot` (`out`) | capture the next frame to a path; without `out` it names itself, uniquely per capture |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
+| `ui` | the open item windows by name (`message_box` while a dialog waits for Enter or Esc), and the window pixels of named elements such as `trade.confirm` |
+| `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`; `not_open` while that window is closed |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
@@ -85,12 +87,14 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
 | `say` (`text`), `whisper` (`name`, `text`) | chat, including `/` commands |
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
+| `trade` (`action`, `target`) | `request` a trade with a player at most one tile away, or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
 | `halt` | stop the walk or repeated attack in progress |
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
 maxima, map number and name, position, alive flag, safe-zone flag, current
-target, the skills the character owns, equipment, inventory, buffs, party and
+target, the skills the character owns, equipment, inventory, buffs, party,
+the open trade (partner, both offers and both confirm buttons, or `null`) and
 `nearby`.
 
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
@@ -141,6 +145,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 | `scene` | `scene` |
 | `view_enter` / `view_leave` | `object` |
 | `party` | `change`, `name` |
+| `trade` | `change` (`requested`, `opened`, `refused`, `unavailable`, `partner_confirm`, `closed`), `name` for a request or an opened trade, `state` (`checked`, `unchecked`, `reset`) for the partner's button, `result` (`completed`, `cancelled`, `inventory_full`, `request_cancelled`, `reinforced_item`) when it closes |
 | `disconnect` | `reason` |
 | `error` | `command`, `error`, `message` |
 
@@ -172,15 +177,16 @@ The event recorders are one-line calls named `App::Control::Events::Record…`,
 sitting at the end of the packet receive functions in
 `src/source/Network/Server/WSclient.cpp` (hits, deaths, experience, stats,
 chat, whisper, drops appearing and vanishing, view enter/leave, party changes,
-logout) plus the scene and map watcher in `App/Control/ControlServer.cpp`.
+trade steps, logout) plus the scene and map watcher in `App/Control/ControlServer.cpp`.
 When one of those functions is rewritten:
 
 1. `rg -c 'App::Control::Events::' src/source/Network/Server/WSclient.cpp` —
-   the count is 23; a lower one means a tap was dropped. Compare it against
+   the count is 27; a lower one means a tap was dropped. Compare it against
    `git show upstream/main:…` when the number itself is in doubt: the count
    is a smoke test, the list above is the contract.
 2. Re-run the live checks that cover the dropped tap (a fight records `hit`,
-   `killed` and `stat`; a pickup records `drop` and `drop_gone`).
+   `killed` and `stat`; a pickup records `drop` and `drop_gone`; the `trade`
+   in-game test records the trade steps, see [in-game-tests.md](in-game-tests.md)).
 
 ## Notes from the field
 

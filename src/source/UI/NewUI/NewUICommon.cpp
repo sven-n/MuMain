@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/SyntheticInput.h"
 
 #include "UI/NewUI/NewUICommon.h"
 #include "UI/NewUI/Widgets/NewUIRenderNumber.h"
@@ -230,7 +231,9 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
     // block would unconditionally clear every Enter press before chat-open logic
     // could observe it — the bug that prevented Enter from opening the chat window
     // on non-editor SDL3 builds. Keep the gate inside the editor guard.
-    if (IsPress(VK_RETURN) && IsEnterPressed() == false)
+    // An Enter the control socket injects never passes the key-event path that
+    // sets the flag, so it counts as let through, like a physical Enter.
+    if (IsPress(VK_RETURN) && IsEnterPressed() == false && !Core::Input::Synthetic::IsKeyHeld(VK_RETURN))
     {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;
     }

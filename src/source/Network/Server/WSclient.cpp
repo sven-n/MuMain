@@ -7283,6 +7283,7 @@ BOOL ReceiveTrade(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     auto Data = (LPPCHATING)ReceiveBuffer;
     g_pTrade->ProcessToReceiveTradeRequest(Data->ID);
+    App::Control::Events::RecordTradeRequested(Data->ID);
 
     return (TRUE);
 }
@@ -7293,6 +7294,7 @@ void ReceiveTradeResult(const BYTE* ReceiveBuffer)
     // The server sends TradePartnerLevel big-endian.
     trade.Level = ntoh16(trade.Level);
     g_pTrade->ProcessToReceiveTradeResult(&trade);
+    App::Control::Events::RecordTradeAnswer(trade.SubCode, trade.ID);
 }
 
 void ReceiveTradeYourInventoryDelete(const BYTE* ReceiveBuffer)
@@ -7324,6 +7326,7 @@ void ReceiveTradeYourResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     g_pTrade->ProcessToReceiveYourConfirm(Data->Value);
+    App::Control::Events::RecordTradePartnerConfirm(Data->Value);
 }
 
 void ReceiveTradeExit(const BYTE* ReceiveBuffer)
@@ -7340,6 +7343,7 @@ void ReceiveTradeExit(const BYTE* ReceiveBuffer)
 
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     g_pTrade->ProcessToReceiveTradeExit(Data->Value);
+    App::Control::Events::RecordTradeClosed(Data->Value);
 }
 
 void ReceivePing(const BYTE* ReceiveBuffer)

@@ -1529,6 +1529,17 @@ bool CNewUIMyInventory::CheckTakeOff(int equipmentSlot) const
     return false;
 }
 
+bool CNewUIMyInventory::GetEquipmentSlotCenter(int slot, POINT& center) const
+{
+    if (slot < 0 || slot >= MAX_EQUIPMENT_INDEX)
+        return false;
+
+    const EQUIPMENT_ITEM& equipmentSlot = m_EquipmentSlots[slot];
+    center.x = equipmentSlot.x + equipmentSlot.width / 2;
+    center.y = equipmentSlot.y + equipmentSlot.height / 2;
+    return true;
+}
+
 bool CNewUIMyInventory::InventoryProcess() const
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)

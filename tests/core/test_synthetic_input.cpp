@@ -100,7 +100,7 @@ TEST_CASE("A second injection is refused while one is in flight [core][synthetic
     CHECK(Click(1.0f, 1.0f, MouseButton::Left));
 }
 
-TEST_CASE("A click walks press, hold, release through the mouse globals [core][synthetic-input]")
+TEST_CASE("A click walks hover, press, hold, release through the mouse globals [core][synthetic-input]")
 {
     ResetInjector guard;
     WindowWidth = 1280;
@@ -111,12 +111,20 @@ TEST_CASE("A click walks press, hold, release through the mouse globals [core][s
 
     CHECK(Click(1000.0f, 725.0f, MouseButton::Left));
 
+    // First the pointer rests on the target with the button up for two
+    // frames, as a real mouse does before a press.
     BeginFrame();
     CHECK(g_fWindowMouseX == doctest::Approx(1000.0f));
     CHECK(g_fWindowMouseY == doctest::Approx(725.0f));
     // The overlay space is 640x480 stretched over the window.
     CHECK(MouseX == 500);
     CHECK(MouseY == 362);
+    CHECK_FALSE(MouseLButton);
+    CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
+    BeginFrame();
+    CHECK_FALSE(MouseLButton);
+
+    BeginFrame();
     CHECK(MouseLButton);
     CHECK(MouseLButtonPush);
     CHECK_FALSE(MouseLButtonPop);
@@ -162,6 +170,8 @@ TEST_CASE("Abandoning an injection releases what it pressed [core][synthetic-inp
     MouseLButtonPop = false;
 
     CHECK(Click(1000.0f, 725.0f, MouseButton::Left));
+    BeginFrame();
+    BeginFrame();
     BeginFrame();
     CHECK(MouseLButton);
 

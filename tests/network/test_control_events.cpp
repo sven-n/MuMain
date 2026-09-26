@@ -231,3 +231,26 @@ TEST_CASE("Control events name each recorder's fields [network][control-events]"
     CHECK(FieldsOf(recorded[8])["error"] == "no_path");
 }
 
+TEST_CASE("Control events describe the steps of a trade [network][control-events]")
+{
+    const RingFixture fixture;
+
+    Events::RecordTrade("requested", "testgm2Sum", "");
+    Events::RecordTrade("partner_confirm", "", "checked");
+    Events::RecordTrade("closed", "", "completed");
+
+    const std::vector<Events::Record> recorded = Events::Since(0);
+    REQUIRE(recorded.size() == 3);
+
+    CHECK(recorded[0].name == "trade");
+    CHECK(FieldsOf(recorded[0])["change"] == "requested");
+    CHECK(FieldsOf(recorded[0])["name"] == "testgm2Sum");
+    CHECK_FALSE(FieldsOf(recorded[0]).contains("state"));
+
+    // The confirm button reports its state; the end of a trade its result.
+    CHECK(FieldsOf(recorded[1])["state"] == "checked");
+    CHECK_FALSE(FieldsOf(recorded[1]).contains("name"));
+    CHECK(FieldsOf(recorded[2])["change"] == "closed");
+    CHECK(FieldsOf(recorded[2])["result"] == "completed");
+}
+

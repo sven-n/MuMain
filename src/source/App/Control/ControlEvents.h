@@ -101,6 +101,10 @@ void RecordMap(int mapNumber, const wchar_t* mapName, int x, int y);
 void RecordViewEnter(int key);
 void RecordViewLeave(int key);
 void RecordParty(std::string_view change, const wchar_t* name);
+// A trade step: `change` is requested, opened, refused, unavailable,
+// partner_confirm or closed. `name` is the partner (may be empty), `detail`
+// the confirm state or how the trade closed (may be empty).
+void RecordTrade(std::string_view change, std::string_view name, std::string_view detail);
 void RecordDisconnect(std::string_view reason);
 void RecordError(std::string_view command, std::string_view code, std::string_view message);
 } // namespace App::Control::Events

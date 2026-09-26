@@ -336,6 +336,26 @@ void RecordParty(std::string_view change, const wchar_t* name)
     Push("party", fields);
 }
 
+void RecordTrade(std::string_view change, std::string_view name, std::string_view detail)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    json fields;
+    fields["change"] = change;
+    if (!name.empty())
+    {
+        fields["name"] = name;
+    }
+    if (!detail.empty())
+    {
+        fields[change == "closed" ? "result" : "state"] = detail;
+    }
+    Push("trade", fields);
+}
+
 void RecordDisconnect(std::string_view reason)
 {
     if (!IsEnabled())

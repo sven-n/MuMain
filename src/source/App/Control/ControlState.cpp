@@ -13,6 +13,7 @@
 #include "GameLogic/Items/InventoryUtils.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
+#include "UI/NewUI/NewUISystem.h"
 #include "World/MapInfra/MapManager.h"
 
 #include "json.hpp"
@@ -37,6 +38,45 @@ json DescribeItem(const ITEM& item, int slot)
     described["level"] = item.Level;
     described["durability"] = item.Durability;
     return described;
+}
+
+// The items of a trade grid, by the grid's own slot numbers.
+json TradeGridItems(SEASON3B::CNewUIInventoryCtrl* grid)
+{
+    json items = json::array();
+    if (grid == nullptr)
+    {
+        return items;
+    }
+    for (int i = 0; i < static_cast<int>(grid->GetNumberOfItems()); ++i)
+    {
+        const ITEM* item = grid->GetItem(i);
+        if (item != nullptr)
+        {
+            items.push_back(DescribeItem(*item, item->y * grid->GetNumberOfColumn() + item->x));
+        }
+    }
+    return items;
+}
+
+// The open trade, or null: the partner, both offers and both confirm buttons.
+json TradeState()
+{
+    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
+    {
+        return nullptr;
+    }
+
+    wchar_t partner[MAX_USERNAME_SIZE + 1]{};
+    g_pTrade->GetYourID(partner);
+    json trade;
+    trade["partner"] = Core::Text::ToUtf8(partner);
+    trade["partner_level"] = g_pTrade->GetYourLevel();
+    trade["my_items"] = TradeGridItems(g_pTrade->GetMyInvenCtrl());
+    trade["partner_items"] = TradeGridItems(g_pTrade->GetYourInvenCtrl());
+    trade["my_confirmed"] = g_pTrade->IsMyConfirmed();
+    trade["partner_confirmed"] = g_pTrade->IsYourConfirmed();
+    return trade;
 }
 
 std::string_view ObjectKindName(int objectKind)
@@ -202,6 +242,7 @@ std::string WorldStateObject()
     state["skills"] = SkillArray();
     state["buffs"] = BuffArray();
     state["party"] = PartyArray();
+    state["trade"] = TradeState();
     state["nearby"] = NearbyArray();
 
     return state.dump();
