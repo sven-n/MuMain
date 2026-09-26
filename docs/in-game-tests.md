@@ -49,6 +49,31 @@ no account with what a scenario needs, OpenMU's test data gets a new one
 
 ## Running them
 
+The quickest way is the `InGameTests` build target of an editor build. It
+builds `Main` and plays the scenarios with it:
+
+```sh
+cmake --build out/build/windows-x64-mueditor --config Release --target InGameTests
+```
+
+Two cache variables choose what it runs; set them once with `-D` when
+configuring, or in CLion's CMake options:
+
+| Variable | Meaning |
+|---|---|
+| `MU_IN_GAME_TEST_SERVER` | the server, `host:port`; default `127.0.0.1:44405`, the test server below |
+| `MU_IN_GAME_TEST_SCENARIOS` | the scenarios to run, e.g. `trade` or `trade;icarus-take-off`; empty runs all |
+
+```sh
+cmake -B out/build/windows-x64-mueditor "-DMU_IN_GAME_TEST_SERVER=127.0.0.1:55901" "-DMU_IN_GAME_TEST_SCENARIOS=trade"
+```
+
+Keep the quotes in PowerShell, which otherwise splits the value at the first
+dot. The build fails when a scenario fails, and the failure details go to
+`in-game-test-results` in the build folder.
+
+The runner can also be started directly:
+
 ```sh
 dotnet run --project tools/InGameTests -- --client out/build/windows-x64-mueditor/src/Release/Main.exe --server 127.0.0.1:55901
 ```

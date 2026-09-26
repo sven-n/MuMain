@@ -840,6 +840,36 @@ if (DOTNET_EXECUTABLE)
     target_sources(MuClient PRIVATE ${RESX_GEN_SOURCES})
     target_include_directories(MuClient PUBLIC "${CMAKE_BINARY_DIR}/Generated")
   endif()
+
+  # InGameTests: builds Main and plays the in-game test scenarios with it
+  # against a running server (docs/in-game-tests.md). Only a client with the
+  # control socket can be driven, so the target exists only in those builds.
+  #   cmake --build <build dir> --config Release --target InGameTests
+  if (ENABLE_CONTROL_SOCKET)
+    set(MU_IN_GAME_TEST_SERVER "127.0.0.1:44405" CACHE STRING
+      "Server the InGameTests target connects the clients to, host:port")
+    set(MU_IN_GAME_TEST_SCENARIOS "" CACHE STRING
+      "In-game test scenarios the InGameTests target runs, e.g. trade;icarus-take-off; empty runs all")
+
+    set(IN_GAME_TESTS_ARGS --server "${MU_IN_GAME_TEST_SERVER}")
+    foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
+      list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
+    endforeach()
+
+    add_custom_target(InGameTests
+      COMMAND ${CMAKE_COMMAND} -E env
+              --unset=Platform
+              "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+              "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+              "${DOTNET_EXECUTABLE}" run --project "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests" -c Release
+              -- --client "$<TARGET_FILE:Main>" ${IN_GAME_TESTS_ARGS}
+              --out "${CMAKE_BINARY_DIR}/in-game-test-results"
+      COMMENT "In-game tests against ${MU_IN_GAME_TEST_SERVER}"
+      USES_TERMINAL
+      VERBATIM
+    )
+    add_dependencies(InGameTests Main)
+  endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
     "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
