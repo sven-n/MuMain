@@ -77,6 +77,7 @@ enum EPathNodeState : BYTE
     PATH_END = (0x04),
 };
 
+// cppcheck-suppress unknownMacro ; Windows macro (winnt.h), unknown to cppcheck
 DEFINE_ENUM_FLAG_OPERATORS(EPathNodeState)
 
 enum EPathDirection
