@@ -105,6 +105,21 @@ void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& def
     CopyRequirements(attribute, definition);
 }
 
+void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target)
+{
+    target.tags = source.tags;
+    target.wingTier = source.wingTier;
+    target.tradable = source.tradable;
+    target.droppable = source.droppable;
+    target.storable = source.storable;
+    target.sellable = source.sellable;
+    target.personalShopSellable = source.personalShopSellable;
+    target.repairable = source.repairable;
+    target.droppableWhileRented = source.droppableWhileRented;
+    target.personalShopSellableWhileRented = source.personalShopSellableWhileRented;
+    target.sellableWhenRentalExpired = source.sellableWhenRentalExpired;
+}
+
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)
 {
     ItemDefinition definition;

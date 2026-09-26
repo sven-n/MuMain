@@ -6,6 +6,7 @@
 #include <vector>
 
 #ifdef _EDITOR
+#include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #endif
@@ -18,7 +19,7 @@ class CItemDataHandler
 public:
     static CItemDataHandler& GetInstance();
 
-    // Data/Local/<language>/Item_<language>.bmd, written by Export as bmd.
+    // Data/Local/<language>/Item_<language>.bmd (legacy item files).
     static std::wstring GetItemFilePath(const std::wstring& language);
 
     // Loads and validates Data/Items, builds the item database and fills
@@ -37,6 +38,12 @@ public:
     // Validates the item database and writes Data/Items. Nothing is written
     // when the data has errors.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
+
+    // Replaces all items with the legacy Item_<language>.bmd files. Items the
+    // English file lacks keep their current English name. Nothing changes
+    // when the files cannot be read; problems the imported data still has
+    // (Save refuses it while they are errors) are in validationIssues.
+    Data::Items::ItemBmdImportResult ImportFromBmd();
 
     // Writes Item_<language>.bmd for every legacy language, with the names
     // of that language. Files that already have the data are left as they
@@ -59,6 +66,15 @@ private:
     void FillItemAttributes();
     void RegisterLocaleObserver();
     static void OnLocaleChanged(void* context) noexcept;
+
+#ifdef _EDITOR
+    // Gives imported items without an English name the one the item has now.
+    // Returns how many names were kept.
+    static int KeepCurrentEnglishNames(std::vector<Data::Items::ItemDefinition>& items);
+    // Gives imported items the current values of the fields item.bmd does
+    // not have (tags, wing tier, rule flags).
+    static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items);
+#endif
 
     bool m_localeObserverRegistered = false;
 

@@ -220,22 +220,44 @@ The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
 `<build folder>/Data/Items` to `src/bin/Data/Items` and commit them.
 
-### Export as bmd
+### Import from bmd / Export as bmd
 
-**Export as bmd** writes `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd` for
-English, Portuguese and Spanish with the names of each language, for tools
-that still need the old format; a backup of an existing file is kept. Files
-that already have the data stay as they are. Values that the bmd format
-does not have (tags, wing tier, rule flags) are left out. The game and the
-editor never read these files, so the repository does not ship them.
+The repository does not ship `Item_<lang>.bmd` files; the JSON files are the
+only item data. The import is there to bring in your own old item files.
 
-### Where the item data came from
+- **Import from bmd** replaces all items with
+  `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd` next to the game; copy your
+  files there first. English provides the values and is required,
+  Portuguese and Spanish add their names (a translation equal to the
+  English name is not stored). Items the English file does not have keep
+  the English name they have now, and every item keeps its tags, wing tier
+  and rule flags (the bmd format has none). Save afterwards to keep the
+  result. The console lists what the import had to fix (see below) and any
+  problem the imported data still has; Save refuses it until those are
+  fixed.
+- **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
+  Spanish with the names of each language; a backup of each old file is kept.
+  Files that already have the data stay as they are. Values that the bmd
+  format does not have (tags, wing tier, rule flags) are left out.
 
-The JSON files were imported once from the original `Item_<lang>.bmd`
-files. Those files have 30 bytes for a name, and longer names ran on into
-the next fields (two-handed flag, level, slot, …). The game used these
-broken values; for example, *Open Access Ticket to Chaos Castle* was
-two-handed, had level 25964 and went into the weapon slot. The import kept
-the full names and took the overwritten fields from a language whose name
-was short enough, or used the field's default. Portuguese and Spanish names
-were read as Windows-1252, so their accented letters are correct now.
+### How the bmd import repairs the legacy files
+
+The original item files have 30 bytes for a name. Longer names ran on into
+the next fields (two-handed flag, level, slot, …), so those fields hold
+parts of the name instead of values. The game used these broken values;
+for example, *Open Access Ticket to Chaos Castle* was two-handed, had
+level 25964 and went into the weapon slot.
+
+The import:
+
+1. reads each name up to its end, so the full name is kept
+   (*Open Access Ticket to Chaos Castle* instead of
+   *Open Access Ticket to Chaos Ca*);
+2. takes every field a name ran into from the next language whose name did
+   not reach that field (English, then Portuguese, then Spanish);
+3. uses the field's default when no language has an undamaged value.
+
+Names that are not valid UTF-8 are read as Windows-1252, the encoding of
+the Portuguese and Spanish files; the original client showed their
+accented letters as `�`. The byte pair `A1 AF` (a right quote on Korean
+systems) becomes an apostrophe (*Gaion's Order*).

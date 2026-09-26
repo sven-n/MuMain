@@ -1,17 +1,27 @@
+#include "stdafx.h"
+
 #include "doctest.h"
 
+#include "Core/Globals/_crypt.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#include "Data/DataHandler/ItemData/ItemBmdLanguages.h"
+#include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
+#include <algorithm>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <random>
 #include <string>
+#include <string_view>
 #include <vector>
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
@@ -27,10 +37,14 @@ const std::filesystem::path ShippedClientDirectory = DataDirectory.parent_path()
 
 constexpr int KrisType = MakeItemType(0, 0);
 constexpr int BladeType = MakeItemType(0, 5);
+constexpr int ChaosCastleTicketType = MakeItemType(13, 121);
+constexpr int GaionsOrderType = MakeItemType(14, 102);
+constexpr BYTE NoSlot = 255;
+constexpr WORD ItemFileChecksumKey = 0xE2F1;
 
-// CItemDataHandler::Load reads Data\... relative to the working directory
-// and fills the global ItemAttribute, like the game does at startup. This
-// points both at test-owned state and restores them.
+// CItemDataHandler::Load and the bmd import read Data\... relative to the
+// working directory; Load also fills the global ItemAttribute, like the game
+// does at startup. This points both at test-owned state and restores them.
 class ClientDataScope
 {
 public:
@@ -68,7 +82,9 @@ class TemporaryClientFolder
 {
 public:
     TemporaryClientFolder()
-        : m_directory(std::filesystem::temp_directory_path() / "mu_test_item_data")
+        // CTest runs the test cases as parallel processes; each needs its own folder.
+        : m_directory(std::filesystem::temp_directory_path() /
+                      ("mu_test_item_data_" + std::to_string(std::random_device{}())))
     {
         std::filesystem::remove_all(m_directory);
         std::filesystem::create_directories(m_directory / GetItemDataDirectory());
@@ -87,9 +103,85 @@ public:
 
     const std::filesystem::path& Directory() const { return m_directory; }
 
+    // Data/Local/<language>/Item_<language>.bmd in this folder; creates the
+    // language folder.
+    std::filesystem::path LegacyItemFilePath(const std::wstring& language) const
+    {
+        const std::filesystem::path path = m_directory / CItemDataHandler::GetItemFilePath(language);
+        std::filesystem::create_directories(path.parent_path());
+        return path;
+    }
+
+    // The shipped Data/Items, and empty folders for the bmd export.
+    void CopyShippedItems() const
+    {
+        std::filesystem::copy(DataDirectory / "Items", m_directory / GetItemDataDirectory(),
+                              std::filesystem::copy_options::recursive |
+                                  std::filesystem::copy_options::overwrite_existing);
+        for (const ItemBmdLanguage& language : GetItemBmdLanguages())
+        {
+            std::filesystem::create_directories(m_directory / "Data" / "Local" / language.folder);
+        }
+    }
+
 private:
     std::filesystem::path m_directory;
 };
+
+// A legacy Item_<language>.bmd with 30-byte names, as the original client
+// data has it. The repo does not ship these files, so tests build them.
+class LegacyItemFile
+{
+public:
+    LegacyItemFile() : m_records(MAX_ITEM) {}
+
+    ITEM_ATTRIBUTE_FILE_LEGACY& Item(int itemType)
+    {
+        return m_records[itemType];
+    }
+
+    // Like in the original files, a name longer than the name field runs on
+    // into the fields after it. Set the fields first.
+    void SetName(int itemType, std::string_view name)
+    {
+        auto* bytes = reinterpret_cast<char*>(&m_records[itemType]);
+        std::memcpy(bytes, name.data(), name.size());
+        bytes[name.size()] = '\0';
+    }
+
+    void Write(const std::filesystem::path& path) const
+    {
+        std::vector<ITEM_ATTRIBUTE_FILE_LEGACY> encrypted = m_records;
+        for (ITEM_ATTRIBUTE_FILE_LEGACY& record : encrypted)
+        {
+            BuxConvert(reinterpret_cast<BYTE*>(&record), sizeof(record));
+        }
+        const auto* bytes = reinterpret_cast<const BYTE*>(encrypted.data());
+        const DWORD size = static_cast<DWORD>(encrypted.size() * sizeof(ITEM_ATTRIBUTE_FILE_LEGACY));
+        const DWORD checksum = GenerateCheckSum2(bytes, size, ItemFileChecksumKey);
+
+        std::ofstream file(path, std::ios::binary);
+        file.write(reinterpret_cast<const char*>(bytes), size);
+        file.write(reinterpret_cast<const char*>(&checksum), sizeof(checksum));
+    }
+
+private:
+    std::vector<ITEM_ATTRIBUTE_FILE_LEGACY> m_records;
+};
+
+std::string ReadWholeFile(const std::filesystem::path& path)
+{
+    std::ifstream file(path, std::ios::binary);
+    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+}
+
+const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int itemType)
+{
+    const auto found = std::find_if(items.begin(), items.end(), [&](const ItemDefinition& item) {
+        return MakeItemType(item.group, item.number) == itemType;
+    });
+    return found != items.end() ? &*found : nullptr;
+}
 } // namespace
 
 TEST_CASE("Shipped item data loads without problems [data][items]")
@@ -157,6 +249,59 @@ TEST_CASE("Saved item data loads back the same [data][items]")
         INFO(fileName);
         CHECK(savedText == shippedText);
     }
+}
+
+TEST_CASE("Bmd import recovers long names and repairs the fields they overwrote [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.Item(ChaosCastleTicketType).m_byItemSlot = NoSlot;
+    // The name runs on into TwoHand, Level and, with its null byte, the slot.
+    english.SetName(ChaosCastleTicketType, "Open Access Ticket to Chaos Castle");
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    portuguese.Item(ChaosCastleTicketType).m_byItemSlot = NoSlot;
+    portuguese.SetName(ChaosCastleTicketType, "Ingresso Castelo");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.importedLocales == std::vector<std::string>{"en", "pt"});
+    CHECK(result.recoveredNameCount == 1);
+
+    const ItemDefinition* ticket = FindItem(result.items, ChaosCastleTicketType);
+    REQUIRE(ticket != nullptr);
+    CHECK(ticket->names.GetNeutral() == "Open Access Ticket to Chaos Castle");
+    CHECK_FALSE(ticket->twoHanded);
+    CHECK(ticket->level == 0);
+    CHECK(ticket->slot == ItemSlot::None);
+    REQUIRE_FALSE(result.repairs.empty());
+    CHECK(result.repairs.front().fromLocale == "pt");
+}
+
+TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.SetName(BladeType, "Blade");
+    english.SetName(GaionsOrderType, "Gaion\xA1\xAFs Order"); // A1 AF: a right quote on Korean systems
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    portuguese.SetName(BladeType, "L\xE2mina");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+
+    const ItemDefinition* blade = FindItem(result.items, BladeType);
+    REQUIRE(blade != nullptr);
+    CHECK(blade->names.Get("pt") == "L\xC3\xA2mina");
+
+    const ItemDefinition* gaionsOrder = FindItem(result.items, GaionsOrderType);
+    REQUIRE(gaionsOrder != nullptr);
+    CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
@@ -240,15 +385,34 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     }
 }
 
+TEST_CASE("Exporting the items as bmd and importing them again gives the same data [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.validationIssues.empty());
+    // Tags, wing tiers and rule flags are not in the bmd files; the items keep
+    // the ones they have, so the files below match.
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        INFO(GetItemGroupFileName(group));
+        CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
+              ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
+    }
+}
+
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
 {
     TemporaryClientFolder folder;
-    std::filesystem::copy(DataDirectory / "Items", folder.Directory() / GetItemDataDirectory(),
-                          std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
-    for (const ItemBmdLanguage& language : GetItemBmdLanguages())
-    {
-        std::filesystem::create_directories(folder.Directory() / "Data" / "Local" / language.folder);
-    }
+    folder.CopyShippedItems();
     ClientDataScope client(folder.Directory());
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
