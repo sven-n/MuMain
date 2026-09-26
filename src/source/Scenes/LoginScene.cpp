@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "LoginScene.h"
-#include "UI/Windows/MsgWin.h"
 #include "Camera/CameraUtility.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMove.h"
@@ -102,30 +101,6 @@ int GetLoginCameraWalkCut() {
 //=============================================================================
 // LoginScene Implementation
 //=============================================================================
-
-void DeleteCharacter()
-{
-    if (SelectedHero < 0 || SelectedHero >= MAX_CHARACTERS_PER_ACCOUNT)
-    {
-        return;
-    }
-
-    int characterToDelete = SelectedHero;
-    SelectedHero = -1;
-
-    // CMsgWin owns the resident-password field (#msgwin_input) that this request reads.
-    const std::wstring residentPassword = g_MsgWin.GetResidentPasswordInput();
-    wcsncpy(InputText[0], residentPassword.c_str(), _countof(InputText[0]) - 1);
-    InputText[0][_countof(InputText[0]) - 1] = L'\0';
-
-    CurrentProtocolState = REQUEST_DELETE_CHARACTER;
-    SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[characterToDelete].ID), MU_C16(InputText[0]));
-
-    PlayBuffer(SOUND_MENU01);
-
-    ClearInput();
-    InputEnable = false;
-}
 
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle)
 {
