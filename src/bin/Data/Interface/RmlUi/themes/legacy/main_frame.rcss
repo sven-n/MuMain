@@ -54,7 +54,12 @@
 	/* Reserve enough text width for full resource values, even on 16px gauges.
 	   RmlUi cannot centre overflowing inline text in those narrow boxes. */
 	width: 96px;
-	font-size: 12px;
+	/* Native RenderNumber() sprite digits are 12 px tall and step 10 px at 1024x768; bold DejaVu
+	   at 12px stood 13 tall and stepped 11, so HP ran into SD (and the mana pair). 11px gives
+	   the height, the horizontal squeeze the pitch (letter-spacing has no effect in this build). */
+	font-size: 11px;
+	transform: scaleX(0.91);
+	transform-origin: center top;
 	line-height: 12px;
 	text-align: center;
 	color: token(text-primary);
