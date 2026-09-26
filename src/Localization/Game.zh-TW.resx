@@ -13010,4 +13010,10 @@
   <data name="OperationResurrecting" xml:space="preserve">
     <value>Item resurrection</value>
   </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>恭喜！您已成功完成血色城堡任務！</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>不幸的是，你失敗了完成血色城堡任務。</value>
+  </data>
 </root>

@@ -13010,4 +13010,10 @@
   <data name="OperationResurrecting" xml:space="preserve">
     <value>Item resurrection</value>
   </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Щиро вітаю! Ви успішно завершив квест Кривавого замку!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>На жаль, вам не вдалося щоб завершити квест Кривавого замку.</value>
+  </data>
 </root>

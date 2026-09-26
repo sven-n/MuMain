@@ -13010,4 +13010,10 @@
   <data name="OperationResurrecting" xml:space="preserve">
     <value>Item resurrection</value>
   </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Parabéns! Você conseguiu com sucesso completou a missão do Castelo de Sangue!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Infelizmente você falhou para completar a missão do Castelo de Sangue.</value>
+  </data>
 </root>

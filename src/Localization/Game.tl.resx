@@ -13010,4 +13010,10 @@
   <data name="OperationResurrecting" xml:space="preserve">
     <value>Item resurrection</value>
   </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Binabati kita! Naging matagumpay ka natapos ang Blood Castle Quest!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Sa kasamaang palad, nabigo ka para makumpleto ang Blood Castle Quest.</value>
+  </data>
 </root>
