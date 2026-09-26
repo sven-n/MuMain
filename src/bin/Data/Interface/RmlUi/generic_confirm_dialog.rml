@@ -28,6 +28,9 @@
 		     recolor the text only, no tinted sprite variants. -->
 		<div class="gcd-header-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
 		     data-class-error="severity_error">{{title}}</div>
+		<!-- Portrait2D's Overlay layout (the default): native's duel crest, drawn behind the text at a
+		     fixed offset in #panel's own coordinate space; its caption is the first text row below. -->
+		<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay"></div>
 		<div class="gcd-body">
 			<!-- Invisible position reference for the native 3D item-preview render pass
 			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself. A flex sibling of
@@ -40,12 +43,8 @@
 			     .gcd-text-col below; no dialog uses both. -->
 			<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
 			<div class="gcd-text-col">
-				<!-- Portrait2D's Overlay layout (the default) -- caption text drawn on top of the
-				     sprite. First child of .gcd-text-col (icon-TOP/text-BELOW), unlike item3D's
-				     icon-left/text-right sibling shape. -->
-				<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
-					<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
-				</div>
+				<!-- Portrait2D's Overlay caption: the bold row right above the lines, over the crest. -->
+				<div class="gcd-portrait2d-text" data-class-hidden="!has_portrait2d_overlay">{{portrait2d_text}}</div>
 				<!-- A line's own colour (GenericDialogConfig::Line::color), else the legacy theme's
 				     text-primary: an empty inline value would not clear a previous dialog's colour. -->
 				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold"

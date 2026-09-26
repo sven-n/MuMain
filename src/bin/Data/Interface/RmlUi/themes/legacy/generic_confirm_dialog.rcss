@@ -33,11 +33,26 @@
 	min-height: 240dp;
 }
 /* The overlay-portrait box is native's CDuelMsgBox/CDuelResultMsgBox: top edge at y=70, 67 + 7*15 +
-   50 = 222 tall, the 148x138 crest drawn at y+15 behind the text, the bold heading at y+100 and
-   the message lines from y+120. */
+   50 = 222 tall, the 148x138 crest drawn at y+15 behind the text. The text block ends right
+   above the buttons (last line at y+151 in both boxes), with the bold caption one 20 row above
+   its first line (y+100 over three lines, y+115 over two), lines 16 apart. */
 #panel.portrait {
 	top: 70dp;
 	min-height: 222dp;
+}
+#panel.portrait .gcd-body {
+	height: 131dp; /* 222 - 35 top - 56 button blank: ends just above the buttons */
+	align-items: stretch;
+}
+#panel.portrait .gcd-text-col {
+	justify-content: flex-end;
+	overflow: visible; /* a fixed native box never scrolls */
+}
+/* Positioned so they paint above the (positioned) crest, which comes first in the markup. */
+#panel.portrait .gcd-line {
+	position: relative;
+	line-height: 16dp;
+	min-height: 16dp; /* an empty line keeps its row, as native draws every row at its own y */
 }
 
 /* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) -- a title-banner variant
@@ -191,18 +206,15 @@
    40dp-wide empty slot. */
 .gcd-item3d-anchor.hidden { display: none; }
 
-/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a
-   static flex child INSIDE .gcd-text-col (icon-top/text-below) rather than a sibling like
-   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). .gcd-text-col's own
-   align-items:center centers it horizontally with no extra margin math needed. 100x93dp keeps
-   the current art's 148:138 aspect ratio. */
+/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a direct
+   #panel child at native's fixed crest position (x+41, y+15, 148x138), behind the text, unlike
+   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). */
 .gcd-portrait2d {
-	position: relative;
+	position: absolute;
+	left: 41dp; /* (230 - 148) / 2 */
+	top: 15dp;
 	width: 148dp;
 	height: 138dp;
-	flex-shrink: 0;
-	margin-top: -20dp;    /* .gcd-body starts 35 down; the crest starts 15 down */
-	margin-bottom: -33dp; /* message lines start at y+120, inside the crest's lower part */
 	decorator: image(portrait2d-image);
 }
 /* Same cascade-tie fix as .gcd-item3d-anchor above. */
@@ -219,18 +231,19 @@
 	margin-bottom: 0;
 	decorator: image(portrait2d-image);
 }
-/* Overlaid directly on the sprite (native draws this ON TOP of the art, not below it) -- matches
-   native's own bold yellow; font-effect:shadow keeps it legible over the sprite's bright areas. */
+/* The caption row over the crest (native draws it ON TOP of the art): native's bold yellow, first
+   row of .gcd-text-col, positioned so it paints above the (positioned) crest. */
 .gcd-portrait2d-text {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 85dp; /* y+100 */
+	position: relative;
+	display: block;
+	width: 100%;
+	line-height: 20dp;
 	text-align: center;
 	font-weight: bold;
 	font-size: 1rem;
 	color: token(text-heading);
 }
+.gcd-portrait2d-text.hidden { display: none; } /* display: block above outranks .hidden */
 
 /* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
    `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
