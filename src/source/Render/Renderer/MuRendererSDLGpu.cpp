@@ -38,9 +38,9 @@
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuReplayState.h"
 #include "SdlGpuValidation.h"
-#include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Text/SdlTtfFontSet.h"
 #ifdef _EDITOR
 #include "Core/MuEditorCore.h"
 #endif
@@ -889,134 +889,23 @@ static bool s_fogDirty = true; // upload on first draw if SetFog not called
 
 // Story 7.9.8 (AC-2): SDL_ttf GPU text engine and font variants.
 // s_textEngine: atlas-based text engine created after SDL_GPUDevice.
-// s_ttfFont*: pre-loaded fonts for UI text rendering (normal, bold, big, fixed).
+// s_ttfFonts: pre-loaded fonts for UI text rendering (normal, bold, big, fixed).
 static TTF_TextEngine* s_textEngine = nullptr;
-static TTF_Font* s_ttfFont = nullptr;      // normal (default)
-static TTF_Font* s_ttfFontBold = nullptr;  // bold weight
-static TTF_Font* s_ttfFontBig = nullptr;   // larger size, bold
-static TTF_Font* s_ttfFontFixed = nullptr; // monospace
-static TTF_Font* s_ttfFallback = nullptr;
-static TTF_Font* s_ttfFallbackBold = nullptr;
-static TTF_Font* s_ttfFallbackBig = nullptr;
-static TTF_Font* s_ttfFallbackFixed = nullptr;
-
-#ifdef NDEBUG
-inline constexpr bool kAllowSystemFontFallback = false;
-#else
-inline constexpr bool kAllowSystemFontFallback = true;
-#endif
+static Render::Text::SdlTtfFontSet s_ttfFonts;
 
 // F-7 fix: Cached window dimensions, updated once per frame in BeginFrame().
 static int s_cachedWinW = 0;
 static int s_cachedWinH = 0;
 
 #if MU_HAS_SDL_TTF
-[[nodiscard]] static std::string BundledFontPath(const char* relativePath)
-{
-    return ResolveBundledFontPath(relativePath).string();
-}
-
-[[nodiscard]] static std::string FindDeveloperFontPath()
-{
-#ifndef NDEBUG
-    static const char* const k_SystemFontPaths[] = {
-#ifdef __APPLE__
-        "/System/Library/Fonts/Supplemental/Arial.ttf",
-        "/System/Library/Fonts/Helvetica.ttc",
-        "/Library/Fonts/Arial Unicode.ttf",
-#elif defined(__linux__)
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",
-#else // Windows
-        "C:\\Windows\\Fonts\\arial.ttf",
-        "C:\\Windows\\Fonts\\segoeui.ttf",
-#endif
-    };
-
-    for (const char* path : k_SystemFontPaths)
-    {
-        if (std::filesystem::exists(path))
-        {
-            return path;
-        }
-    }
-#endif
-
-    return {};
-}
-
-static void CloseTtfFont(TTF_Font*& font)
-{
-    if (!font)
-        return;
-    TTF_CloseFont(font);
-    font = nullptr;
-}
-
-[[nodiscard]] static TTF_Font* OpenTtfFontRole(std::string_view family, std::string_view role, const char* relativePath,
-                                               float pointSize)
-{
-    const std::string packagedPath = BundledFontPath(relativePath);
-    if (TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize))
-    {
-        mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role, packagedPath);
-        return font;
-    }
-
-    mu::log::Get("render")->error("SDL_ttf -- bundled family='{}' role='{}' path='{}' failed: {}", family, role,
-                                  packagedPath, SDL_GetError());
-    if (!kAllowSystemFontFallback)
-        return nullptr;
-
-    const std::string fallbackPath = FindDeveloperFontPath();
-    if (fallbackPath.empty())
-        return nullptr;
-
-    mu::log::Get("render")->warn("SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}'",
-                                 family, role, fallbackPath);
-    TTF_Font* fallback = TTF_OpenFont(fallbackPath.c_str(), pointSize);
-    if (!fallback)
-    {
-        mu::log::Get("render")->error(
-            "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}' failed: {}", family, role,
-            fallbackPath, SDL_GetError());
-    }
-    return fallback;
-}
-
-[[nodiscard]] static TTF_Font* OpenTtfFallbackRole(std::string_view role, float pointSize)
-{
-    const std::string packagedPath = BundledFontPath(kBundledFallbackFont.regular);
-    TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize);
-    if (font)
-    {
-        mu::log::Get("render")->info("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}'",
-                                     kBundledFallbackFont.family, role, packagedPath);
-        return font;
-    }
-
-    mu::log::Get("render")->error("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}' failed: {}",
-                                  kBundledFallbackFont.family, role, packagedPath, SDL_GetError());
-    return nullptr;
-}
-
-[[nodiscard]] static bool AttachTtfFallback(TTF_Font* font, TTF_Font* fallback, std::string_view role)
-{
-    if (TTF_AddFallbackFont(font, fallback))
-        return true;
-
-    mu::log::Get("render")->error("SDL_ttf -- fallback attach failed for role='{}': {}", role, SDL_GetError());
-    return false;
-}
-
 static void WarmTtfFonts()
 {
     static constexpr const char* k_WarmupGlyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
                                                   "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\한글";
-    TTF_Font* fonts[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
-    for (TTF_Font* font : fonts)
+    using Render::Text::SdlTtfFontRole;
+    for (SdlTtfFontRole role : {SdlTtfFontRole::Normal, SdlTtfFontRole::Bold, SdlTtfFontRole::Big, SdlTtfFontRole::Fixed})
     {
+        TTF_Font* font = s_ttfFonts.Get(role);
         TTF_Text* warmup = TTF_CreateText(s_textEngine, font, k_WarmupGlyphs, 0);
         if (!warmup)
             continue;
@@ -1028,51 +917,9 @@ static void WarmTtfFonts()
 [[nodiscard]] static bool LoadTtfFonts(std::string_view configuredFamily, float normalPointSize, float bigPointSize,
                                        float fixedPointSize)
 {
-    const BundledFont& family = ResolveBundledFont(configuredFamily);
-    TTF_Font* normal = OpenTtfFontRole(family.family, "normal", family.regular, normalPointSize);
-    TTF_Font* bold = OpenTtfFontRole(family.family, "bold", family.bold, normalPointSize);
-    TTF_Font* big = OpenTtfFontRole(family.family, "big-bold", family.bold, bigPointSize);
-    TTF_Font* fixed =
-        OpenTtfFontRole(kBundledFixedFont.family, "fixed", kBundledFixedFont.regular, fixedPointSize);
-    TTF_Font* fallback = OpenTtfFallbackRole("normal", normalPointSize);
-    TTF_Font* fallbackBold = OpenTtfFallbackRole("bold", normalPointSize);
-    TTF_Font* fallbackBig = OpenTtfFallbackRole("big-bold", bigPointSize);
-    TTF_Font* fallbackFixed = OpenTtfFallbackRole("fixed", fixedPointSize);
-    if (fallbackBold)
-        TTF_SetFontStyle(fallbackBold, TTF_STYLE_BOLD);
-    if (fallbackBig)
-        TTF_SetFontStyle(fallbackBig, TTF_STYLE_BOLD);
-    if (!normal || !bold || !big || !fixed || !fallback || !fallbackBold || !fallbackBig || !fallbackFixed ||
-        !AttachTtfFallback(normal, fallback, "normal") || !AttachTtfFallback(bold, fallbackBold, "bold") ||
-        !AttachTtfFallback(big, fallbackBig, "big-bold") || !AttachTtfFallback(fixed, fallbackFixed, "fixed"))
-    {
-        CloseTtfFont(fixed);
-        CloseTtfFont(big);
-        CloseTtfFont(bold);
-        CloseTtfFont(normal);
-        CloseTtfFont(fallbackFixed);
-        CloseTtfFont(fallbackBig);
-        CloseTtfFont(fallbackBold);
-        CloseTtfFont(fallback);
+    if (!s_ttfFonts.Load(configuredFamily, normalPointSize, bigPointSize, fixedPointSize))
         return false;
-    }
 
-    CloseTtfFont(s_ttfFontFixed);
-    CloseTtfFont(s_ttfFontBig);
-    CloseTtfFont(s_ttfFontBold);
-    CloseTtfFont(s_ttfFont);
-    CloseTtfFont(s_ttfFallbackFixed);
-    CloseTtfFont(s_ttfFallbackBig);
-    CloseTtfFont(s_ttfFallbackBold);
-    CloseTtfFont(s_ttfFallback);
-    s_ttfFont = normal;
-    s_ttfFontBold = bold;
-    s_ttfFontBig = big;
-    s_ttfFontFixed = fixed;
-    s_ttfFallback = fallback;
-    s_ttfFallbackBold = fallbackBold;
-    s_ttfFallbackBig = fallbackBig;
-    s_ttfFallbackFixed = fallbackFixed;
     WarmTtfFonts();
     return true;
 }
@@ -1563,15 +1410,8 @@ public:
 
 #if MU_HAS_SDL_TTF
         // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
-        // Close font variants first, then default font, then engine.
-        CloseTtfFont(s_ttfFontFixed);
-        CloseTtfFont(s_ttfFontBig);
-        CloseTtfFont(s_ttfFontBold);
-        CloseTtfFont(s_ttfFont);
-        CloseTtfFont(s_ttfFallbackFixed);
-        CloseTtfFont(s_ttfFallbackBig);
-        CloseTtfFont(s_ttfFallbackBold);
-        CloseTtfFont(s_ttfFallback);
+        // Close the fonts first, then the engine.
+        s_ttfFonts.Close();
         if (s_textEngine)
         {
             TTF_DestroyGPUTextEngine(s_textEngine);
@@ -2506,21 +2346,21 @@ public:
     // Story 7.9.8 (AC-2): Default TTF font accessor.
     [[nodiscard]] TTF_Font* GetTtfFont() override
     {
-        return s_ttfFont;
+        return s_ttfFonts.Get(Render::Text::SdlTtfFontRole::Normal);
     }
 
     // F-1 fix: Font variant accessors for bold, big, and fixed-width text.
     [[nodiscard]] TTF_Font* GetTtfFontBold() override
     {
-        return s_ttfFontBold ? s_ttfFontBold : s_ttfFont;
+        return s_ttfFonts.Get(Render::Text::SdlTtfFontRole::Bold);
     }
     [[nodiscard]] TTF_Font* GetTtfFontBig() override
     {
-        return s_ttfFontBig ? s_ttfFontBig : s_ttfFont;
+        return s_ttfFonts.Get(Render::Text::SdlTtfFontRole::Big);
     }
     [[nodiscard]] TTF_Font* GetTtfFontFixed() override
     {
-        return s_ttfFontFixed ? s_ttfFontFixed : s_ttfFont;
+        return s_ttfFonts.Get(Render::Text::SdlTtfFontRole::Fixed);
     }
 
     [[nodiscard]] bool ReloadTtfFonts(std::string_view fontFamily, float normalPointSize, float bigPointSize,
