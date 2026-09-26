@@ -49,3 +49,10 @@ foreach(source_name gpu_text property_header patch)
         message(FATAL_ERROR "${source_name} must contain upload property ${upload_property}")
     endif()
 endforeach()
+
+# Fallback glyphs are placed at the primary font's ascent, so they share its baseline.
+file(READ "${SDL3_TTF_SOURCE}/src/SDL_ttf.c" ttf_source)
+string(FIND "${ttf_source}" "pos->y = y + F26Dot6(font->ascent) - pos->y_offset;" baseline_position)
+if(baseline_position EQUAL -1)
+    message(FATAL_ERROR "SDL_ttf.c must place fallback glyphs at the primary font's ascent")
+endif()

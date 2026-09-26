@@ -222,15 +222,19 @@ To keep your changes, copy the changed files from
 
 ### Import from bmd / Export as bmd
 
+The repository does not ship `Item_<lang>.bmd` files; the JSON files are the
+only item data. The import is there to bring in your own old item files.
+
 - **Import from bmd** replaces all items with
-  `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd`: English provides the values,
+  `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd` next to the game; copy your
+  files there first. English provides the values and is required,
   Portuguese and Spanish add their names (a translation equal to the
   English name is not stored). Items the English file does not have keep
   the English name they have now, and every item keeps its tags, wing tier
-  and rule flags (the bmd format has none), so importing over the shipped
-  data gives the shipped data again. Save afterwards to keep the result. The console
-  lists what the import had to fix (see below) and any problem the
-  imported data still has; Save refuses it until those are fixed.
+  and rule flags (the bmd format has none). Save afterwards to keep the
+  result. The console lists what the import had to fix (see below) and any
+  problem the imported data still has; Save refuses it until those are
+  fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
   Files that already have the data stay as they are. Values that the bmd
