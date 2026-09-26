@@ -41,7 +41,7 @@ master accounts `testgm` and `testgm2` stay free for people.
 | Scenario | Account | Character |
 |---|---|---|
 | `trade` | `test300`, `socket` | `test300Dl` (level 300 Dark Lord with Jewels of Bless) sells to `socketElf` |
-| `icarus-take-off` | `test400` | `test400Dl` (level 400 Lord Emperor with a Cape of Emperor and a Dark Horse) |
+| `icarus-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
 
 A new scenario takes an account no other scenario uses. When the test data has
 no account with what a scenario needs, OpenMU's test data gets a new one
@@ -77,7 +77,7 @@ fully hidden may stop rendering, and its socket stops answering then.
 | Scenario | Checks |
 |---|---|
 | `trade` | Two clients warp to Lorencia, meet and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and the jewel ends up in the buyer's inventory (sven-n/MuMain#588). |
-| `icarus-take-off` | A Dark Lord with a cape and a Dark Horse warps to Icarus. Right-clicking the cape takes it off, because the Dark Horse flies; the Dark Horse, now the last flying item, stays on both on a right-click and when dragged (sven-n/MuMain#631). The cape is put back on afterwards. |
+| `icarus-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged (sven-n/MuMain#631). The wings are put back on afterwards. |
 
 ## Writing a scenario
 
@@ -98,7 +98,7 @@ needs by role and gets them started and logged out.
   answer. For an event, take `LastEventSequenceAsync` before the action and
   pass it to `WaitForEventAsync`, so an early answer is not missed.
 - **Leave the test accounts as they were**, so the next run starts from the
-  same data (see `IcarusTakeOffScenario`, which puts the cape back on).
+  same data (see `IcarusTakeOffScenario`, which puts the wings back on).
 
 ## Not covered yet
 
