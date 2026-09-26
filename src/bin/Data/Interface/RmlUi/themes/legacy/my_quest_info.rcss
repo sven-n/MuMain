@@ -71,7 +71,10 @@
 	position: absolute;
 	left: 14px;
 	top: 32px; /* native glyph tops at y+96, 18 apart (bound in my_quest_info.rml); tab at y+60 */
-	width: 140px;
+	/* To the panel's inner edge (x 180, like .party-empty-msg), not native's 140 wrap width: the
+	   original draws its line past 140 when the text grows (800x600, 1280x720). The text is one
+	   line (MyQuestInfoWindow.cpp) and wraps here only when it would leave the frame. */
+	width: 157px;
 	color: token(text-heading);
 	font-weight: bold;
 	font-size: 1em;
