@@ -38,6 +38,7 @@
 	width: 190px;
 	text-align: center;
 	color: token(accent-teal);
+	font-weight: bold; /* native g_hFontBold, like the title, NPC and player names */
 	font-size: 1em;
 }
 
@@ -47,6 +48,7 @@
 	left: 13px;
 	top: 51px;
 	color: #ffff0a;
+	font-weight: bold;
 	font-size: 1em;
 }
 
@@ -61,7 +63,7 @@
 	display: block;
 	color: token(text-narrative);
 	font-size: 1em;
-	line-height: 15px; /* native QP_TEXT_GAP */
+	line-height: inherit; /* native QP_TEXT_GAP 15px, bound on the text layer (quest_progress.rml) */
 	white-space: nowrap;
 }
 
@@ -104,6 +106,7 @@
 	left: 13px;
 	top: 207px;
 	color: #ffb90a;
+	font-weight: bold;
 	font-size: 1em;
 }
 
@@ -118,13 +121,13 @@
 	display: block;
 	color: token(text-narrative);
 	font-size: 1em;
-	margin-bottom: 15px;
+	/* margin-bottom 15px, bound (the .qp-answers text layer is in physical px) */
 }
 .qp-answer-row {
 	display: block;
 	color: token(text-narrative);
 	font-size: 1em;
-	line-height: 15px; /* native QP_TEXT_GAP */
+	line-height: inherit; /* native QP_TEXT_GAP 15px, bound on the text layer */
 	cursor: pointer;
 	pointer-events: auto;
 }
@@ -160,8 +163,7 @@
 .qp-reward-row {
 	display: block;
 	width: 100%;
-	text-align: center;
-	padding: 1px 4px;
+	text-align: center; /* padding 1px 4px, bound (text layer) */
 	font-size: 1em;
 	color: token(text-primary);
 }

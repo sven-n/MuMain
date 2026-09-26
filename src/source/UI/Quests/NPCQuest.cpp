@@ -21,6 +21,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
 
+#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -306,11 +307,16 @@ void CNPCQuest::RenderItem3D()
                 x = UI::Scaling::LogicalX(transform, offset.x) - 22.f;
                 y = UI::Scaling::LogicalY(transform, offset.y) - 9.f;
 
+                // A row's box height is in the panel's own (logical) units -- a transform does not
+                // change box sizes -- unless a theme lays the rows out in physical pixels inside a
+                // counter-scaled text layer (legacy .sharp-text): then it is divided back.
                 if (Rml::Element* firstRow = conditionsEl->GetChild(0))
                 {
-                    const float rowHeightPx = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
-                    if (rowHeightPx > 0.0f)
-                        rowStep = rowHeightPx / transform.scaleY;
+                    float rowHeight = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
+                    if (conditionsEl->GetComputedValues().has_local_transform())
+                        rowHeight /= transform.scaleY;
+                    if (rowHeight > 0.0f)
+                        rowStep = rowHeight;
                 }
             }
         }

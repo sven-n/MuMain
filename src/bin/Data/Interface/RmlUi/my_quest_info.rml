@@ -16,24 +16,28 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title">Quest</span>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">Quest</span>
 
 		<div class="tab-row">
-			<div id="tab_quest" class="tab-btn tab-btn-quest" data-class-active="active_tab == 0"
+			<div id="tab_quest" class="sharp-text tab-btn tab-btn-quest" data-class-active="active_tab == 0" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(48 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
 			     data-event-click="myquest_select_tab(0)">{{tab_quest_label}}</div>
-			<div id="tab_jobchange" class="tab-btn tab-btn-jobchange" data-class-active="active_tab == 1"
+			<div id="tab_jobchange" class="sharp-text tab-btn tab-btn-jobchange" data-class-active="active_tab == 1" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(48 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
 			     data-event-click="myquest_select_tab(1)">{{tab_jobchange_label}}</div>
-			<div id="tab_castletemple" class="tab-btn tab-btn-castletemple" data-class-active="active_tab == 2"
+			<div id="tab_castletemple" class="sharp-text tab-btn tab-btn-castletemple" data-class-active="active_tab == 2" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(72 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
 			     data-event-click="myquest_select_tab(2)">{{tab_castletemple_label}}</div>
 		</div>
 
 		<!-- Quest tab -->
 		<div class="quest-tab" data-class-hidden="active_tab != 0">
-			<div class="quest-empty-msg" data-class-hidden="!quest_list_empty">
+			<div class="sharp-text quest-empty-msg" data-class-hidden="!quest_list_empty"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(140 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
 				<span data-for="line : empty_quest_lines">{{line.text}}</span>
 			</div>
-			<div class="quest-list" data-class-hidden="quest_list_empty">
+			<div class="sharp-text quest-list" data-class-hidden="quest_list_empty"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-height="(100 * root_scale) + 'px'">
 				<div class="quest-row" data-for="q : quests" data-class-selected="q.selected"
+				     data-style-height="(18 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'" data-style-padding-left="(4 * root_scale) + 'px'"
 				     data-event-click="myquest_select_quest(q.index)">{{q.text}}</div>
 			</div>
 
@@ -41,8 +45,10 @@
 			     stretching it to fill would warp it vertically (RenderQuestInfo draws it at fixed size). -->
 			<div class="quest-divider"></div>
 
-			<div class="quest-contents">
+			<div class="sharp-text quest-contents"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-height="(199 * root_scale) + 'px'">
 				<span class="quest-content-row" data-for="c : contents" data-class-bold="c.bold"
+				      data-style-padding="(1 * root_scale) + 'px ' + (4 * root_scale) + 'px'"
 				      data-class-clickable="c.clickable"
 				      data-class-row-subject="c.style == 'subject'"
 				      data-class-row-summary="c.style == 'summary'"
@@ -64,31 +70,42 @@
 		<div id="reward_popup_anchor" class="quest-popup-anchor" data-class-hidden="active_tab != 0"></div>
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
 		     data-class-locked="!open_enabled" data-event-click="myquest_click_open"></div>
-		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-open"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{open_tooltip}}</span>
 		<div id="btn_quest_giveup" class="quest-btn quest-btn-giveup" data-class-hidden="active_tab != 0"
 		     data-class-locked="!giveup_enabled" data-event-click="myquest_click_giveup"></div>
-		<span class="tooltip tooltip-giveup">{{giveup_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-giveup"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{giveup_tooltip}}</span>
 
 		<!-- Job-change tab -->
 		<div class="jobchange-tab" data-class-hidden="active_tab != 1">
-			<div class="jobchange-title">{{jobchange_title}}</div>
-			<div class="jobchange-contents">
+			<div class="sharp-text jobchange-title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(16 * root_scale) + 'px'">{{jobchange_title}}</div>
+			<div class="sharp-text jobchange-contents"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(16 * root_scale) + 'px'">
 				<span data-for="line : jobchange_lines">{{line.text}}</span>
 			</div>
 			<div class="quest-divider jobchange-divider"></div>
-			<div class="jobchange-state">
+			<div class="sharp-text jobchange-state"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(158 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
 				<span data-for="line : jobchange_state_lines">{{line.text}}</span>
 			</div>
 		</div>
 
 		<!-- Castle/Temple tab -->
 		<div class="castletemple-tab" data-class-hidden="active_tab != 2">
-			<div class="castle-title">{{castle_title}}</div>
-			<div class="castle-line">{{castle_line0}}</div>
-			<div class="castle-line">{{castle_line1}}</div>
-			<div class="temple-title">{{temple_title}}</div>
-			<div class="temple-line">{{temple_line0}}</div>
-			<div class="temple-line">{{temple_line1}}</div>
+			<div class="sharp-text castle-block"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(20 * root_scale) + 'px'">
+				<div class="castle-title">{{castle_title}}</div>
+				<div class="castle-line">{{castle_line0}}</div>
+				<div class="castle-line">{{castle_line1}}</div>
+			</div>
+			<div class="sharp-text temple-block"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(20 * root_scale) + 'px'">
+				<div class="temple-title">{{temple_title}}</div>
+				<div class="temple-line">{{temple_line0}}</div>
+				<div class="temple-line">{{temple_line1}}</div>
+			</div>
 			<div class="quest-divider castletemple-divider"></div>
 		</div>
 
@@ -97,7 +114,8 @@
 		<div id="btn_exit" class="quest-btn quest-btn-exit" data-event-click="myquest_click_exit">
 			<span class="btn-exit-label">×</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

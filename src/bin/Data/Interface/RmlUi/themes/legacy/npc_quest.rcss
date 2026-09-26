@@ -43,8 +43,7 @@
 	top: 16px;
 	width: 190px;
 	text-align: center;
-	color: token(accent-cyan);
-	font-weight: bold;
+	color: token(accent-cyan); /* native g_hFont, not bold */
 	font-size: 1em;
 }
 
@@ -81,10 +80,10 @@
 	top: 244px;
 	width: 128px;
 }
+/* Rows inside text layers (npc_quest.rml) take the layer's bound line height as their pitch. */
 .nq-condition-row {
 	display: block;
-	height: 32px;
-	line-height: 32px;
+	line-height: inherit; /* 32px */
 	font-weight: bold;
 	font-size: 1em;
 	white-space: nowrap;
@@ -122,10 +121,12 @@
 	height: 24px;
 	decorator: image(nq-zen-img);
 }
+/* Native draws the label at x+20 and the amount right-aligned to x+170 (window coordinates), both
+   bold at y+368; .nq-cost itself starts at x+11. */
 .nq-cost-label {
 	display: block;
 	position: absolute;
-	left: 20px;
+	left: 9px;
 	top: 7px;
 	color: token(text-hint);
 	font-weight: bold;
@@ -134,10 +135,11 @@
 .nq-cost-amount {
 	display: block;
 	position: absolute;
-	left: 20px;
+	left: 9px;
 	top: 7px;
 	width: 150px;
 	text-align: right;
+	font-weight: bold;
 	font-size: 1em;
 }
 
@@ -150,16 +152,14 @@
 /* Native advances every message and answer line 18 reference px and never wraps them. */
 .nq-message-line {
 	display: block;
-	height: 18px;
-	line-height: 18px;
+	line-height: inherit; /* 18px */
 	white-space: nowrap;
 	color: token(text-narrative);
 	font-size: 1em;
 }
 .nq-answer-row {
 	display: block;
-	height: 18px;
-	line-height: 18px;
+	line-height: inherit; /* 18px */
 	white-space: nowrap;
 	color: #dfbf67;
 	font-weight: bold;
