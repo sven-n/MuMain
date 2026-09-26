@@ -16,8 +16,8 @@
 	top: 15px;
 	width: 190px;
 	text-align: center;
-	color: token(accent-blue);
-	font-weight: bold;
+	/* Native draws it in the normal font, 0xFF49B0FF -- an ABGR DWORD, i.e. (255,176,73). */
+	color: #ffb049;
 	font-size: 1em;
 }
 
