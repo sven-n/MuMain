@@ -13010,4 +13010,10 @@
   <data name="OperationResurrecting" xml:space="preserve">
     <value>Item resurrection</value>
   </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Selamat! Anda telah berhasil menyelesaikan Quest Kastil Darah!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Sayangnya, Anda telah gagal untuk menyelesaikan Quest Kastil Darah.</value>
+  </data>
 </root>

@@ -13096,4 +13096,10 @@
   <data name="OperationResurrecting" xml:space="preserve">
     <value>Item resurrection</value>
   </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Congratulations! You have successfully completed the Blood Castle Quest!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Unfortunately, you have failed to complete the Blood Castle Quest.</value>
+  </data>
 </root>
