@@ -20,16 +20,19 @@
 {
 	src: "../../../MacroUI/MacroUI_Setup.tga";
 	muhelper-config-image: 0px 0px 18px 13px;
+	muhelper-config-hover: 0px 13px 18px 13px;
 }
 @spritesheet muhelper-start-sheet
 {
 	src: "../../../MacroUI/MacroUI_Start.tga";
 	muhelper-start-image: 0px 0px 18px 13px;
+	muhelper-start-hover: 0px 13px 18px 13px;
 }
 @spritesheet muhelper-stop-sheet
 {
 	src: "../../../MacroUI/MacroUI_Stop.tga";
 	muhelper-stop-image: 0px 0px 18px 13px;
+	muhelper-stop-hover: 0px 13px 18px 13px;
 }
 
 #panel {
@@ -105,6 +108,10 @@
 	left: 171dp;
 	decorator: image(muhelper-stop-image);
 }
+/* Native SetButtonInfo(..., overflg 1, ...): the sheet's second 13px frame while hovered. */
+#btn_config:hover { decorator: image(muhelper-config-hover); }
+#btn_start:hover { decorator: image(muhelper-start-hover); }
+#btn_stop:hover { decorator: image(muhelper-stop-hover); }
 
 .dot {
 	display: none;

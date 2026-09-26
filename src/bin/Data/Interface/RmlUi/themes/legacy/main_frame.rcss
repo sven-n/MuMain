@@ -1,8 +1,8 @@
 /* Legacy theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. #bars binds
    left/top/scale live from C++; #buttons/#exp nest inside it to inherit that transform, so their
    coordinates below are plain px, not dp -- dp would double the ancestor's own scale. Gauge
-   fills use real legacy gauge textures; numeric readouts are plain text; buttons use a brightness
-   filter for hover instead of a separate sprite frame. */
+   fills use real legacy gauge textures; numeric readouts are plain text; buttons use their sheet's
+   own hover frame, as native does. */
 
 #bars {
 	position: absolute;
@@ -108,11 +108,11 @@
 .tooltip-hp, .tooltip-sd, .tooltip-ag, .tooltip-mp { top: 418px; }
 
 /* Buttons: nested inside #bars, plain reference-pixel position next to the mana bar. */
-@spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
-@spritesheet mainframe-btn-chainfo-sheet { src: "../../../partCharge1/newui_menu_Bt01.jpg"; mainframe-btn-chainfo-normal: 0px 0px 30px 41px; mainframe-btn-chainfo-open: 0px 82px 30px 41px; }
-@spritesheet mainframe-btn-myinven-sheet { src: "../../../partCharge1/newui_menu_Bt02.jpg"; mainframe-btn-myinven-normal: 0px 0px 30px 41px; mainframe-btn-myinven-open: 0px 82px 30px 41px; }
-@spritesheet mainframe-btn-friend-sheet  { src: "../../../partCharge1/newui_menu_Bt03.jpg"; mainframe-btn-friend-normal: 0px 0px 30px 41px; mainframe-btn-friend-open: 0px 82px 30px 41px; }
-@spritesheet mainframe-btn-window-sheet  { src: "../../../partCharge1/newui_menu_Bt04.jpg"; mainframe-btn-window-normal: 0px 0px 30px 41px; mainframe-btn-window-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-hover: 0px 41px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-chainfo-sheet { src: "../../../partCharge1/newui_menu_Bt01.jpg"; mainframe-btn-chainfo-normal: 0px 0px 30px 41px; mainframe-btn-chainfo-hover: 0px 41px 30px 41px; mainframe-btn-chainfo-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-myinven-sheet { src: "../../../partCharge1/newui_menu_Bt02.jpg"; mainframe-btn-myinven-normal: 0px 0px 30px 41px; mainframe-btn-myinven-hover: 0px 41px 30px 41px; mainframe-btn-myinven-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-friend-sheet  { src: "../../../partCharge1/newui_menu_Bt03.jpg"; mainframe-btn-friend-normal: 0px 0px 30px 41px; mainframe-btn-friend-hover: 0px 41px 30px 41px; mainframe-btn-friend-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-window-sheet  { src: "../../../partCharge1/newui_menu_Bt04.jpg"; mainframe-btn-window-normal: 0px 0px 30px 41px; mainframe-btn-window-hover: 0px 41px 30px 41px; mainframe-btn-window-open: 0px 82px 30px 41px; }
 
 #buttons {
 	position: absolute;
@@ -129,7 +129,13 @@
 	cursor: pointer;
 	pointer-events: auto;
 }
-.frame-btn:hover { filter: brightness(1.25); }
+/* Native CNewUIButton with an over image (ChangeButtonImgState(..., true)): the sheet's second
+   41px frame while hovered; an open window keeps its third (pushed) frame. */
+#btn_cshop:hover   { decorator: image(mainframe-btn-cshop-hover); }
+#btn_chainfo:hover { decorator: image(mainframe-btn-chainfo-hover); }
+#btn_myinven:hover { decorator: image(mainframe-btn-myinven-hover); }
+#btn_friend:hover  { decorator: image(mainframe-btn-friend-hover); }
+#btn_window:hover  { decorator: image(mainframe-btn-window-hover); }
 
 .btn-icon-label { display: none; }
 /* Item hotkey chrome: hit-test/stack-count only. Q/W/E/R letters are baked into the sprite art
