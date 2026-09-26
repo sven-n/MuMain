@@ -71,6 +71,9 @@
 	decorator: image(nq-line-img);
 }
 
+/* The always-present divider (npc_quest_bg.rml) under the dialogue text. */
+.nq-divider-dialogue { top: 220px; }
+
 /* No explicit display -- same reasoning as .nq-quest-title above. */
 .nq-conditions {
 	position: absolute;
@@ -144,13 +147,20 @@
 	width: 190px;
 	text-align: center;
 }
+/* Native advances every message and answer line 18 reference px and never wraps them. */
 .nq-message-line {
 	display: block;
+	height: 18px;
+	line-height: 18px;
+	white-space: nowrap;
 	color: token(text-narrative);
 	font-size: 1em;
 }
 .nq-answer-row {
 	display: block;
+	height: 18px;
+	line-height: 18px;
+	white-space: nowrap;
 	color: #dfbf67;
 	font-weight: bold;
 	font-size: 1em;

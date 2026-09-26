@@ -112,6 +112,8 @@ void CNPCQuest::BuildRmlUi()
             c.Bind("answers", &model.answers);
 
             c.Bind("dialogue_top", &model.dialogueTop);
+            c.Bind("message_top", &model.messageTop);
+            c.Bind("answers_top", &model.answersTop);
 
             c.Bind("complete_label", &model.completeLabel);
             c.Bind("cost_label", &model.costLabel);
@@ -567,14 +569,16 @@ void CNPCQuest::SyncRmlModel()
     // Same vertical-centering formula RenderText() used natively; the QUEST_ING branch depends on
     // how many message+answer lines are present this instance (a real per-instance value), the other
     // branch is a fixed lower anchor (room for the cost banner above it).
-    if (QUEST_ING == byCurQuestState)
-    {
-        const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
-        model.dialogueTop = 66.f + (NUM_LINE_CMB - iTotalLine) * 18.f / 2.f;
-    }
-    else
-    {
-        model.dialogueTop = 250.f;
-    }
+    constexpr float kLineAdvance = 18.f;
+    constexpr float kAnswersAnchorTop = 250.f;
+    const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
+    model.messageTop = 66.f + static_cast<float>(NUM_LINE_CMB - iTotalLine) * kLineAdvance / 2.f;
+    const bool questInProgress = QUEST_ING == byCurQuestState;
+    model.answersTop = questInProgress
+        ? model.messageTop + static_cast<float>(g_iNumLineMessageBoxCustom) * kLineAdvance
+        : kAnswersAnchorTop;
+    model.dialogueTop = questInProgress ? model.messageTop : kAnswersAnchorTop;
     m_RmlBinder.MarkDirty("dialogue_top");
+    m_RmlBinder.MarkDirty("message_top");
+    m_RmlBinder.MarkDirty("answers_top");
 }

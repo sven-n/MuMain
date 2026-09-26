@@ -44,8 +44,12 @@
 			      data-class-gold-ten-million="cost_tier == 'ten-million'">{{cost_amount}}</span>
 		</div>
 
-		<div class="nq-dialogue" data-style-top="dialogue_top + 'px'">
+		<!-- Messages and answers are positioned separately, as native draws them (message_top /
+		     answers_top, NPCQuestRmlModel.h). -->
+		<div class="nq-dialogue" data-style-top="message_top + 'px'">
 			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
+		</div>
+		<div class="nq-dialogue" data-style-top="answers_top + 'px'">
 			<div class="nq-answer-row" data-for="a : answers"
 			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
 		</div>
