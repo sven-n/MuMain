@@ -13,20 +13,25 @@
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
-		<span id="title">{{title}}</span>
-		<span id="tax_rate">{{tax_rate_text}}</span>
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		<span class="sharp-text" id="tax_rate"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{tax_rate_text}}</span>
 
 		<div id="btn_repair" class="shop-btn shop-btn-repair" data-class-hidden="!repair_visible"
 		     data-event-click="npc_shop_repair_click"></div>
-		<span class="tooltip tooltip-repair">{{repair_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-repair"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{repair_tooltip}}</span>
 
 		<div id="btn_repair_all" class="shop-btn shop-btn-repair-all" data-class-hidden="!repair_visible"
 		     data-event-click="npc_shop_repair_all_click"></div>
-		<span class="tooltip tooltip-repair-all">{{repair_all_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-repair-all"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{repair_all_tooltip}}</span>
 
 		<div id="repair_money_bg" class="repair-money" data-class-hidden="!repair_visible"></div>
-		<span id="repair_all_label" class="repair-money-label" data-class-hidden="!repair_visible">{{repair_all_label}}</span>
-		<span id="repair_gold_text" class="repair-money-value gold-amount" data-class-hidden="!repair_visible"
+		<span id="repair_all_label" class="sharp-text repair-money-label" data-class-hidden="!repair_visible"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{repair_all_label}}</span>
+		<span id="repair_gold_text" class="sharp-text repair-money-value gold-amount" data-class-hidden="!repair_visible" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		      data-class-gold-base="repair_gold_tier == 'base'"
 		      data-class-gold-hundred-thousand="repair_gold_tier == 'hundred-thousand'"
 		      data-class-gold-million="repair_gold_tier == 'million'"

@@ -93,6 +93,7 @@
 	left: 30px;
 	font-family: "token(font-body)";
 	font-size: 1em;
+	white-space: nowrap; /* one native line each; the text layer has no width of its own */
 }
 .myshop-line-still-opening {
 	left: 0;

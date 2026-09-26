@@ -11,30 +11,37 @@
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
-		<span id="title" data-class-locked="title_locked">{{title}}</span>
+		<span class="sharp-text" id="title" data-class-locked="title_locked"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
 		<div id="money_bg"></div>
-		<span id="zen_text" class="gold-amount"
+		<span id="zen_text" class="sharp-text sharp-right gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		      data-class-gold-base="zen_tier == 'base'"
 		      data-class-gold-hundred-thousand="zen_tier == 'hundred-thousand'"
 		      data-class-gold-million="zen_tier == 'million'"
 		      data-class-gold-ten-million="zen_tier == 'ten-million'">{{zen_text}}</span>
-		<span id="fee_label">{{fee_label}}</span>
-		<span id="fee_value">{{fee_value}}</span>
+		<span class="sharp-text" id="fee_label"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{fee_label}}</span>
+		<span class="sharp-text sharp-right" id="fee_value"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{fee_value}}</span>
 
 		<div id="btn_insert" class="stor-btn stor-btn-insert" data-event-click="storage_insert_click"></div>
-		<span class="tooltip tooltip-insert">{{insert_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-insert"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{insert_tooltip}}</span>
 
 		<div id="btn_take" class="stor-btn stor-btn-take" data-event-click="storage_take_click"></div>
-		<span class="tooltip tooltip-take">{{take_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-take"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{take_tooltip}}</span>
 
 		<div id="btn_lock" class="stor-btn stor-btn-lock" data-class-locked-mode="storage_locked"
 		     data-event-click="storage_lock_click"></div>
-		<span class="tooltip tooltip-lock">{{lock_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-lock"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{lock_tooltip}}</span>
 
 		<div id="btn_expand" class="stor-btn stor-btn-expand" data-class-hidden="!expand_visible"
 		     data-event-click="storage_expand_click"></div>
-		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-expand"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{expand_tooltip}}</span>
 	</div>
 </body>
 </rml>
