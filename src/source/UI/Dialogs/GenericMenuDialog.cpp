@@ -11,6 +11,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h" // CManager::AddUIObj
 #include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDialogCanvas.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -73,6 +74,7 @@ void CGenericMenuDialog::BuildRmlUi()
             c.Bind("native_line_advance", &model.nativeLineAdvance);
             c.Bind("native_text_inset", &model.nativeTextInset);
             c.Bind("native_divider_top", &model.nativeDividerTop);
+            c.Bind("canvas_top", &model.canvasTop);
             c.Bind("title", &model.title);
 
             // window_shell's positioning/dragging extension -- unused here, this dialog stays
@@ -200,6 +202,8 @@ bool CGenericMenuDialog::Update()
     if (!m_bActive)
         return true;
 
+    SyncCanvasTop();
+
     if (m_bButtonClicked)
     {
         m_bButtonClicked = false;
@@ -278,10 +282,21 @@ void CGenericMenuDialog::SyncNativeFrame()
     sync(model.nativeDividerTop, frame.dividerTop, "native_divider_top");
 }
 
+void CGenericMenuDialog::SyncCanvasTop()
+{
+    auto& model = m_RmlBinder.GetModel();
+    const float canvasTop = UI::RmlBridge::DialogCanvasTop(RmlUiRuntime::Instance().GetContext());
+    if (model.canvasTop == canvasTop)
+        return;
+    model.canvasTop = canvasTop;
+    m_RmlBinder.MarkDirty("canvas_top");
+}
+
 void CGenericMenuDialog::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
+    SyncCanvasTop();
     auto& model = m_RmlBinder.GetModel();
 
     const bool hasTitle = !m_Active.title.empty();
