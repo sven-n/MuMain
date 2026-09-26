@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="generic_confirm_dialog.rcss"/>
 </head>
-<body>
+<body class="native-text">
 	<!-- This is legacy's own markup in practice -- modern has its own complete fork
 	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy. Keep ids/
 	     data-model/event names in sync with the modern fork, GenericConfirmDialog.cpp binds both
@@ -14,7 +14,8 @@
 	     bottom cap) moved to generic_confirm_dialog_bg.rml -- a background-context document
 	     rendered BEFORE the 3D pass that draws item3D each frame, so the item shows through this
 	     now-paint-less #panel instead of being painted over by it. See that file's own comment. -->
-	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel">
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel"
+	     data-class-portrait="has_portrait2d_overlay">
 		<!-- Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) swapped in for the
 		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives here, not
 		     in generic_confirm_dialog_bg.rml -- unlike item3D, a title banner has no compositing-
@@ -27,6 +28,9 @@
 		     recolor the text only, no tinted sprite variants. -->
 		<div class="gcd-header-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
 		     data-class-error="severity_error">{{title}}</div>
+		<!-- Portrait2D's Overlay layout (the default): native's duel crest, drawn behind the text at a
+		     fixed offset in #panel's own coordinate space; its caption is the first text row below. -->
+		<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay"></div>
 		<div class="gcd-body">
 			<!-- Invisible position reference for the native 3D item-preview render pass
 			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself. A flex sibling of
@@ -39,13 +43,12 @@
 			     .gcd-text-col below; no dialog uses both. -->
 			<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
 			<div class="gcd-text-col">
-				<!-- Portrait2D's Overlay layout (the default) -- caption text drawn on top of the
-				     sprite. First child of .gcd-text-col (icon-TOP/text-BELOW), unlike item3D's
-				     icon-left/text-right sibling shape. -->
-				<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
-					<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
-				</div>
-				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+				<!-- Portrait2D's Overlay caption: the bold row right above the lines, over the crest. -->
+				<div class="gcd-portrait2d-text" data-class-hidden="!has_portrait2d_overlay">{{portrait2d_text}}</div>
+				<!-- A line's own colour (GenericDialogConfig::Line::color), else the legacy theme's
+				     text-primary: an empty inline value would not clear a previous dialog's colour. -->
+				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold"
+				     data-style-color="line.color == '' ? '#ffffff' : line.color">{{line.text}}</div>
 				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit
 				     buttons, anti-shoulder-surfing, deliberately NOT an <input type="number">);
 				     Text is a stock RmlUi <input> below. -->
@@ -89,6 +92,7 @@
 		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary"
 		     data-class-solo="!has_secondary &amp;&amp; !show_cancel"
 		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-stock-ok="primary_is_stock_ok"
 		     data-class-hidden="has_progress" data-event-click="gcd_primary_click">{{primary_label}}</div>
 		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary"
 		     data-class-triple="has_secondary &amp;&amp; show_cancel"
@@ -96,6 +100,7 @@
 		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
 		<div id="gcd_btn_cancel" class="btn gcd-btn-cancel"
 		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-stock-cancel="cancel_is_stock_cancel"
 		     data-class-hidden="!show_cancel || has_progress"
 		     data-event-click="gcd_cancel_click">{{cancel_label}}</div>
 	</div>

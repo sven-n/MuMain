@@ -46,6 +46,7 @@ namespace mu::ui::window
         struct MyShopRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
             Rml::String title;
 
             // The editable shop name, two-way bound to my_shop.rml's <input data-value="shop_title">.

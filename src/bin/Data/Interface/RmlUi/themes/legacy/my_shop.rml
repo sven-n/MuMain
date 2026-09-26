@@ -9,8 +9,10 @@
 	     native (MyShopInventory.h). Frame background lives in my_shop_bg.rml instead, since it must
 	     paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
-		<span id="title">{{title}}</span>
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<span class="sharp-text" id="title"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
 		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and
 		     two-way binds the committed value to MyShopRmlModel::shopTitle. Deliberately NOT
@@ -19,32 +21,47 @@
 		     opens). Click the field to type. maxlength comes from C++ (ApplyShopTitleLimit()). Owns
 		     its own background now, so the separate #edit_bg strip this window used to need in the
 		     background document is gone. -->
-		<input id="shop_title" type="text" class="text-field my-shop-title-field"
-		       data-value="shop_title"/>
+		<input id="shop_title" type="text" class="sharp-text text-field my-shop-title-field"
+		       data-value="shop_title" data-style-transform="'scale(' + (1 / root_scale) + ')'"
+		       data-style-font-size="text_px + 'px'" data-style-width="(169 * root_scale) + 'px'"
+		       data-style-height="(26 * root_scale) + 'px'"
+		       data-style-padding="(6 * root_scale) + 'px ' + (6 * root_scale) + 'px 0 ' + (38 * root_scale) + 'px'"/>
 
 		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click"></div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 
 		<div id="btn_open" class="shop-btn shop-btn-open" data-class-locked="open_locked"
 		     data-event-click="my_shop_open_click"></div>
-		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-open"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{open_tooltip}}</span>
 
 		<div id="btn_close" class="shop-btn shop-btn-close" data-class-locked="close_locked"
 		     data-event-click="my_shop_close_click"></div>
-		<span class="tooltip tooltip-close">{{close_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-close"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{close_tooltip}}</span>
 
 		<!-- Former RenderTextInfo() -- fixed instructional text at the same reference-pixel offsets
 		     the native RenderText() calls used, static except still_opening's visibility. Colors are
 		     plain RCSS (myshop-line-* classes), not data-bound -- fixed decorative constants. -->
-		<div id="still_opening_line" class="myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening">{{still_opening_text}}</div>
-		<div id="warning_line" class="myshop-line myshop-line-warning">{{warning_text}}</div>
-		<div id="selling_price_line" class="myshop-line myshop-line-info">{{selling_price_text}}</div>
-		<div id="please_verify_line" class="myshop-line myshop-line-info">{{please_verify_text}}</div>
-		<div id="already_in_store_line" class="myshop-line myshop-line-info">{{already_in_store_text}}</div>
-		<div id="cancel_sold_line" class="myshop-line myshop-line-info">{{cancel_sold_text}}</div>
-		<div id="cant_be_returned_line" class="myshop-line myshop-line-info">{{cant_be_returned_text}}</div>
-		<div id="all_item_trading_line" class="myshop-line myshop-line-warning">{{all_item_trading_text}}</div>
-		<div id="can_only_be_done_using_zen_line" class="myshop-line myshop-line-warning">{{can_only_be_done_using_zen_text}}</div>
+		<div id="still_opening_line" class="sharp-text myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{still_opening_text}}</div>
+		<div id="warning_line" class="sharp-text myshop-line myshop-line-warning"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{warning_text}}</div>
+		<div id="selling_price_line" class="sharp-text myshop-line myshop-line-info"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{selling_price_text}}</div>
+		<div id="please_verify_line" class="sharp-text myshop-line myshop-line-info"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{please_verify_text}}</div>
+		<div id="already_in_store_line" class="sharp-text myshop-line myshop-line-info"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{already_in_store_text}}</div>
+		<div id="cancel_sold_line" class="sharp-text myshop-line myshop-line-info"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cancel_sold_text}}</div>
+		<div id="cant_be_returned_line" class="sharp-text myshop-line myshop-line-info"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cant_be_returned_text}}</div>
+		<div id="all_item_trading_line" class="sharp-text myshop-line myshop-line-warning"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{all_item_trading_text}}</div>
+		<div id="can_only_be_done_using_zen_line" class="sharp-text myshop-line myshop-line-warning"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{can_only_be_done_using_zen_text}}</div>
 	</div>
 </body>
 </rml>

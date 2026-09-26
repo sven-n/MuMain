@@ -63,6 +63,7 @@ namespace mu::ui::window
         struct LuckyItemRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
             float rootWidth = 0.f, rootHeight = 0.f;
             Rml::String title;
             Rml::String mixTooltip;

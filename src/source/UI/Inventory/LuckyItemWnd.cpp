@@ -242,6 +242,7 @@ void CLuckyItemWnd::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                c.Bind("text_px", &model.textPx);
                 c.Bind("root_width", &model.rootWidth);
                 c.Bind("root_height", &model.rootHeight);
                 c.Bind("title", &model.title);
@@ -662,6 +663,7 @@ void CLuckyItemWnd::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_ptPos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     auto& model = m_RmlBinder.GetModel();
     model.rootWidth = m_fSizeX;

@@ -14,9 +14,11 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"       // g_pNewUI3DRenderMng macro resolves through CSystem
+#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 
+#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -70,14 +72,17 @@ void CGenericConfirmDialog::BuildRmlUi()
             auto line = c.RegisterStruct<LineEntry>();
             line.RegisterMember("text", &LineEntry::text);
             line.RegisterMember("bold", &LineEntry::bold);
+            line.RegisterMember("color", &LineEntry::color);
             c.RegisterArray<std::vector<LineEntry>>();
             c.Bind("lines", &model.lines);
 
             c.Bind("primary_label", &model.primaryLabel);
+            c.Bind("primary_is_stock_ok", &model.primaryIsStockOk);
             c.Bind("has_secondary", &model.hasSecondary);
             c.Bind("secondary_label", &model.secondaryLabel);
             c.Bind("show_cancel", &model.showCancel);
             c.Bind("cancel_label", &model.cancelLabel);
+            c.Bind("cancel_is_stock_cancel", &model.cancelIsStockCancel);
 
             c.Bind("has_title", &model.hasTitle);
             c.Bind("title", &model.title);
@@ -420,8 +425,30 @@ Rml::Vector2f CGenericConfirmDialog::PanelTranslateCorrection() const
     Rml::Element* pPanel = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
     if (!pPanel)
         return { 0.f, 0.f };
+    // A theme may place #panel without the centering transform (legacy anchors it like native).
+    if (!pPanel->GetComputedValues().has_local_transform())
+        return {0.f, 0.f};
     const Rml::Vector2f size = pPanel->GetBox().GetSize();
     return { -size.x * 0.5f, -size.y * 0.5f };
+}
+
+void CGenericConfirmDialog::SyncBackgroundPanel()
+{
+    Rml::Element* pPanel = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
+    Rml::Element* pBgPanel = m_pRmlBgDoc ? m_pRmlBgDoc->GetElementById("panel") : nullptr;
+    if (!pPanel || !pBgPanel)
+        return;
+
+    const float height = pPanel->GetBox().GetSize(Rml::BoxArea::Border).y;
+    if (height > 0.f && height != pBgPanel->GetBox().GetSize(Rml::BoxArea::Border).y)
+        pBgPanel->SetProperty(Rml::PropertyId::Height, Rml::Property(height, Rml::Unit::PX));
+
+    // Only a panel placed without the centering transform reports its real top edge.
+    if (pPanel->GetComputedValues().has_local_transform())
+        return;
+    const float top = pPanel->GetAbsoluteOffset(Rml::BoxArea::Border).y;
+    if (top != pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border).y)
+        pBgPanel->SetProperty(Rml::PropertyId::Top, Rml::Property(top, Rml::Unit::PX));
 }
 
 void CGenericConfirmDialog::UpdateProgress()
@@ -454,6 +481,8 @@ bool CGenericConfirmDialog::Update()
 {
     if (!m_bActive)
         return true;
+
+    SyncBackgroundPanel();
 
     if (m_Active.progress)
     {
@@ -576,11 +605,13 @@ void CGenericConfirmDialog::SyncRmlModel()
     std::vector<LineEntry> newLines;
     newLines.reserve(m_Active.lines.size());
     for (const auto& line : m_Active.lines)
-        newLines.push_back({ StringUtils::WideToNarrow(line.text.c_str()), line.bold });
+        newLines.push_back(
+            {StringUtils::WideToNarrow(line.text.c_str()), line.bold, UI::RmlBridge::RgbaToCss(line.color)});
 
     bool linesChanged = newLines.size() != model.lines.size();
     for (size_t i = 0; i < newLines.size() && !linesChanged; ++i)
-        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold;
+        linesChanged = newLines[i].text != model.lines[i].text || newLines[i].bold != model.lines[i].bold ||
+                       newLines[i].color != model.lines[i].color;
     if (linesChanged)
     {
         model.lines = std::move(newLines);
@@ -592,6 +623,12 @@ void CGenericConfirmDialog::SyncRmlModel()
     {
         model.primaryLabel = primaryLabel;
         m_RmlBinder.MarkDirty("primary_label");
+    }
+    const bool primaryIsStockOk = m_Active.primaryLabel == GenericDialogConfig{}.primaryLabel;
+    if (model.primaryIsStockOk != primaryIsStockOk)
+    {
+        model.primaryIsStockOk = primaryIsStockOk;
+        m_RmlBinder.MarkDirty("primary_is_stock_ok");
     }
 
     const bool hasSecondary = m_Active.secondaryLabel.has_value();
@@ -618,6 +655,12 @@ void CGenericConfirmDialog::SyncRmlModel()
     {
         model.cancelLabel = cancelLabel;
         m_RmlBinder.MarkDirty("cancel_label");
+    }
+    const bool cancelIsStockCancel = m_Active.cancelLabel == GenericDialogConfig{}.cancelLabel;
+    if (model.cancelIsStockCancel != cancelIsStockCancel)
+    {
+        model.cancelIsStockCancel = cancelIsStockCancel;
+        m_RmlBinder.MarkDirty("cancel_is_stock_cancel");
     }
 
     const bool hasTitle = !m_Active.title.empty();

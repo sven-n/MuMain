@@ -7,6 +7,7 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
@@ -66,6 +67,7 @@ void CPartyInfoWindow::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                c.Bind("text_px", &model.textPx);
 
                 c.Bind("has_party", &model.hasParty);
                 c.Bind("window_title", &model.windowTitle);
@@ -271,6 +273,7 @@ void CPartyInfoWindow::SyncRmlModel()
     m_RmlBinder.MarkDirty("root_x");
     m_RmlBinder.MarkDirty("root_y");
     m_RmlBinder.MarkDirty("root_scale");
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     if (model.hasParty != m_bParty)
     {

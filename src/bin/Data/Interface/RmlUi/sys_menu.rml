@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="sys_menu.rcss"/>
 </head>
-<body>
+<body class="native-text">
 	<div id="backdrop"></div>
 	<!-- .center-both/.compact replace C++-pushed centering; select_server_hidden doubles as the
 	     "shorter login-scene panel" flag -- see sys_menu.rcss for the geometry. -->

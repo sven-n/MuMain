@@ -15,7 +15,7 @@
 	width: 213dp;
 	height: 187dp;
 	font-family: "token(font-body)";
-	font-size: 12dp;
+	font-size: 1rem;
 	color: white;
 }
 #panel.compact {

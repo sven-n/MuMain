@@ -82,27 +82,35 @@
 .inv-btn-myshop.close-mode { decorator: image(inv-btn-myshop-close); }
 .inv-btn-expand  { left: 124px;     decorator: image(inv-btn-expand); }
 
-/* Tooltips are siblings of their trigger -- this build's shrink-to-fit width can't grow past a
-   narrow nested trigger. */
+/* Button hints, native CNewUIButton::Render() with a top-positioned tooltip: one line of normal
+   text in a black 180-alpha box as wide as the text + 6, centred on the button, its bottom 2 above
+   the button. Siblings of their trigger (this build's shrink-to-fit width can't grow past a
+   narrow nested trigger); the row is centred on the button and the inline span carries the box.
+   font-size comes from the RML: the native text size divided by #panel's scale. */
 .tooltip {
 	display: none;
 	position: absolute;
-	top: 375px;
-	width: 120px;
+	bottom: 40px; /* 429 - 389: 2 above the buttons at y 391 */
+	width: 160px;
+	text-align: center;
 	white-space: nowrap;
-	background-color: token(surface-tooltip);
 	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
 	pointer-events: none;
 	z-index: 1;
 }
-.tooltip-exit   { left: -30px; }
-.tooltip-repair { left: 7px; }
-.tooltip-myshop { left: 44px; }
-.tooltip-expand { left: 60px; }
+.tooltip span {
+	padding: 0 2px;
+	background-color: rgba(0, 0, 0, 180);
+}
+/* The hints are text layers (.sharp-text, my_inventory.rml) anchored by their bottom edge: they
+   scale back around it. The span padding (0 2px) is bound there too. */
+.tooltip.sharp-text { transform-origin: left bottom; }
+/* Button centres (x + 18) less half the row. */
+.tooltip-exit   { left: -49px; }
+.tooltip-repair { left: -12px; }
+.tooltip-myshop { left: 25px; }
+.tooltip-expand { left: 62px; }
 
 #btn_exit:hover ~ .tooltip-exit,
 #btn_repair:hover ~ .tooltip-repair,

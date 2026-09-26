@@ -27,7 +27,7 @@
 	text-align: center;
 	color: token(text-title);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 .qp-subject {
@@ -38,7 +38,8 @@
 	width: 190px;
 	text-align: center;
 	color: token(accent-teal);
-	font-size: 12px;
+	font-weight: bold; /* native g_hFontBold, like the title, NPC and player names */
+	font-size: 1em;
 }
 
 .qp-npc-name {
@@ -47,7 +48,8 @@
 	left: 13px;
 	top: 51px;
 	color: #ffff0a;
-	font-size: 12px;
+	font-weight: bold;
+	font-size: 1em;
 }
 
 .qp-npc-lines {
@@ -60,7 +62,8 @@
 .qp-line {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
+	line-height: inherit; /* native QP_TEXT_GAP 15px, bound on the text layer (quest_progress.rml) */
 	white-space: nowrap;
 }
 
@@ -88,10 +91,9 @@
 .qp-btn-l { left: 131px; decorator: image(qp-btn-l); }
 .qp-btn-r { left: 153px; decorator: image(qp-btn-r); }
 .qp-btn-l:hover, .qp-btn-r:hover { filter: brightness(1.25); }
-/* No pointer-events:none -- the RmlClickPrevPage()/RmlClickNextPage() handlers already guard on
-   prev_enabled/next_enabled, so a locked click is a safe no-op; dimming alone is enough (same
-   convention my_quest_info.rcss's own .quest-btn.locked comment documents). */
-.qp-btn-l.locked, .qp-btn-r.locked { filter: brightness(0.6); }
+/* Native CNewUIQuestProgress(ByEtc)::Render() skips a locked pager button entirely, so a page
+   arrow only shows while there is another page that way. */
+.qp-btn-l.locked, .qp-btn-r.locked { display: none; }
 
 /* Player-name label -- CQuestProgress's own document only (quest_progress_etc.rml has no such
    element at all). Shown for active_view 0 and 1, hidden only in reward view (2).
@@ -104,7 +106,8 @@
 	left: 13px;
 	top: 207px;
 	color: #ffb90a;
-	font-size: 12px;
+	font-weight: bold;
+	font-size: 1em;
 }
 
 .qp-answers {
@@ -117,16 +120,16 @@
 .qp-player-words {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
-	margin-bottom: 15px;
+	font-size: 1em;
+	/* margin-bottom 15px, bound (the .qp-answers text layer is in physical px) */
 }
 .qp-answer-row {
 	display: block;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
+	line-height: inherit; /* native QP_TEXT_GAP 15px, bound on the text layer */
 	cursor: pointer;
 	pointer-events: auto;
-	margin-bottom: 2px;
 }
 .qp-answer-row:hover { background-color: token(surface-hover); }
 
@@ -160,9 +163,8 @@
 .qp-reward-row {
 	display: block;
 	width: 100%;
-	text-align: center;
-	padding: 1px 4px;
-	font-size: 12px;
+	text-align: center; /* padding 1px 4px, bound (text layer) */
+	font-size: 1em;
 	color: token(text-primary);
 }
 .qp-reward-row.bold { font-weight: bold; }
@@ -179,7 +181,7 @@
 	vertical-align: middle;
 	line-height: 29px;
 	color: token(text-narrative);
-	font-size: 12px;
+	font-size: 1em;
 	cursor: pointer;
 	pointer-events: auto;
 	decorator: image(qp-btn-complete-idle);

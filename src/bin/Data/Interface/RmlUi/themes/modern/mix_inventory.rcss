@@ -53,6 +53,10 @@
 	color: token(text-primary);
 }
 .mix-socket-prompt { color: token(text-secondary); }
+/* .mix-line's display: block outranks base.rcss's .hidden (same specificity, later rule), so a
+   hidden line kept showing its last text -- the previous mix type's prediction, success rate and
+   socket prompt. */
+.mix-line.hidden { display: none; }
 
 /* Single Mix button, centered: (190-37)/2, same family default size as every other
    CInventoryCtrl-owning window's icon buttons (base.rcss's .modern-icon-btn-px comment) -- not a

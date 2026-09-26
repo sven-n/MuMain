@@ -16,6 +16,8 @@
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
+		<!-- Native RenderBackImage() always draws this divider under the dialogue text. -->
+		<div class="nq-divider nq-divider-dialogue"></div>
 	</div>
 </body>
 </rml>

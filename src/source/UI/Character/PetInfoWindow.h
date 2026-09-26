@@ -65,6 +65,7 @@ namespace mu::ui::window
             // Movable window (SetPos(), collision-shuffled by PanelColumnX), not HUD-anchored --
             // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             int activeTab = TAB_TYPE_DARKHORSE;
             Rml::String windowTitle;

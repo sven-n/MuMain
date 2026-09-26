@@ -72,6 +72,7 @@ namespace mu::ui::window
         struct TradeRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             Rml::String title;
 

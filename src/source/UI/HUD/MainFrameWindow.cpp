@@ -917,6 +917,10 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             // unconditionally -- AboveLeft matches that; Show()'s own clamping now also covers the
             // horizontal/lower-edge cases that CSS-only transform never did.
             config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
+            // QueueTooltip()'s anchor is native's: the icon's centre, 10 above it; lines centred
+            // (RenderTipTextList(..., RT3_SORT_CENTER, ...)).
+            config.centerHorizontally = true;
+            config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
             config.transform = skillTooltipTransform;
             UI::RmlBridge::Tooltip::Show(config, g_pSkillList);
         }
@@ -2301,6 +2305,15 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
     }
 }
 
+// Native CNewUISkillList::RenderSkillInfo() centres the skill tooltip on the icon (slot x + 10 for
+// the current skill and hotkeys, cell x + 15 in the expanded list) and ends it 10 above the icon.
+namespace
+{
+constexpr float kSlotTooltipOffsetX = 10.f;
+constexpr float kGridTooltipOffsetX = 15.f;
+constexpr float kTooltipGapAbove = 10.f;
+} // namespace
+
 void mu::ui::window::CSkillList::QueueTooltip(int iSkillIndex, float x, float y)
 {
     m_bTooltipPending = true;
@@ -2389,8 +2402,9 @@ void mu::ui::window::CSkillList::OnHotkeySlotHover(int iSlotIndex)
     if (SkillAttribute[bySkillType].SkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
         return;
 
-    // Anchor matches RenderCurrentSkillAndHotSkillList()'s x for the same slot (190 + (iSlotIndex+1)*32).
-    QueueTooltip(m_iHotKeySkillType[iIndex], 190.f + (iSlotIndex + 1) * 32.f, 431.f);
+    // Slot x matches RenderCurrentSkillAndHotSkillList() (190 + (iSlotIndex+1)*32, y 431).
+    QueueTooltip(m_iHotKeySkillType[iIndex], 190.f + (iSlotIndex + 1) * 32.f + kSlotTooltipOffsetX,
+                 431.f - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnCurrentSkillClick()
@@ -2401,7 +2415,7 @@ void mu::ui::window::CSkillList::OnCurrentSkillClick()
 
 void mu::ui::window::CSkillList::OnCurrentSkillHover()
 {
-    QueueTooltip(Hero->CurrentSkill, 392.f, 437.f);
+    QueueTooltip(Hero->CurrentSkill, 392.f + kSlotTooltipOffsetX, 437.f - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnGridCellClick(int iSkillIndex)
@@ -2419,7 +2433,7 @@ void mu::ui::window::CSkillList::OnGridCellHover(int iSkillIndex)
     {
         if (entry.skillIndex == iSkillIndex)
         {
-            QueueTooltip(iSkillIndex, entry.left, entry.top);
+            QueueTooltip(iSkillIndex, entry.left + kGridTooltipOffsetX, entry.top - kTooltipGapAbove);
             break;
         }
     }
@@ -2441,7 +2455,7 @@ void mu::ui::window::CSkillList::OnPetCellHover(int iSkillIndex)
     {
         if (entry.skillIndex == iSkillIndex)
         {
-            QueueTooltip(iSkillIndex, entry.left, entry.top);
+            QueueTooltip(iSkillIndex, entry.left + kGridTooltipOffsetX, entry.top - kTooltipGapAbove);
             break;
         }
     }

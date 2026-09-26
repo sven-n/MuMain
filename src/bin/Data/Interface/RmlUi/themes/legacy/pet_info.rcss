@@ -28,7 +28,7 @@
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	pointer-events: none;
 }
 
@@ -40,7 +40,7 @@
 	height: 22px;
 	text-align: center;
 	line-height: 22px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-muted);
 	cursor: pointer;
 	pointer-events: auto;
@@ -54,17 +54,26 @@
 
 .pet-tab { position: absolute; left: 0; top: 0; width: 190px; height: 429px; }
 
+/* Native draws it bold in 0xFF0000FF -- an ABGR DWORD, i.e. red -- into a 160x30 text box at
+   (15,100) whose background shows as a dark translucent band (the renderer's background colour is
+   still set when it draws). */
 .pet-no-pet-msg {
 	display: block;
 	position: absolute;
 	left: 15px;
-	top: 100px;
+	top: 96px;
 	width: 160px;
-	color: #0000ff;
+	height: 27px;
+	padding-top: 3px;
+	color: #ff0000;
+	background-color: rgba(0, 28, 48, 150);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 	text-align: center;
 }
+/* display: block above would otherwise outrank base.rcss's .hidden (equal specificity, later
+   rule) and keep the message up while a pet is equipped. */
+.pet-no-pet-msg.hidden { display: none; }
 
 .pet-subtitle {
 	display: block;
@@ -73,7 +82,7 @@
 	top: 25px;
 	width: 70px;
 	text-align: center;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	pointer-events: none;
 }
@@ -108,7 +117,7 @@
 	display: block;
 	position: absolute;
 	left: 22px;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	white-space: nowrap;
 	pointer-events: none;
@@ -177,7 +186,7 @@
 	left: 14px;
 	width: 100px;
 	text-align: center;
-	font-size: 12px;
+	font-size: 1em;
 	color: token(text-primary);
 	pointer-events: none;
 }

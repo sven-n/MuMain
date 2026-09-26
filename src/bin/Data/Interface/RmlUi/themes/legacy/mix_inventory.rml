@@ -10,34 +10,64 @@
 	     (a real interactive widget, not presentation) stay fully native. Background lives in
 	     mix_inventory_bg.rml instead, since it must paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
-		<span id="title">{{title}}</span>
+	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<!-- Text laid out where native RenderFrame()/RenderMixDescriptions() drew it: the title a
+		     little lower when there is no tax line, the recipe block at 49, the prediction/source/
+		     status list at 203 (15 apart, advice after one blank line), the descriptions at their own
+		     native offsets (d.top). -->
+		<span class="sharp-text" id="title" data-class-low="!show_tax_rate"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
-		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate">{{tax_rate_text}}</div>
-
-		<div class="mix-content" data-class-hidden="!show_recipe">
-			<div class="mix-line mix-recipe-line" data-style-color="recipe_color">{{recipe_line1}}</div>
-			<div class="mix-line mix-recipe-line" data-style-color="recipe_color"
-			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</div>
-
-			<div class="mix-line mix-success-rate" data-class-hidden="!show_success_rate"
-			     data-style-color="success_rate_color">{{success_rate_text}}</div>
-
-			<div class="mix-line mix-required-zen" data-class-hidden="!show_required_zen">{{required_zen_text}}</div>
-
-			<div class="mix-line mix-prediction" data-class-hidden="!show_prediction">{{prediction_text}}</div>
-
-			<div class="mix-line" data-for="s : source_lines" data-style-color="s.color">{{s.text}}</div>
-			<div class="mix-line" data-for="s : status_lines" data-style-color="s.color">{{s.text}}</div>
-			<div class="mix-line" data-for="a : advice_lines" data-style-color="a.color">{{a.text}}</div>
-			<div class="mix-line" data-for="d : description_lines" data-style-color="d.color">{{d.text}}</div>
-
-			<div class="mix-line mix-socket-prompt" data-class-hidden="!show_socket_prompt">{{socket_prompt_text}}</div>
+		<div class="mix-tax-rate sharp-text" data-class-hidden="!show_tax_rate"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">
+			<div class="mix-fit" data-style-transform="'scale(' + tax_rate_fit + ')'">{{tax_rate_text}}</div>
 		</div>
+
+		<div class="mix-head sharp-text" data-class-hidden="!show_recipe"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">
+			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text" data-style-color="recipe_color">{{recipe_line1}}</span></div>
+			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text" data-style-color="recipe_color"
+			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</span></div>
+			<div class="mix-row mix-row-wide" data-class-hidden="!show_success_rate"
+			     data-style-height="(20 * root_scale) + 'px'"><span class="mix-text"
+			     data-style-color="success_rate_color">{{success_rate_text}}</span></div>
+			<!-- Native leaves the recipe colour set for the zen line unless a success line reset it. -->
+			<div class="mix-row mix-row-wide mix-required-zen" data-class-hidden="!show_required_zen"
+			     data-style-height="(20 * root_scale) + 'px'"><span
+			     class="mix-text" data-style-color="show_success_rate ? 'rgba(210,230,255,255)' : recipe_color"
+			     >{{required_zen_text}}</span></div>
+		</div>
+
+		<div class="mix-list sharp-text" data-class-hidden="!show_recipe"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+			<div class="mix-list-line mix-prediction" data-class-hidden="!show_prediction"><span
+			     class="mix-text">{{prediction_text}}</span></div>
+			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text"
+			     data-style-color="s.color">{{s.text}}</span></div>
+			<div class="mix-list-line mix-unwrapped" data-for="s : status_lines"><span class="mix-text"
+			     data-style-color="s.color">{{s.text}}</span></div>
+			<div class="mix-advice" data-style-margin-top="(15 * root_scale) + 'px'">
+				<div class="mix-list-line mix-unwrapped" data-for="a : advice_lines"><span class="mix-text"
+				     data-style-color="a.color">{{a.text}}</span></div>
+			</div>
+		</div>
+
+		<div class="mix-descriptions" data-class-hidden="!show_recipe">
+			<div class="mix-description sharp-text" data-for="d : description_lines" data-style-top="d.top + 'px'"
+			     data-class-left="d.align_left" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+			     data-style-width="((d.align_left ? 180 : 160) * root_scale) + 'px'">
+				<div class="mix-fit" data-style-color="d.color" data-style-transform="'scale(' + d.fit + ')'">{{d.text}}</div>
+			</div>
+		</div>
+
+		<div class="sharp-text mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">{{socket_prompt_text}}</div>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-class-locked="mix_locked"
 		     data-event-click="mix_inventory_mix_click"></div>
-		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
+		<span class="sharp-text tooltip tooltip-mix"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{mix_tooltip}}</span>
 	</div>
 </body>
 </rml>

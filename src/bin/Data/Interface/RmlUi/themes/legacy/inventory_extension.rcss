@@ -17,7 +17,7 @@
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 1em;
 }
 
 @spritesheet ext-btn-exit-sheet { src: "../../../newui_exit_00.tga"; ext-btn-exit: 0px 0px 36px 29px; }
@@ -45,7 +45,7 @@
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 1em;
 	pointer-events: none;
 	z-index: 1;
 }

@@ -153,6 +153,9 @@ namespace mu::ui::window
         // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
         // dropdownId.
         void RmlToggleDropdown(int dropdownId);
+        // A just-opened dropdown shows its current value, as native's list boxes open on it: run
+        // the frame after opening, once the list is laid out.
+        void ScrollOpenDropdownToSelection();
         void RmlDropdownOptionClick(int dropdownId, int optionIndex);
         void RmlToggleAutoAttack();
         void RmlToggleWhisperSound();
@@ -348,6 +351,7 @@ namespace mu::ui::window
         int m_iActiveTab = 0;
         // -1 = none open. See model.openDropdown's own comment (OptionRmlModel) for the id scheme.
         int m_iOpenDropdown = -1;
+        bool m_bScrollDropdownPending = false;
 
         // Video tab additions -- m_bVsyncEnabled seeded from GameConfig::GetVSyncEnabled() (same
         // place m_bWindowedMode seeds from g_bUseWindowMode); m_iFpsCapIndex indexes
