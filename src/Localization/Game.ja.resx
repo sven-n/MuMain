@@ -10966,88 +10966,88 @@
     <value>デフォルト</value>
   </data>
   <data name="MixLevelAtLeast" xml:space="preserve">
-    <value>+%d or higher</value>
+    <value>+%d以上</value>
   </data>
   <data name="MixLevelAtMost" xml:space="preserve">
-    <value>+%d or lower</value>
+    <value>+%d以下</value>
   </data>
   <data name="MixOption" xml:space="preserve">
-    <value>option +%d</value>
+    <value>+%dオプション</value>
   </data>
   <data name="MixOptionAtLeast" xml:space="preserve">
-    <value>option +%d or higher</value>
+    <value>+%dオプション以上</value>
   </data>
   <data name="MixOptionAtMost" xml:space="preserve">
-    <value>option +%d or lower</value>
+    <value>+%dオプション以下</value>
   </data>
   <data name="MixOptionRange" xml:space="preserve">
-    <value>option +%d~%d</value>
+    <value>+%d~%dオプション</value>
   </data>
   <data name="MixCount" xml:space="preserve">
-    <value>x%d</value>
+    <value>%d個</value>
   </data>
   <data name="MixCountAtLeast" xml:space="preserve">
-    <value>x%d or more</value>
+    <value>%d個以上</value>
   </data>
   <data name="MixCountAtMost" xml:space="preserve">
-    <value>x%d or fewer</value>
+    <value>%d個以下</value>
   </data>
   <data name="MixCountRange" xml:space="preserve">
-    <value>x%d~%d</value>
+    <value>%d~%d個</value>
   </data>
   <data name="SummonedMonsterOwner" xml:space="preserve">
-    <value>%ls of %ls</value>
+    <value>%lsの%ls</value>
   </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
-    <value>Would you like to cancel %ls?</value>
+    <value>%lsを取り消しますか？</value>
   </data>
   <data name="JewelCombinationSucceeded" xml:space="preserve">
-    <value>Jewel combination succeeded.</value>
+    <value>宝石合成が成功しました。</value>
   </data>
   <data name="JewelCombinationFailed" xml:space="preserve">
-    <value>Jewel combination failed.</value>
+    <value>宝石合成が失敗しました</value>
   </data>
   <data name="JewelDismantlingSucceeded" xml:space="preserve">
-    <value>Jewel dismantling succeeded.</value>
+    <value>宝石解体が成功しました。</value>
   </data>
   <data name="JewelDismantlingFailed" xml:space="preserve">
-    <value>Jewel dismantling failed.</value>
+    <value>宝石解体が失敗しました</value>
   </data>
   <data name="ZoneDCleared" xml:space="preserve">
-    <value>Zone %d cleared</value>
+    <value>%d要塞進行成功</value>
   </data>
   <data name="QuestRewardBuffBonus" xml:space="preserve">
-    <value>Bonus: %ls for %lu minutes</value>
+    <value>Bonus: %ls x %lu分</value>
   </data>
   <data name="CrownSwitchD" xml:space="preserve">
-    <value>Crown switch %d</value>
+    <value>刻印スイッチ%d</value>
   </data>
   <data name="FruitStatIncreased" xml:space="preserve">
-    <value>(%ls fruit) %d stat points have been added.</value>
+    <value>%sステータス %dポイントが生成になりました</value>
   </data>
   <data name="FruitStatDecreased" xml:space="preserve">
-    <value>(%ls fruit) %d stat points have been removed.</value>
+    <value>%sステータス %dポイントが減少になりました</value>
   </data>
   <data name="FruitStatCannotIncrease" xml:space="preserve">
-    <value>This stat cannot be increased any more.</value>
+    <value>該当のステータスはこれ以上生成させることができません。</value>
   </data>
   <data name="FruitStatCannotDecrease" xml:space="preserve">
-    <value>This stat cannot be decreased any more.</value>
+    <value>該当のステータスはこれ以上減少させることができません。</value>
   </data>
   <data name="StatPointsAdded" xml:space="preserve">
-    <value>Added</value>
+    <value>生成</value>
   </data>
   <data name="StatPointsRemoved" xml:space="preserve">
-    <value>Removed</value>
+    <value>減少</value>
   </data>
   <data name="QuestCompletedSuccessfully" xml:space="preserve">
-    <value>You have successfully completed the quest.</value>
+    <value>クエストを成功しました。</value>
   </data>
   <data name="QuestFailedUnfortunately" xml:space="preserve">
-    <value>Unfortunately, you have failed the quest.</value>
+    <value>クエストを失敗しました。</value>
   </data>
   <data name="RequestHasFailed" xml:space="preserve">
-    <value>The request has failed.</value>
+    <value>失敗しました。</value>
   </data>
   <data name="QuestRequirementMonster" xml:space="preserve">
     <value>Mon.: %ls x %lu/%lu</value>
@@ -11056,7 +11056,7 @@
     <value>Item: %ls x %lu/%lu</value>
   </data>
   <data name="QuestRequirementLevel" xml:space="preserve">
-    <value>Level: %lu or higher</value>
+    <value>Level: %lu以上</value>
   </data>
   <data name="QuestRequirementZen" xml:space="preserve">
     <value>Zen: %lu</value>
@@ -11071,22 +11071,22 @@
     <value>Item: %ls x %lu</value>
   </data>
   <data name="OperationRefining" xml:space="preserve">
-    <value>Refining</value>
+    <value>製錬</value>
   </data>
   <data name="OperationRestoring" xml:space="preserve">
-    <value>Restoring</value>
+    <value>還元</value>
   </data>
   <data name="OperationChaosCardCombination" xml:space="preserve">
-    <value>Chaos card combination</value>
+    <value>パンドラカード合成</value>
   </data>
   <data name="OperationCherryBlossomAssembly" xml:space="preserve">
-    <value>Cherry blossom branch assembly</value>
+    <value>桜の枝の合成</value>
   </data>
   <data name="OperationRegistration" xml:space="preserve">
-    <value>Registration</value>
+    <value>登録する。</value>
   </data>
   <data name="OperationResurrecting" xml:space="preserve">
-    <value>Item resurrection</value>
+    <value>復活</value>
   </data>
   <data name="BloodCastleQuestCompleted" xml:space="preserve">
     <value>おめでとうございます！ブラッドキャッスルクエストを成功しました。</value>
