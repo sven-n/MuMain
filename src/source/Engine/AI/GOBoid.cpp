@@ -759,7 +759,7 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
                 CreateEffect(MODEL_GROUND_STONE + rand() % 2, Position, o->Angle, o->Light);
             }
         }
-        EarthQuake = (rand() % 3 - 3) * 0.7f;
+        SetEarthQuakeAt(o->Position, (rand() % 3 - 3) * 0.7f);
     }
     else if (o->WeaponLevel == (BYTE)(19.f / FPS_ANIMATION_FACTOR))
     {
@@ -802,7 +802,7 @@ void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
 
     if (o->WeaponLevel == iMaxSkill - 1)
     {
-        EarthQuake = (rand() % 3 - 3) * 0.7f;
+        SetEarthQuakeAt(o->Position, (rand() % 3 - 3) * 0.7f);
         CreateEffect(MODEL_SKILL_FURY_STRIKE, TargetO.Position, TargetO.Angle, TargetO.Light, 0, o, -1, 0, 2);
     }
 
