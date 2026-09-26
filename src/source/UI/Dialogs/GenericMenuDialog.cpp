@@ -59,6 +59,8 @@ void CGenericMenuDialog::BuildRmlUi()
             button.RegisterMember("enabled", &MenuButtonEntry::enabled);
             button.RegisterMember("compact", &MenuButtonEntry::compact);
             button.RegisterMember("cols2", &MenuButtonEntry::cols2);
+            button.RegisterMember("native_top", &MenuButtonEntry::nativeTop);
+            button.RegisterMember("lines_below", &MenuButtonEntry::linesBelow);
             c.RegisterArray<std::vector<MenuButtonEntry>>();
             c.Bind("buttons", &model.buttons);
 
@@ -67,6 +69,10 @@ void CGenericMenuDialog::BuildRmlUi()
             c.Bind("is_system_menu", &model.isSystemMenu);
             c.Bind("native_top", &model.nativeTop);
             c.Bind("native_height", &model.nativeHeight);
+            c.Bind("native_text_top", &model.nativeTextTop);
+            c.Bind("native_line_advance", &model.nativeLineAdvance);
+            c.Bind("native_text_inset", &model.nativeTextInset);
+            c.Bind("native_divider_top", &model.nativeDividerTop);
             c.Bind("title", &model.title);
 
             // window_shell's positioning/dragging extension -- unused here, this dialog stays
@@ -256,6 +262,19 @@ void CGenericMenuDialog::SyncNativeFrame()
         model.nativeHeight = height;
         m_RmlBinder.MarkDirty("native_height");
     }
+
+    const auto sync = [this](float& field, int value, const char* name)
+    {
+        const float wanted = static_cast<float>(value);
+        if (field == wanted)
+            return;
+        field = wanted;
+        m_RmlBinder.MarkDirty(name);
+    };
+    sync(model.nativeTextTop, frame.textTop, "native_text_top");
+    sync(model.nativeLineAdvance, frame.lineAdvance, "native_line_advance");
+    sync(model.nativeTextInset, frame.textInset, "native_text_inset");
+    sync(model.nativeDividerTop, frame.dividerTop, "native_divider_top");
 }
 
 void CGenericMenuDialog::SyncRmlModel()
@@ -317,6 +336,8 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.enabled = button.enabled;
         entry.compact = button.compact;
         entry.cols2 = (m_Active.columns == 2) && !button.compact;
+        entry.nativeTop = static_cast<float>(button.nativeTop);
+        entry.linesBelow = button.linesBelow;
         newButtons.push_back(std::move(entry));
     }
     bool buttonsChanged = newButtons.size() != model.buttons.size();
@@ -326,7 +347,8 @@ void CGenericMenuDialog::SyncRmlModel()
         const auto& b = model.buttons[i];
         buttonsChanged = a.label != b.label || a.tooltip != b.tooltip
             || a.hasTooltip != b.hasTooltip || a.enabled != b.enabled || a.compact != b.compact
-            || a.cols2 != b.cols2 || a.lines.size() != b.lines.size();
+            || a.cols2 != b.cols2 || a.nativeTop != b.nativeTop || a.linesBelow != b.linesBelow
+            || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
             buttonsChanged = !SameLine(a.lines[j], b.lines[j]);
     }

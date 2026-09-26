@@ -72,6 +72,46 @@
 	margin-bottom: 4dp;
 }
 .gmd-line.bold { font-weight: bold; }
+.gmd-lines { display: block; width: 100%; }
+
+/* A described native layout (GenericMenuConfig::nativeFrame, MenuButton::nativeTop): the lines and
+   buttons sit at the native box's own y offsets (top/line-height bound in generic_menu_dialog.rml).
+   Offsets are from the panel's top edge: the containing block is the shell's content box, which
+   starts at the panel top in a titled native-frame menu (see #panel.native-frame above). */
+#panel.native-frame .gmd-lines.native-placed {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+}
+#panel.native-frame .gmd-lines.native-placed .gmd-line { margin-bottom: 0; }
+/* Native's "about" texts are left-aligned, wrapped inside an inset (CElpisMsgBox's x+30). */
+#panel.native-frame .gmd-lines.inset .gmd-line { text-align: left; }
+#panel.native-frame .gmd-button-cell.native-placed {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	margin: 0;
+}
+/* CTrainerRecoverMsgBox draws each pet's status line under its button. */
+.gmd-button-cell.lines-below { flex-direction: column-reverse; }
+#panel.native-frame .gmd-button-cell.lines-below .gmd-line { line-height: 18dp; margin: 0; }
+
+/* CElpisMsgBox's divider (newui_Message_Line.tga, 223x21) across the box at native_divider_top. */
+@spritesheet msgbox-line-sheet
+{
+	src: "../../../newui_Message_Line.tga";
+	msgbox-line-image: 0px 0px 223px 21px;
+}
+.gmd-divider {
+	position: absolute;
+	left: -16dp; /* the content box is inset 16dp from the panel edge */
+	width: 223dp;
+	height: 21dp;
+	decorator: image(msgbox-line-image);
+}
+.gmd-divider.hidden { display: none; }
 
 /* No explicit column count -- row + flex-wrap lets the button count/width and the row's own
    available width determine how many fit per line, same mechanism

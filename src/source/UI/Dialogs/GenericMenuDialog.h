@@ -55,6 +55,9 @@ namespace mu::ui::window
                                             // but it's a one-bool add worth reserving
             bool compact = false;           // true = native's smaller "Cancel/Exit" button style;
                                             // false = the larger action-button style
+            int nativeTop = 0;              // native box's button y offset (with nativeFrame);
+                                            // 0 = flow
+            bool linesBelow = false;        // `lines` sit under the button (CTrainerRecoverMsgBox)
             std::function<void()> onClick;  // fires, then the dialog closes -- every native
                                             // button in this family destroys its own box on click,
                                             // none need a KeepOpen()-style veto
@@ -73,12 +76,17 @@ namespace mu::ui::window
         int columns = 0;
 
         // The native box this menu replaces (CNewUIMessageBoxBase::Create): its top edge and the
-        // number of 15px middle strips between its 67px top and 50px bottom caps. Data only -- a
-        // theme may reproduce the native frame (legacy does); 0 = not described.
+        // number of 15px middle strips between its 67px top and 50px bottom caps, and where its
+        // RenderTexts() draws `lines`. Data only -- a theme may reproduce the native layout
+        // (legacy does); 0 = not described / flow.
         struct NativeFrame
         {
             int top = 0;
             int middleCount = 0;
+            int textTop = 0;       // y offset of the first line's text
+            int lineAdvance = 0;   // y step between lines
+            int textInset = 0;     // left/right inset of left-aligned text (0 = centred)
+            int dividerTop = 0;    // y offset of a newui_Message_Line divider (CElpisMsgBox)
         };
         NativeFrame nativeFrame;
 
@@ -145,6 +153,8 @@ namespace mu::ui::window
             bool enabled = true;
             bool compact = false;
             bool cols2 = false;     // GenericMenuConfig::columns == 2 && !compact -- see its comment
+            float nativeTop = 0.f;  // MenuButton::nativeTop
+            bool linesBelow = false;
         };
         struct GenericMenuRmlModel
         {
@@ -153,6 +163,10 @@ namespace mu::ui::window
             bool highlightTitle = false;
             float nativeTop = 0.f;     // GenericMenuConfig::nativeFrame, in reference pixels
             float nativeHeight = 0.f;
+            float nativeTextTop = 0.f;
+            float nativeLineAdvance = 0.f;
+            float nativeTextInset = 0.f;
+            float nativeDividerTop = 0.f;
             Rml::String title;
             std::vector<LineEntry> lines;
             std::vector<MenuButtonEntry> buttons;

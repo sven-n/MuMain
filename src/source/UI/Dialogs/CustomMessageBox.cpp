@@ -1730,7 +1730,7 @@ bool mu::ui::window::CCursedTempleHolicItemSaveLayout::SetLayout()
 void mu::ui::window::ShowLuckyTradeMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 43, 18 };
     // Hardcoded Korean, no I18N constant -- faithfully carried over from native's own literal.
     cfg.title = L"럭키아이템 교환NPC"; // "LuckyItem Trade NPC"
     cfg.lines.push_back({ L"럭키아이템으로 교환하거나 제련할 수 있습니?", false });
@@ -1739,11 +1739,13 @@ void mu::ui::window::ShowLuckyTradeMenuDialog()
 
     GenericMenuConfig::MenuButton btnTrade;
     btnTrade.label = L"럭키아이템 교환"; // "GlobalText"
+    btnTrade.nativeTop = 85;
     btnTrade.onClick = [] { g_pLuckyItemWnd->SetAct(eLuckyItemType_Trade); g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND); };
     cfg.buttons.push_back(std::move(btnTrade));
 
     GenericMenuConfig::MenuButton btnRefinery;
     btnRefinery.label = L"럭키아이템 제련"; // "GlobalText"
+    btnRefinery.nativeTop = 120;
     btnRefinery.onClick = [] { g_pLuckyItemWnd->SetAct(eLuckyItemType_Refinery); g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND); };
     cfg.buttons.push_back(std::move(btnRefinery));
 
@@ -1762,7 +1764,7 @@ void mu::ui::window::ShowLuckyTradeMenuDialog()
 void mu::ui::window::ShowTrainerMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 43, 18 };
     cfg.title = I18N::Game::Trainer;
     cfg.lines.push_back({ I18N::Game::Hi, false });
 
@@ -1772,11 +1774,13 @@ void mu::ui::window::ShowTrainerMenuDialog()
 
     GenericMenuConfig::MenuButton btnRecover;
     btnRecover.label = I18N::Game::RestoreLifeDurability;
+    btnRecover.nativeTop = 85;
     btnRecover.onClick = [] { mu::ui::window::ShowTrainerRecoverDialog(); };
     cfg.buttons.push_back(std::move(btnRecover));
 
     GenericMenuConfig::MenuButton btnRevive;
     btnRevive.label = I18N::Game::ResurrectSpirit;
+    btnRevive.nativeTop = 120;
     btnRevive.onClick = []
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_TRAINER);
@@ -1798,27 +1802,32 @@ void mu::ui::window::ShowTrainerMenuDialog()
 void mu::ui::window::ShowTrainerRecoverDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 43, 18 };
     cfg.title = I18N::Game::Trainer;
     cfg.lines.push_back({ I18N::Game::SelectThePetToRecoverLife, false });
 
     // Native positions each pet's own recovery-cost/status sentence (from CalcRecoveryZen)
-    // directly under that pet's own button -- attached to each MenuButton's own lines here so it
-    // renders in the same place, rather than bunched above the whole button list.
+    // directly under that pet's own button, in its muted gold -- attached to each MenuButton's own
+    // lines (linesBelow) so it renders in the same place, rather than bunched above the list.
+    const unsigned long statusColor = RGBA(206, 192, 146, 255);
     wchar_t costText[100] = { 0, };
     auto exitFn = [] { SocketClient->ToGameServer()->SendCloseNpcRequest(); };
 
     GenericMenuConfig::MenuButton btnDarkHorse;
     btnDarkHorse.label = I18N::Game::DarkHorse;
     npcBreeder::CalcRecoveryZen(REVIVAL_DARKHORSE, costText);
-    btnDarkHorse.lines.push_back({ costText, false });
+    btnDarkHorse.lines.push_back({ costText, false, statusColor });
+    btnDarkHorse.linesBelow = true;
+    btnDarkHorse.nativeTop = 65;
     btnDarkHorse.onClick = [] { npcBreeder::RecoverPet(REVIVAL_DARKHORSE); SocketClient->ToGameServer()->SendCloseNpcRequest(); };
     cfg.buttons.push_back(std::move(btnDarkHorse));
 
     GenericMenuConfig::MenuButton btnDarkSpirit;
     btnDarkSpirit.label = I18N::Game::DarkRaven;
     npcBreeder::CalcRecoveryZen(REVIVAL_DARKSPIRIT, costText);
-    btnDarkSpirit.lines.push_back({ costText, false });
+    btnDarkSpirit.lines.push_back({ costText, false, statusColor });
+    btnDarkSpirit.linesBelow = true;
+    btnDarkSpirit.nativeTop = 115;
     btnDarkSpirit.onClick = [] { npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT); SocketClient->ToGameServer()->SendCloseNpcRequest(); };
     cfg.buttons.push_back(std::move(btnDarkSpirit));
 
@@ -1840,34 +1849,43 @@ void mu::ui::window::ShowTrainerRecoverDialog()
 void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 12 };
+    // Native CElpisMsgBox: bold gold text from y+43 (the "about" texts left-aligned, wrapped
+    // 30 in from each side), a divider at y+120, buttons at y+145/175/205.
+    constexpr int kAboutTextInset = 30;
+    const unsigned long textColor = RGBA(220, 183, 131, 255);
+    cfg.nativeFrame = { 60, 12, 43, 18, 0, 120 };
     cfg.title = I18N::Game::Elpis;
 
     switch (iMessageType)
     {
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY:
-        cfg.lines.push_back({ I18N::Game::GemstoneOfJewelOfHarmonyHas, false });
+        cfg.lines.push_back({ I18N::Game::GemstoneOfJewelOfHarmonyHas, true, textColor });
+        cfg.nativeFrame.textInset = kAboutTextInset;
         break;
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY:
-        cfg.lines.push_back({ I18N::Game::NewPowerCanBeGrantedTo, false });
+        cfg.lines.push_back({ I18N::Game::NewPowerCanBeGrantedTo, true, textColor });
+        cfg.nativeFrame.textInset = kAboutTextInset;
         break;
     default:
-        cfg.lines.push_back({ I18N::Game::WhatWouldYouLikeToKnow, false });
+        cfg.lines.push_back({ I18N::Game::WhatWouldYouLikeToKnow, true, textColor });
         break;
     }
 
     GenericMenuConfig::MenuButton btnAboutRefinary;
     btnAboutRefinary.label = I18N::Game::AboutRefinery;
+    btnAboutRefinary.nativeTop = 145;
     btnAboutRefinary.onClick = [] { ShowElpisMenuDialog(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY); };
     cfg.buttons.push_back(std::move(btnAboutRefinary));
 
     GenericMenuConfig::MenuButton btnAboutJewel;
     btnAboutJewel.label = I18N::Game::JewelOfHarmony;
+    btnAboutJewel.nativeTop = 175;
     btnAboutJewel.onClick = [] { ShowElpisMenuDialog(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY); };
     cfg.buttons.push_back(std::move(btnAboutJewel));
 
     GenericMenuConfig::MenuButton btnRefine;
     btnRefine.label = I18N::Game::RefineGemstone;
+    btnRefine.nativeTop = 205;
     btnRefine.onClick = []
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ELPIS);
@@ -1889,13 +1907,14 @@ void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 void mu::ui::window::ShowSeedMasterMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 43, 18 };
     cfg.title = I18N::Game::SeedMaster;
     cfg.lines.push_back({ I18N::Game::ExtractTheSeedOrTheSeedSphere, false });
     cfg.lines.push_back({ I18N::Game::YouMayAssemblyThemTogether, false });
 
     GenericMenuConfig::MenuButton btnExtract;
     btnExtract.label = I18N::Game::SeedExtraction;
+    btnExtract.nativeTop = 85;
     btnExtract.onClick = []
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_EXTRACT_SEED);
@@ -1905,6 +1924,7 @@ void mu::ui::window::ShowSeedMasterMenuDialog()
 
     GenericMenuConfig::MenuButton btnSphere;
     btnSphere.label = I18N::Game::SeedSphereAssembly;
+    btnSphere.nativeTop = 120;
     btnSphere.onClick = []
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_SEED_SPHERE);
@@ -1926,13 +1946,14 @@ void mu::ui::window::ShowSeedMasterMenuDialog()
 void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 43, 18 };
     cfg.title = I18N::Game::SeedResearcher;
     cfg.lines.push_back({ I18N::Game::EitherApplyTheSeedSphere, false });
     cfg.lines.push_back({ I18N::Game::OrDestroyTheSeedSphereAccordingly, false });
 
     GenericMenuConfig::MenuButton btnAttach;
     btnAttach.label = I18N::Game::SeedSphereApplication;
+    btnAttach.nativeTop = 85;
     btnAttach.onClick = []
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ATTACH_SOCKET);
@@ -1942,6 +1963,7 @@ void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 
     GenericMenuConfig::MenuButton btnDetach;
     btnDetach.label = I18N::Game::SeedSphereDestruction;
+    btnDetach.nativeTop = 120;
     btnDetach.onClick = []
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_DETACH_SOCKET);
@@ -1963,12 +1985,13 @@ void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 void mu::ui::window::ShowResetCharacterPointDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 53, 18 };
     cfg.title = I18N::Game::ReInitializationHelper;
     cfg.lines.push_back({ I18N::Game::ClickOnTheButtonToReinitializeAllStatPoints, false });
 
     GenericMenuConfig::MenuButton btnReset;
     btnReset.label = I18N::Game::StatReInitialization; // "스탯 초기화"
+    btnReset.nativeTop = 105;
     btnReset.onClick = []
     {
         for (int i = 0; i < MAX_EQUIPMENT; i++)
@@ -2288,7 +2311,7 @@ bool mu::ui::window::CGuild_ToPerson_PositionLayout::SetLayout()
 void mu::ui::window::ShowDelgardoMainMenuDialog()
 {
     GenericMenuConfig cfg;
-    cfg.nativeFrame = { 60, 7 };
+    cfg.nativeFrame = { 60, 7, 48, 12 };
     cfg.title = I18N::Game::Delgado;
     cfg.lines.push_back({ I18N::Game::RegisterYourLuckyCoinsOr, false });
     cfg.lines.push_back({ I18N::Game::UseTheLuckyCoinsYouAlreadyHave, false });
@@ -2296,11 +2319,13 @@ void mu::ui::window::ShowDelgardoMainMenuDialog()
 
     GenericMenuConfig::MenuButton btnReg;
     btnReg.label = I18N::Game::LuckyCoinRegistration;
+    btnReg.nativeTop = 85;
     btnReg.onClick = [] { g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION); };
     cfg.buttons.push_back(std::move(btnReg));
 
     GenericMenuConfig::MenuButton btnExchange;
     btnExchange.label = I18N::Game::LuckyCoinExchange;
+    btnExchange.nativeTop = 120;
     btnExchange.onClick = [] { g_pNewUISystem->Show(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN); };
     cfg.buttons.push_back(std::move(btnExchange));
 
