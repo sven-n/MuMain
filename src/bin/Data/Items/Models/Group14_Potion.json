@@ -394,7 +394,8 @@
     },
     {
       "number": 83,
-      "file": "Data/Item/partCharge2/expensiveitem04b.bmd"
+      "file": "Data/Item/partCharge2/expensiveitem04b.bmd",
+      "textureFolders": ["Item/partCharge2", "Item/partCharge1"]
     },
     {
       "number": 84,
