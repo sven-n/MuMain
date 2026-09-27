@@ -459,7 +459,8 @@ per-window, or entirely unbuilt:
 
 - **ItemSlot / ItemGrid** — the slot *chrome* (border/hover highlight/count/cooldown overlay) has
   no reusable RmlUi component yet, but the pattern to build one isn't unproven: it's the same
-  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) already validated for skill icons.
+  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) validated for skill icons (since
+  2026-09-27 the skill icons themselves are RmlUi sprites too: `skill_icons.rcss`, `ResolveSkillIcon()`).
   **Correction, 2026-09-06**: this entry previously called `CItemHotKey`'s icons "3D-camera-
   composited" and framed the whole slot as "still 100% legacy 2D rendering... the next real
   candidate to prove a pattern against" — wrong on both counts. Traced to source
