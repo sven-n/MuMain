@@ -45,17 +45,9 @@ public:
         return m_modelCount;
     }
 
-    // Changes with every Build, so values taken from the models can be
-    // looked up again.
-    int GetVersion() const
-    {
-        return m_version;
-    }
-
 private:
     std::vector<ItemModelDefinition> m_models;
     int m_modelCount = 0;
-    int m_version = 0;
 };
 } // namespace Data::Items
 

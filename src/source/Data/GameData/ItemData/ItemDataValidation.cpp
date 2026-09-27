@@ -15,7 +15,6 @@ namespace Data::Items
 namespace
 {
 constexpr const char* NameField = "name";
-constexpr const char* GlowColorListFile = "Data/Effects/GlowColors.json";
 
 void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const ItemDefinition& definition,
               const std::string& message, const char* field = NameField)
@@ -139,7 +138,7 @@ void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
         names.insert(color.name);
     }
 
-    const std::string colorList = GlowColorListFile;
+    const std::string colorList = Effects::GlowColorsFile;
     for (const char* name : {ItemGlow::DefaultColor, ItemGlow::DefaultShineColor, ItemGlow::DefaultAncientColor})
     {
         if (!names.contains(name))

@@ -5899,7 +5899,7 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
     }
     else
     {
-        color = Render::Items::Glow::GetColorsOfDrawnItem(Type).color;
+        color = Render::Items::Glow::GetColors(Type).color;
     }
 
     Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
@@ -5908,13 +5908,14 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
 
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon)
 {
-    if (Render::Items::Glow::Get(Type).shineWhite)
+    const Render::Items::Glow::Colors& colors = Render::Items::Glow::GetColors(Type);
+    if (colors.shineWhite)
     {
         Vector(1.f, 1.f, 1.f, Light);
         return;
     }
 
-    const Render::Items::Glow::Color& color = Render::Items::Glow::GetColors(Type).shineColor;
+    const Render::Items::Glow::Color& color = colors.shineColor;
     Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
     Vector(Bright * color[0] * Light[0], Bright * color[1] * Light[1], Bright * color[2] * Light[2], Light);
 }
@@ -8017,18 +8018,7 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
         b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return;
     }
-    // Not an item model.
-    if (Type == MODEL_ARMORINVEN_74)
-    {
-        if (RenderType & RENDER_METAL)
-        {
-            b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        }
-        b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return;
-    }
-    Render::Items::Glow::RenderMeshes(b, o, Render::Items::Glow::Get(Type).meshes, RenderType, Alpha, Texture);
+    Render::Items::Glow::RenderGlow(b, o, Type, RenderType, Alpha, Texture);
 }
 
 void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture)
@@ -8048,13 +8038,7 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     {
         PartObjectColor2(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
-    // Not an item model.
-    if (Type == MODEL_ARMORINVEN_74)
-    {
-        b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return;
-    }
-    Render::Items::Glow::RenderMeshes(b, o, Render::Items::Glow::Get(Type).shineMeshes, RenderType, Alpha, Texture);
+    Render::Items::Glow::RenderShine(b, o, Type, RenderType, Alpha, Texture);
 }
 
 void NextGradeObjectRender(CHARACTER* c)

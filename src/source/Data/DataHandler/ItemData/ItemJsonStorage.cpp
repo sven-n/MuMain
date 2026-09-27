@@ -158,13 +158,13 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
 
 std::filesystem::path GetGlowColorsFile()
 {
-    return std::filesystem::path("Data") / "Effects" / "GlowColors.json";
+    return std::filesystem::path(Effects::GlowColorsFile);
 }
 
 GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
 {
     GlowColorsLoadResult result;
-    const std::string source = file.filename().string();
+    const std::string source = Effects::GlowColorsFile;
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {

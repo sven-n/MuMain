@@ -188,6 +188,9 @@ TEST_CASE("The glow color list is checked [data][effects]")
                    "colors.blue"));
     CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {}, "shades": 3})"), ItemDataIssueSeverity::Warning,
                    "shades"));
+    // The JSON reader would keep only the last of two equal names.
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"gold": [1, 0.7, 0.2], "gold": [1, 1, 0]}})"),
+                   ItemDataIssueSeverity::Error, "colors.gold"));
 }
 
 TEST_CASE("Item model glow colors must be in the glow color list [data][items]")

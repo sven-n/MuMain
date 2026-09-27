@@ -406,7 +406,8 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": "sand"
+        "color": "sand",
+        "hiddenMesh": 2
       }
     },
     {

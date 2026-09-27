@@ -4,9 +4,8 @@
 
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
-#include <algorithm>
-#include <cctype>
 #include <cmath>
+#include <set>
 
 namespace Data::Effects
 {
@@ -18,11 +17,35 @@ using Items::Json::OrderedJson;
 
 constexpr const char* ColorsKey = "colors";
 constexpr double MaxColorValue = 1.0;
+// The names of the colors are keys in the object of "colors" in the root.
+constexpr int ColorNameDepth = 2;
 
-bool IsValidName(const std::string& name)
+// The JSON reader keeps only the last of two equal keys, so a name that is
+// in the list twice is looked for in the text.
+std::vector<std::string> FindRepeatedColorNames(std::string_view text)
 {
-    return !name.empty() &&
-           std::all_of(name.begin(), name.end(), [](unsigned char character) { return std::isalnum(character) != 0; });
+    std::vector<std::string> repeated;
+    std::vector<std::set<std::string>> keysPerObject;
+    const OrderedJson::parser_callback_t callback =
+        [&](int depth, OrderedJson::parse_event_t event, OrderedJson& parsed)
+    {
+        if (event == OrderedJson::parse_event_t::object_start)
+        {
+            keysPerObject.emplace_back();
+        }
+        else if (event == OrderedJson::parse_event_t::object_end && !keysPerObject.empty())
+        {
+            keysPerObject.pop_back();
+        }
+        else if (event == OrderedJson::parse_event_t::key && depth == ColorNameDepth && !keysPerObject.empty() &&
+                 !keysPerObject.back().insert(parsed.get<std::string>()).second)
+        {
+            repeated.push_back(parsed.get<std::string>());
+        }
+        return true;
+    };
+    static_cast<void>(OrderedJson::parse(text, callback, false));
+    return repeated;
 }
 
 bool ReadValue(const OrderedJson& json, GlowColorValue& value)
@@ -65,11 +88,15 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
         AddError(issues, source, ColorsKey, "missing or not an object of names and colors");
         return;
     }
+    for (const std::string& name : FindRepeatedColorNames(text))
+    {
+        AddError(issues, source, std::string(ColorsKey) + "." + name, "is in the list more than once");
+    }
     for (const auto& [name, json] : list->items())
     {
         const std::string field = std::string(ColorsKey) + "." + name;
         GlowColorValue value{};
-        if (!IsValidName(name))
+        if (!Items::Json::IsName(name))
         {
             AddError(issues, source, field, "a name has only letters and digits");
         }
@@ -92,22 +119,4 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
     }
 }
 
-GlowColorList& GlowColorList::GetInstance()
-{
-    static GlowColorList instance;
-    return instance;
-}
-
-void GlowColorList::Build(std::span<const GlowColor> colors)
-{
-    m_colors.assign(colors.begin(), colors.end());
-    ++m_version;
-}
-
-const GlowColorValue* GlowColorList::Find(std::string_view name) const
-{
-    const auto found =
-        std::find_if(m_colors.begin(), m_colors.end(), [name](const GlowColor& color) { return color.name == name; });
-    return found != m_colors.end() ? &found->value : nullptr;
-}
 } // namespace Data::Effects

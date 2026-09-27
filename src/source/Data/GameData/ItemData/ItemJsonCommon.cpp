@@ -2,6 +2,8 @@
 
 #include "ItemJsonCommon.h"
 
+#include <algorithm>
+#include <cctype>
 #include <limits>
 
 namespace Data::Items::Json
@@ -126,6 +128,12 @@ bool ReadWholeNumber(const OrderedJson& json, long long& number)
         return true;
     }
     return false;
+}
+
+bool IsName(std::string_view text)
+{
+    return !text.empty() &&
+           std::all_of(text.begin(), text.end(), [](unsigned char character) { return std::isalnum(character) != 0; });
 }
 
 void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,

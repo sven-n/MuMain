@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemModelGlowJson.h"
+#include "ItemModelValueReader.h"
 
 #include <limits>
 #include <string>
@@ -84,7 +85,7 @@ OrderedJson WriteGlow(const ItemGlow& glow)
 // ---------------------------------------------------------------- reading
 
 // One level for all item levels, or one per item level.
-void ReadLevels(ModelJson::ValueReader& reader, std::vector<int>& levels)
+void ReadLevels(ModelJson::ItemModelValueReader& reader, std::vector<int>& levels)
 {
     if (!reader.Has(LevelKey))
     {
@@ -110,7 +111,8 @@ void ReadLevels(ModelJson::ValueReader& reader, std::vector<int>& levels)
     }
 }
 
-void ReadOptionalIndex(ModelJson::ValueReader& reader, const char* key, std::optional<int>& value, int maxValue)
+void ReadOptionalIndex(ModelJson::ItemModelValueReader& reader, const char* key, std::optional<int>& value,
+                       int maxValue)
 {
     int index = 0;
     if (reader.ReadIndex(key, index, maxValue))
@@ -119,7 +121,7 @@ void ReadOptionalIndex(ModelJson::ValueReader& reader, const char* key, std::opt
     }
 }
 
-void ReadMeshes(ModelJson::ValueReader& reader, const char* meshesKey, const char* hiddenMeshKey,
+void ReadMeshes(ModelJson::ItemModelValueReader& reader, const char* meshesKey, const char* hiddenMeshKey,
                 ItemGlowMeshes& meshes)
 {
     if (reader.Has(meshesKey) && reader.Has(hiddenMeshKey))
@@ -149,7 +151,7 @@ void Read(const OrderedJson& json, ItemModelDefinition& model, const ModelJson::
     }
 
     ItemGlow& glow = model.glow;
-    ModelJson::ValueReader reader(*object, GlowKey, report);
+    ModelJson::ItemModelValueReader reader(*object, GlowKey, report);
     ReadLevels(reader, glow.levels);
     reader.ReadName(ColorKey, glow.color);
     ReadMeshes(reader, MeshesKey, HiddenMeshKey, glow.meshes);

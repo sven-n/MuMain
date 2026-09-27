@@ -29,6 +29,5 @@ void ItemModelDatabase::Build(std::span<const ItemModelDefinition> models)
         m_modelCount += slot.Exists() ? 0 : 1;
         slot = model;
     }
-    ++m_version;
 }
 } // namespace Data::Items

@@ -89,6 +89,41 @@ void MarkNoneBlendMeshes(int itemType, const ItemModelDefinition& model)
     }
 }
 
+void AddMissingGlowMesh(const ItemModelDefinition& model, const char* field, int mesh, int meshCount)
+{
+    ItemModelProblem problem = MakeProblem(ItemModelProblemType::GlowMeshMissing, model);
+    problem.field = field;
+    problem.mesh = mesh;
+    problem.meshCount = meshCount;
+    AddProblem(std::move(problem));
+}
+
+void CheckGlowMeshes(int itemType, const ItemModelDefinition& model)
+{
+    const int meshCount = Models[MODEL_ITEM + itemType].NumMeshs;
+    const auto check = [&](const char* field, std::optional<int> mesh)
+    {
+        if (mesh && *mesh >= meshCount)
+        {
+            AddMissingGlowMesh(model, field, *mesh, meshCount);
+        }
+    };
+    const auto checkMeshes = [&](const char* meshesField, const char* hiddenField, const ItemGlowMeshes& meshes)
+    {
+        for (const int mesh : meshes.only)
+        {
+            check(meshesField, mesh);
+        }
+        check(hiddenField, meshes.hidden);
+    };
+
+    const ItemGlow& glow = model.glow;
+    checkMeshes("glow.meshes", "glow.hiddenMesh", glow.meshes);
+    checkMeshes("glow.shineMeshes", "glow.shineHiddenMesh", glow.shineMeshes);
+    check("glow.excellentMesh", glow.excellentMesh);
+    check("glow.excellentMeshWithoutSkin", glow.excellentMeshWithoutSkin);
+}
+
 void OpenModel(int itemType, const ItemModelDefinition& model)
 {
     const std::wstring path = ToLoaderPath(model.file);
@@ -102,6 +137,7 @@ void OpenModel(int itemType, const ItemModelDefinition& model)
         return;
     }
     MarkNoneBlendMeshes(itemType, model);
+    CheckGlowMeshes(itemType, model);
 }
 
 ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemModelDisplayJson.h"
+#include "ItemModelValueReader.h"
 
 #include <span>
 
@@ -78,7 +79,7 @@ void ReadInventory(const OrderedJson& json, ItemInventoryDisplay& display, const
         return;
     }
 
-    ModelJson::ValueReader reader(*object, InventoryKey, report);
+    ModelJson::ItemModelValueReader reader(*object, InventoryKey, report);
     reader.ReadNumbers(AnchorKey, display.anchor, AnchorCount);
     reader.ReadNumbers(OffsetKey, display.offset, PlaneOffsetCount);
     reader.ReadNumbers(RotationKey, display.rotation, RotationCount);
@@ -95,7 +96,7 @@ void ReadGround(const OrderedJson& json, ItemGroundDisplay& display, const Repor
         return;
     }
 
-    ModelJson::ValueReader reader(*object, GroundKey, report);
+    ModelJson::ItemModelValueReader reader(*object, GroundKey, report);
     reader.ReadNumbers(RotationKey, display.rotation, RotationCount);
     double scale = 0.0;
     if (reader.ReadNumber(ScaleKey, scale, true))

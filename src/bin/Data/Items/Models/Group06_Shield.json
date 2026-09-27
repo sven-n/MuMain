@@ -191,7 +191,8 @@
         "rotation": [0, 270, 225]
       },
       "glow": {
-        "color": "lime"
+        "color": "lime",
+        "hiddenMesh": 2
       }
     },
     {

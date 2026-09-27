@@ -302,7 +302,7 @@ start with a message, and so does a list without the defaults (`orange`,
 `white`, `azure`).
 
 The glow of monsters, and of the event models that level variants are
-drawn with, is still set in code.
+drawn with, is still set in code; changing the list does not change them.
 
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
@@ -346,6 +346,7 @@ The problems are:
 | A texture is not a `.jpg` or `.tga` texture; the game cannot load other types. | error |
 | A texture is in none of the texture folders, but another model loaded it before; that one is used. The warning names the folder to add to `textureFolders`. | warning |
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
+| A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
 
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts

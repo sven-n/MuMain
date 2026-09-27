@@ -63,6 +63,9 @@ template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& numb
     return true;
 }
 
+// Names in the data (e.g. glow colors) have only letters and digits.
+bool IsName(std::string_view text);
+
 // The JSON writer puts every list entry on its own line. Short lists of
 // words or numbers are easier to read on one line: "tags": ["jewel", "valuable"].
 // Puts every list of `key` on one line; text in quotes (e.g. a folder name

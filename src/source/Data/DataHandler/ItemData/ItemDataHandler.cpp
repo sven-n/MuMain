@@ -6,11 +6,12 @@
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
-#include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Render/Items/ItemGlow.h"
 #include "I18N/All.h"
 
 #include <chrono>
@@ -170,6 +171,7 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 
     g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models);
+    Render::Items::Glow::ResolveColors();
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
     return true;
