@@ -172,3 +172,49 @@ future session doesn't mistake the `MUTEX_*` enum for a live, comprehensive poli
 it is vestigial. Not in this retirement checklist's scope (it's not `UIControls.h`), but touches
 the same investigation and the same `g_pUIPopup` dependency as item 3 above.
 
+
+## Tracked deferral: audit where ports steered away from the original UI
+
+Requested 2026-09-27, after `origin/dev/rmlui-ui-system`'s parity pass (PR #644) merged in. Not a
+suspicion that something is broken — it's the recognition that a port makes dozens of small
+judgement calls that never get revisited once it's marked Done, and the only two mechanisms that
+have caught any of them so far are somebody playing the game and somebody else's parity review.
+
+**What to look for.** Not bugs — decisions. A port diverges from the original in four recognisable
+ways, and only the first is self-announcing:
+
+1. **A deliberate, recorded simplification.** These are already written down at the site that made
+   them; the audit's job is to ask whether the reason still holds, not to rediscover them.
+2. **A primitive that generalized past its first consumer.** Extracting a shared class changes
+   every window that adopts it, and the change is invisible in the consumer's own file.
+3. **An RmlUi behaviour standing in for a native one because it was free.** `:hover` for a
+   C++-computed selection flag, `line-height` for a measured row pitch, DOM scrolling for a
+   line-window model. Each is right in isolation and each shifts the rendering slightly.
+4. **A judgement call made with no reference to hand**, i.e. most modern-theme treatments.
+
+**Known instances to seed it with**, so the audit doesn't start from zero:
+
+- **`.scroll-pane` reaching `CGenericConfirmDialog`.** `7dabcf54` moved `.gcd-text-col` off the
+  dialog's own flat 6dp rail onto the shared primitive's 15dp native sprite art, and `2e619ea6`
+  added the 3dp end caps. Both were the right call for the primitive; both changed a legacy dialog
+  that PR #644 was independently tuning for parity, without that branch's knowledge. This one
+  prompted the request.
+- **`.scroll-pane`'s own two legacy simplifications** — the middle slice stretched as one ninepatch
+  rather than repeat-tiled, and native's 7-vs-15 thumb overhang not reproduced (`component-catalog.md`
+  records both and why).
+- **Hover highlights now paint behind their text**, in `CChatLogWindow` and `CMoveCommandWindow`.
+  Native drew the tint quad *after* the row text, so the glyphs sat under it; a `background-color`
+  sits behind them. Reads cleaner, is not what shipped.
+- **`CMoveCommandWindow`'s scrollbar is `dp`-sized** and so doesn't grow with its panel, unlike
+  native's reference-scaled one. Deliberate — its pane's net transform is identity — but it makes
+  this window's scrollbar the one element that tracks the user's scale dial instead of the dock's.
+- **Reward-item preview moved from hover to click** in `CMyQuestInfoWindow`/`CQuestProgress`.
+- **Modern-theme treatments picked without checking dock neighbours** — already its own gap note in
+  `STATUS.md`, which has recurred twice and whose *process* half is still unfixed.
+
+**The precedent worth knowing before starting.** `CCharacterInfoWindow`'s summary box shipped as
+corner brackets plus a flat fill, a recorded and reasonable simplification of `RenderFrame()`'s
+8-piece frame — and #623 later restored the real thing. So at least one entry of exactly this kind
+has already been found worth reverting by someone looking specifically for it. That is the argument
+for the audit, and also the reason to treat "recorded simplification" as a finding rather than a
+resolution.

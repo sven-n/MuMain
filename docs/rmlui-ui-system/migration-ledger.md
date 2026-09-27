@@ -246,3 +246,8 @@ Before starting a new port: find the component's row, read its Detail pointer fo
 and check the "Checklist for every new port" in `STATUS.md`. After landing a port: update the row's
 Status/Target columns here in the same commit — this file drifting out of sync with reality is worse
 than it not existing, since a stale "Not started" reads as a confident false negative.
+
+**`Done` means ported, not audited.** Every port makes judgement calls that diverge slightly from
+the original, and nothing revisits them once the row flips. `tracked-deferrals.md`'s "audit where
+ports steered away from the original UI" entry is the standing pass for that, with the known
+instances already seeded — read it before treating a `Done` row as settled.
