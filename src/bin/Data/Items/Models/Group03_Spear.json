@@ -1,0 +1,67 @@
+{
+  "formatVersion": 1,
+  "group": 3,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Spear01.bmd",
+      "textureFolders": ["Item"],
+      "noneBlendMeshes": [1]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Spear02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Spear03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Spear04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Spear05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Spear06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Spear07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Spear08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Spear09.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Spear10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/spear11.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/gamble_scyder01.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

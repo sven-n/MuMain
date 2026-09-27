@@ -1,0 +1,191 @@
+{
+  "formatVersion": 1,
+  "group": 15,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Book01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Book02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Book03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Book04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Book05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Book06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Book07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Book08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Book09.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Book10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Book11.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Book12.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Book13.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Book14.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Book15.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Book16.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Book17.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Book18.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Book19.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 24,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 25,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 26,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 27,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 28,
+      "file": "Data/Item/Book18.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 29,
+      "file": "Data/Item/Book18.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 30,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 35,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 36,
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

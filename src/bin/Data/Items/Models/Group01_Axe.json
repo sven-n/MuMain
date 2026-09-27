@@ -1,0 +1,51 @@
+{
+  "formatVersion": 1,
+  "group": 1,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Axe01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Axe02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Axe03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Axe04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Axe05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Axe06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Axe07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Axe08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Axe09.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

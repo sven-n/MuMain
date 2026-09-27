@@ -33,7 +33,6 @@ public:
 
     void LoadXmasEvent();
     void LoadXmasEventEffect();
-    void LoadXmasEventItem();
     void LoadXmasEventSound();
 
     void CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType);

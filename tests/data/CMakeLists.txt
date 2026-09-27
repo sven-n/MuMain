@@ -9,13 +9,14 @@ mu_add_test(
         MuClient
 )
 
-# Reads the item files shipped in src/bin/Data through the real loader. The
-# loader pulls in client globals defined in Winmain.cpp, so it is linked here
-# (same as test_audio_playback).
+# Reads the item and item model files shipped in src/bin/Data through the real
+# loader. The loader pulls in client globals defined in Winmain.cpp, so it is
+# linked here (same as test_audio_playback).
 mu_add_test(
     NAME test_item_database_files
     SOURCES
         test_item_database_files.cpp
+        test_item_model_files.cpp
         test_item_rules.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS

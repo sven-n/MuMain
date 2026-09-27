@@ -1,0 +1,102 @@
+{
+  "formatVersion": 1,
+  "group": 2,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Mace01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Mace02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Mace03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Mace04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Mace05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Mace06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Mace07.bmd",
+      "textureFolders": ["Item"],
+      "noneBlendMeshes": [1]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Mace08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Mace09.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Mace10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Mace11.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Mace12.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Mace13.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/saint.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/HDK_Mace.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/CW_Mace.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Mace_17.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Mace_18.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/gamble_safter01.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

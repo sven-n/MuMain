@@ -1,0 +1,157 @@
+{
+  "formatVersion": 1,
+  "group": 5,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Staff01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Staff02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Staff03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Staff04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Staff05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Staff06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Staff07.bmd",
+      "textureFolders": ["Item"],
+      "noneBlendMeshes": [2]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Staff08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Staff09.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Staff10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Staff11.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Staff12.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/HDK_Staff.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/CW_Staff.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Staff15.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Staff16.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Staff17.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Staff18.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Staff19.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Staff20.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/Staff21.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/Book_of_Sahamutt.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/Book_of_Neil.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/Book_of_Rargle.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 30,
+      "file": "Data/Item/Staff_31.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/Staff_32.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/Staff_33.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/gamble_wand.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/gamble_stick.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 36,
+      "file": "Data/Item/Archangelus.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

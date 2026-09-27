@@ -2,7 +2,8 @@
 
 All item definitions (names, size, slot, stats, requirements, tags and
 rules) live in JSON files in `src/bin/Data/Items/`, one file per item
-group. The client loads them once at startup into an in-memory item
+group; the item models are in `src/bin/Data/Items/Models/` (see
+[Item models](#item-models)). The client loads them once at startup into an in-memory item
 database; `Item_<lang>.bmd` is no longer read by the game.
 
 The data matches OpenMU's `ItemDefinition` where both sides have the same
@@ -208,6 +209,49 @@ the field. All problems are also written to `MuError.log`. Errors are:
 
 An automated test loads the shipped item data, so a pull request with
 broken item data fails its checks.
+
+## Item models
+
+Which 3D model an item shows is set in `src/bin/Data/Items/Models/`, one
+file per item group with the same file names as the item files. They are
+separate from the item files because they only matter to the client; the
+item files hold what client and server share.
+
+```json
+{
+  "formatVersion": 1,
+  "group": 13,
+  "models": [
+    {
+      "number": 4,
+      "file": "Data/Item/DarkHorseHorn.bmd",
+      "textureFolders": ["Item", "Skill"]
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `number` | The item number (0–511) in the file's group. |
+| `file` | The `.bmd` model, relative to the game folder, with `/` between folders. |
+| `textureFolders` | Folders below `Data/` with the model's textures. Each texture is taken from the **first** folder that has it. Without folders the model has no textures. |
+| `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
+
+- All item models are loaded at startup, on the loading screen.
+- An item without a model entry is not drawn. Some items are drawn with
+  the model of another item or with an effect model; that choice is still
+  made in code.
+- Models that are not item models (effects, monsters, the character
+  bodies) are not in these files.
+- Write paths with the upper and lower case of the files, so the game
+  also finds them on Linux and macOS.
+
+Model files are checked like the item files: invalid JSON, a missing
+`number` or `file`, a file that is not a `.bmd`, `\` in a path, or an item
+with two models stop the start with a message; unknown fields are
+warnings. The automated tests also check that every model file and
+texture folder exists.
 
 ---
 

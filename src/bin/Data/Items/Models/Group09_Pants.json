@@ -1,0 +1,351 @@
+{
+  "formatVersion": 1,
+  "group": 9,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Player/PantMale01.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Player/PantMale02.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Player/PantMale03.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Player/PantMale04.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Player/PantMale05.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Player/PantMale06.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Player/PantMale07.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Player/PantMale08.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Player/PantMale09.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Player/PantMale10.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Player/PantElf01.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Player/PantElf02.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Player/PantElf03.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Player/PantElf04.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Player/PantElf05.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Player/PantMale16.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Player/PantMale17.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Player/PantMale18.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Player/t_PantMale19.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 19,
+      "file": "Data/Player/PantMaleTest20.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 20,
+      "file": "Data/Player/PantMale21.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 21,
+      "file": "Data/Player/PantMale22.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 22,
+      "file": "Data/Player/PantMale23.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 23,
+      "file": "Data/Player/PantMale24.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 24,
+      "file": "Data/Player/PantMale25.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 25,
+      "file": "Data/Player/PantMale26.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 26,
+      "file": "Data/Player/PantMale27.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 27,
+      "file": "Data/Player/PantMale28.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 28,
+      "file": "Data/Player/PantMale29.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 29,
+      "file": "Data/Player/HDK_PantMale01.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 30,
+      "file": "Data/Player/HDK_PantMale02.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 31,
+      "file": "Data/Player/HDK_PantMale03.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 32,
+      "file": "Data/Player/HDK_PantMale04.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 33,
+      "file": "Data/Player/HDK_PantMale05.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 34,
+      "file": "Data/Player/CW_PantMale01.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 35,
+      "file": "Data/Player/CW_PantMale02.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 36,
+      "file": "Data/Player/CW_PantMale03.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 37,
+      "file": "Data/Player/CW_PantMale04.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 38,
+      "file": "Data/Player/CW_PantMale05.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 39,
+      "file": "Data/Player/PantMale40.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 40,
+      "file": "Data/Player/PantMale41.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 41,
+      "file": "Data/Player/PantMale42.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 42,
+      "file": "Data/Player/PantMale43.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 43,
+      "file": "Data/Player/PantMale44.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 44,
+      "file": "Data/Player/PantMale45.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 45,
+      "file": "Data/Player/PantMale46.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 46,
+      "file": "Data/Player/PantMale47.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 47,
+      "file": "Data/Player/PantMale48.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 48,
+      "file": "Data/Player/PantMale49.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 49,
+      "file": "Data/Player/PantMale50.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 50,
+      "file": "Data/Player/PantMale51.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 51,
+      "file": "Data/Player/PantMale52.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 52,
+      "file": "Data/Player/PantMale53.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 53,
+      "file": "Data/Player/PantMale54.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 59,
+      "file": "Data/Player/PantMale60.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 60,
+      "file": "Data/Player/PantMale61.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 61,
+      "file": "Data/Player/PantMale62.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 62,
+      "file": "Data/Player/LuckyItem/62/new_Pant01.bmd",
+      "textureFolders": ["Player/LuckyItem/62"]
+    },
+    {
+      "number": 63,
+      "file": "Data/Player/LuckyItem/63/new_Pant02.bmd",
+      "textureFolders": ["Player/LuckyItem/63"]
+    },
+    {
+      "number": 64,
+      "file": "Data/Player/LuckyItem/64/new_Pant03.bmd",
+      "textureFolders": ["Player/LuckyItem/64"]
+    },
+    {
+      "number": 65,
+      "file": "Data/Player/LuckyItem/65/new_Pant04.bmd",
+      "textureFolders": ["Player/LuckyItem/65"]
+    },
+    {
+      "number": 66,
+      "file": "Data/Player/LuckyItem/66/new_Pant05.bmd",
+      "textureFolders": ["Player/LuckyItem/66"]
+    },
+    {
+      "number": 67,
+      "file": "Data/Player/LuckyItem/67/new_Pant06.bmd",
+      "textureFolders": ["Player/LuckyItem/67"]
+    },
+    {
+      "number": 68,
+      "file": "Data/Player/LuckyItem/68/new_Pant07.bmd",
+      "textureFolders": ["Player/LuckyItem/68"]
+    },
+    {
+      "number": 69,
+      "file": "Data/Player/LuckyItem/69/new_Pant08.bmd",
+      "textureFolders": ["Player/LuckyItem/69"]
+    },
+    {
+      "number": 70,
+      "file": "Data/Player/LuckyItem/70/new_Pant09.bmd",
+      "textureFolders": ["Player/LuckyItem/70"]
+    },
+    {
+      "number": 71,
+      "file": "Data/Player/LuckyItem/71/new_Pant10.bmd",
+      "textureFolders": ["Player/LuckyItem/71"]
+    },
+    {
+      "number": 72,
+      "file": "Data/Player/LuckyItem/72/new_Pant11.bmd",
+      "textureFolders": ["Player/LuckyItem/72"]
+    },
+    {
+      "number": 73,
+      "file": "Data/Player/PantMale74.bmd",
+      "textureFolders": ["Player"]
+    }
+  ]
+}

@@ -1,0 +1,511 @@
+{
+  "formatVersion": 1,
+  "group": 12,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Wing01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Wing02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Wing03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Wing04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Wing05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Wing06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Wing07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Gem01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Gem02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Gem03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Gem04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Gem05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Gem06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Gem07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Gem08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Jewel15.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Gem10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Gem11.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Gem12.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Gem13.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/Gem14.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 24,
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 30,
+      "file": "Data/Item/Jewel01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/Jewel02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/giftbox_r.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/giftbox_g.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/giftbox_b.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 35,
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 36,
+      "file": "Data/Item/wing08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 37,
+      "file": "Data/Item/wing09.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 38,
+      "file": "Data/Item/wing10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 39,
+      "file": "Data/Item/wing11.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 40,
+      "file": "Data/Item/DarkLordRobe02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 41,
+      "file": "Data/Item/Wing42.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 42,
+      "file": "Data/Item/Wing43.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 43,
+      "file": "Data/Item/Wing44.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 44,
+      "file": "Data/Item/Gem06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 45,
+      "file": "Data/Item/Gem06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 46,
+      "file": "Data/Item/Gem06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 47,
+      "file": "Data/Item/Gem06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 48,
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 49,
+      "file": "Data/Item/Wing50.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 50,
+      "file": "Data/Item/Wing51.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 60,
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "number": 61,
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "number": 62,
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "number": 63,
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "number": 64,
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "number": 65,
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "number": 70,
+      "file": "Data/Item/s30_sphere_body01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 71,
+      "file": "Data/Item/s30_sphere_body02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 72,
+      "file": "Data/Item/s30_sphere_body03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 73,
+      "file": "Data/Item/s30_sphere_body04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 74,
+      "file": "Data/Item/s30_sphere_body05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 100,
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 101,
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 102,
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 103,
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 104,
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 105,
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 106,
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 107,
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 108,
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 109,
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 110,
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 111,
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 112,
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 113,
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 114,
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 115,
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 116,
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 117,
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 118,
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 119,
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 120,
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 121,
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 122,
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 123,
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 124,
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 125,
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 126,
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 127,
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 128,
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 129,
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "number": 130,
+      "file": "Data/Item/DarkLordRobe.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 131,
+      "file": "Data/Item/Ingameshop/alice1wing.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 132,
+      "file": "Data/Item/Ingameshop/elf_wing.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 133,
+      "file": "Data/Item/Ingameshop/angel_wing.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 134,
+      "file": "Data/Item/Ingameshop/devil_wing.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 135,
+      "file": "Data/Item/Wing50.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 136,
+      "file": "Data/Item/Jewel03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 137,
+      "file": "Data/Item/jewel22.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 138,
+      "file": "Data/Item/suho.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 139,
+      "file": "Data/Item/rs.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 140,
+      "file": "Data/Item/jos.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 141,
+      "file": "Data/Item/Jewel15.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 142,
+      "file": "Data/Item/LowRefineStone.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 143,
+      "file": "Data/Item/HighRefineStone.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

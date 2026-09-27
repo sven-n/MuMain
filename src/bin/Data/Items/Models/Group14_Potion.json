@@ -1,0 +1,740 @@
+{
+  "formatVersion": 1,
+  "group": 14,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Potion01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Potion02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Potion03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Potion04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Potion05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Potion06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Potion07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/SpecialPotion.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Antidote01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Beer01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Scroll01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/MagicBox01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Event01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Jewel01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Jewel02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Gold01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Jewel03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Devil00.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Devil01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Devil02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/Drink00.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/ConChip00.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/jewel22.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/Quest00.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 24,
+      "file": "Data/Item/Quest01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 25,
+      "file": "Data/Item/Quest02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 26,
+      "file": "Data/Item/Quest03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 27,
+      "file": "Data/Item/godesteel.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 28,
+      "file": "Data/Item/HELLASITEM00.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 29,
+      "file": "Data/Item/HELLASITEM01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/suho.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/giftbox_bp.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/giftbox_br.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/giftbox_bb.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 35,
+      "file": "Data/Item/sdwater01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 36,
+      "file": "Data/Item/sdwater02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 37,
+      "file": "Data/Item/sdwater03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 38,
+      "file": "Data/Item/megawater01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 39,
+      "file": "Data/Item/megawater02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 40,
+      "file": "Data/Item/megawater03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 41,
+      "file": "Data/Item/rs.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 42,
+      "file": "Data/Item/jos.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 43,
+      "file": "Data/Item/LowRefineStone.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 44,
+      "file": "Data/Item/HighRefineStone.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 45,
+      "file": "Data/Item/hobakhead.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 46,
+      "file": "Data/Item/hellowinscroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 47,
+      "file": "Data/Item/hellowinscroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 48,
+      "file": "Data/Item/hellowinscroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 49,
+      "file": "Data/Item/Gogi.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 50,
+      "file": "Data/Item/pumpkincup.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 51,
+      "file": "Data/Item/MagicBox02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 52,
+      "file": "Data/Item/GM02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 53,
+      "file": "Data/Item/partCharge1/bujuck01.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 54,
+      "file": "Data/Item/partCharge1/juju.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 58,
+      "file": "Data/Item/partCharge1/expensiveitem01.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 59,
+      "file": "Data/Item/partCharge1/expensiveitem02a.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 60,
+      "file": "Data/Item/partCharge1/expensiveitem02b.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 61,
+      "file": "Data/Item/partCharge1/expensiveitem03a.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 62,
+      "file": "Data/Item/partCharge1/expensiveitem03b.bmd",
+      "textureFolders": ["Item/partCharge1"]
+    },
+    {
+      "number": 63,
+      "file": "Data/Item/GM01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 64,
+      "file": "Data/Item/songss.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 65,
+      "file": "Data/Item/deathbeamstone.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 66,
+      "file": "Data/Item/hellhorn.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 67,
+      "file": "Data/Item/phoenixfeather.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 68,
+      "file": "Data/Item/Deye.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 70,
+      "file": "Data/Item/partCharge2/EPotionR.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 71,
+      "file": "Data/Item/partCharge2/EPotionB.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 72,
+      "file": "Data/Item/partCharge2/elitescroll_quick.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 73,
+      "file": "Data/Item/partCharge2/elitescroll_depence.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 74,
+      "file": "Data/Item/partCharge2/elitescroll_anger.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 75,
+      "file": "Data/Item/partCharge2/elitescroll_magic.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 76,
+      "file": "Data/Item/partCharge2/elitescroll_strenth.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 77,
+      "file": "Data/Item/partCharge2/elitescroll_mana.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 78,
+      "file": "Data/Item/partCharge2/secret_power.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 79,
+      "file": "Data/Item/partCharge2/secret_quick.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 80,
+      "file": "Data/Item/partCharge2/secret_strenth.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 81,
+      "file": "Data/Item/partCharge2/secret_energe.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 82,
+      "file": "Data/Item/partCharge2/secret_command.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 83,
+      "file": "Data/Item/partCharge2/expensiveitem04b.bmd"
+    },
+    {
+      "number": 84,
+      "file": "Data/Item/cherryblossom/cherrybox.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 85,
+      "file": "Data/Item/cherryblossom/chwine.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 86,
+      "file": "Data/Item/cherryblossom/chgateaux.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 87,
+      "file": "Data/Item/cherryblossom/chpetal.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 88,
+      "file": "Data/Item/cherryblossom/chbranche.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 89,
+      "file": "Data/Item/cherryblossom/chbranche_red.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 90,
+      "file": "Data/Item/cherryblossom/chbranche_yellow.bmd",
+      "textureFolders": ["Item/cherryblossom"]
+    },
+    {
+      "number": 91,
+      "file": "Data/Item/partCharge3/alicecard.bmd",
+      "textureFolders": ["Item/partCharge3"]
+    },
+    {
+      "number": 92,
+      "file": "Data/Item/partCharge3/juju.bmd",
+      "textureFolders": ["Item/partCharge3"]
+    },
+    {
+      "number": 93,
+      "file": "Data/Item/partCharge3/juju.bmd",
+      "textureFolders": ["Item/partCharge3"]
+    },
+    {
+      "number": 94,
+      "file": "Data/Item/partCharge2/EPotionR.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "number": 95,
+      "file": "Data/Item/partCharge3/juju.bmd",
+      "textureFolders": ["Item/partCharge3"]
+    },
+    {
+      "number": 96,
+      "file": "Data/Item/partcharge4/strengamulet.bmd",
+      "textureFolders": ["Item/partcharge4"]
+    },
+    {
+      "number": 97,
+      "file": "Data/Item/partcharge4/battlescroll.bmd",
+      "textureFolders": ["Item/partcharge4"]
+    },
+    {
+      "number": 98,
+      "file": "Data/Item/partcharge4/strengscroll.bmd",
+      "textureFolders": ["Item/partcharge4"]
+    },
+    {
+      "number": 99,
+      "file": "Data/Item/xmas/xmasfire.bmd",
+      "textureFolders": ["Item/xmas"]
+    },
+    {
+      "number": 100,
+      "file": "Data/Item/coin7.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 101,
+      "file": "Data/Item/doubt_paper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 102,
+      "file": "Data/Item/warrant.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 103,
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 104,
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 105,
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 106,
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 107,
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 108,
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 109,
+      "file": "Data/Item/secromicon.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 110,
+      "file": "Data/Item/indication.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 111,
+      "file": "Data/Item/speculum.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 112,
+      "file": "Data/Item/Ingameshop/ItemBoxKey_silver.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 113,
+      "file": "Data/Item/Ingameshop/ItemBoxKey_gold.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 114,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 115,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 116,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 117,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 118,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 119,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 120,
+      "file": "Data/Item/Ingameshop/gold_coin.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 121,
+      "file": "Data/Item/Ingameshop/itembox_gold.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 122,
+      "file": "Data/Item/Ingameshop/itembox_silver.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 123,
+      "file": "Data/Item/Ingameshop/itembox_gold.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 124,
+      "file": "Data/Item/Ingameshop/itembox_silver.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 126,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 127,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 128,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 129,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 130,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 131,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 132,
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 133,
+      "file": "Data/Item/partcharge7/ESDPotion.bmd",
+      "textureFolders": ["Item/partcharge7", "Item/partCharge2"]
+    },
+    {
+      "number": 134,
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 135,
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 136,
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 137,
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 138,
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 139,
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "number": 140,
+      "file": "Data/Item/strengscroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 141,
+      "file": "Data/Item/requitalbox_red.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 142,
+      "file": "Data/Item/requitalbox_violet.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 143,
+      "file": "Data/Item/requitalbox_blue.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 144,
+      "file": "Data/Item/requitalbox_wood.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 145,
+      "file": "Data/Item/partCharge8/rareitem_ticket7.bmd",
+      "textureFolders": ["Item/partCharge8"]
+    },
+    {
+      "number": 146,
+      "file": "Data/Item/partCharge8/rareitem_ticket8.bmd",
+      "textureFolders": ["Item/partCharge8"]
+    },
+    {
+      "number": 147,
+      "file": "Data/Item/partCharge8/rareitem_ticket9.bmd",
+      "textureFolders": ["Item/partCharge8"]
+    },
+    {
+      "number": 148,
+      "file": "Data/Item/partCharge8/rareitem_ticket10.bmd",
+      "textureFolders": ["Item/partCharge8"]
+    },
+    {
+      "number": 149,
+      "file": "Data/Item/partCharge8/rareitem_ticket11.bmd",
+      "textureFolders": ["Item/partCharge8"]
+    },
+    {
+      "number": 150,
+      "file": "Data/Item/partCharge8/rareitem_ticket12.bmd",
+      "textureFolders": ["Item/partCharge8"]
+    },
+    {
+      "number": 160,
+      "file": "Data/Item/LuckyItem/lucky_items01.bmd",
+      "textureFolders": ["Item/LuckyItem"]
+    },
+    {
+      "number": 161,
+      "file": "Data/Item/LuckyItem/lucky_items02.bmd",
+      "textureFolders": ["Item/LuckyItem"]
+    }
+  ]
+}
