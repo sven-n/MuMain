@@ -78,17 +78,17 @@ namespace mu::ui::window
         int m_iHoveredSlot = -1;
     };
 
-    // One interactive overlay cell in the expanded skill grid or pet row, rebuilt every frame
-    // while open. Icon/box art is NOT here -- it stays a legacy 2D draw (RenderSkillIcon()'s atlas
-    // addressing is too irregular to port blind); this struct only drives RmlUi's hit target,
-    // cooldown wipe, and selection highlight.
+    // One cell of the expanded skill grid or pet row, rebuilt every frame while open: position,
+    // icon sprite, hotkey number, cooldown wipe and selection for main_frame.rml's .skill-cell.
     struct SkillCellEntry
     {
-        float left = 0.f, top = 0.f;   // px, in #bars's local space; matches the legacy icon/box position
+        float left = 0.f, top = 0.f;   // px, in #bars's local space: the cell's 32x38 box
         int skillIndex = -1;           // CharacterAttribute->Skill[] index (grid) or AT_PET_COMMAND_* value (pet row)
         bool isPet = false;            // true for pet-row entries -- click routes to the pet path
         bool isCurrent = false;        // Hero->CurrentSkill == skillIndex
         float cooldownFraction = 0.f;  // 0 = ready; shrinks toward 0 as the skill's delay counts down
+        Rml::String icon = "none";     // decorator of the skill's icon (CSkillList::GetSkillIconDecorator())
+        Rml::String hotkey;            // the skill's hotkey number, empty when it has none
     };
 
     class CSkillList : public CObject
@@ -133,7 +133,17 @@ namespace mu::ui::window
         void SetHotKey(int iHotKey, int iSkillType);
         int GetHotKey(int iHotKey);
         int GetSkillIndex(int iSkillType);
-        void RenderCurrentSkillAndHotSkillList();
+
+        // The icon decorator ("image(<sprite>)", or "none") for a skill/pet-command index, lit or
+        // grey as the original's RenderSkillIcon() chose: UI::Skills::Icon::ResolveSkillIcon() on
+        // this frame's usability.
+        Rml::String GetSkillIconDecorator(int iIndex);
+        Rml::String GetHotKeySlotIconDecorator(int iSlotIndex);
+        Rml::String GetCurrentSkillIconDecorator();
+
+        // The hotkey (0-9) a skill/pet-command index is bound to, or -1: the number the original
+        // drew on every skill icon.
+        int GetSkillHotKeyNumber(int iIndex);
 
         // Whether hotkey-row slot iSlotIndex (0-4) shows the active skill -- feeds
         // #skill_slot_0..4's selection highlight in SyncRmlModel().
@@ -161,9 +171,10 @@ namespace mu::ui::window
         // UseHotKey() (so pet-check/auto-attack-cancel rules don't apply here either -- preserved
         // faithfully).
         void OnHotkeySlotClick(int iSlotIndex);
-        void OnHotkeySlotHover(int iSlotIndex);
+        // slotLeft/slotTop and iconLeft/iconTop: the hovered slot or icon in #bars's local space.
+        void OnHotkeySlotHover(int iSlotIndex, float slotLeft, float slotTop);
         void OnCurrentSkillClick();
-        void OnCurrentSkillHover();
+        void OnCurrentSkillHover(float iconLeft, float iconTop);
         void OnGridCellClick(int iSkillIndex);
         void OnGridCellHover(int iSkillIndex);
         void OnPetCellClick(int iSkillIndex);
@@ -171,8 +182,7 @@ namespace mu::ui::window
         void OnUnhover();
 
         // Grid/pet overlay snapshots, rebuilt by Update() while the grid is open; copied into the
-        // RmlUi model's skill_grid_cells/pet_skill_cells by SyncRmlModel() and also read by
-        // Render()'s legacy icon draw.
+        // RmlUi model's skill_grid_cells/pet_skill_cells by SyncRmlModel().
         const std::vector<SkillCellEntry>& GetGridSnapshot() const { return m_GridSnapshot; }
         const std::vector<SkillCellEntry>& GetPetSnapshot() const { return m_PetSnapshot; }
 
@@ -190,12 +200,7 @@ namespace mu::ui::window
         bool IsArrayIn(BYTE bySkill);
         void UseHotKey(int iHotKey);
 
-        void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
-        // Cooldown math now lives in ComputeSkillCooldownFraction() (MainFrameWindow.cpp);
-        // pet-row drawing is inlined into Render().
-
-        // Rebuilds m_GridSnapshot/m_PetSnapshot from the grid/pet state each frame while open;
-        // Render() iterates the result instead of recomputing positions.
+        // Rebuilds m_GridSnapshot/m_PetSnapshot from the grid/pet state each frame while open.
         void RebuildGridSnapshot();
 
         // Queues a tooltip for the given skill/pet-command index, anchored at (x, y) in #bars's
@@ -228,15 +233,15 @@ namespace mu::ui::window
     };
 
     // This file welds three classes: this one (frame chrome + HP/MP/AG/SD/EXP bars + 5 corner
-    // buttons, RmlUi), CSkillList (hotkey row/grid/pet commands, still legacy), and CItemHotKey
+    // buttons, RmlUi), CSkillList (hotkey row/grid/pet commands, RmlUi), and CItemHotKey
     // (QWER item slots, permanently native 3D icon render -- only #item_slots' hover/stack-count
     // chrome moved to RmlUi).
     //
     // Render() is a thin passthrough, not a full no-op: RmlUi always paints last in the frame, so
-    // moving the center-band background chrome to RmlUi would occlude the still-legacy skill row
-    // painted earlier. Render() still calls RenderLeftFrame()/RenderCenterFrame() (chrome for
-    // regions with legacy content) and RenderCurrentSkillAndHotSkillList(); the chrome/parts for
-    // fully-RmlUi regions (right frame, exp background, buttons, gauges) are gone.
+    // the center-band background chrome stays under the RmlUi skill icons and the native 3D
+    // potions. Render() still calls RenderLeftFrame()/RenderCenterFrame() (chrome for regions
+    // with native content); the chrome/parts for fully-RmlUi regions (right frame, exp
+    // background, buttons, gauges) are gone.
     //
     // UpdateMouseEvent() drops BtnProcess() (RmlUi now hit-tests the corner buttons) and always
     // reports "not consumed". UpdateKeyEvent() is unchanged -- still gates legacy CItemHotKey
@@ -316,7 +321,6 @@ namespace mu::ui::window
         void LoadImages();
         void UnloadImages();
 
-        void RenderCenterRegion();
         void RenderLeftFrame();
         void RenderCenterFrame();
 
@@ -395,6 +399,13 @@ namespace mu::ui::window
             // Hotkey number label per slot (see CSkillList::GetHotKeySlotNumber()); empty string
             // for an unbound slot renders nothing.
             Rml::String skillSlot0Hotkey, skillSlot1Hotkey, skillSlot2Hotkey, skillSlot3Hotkey, skillSlot4Hotkey;
+
+            // Icon decorator per hotkey slot and for the current-skill slot (see
+            // CSkillList::GetSkillIconDecorator()), and the current skill's hotkey number.
+            Rml::String skillSlot0Icon = "none", skillSlot1Icon = "none", skillSlot2Icon = "none",
+                        skillSlot3Icon = "none", skillSlot4Icon = "none";
+            Rml::String currentSkillIcon = "none";
+            Rml::String currentSkillHotkey;
 
             // Cooldown wipe for the compact row + current-skill slot; same per-field convention as skillSlot0..4Hotkey.
             float skillSlot0Cooldown = 0.f, skillSlot1Cooldown = 0.f, skillSlot2Cooldown = 0.f,

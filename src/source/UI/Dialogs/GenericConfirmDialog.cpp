@@ -160,6 +160,43 @@ void CGenericConfirmDialog::BuildRmlUi()
     // in lockstep with m_pRmlDoc from here on.
     m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/generic_confirm_dialog_bg.rml",
         RmlUiRuntime::Instance().GetDialogBackgroundContext());
+
+    // Main-context copy of the same chrome for dialogs without item3D (see m_pRmlChromeDoc). It
+    // paints only: the dialog's input belongs to the modal m_pRmlDoc above it.
+    m_pRmlChromeDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/generic_confirm_dialog_bg.rml",
+                                                              RmlUiRuntime::Instance().GetContext());
+    if (m_pRmlChromeDoc)
+        m_pRmlChromeDoc->SetProperty("pointer-events", "none");
+}
+
+Rml::ElementDocument* CGenericConfirmDialog::ActiveChromeDocument() const
+{
+    return m_Active.item3D ? m_pRmlBgDoc : m_pRmlChromeDoc;
+}
+
+void CGenericConfirmDialog::ShowChrome()
+{
+    Rml::ElementDocument* chrome = ActiveChromeDocument();
+    Rml::ElementDocument* other = chrome == m_pRmlBgDoc ? m_pRmlChromeDoc : m_pRmlBgDoc;
+    if (other)
+        other->Hide();
+    if (!chrome)
+        return;
+
+    chrome->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+    chrome->PullToFront();
+    // The bg documents have no data model of their own -- tallPanel's "tall" class is mirrored
+    // onto their #panel imperatively instead.
+    if (Rml::Element* bgPanel = chrome->GetElementById("panel"))
+        bgPanel->SetClass("tall", m_Active.tallPanel);
+}
+
+void CGenericConfirmDialog::HideChrome()
+{
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
+    if (m_pRmlChromeDoc)
+        m_pRmlChromeDoc->Hide();
 }
 
 void CGenericConfirmDialog::ReloadRmlTheme()
@@ -178,16 +215,20 @@ void CGenericConfirmDialog::ReloadRmlTheme()
             bgContext->UnloadDocument(m_pRmlBgDoc);
         m_pRmlBgDoc = nullptr;
     }
+    if (m_pRmlChromeDoc)
+    {
+        context->UnloadDocument(m_pRmlChromeDoc);
+        m_pRmlChromeDoc = nullptr;
+    }
 
-    BuildRmlUi(); // leaves m_pRmlBgDoc Hidden -- re-Show() below if this dialog was actually open
+    BuildRmlUi(); // leaves both chrome documents Hidden -- re-Show() below if this dialog was actually open
     if (wasVisible)
     {
         SyncRmlModel();
+        ShowChrome();
         if (m_pRmlDoc)
             m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
-            ApplyInputFieldConfig();
-        if (m_pRmlBgDoc)
-            m_pRmlBgDoc->Show();
+        ApplyInputFieldConfig();
     }
 }
 
@@ -198,8 +239,7 @@ void CGenericConfirmDialog::Release()
 
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
+    HideChrome();
     m_bActive = false;
     m_Queue.clear();
 }
@@ -262,20 +302,14 @@ void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
         m_dwProgressEndTime = m_dwProgressStartTime + m_Active.progress->elapseMs;
     }
 
+    ShowChrome();
     if (m_pRmlDoc)
     {
         SyncRmlModel();
         // Modal: blocks the game world/other UI from stealing focus or clicks while this is open.
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+        m_pRmlDoc->PullToFront();
         ApplyInputFieldConfig();
-    }
-    if (m_pRmlBgDoc)
-    {
-        m_pRmlBgDoc->Show();
-        // The bg document has no data model of its own -- tallPanel's "tall" class is mirrored
-        // onto its #panel imperatively instead.
-        if (Rml::Element* bgPanel = m_pRmlBgDoc->GetElementById("panel"))
-            bgPanel->SetClass("tall", m_Active.tallPanel);
     }
 }
 
@@ -310,17 +344,13 @@ void CGenericConfirmDialog::ShowNext()
         m_dwProgressEndTime = m_dwProgressStartTime + m_Active.progress->elapseMs;
     }
 
+    ShowChrome();
     if (m_pRmlDoc)
     {
         SyncRmlModel();
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+        m_pRmlDoc->PullToFront();
         ApplyInputFieldConfig();
-    }
-    if (m_pRmlBgDoc)
-    {
-        m_pRmlBgDoc->Show();
-        if (Rml::Element* bgPanel = m_pRmlBgDoc->GetElementById("panel"))
-            bgPanel->SetClass("tall", m_Active.tallPanel);
     }
 }
 
@@ -349,8 +379,7 @@ void CGenericConfirmDialog::Resolve(ClickResult which)
 
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
+    HideChrome();
 
     // Clear the field so a later dialog never inherits this one's typed value. No shared native
     // widget/IME state to release any more -- #gcd_input is this document's own element, and
@@ -437,7 +466,8 @@ Rml::Vector2f CGenericConfirmDialog::PanelTranslateCorrection() const
 void CGenericConfirmDialog::SyncBackgroundPanel()
 {
     Rml::Element* pPanel = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
-    Rml::Element* pBgPanel = m_pRmlBgDoc ? m_pRmlBgDoc->GetElementById("panel") : nullptr;
+    Rml::ElementDocument* chrome = ActiveChromeDocument();
+    Rml::Element* pBgPanel = chrome ? chrome->GetElementById("panel") : nullptr;
     if (!pPanel || !pBgPanel)
         return;
 

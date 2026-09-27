@@ -20,6 +20,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/HUD/Skills/SkillIconAtlas.h"
 #include "UI/HUD/Skills/SkillTooltip.h"
 #include "UI/Scaling/UITransform.h"
 #include "Core/Time/CTimCheck.h"
@@ -110,6 +111,39 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
     return true;
 }
 
+namespace
+{
+constexpr float kSkillIconWidth = 20.f;
+constexpr float kSkillIconHeight = 28.f;
+
+struct SlotBox
+{
+    float left = 0.f, top = 0.f, width = 0.f, height = 0.f;
+};
+
+// A hotkey-row element's box in #bars's local reference px. GetAbsoluteOffset() ignores
+// #bars's CSS scale, so the difference to #bars's own offset is already unscaled (the same
+// convention as GetSkillListOffsetX()); it follows each theme's RCSS instead of C++ copies of
+// the slot positions.
+SlotBox SlotBoxInBars(Rml::Element* element)
+{
+    SlotBox box;
+    if (element == nullptr)
+        return box;
+    Rml::Element* bars = element;
+    while (bars != nullptr && bars->GetId() != "bars")
+        bars = bars->GetParentNode();
+    const Rml::Vector2f offset = element->GetAbsoluteOffset(Rml::BoxArea::Border) -
+                                 (bars ? bars->GetAbsoluteOffset(Rml::BoxArea::Border) : Rml::Vector2f(0.f, 0.f));
+    const Rml::Vector2f size = element->GetBox().GetSize(Rml::BoxArea::Border);
+    box.left = offset.x;
+    box.top = offset.y;
+    box.width = size.x;
+    box.height = size.y;
+    return box;
+}
+} // namespace
+
 void mu::ui::window::CMainFrameWindow::BuildRmlUi()
 {
     const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "main_frame",
@@ -168,6 +202,14 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.Bind("skill_slot_3_hotkey", &model.skillSlot3Hotkey);
                 c.Bind("skill_slot_4_hotkey", &model.skillSlot4Hotkey);
 
+                c.Bind("skill_slot_0_icon", &model.skillSlot0Icon);
+                c.Bind("skill_slot_1_icon", &model.skillSlot1Icon);
+                c.Bind("skill_slot_2_icon", &model.skillSlot2Icon);
+                c.Bind("skill_slot_3_icon", &model.skillSlot3Icon);
+                c.Bind("skill_slot_4_icon", &model.skillSlot4Icon);
+                c.Bind("current_skill_icon", &model.currentSkillIcon);
+                c.Bind("current_skill_hotkey", &model.currentSkillHotkey);
+
                 // Skill list cooldown bindings -- see MainFrameRmlModel::skillGridOpen's own
                 // header comment.
                 c.Bind("skill_slot_0_cooldown", &model.skillSlot0Cooldown);
@@ -186,6 +228,8 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
                 skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
                 skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
+                skillCell.RegisterMember("icon", &SkillCellEntry::icon);
+                skillCell.RegisterMember("hotkey", &SkillCellEntry::hotkey);
                 c.RegisterArray<std::vector<SkillCellEntry>>();
 
                 c.Bind("skill_grid_open", &model.skillGridOpen);
@@ -198,11 +242,23 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.BindEventCallback("skill_hotkey_click",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnHotkeySlotClick(args.empty() ? 0 : args[0].Get<int>()); });
                 c.BindEventCallback("skill_hotkey_hover",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>()); });
+                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                                    {
+                                        const SlotBox slot = SlotBoxInBars(event.GetCurrentElement());
+                                        g_pSkillList->OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>(),
+                                                                        slot.left, slot.top);
+                                    });
                 c.BindEventCallback("skill_current_click",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnCurrentSkillClick(); });
                 c.BindEventCallback("skill_current_hover",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnCurrentSkillHover(); });
+                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                                    {
+                                        // The slot box is the icon plus the theme's even inset.
+                                        const SlotBox slot = SlotBoxInBars(event.GetCurrentElement());
+                                        g_pSkillList->OnCurrentSkillHover(
+                                            slot.left + (slot.width - kSkillIconWidth) / 2.f,
+                                            slot.top + (slot.height - kSkillIconHeight) / 2.f);
+                                    });
                 c.BindEventCallback("skill_grid_click",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellClick(args.empty() ? -1 : args[0].Get<int>()); });
                 c.BindEventCallback("skill_grid_hover",
@@ -335,8 +391,8 @@ void mu::ui::window::CMainFrameWindow::Release()
 
 bool mu::ui::window::CMainFrameWindow::Render()
 {
-    // Thin passthrough, not a full no-op: only the two chrome bands with legacy content (item
-    // hotkeys, skill list) still draw here; the rest moved to RmlUi and is synced by
+    // Thin passthrough, not a full no-op: only the two chrome bands under native or RmlUi icons
+    // (item hotkeys, skill list) still draw here; the rest moved to RmlUi and is synced by
     // SyncRmlModel().
     //
     // leftTransform/centerTransform each add their own theme-provided offset
@@ -365,10 +421,6 @@ bool mu::ui::window::CMainFrameWindow::Render()
         RenderCenterFrame();
     }
 
-    {
-        UI::Scaling::ScopedActiveTransform layout(centerTransform, true);
-        RenderCenterRegion();
-    }
     DisableAlphaBlend();
 
     return true;
@@ -394,12 +446,6 @@ void mu::ui::window::CMainFrameWindow::Render3D()
 bool mu::ui::window::CMainFrameWindow::IsVisible() const
 {
     return CObject::IsVisible();
-}
-
-void mu::ui::window::CMainFrameWindow::RenderCenterRegion()
-{
-    // HP/MP/AG/SD bars moved to RmlUi; the skill row/current-skill icon stays legacy.
-    g_pSkillList->RenderCurrentSkillAndHotSkillList();
 }
 
 // Theme-aware background fill behind the still-legacy 3D-composited item/skill icons. RmlUi's main
@@ -845,15 +891,15 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     g_pFriendMenu->IncreaseBlinkTemp();
     syncBool(&MainFrameRmlModel::friendAlert, "friend_alert", friendAlert);
 
-    // Skill-hotkey row selection highlight (modern theme only; see MainFrameRmlModel::
-    // skillSlot0Selected and CSkillList::IsHotKeySlotCurrentSkill()).
+    // Skill-hotkey row selection highlight (legacy: the IMAGE_SKILLBOX_USE sprite, modern: an
+    // outline; see MainFrameRmlModel::skillSlot0Selected and CSkillList::IsHotKeySlotCurrentSkill()).
     syncBool(&MainFrameRmlModel::skillSlot0Selected, "skill_slot_0_selected", g_pSkillList->IsHotKeySlotCurrentSkill(0));
     syncBool(&MainFrameRmlModel::skillSlot1Selected, "skill_slot_1_selected", g_pSkillList->IsHotKeySlotCurrentSkill(1));
     syncBool(&MainFrameRmlModel::skillSlot2Selected, "skill_slot_2_selected", g_pSkillList->IsHotKeySlotCurrentSkill(2));
     syncBool(&MainFrameRmlModel::skillSlot3Selected, "skill_slot_3_selected", g_pSkillList->IsHotKeySlotCurrentSkill(3));
     syncBool(&MainFrameRmlModel::skillSlot4Selected, "skill_slot_4_selected", g_pSkillList->IsHotKeySlotCurrentSkill(4));
 
-    // Skill-hotkey number labels (modern theme only; see MainFrameRmlModel::skillSlot0Hotkey and
+    // Skill-hotkey number labels (see MainFrameRmlModel::skillSlot0Hotkey and
     // CSkillList::GetHotKeySlotNumber()). -1 (empty slot) becomes an empty string.
     auto hotkeyText = [](int hotkey) { return hotkey >= 0 ? std::to_string(hotkey) : Rml::String(); };
     syncText(&MainFrameRmlModel::skillSlot0Hotkey, "skill_slot_0_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(0)));
@@ -861,6 +907,17 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     syncText(&MainFrameRmlModel::skillSlot2Hotkey, "skill_slot_2_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(2)));
     syncText(&MainFrameRmlModel::skillSlot3Hotkey, "skill_slot_3_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(3)));
     syncText(&MainFrameRmlModel::skillSlot4Hotkey, "skill_slot_4_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(4)));
+
+    // Skill icons of the hotkey row and the current-skill slot, and the current skill's hotkey.
+    syncText(&MainFrameRmlModel::skillSlot0Icon, "skill_slot_0_icon", g_pSkillList->GetHotKeySlotIconDecorator(0));
+    syncText(&MainFrameRmlModel::skillSlot1Icon, "skill_slot_1_icon", g_pSkillList->GetHotKeySlotIconDecorator(1));
+    syncText(&MainFrameRmlModel::skillSlot2Icon, "skill_slot_2_icon", g_pSkillList->GetHotKeySlotIconDecorator(2));
+    syncText(&MainFrameRmlModel::skillSlot3Icon, "skill_slot_3_icon", g_pSkillList->GetHotKeySlotIconDecorator(3));
+    syncText(&MainFrameRmlModel::skillSlot4Icon, "skill_slot_4_icon", g_pSkillList->GetHotKeySlotIconDecorator(4));
+    syncText(&MainFrameRmlModel::currentSkillIcon, "current_skill_icon", g_pSkillList->GetCurrentSkillIconDecorator());
+    syncText(&MainFrameRmlModel::currentSkillHotkey, "current_skill_hotkey",
+             CharacterAttribute->SkillNumber > 0 ? hotkeyText(g_pSkillList->GetSkillHotKeyNumber(Hero->CurrentSkill))
+                                                 : Rml::String());
 
     // Skill list cooldown fractions.
     syncFloat(&MainFrameRmlModel::skillSlot0Cooldown, "skill_slot_0_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(0));
@@ -914,8 +971,16 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             // Tooltip::Show() used to apply that ambient conversion itself; see RmlTooltip.h's own
             // comment for why it no longer does.
             const auto skillTooltipTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+            // The native box ends below its anchor (G2); measured with the native text renderer
+            // under the tooltip's own transform.
+            float bottomBelowAnchor = 0.f;
+            {
+                UI::Scaling::ScopedActiveTransform measure(skillTooltipTransform);
+                bottomBelowAnchor = UI::Skills::Tooltip::NativeBoxBottomBelowAnchor(tooltipModel);
+            }
             config.anchorX = UI::Scaling::PositionX(skillTooltipTransform, g_pSkillList->GetTooltipAnchorX());
-            config.anchorY = UI::Scaling::PositionY(skillTooltipTransform, g_pSkillList->GetTooltipAnchorY());
+            config.anchorY =
+                UI::Scaling::PositionY(skillTooltipTransform, g_pSkillList->GetTooltipAnchorY() + bottomBelowAnchor);
             // The old #skill_tooltip's CSS (`transform: translateY(-100%)`) always grew upward,
             // unconditionally -- AboveLeft matches that; Show()'s own clamping now also covers the
             // horizontal/lower-edge cases that CSS-only transform never did.
@@ -1283,8 +1348,8 @@ int mu::ui::window::CItemHotKey::GetHotKeyLevel(int iHotKey)
 // PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): x=10+i*38/y=443/
 // 20x20 below is the same literal reference-space value both themes' main_frame.rcss hardcode for
 // #item_slot_0..3 -- "kept in sync by hand" per that file's own header comment. If either side
-// changes, update the other; this is deferred (not read live from RmlUi) until the RenderSkillIcon()
-// atlas port needs visual re-verification of these positions anyway.
+// changes, update the other. The skill row no longer has this duplication (its icons are RmlUi);
+// the item icons stay native 3D renders, so this pair remains.
 void mu::ui::window::CItemHotKey::RenderItems()
 {
     float x, y, width, height;
@@ -1386,6 +1451,8 @@ void mu::ui::window::CSkillList::Reset()
 
 void mu::ui::window::CSkillList::LoadImages()
 {
+    // The HUD draws none of these any more (main_frame.rml loads the atlases itself), but the
+    // texture slots are shared: CUIMuHelper draws skill icons and boxes from them natively.
     LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_command.jpg", IMAGE_COMMAND, GL_LINEAR);
@@ -1616,71 +1683,10 @@ bool mu::ui::window::CSkillList::Update()
     return true;
 }
 
-// PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): x=190/y=431/
-// width=32 below (compact hotkey row) and x=392/y=437 (current-skill icon) are the same literal
-// reference-space values both themes' main_frame.rcss hardcode for #skill_slot_0..4/
-// #current_skill_slot -- "kept in sync by hand" per that file's own header comment. If either side
-// changes, update the other; this is deferred (not read live from RmlUi) until the RenderSkillIcon()
-// atlas port needs visual re-verification of these positions anyway.
-void mu::ui::window::CSkillList::RenderCurrentSkillAndHotSkillList()
-{
-    int i;
-    float x, y, width, height;
-
-    BYTE bySkillNumber = CharacterAttribute->SkillNumber;
-
-    if (bySkillNumber > 0)
-    {
-        int iStartSkillIndex = 1;
-        if (m_bHotKeySkillListUp)
-        {
-            iStartSkillIndex = 6;
-        }
-
-        x = 190; y = 431; width = 32; height = 38;
-        for (i = 0; i < 5; ++i)
-        {
-            x += width;
-
-            int iIndex = iStartSkillIndex + i;
-            if (iIndex == 10)
-            {
-                iIndex = 0;
-            }
-
-            if (m_iHotKeySkillType[iIndex] == -1)
-            {
-                continue;
-            }
-
-            if (m_iHotKeySkillType[iIndex] >= AT_PET_COMMAND_DEFAULT && m_iHotKeySkillType[iIndex] < AT_PET_COMMAND_END)
-            {
-                if (Hero->m_pPet == NULL)
-                {
-                    continue;
-                }
-            }
-
-            if (Hero->CurrentSkill == m_iHotKeySkillType[iIndex])
-            {
-                // Suppressed for modern theme -- #skill_slot_0..4's RmlUi highlight (synced from
-                // IsHotKeySlotCurrentSkill()) always paints on top, so drawing this sprite too
-                // would double up. Legacy theme keeps the sprite (its own established look, not
-                // reproducible with a plain CSS outline).
-                if (!UI::RmlBridge::ThemeProvidesOwnIconChrome())
-                    mu::ui::window::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
-            }
-            RenderSkillIcon(m_iHotKeySkillType[iIndex], x + 6, y + 6, 20, 28);
-        }
-
-        x = 392; y = 437; width = 20; height = 28;
-        RenderSkillIcon(Hero->CurrentSkill, x, y, width, height);
-    }
-}
-
 bool mu::ui::window::CSkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
 {
-    // Mirrors RenderCurrentSkillAndHotSkillList()'s loop (wraparound, empty-slot, no-pet checks).
+    // The hotkey row shows hotkeys 1-5 or 6-9,0 (wraparound), skipping empty slots and pet
+    // commands without a pet.
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return false;
 
@@ -1733,36 +1739,8 @@ int mu::ui::window::CSkillList::GetHotKeySlotNumber(int iSlotIndex)
 
 bool mu::ui::window::CSkillList::Render()
 {
-    BYTE bySkillNumber = CharacterAttribute->SkillNumber;
-
-    // Without this, the expanded grid (registered directly with CManager, generic untransformed
-    // Render() dispatch) would render under the baseline transform instead of matching the compact
-    // hotkey row's centerTransform, misaligning at non-4:3 resolutions.
-    auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-    transform.offsetX += g_pMainFrame->GetSkillListOffsetX() * transform.scaleX;
-    UI::Scaling::ScopedActiveTransform layout(transform, true);
-
-    // Icon art stays legacy 2D (atlas lookup too irregular to port, see SkillCellEntry). The
-    // box-frame sprite is suppressed for modern theme (relies on .skill-cell's own border/
-    // highlight instead); legacy theme keeps it. This loop only draws from
-    // m_GridSnapshot/m_PetSnapshot -- hit-testing/tooltip-queueing moved to RmlUi (OnGridCellClick() etc).
-    if (bySkillNumber > 0 && m_bSkillList == true)
-    {
-        const bool bDrawBoxSprite = !UI::RmlBridge::ThemeProvidesOwnIconChrome();
-        for (const SkillCellEntry& entry : m_GridSnapshot)
-        {
-            if (bDrawBoxSprite)
-                mu::ui::window::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
-            RenderSkillIcon(entry.skillIndex, entry.left + 6.f, entry.top + 6.f, 20.f, 28.f);
-        }
-        for (const SkillCellEntry& entry : m_PetSnapshot)
-        {
-            if (bDrawBoxSprite)
-                mu::ui::window::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
-            RenderSkillIcon(entry.skillIndex, entry.left + 6.f, entry.top + 6.f, 20.f, 28.f);
-        }
-    }
-
+    // Nothing native: the hotkey row, current-skill slot, grid and pet row are main_frame.rml
+    // (icons, legacy box art, hotkey numbers, cooldown wipes), fed by SyncRmlModel().
     return true;
 }
 
@@ -1781,24 +1759,23 @@ void mu::ui::window::CSkillList::SetHeroPriorSkill(BYTE bySkill)
     m_wHeroPriorSkill = bySkill;
 }
 
-void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
+namespace
 {
-    auto bySkillType = CharacterAttribute->Skill[iIndex];
+bool HasOneHandedOrMeleeWeapon()
+{
+    const int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
+    const int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
+    return iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
+           (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX);
+}
 
-    if (bySkillType == 0)
-    {
-        return;
-    }
-
-    if (iIndex >= AT_PET_COMMAND_DEFAULT)
-    {
-        bySkillType = (ActionSkillType)iIndex;
-    }
-
+// The original RenderSkillIcon()'s checks that chose the grey icon: equipment, mount, buffs,
+// party, map and stats. The atlas cell itself is UI::Skills::Icon::ResolveSkillIcon().
+bool IsHudSkillUsable(ActionSkillType bySkillType)
+{
     bool bCantSkill = false;
 
-    BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
-    int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
+    const BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
 
     if (!gSkillManager.AreSkillAttributeRequirementsMet(bySkillType))
     {
@@ -1813,7 +1790,8 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
     {
         bCantSkill = true;
     }
-    auto isSittingOnPet = (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR);
+    auto isSittingOnPet = (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT ||
+                           Hero->Helper.Type == MODEL_HORN_OF_FENRIR);
     if (bySkillType == AT_SKILL_IMPALE && !isSittingOnPet)
     {
         bCantSkill = true;
@@ -1829,20 +1807,15 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
         }
     }
 
-    if (isSittingOnPet
-        && ((bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SLASH)
-            || bySkillType == AT_SKILL_FALLING_SLASH_STR
-            || bySkillType == AT_SKILL_LUNGE_STR
-            || bySkillType == AT_SKILL_CYCLONE_STR
-            || bySkillType == AT_SKILL_CYCLONE_STR_MG
-            || bySkillType == AT_SKILL_SLASH_STR
-            ))
+    if (isSittingOnPet && ((bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SLASH) ||
+                           bySkillType == AT_SKILL_FALLING_SLASH_STR || bySkillType == AT_SKILL_LUNGE_STR ||
+                           bySkillType == AT_SKILL_CYCLONE_STR || bySkillType == AT_SKILL_CYCLONE_STR_MG ||
+                           bySkillType == AT_SKILL_SLASH_STR))
     {
         bCantSkill = true;
     }
 
-    if ((bySkillType == AT_SKILL_POWER_SLASH || bySkillType == AT_SKILL_POWER_SLASH_STR)
-        && isSittingOnPet)
+    if ((bySkillType == AT_SKILL_POWER_SLASH || bySkillType == AT_SKILL_POWER_SLASH_STR) && isSittingOnPet)
     {
         bCantSkill = true;
     }
@@ -1852,12 +1825,14 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
         bCantSkill = true;
     }
 
-    if (bySkillType == AT_SKILL_PARTY_TELEPORT && (IsDoppelGanger1() || IsDoppelGanger2() || IsDoppelGanger3() || IsDoppelGanger4()))
+    if (bySkillType == AT_SKILL_PARTY_TELEPORT &&
+        (IsDoppelGanger1() || IsDoppelGanger2() || IsDoppelGanger3() || IsDoppelGanger4()))
     {
         bCantSkill = true;
     }
 
-    if (bySkillType == AT_SKILL_EARTHSHAKE || bySkillType == AT_SKILL_EARTHSHAKE_STR || bySkillType == AT_SKILL_EARTHSHAKE_MASTERY)
+    if (bySkillType == AT_SKILL_EARTHSHAKE || bySkillType == AT_SKILL_EARTHSHAKE_STR ||
+        bySkillType == AT_SKILL_EARTHSHAKE_MASTERY)
     {
         BYTE byDarkHorseLife = 0;
         byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -1879,15 +1854,13 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
             bCantSkill = true;
         }
     }
-#endif //PJH_FIX_SPRIT
-    if ((bySkillType == AT_SKILL_INFINITY_ARROW)
-        || (bySkillType == AT_SKILL_INFINITY_ARROW_STR)
-        || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY)
-        || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR)
-        || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
-        )
+#endif // PJH_FIX_SPRIT
+    if ((bySkillType == AT_SKILL_INFINITY_ARROW) || (bySkillType == AT_SKILL_INFINITY_ARROW_STR) ||
+        (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY) || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR) ||
+        (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY))
     {
-        if ((g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow)) || (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower)))
+        if ((g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow)) ||
+            (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower)))
         {
             bCantSkill = true;
         }
@@ -1905,7 +1878,8 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 
-        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) && (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
+        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
+              (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
         {
             bCantSkill = true;
         }
@@ -1913,35 +1887,32 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
 
     switch (bySkillType)
     {
-        //case AT_SKILL_PIERCING:
+        // case AT_SKILL_PIERCING:
     case AT_SKILL_ICE_ARROW:
     case AT_SKILL_ICE_ARROW_STR:
     {
-        WORD  Dexterity;
+        WORD Dexterity;
         const WORD wRequireDexterity = 646;
         Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
         if (Dexterity < wRequireDexterity)
         {
             bCantSkill = true;
         }
-    }break;
+    }
+    break;
     }
 
-    if (bySkillType == AT_SKILL_TWISTING_SLASH
-        || bySkillType == AT_SKILL_TWISTING_SLASH_STR
-        || bySkillType == AT_SKILL_TWISTING_SLASH_STR_MG
-        || bySkillType == AT_SKILL_TWISTING_SLASH_MASTERY
-        || bySkillType == AT_SKILL_RAGEFUL_BLOW
-        || bySkillType == AT_SKILL_RAGEFUL_BLOW_STR
-        || bySkillType == AT_SKILL_RAGEFUL_BLOW_MASTERY
-        || bySkillType == AT_SKILL_DEATHSTAB
-        || bySkillType == AT_SKILL_DEATHSTAB_STR
-        )
+    if (bySkillType == AT_SKILL_TWISTING_SLASH || bySkillType == AT_SKILL_TWISTING_SLASH_STR ||
+        bySkillType == AT_SKILL_TWISTING_SLASH_STR_MG || bySkillType == AT_SKILL_TWISTING_SLASH_MASTERY ||
+        bySkillType == AT_SKILL_RAGEFUL_BLOW || bySkillType == AT_SKILL_RAGEFUL_BLOW_STR ||
+        bySkillType == AT_SKILL_RAGEFUL_BLOW_MASTERY || bySkillType == AT_SKILL_DEATHSTAB ||
+        bySkillType == AT_SKILL_DEATHSTAB_STR)
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 
-        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) && (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
+        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
+              (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
         {
             bCantSkill = true;
         }
@@ -1949,21 +1920,18 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
 
     if (gMapManager.InChaosCastle() == true)
     {
-        if (bySkillType == AT_SKILL_EARTHSHAKE
-            || bySkillType == AT_SKILL_EARTHSHAKE_STR
-            || bySkillType == AT_SKILL_EARTHSHAKE_MASTERY
-            || bySkillType == AT_SKILL_RIDER
-            || (static_cast<int>(bySkillType) >= static_cast<int>(AT_PET_COMMAND_DEFAULT) && static_cast<int>(bySkillType) <= static_cast<int>(AT_PET_COMMAND_TARGET))
-            )
+        if (bySkillType == AT_SKILL_EARTHSHAKE || bySkillType == AT_SKILL_EARTHSHAKE_STR ||
+            bySkillType == AT_SKILL_EARTHSHAKE_MASTERY || bySkillType == AT_SKILL_RIDER ||
+            (static_cast<int>(bySkillType) >= static_cast<int>(AT_PET_COMMAND_DEFAULT) &&
+             static_cast<int>(bySkillType) <= static_cast<int>(AT_PET_COMMAND_TARGET)))
         {
             bCantSkill = true;
         }
     }
     else
     {
-        if (bySkillType == AT_SKILL_EARTHSHAKE
-            || bySkillType == AT_SKILL_EARTHSHAKE_STR
-            || bySkillType == AT_SKILL_EARTHSHAKE_MASTERY)
+        if (bySkillType == AT_SKILL_EARTHSHAKE || bySkillType == AT_SKILL_EARTHSHAKE_STR ||
+            bySkillType == AT_SKILL_EARTHSHAKE_MASTERY)
         {
             BYTE byDarkHorseLife = 0;
             byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -1986,208 +1954,75 @@ void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, f
     ITEM* pLeftRing = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
     ITEM* pRightRing = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 
-    if (g_CMonkSystem.IsChangeringNotUseSkill(pLeftRing->Type, pRightRing->Type, pLeftRing->Level, pRightRing->Level)
-        && (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
+    if (g_CMonkSystem.IsChangeringNotUseSkill(pLeftRing->Type, pRightRing->Type, pLeftRing->Level, pRightRing->Level) &&
+        (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
     {
         bCantSkill = true;
     }
-
-    float fU, fV;
-    int iKindofSkill = 0;
 
     if (!g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(bySkillType))
     {
         bCantSkill = true;
     }
 
-    if (static_cast<int>(bySkillType) >= static_cast<int>(AT_PET_COMMAND_DEFAULT) && static_cast<int>(bySkillType) <= static_cast<int>(AT_PET_COMMAND_END))
+    if (bySkillType == AT_SKILL_MULTI_SHOT && gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)
     {
-        fU = ((static_cast<int>(bySkillType) - AT_PET_COMMAND_DEFAULT) % 8) * width / 256.f;
-        fV = ((static_cast<int>(bySkillType) - AT_PET_COMMAND_DEFAULT) / 8) * height / 256.f;
-        iKindofSkill = KOS_COMMAND;
-    }
-    else if (bySkillType == AT_SKILL_PLASMA_STORM_FENRIR)
-    {
-        fU = 4 * width / 256.f;
-        fV = 0.f;
-        iKindofSkill = KOS_COMMAND;
-    }
-    else if ((bySkillType >= AT_SKILL_ALICE_DRAINLIFE && bySkillType <= AT_SKILL_ALICE_THORNS))
-    {
-        fU = ((bySkillType - AT_SKILL_ALICE_DRAINLIFE) % 8) * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType >= AT_SKILL_ALICE_SLEEP && bySkillType <= AT_SKILL_ALICE_BLIND)
-    {
-        fU = ((bySkillType - AT_SKILL_ALICE_SLEEP + 4) % 8) * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_ALICE_BERSERKER)
-    {
-        fU = 10 * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType >= AT_SKILL_ALICE_WEAKNESS && bySkillType <= AT_SKILL_ALICE_ENERVATION)
-    {
-        fU = (bySkillType - AT_SKILL_ALICE_WEAKNESS + 8) * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType >= AT_SKILL_SUMMON_EXPLOSION && bySkillType <= AT_SKILL_SUMMON_REQUIEM)
-    {
-        fU = ((bySkillType - AT_SKILL_SUMMON_EXPLOSION + 6) % 8) * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_SUMMON_POLLUTION)
-    {
-        fU = 11 * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_STRIKE_OF_DESTRUCTION)
-    {
-        fU = 7 * width / 256.f;
-        fV = 2 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_CHAOTIC_DISEIER)
-    {
-        fU = 3 * width / 256.f;
-        fV = 8 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_RECOVER)
-    {
-        fU = 9 * width / 256.f;
-        fV = 2 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_MULTI_SHOT)
-    {
-        if (gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)
-        {
-            bCantSkill = true;
-        }
-
-        fU = 0 * width / 256.f;
-        fV = 8 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_FLAME_STRIKE)
-    {
-        int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-        int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-
-        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) && (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
-        {
-            bCantSkill = true;
-        }
-
-        fU = 1 * width / 256.f;
-        fV = 8 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_GIGANTIC_STORM)
-    {
-        fU = 2 * width / 256.f;
-        fV = 8 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_LIGHTNING_SHOCK)
-    {
-        fU = 2 * width / 256.f;
-        fV = 3 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY)
-    {
-        fU = 8 * width / 256.f;
-        fV = 2 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillUseType == 4)
-    {
-        fU = (width / 256.f) * (Skill_Icon % 12);
-        fV = (height / 256.f) * ((Skill_Icon / 12) + 4);
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType >= AT_SKILL_KILLING_BLOW)
-    {
-        fU = ((bySkillType - AT_SKILL_KILLING_BLOW) % 12) * width / 256.f;
-        fV = ((bySkillType - AT_SKILL_KILLING_BLOW) / 12) * height / 256.f;
-        iKindofSkill = KOS_SKILL3;
-    }
-    else if (bySkillType >= AT_SKILL_SPIRAL_SLASH)
-    {
-        fU = ((bySkillType - AT_SKILL_SPIRAL_SLASH) % 8) * width / 256.f;
-        fV = ((bySkillType - AT_SKILL_SPIRAL_SLASH) / 8) * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else
-    {
-        fU = ((bySkillType - 1) % 8) * width / 256.f;
-        fV = ((bySkillType - 1) / 8) * height / 256.f;
-        iKindofSkill = KOS_SKILL1;
-    }
-    int iSkillIndex = 0;
-    switch (iKindofSkill)
-    {
-    case KOS_COMMAND:
-    {
-        iSkillIndex = IMAGE_COMMAND;
-    }break;
-    case KOS_SKILL1:
-    {
-        iSkillIndex = IMAGE_SKILL1;
-    }break;
-    case KOS_SKILL2:
-    {
-        iSkillIndex = IMAGE_SKILL2;
-    }break;
-    case KOS_SKILL3:
-    {
-        iSkillIndex = IMAGE_SKILL3;
-    }break;
+        bCantSkill = true;
     }
 
-    if (bySkillType >= AT_SKILL_MASTER_BEGIN)
+    if (bySkillType == AT_SKILL_FLAME_STRIKE && !HasOneHandedOrMeleeWeapon())
     {
-        if (bCantSkill)
+        bCantSkill = true;
+    }
+
+    return !bCantSkill;
+}
+} // namespace
+
+Rml::String mu::ui::window::CSkillList::GetSkillIconDecorator(int iIndex)
+{
+    auto bySkillType = CharacterAttribute->Skill[iIndex];
+
+    if (bySkillType == 0)
+    {
+        return "none";
+    }
+
+    if (iIndex >= AT_PET_COMMAND_DEFAULT)
+    {
+        bySkillType = (ActionSkillType)iIndex;
+    }
+
+    const UI::Skills::Icon::SkillIcon icon =
+        UI::Skills::Icon::ResolveSkillIcon({.skillType = bySkillType,
+                                            .skillUseType = SkillAttribute[bySkillType].SkillUseType,
+                                            .magicIcon = SkillAttribute[bySkillType].Magic_Icon,
+                                            .usable = IsHudSkillUsable(bySkillType)});
+    const std::string sprite = UI::Skills::Icon::IconSpriteName(icon);
+    return sprite.empty() ? Rml::String("none") : "image(" + sprite + ")";
+}
+
+Rml::String mu::ui::window::CSkillList::GetHotKeySlotIconDecorator(int iSlotIndex)
+{
+    const int iHotKey = GetHotKeySlotNumber(iSlotIndex);
+    return iHotKey >= 0 ? GetSkillIconDecorator(m_iHotKeySkillType[iHotKey]) : Rml::String("none");
+}
+
+Rml::String mu::ui::window::CSkillList::GetCurrentSkillIconDecorator()
+{
+    return CharacterAttribute->SkillNumber > 0 ? GetSkillIconDecorator(Hero->CurrentSkill) : Rml::String("none");
+}
+
+int mu::ui::window::CSkillList::GetSkillHotKeyNumber(int iIndex)
+{
+    for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
+    {
+        if (m_iHotKeySkillType[i] == iIndex)
         {
-            RenderImage(BITMAP_INTERFACE_MASTER_BEGIN + 3, x, y, width, height, (20.f / 512.f) * (Skill_Icon % 25), ((28.f / 512.f) * ((Skill_Icon / 25))), 20.f / 512.f, 28.f / 512.f);
-        }
-        else
-        {
-            RenderImage(BITMAP_INTERFACE_MASTER_BEGIN + 2, x, y, width, height, (20.f / 512.f)* (Skill_Icon % 25), ((28.f / 512.f)* ((Skill_Icon / 25))), 20.f / 512.f, 28.f / 512.f);
+            return i;
         }
     }
-    else
-    {
-        if (bCantSkill == true)
-        {
-            iSkillIndex += 6;
-        }
-
-        if (iSkillIndex != 0)
-        {
-            RenderBitmap(iSkillIndex, x, y, width, height, fU, fV, width / 256.f, height / 256.f);
-        }
-    }
-
-    // Hotkey-number subscript retired -- both themes show it via RmlUi (#skill_slot_0..4's .skill-hotkey-label) instead.
-
-    if ((bySkillType == AT_SKILL_CHAIN_DRIVE
-        || bySkillType == AT_SKILL_CHAIN_DRIVE_STR
-        || bySkillType == AT_SKILL_DRAGON_KICK
-        || bySkillType == AT_SKILL_DRAGON_ROAR
-        || bySkillType == AT_SKILL_DRAGON_ROAR_STR) && (bCantSkill))
-        return;
-
-    // The cooldown wipe lives in RmlUi (SkillCellEntry::cooldownFraction / ComputeSkillCooldownFraction()).
+    return -1;
 }
 
 namespace
@@ -2232,10 +2067,18 @@ namespace
     }
 }
 
+namespace
+{
+Rml::String HotKeyText(int hotkey)
+{
+    return hotkey >= 0 ? std::to_string(hotkey) : Rml::String();
+}
+} // namespace
+
 void mu::ui::window::CSkillList::RebuildGridSnapshot()
 {
     // Same iteration/filter/zig-zag-position math the legacy grid loop used, now producing data
-    // instead of drawing. Render() iterates the resulting snapshot.
+    // for main_frame.rml's .skill-cell list instead of drawing.
     m_GridSnapshot.clear();
     m_PetSnapshot.clear();
 
@@ -2287,6 +2130,8 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
         entry.isPet = false;
         entry.isCurrent = (i == Hero->CurrentSkill);
         entry.cooldownFraction = ComputeSkillCooldownFraction(i);
+        entry.icon = GetSkillIconDecorator(i);
+        entry.hotkey = HotKeyText(GetSkillHotKeyNumber(i));
         m_GridSnapshot.push_back(entry);
     }
 
@@ -2302,19 +2147,25 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
             entry.isPet = true;
             entry.isCurrent = (i == Hero->CurrentSkill);
             entry.cooldownFraction = ComputeSkillCooldownFraction(i);
+            entry.icon = GetSkillIconDecorator(i);
+            entry.hotkey = HotKeyText(GetSkillHotKeyNumber(i));
             m_PetSnapshot.push_back(entry);
             px += width;
         }
     }
 }
 
-// Native CNewUISkillList::RenderSkillInfo() centres the skill tooltip on the icon (slot x + 10 for
-// the current skill and hotkeys, cell x + 15 in the expanded list) and ends it 10 above the icon.
+// Native CNewUISkillList::RenderSkillInfo() centres the skill tooltip at box x + 10 for the current
+// skill and hotkeys, cell x + 15 in the expanded list, anchored 10 above the box.
 namespace
 {
 constexpr float kSlotTooltipOffsetX = 10.f;
 constexpr float kGridTooltipOffsetX = 15.f;
 constexpr float kTooltipGapAbove = 10.f;
+// The original hit-tested the current skill as a 32x38 box around its 20x28 icon (385/431 around
+// 392/437) and anchored the hint on that box like a hotkey slot.
+constexpr float kCurrentSkillBoxInsetX = 7.f;
+constexpr float kCurrentSkillBoxInsetY = 6.f;
 } // namespace
 
 void mu::ui::window::CSkillList::QueueTooltip(int iSkillIndex, float x, float y)
@@ -2384,7 +2235,7 @@ void mu::ui::window::CSkillList::OnHotkeySlotClick(int iSlotIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CSkillList::OnHotkeySlotHover(int iSlotIndex)
+void mu::ui::window::CSkillList::OnHotkeySlotHover(int iSlotIndex, float slotLeft, float slotTop)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return;
@@ -2405,9 +2256,7 @@ void mu::ui::window::CSkillList::OnHotkeySlotHover(int iSlotIndex)
     if (SkillAttribute[bySkillType].SkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
         return;
 
-    // Slot x matches RenderCurrentSkillAndHotSkillList() (190 + (iSlotIndex+1)*32, y 431).
-    QueueTooltip(m_iHotKeySkillType[iIndex], 190.f + (iSlotIndex + 1) * 32.f + kSlotTooltipOffsetX,
-                 431.f - kTooltipGapAbove);
+    QueueTooltip(m_iHotKeySkillType[iIndex], slotLeft + kSlotTooltipOffsetX, slotTop - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnCurrentSkillClick()
@@ -2416,9 +2265,10 @@ void mu::ui::window::CSkillList::OnCurrentSkillClick()
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CSkillList::OnCurrentSkillHover()
+void mu::ui::window::CSkillList::OnCurrentSkillHover(float iconLeft, float iconTop)
 {
-    QueueTooltip(Hero->CurrentSkill, 392.f + kSlotTooltipOffsetX, 437.f - kTooltipGapAbove);
+    QueueTooltip(Hero->CurrentSkill, iconLeft - kCurrentSkillBoxInsetX + kSlotTooltipOffsetX,
+                 iconTop - kCurrentSkillBoxInsetY - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnGridCellClick(int iSkillIndex)

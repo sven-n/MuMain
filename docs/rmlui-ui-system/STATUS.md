@@ -233,6 +233,20 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   caught it. Both now latch through `m_bScrollPending`/`m_bScrollRequest`, and the logical cursor
   reads back from the live scroll offset so external callers start from where the user actually is.
 
+- **`CMasterLevel`** (master skill tree) — **done, both themes (2026-09-27)**. RmlUi-only 2D
+  (`master_level.rml`): the legacy panel is authored in 640x480 reference px and stretched
+  W/640 x H/480 like the original, text counter-scaled to the native size. Node geometry, icon
+  sprite names and the EXP percent are pure (`UI::Skills::MasterTree`, unit-tested); icons come
+  from the generated `master_skill_icons.rcss`. Its learn confirm stays `CGenericConfirmDialog`,
+  whose plain chrome now paints from the main context so it sits above the tree (`a7798a62`).
+- **HUD skill icons (`CSkillList`)** — **done, both themes (2026-09-27)**. The current-skill slot,
+  hotkey row, skill list and pet-command row draw their icons as sprites (`skill_icons.rcss`,
+  generated, plus the master sheet) picked by the pure `UI::Skills::Icon::ResolveSkillIcon()`;
+  legacy draws the original box art as decorators and shows the hotkey number on every icon like
+  the original. C++ no longer draws or positions skill icons: hint anchors read the hovered slot's
+  box back from RmlUi, and the hint ends below its anchor like the native one. Paint order is
+  RmlUi's: the icons now follow `main_frame.rml`'s document order instead of the native layer
+  depth (the hit targets already did). The skill textures stay loaded for `CUIMuHelper`.
 - **`CMoveCommandWindow`** — **done, both themes (2026-09-27)**. The left-docked warp list (`/move`).
   Ported for the scrollbar: this is the window that actually *retires* a hand-rolled one rather than
   decorating a new one. `ThumbYForScrollOffset`/`ScrollOffsetForThumbY`/`UpdateDragState`/

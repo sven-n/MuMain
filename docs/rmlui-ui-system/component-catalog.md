@@ -341,7 +341,11 @@ reading it cold:
   instead of under it. The mechanism (a dedicated third `Rml::Context`,
   `RmlUiRuntime::RenderDialogBackgroundLayer()`, fired from `CManager::Render()`'s own loop right
   before the shared 3D camera's z-order) is fully documented in the class's own header comment —
-  read that, not a paraphrase, before touching anything `item3D`-adjacent.
+  read that, not a paraphrase, before touching anything `item3D`-adjacent. Only an `item3D` dialog
+  paints its chrome in that context: every other dialog shows the same background markup as a
+  second document in the main context, pulled to the front right under its text, so a
+  full-screen RmlUi window (the master skill tree) cannot cover the panel of a dialog opened over
+  it.
 - Single active instance, not a real stack — a second `Show()` call while one is open queues
   instead of replacing it; see the class's own header comment for why that's not a functional
   regression from what it replaces.
@@ -455,7 +459,8 @@ per-window, or entirely unbuilt:
 
 - **ItemSlot / ItemGrid** — the slot *chrome* (border/hover highlight/count/cooldown overlay) has
   no reusable RmlUi component yet, but the pattern to build one isn't unproven: it's the same
-  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) already validated for skill icons.
+  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) validated for skill icons (since
+  2026-09-27 the skill icons themselves are RmlUi sprites too: `skill_icons.rcss`, `ResolveSkillIcon()`).
   **Correction, 2026-09-06**: this entry previously called `CItemHotKey`'s icons "3D-camera-
   composited" and framed the whole slot as "still 100% legacy 2D rendering... the next real
   candidate to prove a pattern against" — wrong on both counts. Traced to source
