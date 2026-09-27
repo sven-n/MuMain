@@ -35,7 +35,11 @@ void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source,
                   const std::string& message);
 
 // Parses the text and checks that it is an object with a supported
-// "formatVersion" (1 to maxFormatVersion) and a valid "group".
+// "formatVersion" (1 to maxFormatVersion).
+bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
+                     std::vector<ItemDataIssue>& issues);
+
+// ReadFileVersion, and checks that the file has a valid "group".
 bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
                     int& group, std::vector<ItemDataIssue>& issues);
 

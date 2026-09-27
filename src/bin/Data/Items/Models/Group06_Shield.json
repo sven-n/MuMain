@@ -191,7 +191,7 @@
         "rotation": [0, 270, 225]
       },
       "glow": {
-        "color": [0.6, 0.8, 0.4]
+        "color": "lime"
       }
     },
     {
@@ -227,7 +227,7 @@
         "rotation": [0, 270, 225]
       },
       "glow": {
-        "color": [0.2, 0.7, 0.3],
+        "color": "emerald",
         "meshes": [0],
         "shineMeshes": [0]
       }
@@ -243,7 +243,7 @@
         "rotation": [0, 270, 225]
       },
       "glow": {
-        "color": [0.5, 0.5, 0.7],
+        "color": "periwinkle",
         "meshes": [0]
       }
     },
@@ -259,7 +259,7 @@
         "rotation": [0, 270, 225]
       },
       "glow": {
-        "color": [0.7, 0.3, 0.3],
+        "color": "rust",
         "meshes": [0]
       }
     }

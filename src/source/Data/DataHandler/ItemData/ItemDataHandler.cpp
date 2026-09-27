@@ -6,6 +6,8 @@
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -16,7 +18,6 @@
 
 #ifdef _EDITOR
 #include "Data/DataHandler/CommonDataSaver.h"
-#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "ItemDataSaver.h"
 #include "ItemDataExportS6E3.h"
 #include "ItemDataExportAsCSV.h"
@@ -153,7 +154,13 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 bool CItemDataHandler::LoadModels(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
+    GlowColorsLoadResult colors = LoadGlowColorsFile(GetGlowColorsFile());
     ItemModelDataLoadResult result = LoadItemModelDataDirectory(GetItemModelDataDirectory());
+    result.issues.insert(result.issues.begin(), colors.issues.begin(), colors.issues.end());
+    if (!HasErrors(colors.issues))
+    {
+        ValidateItemModelGlowColors(result.models, colors.colors, result.issues);
+    }
     LogIssues(result.issues);
     if (HasErrors(result.issues))
     {
@@ -161,6 +168,7 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
         return false;
     }
 
+    g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models);
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));

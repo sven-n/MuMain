@@ -54,7 +54,7 @@ pattern later but are not part of this work.
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model. Phase 12 (level variants as items of their own) then shares models without loading them twice. |
-| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (colors as red, green and blue, which keeps the values of the old `PartObjectColor*` palettes without naming 44 colors; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. |
+| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
@@ -411,7 +411,7 @@ in both repos (as separate PRs, one per repo).
 | 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
 | 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, 4d, A | Move items into new groups for the new client; level variants become items of their own; legacy ids for the original client (D21). |
 | D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
-| 13 | Cleanup | Client | MuMain | all | Remove this document. |
+| 13 | Cleanup | Client | MuMain | all | The glow of the Phoenix Soul inventory model, then remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -524,7 +524,7 @@ server with original clients (after phases 6 and B).
    { "number": 5, "file": "Data/Item/Sword06.bmd", "textureFolders": ["Item"],
      "inventory": { "offset": [-0.02, 0.03], "rotation": [180, 270, 15], "scale": 0.0039 },
      "ground": { "rotation": [60, 0, -45], "scale": 1.0 },
-     "glow": { "color": [1, 0.7, 0.2], "meshes": [0] },
+     "glow": { "color": "gold", "meshes": [0] },
      "renderStyle": "chromeMesh0", "effects": ["flameSparks"] }
    ```
 
@@ -550,15 +550,19 @@ server with original clients (after phases 6 and B).
    - **4c Render effects (D24)**, three PRs because the drawing code is
      large (about 3,500 lines):
      - **4c1 Glow:** `"glow"` holds the level an item glows like (jewels +8,
-       wings +0), the colors of the level glow, of the shine of items +11
-       and up and of ancient items, the meshes they are drawn on, and the
-       excellent glow (off for wings and capes, or on one mesh). It
-       replaces `PartObjectColor`, `PartObjectColor2`, `PartObjectColor3`,
-       the mesh choices of `RenderPartObjectBodyColor(2)` and the item
-       cases of the glow level switch. Monsters, the formulas of arrows,
-       bolts and Devil's Square items, the event models of level variants
-       and the Deadly Staff's second glow step (a one-off that changes the
-       object, moved in 4c2) stay in code.
+       wings +0, or one per item level for arrows, bolts and Devil's Square
+       items), the colors of the level glow, of the shine of items +11 and
+       up and of ancient items (names from `Data/Effects/GlowColors.json`),
+       the meshes they are drawn on, and the excellent glow (off for wings
+       and capes, or on one mesh). It replaces `PartObjectColor`,
+       `PartObjectColor2`, `PartObjectColor3`, the mesh choices of
+       `RenderPartObjectBodyColor(2)` and the item cases of the glow level
+       switch. Still in code: the glow of monsters (a follow-up of its own:
+       monsters have their own models, data and code), of the event models
+       of level variants (with 4d and phase 12, when they get model entries
+       and the drawing code knows the item), of the inventory model of the
+       Phoenix Soul Armor (see the last step below), and the Deadly Staff's
+       second glow step (a one-off that changes the object, moved in 4c2).
      - **4c2 Render styles:** `renderStyle` names the `RenderPartObjectBody`
        recipe of an item (about 160 item branches, 133 distinct recipes),
        including the display-only item lists of phase 3 that choose them.
@@ -701,7 +705,16 @@ server with original clients (after phases 6 and B).
     Questions for then: the exact new groups and which items move; whether
     the legacy id lives only in OpenMU or also in the client data; the
     protocol change for the new item encoding.
-13. **Cleanup**: remove this document once the work has landed.
+13. **Cleanup**, once the work has landed:
+    - The glow of the inventory model of the Phoenix Soul Armor
+      (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
+      for an item that glows differently from its item: only on its first
+      mesh (its item's armor model glows on mesh 2), and the metal pass of
+      +9 and up draws that mesh three times, so it shines brighter than the
+      other inventory models (probably a copy-paste leftover; to keep or to
+      drop then). Left for last because it only shows in the inventory and
+      is easiest to check once everything else is in data.
+    - Remove this document.
 
 ## Open questions
 

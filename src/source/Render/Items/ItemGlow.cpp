@@ -4,7 +4,9 @@
 #include "ItemDisplay.h"
 
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Render/Models/ZzzBMD.h"
@@ -25,6 +27,53 @@ const ItemModelDefinition* FindItemModel(int modelType)
 {
     return g_ItemModelDatabase.Find(modelType - MODEL_ITEM);
 }
+
+// The glow colors of every item type, looked up in the glow color list again
+// when the models or the list change.
+struct ColorCache
+{
+    int modelsVersion = -1;
+    int colorListVersion = -1;
+    Colors defaults;
+    std::vector<Colors> items;
+};
+
+// Names that are not in the list (loading reports them) have no color.
+Color FindColor(const std::string& name)
+{
+    const Data::Effects::GlowColorValue* value = g_GlowColors.Find(name);
+    if (value == nullptr)
+    {
+        return {};
+    }
+    return {static_cast<float>((*value)[0]), static_cast<float>((*value)[1]), static_cast<float>((*value)[2])};
+}
+
+Colors FindColors(const ItemGlow& glow)
+{
+    return {FindColor(glow.color), FindColor(glow.shineColor), FindColor(glow.ancientColor)};
+}
+
+const ColorCache& GetColorCache()
+{
+    static ColorCache cache;
+    if (cache.modelsVersion != g_ItemModelDatabase.GetVersion() || cache.colorListVersion != g_GlowColors.GetVersion())
+    {
+        cache.defaults = FindColors(DefaultGlow);
+        cache.items.assign(MAX_ITEM, cache.defaults);
+        const std::span<const ItemModelDefinition> models = g_ItemModelDatabase.GetAllSlots();
+        for (size_t itemType = 0; itemType < models.size(); ++itemType)
+        {
+            if (models[itemType].Exists())
+            {
+                cache.items[itemType] = FindColors(models[itemType].glow);
+            }
+        }
+        cache.modelsVersion = g_ItemModelDatabase.GetVersion();
+        cache.colorListVersion = g_GlowColors.GetVersion();
+    }
+    return cache;
+}
 } // namespace
 
 const ItemGlow& Get(int modelType)
@@ -33,32 +82,32 @@ const ItemGlow& Get(int modelType)
     return model != nullptr ? model->glow : DefaultGlow;
 }
 
-const ItemGlow& GetOfDrawnItem(int modelType)
+const Colors& GetColors(int modelType)
 {
-    if (const ItemModelDefinition* model = FindItemModel(modelType))
-    {
-        return model->glow;
-    }
+    const ColorCache& cache = GetColorCache();
+    const int itemType = modelType - MODEL_ITEM;
+    return Data::Items::IsValidItemType(itemType) ? cache.items[itemType] : cache.defaults;
+}
+
+const Colors& GetColorsOfDrawnItem(int modelType)
+{
     if (const std::optional<int> item = Display::GetItemOfInventoryModel(modelType))
     {
-        return Get(MODEL_ITEM + *item);
+        return GetColors(MODEL_ITEM + *item);
     }
-    return Get(g_CMonkSystem.EqualItemModelType(modelType));
+    if (FindItemModel(modelType) == nullptr)
+    {
+        return GetColors(g_CMonkSystem.EqualItemModelType(modelType));
+    }
+    return GetColors(modelType);
 }
 
 int GetLevel(int modelType, int level)
 {
-    // The glow of these depends on their level.
+    // The event models of level variants; they get model entries of their own
+    // with phase 4d and 12.
     switch (modelType)
     {
-    case MODEL_DEVILS_EYE:
-    case MODEL_DEVILS_KEY:
-    case MODEL_DEVILS_INVITATION:
-        return level <= 6 ? level / 2 : 13;
-    case MODEL_BOLT:
-    case MODEL_ARROWS:
-        return level >= 1 ? level * 2 + 1 : 0;
-    // The event models of level variants.
     case MODEL_EVENT:
     case MODEL_EVENT + 1:
     case MODEL_EVENT + 9:
@@ -81,7 +130,16 @@ int GetLevel(int modelType, int level)
     case MODEL_EVENT + 14:
         return level + 7;
     }
-    return Get(modelType).level.value_or(level);
+    const std::vector<int>& levels = Get(modelType).levels;
+    if (levels.size() == 1)
+    {
+        return levels.front();
+    }
+    if (level >= 0 && level < static_cast<int>(levels.size()))
+    {
+        return levels[level];
+    }
+    return level;
 }
 
 bool HasExcellentGlow(int modelType)

@@ -5899,8 +5899,7 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
     }
     else
     {
-        const std::array<double, 3>& itemColor = Render::Items::Glow::GetOfDrawnItem(Type).color;
-        color = {static_cast<float>(itemColor[0]), static_cast<float>(itemColor[1]), static_cast<float>(itemColor[2])};
+        color = Render::Items::Glow::GetColorsOfDrawnItem(Type).color;
     }
 
     Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
@@ -5909,23 +5908,21 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
 
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon)
 {
-    const Data::Items::ItemGlow& glow = Render::Items::Glow::Get(Type);
-    if (glow.shineWhite)
+    if (Render::Items::Glow::Get(Type).shineWhite)
     {
         Vector(1.f, 1.f, 1.f, Light);
         return;
     }
 
+    const Render::Items::Glow::Color& color = Render::Items::Glow::GetColors(Type).shineColor;
     Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
-    Vector(Bright * static_cast<float>(glow.shineColor[0]) * Light[0],
-           Bright * static_cast<float>(glow.shineColor[1]) * Light[1],
-           Bright * static_cast<float>(glow.shineColor[2]) * Light[2], Light);
+    Vector(Bright * color[0] * Light[0], Bright * color[1] * Light[1], Bright * color[2] * Light[2], Light);
 }
 
 void PartObjectColor3(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon)
 {
-    const std::array<double, 3>& color = Render::Items::Glow::Get(Type).ancientColor;
-    Vector(static_cast<float>(color[0]), static_cast<float>(color[1]), static_cast<float>(color[2]), Light);
+    const Render::Items::Glow::Color& color = Render::Items::Glow::GetColors(Type).ancientColor;
+    Vector(color[0], color[1], color[2], Light);
 }
 
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)

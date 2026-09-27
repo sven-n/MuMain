@@ -2,7 +2,6 @@
 
 #include "ItemModelGlowJson.h"
 
-#include <array>
 #include <limits>
 #include <string>
 
@@ -11,19 +10,18 @@ namespace Data::Items::GlowJson
 namespace
 {
 using Json::OrderedJson;
-using ModelJson::WriteNumber;
-using ModelJson::WriteNumbers;
 
-constexpr const char* LevelKey = "level";
+constexpr const char* ColorKey = "color";
 constexpr const char* HiddenMeshKey = "hiddenMesh";
+constexpr const char* ShineColorKey = "shineColor";
 constexpr const char* ShineWhiteKey = "shineWhite";
 constexpr const char* ShineHiddenMeshKey = "shineHiddenMesh";
+constexpr const char* AncientColorKey = "ancientColor";
 constexpr const char* ExcellentKey = "excellent";
 constexpr const char* ExcellentMeshKey = "excellentMesh";
 constexpr const char* ExcellentMeshWithoutSkinKey = "excellentMeshWithoutSkin";
 
 constexpr int MaxMesh = std::numeric_limits<int>::max();
-constexpr double MaxColorValue = 1.0;
 
 // ---------------------------------------------------------------- writing
 
@@ -42,18 +40,22 @@ void WriteMeshes(const ItemGlowMeshes& meshes, const char* meshesKey, const char
 OrderedJson WriteGlow(const ItemGlow& glow)
 {
     OrderedJson json = OrderedJson::object();
-    if (glow.level)
+    if (glow.levels.size() == 1)
     {
-        json[LevelKey] = *glow.level;
+        json[LevelKey] = glow.levels.front();
+    }
+    else if (!glow.levels.empty())
+    {
+        json[LevelKey] = glow.levels;
     }
     if (glow.color != ItemGlow::DefaultColor)
     {
-        json[ColorKey] = WriteNumbers(glow.color);
+        json[ColorKey] = glow.color;
     }
     WriteMeshes(glow.meshes, MeshesKey, HiddenMeshKey, json);
     if (glow.shineColor != ItemGlow::DefaultShineColor)
     {
-        json[ShineColorKey] = WriteNumbers(glow.shineColor);
+        json[ShineColorKey] = glow.shineColor;
     }
     if (glow.shineWhite)
     {
@@ -62,7 +64,7 @@ OrderedJson WriteGlow(const ItemGlow& glow)
     WriteMeshes(glow.shineMeshes, ShineMeshesKey, ShineHiddenMeshKey, json);
     if (glow.ancientColor != ItemGlow::DefaultAncientColor)
     {
-        json[AncientColorKey] = WriteNumbers(glow.ancientColor);
+        json[AncientColorKey] = glow.ancientColor;
     }
     if (!glow.excellent)
     {
@@ -81,22 +83,31 @@ OrderedJson WriteGlow(const ItemGlow& glow)
 
 // ---------------------------------------------------------------- reading
 
-void ReadColor(ModelJson::ValueReader& reader, const char* key, std::array<double, 3>& color)
+// One level for all item levels, or one per item level.
+void ReadLevels(ModelJson::ValueReader& reader, std::vector<int>& levels)
 {
-    std::array<double, 3> value{};
-    if (!reader.ReadNumbers(key, value, value.size()))
+    if (!reader.Has(LevelKey))
     {
         return;
     }
-    for (const double part : value)
+    int level = 0;
+    std::vector<int> perItemLevel;
+    if (reader.IsNumber(LevelKey))
     {
-        if (part < 0.0 || part > MaxColorValue)
+        if (reader.ReadIndex(LevelKey, level, MaxLevel))
         {
-            reader.Error(key, "must be a list of red, green and blue from 0 to 1");
-            return;
+            levels = {level};
         }
     }
-    color = value;
+    else if (reader.ReadIndexes(LevelKey, perItemLevel, MaxLevel))
+    {
+        if (perItemLevel.size() != ItemLevelCount)
+        {
+            reader.Error(LevelKey, "must be one level, or a list of one level for each item level 0 to 15");
+            return;
+        }
+        levels = std::move(perItemLevel);
+    }
 }
 
 void ReadOptionalIndex(ModelJson::ValueReader& reader, const char* key, std::optional<int>& value, int maxValue)
@@ -139,13 +150,13 @@ void Read(const OrderedJson& json, ItemModelDefinition& model, const ModelJson::
 
     ItemGlow& glow = model.glow;
     ModelJson::ValueReader reader(*object, GlowKey, report);
-    ReadOptionalIndex(reader, LevelKey, glow.level, MaxLevel);
-    ReadColor(reader, ColorKey, glow.color);
+    ReadLevels(reader, glow.levels);
+    reader.ReadName(ColorKey, glow.color);
     ReadMeshes(reader, MeshesKey, HiddenMeshKey, glow.meshes);
-    ReadColor(reader, ShineColorKey, glow.shineColor);
+    reader.ReadName(ShineColorKey, glow.shineColor);
     reader.ReadBool(ShineWhiteKey, glow.shineWhite);
     ReadMeshes(reader, ShineMeshesKey, ShineHiddenMeshKey, glow.shineMeshes);
-    ReadColor(reader, AncientColorKey, glow.ancientColor);
+    reader.ReadName(AncientColorKey, glow.ancientColor);
     reader.ReadBool(ExcellentKey, glow.excellent);
     ReadOptionalIndex(reader, ExcellentMeshKey, glow.excellentMesh, MaxMesh);
     ReadOptionalIndex(reader, ExcellentMeshWithoutSkinKey, glow.excellentMeshWithoutSkin, MaxMesh);

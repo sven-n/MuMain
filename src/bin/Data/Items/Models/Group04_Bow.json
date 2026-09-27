@@ -68,8 +68,8 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 1, 1],
-        "shineColor": [0, 0.5, 1]
+        "color": "white",
+        "shineColor": "blue"
       }
     },
     {
@@ -93,6 +93,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "level": [0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
       }
     },
     {
@@ -167,8 +170,8 @@
         "rotation": [90, 0, -45]
       },
       "glow": {
-        "color": [1, 1, 1],
-        "shineColor": [0, 0.5, 1]
+        "color": "white",
+        "shineColor": "blue"
       }
     },
     {
@@ -194,6 +197,9 @@
       },
       "ground": {
         "rotation": [90, 0, -45]
+      },
+      "glow": {
+        "level": [0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
       }
     },
     {
@@ -220,7 +226,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.5, 0.5, 0.8]
+        "color": "steelBlue"
       }
     },
     {
@@ -235,7 +241,7 @@
         "rotation": [90, 0, -45]
       },
       "glow": {
-        "color": [0.75, 0.65, 0.5]
+        "color": "sand"
       }
     },
     {
@@ -251,7 +257,7 @@
         "rotation": [90, 0, -45]
       },
       "glow": {
-        "color": [0.5, 0.5, 0.8]
+        "color": "steelBlue"
       }
     },
     {
@@ -263,7 +269,7 @@
         "rotation": [180, -90, 15]
       },
       "glow": {
-        "color": [0.8, 0.46, 0.25]
+        "color": "copper"
       }
     },
     {
@@ -277,7 +283,7 @@
         "scale": 0.0022
       },
       "glow": {
-        "color": [0.3, 0.7, 0.3]
+        "color": "leafGreen"
       }
     },
     {
@@ -291,7 +297,7 @@
         "scale": 0.002
       },
       "glow": {
-        "color": [0.3, 0.7, 0.3]
+        "color": "leafGreen"
       }
     },
     {
@@ -308,7 +314,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.7, 0.4, 0.4]
+        "color": "rose"
       }
     },
     {
@@ -325,7 +331,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.5, 0.5, 0.7],
+        "color": "periwinkle",
         "meshes": [0]
       }
     }

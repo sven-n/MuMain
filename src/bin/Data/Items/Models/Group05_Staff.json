@@ -80,9 +80,9 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0, 0.5, 1],
+        "color": "blue",
         "hiddenMesh": 1,
-        "shineColor": [0, 0.5, 1],
+        "shineColor": "blue",
         "shineHiddenMesh": 1
       }
     },
@@ -139,7 +139,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 1, 1]
+        "color": "white"
       }
     },
     {
@@ -168,7 +168,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.65, 0.45, 0.3]
+        "color": "bronze"
       }
     },
     {
@@ -185,7 +185,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.37, 0.37, 1]
+        "color": "royalBlue"
       }
     },
     {
@@ -202,7 +202,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.6, 0.6, 0.6]
+        "color": "grey"
       }
     },
     {
@@ -219,7 +219,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.6, 0.5, 0.2]
+        "color": "ochre"
       }
     },
     {
@@ -235,7 +235,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.2, 0.3, 0.6]
+        "color": "denim"
       }
     },
     {
@@ -251,7 +251,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 0.2, 0]
+        "color": "red"
       }
     },
     {
@@ -268,7 +268,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0, 0.5, 1]
+        "color": "blue"
       }
     },
     {
@@ -285,7 +285,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.7, 0.3, 0.3]
+        "color": "rust"
       }
     },
     {
@@ -302,7 +302,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.5, 0.4, 1]
+        "color": "violet"
       }
     },
     {
@@ -319,7 +319,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 1, 1]
+        "color": "white"
       }
     },
     {
@@ -348,7 +348,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 0.2, 0]
+        "color": "red"
       }
     },
     {
@@ -377,7 +377,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 0.2, 0]
+        "color": "red"
       }
     },
     {
@@ -393,7 +393,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.37, 0.37, 1]
+        "color": "royalBlue"
       }
     },
     {
@@ -426,7 +426,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.8, 0.6, 0.2],
+        "color": "goldenrod",
         "meshes": [0]
       }
     },
@@ -444,7 +444,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 1, 1],
+        "color": "white",
         "meshes": [0]
       }
     },

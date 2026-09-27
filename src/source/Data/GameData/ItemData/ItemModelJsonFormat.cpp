@@ -306,11 +306,9 @@ std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefiniti
     text = Json::PutListsOnOneLine(text, DisplayJson::AnchorKey);
     text = Json::PutListsOnOneLine(text, DisplayJson::OffsetKey);
     text = Json::PutListsOnOneLine(text, DisplayJson::RotationKey);
-    text = Json::PutListsOnOneLine(text, GlowJson::ColorKey);
+    text = Json::PutListsOnOneLine(text, GlowJson::LevelKey);
     text = Json::PutListsOnOneLine(text, GlowJson::MeshesKey);
-    text = Json::PutListsOnOneLine(text, GlowJson::ShineColorKey);
     text = Json::PutListsOnOneLine(text, GlowJson::ShineMeshesKey);
-    text = Json::PutListsOnOneLine(text, GlowJson::AncientColorKey);
     return text + "\n";
 }
 } // namespace Data::Items

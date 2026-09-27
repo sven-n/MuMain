@@ -134,8 +134,8 @@ void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source,
     issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
 }
 
-bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
-                    int& group, std::vector<ItemDataIssue>& issues)
+bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
+                     std::vector<ItemDataIssue>& issues)
 {
     if (!TryParse(text, source, root, issues))
     {
@@ -146,7 +146,13 @@ bool ReadFileHeader(std::string_view text, const std::string& source, int maxFor
         AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the file must contain a JSON object");
         return false;
     }
-    return ReadFormatVersion(root, source, maxFormatVersion, issues) && ReadGroup(root, source, group, issues);
+    return ReadFormatVersion(root, source, maxFormatVersion, issues);
+}
+
+bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
+                    int& group, std::vector<ItemDataIssue>& issues)
+{
+    return ReadFileVersion(text, source, maxFormatVersion, root, issues) && ReadGroup(root, source, group, issues);
 }
 
 std::string PutListsOnOneLine(const std::string& text, std::string_view key)

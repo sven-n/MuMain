@@ -2,6 +2,8 @@
 
 #include "ItemModelJsonValues.h"
 
+#include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <optional>
 
@@ -188,6 +190,30 @@ bool ValueReader::ReadBool(const char* key, bool& value)
     }
     value = field->get<bool>();
     return true;
+}
+
+bool ValueReader::ReadName(const char* key, std::string& value)
+{
+    const OrderedJson* field = Find(key);
+    if (field == nullptr)
+    {
+        return false;
+    }
+    if (!field->is_string() || field->get_ref<const std::string&>().empty() ||
+        !std::all_of(field->get_ref<const std::string&>().begin(), field->get_ref<const std::string&>().end(),
+                     [](unsigned char character) { return std::isalnum(character) != 0; }))
+    {
+        Error(key, "must be a name of letters and digits");
+        return false;
+    }
+    value = field->get<std::string>();
+    return true;
+}
+
+bool ValueReader::IsNumber(const char* key) const
+{
+    const auto field = m_json.find(key);
+    return field != m_json.end() && field->is_number();
 }
 
 void ValueReader::Error(const char* key, const std::string& message)

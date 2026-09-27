@@ -184,8 +184,8 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0, 0.5, 1],
-        "shineColor": [0, 0.5, 1]
+        "color": "blue",
+        "shineColor": "blue"
       }
     },
     {
@@ -261,7 +261,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.75, 0.65, 0.5],
+        "color": "sand",
         "hiddenMesh": 1,
         "shineHiddenMesh": 1
       }
@@ -278,7 +278,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [1, 1, 1],
+        "color": "white",
         "hiddenMesh": 0,
         "shineHiddenMesh": 0
       }
@@ -295,7 +295,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.5, 0.4, 0.3]
+        "color": "brown"
       }
     },
     {
@@ -310,7 +310,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.3, 0.3, 0.45]
+        "color": "dusk"
       }
     },
     {
@@ -327,7 +327,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.6, 0.5, 0.2]
+        "color": "ochre"
       }
     },
     {
@@ -342,7 +342,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.5, 0.6, 0.7]
+        "color": "mist"
       }
     },
     {
@@ -390,7 +390,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.8, 0.8, 1],
+        "color": "paleBlue",
         "meshes": [2]
       }
     },
@@ -406,7 +406,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.75, 0.65, 0.5]
+        "color": "sand"
       }
     },
     {
@@ -423,7 +423,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.8, 0.46, 0.25]
+        "color": "copper"
       }
     },
     {
@@ -440,7 +440,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.8, 0.4, 0]
+        "color": "darkOrange"
       }
     },
     {
@@ -457,7 +457,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.5, 0.4, 0.3]
+        "color": "brown"
       }
     },
     {
@@ -474,7 +474,7 @@
         "rotation": [60, 0, -45]
       },
       "glow": {
-        "color": [0.5, 0.8, 0.9]
+        "color": "ice"
       }
     }
   ]

@@ -1,5 +1,7 @@
 #include "doctest.h"
 
+#include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 
 #include <algorithm>
@@ -51,13 +53,13 @@ ItemModelDefinition MakeGlowingModel()
     model.number = 0;
     model.file = "Data/Item/Sword01.bmd";
     ItemGlow& glow = model.glow;
-    glow.level = 8;
-    glow.color = {0.5, 0.8, 0.9};
+    glow.levels = {8};
+    glow.color = "ice";
     glow.meshes.only = {0, 2};
-    glow.shineColor = {1, 0.5, 0};
+    glow.shineColor = "orange";
     glow.shineWhite = true;
     glow.shineMeshes.hidden = 1;
-    glow.ancientColor = {1, 0.7, 0.2};
+    glow.ancientColor = "gold";
     glow.excellent = false;
     glow.excellentMesh = 1;
     glow.excellentMeshWithoutSkin = 2;
@@ -77,6 +79,22 @@ TEST_CASE("Item model glow values are kept through write and read [data][items]"
     CHECK(result.models[0] == models[0]);
 }
 
+TEST_CASE("An item model can glow like another level for each item level [data][items]")
+{
+    ItemModelDefinition arrows = MakeGlowingModel();
+    arrows.glow.levels = {0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
+    const std::vector<ItemModelDefinition> models{arrows};
+
+    const std::string text = WriteItemModelGroupJson(0, models);
+    CHECK(Contains(text, R"("level": [0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31])"));
+
+    ReadResult result;
+    ReadItemModelGroupJson(text, Source, result.models, result.issues);
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].glow.levels == arrows.glow.levels);
+}
+
 TEST_CASE("Item model glow values are written compactly [data][items]")
 {
     const std::vector<ItemModelDefinition> models{MakeGlowingModel()};
@@ -84,12 +102,11 @@ TEST_CASE("Item model glow values are written compactly [data][items]")
     const std::string text = WriteItemModelGroupJson(0, models);
 
     CHECK(Contains(text, R"("level": 8)"));
-    CHECK(Contains(text, R"("color": [0.5, 0.8, 0.9])"));
+    CHECK(Contains(text, R"("color": "ice")"));
     CHECK(Contains(text, R"("meshes": [0, 2])"));
-    // Whole numbers have no decimals.
-    CHECK(Contains(text, R"("shineColor": [1, 0.5, 0])"));
+    CHECK(Contains(text, R"("shineColor": "orange")"));
     CHECK(Contains(text, R"("shineHiddenMesh": 1)"));
-    CHECK(Contains(text, R"("ancientColor": [1, 0.7, 0.2])"));
+    CHECK(Contains(text, R"("ancientColor": "gold")"));
     CHECK(Contains(text, R"("excellent": false)"));
 }
 
@@ -112,13 +129,14 @@ TEST_CASE("Item model glow defaults are left out [data][items]")
 TEST_CASE("Item model glow values are checked [data][items]")
 {
     CHECK(HasError(R"("glow": [])", "glow"));
-    CHECK(HasError(R"("glow": {"level": 16})", "glow.level"));
+    CHECK(HasError(R"("glow": {"level": 32})", "glow.level"));
     CHECK(HasError(R"("glow": {"level": -1})", "glow.level"));
     CHECK(HasError(R"("glow": {"level": 2.5})", "glow.level"));
-    CHECK(HasError(R"("glow": {"color": [1, 0.5]})", "glow.color"));
-    CHECK(HasError(R"("glow": {"color": [1, 0.5, 2]})", "glow.color"));
-    CHECK(HasError(R"("glow": {"shineColor": [-0.1, 0, 0]})", "glow.shineColor"));
-    CHECK(HasError(R"("glow": {"ancientColor": "gold"})", "glow.ancientColor"));
+    CHECK(HasError(R"("glow": {"level": [0, 1, 2]})", "glow.level"));
+    CHECK(HasError(R"("glow": {"color": [1, 0.5, 0]})", "glow.color"));
+    CHECK(HasError(R"("glow": {"color": ""})", "glow.color"));
+    CHECK(HasError(R"("glow": {"shineColor": "light blue"})", "glow.shineColor"));
+    CHECK(HasError(R"("glow": {"ancientColor": 3})", "glow.ancientColor"));
     CHECK(HasError(R"("glow": {"meshes": []})", "glow.meshes"));
     CHECK(HasError(R"("glow": {"meshes": [0, -1]})", "glow.meshes"));
     CHECK(HasError(R"("glow": {"meshes": [1], "hiddenMesh": 0})", "glow.meshes"));
@@ -135,4 +153,61 @@ TEST_CASE("Unknown item model glow fields are warnings [data][items]")
 
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "glow.sparkle"));
     CHECK(result.models.size() == 1);
+}
+
+TEST_CASE("The glow color list names colors [data][effects]")
+{
+    std::vector<Data::Effects::GlowColor> colors;
+    std::vector<ItemDataIssue> issues;
+    Data::Effects::ReadGlowColorsJson(
+        R"({"formatVersion": 1, "colors": {"orange": [1, 0.5, 0], "gold": [1, 0.7, 0.2]}})", "GlowColors.json", colors,
+        issues);
+
+    CHECK(issues.empty());
+    const std::vector<Data::Effects::GlowColor> expected{{"orange", {1, 0.5, 0}}, {"gold", {1, 0.7, 0.2}}};
+    CHECK(colors == expected);
+}
+
+TEST_CASE("The glow color list is checked [data][effects]")
+{
+    const auto errorsOf = [](const std::string& text)
+    {
+        std::vector<Data::Effects::GlowColor> colors;
+        std::vector<ItemDataIssue> issues;
+        Data::Effects::ReadGlowColorsJson(text, "GlowColors.json", colors, issues);
+        return issues;
+    };
+
+    CHECK(HasIssue(errorsOf(R"({"colors": {}})"), ItemDataIssueSeverity::Error, "formatVersion"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1})"), ItemDataIssueSeverity::Error, "colors"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"light blue": [0, 0, 1]}})"),
+                   ItemDataIssueSeverity::Error, "colors.light blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 0, 2]}})"), ItemDataIssueSeverity::Error,
+                   "colors.blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 1]}})"), ItemDataIssueSeverity::Error,
+                   "colors.blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {}, "shades": 3})"), ItemDataIssueSeverity::Warning,
+                   "shades"));
+}
+
+TEST_CASE("Item model glow colors must be in the glow color list [data][items]")
+{
+    const std::vector<Data::Effects::GlowColor> colors{
+        {"orange", {1, 0.5, 0}}, {"white", {1, 1, 1}}, {"azure", {0.1, 0.6, 1}}, {"gold", {1, 0.7, 0.2}}};
+    ItemModelDefinition model;
+    model.file = "Data/Item/Sword01.bmd";
+    model.glow.ancientColor = "gold";
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItemModelGlowColors(std::vector<ItemModelDefinition>{model}, colors, issues);
+    CHECK(issues.empty());
+
+    model.glow.color = "teal";
+    ValidateItemModelGlowColors(std::vector<ItemModelDefinition>{model}, colors, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "glow.color"));
+
+    // The default colors must be in the list.
+    issues.clear();
+    ValidateItemModelGlowColors({}, std::vector<Data::Effects::GlowColor>{{"orange", {1, 0.5, 0}}}, issues);
+    CHECK(issues.size() == 2);
 }

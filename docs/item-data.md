@@ -270,27 +270,39 @@ inventory with models of their own (`MODEL_ARMORINVEN_*`), with the
 `glow` holds how the item glows. Which glow an item gets for its level,
 excellent options or ancient set is decided by the game; these values
 only set its colors, its meshes and the level it glows like. Colors are
-`[red, green, blue]` from 0 to 1.
+names from the glow color list, see below.
 
 ```json
-"glow": { "color": [0.5, 0.8, 0.9], "meshes": [2], "shineColor": [1, 0.5, 0], "excellentMesh": 2 }
+"glow": { "color": "ice", "meshes": [2], "shineColor": "orange", "excellentMesh": 2 }
 ```
 
 | Value | Meaning | Default |
 |---|---|---|
-| `level` | The level the item glows like instead of its own, e.g. `8` for jewels, `0` for wings. | its level |
-| `color` | Color of the glow of items +7 and up. | `[1, 0.5, 0]` |
+| `level` | The level the item glows like instead of its own: one level, e.g. `8` for jewels and `0` for wings, or a list of 16, one for each item level from 0 to 15 (arrows, Devil's Square items). Levels above 15 do not glow. | its level |
+| `color` | Color of the glow of items +7 and up. | `orange` |
 | `meshes` / `hiddenMesh` | The glow is only on these meshes (`[0, 1]`), or on all meshes but this one (`1`). | all meshes |
-| `shineColor` | The extra shine of items +11 and up tints the light of the item with this color. | `[1, 1, 1]` |
+| `shineColor` | The extra shine of items +11 and up tints the light of the item with this color. | `white` |
 | `shineWhite` | `true`: the shine is plain white instead. | `false` |
 | `shineMeshes` / `shineHiddenMesh` | Like `meshes` / `hiddenMesh`, for the shine and for the glow of ancient items. | all meshes |
-| `ancientColor` | Color of the glow of ancient items. | `[0.1, 0.6, 1]` |
+| `ancientColor` | Color of the glow of ancient items. | `azure` |
 | `excellent` | `false`: excellent items do not glow (wings and capes). | `true` |
 | `excellentMesh` | The excellent glow is only on this mesh. | all meshes |
 | `excellentMeshWithoutSkin` | The same, when the item is drawn without the character, in the inventory and on the ground. | `excellentMesh` |
 
-The glow of arrows, bolts and the Devil's Square items depends on their
-level and stays in code, and so does the glow of monsters.
+The glow colors are named in `src/bin/Data/Effects/GlowColors.json`, as
+red, green and blue from 0 to 1:
+
+```json
+{ "formatVersion": 1, "colors": { "orange": [1, 0.5, 0], "gold": [1, 0.7, 0.2] } }
+```
+
+A name has only letters and digits. A new color is added to the list and
+can then be used by any item; a name that is not in the list stops the
+start with a message, and so does a list without the defaults (`orange`,
+`white`, `azure`).
+
+The glow of monsters, and of the event models that level variants are
+drawn with, is still set in code.
 
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with

@@ -6,24 +6,26 @@
 
 // The glow of the item model files:
 //
-//   "glow": { "level": 8, "color": [0.5, 0.8, 0.9], "meshes": [1], "shineColor": [1, 0.5, 0],
-//             "shineHiddenMesh": 0, "ancientColor": [1, 0.7, 0.2], "excellent": false }
+//   "glow": { "level": 8, "color": "ice", "meshes": [1], "shineColor": "orange", "shineHiddenMesh": 0,
+//             "ancientColor": "gold", "excellent": false }
 //
-// Values equal to their default (ItemGlow) are left out, and so is "glow"
-// without other values.
+// The colors are names from the glow color list; that they are in it is
+// checked when the models are loaded (ValidateItemModelGlowColors). Values
+// equal to their default (ItemGlow) are left out, and so is "glow" without
+// other values.
 namespace Data::Items::GlowJson
 {
 constexpr const char* GlowKey = "glow";
 
 // Keys of the lists that are written on one line.
-constexpr const char* ColorKey = "color";
+constexpr const char* LevelKey = "level";
 constexpr const char* MeshesKey = "meshes";
-constexpr const char* ShineColorKey = "shineColor";
 constexpr const char* ShineMeshesKey = "shineMeshes";
-constexpr const char* AncientColorKey = "ancientColor";
 
-// Glow levels are item levels.
-constexpr int MaxLevel = 15;
+// A level per item level has one value for each of the levels 0 to 15.
+constexpr size_t ItemLevelCount = 16;
+// Levels above 15 do not glow; arrows +15 glow like 31.
+constexpr int MaxLevel = 31;
 
 // Adds the glow of the model to its JSON object.
 void Write(const ItemModelDefinition& model, Json::OrderedJson& json);

@@ -38,6 +38,10 @@ public:
     // Reads a list of at least one whole number from 0 to maxValue.
     bool ReadIndexes(const char* key, std::vector<int>& values, int maxValue);
     bool ReadBool(const char* key, bool& value);
+    // Reads a name of letters and digits.
+    bool ReadName(const char* key, std::string& value);
+
+    bool IsNumber(const char* key) const;
 
     bool Has(const char* key) const;
     void Error(const char* key, const std::string& message);

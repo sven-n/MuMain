@@ -115,7 +115,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.5, 0.5, 0.8]
+        "color": "steelBlue"
       }
     },
     {
@@ -131,7 +131,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.75, 0.65, 0.5]
+        "color": "sand"
       }
     },
     {
@@ -147,7 +147,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.47, 0.67, 0.6]
+        "color": "sage"
       }
     },
     {
@@ -175,7 +175,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.8, 0.46, 0.25]
+        "color": "copper"
       }
     },
     {
@@ -203,7 +203,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.45, 0.45, 0.23]
+        "color": "olive"
       }
     },
     {
@@ -219,7 +219,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.45, 0.45, 0.23]
+        "color": "olive"
       }
     },
     {
@@ -248,7 +248,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [0.7, 0.2, 0.2]
+        "color": "crimson"
       }
     },
     {
@@ -265,7 +265,7 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": [1, 1, 1],
+        "color": "white",
         "meshes": [0]
       }
     }

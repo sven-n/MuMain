@@ -28,7 +28,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [1, 0.2, 0]
+        "color": "red"
       }
     },
     {
@@ -57,8 +57,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0, 0.5, 1],
-        "ancientColor": [1, 0.7, 0.2]
+        "color": "blue",
+        "ancientColor": "gold"
       }
     },
     {
@@ -74,8 +74,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [1, 1, 1],
-        "shineColor": [1, 0.5, 0]
+        "color": "white",
+        "shineColor": "orange"
       }
     },
     {
@@ -104,7 +104,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.6, 0.8, 0.4]
+        "color": "lime"
       }
     },
     {
@@ -146,8 +146,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0, 0.5, 1],
-        "ancientColor": [1, 0.7, 0.2]
+        "color": "blue",
+        "ancientColor": "gold"
       }
     },
     {
@@ -189,7 +189,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0, 0.5, 1]
+        "color": "blue"
       }
     },
     {
@@ -205,7 +205,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0, 0.8, 0.4]
+        "color": "green"
       }
     },
     {
@@ -221,8 +221,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [1, 1, 1],
-        "shineColor": [1, 0.5, 0]
+        "color": "white",
+        "shineColor": "orange"
       }
     },
     {
@@ -238,7 +238,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.75, 0.65, 0.5]
+        "color": "sand"
       }
     },
     {
@@ -254,9 +254,9 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.5, 0.8],
-        "shineColor": [1, 0.5, 0],
-        "ancientColor": [1, 0.7, 0.2]
+        "color": "steelBlue",
+        "shineColor": "orange",
+        "ancientColor": "gold"
       }
     },
     {
@@ -272,8 +272,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [1, 1, 1],
-        "shineColor": [0, 0.5, 1]
+        "color": "white",
+        "shineColor": "blue"
       }
     },
     {
@@ -289,7 +289,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.5, 0.8]
+        "color": "steelBlue"
       }
     },
     {
@@ -305,7 +305,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.8, 0.46, 0.25],
+        "color": "copper",
         "shineWhite": true
       }
     },
@@ -322,7 +322,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.65, 0.45, 0.3]
+        "color": "bronze"
       }
     },
     {
@@ -338,7 +338,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.8, 0.46, 0.25]
+        "color": "copper"
       }
     },
     {
@@ -354,7 +354,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.35, 0.35, 0.6]
+        "color": "slate"
       }
     },
     {
@@ -370,7 +370,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.47, 0.67, 0.6]
+        "color": "sage"
       }
     },
     {
@@ -386,7 +386,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.75, 0.65, 0.5]
+        "color": "sand"
       }
     },
     {
@@ -402,7 +402,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.2, 0.3, 0.6]
+        "color": "denim"
       }
     },
     {
@@ -418,7 +418,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.4, 0.3]
+        "color": "brown"
       }
     },
     {
@@ -436,7 +436,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.37, 0.37, 1]
+        "color": "royalBlue"
       }
     },
     {
@@ -454,7 +454,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.3, 0.7, 0.3]
+        "color": "leafGreen"
       }
     },
     {
@@ -470,7 +470,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.45, 0.45, 0.23]
+        "color": "olive"
       }
     },
     {
@@ -486,7 +486,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.6, 0.5, 0.2]
+        "color": "ochre"
       }
     },
     {
@@ -504,7 +504,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.6, 0.6, 0.6]
+        "color": "grey"
       }
     },
     {
@@ -520,7 +520,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.3, 0.7, 0.3]
+        "color": "leafGreen"
       }
     },
     {
@@ -536,7 +536,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.45, 0.45, 0.23]
+        "color": "olive"
       }
     },
     {
@@ -556,8 +556,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.2, 0.7, 0.3],
-        "shineColor": [1, 0.5, 0],
+        "color": "emerald",
+        "shineColor": "orange",
         "excellentMeshWithoutSkin": 2
       }
     },
@@ -578,8 +578,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.7, 0.3, 0.3],
-        "shineColor": [1, 0.5, 0],
+        "color": "rust",
+        "shineColor": "orange",
         "excellentMeshWithoutSkin": 1
       }
     },
@@ -600,8 +600,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.7, 0.5, 0.3],
-        "shineColor": [1, 0.5, 0],
+        "color": "amber",
+        "shineColor": "orange",
         "excellentMeshWithoutSkin": 0
       }
     },
@@ -622,8 +622,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.2, 0.7],
-        "shineColor": [1, 0.5, 0],
+        "color": "purple",
+        "shineColor": "orange",
         "excellentMeshWithoutSkin": 2
       }
     },
@@ -644,8 +644,8 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.8, 0.4, 0.6],
-        "shineColor": [0, 0.5, 1],
+        "color": "pink",
+        "shineColor": "blue",
         "excellentMeshWithoutSkin": 1
       }
     },
@@ -666,7 +666,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.6, 0.4, 0.8],
+        "color": "lilac",
         "shineWhite": true,
         "excellentMeshWithoutSkin": 2
       }
@@ -684,7 +684,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.5, 0.7]
+        "color": "periwinkle"
       }
     },
     {
@@ -700,7 +700,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.8, 0.4, 0]
+        "color": "darkOrange"
       }
     },
     {
@@ -716,7 +716,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.7, 0.4, 0.4],
+        "color": "rose",
         "meshes": [0],
         "shineMeshes": [0]
       }
@@ -734,7 +734,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.3, 0.6, 0.4],
+        "color": "moss",
         "meshes": [1],
         "shineMeshes": [1]
       }
@@ -752,7 +752,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.7, 0.2, 0.2]
+        "color": "crimson"
       }
     },
     {
@@ -768,7 +768,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.5, 0.7]
+        "color": "periwinkle"
       }
     },
     {
@@ -784,7 +784,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.7, 0.2, 0.7],
+        "color": "magenta",
         "meshes": [2],
         "shineMeshes": [2]
       }
@@ -804,7 +804,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.8, 0.46, 0.25],
+        "color": "copper",
         "meshes": [1],
         "shineMeshes": [1],
         "excellentMesh": 1
@@ -823,7 +823,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.8, 0.4, 0],
+        "color": "darkOrange",
         "meshes": [1],
         "shineMeshes": [1],
         "excellentMesh": 1
@@ -842,7 +842,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.4, 0.3],
+        "color": "brown",
         "meshes": [0],
         "shineMeshes": [0],
         "excellentMesh": 0
@@ -1003,7 +1003,7 @@
         "bodyHeight": -160
       },
       "glow": {
-        "color": [0.5, 0.8, 0.9],
+        "color": "ice",
         "meshes": [0],
         "shineMeshes": [0],
         "excellentMesh": 0

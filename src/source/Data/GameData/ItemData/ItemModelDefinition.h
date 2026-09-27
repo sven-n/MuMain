@@ -58,26 +58,28 @@ struct ItemGlowMeshes
 };
 
 // How an item glows. The defaults are the glow of items without values of
-// their own. Colors are red, green and blue from 0 to 1.
+// their own. Colors are names from the glow color list
+// (Data/Effects/GlowColors.json).
 struct ItemGlow
 {
-    static constexpr std::array<double, 3> DefaultColor{1.0, 0.5, 0.0};
-    static constexpr std::array<double, 3> DefaultShineColor{1.0, 1.0, 1.0};
-    static constexpr std::array<double, 3> DefaultAncientColor{0.1, 0.6, 1.0};
+    static constexpr const char* DefaultColor = "orange";
+    static constexpr const char* DefaultShineColor = "white";
+    static constexpr const char* DefaultAncientColor = "azure";
 
-    // The level the item glows like instead of its own (e.g. 8 for jewels,
-    // 0 for wings).
-    std::optional<int> level;
+    // The level the item glows like instead of its own: one level for all
+    // item levels (e.g. 8 for jewels, 0 for wings), or one per item level
+    // from 0 to 15 (arrows). Empty: its own level.
+    std::vector<int> levels;
     // The glow of items +7 and up.
-    std::array<double, 3> color = DefaultColor;
+    std::string color = DefaultColor;
     ItemGlowMeshes meshes;
     // The shine of items +11 and up tints the light of the item with this
     // color, or is plain white.
-    std::array<double, 3> shineColor = DefaultShineColor;
+    std::string shineColor = DefaultShineColor;
     bool shineWhite = false;
     ItemGlowMeshes shineMeshes;
     // The shine of ancient items.
-    std::array<double, 3> ancientColor = DefaultAncientColor;
+    std::string ancientColor = DefaultAncientColor;
     // Whether excellent items glow; wings and capes do not.
     bool excellent = true;
     // The only mesh with the excellent glow, and the one when the model is

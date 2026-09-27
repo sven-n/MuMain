@@ -221,7 +221,7 @@
       },
       "glow": {
         "level": 9,
-        "color": [0, 0.5, 1]
+        "color": "blue"
       }
     },
     {
