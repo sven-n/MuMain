@@ -2,8 +2,8 @@ using System.Text.Json;
 
 namespace MuMain.Tools.InGameTests.Clients;
 
-/// <summary>An item as <c>state</c> reports it: where it is and what it is.</summary>
-internal sealed record ItemSlot(int Slot, string Name);
+/// <summary>An item as <c>state</c> reports it: where it is, what it is, and its size in inventory squares.</summary>
+internal sealed record ItemSlot(int Slot, string Name, int Width = 1, int Height = 1);
 
 /// <summary>Reads the item lists of a <c>state</c> answer.</summary>
 internal static class ItemSlots
@@ -22,5 +22,9 @@ internal static class ItemSlots
     public static ItemSlot? At(IReadOnlyList<ItemSlot> items, int slot) => items.FirstOrDefault(item => item.Slot == slot);
 
     private static ItemSlot Read(JsonElement item)
-        => new(item.GetProperty("slot").GetInt32(), item.GetProperty("name").GetString() ?? string.Empty);
+        => new(
+            item.GetProperty("slot").GetInt32(),
+            item.GetProperty("name").GetString() ?? string.Empty,
+            item.TryGetProperty("width", out var width) ? width.GetInt32() : 1,
+            item.TryGetProperty("height", out var height) ? height.GetInt32() : 1);
 }

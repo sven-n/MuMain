@@ -122,7 +122,7 @@ internal static class HtmlReport
             return;
         }
 
-        // A failure before the first step (a client that did not start) has no step to show it.
+        // A failure outside a step (a client that did not start, a check between two steps) has no step to show it.
         if (scenario.Failed && scenario.Steps.All(step => step.Passed))
         {
             html.Append("<p class=\"failure\">").Append(Encode(scenario.Failure ?? "failed")).Append("</p>");
@@ -163,6 +163,7 @@ internal static class HtmlReport
         ScenarioStatus.Skipped => scenario.SkipReason ?? "skipped",
         ScenarioStatus.Failed when scenario.Steps.FirstOrDefault(step => !step.Passed) is { } failed
             => $"failed at step {failed.Number} of {scenario.Steps.Count} · {Seconds(scenario.Duration)}",
+        ScenarioStatus.Failed when scenario.Steps.Count > 0 => $"failed after step {scenario.Steps.Count} · {Seconds(scenario.Duration)}",
         ScenarioStatus.Failed => $"failed before step 1 · {Seconds(scenario.Duration)}",
         _ => $"{scenario.Steps.Count} steps · {Seconds(scenario.Duration)}",
     };

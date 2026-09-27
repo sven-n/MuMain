@@ -50,6 +50,7 @@ internal sealed class IcarusTakeOffScenario : Scenario
             "The inventory window opens and shows the equipment.",
             () => flyer.OpenInventoryAsync());
 
+        var failed = false;
         try
         {
             await context.StepAsync(
@@ -71,15 +72,18 @@ internal sealed class IcarusTakeOffScenario : Scenario
                         $"'{wings.Name}' did not move into the inventory after a right-click, although '{mount.Name}' flies");
                 });
 
-            // Right-click unequip does nothing without room in the inventory; with
-            // room, only the Icarus rule can keep the mount on.
-            var freeSlot = await FirstFreeInventorySlotAsync(flyer);
+            // Right-click unequip does nothing without room for the item, and a
+            // drag onto squares it does not fit is refused too: without room the
+            // mount stays on for that reason, not for the Icarus rule. So both
+            // steps first make sure the inventory has room for it.
             await context.StepAsync(
                 $"Right-click '{mount.Name}'",
                 $"Nothing happens: '{mount.Name}' is the last flying item, and without it the Elf would fall in Icarus "
-                + "(sven-n/MuMain#631). The inventory has room, so only this rule keeps it on.",
+                + $"(sven-n/MuMain#631). The inventory has room for its {mount.Width}x{mount.Height} squares, so only this rule "
+                + "keeps it on.",
                 async () =>
                 {
+                    await FreeAreaAsync(flyer, mount);
                     await flyer.ClickSlotAsync("equipment", HelperSlot, "right");
                     await Expect.StillAfterAsync(
                         async () => await EquippedAsync(flyer, HelperSlot) is not null,
@@ -88,23 +92,37 @@ internal sealed class IcarusTakeOffScenario : Scenario
                 });
             await context.StepAsync(
                 $"Drag '{mount.Name}' into the inventory with two clicks",
-                $"'{mount.Name}' stays in its slot: taking the last flying item off by dragging is refused in Icarus as well "
-                + "(sven-n/MuMain#631).",
+                $"'{mount.Name}' stays in its slot although the free squares it is dropped on fit it: taking the last flying item "
+                + "off by dragging is refused in Icarus as well (sven-n/MuMain#631).",
                 async () =>
                 {
-                    await flyer.MoveItemAsync("equipment", HelperSlot, "inventory", freeSlot);
+                    var freeArea = await FreeAreaAsync(flyer, mount);
+                    await flyer.MoveItemAsync("equipment", HelperSlot, "inventory", freeArea);
                     await Expect.StillAfterAsync(
                         async () => await EquippedAsync(flyer, HelperSlot) is not null,
                         RefusalWait,
                         $"dragging took off '{mount.Name}', the last flying item in Icarus");
                 });
         }
+        catch
+        {
+            failed = true;
+            throw;
+        }
         finally
         {
-            await context.StepAsync(
-                $"Put '{wings.Name}' back on",
-                $"'{wings.Name}' is back in slot {WingSlot}, so the account is as the test data made it.",
-                () => PutWingsBackAsync(flyer, wings));
+            try
+            {
+                await context.StepAsync(
+                    $"Put '{wings.Name}' back on",
+                    $"'{wings.Name}' is back in slot {WingSlot}, so the account is as the test data made it.",
+                    () => PutWingsBackAsync(flyer, wings));
+            }
+            catch (Exception cleanup) when (failed)
+            {
+                // The earlier failure is what the scenario reports; this one only follows from it.
+                context.Note($"putting the wings back failed too: {cleanup.Message}");
+            }
         }
     }
 
@@ -119,15 +137,31 @@ internal sealed class IcarusTakeOffScenario : Scenario
         return item!;
     }
 
-    // The inventory grid starts after the 12 equipment slots.
-    private static async Task<int> FirstFreeInventorySlotAsync(GameClient client)
+    // The top-left slot of the first free area of the main inventory grid that
+    // fits <paramref name="item"/>. `state` lists an item under every square it
+    // covers, so a square is free when no item is listed on it.
+    private static async Task<int> FreeAreaAsync(GameClient client, ItemSlot item)
     {
         const int FirstInventorySlot = 12;
-        const int InventorySquares = 64;
-        var used = ItemSlots.Of(await client.StateAsync(), "inventory").Select(item => item.Slot).ToHashSet();
-        return Enumerable.Range(FirstInventorySlot, InventorySquares).FirstOrDefault(slot => !used.Contains(slot), -1) is var free and >= 0
-            ? free
-            : throw new ScenarioFailedException("the inventory has no free square");
+        const int Columns = 8;
+        const int Rows = 8;
+        var used = ItemSlots.Of(await client.StateAsync(), "inventory").Select(entry => entry.Slot).ToHashSet();
+        for (var row = 0; row + item.Height <= Rows; row++)
+        {
+            for (var column = 0; column + item.Width <= Columns; column++)
+            {
+                var fits = Enumerable.Range(0, item.Height)
+                    .SelectMany(dy => Enumerable.Range(0, item.Width).Select(dx => FirstInventorySlot + ((row + dy) * Columns) + column + dx))
+                    .All(slot => !used.Contains(slot));
+                if (fits)
+                {
+                    return FirstInventorySlot + (row * Columns) + column;
+                }
+            }
+        }
+
+        throw new ScenarioFailedException(
+            $"the inventory has no free {item.Width}x{item.Height} area for '{item.Name}'; a refused take-off would prove nothing");
     }
 
     // Leaves the test account as the test data made it.

@@ -61,7 +61,7 @@ internal sealed class TradeScenario : Scenario
         await context.StepAsync(
             "The seller walks to the meeting spot",
             $"{sellerCharacter.Name} stands at ({MeetingX},{MeetingY}), a free spot in Lorencia's town, or one tile from it.",
-            () => seller.SendAsync("move", new { x = MeetingX, y = MeetingY }, WalkTimeout));
+            () => WalkToAsync(seller, MeetingX, MeetingY));
         await context.StepAsync(
             "The buyer walks up to the seller",
             $"{buyerCharacter.Name} stands on a tile next to {sellerCharacter.Name}: a trade needs the partner at most one tile away.",
@@ -147,13 +147,33 @@ internal sealed class TradeScenario : Scenario
                     return false;
                 }
 
-                await buyer.SendAsync("move", new { x = sellerPosition.X, y = sellerPosition.Y }, WalkTimeout);
+                await WalkToAsync(buyer, sellerPosition.X, sellerPosition.Y);
                 return false;
             },
             WalkTimeout,
             () => $"the buyer ({buyerPosition.X},{buyerPosition.Y}; the seller's client sees it at "
                   + $"{(seenPosition is { } seen ? $"({seen.X},{seen.Y})" : "no place")}) did not get next to the seller "
                   + $"({sellerPosition.X},{sellerPosition.Y})");
+    }
+
+    // The client ends one `move` after 30 s; a longer walk (across the town, or
+    // with a slowly drawing client) goes on with the next one from where the
+    // last stopped, until the walk's own time is up.
+    private static async Task WalkToAsync(GameClient client, int x, int y)
+    {
+        var deadline = DateTime.UtcNow + WalkTimeout;
+        while (true)
+        {
+            try
+            {
+                await client.SendAsync("move", new { x, y }, WalkTimeout);
+                return;
+            }
+            catch (ControlException exception) when (exception.Error == "timeout" && DateTime.UtcNow < deadline)
+            {
+                // Walk on.
+            }
+        }
     }
 
     private static bool IsNextTo((int X, int Y) position, (int X, int Y) other)
@@ -167,7 +187,7 @@ internal sealed class TradeScenario : Scenario
         {
             try
             {
-                await buyer.SendAsync("move", new { x = sellerPosition.X + dx, y = sellerPosition.Y + dy }, WalkTimeout);
+                await WalkToAsync(buyer, sellerPosition.X + dx, sellerPosition.Y + dy);
                 return;
             }
             catch (ControlException exception) when (exception.Error == "no_path")

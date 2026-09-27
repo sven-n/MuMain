@@ -27,6 +27,9 @@ internal sealed class ScenarioContext(
 
     public GameClient Client(string role) => clients[role];
 
+    /// <summary>A line in the log that is no step, e.g. what else went wrong.</summary>
+    public void Note(string text) => log.WriteLine($"        {text}");
+
     /// <summary>
     /// Runs one step. <paramref name="title"/> says what is done, <paramref name="expectation"/>
     /// what should happen then, for someone reading the report; <paramref name="action"/> does it

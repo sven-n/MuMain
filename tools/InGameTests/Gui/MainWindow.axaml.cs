@@ -141,8 +141,15 @@ internal sealed partial class MainWindow : Window
             this.RunStatusText.Text = $"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, "
                                       + $"{run.Count(ScenarioStatus.Skipped)} skipped · report written";
         }
-        catch (Exception exception) when (exception is InvalidOperationException or IOException)
+        catch (OperationCanceledException)
         {
+            // Stop while the server was being prepared: no scenario ran.
+            this.AppendLog("stopped before the first test" + Environment.NewLine);
+            this.RunStatusText.Text = "stopped before the first test";
+        }
+        catch (Exception exception)
+        {
+            // An async void handler must not let anything escape: it would end the window.
             this.AppendLog(exception.Message + Environment.NewLine);
             this.RunStatusText.Text = exception.Message;
         }

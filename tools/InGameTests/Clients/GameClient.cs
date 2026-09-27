@@ -48,15 +48,21 @@ internal sealed class GameClient : IAsyncDisposable
         startInfo.Environment["MU_CONTROL_SOCKET"] = socketPath;
         var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"could not start {options.ExecutablePath}");
 
+        ControlConnection? control = null;
         try
         {
-            var control = await ConnectAsync(socketPath, process, options.StartTimeout, cancellationToken);
+            control = await ConnectAsync(socketPath, process, options.StartTimeout, cancellationToken);
             var client = new GameClient(role, process, control, options.StepDelay);
             await client.SendAsync("ping");
             return client;
         }
         catch
         {
+            if (control is not null)
+            {
+                await control.DisposeAsync();
+            }
+
             process.Kill(entireProcessTree: true);
             process.Dispose();
             throw;

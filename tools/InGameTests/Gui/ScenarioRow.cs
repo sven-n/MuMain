@@ -16,6 +16,7 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
     private RowState state = RowState.Idle;
     private int completedSteps;
     private int failedStep;
+    private int stepsRun;
     private string detail = string.Empty;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -62,13 +63,19 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
 
     public bool Failed => this.state == RowState.Failed;
 
-    public string FailedText => this.failedStep > 0 ? $"FAILED at step {this.failedStep}" : "FAILED before step 1";
+    public string FailedText => this.failedStep > 0 ? $"FAILED at step {this.failedStep}"
+        : this.stepsRun > 0 ? $"FAILED after step {this.stepsRun}"
+        : "FAILED before step 1";
 
     /// <summary>The running step, or why it failed: the tooltip of the progress and the result.</summary>
     public string Detail => this.detail;
 
     /// <summary>Queued for the run that starts; unchecked rows are cleared.</summary>
-    public void Queue() => this.Change(this.isChecked ? RowState.Waiting : RowState.Idle, 0, 0, string.Empty);
+    public void Queue()
+    {
+        this.stepsRun = 0;
+        this.Change(this.isChecked ? RowState.Waiting : RowState.Idle, 0, 0, string.Empty);
+    }
 
     public void StepStarted(int number, string title)
         => this.Change(RowState.Running, number - 1, 0, $"step {number} of {this.StepCount}: {title}");
@@ -84,6 +91,8 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
             return;
         }
 
+        // No step failed but some ran: the scenario failed between two steps.
+        this.stepsRun = result.Steps.Count;
         var failed = result.Steps.FirstOrDefault(step => !step.Passed);
         this.Change(RowState.Failed, this.completedSteps, failed?.Number ?? 0, failed is null
             ? result.Failure ?? "failed"

@@ -155,9 +155,24 @@ internal static class TestServer
         using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"could not start {tool}");
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(RecreateTimeout);
-        var output = process.StandardOutput.ReadToEndAsync(timeout.Token);
-        var errors = process.StandardError.ReadToEndAsync(timeout.Token);
-        await process.WaitForExitAsync(timeout.Token);
+        var output = process.StandardOutput.ReadToEndAsync(CancellationToken.None);
+        var errors = process.StandardError.ReadToEndAsync(CancellationToken.None);
+        try
+        {
+            await process.WaitForExitAsync(timeout.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // Stopped, or hanging: a cancelled wait leaves the process running.
+            process.Kill(entireProcessTree: true);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+
+            throw new InvalidOperationException($"`{Path.GetFileName(tool)} {string.Join(' ', arguments)}` did not finish within {RecreateTimeout.TotalMinutes:0} minutes");
+        }
+
         var text = errorsToo ? $"{(await errors).Trim()} {(await output).Trim()}".Trim() : (await output).Trim();
         return (process.ExitCode, text);
     }

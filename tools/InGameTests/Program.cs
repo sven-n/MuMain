@@ -71,7 +71,7 @@ internal static class Program
             var run = await TestRun.RunAsync(runOptions, Console.Out, null, CancellationToken.None);
             return run.AllPassed ? ExitPassed : ExitFailed;
         }
-        catch (InvalidOperationException exception)
+        catch (Exception exception) when (exception is InvalidOperationException or OperationCanceledException or IOException)
         {
             Console.Error.WriteLine(exception.Message);
             return ExitFailed;
