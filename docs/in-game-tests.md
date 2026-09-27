@@ -15,6 +15,10 @@ report each scenario as passed or failed.
   macOS a running `podman machine`), or any other
   [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
 - The .NET 10 runtime, which comes with the SDK the client build needs anyway.
+  On Linux, a .NET installed with Microsoft's `dotnet-install.sh` sits in a
+  folder the tester does not look in; set `DOTNET_ROOT` to it, or write the
+  folder into `/etc/dotnet/install_location_x64`. Distribution packages
+  register themselves.
 
 ## The tester
 
