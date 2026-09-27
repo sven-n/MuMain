@@ -15,7 +15,8 @@ internal sealed class ScenarioRunner(
     string folder,
     TextWriter log,
     Action<int, string>? stepStarted,
-    Action<StepResult>? stepFinished)
+    Action<StepResult>? stepFinished,
+    Action<GameClient>? clientStarted = null)
 {
     private const int RecentEventCount = 200;
 
@@ -32,6 +33,7 @@ internal sealed class ScenarioRunner(
             {
                 log.WriteLine($"    starting client '{role}'");
                 clients[role] = await GameClient.StartAsync(clientOptions, role, cancellationToken);
+                clientStarted?.Invoke(clients[role]);
             }
 
             await scenario.RunAsync(context);

@@ -20,6 +20,12 @@ services:
     # tests pass with it.
     image: docker.io/munique/openmu:0.9.10@sha256:681c52b304a44e70d26003e85193e167353d28eeee75cf1a49e8eae2add41ded
     container_name: mumain-in-game-tests-openmu
+    # What the image is, for the report: the image has no such labels itself.
+    # Keep them with the pinned image above.
+    labels:
+      org.opencontainers.image.version: "0.9.10"
+      org.opencontainers.image.revision: "d4ca915c442a56e267e3f01638822f367fa81082"
+      org.opencontainers.image.source: "https://github.com/MUnique/OpenMU"
     # The image starts with -autostart; -demo is added to it.
     command: ["-demo"]
     ports:

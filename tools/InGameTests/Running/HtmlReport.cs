@@ -15,10 +15,12 @@ internal static class HtmlReport
 {
     private const string Style = """
         :root { --bg:#f6f7f9; --card:#fff; --text:#1d2330; --muted:#5d6675; --line:#dde1e7; --hover:#eef1f5;
-                --pass:#1f7a3f; --pass-bg:#e3f4e8; --fail:#b3261e; --fail-bg:#fbe5e3; --skip:#5d6675; --skip-bg:#eceef1; }
+                --pass:#1f7a3f; --pass-bg:#e3f4e8; --fail:#b3261e; --fail-bg:#fbe5e3; --skip:#5d6675; --skip-bg:#eceef1;
+                --notice:#5c4400; --notice-bg:#fff4c2; --notice-line:#e0bb00; }
         @media (prefers-color-scheme: dark) {
           :root { --bg:#15181d; --card:#1e2229; --text:#e6e9ef; --muted:#9aa3b2; --line:#303641; --hover:#262b33;
-                  --pass:#6fd08f; --pass-bg:#1c3326; --fail:#ff8a80; --fail-bg:#3a1f1e; --skip:#9aa3b2; --skip-bg:#2a2f37; }
+                  --pass:#6fd08f; --pass-bg:#1c3326; --fail:#ff8a80; --fail-bg:#3a1f1e; --skip:#9aa3b2; --skip-bg:#2a2f37;
+                  --notice:#ffe28a; --notice-bg:#3a3000; --notice-line:#8a7200; }
         }
         * { box-sizing: border-box; }
         body { margin:0; padding:24px 16px 48px; background:var(--bg); color:var(--text);
@@ -47,6 +49,8 @@ internal static class HtmlReport
                    padding:18px 26px; margin:0 0 20px; }
         .verdict strong { font-size:40px; font-weight:800; letter-spacing:.04em; line-height:1.1; }
         .verdict span { font-size:18px; font-weight:500; opacity:.95; }
+        .notice { background:var(--notice-bg); color:var(--notice); border:1px solid var(--notice-line); border-radius:10px;
+                  padding:10px 18px; margin:-8px 0 20px; font-weight:600; }
         .verdict-pass { background:#1f7a3f; } .verdict-fail { background:#b3261e; } .verdict-none { background:#5d6675; }
         .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:16px 0; }
         table { border-collapse:collapse; width:100%; }
@@ -114,10 +118,21 @@ internal static class HtmlReport
         html.Append("<div class=\"verdict verdict-").Append(verdictClass).Append("\"><strong>").Append(verdict).Append("</strong><span>")
             .Append(Encode(detail)).Append("</span></div>");
 
+        // A PASSED run that left scenarios out has not tested everything.
+        var skipped = run.Scenarios.Where(scenario => scenario.Status == ScenarioStatus.Skipped).ToList();
+        if (skipped.Count > 0)
+        {
+            html.Append("<div class=\"notice\">").Append(Encode(
+                $"Not all scenarios were run: {skipped.Count} of {run.Scenarios.Count} skipped ({string.Join(", ", skipped.Select(scenario => scenario.Name))})."))
+                .Append("</div>");
+        }
+
         html.Append("<h1>In-game test report</h1><p class=\"muted\">")
             .Append(Encode($"{run.Started:yyyy-MM-dd HH:mm:ss} · server {run.Options.ServerHost}:{run.Options.ServerPort}"))
             .Append(run.Options.FreshServer ? Encode(" (fresh test data)") : string.Empty)
-            .Append("<br>").Append(Encode($"client {run.Options.ClientPath}")).Append("</p>");
+            .Append("<br>").Append(Encode($"client {run.Options.ClientPath}"))
+            .Append("<br>").Append(ClientLine(run.Client))
+            .Append("<br>").Append(ServerLine(run.Server)).Append("</p>");
 
         html.Append("<section class=\"card\"><table class=\"overview\"><colgroup><col><col class=\"result\"><col class=\"steps\"><col class=\"duration\"><col class=\"pause\"><col class=\"quality\"></colgroup><thead><tr><th>Scenario</th><th>Result</th><th>Steps</th><th>Duration</th><th>Pause per action</th><th>Screenshot quality</th></tr></thead>");
         foreach (var group in Categories(run))
@@ -226,6 +241,31 @@ internal static class HtmlReport
 
         html.Append("</div></details>");
     }
+
+    // Which client was tested: the git commit it was built from.
+    private static string ClientLine(ClientVersion? client)
+        => client is null
+            ? "tested client: commit unknown (the client did not say)"
+            : "tested client: commit <code title=\"" + Encode(client.Commit) + "\">" + Encode(Short(client.Commit)) + "</code>"
+              + (client.Changed ? Encode(" (built with changes that were not committed)") : string.Empty);
+
+    // What served the run: the test server's version and commit, linked to its source.
+    private static string ServerLine(ServerVersion? server)
+    {
+        if (server is null)
+        {
+            return Encode("server: unknown (not the test server)");
+        }
+
+        var commit = server.Commit is null
+            ? "commit unknown"
+            : server.Source is { } source
+                ? "commit <a href=\"" + Encode($"{source}/commit/{server.Commit}") + "\"><code>" + Encode(Short(server.Commit)) + "</code></a>"
+                : "commit <code>" + Encode(Short(server.Commit)) + "</code>";
+        return Encode($"server: {server.Name} {server.Version ?? "version unknown"}, ") + commit;
+    }
+
+    private static string Short(string commit) => commit.Length > 10 ? commit[..10] : commit;
 
     // The run in one word, for the banner on top: FAILED when a scenario failed,
     // STOPPED when the run did not get to all it was to run, NOTHING RAN, or

@@ -64,7 +64,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 
 | Command | What it does |
 |---|---|
-| `ping` | build identifier and current scene |
+| `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
 | `nearby` | the objects the client can see |

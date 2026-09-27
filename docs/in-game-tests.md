@@ -124,7 +124,8 @@ each row its own progress and current step. **Open report** opens the report of
 the run, and **Open report folder** shows the file in the file browser, ready to
 be dragged into a pull request comment (before a run: the folder the reports go
 to). The window remembers its
-settings between runs.
+settings between runs. A line above the list says which server the tests run
+against, and after a run which client commit they tested.
 
 ### The report
 
@@ -136,7 +137,13 @@ to 25 MB in a comment; the tester warns when a report is bigger):
 
 - On top, the run's result in large: PASSED in green when every test of the
   run passed, FAILED in red when one failed, or STOPPED when the run was
-  stopped before its last test. Scenarios that were not selected do not count.
+  stopped before its last test. Scenarios that were not selected do not count,
+  but a yellow line below says which were not run.
+- What was tested against what: the git commit the client was built from
+  (and whether it had changes that were not committed), and the server's
+  OpenMU version and commit. The client says its commit itself (`ping`); the
+  test server's version and commit are labels in its compose file, so another
+  server shows as unknown.
 - A table of every scenario there is, with PASS, FAIL, or SKIPPED for the ones
   the run did not include, and below it a section per scenario that opens on a
   click. Both are grouped by category, and a click on a category folds it in
@@ -200,6 +207,12 @@ followed by the options runs it too; it then needs `--client`.
 | `-q` | JPEG quality of the step screenshots, 1 to 100; default `70`; lower makes the report smaller |
 | `--gui` | open the window; also without any option |
 | `--list` | list the scenarios |
+
+On Windows the tester is a window program, so no empty console window opens
+with it; typed into a terminal it writes its log there, but the prompt comes
+back at once. To wait for the run and its exit code, pipe its output, e.g.
+`.\InGameTests.exe --fresh-server | Out-Host` in PowerShell, or use the
+`InGameTests` target.
 
 Each scenario starts its own clients, runs, and closes them again. The runner
 prints every step and `PASS` or `FAIL` per scenario, and exits with `0` when

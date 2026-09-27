@@ -37,24 +37,73 @@ internal static class TestServer
 
         // The compose file names its project, so where it is written does not matter.
         string[] compose = ["compose", "-f", await WriteComposeFileAsync(cancellationToken), "up", "-d", "--force-recreate"];
-        var (exitCode, output) = await RunAsync(tool, compose, null, cancellationToken);
-        if (exitCode != 0 && IsPodman(tool) && output.Contains("Cannot connect to Podman", StringComparison.Ordinal))
-        {
-            // podman keeps the connection to its machine in a file that can be
-            // missing (e.g. the machine was set up by a program whose AppData
-            // Windows redirects); podman then knows no machine at all. The
-            // machine's own configuration still describes it.
-            if (await WriteMachineConnectionsAsync(tool, cancellationToken) is { } connections)
-            {
-                log.WriteLine("podman has no connection to its machine; connecting as `podman machine inspect` describes it");
-                (exitCode, output) = await RunAsync(tool, compose, new() { ["PODMAN_CONNECTIONS_CONF"] = connections }, cancellationToken);
-            }
-        }
-
+        var (exitCode, output, errors) = await RunConnectedAsync(tool, compose, log, cancellationToken);
         if (exitCode != 0)
         {
-            throw new InvalidOperationException($"`{toolName} compose up` failed ({exitCode}): {output}");
+            throw new InvalidOperationException($"`{toolName} compose up` failed ({exitCode}): {errors} {output}");
         }
+    }
+
+    /// <summary>
+    /// The OpenMU version and commit of the test server, from the labels its compose
+    /// file gives the container; null when that container does not serve
+    /// <paramref name="host"/>:<paramref name="port"/> or cannot be asked.
+    /// </summary>
+    public static async Task<ServerVersion?> DescribeAsync(string host, int port, CancellationToken cancellationToken)
+    {
+        if (port != TestServerPort || !IsLoopback(host) || FindContainerTool() is not { } tool)
+        {
+            return null;
+        }
+
+        try
+        {
+            var (exitCode, output, _) = await RunConnectedAsync(
+                tool, ["inspect", ContainerName, "--format", "{{json .Config.Labels}}"], TextWriter.Null, cancellationToken);
+            if (exitCode != 0 || JsonNode.Parse(output) is not JsonObject labels)
+            {
+                return null;
+            }
+
+            return new ServerVersion(
+                "OpenMU",
+                (string?)labels["org.opencontainers.image.version"],
+                (string?)labels["org.opencontainers.image.revision"],
+                (string?)labels["org.opencontainers.image.source"]);
+        }
+        catch (Exception exception) when (exception is JsonException or InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+    }
+
+    private const string ContainerName = "mumain-in-game-tests-openmu";
+    private const int TestServerPort = 56901;
+
+    private static bool IsLoopback(string host)
+        => host is "127.0.0.1" or "localhost" or "::1";
+
+    // Runs the container tool. podman keeps the connection to its machine in a
+    // file that can be missing (e.g. the machine was set up by a program whose
+    // AppData Windows redirects); podman then knows no machine at all and
+    // answers "Cannot connect to Podman", although the machine runs. The
+    // machine's own configuration still describes it, so the command runs again
+    // with a connections file made from it.
+    private static async Task<(int ExitCode, string Output, string Errors)> RunConnectedAsync(
+        string tool,
+        string[] arguments,
+        TextWriter log,
+        CancellationToken cancellationToken)
+    {
+        var result = await RunAsync(tool, arguments, null, cancellationToken);
+        if (result.ExitCode != 0 && IsPodman(tool) && result.Errors.Contains("Cannot connect to Podman", StringComparison.Ordinal)
+            && await WriteMachineConnectionsAsync(tool, cancellationToken) is { } connections)
+        {
+            log.WriteLine("podman has no connection to its machine; connecting as `podman machine inspect` describes it");
+            return await RunAsync(tool, arguments, new() { ["PODMAN_CONNECTIONS_CONF"] = connections }, cancellationToken);
+        }
+
+        return result;
     }
 
     // A connections file like the one `podman machine init` writes, for the
@@ -62,7 +111,7 @@ internal static class TestServer
     // the machine's forwarded socket. Null when no machine runs.
     private static async Task<string?> WriteMachineConnectionsAsync(string podman, CancellationToken cancellationToken)
     {
-        var (exitCode, output) = await RunAsync(podman, ["machine", "inspect"], null, cancellationToken, errorsToo: false);
+        var (exitCode, output, _) = await RunAsync(podman, ["machine", "inspect"], null, cancellationToken);
         if (exitCode != 0)
         {
             return null;
@@ -129,12 +178,11 @@ internal static class TestServer
         }
     }
 
-    private static async Task<(int ExitCode, string Output)> RunAsync(
+    private static async Task<(int ExitCode, string Output, string Errors)> RunAsync(
         string tool,
         IEnumerable<string> arguments,
         Dictionary<string, string>? environment,
-        CancellationToken cancellationToken,
-        bool errorsToo = true)
+        CancellationToken cancellationToken)
     {
         var startInfo = new ProcessStartInfo(tool)
         {
@@ -173,8 +221,7 @@ internal static class TestServer
             throw new InvalidOperationException($"`{Path.GetFileName(tool)} {string.Join(' ', arguments)}` did not finish within {RecreateTimeout.TotalMinutes:0} minutes");
         }
 
-        var text = errorsToo ? $"{(await errors).Trim()} {(await output).Trim()}".Trim() : (await output).Trim();
-        return (process.ExitCode, text);
+        return (process.ExitCode, (await output).Trim(), (await errors).Trim());
     }
 
     private static bool IsPodman(string tool) => Path.GetFileNameWithoutExtension(tool).Equals("podman", StringComparison.OrdinalIgnoreCase);

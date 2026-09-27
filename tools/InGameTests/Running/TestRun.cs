@@ -89,6 +89,8 @@ internal static class TestRun
             throw new InvalidOperationException($"no game server answers on {options.ServerHost}:{options.ServerPort}; is the test server running?");
         }
 
+        var server = await TestServer.DescribeAsync(options.ServerHost, options.ServerPort, cancellationToken);
+        ClientVersion? client = null;
         var results = new List<ScenarioResult>();
         foreach (var selection in options.Scenarios)
         {
@@ -110,7 +112,8 @@ internal static class TestRun
                 Path.Combine(folder, scenario.Name),
                 log,
                 (number, title) => listener?.StepStarted?.Invoke(scenario.Name, number, title),
-                step => listener?.StepFinished?.Invoke(scenario.Name, step));
+                step => listener?.StepFinished?.Invoke(scenario.Name, step),
+                started => client ??= started.Version);
             var result = await runner.RunAsync(scenario, CancellationToken.None);
             results.Add(result);
             listener?.ScenarioFinished?.Invoke(result);
@@ -128,7 +131,7 @@ internal static class TestRun
         var output = Path.GetFullPath(options.OutputFolder);
         Directory.CreateDirectory(output);
         var reportPath = Path.Combine(output, $"in-game-report-{started:yyyyMMdd-HHmmss}.html");
-        var run = new TestRunResult(started, options, reported, reportPath);
+        var run = new TestRunResult(started, options, reported, reportPath, client, server);
         await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run, JsonSerializer.Serialize(Summary(run), JsonOptions)), CancellationToken.None);
         log.WriteLine($"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, {run.Count(ScenarioStatus.Skipped)} skipped");
         log.WriteLine($"report: {reportPath}");
@@ -167,6 +170,11 @@ internal static class TestRun
         client = run.Options.ClientPath,
         server = $"{run.Options.ServerHost}:{run.Options.ServerPort}",
         freshServer = run.Options.FreshServer,
+        clientCommit = run.Client?.Commit,
+        clientChanged = run.Client?.Changed,
+        serverName = run.Server?.Name,
+        serverVersion = run.Server?.Version,
+        serverCommit = run.Server?.Commit,
         passed = run.AllPassed,
         scenarios = run.Scenarios,
     };

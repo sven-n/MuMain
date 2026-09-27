@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using MuMain.Tools.InGameTests.Control;
+using MuMain.Tools.InGameTests.Running;
 
 namespace MuMain.Tools.InGameTests.Clients;
 
@@ -29,6 +30,9 @@ internal sealed class GameClient : IAsyncDisposable
         this.stepDelay = stepDelay;
     }
 
+    /// <summary>What the client says it was built from; null for a client that does not say.</summary>
+    public ClientVersion? Version { get; private set; }
+
     /// <summary>The scenario's name for this client, e.g. "seller".</summary>
     public string Role { get; }
 
@@ -53,7 +57,15 @@ internal sealed class GameClient : IAsyncDisposable
         {
             control = await ConnectAsync(socketPath, process, options.StartTimeout, cancellationToken);
             var client = new GameClient(role, process, control, options.StepDelay);
-            await client.SendAsync("ping");
+            var ping = await client.SendAsync("ping");
+            if (ping.TryGetProperty("commit", out var commit) && commit.GetString() is { } hash)
+            {
+                client.Version = new ClientVersion(
+                    hash,
+                    ping.TryGetProperty("commit_changed", out var changed) && changed.GetBoolean(),
+                    ping.TryGetProperty("build", out var build) ? build.GetString() : null);
+            }
+
             return client;
         }
         catch

@@ -10,6 +10,7 @@
 #include "Scenes/SceneManager.h"
 #include "UI/Legacy/UIControls.h"
 
+#include "MuGitCommit.h"
 #include "json.hpp"
 
 #include <algorithm>
@@ -412,6 +413,10 @@ std::string Ping(const Request& request, std::unique_ptr<Act>&)
 {
     json result;
     result["build"] = BuildIdentifier();
+    // The git commit the client was built from; `commit_changed` when tracked
+    // files differed from it, so the client is not exactly that commit.
+    result["commit"] = MU_GIT_COMMIT;
+    result["commit_changed"] = MU_GIT_COMMIT_CHANGED != 0;
     result["scene"] = CurrentSceneName();
     return EncodeResult(request.EncodedId(), result.dump());
 }

@@ -25,6 +25,7 @@ internal sealed partial class MainWindow : Window
     private CancellationTokenSource? stopRequest;
     private List<ScenarioRow> runRows = [];
     private string? reportPath;
+    private TestRunResult? lastRun;
 
     // For the XAML previewer; the application uses the other constructor.
     public MainWindow()
@@ -81,7 +82,36 @@ internal sealed partial class MainWindow : Window
         this.OpenReportFolderButton.Click += this.OnOpenReportFolder;
         this.Closing += this.OnClosing;
         this.UpdateSelection();
+        this.VersionText.Text = "Client commit: known after a run · server: asking…";
+        _ = this.ShowServerVersionAsync();
     }
+
+    // What the test server is, before any run; the client says its commit only when it runs.
+    private async Task ShowServerVersionAsync()
+    {
+        ServerVersion? server = null;
+        if (RunnerOptions.TryParseServer(this.ServerBox.Text?.Trim() ?? string.Empty, out var host, out var port))
+        {
+            server = await Task.Run(() => TestServer.DescribeAsync(host, port, CancellationToken.None));
+        }
+
+        if (!this.IsRunning && this.lastRun is null)
+        {
+            this.VersionText.Text = $"Client commit: known after a run · {DescribeServer(server)}";
+        }
+    }
+
+    private static string DescribeClient(ClientVersion? client)
+        => client is null
+            ? "tested client: commit unknown"
+            : $"tested client: commit {Short(client.Commit)}" + (client.Changed ? " (with changes that were not committed)" : string.Empty);
+
+    private static string DescribeServer(ServerVersion? server)
+        => server is null
+            ? "server: unknown (not the running test server)"
+            : $"server: {server.Name} {server.Version ?? "version unknown"}, commit {(server.Commit is null ? "unknown" : Short(server.Commit))}";
+
+    private static string Short(string commit) => commit.Length > 10 ? commit[..10] : commit;
 
     private bool IsRunning => this.stopRequest is not null;
 
@@ -165,6 +195,8 @@ internal sealed partial class MainWindow : Window
             var token = this.stopRequest.Token;
             var run = await Task.Run(() => TestRun.RunAsync(options, log, listener, token));
             this.reportPath = run.ReportPath;
+            this.lastRun = run;
+            this.VersionText.Text = $"Last run: {DescribeClient(run.Client)} · {DescribeServer(run.Server)}";
             this.ShowOverallResult(run);
             this.RunStatusText.Text = $"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, "
                                       + $"{run.Count(ScenarioStatus.Skipped)} skipped · report written";

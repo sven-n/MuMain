@@ -32,6 +32,9 @@
     </Grid>
 
     <!-- Which tests -->
+    <!-- What is tested against what -->
+    <TextBlock x:Name="VersionText" DockPanel.Dock="Top" Margin="0,12,0,0" Opacity="0.75" TextWrapping="Wrap" />
+
     <!-- All steps of the tests in the run, together -->
     <Grid x:Name="OverallPanel" DockPanel.Dock="Top" ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0,16,0,0" IsVisible="False">
       <TextBlock Text="All tests of the run" VerticalAlignment="Center" />
