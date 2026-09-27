@@ -22,15 +22,29 @@ CLoadData::~CLoadData() // OK
 {
 }
 
+namespace
+{
+// "Sword" and 1 give "Sword01.bmd", without a number (-1) "Sword.bmd". Built
+// as a string, because the names can come from the item model files and have
+// any length.
+std::wstring GetModelFileName(const wchar_t* FileName, int i)
+{
+    std::wstring name = FileName;
+    if (i != -1)
+    {
+        if (i < 10)
+        {
+            name += L'0';
+        }
+        name += std::to_wstring(i);
+    }
+    return name + L".bmd";
+}
+} // namespace
+
 bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i)
 {
-    wchar_t Name[64];
-    if (i == -1)
-        mu_swprintf(Name, L"%ls.bmd", FileName);
-    else if (i < 10)
-        mu_swprintf(Name, L"%ls0%d.bmd", FileName, i);
-    else
-        mu_swprintf(Name, L"%ls%d.bmd", FileName, i);
+    const std::wstring Name = GetModelFileName(FileName, i);
 
     RememberModelFile(Type, std::wstring(Dir) + Name);
 
@@ -38,17 +52,16 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
 
     Models[Type].m_iBMDSeqID = Type;
 
-    Success = Models[Type].Open2(Dir, Name);
+    Success = Models[Type].Open2(Dir, Name.c_str());
 
     if (Success == false)
     {
-        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name, Type);
+        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name.c_str(), Type);
 
         if (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 || wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0)
         {
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls file does not exist.", Name);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
+            const std::wstring Text = Name + L" file does not exist.";
+            MessageBox(g_hWnd, Text.c_str(), NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }
     }
@@ -148,9 +161,23 @@ BITMAP_t* UseLoadedTexture(const std::wstring& textureFileName)
     return pBitmap;
 }
 
-void ShowMissingTexture(const std::wstring& modelFile, int model, const std::wstring& path)
+// "Data\Item\x.jpg", and the other folders that were searched:
+// "Data\Item\x.jpg (also searched Data\Player\)".
+std::wstring DescribeSearchedPaths(std::span<const std::wstring> subFolders, const std::wstring& textureFileName)
 {
-    const std::wstring message = L"OpenTexture Failed: " + path + L" of " + modelFile;
+    std::wstring text = GetTexturePath(subFolders.front(), textureFileName);
+    for (size_t i = 1; i < subFolders.size(); ++i)
+    {
+        text += (i == 1 ? L" (also searched " : L", ") + (TextureRootFolder + subFolders[i]);
+    }
+    return subFolders.size() > 1 ? text + L")" : text;
+}
+
+void ShowMissingTexture(const std::wstring& modelFile, int model, std::span<const std::wstring> subFolders,
+                        const std::wstring& textureFileName)
+{
+    const std::wstring message =
+        L"OpenTexture Failed: " + DescribeSearchedPaths(subFolders, textureFileName) + L" of " + modelFile;
     g_ErrorReport.Write(L"%ls (Model=%d)\r\n", message.c_str(), model);
 #ifdef FOR_WORK
     PopUpErrorCheckMsgBox(message.c_str());
@@ -164,6 +191,11 @@ void CLoadData::OpenTexture(int Model, const wchar_t* SubFolder, int Wrap, int T
 {
     const std::wstring subFolder = SubFolder;
     OpenModelTextures(Model, std::span<const std::wstring>(&subFolder, 1), Wrap, Type, nullptr);
+}
+
+void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders, int Wrap, int Type)
+{
+    OpenModelTextures(Model, SubFolders, Wrap, Type, nullptr);
 }
 
 void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders, std::vector<TextureProblem>& Problems,
@@ -211,7 +243,7 @@ void CLoadData::OpenModelTextures(int Model, std::span<const std::wstring> SubFo
         }
         else if (loaded == nullptr)
         {
-            ShowMissingTexture(GetModelFile(Model), Model, GetTexturePath(SubFolders.front(), textureFileName));
+            ShowMissingTexture(GetModelFile(Model), Model, SubFolders, textureFileName);
         }
     }
 }

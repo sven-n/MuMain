@@ -30,8 +30,11 @@ public:
     void OpenTexture(int Model, const wchar_t* SubFolder, int Wrap = GL_REPEAT, int Type = GL_NEAREST,
                      bool Check = true);
     // Loads each texture of the model from the first of the folders (below
-    // Data\, each ending with '\') that has it. The textures none of them has
-    // are added to Problems instead of being shown.
+    // Data\, each ending with '\') that has it. A texture none of them has is
+    // shown as an error.
+    void OpenTexture(int Model, std::span<const std::wstring> SubFolders, int Wrap = GL_REPEAT, int Type = GL_NEAREST);
+    // Like above, but the textures none of the folders has are added to
+    // Problems instead of being shown.
     void OpenTexture(int Model, std::span<const std::wstring> SubFolders, std::vector<TextureProblem>& Problems,
                      int Wrap = GL_REPEAT, int Type = GL_NEAREST);
 

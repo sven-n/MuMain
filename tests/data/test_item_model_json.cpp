@@ -125,6 +125,19 @@ TEST_CASE("A model needs a number and a .bmd file [data][items]")
     CHECK(Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.BMD"})")).issues.empty());
 }
 
+TEST_CASE("Model paths stay inside the game folder [data][items]")
+{
+    CHECK(HasError(R"({"number": 8, "file": "/Data/Item/Ring01.bmd"})", "file"));
+    CHECK(HasError(R"({"number": 8, "file": "C:/Mu/Data/Item/Ring01.bmd"})", "file"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/../../Ring01.bmd"})", "file"));
+    CHECK(HasError(R"({"number": 8, "file": "Data//Item/Ring01.bmd"})", "file"));
+    CHECK(
+        HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["../Item"]})", "textureFolders"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["/Item"]})", "textureFolders"));
+    CHECK(Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/..Ring01.bmd", "textureFolders": ["Item/xmas"]})"))
+              .issues.empty());
+}
+
 TEST_CASE("Texture folders and none-blend meshes are checked [data][items]")
 {
     CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": "Item"})", "textureFolders"));

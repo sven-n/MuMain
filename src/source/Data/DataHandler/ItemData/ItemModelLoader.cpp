@@ -9,7 +9,6 @@
 #include "Data/DataHandler/LoadData.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
-#include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 

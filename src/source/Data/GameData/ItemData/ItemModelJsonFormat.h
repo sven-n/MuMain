@@ -31,6 +31,8 @@ constexpr int ItemModelJsonFormatVersion = 1;
 void ReadItemModelGroupJson(std::string_view text, const std::string& source, std::vector<ItemModelDefinition>& models,
                             std::vector<ItemDataIssue>& issues);
 
-// Writes the models of `group` (other models are ignored).
+// Writes the models of `group` (other models are ignored). Nothing in the
+// client saves model files yet; the tests use it to check that the shipped
+// files are in this format.
 std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefinition> models);
 } // namespace Data::Items

@@ -375,14 +375,16 @@ static void StopOnItemDataError(const std::string& errorMessage)
 }
 
 // Loads the item models (Data/Items/Models); without them no item could be
-// drawn.
-static void OpenItemModelData()
+// drawn, so false stops the game.
+static bool OpenItemModelData()
 {
     std::string errorMessage;
     if (!g_ItemDataHandler.LoadModels(errorMessage))
     {
         StopOnItemDataError(errorMessage);
+        return false;
     }
+    return true;
 }
 
 // Models that are drawn for items, but are no item models themselves:
@@ -432,18 +434,56 @@ static void OpenItemEffectModels()
 // The cloth of the Grand Soul pants is drawn on mesh 2 of their model.
 // Creating the cloth once rebuilds the triangles and texture coordinates of
 // that mesh as a cloth grid; the cloth itself is not needed.
+constexpr int GrandSoulClothMesh = 2;
+constexpr int GrandSoulClothBone = 17;
+constexpr int GrandSoulClothColumns = 5;
+constexpr int GrandSoulClothRows = 8;
+constexpr float GrandSoulClothWidth = 45.0f;
+constexpr float GrandSoulClothHeight = 85.0f;
+
+// The rebuild writes the cloth grid into the mesh without checks. It only
+// fits a mesh with a texture coordinate for every grid point and at most two
+// triangles per grid cell. The model comes from the item model files (item
+// 9,18), so it may be missing or be another model.
+static bool FitsGrandSoulClothGrid(const BMD& model)
+{
+    if (model.Meshs == nullptr || model.NumMeshs <= GrandSoulClothMesh)
+    {
+        return false;
+    }
+
+    const Mesh_t& mesh = model.Meshs[GrandSoulClothMesh];
+    const int gridPoints = GrandSoulClothColumns * GrandSoulClothRows;
+    const int maxTriangles = 2 * (GrandSoulClothColumns - 1) * (GrandSoulClothRows - 1);
+    return mesh.Triangles != nullptr && mesh.TexCoords != nullptr && mesh.NumTexCoords >= gridPoints &&
+           mesh.NumTriangles <= maxTriangles;
+}
+
+// The cloth of the Grand Soul pants is drawn on mesh 2 of their model.
+// Creating the cloth once rebuilds the triangles and texture coordinates of
+// that mesh as a cloth grid; the cloth itself is not needed.
 static void PrepareGrandSoulPantsClothMesh()
 {
+    if (!FitsGrandSoulClothGrid(Models[MODEL_GRAND_SOUL_PANTS]))
+    {
+        g_ErrorReport.Write(L"The Grand Soul pants model does not fit the cloth grid; its cloth is not prepared.\r\n");
+        return;
+    }
+
     auto cloth = std::make_unique<CPhysicsClothMesh>();
-    cloth->Create(&Hero->Object, 2, 17, 0.0f, 0.0f, 0.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL,
-                  PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
+    cloth->Create(&Hero->Object, GrandSoulClothMesh, GrandSoulClothBone, 0.0f, 0.0f, 0.0f, GrandSoulClothColumns,
+                  GrandSoulClothRows, GrandSoulClothWidth, GrandSoulClothHeight, BITMAP_PANTS_G_SOUL,
+                  BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
 void OpenItems()
 {
-    OpenItemModelData();
-    Data::Items::ModelLoader::OpenModels();
-    PrepareGrandSoulPantsClothMesh();
+    // Without model data the game stops; the item models are not opened.
+    if (OpenItemModelData())
+    {
+        Data::Items::ModelLoader::OpenModels();
+        PrepareGrandSoulPantsClothMesh();
+    }
     OpenItemEffectModels();
 
     LoadBitmap(L"Item\\NCcape.tga", BITMAP_NCCAPE, GL_LINEAR, GL_REPEAT);

@@ -61,6 +61,7 @@ template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& numb
 
 // The JSON writer puts every list entry on its own line. Short lists of
 // words or numbers are easier to read on one line: "tags": ["jewel", "valuable"].
-// Puts every list of `key` on one line; its entries must not contain spaces.
+// Puts every list of `key` on one line; text in quotes (e.g. a folder name
+// with spaces) is kept as it is.
 std::string PutListsOnOneLine(const std::string& text, std::string_view key);
 } // namespace Data::Items::Json

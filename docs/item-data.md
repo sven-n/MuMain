@@ -249,10 +249,12 @@ item files hold what client and server share.
   also finds them on Linux and macOS.
 
 Model files are checked like the item files: invalid JSON, a missing
-`number` or `file`, a file that is not a `.bmd`, `\` in a path, or an item
-with two models stop the start with a message; unknown fields are
-warnings. The automated tests also check that every model file and
-texture folder exists.
+`number` or `file`, a file that is not a `.bmd`, a path that leaves the
+game folder (starting with `/`, a drive letter or `..`), `\` in a path,
+or an item with two models stop the start with a message; unknown fields
+are warnings. The automated tests also check that every model file and
+texture folder exists, and that every texture of a model is in one of its
+texture folders.
 
 When a model file or a texture is missing, one message after loading
 lists the problems (up to 10; all of them are in `MuError.log`).
