@@ -33,7 +33,7 @@ internal sealed class TradeScenario : Scenario
 
     public override IReadOnlyList<string> Roles => [Seller, Buyer];
 
-    public override int StepCount => 11;
+    public override int StepCount => 12;
 
     public override async Task RunAsync(ScenarioContext context)
     {
@@ -68,6 +68,9 @@ internal sealed class TradeScenario : Scenario
             () => WalkUpToAsync(buyer, seller, buyerCharacter.Name));
 
         var offer = await FindJewelAsync(seller);
+        // How many of the jewel each one has before the trade: the buyer may have some already.
+        var sellerHadJewels = await CountAsync(seller, offer.Name);
+        var buyerHadJewels = await CountAsync(buyer, offer.Name);
         await context.StepAsync(
             "The seller asks the buyer for a trade",
             $"{buyerCharacter.Name} gets the request: a dialog asks whether to trade with {sellerCharacter.Name}.",
@@ -98,18 +101,43 @@ internal sealed class TradeScenario : Scenario
         var buyerSequence = await buyer.LastEventSequenceAsync();
         await context.StepAsync(
             "The buyer presses the confirm button",
-            $"Both have confirmed, so the trade completes: the window closes, '{offer.Name}' is in {buyerCharacter.Name}'s inventory "
-            + $"and gone from {sellerCharacter.Name}'s slot {offer.Slot}.",
+            "Both have confirmed, so the trade completes and its window closes on both sides.",
             async () =>
             {
                 await ConfirmAsync(buyer);
                 await buyer.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "closed", ["result"] = "completed" }, buyerSequence, ServerAnswer);
-                var buyerInventory = ItemSlots.Of(await buyer.StateAsync(), "inventory");
-                Expect.That(buyerInventory.Any(item => item.Name == offer.Name), $"the buyer's inventory has no '{offer.Name}' after the trade");
+            });
+        await context.StepAsync(
+            "Both look into their inventories",
+            $"'{offer.Name}' has changed owner: {buyerCharacter.Name} has one more ({buyerHadJewels + 1} now), and "
+            + $"{sellerCharacter.Name} one fewer ({sellerHadJewels - 1} left), with slot {offer.Slot} empty.",
+            async () =>
+            {
+                await seller.OpenInventoryAsync();
+                await buyer.OpenInventoryAsync();
+                // The inventories follow the server's answer to the trade.
+                var buyerHas = 0;
+                var sellerHas = 0;
+                await Expect.EventuallyAsync(
+                    async () => (buyerHas = await CountAsync(buyer, offer.Name)) == buyerHadJewels + 1,
+                    ServerAnswer,
+                    () => $"the buyer has {buyerHas} '{offer.Name}' after the trade, not {buyerHadJewels + 1}");
+                await Expect.EventuallyAsync(
+                    async () => (sellerHas = await CountAsync(seller, offer.Name)) == sellerHadJewels - 1,
+                    ServerAnswer,
+                    () => $"the seller has {sellerHas} '{offer.Name}' after the trade, not {sellerHadJewels - 1}");
                 var sellerInventory = ItemSlots.Of(await seller.StateAsync(), "inventory");
                 Expect.That(ItemSlots.At(sellerInventory, offer.Slot)?.Name != offer.Name, $"'{offer.Name}' is still in the seller's slot {offer.Slot}");
             });
     }
+
+    // How many items named <paramref name="name"/> the inventory holds. `state`
+    // lists an item under every square it covers, so the squares are divided by
+    // the item's size.
+    private static async Task<int> CountAsync(GameClient client, string name)
+        => (int)Math.Round(ItemSlots.Of(await client.StateAsync(), "inventory")
+            .Where(item => item.Name == name)
+            .Sum(item => 1.0 / (item.Width * item.Height)));
 
     // Walks the buyer next to where the seller stands, as the seller's client
     // sees it: that client checks the distance of a trade request.

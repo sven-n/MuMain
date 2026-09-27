@@ -192,7 +192,7 @@ fully hidden may stop rendering, and its socket stops answering then.
 
 | Scenario | Checks |
 |---|---|
-| `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and the jewel ends up in the buyer's inventory (sven-n/MuMain#588). |
+| `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and both inventories show that the jewel changed owner: the buyer has one more, the seller one fewer (sven-n/MuMain#588). |
 | `icarus-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged (sven-n/MuMain#631). The wings are put back on afterwards. |
 
 ## Writing a scenario
