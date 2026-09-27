@@ -2,6 +2,7 @@
 
 #include "ItemModelJsonFormat.h"
 #include "ItemJsonCommon.h"
+#include "ItemModelDisplayJson.h"
 #include "ItemTextureFiles.h"
 
 #include <algorithm>
@@ -77,6 +78,7 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     {
         json[Keys::NoneBlendMeshes] = model.noneBlendMeshes;
     }
+    DisplayJson::Write(model, json);
     return json;
 }
 
@@ -201,8 +203,13 @@ void ItemModelReader::ReadNoneBlendMeshes(const OrderedJson& json, std::vector<i
 
 void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json)
 {
-    static const std::set<std::string, std::less<>> KnownKeys{Keys::Number, Keys::File, Keys::TextureFolders,
-                                                              Keys::NoneBlendMeshes};
+    static const std::set<std::string, std::less<>> KnownKeys{Keys::Number,
+                                                              Keys::File,
+                                                              Keys::TextureFolders,
+                                                              Keys::NoneBlendMeshes,
+                                                              DisplayJson::InventoryKey,
+                                                              DisplayJson::GroundKey,
+                                                              DisplayJson::ClothKey};
     for (const auto& [key, value] : json.items())
     {
         if (!KnownKeys.contains(key))
@@ -230,6 +237,9 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     model.number = m_number;
     ReadTextureFolders(json, model.textureFolders);
     ReadNoneBlendMeshes(json, model.noneBlendMeshes);
+    DisplayJson::Read(json, model,
+                      [this](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
+                      { AddIssue(severity, field, message); });
     WarnAboutUnknownKeys(json);
     return !m_hasErrors;
 }
@@ -289,6 +299,9 @@ std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefiniti
     std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
     text = Json::PutListsOnOneLine(text, Keys::TextureFolders);
     text = Json::PutListsOnOneLine(text, Keys::NoneBlendMeshes);
+    text = Json::PutListsOnOneLine(text, DisplayJson::AnchorKey);
+    text = Json::PutListsOnOneLine(text, DisplayJson::OffsetKey);
+    text = Json::PutListsOnOneLine(text, DisplayJson::RotationKey);
     return text + "\n";
 }
 } // namespace Data::Items

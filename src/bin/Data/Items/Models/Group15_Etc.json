@@ -100,47 +100,128 @@
     {
       "number": 19,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 20,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 21,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 22,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 23,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 24,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 25,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 26,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 27,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 0.8
+      }
     },
     {
       "number": 28,
@@ -155,37 +236,72 @@
     {
       "number": 30,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     },
     {
       "number": 31,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     },
     {
       "number": 32,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     },
     {
       "number": 33,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     },
     {
       "number": 34,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     },
     {
       "number": 35,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     },
     {
       "number": 36,
       "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.03, 0.03],
+        "rotation": [270, 0, 0],
+        "scale": 0.0023
+      }
     }
   ]
 }

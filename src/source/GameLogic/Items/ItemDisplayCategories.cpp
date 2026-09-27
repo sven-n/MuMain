@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 
 // Item lists that are only used for drawing items and for tooltips. They stay
 // hardcoded until the model data (phase 4) and the tooltip data (phase 8)
@@ -7,11 +8,12 @@
 // (ItemCategories.cpp).
 namespace
 {
+// Capes worn as cloth are marked in the item model files ("cloth": true); the
+// cloth of the character is deleted when one is put on or taken off.
 bool IsClothWingType(int itemType)
 {
-    return itemType == ITEM_CAPE_OF_LORD || itemType == ITEM_WING_OF_RUIN || itemType == ITEM_CAPE_OF_EMPEROR ||
-           itemType == ITEM_CAPE_OF_FIGHTER || itemType == ITEM_CAPE_OF_OVERRULE ||
-           itemType == ITEM_SMALL_CAPE_OF_LORD || itemType == ITEM_LITTLE_WARRIORS_CLOAK;
+    const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
+    return model != nullptr && model->cloth;
 }
 
 bool IsCharacterCardType(int itemType)
@@ -33,11 +35,6 @@ bool IsDayPassType(int itemType)
 bool IsHourPassType(int itemType)
 {
     return itemType == ITEM_3_HOUR_PASS || itemType == ITEM_5_HOUR_PASS || itemType == ITEM_10_HOUR_PASS;
-}
-
-bool IsPackageBoxType(int itemType)
-{
-    return itemType >= ITEM_PACKAGE_BOX_A && itemType <= ITEM_PACKAGE_BOX_F;
 }
 
 bool IsSilverOrGoldKeyType(int itemType)
@@ -98,16 +95,6 @@ bool IsSealType(int itemType)
     return itemType == ITEM_SEAL_OF_ASCENSION || itemType == ITEM_SEAL_OF_WEALTH || itemType == ITEM_SEAL_OF_SUSTENANCE;
 }
 
-bool IsSeal(const ITEM* pItem)
-{
-    return IsSealType(pItem->Type);
-}
-
-bool IsSealModel(int modelType)
-{
-    return IsSealType(modelType - MODEL_ITEM);
-}
-
 bool IsCharacterCard(const ITEM* pItem)
 {
     return IsCharacterCardType(pItem->Type);
@@ -148,11 +135,6 @@ bool IsHealingOrDivinitySealType(int itemType)
     return itemType == ITEM_SEAL_OF_HEALING || itemType == ITEM_SEAL_OF_DIVINITY;
 }
 
-bool IsHealingOrDivinitySeal(const ITEM* pItem)
-{
-    return IsHealingOrDivinitySealType(pItem->Type);
-}
-
 bool IsHealingOrDivinitySealModel(int modelType)
 {
     return IsHealingOrDivinitySealType(modelType - MODEL_ITEM);
@@ -185,24 +167,9 @@ bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem)
     return IsDoppelgangerOrVarkaTicketType(pItem->Type);
 }
 
-bool IsDoppelgangerOrVarkaTicketModel(int modelType)
-{
-    return IsDoppelgangerOrVarkaTicketType(modelType - MODEL_ITEM);
-}
-
-bool IsAccountServiceItem(const ITEM* pItem)
-{
-    return IsAccountServiceItemType(pItem->Type);
-}
-
 bool IsAccountServiceItemModel(int modelType)
 {
     return IsAccountServiceItemType(modelType - MODEL_ITEM);
-}
-
-bool IsDayPass(const ITEM* pItem)
-{
-    return IsDayPassType(pItem->Type);
 }
 
 bool IsDayPassModel(int modelType)
@@ -210,29 +177,9 @@ bool IsDayPassModel(int modelType)
     return IsDayPassType(modelType - MODEL_ITEM);
 }
 
-bool IsHourPass(const ITEM* pItem)
-{
-    return IsHourPassType(pItem->Type);
-}
-
 bool IsHourPassModel(int modelType)
 {
     return IsHourPassType(modelType - MODEL_ITEM);
-}
-
-bool IsPackageBox(const ITEM* pItem)
-{
-    return IsPackageBoxType(pItem->Type);
-}
-
-bool IsPackageBoxModel(int modelType)
-{
-    return IsPackageBoxType(modelType - MODEL_ITEM);
-}
-
-bool IsSilverOrGoldKey(const ITEM* pItem)
-{
-    return IsSilverOrGoldKeyType(pItem->Type);
 }
 
 bool IsSilverOrGoldKeyModel(int modelType)
@@ -251,11 +198,6 @@ bool IsChocolateBox(const ITEM* pItem)
     return IsChocolateBoxType(pItem->Type);
 }
 
-bool IsChocolateBoxModel(int modelType)
-{
-    return IsChocolateBoxType(modelType - MODEL_ITEM);
-}
-
 bool IsRibbonBoxType(int itemType)
 {
     return itemType == ITEM_RED_RIBBON_BOX || itemType == ITEM_GREEN_RIBBON_BOX || itemType == ITEM_BLUE_RIBBON_BOX;
@@ -266,19 +208,9 @@ bool IsRibbonBox(const ITEM* pItem)
     return IsRibbonBoxType(pItem->Type);
 }
 
-bool IsRibbonBoxModel(int modelType)
-{
-    return IsRibbonBoxType(modelType - MODEL_ITEM);
-}
-
 bool IsSecromiconQuestItem(const ITEM* pItem)
 {
     return IsSecromiconQuestItemType(pItem->Type);
-}
-
-bool IsSecromiconQuestItemModel(int modelType)
-{
-    return IsSecromiconQuestItemType(modelType - MODEL_ITEM);
 }
 
 bool IsSummonerStickModel(int modelType)
