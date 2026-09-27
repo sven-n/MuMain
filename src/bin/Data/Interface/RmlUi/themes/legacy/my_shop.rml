@@ -47,21 +47,21 @@
 		<div id="still_opening_line" class="sharp-text myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{still_opening_text}}</div>
 		<div id="warning_line" class="sharp-text myshop-line myshop-line-warning"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{warning_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{warning_text}}</div>
 		<div id="selling_price_line" class="sharp-text myshop-line myshop-line-info"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{selling_price_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{selling_price_text}}</div>
 		<div id="please_verify_line" class="sharp-text myshop-line myshop-line-info"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{please_verify_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{please_verify_text}}</div>
 		<div id="already_in_store_line" class="sharp-text myshop-line myshop-line-info"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{already_in_store_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{already_in_store_text}}</div>
 		<div id="cancel_sold_line" class="sharp-text myshop-line myshop-line-info"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cancel_sold_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{cancel_sold_text}}</div>
 		<div id="cant_be_returned_line" class="sharp-text myshop-line myshop-line-info"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cant_be_returned_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{cant_be_returned_text}}</div>
 		<div id="all_item_trading_line" class="sharp-text myshop-line myshop-line-warning"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{all_item_trading_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{all_item_trading_text}}</div>
 		<div id="can_only_be_done_using_zen_line" class="sharp-text myshop-line myshop-line-warning"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{can_only_be_done_using_zen_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{can_only_be_done_using_zen_text}}</div>
 	</div>
 </body>
 </rml>

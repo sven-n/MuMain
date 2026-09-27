@@ -356,6 +356,9 @@ namespace mu::ui::window
             // (not `dp`) so they scale via bars_scale only, not a second time via RmlUi's
             // density-independent-pixel ratio.
             float barsLeft = 0.f, barsTop = 0.f, barsScale = 1.f;
+            // The original's gauge and button hint text size in real pixels: RenderTipText() under
+            // the bottom HUD's transform (capped at 2x), which grows about half as fast as the bars.
+            float hintPx = 0.f;
 
             float hpFraction = 0.f, mpFraction = 0.f, agFraction = 0.f, sdFraction = 0.f;
             Rml::String hpText, mpText, agText, sdText;

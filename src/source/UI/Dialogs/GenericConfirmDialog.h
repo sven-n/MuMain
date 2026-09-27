@@ -233,6 +233,7 @@ namespace mu::ui::window
         // the fg one's laid-out height (and, for an untransformed panel, its top edge) every frame
         // the dialog is open.
         void SyncBackgroundPanel();
+        void SyncCanvasTop();
 
         struct LineEntry
         {
@@ -274,6 +275,7 @@ namespace mu::ui::window
             int keypadDigit5 = 0, keypadDigit6 = 0, keypadDigit7 = 0, keypadDigit8 = 0, keypadDigit9 = 0;
 
             bool hasProgress = false;
+            float canvasTop = 0.f; // UI::RmlBridge::DialogCanvasTop, in dp
             float progressFraction = 0.f;
 
             // Toggles #gcd_item3d_anchor's own hidden/shown state and .gcd-body's icon-left/text-

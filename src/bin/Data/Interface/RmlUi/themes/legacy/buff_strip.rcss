@@ -191,9 +191,9 @@
 	atlas2-89: 180px 224px 20px 28px;
 }
 
-/* Centering/top offset comes from base.rcss's .center-x (buff_strip.rml); width matches the
-   full-row content width for exact centering. */
+/* The left edge is native's (strip_left, buff_strip.rml): no .center-x centring transform. */
 #panel {
+	transform: none;
 	top: 15dp;
 	width: 200dp;
 	font-family: "token(font-body)";

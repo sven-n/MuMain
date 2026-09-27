@@ -78,13 +78,16 @@
 }
 .mix-list-line.hidden { display: none; }
 /* Native cuts only the prediction and source lines (CutStr); status and advice run on. */
-.mix-unwrapped { white-space: nowrap; }
+/* One native line each, cut at the frame's inner edge (x 182, width bound in mix_inventory.rml):
+   nothing covers what native runs on past its frame. */
+.mix-unwrapped { white-space: nowrap; overflow: hidden; }
 .mix-advice { display: block; } /* margin-top 15px, bound (text layer) */
 
 /* RenderMixDescriptions(): each line at its own native top (d.top), centred in 160px at x=15 or
    left-aligned from x=5, no band, shrunk to fit its box like native (d.fit, as a transform on
    .mix-fit: a continuous scale, where font-size steps would be coarse). Native's left box is 200
-   wide and runs past the window; here it stays inside it (180). */
+   wide and runs past the window; here it stays inside it (180). A line still too long at the
+   minimum size is cut at its box, as native's window cuts it. */
 .mix-descriptions {
 	position: absolute;
 	left: 0;
@@ -93,10 +96,11 @@
 }
 .mix-description {
 	position: absolute;
-	left: 15px;
-	width: 160px;
+	left: 5px;   /* native's 160 box at x=15, widened to the frame around the same centre (95): */
+	width: 180px; /* the fit still targets 160 (MixInventory.cpp), the cut is at the frame */
 	text-align: center;
 	white-space: nowrap;
+	overflow: hidden;
 	font-weight: bold;
 	font-size: 1em;
 }

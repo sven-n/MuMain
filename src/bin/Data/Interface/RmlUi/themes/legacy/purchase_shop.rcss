@@ -46,7 +46,9 @@
 }
 
 /* Static warning notice below the grid -- same seven lines/colors/offsets as the old
-   RenderTextInfo() (PurchaseShopInventory.cpp). */
+   RenderTextInfo() (PurchaseShopInventory.cpp). Each line is cut at the frame's inner edge (x 182,
+   width bound in purchase_shop.rml): native runs a long line on under the inventory, which covers
+   it; here nothing covers it. */
 .warning-label, .warning-label-2 {
 	position: absolute;
 	left: 30px;
@@ -54,6 +56,7 @@
 	font-weight: bold;
 	font-size: 1em;
 	white-space: nowrap;
+	overflow: hidden;
 	pointer-events: none;
 }
 .warning-label { top: 230px; }
@@ -63,6 +66,7 @@
 	color: token(text-notice);
 	font-size: 1em;
 	white-space: nowrap;
+	overflow: hidden;
 	pointer-events: none;
 }
 .line-1 { top: 250px; }

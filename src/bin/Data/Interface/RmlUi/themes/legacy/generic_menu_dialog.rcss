@@ -26,7 +26,7 @@
 }
 #panel.window-shell-positioned { margin-left: 0; }
 /* A menu that describes its native box (GenericMenuConfig::nativeFrame) gets that box's top edge
-   (margin-top offsets the default 60dp) and its fixed height (both bound in
+   (margin-top offsets the default 60dp, plus the dialog canvas offset -- RmlDialogCanvas.h) and its fixed height (both bound in
    generic_menu_dialog.rml, as native's frames are fixed); the shell's content box is then placed
    inside it as window_shell.rcss does, and its compact Close button sits where native's does, 20
    above the bottom edge. */

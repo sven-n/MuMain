@@ -75,8 +75,9 @@
 #bar_sd .gauge-num { left: -35px; top: 31px; }
 #bar_ag .gauge-num { left: -40.5px; top: 31px; }
 
-/* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size
-   binding rasterizes at display size; its inverse transform cancels the HUD scale.
+/* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size binding
+   (hint_px: the original's native text size) rasterizes at display size; its inverse transform
+   cancels the HUD scale.
    Use content width and stable edge anchors, not a hidden box's percentage transform. */
 .tooltip {
 	display: none;

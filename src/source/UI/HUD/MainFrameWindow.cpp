@@ -118,6 +118,7 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.Bind("bars_left", &model.barsLeft);
                 c.Bind("bars_top", &model.barsTop);
                 c.Bind("bars_scale", &model.barsScale);
+                c.Bind("hint_px", &model.hintPx);
 
                 c.Bind("hp_fraction", &model.hpFraction);
                 c.Bind("mp_fraction", &model.mpFraction);
@@ -614,6 +615,8 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         syncFloat(&MainFrameRmlModel::barsLeft, "bars_left", centerTransform.offsetX);
         syncFloat(&MainFrameRmlModel::barsTop, "bars_top", centerTransform.offsetY);
         syncFloat(&MainFrameRmlModel::barsScale, "bars_scale", centerTransform.scaleX);
+        syncFloat(&MainFrameRmlModel::hintPx, "hint_px",
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, centerTransform));
 
         // Item-hotkey/skill-hotkey band offsets, read from #item_hotkey_anchor/#skill_list_anchor's
         // real screen position and turned into a delta from centerTransform's offsetX; Render3D()

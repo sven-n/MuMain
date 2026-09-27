@@ -133,6 +133,7 @@ namespace mu::ui::window
         void BuildRmlUi();
         void SyncRmlModel();
         void SyncNativeFrame();
+        void SyncCanvasTop();
         void ShowNext();           // pops m_Queue (if non-empty) and opens the document
         void Resolve(int buttonIndex); // -1 = cancel/no button; hides the document, invokes the
                                        // chosen callback, then ShowNext()
@@ -169,6 +170,7 @@ namespace mu::ui::window
             float nativeLineAdvance = 0.f;
             float nativeTextInset = 0.f;
             float nativeDividerTop = 0.f;
+            float canvasTop = 0.f; // UI::RmlBridge::DialogCanvasTop, in dp
             Rml::String title;
             std::vector<LineEntry> lines;
             std::vector<MenuButtonEntry> buttons;

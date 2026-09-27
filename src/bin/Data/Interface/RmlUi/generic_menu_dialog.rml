@@ -19,7 +19,7 @@
 <body template="window_shell" data-model="generic_menu_dialog" data-class-system-menu="is_system_menu"
       data-class-highlight-title="highlight_title"
       data-class-native-frame="native_height > 0"
-      data-style-margin-top="native_top > 0 ? (native_top - 60) + 'dp' : '0dp'"
+      data-style-margin-top="((native_top > 0 ? native_top - 60 : 0) + canvas_top) + 'dp'"
       data-style-height="native_height > 0 ? native_height + 'dp' : 'auto'">
 	<!-- Inline styles bound below always carry a value ('auto', '0dp', '1.2' -- RmlUi's default
 	     line-height, it has no 'normal' keyword -- when unused): an

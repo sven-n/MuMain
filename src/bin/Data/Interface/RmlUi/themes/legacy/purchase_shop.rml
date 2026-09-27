@@ -22,21 +22,21 @@
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{shop_owner_text}}</span>
 
 		<span class="sharp-text warning-label"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{warning_label}}</span>
 		<span class="sharp-text warning-line line-1"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{selling_price_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{selling_price_line}}</span>
 		<span class="sharp-text warning-line line-2"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{verify_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{verify_line}}</span>
 		<span class="sharp-text warning-line line-3"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{already_in_store_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{already_in_store_line}}</span>
 		<span class="sharp-text warning-line line-4"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cancel_purchased_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{cancel_purchased_line}}</span>
 		<span class="sharp-text warning-line line-5"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{cant_be_returned_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{cant_be_returned_line}}</span>
 		<span class="sharp-text warning-label-2 line-6"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{all_item_trading_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{all_item_trading_line}}</span>
 		<span class="sharp-text warning-label-2 line-7"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{zen_only_line}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{zen_only_line}}</span>
 
 		<div id="btn_exit" class="shop-btn-exit" data-event-click="purchase_shop_exit_click"></div>
 	</div>
