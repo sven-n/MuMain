@@ -49,6 +49,7 @@ internal static class HtmlReport
                    padding:18px 26px; margin:0 0 20px; }
         .verdict strong { font-size:40px; font-weight:800; letter-spacing:.04em; line-height:1.1; }
         .verdict span { font-size:18px; font-weight:500; opacity:.95; }
+        .notice + .notice { margin-top:-12px; }
         .notice { background:var(--notice-bg); color:var(--notice); border:1px solid var(--notice-line); border-radius:10px;
                   padding:10px 18px; margin:-8px 0 20px; font-weight:600; }
         .verdict-pass { background:#1f7a3f; } .verdict-fail { background:#b3261e; } .verdict-none { background:#5d6675; }
@@ -117,6 +118,13 @@ internal static class HtmlReport
         var (verdictClass, verdict, detail) = Verdict(run);
         html.Append("<div class=\"verdict verdict-").Append(verdictClass).Append("\"><strong>").Append(verdict).Append("</strong><span>")
             .Append(Encode(detail)).Append("</span></div>");
+
+        // A client built with changes that were not committed is not exactly the commit it names.
+        if (run.Client is { Changed: true } changedClient)
+        {
+            html.Append("<div class=\"notice\">The tested client was built from commit <code>").Append(Encode(Short(changedClient.Commit)))
+                .Append("</code> with changes that were not committed, so it is not exactly that commit.</div>");
+        }
 
         // A PASSED run that left scenarios out has not tested everything.
         var skipped = run.Scenarios.Where(scenario => scenario.Status == ScenarioStatus.Skipped).ToList();

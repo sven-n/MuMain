@@ -125,7 +125,8 @@ the run, and **Open report folder** shows the file in the file browser, ready to
 be dragged into a pull request comment (before a run: the folder the reports go
 to). The window remembers its
 settings between runs. A line above the list says which server the tests run
-against, and after a run which client commit they tested.
+against, and after a run which client commit they tested (in yellow when it
+had changes that were not committed).
 
 ### The report
 
@@ -138,7 +139,8 @@ to 25 MB in a comment; the tester warns when a report is bigger):
 - On top, the run's result in large: PASSED in green when every test of the
   run passed, FAILED in red when one failed, or STOPPED when the run was
   stopped before its last test. Scenarios that were not selected do not count,
-  but a yellow line below says which were not run.
+  but a yellow line below says which were not run; another says so when the
+  client was built with changes that were not committed.
 - What was tested against what: the git commit the client was built from
   (and whether it had changes that were not committed), and the server's
   OpenMU version and commit. The client says its commit itself (`ping`); the

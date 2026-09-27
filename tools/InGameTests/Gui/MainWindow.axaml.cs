@@ -101,10 +101,9 @@ internal sealed partial class MainWindow : Window
         }
     }
 
+    // Changes that were not committed show in the yellow note next to it.
     private static string DescribeClient(ClientVersion? client)
-        => client is null
-            ? "tested client: commit unknown"
-            : $"tested client: commit {Short(client.Commit)}" + (client.Changed ? " (with changes that were not committed)" : string.Empty);
+        => client is null ? "tested client: commit unknown" : $"tested client: commit {Short(client.Commit)}";
 
     private static string DescribeServer(ServerVersion? server)
         => server is null
@@ -197,6 +196,7 @@ internal sealed partial class MainWindow : Window
             this.reportPath = run.ReportPath;
             this.lastRun = run;
             this.VersionText.Text = $"Last run: {DescribeClient(run.Client)} · {DescribeServer(run.Server)}";
+            this.ChangedClientNote.IsVisible = run.Client is { Changed: true };
             this.ShowOverallResult(run);
             this.RunStatusText.Text = $"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, "
                                       + $"{run.Count(ScenarioStatus.Skipped)} skipped · report written";

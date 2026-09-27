@@ -33,7 +33,13 @@
 
     <!-- Which tests -->
     <!-- What is tested against what -->
-    <TextBlock x:Name="VersionText" DockPanel.Dock="Top" Margin="0,12,0,0" Opacity="0.75" TextWrapping="Wrap" />
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,12,0,0">
+      <TextBlock x:Name="VersionText" Opacity="0.75" TextWrapping="Wrap" VerticalAlignment="Center" />
+      <Border x:Name="ChangedClientNote" IsVisible="False" Background="#FFF4C2" BorderBrush="#E0BB00" BorderThickness="1"
+              CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+        <TextBlock Text="client built with changes that were not committed" Foreground="#5C4400" FontWeight="SemiBold" />
+      </Border>
+    </StackPanel>
 
     <!-- All steps of the tests in the run, together -->
     <Grid x:Name="OverallPanel" DockPanel.Dock="Top" ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0,16,0,0" IsVisible="False">
