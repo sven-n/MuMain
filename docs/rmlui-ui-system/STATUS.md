@@ -100,9 +100,9 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   rendered via normal block flow (`display:block` stacking, 13px line-height) instead of
   per-line C++-computed `top` offsets — reproduces the original's variable per-class/per-buff line
   count for free. `LoadImages()`/`UnloadImages()` are kept even though this window no longer
-  renders through the legacy bitmap-atlas system: `CGensRanking` and `CUIMuHelper`'s own hunt/
-  pick-range "+" buttons alias their own `IMAGE_LIST` entries onto these same texture slots (same
-  reason `CMyQuestInfoWindow` keeps its own `LoadImages()`). The legacy summary box follows the original `RenderFrame()`: its translucent fill,
+  renders through the legacy bitmap-atlas system: `CGensRanking` aliases its own `IMAGE_LIST`
+  entries onto these same texture slots (same reason `CMyQuestInfoWindow` keeps its own
+  `LoadImages()`). The legacy summary box follows the original `RenderFrame()`: its translucent fill,
   the 4 corner sprites, each 1px edge sprite stretched across its edge, and the separator line
   (2026-09-24, #623; the corners-plus-flat-fill simplification it replaced is gone). The same
   change sizes every legacy text leaf to the native text renderer's physical size
@@ -281,6 +281,31 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   - **`.scroll-pane`'s well had no end caps at all**, in every consumer. Fixed in the primitive —
     see `component-catalog.md`; the fix and its follow-up are described there rather than here
     because they are the primitive's behaviour, not this window's.
+- **The MU Helper configuration windows** — **done, both themes (2026-09-27)**:
+  `CMuHelperConfigWindow` (was `CUIMuHelper`), `CMuHelperDetailWindow` (was `CMuHelperExt`) and
+  `CMuHelperSkillPicker` (was `CMuHelperSkillList`), now in `UI/MuHelper/`. Config and detail are
+  docked panels at `PanelColumnX(1)`/`(2)` on the `character_info` recipe; the picker is a
+  borderless flyout. The ledger row lists what was deleted and which native bugs were fixed.
+
+  Worth carrying to the next port:
+
+  - **Class-specific controls are one tested table, not RCSS.** Native registered ~45 controls
+    against class masks in four tables; `UI::MuHelper::ResolveClassFeatures()` returns seven flags and two page ids,
+    bound into the model, and the RML hides by flag. The two themes cannot disagree on who sees what.
+  - **The skill-icon atlas is a plain grid.** The long-standing "too irregular to port" note was
+    wrong; `UI::Skills::ResolveIconCell()` plus generated sprites (`component-catalog.md`'s "Skill
+    icons") are what `CSkillList` needs next.
+  - **A native window can be holding up an unrelated bug.** `CUIMuHelper::Show()` released every
+    `CUITextInputBox`'s focus on each show and hide. That was quietly clearing a dead startup box,
+    `g_pMercenaryInputBox`, whose `Init()` took focus at launch. Without it, every hotkey stayed
+    suspended in the main scene. The box, and the equally dead `CUILoginInputBox`, are deleted.
+    When a port drops a side effect like that, look for what it was covering.
+  - **RmlUi hands focus back to a remembered field.** Hiding *any* document refocuses the element
+    the most recently focused other document last had focused, even a text field the player had
+    clicked away from. `RmlUiRuntime::ReleaseStrandedFieldFocus()` unlinks such fields after every
+    press and each frame (`engine-findings.md`).
+
+  Verified in-game, both themes and at more than one UI scale (`validation-matrix.md`).
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 

@@ -39,10 +39,10 @@ namespace mu::ui::window
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     public:
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        // Kept even though this window no longer renders through the legacy bitmap-atlas system --
-        // CUIMuHelper's own hunt/pick-range "+" buttons alias these same texture slots and expect
-        // LoadImages() below to have populated them (same reason CCharacterInfoWindow/
-        // CMyQuestInfoWindow keep their own LoadImages()).
+        // Kept even though this window no longer renders through the legacy bitmap-atlas system. No
+        // other window aliases BITMAP_OPTION_BEGIN any more (the MU Helper did, until its port), but
+        // LoadImages() below also loads slots aliased from CMessageBoxMng/CMyInventory -- check those
+        // owners load their own before removing it.
         enum IMAGE_LIST
         {
             IMAGE_OPTION_FRAME_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,

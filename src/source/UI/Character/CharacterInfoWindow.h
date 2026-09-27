@@ -19,9 +19,9 @@ namespace mu::ui::window
     {
     public:
         // Kept even though this window no longer renders through the legacy bitmap-atlas system --
-        // CGensRanking (IMAGE_RANKBACK_TEXTBOX) and CUIMuHelper's own hunt/pick-range "+" buttons
-        // alias their own IMAGE_LIST entries onto these same texture slots and expect LoadImages()
-        // below to have populated them (same reason CMyQuestInfoWindow keeps its own IMAGE_LIST).
+        // CGensRanking (IMAGE_RANKBACK_TEXTBOX) aliases its own IMAGE_LIST entries onto these same
+        // texture slots and expects LoadImages() below to have populated them (same reason
+        // CMyQuestInfoWindow keeps its own IMAGE_LIST).
         enum IMAGE_LIST
         {
             IMAGE_CHAINFO_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg

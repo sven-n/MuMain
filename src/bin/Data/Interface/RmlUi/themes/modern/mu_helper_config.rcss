@@ -1,0 +1,116 @@
+/* Modern layout for CMuHelperConfigWindow -- the same positions as the legacy theme's copy (this is
+   layout, not presentation: native's own m_Pos + K). The pieces' look comes from this theme's
+   mu_helper_common.rcss. Controls a class doesn't have are hidden in the RML from
+   UI::MuHelper::ResolveClassFeatures(), never here. */
+
+.mhc-tab { position: absolute; left: 0; top: 0; }
+.mh-check { position: absolute; width: 15px; height: 15px; }
+
+/* --- Hunting ----------------------------------------------------------------------------------- */
+#box_h_range    { left: 12px; top: 73px;  width: 68px;  height: 50px; }
+#box_h_recovery { left: 75px; top: 73px;  width: 102px; height: 50px; }
+#box_h_movement { left: 12px; top: 120px; width: 165px; height: 39px; }
+#box_h_skills   { left: 12px; top: 156px; width: 165px; height: 135px; }
+#box_h_buffs    { left: 12px; top: 288px; width: 165px; height: 69px; }
+
+#h_range_label  { left: 18px; top: 78px; }
+#h_range_rule   { left: 18px; top: 83px; }
+#h_range_digit  { left: 29px; top: 92px; }
+#btn_hunt_add   { left: 56px; top: 78px; }
+#btn_hunt_minus { left: 56px; top: 97px; }
+
+#cb_potion       { left: 79px; top: 80px; }
+#cb_auto_heal    { left: 79px; top: 97px; }
+#cb_drain_life   { left: 79px; top: 97px; }
+/* The summoner's potion Setting sits five units higher than everyone else's. */
+#btn_potion_setting, #btn_potion_setting_label { left: 132px; top: 84px; }
+#btn_potion_setting.summoner, #btn_potion_setting_label.summoner { top: 79px; }
+
+#cb_long_distance { left: 18px;  top: 122px; }
+#cb_orig_position { left: 18px;  top: 137px; }
+#distance_label   { left: 110px; top: 141px; }
+#distance_plate   { left: 140px; top: 137px; }
+#distance_time    { left: 142px; top: 140px; }
+#distance_unit    { left: 162px; top: 141px; }
+
+#basic_skill_label { left: 18px; top: 160px; }
+#activation1_label { left: 59px; top: 160px; }
+#slot_0 { left: 17px; top: 171px; }
+#slot_1 { left: 61px; top: 171px; }
+
+#cb_skill2_delay     { left: 94px;  top: 174px; }
+#skill2_plate        { left: 140px; top: 174px; }
+#skill2_delay        { left: 142px; top: 177px; }
+#skill2_unit         { left: 162px; top: 178px; }
+#cb_skill2_condition { left: 94px;  top: 191px; }
+#btn_skill2_setting, #btn_skill2_setting_label { left: 132px; top: 191px; }
+
+#activation2_label   { left: 59px;  top: 212px; }
+#slot_2              { left: 61px;  top: 222px; }
+#cb_skill3_delay     { left: 94px;  top: 226px; }
+#skill3_plate        { left: 140px; top: 226px; }
+#skill3_delay        { left: 142px; top: 229px; }
+#skill3_unit         { left: 162px; top: 230px; }
+#cb_skill3_condition { left: 94px;  top: 243px; }
+#btn_skill3_setting, #btn_skill3_setting_label { left: 132px; top: 243px; }
+
+#cb_combo    { left: 18px; top: 226px; }
+#cb_fallback { left: 18px; top: 266px; }
+
+/* Dark Lord's raven and the other classes' party support share this corner -- no class has both. */
+#cb_use_pet        { left: 18px; top: 218px; }
+#rb_raven_cease    { left: 94px; top: 235px; }
+#rb_raven_auto     { left: 30px; top: 235px; }
+#rb_raven_together { left: 30px; top: 250px; }
+#cb_party          { left: 18px; top: 218px; }
+#btn_party_setting, #btn_party_setting_label { left: 17px; top: 234px; }
+
+#cb_buff_duration { left: 18px; top: 291px; }
+#slot_3 { left: 21px; top: 308px; }
+#slot_4 { left: 55px; top: 308px; }
+#slot_5 { left: 89px; top: 308px; }
+
+/* --- Item pick-up ------------------------------------------------------------------------------ */
+#box_o_range  { left: 12px; top: 73px;  width: 68px;  height: 50px; }
+#box_o_repair { left: 75px; top: 73px;  width: 102px; height: 50px; }
+#box_o_mode   { left: 12px; top: 120px; width: 165px; height: 30px; }
+#box_o_items  { left: 12px; top: 147px; width: 165px; height: 195px; }
+#box_o_list   { left: 16px; top: 235px; width: 158px; height: 75px; }
+
+#o_range_label  { left: 18px; top: 78px; }
+#o_range_rule   { left: 18px; top: 83px; }
+#o_range_digit  { left: 29px; top: 92px; }
+#btn_pick_add   { left: 56px; top: 78px; }
+#btn_pick_minus { left: 56px; top: 97px; }
+
+#cb_repair         { left: 79px; top: 80px; }
+#cb_pick_all       { left: 17px; top: 125px; }
+#cb_pick_selected  { left: 17px; top: 152px; }
+#cb_pick_jewel     { left: 22px; top: 170px; }
+#cb_pick_ancient   { left: 85px; top: 170px; }
+#cb_pick_zen       { left: 22px; top: 185px; }
+#cb_pick_excellent { left: 85px; top: 185px; }
+#cb_pick_extra     { left: 22px; top: 200px; }
+
+#item_plate { left: 34px; top: 216px; }
+#item_name  { left: 36px; top: 219px; }
+#btn_add_item, #btn_add_item_label { left: 132px; top: 208px; }
+
+#extra_list { position: absolute; left: 20px; top: 238px; width: 160px; height: 70px; }
+#btn_delete_item, #btn_delete_item_label { left: 132px; top: 309px; }
+
+/* --- Other ------------------------------------------------------------------------------------- */
+#box_x_accept { left: 12px; top: 73px;  width: 165px; height: 50px; }
+#box_x_defend { left: 12px; top: 120px; width: 165px; height: 222px; }
+#cb_auto_friend { left: 18px; top: 80px; }
+#cb_auto_guild  { left: 18px; top: 97px; }
+#cb_auto_defend { left: 18px; top: 125px; }
+
+/* --- Extension note (second and third tabs) ----------------------------------------------------- */
+#box_extension  { left: 12px; top: 340px; width: 165px; height: 46px; }
+#extension_used { left: 20px; top: 347px; }
+#extension_none { left: 20px; top: 365px; }
+
+/* --- Footer ------------------------------------------------------------------------------------ */
+#btn_save, #btn_save_label { left: 120px; top: 388px; }
+#btn_init, #btn_init_label { left: 65px;  top: 388px; }

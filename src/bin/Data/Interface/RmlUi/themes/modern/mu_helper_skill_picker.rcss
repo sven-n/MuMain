@@ -1,0 +1,37 @@
+/* Modern theme for CMuHelperSkillPicker -- each entry is base.rcss's shared .slot/.slot--filled
+   rather than native's newui_skillbox art. The skill icons themselves are game art and identical in
+   both themes (skill_icons.rcss). Plain reference px: #panel carries transform: scale(root_scale). */
+
+/* Above the docked MU Helper documents (z-index:auto, show order) so RmlUi's own hit test stops at
+   the flyout rather than reaching a control underneath it. Below the shared tooltip's 9999. */
+body {
+	position: absolute;
+	z-index: 1;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.mhsp-entry {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	/* base.rcss sizes .slot's border in dp; this panel is px scaled by root_scale, where dp would
+	   scale twice. border-box keeps each entry on native's 32x38 pitch instead of growing by the
+	   border and overlapping its neighbours. */
+	border-width: 1px;
+	box-sizing: border-box;
+	pointer-events: auto;
+}
+
+/* Native's (6, 5) centring offset, measured from inside the 1px border. */
+.mhsp-icon {
+	position: absolute;
+	left: 5px;
+	top: 4px;
+	width: 20px;
+	height: 28px;
+}

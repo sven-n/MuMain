@@ -77,12 +77,6 @@ typedef struct
 typedef struct
 {
     BOOL m_bIsSelected;
-    wchar_t m_szPattern[MAX_ITEM_NAME + 1];
-} FILTERLIST_TEXT;
-
-typedef struct
-{
-    BOOL m_bIsSelected;
     DWORD m_dwUIID;
     wchar_t m_szTitle[64];
     int m_iStatus;
@@ -683,28 +677,6 @@ protected:
     virtual BOOL DoLineMouseAction(int iLineNumber);
     virtual int GetRenderLinePos_y(int iLineNumber);
 };
-
-class CUIExtraItemListBox : public CUITextListBox<FILTERLIST_TEXT>
-{
-public:
-    CUIExtraItemListBox();
-    ~CUIExtraItemListBox() = default;
-
-    virtual void AddText(const wchar_t* pszPattern);
-    virtual void DeleteText(const wchar_t* pszPattern);
-    virtual void SetNumRenderLine(int iLine);
-    FILTERLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
-};
-
 class CUIUnmixgemList : public CUITextListBox<UNMIX_TEXT>
 {
 public:
@@ -1251,25 +1223,6 @@ private:
     std::deque<wchar_t*>::iterator m_HistoryListIter;
 };
 
-class CUILoginInputBox : public CUIChatInputBox
-{
-public:
-    CUILoginInputBox() {}
-    virtual ~CUILoginInputBox() {}
-    virtual void Init(HWND hWnd);
-    virtual void AddHistory(const wchar_t* pszText) {}
-    virtual void MoveHistory(int iDegree) {}
-};
-
-class CUIMercenaryInputBox : public CUIChatInputBox
-{
-public:
-    CUIMercenaryInputBox() {}
-    virtual ~CUIMercenaryInputBox() {}
-    virtual void Init(HWND hWnd);
-    virtual void AddHistory(const wchar_t* pszText) {}
-    virtual void MoveHistory(int iDegree) {}
-};
 
 #define SLIDE_LEVEL_MAX 5
 #define SLIDE_TEXT_LENGTH 1024

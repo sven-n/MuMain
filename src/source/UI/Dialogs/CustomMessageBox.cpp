@@ -19,6 +19,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Core/WindowSystem.h"
+#include "MUHelper/MuHelper.h"
 #include "Core/Text/TextLineWrap.h"
 
 extern int DeleteIndex;

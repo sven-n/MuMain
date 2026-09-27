@@ -90,7 +90,7 @@ instead.
 | Single-line text entry | **stock RmlUi `<input>`** + shared `.text-field` | `themes/*/base.rcss`, `themes/*/my_shop.rml` | The convention for new UI — bind with `data-value`, style with `.text-field`, keep `maxlength`/validation in C++. See `component-catalog.md`'s "Text field". `CUITextInputBox` is the fallback for **unmigrated** windows only, not a choice for new ones |
 | Progress/gauge bar | *(none yet as a reusable wrapper — `CGaugeBar` is sprite-toolkit-only, closed)* | — | RmlUi's own built-in `<progress>` element (`RmlUi/Core/Elements/ElementProgress.h`, registered by `Factory.cpp` with no extra setup) is a real, proven option now — `title_scene.rml`'s loading bar uses it, with `SetValue()`/`SetMax()` called directly from C++. `main_frame.rcss`/`server_select.rcss`'s own gauges predate that and still use a plain div + `data-style-width`, not retrofitted — check `component-catalog.md`'s "doesn't exist yet" list before inventing a third pattern |
 | Scrollable list of rows | *(no native-tier wrapper — don't build one)* | — | `CUITextListBox<T>` (`UI/Widgets/UIControls.h`, `CUIControl` family) is the legacy answer and is closed to new consumers (`ui-target-architecture.md` Rule 11) — including from a window already on `mu::ui::window::CObject`, which doesn't exempt it. The real answer is RmlUi's `data-for` binding: `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list (ported off `CUICurQuestListBox`/`CUIQuestContentsListBox`) are the two proven references |
-| MU Helper bot-engine window | `mu::ui::window::CUIMuHelper` | `UI/Core/WindowMuHelper.h` | Deliberately kept its `UI` — the plain-stripped `CMuHelper` would collide with `MUHelper::CMuHelper`, the actual bot-logic engine this window displays/controls (a real, unrelated class, not a duplicate) |
+| MU Helper configuration windows | `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` | `UI/MuHelper/` | Named for what each window is; none can be mistaken for `MUHelper::CMuHelper`, the bot-logic engine they configure |
 
 ## Resolved name collisions
 
@@ -108,11 +108,9 @@ qualified — the namespace itself disambiguates:
   family) vs. **`mu::ui::window::CButton`** (the one to use for new work).
 - **`::CRadioButton`** (`UIControls.h`, no base) vs. **`mu::ui::window::CRadioButton`** (the one to
   use for new work).
-- **`MUHelper::CMuHelper`** (the actual bot-logic engine) vs. **`mu::ui::window::CUIMuHelper`**
-  (the window that displays/controls it) — this one kept a disambiguating name (`CUIMuHelper`, not
-  the plain-stripped `CMuHelper`) rather than relying on the namespace alone, since both classes
-  are legitimately reachable from similar contexts and a bare `CMuHelper` reference could plausibly
-  mean either.
+- **`MUHelper::CMuHelper`** (the actual bot-logic engine) vs. its configuration window, now
+  `CMuHelperConfigWindow`: a descriptive name rather than a stripped one, so a bare `CMuHelper`
+  only ever means the engine.
 
 **A subtlety worth knowing if you're writing code in this tier**: a file that does `using namespace
 mu::ui::window;` at file/global scope (common — most files in this tier do, since their own class

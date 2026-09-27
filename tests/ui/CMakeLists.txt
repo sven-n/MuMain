@@ -60,6 +60,22 @@ mu_add_test(
     LINK_LIBS MuClient
 )
 
+mu_add_test(
+    NAME mu_helper_tests
+    SOURCES
+        test_mu_helper.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME skill_icon_cell_tests
+    SOURCES
+        test_skill_icon_cell.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
 add_test(
     NAME display_settings_contract
     COMMAND "${CMAKE_COMMAND}"

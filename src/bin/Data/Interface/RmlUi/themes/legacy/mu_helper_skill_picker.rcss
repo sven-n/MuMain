@@ -1,0 +1,38 @@
+/* Legacy theme for CMuHelperSkillPicker. Native drew each entry as newui_skillbox (32x38) with the
+   skill's 20x28 icon centred in it -- (32 - 20) / 2 = 6 across, (38 - 28) / 2 = 5 down. Plain
+   reference px throughout: #panel carries transform: scale(root_scale). */
+
+/* Above the docked MU Helper documents, which stack at z-index:auto in show order. The flyout
+   overlaps the detail window's column, and RmlUi hit-tests documents independently of CManager --
+   without this, a click on an icon could also land on a control underneath. Below the shared
+   tooltip's 9999. */
+body {
+	position: absolute;
+	z-index: 1;
+}
+
+@spritesheet mhsp-box-sheet { src: "../../../newui_skillbox.jpg"; mhsp-box: 0px 0px 32px 38px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.mhsp-entry {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	decorator: image(mhsp-box);
+	/* Claims the cursor so RmlUi stops its hit test here (see body above). Selection itself stays
+	   native -- CMuHelperSkillPicker's header comment says why. */
+	pointer-events: auto;
+}
+
+.mhsp-icon {
+	position: absolute;
+	left: 6px;
+	top: 5px;
+	width: 20px;
+	height: 28px;
+}

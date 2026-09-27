@@ -86,6 +86,9 @@ CSystem::CSystem()
     m_pNewWindowMenu = nullptr;
     m_pNewOptionWindow = nullptr;
     m_pMuHelperBar = nullptr;
+    m_pMuHelperConfig = nullptr;
+    m_pMuHelperSkillPicker = nullptr;
+    m_pMuHelperDetail = nullptr;
     m_pNewHelpWindow = nullptr;
     m_pNewChatCommandWindow = nullptr;
     m_pNewItemExplanationWindow = nullptr;
@@ -554,16 +557,16 @@ bool CSystem::LoadMainSceneInterface()
     m_pGenericMenuDialog->Create(m_pNewUIMng);
     g_pGenericMenuDialog = m_pGenericMenuDialog;
 
-    m_pNewUIMuHelper = new CUIMuHelper;
-    if (m_pNewUIMuHelper->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    m_pMuHelperConfig = new CMuHelperConfigWindow;
+    if (m_pMuHelperConfig->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewUIMuHelperExt = new CMuHelperExt;
-    if (m_pNewUIMuHelperExt->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
+    m_pMuHelperDetail = new CMuHelperDetailWindow;
+    if (m_pMuHelperDetail->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
-    m_pNewUIMuHelperSkillList = new CMuHelperSkillList;
-    if (m_pNewUIMuHelperSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+    m_pMuHelperSkillPicker = new CMuHelperSkillPicker;
+    if (m_pMuHelperSkillPicker->Create(m_pNewUIMng) == false)
         return false;
 
     return true;
@@ -616,6 +619,9 @@ void CSystem::UnloadMainSceneInterface()
     SAFE_DELETE(m_pNewChaosCastleTime);
     SAFE_DELETE(m_pNewCommandWindow);
     SAFE_DELETE(m_pMuHelperBar);
+    SAFE_DELETE(m_pMuHelperConfig);
+    SAFE_DELETE(m_pMuHelperSkillPicker);
+    SAFE_DELETE(m_pMuHelperDetail);
     SAFE_DELETE(m_pNewMoveCommandWindow);
     SAFE_DELETE(m_pNewUIHotKey);
     SAFE_DELETE(m_pNewSiegeWarfare);
@@ -2508,17 +2514,17 @@ CLuckyItemWnd* mu::ui::window::CSystem::Get_pNewUILuckyItemWnd() const
     return m_pNewUILuckyItemWnd;
 }
 
-CUIMuHelper* CSystem::Get_pNewUIMuHelper() const
+CMuHelperConfigWindow* CSystem::GetUI_MuHelperConfig() const
 {
-    return m_pNewUIMuHelper;
+    return m_pMuHelperConfig;
 }
 
-CMuHelperExt* CSystem::Get_pNewUIMuHelperExt() const
+CMuHelperDetailWindow* CSystem::GetUI_MuHelperDetail() const
 {
-    return m_pNewUIMuHelperExt;
+    return m_pMuHelperDetail;
 }
 
-CMuHelperSkillList* CSystem::Get_pNewUIMuHelperSkillList() const
+CMuHelperSkillPicker* CSystem::GetUI_MuHelperSkillPicker() const
 {
-    return m_pNewUIMuHelperSkillList;
+    return m_pMuHelperSkillPicker;
 }

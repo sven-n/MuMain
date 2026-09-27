@@ -82,7 +82,9 @@
 #include "UI/Inventory/UnitedMarketPlaceWindow.h"
 
 #include "UI/Inventory/LuckyItemWnd.h"
-#include "UI/Core/WindowMuHelper.h"
+#include "UI/MuHelper/MuHelperConfigWindow.h"
+#include "UI/MuHelper/MuHelperSkillPicker.h"
+#include "UI/MuHelper/MuHelperDetailWindow.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/GenericMenuDialog.h"
 
@@ -229,9 +231,9 @@ namespace mu::ui::window
         CGensRanking* m_pNewGensRanking;
         CUnitedMarketPlaceWindow* m_pNewUnitedMarketPlaceWindow;
         CLuckyItemWnd* m_pNewUILuckyItemWnd;
-        CUIMuHelper* m_pNewUIMuHelper;
-        CMuHelperExt* m_pNewUIMuHelperExt;
-        CMuHelperSkillList* m_pNewUIMuHelperSkillList;
+        CMuHelperConfigWindow* m_pMuHelperConfig;
+        CMuHelperDetailWindow* m_pMuHelperDetail;
+        CMuHelperSkillPicker* m_pMuHelperSkillPicker;
         CGenericConfirmDialog* m_pGenericConfirmDialog;
         CGenericMenuDialog* m_pGenericMenuDialog;
 
@@ -316,9 +318,9 @@ namespace mu::ui::window
         CUnitedMarketPlaceWindow* GetUI_pNewUnitedMarketPlaceWindow() const;
         //CUnitedMarketPlaceWindow*	GetUI_pNewUnitedMarketPlaceFrame() const;
         CLuckyItemWnd* Get_pNewUILuckyItemWnd() const;
-        CUIMuHelper* Get_pNewUIMuHelper() const;
-        CMuHelperExt* Get_pNewUIMuHelperExt() const;
-        CMuHelperSkillList* Get_pNewUIMuHelperSkillList() const;
+        CMuHelperConfigWindow* GetUI_MuHelperConfig() const;
+        CMuHelperDetailWindow* GetUI_MuHelperDetail() const;
+        CMuHelperSkillPicker* GetUI_MuHelperSkillPicker() const;
     };
 }
 
@@ -405,7 +407,7 @@ namespace mu::ui::window
 #endif //PBG_MOD_STAMINA_UI
 #define g_pNewUIGensRanking mu::ui::window::CSystem::GetInstance()->GetUI_NewGensRanking()
 #define g_pLuckyItemWnd	mu::ui::window::CSystem::GetInstance()->Get_pNewUILuckyItemWnd()
-#define g_pNewUIMuHelper mu::ui::window::CSystem::GetInstance()->Get_pNewUIMuHelper()
-#define g_pNewUIMuHelperExt mu::ui::window::CSystem::GetInstance()->Get_pNewUIMuHelperExt()
-#define g_pNewUIMuHelperSkillList mu::ui::window::CSystem::GetInstance()->Get_pNewUIMuHelperSkillList()
+#define g_pMuHelperConfig mu::ui::window::CSystem::GetInstance()->GetUI_MuHelperConfig()
+#define g_pMuHelperDetail mu::ui::window::CSystem::GetInstance()->GetUI_MuHelperDetail()
+#define g_pMuHelperSkillPicker mu::ui::window::CSystem::GetInstance()->GetUI_MuHelperSkillPicker()
 #endif // _NEWUISYSTEM_H_

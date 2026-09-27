@@ -85,7 +85,11 @@ public:
     // not rely on this wrapper to enumerate them -- there is no reflection to enumerate from.
     void MarkDirty(const Rml::String& fieldName)
     {
-        m_Handle.DirtyVariable(fieldName);
+        // DataModelHandle::DirtyVariable() dereferences its model unchecked, so a MarkDirty() before
+        // Create() -- or after Destroy(), or when Create() failed -- would crash. A window that stages
+        // model state from game code (a config applied before its document exists) hits exactly that.
+        if (m_Handle)
+            m_Handle.DirtyVariable(fieldName);
     }
 
 private:

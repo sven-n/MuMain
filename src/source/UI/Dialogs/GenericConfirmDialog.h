@@ -205,21 +205,6 @@ namespace mu::ui::window
         // Pushes this invocation's Mode::Text settings onto #gcd_input (type/maxlength) and seeds
         // its value -- this dialog is shared, so the field is reconfigured on every Show().
         void ApplyInputFieldConfig();
-        // Rejects non-digit keystrokes in the capture phase, before WidgetTextInput can insert
-        // them -- the only way to enforce numericOnly without disturbing the caret (writing a
-        // filtered value back onto the element resets the cursor to index 0). Paste bypasses
-        // textinput, so GetInputText() filters on read as well.
-        class DigitOnlyInputFilter final : public Rml::EventListener
-        {
-        public:
-            explicit DigitOnlyInputFilter(CGenericConfirmDialog* owner) : m_pOwner(owner) {}
-            void ProcessEvent(Rml::Event& event) override;
-
-        private:
-            CGenericConfirmDialog* m_pOwner = nullptr;
-        };
-        DigitOnlyInputFilter m_DigitOnlyFilter{ this };
-
         // #panel is centered via `.center-both` (`left:50%; top:50%; transform:translate(-50%,-50%)`,
         // base.rcss) -- GetAbsoluteOffset() walks the ancestor chain summing offsets but does NOT
         // apply CSS `transform` at any level, so every element inside #panel is off by half the

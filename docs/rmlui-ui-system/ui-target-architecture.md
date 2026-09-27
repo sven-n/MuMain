@@ -170,10 +170,10 @@ to cover two genuinely different things, only one of which is actually permanent
 
 **Temporary, sequenced — not permanent, despite looking similar at a glance:** 3. **2D sprite-atlas icon rendering** (the skill-grid/pet-row icons `MainFrameWindow.cpp` still
 draws as legacy 2D sprites). `STATUS.md` itself calls this "a deliberate Phase 2 scope cut,"
-blocked on `RenderSkillIcon()`'s irregular atlas addressing, not on any RmlUi limitation — this
-is a decoded-texture-atlas problem, not a live-3D-compositing one. It's expected to retire into
-RmlUi (most likely via generated `@spritesheet` rects, the same mechanism `STATUS.md` already
-documents solving an equivalent atlas case elsewhere) once that port lands. Treating it as
+not on any RmlUi limitation — this is a texture-atlas problem, not a live-3D-compositing one. The
+atlas turned out to be a regular grid, and the MU Helper port built the pieces this needs: the
+resolver `UI::Skills::ResolveIconCell()` and generated `@spritesheet` rects (`skill_icons.rcss`).
+It retires once `CSkillList` is rewired onto them. Treating it as
 permanent, as this document's first pass did, would wrongly justify never doing that port.
 
 So the durable boundary is **"can this content be represented as a live 3D render target or a

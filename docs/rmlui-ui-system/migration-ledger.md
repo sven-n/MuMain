@@ -64,7 +64,7 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | `CSystemLogWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `system_log.rml` + both themes. The top-left system/error overlay, ported right after the `CChatLogWindow` it shares a file with, and reusing its `ChatLogLineEntry` line shape. Simpler in three ways that are easy to get wrong by copying its file-mate: it grows DOWNWARD from a fully static origin (`Create()` at (0,80), `m_WndSize.cy` never recomputed, `SetPosition()` never called), it has only two colours (system-blue vs error-red for everything else, not a per-type map), and its row pitch is font-derived (`MeasureText(L"Q").cy * 1.2`) so RCSS's own `line-height` default of 1.2 reproduces it by doing nothing. No scrolling and no interaction at all, so the whole panel is `pointer-events: none`. |
 | `CMiniMap` | `CObject`-tier | Not started | TBD | |
 | `CMasterLevel` | `CObject`-tier | Not started | TBD | Already a `CGenericConfirmDialog` *caller* for one confirm popup — the window's own chrome is still fully native |
-| `CUIMuHelper` (+ `CMuHelperSkillList`, `CMuHelperExt`) | `CObject`-tier | Not started | TBD | The MU Helper bot *configuration* window — distinct from the always-visible `CMuHelperBar`, which is done |
+| `CMuHelperConfigWindow` (was `CUIMuHelper`) + `CMuHelperDetailWindow` (was `CMuHelperExt`) + `CMuHelperSkillPicker` (was `CMuHelperSkillList`) | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `mu_helper_config.rml`, `mu_helper_detail.rml`, `mu_helper_skill_picker.rml` + both themes; shared pieces in `themes/*/mu_helper_common.rcss`. The bot's *configuration* windows (hotkey `Z`, and the `CMuHelperBar` config button), now in `UI/MuHelper/`. Config and detail are docked `PanelColumnX(1)`/`(2)` panels on the `character_info` recipe; the picker is a borderless flyout whose fan-out layout stays in C++. Every control has one fixed position per id, so the config window is static RML positioned by RCSS, and which class sees which control is one tested table, `UI::MuHelper::ResolveClassFeatures()`, bound as flags — never RCSS. The detail window's fill gauges keep native C++ input (click, wheel, drag) over RmlUi art. Deleted: `UI/Core/WindowMuHelper.h/.cpp` (~3,400 lines), `CUIExtraItemListBox`, 44 leaked `CButton`/`CCheckBox`, the dead `RenderSkillInfo` tooltip chain. Native bugs fixed on the way (see `tracked-deferrals.md`'s divergence audit): pick-all/pick-selected now truly exclusive, a skill condition page opened with no radio set now gets a default, the potion gauge's hit test no longer runs on every page, the buff interval is no longer saved as 0 from other pages, right-clicking a number plate no longer writes past the slot array. Native `CUIMuHelper::Show()` released every `CUITextInputBox`'s focus as a side effect, which hid the dead startup box `g_pMercenaryInputBox` holding focus from launch; the port removed that box (and the equally dead `CUILoginInputBox`) rather than keep the side effect. |
 
 ### Character
 
@@ -214,8 +214,8 @@ verify whether it's still a live shape before scoping a port.
 ## `CUIControl` list family (`UI/Widgets/UIControls.h`)
 
 The `data-for` binding pattern is proven (`component-catalog.md`'s "List / repeated rows") on 2 of
-18 `CUITextListBox<T>` instantiations. The other 16 are the tracked deferral in
-`tracked-deferrals.md`.
+18 `CUITextListBox<T>` instantiations, and a third (`CUIExtraItemListBox`) was deleted with its only
+user. The other 15 are the tracked deferral in `tracked-deferrals.md`.
 
 | Component | Row type | Status | Detail pointer |
 |---|---|---|---|
@@ -231,7 +231,7 @@ The `data-for` binding pattern is proven (`component-catalog.md`'s "List / repea
 | `CUIGuildNoticeListBox` | `GUILDLOG_TEXT` | Not started | `tracked-deferrals.md` |
 | `CUINewGuildMemberListBox` | `GUILDLIST_TEXT` | Not started | `tracked-deferrals.md` |
 | `CUIUnionGuildListBox` | `UNIONGUILD_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIExtraItemListBox` | `FILTERLIST_TEXT` | Not started | `tracked-deferrals.md` |
+| `CUIExtraItemListBox` | `FILTERLIST_TEXT` | Deleted | Its only user, the MU Helper config window, now binds a `data-for` list in a `.scroll-pane` |
 | `CUIUnmixgemList` | `UNMIX_TEXT` | Not started | `tracked-deferrals.md` |
 | `CUIBCDeclareGuildListBox` | `BCDECLAREGUILD_TEXT` | Not started | `tracked-deferrals.md` |
 | `CUIBCGuildListBox` | `BCGUILD_TEXT` | Not started | `tracked-deferrals.md` |

@@ -558,6 +558,11 @@ body {
 /* Layout primitives -- identical to
    themes/legacy/base.rcss's copy; pure layout, nothing theme-specific to vary. */
 
+/* Text drawn sharp inside a panel scaled by transform: scale(root_scale) -- see legacy base.rcss's
+   copy for the full explanation. */
+.sharp-text { transform-origin: left top; }
+.sharp-text.sharp-right { transform-origin: right top; }
+
 .anchor-top-left {
 	position: absolute;
 	left: 0;
@@ -929,6 +934,52 @@ body {
 	font-weight: bold;
 	font-family: "DejaVu Sans";
 	pointer-events: none;
+}
+
+/* px companions of .btn and .checkbox-box, for panels scaled by transform: scale(root_scale),
+   where their dp sizes would be scaled twice. Same recipe and values, reference px; no size of
+   their own -- each consumer boxes them. */
+.modern-btn-px {
+	position: absolute;
+	text-align: center;
+	cursor: pointer;
+	color: #c0b9a4;
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 10), transparent 45%),
+		linear-gradient(to bottom, #26251d, #13140f 58%, #0a0b09);
+	border-width: 1px;
+	border-color: #4a4738;
+	border-radius: token(radius-sm)px;
+	box-sizing: border-box;
+	pointer-events: auto;
+	box-shadow:
+		inset 0 1px 0 rgba(232, 215, 168, 14),
+		inset 0 -1px 0 #000000,
+		0 1px 2px rgba(0, 0, 0, 153);
+}
+.modern-btn-px:hover {
+	color: #e0c476;
+	border-color: #776646;
+	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 13), transparent 45%),
+		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09);
+}
+.modern-btn-px:active {
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 184);
+}
+
+.modern-checkbox-px {
+	position: absolute;
+	background-color: #0c0e0b;
+	border-width: 1px;
+	border-color: #514a35;
+	border-radius: token(radius-sm)px;
+	box-sizing: border-box;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 140);
+}
+.modern-checkbox-px.checked {
+	background-color: #8f6922;
+	decorator: linear-gradient(to bottom, #d3aa4e, #8f6922);
+	border-color: #aa8132;
 }
 
 /* Vector wallet bar (forged-metal strip + coin glyph + label), replacing every legacy money-bar

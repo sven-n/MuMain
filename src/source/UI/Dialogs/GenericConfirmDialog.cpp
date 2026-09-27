@@ -16,6 +16,7 @@
 #include "UI/Core/WindowSystem.h"       // g_pNewUI3DRenderMng macro resolves through CSystem
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDialogCanvas.h"
+#include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -148,10 +149,7 @@ void CGenericConfirmDialog::BuildRmlUi()
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
             "Data/Interface/RmlUi/generic_confirm_dialog.rml");
 
-        // Capture phase, on the document rather than the field: that's what makes it run before the
-        // focused WidgetTextInput's own textinput listener (see DigitOnlyInputFilter's comment).
-        if (m_pRmlDoc)
-            m_pRmlDoc->AddEventListener(Rml::EventId::Textinput, &m_DigitOnlyFilter, true);
+        UI::RmlBridge::AttachNumericInputFilter(m_pRmlDoc);
     }
 
     // Background-context companion -- see the class comment for the mechanism. No RmlModelBinder
@@ -216,17 +214,6 @@ namespace
         return digits;
     }
 
-    Rml::String KeepDigitsOnly(const Rml::String& value)
-    {
-        Rml::String digits;
-        digits.reserve(value.size());
-        for (const char c : value)
-        {
-            if (c >= '0' && c <= '9')
-                digits += c;
-        }
-        return digits;
-    }
 }
 
 void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
@@ -388,6 +375,7 @@ void CGenericConfirmDialog::ApplyInputFieldConfig()
     // type/limit go on first and the seeded value last.
     field->SetAttribute("type", m_Active.input->masked ? "password" : "text");
     field->SetAttribute("maxlength", m_Active.input->maxLength);
+    field->SetClass(UI::RmlBridge::NumericFieldClass, m_Active.input->numericOnly);
 
     m_RmlBinder.GetModel().inputValue = StringUtils::WideToNarrow(m_PendingInputSeed.c_str());
     m_RmlBinder.MarkDirty("input_value");
@@ -396,30 +384,6 @@ void CGenericConfirmDialog::ApplyInputFieldConfig()
     // This dialog opens with FocusFlag::Document, so the field needs an explicit focus rather than
     // an autofocus attribute -- the attribute would also fight the keypad mode, which shares the row.
     field->Focus();
-}
-
-// Runs in the capture phase on the document, so it sees every textinput before the focused
-// WidgetTextInput's own target-phase listener does; StopPropagation() there means the character is
-// never inserted and the caret never moves. Writing a filtered value back onto the element instead
-// (the obvious approach) re-enters OnValueAttributeChanged() and resets the cursor to index 0.
-void CGenericConfirmDialog::DigitOnlyInputFilter::ProcessEvent(Rml::Event& event)
-{
-    if (m_pOwner == nullptr || !m_pOwner->m_Active.input || !m_pOwner->m_Active.input->numericOnly)
-        return;
-
-    Rml::Element* target = event.GetTargetElement();
-    if (target == nullptr || target->GetId() != "gcd_input")
-        return;
-
-    const Rml::String text = event.GetParameter<Rml::String>("text", Rml::String());
-    for (const char c : text)
-    {
-        if (c < '0' || c > '9')
-        {
-            event.StopPropagation();
-            return;
-        }
-    }
 }
 
 Rml::Vector2f CGenericConfirmDialog::PanelTranslateCorrection() const
@@ -593,10 +557,10 @@ std::wstring CGenericConfirmDialog::GetInputText() const
         return m_KeypadBuffer;
 
     // Mode::Text -- RmlUi owns the edit buffer; the model holds the committed value. Filtered again
-    // here because DigitOnlyInputFilter only covers typed input: a clipboard paste reaches
+    // here because the numeric input filter only covers typed input: a clipboard paste reaches
     // WidgetTextInput without a textinput event, so this is what makes the rule hold either way.
     const Rml::String& value = m_RmlBinder.GetModel().inputValue;
-    return StringUtils::NarrowToWide(m_Active.input->numericOnly ? KeepDigitsOnly(value) : value);
+    return StringUtils::NarrowToWide(m_Active.input->numericOnly ? UI::RmlBridge::KeepDigitsOnly(value) : value);
 }
 
 void CGenericConfirmDialog::SyncCanvasTop()

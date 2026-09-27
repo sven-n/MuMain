@@ -88,6 +88,8 @@ exempt in principle, they simply have no such conversion to get wrong.
 | `CNPCDialogue` | docked | both pagers, sel-text rows |
 | `CNPCQuest` | docked | answer rows (bg-document `#panel`); **condition item icons sit against their text rows** — these were misplaced by the same bug class, so this is the sharpest single check in the table |
 | `CMoveCommandWindow` | dock-left | panel rectangle blocks world clicks along its whole height; warp rows click; close bar clicks. The only `LayoutMode::DockLeft` window, and the only one whose `#panel` height is bound per-frame rather than fixed, so its hit box is the one most likely to disagree with what is drawn |
+| `CMuHelperConfigWindow` | docked | tabs, the six skill slots (left-click opens the picker, right-click clears), range +/−, the extra-item list's wheel (claimed only over the list), corner × |
+| `CMuHelperDetailWindow` | docked | the three gauges: click, wheel and drag set the level only on their own page, and the level matches where the fill is drawn |
 
 ## Axes deliberately not covered yet
 
@@ -109,3 +111,4 @@ Fill in per run. An empty cell is "not checked," which is not the same as passin
 | Date | Build | Scales | Themes | Windows checked | Result |
 |---|---|---|---|---|---|
 | 2026-09-27 | `RelWithDebInfo` | several (not the full 50/200 ladder) | both | `CMoveCommandWindow` only | Pass — rows click, close bar clicks, panel blocks world clicks. **One window, not the table.** Every other row remains unchecked. |
+| 2026-09-27 | `RelWithDebInfo` | several | both | `CMuHelperConfigWindow`, `CMuHelperDetailWindow` | Pass. |

@@ -79,9 +79,9 @@ namespace mu::ui::window
     };
 
     // One interactive overlay cell in the expanded skill grid or pet row, rebuilt every frame
-    // while open. Icon/box art is NOT here -- it stays a legacy 2D draw (RenderSkillIcon()'s atlas
-    // addressing is too irregular to port blind); this struct only drives RmlUi's hit target,
-    // cooldown wipe, and selection highlight.
+    // while open. Icon/box art is NOT here -- it is still a legacy 2D draw (RenderSkillIcon(); the
+    // RmlUi equivalent is UI::Skills::ResolveIconCell() + skill_icons.rcss). This struct only drives
+    // RmlUi's hit target, cooldown wipe, and selection highlight.
     struct SkillCellEntry
     {
         float left = 0.f, top = 0.f;   // px, in #bars's local space; matches the legacy icon/box position
