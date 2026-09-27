@@ -15,7 +15,8 @@
 	/* Native CCommonMessageBox: centred horizontally, top edge at y=100, 117 tall for up to two
 	   lines and growing with each further line -- so no centering transform and no fixed height:
 	   the flowing .gcd-body below sizes it (GenericConfirmDialog.cpp copies the result to the bg
-	   document's own #panel). */
+	   document's own #panel). Native counts y=100 from its 640x480 canvas top: the markup adds
+	   that canvas's offset (canvas_top, RmlDialogCanvas.h) as margin-top. */
 	top: 100dp;
 	left: 50%;
 	margin-left: -115dp;

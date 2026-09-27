@@ -15,6 +15,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"       // g_pNewUI3DRenderMng macro resolves through CSystem
 #include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDialogCanvas.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -105,6 +106,7 @@ void CGenericConfirmDialog::BuildRmlUi()
             c.Bind("keypad_digit_9", &model.keypadDigit9);
 
             c.Bind("has_progress", &model.hasProgress);
+            c.Bind("canvas_top", &model.canvasTop);
             c.Bind("progress_fraction", &model.progressFraction);
 
             c.Bind("has_item3d", &model.hasItem3D);
@@ -482,6 +484,7 @@ bool CGenericConfirmDialog::Update()
     if (!m_bActive)
         return true;
 
+    SyncCanvasTop();
     SyncBackgroundPanel();
 
     if (m_Active.progress)
@@ -596,10 +599,21 @@ std::wstring CGenericConfirmDialog::GetInputText() const
     return StringUtils::NarrowToWide(m_Active.input->numericOnly ? KeepDigitsOnly(value) : value);
 }
 
+void CGenericConfirmDialog::SyncCanvasTop()
+{
+    auto& model = m_RmlBinder.GetModel();
+    const float canvasTop = UI::RmlBridge::DialogCanvasTop(RmlUiRuntime::Instance().GetContext());
+    if (model.canvasTop == canvasTop)
+        return;
+    model.canvasTop = canvasTop;
+    m_RmlBinder.MarkDirty("canvas_top");
+}
+
 void CGenericConfirmDialog::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
+    SyncCanvasTop();
     auto& model = m_RmlBinder.GetModel();
 
     std::vector<LineEntry> newLines;

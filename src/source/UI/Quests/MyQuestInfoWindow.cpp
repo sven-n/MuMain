@@ -535,7 +535,11 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
     }
 
     // Small lists, rebuilt and marked dirty unconditionally each sync (same as CreditWin/BuffStrip).
-    model.emptyQuestLines = bEmpty ? BuildTextLines(2825, 140) : std::vector<TextLine>{};
+    // One line, wrapped by the text box (.quest-empty-msg): native's own 140-pixel split measures
+    // with whichever font size was active last, so it breaks the line at some window sizes only.
+    model.emptyQuestLines.clear();
+    if (bEmpty)
+        model.emptyQuestLines.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(2825))});
     m_RmlBinder.MarkDirty("empty_quest_lines");
 
     model.quests.clear();

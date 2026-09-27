@@ -45,10 +45,10 @@
 			     class="mix-text">{{prediction_text}}</span></div>
 			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text"
 			     data-style-color="s.color">{{s.text}}</span></div>
-			<div class="mix-list-line mix-unwrapped" data-for="s : status_lines"><span class="mix-text"
+			<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="s : status_lines"><span class="mix-text"
 			     data-style-color="s.color">{{s.text}}</span></div>
 			<div class="mix-advice" data-style-margin-top="(15 * root_scale) + 'px'">
-				<div class="mix-list-line mix-unwrapped" data-for="a : advice_lines"><span class="mix-text"
+				<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="a : advice_lines"><span class="mix-text"
 				     data-style-color="a.color">{{a.text}}</span></div>
 			</div>
 		</div>

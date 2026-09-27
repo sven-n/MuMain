@@ -31,7 +31,7 @@
 		<!-- Quest tab -->
 		<div class="quest-tab" data-class-hidden="active_tab != 0">
 			<div class="sharp-text quest-empty-msg" data-class-hidden="!quest_list_empty"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(140 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(157 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
 				<span data-for="line : empty_quest_lines">{{line.text}}</span>
 			</div>
 			<div class="sharp-text quest-list" data-class-hidden="quest_list_empty"

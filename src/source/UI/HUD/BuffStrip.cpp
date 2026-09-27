@@ -250,7 +250,7 @@ void CBuffStrip::BuildRmlUi()
             c.RegisterArray<std::vector<BuffEntry>>();
 
             c.Bind("buffs", &model.buffs);
-            c.Bind("strip_center", &model.stripCenter);
+            c.Bind("strip_left", &model.stripLeft);
             c.Bind("tooltip_line_px", &model.tooltipLinePx);
         });
 
@@ -348,7 +348,7 @@ void CBuffStrip::SyncRmlModel()
     }
 
     m_RmlBinder.MarkDirty("buffs");
-    SyncStripCenter();
+    SyncStripLeft();
     SyncTooltipLineHeight();
 }
 
@@ -370,19 +370,20 @@ void CBuffStrip::SyncTooltipLineHeight()
     m_RmlBinder.MarkDirty("tooltip_line_px");
 }
 
-void CBuffStrip::SyncStripCenter()
+void CBuffStrip::SyncStripLeft()
 {
-    // Docked panels sit at the right edge through the dock transform, so the free area ends where
-    // the leftmost of them begins.
-    const auto dock = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::DockRight, WindowWidth, WindowHeight);
-    const float freeWidth = UI::Scaling::PositionX(dock, static_cast<float>(m_iFreeScreenWidth));
-    const float center = freeWidth * 0.5f;
+    // Native CNewUIBuffWindow::SetPos(): the strip starts at (free - 200) / 2 of the free width
+    // (640, 450, 373 or 260 units the docked panels leave, x 220/125/86/30), in its own stretched
+    // HUD space -- not centred in the docks' space, which at wide window sizes is narrower.
+    constexpr float kNativeRowWidth = 200.0f;
+    const auto hud = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    const float left = UI::Scaling::PositionX(hud, (static_cast<float>(m_iFreeScreenWidth) - kNativeRowWidth) * 0.5f);
 
     auto& model = m_RmlBinder.GetModel();
-    if (model.stripCenter == center)
+    if (model.stripLeft == left)
         return;
-    model.stripCenter = center;
-    m_RmlBinder.MarkDirty("strip_center");
+    model.stripLeft = left;
+    m_RmlBinder.MarkDirty("strip_left");
 }
 
 float CBuffStrip::GetLayerDepth()
