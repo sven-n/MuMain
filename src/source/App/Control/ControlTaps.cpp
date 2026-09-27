@@ -4,6 +4,7 @@
 #include "App/Control/ControlEvents.h"
 #include "GameLogic/Automation/Attack.h"
 #include "App/Control/ControlObjects.h"
+#include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -228,7 +229,11 @@ void RecordDisconnected(const char* reason)
 
 namespace
 {
-// A name field of a packet: not always null-terminated.
+// A name field of a packet, as UTF-8 the event can hold. The field is not
+// always null-terminated, and its bytes need not be valid UTF-8: a name cut
+// mid-character, or a server writing another code page. Decoding it the way
+// the trade window does (invalid bytes become U+FFFD) and encoding it again
+// keeps `json::dump`, which throws on invalid UTF-8, from failing.
 std::string PacketName(const char* name)
 {
     if (name == nullptr)
@@ -237,7 +242,7 @@ std::string PacketName(const char* name)
     }
     const void* end = std::memchr(name, 0, MAX_USERNAME_SIZE);
     const size_t length = end != nullptr ? static_cast<const char*>(end) - name : MAX_USERNAME_SIZE;
-    return std::string(name, length);
+    return Core::Text::ToUtf8(Core::Text::FromUtf8(std::string(name, length)).c_str());
 }
 } // namespace
 

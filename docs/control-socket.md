@@ -74,7 +74,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `ui` | the open item windows by name (`message_box` while a dialog waits for Enter or Esc), and the window pixels of named elements such as `trade.confirm` |
-| `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`; `not_open` while that window is closed |
+| `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`; `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
@@ -87,7 +87,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
 | `say` (`text`), `whisper` (`name`, `text`) | chat, including `/` commands |
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
-| `trade` (`action`, `target`) | `request` a trade with a player at most one tile away, or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
+| `trade` (`action`, `target`) | `request` a trade with another player at most one tile away (`not_allowed` otherwise), or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
 | `halt` | stop the walk or repeated attack in progress |
 
 `state` reports the scene and account on every screen, and in the world adds:
@@ -95,7 +95,9 @@ character name, class, level, experience, zen, HP/mana/SD/AG with their
 maxima, map number and name, position, alive flag, safe-zone flag, current
 target, the skills the character owns, equipment, inventory, buffs, party,
 the open trade (partner, both offers and both confirm buttons, or `null`) and
-`nearby`.
+`nearby`. An item carries `slot`, `name`, `level`, `durability`, and its
+`width` and `height` in inventory squares; one that covers several squares is
+listed once for each of them.
 
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a

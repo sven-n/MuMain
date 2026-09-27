@@ -37,6 +37,9 @@ json DescribeItem(const ITEM& item, int slot)
     described["name"] = ItemName(item);
     described["level"] = item.Level;
     described["durability"] = item.Durability;
+    // In inventory squares, so a script can tell whether an item fits somewhere.
+    described["width"] = ItemAttribute[item.Type].Width;
+    described["height"] = ItemAttribute[item.Type].Height;
     return described;
 }
 
