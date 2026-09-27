@@ -8,7 +8,9 @@
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "UI/Legacy/UIControls.h"
 
+#include "MuGitCommit.h"
 #include "json.hpp"
 
 #include <algorithm>
@@ -50,9 +52,10 @@ constexpr double MaxWaitForSeconds = 3600.0;
 // small enough that the cast to `float` is exact.
 constexpr double MaxWindowPixel = 100000.0;
 
-// An injected key or click spans three rendered frames; the allowance
-// covers a client that renders slowly without letting a caller hang.
-constexpr std::chrono::milliseconds SyntheticInputDeadline{5000};
+// An injected click spans about seven rendered frames until it answers (idle,
+// two hover frames, press, held, release, idle), a key three. The allowance
+// covers a client drawing a frame every two seconds without letting a caller hang.
+constexpr std::chrono::milliseconds SyntheticInputDeadline{15000};
 
 // One recorded event as the protocol reports it.
 json EventObject(const App::Control::Events::Record& record)
@@ -411,6 +414,10 @@ std::string Ping(const Request& request, std::unique_ptr<Act>&)
 {
     json result;
     result["build"] = BuildIdentifier();
+    // The git commit the client was built from; `commit_changed` when tracked
+    // files differed from it, so the client is not exactly that commit.
+    result["commit"] = MU_GIT_COMMIT;
+    result["commit_changed"] = MU_GIT_COMMIT_CHANGED != 0;
     result["scene"] = CurrentSceneName();
     return EncodeResult(request.EncodedId(), result.dump());
 }
@@ -538,8 +545,15 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
         targetPath = ResolveScreenshotPath(requestedPath).wstring();
     }
 
+    int quality = BestScreenshotQuality;
+    if (request.Has("quality") &&
+        (!request.GetInt("quality", quality) || quality < 1 || quality > BestScreenshotQuality))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`quality` is the JPEG quality, 1 to 100");
+    }
+
     auto state = std::make_shared<ScreenshotState>();
-    if (!RequestScriptedScreenshot(targetPath,
+    if (!RequestScriptedScreenshot(targetPath, quality,
                                    [state](const ScreenshotOutcome& outcome)
                                    {
                                        state->outcome = outcome;
@@ -551,6 +565,29 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
 
     act = std::make_unique<ScreenshotAct>(std::move(state));
     return {};
+}
+
+std::string Type(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string text;
+    if (!request.GetString("text", text) || text.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`type` needs `text`");
+    }
+
+    // What SDL's text-input event does with committed characters
+    // (FeedPortableTextInput in Winmain.cpp): the field with the focus takes
+    // them, as if they were typed.
+    CUITextInputBox* field = CUITextInputBox::GetFocusedPortable();
+    if (field == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::NotOpen, "no text field has the focus");
+    }
+    field->OnTextInput(Core::Text::FromUtf8(text).c_str());
+
+    json result;
+    result["text"] = text;
+    return EncodeResult(request.EncodedId(), result.dump());
 }
 
 std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)

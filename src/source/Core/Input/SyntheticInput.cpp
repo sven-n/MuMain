@@ -46,15 +46,24 @@ enum class Kind : std::uint8_t
 enum class Stage : std::uint8_t
 {
     Idle,
+    // A click's pointer rests on its target before the press, as a real
+    // mouse does: an item grid only picks up an item it saw hovered.
+    Hovering,
     Pressed,
     Held,
     Released,
 };
 
+// Frames a click hovers before the press. An item grid handles the mouse
+// before it updates the square under the pointer, so it sees the hover in the
+// second frame.
+constexpr int ClickHoverFrames = 2;
+
 struct Injection
 {
     Kind kind = Kind::None;
     Stage stage = Stage::Idle;
+    int hoverFramesLeft = 0;
     int virtualKey = 0;
     float windowX = 0.0f;
     float windowY = 0.0f;
@@ -195,6 +204,15 @@ void AdvanceClick()
 {
     switch (g_injection.stage)
     {
+    case Stage::Hovering:
+        ApplyPointerPosition();
+        if (--g_injection.hoverFramesLeft > 0)
+        {
+            return;
+        }
+        ApplyButtonDown();
+        g_injection.stage = Stage::Pressed;
+        return;
     case Stage::Pressed:
         // Reasserted every frame the click is held: SDL events are pumped
         // between frames, so a real pointer movement would otherwise drag
@@ -333,8 +351,8 @@ void BeginFrame()
         if (g_injection.stage == Stage::Idle)
         {
             ApplyPointerPosition();
-            ApplyButtonDown();
-            g_injection.stage = Stage::Pressed;
+            g_injection.stage = Stage::Hovering;
+            g_injection.hoverFramesLeft = ClickHoverFrames;
             return;
         }
         AdvanceClick();

@@ -256,12 +256,17 @@ static ScreenshotCaptureState g_screenshotCapture;
 // Set while a scripted capture (control socket) is pending; a human's Print
 // Screen leaves it empty and behaves exactly as before.
 static ScreenshotCompletion g_screenshotCompletion;
+// JPEG quality of the pending capture.
+static int g_screenshotQuality = BestScreenshotQuality;
 
 // The readback is only ready on a later frame than the one that asked for it,
 // and a request may arrive either before or after this frame's consume pass
 // (Print Screen comes from the scene update, a scripted capture from the
-// control socket's poll). Give the renderer a few frames before giving up.
-constexpr int MaxScreenshotConsumeAttempts = 3;
+// control socket's poll). A frame the renderer skips (no swapchain image: a
+// minimized window, or too many frames in flight) delivers nothing and leaves
+// the request for the next one, so the wait allows for a few skipped frames:
+// about a second at 60 frames per second.
+constexpr int MaxScreenshotConsumeAttempts = 60;
 static int g_screenshotConsumeAttempts = 0;
 
 static bool PrepareJpegPixels(mu::FramePixels& pixels)
@@ -314,6 +319,9 @@ static void ConsumeScreenshot()
             return;
         }
 
+        // The request may still be pending in the renderer; drop it, or it
+        // would block the next capture.
+        mu::GetRenderer().CancelFramePixels();
         g_screenshotCapture.Clear();
         ReportScreenshotOutcome(false, fileName, 0, 0);
         return;
@@ -329,7 +337,7 @@ static void ConsumeScreenshot()
     const int width = static_cast<int>(pixels.width);
     const int height = static_cast<int>(pixels.height);
     std::wstring writtenName = fileName;
-    const bool saved = WriteJpeg(writtenName.data(), width, height, pixels.rgb.data(), 100);
+    const bool saved = WriteJpeg(writtenName.data(), width, height, pixels.rgb.data(), g_screenshotQuality);
 
     // A scripted capture has no message: the system log belongs to the player's
     // own Print Screen, and so does the rolling screenshot counter.
@@ -362,8 +370,7 @@ static bool BeginScreenshotCapture(const std::wstring& fileName, const std::wstr
 
     // A previous capture may have given up waiting for its pixels; they can
     // still arrive, and this capture must not report the earlier frame.
-    mu::FramePixels stale;
-    (void)mu::GetRenderer().ConsumeFramePixels(stale);
+    mu::GetRenderer().CancelFramePixels();
 
     if (!mu::GetRenderer().RequestFramePixels())
     {
@@ -379,7 +386,10 @@ static void RequestScreenshot()
     wchar_t screenshotText[256];
     GenerateScreenshotFilename(GrabFileName, screenshotText);
 
-    (void)BeginScreenshotCapture(GrabFileName, screenshotText);
+    if (BeginScreenshotCapture(GrabFileName, screenshotText))
+    {
+        g_screenshotQuality = BestScreenshotQuality;
+    }
 }
 
 void CancelScriptedScreenshot()
@@ -391,9 +401,10 @@ void CancelScriptedScreenshot()
 
     g_screenshotCapture.Clear();
     g_screenshotCompletion = nullptr;
+    mu::GetRenderer().CancelFramePixels();
 }
 
-bool RequestScriptedScreenshot(const std::wstring& path, ScreenshotCompletion onComplete)
+bool RequestScriptedScreenshot(const std::wstring& path, int quality, ScreenshotCompletion onComplete)
 {
     if (g_screenshotCapture.HasPending())
     {
@@ -411,6 +422,7 @@ bool RequestScriptedScreenshot(const std::wstring& path, ScreenshotCompletion on
         return false;
     }
 
+    g_screenshotQuality = std::clamp(quality, 1, BestScreenshotQuality);
     g_screenshotCompletion = std::move(onComplete);
     return true;
 }

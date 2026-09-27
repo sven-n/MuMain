@@ -83,9 +83,9 @@ TEST_CASE("Control protocol treats a blank line as no request [network][control-
 TEST_CASE("Control protocol serves the documented command vocabulary [network][control-protocol]")
 {
     const std::vector<std::string> expected = {
-        "ping",   "scene", "state",   "nearby", "events",   "wait-for", "screenshot", "login",  "select-char",
-        "logout", "quit",  "move",    "warp",   "teleport", "attack",   "skill",      "pickup", "use",
-        "equip",  "say",   "whisper", "party",  "halt",     "hotkey",   "click-ui",
+        "ping",    "scene", "state", "nearby",   "events",   "wait-for", "screenshot", "login", "select-char", "logout",
+        "quit",    "move",  "warp",  "teleport", "attack",   "skill",    "pickup",     "use",   "equip",       "say",
+        "whisper", "party", "halt",  "hotkey",   "click-ui", "ui",       "slot-pixel", "trade", "type",
     };
 
     for (const std::string& command : expected)
@@ -129,7 +129,7 @@ TEST_CASE("Control protocol names every error code [network][control-protocol]")
         ErrorCode::NoSuchCharacter,  ErrorCode::NoSuchSkill,    ErrorCode::NotInView,    ErrorCode::NotAttackable,
         ErrorCode::NoPath,           ErrorCode::NotAllowed,     ErrorCode::WarpRefused,  ErrorCode::SkillRefused,
         ErrorCode::InsufficientMana, ErrorCode::NotPickable,    ErrorCode::EmptySlot,    ErrorCode::MoveRefused,
-        ErrorCode::Failed,
+        ErrorCode::NotOpen,          ErrorCode::Failed,
     };
 
     for (const ErrorCode code : codes)

@@ -66,6 +66,15 @@ void RecordPartyChange(const char* change, const wchar_t* name);
 
 // The server closed the session.
 void RecordDisconnected(const char* reason);
+
+// Trade packets: an incoming request (`name` as the packet carries it, UTF-8,
+// at most MAX_USERNAME_SIZE bytes), the answer to a request, the partner's
+// confirm button and the end of the trade, with the codes the server sends.
+// `asked`: the client shows the request's dialog; false when it refused by itself.
+void RecordTradeRequested(const char* name, bool asked);
+void RecordTradeAnswer(int answer, const char* name);
+void RecordTradePartnerConfirm(int state);
+void RecordTradeClosed(int result);
 } // namespace App::Control::Events
 
 #else
@@ -89,6 +98,10 @@ inline void RecordViewEnterKey(int) {}
 inline void RecordViewLeaveKey(int) {}
 inline void RecordPartyChange(const char*, const wchar_t*) {}
 inline void RecordDisconnected(const char*) {}
+inline void RecordTradeRequested(const char*, bool) {}
+inline void RecordTradeAnswer(int, const char*) {}
+inline void RecordTradePartnerConfirm(int) {}
+inline void RecordTradeClosed(int) {}
 } // namespace App::Control::Events
 
 #endif // MU_ENABLE_CONTROL_SOCKET

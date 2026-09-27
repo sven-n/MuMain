@@ -4,6 +4,7 @@
 #include "App/Control/ControlEvents.h"
 #include "GameLogic/Automation/Attack.h"
 #include "App/Control/ControlObjects.h"
+#include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -224,5 +225,53 @@ void RecordPartyChange(const char* change, const wchar_t* name)
 void RecordDisconnected(const char* reason)
 {
     RecordDisconnect(reason != nullptr ? reason : "the server closed the connection");
+}
+
+namespace
+{
+// A name field of a packet, as UTF-8 the event can hold. The field is not
+// always null-terminated, and its bytes need not be valid UTF-8: a name cut
+// mid-character, or a server writing another code page. Decoding it the way
+// the trade window does (invalid bytes become U+FFFD) and encoding it again
+// keeps `json::dump`, which throws on invalid UTF-8, from failing.
+std::string PacketName(const char* name)
+{
+    if (name == nullptr)
+    {
+        return {};
+    }
+    const void* end = std::memchr(name, 0, MAX_USERNAME_SIZE);
+    const size_t length = end != nullptr ? static_cast<const char*>(end) - name : MAX_USERNAME_SIZE;
+    return Core::Text::ToUtf8(Core::Text::FromUtf8(std::string(name, length)).c_str());
+}
+} // namespace
+
+void RecordTradeRequested(const char* name, bool asked)
+{
+    // A window that forbids trading was open: the client said no without a dialog.
+    RecordTrade(asked ? "requested" : "refused", PacketName(name),
+                asked ? "" : "the client refused it: a window that forbids trading is open");
+}
+
+void RecordTradeAnswer(int answer, const char* name)
+{
+    // 0: the partner refused, 1: the trade window opens, 2: no trade now.
+    constexpr std::string_view Answers[] = {"refused", "opened", "unavailable"};
+    const std::string_view change = answer >= 0 && answer <= 2 ? Answers[answer] : "unavailable";
+    RecordTrade(change, answer == 1 ? PacketName(name) : std::string{}, "");
+}
+
+void RecordTradePartnerConfirm(int state)
+{
+    // 0: unchecked, 1: checked, 2: both reset because an offer changed.
+    constexpr std::string_view States[] = {"unchecked", "checked", "reset"};
+    RecordTrade("partner_confirm", "", state >= 0 && state <= 2 ? States[state] : "unknown");
+}
+
+void RecordTradeClosed(int result)
+{
+    constexpr std::string_view Results[] = {"cancelled", "completed", "inventory_full", "request_cancelled",
+                                            "reinforced_item"};
+    RecordTrade("closed", "", result >= 0 && result <= 4 ? Results[result] : "unknown");
 }
 } // namespace App::Control::Events

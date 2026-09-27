@@ -117,6 +117,44 @@ namespace SEASON3B
         void ProcessClosing();
 
         void GetYourID(wchar_t* pszYourID);
+        int GetYourLevel() const
+        {
+            return m_nYourLevel;
+        }
+        bool IsMyConfirmed() const
+        {
+            return m_bMyConfirm;
+        }
+        bool IsYourConfirmed() const
+        {
+            return m_bYourConfirm;
+        }
+        // My confirm button in window-local coordinates.
+        RECT GetMyConfirmRect() const
+        {
+            return {m_posMyConfirm.x, m_posMyConfirm.y, m_posMyConfirm.x + CONFIRM_WIDTH,
+                    m_posMyConfirm.y + CONFIRM_HEIGHT};
+        }
+        // The zen input button in window-local coordinates.
+        RECT GetZenButtonRect()
+        {
+            const POINT& position = m_abtn[BTN_ZEN_INPUT].GetPos();
+            const POINT& size = m_abtn[BTN_ZEN_INPUT].GetSize();
+            return {position.x, position.y, position.x + size.x, position.y + size.y};
+        }
+        int GetMyTradeGold() const
+        {
+            return m_nMyTradeGold;
+        }
+        // Frames until my confirm button takes clicks again after an offer changed.
+        int GetMyTradeWait() const
+        {
+            return m_nMyTradeWait;
+        }
+        int GetYourTradeGold() const
+        {
+            return m_nYourTradeGold;
+        }
         void SetYourTradeGold(int nGold) { m_nYourTradeGold = nGold; }
 
         void SendRequestMyGoldInput(int nInputGold);
@@ -127,7 +165,9 @@ namespace SEASON3B
         // into the inventory.
         bool ProcessMyTradeItemAutoMoveToInventory();
 
-        void ProcessToReceiveTradeRequest(char* pbyYourID);
+        // Shows the request's dialog; false when a window that forbids trading is
+        // open and the client has answered no by itself.
+        bool ProcessToReceiveTradeRequest(char* pbyYourID);
         void ProcessToReceiveTradeResult(LPPTRADE pTradeData);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
         void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket);

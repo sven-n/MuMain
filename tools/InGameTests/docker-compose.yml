@@ -1,0 +1,33 @@
+# The server for the in-game tests (docs/in-game-tests.md): OpenMU in demo mode.
+#
+# -demo keeps the data in memory and creates OpenMU's test data on every start,
+# so each test run starts from the same accounts, characters and items.
+# Recreating the container resets it; the InGameTests build target does that
+# before every run.
+#
+# Only the game server of channel 1 is published, on host port 56901: the test
+# clients log in to it directly, without the connect server. Nothing else
+# collides with a local OpenMU on its default ports, so both can run at once.
+#   podman compose -f tools/InGameTests/docker-compose.yml up -d --force-recreate
+#   podman compose -f tools/InGameTests/docker-compose.yml down
+# (docker compose works the same way.)
+name: mumain-in-game-tests
+
+services:
+  openmu:
+    # Pinned: the scenarios depend on the exact test data (accounts, their
+    # characters and items). Move to a newer release on purpose, after the
+    # tests pass with it.
+    image: docker.io/munique/openmu:0.9.10@sha256:681c52b304a44e70d26003e85193e167353d28eeee75cf1a49e8eae2add41ded
+    container_name: mumain-in-game-tests-openmu
+    # What the image is, for the report: the image has no such labels itself.
+    # Keep them with the pinned image above.
+    labels:
+      org.opencontainers.image.version: "0.9.10"
+      org.opencontainers.image.revision: "d4ca915c442a56e267e3f01638822f367fa81082"
+      org.opencontainers.image.source: "https://github.com/MUnique/OpenMU"
+    # The image starts with -autostart; -demo is added to it.
+    command: ["-demo"]
+    ports:
+      # Loopback only: the test data's accounts have public passwords.
+      - "127.0.0.1:56901:55901"

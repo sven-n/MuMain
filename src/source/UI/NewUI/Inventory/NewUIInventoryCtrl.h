@@ -189,6 +189,12 @@ namespace SEASON3B
         bool Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
         void Release();
 
+        // The slot number of the grid's first square (e.g. 12 for the inventory).
+        int GetIndexOffset() const
+        {
+            return m_nIndexOffset;
+        }
+
         bool AddItem(int iLinealPos, std::span<const BYTE> pbyItemPacket);
         bool AddItem(int iColumnX, int iRowY, std::span<const BYTE> pbyItemPacket);
         bool AddItem(int iColumnX, int iRowY, ITEM* pItem);

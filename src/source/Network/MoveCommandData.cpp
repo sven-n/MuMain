@@ -43,7 +43,8 @@ bool CMoveCommandData::Create(const std::wstring& filename)
 
     for (int i = 0; i < count; i++)
     {
-        auto* pMoveInfoData = new MOVEINFODATA;
+        // Value-initialised: the flags stay false until the move window sets them.
+        auto* pMoveInfoData = new MOVEINFODATA{};
         MOVEREQINFO_FILE moveReqInfo{};
         fread(&moveReqInfo, sizeof moveReqInfo, 1, fp);
 

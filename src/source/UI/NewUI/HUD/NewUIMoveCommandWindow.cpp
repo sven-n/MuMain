@@ -704,6 +704,9 @@ bool CNewUIMoveCommandWindow::CanMoveToMap(const wchar_t* pszMapName)
         }
     }
 
+    // The strife flags are otherwise only set when the window opens, and a
+    // query may come before it ever did.
+    SetStrifeMap();
     SettingCanMoveMap();
 
     for (auto* moveInfo : m_listMoveInfoData)

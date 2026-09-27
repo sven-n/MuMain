@@ -1556,10 +1556,12 @@ public:
         // If swapchain texture is null, window is minimized/occluded — skip frame.
         if (!s_swapchainTexture)
         {
-            // Debug-level only — this happens normally when window is minimized.
+            // Debug-level only — this happens normally when window is minimized,
+            // and now and then for a visible window while too many frames are in
+            // flight. A requested readback stays pending for the next frame that
+            // renders; its consumer decides how long to wait.
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
-            FailPendingFrameReadback();
             return;
         }
 
@@ -1590,13 +1592,14 @@ public:
     {
         if (!s_frameActive)
         {
-            // Frame was not started (minimized window or error).
+            // Frame was not started (minimized window or error). BeginFrame
+            // already failed a pending readback on an error; a skipped frame
+            // keeps it for the next one.
             if (s_cmdBuf)
             {
                 SDL_CancelGPUCommandBuffer(s_cmdBuf);
                 s_cmdBuf = nullptr;
             }
-            FailPendingFrameReadback();
             return;
         }
         s_frameActive = false;
@@ -2032,6 +2035,12 @@ public:
 
         pixels = std::move(completed);
         return true;
+    }
+
+    void CancelFramePixels() override
+    {
+        s_frameReadbackState.Reset();
+        ReleaseFrameReadbackTexture();
     }
 
     // -----------------------------------------------------------------------

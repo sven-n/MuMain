@@ -84,6 +84,14 @@ option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 # not exist in the binary (enforced by the control_socket_leak test).
 option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (never for player builds)" OFF)
 
+# In-game tests (docs/in-game-tests.md): publishes the tester, which plays test
+# scenarios with the client through the control socket, next to Main, and adds
+# the InGameTests / InGameTestsGui targets. Developers only, like the socket.
+option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (developer builds with the control socket)" OFF)
+if(ENABLE_IN_GAME_TESTS AND NOT ENABLE_CONTROL_SOCKET)
+  message(FATAL_ERROR "ENABLE_IN_GAME_TESTS needs ENABLE_CONTROL_SOCKET: the tester drives the client through it")
+endif()
+
 # ---------------------------------------------------------------------------
 # Engine/game code -> static library (libMuClient); MuMain -> thin executable.
 #
@@ -185,6 +193,21 @@ endif()
 # attached PUBLIC below so both the Main executable and any test binary that
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
+
+# The control socket's `ping` names the git commit the client was built from,
+# so a test report says which client it tested (cmake/WriteGitCommit.cmake).
+# Checked on every build; the header only changes with the commit.
+if(ENABLE_CONTROL_SOCKET)
+  set(MU_GIT_COMMIT_HEADER "${CMAKE_BINARY_DIR}/Generated/MuGitCommit.h")
+  add_custom_target(GitCommitHeader
+    COMMAND "${CMAKE_COMMAND}" "-DSOURCE_DIR=${CMAKE_SOURCE_DIR}" "-DOUTPUT=${MU_GIT_COMMIT_HEADER}"
+            -P "${CMAKE_SOURCE_DIR}/cmake/WriteGitCommit.cmake"
+    BYPRODUCTS "${MU_GIT_COMMIT_HEADER}"
+    COMMENT "Recording the git commit for the control socket"
+    VERBATIM)
+  add_dependencies(MuClient GitCommitHeader)
+  target_include_directories(MuClient PRIVATE "${CMAKE_BINARY_DIR}/Generated")
+endif()
 target_compile_features(MuClient PUBLIC cxx_std_20)
 if(MSVC)
   target_compile_options(MuClient PRIVATE /utf-8 /we4828)
@@ -839,6 +862,106 @@ if (DOTNET_EXECUTABLE)
     add_dependencies(MuClient ResxGen)
     target_sources(MuClient PRIVATE ${RESX_GEN_SOURCES})
     target_include_directories(MuClient PUBLIC "${CMAKE_BINARY_DIR}/Generated")
+  endif()
+
+  # The in-game tester (docs/in-game-tests.md): published as one file next to
+  # Main (next to Main.app on macOS), so it finds the client without being told.
+  # It needs the .NET runtime, which building the client needs anyway. The
+  # InGameTests target plays the scenarios, InGameTestsGui opens its window:
+  #   cmake --build <build dir> --config Release --target InGameTests
+  if (ENABLE_IN_GAME_TESTS)
+    set(MU_IN_GAME_TEST_SERVER "127.0.0.1:56901" CACHE STRING
+      "Game server the InGameTests target logs the clients in to, host:port; default the test server")
+    option(MU_IN_GAME_TEST_FRESH_SERVER
+      "Recreate the test server (tools/InGameTests/docker-compose.yml) before every InGameTests run, so it starts from fresh test data"
+      ON)
+    set(MU_IN_GAME_TEST_SCENARIOS "" CACHE STRING
+      "In-game test scenarios the InGameTests target runs, e.g. trade;icarus-flying-item-take-off; empty runs all")
+    set(MU_IN_GAME_TEST_STEP_DELAY "0" CACHE STRING
+      "Milliseconds the InGameTests target pauses after every client action, to watch a run; 0 runs at full speed")
+    set(MU_IN_GAME_TEST_JPEG_QUALITY "70" CACHE STRING
+      "JPEG quality (1 to 100) of the InGameTests target's step screenshots; lower makes the report smaller")
+
+    set(IN_GAME_TESTS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests")
+    # Next to Main, which lands in the default runtime folder (next to Main.app
+    # on macOS): known without the target, so the file itself is the output and
+    # a deleted tester is published again.
+    get_property(IN_GAME_TESTS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if (IN_GAME_TESTS_MULTI_CONFIG)
+      set(IN_GAME_TESTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
+    else()
+      set(IN_GAME_TESTS_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+    endif()
+    # The tester runs on the machine that runs dotnet, on its runtime
+    # (--use-current-runtime): an x86 client needs no x86 .NET for it.
+    if (DOTNET_EXECUTABLE MATCHES "\\.exe$")
+      set(IN_GAME_TESTS_NAME "InGameTests.exe")
+    else()
+      set(IN_GAME_TESTS_NAME "InGameTests")
+    endif()
+    set(IN_GAME_TESTS_EXE "${IN_GAME_TESTS_DIR}/${IN_GAME_TESTS_NAME}")
+    set(IN_GAME_TESTS_PUBLISH "${CMAKE_BINARY_DIR}/in-game-tests-publish")
+    file(GLOB_RECURSE IN_GAME_TESTS_SOURCES CONFIGURE_DEPENDS
+      "${IN_GAME_TESTS_ROOT}/*.cs" "${IN_GAME_TESTS_ROOT}/*.axaml")
+    list(FILTER IN_GAME_TESTS_SOURCES EXCLUDE REGEX "[/\\](bin|obj)[/\\]")
+    mu_native_path("${IN_GAME_TESTS_ROOT}/InGameTests.csproj" IN_GAME_TESTS_PROJ_NATIVE)
+    mu_native_path("${IN_GAME_TESTS_PUBLISH}" IN_GAME_TESTS_PUBLISH_NATIVE)
+
+    # Only when the tester's sources change; a client build alone does not
+    # publish it again. Published into the build folder first, whose path
+    # dotnet.exe understands under WSL too, then copied next to Main.
+    add_custom_command(
+      OUTPUT "${IN_GAME_TESTS_EXE}"
+      COMMAND ${CMAKE_COMMAND} -E env
+              --unset=Platform
+              "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+              "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+              "${DOTNET_EXECUTABLE}" publish "${IN_GAME_TESTS_PROJ_NATIVE}" -c Release --use-current-runtime
+              -o "${IN_GAME_TESTS_PUBLISH_NATIVE}" --nologo
+      COMMAND ${CMAKE_COMMAND} -E copy "${IN_GAME_TESTS_PUBLISH}/${IN_GAME_TESTS_NAME}" "${IN_GAME_TESTS_EXE}"
+      DEPENDS ${IN_GAME_TESTS_SOURCES} "${IN_GAME_TESTS_ROOT}/InGameTests.csproj" "${IN_GAME_TESTS_ROOT}/docker-compose.yml"
+      COMMENT "Publishing the in-game tester next to Main"
+      VERBATIM
+    )
+    add_custom_target(InGameTestsTool ALL DEPENDS "${IN_GAME_TESTS_EXE}")
+    add_dependencies(InGameTestsTool Main)
+
+    # A framework-dependent tester looks for .NET in the usual places; one
+    # installed elsewhere (dotnet-install.sh) is where CMake found dotnet.
+    set(IN_GAME_TESTS_ENV "")
+    if (NOT DOTNET_EXECUTABLE MATCHES "\\.exe$")
+      get_filename_component(IN_GAME_TESTS_DOTNET "${DOTNET_EXECUTABLE}" REALPATH)
+      get_filename_component(IN_GAME_TESTS_DOTNET_ROOT "${IN_GAME_TESTS_DOTNET}" DIRECTORY)
+      # Only a folder that holds a .NET: a snap's dotnet resolves to /usr/bin/snap.
+      if (EXISTS "${IN_GAME_TESTS_DOTNET_ROOT}/host/fxr")
+        set(IN_GAME_TESTS_ENV ${CMAKE_COMMAND} -E env "DOTNET_ROOT=${IN_GAME_TESTS_DOTNET_ROOT}")
+      endif()
+    endif()
+
+    set(IN_GAME_TESTS_SERVER_ARGS --server "${MU_IN_GAME_TEST_SERVER}")
+    if (MU_IN_GAME_TEST_FRESH_SERVER)
+      list(APPEND IN_GAME_TESTS_SERVER_ARGS --fresh-server)
+    endif()
+    set(IN_GAME_TESTS_ARGS -t "${MU_IN_GAME_TEST_STEP_DELAY}" -q "${MU_IN_GAME_TEST_JPEG_QUALITY}" ${IN_GAME_TESTS_SERVER_ARGS})
+    foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
+      list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
+    endforeach()
+
+    add_custom_target(InGameTests
+      COMMAND ${IN_GAME_TESTS_ENV} "${IN_GAME_TESTS_EXE}" --client "$<TARGET_FILE:Main>" ${IN_GAME_TESTS_ARGS}
+      COMMENT "In-game tests against ${MU_IN_GAME_TEST_SERVER}"
+      USES_TERMINAL
+      VERBATIM
+    )
+    add_dependencies(InGameTests InGameTestsTool)
+
+    add_custom_target(InGameTestsGui
+      COMMAND ${IN_GAME_TESTS_ENV} "${IN_GAME_TESTS_EXE}" --gui --client "$<TARGET_FILE:Main>" ${IN_GAME_TESTS_SERVER_ARGS}
+      COMMENT "In-game test window"
+      USES_TERMINAL
+      VERBATIM
+    )
+    add_dependencies(InGameTestsGui InGameTestsTool)
   endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
