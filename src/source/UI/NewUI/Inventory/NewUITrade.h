@@ -135,6 +135,21 @@ namespace SEASON3B
             return {m_posMyConfirm.x, m_posMyConfirm.y, m_posMyConfirm.x + CONFIRM_WIDTH,
                     m_posMyConfirm.y + CONFIRM_HEIGHT};
         }
+        // The zen input button in window-local coordinates.
+        RECT GetZenButtonRect()
+        {
+            const POINT& position = m_abtn[BTN_ZEN_INPUT].GetPos();
+            const POINT& size = m_abtn[BTN_ZEN_INPUT].GetSize();
+            return {position.x, position.y, position.x + size.x, position.y + size.y};
+        }
+        int GetMyTradeGold() const
+        {
+            return m_nMyTradeGold;
+        }
+        int GetYourTradeGold() const
+        {
+            return m_nYourTradeGold;
+        }
         void SetYourTradeGold(int nGold) { m_nYourTradeGold = nGold; }
 
         void SendRequestMyGoldInput(int nInputGold);

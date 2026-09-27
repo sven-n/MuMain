@@ -72,6 +72,7 @@ json Elements()
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
     {
         elements["trade.confirm"] = WindowRect(*g_pTrade, g_pTrade->GetMyConfirmRect());
+        elements["trade.zen"] = WindowRect(*g_pTrade, g_pTrade->GetZenButtonRect());
     }
     return elements;
 }

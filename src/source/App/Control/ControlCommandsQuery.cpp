@@ -8,6 +8,7 @@
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "UI/Legacy/UIControls.h"
 
 #include "json.hpp"
 
@@ -558,6 +559,29 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
 
     act = std::make_unique<ScreenshotAct>(std::move(state));
     return {};
+}
+
+std::string Type(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string text;
+    if (!request.GetString("text", text) || text.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`type` needs `text`");
+    }
+
+    // What SDL's text-input event does with committed characters
+    // (FeedPortableTextInput in Winmain.cpp): the field with the focus takes
+    // them, as if they were typed.
+    CUITextInputBox* field = CUITextInputBox::GetFocusedPortable();
+    if (field == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::NotOpen, "no text field has the focus");
+    }
+    field->OnTextInput(Core::Text::FromUtf8(text).c_str());
+
+    json result;
+    result["text"] = text;
+    return EncodeResult(request.EncodedId(), result.dump());
 }
 
 std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)

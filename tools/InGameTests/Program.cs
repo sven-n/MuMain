@@ -25,6 +25,11 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // The log and the report are English: "123,456 zen", "12.5 s", whatever the
+        // machine's language.
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
         var options = RunnerOptions.Parse(args, out var usageError);
         if (options is null)
         {

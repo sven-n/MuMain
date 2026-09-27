@@ -202,7 +202,7 @@ them under these categories.
 
 | Category | Scenario | Checks |
 |---|---|---|
-| Player Interactions | `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and both inventories show that the jewel changed owner: the buyer has one more, the seller one fewer (sven-n/MuMain#588). |
+| Player Interactions | `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, the buyer types an amount of zen into the trade's zen box, both press the confirm button, and both inventories show that jewel and zen changed owner: the buyer has one more jewel and that much less zen, the seller one jewel fewer and that much more zen (sven-n/MuMain#588). |
 | Game Behaviour | `icarus-flying-item-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged. Then the other way round: with the wings back on, right-clicking the Fenrir takes it off, and the wings, now the last flying item, stay on both ways (sven-n/MuMain#631). Both are put back on afterwards. |
 
 ## Writing a scenario

@@ -38,6 +38,7 @@ const std::vector<CommandEntry>& CommandTable()
         {"wait-for", SceneRequirement::Any, &Commands::WaitFor},
         {"screenshot", SceneRequirement::Any, &Commands::Screenshot},
         {"hotkey", SceneRequirement::Any, &Commands::Hotkey},
+        {"type", SceneRequirement::Any, &Commands::Type},
         {"click-ui", SceneRequirement::Any, &Commands::ClickUi},
         {"ui", SceneRequirement::World, &Commands::Ui},
         {"slot-pixel", SceneRequirement::World, &Commands::SlotPixel},

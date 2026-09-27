@@ -21,6 +21,9 @@ internal sealed class TradeScenario : Scenario
     private const int MeetingY = 128;
     private const int TradeDistance = 1;
 
+    // What the buyer pays: a number that stands out in the screenshots.
+    private const int ZenOffer = 123456;
+
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
     // Walking across Lorencia's town, see WalkUpToAsync.
     private static readonly TimeSpan WalkTimeout = TimeSpan.FromSeconds(120);
@@ -29,13 +32,13 @@ internal sealed class TradeScenario : Scenario
 
     public override string Name => "trade";
 
-    public override string Description => "an item put into the trade window with clicks changes owner (#588)";
+    public override string Description => "an item put into the trade window with clicks, and zen typed into it, change owner (#588)";
 
     public override ScenarioCategory Category => ScenarioCategory.PlayerInteractions;
 
     public override IReadOnlyList<string> Roles => [Seller, Buyer];
 
-    public override int StepCount => 12;
+    public override int StepCount => 13;
 
     public override async Task RunAsync(ScenarioContext context)
     {
@@ -70,9 +73,12 @@ internal sealed class TradeScenario : Scenario
             () => WalkUpToAsync(buyer, seller, buyerCharacter.Name));
 
         var offer = await FindJewelAsync(seller);
-        // How many of the jewel each one has before the trade: the buyer may have some already.
+        // What each one has before the trade: the buyer may have such a jewel
+        // already, and the warps have cost zen.
         var sellerHadJewels = await CountAsync(seller, offer.Name);
         var buyerHadJewels = await CountAsync(buyer, offer.Name);
+        var sellerHadZen = await ZenAsync(seller);
+        var buyerHadZen = await ZenAsync(buyer);
         await context.StepAsync(
             "The seller asks the buyer for a trade",
             $"{buyerCharacter.Name} gets the request: a dialog asks whether to trade with {sellerCharacter.Name}.",
@@ -95,6 +101,25 @@ internal sealed class TradeScenario : Scenario
                     $"the buyer does not see '{offer.Name}' in the seller's offer");
             });
         await context.StepAsync(
+            $"The buyer offers {ZenOffer:N0} zen",
+            $"The buyer clicks the zen button of the trade window, types {ZenOffer} into the box that opens and confirms with "
+            + $"Enter. The seller sees {ZenOffer:N0} zen in the buyer's half of the trade window.",
+            async () =>
+            {
+                await buyer.ClickElementAsync("trade.zen");
+                await Expect.EventuallyAsync(
+                    async () => (await buyer.OpenWindowsAsync()).Contains("message_box"),
+                    ServerAnswer,
+                    "the zen box does not open");
+                await buyer.SendAsync("type", new { text = ZenOffer.ToString(System.Globalization.CultureInfo.InvariantCulture) });
+                await buyer.SendAsync("hotkey", new { key = "enter" });
+                var seen = 0;
+                await Expect.EventuallyAsync(
+                    async () => (seen = TradeZen(await seller.StateAsync(), "partner_zen")) == ZenOffer,
+                    ServerAnswer,
+                    () => $"the seller sees {seen} zen in the buyer's offer, not {ZenOffer}");
+            });
+        await context.StepAsync(
             "The seller presses the confirm button",
             "The seller's confirm button stays pressed. Right after the offer changed it ignores clicks for a moment, so it is "
             + "pressed until it counts.",
@@ -111,8 +136,9 @@ internal sealed class TradeScenario : Scenario
             });
         await context.StepAsync(
             "Both look into their inventories",
-            $"'{offer.Name}' has changed owner: {buyerCharacter.Name} has one more ({buyerHadJewels + 1} now), and "
-            + $"{sellerCharacter.Name} one fewer ({sellerHadJewels - 1} left), with slot {offer.Slot} empty.",
+            $"'{offer.Name}' and the zen have changed owner: {buyerCharacter.Name} has one more jewel ({buyerHadJewels + 1} now) "
+            + $"and {ZenOffer:N0} zen less ({buyerHadZen - ZenOffer:N0}); {sellerCharacter.Name} one jewel fewer "
+            + $"({sellerHadJewels - 1} left, slot {offer.Slot} empty) and {ZenOffer:N0} zen more ({sellerHadZen + ZenOffer:N0}).",
             async () =>
             {
                 await seller.OpenInventoryAsync();
@@ -130,8 +156,24 @@ internal sealed class TradeScenario : Scenario
                     () => $"the seller has {sellerHas} '{offer.Name}' after the trade, not {sellerHadJewels - 1}");
                 var sellerInventory = ItemSlots.Of(await seller.StateAsync(), "inventory");
                 Expect.That(ItemSlots.At(sellerInventory, offer.Slot)?.Name != offer.Name, $"'{offer.Name}' is still in the seller's slot {offer.Slot}");
+                var buyerZen = 0L;
+                var sellerZen = 0L;
+                await Expect.EventuallyAsync(
+                    async () => (buyerZen = await ZenAsync(buyer)) == buyerHadZen - ZenOffer,
+                    ServerAnswer,
+                    () => $"the buyer has {buyerZen:N0} zen after the trade, not {buyerHadZen - ZenOffer:N0}");
+                await Expect.EventuallyAsync(
+                    async () => (sellerZen = await ZenAsync(seller)) == sellerHadZen + ZenOffer,
+                    ServerAnswer,
+                    () => $"the seller has {sellerZen:N0} zen after the trade, not {sellerHadZen + ZenOffer:N0}");
             });
     }
+
+    private static async Task<long> ZenAsync(GameClient client) => (await client.StateAsync()).GetProperty("zen").GetInt64();
+
+    // The zen of one side of the open trade; 0 without a trade.
+    private static int TradeZen(System.Text.Json.JsonElement state, string side)
+        => state.GetProperty("trade") is { ValueKind: System.Text.Json.JsonValueKind.Object } trade ? trade.GetProperty(side).GetInt32() : 0;
 
     // How many items named <paramref name="name"/> the inventory holds. `state`
     // lists an item under every square it covers, so the squares are divided by

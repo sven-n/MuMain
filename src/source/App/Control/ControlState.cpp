@@ -77,6 +77,8 @@ json TradeState()
     trade["partner_level"] = g_pTrade->GetYourLevel();
     trade["my_items"] = TradeGridItems(g_pTrade->GetMyInvenCtrl());
     trade["partner_items"] = TradeGridItems(g_pTrade->GetYourInvenCtrl());
+    trade["my_zen"] = g_pTrade->GetMyTradeGold();
+    trade["partner_zen"] = g_pTrade->GetYourTradeGold();
     trade["my_confirmed"] = g_pTrade->IsMyConfirmed();
     trade["partner_confirmed"] = g_pTrade->IsYourConfirmed();
     return trade;

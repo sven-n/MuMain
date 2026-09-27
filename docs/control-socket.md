@@ -73,7 +73,8 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
-| `ui` | the open item windows by name (`message_box` while a dialog waits for Enter or Esc), and the window pixels of named elements such as `trade.confirm` |
+| `type` (`text`) | type text into the text field that has the focus, as the keyboard's text input does, e.g. an amount into the trade's zen box; `not_open` when no field has the focus |
+| `ui` | the open item windows by name (`message_box` while a dialog waits for Enter or Esc), and the window pixels of named elements: `trade.confirm`, `trade.zen` |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`; `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
@@ -94,7 +95,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 character name, class, level, experience, zen, HP/mana/SD/AG with their
 maxima, map number and name, position, alive flag, safe-zone flag, current
 target, the skills the character owns, equipment, inventory, buffs, party,
-the open trade (partner, both offers and both confirm buttons, or `null`) and
+the open trade (partner, both offers with their items and zen, and both confirm buttons, or `null`) and
 `nearby`. An item carries `slot`, `name`, `level`, `durability`, and its
 `width` and `height` in inventory squares; one that covers several squares is
 listed once for each of them.
