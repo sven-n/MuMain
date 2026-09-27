@@ -1,0 +1,165 @@
+#include "stdafx.h"
+
+#include "ItemJsonCommon.h"
+
+#include <limits>
+
+namespace Data::Items::Json
+{
+namespace
+{
+bool TryParse(std::string_view text, const std::string& source, OrderedJson& root, std::vector<ItemDataIssue>& issues)
+{
+    try
+    {
+        root = OrderedJson::parse(text);
+        return true;
+    }
+    catch (const OrderedJson::parse_error& error)
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, "", std::string("invalid JSON: ") + error.what());
+        return false;
+    }
+}
+
+bool ReadFormatVersion(const OrderedJson& root, const std::string& source, int maxFormatVersion,
+                       std::vector<ItemDataIssue>& issues)
+{
+    const auto version = root.find(Keys::FormatVersion);
+    if (version == root.end() || !version->is_number_integer())
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion, "missing or not a whole number");
+        return false;
+    }
+
+    long long formatVersion = 0;
+    if (!ReadWholeNumber(*version, formatVersion) || formatVersion < 1 || formatVersion > maxFormatVersion)
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion,
+                     "version " + version->dump() + " is not supported (this client reads up to " +
+                         std::to_string(maxFormatVersion) + ")");
+        return false;
+    }
+    return true;
+}
+
+bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, std::vector<ItemDataIssue>& issues)
+{
+    const auto groupField = root.find(Keys::Group);
+    if (groupField == root.end() || !groupField->is_number_integer())
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group, "missing or not a whole number");
+        return false;
+    }
+
+    long long groupNumber = 0;
+    if (!ReadWholeNumber(*groupField, groupNumber) || groupNumber < 0 || groupNumber >= MAX_ITEM_TYPE)
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group,
+                     "must be between 0 and " + std::to_string(MAX_ITEM_TYPE - 1));
+        return false;
+    }
+    group = static_cast<int>(groupNumber);
+    return true;
+}
+
+// Appends the list entries that start at `position` and its closing ']' to
+// `result`, without the newlines and indentation between the entries (the
+// space after each comma stays). Text in quotes is kept as it is. Returns
+// the position after the ']'.
+size_t AppendListOnOneLine(const std::string& text, size_t position, std::string& result)
+{
+    bool inText = false;
+    for (; position < text.size(); ++position)
+    {
+        const char character = text[position];
+        if (inText)
+        {
+            result += character;
+            if (character == '\\' && position + 1 < text.size())
+            {
+                result += text[++position];
+            }
+            else if (character == '"')
+            {
+                inText = false;
+            }
+            continue;
+        }
+
+        if (character == ']')
+        {
+            break;
+        }
+        inText = character == '"';
+        const bool afterComma = !result.empty() && result.back() == ',';
+        if (character != '\n' && (character != ' ' || afterComma))
+        {
+            result += character;
+        }
+    }
+    result += ']';
+    return position + 1;
+}
+} // namespace
+
+bool ReadWholeNumber(const OrderedJson& json, long long& number)
+{
+    if (json.is_number_unsigned())
+    {
+        const auto value = json.get<unsigned long long>();
+        if (value > static_cast<unsigned long long>(std::numeric_limits<long long>::max()))
+        {
+            return false;
+        }
+        number = static_cast<long long>(value);
+        return true;
+    }
+    if (json.is_number_integer())
+    {
+        number = json.get<long long>();
+        return true;
+    }
+    return false;
+}
+
+void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
+                  const std::string& message)
+{
+    issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
+}
+
+bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
+                    int& group, std::vector<ItemDataIssue>& issues)
+{
+    if (!TryParse(text, source, root, issues))
+    {
+        return false;
+    }
+    if (!root.is_object())
+    {
+        AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the file must contain a JSON object");
+        return false;
+    }
+    return ReadFormatVersion(root, source, maxFormatVersion, issues) && ReadGroup(root, source, group, issues);
+}
+
+std::string PutListsOnOneLine(const std::string& text, std::string_view key)
+{
+    const std::string listStart = "\"" + std::string(key) + "\": [";
+    std::string result;
+    size_t position = 0;
+    while (true)
+    {
+        const size_t start = text.find(listStart, position);
+        if (start == std::string::npos)
+        {
+            result.append(text, position, std::string::npos);
+            return result;
+        }
+
+        result.append(text, position, start + listStart.size() - position);
+        position = AppendListOnOneLine(text, start + listStart.size(), result);
+    }
+}
+} // namespace Data::Items::Json
