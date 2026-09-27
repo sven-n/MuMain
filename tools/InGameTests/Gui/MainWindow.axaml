@@ -35,7 +35,15 @@
     <!-- All steps of the tests in the run, together -->
     <Grid x:Name="OverallPanel" DockPanel.Dock="Top" ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0,16,0,0" IsVisible="False">
       <TextBlock Text="All tests of the run" VerticalAlignment="Center" />
-      <ProgressBar x:Name="OverallProgress" Grid.Column="1" Minimum="0" Height="22" ShowProgressText="True" />
+      <Panel Grid.Column="1" VerticalAlignment="Center">
+        <ProgressBar x:Name="OverallProgress" Minimum="0" Height="22" ShowProgressText="True" />
+        <Border x:Name="OverallPassed" IsVisible="False" Background="#1F7A3F" CornerRadius="4" Padding="10,3" HorizontalAlignment="Left">
+          <TextBlock x:Name="OverallPassedText" Foreground="White" FontWeight="Bold" />
+        </Border>
+        <Border x:Name="OverallFailed" IsVisible="False" Background="#B3261E" CornerRadius="4" Padding="10,3" HorizontalAlignment="Left">
+          <TextBlock x:Name="OverallFailedText" Foreground="White" FontWeight="Bold" />
+        </Border>
+      </Panel>
     </Grid>
 
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,18,0,6">
@@ -105,8 +113,8 @@
       <Button x:Name="RunButton" Content="Run and write report" Classes="accent" />
       <Button x:Name="StopButton" Content="Stop after this test" IsEnabled="False" />
       <Button x:Name="OpenReportButton" Content="Open report" IsEnabled="False" />
-      <Button x:Name="OpenReportFolderButton" Content="Open report folder" IsEnabled="False"
-              ToolTip.Tip="Shows the report file in the file browser, e.g. to drag it into a pull request comment" />
+      <Button x:Name="OpenReportFolderButton" Content="Open report folder"
+              ToolTip.Tip="Shows the report of the last run in the file browser, e.g. to drag it into a pull request comment; before a run, the folder the reports go to" />
       <TextBlock x:Name="RunStatusText" VerticalAlignment="Center" TextWrapping="Wrap" />
     </StackPanel>
 

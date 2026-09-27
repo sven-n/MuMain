@@ -141,6 +141,7 @@ internal sealed partial class MainWindow : Window
 
         this.runRows = [.. this.rows.Where(row => row.IsChecked)];
         this.OverallPanel.IsVisible = true;
+        this.ShowOverallResult(null);
         this.UpdateOverallProgress();
 
         var log = new WindowLog(this.AppendLog);
@@ -164,6 +165,7 @@ internal sealed partial class MainWindow : Window
             var token = this.stopRequest.Token;
             var run = await Task.Run(() => TestRun.RunAsync(options, log, listener, token));
             this.reportPath = run.ReportPath;
+            this.ShowOverallResult(run);
             this.RunStatusText.Text = $"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, "
                                       + $"{run.Count(ScenarioStatus.Skipped)} skipped · report written";
         }
@@ -314,7 +316,7 @@ internal sealed partial class MainWindow : Window
         this.RunButton.IsEnabled = !running;
         this.StopButton.IsEnabled = running;
         this.OpenReportButton.IsEnabled = !running && this.reportPath is not null;
-        this.OpenReportFolderButton.IsEnabled = !running && this.reportPath is not null;
+        this.OpenReportFolderButton.IsEnabled = !running;
         this.CheckAllButton.IsEnabled = !running;
         this.ScenarioList.IsEnabled = !running;
         this.BrowseButton.IsEnabled = !running;
@@ -335,11 +337,15 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    // The file browser at the report, with the file selected where the system can.
+    // The file browser at the report, with the file selected where the system
+    // can; before a run, or when the report is gone, at the folder the reports go to.
     private void OnOpenReportFolder(object? sender, RoutedEventArgs e)
     {
         if (this.reportPath is null || !File.Exists(this.reportPath))
         {
+            var folder = Path.GetFullPath(this.startOptions.OutputFolder);
+            Directory.CreateDirectory(folder);
+            Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
             return;
         }
 
@@ -367,6 +373,26 @@ internal sealed partial class MainWindow : Window
         this.OverallProgress.Maximum = Math.Max(total, 1);
         this.OverallProgress.Value = done;
         this.OverallProgress.ProgressTextFormat = $"{done} / {total} steps · {finished} of {this.runRows.Count} tests";
+    }
+
+    // The end of a run replaces the overall bar: PASSED in green when every test
+    // of the run passed, FAILED in red when one failed; a stopped run keeps the
+    // bar. Null shows the bar again, for a new run.
+    private void ShowOverallResult(TestRunResult? run)
+    {
+        var ran = run?.Scenarios.Where(scenario => scenario.Status != ScenarioStatus.Skipped).ToList() ?? [];
+        var complete = run is not null && ran.Count == this.runRows.Count;
+        var failed = ran.Count(scenario => scenario.Failed);
+        var passed = complete && failed == 0;
+        var steps = ran.Sum(scenario => scenario.Steps.Count);
+
+        this.OverallPassed.IsVisible = passed;
+        this.OverallFailed.IsVisible = run is not null && failed > 0;
+        this.OverallProgress.IsVisible = !this.OverallPassed.IsVisible && !this.OverallFailed.IsVisible;
+        this.OverallPassedText.Text = $"PASSED · {steps} steps · {Tests(ran.Count)}";
+        this.OverallFailedText.Text = $"FAILED · {failed} of {Tests(ran.Count)}";
+
+        static string Tests(int count) => count == 1 ? "1 test" : $"{count} tests";
     }
 
     // Closing while clients run would leave them behind.

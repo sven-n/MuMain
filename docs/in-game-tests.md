@@ -119,9 +119,11 @@ lower makes the report smaller, e.g. 40 takes a run of both scenarios from
 about 8 MB to about 5 MB. A scenario row can have its own wait and its own
 quality, which then win over the fields. **Run and write report** runs the
 checked scenarios one after the other; a bar over the list shows the steps of
-all of them together, and each row its own progress and current step. **Open
-report** opens the report of the run, and **Open report folder** shows the file
-in the file browser, ready to be dragged into a pull request comment. The window remembers its
+all of them together (and at the end PASSED in green, or FAILED in red), and
+each row its own progress and current step. **Open report** opens the report of
+the run, and **Open report folder** shows the file in the file browser, ready to
+be dragged into a pull request comment (before a run: the folder the reports go
+to). The window remembers its
 settings between runs.
 
 ### The report
