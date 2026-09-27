@@ -25,6 +25,8 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        AttachToParentConsole();
+
         // The log and the report are English: "123,456 zen", "12.5 s", whatever the
         // machine's language.
         System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
@@ -54,6 +56,26 @@ internal static class Program
 
         return options.Gui ? GuiApp.Run(options, args) : RunAsync(options).GetAwaiter().GetResult();
     }
+
+    // On Windows the tester is a window program (WinExe), so starting it, e.g. by a
+    // double-click, opens no empty console window. Started from a console, it
+    // writes its log there; with its output redirected (the build target, a
+    // script) it has that already. Must run before anything touches Console.
+    private static void AttachToParentConsole()
+    {
+        const int AttachParentProcess = -1;
+        const int StdOutputHandle = -11;
+        if (OperatingSystem.IsWindows() && GetStdHandle(StdOutputHandle) == IntPtr.Zero)
+        {
+            AttachConsole(AttachParentProcess);
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool AttachConsole(int processId);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern IntPtr GetStdHandle(int standardHandle);
 
     private static async Task<int> RunAsync(RunnerOptions options)
     {

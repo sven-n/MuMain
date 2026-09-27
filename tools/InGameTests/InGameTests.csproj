@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <!-- A window program on Windows: no empty console window opens with it. Program.AttachToParentConsole
+         gives the command line its console back; elsewhere this is the same as Exe. -->
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>MuMain.Tools.InGameTests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
