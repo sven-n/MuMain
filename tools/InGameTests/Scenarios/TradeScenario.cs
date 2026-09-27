@@ -22,7 +22,7 @@ internal sealed class TradeScenario : Scenario
     private const int TradeDistance = 1;
 
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
-    // Walking across Lorencia's town, see MeetAsync.
+    // Walking across Lorencia's town, see WalkUpToAsync.
     private static readonly TimeSpan WalkTimeout = TimeSpan.FromSeconds(120);
     // After an offer changes, the confirm button waits about 150 frames.
     private static readonly TimeSpan ConfirmWait = TimeSpan.FromSeconds(20);
@@ -40,50 +40,85 @@ internal sealed class TradeScenario : Scenario
         var sellerCharacter = TestAccounts.TradeSeller;
         var buyerCharacter = TestAccounts.TradeBuyer;
 
-        context.Log("both characters enter Lorencia and meet");
-        await seller.EnterWorldAsync(sellerCharacter.Account, sellerCharacter.Password, sellerCharacter.Name);
-        await buyer.EnterWorldAsync(buyerCharacter.Account, buyerCharacter.Password, buyerCharacter.Name);
-        await MeetAsync(seller, buyer);
+        await context.StepAsync(
+            $"The seller logs in as {sellerCharacter.Name}",
+            $"{sellerCharacter.Name} enters the world; the test data puts it in the safe zone of its home map.",
+            () => seller.EnterWorldAsync(sellerCharacter.Account, sellerCharacter.Password, sellerCharacter.Name));
+        await context.StepAsync(
+            $"The buyer logs in as {buyerCharacter.Name}",
+            $"{buyerCharacter.Name} enters the world in the safe zone of its home map.",
+            () => buyer.EnterWorldAsync(buyerCharacter.Account, buyerCharacter.Password, buyerCharacter.Name));
+        await context.StepAsync(
+            "The seller warps to Lorencia",
+            $"{sellerCharacter.Name} stands in Lorencia's town. A warp to a town lands anywhere in it.",
+            () => seller.WarpAsync(LorenciaGate, LorenciaMap));
+        await context.StepAsync(
+            "The buyer warps to Lorencia",
+            $"{buyerCharacter.Name} stands in Lorencia's town, somewhere else than the seller.",
+            () => buyer.WarpAsync(LorenciaGate, LorenciaMap));
+        await context.StepAsync(
+            "The seller walks to the meeting spot",
+            $"{sellerCharacter.Name} stands at ({MeetingX},{MeetingY}), a free spot in Lorencia's town, or one tile from it.",
+            () => seller.SendAsync("move", new { x = MeetingX, y = MeetingY }, WalkTimeout));
+        await context.StepAsync(
+            "The buyer walks up to the seller",
+            $"{buyerCharacter.Name} stands on a tile next to {sellerCharacter.Name}: a trade needs the partner at most one tile away.",
+            () => WalkUpToAsync(buyer, seller));
 
         var offer = await FindJewelAsync(seller);
-        context.Log($"the seller offers '{offer.Name}' from inventory slot {offer.Slot}");
+        await context.StepAsync(
+            "The seller asks the buyer for a trade",
+            $"{buyerCharacter.Name} gets the request: a dialog asks whether to trade with {sellerCharacter.Name}.",
+            () => RequestTradeAsync(seller, buyer, buyerCharacter.Name));
+        await context.StepAsync(
+            "The buyer accepts with Enter",
+            "The trade window opens for both characters, each with the inventory next to it.",
+            () => AcceptTradeAsync(seller, buyer));
+        await context.StepAsync(
+            $"The seller puts '{offer.Name}' into the trade window with two clicks",
+            $"The first click picks '{offer.Name}' up from inventory slot {offer.Slot}, the second puts it into the first square of the "
+            + $"seller's offer. {buyerCharacter.Name} then sees it in the seller's half of the trade window (sven-n/MuMain#588).",
+            async () =>
+            {
+                await seller.OpenInventoryAsync();
+                await seller.MoveItemAsync("inventory", offer.Slot, TradeGrid, FirstTradeSlot);
+                await Expect.EventuallyAsync(
+                    async () => ItemSlots.OfTrade(await buyer.StateAsync(), "partner_items").Any(item => item.Name == offer.Name),
+                    ServerAnswer,
+                    $"the buyer does not see '{offer.Name}' in the seller's offer");
+            });
+        await context.StepAsync(
+            "The seller presses the confirm button",
+            "The seller's confirm button stays pressed. Right after the offer changed it ignores clicks for a moment, so it is "
+            + "pressed until it counts.",
+            () => ConfirmAsync(seller));
 
-        await OpenTradeAsync(context, seller, buyer, buyerCharacter.Name);
-
-        context.Log("the seller puts the item into the trade window with two clicks");
-        await seller.OpenInventoryAsync();
-        await seller.MoveItemAsync("inventory", offer.Slot, TradeGrid, FirstTradeSlot);
-        await Expect.EventuallyAsync(
-            async () => ItemSlots.OfTrade(await buyer.StateAsync(), "partner_items").Any(item => item.Name == offer.Name),
-            ServerAnswer,
-            $"the buyer does not see '{offer.Name}' in the seller's offer");
-
-        context.Log("both press the confirm button");
         var buyerSequence = await buyer.LastEventSequenceAsync();
-        await ConfirmAsync(seller);
-        await ConfirmAsync(buyer);
-        await buyer.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "closed", ["result"] = "completed" }, buyerSequence, ServerAnswer);
-
-        var buyerInventory = ItemSlots.Of(await buyer.StateAsync(), "inventory");
-        Expect.That(buyerInventory.Any(item => item.Name == offer.Name), $"the buyer's inventory has no '{offer.Name}' after the trade");
-        var sellerInventory = ItemSlots.Of(await seller.StateAsync(), "inventory");
-        Expect.That(ItemSlots.At(sellerInventory, offer.Slot)?.Name != offer.Name, $"'{offer.Name}' is still in the seller's slot {offer.Slot}");
+        await context.StepAsync(
+            "The buyer presses the confirm button",
+            $"Both have confirmed, so the trade completes: the window closes, '{offer.Name}' is in {buyerCharacter.Name}'s inventory "
+            + $"and gone from {sellerCharacter.Name}'s slot {offer.Slot}.",
+            async () =>
+            {
+                await ConfirmAsync(buyer);
+                await buyer.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "closed", ["result"] = "completed" }, buyerSequence, ServerAnswer);
+                var buyerInventory = ItemSlots.Of(await buyer.StateAsync(), "inventory");
+                Expect.That(buyerInventory.Any(item => item.Name == offer.Name), $"the buyer's inventory has no '{offer.Name}' after the trade");
+                var sellerInventory = ItemSlots.Of(await seller.StateAsync(), "inventory");
+                Expect.That(ItemSlots.At(sellerInventory, offer.Slot)?.Name != offer.Name, $"'{offer.Name}' is still in the seller's slot {offer.Slot}");
+            });
     }
 
-    // Warps both to Lorencia and walks the buyer next to where the seller stands.
+    // Walks the buyer next to where the seller stands.
     //
     // A warp to a town lands anywhere in it, and a character that is in Lorencia
     // already starts wherever it stood, so how far each one walks changes from run
-    // to run: across the whole town at worst. The walk gets time for that.
-    private static async Task MeetAsync(GameClient seller, GameClient buyer)
+    // to run: across the whole town at worst. The walk gets time for that. And
+    // `move` answers within a tile of its target while the walk may still take
+    // its last step, so the buyer heads for where the seller stands now, until
+    // the two are next to each other.
+    private static async Task WalkUpToAsync(GameClient buyer, GameClient seller)
     {
-        await seller.WarpAsync(LorenciaGate, LorenciaMap);
-        await buyer.WarpAsync(LorenciaGate, LorenciaMap);
-        await seller.SendAsync("move", new { x = MeetingX, y = MeetingY }, WalkTimeout);
-
-        // `move` answers within a tile of its target, and the walk may still take
-        // its last step then; so the buyer heads for where the seller stands now,
-        // until the two are next to each other.
         var sellerPosition = (X: 0, Y: 0);
         var buyerPosition = (X: 0, Y: 0);
         await Expect.EventuallyAsync(
@@ -118,10 +153,8 @@ internal sealed class TradeScenario : Scenario
     }
 
     // Setup: the request is a direct command; accepting it is the Enter key on the dialog.
-    private static async Task OpenTradeAsync(ScenarioContext context, GameClient seller, GameClient buyer, string buyerName)
+    private static async Task RequestTradeAsync(GameClient seller, GameClient buyer, string buyerName)
     {
-        context.Log("the seller asks for a trade, the buyer accepts with Enter");
-        var sellerSequence = await seller.LastEventSequenceAsync();
         var buyerSequence = await buyer.LastEventSequenceAsync();
         // The seller's client learns where the buyer stands from the server, a
         // moment after the buyer's own; until then it refuses the request as too far.
@@ -146,6 +179,12 @@ internal sealed class TradeScenario : Scenario
             async () => (await buyer.OpenWindowsAsync()).Contains("message_box"),
             ServerAnswer,
             "the buyer sees no trade request dialog");
+    }
+
+    private static async Task AcceptTradeAsync(GameClient seller, GameClient buyer)
+    {
+        var sellerSequence = await seller.LastEventSequenceAsync();
+        var buyerSequence = await buyer.LastEventSequenceAsync();
         await buyer.SendAsync("hotkey", new { key = "enter" });
         await seller.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "opened" }, sellerSequence, ServerAnswer);
         await buyer.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "opened" }, buyerSequence, ServerAnswer);

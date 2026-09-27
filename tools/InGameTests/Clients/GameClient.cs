@@ -161,8 +161,8 @@ internal sealed class GameClient : IAsyncDisposable
     /// <summary>The events recorded after <paramref name="since"/>.</summary>
     public async Task<JsonElement> EventsSinceAsync(long since) => await this.SendAsync("events", new { since });
 
-    /// <summary>Saves a screenshot of the next frame to <paramref name="path"/>.</summary>
-    public Task ScreenshotAsync(string path) => this.SendAsync("screenshot", new { @out = path });
+    /// <summary>Saves the next frame to <paramref name="path"/> as a JPEG of <paramref name="quality"/> (1 to 100).</summary>
+    public Task ScreenshotAsync(string path, int quality = 100) => this.SendAsync("screenshot", new { @out = path, quality });
 
     public async ValueTask DisposeAsync()
     {

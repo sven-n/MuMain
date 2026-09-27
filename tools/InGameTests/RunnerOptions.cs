@@ -4,15 +4,18 @@ namespace MuMain.Tools.InGameTests;
 internal sealed class RunnerOptions
 {
     public const string Usage = """
-        usage: InGameTests --client <path to Main> [--server <host:port>] [--scenario <name>]... [--out <folder>] [-t <ms>]
+        usage: InGameTests --client <path to Main> [--server <host:port>] [--fresh-server] [--scenario <name>]... [--out <folder>] [-t <ms>]
+               InGameTests --gui [--client <path to Main>] [--server <host:port>] [--fresh-server] [--out <folder>]
                InGameTests --list
 
-          --client    an editor build of Main (ENABLE_CONTROL_SOCKET=ON), e.g. out/build/windows-x64-mueditor/src/Release/Main.exe
-          --server    the game server the clients log in to, default 127.0.0.1:56901, the test server
-          --scenario  run only this scenario; repeat for several, default all
-          --out       where failure screenshots, events and states go, default in-game-test-results
-          -t          pause this many milliseconds after every action, to watch a scenario, default 0
-          --list      list the scenarios
+          --client        an editor build of Main (ENABLE_CONTROL_SOCKET=ON), e.g. out/build/windows-x64-mueditor/src/Release/Main.exe
+          --server        the game server the clients log in to, default 127.0.0.1:56901, the test server
+          --fresh-server  recreate the test server (docker-compose.yml, with podman or docker) before the run
+          --scenario      run only this scenario; repeat for several, default all
+          --out           where the report, screenshots and failure details go, default in-game-test-results
+          -t              pause this many milliseconds after every action, to watch a scenario, default 0
+          --gui           open the window to choose and run scenarios; also without any option
+          --list          list the scenarios
         """;
 
     private const string DefaultHost = "127.0.0.1";
@@ -24,18 +27,25 @@ internal sealed class RunnerOptions
 
     public int ServerPort { get; private set; } = DefaultPort;
 
+    /// <summary>Whether --server was given, so the window can prefer it over its saved value.</summary>
+    public bool ServerGiven { get; private set; }
+
+    public bool FreshServer { get; private set; }
+
     public List<string> ScenarioNames { get; } = [];
 
     public string OutputFolder { get; private set; } = "in-game-test-results";
 
     public bool ListScenarios { get; private set; }
 
+    public bool Gui { get; private set; }
+
     public TimeSpan StepDelay { get; private set; } = TimeSpan.Zero;
 
     /// <summary>Parses <paramref name="args"/>; null with <paramref name="error"/> when they are not usable.</summary>
     public static RunnerOptions? Parse(string[] args, out string error)
     {
-        var options = new RunnerOptions();
+        var options = new RunnerOptions { Gui = args.Length == 0 };
         error = string.Empty;
         for (var i = 0; i < args.Length; i++)
         {
@@ -44,6 +54,12 @@ internal sealed class RunnerOptions
             {
                 case "--list":
                     options.ListScenarios = true;
+                    continue;
+                case "--gui":
+                    options.Gui = true;
+                    continue;
+                case "--fresh-server":
+                    options.FreshServer = true;
                     continue;
                 case "--client" when value is not null:
                     options.ClientPath = value;
@@ -64,12 +80,13 @@ internal sealed class RunnerOptions
                     options.StepDelay = TimeSpan.FromMilliseconds(milliseconds);
                     break;
                 case "--server" when value is not null:
-                    if (!options.TrySetServer(value))
+                    if (!TryParseServer(value, out var host, out var port))
                     {
                         error = $"--server takes host:port, not '{value}'";
                         return null;
                     }
 
+                    (options.ServerHost, options.ServerPort, options.ServerGiven) = (host, port, true);
                     break;
                 default:
                     error = $"unknown or incomplete option '{args[i]}'";
@@ -79,7 +96,8 @@ internal sealed class RunnerOptions
             i++;
         }
 
-        if (!options.ListScenarios && (options.ClientPath is null || !File.Exists(options.ClientPath)))
+        var needsClient = !options.ListScenarios && !options.Gui;
+        if (needsClient && (options.ClientPath is null || !File.Exists(options.ClientPath)))
         {
             error = $"--client has to name an existing Main, not '{options.ClientPath}'";
             return null;
@@ -88,16 +106,18 @@ internal sealed class RunnerOptions
         return options;
     }
 
-    private bool TrySetServer(string value)
+    /// <summary>Splits <c>host:port</c>.</summary>
+    public static bool TryParseServer(string value, out string host, out int port)
     {
+        host = string.Empty;
+        port = 0;
         var separator = value.LastIndexOf(':');
-        if (separator <= 0 || !int.TryParse(value[(separator + 1)..], out var port) || port is <= 0 or > ushort.MaxValue)
+        if (separator <= 0 || !int.TryParse(value[(separator + 1)..], out port) || port is <= 0 or > ushort.MaxValue)
         {
             return false;
         }
 
-        this.ServerHost = value[..separator];
-        this.ServerPort = port;
+        host = value[..separator];
         return true;
     }
 }

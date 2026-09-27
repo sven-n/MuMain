@@ -856,39 +856,45 @@ if (DOTNET_EXECUTABLE)
     set(MU_IN_GAME_TEST_STEP_DELAY "0" CACHE STRING
       "Milliseconds the InGameTests target pauses after every client action, to watch a run; 0 runs at full speed")
 
-    set(IN_GAME_TESTS_ARGS --server "${MU_IN_GAME_TEST_SERVER}" -t "${MU_IN_GAME_TEST_STEP_DELAY}")
+    set(IN_GAME_TESTS_ARGS -t "${MU_IN_GAME_TEST_STEP_DELAY}")
     foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
       list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
     endforeach()
 
-    # The test server keeps its data in memory; recreating it brings back
-    # OpenMU's test data, whatever the last run changed.
-    set(IN_GAME_TESTS_SERVER_COMMAND "")
+    # The test server keeps its data in memory; the runner recreates it with
+    # podman or docker, which brings back OpenMU's test data.
+    set(IN_GAME_TESTS_SERVER_ARGS --server "${MU_IN_GAME_TEST_SERVER}")
     if (MU_IN_GAME_TEST_FRESH_SERVER)
-      find_program(MU_CONTAINER_TOOL NAMES podman docker)
-      if (MU_CONTAINER_TOOL)
-        set(IN_GAME_TESTS_SERVER_COMMAND
-          COMMAND "${MU_CONTAINER_TOOL}" compose -f "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests/docker-compose.yml"
-                  up -d --force-recreate)
-      else()
-        message(STATUS "InGameTests: neither podman nor docker found; the test server has to be started by hand")
-      endif()
+      list(APPEND IN_GAME_TESTS_SERVER_ARGS --fresh-server)
     endif()
+    list(APPEND IN_GAME_TESTS_ARGS ${IN_GAME_TESTS_SERVER_ARGS})
+
+    set(IN_GAME_TESTS_RUN
+      ${CMAKE_COMMAND} -E env
+      --unset=Platform
+      "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+      "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+      "${DOTNET_EXECUTABLE}" run --project "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests" -c Release
+      -- --client "$<TARGET_FILE:Main>" --out "${CMAKE_BINARY_DIR}/in-game-test-results")
 
     add_custom_target(InGameTests
-      ${IN_GAME_TESTS_SERVER_COMMAND}
-      COMMAND ${CMAKE_COMMAND} -E env
-              --unset=Platform
-              "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
-              "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
-              "${DOTNET_EXECUTABLE}" run --project "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests" -c Release
-              -- --client "$<TARGET_FILE:Main>" ${IN_GAME_TESTS_ARGS}
-              --out "${CMAKE_BINARY_DIR}/in-game-test-results"
+      COMMAND ${IN_GAME_TESTS_RUN} ${IN_GAME_TESTS_ARGS}
       COMMENT "In-game tests against ${MU_IN_GAME_TEST_SERVER}"
       USES_TERMINAL
       VERBATIM
     )
     add_dependencies(InGameTests Main)
+
+    # InGameTestsGui: the same with a window to choose the tests and how slowly
+    # they run; every run writes a report with a screenshot per step.
+    #   cmake --build <build dir> --config Release --target InGameTestsGui
+    add_custom_target(InGameTestsGui
+      COMMAND ${IN_GAME_TESTS_RUN} --gui ${IN_GAME_TESTS_SERVER_ARGS}
+      COMMENT "In-game test window"
+      USES_TERMINAL
+      VERBATIM
+    )
+    add_dependencies(InGameTestsGui Main)
   endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "

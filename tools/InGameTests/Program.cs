@@ -1,8 +1,9 @@
 // In-game tests: start editor builds of the client with the control socket,
 // drive them through scenarios against a running server, and report each
-// scenario as passed or failed. See docs/in-game-tests.md.
+// scenario, step by step with screenshots. See docs/in-game-tests.md.
 
-using MuMain.Tools.InGameTests.Clients;
+using MuMain.Tools.InGameTests.Gui;
+using MuMain.Tools.InGameTests.Running;
 using MuMain.Tools.InGameTests.Scenarios;
 
 namespace MuMain.Tools.InGameTests;
@@ -13,16 +14,16 @@ internal static class Program
     private const int ExitFailed = 1;
     private const int ExitUsage = 2;
 
-    // A test server that was just recreated takes a few seconds to listen.
-    private static readonly TimeSpan ServerStartTimeout = TimeSpan.FromSeconds(60);
-
-    private static readonly Scenario[] AllScenarios =
+    /// <summary>Every scenario, in the order they run.</summary>
+    public static readonly Scenario[] AllScenarios =
     [
         new TradeScenario(),
         new IcarusTakeOffScenario(),
     ];
 
-    public static async Task<int> Main(string[] args)
+    // The window's file dialogs need a single-threaded apartment on Windows.
+    [STAThread]
+    public static int Main(string[] args)
     {
         var options = RunnerOptions.Parse(args, out var usageError);
         if (options is null)
@@ -42,9 +43,11 @@ internal static class Program
             return ExitPassed;
         }
 
-        var selected = options.ScenarioNames.Count == 0
-            ? AllScenarios
-            : AllScenarios.Where(scenario => options.ScenarioNames.Contains(scenario.Name)).ToArray();
+        return options.Gui ? GuiApp.Run(options, args) : RunAsync(options).GetAwaiter().GetResult();
+    }
+
+    private static async Task<int> RunAsync(RunnerOptions options)
+    {
         var unknown = options.ScenarioNames.Except(AllScenarios.Select(scenario => scenario.Name)).ToList();
         if (unknown.Count > 0)
         {
@@ -52,27 +55,25 @@ internal static class Program
             return ExitUsage;
         }
 
-        var clientOptions = new ClientOptions(options.ClientPath!, options.ServerHost, options.ServerPort)
+        var selected = options.ScenarioNames.Count == 0
+            ? AllScenarios
+            : AllScenarios.Where(scenario => options.ScenarioNames.Contains(scenario.Name)).ToArray();
+        var runOptions = new TestRunOptions(
+            Path.GetFullPath(options.ClientPath!),
+            options.ServerHost,
+            options.ServerPort,
+            options.FreshServer,
+            options.OutputFolder,
+            [.. selected.Select(scenario => new ScenarioSelection(scenario, options.StepDelay))]);
+        try
         {
-            StepDelay = options.StepDelay,
-        };
-        if (!await ServerReadiness.WaitAsync(options.ServerHost, options.ServerPort, ServerStartTimeout, CancellationToken.None))
+            var run = await TestRun.RunAsync(runOptions, Console.Out, null, CancellationToken.None);
+            return run.AllPassed ? ExitPassed : ExitFailed;
+        }
+        catch (InvalidOperationException exception)
         {
-            Console.Error.WriteLine($"no game server answers on {options.ServerHost}:{options.ServerPort}; is the test server running?");
+            Console.Error.WriteLine(exception.Message);
             return ExitFailed;
         }
-
-        var runner = new ScenarioRunner(clientOptions, options.OutputFolder, Console.Out);
-        var failed = 0;
-        foreach (var scenario in selected)
-        {
-            if (!await runner.RunAsync(scenario, CancellationToken.None))
-            {
-                failed++;
-            }
-        }
-
-        Console.WriteLine($"{selected.Length - failed} passed, {failed} failed");
-        return failed == 0 ? ExitPassed : ExitFailed;
     }
 }

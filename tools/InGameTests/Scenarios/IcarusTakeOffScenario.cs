@@ -29,48 +29,80 @@ internal sealed class IcarusTakeOffScenario : Scenario
         var flyer = context.Client(Flyer);
         var character = TestAccounts.IcarusFlyer;
 
-        context.Log("the character enters Icarus with wings and a flying mount");
-        await flyer.EnterWorldAsync(character.Account, character.Password, character.Name);
-        var wings = await EquippedEventuallyAsync(flyer, WingSlot, $"{character.Name} wears no wings");
-        var mount = await EquippedEventuallyAsync(flyer, HelperSlot, $"{character.Name} has no flying mount");
-        await flyer.WarpAsync(IcarusGate, IcarusMap);
-        await flyer.OpenInventoryAsync();
+        var (wings, mount) = await context.StepAsync(
+            $"Log in as {character.Name}",
+            $"{character.Name} enters the world wearing wings (slot {WingSlot}) and a flying mount (slot {HelperSlot}); "
+            + "the test data puts it in Noria, the Elves' home map.",
+            async () =>
+            {
+                await flyer.EnterWorldAsync(character.Account, character.Password, character.Name);
+                return (await EquippedEventuallyAsync(flyer, WingSlot, $"{character.Name} wears no wings"),
+                        await EquippedEventuallyAsync(flyer, HelperSlot, $"{character.Name} has no flying mount"));
+            });
+        await context.StepAsync(
+            "Warp to Icarus",
+            "The Elf stands in Icarus. The warp is allowed because it can fly.",
+            () => flyer.WarpAsync(IcarusGate, IcarusMap));
+        await context.StepAsync(
+            "Open the inventory with I",
+            "The inventory window opens and shows the equipment.",
+            () => flyer.OpenInventoryAsync());
 
         try
         {
-            context.Log($"right-clicking '{wings.Name}' takes it off: '{mount.Name}' still flies");
-            await flyer.ClickSlotAsync("equipment", WingSlot, "right");
-            // The slot empties at once; the item reaches the inventory with the server's answer.
-            await Expect.EventuallyAsync(
+            await context.StepAsync(
+                $"Right-click '{wings.Name}'",
+                $"'{wings.Name}' leaves the wing slot and goes into the inventory: '{mount.Name}' still flies, so the Elf may take "
+                + "the wings off in Icarus.",
                 async () =>
                 {
-                    var state = await flyer.StateAsync();
-                    return ItemSlots.At(ItemSlots.Of(state, "equipment"), WingSlot) is null
-                           && ItemSlots.Of(state, "inventory").Any(item => item.Name == wings.Name);
-                },
-                ServerAnswer,
-                $"'{wings.Name}' did not move into the inventory after a right-click, although '{mount.Name}' flies");
+                    await flyer.ClickSlotAsync("equipment", WingSlot, "right");
+                    // The slot empties at once; the item reaches the inventory with the server's answer.
+                    await Expect.EventuallyAsync(
+                        async () =>
+                        {
+                            var state = await flyer.StateAsync();
+                            return ItemSlots.At(ItemSlots.Of(state, "equipment"), WingSlot) is null
+                                   && ItemSlots.Of(state, "inventory").Any(item => item.Name == wings.Name);
+                        },
+                        ServerAnswer,
+                        $"'{wings.Name}' did not move into the inventory after a right-click, although '{mount.Name}' flies");
+                });
 
             // Right-click unequip does nothing without room in the inventory; with
             // room, only the Icarus rule can keep the mount on.
             var freeSlot = await FirstFreeInventorySlotAsync(flyer);
-            context.Log($"right-clicking '{mount.Name}', the last flying item, leaves it on");
-            await flyer.ClickSlotAsync("equipment", HelperSlot, "right");
-            await Expect.StillAfterAsync(
-                async () => await EquippedAsync(flyer, HelperSlot) is not null,
-                RefusalWait,
-                $"a right-click took off '{mount.Name}', the last flying item in Icarus");
-
-            context.Log($"dragging '{mount.Name}' out of its slot leaves it on");
-            await flyer.MoveItemAsync("equipment", HelperSlot, "inventory", freeSlot);
-            await Expect.StillAfterAsync(
-                async () => await EquippedAsync(flyer, HelperSlot) is not null,
-                RefusalWait,
-                $"dragging took off '{mount.Name}', the last flying item in Icarus");
+            await context.StepAsync(
+                $"Right-click '{mount.Name}'",
+                $"Nothing happens: '{mount.Name}' is the last flying item, and without it the Elf would fall in Icarus "
+                + "(sven-n/MuMain#631). The inventory has room, so only this rule keeps it on.",
+                async () =>
+                {
+                    await flyer.ClickSlotAsync("equipment", HelperSlot, "right");
+                    await Expect.StillAfterAsync(
+                        async () => await EquippedAsync(flyer, HelperSlot) is not null,
+                        RefusalWait,
+                        $"a right-click took off '{mount.Name}', the last flying item in Icarus");
+                });
+            await context.StepAsync(
+                $"Drag '{mount.Name}' into the inventory with two clicks",
+                $"'{mount.Name}' stays in its slot: taking the last flying item off by dragging is refused in Icarus as well "
+                + "(sven-n/MuMain#631).",
+                async () =>
+                {
+                    await flyer.MoveItemAsync("equipment", HelperSlot, "inventory", freeSlot);
+                    await Expect.StillAfterAsync(
+                        async () => await EquippedAsync(flyer, HelperSlot) is not null,
+                        RefusalWait,
+                        $"dragging took off '{mount.Name}', the last flying item in Icarus");
+                });
         }
         finally
         {
-            await PutWingsBackAsync(context, flyer, wings);
+            await context.StepAsync(
+                $"Put '{wings.Name}' back on",
+                $"'{wings.Name}' is back in slot {WingSlot}, so the account is as the test data made it.",
+                () => PutWingsBackAsync(flyer, wings));
         }
     }
 
@@ -97,7 +129,7 @@ internal sealed class IcarusTakeOffScenario : Scenario
     }
 
     // Leaves the test account as the test data made it.
-    private static async Task PutWingsBackAsync(ScenarioContext context, GameClient client, ItemSlot wings)
+    private static async Task PutWingsBackAsync(GameClient client, ItemSlot wings)
     {
         if (await EquippedAsync(client, WingSlot) is not null)
         {
@@ -105,13 +137,9 @@ internal sealed class IcarusTakeOffScenario : Scenario
         }
 
         var inventory = ItemSlots.Of(await client.StateAsync(), "inventory");
-        var takenOff = inventory.FirstOrDefault(item => item.Name == wings.Name);
-        if (takenOff is null)
-        {
-            throw new ScenarioFailedException($"'{wings.Name}' is neither equipped nor in the inventory; the test account is left without it");
-        }
+        var takenOff = inventory.FirstOrDefault(item => item.Name == wings.Name)
+                       ?? throw new ScenarioFailedException($"'{wings.Name}' is neither equipped nor in the inventory; the test account is left without it");
 
-        context.Log($"putting '{wings.Name}' back on");
         await client.SendAsync("equip", new { slot = takenOff.Slot, target_slot = WingSlot });
         // `equip` answers once the request is sent; the client must not close before the server moved the item.
         await Expect.EventuallyAsync(

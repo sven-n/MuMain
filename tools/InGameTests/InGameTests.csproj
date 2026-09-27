@@ -8,6 +8,20 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The window (Gui/); the command line runs without opening it. -->
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The test server; TestServer recreates it from next to the runner. -->
+    <None Update="docker-compose.yml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
 </Project>

@@ -1,22 +1,26 @@
 using System.Diagnostics;
 using System.Text.Json;
 using MuMain.Tools.InGameTests.Clients;
+using MuMain.Tools.InGameTests.Running;
 
 namespace MuMain.Tools.InGameTests.Scenarios;
 
 /// <summary>
-/// Runs a scenario with fresh clients and reports it. On a failure it saves, per
-/// client, a screenshot, the recent events and the state into the output folder.
+/// Runs a scenario with fresh clients. Its screenshots go into
+/// <paramref name="folder"/>; on a failure the recent events and the state of
+/// every client go there too.
 /// </summary>
-internal sealed class ScenarioRunner(ClientOptions clientOptions, string outputFolder, TextWriter log)
+internal sealed class ScenarioRunner(ClientOptions clientOptions, string folder, TextWriter log, Action<int, string>? stepStarted)
 {
     private const int RecentEventCount = 200;
 
-    public async Task<bool> RunAsync(Scenario scenario, CancellationToken cancellationToken)
+    public async Task<ScenarioResult> RunAsync(Scenario scenario, CancellationToken cancellationToken)
     {
         log.WriteLine($"{scenario.Name}: {scenario.Description}");
+        Directory.CreateDirectory(folder);
         var stopwatch = Stopwatch.StartNew();
         var clients = new Dictionary<string, GameClient>();
+        var context = new ScenarioContext(clients, folder, log, stepStarted);
         try
         {
             foreach (var role in scenario.Roles)
@@ -25,15 +29,15 @@ internal sealed class ScenarioRunner(ClientOptions clientOptions, string outputF
                 clients[role] = await GameClient.StartAsync(clientOptions, role, cancellationToken);
             }
 
-            await scenario.RunAsync(new ScenarioContext(clients, log));
+            await scenario.RunAsync(context);
             log.WriteLine($"PASS {scenario.Name} ({stopwatch.Elapsed.TotalSeconds:0} s)");
-            return true;
+            return this.Result(scenario, true, stopwatch.Elapsed, null, context);
         }
         catch (Exception exception)
         {
             log.WriteLine($"FAIL {scenario.Name} ({stopwatch.Elapsed.TotalSeconds:0} s): {exception.Message}");
-            await this.SaveFailureAsync(scenario, clients);
-            return false;
+            await this.SaveFailureAsync(clients);
+            return this.Result(scenario, false, stopwatch.Elapsed, exception.Message, context);
         }
         finally
         {
@@ -44,20 +48,20 @@ internal sealed class ScenarioRunner(ClientOptions clientOptions, string outputF
         }
     }
 
-    private async Task SaveFailureAsync(Scenario scenario, IReadOnlyDictionary<string, GameClient> clients)
+    private ScenarioResult Result(Scenario scenario, bool passed, TimeSpan duration, string? failure, ScenarioContext context)
+        => new(scenario.Name, scenario.Description, passed, duration, clientOptions.StepDelay, failure, [.. context.Steps]);
+
+    private async Task SaveFailureAsync(IReadOnlyDictionary<string, GameClient> clients)
     {
-        var folder = Path.Combine(outputFolder, $"{scenario.Name}-{DateTime.Now:yyyyMMdd-HHmmss}");
-        Directory.CreateDirectory(folder);
         foreach (var (role, client) in clients)
         {
-            await TrySaveAsync(() => client.ScreenshotAsync(Path.GetFullPath(Path.Combine(folder, $"{role}.png"))));
-            await TrySaveAsync(async () =>
+            await this.TrySaveAsync(async () =>
             {
                 var last = await client.LastEventSequenceAsync();
                 var events = await client.EventsSinceAsync(Math.Max(0, last - RecentEventCount));
                 await File.WriteAllTextAsync(Path.Combine(folder, $"{role}-events.json"), Pretty(events));
             });
-            await TrySaveAsync(async () =>
+            await this.TrySaveAsync(async () =>
                 await File.WriteAllTextAsync(Path.Combine(folder, $"{role}-state.json"), Pretty(await client.StateAsync())));
         }
 
