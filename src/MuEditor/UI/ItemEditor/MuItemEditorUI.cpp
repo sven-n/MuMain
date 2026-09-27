@@ -76,21 +76,10 @@ CMuItemEditorUI::~CMuItemEditorUI()
     }
 }
 
-namespace
-{
-bool g_CMuItemEditorUICreated = false;
-}
-
 CMuItemEditorUI& CMuItemEditorUI::GetInstance()
 {
     static CMuItemEditorUI instance;
-    g_CMuItemEditorUICreated = true;
     return instance;
-}
-
-bool CMuItemEditorUI::HasInstance()
-{
-    return g_CMuItemEditorUICreated;
 }
 
 void CMuItemEditorUI::Render(bool& showEditor)

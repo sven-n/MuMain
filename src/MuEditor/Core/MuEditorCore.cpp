@@ -362,17 +362,9 @@ void CMuEditorCore::Shutdown()
     if (!m_bInitialized)
         return;
 
-    // Constructing an editor here would run during static destruction and read an already
-    // destroyed g_MuEditorConfig, so only save the ones that were opened.
-    if (CMuItemEditorUI::HasInstance())
-    {
-        g_MuItemEditorUI.SaveColumnPreferences();
-    }
-
-    if (CMuSkillEditorUI::HasInstance())
-    {
-        g_MuSkillEditorUI.SaveColumnPreferences();
-    }
+    // Do not touch the editor singletons here: their destructors already save the column
+    // preferences, and when this runs from ~CMuEditorCore during static destruction they
+    // would be built from scratch or, if they were opened, already destroyed.
 
     mu::WaitForSDLGpuIdle();
     ImGui_ImplSDLGPU3_Shutdown();
