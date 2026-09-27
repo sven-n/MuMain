@@ -258,6 +258,8 @@ CPhysicsColSphere::~CPhysicsColSphere()
 {
 }
 
+// Hides the base Clear on purpose and calls it first (Clear is not virtual).
+// cppcheck-suppress duplInheritedMember
 void CPhysicsColSphere::Clear(void)
 {
     CPhysicsCollision::Clear();
@@ -951,7 +953,8 @@ CPhysicsClothMesh::CPhysicsClothMesh()
 
 CPhysicsClothMesh::~CPhysicsClothMesh()
 {
-    Clear();
+    // A destructor never calls overrides; name the class to make that clear.
+    CPhysicsClothMesh::Clear();
 }
 
 void CPhysicsClothMesh::Clear(void)
@@ -961,8 +964,33 @@ void CPhysicsClothMesh::Clear(void)
 
 extern float BoneScale;
 
+bool CPhysicsClothMesh::CanCreate(int iBMDType, int iMesh)
+{
+    const BMD& b = Models[iBMDType];
+    return b.Meshs != nullptr && iMesh >= 0 && iMesh < b.NumMeshs;
+}
+
+bool CPhysicsClothMesh::CanCreate(int iBMDType, int iMesh, int iNumHor, int iNumVer)
+{
+    if (!CanCreate(iBMDType, iMesh))
+    {
+        return false;
+    }
+
+    const Mesh_t& mesh = Models[iBMDType].Meshs[iMesh];
+    const int gridPoints = iNumHor * iNumVer;
+    const int maxTriangles = 2 * (iNumHor - 1) * (iNumVer - 1);
+    return mesh.Vertices != nullptr && mesh.Triangles != nullptr && mesh.TexCoords != nullptr &&
+           mesh.NumVertices >= gridPoints && mesh.NumTexCoords >= gridPoints && mesh.NumTriangles <= maxTriangles;
+}
+
 BOOL CPhysicsClothMesh::Create(OBJECT* o, int iMesh, int iBone, DWORD dwType, int iBMDType)
 {
+    if (!CanCreate((iBMDType == -1) ? o->Type : iBMDType, iMesh))
+    {
+        return FALSE;
+    }
+
     m_oOwner = o;
     m_iMesh = iMesh;
     m_iBone = iBone;
@@ -1044,6 +1072,11 @@ BOOL CPhysicsClothMesh::Create(OBJECT* o, int iMesh, int iBone, DWORD dwType, in
 
 BOOL CPhysicsClothMesh::Create(OBJECT* o, int iMesh, int iBone, float fxPos, float fyPos, float fzPos, int iNumHor, int iNumVer, float fWidth, float fHeight, int iTexFront, int TexBack, DWORD dwType, int iBMDType)
 {
+    if (!CanCreate((iBMDType == -1) ? o->Type : iBMDType, iMesh, iNumHor, iNumVer))
+    {
+        return FALSE;
+    }
+
     m_iBMDType = (iBMDType == -1) ? m_oOwner->Type : iBMDType;
 
     m_iMesh = iMesh;

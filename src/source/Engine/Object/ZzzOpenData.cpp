@@ -431,9 +431,6 @@ static void OpenItemEffectModels()
     Models[MODEL_EVENT + 9].Meshs[1].NoneBlendMesh = true;
 }
 
-// The cloth of the Grand Soul pants is drawn on mesh 2 of their model.
-// Creating the cloth once rebuilds the triangles and texture coordinates of
-// that mesh as a cloth grid; the cloth itself is not needed.
 constexpr int GrandSoulClothMesh = 2;
 constexpr int GrandSoulClothBone = 17;
 constexpr int GrandSoulClothColumns = 5;
@@ -441,30 +438,13 @@ constexpr int GrandSoulClothRows = 8;
 constexpr float GrandSoulClothWidth = 45.0f;
 constexpr float GrandSoulClothHeight = 85.0f;
 
-// The rebuild writes the cloth grid into the mesh without checks. It only
-// fits a mesh with a texture coordinate for every grid point and at most two
-// triangles per grid cell. The model comes from the item model files (item
-// 9,18), so it may be missing or be another model.
-static bool FitsGrandSoulClothGrid(const BMD& model)
-{
-    if (model.Meshs == nullptr || model.NumMeshs <= GrandSoulClothMesh)
-    {
-        return false;
-    }
-
-    const Mesh_t& mesh = model.Meshs[GrandSoulClothMesh];
-    const int gridPoints = GrandSoulClothColumns * GrandSoulClothRows;
-    const int maxTriangles = 2 * (GrandSoulClothColumns - 1) * (GrandSoulClothRows - 1);
-    return mesh.Triangles != nullptr && mesh.TexCoords != nullptr && mesh.NumTexCoords >= gridPoints &&
-           mesh.NumTriangles <= maxTriangles;
-}
-
 // The cloth of the Grand Soul pants is drawn on mesh 2 of their model.
 // Creating the cloth once rebuilds the triangles and texture coordinates of
 // that mesh as a cloth grid; the cloth itself is not needed.
 static void PrepareGrandSoulPantsClothMesh()
 {
-    if (!FitsGrandSoulClothGrid(Models[MODEL_GRAND_SOUL_PANTS]))
+    if (!CPhysicsClothMesh::CanCreate(MODEL_GRAND_SOUL_PANTS, GrandSoulClothMesh, GrandSoulClothColumns,
+                                      GrandSoulClothRows))
     {
         g_ErrorReport.Write(L"The Grand Soul pants model does not fit the cloth grid; its cloth is not prepared.\r\n");
         return;
@@ -557,8 +537,8 @@ static void OpenItemEffectTextures()
 
 void OpenItemTextures()
 {
-    // First: the parts of the Rage Fighter weapons use textures of the
-    // weapon items.
+    // Before the effect textures, like the old code: a model texture that is
+    // also an effect bitmap below stays a texture of its own, with its filter.
     Data::Items::ModelLoader::OpenTextures();
     OpenItemEffectModelTextures();
     gLoadData.OpenTexture(MODEL_ARROW, L"Item\\Bow\\");
