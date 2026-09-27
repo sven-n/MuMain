@@ -95,6 +95,7 @@ internal static class TestRun
         // Every scenario there is, in its order; the ones that did not run as skipped.
         var selected = options.Scenarios.Select(selection => selection.Scenario.Name).ToHashSet();
         var reported = options.AllScenarios
+            .OrderBy(scenario => scenario.Category)
             .Select(scenario => results.FirstOrDefault(result => result.Name == scenario.Name)
                                 ?? ScenarioResult.Skip(scenario, selected.Contains(scenario.Name) ? "the run was stopped before it" : "not selected for this run"))
             .Concat(results.Where(result => options.AllScenarios.All(scenario => scenario.Name != result.Name)))

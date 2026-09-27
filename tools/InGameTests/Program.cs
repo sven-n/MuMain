@@ -18,7 +18,7 @@ internal static class Program
     public static readonly Scenario[] AllScenarios =
     [
         new TradeScenario(),
-        new IcarusTakeOffScenario(),
+        new IcarusFlyingItemTakeOffScenario(),
     ];
 
     // The window's file dialogs need a single-threaded apartment on Windows.
@@ -35,9 +35,13 @@ internal static class Program
 
         if (options.ListScenarios)
         {
-            foreach (var scenario in AllScenarios)
+            foreach (var group in AllScenarios.GroupBy(scenario => scenario.Category).OrderBy(group => group.Key))
             {
-                Console.WriteLine($"{scenario.Name,-20} {scenario.Description}");
+                Console.WriteLine(group.Key.DisplayName());
+                foreach (var scenario in group)
+                {
+                    Console.WriteLine($"  {scenario.Name,-30} {scenario.Description}");
+                }
             }
 
             return ExitPassed;
@@ -55,9 +59,10 @@ internal static class Program
             return ExitUsage;
         }
 
-        var selected = options.ScenarioNames.Count == 0
-            ? AllScenarios
-            : AllScenarios.Where(scenario => options.ScenarioNames.Contains(scenario.Name)).ToArray();
+        var selected = AllScenarios
+            .Where(scenario => options.ScenarioNames.Count == 0 || options.ScenarioNames.Contains(scenario.Name))
+            .OrderBy(scenario => scenario.Category)
+            .ToArray();
         var runOptions = new TestRunOptions(
             Path.GetFullPath(options.ClientPath!),
             options.ServerHost,

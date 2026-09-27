@@ -861,7 +861,7 @@ if (DOTNET_EXECUTABLE)
       "Recreate the test server (tools/InGameTests/docker-compose.yml) before every InGameTests run, so it starts from fresh test data"
       ON)
     set(MU_IN_GAME_TEST_SCENARIOS "" CACHE STRING
-      "In-game test scenarios the InGameTests target runs, e.g. trade;icarus-take-off; empty runs all")
+      "In-game test scenarios the InGameTests target runs, e.g. trade;icarus-flying-item-take-off; empty runs all")
     set(MU_IN_GAME_TEST_STEP_DELAY "0" CACHE STRING
       "Milliseconds the InGameTests target pauses after every client action, to watch a run; 0 runs at full speed")
 

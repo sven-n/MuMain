@@ -135,3 +135,11 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
         this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+
+/// <summary>The scenarios of one category, under their heading in the window's list.</summary>
+internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<ScenarioRow> rows)
+{
+    public string Title => category.DisplayName();
+
+    public IReadOnlyList<ScenarioRow> Rows { get; } = rows;
+}

@@ -7,6 +7,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using MuMain.Tools.InGameTests.Running;
+using MuMain.Tools.InGameTests.Scenarios;
 
 namespace MuMain.Tools.InGameTests.Gui;
 
@@ -33,7 +34,7 @@ internal sealed partial class MainWindow : Window
         this.startOptions = startOptions;
         this.InitializeComponent();
 
-        foreach (var scenario in Program.AllScenarios)
+        foreach (var scenario in Program.AllScenarios.OrderBy(scenario => scenario.Category))
         {
             var row = new ScenarioRow(scenario);
             if (this.settings.Scenarios.TryGetValue(scenario.Name, out var saved))
@@ -46,7 +47,10 @@ internal sealed partial class MainWindow : Window
             this.rows.Add(row);
         }
 
-        this.ScenarioList.ItemsSource = this.rows;
+        this.ScenarioList.ItemsSource = this.rows
+            .GroupBy(row => row.Scenario.Category)
+            .Select(group => new ScenarioGroup(group.Key, [.. group]))
+            .ToList();
 
         // The command line wins over what the window remembers.
         this.ClientPathBox.Text = startOptions.ClientPath is not null

@@ -91,7 +91,7 @@ Noria.
 | Scenario | Account | Character |
 |---|---|---|
 | `trade` | `test300`, `socket` | `test300Dl` (level 300 Dark Lord with Jewels of Bless) sells to `socketElf` |
-| `icarus-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
+| `icarus-flying-item-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
 
 A new scenario takes an account no other scenario uses. When the test data has
 no account with what a scenario needs, OpenMU's test data gets a new one
@@ -149,7 +149,7 @@ or in CLion's CMake options:
 
 | Variable | Meaning |
 |---|---|
-| `MU_IN_GAME_TEST_SCENARIOS` | the scenarios to run, e.g. `trade` or `trade;icarus-take-off`; empty runs all |
+| `MU_IN_GAME_TEST_SCENARIOS` | the scenarios to run, e.g. `trade` or `trade;icarus-flying-item-take-off`; empty runs all |
 | `MU_IN_GAME_TEST_STEP_DELAY` | milliseconds to pause after every client action, e.g. `1000` to watch a run; default `0` |
 | `MU_IN_GAME_TEST_SERVER` | the game server the clients log in to, `host:port`; default `127.0.0.1:56901`, the test server |
 | `MU_IN_GAME_TEST_FRESH_SERVER` | recreate the test server before every run; default `ON`; turn it off for another server |
@@ -190,16 +190,23 @@ fully hidden may stop rendering, and its socket stops answering then.
 
 ## Scenarios
 
-| Scenario | Checks |
-|---|---|
-| `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and both inventories show that the jewel changed owner: the buyer has one more, the seller one fewer (sven-n/MuMain#588). |
-| `icarus-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged. Then the other way round: with the wings back on, right-clicking the Fenrir takes it off, and the wings, now the last flying item, stay on both ways (sven-n/MuMain#631). Both are put back on afterwards. |
+Scenarios are grouped by what they check; the window and the report list
+them under these categories.
+
+| Category | Scenario | Checks |
+|---|---|---|
+| Player Interactions | `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and both inventories show that the jewel changed owner: the buyer has one more, the seller one fewer (sven-n/MuMain#588). |
+| Game Behaviour | `icarus-flying-item-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged. Then the other way round: with the wings back on, right-clicking the Fenrir takes it off, and the wings, now the last flying item, stay on both ways (sven-n/MuMain#631). Both are put back on afterwards. |
 
 ## Writing a scenario
 
 A scenario is a class in `tools/InGameTests/Scenarios` that derives from
 `Scenario` and is listed in `Program.AllScenarios`. It names the clients it
-needs by role and gets them started and logged out.
+needs by role and gets them started and logged out, says its `Category`
+(`PlayerInteractions` for players doing something with each other,
+`GameBehaviour` for how the game treats a player, e.g. the rules of a map; a
+new kind gets a new value in `ScenarioCategory`), and its `StepCount` for
+the progress bar.
 
 - **Write it as steps.** Everything a scenario does goes through
   `context.StepAsync(title, expectation, action)`: the title says what is
@@ -222,7 +229,7 @@ needs by role and gets them started and logged out.
   answer. For an event, take `LastEventSequenceAsync` before the action and
   pass it to `WaitForEventAsync`, so an early answer is not missed.
 - **Leave the test accounts as they were** where it is cheap, so a run against
-  a server that keeps its data can be repeated (see `IcarusTakeOffScenario`,
+  a server that keeps its data can be repeated (see `IcarusFlyingItemTakeOffScenario`,
   which puts the wings back on).
 - **Don't count on where a character stands.** A warp to a town lands anywhere
   in it, so walks take different times from run to run (see

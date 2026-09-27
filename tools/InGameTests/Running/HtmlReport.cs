@@ -1,4 +1,5 @@
 using System.Net;
+using MuMain.Tools.InGameTests.Scenarios;
 using System.Text;
 
 namespace MuMain.Tools.InGameTests.Running;
@@ -23,6 +24,8 @@ internal static class HtmlReport
                font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
         main { max-width:1200px; margin:0 auto; }
         h1 { font-size:24px; margin:0 0 4px; } h2 { font-size:18px; margin:0; }
+        h3.category { font-size:15px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:28px 0 -4px; }
+        tr.category th { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding-top:14px; }
         .muted { color:var(--muted); }
         .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:16px 0; }
         table { border-collapse:collapse; width:100%; }
@@ -83,6 +86,11 @@ internal static class HtmlReport
         html.Append("<section class=\"card\"><table><thead><tr><th>Scenario</th><th>Result</th><th>Steps</th><th>Duration</th><th>Pause per action</th></tr></thead><tbody>");
         foreach (var scenario in run.Scenarios)
         {
+            if (IsFirstOfCategory(run, scenario))
+            {
+                html.Append("<tr class=\"category\"><th colspan=\"5\">").Append(Encode(scenario.Category.DisplayName())).Append("</th></tr>");
+            }
+
             var ran = scenario.Status != ScenarioStatus.Skipped;
             html.Append("<tr><td><a href=\"#").Append(Encode(scenario.Name)).Append("\">").Append(Encode(scenario.Name)).Append("</a><br><span class=\"muted\">")
                 .Append(Encode(scenario.Description)).Append("</span></td><td>").Append(Badge(scenario.Status)).Append("</td><td>")
@@ -102,6 +110,11 @@ internal static class HtmlReport
 
         foreach (var scenario in run.Scenarios)
         {
+            if (IsFirstOfCategory(run, scenario))
+            {
+                html.Append("<h3 class=\"category\">").Append(Encode(scenario.Category.DisplayName())).Append("</h3>");
+            }
+
             RenderScenario(html, scenario);
         }
 
@@ -156,6 +169,11 @@ internal static class HtmlReport
 
         html.Append("</div></details>");
     }
+
+    // The scenarios come grouped by category (TestRun orders them so); a
+    // category's heading goes before its first one.
+    private static bool IsFirstOfCategory(TestRunResult run, ScenarioResult scenario)
+        => run.Scenarios.First(other => other.Category == scenario.Category) == scenario;
 
     // The line next to the name while the section is collapsed.
     private static string Summary(ScenarioResult scenario) => scenario.Status switch

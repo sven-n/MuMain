@@ -8,7 +8,7 @@ namespace MuMain.Tools.InGameTests.Scenarios;
 /// flying items can. Checked both ways round: the mount as the last flying
 /// item, then the wings.
 /// </summary>
-internal sealed class IcarusTakeOffScenario : Scenario
+internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
 {
     private const string Flyer = "flyer";
     private const int WingSlot = 7;
@@ -20,9 +20,11 @@ internal sealed class IcarusTakeOffScenario : Scenario
     // A refused take-off sends nothing, so "still equipped after a while" is the answer.
     private static readonly TimeSpan RefusalWait = TimeSpan.FromSeconds(3);
 
-    public override string Name => "icarus-take-off";
+    public override string Name => "icarus-flying-item-take-off";
 
     public override string Description => "in Icarus the last flying item stays on, by right-click and by dragging, wings or mount (#631)";
+
+    public override ScenarioCategory Category => ScenarioCategory.GameBehaviour;
 
     public override IReadOnlyList<string> Roles => [Flyer];
 

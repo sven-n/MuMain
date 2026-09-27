@@ -12,7 +12,7 @@ internal sealed record TestCharacter(string Account, string Password, string Nam
 internal static class TestAccounts
 {
     /// <summary>
-    /// <c>icarus-take-off</c>: level 400 High Elf with a Wing of Illusion and a Horn of Fenrir,
+    /// <c>icarus-flying-item-take-off</c>: level 400 High Elf with a Wing of Illusion and a Horn of Fenrir,
     /// and room in the inventory for both.
     /// </summary>
     public static readonly TestCharacter IcarusFlyer = new("test400", "test400", "test400Elf");

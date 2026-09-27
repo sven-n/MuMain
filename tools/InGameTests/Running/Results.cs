@@ -29,6 +29,7 @@ internal enum ScenarioStatus
 internal sealed record ScenarioResult(
     string Name,
     string Description,
+    ScenarioCategory Category,
     ScenarioStatus Status,
     TimeSpan Duration,
     TimeSpan StepDelay,
@@ -42,7 +43,7 @@ internal sealed record ScenarioResult(
 
     /// <summary>A scenario the run did not get to, and why.</summary>
     public static ScenarioResult Skip(Scenario scenario, string reason)
-        => new(scenario.Name, scenario.Description, ScenarioStatus.Skipped, TimeSpan.Zero, TimeSpan.Zero, null, [], reason);
+        => new(scenario.Name, scenario.Description, scenario.Category, ScenarioStatus.Skipped, TimeSpan.Zero, TimeSpan.Zero, null, [], reason);
 }
 
 /// <summary>A whole run: its settings, every scenario's result and where the report is.</summary>

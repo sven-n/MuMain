@@ -31,6 +31,8 @@ internal sealed class TradeScenario : Scenario
 
     public override string Description => "an item put into the trade window with clicks changes owner (#588)";
 
+    public override ScenarioCategory Category => ScenarioCategory.PlayerInteractions;
+
     public override IReadOnlyList<string> Roles => [Seller, Buyer];
 
     public override int StepCount => 12;

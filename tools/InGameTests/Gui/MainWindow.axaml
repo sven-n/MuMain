@@ -31,37 +31,46 @@
       <TextBlock x:Name="SelectionText" VerticalAlignment="Center" Opacity="0.75" />
     </StackPanel>
 
-    <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="6" MaxHeight="280">
+    <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="6" MaxHeight="360">
       <ScrollViewer>
         <ItemsControl x:Name="ScenarioList">
           <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="gui:ScenarioRow">
-              <Grid ColumnDefinitions="Auto,*,Auto,240" ColumnSpacing="10" Margin="10,8">
-                <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Top" />
-                <StackPanel Grid.Column="1" Spacing="2">
-                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Opacity="0.75" />
-                </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
-                            ToolTip.Tip="Milliseconds to wait after each action of this test; empty takes the value above">
-                  <TextBlock Text="Wait" VerticalAlignment="Center" />
-                  <TextBox Text="{Binding DelayText}" Width="80" />
-                  <TextBlock Text="ms" VerticalAlignment="Center" />
-                </StackPanel>
-                <Panel Grid.Column="3" VerticalAlignment="Center">
-                  <ProgressBar IsVisible="{Binding ShowsProgress}" Minimum="0" Maximum="{Binding StepCount}"
-                               Value="{Binding CompletedSteps}" ShowProgressText="True" ProgressTextFormat="{Binding ProgressText}"
-                               Height="22" ToolTip.Tip="{Binding Detail}" />
-                  <Border IsVisible="{Binding Passed}" Background="#1F7A3F" CornerRadius="4" Padding="10,3"
-                          HorizontalAlignment="Left" ToolTip.Tip="{Binding Detail}">
-                    <TextBlock Text="PASS" Foreground="White" FontWeight="Bold" />
-                  </Border>
-                  <Border IsVisible="{Binding Failed}" Background="#B3261E" CornerRadius="4" Padding="10,3"
-                          HorizontalAlignment="Left" ToolTip.Tip="{Binding Detail}">
-                    <TextBlock Text="{Binding FailedText}" Foreground="White" FontWeight="Bold" />
-                  </Border>
-                </Panel>
-              </Grid>
+            <DataTemplate x:DataType="gui:ScenarioGroup">
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" Opacity="0.7" Margin="10,10,10,0" />
+                <ItemsControl ItemsSource="{Binding Rows}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="gui:ScenarioRow">
+                      <Grid ColumnDefinitions="Auto,*,Auto,240" ColumnSpacing="10" Margin="10,8">
+                        <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1" Spacing="2">
+                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                          <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Opacity="0.75" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                                    ToolTip.Tip="Milliseconds to wait after each action of this test; empty takes the value above">
+                          <TextBlock Text="Wait" VerticalAlignment="Center" />
+                          <TextBox Text="{Binding DelayText}" Width="80" />
+                          <TextBlock Text="ms" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Panel Grid.Column="3" VerticalAlignment="Center">
+                          <ProgressBar IsVisible="{Binding ShowsProgress}" Minimum="0" Maximum="{Binding StepCount}"
+                                       Value="{Binding CompletedSteps}" ShowProgressText="True" ProgressTextFormat="{Binding ProgressText}"
+                                       Height="22" ToolTip.Tip="{Binding Detail}" />
+                          <Border IsVisible="{Binding Passed}" Background="#1F7A3F" CornerRadius="4" Padding="10,3"
+                                  HorizontalAlignment="Left" ToolTip.Tip="{Binding Detail}">
+                            <TextBlock Text="PASS" Foreground="White" FontWeight="Bold" />
+                          </Border>
+                          <Border IsVisible="{Binding Failed}" Background="#B3261E" CornerRadius="4" Padding="10,3"
+                                  HorizontalAlignment="Left" ToolTip.Tip="{Binding Detail}">
+                            <TextBlock Text="{Binding FailedText}" Foreground="White" FontWeight="Bold" />
+                          </Border>
+                        </Panel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>

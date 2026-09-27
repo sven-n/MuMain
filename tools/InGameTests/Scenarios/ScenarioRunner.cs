@@ -62,6 +62,7 @@ internal sealed class ScenarioRunner(
         => new(
             scenario.Name,
             scenario.Description,
+            scenario.Category,
             passed ? ScenarioStatus.Passed : ScenarioStatus.Failed,
             duration,
             clientOptions.StepDelay,
