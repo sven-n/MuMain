@@ -24,6 +24,8 @@ internal sealed class IcarusTakeOffScenario : Scenario
 
     public override IReadOnlyList<string> Roles => [Flyer];
 
+    public override int StepCount => 7;
+
     public override async Task RunAsync(ScenarioContext context)
     {
         var flyer = context.Client(Flyer);

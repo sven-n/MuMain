@@ -122,17 +122,15 @@ internal sealed partial class MainWindow : Window
         this.RunStatusText.Text = "running…";
         foreach (var row in this.rows)
         {
-            row.Status = row.IsChecked ? "waiting" : string.Empty;
+            row.Queue();
         }
 
         var log = new WindowLog(this.AppendLog);
         var listener = new TestRunListener
         {
-            ScenarioStarted = name => Dispatcher.UIThread.Post(() => this.Row(name).Status = "starting clients…"),
-            StepStarted = (name, number, title) => Dispatcher.UIThread.Post(() => this.Row(name).Status = $"step {number}: {title}"),
-            ScenarioFinished = result => Dispatcher.UIThread.Post(() => this.Row(result.Name).Status = result.Passed
-                ? $"PASS · {result.Steps.Count} steps · {result.Duration.TotalSeconds:0} s"
-                : $"FAIL · {result.Failure}"),
+            StepStarted = (name, number, title) => Dispatcher.UIThread.Post(() => this.Row(name).StepStarted(number, title)),
+            StepFinished = (name, step) => Dispatcher.UIThread.Post(() => this.Row(name).StepFinished(step)),
+            ScenarioFinished = result => Dispatcher.UIThread.Post(() => this.Row(result.Name).Finished(result)),
         };
 
         try
@@ -142,22 +140,20 @@ internal sealed partial class MainWindow : Window
             this.reportPath = run.ReportPath;
             var passed = run.Scenarios.Count(result => result.Passed);
             this.RunStatusText.Text = $"{passed} passed, {run.Scenarios.Count - passed} failed · report written";
-            foreach (var row in this.rows.Where(row => row.Status == "waiting"))
-            {
-                row.Status = "not run (stopped)";
-            }
         }
         catch (Exception exception) when (exception is InvalidOperationException or IOException)
         {
             this.AppendLog(exception.Message + Environment.NewLine);
             this.RunStatusText.Text = exception.Message;
-            foreach (var row in this.rows.Where(row => row.Status == "waiting"))
-            {
-                row.Status = string.Empty;
-            }
         }
         finally
         {
+            // Posted updates run before this continuation; what is still queued did not run.
+            foreach (var row in this.rows)
+            {
+                row.NotRun();
+            }
+
             this.stopRequest.Dispose();
             this.stopRequest = null;
             this.SetRunning(false);

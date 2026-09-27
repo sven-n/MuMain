@@ -16,5 +16,11 @@ internal abstract class Scenario
     /// <summary>The clients the scenario needs, by role.</summary>
     public abstract IReadOnlyList<string> Roles { get; }
 
+    /// <summary>
+    /// How many steps a passing run takes, for the window's progress bar. The runner
+    /// notes a passing run that took a different number.
+    /// </summary>
+    public abstract int StepCount { get; }
+
     public abstract Task RunAsync(ScenarioContext context);
 }

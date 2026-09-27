@@ -14,7 +14,8 @@ internal sealed class ScenarioContext(
     IReadOnlyDictionary<string, GameClient> clients,
     string folder,
     TextWriter log,
-    Action<int, string>? stepStarted)
+    Action<int, string>? stepStarted,
+    Action<StepResult>? stepFinished)
 {
     // Small enough to embed a picture per step and client in the report.
     private const int ScreenshotQuality = 70;
@@ -52,15 +53,21 @@ internal sealed class ScenarioContext(
         {
             var result = await action();
             var duration = stopwatch.Elapsed;
-            this.steps.Add(new StepResult(number, title, expectation, true, duration, null, await this.CaptureAsync(number)));
+            this.Finish(new StepResult(number, title, expectation, true, duration, null, await this.CaptureAsync(number)));
             return result;
         }
         catch (Exception exception)
         {
             var duration = stopwatch.Elapsed;
-            this.steps.Add(new StepResult(number, title, expectation, false, duration, exception.Message, await this.CaptureAsync(number)));
+            this.Finish(new StepResult(number, title, expectation, false, duration, exception.Message, await this.CaptureAsync(number)));
             throw;
         }
+    }
+
+    private void Finish(StepResult step)
+    {
+        this.steps.Add(step);
+        stepFinished?.Invoke(step);
     }
 
     // Every client, so a trade shows both sides.

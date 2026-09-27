@@ -23,6 +23,8 @@ internal sealed class TestRunListener
 
     public Action<string, int, string>? StepStarted { get; init; }
 
+    public Action<string, StepResult>? StepFinished { get; init; }
+
     public Action<ScenarioResult>? ScenarioFinished { get; init; }
 }
 
@@ -79,7 +81,8 @@ internal static class TestRun
                 clientOptions,
                 Path.Combine(folder, scenario.Name),
                 log,
-                (number, title) => listener?.StepStarted?.Invoke(scenario.Name, number, title));
+                (number, title) => listener?.StepStarted?.Invoke(scenario.Name, number, title),
+                step => listener?.StepFinished?.Invoke(scenario.Name, step));
             var result = await runner.RunAsync(scenario, CancellationToken.None);
             results.Add(result);
             listener?.ScenarioFinished?.Invoke(result);

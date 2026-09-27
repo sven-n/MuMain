@@ -10,7 +10,12 @@ namespace MuMain.Tools.InGameTests.Scenarios;
 /// <paramref name="folder"/>; on a failure the recent events and the state of
 /// every client go there too.
 /// </summary>
-internal sealed class ScenarioRunner(ClientOptions clientOptions, string folder, TextWriter log, Action<int, string>? stepStarted)
+internal sealed class ScenarioRunner(
+    ClientOptions clientOptions,
+    string folder,
+    TextWriter log,
+    Action<int, string>? stepStarted,
+    Action<StepResult>? stepFinished)
 {
     private const int RecentEventCount = 200;
 
@@ -20,7 +25,7 @@ internal sealed class ScenarioRunner(ClientOptions clientOptions, string folder,
         Directory.CreateDirectory(folder);
         var stopwatch = Stopwatch.StartNew();
         var clients = new Dictionary<string, GameClient>();
-        var context = new ScenarioContext(clients, folder, log, stepStarted);
+        var context = new ScenarioContext(clients, folder, log, stepStarted, stepFinished);
         try
         {
             foreach (var role in scenario.Roles)
@@ -31,6 +36,11 @@ internal sealed class ScenarioRunner(ClientOptions clientOptions, string folder,
 
             await scenario.RunAsync(context);
             log.WriteLine($"PASS {scenario.Name} ({stopwatch.Elapsed.TotalSeconds:0} s)");
+            if (context.Steps.Count != scenario.StepCount)
+            {
+                log.WriteLine($"    note: {scenario.Name} ran {context.Steps.Count} steps but its StepCount says {scenario.StepCount}");
+            }
+
             return this.Result(scenario, true, stopwatch.Elapsed, null, context);
         }
         catch (Exception exception)

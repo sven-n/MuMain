@@ -33,6 +33,8 @@ internal sealed class TradeScenario : Scenario
 
     public override IReadOnlyList<string> Roles => [Seller, Buyer];
 
+    public override int StepCount => 11;
+
     public override async Task RunAsync(ScenarioContext context)
     {
         var seller = context.Client(Seller);
