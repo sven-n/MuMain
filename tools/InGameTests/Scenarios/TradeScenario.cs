@@ -65,7 +65,7 @@ internal sealed class TradeScenario : Scenario
         await context.StepAsync(
             "The buyer walks up to the seller",
             $"{buyerCharacter.Name} stands on a tile next to {sellerCharacter.Name}: a trade needs the partner at most one tile away.",
-            () => WalkUpToAsync(buyer, seller));
+            () => WalkUpToAsync(buyer, seller, buyerCharacter.Name));
 
         var offer = await FindJewelAsync(seller);
         await context.StepAsync(
@@ -111,7 +111,8 @@ internal sealed class TradeScenario : Scenario
             });
     }
 
-    // Walks the buyer next to where the seller stands.
+    // Walks the buyer next to where the seller stands, as the seller's client
+    // sees it: that client checks the distance of a trade request.
     //
     // A warp to a town lands anywhere in it, and a character that is in Lorencia
     // already starts wherever it stood, so how far each one walks changes from run
@@ -119,32 +120,82 @@ internal sealed class TradeScenario : Scenario
     // `move` answers within a tile of its target while the walk may still take
     // its last step, so the buyer heads for where the seller stands now, until
     // the two are next to each other.
-    private static async Task WalkUpToAsync(GameClient buyer, GameClient seller)
+    //
+    // The buyer's own client can also show it a step further than the others see
+    // it, when its last step did not reach them. Then the buyer walks a few tiles
+    // away and comes back: a `move` onto a tile in reach sends no walk at all.
+    private static async Task WalkUpToAsync(GameClient buyer, GameClient seller, string buyerName)
     {
         var sellerPosition = (X: 0, Y: 0);
         var buyerPosition = (X: 0, Y: 0);
+        (int X, int Y)? seenPosition = null;
         await Expect.EventuallyAsync(
             async () =>
             {
                 sellerPosition = await PositionAsync(seller);
                 buyerPosition = await PositionAsync(buyer);
-                if (Math.Abs(buyerPosition.X - sellerPosition.X) <= TradeDistance
-                    && Math.Abs(buyerPosition.Y - sellerPosition.Y) <= TradeDistance)
+                seenPosition = await SeenPositionAsync(seller, buyerName);
+                var nextToSeller = IsNextTo(buyerPosition, sellerPosition);
+                if (nextToSeller && seenPosition is { } seen && IsNextTo(seen, sellerPosition))
                 {
                     return true;
+                }
+
+                if (nextToSeller)
+                {
+                    await StepAwayAsync(buyer, sellerPosition);
+                    return false;
                 }
 
                 await buyer.SendAsync("move", new { x = sellerPosition.X, y = sellerPosition.Y }, WalkTimeout);
                 return false;
             },
             WalkTimeout,
-            () => $"the buyer ({buyerPosition.X},{buyerPosition.Y}) did not get next to the seller ({sellerPosition.X},{sellerPosition.Y})");
+            () => $"the buyer ({buyerPosition.X},{buyerPosition.Y}; the seller's client sees it at "
+                  + $"{(seenPosition is { } seen ? $"({seen.X},{seen.Y})" : "no place")}) did not get next to the seller "
+                  + $"({sellerPosition.X},{sellerPosition.Y})");
+    }
+
+    private static bool IsNextTo((int X, int Y) position, (int X, int Y) other)
+        => Math.Abs(position.X - other.X) <= TradeDistance && Math.Abs(position.Y - other.Y) <= TradeDistance;
+
+    // Three tiles away from the seller, in the first direction that can be walked.
+    private static async Task StepAwayAsync(GameClient buyer, (int X, int Y) sellerPosition)
+    {
+        const int Away = 3;
+        foreach (var (dx, dy) in new[] { (Away, 0), (-Away, 0), (0, Away), (0, -Away) })
+        {
+            try
+            {
+                await buyer.SendAsync("move", new { x = sellerPosition.X + dx, y = sellerPosition.Y + dy }, WalkTimeout);
+                return;
+            }
+            catch (ControlException exception) when (exception.Error == "no_path")
+            {
+                // A wall or a building; try the next direction.
+            }
+        }
     }
 
     private static async Task<(int X, int Y)> PositionAsync(GameClient client)
     {
         var position = (await client.StateAsync()).GetProperty("position");
         return (position[0].GetInt32(), position[1].GetInt32());
+    }
+
+    // Where the client of <paramref name="observer"/> sees the player <paramref name="name"/>.
+    private static async Task<(int X, int Y)?> SeenPositionAsync(GameClient observer, string name)
+    {
+        foreach (var entry in (await observer.StateAsync()).GetProperty("nearby").EnumerateArray())
+        {
+            if (entry.TryGetProperty("name", out var entryName) && entryName.GetString() == name
+                && entry.TryGetProperty("position", out var position))
+            {
+                return (position[0].GetInt32(), position[1].GetInt32());
+            }
+        }
+
+        return null;
     }
 
     private static async Task<ItemSlot> FindJewelAsync(GameClient client)
