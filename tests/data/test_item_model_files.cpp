@@ -5,18 +5,22 @@
 #include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Render/Items/ItemDisplay.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <filesystem>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace Data::Items;
@@ -212,4 +216,93 @@ TEST_CASE("Shipped item models keep the models of the old loading code [data][it
     const ItemModelDefinition* bronzeHelm = FindModel(models, 7, 0);
     REQUIRE(bronzeHelm != nullptr);
     CHECK(bronzeHelm->file == "Data/Player/HelmMale01.bmd");
+}
+
+TEST_CASE("Shipped item models keep the display of the old drawing code [data][items]")
+{
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+
+    const ItemModelDefinition* kris = FindModel(models, 0, 0);
+    REQUIRE(kris != nullptr);
+    CHECK(kris->inventory.anchor == std::array<double, 2>{0.8, 0.85});
+    CHECK(kris->inventory.offset == std::array<double, 3>{-0.02, 0.03, 0.0});
+    CHECK(kris->inventory.rotation == std::array<double, 3>{180, 270, 15});
+    CHECK(kris->inventory.scale == ItemInventoryDisplay::DefaultScale);
+    CHECK(kris->ground.rotation == std::array<double, 3>{60, 0, -45});
+    CHECK_FALSE(kris->ground.scale.has_value());
+
+    // The only item that is also moved in depth.
+    const ItemModelDefinition* lowerRefiningStone = FindModel(models, 14, 43);
+    REQUIRE(lowerRefiningStone != nullptr);
+    CHECK(lowerRefiningStone->inventory.offset[2] == 0.02);
+
+    // Armor is drawn on the character skeleton, helms 160 units down.
+    const ItemModelDefinition* bronzeHelm = FindModel(models, 7, 0);
+    REQUIRE(bronzeHelm != nullptr);
+    CHECK(bronzeHelm->inventory.bodyHeight == -160);
+    CHECK(bronzeHelm->ground.bodyHeight == -160);
+}
+
+TEST_CASE("Shipped item models mark the capes that are drawn as cloth [data][items]")
+{
+    std::vector<std::pair<int, int>> cloth;
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (model.cloth)
+        {
+            cloth.emplace_back(model.group, model.number);
+        }
+    }
+    std::sort(cloth.begin(), cloth.end());
+
+    // Wing of Ruin, Cape of Emperor, Cape of Fighter, Cape of Overrule, Small
+    // Cape of Lord, Little Warrior's Cloak and the Cape of Lord.
+    const std::vector<std::pair<int, int>> capes{{12, 39},  {12, 40},  {12, 49}, {12, 50},
+                                                 {12, 130}, {12, 135}, {13, 30}};
+    CHECK(cloth == capes);
+}
+
+// The place in the slot of the items whose place depends on their level, as
+// the old drawing code had it (recorded for levels 0 to 15).
+TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
+{
+    struct Expected
+    {
+        int group;
+        int number;
+        std::vector<std::pair<std::vector<int>, Render::Items::Display::Anchor>> anchors;
+        Render::Items::Display::Anchor otherLevels;
+    };
+    using Anchor = Render::Items::Display::Anchor;
+    const std::vector<Expected> expected{
+        {13, 11, {{{0}, {0.5f, 0.8f}}, {{1}, {0.5f, 0.5f}}}, {}},                     // Life Stone
+        {13, 14, {{{1}, {0.55f, 0.85f}}}, {0.6f, 1.0f}},                              // Loch's Feather
+        {13, 19, {{{0}, {0.5f, 0.5f}}, {{1}, {0.7f, 0.8f}}, {{2}, {0.7f, 0.7f}}}, {}}, // Weapon of Archangel
+        {13, 20, {{{0}, {0.5f, 0.65f}}, {{1, 2, 3}, {0.5f, 0.8f}}}, {}},              // Wizard's Ring
+        {14, 9, {{{1}, {0.5f, 0.8f}}}, {0.5f, 0.95f}},                                // Ale
+        {14, 11, {{{3, 13}, {0.5f, 0.5f}}, {{14, 15}, {0.5f, 0.8f}}}, {0.5f, 0.95f}}, // Box of Luck
+        {14, 21, {{{0, 3}, {0.5f, 0.5f}}, {{1, 2}, {0.4f, 0.8f}}}, {}},               // Rena
+        {14, 24, {{{1}, {0.5f, 0.8f}}}, {0.5f, 0.95f}},                               // Broken Sword / Dark Stone
+    };
+    g_ItemModelDatabase.Build(ShippedModels().models);
+
+    for (const Expected& item : expected)
+    {
+        for (int level = 0; level <= 15; ++level)
+        {
+            Anchor want = item.otherLevels;
+            for (const auto& [levels, anchor] : item.anchors)
+            {
+                if (std::find(levels.begin(), levels.end(), level) != levels.end())
+                {
+                    want = anchor;
+                }
+            }
+            const Anchor got = Render::Items::Display::GetInventoryAnchor(MakeItemType(item.group, item.number), level);
+            INFO("(" << item.group << "," << item.number << ") level " << level);
+            CHECK(got.x == want.x);
+            CHECK(got.y == want.y);
+        }
+    }
+    g_ItemModelDatabase.Build({});
 }

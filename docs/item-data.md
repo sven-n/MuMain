@@ -226,7 +226,11 @@ item files hold what client and server share.
     {
       "number": 4,
       "file": "Data/Item/DarkHorseHorn.bmd",
-      "textureFolders": ["Item", "Skill"]
+      "textureFolders": ["Item", "Skill"],
+      "inventory": {
+        "rotation": [-90, -90, 0],
+        "scale": 0.0015
+      }
     }
   ]
 }
@@ -238,11 +242,32 @@ item files hold what client and server share.
 | `file` | The `.bmd` model, relative to the game folder, with `/` between folders. |
 | `textureFolders` | Folders below `Data/` with the model's textures. Each texture is taken from the **first** folder that has it. Without folders the model has no textures. |
 | `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
+| `inventory` | How the item is drawn in the inventory, see below. Optional. |
+| `ground` | How the item lies on the ground, see below. Optional. |
+| `cloth` | `true` for capes that are drawn as cloth when worn. Optional. |
+
+`inventory` and `ground` hold these values; a missing value has the
+default, which is the look of items without values of their own:
+
+| Value | Meaning | Default |
+|---|---|---|
+| `inventory.anchor` | Where the model sits in its slot, as a share of the slot width and height from the top left corner. | `[0.5, 0.6]` |
+| `inventory.offset` | Moves the model from there: `[x, y]`, or `[x, y, z]` to also move it in depth. | `[0, 0]` |
+| `inventory.rotation` | Degrees around x, y and z. | `[270, -10, 0]` |
+| `inventory.scale` | Size of the model. | `0.0025` |
+| `inventory.bodyHeight`, `ground.bodyHeight` | For armor, which is drawn on the character skeleton: how far down it sits (e.g. `-160` for helms). | `0` |
+| `ground.rotation` | Degrees around x, y and z. | `[0, 0, -45]` |
+| `ground.scale` | Size of the model on the ground. Without it the item keeps the size all dropped items have. | none |
+
+In the inventory every item turns while the mouse is on it, and gamble
+items (tag `gambleItem`) turn slowly all the time.
 
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
-  the model of another item or with an effect model; that choice is still
-  made in code.
+  the model of another item or with an effect model; that choice, and
+  the look of those effect models, is still made in code. So is the look
+  of items that changes with their level (level variants, e.g. the Box
+  of Luck); they become items of their own later.
 - Models that are not item models (effects, monsters, the character
   bodies) are not in these files.
 - Write paths with the upper and lower case of the files, so the game
@@ -251,10 +276,12 @@ item files hold what client and server share.
 Model files are checked like the item files: invalid JSON, a missing
 `number` or `file`, a file that is not a `.bmd`, a path that leaves the
 game folder (starting with `/`, a drive letter or `..`), `\` in a path,
-or an item with two models stop the start with a message; unknown fields
-are warnings. The automated tests also check that every model file and
-texture folder exists, that every texture of a model is in one of its
-texture folders, and that every texture is a `.jpg` or `.tga` texture.
+display values of the wrong kind (e.g. a rotation with two numbers or a
+scale of 0), or an item with two models stop the start with a message;
+unknown fields are warnings. The automated tests also check that every
+model file and texture folder exists, that every texture of a model is in
+one of its texture folders, and that every texture is a `.jpg` or `.tga`
+texture.
 
 When a model file or a texture cannot be loaded, one message after
 loading lists the problems (up to 10; all of them are in `MuError.log`).

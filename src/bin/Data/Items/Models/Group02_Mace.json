@@ -5,98 +5,241 @@
     {
       "number": 0,
       "file": "Data/Item/Mace01.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 1,
       "file": "Data/Item/Mace02.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 2,
       "file": "Data/Item/Mace03.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 3,
       "file": "Data/Item/Mace04.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 4,
       "file": "Data/Item/Mace05.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 5,
       "file": "Data/Item/Mace06.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 6,
       "file": "Data/Item/Mace07.bmd",
       "textureFolders": ["Item"],
-      "noneBlendMeshes": [1]
+      "noneBlendMeshes": [1],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 7,
       "file": "Data/Item/Mace08.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 8,
       "file": "Data/Item/Mace09.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 9,
       "file": "Data/Item/Mace10.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 10,
       "file": "Data/Item/Mace11.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 11,
       "file": "Data/Item/Mace12.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 12,
       "file": "Data/Item/Mace13.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 13,
       "file": "Data/Item/saint.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.5],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 14,
       "file": "Data/Item/HDK_Mace.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "offset": [-0.01, 0.1],
+        "rotation": [180, 90, 13]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 15,
       "file": "Data/Item/CW_Mace.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "offset": [0, 0.05],
+        "rotation": [180, 90, 13]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 16,
       "file": "Data/Item/Mace_17.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "offset": [-0.02, 0],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 17,
       "file": "Data/Item/Mace_18.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "offset": [-0.02, 0.04],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 18,
       "file": "Data/Item/gamble_safter01.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "offset": [-0.03, 0.06],
+        "rotation": [180, 90, 2],
+        "scale": 0.0024
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     }
   ]
 }

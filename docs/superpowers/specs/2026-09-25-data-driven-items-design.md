@@ -535,13 +535,16 @@ server with original clients (after phases 6 and B).
      code. `textureFolders` is a search list: each texture comes from the
      first folder that has it (the old code loaded folder after folder and
      sometimes relied on textures another model had loaded before).
-   - **4b Display:** the inventory transform (`RenderObjectScreen()`,
-     offset, rotation, scale) and the ground transform (`ItemAngle()`,
-     `ItemHeight()`) come from the data; `"cloth": true` marks capes drawn
-     as cloth. The display-only lists of phase 3
-     (`ItemDisplayCategories.cpp`) go away where they only chose position,
-     angle or scale. Display cases that depend on the item level stay in
-     code until phase 12.
+   - **4b Display:** the inventory transform (`RenderItem3D()` slot
+     anchor, `RenderObjectScreen()` offset, rotation, scale and body
+     height) and the ground transform (`ItemAngle()`, `ItemHeight()`) come
+     from the data; `"cloth": true` marks capes drawn as cloth. The
+     display-only lists of phase 3 (`ItemDisplayCategories.cpp`) go away
+     where they only chose position, angle or scale. Display cases that
+     depend on the item level stay in code until phase 12, and so does the
+     look of the non-item models drawn for items (event models of level
+     variants, the inventory models of the Rage Fighter armor), a small
+     table in `Render/Items/ItemDisplay.cpp`.
    - **4c Named render effects (D24):** `glow`, `renderStyle` and `effects`
      select effect code by name.
 

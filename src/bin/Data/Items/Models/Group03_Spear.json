@@ -6,62 +6,159 @@
       "number": 0,
       "file": "Data/Item/Spear01.bmd",
       "textureFolders": ["Item"],
-      "noneBlendMeshes": [1]
+      "noneBlendMeshes": [1],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "offset": [0, 0.05],
+        "rotation": [0, 90, 20],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 1,
       "file": "Data/Item/Spear02.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 2,
       "file": "Data/Item/Spear03.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 3,
       "file": "Data/Item/Spear04.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 4,
       "file": "Data/Item/Spear05.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 5,
       "file": "Data/Item/Spear06.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 6,
       "file": "Data/Item/Spear07.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 7,
       "file": "Data/Item/Spear08.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 8,
       "file": "Data/Item/Spear09.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 9,
       "file": "Data/Item/Spear10.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 25],
+        "scale": 0.0021
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 10,
       "file": "Data/Item/spear11.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "rotation": [180, 270, 20],
+        "scale": 0.0018
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     },
     {
       "number": 11,
       "file": "Data/Item/gamble_scyder01.bmd",
-      "textureFolders": ["Item"]
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.65],
+        "offset": [0, 0.02],
+        "rotation": [180, 90, 15]
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
     }
   ]
 }
