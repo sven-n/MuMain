@@ -21,7 +21,7 @@ namespace mu::ui::window
     {
         float left = 0.f;       // reference px, in #panel's local space
         float top = 0.f;
-        Rml::String decorator;  // "image(skill-icon-skill2-3-8)" -- see UI::Skills::IconSpriteName()
+        Rml::String decorator;  // "image(skill-icon-skill2-lit-3-8)" -- see UI::MuHelper::SkillIconDecorator()
     };
 
     struct MuHelperSkillPickerRmlModel

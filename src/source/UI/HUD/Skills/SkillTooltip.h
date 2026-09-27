@@ -19,6 +19,11 @@ namespace UI::Skills::Tooltip
     // when CharacterAttribute is null.
     bool BuildModelForSlot(int Type, Model& outModel);
 
+    // How far below Render()'s (sx, sy) its box ends, in reference px under the active transform:
+    // Render() raises the box by one text height per line (half for spacers) but
+    // RenderTipTextList() makes lines 1.1 heights tall (0.55 for spacers) and adds a 1 px frame.
+    float NativeBoxBottomBelowAnchor(const Model& model);
+
     // Converts a resolved Model's lines into UI::RmlBridge::Tooltip's own Line list -- shared by
     // every in-game caller that migrates off Render()'s native draw onto the shared RmlUi tooltip,
     // so each one doesn't hand-roll the same LineColor switch. Deliberately NOT in

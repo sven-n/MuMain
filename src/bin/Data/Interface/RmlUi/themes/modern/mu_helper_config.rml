@@ -4,6 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="docked_panel_frame.rcss"/>
 	<link type="text/rcss" href="skill_icons.rcss"/>
+	<link type="text/rcss" href="master_skill_icons.rcss"/>
 	<link type="text/rcss" href="mu_helper_common.rcss"/>
 	<link type="text/rcss" href="mu_helper_config.rcss"/>
 </head>

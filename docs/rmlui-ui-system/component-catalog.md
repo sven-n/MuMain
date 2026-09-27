@@ -354,7 +354,11 @@ reading it cold:
   instead of under it. The mechanism (a dedicated third `Rml::Context`,
   `RmlUiRuntime::RenderDialogBackgroundLayer()`, fired from `CManager::Render()`'s own loop right
   before the shared 3D camera's z-order) is fully documented in the class's own header comment —
-  read that, not a paraphrase, before touching anything `item3D`-adjacent.
+  read that, not a paraphrase, before touching anything `item3D`-adjacent. Only an `item3D` dialog
+  paints its chrome in that context: every other dialog shows the same background markup as a
+  second document in the main context, pulled to the front right under its text, so a
+  full-screen RmlUi window (the master skill tree) cannot cover the panel of a dialog opened over
+  it.
 - Single active instance, not a real stack — a second `Show()` call while one is open queues
   instead of replacing it; see the class's own header comment for why that's not a functional
   regression from what it replaces.
@@ -458,14 +462,11 @@ this primitive's positioning/clamping logic for two low-traffic windows.
 
 ## Skill icons
 
-`UI::Skills::ResolveIconCell(skillType)` (`UI/HUD/Skills/SkillIconCell.h`) maps a skill to its cell
-in one of the five icon sheets (`newui_skill`/`skill2`/`skill3`/`command`, a 12x9 grid of 20x28 on
-256; the master-skill sheet, 25x18 on 512), and `IconSpriteName()` names the matching sprite.
-`Tools/gen_skill_icon_sheets.py` generates the sprites into both themes' `skill_icons.rcss`; link
-that file, build `"image(" + IconSpriteName(cell) + ")"` in C++, and bind it with
-`data-style-decorator` on a 20x28 element. It is the
-one resolver the three native copies of `RenderSkillIcon()`'s lookup collapse into; the MU Helper
-windows use it, and `CSkillList` still draws natively.
+`UI::Skills::Icon::ResolveSkillIcon()` (`UI/HUD/Skills/SkillIconAtlas.h`) maps a skill to its
+20x28 cell, lit or grey, and `IconSpriteName()` names the sprite in `skill_icons.rcss` or
+`master_skill_icons.rcss`. Link both, build `"image(" + sprite + ")"` in C++ and bind it with
+`data-style-decorator`. It is the one resolver for every skill icon: the HUD (`CSkillList`), the
+master tree and the MU Helper windows (`UI::MuHelper::SkillIconDecorator()`, always lit).
 
 A *gauge*, native's fill-by-level slider (`newui_option_volume01` back, `volume02` fill clipped to
 `level * 10%`), is built in `mu_helper_common.rcss` (`.mh-gauge`/`.mh-gauge-fill`). Legacy uses one
@@ -479,7 +480,8 @@ per-window, or entirely unbuilt:
 
 - **ItemSlot / ItemGrid** — the slot *chrome* (border/hover highlight/count/cooldown overlay) has
   no reusable RmlUi component yet, but the pattern to build one isn't unproven: it's the same
-  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) already validated for skill icons.
+  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) validated for skill icons (since
+  2026-09-27 the skill icons themselves are RmlUi sprites too: `skill_icons.rcss`, `ResolveSkillIcon()`).
   **Correction, 2026-09-06**: this entry previously called `CItemHotKey`'s icons "3D-camera-
   composited" and framed the whole slot as "still 100% legacy 2D rendering... the next real
   candidate to prove a pattern against" — wrong on both counts. Traced to source

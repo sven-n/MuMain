@@ -6,7 +6,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/HUD/Skills/SkillIconCell.h"
+#include "UI/MuHelper/MuHelperShared.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -252,8 +252,7 @@ void CMuHelperSkillPicker::SyncRmlModel()
         MuHelperSkillPickerEntry e;
         e.left = p.left;
         e.top = p.top;
-        const std::string sprite = UI::Skills::IconSpriteName(UI::Skills::ResolveIconCell(p.skillType));
-        e.decorator = sprite.empty() ? Rml::String("none") : "image(" + sprite + ")";
+        e.decorator = UI::MuHelper::SkillIconDecorator(p.skillType);
         model.entries.push_back(std::move(e));
     }
     m_RmlBinder.MarkDirty("entries");

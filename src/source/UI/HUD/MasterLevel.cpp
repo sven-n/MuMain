@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/HUD/MasterLevel.h"
+#include "UI/HUD/Skills/MasterSkillTreeLayout.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "I18N/All.h"
 
@@ -15,17 +16,63 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Scaling/UITransform.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 namespace
 {
     _MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
     _MASTER_SKILL_TOOLTIP m_stMasterSkillTooltip[MAX_MASTER_SKILL_DATA];
 
-    // Distinct Tooltip::Owner tokens -- RenderIcon()'s RenderToolTip() (skill hover) always runs
-    // before RenderText() (XP hover) within the same Render() call, and only one of the two can be
-    // hovered at once; separate owners stop whichever call's unconditional Hide() runs second from
-    // clobbering the other's Show() from earlier the same frame.
-    const int kSkillTooltipOwner = 0;
-    const int kXpTooltipOwner = 0;
+    // Distinct Tooltip::Owner tokens: each hint hides only itself, so whichever of the three is
+    // re-shown this frame is never clobbered by another's Hide().
+    const int kNodeHintOwner = 0;
+    const int kExperienceHintOwner = 0;
+    const int kCloseHintOwner = 0;
+
+    // Where the original anchored its hints, reference px: the node hint under the icon's left
+    // edge (above it for the lower ranks), the EXP hint under the label, the close button's
+    // CTooltip centred under the 13x14 button at (611, 9).
+    constexpr int kIconOffsetX = 8;
+    constexpr int kNodeHintBelowIcon = 33;
+    constexpr int kNodeHintFlipTop = 300;
+    constexpr float kExperienceHintX = 466.0f;
+    constexpr float kExperienceHintY = 26.0f;
+    constexpr int kCloseX = 611;
+    constexpr int kCloseY = 9;
+    constexpr int kCloseWidth = 13;
+    constexpr int kCloseHeight = 14;
+    constexpr int kCloseHintGap = 2;
+    constexpr int kCloseHintCenterX = kCloseX + kCloseWidth / 2;
+    constexpr int kCloseHintTop = kCloseY + kCloseHeight + kCloseHintGap;
+
+    // The tree's own rectangle: 640 wide, down to the bottom of its 428-high background art.
+    constexpr int kTreeHeight = 428;
+
+    template <typename Model>
+    void SyncString(RmlModelBinder<Model>& binder, Rml::String Model::* field, const char* name, Rml::String value)
+    {
+        Model& model = binder.GetModel();
+        if (model.*field == value)
+            return;
+        model.*field = std::move(value);
+        binder.MarkDirty(name);
+    }
+
+    template <typename Model>
+    void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* name, float value)
+    {
+        Model& model = binder.GetModel();
+        if (model.*field == value)
+            return;
+        model.*field = value;
+        binder.MarkDirty(name);
+    }
 }
 
 
@@ -36,9 +83,7 @@ mu::ui::window::CMasterLevel::CMasterLevel()
     this->CurSkillID = 0;
     this->classCode = MASTER_SKILL_TREE_CLASS_NONE;
     this->CategoryTextIndex = 0;
-    this->categoryPos[0] = { 11,55 };
-    this->categoryPos[1] = { 221,55 };
-    this->categoryPos[2] = { 431,55 };
+    this->ClassNameTextIndex = 0;
     this->InitMasterSkillPoint();
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
@@ -71,18 +116,8 @@ bool mu::ui::window::CMasterLevel::Create(CManager* pNewUIMng)
 
     this->LoadImages();
 
-    this->m_CloseBT.ChangeButtonImgState(true, IMAGE_MASTER_INTERFACE + 5, false, false, false);
-
-    this->m_CloseBT.ChangeButtonInfo(611, 9, 13, 14);
-
-    this->m_CloseBT.ChangeToolTipText(&I18N::Game::Close388);
-
-    for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
-    {
-        this->ButtonX[i] = 0;
-
-        this->ButtonY[i] = 0;
-    }
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     return true;
 }
@@ -93,6 +128,7 @@ void mu::ui::window::CMasterLevel::Release()
     this->ClearSkillTooltipData();
     if (m_pNewUIMng)
     {
+        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
@@ -103,7 +139,7 @@ void mu::ui::window::CMasterLevel::SetPos()
     this->PosX = 0;
     this->PosY = 0;
     this->width = REFERENCE_WIDTH;
-    this->height = 428;
+    this->height = kTreeHeight;
 }
 
 void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
@@ -417,61 +453,27 @@ int mu::ui::window::CMasterLevel::SetDivideString(wchar_t* text, int isItemTollT
 
 bool mu::ui::window::CMasterLevel::Render()
 {
-    EnableAlphaTest();
-    RenderImage(IMAGE_MASTER_INTERFACE, this->PosX, this->PosY, Bitmaps[IMAGE_MASTER_INTERFACE].Width, Bitmaps[IMAGE_MASTER_INTERFACE].Height);
-    RenderImage(IMAGE_MASTER_INTERFACE + 1, this->PosX + Bitmaps[IMAGE_MASTER_INTERFACE].Width, this->PosY, Bitmaps[IMAGE_MASTER_INTERFACE + 1].Width, Bitmaps[IMAGE_MASTER_INTERFACE + 1].Height);
-    this->RenderIcon();
-    this->m_CloseBT.Render();
-    DisableAlphaBlend();
-    this->RenderText();
-
+    // Nothing native left: the background, the nodes, the header and the close button are all
+    // RmlUi (master_level.rml). Kept because CObject requires the override.
     return true;
 }
 
 bool mu::ui::window::CMasterLevel::Update()
 {
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CMasterLevel::UpdateMouseEvent()
 {
-    if (this->m_CloseBT.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL);
-
-        return true;
-    }
-
-    bool result = true;
-
-    if (mu::ui::window::IsPress(VK_LBUTTON) == true)
-    {
-        result = this->CheckMouse(MouseX, MouseY);
-
-        if (result == false)
-        {
-            PlayBuffer(SOUND_CLICK01);
-        }
-    }
-
-    for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
-    {
-        if (this->ButtonX[i] == 1 && mu::ui::window::IsPress(VK_LBUTTON) == true)
-        {
-            this->ButtonX[i] = 0;
-
-            return true;
-        }
-    }
-
-    this->CheckBtn();
-
+    // Node presses, hints and the close button are RmlUi events now. What is left is claiming the
+    // tree's own rectangle, so a click on it never reaches a window or the world underneath.
     if (mu::ui::window::WindowGeometry(this->PosX, this->PosY, this->width, this->height).Contains(MouseX, MouseY) == true)
     {
         return false;
     }
 
-    return result;
+    return true;
 }
 
 bool mu::ui::window::CMasterLevel::UpdateKeyEvent()
@@ -495,407 +497,483 @@ float mu::ui::window::CMasterLevel::GetLayerDepth()
 
 void mu::ui::window::CMasterLevel::LoadImages()
 {
-    LoadBitmap(L"Interface\\new_Master_back01.jpg", IMAGE_MASTER_INTERFACE, GL_LINEAR, GL_REPEAT, true, false);
-    LoadBitmap(L"Interface\\new_Master_back02.jpg", IMAGE_MASTER_INTERFACE + 1, GL_LINEAR, GL_REPEAT, true, false);
+    // The tree itself draws from RmlUi spritesheets over the same files (master_level.rcss); the
+    // two icon atlases stay loaded for the HUD skill slots and the MU Helper, which still draw
+    // master skill icons natively from these slots.
     LoadBitmap(L"Interface\\new_Master_Icon.jpg", IMAGE_MASTER_INTERFACE + 2, GL_LINEAR, GL_CLAMP, true, false);
     LoadBitmap(L"Interface\\new_Master_Non_Icon.jpg", IMAGE_MASTER_INTERFACE + 3, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_box.tga", IMAGE_MASTER_INTERFACE + 4, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_exit.jpg", IMAGE_MASTER_INTERFACE + 5, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow01.tga", IMAGE_MASTER_INTERFACE + 6, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow02.tga", IMAGE_MASTER_INTERFACE + 7, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow03.tga", IMAGE_MASTER_INTERFACE + 8, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow04.tga", IMAGE_MASTER_INTERFACE + 9, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow05.tga", IMAGE_MASTER_INTERFACE + 10, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow06.tga", IMAGE_MASTER_INTERFACE + 11, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow07.tga", IMAGE_MASTER_INTERFACE + 12, GL_LINEAR);
-    LoadBitmap(L"Interface\\new_Master_arrow08.tga", IMAGE_MASTER_INTERFACE + 13, GL_LINEAR);
 }
 
 void mu::ui::window::CMasterLevel::UnloadImages()
 {
-    for (int i = 0; i < 14; i++)
+    DeleteBitmap(IMAGE_MASTER_INTERFACE + 2, false);
+    DeleteBitmap(IMAGE_MASTER_INTERFACE + 3, false);
+}
+
+void mu::ui::window::CMasterLevel::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "master_level",
+        [this](Rml::DataModelConstructor& c, MasterLevelRmlModel& model)
+        {
+            c.Bind("scale_x", &model.scaleX);
+            c.Bind("scale_y", &model.scaleY);
+            c.Bind("inverse_scale_x", &model.inverseScaleX);
+            c.Bind("inverse_scale_y", &model.inverseScaleY);
+            c.Bind("text_px", &model.textPx);
+
+            c.Bind("class_name_text", &model.classNameText);
+            c.Bind("master_level_text", &model.masterLevelText);
+            c.Bind("level_point_text", &model.levelPointText);
+            c.Bind("experience_text", &model.experienceText);
+            c.Bind("column_text_0", &model.columnText0);
+            c.Bind("column_text_1", &model.columnText1);
+            c.Bind("column_text_2", &model.columnText2);
+
+            auto node = c.RegisterStruct<MasterLevelNodeEntry>();
+            node.RegisterMember("id", &MasterLevelNodeEntry::id);
+            node.RegisterMember("left", &MasterLevelNodeEntry::left);
+            node.RegisterMember("top", &MasterLevelNodeEntry::top);
+            node.RegisterMember("icon", &MasterLevelNodeEntry::icon);
+            node.RegisterMember("usable", &MasterLevelNodeEntry::usable);
+            node.RegisterMember("arrow", &MasterLevelNodeEntry::arrow);
+            node.RegisterMember("level_text", &MasterLevelNodeEntry::levelText);
+            c.RegisterArray<std::vector<MasterLevelNodeEntry>>();
+            c.Bind("nodes", &model.nodes);
+
+            // Only recorded here and acted on in Update(): the press opens a modal dialog, which
+            // must not happen inside this document's own event dispatch.
+            c.BindEventCallback("master_node_press",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PressedNodeId = arguments[0].Get<int>(-1);
+                                });
+            c.BindEventCallback("master_node_hover",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_HoveredNodeId = arguments[0].Get<int>(-1);
+                                });
+            c.BindEventCallback("master_experience_hover",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_bExperienceHovered = arguments[0].Get<int>(0) != 0;
+                                });
+            c.BindEventCallback("master_close_hover",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_bCloseHovered = arguments[0].Get<int>(0) != 0;
+                                });
+            c.BindEventCallback("master_close", [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL); });
+        });
+
+    if (modelCreated)
     {
-        DeleteBitmap(i + IMAGE_MASTER_INTERFACE, false);
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                      "Data/Interface/RmlUi/master_level.rml");
+    }
+
+    m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/master_level_bg.rml");
+}
+
+void mu::ui::window::CMasterLevel::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return; // never opened -- BuildRmlUi() picks up the new theme whenever it first is
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    if (m_pRmlBgDoc)
+    {
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+            bgContext->UnloadDocument(m_pRmlBgDoc);
+        m_pRmlBgDoc = nullptr;
+    }
+
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() restores visibility, the header and the node list.
+}
+
+void mu::ui::window::CMasterLevel::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    const bool visible = IsVisible();
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    // Show() pulls the tree to the front of the main context, above the HUD documents it covers,
+    // as the original drew it over them.
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, visible);
+    SyncBackgroundVisibility(visible);
+
+    if (!visible)
+    {
+        if (wasVisible)
+            ResetHints();
+        return;
+    }
+
+    SyncTransform();
+    SyncHeaderTexts();
+    RebuildNodeModel();
+
+    if (m_PressedNodeId >= 0)
+    {
+        const int nodeId = m_PressedNodeId;
+        m_PressedNodeId = -1;
+        OnNodePressed(nodeId);
+    }
+
+    SyncHints();
+}
+
+void mu::ui::window::CMasterLevel::SyncBackgroundVisibility(bool visible)
+{
+    if (m_pRmlBgDoc == nullptr || m_pRmlBgDoc->IsVisible() == visible)
+        return;
+
+    if (!visible)
+    {
+        m_pRmlBgDoc->Hide();
+        return;
+    }
+
+    // Behind every other background document: the bottom HUD's own art draws over this black.
+    m_pRmlBgDoc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+    m_pRmlBgDoc->PushToBack();
+}
+
+void mu::ui::window::CMasterLevel::SyncTransform()
+{
+    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset. The inverse is
+    // pushed rather than computed in the markup so each text leaf's transform stays a plain
+    // binding.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+}
+
+void mu::ui::window::CMasterLevel::SyncHeaderTexts()
+{
+    wchar_t buffer[256] = {};
+
+    SyncString(m_RmlBinder, &MasterLevelRmlModel::classNameText, "class_name_text",
+               StringUtils::WideToNarrow(I18N::Game::Lookup(this->ClassNameTextIndex)));
+
+    mu_swprintf(buffer, I18N::Game::MasterLevelD, Master_Level_Data.nMLevel);
+    SyncString(m_RmlBinder, &MasterLevelRmlModel::masterLevelText, "master_level_text",
+               StringUtils::WideToNarrow(buffer));
+
+    mu_swprintf(buffer, I18N::Game::LevelPointD, Master_Level_Data.nMLevelUpMPoint);
+    SyncString(m_RmlBinder, &MasterLevelRmlModel::levelPointText, "level_point_text",
+               StringUtils::WideToNarrow(buffer));
+
+    Rml::String experienceText;
+    if (Master_Level_Data.lNext_MasterLevel_Experince != 0)
+    {
+        const double percent = UI::Skills::MasterTree::ExperiencePercent(
+            {Master_Level_Data.nMLevel, Master_Level_Data.lMasterLevel_Experince,
+             Master_Level_Data.lNext_MasterLevel_Experince});
+        mu_swprintf(buffer, I18N::Game::EXP62f, percent);
+        experienceText = StringUtils::WideToNarrow(buffer);
+    }
+    SyncString(m_RmlBinder, &MasterLevelRmlModel::experienceText, "experience_text", std::move(experienceText));
+
+    Rml::String MasterLevelRmlModel::* const columnFields[MAX_MASTER_SKILL_CATEGORY] = {
+        &MasterLevelRmlModel::columnText0, &MasterLevelRmlModel::columnText1, &MasterLevelRmlModel::columnText2};
+    const char* const columnNames[MAX_MASTER_SKILL_CATEGORY] = {"column_text_0", "column_text_1", "column_text_2"};
+    for (int column = 0; column < MAX_MASTER_SKILL_CATEGORY; ++column)
+    {
+        mu_swprintf(buffer, I18N::Game::Lookup(this->CategoryTextIndex + column), this->CategoryPoint[column]);
+        SyncString(m_RmlBinder, columnFields[column], columnNames[column], StringUtils::WideToNarrow(buffer));
     }
 }
 
-void mu::ui::window::CMasterLevel::RenderText() const
+void mu::ui::window::CMasterLevel::RebuildNodeModel()
 {
-    g_pRenderText->SetFont(g_hFont);
+    MasterLevelRmlModel& model = m_RmlBinder.GetModel();
 
-    if (mu::ui::window::IsPress(VK_LBUTTON) == false && mu::ui::window::CheckMouseIn(458, 11, 81, 10) == true)
+    std::vector<MasterLevelNodeEntry> nodes;
+    nodes.reserve(this->map_masterData.size());
+
+    // In tree order, as native drew them: IsNodeUsable()'s rank check reads the levels the
+    // previous ranks recorded on the way (CheckRankPoint()), and later nodes paint over the arrows
+    // of earlier ones.
+    for (const auto& [treeIndex, skillData] : this->map_masterData)
     {
-        TextList[0][0] = 0;
-        TextBold[0] = 0;
-        TextListColor[0] = 0;
-        mu_swprintf(TextList[0], L"%I64d / %I64d", Master_Level_Data.lMasterLevel_Experince, Master_Level_Data.lNext_MasterLevel_Experince);
+        if (skillData.Group >= MAX_MASTER_SKILL_CATEGORY)
+            continue;
 
-        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::RmlBridge::Tooltip::Config config;
-        config.lines = BuildTooltipLinesFromTextList(1);
-        config.anchorX = UI::Scaling::PositionX(activeTransform, 466.0f);
-        config.anchorY = UI::Scaling::PositionY(activeTransform, 26.0f);
-        config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
-        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
-        UI::RmlBridge::Tooltip::Show(config, &kXpTooltipOwner);
+        const SKILL_ATTRIBUTE& skillAttribute = SkillAttribute[skillData.Skill];
+        const auto position = UI::Skills::MasterTree::NodeBoxPosition(
+            skillData.Group, UI::Skills::MasterTree::SlotInRank(skillData.Index), skillAttribute.SkillRank);
+        const bool usable = IsNodeUsable(skillData);
+
+        MasterLevelNodeEntry entry;
+        entry.id = treeIndex;
+        entry.left = static_cast<float>(position.left);
+        entry.top = static_cast<float>(position.top);
+        entry.icon = "image(" + UI::Skills::MasterTree::IconSpriteName(skillAttribute.Magic_Icon, usable) + ")";
+        entry.usable = usable;
+        entry.arrow = skillData.ArrowDirection;
+        entry.levelText = std::to_string(CharacterAttribute->MasterSkillInfo[skillData.Skill].GetSkillLevel());
+        nodes.push_back(std::move(entry));
+    }
+
+    // Only publish a genuine change: the tree is static until a point is spent or equipment
+    // changes, and marking the array dirty re-runs every node's bindings.
+    const bool changed = nodes.size() != model.nodes.size() ||
+                         !std::equal(nodes.begin(), nodes.end(), model.nodes.begin(),
+                                     [](const MasterLevelNodeEntry& a, const MasterLevelNodeEntry& b)
+                                     {
+                                         return a.id == b.id && a.left == b.left && a.top == b.top &&
+                                                a.icon == b.icon && a.usable == b.usable && a.arrow == b.arrow &&
+                                                a.levelText == b.levelText;
+                                     });
+    if (!changed)
+        return;
+
+    model.nodes = std::move(nodes);
+    m_RmlBinder.MarkDirty("nodes");
+}
+
+bool mu::ui::window::CMasterLevel::IsNodeUsable(const _MASTER_SKILLTREE_DATA& skillData)
+{
+    const auto skill = skillData.Skill;
+    const BYTE rank = SkillAttribute[skill].SkillRank;
+    const BYTE skillLevel = CharacterAttribute->MasterSkillInfo[skill].GetSkillLevel();
+
+    return this->CheckParentSkill(skillData) && this->CheckRankPoint(skillData.Group, rank, skillLevel) &&
+           this->CheckBeforeSkill(skill, skillLevel) && g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(skill);
+}
+
+void mu::ui::window::CMasterLevel::SyncHints()
+{
+    // Native showed no hint on the frame of a press.
+    const bool pressing = mu::ui::window::IsPress(VK_LBUTTON);
+
+    if (pressing || m_HoveredNodeId < 0 || !ShowNodeHint(m_HoveredNodeId))
+        UI::RmlBridge::Tooltip::Hide(&kNodeHintOwner);
+
+    if (!pressing && m_bExperienceHovered)
+        ShowExperienceHint();
+    else
+        UI::RmlBridge::Tooltip::Hide(&kExperienceHintOwner);
+
+    if (m_bCloseHovered)
+        ShowCloseHint();
+    else
+        UI::RmlBridge::Tooltip::Hide(&kCloseHintOwner);
+}
+
+void mu::ui::window::CMasterLevel::ResetHints()
+{
+    // A document hidden under the pointer sends no mouseout.
+    m_HoveredNodeId = -1;
+    m_PressedNodeId = -1;
+    m_bExperienceHovered = false;
+    m_bCloseHovered = false;
+    UI::RmlBridge::Tooltip::Hide(&kNodeHintOwner);
+    UI::RmlBridge::Tooltip::Hide(&kExperienceHintOwner);
+    UI::RmlBridge::Tooltip::Hide(&kCloseHintOwner);
+}
+
+void mu::ui::window::CMasterLevel::ShowExperienceHint()
+{
+    TextList[0][0] = 0;
+    TextBold[0] = 0;
+    TextListColor[0] = 0;
+    mu_swprintf(TextList[0], L"%I64d / %I64d", Master_Level_Data.lMasterLevel_Experince,
+                Master_Level_Data.lNext_MasterLevel_Experince);
+
+    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+    UI::RmlBridge::Tooltip::Config config;
+    config.lines = BuildTooltipLinesFromTextList(1);
+    config.anchorX = UI::Scaling::PositionX(activeTransform, kExperienceHintX);
+    config.anchorY = UI::Scaling::PositionY(activeTransform, kExperienceHintY);
+    config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
+    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
+    UI::RmlBridge::Tooltip::Show(config, &kExperienceHintOwner);
+}
+
+void mu::ui::window::CMasterLevel::ShowCloseHint()
+{
+    // The CTooltip the native close button carried: one centred line under the button.
+    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+    UI::RmlBridge::Tooltip::Config config;
+    UI::RmlBridge::Tooltip::Line line;
+    line.text = StringUtils::WideToNarrow(I18N::Game::Close388);
+    config.lines.push_back(std::move(line));
+    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(kCloseHintCenterX));
+    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(kCloseHintTop));
+    config.centerHorizontally = true;
+    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
+    UI::RmlBridge::Tooltip::Show(config, &kCloseHintOwner);
+}
+
+bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)
+{
+    const auto it = this->map_masterData.find(static_cast<BYTE>(nodeId));
+    if (it == this->map_masterData.end() || it->second.Group >= MAX_MASTER_SKILL_CATEGORY)
+        return false;
+
+    const auto tooltip = this->map_masterSkillToolTip.find(it->second.Skill);
+    if (tooltip == this->map_masterSkillToolTip.end())
+        return false;
+
+    const int lineCount = this->BuildNodeHintLines(it->second, tooltip->second);
+
+    const auto position =
+        UI::Skills::MasterTree::NodeBoxPosition(it->second.Group, UI::Skills::MasterTree::SlotInRank(it->second.Index),
+                                                SkillAttribute[it->second.Skill].SkillRank);
+    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+    UI::RmlBridge::Tooltip::Config config;
+    config.lines = BuildTooltipLinesFromTextList(lineCount);
+    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(position.left + kIconOffsetX));
+    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(position.top + kNodeHintBelowIcon));
+    config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
+    config.anchor = (position.top > kNodeHintFlipTop)
+                        ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
+                        : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft; // matches the old STRP_BOTTOMCENTER flip near
+                                                                          // the bottom of the screen.
+    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
+    UI::RmlBridge::Tooltip::Show(config, &kNodeHintOwner);
+    return true;
+}
+
+int mu::ui::window::CMasterLevel::BuildNodeHintLines(const _MASTER_SKILLTREE_DATA& skillData,
+                                                     const _MASTER_SKILL_TOOLTIP& tooltip)
+{
+    const auto Skill = skillData.Skill;
+    const SKILL_ATTRIBUTE* p = &SkillAttribute[Skill];
+
+    auto skillInfo = CharacterAttribute->MasterSkillInfo[Skill];
+    const auto skillLevel = skillInfo.GetSkillLevel();
+    auto skillValue = skillInfo.GetSkillValue();
+    const auto skillNextValue = skillInfo.GetSkillNextValue();
+
+    for (int i = 0; i < 30; i++)
+    {
+        TextList[i][0] = 0;
+    }
+
+    memset(TextBold, 0, sizeof(TextBold));
+
+    for (int i = 0; i < 30; i++)
+    {
+        TextListColor[i] = i == 0 ? TEXT_COLOR_YELLOW : TEXT_COLOR_WHITE;
+    }
+
+    int lineCount = 0;
+
+    mu_swprintf(TextList[lineCount], L"%ls", p->Name);
+
+    TextBold[lineCount] = true;
+
+    lineCount++;
+
+    mu_swprintf(TextList[lineCount], tooltip.Info1, p->SkillRank, skillLevel, skillData.MaxLevel);
+
+    lineCount++;
+
+    wchar_t buffer[512] = {};
+
+    if (skillData.DefValue == -1.0f)
+    {
+        mu_swprintf(buffer, tooltip.Info2);
     }
     else
     {
-        UI::RmlBridge::Tooltip::Hide(&kXpTooltipOwner);
+        mu_swprintf(buffer, tooltip.Info2, skillLevel != 0 ? skillValue : skillData.DefValue);
     }
 
-    g_pRenderText->SetTextColor(255, 255, 255, 0xFFu);
+    lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
 
-    g_pRenderText->SetBgColor(0, 0, 0, 1u);
-
-    wchar_t Buffer[256] = {};
-
-    mu_swprintf(Buffer, I18N::Game::MasterLevelD, Master_Level_Data.nMLevel);
-
-    g_pRenderText->RenderText(275, 11, Buffer, 0, 0, 1, 0);
-
-    mu_swprintf(Buffer, I18N::Game::LevelPointD, Master_Level_Data.nMLevelUpMPoint);
-
-    g_pRenderText->RenderText(372, 11, Buffer, 0, 0, 1, 0);
-
-    if (Master_Level_Data.lNext_MasterLevel_Experince != 0)
+    if (skillLevel != 0 && skillLevel < skillData.MaxLevel)
     {
-        const __int64 iTotalLevel = Master_Level_Data.nMLevel + 400;				// 종합레벨 - 400렙이 만렙이기 때문에 더해준다.
-        const __int64 iTOverLevel = iTotalLevel - 255;		// 255레벨 이상 기준 레벨
-        __int64 iBaseExperience = 0;					// 레벨 초기 경험치
+        mu_swprintf(buffer, I18N::Game::NextLevel);
 
-        const __int64 iData_Master =	// A
-            (
-                (
-                    (__int64)9 + (__int64)iTotalLevel
-                    )
-                * (__int64)iTotalLevel
-                * (__int64)iTotalLevel
-                * (__int64)10
-                )
-            +
-            (
-                (
-                    (__int64)9 + (__int64)iTOverLevel
-                    )
-                * (__int64)iTOverLevel
-                * (__int64)iTOverLevel
-                * (__int64)1000
-                );
+        lineCount = this->SetDivideString(buffer, 0, lineCount, 4, 0, true);
 
-        iBaseExperience = (iData_Master - (__int64)3892250000) / (__int64)2;	// B
+        TextBold[lineCount] = 1;
 
-        // 레벨업 경험치
-        const double fNeedExp = (double)Master_Level_Data.lNext_MasterLevel_Experince - (double)iBaseExperience;
-
-        // 현재 획득한 경험치
-        const double fExp = (double)Master_Level_Data.lMasterLevel_Experince - (double)iBaseExperience;
-
-        mu_swprintf(Buffer, I18N::Game::EXP62f, fExp / fNeedExp * 100.0);
-
-        g_pRenderText->RenderText(466, 11, Buffer, 0, 0, 1, 0);
-    }
-
-    g_pRenderText->RenderText(154, 11, I18N::Game::Lookup(this->ClassNameTextIndex), 0, 0, 1, nullptr);
-
-    g_pRenderText->SetTextColor(255, 155, 0, 0xFFu);
-
-    mu_swprintf(Buffer, I18N::Game::Lookup(this->CategoryTextIndex), this->CategoryPoint[0]);
-
-    g_pRenderText->RenderText(92, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
-
-    mu_swprintf(Buffer, I18N::Game::Lookup(this->CategoryTextIndex + 1), this->CategoryPoint[1]);
-
-    g_pRenderText->RenderText(302, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
-
-    mu_swprintf(Buffer, I18N::Game::Lookup(this->CategoryTextIndex + 2), this->CategoryPoint[2]);
-
-    g_pRenderText->RenderText(513, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
-}
-
-void mu::ui::window::CMasterLevel::RenderIcon()
-{
-    constexpr int SKILL_ICON_WIDTH = 20;
-    constexpr int SKILL_ICON_HEIGHT = 28;
-
-    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
-    {
-        const auto group = it->second.Group;
-        const auto skill = it->second.Skill;
-        const auto skillAttribute = &SkillAttribute[skill];
-        const auto skillLevel = CharacterAttribute->MasterSkillInfo[skill].GetSkillLevel();
-
-        const int index = (it->second.Index - 1) % 4;
-        const BYTE rank = skillAttribute->SkillRank;
-
-        const int CalcX = (int)(index * 49.0f + this->categoryPos[group].x);
-        const int CalcY = (int)(this->categoryPos[group].y + (skillAttribute->SkillRank - 1) * 41.0f);
-
-        DWORD textColor;
-
-        RenderImage(IMAGE_MASTER_INTERFACE + 4, CalcX, CalcY, 50, 38, 0, 0, 50.f / 64.f, 38.f / 64.f);
-
-        if (!this->CheckParentSkill(it->second)
-            || !this->CheckRankPoint(group, rank, skillLevel)
-            || !this->CheckBeforeSkill(skill, skillLevel)
-            || !g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(skill)
-            )
-        {
-            textColor = RGBA(120, 120, 120, 255);
-
-            g_pRenderText->SetTextColor(textColor);
-            RenderImage(IMAGE_MASTER_INTERFACE + 3, CalcX + 8, CalcY + 5, SKILL_ICON_WIDTH, SKILL_ICON_HEIGHT, (20.f / 512.f) * (skillAttribute->Magic_Icon % 25), ((28.f / 512.f) * ((skillAttribute->Magic_Icon / 25))), 20.f / 512, 28.f / 512.f);
-        }
-        else
-        {
-            textColor = RGBA(255, 255, 255, 255);
-
-            g_pRenderText->SetTextColor(textColor);
-
-            RenderImage(IMAGE_MASTER_INTERFACE + 2, CalcX + 8, CalcY + 5, SKILL_ICON_WIDTH, SKILL_ICON_HEIGHT, (20.f / 512.f) * (skillAttribute->Magic_Icon % 25), ((28.f / 512.f) * ((skillAttribute->Magic_Icon / 25))), 20.f / 512.f, 28.f / 512.f);
-        }
-
-        if (it->second.ArrowDirection == 1)
-            RenderImage(IMAGE_MASTER_INTERFACE + 6, CalcX + 8 + (SKILL_ICON_WIDTH)+2, CalcY + (SKILL_ICON_HEIGHT / 2), 28, 7, 0, 0, 28 / 32.f, 7 / 8.f);
-        if (it->second.ArrowDirection == 2)
-            RenderImage(IMAGE_MASTER_INTERFACE + 7, CalcX + 8 + (SKILL_ICON_WIDTH)+2, CalcY + (SKILL_ICON_HEIGHT / 2), 28, 7, 0, 0, 28 / 32.f, 7 / 8.f);
-        if (it->second.ArrowDirection == 3)
-            RenderImage(IMAGE_MASTER_INTERFACE + 8, CalcX + 8 + (SKILL_ICON_WIDTH / 2) - 3.5, CalcY + SKILL_ICON_HEIGHT + 7, 7, 12, 0, 0, 7 / 8.f, 12 / 16.f);
-        if (it->second.ArrowDirection == 4)
-            RenderImage(IMAGE_MASTER_INTERFACE + 9, CalcX + 8 + (SKILL_ICON_WIDTH / 2) - 3.5, CalcY + SKILL_ICON_HEIGHT + 7, 7, 52, 0, 0, 7 / 8.f, 12 / 16.f);
-        if (it->second.ArrowDirection == 5)
-            RenderImage(IMAGE_MASTER_INTERFACE + 10, CalcX, CalcY, 42, 31, 0, 0, 42 / 64.f, 31 / 32.f);
-        if (it->second.ArrowDirection == 6)
-            RenderImage(IMAGE_MASTER_INTERFACE + 11, CalcX, CalcY, 42, 31, 0, 0, 42 / 64.f, 31 / 32.f);
-        if (it->second.ArrowDirection == 7)
-            RenderImage(IMAGE_MASTER_INTERFACE + 12, CalcX + 8 + (SKILL_ICON_WIDTH / 2) - 1.5, CalcY + SKILL_ICON_HEIGHT + 8, 40, 28, 0, 0, 40 / 64.f, 28 / 32.f);
-        if (it->second.ArrowDirection == 8)
-            RenderImage(IMAGE_MASTER_INTERFACE + 13, CalcX, CalcY, 40, 28, 0, 0, 40 / 64.f, 28 / 32.f);
-
-        g_pRenderText->RenderText(CalcX + 8 + 30, CalcY + 28 - 5, std::to_wstring(skillLevel).c_str());
-    }
-
-    this->RenderToolTip();
-}
-
-void mu::ui::window::CMasterLevel::RenderToolTip()
-{
-    bool anyHovered = false;
-
-    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
-    {
-        const BYTE group = it->second.Group;
-
-        auto Skill = it->second.Skill;
-
-        SKILL_ATTRIBUTE* p = &SkillAttribute[Skill];
-
-        if (p == nullptr)
-        {
-            break;
-        }
-
-        const int index = (it->second.Index - 1) % 4;
-
-        const int CalcX = (int)(index * 49.0f + this->categoryPos[group].x);
-
-        const int CalcY = (int)(this->categoryPos[group].y + (p->SkillRank - 1) * 41.0f);
-
-        if (mu::ui::window::IsPress(VK_LBUTTON) == true || mu::ui::window::CheckMouseIn(CalcX + 8, CalcY + 5, 20, 28) == false)
-        {
-            continue;
-        }
-
-        auto mtit = this->map_masterSkillToolTip.find(Skill);
-
-        if (mtit == this->map_masterSkillToolTip.end())
-        {
-            UI::RmlBridge::Tooltip::Hide(&kSkillTooltipOwner);
-            return;
-        }
-
-        anyHovered = true;
-
-        auto skillInfo = CharacterAttribute->MasterSkillInfo[Skill];
-        const auto skillLevel = skillInfo.GetSkillLevel();
-        auto skillValue = skillInfo.GetSkillValue();
-        const auto skillNextValue = skillInfo.GetSkillNextValue();
-
-        for (int i = 0; i < 30; i++)
-        {
-            TextList[i][0] = 0;
-        }
-
-        memset(TextBold, 0, sizeof(TextBold));
-
-        for (int i = 0; i < 30; i++)
-        {
-            TextListColor[i] = i == 0 ? TEXT_COLOR_YELLOW : TEXT_COLOR_WHITE;
-        }
-
-        int lineCount = 0;
-
-        mu_swprintf(TextList[lineCount], L"%ls", p->Name);
-
-        TextBold[lineCount] = true;
-
-        lineCount++;
-
-        mu_swprintf(TextList[lineCount], mtit->second.Info1, p->SkillRank, skillLevel, it->second.MaxLevel);
-
-        lineCount++;
-
-        wchar_t buffer[512] = {};
-
-        if (it->second.DefValue == -1.0f)
-        {
-            mu_swprintf(buffer, mtit->second.Info2);
-        }
-        else
-        {
-            mu_swprintf(buffer, mtit->second.Info2, skillLevel != 0 ? skillValue : it->second.DefValue);
-        }
+        mu_swprintf(buffer, tooltip.Info2, skillNextValue);
 
         lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
+    }
 
-        if (skillLevel != 0 && skillLevel < it->second.MaxLevel)
+    if (skillLevel < skillData.MaxLevel)
+    {
+        mu_swprintf(buffer, I18N::Game::Requirements3329);
+
+        lineCount = this->SetDivideString(buffer, 0, lineCount, 1, 0, true);
+
+        TextBold[lineCount] = 1;
+
+        mu_swprintf(buffer, tooltip.Info3, skillData.RequiredPoints);
+
+        if (skillData.RequiredPoints <= Master_Level_Data.nMLevelUpMPoint)
         {
-            mu_swprintf(buffer, I18N::Game::NextLevel);
-
-            lineCount = this->SetDivideString(buffer, 0, lineCount, 4, 0, true);
-
-            TextBold[lineCount] = 1;
-
-            mu_swprintf(buffer, mtit->second.Info2, skillNextValue);
-
             lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
         }
-
-        if (skillLevel < it->second.MaxLevel)
+        else
         {
-            mu_swprintf(buffer, I18N::Game::Requirements3329);
-
-            lineCount = this->SetDivideString(buffer, 0, lineCount, 1, 0, true);
-
-            TextBold[lineCount] = 1;
-
-            mu_swprintf(buffer, mtit->second.Info3, it->second.RequiredPoints);
-
-            if (it->second.RequiredPoints <= Master_Level_Data.nMLevelUpMPoint)
-            {
-                lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
-            }
-            else
-            {
-                lineCount = this->SetDivideString(buffer, 0, lineCount, 2, 0, true);
-            }
+            lineCount = this->SetDivideString(buffer, 0, lineCount, 2, 0, true);
         }
+    }
 
-        int iTextColor = this->CheckBeforeSkill(Skill, skillLevel) == true ? 0 : 2;
+    int iTextColor = this->CheckBeforeSkill(Skill, skillLevel) == true ? 0 : 2;
 
-        mu_swprintf(buffer, mtit->second.Info4);
+    mu_swprintf(buffer, tooltip.Info4);
+
+    lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
+
+    if (skillLevel < skillData.MaxLevel && p->SkillRank != 1)
+    {
+        iTextColor = this->CheckRankPoint(skillData.Group, p->SkillRank, skillLevel) == true ? 0 : 2;
+
+        mu_swprintf(buffer, tooltip.Info5);
 
         lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
 
-        if (skillLevel < it->second.MaxLevel && p->SkillRank != 1)
+        for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
         {
-            iTextColor = this->CheckRankPoint(group, p->SkillRank, skillLevel) == true ? 0 : 2;
+            const auto RequireSkill = skillData.RequireSkill[i];
 
-            mu_swprintf(buffer, mtit->second.Info5);
-
-            lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
-
-            for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
+            if (RequireSkill >= AT_SKILL_MASTER_BEGIN && RequireSkill <= AT_SKILL_MASTER_END)
             {
-                const auto RequireSkill = it->second.RequireSkill[i];
-
-                if (RequireSkill >= AT_SKILL_MASTER_BEGIN && RequireSkill <= AT_SKILL_MASTER_END)
-                {
-                    auto requiredSkill = CharacterAttribute->MasterSkillInfo[RequireSkill];
-                    iTextColor = requiredSkill.GetSkillValue() < 10 ? 2 : 0;
-                    mu_swprintf(buffer, i == 0 ? mtit->second.Info6 : mtit->second.Info7);
-                    lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
-                }
+                auto requiredSkill = CharacterAttribute->MasterSkillInfo[RequireSkill];
+                iTextColor = requiredSkill.GetSkillValue() < 10 ? 2 : 0;
+                mu_swprintf(buffer, i == 0 ? tooltip.Info6 : tooltip.Info7);
+                lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
             }
         }
-
-        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::RmlBridge::Tooltip::Config config;
-        config.lines = BuildTooltipLinesFromTextList(lineCount);
-        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(CalcX + 8));
-        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(CalcY + 33));
-        config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
-        config.anchor = (CalcY > 300) ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
-                                       : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft; // matches the old STRP_BOTTOMCENTER flip near the bottom of the screen.
-        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
-        UI::RmlBridge::Tooltip::Show(config, &kSkillTooltipOwner);
     }
 
-    if (!anyHovered)
-    {
-        UI::RmlBridge::Tooltip::Hide(&kSkillTooltipOwner);
-    }
+    return lineCount;
 }
 
-bool mu::ui::window::CMasterLevel::CheckMouse(int posx, int posy)
+void mu::ui::window::CMasterLevel::OnNodePressed(int nodeId)
 {
-    constexpr POINT position[3] = { {185,65},{385,65},{585,65} };
+    const auto it = this->map_masterData.find(static_cast<BYTE>(nodeId));
+    if (it == this->map_masterData.end())
+        return;
 
-    for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
-    {
-        if (mu::ui::window::CheckMouseIn(position[i].x + this->PosX, this->ButtonY[i] + position[i].y + this->PosY, 15, 30) == true && this->ButtonX[i] == 0)
-        {
-            this->ButtonY[i] = 1;
-
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool mu::ui::window::CMasterLevel::CheckBtn()
-{
-    constexpr int posX = 220;
-
-    for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
-    {
-        if (this->ButtonX[i] == 1 && mu::ui::window::IsRelease(VK_LBUTTON))
-        {
-            this->ButtonX[i] = 0;
-            return false;
-        }
-
-        if (this->ButtonX[i] == 1)
-        {
-            this->ButtonY[i] = MouseY - 65;
-
-            if (this->ButtonY[i] > posX)
-            {
-                this->ButtonY[i] = posX;
-            }
-            else if (this->ButtonY[i] <= 0)
-            {
-                this->ButtonY[i] = 0;
-            }
-        }
-    }
-
-    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
-    {
-        auto selectedSkill = it->second;
-        
-        switch (selectedSkill.Group)
-        {
-        case 0:
-        case 1:
-        case 2:
-            this->CheckAttributeArea(selectedSkill);
-            break;
-        }
-    }
-
-    return true;
+    this->CheckAttributeArea(it->second);
 }
 
 bool mu::ui::window::CMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA& skillData)
@@ -910,17 +988,6 @@ bool mu::ui::window::CMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DA
     if (lpskill == nullptr)
     {
         return false;
-    }
-
-    const int tindex = (skillData.Index - 1) % 4;
-
-    const int posX = (int)((double)this->categoryPos[skillData.Group].x + tindex * 49.0);
-
-    const int posY = (int)((double)this->categoryPos[skillData.Group].y + (lpskill->SkillRank - 1) * 41.0);
-
-    if (!mu::ui::window::IsPress(VK_LBUTTON) || mu::ui::window::CheckMouseIn(posX + 8, posY + 5, 20, 28) == false)
-    {
-        return true;
     }
 
     const auto skillPoint = CharacterAttribute->MasterSkillInfo[skillData.Skill].GetSkillLevel();

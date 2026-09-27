@@ -3,6 +3,7 @@
 	<title>MU Helper Skill Picker</title>
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="skill_icons.rcss"/>
+	<link type="text/rcss" href="master_skill_icons.rcss"/>
 	<link type="text/rcss" href="mu_helper_skill_picker.rcss"/>
 </head>
 <body>
@@ -11,7 +12,7 @@
 	     entry's left/top is native's reference-space fan-out position, computed in C++
 	     (CMuHelperSkillPicker::LayoutPlacements()) because it is a genuinely computed layout.
 
-	     Each icon is one named cell of a generated skill atlas (skill_icons.rcss), bound as a whole
+	     Each icon is one named cell of a generated skill atlas (skill_icons.rcss, master_skill_icons.rcss), bound as a whole
 	     decorator -- the only way to crop an atlas in this build. -->
 	<div id="panel" data-model="mu_helper_skill_picker"
 	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"

@@ -2,6 +2,8 @@
 
 #include "MUHelper/MuHelperData.h"
 
+#include <string>
+
 // State the MU Helper settings windows share: the config window, its detail panel and the skill
 // picker all edit one staged copy of the bot's settings, which is pushed into g_MuHelper only on
 // Save. The windows themselves never own it.
@@ -41,6 +43,10 @@ namespace UI::MuHelper
 
     // `baseClass` is gCharacterManager.GetBaseClass()'s CLASS_* value.
     ClassFeatures ResolveClassFeatures(int baseClass);
+
+    // A skill's icon as a data-style-decorator value ("image(<sprite>)", or "none" for no skill).
+    // Always the lit icon: the settings show a skill's choice, not whether it can be used now.
+    std::string SkillIconDecorator(int skillType);
 }
 
 // The detail panel's pages. The values line up with the config window's own button ids

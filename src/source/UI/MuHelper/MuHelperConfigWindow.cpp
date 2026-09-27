@@ -10,7 +10,6 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/HUD/Skills/SkillIconCell.h"
 #include "UI/MuHelper/MuHelperDetailWindow.h"
 #include "UI/MuHelper/MuHelperSkillPicker.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -47,14 +46,6 @@ namespace
     int BaseClass()
     {
         return Hero ? gCharacterManager.GetBaseClass(Hero->Class) : -1;
-    }
-
-    Rml::String SlotDecorator(int skill)
-    {
-        if (skill <= 0)
-            return "none";
-        const std::string sprite = UI::Skills::IconSpriteName(UI::Skills::ResolveIconCell(skill));
-        return sprite.empty() ? Rml::String("none") : "image(" + sprite + ")";
     }
 
     void SetConditionMode(uint32_t& bits, bool timer, bool enable)
@@ -894,12 +885,12 @@ void CMuHelperConfigWindow::SyncRmlModel()
     sync(model.checks, checks, "checks");
 
     MuHelperSlotIcons slots;
-    slots.s0 = SlotDecorator(m_aiSelectedSkills[0]);
-    slots.s1 = SlotDecorator(m_aiSelectedSkills[1]);
-    slots.s2 = SlotDecorator(m_aiSelectedSkills[2]);
-    slots.s3 = SlotDecorator(m_aiSelectedSkills[3]);
-    slots.s4 = SlotDecorator(m_aiSelectedSkills[4]);
-    slots.s5 = SlotDecorator(m_aiSelectedSkills[5]);
+    slots.s0 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[0]);
+    slots.s1 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[1]);
+    slots.s2 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[2]);
+    slots.s3 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[3]);
+    slots.s4 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[4]);
+    slots.s5 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[5]);
     sync(model.slots, slots, "slots");
 
     if (m_bExtraItemsDirty)

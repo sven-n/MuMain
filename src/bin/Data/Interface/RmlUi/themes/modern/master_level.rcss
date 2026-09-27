@@ -1,0 +1,106 @@
+/* Modern theme for CMasterLevel -- the master skill tree. Same stretched reference layout as the
+   legacy theme (master_level.rml): the tree is a map of fixed node positions, so the geometry is
+   content, not chrome. The chrome is modern's: forged-panel surfaces in place of the painted
+   background, one recessed well behind the columns, bordered node sockets and a crimson close button.
+   The icon atlases (master_skill_icons.rcss) and the arrow sprites are content and stay. Node
+   state comes from what C++ binds as meaning (usable/locked), never a pushed colour. */
+
+@spritesheet master-arrow-1-sheet { src: "../../../new_Master_arrow01.tga"; master-arrow-1: 0px 0px 28px 7px; }
+@spritesheet master-arrow-2-sheet { src: "../../../new_Master_arrow02.tga"; master-arrow-2: 0px 0px 28px 7px; }
+@spritesheet master-arrow-3-sheet { src: "../../../new_Master_arrow03.tga"; master-arrow-3: 0px 0px 7px 12px; }
+@spritesheet master-arrow-4-sheet { src: "../../../new_Master_arrow04.tga"; master-arrow-4: 0px 0px 7px 48px; }
+@spritesheet master-arrow-5-sheet { src: "../../../new_Master_arrow05.tga"; master-arrow-5: 0px 0px 42px 31px; }
+@spritesheet master-arrow-6-sheet { src: "../../../new_Master_arrow06.tga"; master-arrow-6: 0px 0px 42px 31px; }
+@spritesheet master-arrow-7-sheet { src: "../../../new_Master_arrow07.tga"; master-arrow-7: 0px 0px 40px 28px; }
+@spritesheet master-arrow-8-sheet { src: "../../../new_Master_arrow08.tga"; master-arrow-8: 0px 0px 40px 28px; }
+
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 428px;
+	transform-origin: left top;
+	background-color: token(surface-deep);
+	decorator: linear-gradient(to bottom, token(surface-panel) 0%, token(surface-deep) 100%);
+	border-width: 0 0 1px 0;
+	border-color: token(border-frame);
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+/* One recessed well behind the three columns (x 11 to 627, ranks from y 55). */
+#back_left {
+	position: absolute;
+	left: 6px;
+	top: 52px;
+	width: 628px;
+	height: 370px;
+	background-color: token(surface-recessed);
+	border-width: 1px;
+	border-color: token(border-inner);
+}
+#back_right { display: none; }
+
+.node { position: absolute; width: 50px; height: 38px; }
+.node-box {
+	position: absolute;
+	left: 6px;
+	top: 3px;
+	width: 22px;
+	height: 30px;
+	background-color: token(surface-raised);
+	border-width: 1px;
+	border-color: token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+.node.locked .node-box { border-color: token(border-recessed); background-color: token(surface-panel); }
+.node-icon { position: absolute; left: 8px; top: 5px; width: 20px; height: 28px; }
+.node-icon:hover { box-shadow: 0 0 0 1px token(border-hover); }
+
+.node-arrow { position: absolute; pointer-events: none; opacity: 0.8; }
+.arrow-1 { left: 30px; top: 14px; width: 28px; height: 7px; decorator: image(master-arrow-1); }
+.arrow-2 { left: 30px; top: 14px; width: 28px; height: 7px; decorator: image(master-arrow-2); }
+.arrow-3 { left: 14.5px; top: 35px; width: 7px; height: 12px; decorator: image(master-arrow-3); }
+.arrow-4 { left: 14.5px; top: 35px; width: 7px; height: 52px; decorator: image(master-arrow-4); }
+.arrow-5 { left: 0; top: 0; width: 42px; height: 31px; decorator: image(master-arrow-5); }
+.arrow-6 { left: 0; top: 0; width: 42px; height: 31px; decorator: image(master-arrow-6); }
+.arrow-7 { left: 16.5px; top: 36px; width: 40px; height: 28px; decorator: image(master-arrow-7); }
+.arrow-8 { left: 0; top: 0; width: 40px; height: 28px; decorator: image(master-arrow-8); }
+
+.text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: pre;
+	pointer-events: none;
+}
+
+.node-level { left: 38px; top: 23px; color: token(text-primary); }
+.node.locked .node-level { color: token(text-muted); }
+
+#close {
+	position: absolute;
+	left: 611px;
+	top: 9px;
+	width: 13px;
+	height: 14px;
+	background-color: token(accent-crimson);
+	border-width: 1px;
+	border-color: token(border-title);
+	border-radius: token(radius-sm)px;
+	cursor: pointer;
+}
+#close:hover { background-color: token(accent-crimson-hover); }
+
+.head-text { top: 11px; color: token(text-primary); }
+#class_name { left: 154px; color: token(text-warm); }
+#master_level { left: 275px; }
+#level_point { left: 372px; }
+#experience { left: 466px; }
+#experience_area { position: absolute; left: 458px; top: 11px; width: 81px; height: 10px; }
+
+.column-text { top: 40px; color: token(accent-gold); }
+#column_0 { left: 92px; }
+#column_1 { left: 302px; }
+#column_2 { left: 513px; }

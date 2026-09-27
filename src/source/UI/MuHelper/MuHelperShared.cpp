@@ -2,6 +2,8 @@
 #include "UI/MuHelper/MuHelperShared.h"
 
 #include "Core/Globals/_enum.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "UI/HUD/Skills/SkillIconAtlas.h"
 
 #include <cwchar>
 
@@ -73,5 +75,17 @@ namespace UI::MuHelper
             conditionBits |= static_cast<uint32_t>(ON_MOBS_NEARBY);
         if ((conditionBits & ~MUHELPER_SKILL_SUBCON_CLEAR) == 0)
             conditionBits |= static_cast<uint32_t>(ON_MORE_THAN_TWO_MOBS);
+    }
+
+    std::string SkillIconDecorator(int skillType)
+    {
+        if (skillType <= 0 || SkillAttribute == nullptr)
+            return "none";
+
+        const std::string sprite = UI::Skills::Icon::IconSpriteName(UI::Skills::Icon::ResolveSkillIcon(
+            { .skillType = skillType,
+              .skillUseType = SkillAttribute[skillType].SkillUseType,
+              .magicIcon = SkillAttribute[skillType].Magic_Icon }));
+        return sprite.empty() ? std::string("none") : "image(" + sprite + ")";
     }
 }

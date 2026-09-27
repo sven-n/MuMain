@@ -81,6 +81,29 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
     RenderTipTextList(sx, sy, model.count, 0, RT3_SORT_CENTER, iRenderPoint);
 }
 
+float NativeBoxBottomBelowAnchor(const Model& model)
+{
+    if (model.count <= 0)
+        return 0.f;
+
+    // The raise, as Render() computes it from the first line's font.
+    g_pRenderText->SetFont(model.lines[0].isBold ? g_hFontBold : g_hFont);
+    const float lineHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
+    const float raise = static_cast<float>(model.count - model.skipCount) * lineHeight +
+                        static_cast<float>(model.skipCount) * lineHeight / 2.f;
+
+    // The box, as RenderTipTextList() measures it: it stops at the first empty line.
+    float box = 0.f;
+    for (int i = 0; i < model.count && model.lines[i].text[0] != L'\0'; ++i)
+    {
+        g_pRenderText->SetFont(model.lines[i].isBold ? g_hFontBold : g_hFont);
+        const float rowHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
+        box += rowHeight * (model.lines[i].text[0] == L'\n' ? 0.55f : 1.1f);
+    }
+
+    return box - raise + 1.f;
+}
+
 std::vector<UI::RmlBridge::Tooltip::Line> ToRmlBridgeLines(const Model& model)
 {
     std::vector<UI::RmlBridge::Tooltip::Line> lines;
