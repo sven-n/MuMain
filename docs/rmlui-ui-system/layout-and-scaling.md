@@ -196,11 +196,12 @@ lives in a `transform` or was pre-multiplied in C++ before being handed to RCSS.
 its C++ pre-multiplies the scale into the width it sets. Don't generalize from one to the other;
 check which of the two a document is before converting anything read out of its boxes.
 
-The same asymmetry applies within a single element tree, which is why
-`RefreshLogicalAnchorPosition()` still has this defect: `GetAbsoluteOffset()` returns
-`root_x + childLocalOffset`, where `root_x` was pre-multiplied by the scale but the child's own
-offset was not, so un-mapping the whole sum through the transform wrongly divides the child half.
-See `tracked-deferrals.md`.
+The same asymmetry applies within a single element tree, and `RefreshLogicalAnchorPosition()` had
+exactly this defect before it was fixed: `GetAbsoluteOffset()` returns `root_x + childLocalOffset`,
+where `root_x` was pre-multiplied by the scale but the child's own offset was not, so un-mapping the
+whole sum through the transform wrongly divided the child half. It now takes the child's offset as a
+**delta against `#panel`** and adds the caller's own position — a signature that cannot express the
+bug — and its three callers were corrected with it.
 
 ## Deferred (not part of this policy yet)
 

@@ -1,0 +1,79 @@
+<rml>
+<head>
+	<title>Warp List</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="move_command.rcss"/>
+</head>
+<body>
+	<!-- The left-docked warp list (/move, the warp command window). LayoutMode::DockLeft is this
+	     window's own layout mode and nothing else uses it: logical x=0 is the screen's left edge
+	     and logical y=432 (UI::Scaling::DockLogicalBottom) is the top of the bottom HUD frame, so
+	     the panel is authored in plain reference px and scaled by root_scale, the same convention
+	     every other non-HUD window uses -- not dp. panel_height comes from C++ because it is a
+	     real computed value: the window fills the dock column down to a whole number of rows.
+
+	     Text does NOT scale with the panel. The native renderer's font grows from 11pt to 16pt
+	     while the dock transform grows to 2.25x, so a reference-px font-size would be ~55% too
+	     large at high resolutions and show a third fewer rows. #head and #list therefore counter-
+	     scale themselves out of #panel (the my_quest_info.rml technique) and size their own boxes
+	     in root_scale-multiplied px; everything inside them is then laid out at the native text's
+	     real size. Column positions inside those boxes are percentages, so they need no binding of
+	     their own and stay put at every scale. -->
+	<div id="panel" data-model="move_command"
+	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-height="panel_height + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+
+		<span id="title"
+		      data-style-font-size="text_px + 'px'"
+		      data-style-width="(230 * root_scale) + 'px'"
+		      data-style-margin-left="(115 - 115 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+
+		<div id="head"
+		     data-style-font-size="text_px + 'px'"
+		     data-style-width="(row_width * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span class="col col-strife">{{head_strife}}</span>
+			<span class="col col-map">{{head_map}}</span>
+			<span class="col col-level">{{head_level}}</span>
+			<span class="col col-zen">{{head_zen}}</span>
+		</div>
+
+		<!-- base.rcss's .scroll-pane: RmlUi owns the scroll position, the wheel and the scrollbar
+		     drag, replacing the hand-rolled thumb/track math this window used to carry. -->
+		<div id="list" class="scroll-pane"
+		     data-style-font-size="text_px + 'px'"
+		     data-style-width="(list_width * root_scale) + 'px'"
+		     data-style-height="(list_height * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<!-- The row is narrower than the pane, and explicitly sized rather than 100%, for two
+			     separate reasons: the spare lane on the right is where the scrollbar lives (a
+			     full-width row sits under the handle and swallows the drag), and a percentage
+			     width would additionally shrink the moment a scrollbar appears, shifting every
+			     column in the table. -->
+			<div class="mc-row" data-for="row : rows"
+			     data-class-can-move="row.can_move"
+			     data-style-width="(row_width * root_scale) + 'px'"
+			     data-style-height="(row_height * root_scale) + 'px'"
+			     data-event-click="movecommand_warp(row.index)">
+				<span class="col col-strife">{{row.strife_text}}</span>
+				<span class="col col-map">{{row.map_name}}</span>
+				<span class="col col-level" data-class-unmet="row.level_unmet">{{row.req_level}}</span>
+				<span class="col col-zen" data-class-unmet="row.zen_unmet">{{row.req_zen}}</span>
+			</div>
+		</div>
+
+		<div id="close_bar"
+		     data-style-top="close_top + 'px'"
+		     data-style-height="row_height + 'px'"
+		     data-event-click="movecommand_close">
+			<span id="close_label"
+			      data-style-font-size="text_px + 'px'"
+			      data-style-width="(226 * root_scale) + 'px'"
+			      data-style-margin-left="(113 - 113 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{close_text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

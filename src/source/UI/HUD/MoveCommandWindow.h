@@ -1,16 +1,24 @@
 #pragma once
 
 #include <algorithm>
-#include <cstddef>
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "Network/MoveCommandData.h"
-#include "UI/HUD/ChatLogWindow.h"
+#include "UI/HUD/MoveCommandRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/Scaling/UITransform.h"
+
+namespace Rml
+{
+    class ElementDocument;
+}
 
 namespace UI::MoveCommand
 {
+    // Reference-space geometry, all of it derived from the dock height rather than fixed: the
+    // window starts at windowY and grows down to a whole number of rows short of the dock's own
+    // bottom edge, which is where the bottom HUD frame begins.
     struct Layout
     {
         int windowWidth;
@@ -18,18 +26,6 @@ namespace UI::MoveCommand
         int visibleRows;
         int listTop;
         int closeTop;
-        int closeLeft;
-        int closeWidth;
-        int scrollTrackTop;
-        int scrollTrackHeight;
-        int thumbTravel;
-    };
-
-    struct DragState
-    {
-        int scrollOffset;
-        bool dragging;
-        bool releaseConsumed;
     };
 
     inline Layout CalculateLayout(int windowY, int rowHeight)
@@ -38,10 +34,6 @@ namespace UI::MoveCommand
         constexpr int kFixedChromeHeight = 60;
         constexpr int kListOffsetY = 38;
         constexpr int kCloseBottomGap = 6;
-        constexpr int kCloseLeft = 2;
-        constexpr int kCloseRightGap = 5;
-        constexpr int kScrollBarCapHeight = 3;
-        constexpr int kScrollThumbHeight = 30;
 
         const int safeRowHeight = std::max(rowHeight, 1);
         const int availableHeight = UI::Scaling::DockLogicalBottom - windowY;
@@ -49,52 +41,9 @@ namespace UI::MoveCommand
         const int windowHeight = kFixedChromeHeight + visibleRows * safeRowHeight;
         const int listTop = windowY + kListOffsetY;
         const int closeTop = windowY + windowHeight - safeRowHeight - kCloseBottomGap;
-        const int closeWidth = kWindowWidth - kCloseRightGap;
-        const int scrollTrackTop = listTop - kScrollBarCapHeight;
-        const int scrollTrackHeight = visibleRows * safeRowHeight;
-        const int thumbTravel = std::max(0, scrollTrackHeight - kScrollThumbHeight);
-        return { kWindowWidth, windowHeight, visibleRows, listTop, closeTop, kCloseLeft, closeWidth, scrollTrackTop, scrollTrackHeight, thumbTravel };
-    }
-
-    inline int MaximumScrollOffset(std::size_t itemCount, int visibleRows)
-    {
-        if (visibleRows <= 0 || itemCount <= static_cast<std::size_t>(visibleRows))
-            return 0;
-        return static_cast<int>(itemCount - static_cast<std::size_t>(visibleRows));
-    }
-
-    inline int ClampScrollOffset(int offset, std::size_t itemCount, int visibleRows)
-    {
-        return std::clamp(offset, 0, MaximumScrollOffset(itemCount, visibleRows));
-    }
-
-    inline int ThumbYForScrollOffset(int offset, const Layout& layout, std::size_t itemCount)
-    {
-        const int maximumOffset = MaximumScrollOffset(itemCount, layout.visibleRows);
-        if (maximumOffset == 0 || layout.thumbTravel == 0)
-            return layout.scrollTrackTop;
-
-        const int clampedOffset = ClampScrollOffset(offset, itemCount, layout.visibleRows);
-        return layout.scrollTrackTop + (clampedOffset * layout.thumbTravel + maximumOffset / 2) / maximumOffset;
-    }
-
-    inline int ScrollOffsetForThumbY(int thumbY, const Layout& layout, std::size_t itemCount)
-    {
-        const int maximumOffset = MaximumScrollOffset(itemCount, layout.visibleRows);
-        if (maximumOffset == 0 || layout.thumbTravel == 0)
-            return 0;
-
-        const int travel = std::clamp(thumbY - layout.scrollTrackTop, 0, layout.thumbTravel);
-        return (travel * maximumOffset + layout.thumbTravel / 2) / layout.thumbTravel;
-    }
-
-    inline DragState UpdateDragState(bool dragging, bool released, int mouseY, int grabOffsetY, int scrollOffset,
-                                     const Layout& layout, std::size_t itemCount)
-    {
-        if (!dragging)
-            return { scrollOffset, false, false };
-
-        return { ScrollOffsetForThumbY(mouseY - grabOffsetY, layout, itemCount), !released, released };
+        // The close bar's own left inset (2) and width (230 - 5) are fixed, so they live in RCSS
+        // with the rest of the static geometry rather than being computed and pushed from here.
+        return { kWindowWidth, windowHeight, visibleRows, listTop, closeTop };
     }
 }
 
@@ -102,32 +51,6 @@ namespace mu::ui::window
 {
     class CMoveCommandWindow : public CObject
     {
-        enum IMAGE_LIST
-        {
-            IMAGE_MOVECOMMAND_SCROLL_TOP = CChatLogWindow::IMAGE_SCROLL_TOP,			// newui_scrollbar_up.tga (7,3)
-            IMAGE_MOVECOMMAND_SCROLL_MIDDLE = CChatLogWindow::IMAGE_SCROLL_MIDDLE,			// newui_scrollbar_m.tga (7,15)
-            IMAGE_MOVECOMMAND_SCROLL_BOTTOM = CChatLogWindow::IMAGE_SCROLL_BOTTOM,			// newui_scrollbar_down.tga (7,3)
-            IMAGE_MOVECOMMAND_SCROLLBAR_ON = CChatLogWindow::IMAGE_SCROLLBAR_ON,			// newui_scroll_On.tga (15,30)
-            IMAGE_MOVECOMMAND_SCROLLBAR_OFF = CChatLogWindow::IMAGE_SCROLLBAR_OFF,			// newui_scroll_Off.tga (15,30)
-            //IMAGE_MOVECOMMAND_DRAG_BTN		= CChatLogWindow::IMAGE_DRAG_BTN
-        };
-
-        enum
-        {
-            MOVECOMMAND_SCROLLBTN_WIDTH = 15,
-            MOVECOMMAND_SCROLLBTN_HEIGHT = 30,
-            MOVECOMMAND_SCROLLBAR_TOP_WIDTH = 7,
-            MOVECOMMAND_SCROLLBAR_TOP_HEIGHT = 3,
-            MOVECOMMAND_SCROLLBAR_MIDDLE_WIDTH = 7,
-            MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT = 15,
-        };
-
-        enum MOVECOMMAND_MOUSE_EVENT
-        {
-            MOVECOMMAND_MOUSEBTN_NORMAL = 0,
-            MOVECOMMAND_MOUSEBTN_OVER,
-            MOVECOMMAND_MOUSEBTN_CLICKED,
-        };
     private:
 
         //$$AUTO_BUILD_LINE_ SHUFFLE_BEGIN
@@ -135,20 +58,16 @@ namespace mu::ui::window
         POINT						m_Pos;
         int							m_iRealFontHeight;
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
-        POINT						m_StartUISubjectName;
-        POINT						m_StartMapNamePos;
         POINT						m_MapNameUISize;
-        POINT						m_StrifePos;
-        POINT						m_MapNamePos;
-        POINT						m_ReqLevelPos;
-        POINT						m_ReqZenPos;
-        int							m_iSelectedMapName;
-        int							m_iSelectedTextIndex;
-        int							m_iScrollBtnMouseEvent;
         UI::MoveCommand::Layout		m_layout{};
-        int							m_scrollOffset{0};
-        int							m_scrollDragGrabOffsetY{0};
         DWORD						m_dwMoveCommandKey;
+
+        RmlModelBinder<MoveCommandRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        // One-shot: rewind the list to the top on the first frame after the window opens, once
+        // the document is visible and RmlUi has laid it out. Re-asserting a scroll position every
+        // frame would fight the player's own drag and wheel.
+        bool						m_bRewindPending = false;
 
     public:
         CMoveCommandWindow();
@@ -164,7 +83,7 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        bool BtnProcess();
+        void ReloadRmlTheme();
 
         virtual void OpenningProcess();
         void ClosingProcess();
@@ -191,10 +110,15 @@ namespace mu::ui::window
         void SetStrifeMap();
         void SettingCanMoveMap();
         void RefreshDataAndLayout();
-        void SetScrollOffset(int offset);
-        int VisibleEndIndex() const;
-        void RenderFrame();
-        void LoadImages();
-        void UnloadImages();
+        // The font-derived row height and everything CalculateLayout() derives from it, without
+        // re-copying the warp list itself.
+        void RefreshLayoutMetrics();
+
+        void BuildRmlUi();
+        void SyncRmlModel();
+        void RebuildRowModel();
+        // Warps to the list entry at `row` (a position in m_listMoveInfoData, as pushed into
+        // MoveCommandRowEntry::index), if the character still meets its requirements.
+        void RmlClickWarp(int row);
     };
 };

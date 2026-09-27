@@ -233,6 +233,55 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   caught it. Both now latch through `m_bScrollPending`/`m_bScrollRequest`, and the logical cursor
   reads back from the live scroll offset so external callers start from where the user actually is.
 
+- **`CMoveCommandWindow`** — **done, both themes (2026-09-27)**. The left-docked warp list (`/move`).
+  Ported for the scrollbar: this is the window that actually *retires* a hand-rolled one rather than
+  decorating a new one. `ThumbYForScrollOffset`/`ScrollOffsetForThumbY`/`UpdateDragState`/
+  `MaximumScrollOffset`/`ClampScrollOffset`, the grab-offset bookkeeping and the three-state
+  `MOVECOMMAND_MOUSE_EVENT` machine are gone, with their five unit tests, replaced by
+  `base.rcss`'s `.scroll-pane`. `UI::MoveCommand::CalculateLayout()` deliberately stays: deriving the
+  window's height from the dock column is real layout intent, not scroll bookkeeping.
+
+  Three things here are worth carrying to the next port:
+
+  - **A `.scroll-pane` inside a `transform: scale()` panel has to counter-scale itself out.** The
+    reason is not cosmetic: the native text renderer's font grows 11pt→16pt while the dock
+    transform grows to 2.25x, so a reference-px `font-size` would be ~55% too large at high
+    resolutions *and* show a third fewer rows than the original. `#list` therefore carries
+    `scale(1 / root_scale)` with its box bound as `value * root_scale` px, which makes the net
+    transform at the pane identity and lays its contents out in real pixels. The trap that follows:
+    rows need an **explicit bound width, not `100%`** — a percentage shrinks by the scrollbar's own
+    width when one appears, shifting every column in the table. Recorded in `component-catalog.md`.
+  - **`MeasureText()` returns logical/reference units, not real pixels** (`CUIRenderTextSDLTtf.cpp`
+    divides the active transform out). Worth knowing before reading any native layout that mixes a
+    measured text height into reference-space coordinates and concluding it is a bug — it isn't, and
+    it is why this window genuinely shows *more* rows at higher resolutions.
+  - **A fourth one-shot latch**, same shape as the chat surface's three: native reset its scroll
+    offset in `OpenningProcess()`, which now has to become "rewind `#list` once, on the first frame
+    the document is actually visible" (`CSystem::Show()` runs `OpenningProcess()` before
+    `ShowInterface()`). Per-frame would be a dead scrollbar, exactly as it was in `CChatLogWindow`.
+
+  Two smaller notes. This is the only `LayoutMode::DockLeft` window in the game, so the
+  dock-neighbour check below has no group to match it against — modern borrows
+  `docked_panel_frame.rcss`'s forged vocabulary at rail scale instead of linking a 190x429 dialog
+  frame. And its `IMAGE_LIST` — which aliased `CChatLogWindow::IMAGE_SCROLL_*`, and was the reason
+  that enum was kept two commits earlier — is deleted; it loaded its own `LoadBitmap` copies, so the
+  coupling was only ever compile-time.
+
+  Verified in-game, both themes, and **at more than one UI scale** — the first entry in
+  `validation-matrix.md`'s results table, which had been empty since it was written. Three defects
+  surfaced only by that testing, all worth knowing because none would have been caught by reading
+  the code:
+  - **A `data-for` `<div>` is inline in this build unless the rule says `display: block`**, so every
+    row landed on one line. `.quest-row`, `.party-row` and `.chat-line` all declare it; this was the
+    one that didn't.
+  - **A full-width row sits underneath the scrollbar and swallows the drag.** Native never did that
+    — rows run to `windowWidth - 22` and the well sits beyond them. The pane is now `windowWidth - 5`
+    wide (the same right inset the close bar uses) with the rows still bound to 208, so the
+    scrollbar gets its own lane.
+  - **`.scroll-pane`'s well had no end caps at all**, in every consumer. Fixed in the primitive —
+    see `component-catalog.md`; the fix and its follow-up are described there rather than here
+    because they are the primitive's behaviour, not this window's.
+
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
 1. **Layout intent documented and traceable to the original code's actual computed behavior**,

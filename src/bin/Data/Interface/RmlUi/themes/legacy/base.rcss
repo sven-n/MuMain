@@ -192,12 +192,18 @@ body {
    7x3) and the thumb is a separate fixed 15x30 sprite (newui_scroll_on) that overhangs it --
    see CChatLogWindow::RenderFrame(), which draws exactly this.
 
-   Two deliberate simplifications, same class as character_info.rcss's summary-box frame (corner
-   sprites + flat fill rather than a literal 1px tile): the track is drawn as one ninepatch of the
-   middle slice rather than cap/tile/cap, since this build has no verified repeat-tiling pattern;
-   and the thumb does not overhang, because reproducing that needs the track narrower than the
-   scrollbar element and RmlUi sizes slidertrack itself. Art and proportions read as native; the
-   7-vs-15 overhang does not. */
+   The well is native's real 3-slice construction: the two 7x3 caps are separate files, so drawing
+   only a ninepatch of the middle slice left both ends OPEN -- the rails read as two parallel lines
+   clipped off at top and bottom. RmlUi already generates an element at each end of a scrollbar
+   (sliderarrowdec/inc) and sizes slidertrack between them, which is exactly native's cap/tile/cap
+   shape, so the caps live there. They are pointer-events:none: native has no arrow buttons, these
+   are the closing ends of the well, not controls.
+
+   One deliberate simplification remains, same class as character_info.rcss's summary-box frame:
+   the middle slice is one stretched ninepatch rather than a literal repeat-tile, since this build
+   has no verified repeat-tiling pattern. The thumb's native 7-vs-15 overhang is also not
+   reproduced -- that needs the track narrower than the scrollbar element, and RmlUi sizes
+   slidertrack itself. */
 @spritesheet legacy-scroll-track-sheet
 {
 	src: "../../../newui_scrollbar_m.tga";
@@ -211,6 +217,18 @@ body {
 	src: "../../../newui_scroll_on.tga";
 	legacy-scroll-thumb: 0px 0px 15px 30px;
 	legacy-scroll-thumb-inner: 0px 14px 15px 2px;
+}
+
+@spritesheet legacy-scroll-cap-top-sheet
+{
+	src: "../../../newui_scrollbar_up.tga";
+	legacy-scroll-cap-top: 0px 0px 7px 3px;
+}
+
+@spritesheet legacy-scroll-cap-bottom-sheet
+{
+	src: "../../../newui_scrollbar_down.tga";
+	legacy-scroll-cap-bottom: 0px 0px 7px 3px;
 }
 
 .scroll-pane scrollbarvertical {
@@ -228,12 +246,21 @@ body {
 .scroll-pane scrollbarvertical sliderbar:active {
 	filter: brightness(0.7);
 }
-/* Native has no arrow buttons on this scrollbar -- drag-only. */
+/* The well's two closing caps, not arrow buttons -- native's scrollbar is drag-only.
+
+   width is 100%, not 15dp, so a cap collapses with the scrollbar it belongs to: a consumer that
+   hides its scrollbar by zeroing the scrollbarvertical's own width (chat_log.rcss does exactly
+   that for F5, deliberately, so the wheel still works with the frame hidden) would otherwise be
+   left with two floating caps. WidgetScroll::FormatElements() builds each arrow's box against the
+   scrollbar's own content size, so the percentage resolves to whatever that width currently is. */
 .scroll-pane scrollbarvertical sliderarrowdec,
 .scroll-pane scrollbarvertical sliderarrowinc {
-	width: 0;
-	height: 0;
+	width: 100%;
+	height: 3dp;
+	pointer-events: none;
 }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(legacy-scroll-cap-top); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(legacy-scroll-cap-bottom); }
 .scroll-pane scrollbarhorizontal {
 	height: 0;
 }

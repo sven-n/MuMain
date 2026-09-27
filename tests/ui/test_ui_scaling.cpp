@@ -88,11 +88,6 @@ TEST_CASE("teleport layout uses stable width and fits above the dock [ui][scalin
     CHECK(layout.windowHeight == 424);
     CHECK(layout.listTop == 39);
     CHECK(layout.closeTop == 405);
-    CHECK(layout.closeLeft == 2);
-    CHECK(layout.closeWidth == 225);
-    CHECK(layout.scrollTrackTop == 36);
-    CHECK(layout.scrollTrackHeight == 364);
-    CHECK(layout.thumbTravel == 334);
     CHECK(1 + layout.windowHeight <= UI::Scaling::DockLogicalBottom);
 }
 
@@ -101,47 +96,6 @@ TEST_CASE("teleport width is independent of measured row height [ui][scaling]")
     CHECK(UI::MoveCommand::CalculateLayout(1, 12).windowWidth == 230);
     CHECK(UI::MoveCommand::CalculateLayout(1, 14).windowWidth == 230);
     CHECK(UI::MoveCommand::CalculateLayout(1, 18).windowWidth == 230);
-}
-
-TEST_CASE("teleport scroll offset handles empty short exact and overflow lists [ui][scaling]")
-{
-    CHECK(UI::MoveCommand::MaximumScrollOffset(0, 26) == 0);
-    CHECK(UI::MoveCommand::MaximumScrollOffset(12, 26) == 0);
-    CHECK(UI::MoveCommand::MaximumScrollOffset(26, 26) == 0);
-    CHECK(UI::MoveCommand::MaximumScrollOffset(27, 26) == 1);
-    CHECK(UI::MoveCommand::MaximumScrollOffset(52, 26) == 26);
-
-    CHECK(UI::MoveCommand::ClampScrollOffset(-5, 52, 26) == 0);
-    CHECK(UI::MoveCommand::ClampScrollOffset(13, 52, 26) == 13);
-    CHECK(UI::MoveCommand::ClampScrollOffset(99, 52, 26) == 26);
-}
-
-TEST_CASE("teleport thumb maps first middle and last offsets [ui][scaling]")
-{
-    const auto layout = UI::MoveCommand::CalculateLayout(1, 14);
-    CHECK(UI::MoveCommand::ThumbYForScrollOffset(0, layout, 52) == 36);
-    CHECK(UI::MoveCommand::ThumbYForScrollOffset(13, layout, 52) == 203);
-    CHECK(UI::MoveCommand::ThumbYForScrollOffset(26, layout, 52) == 370);
-
-    CHECK(UI::MoveCommand::ScrollOffsetForThumbY(36, layout, 52) == 0);
-    CHECK(UI::MoveCommand::ScrollOffsetForThumbY(203, layout, 52) == 13);
-    CHECK(UI::MoveCommand::ScrollOffsetForThumbY(370, layout, 52) == 26);
-}
-
-TEST_CASE("teleport thumb disables cleanly without overflow [ui][scaling]")
-{
-    const auto layout = UI::MoveCommand::CalculateLayout(1, 14);
-    CHECK(UI::MoveCommand::ThumbYForScrollOffset(9, layout, 0) == layout.scrollTrackTop);
-    CHECK(UI::MoveCommand::ScrollOffsetForThumbY(layout.scrollTrackTop + 50, layout, 0) == 0);
-}
-
-TEST_CASE("teleport drag release maps, exits, and consumes input [ui][scaling]")
-{
-    const auto layout = UI::MoveCommand::CalculateLayout(1, 14);
-    const auto state = UI::MoveCommand::UpdateDragState(true, true, layout.scrollTrackTop + 999, 0, 13, layout, 52);
-    CHECK(state.scrollOffset == 26);
-    CHECK_FALSE(state.dragging);
-    CHECK(state.releaseConsumed);
 }
 
 TEST_CASE("dialogs scale with the viewport and stop at a readable cap [ui][scaling]")
