@@ -6,6 +6,19 @@ can be taken off where it should stay on. The in-game tests start real clients,
 drive them through the [control socket](control-socket.md) like players and
 report each scenario as passed or failed.
 
+## Quick start
+
+1. Build a developer client: a `-mueditor` preset, e.g.
+   `cmake --preset windows-x64-mueditor` and
+   `cmake --build out/build/windows-x64-mueditor --config Release`.
+2. Start `InGameTests` next to the new `Main`, e.g.
+   `out/build/windows-x64-mueditor/src/Release/InGameTests.exe`.
+3. In its window, leave **Recreate the test server** checked (it needs podman
+   or docker), check the scenarios, and press **Run and write report**;
+   **Open report** shows every step with screenshots.
+
+The rest of this page explains each part.
+
 ## What you need
 
 - A developer build of the client: a `-mueditor` preset, which turns on

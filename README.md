@@ -322,6 +322,11 @@ context.
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
 - [Build guide](docs/build/README.md) - platform-specific build notes.
+- [In-game tests](docs/in-game-tests.md) - the tester next to developer
+  builds that plays test scenarios with real clients against a fresh OpenMU
+  test server and writes a report with a screenshot per step.
+- [Control socket](docs/control-socket.md) - the developer socket through
+  which scripts and the in-game tests drive the client.
 - [Translation system](docs/translation-system.md) - how the .resx ->
   generated C++ accessors pipeline works, how to add a string or a locale,
   runtime locale switching, and observer hooks for cached UI strings.
