@@ -8,7 +8,8 @@
 // (ItemCategories.cpp).
 namespace
 {
-// Capes drawn as cloth are marked in the item model files ("cloth": true).
+// Capes worn as cloth are marked in the item model files ("cloth": true); the
+// cloth of the character is deleted when one is put on or taken off.
 bool IsClothWingType(int itemType)
 {
     const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);

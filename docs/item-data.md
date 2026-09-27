@@ -244,7 +244,7 @@ item files hold what client and server share.
 | `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
 | `inventory` | How the item is drawn in the inventory, see below. Optional. |
 | `ground` | How the item lies on the ground, see below. Optional. |
-| `cloth` | `true` for capes that are drawn as cloth when worn. Optional. |
+| `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 
 `inventory` and `ground` hold these values; a missing value has the
 default, which is the look of items without values of their own:
@@ -261,6 +261,10 @@ default, which is the look of items without values of their own:
 
 In the inventory every item turns while the mouse is on it, and gamble
 items (tag `gambleItem`) turn slowly all the time.
+
+The Rage Fighter armors (8,59), (8,60), (8,61) and (8,73) are drawn in the
+inventory with models of their own (`MODEL_ARMORINVEN_*`), with the
+`inventory` values of their entry.
 
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with

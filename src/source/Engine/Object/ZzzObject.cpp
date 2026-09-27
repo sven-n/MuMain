@@ -5816,18 +5816,10 @@ void RenderItems()
 
             if (o->Visible)
             {
-                int Type = o->Type;
-                if (o->Type >= MODEL_HELM && o->Type < MODEL_BOOTS + MAX_ITEM_INDEX)
-                    Type = MODEL_PLAYER;
-                else if (o->Type == MODEL_POTION + 12)
-                {
-                    int Level = Items[i].Item.Level;
-                    if (Level == 0)
-                        Type = MODEL_EVENT;
-                    else if (Level == 2)
-                        Type = MODEL_EVENT + 1;
-                }
-                BMD* b = &Models[Type];
+                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, Items[i].Item.Level);
+                // Armor is animated on the character skeleton.
+                BMD* b =
+                    &Models[Render::Items::Display::IsDrawnOnCharacterSkeleton(drawnModel) ? MODEL_PLAYER : drawnModel];
                 b->CurrentAction = 0;
                 b->Skin = gCharacterManager.GetBaseClass(Hero->Class); // ???
                 b->CurrentAction = o->CurrentAction;
@@ -5835,9 +5827,6 @@ void RenderItems()
                 ItemHeight(o->Type, b);
                 b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
 
-                if (o->Type >= MODEL_HELM && o->Type < MODEL_BOOTS + MAX_ITEM_INDEX)
-                    Type = o->Type;
-                b = &Models[Type];
                 vec3_t Light;
                 RequestTerrainLight(o->Position[0], o->Position[1], Light);
                 VectorAdd(Light, o->Light, Light);
@@ -9940,19 +9929,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
 
     auto* p = (PART_t*)p2;
 
-    if (Type == MODEL_POTION + 12)
-    {
-        int Level = ItemLevel;
-
-        if (Level == 0)
-        {
-            Type = MODEL_EVENT;
-        }
-        else if (Level == 2)
-        {
-            Type = MODEL_EVENT + 1;
-        }
-    }
+    Type = Render::Items::Display::GetDrawnModel(Type, ItemLevel);
 
     BMD* b = &Models[Type];
     b->HideSkin = HideSkin;

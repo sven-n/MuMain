@@ -63,7 +63,8 @@ struct ItemModelDefinition
     std::vector<int> noneBlendMeshes;
     ItemInventoryDisplay inventory;
     ItemGroundDisplay ground;
-    // Worn as a cape that is drawn as cloth.
+    // A cape worn as cloth: putting it on or taking it off deletes the cloth
+    // of the character. Which capes are drawn as cloth is decided in code.
     bool cloth = false;
 
     bool Exists() const

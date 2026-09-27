@@ -793,7 +793,11 @@
       "file": "Data/Player/ArmorMale60.bmd",
       "textureFolders": ["Player"],
       "inventory": {
-        "anchor": [0.5, 0.8]
+        "anchor": [0.5, 0.8],
+        "offset": [0.01, 0.08],
+        "rotation": [0, 0, 0],
+        "scale": 0.0039,
+        "bodyHeight": -100
       },
       "ground": {
         "rotation": [270, 0, -45],
@@ -805,7 +809,11 @@
       "file": "Data/Player/ArmorMale61.bmd",
       "textureFolders": ["Player"],
       "inventory": {
-        "anchor": [0.5, 0.8]
+        "anchor": [0.5, 0.8],
+        "offset": [0.01, 0.08],
+        "rotation": [0, 0, 0],
+        "scale": 0.0039,
+        "bodyHeight": -100
       },
       "ground": {
         "rotation": [270, 0, -45],
@@ -817,7 +825,11 @@
       "file": "Data/Player/ArmorMale62.bmd",
       "textureFolders": ["Player"],
       "inventory": {
-        "anchor": [0.5, 0.8]
+        "anchor": [0.5, 0.8],
+        "offset": [0.01, 0.08],
+        "rotation": [0, 0, 0],
+        "scale": 0.0039,
+        "bodyHeight": -100
       },
       "ground": {
         "rotation": [270, 0, -45],
@@ -983,7 +995,11 @@
       "file": "Data/Player/ArmorMale74.bmd",
       "textureFolders": ["Player"],
       "inventory": {
-        "anchor": [0.5, 0.8]
+        "anchor": [0.5, 0.8],
+        "offset": [0.01, 0.05],
+        "rotation": [90, 0, 0],
+        "scale": 0.0039,
+        "bodyHeight": -100
       },
       "ground": {
         "rotation": [270, 0, -45],

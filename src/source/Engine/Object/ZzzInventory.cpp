@@ -6697,24 +6697,6 @@ namespace
 // Degrees per millisecond of WorldTime.
 constexpr float GambleItemTurnSpeed = 0.2f;
 constexpr float SelectedItemTurnSpeed = 0.45f;
-
-// Armor is drawn on the character skeleton, like when it is worn.
-bool IsDrawnOnCharacterSkeleton(int modelType)
-{
-    return (modelType >= MODEL_HELM && modelType < MODEL_BOOTS + MAX_ITEM_INDEX) || modelType == MODEL_ARMORINVEN_60 ||
-           modelType == MODEL_ARMORINVEN_61 || modelType == MODEL_ARMORINVEN_62 || modelType == MODEL_ARMORINVEN_74;
-}
-
-bool IsArchangelWeaponModel(int modelType)
-{
-    return modelType == MODEL_DIVINE_SWORD_OF_ARCHANGEL || modelType == MODEL_DIVINE_STAFF_OF_ARCHANGEL ||
-           modelType == MODEL_DIVINE_CB_OF_ARCHANGEL;
-}
-
-float GetSmallArchangelWeaponScale(int modelType)
-{
-    return modelType == MODEL_DIVINE_CB_OF_ARCHANGEL ? 0.0015f : 0.001f;
-}
 } // namespace
 
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target,
@@ -6729,11 +6711,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     else
         VectorMA(MousePosition, 0.1f, Direction, Position);
 
-    // Two level variants of (14,12) are drawn with event models.
-    if (Type == MODEL_POTION + 12 && (Level == 0 || Level == 2))
-    {
-        Type = Level == 0 ? MODEL_EVENT : MODEL_EVENT + 1;
-    }
+    Type = Render::Items::Display::GetDrawnModel(Type, Level);
 
     const Render::Items::Display::InventoryDisplay display = Render::Items::Display::GetInventoryDisplay(Type);
     Position[0] += display.offset[0];
@@ -6751,7 +6729,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         ObjectSelect.Angle[1] = WorldTime * SelectedItemTurnSpeed;
     }
 
-    ObjectSelect.Type = IsDrawnOnCharacterSkeleton(Type) ? MODEL_PLAYER : Type;
+    ObjectSelect.Type = Render::Items::Display::IsDrawnOnCharacterSkeleton(Type) ? MODEL_PLAYER : Type;
 
     BMD* b = &Models[ObjectSelect.Type];
     b->CurrentAction = 0;
@@ -6761,11 +6739,9 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     b->BodyHeight = display.bodyHeight;
 
     float Scale = display.scale;
-    // The Weapon of Archangel (13,19) shows the archangel weapons smaller; it
-    // draws them with level -1.
-    if (ItemLevel < 0 && IsArchangelWeaponModel(Type))
+    if (const std::optional<float> smallScale = Render::Items::Display::GetSmallArchangelWeaponScale(Type, ItemLevel))
     {
-        Scale = GetSmallArchangelWeaponScale(Type);
+        Scale = *smallScale;
         ItemLevel = 0;
     }
 
@@ -6993,25 +6969,10 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 
         RenderObjectScreen(MODEL_POTION + 100, Level, excellentFlags, ancientDiscriminator, Position, _Angle, PickUp);
     }
-    else if (Type == ITEM_SACRED_ARMOR)
-    {
-        RenderObjectScreen(MODEL_ARMORINVEN_60, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
-    }
-    else if (Type == ITEM_STORM_HARD_ARMOR)
-    {
-        RenderObjectScreen(MODEL_ARMORINVEN_61, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
-    }
-    else if (Type == ITEM_PIERCING_ARMOR)
-    {
-        RenderObjectScreen(MODEL_ARMORINVEN_62, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
-    }
-    else if (Type == ITEM_PHOENIX_SOUL_ARMOR)
-    {
-        RenderObjectScreen(MODEL_ARMORINVEN_74, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
-    }
     else
     {
-        RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
+        RenderObjectScreen(Render::Items::Display::GetInventoryModel(Type), Level, excellentFlags, ancientDiscriminator,
+                           Position, Success, PickUp);
     }
 }
 
