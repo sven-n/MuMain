@@ -239,6 +239,8 @@ static void ConsumeDiagnosticFrameCapture()
     capture.schedule.Finish();
     if (!mu::GetRenderer().ConsumeFramePixels(pixels))
     {
+        // A skipped frame leaves the request pending; drop it.
+        mu::GetRenderer().CancelFramePixels();
         g_ErrorReport.Write(L"[capture] frame %llu readback failed\r\n",
                             static_cast<unsigned long long>(capture.targetFrame));
         return;

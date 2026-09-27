@@ -70,7 +70,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `nearby` | the objects the client can see |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
-| `screenshot` (`out`) | capture the next frame to a path; without `out` it names itself, uniquely per capture |
+| `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `ui` | the open item windows by name (`message_box` while a dialog waits for Enter or Esc), and the window pixels of named elements such as `trade.confirm` |

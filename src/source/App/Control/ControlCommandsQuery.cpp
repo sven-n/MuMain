@@ -538,8 +538,15 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
         targetPath = ResolveScreenshotPath(requestedPath).wstring();
     }
 
+    int quality = BestScreenshotQuality;
+    if (request.Has("quality") &&
+        (!request.GetInt("quality", quality) || quality < 1 || quality > BestScreenshotQuality))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`quality` is the JPEG quality, 1 to 100");
+    }
+
     auto state = std::make_shared<ScreenshotState>();
-    if (!RequestScriptedScreenshot(targetPath,
+    if (!RequestScriptedScreenshot(targetPath, quality,
                                    [state](const ScreenshotOutcome& outcome)
                                    {
                                        state->outcome = outcome;

@@ -261,6 +261,9 @@ public:
         (void)pixels;
         return false;
     }
+    // Drops a requested readback that has not been consumed, delivered or not,
+    // so the next request can start.
+    virtual void CancelFramePixels() {}
 
     // Story 4.4.1 — Texture System Migration: SDL_gpu device accessor.
     // Returns the SDL_GPUDevice* used by the active backend, or nullptr if not available.
