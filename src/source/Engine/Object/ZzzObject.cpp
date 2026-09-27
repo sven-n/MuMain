@@ -10718,11 +10718,15 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
             switch (iCloth)
             {
             case 1:
+                if (!CPhysicsClothMesh::CanCreate(Type, 2, 5, 8))
+                    break;
                 pCloth[0] = new CPhysicsClothMesh;
                 pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
                 pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
                 break;
             case 2:
+                if (!CPhysicsClothMesh::CanCreate(Type, 3))
+                    break;
                 iCount = 1;
                 pCloth[0] = new CPhysicsClothMesh;
                 pCloth[0]->Create(o, 3, 2, PCT_OPT_CORRECTEDFORCE | PCT_HEAVY, Type);
@@ -10733,6 +10737,8 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
                 pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -69.0f, 26.0f, 2);
                 break;
             case 3:
+                if (!CPhysicsClothMesh::CanCreate(Type, 2, 7, 5))
+                    break;
                 pCloth[0] = new CPhysicsClothMesh;
                 pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 7, 5, 50.0f, 100.0f, b->IndexTexture[b->Meshs[2].Texture], b->IndexTexture[b->Meshs[2].Texture], PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
                 pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);

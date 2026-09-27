@@ -124,9 +124,22 @@ void MarkSkinAndHair(const char* fileName, const std::wstring& textureFileName, 
     }
 }
 
+// "Data\Item\x.jpg", and the other folders that were searched:
+// "Data\Item\x.jpg (also searched Data\Player\)".
+std::wstring DescribeSearchedPaths(std::span<const std::wstring> subFolders, const std::wstring& textureFileName)
+{
+    std::wstring text = GetTexturePath(subFolders.front(), textureFileName);
+    for (size_t i = 1; i < subFolders.size(); ++i)
+    {
+        text += (i == 1 ? L" (also searched " : L", ") + (TextureRootFolder + subFolders[i]);
+    }
+    return subFolders.size() > 1 ? text + L")" : text;
+}
+
 // A texture that no folder has may already be loaded from another folder,
 // e.g. by another model; that one is used. Otherwise the error is shown.
-GLuint UseLoadedTextureOrReportError(int model, const std::wstring& textureFileName, const std::wstring& firstPath)
+GLuint UseLoadedTextureOrReportError(int model, const std::wstring& textureFileName,
+                                     std::span<const std::wstring> subFolders)
 {
     if (auto pBitmap = Bitmaps.FindTextureByName(textureFileName))
     {
@@ -134,8 +147,8 @@ GLuint UseLoadedTextureOrReportError(int model, const std::wstring& textureFileN
         return pBitmap->BitmapIndex;
     }
 
-    const std::wstring message =
-        L"OpenTexture Failed: " + firstPath + L" of " + Core::Text::FromUtf8(Models[model].Name);
+    const std::wstring message = L"OpenTexture Failed: " + DescribeSearchedPaths(subFolders, textureFileName) +
+                                 L" of " + Core::Text::FromUtf8(Models[model].Name);
     g_ErrorReport.Write(L"%ls (Model=%d)\r\n", message.c_str(), model);
 #ifdef FOR_WORK
     PopUpErrorCheckMsgBox(message.c_str());
@@ -179,8 +192,7 @@ void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders,
 
         if (textureIndex == BITMAP_UNKNOWN)
         {
-            textureIndex = UseLoadedTextureOrReportError(Model, textureFileName,
-                                                         GetTexturePath(SubFolders.front(), textureFileName));
+            textureIndex = UseLoadedTextureOrReportError(Model, textureFileName, SubFolders);
         }
     }
 }
