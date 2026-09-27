@@ -341,7 +341,11 @@ reading it cold:
   instead of under it. The mechanism (a dedicated third `Rml::Context`,
   `RmlUiRuntime::RenderDialogBackgroundLayer()`, fired from `CManager::Render()`'s own loop right
   before the shared 3D camera's z-order) is fully documented in the class's own header comment —
-  read that, not a paraphrase, before touching anything `item3D`-adjacent.
+  read that, not a paraphrase, before touching anything `item3D`-adjacent. Only an `item3D` dialog
+  paints its chrome in that context: every other dialog shows the same background markup as a
+  second document in the main context, pulled to the front right under its text, so a
+  full-screen RmlUi window (the master skill tree) cannot cover the panel of a dialog opened over
+  it.
 - Single active instance, not a real stack — a second `Show()` call while one is open queues
   instead of replacing it; see the class's own header comment for why that's not a functional
   regression from what it replaces.

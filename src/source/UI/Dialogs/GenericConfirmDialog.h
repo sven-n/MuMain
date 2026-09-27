@@ -142,6 +142,8 @@ namespace mu::ui::window
     // `data-model="generic_confirm_dialog"`) is paint-less where the background used to be, so it
     // no longer covers the item once the dedicated context has already painted it earlier the
     // same frame. See generic_confirm_dialog_bg.rml (both themes) for the actual markup split.
+    // That context paints under every main-context document, so only an item3D dialog uses it;
+    // every other dialog shows the same chrome from the main context (m_pRmlChromeDoc).
     class CGenericConfirmDialog : public CObject, public I3DRenderObj
     {
     public:
@@ -305,8 +307,24 @@ namespace mu::ui::window
         // (RmlUiRuntime::GetDialogBackgroundContext()), not the shared one every ordinary window's
         // own bg doc uses -- a shared context renders once globally per frame, which would let
         // other windows' own foreground content paint over this dialog wherever they overlap.
-        // Shown/Hidden in lockstep with m_pRmlDoc at every transition point.
+        // Shown/Hidden in lockstep with m_pRmlDoc at every transition point -- but only for a
+        // dialog with `item3D`, the one reason the chrome has to paint before the 3D pass.
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        // The same background markup loaded a second time, into the main context, for every
+        // dialog WITHOUT `item3D`. The dialog-background context paints before the main context,
+        // so chrome there sits under every main-context document -- a full-screen RmlUi window
+        // (the master skill tree) would cover the panel and leave only its text and buttons on
+        // top. In the main context the chrome is pulled to the front right under m_pRmlDoc, as
+        // native message boxes drew above every other window.
+        Rml::ElementDocument* m_pRmlChromeDoc = nullptr;
+
+        // m_pRmlChromeDoc, or m_pRmlBgDoc while the active dialog has `item3D`.
+        Rml::ElementDocument* ActiveChromeDocument() const;
+        // Shows the active dialog's chrome document (hiding the other one) and mirrors
+        // tallPanel onto it; call before showing m_pRmlDoc so the text stays above it.
+        void ShowChrome();
+        void HideChrome();
 
         // Set by RmlUi click bindings; polled and cleared in Update() -- never act synchronously
         // inside the RmlUi callback itself.
