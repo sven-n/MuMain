@@ -22,6 +22,28 @@ a successful build or a macOS run is not evidence for Linux or Windows.
 - GPU skinning shaders and pipelines are required. An eligible submission
   failure is counted and rejected; it does not silently switch to CPU skinning.
 
+## Building a higher-resolution bitmap variant
+
+This build accepts bitmap images up to 1024 × 1024 and allocates three persistent
+4 MiB whole-image RGBA8 upload slots (12 MiB requested staging, before driver
+overhead). Installing HD assets alone does not raise that limit. A maintainer
+must deliberately raise the shared bitmap dimension limits, ensure both JPEG
+and TGA decoding/power-of-two padding and upload validation consume them, then
+rebuild. Capacity per slot must fit the largest padded image: increasing the
+number of slots does not allow a larger image. Keep three slots unless measured
+performance justifies a different fixed count. No chunking or automatic growth
+is provided.
+
+For square limits of 2048, 4096 and 8192, requested capacity becomes 16,
+64 and 256 MiB per slot respectively (48, 192 and 768 MiB for three slots).
+These are sizing examples, not supported configurations. Check target GPU/backend
+texture limits, CPU decode/copy budgets, resident texture VRAM and fixed staging
+allocation. Extend dimension, overflow and padding boundary tests (including
+just-over-limit rejection), inspect coordinates and actual asset appearance,
+and rerun non-presenting GPU, server-ready FD-limit and native-backend tests.
+If that budget is unacceptable for real HD assets, revisit chunked uploading
+with measured requirements rather than silently adding fallback allocations.
+
 ## Packaged font roles
 
 Release builds resolve every text role from files beside the executable:

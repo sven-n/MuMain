@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "ZzzTexture.h"
+#include "TextureFailure.h"
 
 #include "Network/Server/WSclient.h"
 #include "turbojpeg.h"
@@ -288,30 +289,21 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 }
 void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
-    wchar_t szMsg[1024] = {
-        0,
-    };
-    wcscpy(szMsg, szErrorMsg);
-
-    if (bForceDestroy)
-    {
-        MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_OK | MB_ICONERROR);
-    }
-    else
-    {
-        int iResult = MessageBox(g_hWnd, szMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
-        if (IDYES == iResult)
+    const Render::Textures::TextureErrorActions actions{
+        [](const wchar_t* message, bool forceDestroy)
         {
-            return;
-        }
-    }
-
-    if (SocketClient != nullptr)
-    {
-        SocketClient->Close();
-    }
-
-    DestroySound();
-    DestroyWindow();
-    ExitProcess(0);
+            const int flags = (forceDestroy ? MB_OK : MB_YESNO) | MB_ICONERROR;
+            return MessageBox(g_hWnd, message, L"ErrorCheckBox", flags) == IDYES;
+        },
+        []()
+        {
+            if (SocketClient != nullptr)
+            {
+                SocketClient->Close();
+            }
+        },
+        []() { DestroySound(); },
+        []() { DestroyWindow(); },
+    };
+    Render::Textures::DispatchTextureError(szErrorMsg, bForceDestroy, actions);
 }

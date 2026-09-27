@@ -1,4 +1,22 @@
 mu_add_test(
+    NAME bitmap_gpu_resources_tests
+    SOURCES
+        test_bitmap_gpu_resources.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/BitmapGpuResources.cpp
+    LINK_LIBS SDL3::SDL3
+)
+
+# A standalone executable permits CTest's real skip return code when not opted in.
+# The GPU regression still links the same production owner and SDL dependency as
+# bitmap_gpu_resources_tests; unlike doctest discovery it runs as one timed case.
+add_executable(bitmap_gpu_upload_integration test_bitmap_gpu_upload_integration.cpp
+    ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/BitmapGpuResources.cpp)
+target_include_directories(bitmap_gpu_upload_integration PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+target_link_libraries(bitmap_gpu_upload_integration PRIVATE SDL3::SDL3)
+add_test(NAME bitmap_gpu_upload_integration COMMAND bitmap_gpu_upload_integration)
+set_tests_properties(bitmap_gpu_upload_integration PROPERTIES LABELS gpu SKIP_RETURN_CODE 77 TIMEOUT 180)
+
+mu_add_test(
     NAME frame_pixel_readback_tests
     SOURCES
         test_frame_pixel_readback.cpp
@@ -166,3 +184,48 @@ if(MU_ENABLE_SHADER_COMPILATION
             -P "${CMAKE_SOURCE_DIR}/cmake/ValidateDxilReflection.cmake"
     )
 endif()
+
+add_executable(texture_failure_fixture test_texture_failure.cpp
+    ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TextureFailure.cpp)
+target_include_directories(texture_failure_fixture PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+add_test(NAME texture_failure_emulator_arguments COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_texture_failure_emulator.py")
+
+# Python owns the exit-status assertion, so CTest cannot automatically add the
+# target's cross-compilation emulator to the nested executable invocation.
+set(texture_failure_emulator)
+if(CMAKE_CROSSCOMPILING)
+    get_target_property(texture_failure_emulator texture_failure_fixture CROSSCOMPILING_EMULATOR)
+    if(NOT texture_failure_emulator)
+        set(texture_failure_emulator)
+    endif()
+endif()
+add_test(NAME texture_failure_continue COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_texture_failure_subprocess.py" 0
+    ${texture_failure_emulator} $<TARGET_FILE:texture_failure_fixture> continue
+    COMMAND_EXPAND_LISTS)
+add_test(NAME texture_failure_fatal COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_texture_failure_subprocess.py" 1
+    ${texture_failure_emulator} $<TARGET_FILE:texture_failure_fixture> fatal
+    COMMAND_EXPAND_LISTS)
+add_test(NAME texture_failure_dispatch_continue COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_texture_failure_subprocess.py" 0
+    ${texture_failure_emulator} $<TARGET_FILE:texture_failure_fixture> dispatch-continue
+    COMMAND_EXPAND_LISTS)
+add_test(NAME texture_failure_dispatch_fatal COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_texture_failure_subprocess.py" 1
+    ${texture_failure_emulator} $<TARGET_FILE:texture_failure_fixture> dispatch-fatal
+    COMMAND_EXPAND_LISTS)
+add_test(NAME texture_failure_dispatch_decline COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_texture_failure_subprocess.py" 1
+    ${texture_failure_emulator} $<TARGET_FILE:texture_failure_fixture> dispatch-decline
+    COMMAND_EXPAND_LISTS)
+
+mu_add_test(
+    NAME bitmap_loader_tests
+    SOURCES
+        test_bitmap_loader.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapLoad.cpp
+    LINK_LIBS MuClient
+)

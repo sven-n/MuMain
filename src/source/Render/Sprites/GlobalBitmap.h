@@ -42,7 +42,7 @@ private:
 public:
 #pragma pack(pop)
     SDL_GPUTexture* sdlTexture = nullptr;
-    SDL_GPUSampler* sdlSampler = nullptr;
+    SDL_GPUSampler* sdlSampler = nullptr; // Borrowed from the renderer until device shutdown.
 };
 
 class CBitmapCache
@@ -75,7 +75,7 @@ class CBitmapCache
     type_cache_map		m_mapCacheEffect;
 
     QUICK_CACHE			m_QuickCache[NUMBER_OF_QUICK_CACHE];
-    BITMAP_t* m_pNullBitmap;
+    BITMAP_t* m_pNullBitmap = nullptr;
 
     CTimer2				m_ManageTimer;
 
@@ -99,12 +99,6 @@ public:
 
 class CGlobalBitmap
 {
-    enum
-    {
-        MAX_WIDTH = 1024,
-        MAX_HEIGHT = 1024,
-    };
-
     using BitmapPtr = std::unique_ptr<BITMAP_t>;
     using type_bitmap_map = std::map<GLuint, BitmapPtr>;
     using type_index_list = std::list<GLuint>;
