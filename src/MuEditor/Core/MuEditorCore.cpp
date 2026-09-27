@@ -404,11 +404,9 @@ void CMuEditorCore::Shutdown()
     if (!m_bInitialized)
         return;
 
-    // Save item editor preferences before shutting down
-    g_MuItemEditorUI.SaveColumnPreferences();
-
-    // Save skill editor preferences before shutting down
-    g_MuSkillEditorUI.SaveColumnPreferences();
+    // Do not touch the editor singletons here: their destructors already save the column
+    // preferences, and when this runs from ~CMuEditorCore during static destruction they
+    // would be built from scratch or, if they were opened, already destroyed.
 
     mu::WaitForSDLGpuIdle();
     ImGui_ImplSDLGPU3_Shutdown();
