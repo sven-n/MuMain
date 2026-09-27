@@ -15,9 +15,13 @@ name: mumain-in-game-tests
 
 services:
   openmu:
-    image: docker.io/munique/openmu:latest
+    # Pinned: the scenarios depend on the exact test data (accounts, their
+    # characters and items). Move to a newer release on purpose, after the
+    # tests pass with it.
+    image: docker.io/munique/openmu:0.9.10@sha256:681c52b304a44e70d26003e85193e167353d28eeee75cf1a49e8eae2add41ded
     container_name: mumain-in-game-tests-openmu
     # The image starts with -autostart; -demo is added to it.
     command: ["-demo"]
     ports:
-      - "56901:55901"
+      # Loopback only: the test data's accounts have public passwords.
+      - "127.0.0.1:56901:55901"

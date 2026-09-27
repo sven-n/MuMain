@@ -29,9 +29,10 @@ The rest of this page explains each part.
   [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
 - The .NET 10 runtime, which comes with the SDK the client build needs anyway.
   On Linux, a .NET installed with Microsoft's `dotnet-install.sh` sits in a
-  folder the tester does not look in; set `DOTNET_ROOT` to it, or write the
-  folder into `/etc/dotnet/install_location_x64`. Distribution packages
-  register themselves.
+  folder the tester does not look in. The build targets tell it where; to
+  start it by hand, set `DOTNET_ROOT` to that folder, or write the folder into
+  `/etc/dotnet/install_location_x64`. Distribution packages register
+  themselves.
 
 ## The tester
 
@@ -49,13 +50,16 @@ another developer build of the same platform. `ENABLE_IN_GAME_TESTS` needs
 
 ## The test server
 
-`tools/InGameTests/docker-compose.yml` runs OpenMU in demo mode (`-demo`): it
+`tools/InGameTests/docker-compose.yml` runs OpenMU 0.9.10 in demo mode (`-demo`): it
 uses no database, keeps all data in memory and creates OpenMU's test data on
 every start. Recreating the container therefore brings back the same accounts,
 characters and items, whatever the last run changed; the `InGameTests` build
 target does that before every run.
 
-Only the game server of channel 1 is published, on host port `56901`. The test
+The image is pinned, because the scenarios depend on the exact test data; move
+it to a newer OpenMU release on purpose, once the tests pass with it. Only the
+game server of channel 1 is published, on `127.0.0.1:56901` (the test
+accounts have public passwords, so it is not reachable from the network). The test
 clients log in to it directly, without the connect server, so no IP resolver
 setting is needed, and a local OpenMU on its default ports can keep running
 next to it.
