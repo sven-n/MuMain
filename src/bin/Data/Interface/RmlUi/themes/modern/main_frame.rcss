@@ -286,7 +286,7 @@
 }
 
 /* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border or
-   .slot-fill: RmlUi paints after the still-legacy icons these wrap, so either would hide them.
+   .slot-fill: RmlUi paints after the native 3D potion icons, so either would hide them.
    Wrapper offsets must match #item_hotkey_anchor/#skill_list_anchor exactly (kept in sync by
    hand). */
 #item_slots { position: absolute; left: 140px; top: 0; }
@@ -369,12 +369,7 @@
 
 /* Skill slots are contiguous (pitch == width, no gap). border-radius only matters for the
    .selected highlight -- square off touching inner edges so only the strip's outer corners
-   round.
-
-   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): these 5 boxes are
-   the exact frame CSkillList::RenderCurrentSkillAndHotSkillList() (MainFrameWindow.cpp) reconstructs
-   natively (x=190, width=32, x+=width per slot -> 222/254/286/318/350, y=431) before drawing each
-   icon at frame+6/frame+6. If either side changes, update the other. */
+   round. Only this file places them: C++ reads the hovered slot's box back for the hint anchor. */
 #skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
@@ -388,16 +383,26 @@
 	border: 1px token(accent-gold-hover);
 	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
-/* PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): this is the hit-
-   box/highlight FRAME only, padded 4px around the real icon -- RenderCurrentSkillAndHotSkillList()
-   (MainFrameWindow.cpp) is theme-blind and always draws the actual current-skill icon at the
-   legacy-exact x=392, y=437, 20x28, regardless of this frame's own position. */
+/* The current-skill frame, padded 4px around its 20x28 icon. */
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
+/* A 20x28 skill icon centred in its slot (32x38 row/grid boxes, the 28x36 current-skill frame);
+   the sprite comes from C++ (data-style-decorator). Absolute children sit inside the border, so
+   bordered boxes (grid cells, a selected slot) inset by one pixel less. */
+.skill-icon {
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	width: 20px;
+	height: 28px;
+	pointer-events: none;
+}
+#skill_slots .selected .skill-icon, .skill-cell .skill-icon { left: 5px; top: 5px; }
+#current_skill_slot .skill-icon { left: 4px; top: 4px; }
+
 /* Expanded grid + pet-command row. Same 78px local-origin shift as #skill_slots above -- cell
-   left/top values are raw, un-rebased reference-space values from the same source the still-legacy
-   icon draw uses, so this offset keeps the RmlUi overlay pixel-aligned with it. Containers stay
-   non-interactive; only .skill-cell opts back in. */
+   left/top values are the original's reference-space positions (CSkillList::RebuildGridSnapshot()).
+   Containers stay non-interactive; only .skill-cell opts back in. */
 #skill_grid, #pet_skill_row {
 	position: absolute;
 	left: 78px;
@@ -405,8 +410,8 @@
 	pointer-events: none;
 }
 
-/* Permanent border, same look as .slot-frame -- the legacy IMAGE_SKILLBOX sprite is suppressed
-   for modern theme, so this is the grid's only box outline. */
+/* Permanent border, same look as .slot-frame -- the grid's box outline (legacy uses the
+   original's IMAGE_SKILLBOX sprite instead). */
 .skill-cell {
 	position: absolute;
 	width: 32px;

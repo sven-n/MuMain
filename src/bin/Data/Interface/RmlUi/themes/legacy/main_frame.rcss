@@ -162,10 +162,9 @@
 	pointer-events: none;
 }
 
-/* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
-   (MainFrameWindow.cpp); purely a positioning context, these slots paint nothing of their own.
-   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size") -- both sides carry
-   an explicit cross-reference comment now; update together. */
+/* The original's hotkey row: five 32x38 boxes from x 222 at pitch 32, y 431, the icon 6/6 inside;
+   the current-skill icon at 392/437. Only this file places them: C++ reads the hovered slot's box
+   back for the hint anchor. */
 #skill_slots { position: absolute; left: 0; top: 0; }
 #skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
@@ -173,6 +172,24 @@
 #skill_slot_3 { position: absolute; left: 318px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
 #current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
+
+/* The original's skill boxes: newui_skillbox.jpg, and newui_skillbox2.jpg around the current
+   skill (hotkey row and grid). */
+@spritesheet skill-box-sheet { src: "../../../newui_skillbox.jpg"; skill-box: 0px 0px 32px 38px; }
+@spritesheet skill-box-use-sheet { src: "../../../newui_skillbox2.jpg"; skill-box-use: 0px 0px 32px 38px; }
+#skill_slots .selected { decorator: image(skill-box-use); }
+
+/* A 20x28 skill icon, 6/6 inside its 32x38 box; the current-skill slot is the icon itself. The
+   sprite comes from C++ (data-style-decorator). */
+.skill-icon {
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	width: 20px;
+	height: 28px;
+	pointer-events: none;
+}
+#current_skill_slot .skill-icon { left: 0; top: 0; }
 
 /* Zero-shift wrapper (legacy has no offset, unlike modern's shifted copy); each slot matches
    CItemHotKey::RenderItems()'s native icon draw position/size (x = 10 + i*38, y = 443, 20x20).
@@ -203,17 +220,16 @@
 	pointer-events: none;
 }
 
-/* No border here -- legacy always draws the real IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE sprite
-   underneath (MainFrameWindow.cpp Render()), so an RmlUi border would double up. */
+/* Each cell is the original's box, the current skill's the highlighted one. */
 .skill-cell {
 	position: absolute;
 	width: 32px;
 	height: 38px;
 	pointer-events: auto;
 	cursor: pointer;
+	decorator: image(skill-box);
 }
-/* .selected deliberately left unstyled -- legacy's real IMAGE_SKILLBOX_USE sprite is the
-   current-skill highlight; an RmlUi outline would double it up. */
+.skill-cell.selected { decorator: image(skill-box-use); }
 
 /* Bottom-anchored translucent wipe, shrinking top-down as cooldown counts down -- matches the
    retired RenderSkillDelay()'s ARGB-quad direction (0x80FF8080, alpha ~50%). */
@@ -226,21 +242,23 @@
 	pointer-events: none;
 }
 
-/* Bottom-right, matching the retired RenderNumber(x+20,y+20,...) subscript position
-   (MainFrameWindow.cpp) -- plain text instead of the legacy digit-sprite atlas. */
+/* Bottom-right, matching the original's RenderNumber(icon x+20, icon y+20) subscript on every
+   skill icon -- plain text instead of the legacy digit-sprite atlas. The current-skill slot is
+   the bare icon, so its label sits outside it by the same amount. */
 .skill-hotkey-label {
 	position: absolute;
-	right: 2px;
-	bottom: 1px;
+	right: 3px;
+	bottom: 2px;
 	color: token(text-primary);
 	font-family: "token(font-body)";
 	font-weight: bold;
 	font-effect: outline(1px #000000);
-	font-size: 9px;
-	line-height: 9px;
+	font-size: 12px;
+	line-height: 12px;
 	white-space: nowrap;
 	pointer-events: none;
 }
+#current_skill_slot .skill-hotkey-label { right: -3px; bottom: -2px; }
 
 #btn_cshop    { left: 1px;   decorator: image(mainframe-btn-cshop-normal); }
 #btn_cshop.open    { decorator: image(mainframe-btn-cshop-open); }
