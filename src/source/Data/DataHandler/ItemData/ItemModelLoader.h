@@ -10,4 +10,9 @@ void OpenModels();
 
 // Loads the textures of every item model from its texture folders.
 void OpenTextures();
+
+// Logs the problems OpenModels and OpenTextures found (missing model files
+// and textures) and shows the errors to the player. Called once the item
+// data is loaded, so the messages can name the items.
+void ReportProblems();
 } // namespace Data::Items::ModelLoader

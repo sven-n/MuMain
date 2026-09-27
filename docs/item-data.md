@@ -185,7 +185,8 @@ checks; the design document lists how the flags map to OpenMU.
 At startup all `*.json` files in `Data/Items` are read and checked.
 
 **Errors** stop the start with a message that names the file, the item and
-the field. All problems are also written to `MuError.log`. Errors are:
+the field (**Copy text** copies it). All problems are also written to
+`MuError.log`. Errors are:
 
 - invalid JSON, a missing or unsupported `formatVersion`, an invalid `group`
 - an item without `number` or `name`, a number outside 0–511
@@ -252,6 +253,22 @@ Model files are checked like the item files: invalid JSON, a missing
 with two models stop the start with a message; unknown fields are
 warnings. The automated tests also check that every model file and
 texture folder exists.
+
+When a model file or a texture is missing, one message after loading
+lists the problems (up to 10; all of them are in `MuError.log`).
+**Continue** keeps loading, the items are then drawn without the missing
+parts; **Quit** closes the game; **Copy text** copies the message, e.g.
+for a bug report. Each line says what to fix:
+
+```
+Storm Hard Glove (0,33): texture Item762_Armor.jpg (Item762_Armor.OZJ) of mesh 1 of
+Data/Item/Sword34.bmd not found in Data/Item/ (Data/Items/Models/Group00_Sword.json)
+```
+
+The model names textures as `.jpg`/`.tga`; the game reads the encrypted
+copies with the same name, `.OZJ`/`.OZT`. A texture that is not in the
+model's folders but was loaded by another model before is used anyway
+and only logged as a warning, with the folder to add to `textureFolders`.
 
 ---
 

@@ -399,6 +399,7 @@ in both repos (as separate PRs, one per repo).
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** named render effects (D24). |
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). |
+| 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9), including add/remove items. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
@@ -562,6 +563,16 @@ server with original clients (after phases 6 and B).
    model slot, and objects (`Weapon[]`, `BodyPart[]`, `Wing`, `Helper`,
    dropped items) keep their item type instead of computing it back with
    `- MODEL_ITEM`. Comes right after phase 4, so phase 12 can share models.
+
+   **4e Clear model loading errors:** a missing model file or texture of an
+   item model shows one message after loading instead of one popup per
+   texture. Each line names the item (name, group, number), its entry in
+   the model files, the `.bmd` file and mesh, the texture (with the
+   `.OZJ`/`.OZT` file the game reads) and the folders that were searched.
+   A texture that is only found because another model loaded it before is
+   a warning in `MuError.log` that names the folder to add. Errors of the
+   models that stay in code name the `.bmd` file instead of the path in
+   the model.
 5. **Translation tooling**: a translations editor (items × languages, with
    a filter for missing translations) and missing-translation warnings.
    The names themselves are part of phase 2 (D17).

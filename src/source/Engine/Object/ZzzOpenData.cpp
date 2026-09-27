@@ -33,6 +33,7 @@
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/SocketSystem.h"
 
@@ -369,7 +370,7 @@ static void StopOnItemDataError(const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
     g_ErrorReport.Write(L"%ls\r\n", message.c_str());
-    MessageBox(g_hWnd, message.c_str(), L"Item data error", MB_OK);
+    Core::Platform::ErrorDialog::Show("Item data error", errorMessage, false);
     SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 }
 
@@ -4339,6 +4340,8 @@ void OpenBasicData(HDC hDC)
     // runtime any more.
 
     OpenItemData();
+    // Only now: the messages name the items.
+    Data::Items::ModelLoader::ReportProblems();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
