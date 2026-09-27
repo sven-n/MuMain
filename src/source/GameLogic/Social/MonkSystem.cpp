@@ -91,19 +91,15 @@ void CMonkSystem::RegistItem()
 
 void CMonkSystem::LoadModelItem()
 {
-    gLoadData.AccessModel(MODEL_SACRED_GLOVE, L"Data\\Item\\", L"Sword33");
     gLoadData.AccessModel(MODEL_SWORD_32_LEFT, L"Data\\Item\\", L"SwordL33");
     gLoadData.AccessModel(MODEL_SWORD_32_RIGHT, L"Data\\Item\\", L"SwordR33");
 
-    gLoadData.AccessModel(MODEL_STORM_HARD_GLOVE, L"Data\\Item\\", L"Sword34");
     gLoadData.AccessModel(MODEL_SWORD_33_LEFT, L"Data\\Item\\", L"SwordL34");
     gLoadData.AccessModel(MODEL_SWORD_33_RIGHT, L"Data\\Item\\", L"SwordR34");
 
-    gLoadData.AccessModel(MODEL_PIERCING_BLADE_GLOVE, L"Data\\Item\\", L"Sword35");
     gLoadData.AccessModel(MODEL_SWORD_34_LEFT, L"Data\\Item\\", L"SwordL35");
     gLoadData.AccessModel(MODEL_SWORD_34_RIGHT, L"Data\\Item\\", L"SwordR35");
 
-    gLoadData.AccessModel(MODEL_PHOENIX_SOUL_STAR, L"Data\\Item\\", L"Sword36");
     gLoadData.AccessModel(MODEL_SWORD_35_LEFT, L"Data\\Item\\", L"Sword36L");
     gLoadData.AccessModel(MODEL_SWORD_35_RIGHT, L"Data\\Item\\", L"Sword36R");
 
@@ -115,19 +111,17 @@ void CMonkSystem::LoadModelItem()
 
 void CMonkSystem::LoadModelItemTexture()
 {
-    gLoadData.OpenTexture(MODEL_SACRED_GLOVE, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_32_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_32_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_STORM_HARD_GLOVE, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, L"Item\\");
+    // Like the Storm Hard Glove item, the parts use armor textures from Data\Player.
+    const std::wstring stormHardGloveFolders[] = {L"Item\\", L"Player\\"};
+    gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, stormHardGloveFolders);
+    gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, stormHardGloveFolders);
 
-    gLoadData.OpenTexture(MODEL_PIERCING_BLADE_GLOVE, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_PHOENIX_SOUL_STAR, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_35_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_35_RIGHT, L"player\\");
 

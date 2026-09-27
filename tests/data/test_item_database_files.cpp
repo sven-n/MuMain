@@ -2,6 +2,8 @@
 
 #include "doctest.h"
 
+#include "TestFiles.h"
+
 #include "Core/Globals/_crypt.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
@@ -170,12 +172,6 @@ public:
 private:
     std::vector<ITEM_ATTRIBUTE_FILE_LEGACY> m_records;
 };
-
-std::string ReadWholeFile(const std::filesystem::path& path)
-{
-    std::ifstream file(path, std::ios::binary);
-    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-}
 
 const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int itemType)
 {
@@ -407,7 +403,7 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     {
         INFO(GetItemGroupFileName(group));
         CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
-              ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
+              TestFiles::ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
     }
 }
 

@@ -1,0 +1,177 @@
+{
+  "formatVersion": 1,
+  "group": 0,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Sword01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Sword02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Sword03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Sword04.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Sword05.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Sword06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Sword07.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Sword08.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Sword09.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Sword10.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Sword11.bmd",
+      "textureFolders": ["Item"],
+      "noneBlendMeshes": [1]
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Sword12.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Sword13.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Sword14.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Sword15.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Sword16.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Sword17.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Sword18.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Sword19.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Sword20.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/sword21.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/sword22.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/HDK_Sword.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/HDK_Sword2.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 24,
+      "file": "Data/Item/CW_Sword.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 25,
+      "file": "Data/Item/CW_Sword2.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 26,
+      "file": "Data/Item/Sword_27.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 27,
+      "file": "Data/Item/Sword_28.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 28,
+      "file": "Data/Item/Sword_29.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/Sword32.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/Sword33.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/Sword34.bmd",
+      "textureFolders": ["Item", "Player"]
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/Sword35.bmd",
+      "textureFolders": ["Player"]
+    },
+    {
+      "number": 35,
+      "file": "Data/Item/Sword36.bmd",
+      "textureFolders": ["Player", "Effect"]
+    }
+  ]
+}

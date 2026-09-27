@@ -139,12 +139,6 @@ void CXmasEvent::LoadXmasEventEffect()
     LoadBitmap(L"Effect\\snowseff02.jpg", BITMAP_SNOW_EFFECT_2, GL_LINEAR, GL_CLAMP);
 }
 
-void CXmasEvent::LoadXmasEventItem()
-{
-    gLoadData.AccessModel(MODEL_CHRISTMAS_STAR, L"Data\\Item\\", L"MagicBox", 2);
-    gLoadData.OpenTexture(MODEL_CHRISTMAS_STAR, L"Item\\");
-}
-
 void CXmasEvent::LoadXmasEventSound()
 {
     LoadWaveFile(SOUND_XMAS_JUMP_SNOWMAN, L"Data\\Sound\\xmasjumpsnowman.wav", 1);

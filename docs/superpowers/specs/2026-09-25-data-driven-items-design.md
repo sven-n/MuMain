@@ -282,7 +282,7 @@ Each field belongs to one of two groups:
 | Server flags | ammunition, bound to character, quest item, drops from monsters, storage limit | yes |
 | Rule flags | tradable, droppable, storable, sellable to NPC, personal-shop sellable, repairable, usable/consumable, equippable | yes, after OpenMU is extended (D3) |
 | Categories/tags | wing, flying, mount, pet, potion, jewel, ticket, cash shop, event, … | client-only at first; shared where OpenMU gets matching data |
-| Model | model file, texture folder, cloth flag (in the model files, D22) | client-only |
+| Model | model file, texture folders, cloth flag (in the model files, D22) | client-only |
 | Rendering | inventory offset, rotation and scale; ground rotation and scale; glow color, render style, effects (D24) | client-only |
 
 ### 4. Rule code on top of data
@@ -520,7 +520,7 @@ server with original clients (after phases 6 and B).
    `Data/Items/Models/GroupNN_*.json` (D22):
 
    ```json
-   { "number": 5, "file": "Data/Item/Sword06.bmd", "textureFolder": "Item",
+   { "number": 5, "file": "Data/Item/Sword06.bmd", "textureFolders": ["Item"],
      "inventory": { "offset": [-0.02, 0.03], "rotation": [180, 270, 15], "scale": 0.0039 },
      "ground": { "rotation": [60, 0, -45], "scale": 1.0 },
      "glow": "gold", "renderStyle": "chromeMesh0", "effects": ["flameSparks"] }
@@ -531,7 +531,9 @@ server with original clients (after phases 6 and B).
    - **4a Model files and textures:** `OpenItems()` / `OpenItemTextures()`
      become one loop over the item data. Models that aren't items (e.g.
      `MODEL_EVENT + …`, body parts) and the extra effect bitmaps stay in
-     code.
+     code. `textureFolders` is a search list: each texture comes from the
+     first folder that has it (the old code loaded folder after folder and
+     sometimes relied on textures another model had loaded before).
    - **4b Display:** the inventory transform (`RenderObjectScreen()`,
      offset, rotation, scale) and the ground transform (`ItemAngle()`,
      `ItemHeight()`) come from the data; `"cloth": true` marks capes drawn

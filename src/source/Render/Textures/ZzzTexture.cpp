@@ -288,18 +288,13 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 }
 void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
-    wchar_t szMsg[1024] = {
-        0,
-    };
-    wcscpy(szMsg, szErrorMsg);
-
     if (bForceDestroy)
     {
         MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_OK | MB_ICONERROR);
     }
     else
     {
-        int iResult = MessageBox(g_hWnd, szMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
+        int iResult = MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
         if (IDYES == iResult)
         {
             return;

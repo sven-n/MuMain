@@ -115,4 +115,17 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateSlot(definition, issues);
     }
 }
+
+void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    std::set<int> seenItemTypes;
+    for (const ItemModelDefinition& model : models)
+    {
+        if (!seenItemTypes.insert(MakeItemType(model.group, model.number)).second)
+        {
+            issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, "number",
+                              "the model is defined more than once"});
+        }
+    }
+}
 } // namespace Data::Items

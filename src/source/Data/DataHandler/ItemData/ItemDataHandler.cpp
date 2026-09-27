@@ -7,6 +7,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -53,9 +54,9 @@ void LogIssues(const std::vector<ItemDataIssue>& issues)
     }
 }
 
-std::string DescribeErrors(const std::vector<ItemDataIssue>& issues)
+std::string DescribeErrors(const std::filesystem::path& directory, const std::vector<ItemDataIssue>& issues)
 {
-    std::string message = "The item data in " + GetItemDataDirectory().string() + " has errors:\n";
+    std::string message = "The item data in " + directory.string() + " has errors:\n";
     size_t errorCount = 0;
     for (const ItemDataIssue& issue : issues)
     {
@@ -132,7 +133,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     LogIssues(result.issues);
     if (HasErrors(result.issues))
     {
-        errorMessage = DescribeErrors(result.issues);
+        errorMessage = DescribeErrors(GetItemDataDirectory(), result.issues);
         return false;
     }
     const double loadMilliseconds = MillisecondsSince(loadStart);
@@ -146,6 +147,23 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
                 g_ItemDatabase.GetExistingItemCount(), GetItemDataDirectory().string(), loadMilliseconds,
                 MillisecondsSince(buildStart));
+    return true;
+}
+
+bool CItemDataHandler::LoadModels(std::string& errorMessage)
+{
+    const auto loadStart = std::chrono::steady_clock::now();
+    ItemModelDataLoadResult result = LoadItemModelDataDirectory(GetItemModelDataDirectory());
+    LogIssues(result.issues);
+    if (HasErrors(result.issues))
+    {
+        errorMessage = DescribeErrors(GetItemModelDataDirectory(), result.issues);
+        return false;
+    }
+
+    g_ItemModelDatabase.Build(result.models);
+    MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
+                GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
     return true;
 }
 

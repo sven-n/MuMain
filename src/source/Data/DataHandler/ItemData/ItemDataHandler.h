@@ -12,6 +12,7 @@
 #endif
 
 // Owns loading the item data (Data/Items/*.json) into the item database and
+// the item models (Data/Items/Models/*.json) into the item model database, and
 // keeps ItemAttribute[], the table most game code still reads, filled from
 // the database. Item names follow the UI locale.
 class CItemDataHandler
@@ -26,6 +27,11 @@ public:
     // ItemAttribute[]. On errors nothing is changed, false is returned and
     // errorMessage describes the errors for the player.
     bool Load(std::string& errorMessage);
+
+    // Loads and validates the item models (Data/Items/Models) into the item
+    // model database. On errors nothing is changed, false is returned and
+    // errorMessage describes the errors for the player.
+    bool LoadModels(std::string& errorMessage);
 
 #ifdef _EDITOR
     // The item editor changed ItemAttribute[itemType]; copies the change

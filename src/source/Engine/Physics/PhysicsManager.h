@@ -265,6 +265,16 @@ public:
                         int iNumVer, float fWidth, float fHeight, int iTexFront, int TexBack, DWORD dwType = 0,
                         int iBMDType = -1);
 
+    // Whether the model is loaded and has the mesh; for the cloth that moves
+    // the mesh's own vertices. Create fails when it has not.
+    static bool CanCreate(int iBMDType, int iMesh);
+    // Whether the mesh can become a cloth grid of iNumHor x iNumVer points:
+    // the grid rebuild and the moving cloth write a vertex and a texture
+    // coordinate for every point and two triangles for every grid cell, all
+    // without checks. Many item models come from the item model files, so a
+    // model may be missing or be another model. Create fails when it cannot.
+    static bool CanCreate(int iBMDType, int iMesh, int iNumHor, int iNumVer);
+
 protected:
     int FindMatchVertex(Mesh_t* pMesh, int iV1, int iV2, int iV3);
     BOOL FindInLink(int iCount, int iV1, int iV2);

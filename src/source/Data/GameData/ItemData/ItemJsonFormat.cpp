@@ -2,9 +2,8 @@
 
 #include "ItemJsonFormat.h"
 #include "ItemEnumNames.h"
+#include "ItemJsonCommon.h"
 #include "ItemType.h"
-
-#include "json.hpp"
 
 #include <algorithm>
 #include <array>
@@ -16,39 +15,13 @@ namespace Data::Items
 {
 namespace
 {
-using OrderedJson = nlohmann::ordered_json;
-
-constexpr int JsonIndent = 2;
-
-// Reads a whole number without narrowing it, so a huge value cannot wrap
-// around to a valid one. False when it is not a whole number or does not
-// fit in a long long.
-bool ReadWholeNumber(const OrderedJson& json, long long& number)
-{
-    if (json.is_number_unsigned())
-    {
-        const auto value = json.get<unsigned long long>();
-        if (value > static_cast<unsigned long long>(std::numeric_limits<long long>::max()))
-        {
-            return false;
-        }
-        number = static_cast<long long>(value);
-        return true;
-    }
-    if (json.is_number_integer())
-    {
-        number = json.get<long long>();
-        return true;
-    }
-    return false;
-}
+using Json::OrderedJson;
+using Json::ReadWholeNumber;
 
 namespace Keys
 {
-constexpr const char* FormatVersion = "formatVersion";
-constexpr const char* Group = "group";
+using namespace Json::Keys;
 constexpr const char* Items = "items";
-constexpr const char* Number = "number";
 constexpr const char* Name = "name";
 constexpr const char* Tags = "tags";
 constexpr const char* Requirements = "requirements";
@@ -313,21 +286,12 @@ template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const 
 
 bool ItemReader::ReadIdentity(const OrderedJson& json, ItemDefinition& definition)
 {
-    const auto number = json.find(Keys::Number);
-    long long itemNumber = 0;
-    if (number == json.end() || !number->is_number_integer())
+    const auto addError = [this](const std::string& field, const std::string& message)
+    { AddIssue(ItemDataIssueSeverity::Error, field, message); };
+    if (!Json::ReadNumber(json, m_number, addError))
     {
-        AddIssue(ItemDataIssueSeverity::Error, Keys::Number, "missing or not a whole number");
         return false;
     }
-
-    if (!ReadWholeNumber(*number, itemNumber) || itemNumber < 0 || itemNumber >= MAX_ITEM_INDEX)
-    {
-        AddIssue(ItemDataIssueSeverity::Error, Keys::Number,
-                 "must be between 0 and " + std::to_string(MAX_ITEM_INDEX - 1));
-        return false;
-    }
-    m_number = static_cast<int>(itemNumber);
 
     const auto name = json.find(Keys::Name);
     if (name == json.end())
@@ -509,116 +473,14 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     return !m_hasErrors;
 }
 
-void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
-                  const std::string& message)
-{
-    issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
-}
-
-bool TryParse(std::string_view text, const std::string& source, OrderedJson& root, std::vector<ItemDataIssue>& issues)
-{
-    try
-    {
-        root = OrderedJson::parse(text);
-        return true;
-    }
-    catch (const OrderedJson::parse_error& error)
-    {
-        AddFileIssue(issues, source, ItemDataIssue::NoItem, "", std::string("invalid JSON: ") + error.what());
-        return false;
-    }
-}
-
-bool ReadFormatVersion(const OrderedJson& root, const std::string& source, std::vector<ItemDataIssue>& issues)
-{
-    const auto version = root.find(Keys::FormatVersion);
-    if (version == root.end() || !version->is_number_integer())
-    {
-        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion, "missing or not a whole number");
-        return false;
-    }
-
-    long long formatVersion = 0;
-    if (!ReadWholeNumber(*version, formatVersion) || formatVersion < 1 || formatVersion > ItemJsonFormatVersion)
-    {
-        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion,
-                     "version " + version->dump() + " is not supported (this client reads up to " +
-                         std::to_string(ItemJsonFormatVersion) + ")");
-        return false;
-    }
-    return true;
-}
-
-bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, std::vector<ItemDataIssue>& issues)
-{
-    const auto groupField = root.find(Keys::Group);
-    if (groupField == root.end() || !groupField->is_number_integer())
-    {
-        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group, "missing or not a whole number");
-        return false;
-    }
-
-    long long groupNumber = 0;
-    if (!ReadWholeNumber(*groupField, groupNumber) || groupNumber < 0 || groupNumber >= MAX_ITEM_TYPE)
-    {
-        AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Group,
-                     "must be between 0 and " + std::to_string(MAX_ITEM_TYPE - 1));
-        return false;
-    }
-    group = static_cast<int>(groupNumber);
-    return true;
-}
-// The JSON writer puts every list entry on its own line. Tag lists are short,
-// so they are easier to read on one line: "tags": ["jewel", "valuable"].
-std::string PutTagListsOnOneLine(const std::string& text)
-{
-    const std::string listStart = std::string("\"") + Keys::Tags + "\": [";
-    std::string result;
-    size_t position = 0;
-    while (true)
-    {
-        const size_t start = text.find(listStart, position);
-        const size_t end = start == std::string::npos ? std::string::npos : text.find(']', start);
-        if (end == std::string::npos)
-        {
-            result.append(text, position, std::string::npos);
-            return result;
-        }
-
-        result.append(text, position, start + listStart.size() - position);
-        // Tag names have no spaces, so every newline and indentation can go;
-        // only the space after each comma stays.
-        for (size_t i = start + listStart.size(); i < end; ++i)
-        {
-            const char character = text[i];
-            const bool afterComma = !result.empty() && result.back() == ',';
-            if (character != '\n' && (character != ' ' || afterComma))
-            {
-                result += character;
-            }
-        }
-        result += ']';
-        position = end + 1;
-    }
-}
 } // namespace
 
 void ReadItemGroupJson(std::string_view text, const std::string& source, std::vector<ItemDefinition>& items,
                        std::vector<ItemDataIssue>& issues)
 {
     OrderedJson root;
-    if (!TryParse(text, source, root, issues))
-    {
-        return;
-    }
-    if (!root.is_object())
-    {
-        AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the file must contain a JSON object");
-        return;
-    }
-
     int group = 0;
-    if (!ReadFormatVersion(root, source, issues) || !ReadGroup(root, source, group, issues))
+    if (!Json::ReadFileHeader(text, source, ItemJsonFormatVersion, root, group, issues))
     {
         return;
     }
@@ -626,7 +488,7 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
     const auto itemList = root.find(Keys::Items);
     if (itemList == root.end() || !itemList->is_array())
     {
-        AddFileIssue(issues, source, group, Keys::Items, "missing or not a list");
+        Json::AddFileIssue(issues, source, group, Keys::Items, "missing or not a list");
         return;
     }
 
@@ -665,6 +527,8 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
 
     // Names are UTF-8 already; replace (instead of throwing on) anything that
     // is not, so a bad name can never stop a save half-way.
-    return PutTagListsOnOneLine(root.dump(JsonIndent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
+    return Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace),
+                                   Keys::Tags) +
+           "\n";
 }
 } // namespace Data::Items

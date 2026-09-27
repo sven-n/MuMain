@@ -3,6 +3,7 @@
 #include "ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 
 #include <algorithm>
 #include <array>
@@ -59,6 +60,31 @@ void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, con
     issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
 }
 
+// Reads every *.json file of the folder with readFile(text, source).
+template <typename TReadFile>
+void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMessage,
+                   std::vector<ItemDataIssue>& issues, TReadFile&& readFile)
+{
+    const std::vector<std::filesystem::path> files = FindJsonFiles(directory);
+    if (files.empty())
+    {
+        AddError(issues, directory.string(), noFilesMessage);
+        return;
+    }
+
+    for (const std::filesystem::path& file : files)
+    {
+        const std::string source = file.filename().string();
+        const std::optional<std::string> text = ReadTextFile(file);
+        if (!text)
+        {
+            AddError(issues, source, "could not be read");
+            continue;
+        }
+        readFile(*text, source);
+    }
+}
+
 bool WriteFileIfChanged(const std::filesystem::path& path, const std::string& text, std::vector<ItemDataIssue>& issues)
 {
     const std::optional<std::string> current = ReadTextFile(path);
@@ -108,26 +134,25 @@ std::string GetItemGroupFileName(int group)
 ItemDataLoadResult LoadItemDataDirectory(const std::filesystem::path& directory)
 {
     ItemDataLoadResult result;
-    const std::vector<std::filesystem::path> files = FindJsonFiles(directory);
-    if (files.empty())
-    {
-        AddError(result.issues, directory.string(), "no item data files found");
-        return result;
-    }
-
-    for (const std::filesystem::path& file : files)
-    {
-        const std::string source = file.filename().string();
-        const std::optional<std::string> text = ReadTextFile(file);
-        if (!text)
-        {
-            AddError(result.issues, source, "could not be read");
-            continue;
-        }
-        ReadItemGroupJson(*text, source, result.items, result.issues);
-    }
-
+    ReadJsonFiles(directory, "no item data files found", result.issues,
+                  [&](std::string_view text, const std::string& source)
+                  { ReadItemGroupJson(text, source, result.items, result.issues); });
     ValidateItems(result.items, result.issues);
+    return result;
+}
+
+std::filesystem::path GetItemModelDataDirectory()
+{
+    return GetItemDataDirectory() / "Models";
+}
+
+ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& directory)
+{
+    ItemModelDataLoadResult result;
+    ReadJsonFiles(directory, "no item model files found", result.issues,
+                  [&](std::string_view text, const std::string& source)
+                  { ReadItemModelGroupJson(text, source, result.models, result.issues); });
+    ValidateItemModels(result.models, result.issues);
     return result;
 }
 
