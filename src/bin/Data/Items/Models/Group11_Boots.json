@@ -18,6 +18,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [1, 0.2, 0]
       }
     },
     {
@@ -36,6 +39,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0, 0.5, 1],
+        "ancientColor": [1, 0.7, 0.2]
       }
     },
     {
@@ -45,6 +52,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [1, 1, 1],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -63,6 +74,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.6, 0.8, 0.4]
       }
     },
     {
@@ -90,6 +104,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0, 0.5, 1],
+        "ancientColor": [1, 0.7, 0.2]
       }
     },
     {
@@ -117,6 +135,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0, 0.5, 1]
       }
     },
     {
@@ -126,6 +147,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0, 0.8, 0.4]
       }
     },
     {
@@ -135,6 +159,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [1, 1, 1],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -144,6 +172,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.9, 0.8, 1],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -153,6 +185,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.75, 0.65, 0.5]
       }
     },
     {
@@ -162,6 +197,11 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.8],
+        "shineColor": [1, 0.5, 0],
+        "ancientColor": [1, 0.7, 0.2]
       }
     },
     {
@@ -171,6 +211,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [1, 1, 1],
+        "shineColor": [0, 0.5, 1]
       }
     },
     {
@@ -180,6 +224,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.8]
       }
     },
     {
@@ -189,6 +236,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.8]
       }
     },
     {
@@ -198,6 +248,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.8, 0.46, 0.25],
+        "shineWhite": true
       }
     },
     {
@@ -207,6 +261,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.65, 0.45, 0.3]
       }
     },
     {
@@ -216,6 +273,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.35, 0.35, 0.6]
       }
     },
     {
@@ -225,6 +285,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.8, 0.46, 0.25]
       }
     },
     {
@@ -234,6 +297,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.35, 0.35, 0.6]
       }
     },
     {
@@ -243,6 +309,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.47, 0.67, 0.6]
       }
     },
     {
@@ -252,6 +321,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.75, 0.65, 0.5]
       }
     },
     {
@@ -261,6 +333,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.2, 0.3, 0.6]
       }
     },
     {
@@ -270,6 +345,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.4, 0.3]
       }
     },
     {
@@ -279,6 +357,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.37, 0.37, 1]
       }
     },
     {
@@ -288,6 +369,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.3, 0.7, 0.3]
       }
     },
     {
@@ -297,6 +381,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.4, 1]
       }
     },
     {
@@ -306,6 +393,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.45, 0.45, 0.23]
       }
     },
     {
@@ -315,6 +405,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.6, 0.5, 0.2]
       }
     },
     {
@@ -324,6 +417,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.6, 0.6, 0.6]
       }
     },
     {
@@ -333,6 +429,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.3, 0.7, 0.3]
       }
     },
     {
@@ -342,6 +441,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.6, 0.7]
       }
     },
     {
@@ -351,6 +453,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.45, 0.45, 0.23]
       }
     },
     {
@@ -360,6 +465,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.2, 0.7, 0.3],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -369,6 +478,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.7, 0.3, 0.3],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -378,6 +491,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.7, 0.5, 0.3],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -387,6 +504,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.2, 0.7],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -396,6 +517,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.8, 0.4, 0.6],
+        "shineColor": [0, 0.5, 1]
       }
     },
     {
@@ -405,6 +530,10 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.6, 0.4, 0.8],
+        "shineWhite": true
       }
     },
     {
@@ -414,6 +543,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.7]
       }
     },
     {
@@ -423,6 +555,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.8, 0.4, 0]
       }
     },
     {
@@ -432,6 +567,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.7, 0.5, 0.7]
       }
     },
     {
@@ -441,6 +579,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [1, 0.2, 0]
       }
     },
     {
@@ -450,6 +591,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.7, 0.4, 0.4]
       }
     },
     {
@@ -459,6 +603,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.3, 0.6, 0.4]
       }
     },
     {
@@ -468,6 +615,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.7, 0.2, 0.2]
       }
     },
     {
@@ -477,6 +627,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.7]
       }
     },
     {
@@ -486,6 +639,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.7, 0.2, 0.7]
       }
     },
     {
@@ -495,6 +651,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.8, 0.46, 0.25]
       }
     },
     {
@@ -504,6 +663,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.8, 0.4, 0]
       }
     },
     {
@@ -513,6 +675,9 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.4, 0.3]
       }
     },
     {
@@ -654,6 +819,12 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "scale": 0.0032
+      },
+      "glow": {
+        "color": [0.5, 0.8, 0.9],
+        "meshes": [0],
+        "shineMeshes": [0],
+        "excellentMesh": 0
       }
     }
   ]

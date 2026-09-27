@@ -45,6 +45,49 @@ struct ItemGroundDisplay
     bool operator==(const ItemGroundDisplay&) const = default;
 };
 
+// The meshes of the model a glow is drawn on. Without meshes and without a
+// hidden mesh it is drawn on all meshes.
+struct ItemGlowMeshes
+{
+    // Only these meshes.
+    std::vector<int> only;
+    // All meshes but this one.
+    std::optional<int> hidden;
+
+    bool operator==(const ItemGlowMeshes&) const = default;
+};
+
+// How an item glows. The defaults are the glow of items without values of
+// their own. Colors are red, green and blue from 0 to 1.
+struct ItemGlow
+{
+    static constexpr std::array<double, 3> DefaultColor{1.0, 0.5, 0.0};
+    static constexpr std::array<double, 3> DefaultShineColor{1.0, 1.0, 1.0};
+    static constexpr std::array<double, 3> DefaultAncientColor{0.1, 0.6, 1.0};
+
+    // The level the item glows like instead of its own (e.g. 8 for jewels,
+    // 0 for wings).
+    std::optional<int> level;
+    // The glow of items +7 and up.
+    std::array<double, 3> color = DefaultColor;
+    ItemGlowMeshes meshes;
+    // The shine of items +11 and up tints the light of the item with this
+    // color, or is plain white.
+    std::array<double, 3> shineColor = DefaultShineColor;
+    bool shineWhite = false;
+    ItemGlowMeshes shineMeshes;
+    // The shine of ancient items.
+    std::array<double, 3> ancientColor = DefaultAncientColor;
+    // Whether excellent items glow; wings and capes do not.
+    bool excellent = true;
+    // The only mesh with the excellent glow, and the one when the model is
+    // drawn without the character skin (in the inventory, on the ground).
+    std::optional<int> excellentMesh;
+    std::optional<int> excellentMeshWithoutSkin;
+
+    bool operator==(const ItemGlow&) const = default;
+};
+
 // The model of one item: which .bmd file is opened for it, where its
 // textures are and how it is drawn. One entry of the model files
 // (Data/Items/Models). Each item keeps its own model slot, MODEL_ITEM + item
@@ -66,6 +109,7 @@ struct ItemModelDefinition
     // A cape worn as cloth: putting it on or taking it off deletes the cloth
     // of the character. Which capes are drawn as cloth is decided in code.
     bool cloth = false;
+    ItemGlow glow;
 
     bool Exists() const
     {

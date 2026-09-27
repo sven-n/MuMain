@@ -54,7 +54,7 @@ pattern later but are not part of this work.
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model. Phase 12 (level variants as items of their own) then shares models without loading them twice. |
-| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data as names: a glow color from the existing palette (`PartObjectColor*`), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. |
+| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (colors as red, green and blue, which keeps the values of the old `PartObjectColor*` palettes without naming 44 colors; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
@@ -397,7 +397,7 @@ in both repos (as separate PRs, one per repo).
 | 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
-| 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** named render effects (D24). |
+| 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** particle effects. |
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
@@ -524,7 +524,8 @@ server with original clients (after phases 6 and B).
    { "number": 5, "file": "Data/Item/Sword06.bmd", "textureFolders": ["Item"],
      "inventory": { "offset": [-0.02, 0.03], "rotation": [180, 270, 15], "scale": 0.0039 },
      "ground": { "rotation": [60, 0, -45], "scale": 1.0 },
-     "glow": "gold", "renderStyle": "chromeMesh0", "effects": ["flameSparks"] }
+     "glow": { "color": [1, 0.7, 0.2], "meshes": [0] },
+     "renderStyle": "chromeMesh0", "effects": ["flameSparks"] }
    ```
 
    Every item keeps its model slot `MODEL_ITEM + item type` (D23, own model slots). Three
@@ -546,8 +547,23 @@ server with original clients (after phases 6 and B).
      cases that depend on the item level stay in code until phase 12, and
      so does the look of the event models drawn for level variants, a small
      table in `Render/Items/ItemDisplay.cpp`.
-   - **4c Named render effects (D24):** `glow`, `renderStyle` and `effects`
-     select effect code by name.
+   - **4c Render effects (D24)**, three PRs because the drawing code is
+     large (about 3,500 lines):
+     - **4c1 Glow:** `"glow"` holds the level an item glows like (jewels +8,
+       wings +0), the colors of the level glow, of the shine of items +11
+       and up and of ancient items, the meshes they are drawn on, and the
+       excellent glow (off for wings and capes, or on one mesh). It
+       replaces `PartObjectColor`, `PartObjectColor2`, `PartObjectColor3`,
+       the mesh choices of `RenderPartObjectBodyColor(2)` and the item
+       cases of the glow level switch. Monsters, the formulas of arrows,
+       bolts and Devil's Square items, the event models of level variants
+       and the Deadly Staff's second glow step (a one-off that changes the
+       object, moved in 4c2) stay in code.
+     - **4c2 Render styles:** `renderStyle` names the `RenderPartObjectBody`
+       recipe of an item (about 160 item branches, 133 distinct recipes),
+       including the display-only item lists of phase 3 that choose them.
+     - **4c3 Particle effects:** `effects` lists the particle effects of
+       `RenderPartObjectEffect` (about 80 item branches, 31 distinct).
 
    Verified like phase 3: one-time comparisons of the old and the new code
    (which files and texture folders are loaded for each model; the

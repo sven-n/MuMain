@@ -194,6 +194,15 @@ int GetInventoryModel(int itemType)
     return MODEL_ITEM + itemType;
 }
 
+std::optional<int> GetItemOfInventoryModel(int modelType)
+{
+    if (const ArmorInventoryModel* armor = FindArmorInventoryModel(modelType))
+    {
+        return armor->itemType;
+    }
+    return std::nullopt;
+}
+
 bool IsDrawnOnCharacterSkeleton(int modelType)
 {
     return (modelType >= MODEL_HELM && modelType < MODEL_BOOTS + MAX_ITEM_INDEX) ||

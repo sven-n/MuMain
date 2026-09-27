@@ -28,6 +28,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [1, 0.2, 0]
       }
     },
     {
@@ -56,6 +59,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0, 0.5, 1],
+        "ancientColor": [1, 0.7, 0.2]
       }
     },
     {
@@ -70,6 +77,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [1, 1, 1],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -98,6 +109,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.6, 0.8, 0.4]
       }
     },
     {
@@ -140,6 +154,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0, 0.5, 1],
+        "ancientColor": [1, 0.7, 0.2]
       }
     },
     {
@@ -186,6 +204,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0, 0.5, 1]
       }
     },
     {
@@ -200,6 +221,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0, 0.8, 0.4]
       }
     },
     {
@@ -214,6 +238,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [1, 1, 1],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -228,6 +256,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.9, 0.8, 1],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -242,6 +274,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.75, 0.65, 0.5]
       }
     },
     {
@@ -256,6 +291,11 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.8],
+        "shineColor": [1, 0.5, 0],
+        "ancientColor": [1, 0.7, 0.2]
       }
     },
     {
@@ -270,6 +310,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [1, 1, 1],
+        "shineColor": [0, 0.5, 1]
       }
     },
     {
@@ -284,6 +328,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.8]
       }
     },
     {
@@ -298,6 +345,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.8]
       }
     },
     {
@@ -312,6 +362,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.8, 0.46, 0.25],
+        "shineWhite": true
       }
     },
     {
@@ -326,6 +380,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.65, 0.45, 0.3]
       }
     },
     {
@@ -340,6 +397,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.35, 0.35, 0.6]
       }
     },
     {
@@ -354,6 +414,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.8, 0.46, 0.25]
       }
     },
     {
@@ -368,6 +431,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.35, 0.35, 0.6]
       }
     },
     {
@@ -382,6 +448,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.47, 0.67, 0.6]
       }
     },
     {
@@ -396,6 +465,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.75, 0.65, 0.5]
       }
     },
     {
@@ -410,6 +482,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.2, 0.3, 0.6]
       }
     },
     {
@@ -426,6 +501,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.4, 0.3]
       }
     },
     {
@@ -442,6 +520,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.37, 0.37, 1]
       }
     },
     {
@@ -456,6 +537,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.3, 0.7, 0.3]
       }
     },
     {
@@ -470,6 +554,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.4, 1]
       }
     },
     {
@@ -484,6 +571,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.45, 0.45, 0.23]
       }
     },
     {
@@ -500,6 +590,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.6, 0.5, 0.2]
       }
     },
     {
@@ -516,6 +609,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.6, 0.6, 0.6]
       }
     },
     {
@@ -532,6 +628,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.3, 0.7, 0.3]
       }
     },
     {
@@ -548,6 +647,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.6, 0.7]
       }
     },
     {
@@ -564,6 +666,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.45, 0.45, 0.23]
       }
     },
     {
@@ -580,6 +685,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.2, 0.7, 0.3],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -596,6 +705,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.7, 0.3, 0.3],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -612,6 +725,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.7, 0.5, 0.3],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -628,6 +745,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.2, 0.7],
+        "shineColor": [1, 0.5, 0]
       }
     },
     {
@@ -644,6 +765,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.8, 0.4, 0.6],
+        "shineColor": [0, 0.5, 1]
       }
     },
     {
@@ -660,6 +785,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.6, 0.4, 0.8],
+        "shineWhite": true
       }
     },
     {
@@ -674,6 +803,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.7]
       }
     },
     {
@@ -688,6 +820,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.8, 0.4, 0]
       }
     },
     {
@@ -702,6 +837,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.7, 0.5, 0.7]
       }
     },
     {
@@ -716,6 +854,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [1, 0.2, 0]
       }
     },
     {
@@ -730,6 +871,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.7, 0.4, 0.4]
       }
     },
     {
@@ -744,6 +888,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.3, 0.6, 0.4]
       }
     },
     {
@@ -758,6 +905,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.7, 0.2, 0.2]
       }
     },
     {
@@ -772,6 +922,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.5, 0.7]
       }
     },
     {
@@ -786,6 +939,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.7, 0.2, 0.7]
       }
     },
     {
@@ -802,6 +958,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.8, 0.46, 0.25],
+        "meshes": [1],
+        "shineMeshes": [1],
+        "excellentMesh": 1
       }
     },
     {
@@ -818,6 +980,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.8, 0.4, 0],
+        "meshes": [1],
+        "shineMeshes": [1],
+        "excellentMesh": 1
       }
     },
     {
@@ -834,6 +1002,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.4, 0.3],
+        "meshes": [0],
+        "shineMeshes": [0],
+        "excellentMesh": 0
       }
     },
     {
@@ -1004,6 +1178,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": [0.5, 0.8, 0.9],
+        "meshes": [2],
+        "shineMeshes": [2],
+        "excellentMesh": 2
       }
     }
   ]

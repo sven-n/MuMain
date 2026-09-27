@@ -11,6 +11,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -22,6 +26,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -33,6 +41,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -45,6 +57,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -57,6 +73,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -69,6 +89,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -81,6 +105,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -94,6 +122,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -142,6 +173,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -154,6 +188,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -166,6 +203,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -178,6 +218,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9,
+        "color": [0, 0.5, 1]
       }
     },
     {
@@ -189,6 +233,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -201,6 +248,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -213,6 +263,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -225,6 +278,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -237,6 +293,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -304,6 +363,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -316,6 +378,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -377,6 +442,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -389,6 +458,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -401,6 +474,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -414,7 +491,11 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
     },
     {
       "number": 40,
@@ -427,7 +508,11 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
     },
     {
       "number": 41,
@@ -438,6 +523,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -451,6 +540,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -462,6 +555,10 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
       }
     },
     {
@@ -475,6 +572,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -488,6 +588,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -501,6 +604,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -514,6 +620,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
       }
     },
     {
@@ -540,7 +649,11 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
     },
     {
       "number": 50,
@@ -554,7 +667,11 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
     },
     {
       "number": 60,
@@ -1056,7 +1173,10 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "excellent": false
+      }
     },
     {
       "number": 131,
@@ -1067,6 +1187,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
       }
     },
     {
@@ -1078,6 +1201,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
       }
     },
     {
@@ -1089,6 +1215,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
       }
     },
     {
@@ -1100,6 +1229,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
       }
     },
     {
@@ -1113,7 +1245,10 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "excellent": false
+      }
     },
     {
       "number": 136,
@@ -1126,6 +1261,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -1137,6 +1275,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -1150,6 +1291,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -1163,6 +1307,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -1175,6 +1322,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -1188,6 +1338,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -1202,6 +1355,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -1216,6 +1372,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
       }
     }
   ]

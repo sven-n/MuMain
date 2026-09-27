@@ -42,6 +42,9 @@ Anchor GetInventoryAnchor(int itemType, int level);
 // inventory model of its own that the Rage Fighter armor has.
 int GetInventoryModel(int itemType);
 
+// The item an inventory model of the Rage Fighter armor is drawn for.
+std::optional<int> GetItemOfInventoryModel(int modelType);
+
 // The model drawn for an item model at this level, in the inventory and on
 // the ground: two level variants of (14,12) are drawn with event models.
 // Inline, because every drawn model part asks for it.

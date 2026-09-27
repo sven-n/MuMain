@@ -244,6 +244,7 @@ item files hold what client and server share.
 | `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
 | `inventory` | How the item is drawn in the inventory, see below. Optional. |
 | `ground` | How the item lies on the ground, see below. Optional. |
+| `glow` | How the item glows, see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 
 `inventory` and `ground` hold these values; a missing value has the
@@ -266,6 +267,31 @@ The Rage Fighter armors (8,59), (8,60), (8,61) and (8,73) are drawn in the
 inventory with models of their own (`MODEL_ARMORINVEN_*`), with the
 `inventory` values of their entry.
 
+`glow` holds how the item glows. Which glow an item gets for its level,
+excellent options or ancient set is decided by the game; these values
+only set its colors, its meshes and the level it glows like. Colors are
+`[red, green, blue]` from 0 to 1.
+
+```json
+"glow": { "color": [0.5, 0.8, 0.9], "meshes": [2], "shineColor": [1, 0.5, 0], "excellentMesh": 2 }
+```
+
+| Value | Meaning | Default |
+|---|---|---|
+| `level` | The level the item glows like instead of its own, e.g. `8` for jewels, `0` for wings. | its level |
+| `color` | Color of the glow of items +7 and up. | `[1, 0.5, 0]` |
+| `meshes` / `hiddenMesh` | The glow is only on these meshes (`[0, 1]`), or on all meshes but this one (`1`). | all meshes |
+| `shineColor` | The extra shine of items +11 and up tints the light of the item with this color. | `[1, 1, 1]` |
+| `shineWhite` | `true`: the shine is plain white instead. | `false` |
+| `shineMeshes` / `shineHiddenMesh` | Like `meshes` / `hiddenMesh`, for the shine and for the glow of ancient items. | all meshes |
+| `ancientColor` | Color of the glow of ancient items. | `[0.1, 0.6, 1]` |
+| `excellent` | `false`: excellent items do not glow (wings and capes). | `true` |
+| `excellentMesh` | The excellent glow is only on this mesh. | all meshes |
+| `excellentMeshWithoutSkin` | The same, when the item is drawn without the character, in the inventory and on the ground. | `excellentMesh` |
+
+The glow of arrows, bolts and the Devil's Square items depends on their
+level and stays in code, and so does the glow of monsters.
+
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
   the model of another item or with an effect model; that choice, and
@@ -280,8 +306,9 @@ inventory with models of their own (`MODEL_ARMORINVEN_*`), with the
 Model files are checked like the item files: invalid JSON, a missing
 `number` or `file`, a file that is not a `.bmd`, a path that leaves the
 game folder (starting with `/`, a drive letter or `..`), `\` in a path,
-display values of the wrong kind (e.g. a rotation with two numbers or a
-scale of 0), or an item with two models stop the start with a message;
+display or glow values of the wrong kind (e.g. a rotation with two
+numbers, a scale of 0 or a color value above 1), or an item with two
+models stop the start with a message;
 unknown fields are warnings. The automated tests also check that every
 model file and texture folder exists, that every texture of a model is in
 one of its texture folders, and that every texture is a `.jpg` or `.tga`

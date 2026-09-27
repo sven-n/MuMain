@@ -33,6 +33,9 @@
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [-90, -90, 0]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -84,6 +87,9 @@
       "textureFolders": ["Item"],
       "inventory": {
         "anchor": [0.5, 0.7]
+      },
+      "glow": {
+        "level": 8
       }
     },
     {
@@ -279,7 +285,11 @@
         "rotation": [-45, 0, 45],
         "scale": 0.5
       },
-      "cloth": true
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
     },
     {
       "number": 31,
@@ -390,6 +400,9 @@
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
+      },
+      "glow": {
+        "level": 13
       }
     },
     {
@@ -399,6 +412,9 @@
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
+      },
+      "glow": {
+        "level": 13
       }
     },
     {
@@ -408,6 +424,9 @@
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
+      },
+      "glow": {
+        "level": 13
       }
     },
     {
@@ -417,6 +436,9 @@
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
+      },
+      "glow": {
+        "level": 13
       }
     },
     {
@@ -536,6 +558,10 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0,
+        "shineHiddenMesh": 1
       }
     },
     {
@@ -565,6 +591,9 @@
       },
       "ground": {
         "scale": 1.2
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -579,6 +608,9 @@
       },
       "ground": {
         "scale": 1.2
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
