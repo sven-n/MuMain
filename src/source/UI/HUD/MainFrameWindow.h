@@ -171,10 +171,10 @@ namespace mu::ui::window
         // UseHotKey() (so pet-check/auto-attack-cancel rules don't apply here either -- preserved
         // faithfully).
         void OnHotkeySlotClick(int iSlotIndex);
-        // slotLeft/slotTop and iconCenterX/iconTop: the hovered element in #bars's local space.
+        // slotLeft/slotTop and iconLeft/iconTop: the hovered slot or icon in #bars's local space.
         void OnHotkeySlotHover(int iSlotIndex, float slotLeft, float slotTop);
         void OnCurrentSkillClick();
-        void OnCurrentSkillHover(float iconCenterX, float iconTop);
+        void OnCurrentSkillHover(float iconLeft, float iconTop);
         void OnGridCellClick(int iSkillIndex);
         void OnGridCellHover(int iSkillIndex);
         void OnPetCellClick(int iSkillIndex);

@@ -113,6 +113,7 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
 
 namespace
 {
+    constexpr float kSkillIconWidth = 20.f;
     constexpr float kSkillIconHeight = 28.f;
 
     struct SlotBox
@@ -251,10 +252,9 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.BindEventCallback("skill_current_hover",
                     [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
                     {
-                        // The native anchor is the icon's centre and top; the slot box is the
-                        // icon plus the theme's even inset.
+                        // The slot box is the icon plus the theme's even inset.
                         const SlotBox slot = SlotBoxInBars(event.GetCurrentElement());
-                        g_pSkillList->OnCurrentSkillHover(slot.left + slot.width / 2.f,
+                        g_pSkillList->OnCurrentSkillHover(slot.left + (slot.width - kSkillIconWidth) / 2.f,
                                                           slot.top + (slot.height - kSkillIconHeight) / 2.f);
                     });
                 c.BindEventCallback("skill_grid_click",
@@ -2160,13 +2160,17 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
     }
 }
 
-// Native CNewUISkillList::RenderSkillInfo() centres the skill tooltip on the icon (slot x + 10 for
-// the current skill and hotkeys, cell x + 15 in the expanded list) and ends it 10 above the icon.
+// Native CNewUISkillList::RenderSkillInfo() centres the skill tooltip at box x + 10 for the current
+// skill and hotkeys, cell x + 15 in the expanded list, anchored 10 above the box.
 namespace
 {
 constexpr float kSlotTooltipOffsetX = 10.f;
 constexpr float kGridTooltipOffsetX = 15.f;
 constexpr float kTooltipGapAbove = 10.f;
+// The original hit-tested the current skill as a 32x38 box around its 20x28 icon (385/431 around
+// 392/437) and anchored the hint on that box like a hotkey slot.
+constexpr float kCurrentSkillBoxInsetX = 7.f;
+constexpr float kCurrentSkillBoxInsetY = 6.f;
 } // namespace
 
 void mu::ui::window::CSkillList::QueueTooltip(int iSkillIndex, float x, float y)
@@ -2266,9 +2270,10 @@ void mu::ui::window::CSkillList::OnCurrentSkillClick()
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CSkillList::OnCurrentSkillHover(float iconCenterX, float iconTop)
+void mu::ui::window::CSkillList::OnCurrentSkillHover(float iconLeft, float iconTop)
 {
-    QueueTooltip(Hero->CurrentSkill, iconCenterX, iconTop - kTooltipGapAbove);
+    QueueTooltip(Hero->CurrentSkill, iconLeft - kCurrentSkillBoxInsetX + kSlotTooltipOffsetX,
+                 iconTop - kCurrentSkillBoxInsetY - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnGridCellClick(int iSkillIndex)
