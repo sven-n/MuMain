@@ -10,33 +10,40 @@ report each scenario as passed or failed.
 
 - An editor build of the client (a `-mueditor` preset, which turns on
   `ENABLE_CONTROL_SOCKET`), e.g. `out/build/windows-x64-mueditor/src/Release/Main.exe`.
-- An [OpenMU](https://github.com/MUnique/OpenMU) server with its test data,
-  best the test server below.
+- podman or docker for the test server below, or any other
+  [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
 - The .NET 10 SDK, which the client build needs anyway.
 
 ## The test server
 
-`tools/InGameTests/docker-compose.yml` runs OpenMU in demo mode: the data lives
-in memory, and every start creates OpenMU's test data again. A run therefore
-always starts from the same accounts, characters and items, whatever the last
-run changed. It uses OpenMU's default ports, so stop any other local OpenMU
-first.
+`tools/InGameTests/docker-compose.yml` runs OpenMU in demo mode (`-demo`): it
+uses no database, keeps all data in memory and creates OpenMU's test data on
+every start. Recreating the container therefore brings back the same accounts,
+characters and items, whatever the last run changed; the `InGameTests` build
+target does that before every run.
+
+Only the game server of channel 1 is published, on host port `56901`. The test
+clients log in to it directly, without the connect server, so no IP resolver
+setting is needed, and a local OpenMU on its default ports can keep running
+next to it.
 
 ```sh
-podman compose -f tools/InGameTests/docker-compose.yml up -d      # start
-podman compose -f tools/InGameTests/docker-compose.yml restart    # reset the data
-podman compose -f tools/InGameTests/docker-compose.yml down       # stop
+podman compose -f tools/InGameTests/docker-compose.yml up -d --force-recreate   # start with fresh data
+podman compose -f tools/InGameTests/docker-compose.yml down                     # stop
 ```
 
 `docker compose` works the same way. The tests also run against any other
 OpenMU with the test data, but then they start from whatever state the last
-run left.
+run left: `trade`, for one, moves a jewel from `test300Dl` to `socketElf`
+each time.
 
 ## Test accounts
 
 Every scenario logs in with accounts of its own from OpenMU's test data (the
 password is the account name), so two scenarios never share one. The game
-master accounts `testgm` and `testgm2` stay free for people.
+master accounts `testgm` and `testgm2` stay free for people. The test data
+puts every character in the safe zone of its class's home map, e.g. an Elf in
+Noria.
 
 | Scenario | Account | Character |
 |---|---|---|
@@ -50,40 +57,43 @@ no account with what a scenario needs, OpenMU's test data gets a new one
 ## Running them
 
 The quickest way is the `InGameTests` build target of an editor build. It
-builds `Main` and plays the scenarios with it:
+builds `Main`, recreates the test server and plays the scenarios:
 
 ```sh
 cmake --build out/build/windows-x64-mueditor --config Release --target InGameTests
 ```
 
-Two cache variables choose what it runs; set them once with `-D` when
-configuring, or in CLion's CMake options:
+Cache variables choose what it runs; set them once with `-D` when configuring,
+or in CLion's CMake options:
 
 | Variable | Meaning |
 |---|---|
-| `MU_IN_GAME_TEST_SERVER` | the server, `host:port`; default `127.0.0.1:44405`, the test server below |
 | `MU_IN_GAME_TEST_SCENARIOS` | the scenarios to run, e.g. `trade` or `trade;icarus-take-off`; empty runs all |
+| `MU_IN_GAME_TEST_STEP_DELAY` | milliseconds to pause after every client action, e.g. `1000` to watch a run; default `0` |
+| `MU_IN_GAME_TEST_SERVER` | the game server the clients log in to, `host:port`; default `127.0.0.1:56901`, the test server |
+| `MU_IN_GAME_TEST_FRESH_SERVER` | recreate the test server before every run; default `ON`; turn it off for another server |
 
 ```sh
-cmake -B out/build/windows-x64-mueditor "-DMU_IN_GAME_TEST_SERVER=127.0.0.1:55901" "-DMU_IN_GAME_TEST_SCENARIOS=trade"
+cmake -B out/build/windows-x64-mueditor "-DMU_IN_GAME_TEST_SCENARIOS=trade" "-DMU_IN_GAME_TEST_STEP_DELAY=1000"
 ```
 
-Keep the quotes in PowerShell, which otherwise splits the value at the first
-dot. The build fails when a scenario fails, and the failure details go to
-`in-game-test-results` in the build folder.
+Keep the quotes in PowerShell, which otherwise splits a value like
+`127.0.0.1:56901` at the first dot. The build fails when a scenario fails, and
+the failure details go to `in-game-test-results` in the build folder.
 
-The runner can also be started directly:
+The runner can also be started directly, against a running server:
 
 ```sh
-dotnet run --project tools/InGameTests -- --client out/build/windows-x64-mueditor/src/Release/Main.exe --server 127.0.0.1:55901
+dotnet run --project tools/InGameTests -- --client out/build/windows-x64-mueditor/src/Release/Main.exe -t 1000
 ```
 
 | Option | Meaning |
 |---|---|
 | `--client` | the editor build of `Main` to start |
-| `--server` | the server the clients connect to, `host:port`; default `127.0.0.1:44405` |
+| `--server` | the game server the clients log in to, `host:port`; default `127.0.0.1:56901` |
 | `--scenario` | run only this scenario; repeat it for several; default all |
 | `--out` | where failure details go; default `in-game-test-results` |
+| `-t` | milliseconds to pause after every client action, so a person can follow; default `0` |
 | `--list` | list the scenarios |
 
 Each scenario starts its own clients, runs, and closes them again. The runner
@@ -101,7 +111,7 @@ fully hidden may stop rendering, and its socket stops answering then.
 
 | Scenario | Checks |
 |---|---|
-| `trade` | Two clients warp to Lorencia, meet and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and the jewel ends up in the buyer's inventory (sven-n/MuMain#588). |
+| `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, both press the confirm button, and the jewel ends up in the buyer's inventory (sven-n/MuMain#588). |
 | `icarus-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged (sven-n/MuMain#631). The wings are put back on afterwards. |
 
 ## Writing a scenario
@@ -122,8 +132,12 @@ needs by role and gets them started and logged out.
   `Expect.StillAfterAsync` for a refusal, where nothing happening is the
   answer. For an event, take `LastEventSequenceAsync` before the action and
   pass it to `WaitForEventAsync`, so an early answer is not missed.
-- **Leave the test accounts as they were**, so the next run starts from the
-  same data (see `IcarusTakeOffScenario`, which puts the wings back on).
+- **Leave the test accounts as they were** where it is cheap, so a run against
+  a server that keeps its data can be repeated (see `IcarusTakeOffScenario`,
+  which puts the wings back on).
+- **Don't count on where a character stands.** A warp to a town lands anywhere
+  in it, so walks take different times from run to run (see
+  `TradeScenario.MeetAsync`).
 
 ## Not covered yet
 

@@ -13,6 +13,9 @@ internal static class Program
     private const int ExitFailed = 1;
     private const int ExitUsage = 2;
 
+    // A test server that was just recreated takes a few seconds to listen.
+    private static readonly TimeSpan ServerStartTimeout = TimeSpan.FromSeconds(60);
+
     private static readonly Scenario[] AllScenarios =
     [
         new TradeScenario(),
@@ -49,7 +52,16 @@ internal static class Program
             return ExitUsage;
         }
 
-        var clientOptions = new ClientOptions(options.ClientPath!, options.ServerHost, options.ServerPort);
+        var clientOptions = new ClientOptions(options.ClientPath!, options.ServerHost, options.ServerPort)
+        {
+            StepDelay = options.StepDelay,
+        };
+        if (!await ServerReadiness.WaitAsync(options.ServerHost, options.ServerPort, ServerStartTimeout, CancellationToken.None))
+        {
+            Console.Error.WriteLine($"no game server answers on {options.ServerHost}:{options.ServerPort}; is the test server running?");
+            return ExitFailed;
+        }
+
         var runner = new ScenarioRunner(clientOptions, options.OutputFolder, Console.Out);
         var failed = 0;
         foreach (var scenario in selected)

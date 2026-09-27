@@ -846,17 +846,37 @@ if (DOTNET_EXECUTABLE)
   # control socket can be driven, so the target exists only in those builds.
   #   cmake --build <build dir> --config Release --target InGameTests
   if (ENABLE_CONTROL_SOCKET)
-    set(MU_IN_GAME_TEST_SERVER "127.0.0.1:44405" CACHE STRING
-      "Server the InGameTests target connects the clients to, host:port")
+    set(MU_IN_GAME_TEST_SERVER "127.0.0.1:56901" CACHE STRING
+      "Game server the InGameTests target logs the clients in to, host:port; default the test server")
+    option(MU_IN_GAME_TEST_FRESH_SERVER
+      "Recreate the test server (tools/InGameTests/docker-compose.yml) before every InGameTests run, so it starts from fresh test data"
+      ON)
     set(MU_IN_GAME_TEST_SCENARIOS "" CACHE STRING
       "In-game test scenarios the InGameTests target runs, e.g. trade;icarus-take-off; empty runs all")
+    set(MU_IN_GAME_TEST_STEP_DELAY "0" CACHE STRING
+      "Milliseconds the InGameTests target pauses after every client action, to watch a run; 0 runs at full speed")
 
-    set(IN_GAME_TESTS_ARGS --server "${MU_IN_GAME_TEST_SERVER}")
+    set(IN_GAME_TESTS_ARGS --server "${MU_IN_GAME_TEST_SERVER}" -t "${MU_IN_GAME_TEST_STEP_DELAY}")
     foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
       list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
     endforeach()
 
+    # The test server keeps its data in memory; recreating it brings back
+    # OpenMU's test data, whatever the last run changed.
+    set(IN_GAME_TESTS_SERVER_COMMAND "")
+    if (MU_IN_GAME_TEST_FRESH_SERVER)
+      find_program(MU_CONTAINER_TOOL NAMES podman docker)
+      if (MU_CONTAINER_TOOL)
+        set(IN_GAME_TESTS_SERVER_COMMAND
+          COMMAND "${MU_CONTAINER_TOOL}" compose -f "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests/docker-compose.yml"
+                  up -d --force-recreate)
+      else()
+        message(STATUS "InGameTests: neither podman nor docker found; the test server has to be started by hand")
+      endif()
+    endif()
+
     add_custom_target(InGameTests
+      ${IN_GAME_TESTS_SERVER_COMMAND}
       COMMAND ${CMAKE_COMMAND} -E env
               --unset=Platform
               "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"

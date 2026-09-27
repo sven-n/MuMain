@@ -16,14 +16,21 @@ internal static class Expect
     /// Polls <paramref name="condition"/> until it holds; fails with <paramref name="message"/>
     /// after <paramref name="timeout"/>. The server answers a click some frames later.
     /// </summary>
-    public static async Task EventuallyAsync(Func<Task<bool>> condition, TimeSpan timeout, string message)
+    public static Task EventuallyAsync(Func<Task<bool>> condition, TimeSpan timeout, string message)
+        => EventuallyAsync(condition, timeout, () => message);
+
+    /// <summary>
+    /// As <see cref="EventuallyAsync(Func{Task{bool}}, TimeSpan, string)"/>, with the message
+    /// written when the check fails, e.g. with what <paramref name="condition"/> saw last.
+    /// </summary>
+    public static async Task EventuallyAsync(Func<Task<bool>> condition, TimeSpan timeout, Func<string> message)
     {
         var deadline = DateTime.UtcNow + timeout;
         while (!await condition())
         {
             if (DateTime.UtcNow >= deadline)
             {
-                throw new ScenarioFailedException(message);
+                throw new ScenarioFailedException(message());
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(200));

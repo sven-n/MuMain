@@ -4,18 +4,19 @@ namespace MuMain.Tools.InGameTests;
 internal sealed class RunnerOptions
 {
     public const string Usage = """
-        usage: InGameTests --client <path to Main> [--server <host:port>] [--scenario <name>]... [--out <folder>]
+        usage: InGameTests --client <path to Main> [--server <host:port>] [--scenario <name>]... [--out <folder>] [-t <ms>]
                InGameTests --list
 
           --client    an editor build of Main (ENABLE_CONTROL_SOCKET=ON), e.g. out/build/windows-x64-mueditor/src/Release/Main.exe
-          --server    the server the clients connect to, default 127.0.0.1:44405
+          --server    the game server the clients log in to, default 127.0.0.1:56901, the test server
           --scenario  run only this scenario; repeat for several, default all
           --out       where failure screenshots, events and states go, default in-game-test-results
+          -t          pause this many milliseconds after every action, to watch a scenario, default 0
           --list      list the scenarios
         """;
 
     private const string DefaultHost = "127.0.0.1";
-    private const int DefaultPort = 44405;
+    private const int DefaultPort = 56901;
 
     public string? ClientPath { get; private set; }
 
@@ -28,6 +29,8 @@ internal sealed class RunnerOptions
     public string OutputFolder { get; private set; } = "in-game-test-results";
 
     public bool ListScenarios { get; private set; }
+
+    public TimeSpan StepDelay { get; private set; } = TimeSpan.Zero;
 
     /// <summary>Parses <paramref name="args"/>; null with <paramref name="error"/> when they are not usable.</summary>
     public static RunnerOptions? Parse(string[] args, out string error)
@@ -50,6 +53,15 @@ internal sealed class RunnerOptions
                     break;
                 case "--out" when value is not null:
                     options.OutputFolder = value;
+                    break;
+                case "-t" when value is not null:
+                    if (!int.TryParse(value, out var milliseconds) || milliseconds < 0)
+                    {
+                        error = $"-t takes milliseconds, not '{value}'";
+                        return null;
+                    }
+
+                    options.StepDelay = TimeSpan.FromMilliseconds(milliseconds);
                     break;
                 case "--server" when value is not null:
                     if (!options.TrySetServer(value))

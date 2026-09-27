@@ -1,4 +1,5 @@
 using MuMain.Tools.InGameTests.Clients;
+using MuMain.Tools.InGameTests.Control;
 
 namespace MuMain.Tools.InGameTests.Scenarios;
 
@@ -21,6 +22,8 @@ internal sealed class TradeScenario : Scenario
     private const int TradeDistance = 1;
 
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
+    // Walking across Lorencia's town, see MeetAsync.
+    private static readonly TimeSpan WalkTimeout = TimeSpan.FromSeconds(120);
     // After an offer changes, the confirm button waits about 150 frames.
     private static readonly TimeSpan ConfirmWait = TimeSpan.FromSeconds(20);
 
@@ -68,28 +71,37 @@ internal sealed class TradeScenario : Scenario
     }
 
     // Warps both to Lorencia and walks the buyer next to where the seller stands.
+    //
+    // A warp to a town lands anywhere in it, and a character that is in Lorencia
+    // already starts wherever it stood, so how far each one walks changes from run
+    // to run: across the whole town at worst. The walk gets time for that.
     private static async Task MeetAsync(GameClient seller, GameClient buyer)
     {
-        var warpTimeout = TimeSpan.FromSeconds(60);
-        await WarpToLorenciaAsync(seller, warpTimeout);
-        await WarpToLorenciaAsync(buyer, warpTimeout);
-        await seller.SendAsync("move", new { x = MeetingX, y = MeetingY }, warpTimeout);
-        var (sellerX, sellerY) = await PositionAsync(seller);
-        await buyer.SendAsync("move", new { x = sellerX + 1, y = sellerY }, warpTimeout);
+        await seller.WarpAsync(LorenciaGate, LorenciaMap);
+        await buyer.WarpAsync(LorenciaGate, LorenciaMap);
+        await seller.SendAsync("move", new { x = MeetingX, y = MeetingY }, WalkTimeout);
 
-        var (buyerX, buyerY) = await PositionAsync(buyer);
-        Expect.That(
-            Math.Abs(buyerX - sellerX) <= TradeDistance && Math.Abs(buyerY - sellerY) <= TradeDistance,
-            $"the buyer ({buyerX},{buyerY}) did not get next to the seller ({sellerX},{sellerY})");
-    }
+        // `move` answers within a tile of its target, and the walk may still take
+        // its last step then; so the buyer heads for where the seller stands now,
+        // until the two are next to each other.
+        var sellerPosition = (X: 0, Y: 0);
+        var buyerPosition = (X: 0, Y: 0);
+        await Expect.EventuallyAsync(
+            async () =>
+            {
+                sellerPosition = await PositionAsync(seller);
+                buyerPosition = await PositionAsync(buyer);
+                if (Math.Abs(buyerPosition.X - sellerPosition.X) <= TradeDistance
+                    && Math.Abs(buyerPosition.Y - sellerPosition.Y) <= TradeDistance)
+                {
+                    return true;
+                }
 
-    // The client refuses a warp to the map the character is on.
-    private static async Task WarpToLorenciaAsync(GameClient client, TimeSpan timeout)
-    {
-        if ((await client.StateAsync()).GetProperty("map").GetInt32() != LorenciaMap)
-        {
-            await client.SendAsync("warp", new { gate = LorenciaGate }, timeout);
-        }
+                await buyer.SendAsync("move", new { x = sellerPosition.X, y = sellerPosition.Y }, WalkTimeout);
+                return false;
+            },
+            WalkTimeout,
+            () => $"the buyer ({buyerPosition.X},{buyerPosition.Y}) did not get next to the seller ({sellerPosition.X},{sellerPosition.Y})");
     }
 
     private static async Task<(int X, int Y)> PositionAsync(GameClient client)
@@ -111,7 +123,23 @@ internal sealed class TradeScenario : Scenario
         context.Log("the seller asks for a trade, the buyer accepts with Enter");
         var sellerSequence = await seller.LastEventSequenceAsync();
         var buyerSequence = await buyer.LastEventSequenceAsync();
-        await seller.SendAsync("trade", new { action = "request", target = buyerName });
+        // The seller's client learns where the buyer stands from the server, a
+        // moment after the buyer's own; until then it refuses the request as too far.
+        await Expect.EventuallyAsync(
+            async () =>
+            {
+                try
+                {
+                    await seller.SendAsync("trade", new { action = "request", target = buyerName });
+                    return true;
+                }
+                catch (ControlException exception) when (exception.Error == "not_allowed")
+                {
+                    return false;
+                }
+            },
+            ServerAnswer,
+            "the seller's client does not see the buyer next to it");
         await buyer.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "requested" }, buyerSequence, ServerAnswer);
         // Enter only reaches the dialog once it is on screen; before that it opens the chat.
         await Expect.EventuallyAsync(

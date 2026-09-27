@@ -8,4 +8,10 @@ internal sealed record ClientOptions(string ExecutablePath, string ServerHost, i
 {
     /// <summary>How long a client may take from start until its socket answers.</summary>
     public TimeSpan StartTimeout { get; init; } = TimeSpan.FromSeconds(120);
+
+    /// <summary>
+    /// A pause after every action a client takes (a click, a key, a walk, …), so a
+    /// person watching can follow the scenario; zero runs at full speed.
+    /// </summary>
+    public TimeSpan StepDelay { get; init; } = TimeSpan.Zero;
 }

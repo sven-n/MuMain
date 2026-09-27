@@ -33,11 +33,7 @@ internal sealed class IcarusTakeOffScenario : Scenario
         await flyer.EnterWorldAsync(character.Account, character.Password, character.Name);
         var wings = await EquippedEventuallyAsync(flyer, WingSlot, $"{character.Name} wears no wings");
         var mount = await EquippedEventuallyAsync(flyer, HelperSlot, $"{character.Name} has no flying mount");
-        // The client refuses a warp to the map the character is on.
-        if ((await flyer.StateAsync()).GetProperty("map").GetInt32() != IcarusMap)
-        {
-            await flyer.SendAsync("warp", new { gate = IcarusGate }, TimeSpan.FromSeconds(60));
-        }
+        await flyer.WarpAsync(IcarusGate, IcarusMap);
         await flyer.OpenInventoryAsync();
 
         try

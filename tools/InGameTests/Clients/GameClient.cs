@@ -13,15 +13,20 @@ internal sealed class GameClient : IAsyncDisposable
     private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan WorldTimeout = TimeSpan.FromSeconds(90);
     private static readonly TimeSpan ConnectRetryInterval = TimeSpan.FromMilliseconds(500);
+    // Commands that only read; everything else acts, and is followed by the step delay.
+    private static readonly HashSet<string> ReadingCommands =
+        ["ping", "scene", "state", "nearby", "events", "wait-for", "screenshot", "ui", "slot-pixel"];
 
     private readonly Process process;
     private readonly ControlConnection control;
+    private readonly TimeSpan stepDelay;
 
-    private GameClient(string role, Process process, ControlConnection control)
+    private GameClient(string role, Process process, ControlConnection control, TimeSpan stepDelay)
     {
         this.Role = role;
         this.process = process;
         this.control = control;
+        this.stepDelay = stepDelay;
     }
 
     /// <summary>The scenario's name for this client, e.g. "seller".</summary>
@@ -46,7 +51,7 @@ internal sealed class GameClient : IAsyncDisposable
         try
         {
             var control = await ConnectAsync(socketPath, process, options.StartTimeout, cancellationToken);
-            var client = new GameClient(role, process, control);
+            var client = new GameClient(role, process, control, options.StepDelay);
             await client.SendAsync("ping");
             return client;
         }
@@ -58,15 +63,35 @@ internal sealed class GameClient : IAsyncDisposable
         }
     }
 
-    /// <summary>Sends a command and returns its result.</summary>
-    public Task<JsonElement> SendAsync(string command, object? fields = null, TimeSpan? timeout = null)
-        => this.control.SendAsync(command, fields, timeout ?? CommandTimeout);
+    /// <summary>Sends a command and returns its result; after an action, waits the step delay.</summary>
+    public async Task<JsonElement> SendAsync(string command, object? fields = null, TimeSpan? timeout = null)
+    {
+        var result = await this.control.SendAsync(command, fields, timeout ?? CommandTimeout);
+        if (this.stepDelay > TimeSpan.Zero && !ReadingCommands.Contains(command))
+        {
+            await Task.Delay(this.stepDelay);
+        }
+
+        return result;
+    }
 
     /// <summary>Logs in and enters the world with <paramref name="character"/>.</summary>
     public async Task EnterWorldAsync(string account, string password, string character)
     {
         await this.SendAsync("login", new { account, password }, WorldTimeout);
         await this.SendAsync("select-char", new { name = character }, WorldTimeout);
+    }
+
+    /// <summary>
+    /// Warps through the gate <paramref name="gate"/>, unless the character is on
+    /// <paramref name="map"/> already: the client refuses a warp to its own map.
+    /// </summary>
+    public async Task WarpAsync(string gate, int map)
+    {
+        if ((await this.StateAsync()).GetProperty("map").GetInt32() != map)
+        {
+            await this.SendAsync("warp", new { gate }, WorldTimeout);
+        }
     }
 
     /// <summary>The character and everything around it.</summary>
