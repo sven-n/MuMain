@@ -83,3 +83,10 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/UI/Core/WindowGeometry.cpp
     LINK_LIBS MuClient
 )
+
+mu_add_test(
+    NAME master_skill_tree_layout_tests
+    SOURCES
+        test_master_skill_tree_layout.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
+)

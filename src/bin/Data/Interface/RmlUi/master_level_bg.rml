@@ -1,0 +1,15 @@
+<rml>
+<head>
+	<title>Master Skill Tree Background</title>
+	<link type="text/rcss" href="master_level_bg.rcss"/>
+</head>
+<!-- Background-context companion of master_level.rml (see npc_shop_bg.rml for the mechanism): the
+     part of the tree that must stay UNDER the bottom HUD. The original stretches its 428-high
+     background art from power-of-two textures without cropping, so the texture's black padding
+     covers the screen from reference y 428 down, with the HUD drawn over it. Pushed behind every
+     other background document (CMasterLevel::SyncBackgroundVisibility()). No data model: the band
+     is a fixed fraction of the screen. -->
+<body>
+	<div id="band"></div>
+</body>
+</rml>
