@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "WebzenScene.h"
 #include "SceneCore.h"
+#include "Core/Platform/ScopedSystemCursor.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -122,7 +123,11 @@ void WebzenScene(HDC hDC)
     FogEnable = false;
 
     ::EnableAlphaTest();
-    OpenBasicData(hDC);
+    {
+        // The game draws no cursor while it loads.
+        const Core::Platform::ScopedSystemCursor cursor;
+        OpenBasicData(hDC);
+    }
 
     g_pNewUISystem->LoadMainSceneInterface();
 

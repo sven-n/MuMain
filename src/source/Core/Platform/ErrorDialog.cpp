@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ErrorDialog.h"
+#include "ScopedSystemCursor.h"
 
 #include <SDL3/SDL.h>
 
@@ -50,6 +51,7 @@ Choice Show(const std::string& title, const std::string& message, bool canContin
                                      buttons.data(),
                                      nullptr};
     const Choice defaultChoice = canContinue ? Choice::Continue : Choice::Quit;
+    const ScopedSystemCursor cursor;
 
     while (true)
     {
