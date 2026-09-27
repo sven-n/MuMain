@@ -51,30 +51,34 @@ internal static class TestServer
     /// </summary>
     public static async Task<ServerVersion?> DescribeAsync(string host, int port, CancellationToken cancellationToken)
     {
-        if (port != TestServerPort || !IsLoopback(host) || FindContainerTool() is not { } tool)
+        if (port != TestServerPort || !IsLoopback(host))
         {
             return null;
         }
 
-        try
+        // Started by hand with the other tool, the container is only known to that one.
+        foreach (var tool in FindContainerTools())
         {
-            var (exitCode, output, _) = await RunConnectedAsync(
-                tool, ["inspect", ContainerName, "--format", "{{json .Config.Labels}}"], TextWriter.Null, cancellationToken);
-            if (exitCode != 0 || JsonNode.Parse(output) is not JsonObject labels)
+            try
             {
-                return null;
+                var (exitCode, output, _) = await RunConnectedAsync(
+                    tool, ["inspect", ContainerName, "--format", "{{json .Config.Labels}}"], TextWriter.Null, cancellationToken);
+                if (exitCode == 0 && JsonNode.Parse(output) is JsonObject labels)
+                {
+                    return new ServerVersion(
+                        "OpenMU",
+                        (string?)labels["org.opencontainers.image.version"],
+                        (string?)labels["org.opencontainers.image.revision"],
+                        (string?)labels["org.opencontainers.image.source"]);
+                }
             }
+            catch (Exception exception) when (exception is JsonException or InvalidOperationException or System.ComponentModel.Win32Exception)
+            {
+                // Try the next tool.
+            }
+        }
 
-            return new ServerVersion(
-                "OpenMU",
-                (string?)labels["org.opencontainers.image.version"],
-                (string?)labels["org.opencontainers.image.revision"],
-                (string?)labels["org.opencontainers.image.source"]);
-        }
-        catch (Exception exception) when (exception is JsonException or InvalidOperationException or System.ComponentModel.Win32Exception)
-        {
-            return null;
-        }
+        return null;
     }
 
     private const string ContainerName = "mumain-in-game-tests-openmu";
@@ -226,10 +230,15 @@ internal static class TestServer
 
     private static bool IsPodman(string tool) => Path.GetFileNameWithoutExtension(tool).Equals("podman", StringComparison.OrdinalIgnoreCase);
 
-    private static string? FindContainerTool()
+    private static string? FindContainerTool() => FindContainerTools().FirstOrDefault();
+
+    // podman, then docker: the installed ones, each once.
+    private static IEnumerable<string> FindContainerTools()
     {
         var names = OperatingSystem.IsWindows() ? new[] { "podman.exe", "docker.exe" } : ["podman", "docker"];
         var folders = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
-        return names.SelectMany(name => folders.Select(folder => Path.Combine(folder, name))).FirstOrDefault(File.Exists);
+        return names
+            .Select(name => folders.Select(folder => Path.Combine(folder, name)).FirstOrDefault(File.Exists))
+            .OfType<string>();
     }
 }

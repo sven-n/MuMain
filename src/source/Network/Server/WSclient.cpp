@@ -7282,8 +7282,8 @@ void ReceiveSummonLife(const BYTE* ReceiveBuffer)
 BOOL ReceiveTrade(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     auto Data = (LPPCHATING)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveTradeRequest(Data->ID);
-    App::Control::Events::RecordTradeRequested(Data->ID);
+    const bool asked = g_pTrade->ProcessToReceiveTradeRequest(Data->ID);
+    App::Control::Events::RecordTradeRequested(Data->ID, asked);
 
     return (TRUE);
 }

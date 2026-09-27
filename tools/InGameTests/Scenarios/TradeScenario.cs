@@ -27,7 +27,9 @@ internal sealed class TradeScenario : Scenario
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
     // Walking across Lorencia's town, see WalkUpToAsync.
     private static readonly TimeSpan WalkTimeout = TimeSpan.FromSeconds(120);
-    // After an offer changes, the confirm button waits about 150 frames.
+    // After an offer changes, the confirm button waits about 150 frames: some
+    // seconds normally, half a minute at five frames a second.
+    private static readonly TimeSpan CooldownWait = TimeSpan.FromSeconds(120);
     private static readonly TimeSpan ConfirmWait = TimeSpan.FromSeconds(20);
 
     public override string Name => "trade";
@@ -335,9 +337,17 @@ internal sealed class TradeScenario : Scenario
         await buyer.WaitForEventAsync("trade", new Dictionary<string, string> { ["change"] = "opened" }, buyerSequence, ServerAnswer);
     }
 
-    // The button ignores clicks while it waits after a change, so it is pressed until it counts.
-    private static Task ConfirmAsync(GameClient client)
-        => Expect.EventuallyAsync(
+    // After an offer changes the button ignores clicks for some frames; how long
+    // that takes depends on the frame rate, so it waits for the button, then
+    // presses it until the press counts.
+    private static async Task ConfirmAsync(GameClient client)
+    {
+        await Expect.EventuallyAsync(
+            async () => (await client.StateAsync()).GetProperty("trade") is not { ValueKind: System.Text.Json.JsonValueKind.Object } trade
+                        || trade.GetProperty("my_confirm_wait").GetInt32() <= 0,
+            CooldownWait,
+            $"the {client.Role}'s confirm button does not take clicks again");
+        await Expect.EventuallyAsync(
             async () =>
             {
                 await client.ClickElementAsync("trade.confirm");
@@ -346,4 +356,5 @@ internal sealed class TradeScenario : Scenario
             },
             ConfirmWait,
             $"the {client.Role}'s confirm button does not stay pressed");
+    }
 }

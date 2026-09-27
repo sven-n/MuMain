@@ -152,6 +152,22 @@ internal sealed class GameClient : IAsyncDisposable
         await this.ClickAsync(x, y, "left");
     }
 
+    /// <summary>
+    /// Puts down the item on the cursor so that it covers the <paramref name="width"/> x
+    /// <paramref name="height"/> area whose top-left square is <paramref name="topLeft"/>. An item
+    /// picked from an equipment slot hangs from the cursor by its middle, so the click goes to the
+    /// middle of the area, between its first and its last square.
+    /// </summary>
+    public async Task DropOnAreaAsync(string grid, int topLeft, int width, int height, int columns)
+    {
+        var first = await this.SendAsync("slot-pixel", new { grid, slot = topLeft });
+        var last = await this.SendAsync("slot-pixel", new { grid, slot = topLeft + ((height - 1) * columns) + width - 1 });
+        await this.ClickAsync(
+            (first.GetProperty("x").GetDouble() + last.GetProperty("x").GetDouble()) / 2,
+            (first.GetProperty("y").GetDouble() + last.GetProperty("y").GetDouble()) / 2,
+            "left");
+    }
+
     /// <summary>Picks an item up from one square and puts it down on another, with two clicks.</summary>
     public async Task MoveItemAsync(string fromGrid, int fromSlot, string toGrid, int toSlot)
     {

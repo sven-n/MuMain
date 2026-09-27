@@ -80,6 +80,8 @@ json TradeState()
     trade["my_zen"] = g_pTrade->GetMyTradeGold();
     trade["partner_zen"] = g_pTrade->GetYourTradeGold();
     trade["my_confirmed"] = g_pTrade->IsMyConfirmed();
+    // Frames until the confirm button takes clicks again after an offer changed.
+    trade["my_confirm_wait"] = g_pTrade->GetMyTradeWait();
     trade["partner_confirmed"] = g_pTrade->IsYourConfirmed();
     return trade;
 }

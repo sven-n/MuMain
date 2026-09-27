@@ -146,6 +146,11 @@ namespace SEASON3B
         {
             return m_nMyTradeGold;
         }
+        // Frames until my confirm button takes clicks again after an offer changed.
+        int GetMyTradeWait() const
+        {
+            return m_nMyTradeWait;
+        }
         int GetYourTradeGold() const
         {
             return m_nYourTradeGold;
@@ -160,7 +165,9 @@ namespace SEASON3B
         // into the inventory.
         bool ProcessMyTradeItemAutoMoveToInventory();
 
-        void ProcessToReceiveTradeRequest(char* pbyYourID);
+        // Shows the request's dialog; false when a window that forbids trading is
+        // open and the client has answered no by itself.
+        bool ProcessToReceiveTradeRequest(char* pbyYourID);
         void ProcessToReceiveTradeResult(LPPTRADE pTradeData);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
         void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket);

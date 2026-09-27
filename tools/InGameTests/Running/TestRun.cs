@@ -48,7 +48,10 @@ internal static class TestRun
     /// Runs the scenarios of <paramref name="options"/>. Cancelling stops after the
     /// scenario that is running; the report covers the scenarios that ran.
     /// </summary>
-    /// <exception cref="InvalidOperationException">The server could not be prepared or does not answer.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The server could not be prepared or does not answer, or the report cannot be written;
+    /// when the report fails at the end, the screenshots stay in the work folder the message names.
+    /// </exception>
     public static async Task<TestRunResult> RunAsync(
         TestRunOptions options,
         TextWriter log,
@@ -56,29 +59,55 @@ internal static class TestRun
         CancellationToken cancellationToken)
     {
         var started = DateTime.Now;
+        // Before any scenario: a folder the report cannot go to would lose the whole run at its end.
+        var output = EnsureWritable(options.OutputFolder);
+
         // The screenshots are taken into a work folder; the report takes them in,
-        // and the folder goes away: a run leaves one file.
+        // and the folder goes away: a run leaves one file. When the report cannot
+        // be written, the folder stays, so the run is not lost.
         var folder = Path.Combine(Path.GetTempPath(), "mu-in-game-tests", $"run-{started:yyyyMMdd-HHmmss}-{Environment.ProcessId}");
         Directory.CreateDirectory(folder);
         try
         {
-            return await RunInAsync(folder, started, options, log, listener, cancellationToken);
-        }
-        finally
-        {
+            var run = await RunInAsync(folder, output, started, options, log, listener, cancellationToken);
             TryDelete(folder, log);
+            return run;
+        }
+        catch (Exception exception) when (exception is not ReportNotWrittenException)
+        {
+            // A run that ended before its report has no screenshots worth keeping.
+            TryDelete(folder, log);
+            throw;
+        }
+    }
+
+    // The output folder, created and tried with a file, as a full path.
+    private static string EnsureWritable(string outputFolder)
+    {
+        var output = Path.GetFullPath(outputFolder);
+        try
+        {
+            Directory.CreateDirectory(output);
+            var probe = Path.Combine(output, $".write-test-{Environment.ProcessId}");
+            File.WriteAllText(probe, string.Empty);
+            File.Delete(probe);
+            return output;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            throw new InvalidOperationException($"the report cannot be written to {output}: {exception.Message}", exception);
         }
     }
 
     private static async Task<TestRunResult> RunInAsync(
         string folder,
+        string output,
         DateTime started,
         TestRunOptions options,
         TextWriter log,
         TestRunListener? listener,
         CancellationToken cancellationToken)
     {
-
         if (options.FreshServer)
         {
             await TestServer.RecreateAsync(log, cancellationToken);
@@ -113,7 +142,7 @@ internal static class TestRun
                 log,
                 (number, title) => listener?.StepStarted?.Invoke(scenario.Name, number, title),
                 step => listener?.StepFinished?.Invoke(scenario.Name, step),
-                started => client ??= started.Version);
+                startedClient => client ??= startedClient.Version);
             var result = await runner.RunAsync(scenario, CancellationToken.None);
             results.Add(result);
             listener?.ScenarioFinished?.Invoke(result);
@@ -128,11 +157,16 @@ internal static class TestRun
             .Concat(results.Where(result => options.AllScenarios.All(scenario => scenario.Name != result.Name)))
             .ToList();
 
-        var output = Path.GetFullPath(options.OutputFolder);
-        Directory.CreateDirectory(output);
         var reportPath = Path.Combine(output, $"in-game-report-{started:yyyyMMdd-HHmmss}.html");
         var run = new TestRunResult(started, options, reported, reportPath, client, server);
-        await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run, JsonSerializer.Serialize(Summary(run), JsonOptions)), CancellationToken.None);
+        try
+        {
+            await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run, JsonSerializer.Serialize(Summary(run), JsonOptions)), CancellationToken.None);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            throw new ReportNotWrittenException($"the report could not be written to {reportPath} ({exception.Message}); the screenshots are kept in {folder}", exception);
+        }
         log.WriteLine($"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, {run.Count(ScenarioStatus.Skipped)} skipped");
         log.WriteLine($"report: {reportPath}");
         var megabytes = new FileInfo(reportPath).Length / (1024.0 * 1024.0);
@@ -176,6 +210,33 @@ internal static class TestRun
         serverVersion = run.Server?.Version,
         serverCommit = run.Server?.Commit,
         passed = run.AllPassed,
-        scenarios = run.Scenarios,
+        scenarios = run.Scenarios.Select(scenario => new
+        {
+            name = scenario.Name,
+            description = scenario.Description,
+            category = scenario.Category.ToString(),
+            status = scenario.Status.ToString(),
+            seconds = Math.Round(scenario.Duration.TotalSeconds, 1),
+            stepDelayMilliseconds = scenario.StepDelay.TotalMilliseconds,
+            screenshotQuality = scenario.ScreenshotQuality,
+            failure = scenario.Failure,
+            skipReason = scenario.SkipReason,
+            // The screenshots are in the page, by step and client; the failure
+            // details once, in the page's blocks.
+            steps = scenario.Steps.Select(step => new
+            {
+                number = step.Number,
+                title = step.Title,
+                expectation = step.Expectation,
+                passed = step.Passed,
+                seconds = Math.Round(step.Duration.TotalSeconds, 1),
+                failure = step.Failure,
+                screenshots = step.Screenshots.Select(screenshot => screenshot.Role),
+            }),
+        }),
     };
 }
+
+/// <summary>The report of a finished run could not be written; its screenshots are kept.</summary>
+internal sealed class ReportNotWrittenException(string message, Exception innerException)
+    : InvalidOperationException(message, innerException);

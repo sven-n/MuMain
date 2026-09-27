@@ -19,28 +19,23 @@ using nlohmann::json;
 // The /trade command asks for the partner at most one tile away.
 constexpr int TradeDistance = 1;
 
-// What the client's own /trade asks of the partner (ZzzInterface.cpp): another
-// player, not the hero; the server ignores any other request.
-[[nodiscard]] bool IsTradePartner(int targetKey)
+// The character a request names, as the client knows it; null when it does not.
+[[nodiscard]] const CHARACTER* FindTarget(int targetKey)
 {
     const int index = FindCharacterIndex(targetKey);
-    if (Hero == nullptr || index >= MAX_CHARACTERS_CLIENT)
-    {
-        return false;
-    }
-    const CHARACTER& target = CharactersClient[index];
+    return Hero != nullptr && index < MAX_CHARACTERS_CLIENT ? &CharactersClient[index] : nullptr;
+}
+
+// What the client's own /trade asks of the partner (ZzzInterface.cpp): another
+// player, not the hero; the server ignores any other request.
+[[nodiscard]] bool IsTradePartner(const CHARACTER& target)
+{
     return &target != Hero && target.Object.Kind == KIND_PLAYER &&
            (target.Object.Type == MODEL_PLAYER || target.Change);
 }
 
-[[nodiscard]] bool IsNextToHero(int targetKey)
+[[nodiscard]] bool IsNextToHero(const CHARACTER& target)
 {
-    const int index = FindCharacterIndex(targetKey);
-    if (Hero == nullptr || index >= MAX_CHARACTERS_CLIENT)
-    {
-        return false;
-    }
-    const CHARACTER& target = CharactersClient[index];
     return std::abs(target.PositionX - Hero->PositionX) <= TradeDistance &&
            std::abs(target.PositionY - Hero->PositionY) <= TradeDistance;
 }
@@ -54,12 +49,13 @@ std::string RequestTrade(const Request& request)
     {
         return targetFailure;
     }
-    if (!IsTradePartner(targetKey))
+    const CHARACTER* target = FindTarget(targetKey);
+    if (target == nullptr || !IsTradePartner(*target))
     {
         return App::Control::EncodeError(request.EncodedId(), ErrorCode::NotAllowed,
                                          "the trade partner has to be another player");
     }
-    if (!IsNextToHero(targetKey))
+    if (!IsNextToHero(*target))
     {
         return App::Control::EncodeError(request.EncodedId(), ErrorCode::NotAllowed,
                                          "the trade partner has to stand at most one tile away");

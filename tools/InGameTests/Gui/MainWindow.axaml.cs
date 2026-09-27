@@ -365,13 +365,29 @@ internal sealed partial class MainWindow : Window
     {
         if (this.reportPath is not null && File.Exists(this.reportPath))
         {
-            Process.Start(new ProcessStartInfo(this.reportPath) { UseShellExecute = true });
+            this.TryOpen(() => Process.Start(new ProcessStartInfo(this.reportPath) { UseShellExecute = true }));
+        }
+    }
+
+    // A system without a program for the file (e.g. no xdg-open) must not end the window.
+    private void TryOpen(Action open)
+    {
+        try
+        {
+            open();
+        }
+        catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or IOException
+                                              or UnauthorizedAccessException or InvalidOperationException)
+        {
+            this.RunStatusText.Text = $"could not open it: {exception.Message}";
         }
     }
 
     // The file browser at the report, with the file selected where the system
     // can; before a run, or when the report is gone, at the folder the reports go to.
-    private void OnOpenReportFolder(object? sender, RoutedEventArgs e)
+    private void OnOpenReportFolder(object? sender, RoutedEventArgs e) => this.TryOpen(this.OpenReportFolder);
+
+    private void OpenReportFolder()
     {
         if (this.reportPath is null || !File.Exists(this.reportPath))
         {

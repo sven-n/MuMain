@@ -90,21 +90,23 @@ std::optional<CNewUIInventoryCtrl*> OpenGrid(DWORD windowKey, CNewUIInventoryCtr
 
 // Inventory slot numbers are those `state` reports: the main grid starts after
 // the equipment, the extension grids follow it.
+[[nodiscard]] bool IsInMainGrid(CNewUIInventoryCtrl* main, int slot)
+{
+    return main != nullptr && slot >= main->GetIndexOffset() &&
+           slot < main->GetIndexOffset() + main->GetNumberOfColumn() * main->GetNumberOfRow();
+}
+
 [[nodiscard]] bool IsInventorySlot(int slot)
 {
-    CNewUIInventoryCtrl* main = g_pMyInventory->GetInventoryCtrl();
-    const bool inMain = main != nullptr && slot >= main->GetIndexOffset() &&
-                        slot < main->GetIndexOffset() + main->GetNumberOfColumn() * main->GetNumberOfRow();
     const bool inExtension = slot >= MAX_MY_INVENTORY_INDEX &&
                              slot < MAX_MY_INVENTORY_INDEX + MAX_INVENTORY_EXT_COUNT * MAX_INVENTORY_EXT_ONE;
-    return inMain || inExtension;
+    return IsInMainGrid(g_pMyInventory->GetInventoryCtrl(), slot) || inExtension;
 }
 
 std::optional<CNewUIInventoryCtrl*> InventoryGrid(int slot)
 {
     CNewUIInventoryCtrl* main = g_pMyInventory->GetInventoryCtrl();
-    if (main != nullptr && slot >= main->GetIndexOffset() &&
-        slot < main->GetIndexOffset() + main->GetNumberOfColumn() * main->GetNumberOfRow())
+    if (IsInMainGrid(main, slot))
     {
         return OpenGrid(SEASON3B::INTERFACE_INVENTORY, main);
     }

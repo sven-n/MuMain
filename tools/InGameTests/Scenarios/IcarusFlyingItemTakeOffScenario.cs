@@ -15,6 +15,7 @@ internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
     private const int HelperSlot = 8;
     private const string IcarusGate = "Icarus";
     private const int IcarusMap = 10;
+    private const int InventoryColumns = 8;
 
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
     // A refused take-off sends nothing, so "still equipped after a while" is the answer.
@@ -171,7 +172,10 @@ internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
     private static async Task StaysOnAfterDragAsync(GameClient client, ItemSlot item, int slot)
     {
         var freeArea = await FreeAreaAsync(client, item);
-        await client.MoveItemAsync("equipment", slot, "inventory", freeArea);
+        // The first click picks the item up, the second puts it down so that it
+        // covers the free area; an equipment item hangs from the cursor by its middle.
+        await client.ClickSlotAsync("equipment", slot);
+        await client.DropOnAreaAsync("inventory", freeArea, item.Width, item.Height, InventoryColumns);
         await Expect.StillAfterAsync(
             async () => await EquippedAsync(client, slot) is not null,
             RefusalWait,
@@ -184,7 +188,7 @@ internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
     private static async Task<int> FreeAreaAsync(GameClient client, ItemSlot item)
     {
         const int FirstInventorySlot = 12;
-        const int Columns = 8;
+        const int Columns = InventoryColumns;
         const int Rows = 8;
         var used = ItemSlots.Of(await client.StateAsync(), "inventory").Select(entry => entry.Slot).ToHashSet();
         for (var row = 0; row + item.Height <= Rows; row++)

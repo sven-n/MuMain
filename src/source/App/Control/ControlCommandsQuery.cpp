@@ -52,9 +52,10 @@ constexpr double MaxWaitForSeconds = 3600.0;
 // small enough that the cast to `float` is exact.
 constexpr double MaxWindowPixel = 100000.0;
 
-// An injected key or click spans three rendered frames; the allowance
-// covers a client that renders slowly without letting a caller hang.
-constexpr std::chrono::milliseconds SyntheticInputDeadline{5000};
+// An injected click spans about seven rendered frames until it answers (idle,
+// two hover frames, press, held, release, idle), a key three. The allowance
+// covers a client drawing a frame every two seconds without letting a caller hang.
+constexpr std::chrono::milliseconds SyntheticInputDeadline{15000};
 
 // One recorded event as the protocol reports it.
 json EventObject(const App::Control::Events::Record& record)

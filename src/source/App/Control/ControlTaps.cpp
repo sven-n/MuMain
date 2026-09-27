@@ -246,9 +246,11 @@ std::string PacketName(const char* name)
 }
 } // namespace
 
-void RecordTradeRequested(const char* name)
+void RecordTradeRequested(const char* name, bool asked)
 {
-    RecordTrade("requested", PacketName(name), "");
+    // A window that forbids trading was open: the client said no without a dialog.
+    RecordTrade(asked ? "requested" : "refused", PacketName(name),
+                asked ? "" : "the client refused it: a window that forbids trading is open");
 }
 
 void RecordTradeAnswer(int answer, const char* name)

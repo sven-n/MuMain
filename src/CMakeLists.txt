@@ -932,7 +932,10 @@ if (DOTNET_EXECUTABLE)
     if (NOT DOTNET_EXECUTABLE MATCHES "\\.exe$")
       get_filename_component(IN_GAME_TESTS_DOTNET "${DOTNET_EXECUTABLE}" REALPATH)
       get_filename_component(IN_GAME_TESTS_DOTNET_ROOT "${IN_GAME_TESTS_DOTNET}" DIRECTORY)
-      set(IN_GAME_TESTS_ENV ${CMAKE_COMMAND} -E env "DOTNET_ROOT=${IN_GAME_TESTS_DOTNET_ROOT}")
+      # Only a folder that holds a .NET: a snap's dotnet resolves to /usr/bin/snap.
+      if (EXISTS "${IN_GAME_TESTS_DOTNET_ROOT}/host/fxr")
+        set(IN_GAME_TESTS_ENV ${CMAKE_COMMAND} -E env "DOTNET_ROOT=${IN_GAME_TESTS_DOTNET_ROOT}")
+      endif()
     endif()
 
     set(IN_GAME_TESTS_SERVER_ARGS --server "${MU_IN_GAME_TEST_SERVER}")

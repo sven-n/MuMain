@@ -95,7 +95,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 character name, class, level, experience, zen, HP/mana/SD/AG with their
 maxima, map number and name, position, alive flag, safe-zone flag, current
 target, the skills the character owns, equipment, inventory, buffs, party,
-the open trade (partner, both offers with their items and zen, and both confirm buttons, or `null`) and
+the open trade (partner, both offers with their items and zen, both confirm buttons and `my_confirm_wait`, the frames until my button takes clicks again, or `null`) and
 `nearby`. An item carries `slot`, `name`, `level`, `durability`, and its
 `width` and `height` in inventory squares; one that covers several squares is
 listed once for each of them.
@@ -148,7 +148,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 | `scene` | `scene` |
 | `view_enter` / `view_leave` | `object` |
 | `party` | `change`, `name` |
-| `trade` | `change` (`requested`, `opened`, `refused`, `unavailable`, `partner_confirm`, `closed`), `name` for a request or an opened trade, `state` (`checked`, `unchecked`, `reset`) for the partner's button, `result` (`completed`, `cancelled`, `inventory_full`, `request_cancelled`, `reinforced_item`) when it closes |
+| `trade` | `change` (`requested`, `opened`, `refused`, `unavailable`, `partner_confirm`, `closed`), `name` for a request or an opened trade, `state` (`checked`, `unchecked`, `reset`; `unknown` for a value outside the protocol) for the partner's button, `result` (`completed`, `cancelled`, `inventory_full`, `request_cancelled`, `reinforced_item`) when it closes; `refused` also on the asked side, when a window that forbids trading is open and the client says no by itself |
 | `disconnect` | `reason` |
 | `error` | `command`, `error`, `message` |
 
