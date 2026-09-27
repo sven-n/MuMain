@@ -10,11 +10,15 @@ class ItemDatabase;
 
 enum class ItemModelProblemType
 {
-    // The .bmd file of the model could not be opened; the item is not drawn.
+    // The .bmd file of the model could not be opened or read; the item is
+    // not drawn.
     ModelFileMissing,
-    // No texture folder has the texture and no other model loaded it; the
-    // mesh is drawn without it.
+    // No texture folder has the texture (or it could not be read) and no
+    // other model loaded it; the mesh is drawn without it.
     TextureMissing,
+    // The texture is not a .jpg or .tga file, which the game cannot load; the
+    // mesh is drawn without it.
+    TextureTypeUnsupported,
     // No texture folder has the texture, but another model loaded a texture
     // with that name, which is used. It only works while that other model is
     // loaded first, so the folder of that texture belongs in the list.
@@ -39,16 +43,21 @@ struct ItemModelProblem
     // NoneBlendMeshMissing: how many meshes the model has.
     int meshCount = 0;
 
-    // Only the missing model files and textures are errors that the player
-    // sees; the others are warnings in the log.
+    // Only the problems that leave an item without its model or a texture
+    // are errors that the player sees; the others are warnings in the log.
     bool IsError() const
     {
-        return type == ItemModelProblemType::ModelFileMissing || type == ItemModelProblemType::TextureMissing;
+        return type == ItemModelProblemType::ModelFileMissing || type == ItemModelProblemType::TextureMissing ||
+               type == ItemModelProblemType::TextureTypeUnsupported;
     }
 
     // One line that names the item (with its name from `items`), the model
     // file entry, and what was looked for where.
     std::string ToString(const ItemDatabase& items) const;
+
+    // The same line with only the group and number of the item, for the log
+    // while the item data is not loaded yet.
+    std::string ToLogString() const;
 };
 
 // The message for the player: the errors among `problems`, at most

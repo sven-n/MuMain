@@ -6,6 +6,7 @@
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Models/ZzzBMD.h"
 
@@ -49,24 +50,15 @@ std::string ToLower(std::string text)
     return text;
 }
 
-// The file the game reads for a texture of a model: "Sword01.jpg" is read
-// from "Sword01.OZJ", "hair.tga" from "hair.OZT" (in lower case here). Empty
-// for textures the game does not load: hidden ones ("hid...") and other
-// file types.
+// The file the game reads for a texture of a model, in lower case. Empty for
+// textures the game does not load: hidden ones and other file types.
 std::string GetStoredTextureName(const std::string& texture)
 {
-    const size_t dot = texture.rfind('.');
-    if (texture.starts_with("hid") || dot == std::string::npos || dot + 1 >= texture.size())
+    if (IsHiddenTexture(texture))
     {
         return {};
     }
-
-    const char type = static_cast<char>(std::tolower(static_cast<unsigned char>(texture[dot + 1])));
-    if (type != 't' && type != 'j')
-    {
-        return {};
-    }
-    return ToLower(texture.substr(0, dot)) + (type == 't' ? ".ozt" : ".ozj");
+    return ToLower(GetStoredTextureFileName(texture).value_or(""));
 }
 
 // The files of a folder below Data/ in lower case, because the game finds
@@ -91,18 +83,30 @@ bool IsInFolders(const std::string& storedName, const std::vector<std::string>& 
                        [&](const std::string& folder) { return GetFolderFiles(folder).contains(storedName); });
 }
 
-// The textures of the model that none of its texture folders has.
-std::vector<std::string> FindTexturesOutsideFolders(const ItemModelDefinition& model)
+// The texture names of the meshes of the model file.
+std::vector<std::string> ReadMeshTextures(const ItemModelDefinition& model)
 {
     const std::filesystem::path path = ClientDirectory / model.file;
     const std::wstring folder = path.parent_path().wstring() + L"/";
     auto bmd = std::make_unique<BMD>();
     REQUIRE(bmd->Open2(folder.c_str(), path.filename().wstring().c_str()));
 
-    std::vector<std::string> missing;
+    std::vector<std::string> textures;
     for (int mesh = 0; mesh < bmd->NumMeshs; ++mesh)
     {
-        const std::string texture = bmd->Textures[mesh].FileName;
+        textures.emplace_back(bmd->Textures[mesh].FileName);
+    }
+    return textures;
+}
+
+// The textures of the model that none of its texture folders has.
+std::vector<std::string> FindTexturesOutsideFolders(const ItemModelDefinition& model)
+{
+    const std::vector<std::string> textures = ReadMeshTextures(model);
+    std::vector<std::string> missing;
+    for (size_t mesh = 0; mesh < textures.size(); ++mesh)
+    {
+        const std::string& texture = textures[mesh];
         const std::string storedName = GetStoredTextureName(texture);
         if (!storedName.empty() && !IsInFolders(storedName, model.textureFolders))
         {
@@ -164,6 +168,20 @@ TEST_CASE("Every texture of a shipped item model is in one of its texture folder
         {
             INFO("(" << model.group << "," << model.number << ") " << model.file << " " << missing);
             CHECK(false);
+        }
+    }
+}
+
+// The game only loads .jpg and .tga textures; any other type is an error at
+// the start of the game.
+TEST_CASE("Every texture of a shipped item model is a .jpg or .tga texture or hidden [data][items]")
+{
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        for (const std::string& texture : ReadMeshTextures(model))
+        {
+            INFO("(" << model.group << "," << model.number << ") " << model.file << " " << texture);
+            CHECK((IsHiddenTexture(texture) || GetStoredTextureFileName(texture).has_value()));
         }
     }
 }

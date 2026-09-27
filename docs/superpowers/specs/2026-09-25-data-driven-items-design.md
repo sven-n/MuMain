@@ -569,10 +569,13 @@ server with original clients (after phases 6 and B).
    texture. Each line names the item (name, group, number), its entry in
    the model files, the `.bmd` file and mesh, the texture (with the
    `.OZJ`/`.OZT` file the game reads) and the folders that were searched.
-   A texture that is only found because another model loaded it before is
-   a warning in `MuError.log` that names the folder to add. Errors of the
-   models that stay in code name the `.bmd` file instead of the path in
-   the model.
+   A texture of another type than `.jpg`/`.tga` is an error as well. A
+   texture that is only found because another model loaded it before is
+   a warning in `MuError.log` that names the folder to add. Each problem
+   is logged when it is found. Errors of the models that stay in code name
+   the `.bmd` file instead of the path in the model. The error dialogs
+   have a **Copy text** button and show the mouse cursor, which the
+   loading screen hides.
 5. **Translation tooling**: a translations editor (items × languages, with
    a filter for missing translations) and missing-translation warnings.
    The names themselves are part of phase 2 (D17).

@@ -2,9 +2,9 @@
 
 #include "ItemModelJsonFormat.h"
 #include "ItemJsonCommon.h"
+#include "ItemTextureFiles.h"
 
 #include <algorithm>
-#include <cctype>
 #include <limits>
 #include <set>
 
@@ -26,16 +26,6 @@ constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
 constexpr std::string_view ModelFileExtension = ".bmd";
 constexpr char FolderSeparator = '/';
 constexpr char WindowsFolderSeparator = '\\';
-
-bool EndsWithIgnoringCase(std::string_view text, std::string_view ending)
-{
-    return text.size() >= ending.size() && std::equal(ending.rbegin(), ending.rend(), text.rbegin(),
-                                                      [](char left, char right)
-                                                      {
-                                                          return std::tolower(static_cast<unsigned char>(left)) ==
-                                                                 std::tolower(static_cast<unsigned char>(right));
-                                                      });
-}
 
 constexpr std::string_view ParentFolder = "..";
 constexpr char DriveSeparator = ':';

@@ -290,9 +290,13 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 }
 void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
+    PopUpErrorCheckMsgBox("Error", Core::Text::ToUtf8(szErrorMsg), !bForceDestroy);
+}
+
+void PopUpErrorCheckMsgBox(const std::string& title, const std::string& message, bool canContinue)
+{
     using Core::Platform::ErrorDialog::Choice;
-    const Choice choice = Core::Platform::ErrorDialog::Show("Error", Core::Text::ToUtf8(szErrorMsg), !bForceDestroy);
-    if (choice == Choice::Continue)
+    if (Core::Platform::ErrorDialog::Show(title, message, canContinue) == Choice::Continue)
     {
         return;
     }

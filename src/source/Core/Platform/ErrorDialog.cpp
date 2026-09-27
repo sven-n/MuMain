@@ -1,7 +1,11 @@
 #include "stdafx.h"
 
 #include "ErrorDialog.h"
+#include "IPlatformWindow.h"
+#include "MuPlatform.h"
 #include "ScopedSystemCursor.h"
+
+#include "Core/Utilities/Log/MuLogger.h"
 
 #include <SDL3/SDL.h>
 
@@ -37,14 +41,34 @@ std::vector<SDL_MessageBoxButtonData> MakeButtons(bool canContinue)
     }
     return buttons;
 }
+
+// The game window, so the dialog stays in front of it even when the game
+// does not have the focus (e.g. during the long loading).
+SDL_Window* GetGameWindow()
+{
+    if (mu::IPlatformWindow* window = mu::MuPlatform::GetWindow())
+    {
+        return static_cast<SDL_Window*>(window->GetNativeHandle());
+    }
+    return SDL_GetKeyboardFocus();
+}
+
+// On Linux the game hands copied text to other programs itself, from its
+// event loop; the text may be gone after the game ends. The log has it too.
+void CopyToClipboard(const std::string& text)
+{
+    if (!SDL_SetClipboardText(text.c_str()))
+    {
+        MU_LOG_WARN(mu::log::Get("core"), "The error text could not be copied: {}", SDL_GetError());
+    }
+}
 } // namespace
 
 Choice Show(const std::string& title, const std::string& message, bool canContinue)
 {
     const std::vector<SDL_MessageBoxButtonData> buttons = MakeButtons(canContinue);
-    // Parented to the focused game window, so it stays in front of it.
     const SDL_MessageBoxData data = {SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT,
-                                     SDL_GetKeyboardFocus(),
+                                     GetGameWindow(),
                                      title.c_str(),
                                      message.c_str(),
                                      static_cast<int>(buttons.size()),
@@ -58,13 +82,16 @@ Choice Show(const std::string& title, const std::string& message, bool canContin
         int buttonId = -1;
         if (!SDL_ShowMessageBox(&data, &buttonId))
         {
-            return defaultChoice;
+            // Like before the dialog had a copy button: an error nobody could
+            // see stops the game.
+            MU_LOG_ERROR(mu::log::Get("core"), "The error could not be shown ({}): {}", SDL_GetError(), message);
+            return Choice::Quit;
         }
 
         switch (buttonId)
         {
         case CopyButton:
-            SDL_SetClipboardText((title + "\n\n" + message).c_str());
+            CopyToClipboard(title + "\n\n" + message);
             continue;
         case ContinueButton:
             return Choice::Continue;

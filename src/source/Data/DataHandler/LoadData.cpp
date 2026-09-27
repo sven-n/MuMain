@@ -9,6 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 
 #include <string>
 
@@ -46,13 +47,13 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
 {
     const std::wstring Name = GetModelFileName(FileName, i);
 
-    RememberModelFile(Type, std::wstring(Dir) + Name);
-
     bool Success = false;
 
     Models[Type].m_iBMDSeqID = Type;
 
     Success = Models[Type].Open2(Dir, Name.c_str());
+    // Only a file that was opened is the model of the slot now.
+    RememberModelFile(Type, Success ? std::wstring(Dir) + Name : std::wstring());
 
     if (Success == false)
     {
@@ -97,11 +98,6 @@ constexpr const wchar_t* TextureRootFolder = L"Data\\";
 std::wstring GetTexturePath(const std::wstring& subFolder, const std::wstring& textureFileName)
 {
     return TextureRootFolder + subFolder + textureFileName;
-}
-
-bool IsHiddenTexture(const char* fileName)
-{
-    return fileName[0] == 'h' && fileName[1] == 'i' && fileName[2] == 'd';
 }
 
 // Loads the texture from the first folder that has it. Only .tga and .jpg
@@ -219,7 +215,15 @@ void CLoadData::OpenModelTextures(int Model, std::span<const std::wstring> SubFo
         const std::wstring textureFileName = Core::Text::FromUtf8(fileName);
         GLuint& textureIndex = pModel->IndexTexture[i];
 
-        if (IsHiddenTexture(fileName))
+        const bool hidden = Data::Items::IsHiddenTexture(fileName);
+        // Other types keep the texture they have; item models report them.
+        if (Problems != nullptr && !hidden && !Data::Items::GetStoredTextureFileName(fileName))
+        {
+            Problems->push_back({i, textureFileName, L"", true});
+            continue;
+        }
+
+        if (hidden)
         {
             textureIndex = BITMAP_HIDE;
         }

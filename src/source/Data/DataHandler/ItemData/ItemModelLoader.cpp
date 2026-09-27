@@ -10,7 +10,6 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Render/Models/ZzzBMD.h"
-#include "Render/Textures/ZzzTexture.h"
 
 #include <algorithm>
 #include <string>
@@ -28,8 +27,9 @@ constexpr wchar_t LoaderSeparator = L'\\';
 constexpr std::wstring_view ModelFileExtension = L".bmd";
 // How many errors the player sees; all of them go to the log.
 constexpr size_t MaxErrorsInMessage = 10;
+constexpr const char* LoggerName = "data";
 
-// The problems of OpenModels and OpenTextures, until ReportProblems.
+// The problems of OpenModels and OpenTextures, until TakeProblemMessage.
 std::vector<ItemModelProblem> g_problems;
 
 std::wstring ToLoaderPath(const std::string& path)
@@ -56,6 +56,22 @@ ItemModelProblem MakeProblem(ItemModelProblemType type, const ItemModelDefinitio
     return problem;
 }
 
+// Logs the problem right away, so it is in the log even when the game ends
+// before the problems are shown, and keeps it for the message.
+void AddProblem(ItemModelProblem problem)
+{
+    const auto logger = mu::log::Get(LoggerName);
+    if (problem.IsError())
+    {
+        MU_LOG_ERROR(logger, "Item model {}", problem.ToLogString());
+    }
+    else
+    {
+        MU_LOG_WARN(logger, "Item model {}", problem.ToLogString());
+    }
+    g_problems.push_back(std::move(problem));
+}
+
 void MarkNoneBlendMeshes(int itemType, const ItemModelDefinition& model)
 {
     BMD& bmd = Models[MODEL_ITEM + itemType];
@@ -66,7 +82,7 @@ void MarkNoneBlendMeshes(int itemType, const ItemModelDefinition& model)
             ItemModelProblem problem = MakeProblem(ItemModelProblemType::NoneBlendMeshMissing, model);
             problem.mesh = mesh;
             problem.meshCount = bmd.NumMeshs;
-            g_problems.push_back(std::move(problem));
+            AddProblem(std::move(problem));
             continue;
         }
         bmd.Meshs[mesh].NoneBlendMesh = true;
@@ -82,22 +98,30 @@ void OpenModel(int itemType, const ItemModelDefinition& model)
 
     if (!gLoadData.AccessModel(MODEL_ITEM + itemType, folder.c_str(), name.c_str()))
     {
-        g_problems.push_back(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
+        AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
         return;
     }
     MarkNoneBlendMeshes(itemType, model);
 }
 
+ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)
+{
+    if (textureProblem.unsupportedType)
+    {
+        return ItemModelProblemType::TextureTypeUnsupported;
+    }
+    return textureProblem.usedInstead.empty() ? ItemModelProblemType::TextureMissing
+                                              : ItemModelProblemType::TextureOutsideFolders;
+}
+
 void AddTextureProblem(const ItemModelDefinition& model, const TextureProblem& textureProblem)
 {
-    const bool usesOtherTexture = !textureProblem.usedInstead.empty();
-    ItemModelProblem problem = MakeProblem(
-        usesOtherTexture ? ItemModelProblemType::TextureOutsideFolders : ItemModelProblemType::TextureMissing, model);
+    ItemModelProblem problem = MakeProblem(GetTextureProblemType(textureProblem), model);
     problem.mesh = textureProblem.mesh;
     problem.texture = Core::Text::ToUtf8(textureProblem.fileName.c_str());
     problem.searchedFolders = model.textureFolders;
     problem.usedInstead = ToDataPath(textureProblem.usedInstead);
-    g_problems.push_back(std::move(problem));
+    AddProblem(std::move(problem));
 }
 
 void OpenModelTextures(int itemType, const ItemModelDefinition& model)
@@ -129,22 +153,6 @@ template <typename TOpen> void ForEachModel(TOpen&& open)
         }
     }
 }
-
-void LogProblems()
-{
-    const auto logger = mu::log::Get("data");
-    for (const ItemModelProblem& problem : g_problems)
-    {
-        if (problem.IsError())
-        {
-            MU_LOG_ERROR(logger, "Item model: {}", problem.ToString(g_ItemDatabase));
-        }
-        else
-        {
-            MU_LOG_WARN(logger, "Item model: {}", problem.ToString(g_ItemDatabase));
-        }
-    }
-}
 } // namespace
 
 void OpenModels()
@@ -157,18 +165,13 @@ void OpenTextures()
     ForEachModel(OpenModelTextures);
 }
 
-void ReportProblems()
+std::string TakeProblemMessage()
 {
-    LogProblems();
-    const std::string errors = DescribeItemModelErrors(g_problems, g_ItemDatabase, MaxErrorsInMessage);
+    const std::string message = DescribeItemModelErrors(g_problems, g_ItemDatabase, MaxErrorsInMessage);
     g_problems.clear();
-    if (errors.empty())
-    {
-        return;
-    }
-
-    const std::wstring message =
-        Core::Text::FromUtf8(errors + "\n\nContinue: keep loading, these items are drawn incompletely.");
-    PopUpErrorCheckMsgBox(message.c_str());
+    // Warnings are only written out with the next error; the player may quit
+    // the game from the message.
+    mu::log::Get(LoggerName)->flush();
+    return message;
 }
 } // namespace Data::Items::ModelLoader

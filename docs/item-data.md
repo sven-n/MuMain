@@ -253,24 +253,36 @@ Model files are checked like the item files: invalid JSON, a missing
 game folder (starting with `/`, a drive letter or `..`), `\` in a path,
 or an item with two models stop the start with a message; unknown fields
 are warnings. The automated tests also check that every model file and
-texture folder exists, and that every texture of a model is in one of its
-texture folders.
+texture folder exists, that every texture of a model is in one of its
+texture folders, and that every texture is a `.jpg` or `.tga` texture.
 
-When a model file or a texture is missing, one message after loading
-lists the problems (up to 10; all of them are in `MuError.log`).
+When a model file or a texture cannot be loaded, one message after
+loading lists the problems (up to 10; all of them are in `MuError.log`).
 **Continue** keeps loading, the items are then drawn without the missing
 parts; **Quit** closes the game; **Copy text** copies the message, e.g.
 for a bug report. Each line says what to fix:
 
 ```
 Storm Hard Glove (0,33): texture Item762_Armor.jpg (Item762_Armor.OZJ) of mesh 1 of
-Data/Item/Sword34.bmd not found in Data/Item/ (Data/Items/Models/Group00_Sword.json)
+Data/Item/Sword34.bmd not found or not readable in Data/Item/ (Data/Items/Models/Group00_Sword.json)
 ```
 
+The problems are:
+
+| Problem | Kind |
+|---|---|
+| The `.bmd` file could not be opened (it is missing or not a valid model). | error |
+| A texture is in none of the texture folders, or could not be read. | error |
+| A texture is not a `.jpg` or `.tga` texture; the game cannot load other types. | error |
+| A texture is in none of the texture folders, but another model loaded it before; that one is used. The warning names the folder to add to `textureFolders`. | warning |
+| `noneBlendMeshes` has a mesh number the model does not have. | warning |
+
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
-copies with the same name, `.OZJ`/`.OZT`. A texture that is not in the
-model's folders but was loaded by another model before is used anyway
-and only logged as a warning, with the folder to add to `textureFolders`.
+copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts
+with `hid` are not drawn, so their texture is not loaded.
+
+On Linux the game itself hands out the copied text, so it may only be
+pastable while the game runs. The text is in `MuError.log` as well.
 
 ---
 

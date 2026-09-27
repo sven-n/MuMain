@@ -17,6 +17,8 @@ struct TextureProblem
     // The path of an already loaded texture with that name, which is used
     // instead; empty when there is none and the mesh has no texture.
     std::wstring usedInstead;
+    // Not a .jpg or .tga file, so it was not loaded.
+    bool unsupportedType = false;
 };
 
 class CLoadData

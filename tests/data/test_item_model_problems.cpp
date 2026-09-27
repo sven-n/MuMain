@@ -4,6 +4,7 @@
 
 #include "Data/DataHandler/ItemData/ItemModelProblem.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 
 #include <string>
 #include <vector>
@@ -54,13 +55,46 @@ TEST_CASE("A missing item model texture names the item, the model, the file and 
     CHECK(MakeMissingTexture(1, "Item762_Armor.jpg").ToString(items) ==
           StormHardGloveEntry +
               ": texture Item762_Armor.jpg (Item762_Armor.OZJ) of mesh 1 of Data/Item/Sword34.bmd "
-              "not found in Data/Item/ " +
+              "not found or not readable in Data/Item/ " +
               SwordModels);
 
     ItemModelProblem tga = MakeMissingTexture(0, "hair.tga");
     tga.searchedFolders = {"Item", "Player", "Effect"};
     CHECK(Contains(tga.ToString(items), "hair.tga (hair.OZT)"));
-    CHECK(Contains(tga.ToString(items), "not found in Data/Item/, Data/Player/ or Data/Effect/"));
+    CHECK(Contains(tga.ToString(items), "not found or not readable in Data/Item/, Data/Player/ or Data/Effect/"));
+}
+
+TEST_CASE("The log entry of an item model problem names the item type instead of the item [data][items]")
+{
+    CHECK(MakeMissingTexture(1, "Item762_Armor.jpg").ToLogString() ==
+          "(0,33): texture Item762_Armor.jpg (Item762_Armor.OZJ) of mesh 1 of Data/Item/Sword34.bmd "
+          "not found or not readable in Data/Item/ " +
+              SwordModels);
+}
+
+TEST_CASE("A texture of a type the game cannot load is an error [data][items]")
+{
+    ItemModelProblem problem = MakeMissingTexture(2, "Sword34.bmp");
+    problem.type = ItemModelProblemType::TextureTypeUnsupported;
+
+    CHECK(problem.IsError());
+    CHECK(problem.ToString(MakeItems()) == StormHardGloveEntry +
+                                               ": texture Sword34.bmp of mesh 2 of Data/Item/Sword34.bmd is not a "
+                                               ".jpg or .tga texture, which the game cannot load " +
+                                               SwordModels);
+}
+
+TEST_CASE("The game reads .jpg and .tga textures from their encrypted copies [data][items]")
+{
+    CHECK(GetStoredTextureFileName("Sword01.jpg") == "Sword01.OZJ");
+    CHECK(GetStoredTextureFileName("hair.TGA") == "hair.OZT");
+    CHECK(GetStoredTextureFileName("level.2.jpg") == "level.2.OZJ");
+    CHECK_FALSE(GetStoredTextureFileName("Sword01.bmp").has_value());
+    CHECK_FALSE(GetStoredTextureFileName("Sword01.jpeg").has_value());
+    CHECK_FALSE(GetStoredTextureFileName("Sword01").has_value());
+
+    CHECK(IsHiddenTexture("hide.jpg"));
+    CHECK_FALSE(IsHiddenTexture("Hide.jpg"));
 }
 
 TEST_CASE("A missing item model file names the item and the model entry [data][items]")
@@ -72,8 +106,9 @@ TEST_CASE("A missing item model file names the item and the model entry [data][i
     problem.modelFile = "Data/Item/monmark02.bmd";
 
     CHECK(problem.IsError());
-    CHECK(problem.ToString(MakeItems()) == "<unknown item> (13,116): model file Data/Item/monmark02.bmd not found "
-                                           "(Data/Items/Models/Group13_Helper.json)");
+    CHECK(problem.ToString(MakeItems()) ==
+          "<unknown item> (13,116): model file Data/Item/monmark02.bmd could not be opened (missing or not a valid "
+          ".bmd file) (Data/Items/Models/Group13_Helper.json)");
 }
 
 TEST_CASE("A texture found only outside the texture folders is a warning that names the folder to add [data][items]")

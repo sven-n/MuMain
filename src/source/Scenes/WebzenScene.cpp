@@ -127,11 +127,9 @@ void WebzenScene(HDC hDC)
         // The game draws no cursor while it loads.
         const Core::Platform::ScopedSystemCursor cursor;
         OpenBasicData(hDC);
+        g_pNewUISystem->LoadMainSceneInterface();
+        CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
     }
-
-    g_pNewUISystem->LoadMainSceneInterface();
-
-    CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
 
     rUIMng.ReleaseTitleSceneUI();
     UnloadTitleBitmaps();
