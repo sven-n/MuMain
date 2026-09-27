@@ -94,8 +94,8 @@ std::optional<CNewUIInventoryCtrl*> OpenGrid(DWORD windowKey, CNewUIInventoryCtr
     CNewUIInventoryCtrl* main = g_pMyInventory->GetInventoryCtrl();
     const bool inMain = main != nullptr && slot >= main->GetIndexOffset() &&
                         slot < main->GetIndexOffset() + main->GetNumberOfColumn() * main->GetNumberOfRow();
-    const bool inExtension =
-        slot >= MAX_MY_INVENTORY_INDEX && slot < MAX_MY_INVENTORY_INDEX + MAX_INVENTORY_EXT_COUNT * MAX_INVENTORY_EXT_ONE;
+    const bool inExtension = slot >= MAX_MY_INVENTORY_INDEX &&
+                             slot < MAX_MY_INVENTORY_INDEX + MAX_INVENTORY_EXT_COUNT * MAX_INVENTORY_EXT_ONE;
     return inMain || inExtension;
 }
 
