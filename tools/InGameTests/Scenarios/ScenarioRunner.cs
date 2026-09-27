@@ -7,8 +7,8 @@ namespace MuMain.Tools.InGameTests.Scenarios;
 
 /// <summary>
 /// Runs a scenario with fresh clients. Its screenshots go into
-/// <paramref name="folder"/>; on a failure the recent events and the state of
-/// every client go there too.
+/// <paramref name="folder"/>; on a failure every client's state and recent
+/// events go into the result, for the report.
 /// </summary>
 internal sealed class ScenarioRunner(
     ClientOptions clientOptions,
@@ -46,8 +46,8 @@ internal sealed class ScenarioRunner(
         catch (Exception exception)
         {
             log.WriteLine($"FAIL {scenario.Name} ({stopwatch.Elapsed.TotalSeconds:0} s): {exception.Message}");
-            await this.SaveFailureAsync(clients);
-            return this.Result(scenario, false, stopwatch.Elapsed, exception.Message, context);
+            var details = await this.FailureDetailsAsync(clients);
+            return this.Result(scenario, false, stopwatch.Elapsed, exception.Message, context) with { FailureDetails = details };
         }
         finally
         {
@@ -69,36 +69,37 @@ internal sealed class ScenarioRunner(
             failure,
             [.. context.Steps]);
 
-    private async Task SaveFailureAsync(IReadOnlyDictionary<string, GameClient> clients)
+    private async Task<IReadOnlyList<ClientDetails>> FailureDetailsAsync(IReadOnlyDictionary<string, GameClient> clients)
     {
+        var details = new List<ClientDetails>();
         foreach (var (role, client) in clients)
         {
-            await this.TrySaveAsync(async () =>
+            var state = await this.TryReadAsync(async () => Pretty(await client.StateAsync()));
+            var events = await this.TryReadAsync(async () =>
             {
                 var last = await client.LastEventSequenceAsync();
-                var events = await client.EventsSinceAsync(Math.Max(0, last - RecentEventCount));
-                await File.WriteAllTextAsync(Path.Combine(folder, $"{role}-events.json"), Pretty(events));
+                return Pretty(await client.EventsSinceAsync(Math.Max(0, last - RecentEventCount)));
             });
-            await this.TrySaveAsync(async () =>
-                await File.WriteAllTextAsync(Path.Combine(folder, $"{role}-state.json"), Pretty(await client.StateAsync())));
+            details.Add(new ClientDetails(role, state, events));
         }
 
-        log.WriteLine($"    details in {folder}");
+        return details;
     }
 
     private static string Pretty(JsonElement element)
         => JsonSerializer.Serialize(element, new JsonSerializerOptions { WriteIndented = true });
 
     // A client that is already gone must not hide the scenario's own failure.
-    private async Task TrySaveAsync(Func<Task> save)
+    private async Task<string> TryReadAsync(Func<Task<string>> read)
     {
         try
         {
-            await save();
+            return await read();
         }
         catch (Exception exception)
         {
-            log.WriteLine($"    could not save failure details: {exception.Message}");
+            log.WriteLine($"    could not read failure details: {exception.Message}");
+            return $"(could not be read: {exception.Message})";
         }
     }
 }

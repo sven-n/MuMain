@@ -38,6 +38,9 @@ internal sealed class TestRunListener
 /// </summary>
 internal static class TestRun
 {
+    // The largest file GitHub takes as an attachment of a pull request comment.
+    private const int GitHubAttachmentLimitMegabytes = 25;
+
     // A test server that was just recreated takes a few seconds to listen.
     private static readonly TimeSpan ServerStartTimeout = TimeSpan.FromSeconds(60);
 
@@ -53,8 +56,28 @@ internal static class TestRun
         CancellationToken cancellationToken)
     {
         var started = DateTime.Now;
-        var folder = Path.GetFullPath(Path.Combine(options.OutputFolder, started.ToString("yyyyMMdd-HHmmss")));
+        // The screenshots are taken into a work folder; the report takes them in,
+        // and the folder goes away: a run leaves one file.
+        var folder = Path.Combine(Path.GetTempPath(), "mu-in-game-tests", $"run-{started:yyyyMMdd-HHmmss}-{Environment.ProcessId}");
         Directory.CreateDirectory(folder);
+        try
+        {
+            return await RunInAsync(folder, started, options, log, listener, cancellationToken);
+        }
+        finally
+        {
+            TryDelete(folder, log);
+        }
+    }
+
+    private static async Task<TestRunResult> RunInAsync(
+        string folder,
+        DateTime started,
+        TestRunOptions options,
+        TextWriter log,
+        TestRunListener? listener,
+        CancellationToken cancellationToken)
+    {
 
         if (options.FreshServer)
         {
@@ -101,13 +124,33 @@ internal static class TestRun
             .Concat(results.Where(result => options.AllScenarios.All(scenario => scenario.Name != result.Name)))
             .ToList();
 
-        var reportPath = Path.Combine(folder, "report.html");
-        var run = new TestRunResult(started, options, reported, folder, reportPath);
-        await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run), CancellationToken.None);
-        await File.WriteAllTextAsync(Path.Combine(folder, "results.json"), JsonSerializer.Serialize(Summary(run), JsonOptions), CancellationToken.None);
+        var output = Path.GetFullPath(options.OutputFolder);
+        Directory.CreateDirectory(output);
+        var reportPath = Path.Combine(output, $"in-game-report-{started:yyyyMMdd-HHmmss}.html");
+        var run = new TestRunResult(started, options, reported, reportPath);
+        await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run, JsonSerializer.Serialize(Summary(run), JsonOptions)), CancellationToken.None);
         log.WriteLine($"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, {run.Count(ScenarioStatus.Skipped)} skipped");
         log.WriteLine($"report: {reportPath}");
+        var megabytes = new FileInfo(reportPath).Length / (1024.0 * 1024.0);
+        if (megabytes > GitHubAttachmentLimitMegabytes)
+        {
+            log.WriteLine($"the report has {megabytes:0.0} MB; GitHub takes files up to {GitHubAttachmentLimitMegabytes} MB in a pull request comment");
+        }
+
         return run;
+    }
+
+    // Screenshots and the like; a folder that cannot go away costs only disk space.
+    private static void TryDelete(string folder, TextWriter log)
+    {
+        try
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            log.WriteLine($"could not remove the work folder {folder}: {exception.Message}");
+        }
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()

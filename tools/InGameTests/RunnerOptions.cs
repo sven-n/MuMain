@@ -12,7 +12,7 @@ internal sealed class RunnerOptions
           --server        the game server the clients log in to, default 127.0.0.1:56901, the test server
           --fresh-server  recreate the test server (docker-compose.yml, with podman or docker) before the run
           --scenario      run only this scenario; repeat for several, default all
-          --out           where the report, screenshots and failure details go, default in-game-test-results
+          --out           where the report goes (one HTML file per run), default in-game-test-results
                           (next to the tester when it sits next to Main)
           -t              pause this many milliseconds after every action, to watch a scenario, default 0
           --gui           open the window to choose and run scenarios; also without any option

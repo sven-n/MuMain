@@ -15,7 +15,7 @@ report each scenario as passed or failed.
    `out/build/windows-x64-mueditor/src/Release/InGameTests.exe`.
 3. In its window, leave **Recreate the test server** checked (it needs podman
    or docker), check the scenarios, and press **Run and write report**;
-   **Open report** shows every step with screenshots.
+   **Open report** shows every step with screenshots, in one file you can attach to a pull request.
 
 The rest of this page explains each part.
 
@@ -120,23 +120,27 @@ settings between runs.
 
 ### The report
 
-Every run, from the window or the command line, writes a folder named after
-its start time into the output folder (`in-game-test-results` next to the
-tester):
+Every run, from the window or the command line, writes one file into the
+output folder (`in-game-test-results` next to the tester):
+`in-game-report-<date>-<time>.html`. Everything is in it, so it can be
+attached to a pull request or an issue as it is (GitHub takes `.html` files up
+to 25 MB in a comment; the tester warns when a report is bigger):
 
-- `report.html`: a table of every scenario there is, with PASS, FAIL, or
-  SKIPPED for the ones the run did not include, and below it a section per
-  scenario that opens on a click. Both are grouped by category, and a click on
-  a category folds it in or out; **Expand all** and **Collapse all** open or
-  close everything. An open
-  section shows the scenario step by step: a step says what is done, what
-  should happen then, whether it did and how long it took, with a screenshot
-  of every client taken right after it; a failed step has the failure and the
-  screenshot of what the clients showed then. The screenshots are embedded, so
-  the file can be attached to a pull request or an issue as it is.
-- `results.json`: the same for tools.
-- a folder per scenario with the screenshots, and on a failure the recent
-  events and the `state` of every client.
+- A table of every scenario there is, with PASS, FAIL, or SKIPPED for the ones
+  the run did not include, and below it a section per scenario that opens on a
+  click. Both are grouped by category, and a click on a category folds it in
+  or out; **Expand all** and **Collapse all** open or close everything.
+- An open section shows the scenario step by step: a step says what is done,
+  what should happen then, whether it did and how long it took, with a
+  screenshot of every client taken right after it; a failed step has the
+  failure and the screenshot of what the clients showed then.
+- A failed scenario also has the `state` and the last 200 events of every
+  client, in blocks that open on a click.
+- The results as JSON for tools, in the page's
+  `<script type="application/json" id="results">`.
+
+The screenshots are taken into a work folder in the temp folder, which the
+run deletes once the report has them.
 
 ### The command line
 
@@ -179,7 +183,7 @@ followed by the options runs it too; it then needs `--client`.
 | `--server` | the game server the clients log in to, `host:port`; default `127.0.0.1:56901` |
 | `--fresh-server` | recreate the test server with podman or docker before the run |
 | `--scenario` | run only this scenario; repeat it for several; default all |
-| `--out` | where the run folders go; default `in-game-test-results`, next to the tester when it sits next to `Main` |
+| `--out` | where the reports go; default `in-game-test-results`, next to the tester when it sits next to `Main` |
 | `-t` | milliseconds to pause after every client action, so a person can follow; default `0` |
 | `--gui` | open the window; also without any option |
 | `--list` | list the scenarios |

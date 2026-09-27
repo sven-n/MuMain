@@ -15,6 +15,9 @@ internal sealed record StepResult(
     string? Failure,
     IReadOnlyList<StepScreenshot> Screenshots);
 
+/// <summary>What a client showed when its scenario failed: its `state` and its recent events, as JSON.</summary>
+internal sealed record ClientDetails(string Role, string State, string Events);
+
 /// <summary>How a scenario went in a run.</summary>
 internal enum ScenarioStatus
 {
@@ -35,7 +38,8 @@ internal sealed record ScenarioResult(
     TimeSpan StepDelay,
     string? Failure,
     IReadOnlyList<StepResult> Steps,
-    string? SkipReason = null)
+    string? SkipReason = null,
+    IReadOnlyList<ClientDetails>? FailureDetails = null)
 {
     public bool Passed => this.Status == ScenarioStatus.Passed;
 
@@ -46,12 +50,11 @@ internal sealed record ScenarioResult(
         => new(scenario.Name, scenario.Description, scenario.Category, ScenarioStatus.Skipped, TimeSpan.Zero, TimeSpan.Zero, null, [], reason);
 }
 
-/// <summary>A whole run: its settings, every scenario's result and where the report is.</summary>
+/// <summary>A whole run: its settings, every scenario's result and the one file that reports it.</summary>
 internal sealed record TestRunResult(
     DateTime Started,
     TestRunOptions Options,
     IReadOnlyList<ScenarioResult> Scenarios,
-    string Folder,
     string ReportPath)
 {
     /// <summary>No scenario failed; skipped ones do not count.</summary>

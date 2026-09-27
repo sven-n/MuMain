@@ -5,8 +5,9 @@ using System.Text;
 namespace MuMain.Tools.InGameTests.Running;
 
 /// <summary>
-/// The report of a run as one HTML file with the screenshots embedded, so it can
-/// be attached to a pull request or an issue as it is. It lists every scenario;
+/// The report of a run as one HTML file with everything in it: the screenshots,
+/// the state and events of the clients of a failed scenario, and the results as
+/// JSON for tools. So it can be attached to a pull request or an issue as it is. It lists every scenario;
 /// each one is a collapsed section that opens on a click, with its steps and
 /// screenshots, and the ones that did not run are marked as skipped.
 /// </summary>
@@ -68,6 +69,9 @@ internal static class HtmlReport
         figure { margin:0; flex:1 1 360px; max-width:560px; }
         figure img { width:100%; height:auto; border:1px solid var(--line); border-radius:6px; cursor:zoom-in; display:block; }
         figcaption { font-size:13px; color:var(--muted); margin-top:2px; }
+        details.raw { margin-top:10px; } details.raw > summary { cursor:pointer; color:var(--muted); }
+        details.raw pre { max-height:420px; overflow:auto; background:var(--bg); border:1px solid var(--line); border-radius:6px;
+                          padding:10px; font-size:12px; }
         #zoom { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; padding:16px; cursor:zoom-out; }
         #zoom img { max-width:100%; max-height:100%; }
         """;
@@ -94,7 +98,7 @@ internal static class HtmlReport
         zoom.addEventListener('click', () => { zoom.style.display = 'none'; });
         """;
 
-    public static string Render(TestRunResult run)
+    public static string Render(TestRunResult run, string resultsJson)
     {
         var html = new StringBuilder();
         html.Append("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">")
@@ -147,6 +151,9 @@ internal static class HtmlReport
             html.Append("</details>");
         }
 
+        // For tools: the same results as data. "</" would end the script element early.
+        html.Append("<script type=\"application/json\" id=\"results\">").Append(resultsJson.Replace("</", "<\\/", StringComparison.Ordinal))
+            .Append("</script>");
         html.Append("</main><div id=\"zoom\"><img alt=\"\"></div><script>").Append(Script).Append("</script></body></html>");
         return html.ToString();
     }
@@ -194,6 +201,17 @@ internal static class HtmlReport
             }
 
             html.Append("</div>");
+        }
+
+        if (scenario.FailureDetails is { Count: > 0 } details)
+        {
+            foreach (var client in details)
+            {
+                html.Append("<details class=\"raw\"><summary>State of '").Append(Encode(client.Role)).Append("' when it failed</summary><pre>")
+                    .Append(Encode(client.State)).Append("</pre></details>")
+                    .Append("<details class=\"raw\"><summary>Recent events of '").Append(Encode(client.Role)).Append("'</summary><pre>")
+                    .Append(Encode(client.Events)).Append("</pre></details>");
+            }
         }
 
         html.Append("</div></details>");
