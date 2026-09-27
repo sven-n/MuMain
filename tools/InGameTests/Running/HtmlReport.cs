@@ -43,6 +43,11 @@ internal static class HtmlReport
         details.group[open] > summary::before { content:"▾"; }
         details.group > summary:hover { background:var(--hover); }
         .muted { color:var(--muted); }
+        .verdict { display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; color:#fff; border-radius:12px;
+                   padding:18px 26px; margin:0 0 20px; }
+        .verdict strong { font-size:40px; font-weight:800; letter-spacing:.04em; line-height:1.1; }
+        .verdict span { font-size:18px; font-weight:500; opacity:.95; }
+        .verdict-pass { background:#1f7a3f; } .verdict-fail { background:#b3261e; } .verdict-none { background:#5d6675; }
         .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:16px 0; }
         table { border-collapse:collapse; width:100%; }
         th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
@@ -104,6 +109,10 @@ internal static class HtmlReport
         html.Append("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">")
             .Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">")
             .Append("<title>In-game test report</title><style>").Append(Style).Append("</style></head><body><main>");
+
+        var (verdictClass, verdict, detail) = Verdict(run);
+        html.Append("<div class=\"verdict verdict-").Append(verdictClass).Append("\"><strong>").Append(verdict).Append("</strong><span>")
+            .Append(Encode(detail)).Append("</span></div>");
 
         html.Append("<h1>In-game test report</h1><p class=\"muted\">")
             .Append(Encode($"{run.Started:yyyy-MM-dd HH:mm:ss} · server {run.Options.ServerHost}:{run.Options.ServerPort}"))
@@ -216,6 +225,32 @@ internal static class HtmlReport
         }
 
         html.Append("</div></details>");
+    }
+
+    // The run in one word, for the banner on top: FAILED when a scenario failed,
+    // STOPPED when the run did not get to all it was to run, NOTHING RAN, or
+    // PASSED. Scenarios that were not selected do not count.
+    private static (string Class, string Word, string Detail) Verdict(TestRunResult run)
+    {
+        var ran = run.Scenarios.Where(scenario => scenario.Status != ScenarioStatus.Skipped).ToList();
+        var failed = ran.Count(scenario => scenario.Failed);
+        var notRun = run.Options.Scenarios.Count - ran.Count;
+        var steps = ran.Sum(scenario => scenario.Steps.Count);
+        if (failed > 0)
+        {
+            return ("fail", "FAILED", $"{failed} of {Tests(ran.Count)} failed");
+        }
+
+        if (notRun > 0)
+        {
+            return ("none", "STOPPED", $"{ran.Count} of {Tests(run.Options.Scenarios.Count)} ran and passed; the run was stopped");
+        }
+
+        return ran.Count == 0
+            ? ("none", "NOTHING RAN", "no test was selected")
+            : ("pass", "PASSED", $"{ran.Count} of {Tests(ran.Count)} · {steps} steps");
+
+        static string Tests(int count) => count == 1 ? "1 test" : $"{count} tests";
     }
 
     // The scenarios by category, in the categories' order.

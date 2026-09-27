@@ -134,6 +134,9 @@ output folder (`in-game-test-results` next to the tester):
 attached to a pull request or an issue as it is (GitHub takes `.html` files up
 to 25 MB in a comment; the tester warns when a report is bigger):
 
+- On top, the run's result in large: PASSED in green when every test of the
+  run passed, FAILED in red when one failed, or STOPPED when the run was
+  stopped before its last test. Scenarios that were not selected do not count.
 - A table of every scenario there is, with PASS, FAIL, or SKIPPED for the ones
   the run did not include, and below it a section per scenario that opens on a
   click. Both are grouped by category, and a click on a category folds it in
