@@ -10,7 +10,8 @@ report each scenario as passed or failed.
 
 - An editor build of the client (a `-mueditor` preset, which turns on
   `ENABLE_CONTROL_SOCKET`), e.g. `out/build/windows-x64-mueditor/src/Release/Main.exe`.
-- podman or docker for the test server below, or any other
+- podman or docker with compose for the test server below (on Windows and
+  macOS a running `podman machine`), or any other
   [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
 - The .NET 10 SDK, which the client build needs anyway.
 
@@ -32,7 +33,13 @@ podman compose -f tools/InGameTests/docker-compose.yml up -d --force-recreate   
 podman compose -f tools/InGameTests/docker-compose.yml down                     # stop
 ```
 
-`docker compose` works the same way. The tests also run against any other
+`docker compose` works the same way. When the runner recreates the server and
+podman answers "Cannot connect to Podman" although its machine runs, podman's
+file with the connection to the machine is missing (`podman system connection
+list` is empty); the runner then connects as `podman machine inspect` describes
+the machine, so nothing has to be set up by hand.
+
+The tests also run against any other
 OpenMU with the test data, but then they start from whatever state the last
 run left: `trade`, for one, moves a jewel from `test300Dl` to `socketElf`
 each time.
