@@ -339,6 +339,24 @@ namespace UI::RmlBridge
 
     void ReloadAllThemedDocuments()
     {
+        // Drop the focus before any document is unloaded. RmlUi clears Context::focus directly in
+        // both UnloadDocument() and OnElementDetach() without dispatching Blur, so a focused
+        // <input> is destroyed without its WidgetTextInput ever calling DeactivateKeyboard() --
+        // and RmlUiSystemInterface's text-input latch then stays set with no field left to clear
+        // it. CManager::UpdateKeyEvent() reads that latch to decide the whole UI is typing, so it
+        // would skip every window from then on: no hotkeys, no Enter-to-chat, until a relaunch.
+        // Blurring here goes through Context::Focus(), which does dispatch the event.
+        //
+        // This is also the right behaviour on its own terms: every document is about to be
+        // rebuilt, so nothing should still be holding focus across the swap.
+        if (Rml::Context* context = RmlUiRuntime::Instance().IsCreated()
+                ? RmlUiRuntime::Instance().GetContext()
+                : nullptr)
+        {
+            if (Rml::Element* focused = context->GetFocusElement())
+                focused->Blur();
+        }
+
         // Copy first -- see this function's own header comment (RmlTheme.h) for why.
         const auto callbacks = ThemeReloadRegistry();
         for (const auto& [owner, callback] : callbacks)

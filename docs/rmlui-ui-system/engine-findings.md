@@ -418,6 +418,33 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   runs — the one place every theme switch already goes through. Any future template shared by name
   across theme forks is covered automatically; no per-window awareness needed.
 
+- **Unloading a document does not blur the element that held the focus**, and that can latch the
+  whole keyboard off. `Context::UnloadDocument()` and `Context::OnElementDetach()` both clear
+  `Context::focus` by plain assignment, never through `Context::Focus()`, so no `Blur` event is
+  dispatched; `~WidgetTextInput()` only removes listeners and doesn't deactivate either. A focused
+  `<input>` destroyed that way therefore never reaches
+  `WidgetTextInput::SetKeyboardActive(false)` → `SystemInterface::DeactivateKeyboard()`, and
+  `RmlUiSystemInterface`'s `m_TextInputActive` latch stays set with nothing left alive to clear it.
+  That matters here because `CManager::UpdateKeyEvent()` reads the latch (via
+  `RmlUiRuntime::IsTextInputActive()`) to mean "a field is being typed into, suspend every window's
+  key handling" — so a stale one skips **every** window for the rest of the session: no hotkeys, no
+  Enter-to-chat, no Escape. Silent, total, and only fixable by relaunching.
+
+  Found live after `$theme` hot-swap, and it is exactly the shape that makes it reachable: the
+  command is typed into `CChatInputBox`'s own RmlUi `<input>`, so the field is focused at the moment
+  `ReloadAllThemedDocuments()` unloads the document containing it. The window's own
+  `ClosingProcess()` blur then lands on a *new* document whose field was never focused, so it
+  cannot recover. Not reachable before `CChatInputBox` was ported — the native `CUITextInputBox`
+  it replaced cleared `GetFocusedPortable()` from its own teardown.
+
+  Fixed in two places, deliberately: `ReloadAllThemedDocuments()` blurs the context's focus element
+  *before* invoking any reload callback (correct on its own terms too — every document is about to
+  be rebuilt, nothing should hold focus across the swap), and `RmlUiRuntime::IsTextInputActive()`
+  now confirms the latch against the live focus element's tag rather than trusting it alone. Only a
+  text-entry widget ever activates the keyboard, so that check can't produce a false negative. **Any
+  other code path that unloads a document while a field may be focused needs the same blur** — the
+  runtime check is the net, not the fix.
+
 ## `CObject`/`CManager`/`LayoutMode` gotchas
 
 Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but

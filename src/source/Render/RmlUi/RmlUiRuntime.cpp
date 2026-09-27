@@ -5,6 +5,7 @@
 #include "RmlUiSystemInterface.h"
 
 #include <RmlUi/Core/Core.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/Renderer/MuRenderer.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -255,7 +256,24 @@ bool RmlUiRuntime::IsMouseOverUI() const
 
 bool RmlUiRuntime::IsTextInputActive() const
 {
-    return m_SystemInterface && m_SystemInterface->IsTextInputActive();
+    if (!m_SystemInterface || !m_SystemInterface->IsTextInputActive())
+        return false;
+
+    // The flag above is a latch, set by ActivateKeyboard/DeactivateKeyboard, and RmlUi can drop a
+    // focused element WITHOUT a matching Blur: Context::UnloadDocument() and
+    // Context::OnElementDetach() both clear Context::focus by assignment, and ~WidgetTextInput()
+    // doesn't deactivate either. The latch then outlives the field that set it, and since
+    // CManager::UpdateKeyEvent() treats it as "the user is typing, suspend every window's keys,"
+    // a stale one silently kills every hotkey for the rest of the session.
+    //
+    // So confirm it against the live focus. Only a text-entry widget ever activates the keyboard,
+    // so requiring the focused element to still be one cannot produce a false negative.
+    Rml::Element* focused = m_Context ? m_Context->GetFocusElement() : nullptr;
+    if (!focused)
+        return false;
+
+    const Rml::String& tag = focused->GetTagName();
+    return tag == "input" || tag == "textarea";
 }
 
 void RmlUiRuntime::ProcessTextEditing(const SDL_Event& event)
