@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Platform/ErrorDialog.h"
+#include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include <setjmp.h>
 #include <array>
@@ -288,17 +290,15 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 }
 void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
-    if (bForceDestroy)
+    PopUpErrorCheckMsgBox("Error", Core::Text::ToUtf8(szErrorMsg), !bForceDestroy);
+}
+
+void PopUpErrorCheckMsgBox(const std::string& title, const std::string& message, bool canContinue)
+{
+    using Core::Platform::ErrorDialog::Choice;
+    if (Core::Platform::ErrorDialog::Show(title, message, canContinue) == Choice::Continue)
     {
-        MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_OK | MB_ICONERROR);
-    }
-    else
-    {
-        int iResult = MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
-        if (IDYES == iResult)
-        {
-            return;
-        }
+        return;
     }
 
     if (SocketClient != nullptr)

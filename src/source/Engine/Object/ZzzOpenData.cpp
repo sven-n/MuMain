@@ -33,6 +33,7 @@
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/SocketSystem.h"
 
@@ -369,7 +370,7 @@ static void StopOnItemDataError(const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
     g_ErrorReport.Write(L"%ls\r\n", message.c_str());
-    MessageBox(g_hWnd, message.c_str(), L"Item data error", MB_OK);
+    Core::Platform::ErrorDialog::Show("Item data error", errorMessage, false);
     SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 }
 
@@ -3885,12 +3886,32 @@ void ReleaseCharacterSceneData()
 }
 
 // Item data errors stop the start: the game must not run with half-loaded items.
-static void OpenItemData()
+static bool OpenItemData()
 {
     std::string errorMessage;
     if (!g_ItemDataHandler.Load(errorMessage))
     {
         StopOnItemDataError(errorMessage);
+        return false;
+    }
+    return true;
+}
+
+// Loads the item data, then shows the problems of the item models, which name
+// the items. After an item data error the game stops; the model problems are
+// only in the log then.
+static void OpenItemDataAndShowModelProblems()
+{
+    if (!OpenItemData())
+    {
+        return;
+    }
+
+    const std::string problems = Data::Items::ModelLoader::TakeProblemMessage();
+    if (!problems.empty())
+    {
+        PopUpErrorCheckMsgBox("Item model error",
+                              problems + "\n\nContinue: keep loading, these items are drawn incompletely.");
     }
 }
 
@@ -4358,7 +4379,7 @@ void OpenBasicData(HDC hDC)
     // GameLogic::Quests::Dialog::GetEntry, so there is nothing to load at
     // runtime any more.
 
-    OpenItemData();
+    OpenItemDataAndShowModelProblems();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);

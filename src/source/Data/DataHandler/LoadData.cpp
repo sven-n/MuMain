@@ -9,6 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 
 #include <string>
 
@@ -42,7 +43,7 @@ std::wstring GetModelFileName(const wchar_t* FileName, int i)
 }
 } // namespace
 
-void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i)
+bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i)
 {
     const std::wstring Name = GetModelFileName(FileName, i);
 
@@ -51,6 +52,8 @@ void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
     Models[Type].m_iBMDSeqID = Type;
 
     Success = Models[Type].Open2(Dir, Name.c_str());
+    // Only a file that was opened is the model of the slot now.
+    RememberModelFile(Type, Success ? std::wstring(Dir) + Name : std::wstring());
 
     if (Success == false)
     {
@@ -63,6 +66,29 @@ void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }
     }
+    return Success;
+}
+
+void CLoadData::RememberModelFile(int Model, const std::wstring& path)
+{
+    if (Model < 0)
+    {
+        return;
+    }
+    if (static_cast<size_t>(Model) >= m_modelFiles.size())
+    {
+        m_modelFiles.resize(static_cast<size_t>(Model) + 1);
+    }
+    m_modelFiles[Model] = path;
+}
+
+std::wstring CLoadData::GetModelFile(int Model) const
+{
+    if (Model >= 0 && static_cast<size_t>(Model) < m_modelFiles.size() && !m_modelFiles[Model].empty())
+    {
+        return m_modelFiles[Model];
+    }
+    return Core::Text::FromUtf8(Models[Model].Name);
 }
 
 namespace
@@ -72,11 +98,6 @@ constexpr const wchar_t* TextureRootFolder = L"Data\\";
 std::wstring GetTexturePath(const std::wstring& subFolder, const std::wstring& textureFileName)
 {
     return TextureRootFolder + subFolder + textureFileName;
-}
-
-bool IsHiddenTexture(const char* fileName)
-{
-    return fileName[0] == 'h' && fileName[1] == 'i' && fileName[2] == 'd';
 }
 
 // Loads the texture from the first folder that has it. Only .tga and .jpg
@@ -124,6 +145,18 @@ void MarkSkinAndHair(const char* fileName, const std::wstring& textureFileName, 
     }
 }
 
+// A texture that no folder has may already be loaded from another folder,
+// e.g. by another model; that one is used.
+BITMAP_t* UseLoadedTexture(const std::wstring& textureFileName)
+{
+    BITMAP_t* pBitmap = Bitmaps.FindTextureByName(textureFileName);
+    if (pBitmap)
+    {
+        Bitmaps.LoadImage(pBitmap->BitmapIndex, pBitmap->FileName);
+    }
+    return pBitmap;
+}
+
 // "Data\Item\x.jpg", and the other folders that were searched:
 // "Data\Item\x.jpg (also searched Data\Player\)".
 std::wstring DescribeSearchedPaths(std::span<const std::wstring> subFolders, const std::wstring& textureFileName)
@@ -136,36 +169,39 @@ std::wstring DescribeSearchedPaths(std::span<const std::wstring> subFolders, con
     return subFolders.size() > 1 ? text + L")" : text;
 }
 
-// A texture that no folder has may already be loaded from another folder,
-// e.g. by another model; that one is used. Otherwise the error is shown.
-GLuint UseLoadedTextureOrReportError(int model, const std::wstring& textureFileName,
-                                     std::span<const std::wstring> subFolders)
+void ShowMissingTexture(const std::wstring& modelFile, int model, std::span<const std::wstring> subFolders,
+                        const std::wstring& textureFileName)
 {
-    if (auto pBitmap = Bitmaps.FindTextureByName(textureFileName))
-    {
-        Bitmaps.LoadImage(pBitmap->BitmapIndex, pBitmap->FileName);
-        return pBitmap->BitmapIndex;
-    }
-
-    const std::wstring message = L"OpenTexture Failed: " + DescribeSearchedPaths(subFolders, textureFileName) +
-                                 L" of " + Core::Text::FromUtf8(Models[model].Name);
+    const std::wstring message =
+        L"OpenTexture Failed: " + DescribeSearchedPaths(subFolders, textureFileName) + L" of " + modelFile;
     g_ErrorReport.Write(L"%ls (Model=%d)\r\n", message.c_str(), model);
 #ifdef FOR_WORK
     PopUpErrorCheckMsgBox(message.c_str());
 #else  // FOR_WORK
     PopUpErrorCheckMsgBox(message.c_str(), true);
 #endif // FOR_WORK
-    return BITMAP_UNKNOWN;
 }
 } // namespace
 
 void CLoadData::OpenTexture(int Model, const wchar_t* SubFolder, int Wrap, int Type, bool Check)
 {
     const std::wstring subFolder = SubFolder;
-    OpenTexture(Model, std::span<const std::wstring>(&subFolder, 1), Wrap, Type);
+    OpenModelTextures(Model, std::span<const std::wstring>(&subFolder, 1), Wrap, Type, nullptr);
 }
 
 void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders, int Wrap, int Type)
+{
+    OpenModelTextures(Model, SubFolders, Wrap, Type, nullptr);
+}
+
+void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders, std::vector<TextureProblem>& Problems,
+                            int Wrap, int Type)
+{
+    OpenModelTextures(Model, SubFolders, Wrap, Type, &Problems);
+}
+
+void CLoadData::OpenModelTextures(int Model, std::span<const std::wstring> SubFolders, int Wrap, int Type,
+                                  std::vector<TextureProblem>* Problems)
 {
     if (SubFolders.empty())
     {
@@ -179,7 +215,15 @@ void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders,
         const std::wstring textureFileName = Core::Text::FromUtf8(fileName);
         GLuint& textureIndex = pModel->IndexTexture[i];
 
-        if (IsHiddenTexture(fileName))
+        const bool hidden = Data::Items::IsHiddenTexture(fileName);
+        // Other types keep the texture they have; item models report them.
+        if (Problems != nullptr && !hidden && !Data::Items::GetStoredTextureFileName(fileName))
+        {
+            Problems->push_back({i, textureFileName, L"", true});
+            continue;
+        }
+
+        if (hidden)
         {
             textureIndex = BITMAP_HIDE;
         }
@@ -190,9 +234,20 @@ void CLoadData::OpenTexture(int Model, std::span<const std::wstring> SubFolders,
 
         MarkSkinAndHair(fileName, textureFileName, textureIndex);
 
-        if (textureIndex == BITMAP_UNKNOWN)
+        if (textureIndex != BITMAP_UNKNOWN)
         {
-            textureIndex = UseLoadedTextureOrReportError(Model, textureFileName, SubFolders);
+            continue;
+        }
+
+        const BITMAP_t* loaded = UseLoadedTexture(textureFileName);
+        textureIndex = loaded != nullptr ? loaded->BitmapIndex : BITMAP_UNKNOWN;
+        if (Problems != nullptr)
+        {
+            Problems->push_back({i, textureFileName, loaded != nullptr ? loaded->FileName : L""});
+        }
+        else if (loaded == nullptr)
+        {
+            ShowMissingTexture(GetModelFile(Model), Model, SubFolders, textureFileName);
         }
     }
 }
