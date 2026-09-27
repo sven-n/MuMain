@@ -6,6 +6,7 @@
 
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/Renderer/MuRenderer.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -42,6 +43,12 @@ namespace
             UI::Scaling::ViewportFitScale(windowWidth, windowHeight, UI::Scaling::MaximumPanelScale);
         context->SetDensityIndependentPixelRatio((static_cast<float>(percent) / 100.0f) * autoFit);
         UI::RmlBridge::ApplyNativeTextSize(context);
+    }
+
+    bool IsTextEntry(const Rml::Element* element)
+    {
+        const Rml::String& tag = element->GetTagName();
+        return tag == "input" || tag == "textarea";
     }
 }
 
@@ -199,7 +206,36 @@ void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
     FRAME_PROFILE(RmlUiUpdate);
+    ReleaseStrandedFieldFocus();
     m_Context->Update();
+}
+
+void RmlUiRuntime::ReleaseStrandedFieldFocus()
+{
+    // Every document remembers the element it last had focused, and keeps remembering it after
+    // the focus moves to another document. ElementDocument::Hide() then hands the focus back to the
+    // most recently focused document's remembered element (Context::UnfocusDocument) -- which, if
+    // that was a text field, silently re-activates typing into it and suspends every hotkey
+    // (CManager::UpdateKeyEvent). Hiding ANY document does this, not just the focused one.
+    //
+    // Blur() on an element that isn't the focus only unlinks it from its parent, so the document
+    // falls back to remembering that parent instead.
+    Rml::Element* focused = m_Context->GetFocusElement();
+
+    // Nothing takes typing the player can't see.
+    if (focused != nullptr && IsTextEntry(focused) && !focused->IsVisible(true))
+    {
+        focused->Blur();
+        focused = m_Context->GetFocusElement();
+    }
+
+    for (int i = 0; i < m_Context->GetNumDocuments(); ++i)
+    {
+        Rml::ElementDocument* document = m_Context->GetDocument(i);
+        Rml::Element* remembered = document->GetFocusLeafNode();
+        if (remembered != focused && remembered != document && IsTextEntry(remembered))
+            remembered->Blur();
+    }
 }
 
 bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
@@ -215,8 +251,15 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
     // RmlUi elements) passes through this function. Still reuses RmlSDL::ConvertMouseButton/
     // GetKeyModifierState (pure, side-effect-free helpers) for the actual button index/modifier
     // mapping.
+    // A press or a Tab can move the focus between documents; unlink the field it leaves at once,
+    // before this frame's game update can hide a document (ReleaseStrandedFieldFocus()).
     if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
-        return m_Context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+    {
+        const bool propagates =
+            m_Context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+        ReleaseStrandedFieldFocus();
+        return propagates;
+    }
     if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
         return m_Context->ProcessMouseButtonUp(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
 
@@ -230,7 +273,10 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
     if (event.type == SDL_EVENT_MOUSE_MOTION)
         return m_Context->ProcessMouseMove(static_cast<int>(event.motion.x), static_cast<int>(event.motion.y), RmlSDL::GetKeyModifierState());
 
-    return RmlSDL::InputEventHandler(m_Context, window, event);
+    const bool propagates = RmlSDL::InputEventHandler(m_Context, window, event);
+    if (event.type == SDL_EVENT_KEY_DOWN)
+        ReleaseStrandedFieldFocus();
+    return propagates;
 }
 
 void RmlUiRuntime::CancelSyntheticMousePress(unsigned char button, SDL_Window* window)

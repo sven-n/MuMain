@@ -445,6 +445,18 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   other code path that unloads a document while a field may be focused needs the same blur** — the
   runtime check is the net, not the fix.
 
+- **Hiding any document can hand the keyboard back to a field the player left.** Every element
+  keeps a `focus` pointer to the child it last focused, and a focus move to another document never
+  clears the old document's chain. `ElementDocument::Hide()` calls `Context::UnfocusDocument()`,
+  which focuses `document_focus_history.back()->GetFocusLeafNode()` whether or not the hidden
+  document had the focus. So: type in a field, click another window, and the next hide anywhere
+  (a tooltip is enough) re-focuses that field and activates typing. A document that is itself
+  becoming invisible is safe, because an element that turns invisible calls `Blur()` on itself.
+  `RmlUiRuntime::ReleaseStrandedFieldFocus()` unlinks any remembered `input`/`textarea` that isn't the
+  live focus, after every mouse press and key press and once per frame, and releases a focused field
+  that is no longer visible. `Blur()` on an element that isn't the focus only clears its parent's
+  pointer, so the document then remembers the parent.
+
 ## `CObject`/`CManager`/`LayoutMode` gotchas
 
 Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but

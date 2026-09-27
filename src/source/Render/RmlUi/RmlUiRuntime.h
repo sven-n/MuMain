@@ -137,6 +137,10 @@ private:
     RmlUiRuntime() = default;
     ~RmlUiRuntime();
 
+    // Unlinks text fields that documents still remember as focused after the focus moved on, so
+    // ElementDocument::Hide() can't hand the keyboard back to one. See the .cpp.
+    void ReleaseStrandedFieldFocus();
+
     RmlUiRuntime(const RmlUiRuntime&) = delete;
     RmlUiRuntime& operator=(const RmlUiRuntime&) = delete;
 
