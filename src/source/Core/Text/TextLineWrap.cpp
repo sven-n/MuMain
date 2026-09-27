@@ -1,6 +1,7 @@
 #include "TextLineWrap.h"
 
 #include <string>
+#include <utility>
 #include <cwchar>
 #include <cstring>
 #include "Core/Platform/SecureCrt.h"  // wcsncpy_s / _TRUNCATE on non-Windows (#462)
@@ -173,6 +174,80 @@ std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth
         lines.push_back(line);
     }
 
+    return lines;
+}
+
+namespace
+{
+std::vector<std::wstring> SplitParagraphs(const std::wstring& text, wchar_t separator)
+{
+    std::vector<std::wstring> paragraphs;
+    size_t start = 0;
+    while (start <= text.size())
+    {
+        size_t end = text.find(separator, start);
+        if (end == std::wstring::npos)
+        {
+            end = text.size();
+        }
+        if (end > start)
+        {
+            paragraphs.push_back(text.substr(start, end - start));
+        }
+        start = end + 1;
+    }
+    return paragraphs;
+}
+
+void IndentFirstLineIfItFits(std::vector<std::wstring>& lines, int maxWidth, const MeasureTextWidth& measureWidth)
+{
+    if (lines.empty())
+    {
+        return;
+    }
+    const std::wstring indented = L" " + lines.front();
+    if (measureWidth(indented.c_str(), indented.size()) <= maxWidth)
+    {
+        lines.front() = indented;
+    }
+}
+
+void AppendSplitByLength(std::vector<std::wstring>& lines, std::wstring line, size_t maxCharactersPerLine)
+{
+    while (line.size() > maxCharactersPerLine)
+    {
+        lines.push_back(line.substr(0, maxCharactersPerLine));
+        line.erase(0, maxCharactersPerLine);
+    }
+    if (!line.empty())
+    {
+        lines.push_back(line);
+    }
+}
+} // namespace
+
+std::vector<std::wstring> WrapParagraphsToWidth(const std::wstring& text, wchar_t paragraphSeparator, int maxWidth,
+                                                size_t maxCharactersPerLine, bool indentParagraphs,
+                                                const MeasureTextWidth& measureWidth)
+{
+    std::vector<std::wstring> lines;
+    if (maxCharactersPerLine == 0)
+    {
+        return lines;
+    }
+
+    for (const std::wstring& paragraph : SplitParagraphs(text, paragraphSeparator))
+    {
+        std::vector<std::wstring> wrapped = WrapTextToWidth(paragraph, maxWidth, measureWidth);
+        if (indentParagraphs)
+        {
+            IndentFirstLineIfItFits(wrapped, maxWidth, measureWidth);
+        }
+        for (std::wstring& line : wrapped)
+        {
+            AppendSplitByLength(lines, std::move(line), maxCharactersPerLine);
+        }
+    }
     return lines;
 }
 

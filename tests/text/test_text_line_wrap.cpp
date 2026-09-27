@@ -260,3 +260,48 @@ TEST_CASE("wrap to width: an own line break starts a new line")
     CHECK(lines[0] == L"first");
     CHECK(lines[1] == L"second");
 }
+
+TEST_CASE("wrap paragraphs: each paragraph starts a new line, empty ones are skipped")
+{
+    const auto lines = WrapParagraphsToWidth(L"first;;second;", L';', 32, 63, false, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0] == L"first");
+    CHECK(lines[1] == L"second");
+}
+
+TEST_CASE("wrap paragraphs: CJK text without spaces is broken, not dropped")
+{
+    // The old CutStr-based wrapping only broke at spaces and lost such a paragraph completely.
+    const auto lines = WrapParagraphsToWidth(L"你好世界你好", L';', 4, 63, true, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0] == L"你好世界");
+    CHECK(lines[1] == L"你好");
+}
+
+TEST_CASE("wrap paragraphs: the indent is only added where the first line still fits")
+{
+    const auto indented = WrapParagraphsToWidth(L"abc;defg", L';', 4, 63, true, OneUnitPerCharacter());
+
+    REQUIRE(indented.size() == 2);
+    CHECK(indented[0] == L" abc");
+    CHECK(indented[1] == L"defg");
+}
+
+TEST_CASE("wrap paragraphs: lines longer than the row size are split")
+{
+    const auto lines = WrapParagraphsToWidth(L"abcdefg", L';', 100, 3, false, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0] == L"abc");
+    CHECK(lines[1] == L"def");
+    CHECK(lines[2] == L"g");
+}
+
+TEST_CASE("wrap paragraphs: guards return no lines")
+{
+    CHECK(WrapParagraphsToWidth(L"text", L';', 10, 0, false, OneUnitPerCharacter()).empty());
+    CHECK(WrapParagraphsToWidth(L"", L';', 10, 63, true, OneUnitPerCharacter()).empty());
+    CHECK(WrapParagraphsToWidth(L";;", L';', 10, 63, true, OneUnitPerCharacter()).empty());
+}
