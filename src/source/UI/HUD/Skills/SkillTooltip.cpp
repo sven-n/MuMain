@@ -83,13 +83,14 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
 
 float NativeBoxBottomBelowAnchor(const Model& model)
 {
-    if (model.count <= 0) return 0.f;
+    if (model.count <= 0)
+        return 0.f;
 
     // The raise, as Render() computes it from the first line's font.
     g_pRenderText->SetFont(model.lines[0].isBold ? g_hFontBold : g_hFont);
     const float lineHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
-    const float raise = static_cast<float>(model.count - model.skipCount) * lineHeight
-                        + static_cast<float>(model.skipCount) * lineHeight / 2.f;
+    const float raise = static_cast<float>(model.count - model.skipCount) * lineHeight +
+                        static_cast<float>(model.skipCount) * lineHeight / 2.f;
 
     // The box, as RenderTipTextList() measures it: it stops at the first empty line.
     float box = 0.f;
