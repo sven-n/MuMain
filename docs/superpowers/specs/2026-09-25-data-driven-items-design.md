@@ -704,7 +704,25 @@ server with original clients (after phases 6 and B).
 
     Questions for then: the exact new groups and which items move; whether
     the legacy id lives only in OpenMU or also in the client data; the
-    protocol change for the new item encoding.
+    protocol change for the new item encoding; and which level variants
+    become items of their own. They are of three kinds:
+    - **Different items** under one id: Box of Luck +1–7 and +13–15 (Star
+      of Sacred Birth, Firecracker, …, Heart of Dark Lord, the Lucky
+      Pouches), Rena +1–3, Loch's Feather +1, Ale +1, Wizard's Ring +1–3,
+      the chocolate boxes +1. Own names, models and uses: split.
+    - **Tiers of one item**: Devil's Eye, Key and Invitation +1–7 (the
+      square), Box of Kundun +1–5 (Box of Luck +8–12), the Blood Castle
+      items +1–8. The level is a real attribute that the server uses (event
+      entry, mixes such as Eye +N and Key +N into Invitation +N); splitting
+      them would multiply items and mix rules. Proposal: keep them as one
+      item each, with per-level values where their look changes (like the
+      glow `level` list). Box of Kundun becomes an item of its own whose
+      levels are the tiers; its legacy id maps with an offset (Box of Luck
+      +8–12 ↔ Box of Kundun +1–5).
+    - **Kinds of one item**: the fruits (+0–4 = energy, stamina, agility,
+      strength, command), the Orb of Summoning (which summon) and the
+      Transformation Ring (which monster). The level chooses a kind, not a
+      tier; to decide then.
 13. **Cleanup**, once the work has landed:
     - The glow of the inventory model of the Phoenix Soul Armor
       (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
