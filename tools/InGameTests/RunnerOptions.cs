@@ -4,7 +4,7 @@ namespace MuMain.Tools.InGameTests;
 internal sealed class RunnerOptions
 {
     public const string Usage = """
-        usage: InGameTests --client <path to Main> [--server <host:port>] [--fresh-server] [--scenario <name>]... [--out <folder>] [-t <ms>]
+        usage: InGameTests --client <path to Main> [--server <host:port>] [--fresh-server] [--scenario <name>]... [--out <folder>] [-t <ms>] [-q <1-100>]
                InGameTests --gui [--client <path to Main>] [--server <host:port>] [--fresh-server] [--out <folder>]
                InGameTests --list
 
@@ -15,6 +15,7 @@ internal sealed class RunnerOptions
           --out           where the report goes (one HTML file per run), default in-game-test-results
                           (next to the tester when it sits next to Main)
           -t              pause this many milliseconds after every action, to watch a scenario, default 0
+          -q              JPEG quality of the step screenshots, 1 to 100, default 70; lower makes the report smaller
           --gui           open the window to choose and run scenarios; also without any option
           --list          list the scenarios
         """;
@@ -43,6 +44,11 @@ internal sealed class RunnerOptions
     public bool Gui { get; private set; }
 
     public TimeSpan StepDelay { get; private set; } = TimeSpan.Zero;
+
+    public int ScreenshotQuality { get; private set; } = Clients.ClientOptions.DefaultScreenshotQuality;
+
+    /// <summary>Whether -q was given, so the window can prefer it over its saved value.</summary>
+    public bool ScreenshotQualityGiven { get; private set; }
 
     /// <summary>Parses <paramref name="args"/>; null with <paramref name="error"/> when they are not usable.</summary>
     public static RunnerOptions? Parse(string[] args, out string error)
@@ -82,6 +88,15 @@ internal sealed class RunnerOptions
                     }
 
                     options.StepDelay = TimeSpan.FromMilliseconds(milliseconds);
+                    break;
+                case "-q" when value is not null:
+                    if (!int.TryParse(value, out var quality) || quality is < 1 or > 100)
+                    {
+                        error = $"-q takes a JPEG quality from 1 to 100, not '{value}'";
+                        return null;
+                    }
+
+                    (options.ScreenshotQuality, options.ScreenshotQualityGiven) = (quality, true);
                     break;
                 case "--server" when value is not null:
                     if (!TryParseServer(value, out var host, out var port))

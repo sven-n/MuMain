@@ -864,6 +864,8 @@ if (DOTNET_EXECUTABLE)
       "In-game test scenarios the InGameTests target runs, e.g. trade;icarus-flying-item-take-off; empty runs all")
     set(MU_IN_GAME_TEST_STEP_DELAY "0" CACHE STRING
       "Milliseconds the InGameTests target pauses after every client action, to watch a run; 0 runs at full speed")
+    set(MU_IN_GAME_TEST_JPEG_QUALITY "70" CACHE STRING
+      "JPEG quality (1 to 100) of the InGameTests target's step screenshots; lower makes the report smaller")
 
     set(IN_GAME_TESTS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests")
     # Next to Main, which lands in the default runtime folder (next to Main.app
@@ -922,7 +924,7 @@ if (DOTNET_EXECUTABLE)
     if (MU_IN_GAME_TEST_FRESH_SERVER)
       list(APPEND IN_GAME_TESTS_SERVER_ARGS --fresh-server)
     endif()
-    set(IN_GAME_TESTS_ARGS -t "${MU_IN_GAME_TEST_STEP_DELAY}" ${IN_GAME_TESTS_SERVER_ARGS})
+    set(IN_GAME_TESTS_ARGS -t "${MU_IN_GAME_TEST_STEP_DELAY}" -q "${MU_IN_GAME_TEST_JPEG_QUALITY}" ${IN_GAME_TESTS_SERVER_ARGS})
     foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
       list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
     endforeach()

@@ -14,4 +14,10 @@ internal sealed record ClientOptions(string ExecutablePath, string ServerHost, i
     /// person watching can follow the scenario; zero runs at full speed.
     /// </summary>
     public TimeSpan StepDelay { get; init; } = TimeSpan.Zero;
+
+    /// <summary>JPEG quality of the step screenshots, 1 to 100: lower makes the report smaller.</summary>
+    public int ScreenshotQuality { get; init; } = DefaultScreenshotQuality;
+
+    /// <summary>Small enough to embed a picture per step and client, still easy to read.</summary>
+    public const int DefaultScreenshotQuality = 70;
 }

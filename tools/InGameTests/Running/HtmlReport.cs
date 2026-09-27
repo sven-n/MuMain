@@ -30,7 +30,7 @@ internal static class HtmlReport
         tr.category th .muted { font-weight:400; margin-left:6px; }
         table.overview { table-layout:fixed; }
         table.overview col.result { width:110px; } table.overview col.steps { width:70px; }
-        table.overview col.duration { width:100px; } table.overview col.pause { width:150px; }
+        table.overview col.duration { width:100px; } table.overview col.pause { width:150px; } table.overview col.quality { width:150px; }
         tr.category th::before { content:"▾ "; color:var(--muted); }
         tbody.collapsed tr.category th::before { content:"▸ "; }
         tbody.collapsed tr:not(.category) { display:none; }
@@ -110,10 +110,10 @@ internal static class HtmlReport
             .Append(run.Options.FreshServer ? Encode(" (fresh test data)") : string.Empty)
             .Append("<br>").Append(Encode($"client {run.Options.ClientPath}")).Append("</p>");
 
-        html.Append("<section class=\"card\"><table class=\"overview\"><colgroup><col><col class=\"result\"><col class=\"steps\"><col class=\"duration\"><col class=\"pause\"></colgroup><thead><tr><th>Scenario</th><th>Result</th><th>Steps</th><th>Duration</th><th>Pause per action</th></tr></thead>");
+        html.Append("<section class=\"card\"><table class=\"overview\"><colgroup><col><col class=\"result\"><col class=\"steps\"><col class=\"duration\"><col class=\"pause\"><col class=\"quality\"></colgroup><thead><tr><th>Scenario</th><th>Result</th><th>Steps</th><th>Duration</th><th>Pause per action</th><th>Screenshot quality</th></tr></thead>");
         foreach (var group in Categories(run))
         {
-            html.Append("<tbody class=\"group\"><tr class=\"category\"><th colspan=\"5\"><span class=\"category-title\">")
+            html.Append("<tbody class=\"group\"><tr class=\"category\"><th colspan=\"6\"><span class=\"category-title\">")
                 .Append(Encode(group.Key.DisplayName())).Append("</span> <span class=\"muted\">").Append(Encode(CategorySummary(group)))
                 .Append("</span></th></tr>");
             foreach (var scenario in group)
@@ -123,7 +123,8 @@ internal static class HtmlReport
                     .Append(Encode(scenario.Description)).Append("</span></td><td>").Append(Badge(scenario.Status)).Append("</td><td>")
                     .Append(ran ? scenario.Steps.Count.ToString() : "–").Append("</td><td>")
                     .Append(ran ? Seconds(scenario.Duration) : "–").Append("</td><td>")
-                    .Append(ran ? $"{scenario.StepDelay.TotalMilliseconds} ms" : "–").Append("</td></tr>");
+                    .Append(ran ? $"{scenario.StepDelay.TotalMilliseconds} ms" : "–").Append("</td><td>")
+                    .Append(ran ? $"{scenario.ScreenshotQuality} %" : "–").Append("</td></tr>");
             }
 
             html.Append("</tbody>");

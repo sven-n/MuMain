@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -42,6 +43,7 @@ internal sealed partial class MainWindow : Window
             {
                 row.IsChecked = saved.Checked;
                 row.DelayText = saved.Delay ?? string.Empty;
+                row.QualityText = saved.Quality ?? string.Empty;
             }
 
             row.PropertyChanged += this.OnRowChanged;
@@ -65,6 +67,10 @@ internal sealed partial class MainWindow : Window
         this.DefaultDelayBox.Text = startOptions.StepDelay > TimeSpan.Zero
             ? ((int)startOptions.StepDelay.TotalMilliseconds).ToString()
             : this.settings.StepDelayMilliseconds.ToString();
+
+        this.DefaultQualityBox.Text = startOptions.ScreenshotQualityGiven
+            ? startOptions.ScreenshotQuality.ToString(CultureInfo.InvariantCulture)
+            : this.settings.ScreenshotQuality.ToString(CultureInfo.InvariantCulture);
 
         this.BrowseButton.Click += this.OnBrowse;
         this.CheckAllButton.Click += this.OnCheckAll;
@@ -192,6 +198,11 @@ internal sealed partial class MainWindow : Window
             return this.Refuse("The wait after each action is a number of milliseconds, 0 or more.");
         }
 
+        if (!TryParseQuality(this.DefaultQualityBox.Text, out var defaultQuality) || defaultQuality is null)
+        {
+            return this.Refuse("The screenshot quality is a JPEG quality from 1 to 100.");
+        }
+
         var selections = new List<ScenarioSelection>();
         foreach (var row in this.rows.Where(row => row.IsChecked))
         {
@@ -200,7 +211,15 @@ internal sealed partial class MainWindow : Window
                 return this.Refuse($"The wait of '{row.Name}' is a number of milliseconds, or empty for the value above.");
             }
 
-            selections.Add(new ScenarioSelection(row.Scenario, TimeSpan.FromMilliseconds(delay ?? defaultDelay.Value)));
+            if (!TryParseQuality(row.QualityText, out var quality))
+            {
+                return this.Refuse($"The quality of '{row.Name}' is a JPEG quality from 1 to 100, or empty for the value above.");
+            }
+
+            selections.Add(new ScenarioSelection(
+                row.Scenario,
+                TimeSpan.FromMilliseconds(delay ?? defaultDelay.Value),
+                quality ?? defaultQuality.Value));
         }
 
         if (selections.Count == 0)
@@ -236,6 +255,24 @@ internal sealed partial class MainWindow : Window
         return true;
     }
 
+    // Empty is no value; otherwise a whole number from 1 to 100.
+    private static bool TryParseQuality(string? text, out int? quality)
+    {
+        quality = null;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return true;
+        }
+
+        if (!int.TryParse(text.Trim(), out var value) || value is < 1 or > 100)
+        {
+            return false;
+        }
+
+        quality = value;
+        return true;
+    }
+
     private TestRunOptions? Refuse(string message)
     {
         this.RunStatusText.Text = message;
@@ -248,10 +285,13 @@ internal sealed partial class MainWindow : Window
         this.settings.Server = this.ServerBox.Text?.Trim();
         this.settings.FreshServer = this.FreshServerBox.IsChecked == true;
         this.settings.StepDelayMilliseconds = TryParseDelay(this.DefaultDelayBox.Text, out var delay) ? delay ?? 0 : 0;
+        this.settings.ScreenshotQuality = TryParseQuality(this.DefaultQualityBox.Text, out var quality) && quality is { } value
+            ? value
+            : Clients.ClientOptions.DefaultScreenshotQuality;
         this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
         this.settings.Scenarios = this.rows.ToDictionary(
             row => row.Name,
-            row => new GuiSettings.ScenarioSettings { Checked = row.IsChecked, Delay = row.DelayText });
+            row => new GuiSettings.ScenarioSettings { Checked = row.IsChecked, Delay = row.DelayText, Quality = row.QualityText });
         this.settings.Save();
     }
 

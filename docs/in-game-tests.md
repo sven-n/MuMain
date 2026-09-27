@@ -112,8 +112,11 @@ The window lists every scenario with a checkbox, grouped by category in boxes
 that fold in and out (it remembers which are folded in); **Check all** toggles
 them all. It has a **Wait after each action** field: the milliseconds each
 client pauses after every click, key, walk or warp, so a person can follow what happens;
-`1000` is easy to watch, `0` runs at full speed. A scenario row can have its
-own wait, which then wins over the field. **Run and write report** runs the
+`1000` is easy to watch, `0` runs at full speed. The **Screenshot quality**
+field sets the JPEG quality of the step screenshots (1 to 100, default 70):
+lower makes the report smaller, e.g. 40 takes a run of both scenarios from
+about 8 MB to about 5 MB. A scenario row can have its own wait and its own
+quality, which then win over the fields. **Run and write report** runs the
 checked scenarios one after the other, shows each one's current step, and
 **Open report** opens the report of the run. The window remembers its
 settings between runs.
@@ -158,6 +161,7 @@ or in CLion's CMake options:
 |---|---|
 | `MU_IN_GAME_TEST_SCENARIOS` | the scenarios to run, e.g. `trade` or `trade;icarus-flying-item-take-off`; empty runs all |
 | `MU_IN_GAME_TEST_STEP_DELAY` | milliseconds to pause after every client action, e.g. `1000` to watch a run; default `0` |
+| `MU_IN_GAME_TEST_JPEG_QUALITY` | JPEG quality of the step screenshots, 1 to 100; default `70`; lower makes the report smaller |
 | `MU_IN_GAME_TEST_SERVER` | the game server the clients log in to, `host:port`; default `127.0.0.1:56901`, the test server |
 | `MU_IN_GAME_TEST_FRESH_SERVER` | recreate the test server before every run; default `ON`; turn it off for another server |
 
@@ -185,6 +189,7 @@ followed by the options runs it too; it then needs `--client`.
 | `--scenario` | run only this scenario; repeat it for several; default all |
 | `--out` | where the reports go; default `in-game-test-results`, next to the tester when it sits next to `Main` |
 | `-t` | milliseconds to pause after every client action, so a person can follow; default `0` |
+| `-q` | JPEG quality of the step screenshots, 1 to 100; default `70`; lower makes the report smaller |
 | `--gui` | open the window; also without any option |
 | `--list` | list the scenarios |
 

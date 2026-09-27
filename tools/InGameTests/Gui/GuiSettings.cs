@@ -18,6 +18,8 @@ internal sealed class GuiSettings
 
     public int StepDelayMilliseconds { get; set; }
 
+    public int ScreenshotQuality { get; set; } = Clients.ClientOptions.DefaultScreenshotQuality;
+
     public Dictionary<string, ScenarioSettings> Scenarios { get; set; } = [];
 
     /// <summary>The categories folded in in the list, by name.</summary>
@@ -58,5 +60,7 @@ internal sealed class GuiSettings
         public bool Checked { get; set; } = true;
 
         public string? Delay { get; set; }
+
+        public string? Quality { get; set; }
     }
 }

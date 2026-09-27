@@ -4,8 +4,8 @@ using MuMain.Tools.InGameTests.Scenarios;
 
 namespace MuMain.Tools.InGameTests.Running;
 
-/// <summary>A scenario to run, and the pause after each of its client actions.</summary>
-internal sealed record ScenarioSelection(Scenario Scenario, TimeSpan StepDelay);
+/// <summary>A scenario to run, the pause after each of its client actions, and its screenshots' JPEG quality.</summary>
+internal sealed record ScenarioSelection(Scenario Scenario, TimeSpan StepDelay, int ScreenshotQuality = ClientOptions.DefaultScreenshotQuality);
 
 /// <summary>
 /// What a run does: which client, which server, which scenarios, where the results go.
@@ -103,6 +103,7 @@ internal static class TestRun
             var clientOptions = new ClientOptions(options.ClientPath, options.ServerHost, options.ServerPort)
             {
                 StepDelay = selection.StepDelay,
+                ScreenshotQuality = selection.ScreenshotQuality,
             };
             var runner = new ScenarioRunner(
                 clientOptions,

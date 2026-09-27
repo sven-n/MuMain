@@ -14,12 +14,10 @@ internal sealed class ScenarioContext(
     IReadOnlyDictionary<string, GameClient> clients,
     string folder,
     TextWriter log,
+    int screenshotQuality,
     Action<int, string>? stepStarted,
     Action<StepResult>? stepFinished)
 {
-    // Small enough to embed a picture per step and client in the report.
-    private const int ScreenshotQuality = 70;
-
     private readonly List<StepResult> steps = [];
 
     /// <summary>The steps so far, the last one possibly failed.</summary>
@@ -82,7 +80,7 @@ internal sealed class ScenarioContext(
             var path = Path.GetFullPath(Path.Combine(folder, $"step-{number:00}-{role}.jpg"));
             try
             {
-                await client.ScreenshotAsync(path, ScreenshotQuality);
+                await client.ScreenshotAsync(path, screenshotQuality);
                 screenshots.Add(new StepScreenshot(role, path));
             }
             catch (Exception exception) when (exception is ControlException or TimeoutException or IOException)

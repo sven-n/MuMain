@@ -74,7 +74,7 @@ internal static class Program
             options.ServerPort,
             options.FreshServer,
             options.OutputFolder,
-            [.. selected.Select(scenario => new ScenarioSelection(scenario, options.StepDelay))],
+            [.. selected.Select(scenario => new ScenarioSelection(scenario, options.StepDelay, options.ScreenshotQuality))],
             AllScenarios);
         try
         {

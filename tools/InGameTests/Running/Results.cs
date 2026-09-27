@@ -39,7 +39,8 @@ internal sealed record ScenarioResult(
     string? Failure,
     IReadOnlyList<StepResult> Steps,
     string? SkipReason = null,
-    IReadOnlyList<ClientDetails>? FailureDetails = null)
+    IReadOnlyList<ClientDetails>? FailureDetails = null,
+    int ScreenshotQuality = 0)
 {
     public bool Passed => this.Status == ScenarioStatus.Passed;
 

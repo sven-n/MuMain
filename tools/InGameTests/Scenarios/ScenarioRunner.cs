@@ -25,7 +25,7 @@ internal sealed class ScenarioRunner(
         Directory.CreateDirectory(folder);
         var stopwatch = Stopwatch.StartNew();
         var clients = new Dictionary<string, GameClient>();
-        var context = new ScenarioContext(clients, folder, log, stepStarted, stepFinished);
+        var context = new ScenarioContext(clients, folder, log, clientOptions.ScreenshotQuality, stepStarted, stepFinished);
         try
         {
             foreach (var role in scenario.Roles)
@@ -67,7 +67,8 @@ internal sealed class ScenarioRunner(
             duration,
             clientOptions.StepDelay,
             failure,
-            [.. context.Steps]);
+            [.. context.Steps],
+            ScreenshotQuality: clientOptions.ScreenshotQuality);
 
     private async Task<IReadOnlyList<ClientDetails>> FailureDetailsAsync(IReadOnlyDictionary<string, GameClient> clients)
     {

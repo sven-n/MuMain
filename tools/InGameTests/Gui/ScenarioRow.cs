@@ -13,6 +13,7 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
 {
     private bool isChecked = true;
     private string delayText = string.Empty;
+    private string qualityText = string.Empty;
     private RowState state = RowState.Idle;
     private int completedSteps;
     private int failedStep;
@@ -47,6 +48,13 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
     {
         get => this.delayText;
         set => this.Set(ref this.delayText, value);
+    }
+
+    /// <summary>JPEG quality of the screenshots, 1 to 100; empty takes the run's value.</summary>
+    public string QualityText
+    {
+        get => this.qualityText;
+        set => this.Set(ref this.qualityText, value);
     }
 
     /// <summary>The steps a passing run takes: the progress bar's end.</summary>
