@@ -51,6 +51,7 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "ON",
         "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
         "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
@@ -85,6 +86,7 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "ON",
         "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
@@ -123,7 +125,8 @@
       "inherits": "linux-x64",
       "cacheVariables": {
         "ENABLE_EDITOR": "ON",
-        "ENABLE_CONTROL_SOCKET": "ON"
+        "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON"
       }
     },
     {

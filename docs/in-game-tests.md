@@ -8,12 +8,27 @@ report each scenario as passed or failed.
 
 ## What you need
 
-- An editor build of the client (a `-mueditor` preset, which turns on
-  `ENABLE_CONTROL_SOCKET`), e.g. `out/build/windows-x64-mueditor/src/Release/Main.exe`.
+- A developer build of the client: a `-mueditor` preset, which turns on
+  `ENABLE_CONTROL_SOCKET` and `ENABLE_IN_GAME_TESTS`. Player builds have
+  neither, so the tester never reaches players.
 - podman or docker with compose for the test server below (on Windows and
   macOS a running `podman machine`), or any other
   [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
-- The .NET 10 SDK, which the client build needs anyway.
+- The .NET 10 runtime, which comes with the SDK the client build needs anyway.
+
+## The tester
+
+With `ENABLE_IN_GAME_TESTS` the build publishes the tester as one file next to
+the client: `InGameTests.exe` next to `Main.exe` on Windows, `InGameTests`
+next to `Main` on Linux and next to `Main.app` on macOS, e.g.
+`out/build/windows-x64-mueditor/src/Release/InGameTests.exe`. It is published
+again only when its sources change.
+
+Start it without anything (a double-click, or `./InGameTests`) and it opens
+its window with the client next to it; the reports go to
+`in-game-test-results` next to it. The file can also be copied next to
+another developer build of the same platform. `ENABLE_IN_GAME_TESTS` needs
+`ENABLE_CONTROL_SOCKET`; CMake stops when only the first is on.
 
 ## The test server
 
@@ -65,28 +80,27 @@ no account with what a scenario needs, OpenMU's test data gets a new one
 
 ### The window
 
-The `InGameTestsGui` build target builds `Main` and opens a window to run the
-tests with it:
+Start the tester next to the client, or let the `InGameTestsGui` build target
+build everything and open it:
 
 ```sh
 cmake --build out/build/windows-x64-mueditor --config Release --target InGameTestsGui
 ```
 
-It lists every scenario with a checkbox (**Check all** toggles them all) and
+The window lists every scenario with a checkbox (**Check all** toggles them all) and
 has a **Wait after each action** field: the milliseconds each client pauses
 after every click, key, walk or warp, so a person can follow what happens;
 `1000` is easy to watch, `0` runs at full speed. A scenario row can have its
 own wait, which then wins over the field. **Run and write report** runs the
 checked scenarios one after the other, shows each one's current step, and
 **Open report** opens the report of the run. The window remembers its
-settings between runs; the runner started with `--gui`, or without any
-option, opens it too.
+settings between runs.
 
 ### The report
 
 Every run, from the window or the command line, writes a folder named after
-its start time into the output folder (`in-game-test-results` in the build
-folder for the build targets):
+its start time into the output folder (`in-game-test-results` next to the
+tester):
 
 - `report.html`: a table of every scenario there is, with PASS, FAIL, or
   SKIPPED for the ones the run did not include, and below it a section per
@@ -126,21 +140,24 @@ cmake -B out/build/windows-x64-mueditor "-DMU_IN_GAME_TEST_SCENARIOS=trade" "-DM
 Keep the quotes in PowerShell, which otherwise splits a value like
 `127.0.0.1:56901` at the first dot. The build fails when a scenario fails.
 
-The runner can also be started directly:
+The tester takes the same settings as options, e.g. next to the client:
 
 ```sh
-dotnet run --project tools/InGameTests -- --client out/build/windows-x64-mueditor/src/Release/Main.exe --fresh-server -t 1000
+./InGameTests --fresh-server --scenario trade -t 1000
 ```
+
+From the sources, without a build, `dotnet run --project tools/InGameTests --`
+followed by the options runs it too; it then needs `--client`.
 
 | Option | Meaning |
 |---|---|
-| `--client` | the editor build of `Main` to start |
+| `--client` | the developer build of `Main` to start; default the `Main` next to the tester |
 | `--server` | the game server the clients log in to, `host:port`; default `127.0.0.1:56901` |
 | `--fresh-server` | recreate the test server with podman or docker before the run |
 | `--scenario` | run only this scenario; repeat it for several; default all |
-| `--out` | where the run folders go; default `in-game-test-results` |
+| `--out` | where the run folders go; default `in-game-test-results`, next to the tester when it sits next to `Main` |
 | `-t` | milliseconds to pause after every client action, so a person can follow; default `0` |
-| `--gui` | open the window instead |
+| `--gui` | open the window; also without any option |
 | `--list` | list the scenarios |
 
 Each scenario starts its own clients, runs, and closes them again. The runner

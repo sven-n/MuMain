@@ -8,11 +8,12 @@ internal sealed class RunnerOptions
                InGameTests --gui [--client <path to Main>] [--server <host:port>] [--fresh-server] [--out <folder>]
                InGameTests --list
 
-          --client        an editor build of Main (ENABLE_CONTROL_SOCKET=ON), e.g. out/build/windows-x64-mueditor/src/Release/Main.exe
+          --client        an editor build of Main (ENABLE_CONTROL_SOCKET=ON); default the Main next to the tester
           --server        the game server the clients log in to, default 127.0.0.1:56901, the test server
           --fresh-server  recreate the test server (docker-compose.yml, with podman or docker) before the run
           --scenario      run only this scenario; repeat for several, default all
           --out           where the report, screenshots and failure details go, default in-game-test-results
+                          (next to the tester when it sits next to Main)
           -t              pause this many milliseconds after every action, to watch a scenario, default 0
           --gui           open the window to choose and run scenarios; also without any option
           --list          list the scenarios
@@ -20,6 +21,7 @@ internal sealed class RunnerOptions
 
     private const string DefaultHost = "127.0.0.1";
     private const int DefaultPort = 56901;
+    private const string DefaultOutputFolder = "in-game-test-results";
 
     public string? ClientPath { get; private set; }
 
@@ -34,7 +36,7 @@ internal sealed class RunnerOptions
 
     public List<string> ScenarioNames { get; } = [];
 
-    public string OutputFolder { get; private set; } = "in-game-test-results";
+    public string OutputFolder { get; private set; } = DefaultOutputFolder;
 
     public bool ListScenarios { get; private set; }
 
@@ -46,6 +48,7 @@ internal sealed class RunnerOptions
     public static RunnerOptions? Parse(string[] args, out string error)
     {
         var options = new RunnerOptions { Gui = args.Length == 0 };
+        var outputGiven = false;
         error = string.Empty;
         for (var i = 0; i < args.Length; i++)
         {
@@ -69,6 +72,7 @@ internal sealed class RunnerOptions
                     break;
                 case "--out" when value is not null:
                     options.OutputFolder = value;
+                    outputGiven = true;
                     break;
                 case "-t" when value is not null:
                     if (!int.TryParse(value, out var milliseconds) || milliseconds < 0)
@@ -96,6 +100,17 @@ internal sealed class RunnerOptions
             i++;
         }
 
+        // Published next to Main (ENABLE_IN_GAME_TESTS), the tester finds its
+        // client and keeps its reports there, wherever it is started from.
+        if (ClientNextToTester() is { } client)
+        {
+            options.ClientPath ??= client;
+            if (!outputGiven)
+            {
+                options.OutputFolder = Path.Combine(AppContext.BaseDirectory, DefaultOutputFolder);
+            }
+        }
+
         var needsClient = !options.ListScenarios && !options.Gui;
         if (needsClient && (options.ClientPath is null || !File.Exists(options.ClientPath)))
         {
@@ -105,6 +120,12 @@ internal sealed class RunnerOptions
 
         return options;
     }
+
+    // Main next to the tester: Main.exe on Windows, Main on Linux, the bundle on macOS.
+    private static string? ClientNextToTester()
+        => new[] { "Main.exe", "Main", Path.Combine("Main.app", "Contents", "MacOS", "Main") }
+            .Select(name => Path.Combine(AppContext.BaseDirectory, name))
+            .FirstOrDefault(File.Exists);
 
     /// <summary>Splits <c>host:port</c>.</summary>
     public static bool TryParseServer(string value, out string host, out int port)

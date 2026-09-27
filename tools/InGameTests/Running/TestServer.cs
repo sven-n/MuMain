@@ -13,8 +13,18 @@ internal static class TestServer
 {
     private static readonly TimeSpan RecreateTimeout = TimeSpan.FromMinutes(3);
 
-    /// <summary>The compose file, copied next to the runner by the build.</summary>
-    public static string ComposeFile => Path.Combine(AppContext.BaseDirectory, "docker-compose.yml");
+    /// <summary>Writes the compose file the tester carries to its temp folder and returns its path.</summary>
+    private static async Task<string> WriteComposeFileAsync(CancellationToken cancellationToken)
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "mu-in-game-tests");
+        Directory.CreateDirectory(folder);
+        var path = Path.Combine(folder, "docker-compose.yml");
+        await using var resource = typeof(TestServer).Assembly.GetManifestResourceStream("docker-compose.yml")
+                                   ?? throw new InvalidOperationException("the tester carries no docker-compose.yml");
+        await using var file = File.Create(path);
+        await resource.CopyToAsync(file, cancellationToken);
+        return path;
+    }
 
     /// <summary>Recreates the test server with podman or docker, whichever is installed.</summary>
     /// <exception cref="InvalidOperationException">Neither is installed, or compose failed.</exception>
@@ -25,7 +35,8 @@ internal static class TestServer
         var toolName = Path.GetFileName(tool);
         log.WriteLine($"recreating the test server with {toolName}");
 
-        string[] compose = ["compose", "-f", ComposeFile, "up", "-d", "--force-recreate"];
+        // The compose file names its project, so where it is written does not matter.
+        string[] compose = ["compose", "-f", await WriteComposeFileAsync(cancellationToken), "up", "-d", "--force-recreate"];
         var (exitCode, output) = await RunAsync(tool, compose, null, cancellationToken);
         if (exitCode != 0 && IsPodman(tool) && output.Contains("Cannot connect to Podman", StringComparison.Ordinal))
         {

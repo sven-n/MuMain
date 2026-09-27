@@ -84,6 +84,14 @@ option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 # not exist in the binary (enforced by the control_socket_leak test).
 option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (never for player builds)" OFF)
 
+# In-game tests (docs/in-game-tests.md): publishes the tester, which plays test
+# scenarios with the client through the control socket, next to Main, and adds
+# the InGameTests / InGameTestsGui targets. Developers only, like the socket.
+option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (developer builds with the control socket)" OFF)
+if(ENABLE_IN_GAME_TESTS AND NOT ENABLE_CONTROL_SOCKET)
+  message(FATAL_ERROR "ENABLE_IN_GAME_TESTS needs ENABLE_CONTROL_SOCKET: the tester drives the client through it")
+endif()
+
 # ---------------------------------------------------------------------------
 # Engine/game code -> static library (libMuClient); MuMain -> thin executable.
 #
@@ -841,11 +849,12 @@ if (DOTNET_EXECUTABLE)
     target_include_directories(MuClient PUBLIC "${CMAKE_BINARY_DIR}/Generated")
   endif()
 
-  # InGameTests: builds Main and plays the in-game test scenarios with it
-  # against a running server (docs/in-game-tests.md). Only a client with the
-  # control socket can be driven, so the target exists only in those builds.
+  # The in-game tester (docs/in-game-tests.md): published as one file next to
+  # Main (next to Main.app on macOS), so it finds the client without being told.
+  # It needs the .NET runtime, which building the client needs anyway. The
+  # InGameTests target plays the scenarios, InGameTestsGui opens its window:
   #   cmake --build <build dir> --config Release --target InGameTests
-  if (ENABLE_CONTROL_SOCKET)
+  if (ENABLE_IN_GAME_TESTS)
     set(MU_IN_GAME_TEST_SERVER "127.0.0.1:56901" CACHE STRING
       "Game server the InGameTests target logs the clients in to, host:port; default the test server")
     option(MU_IN_GAME_TEST_FRESH_SERVER
@@ -856,45 +865,61 @@ if (DOTNET_EXECUTABLE)
     set(MU_IN_GAME_TEST_STEP_DELAY "0" CACHE STRING
       "Milliseconds the InGameTests target pauses after every client action, to watch a run; 0 runs at full speed")
 
-    set(IN_GAME_TESTS_ARGS -t "${MU_IN_GAME_TEST_STEP_DELAY}")
-    foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
-      list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
-    endforeach()
+    set(IN_GAME_TESTS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests")
+    if (APPLE)
+      set(IN_GAME_TESTS_DIR "$<TARGET_BUNDLE_DIR:Main>/..")
+    else()
+      set(IN_GAME_TESTS_DIR "$<TARGET_FILE_DIR:Main>")
+    endif()
+    set(IN_GAME_TESTS_EXE "${IN_GAME_TESTS_DIR}/InGameTests${CMAKE_EXECUTABLE_SUFFIX}")
+    set(IN_GAME_TESTS_STAMP "${CMAKE_CURRENT_BINARY_DIR}/InGameTests-$<CONFIG>.stamp")
+    file(GLOB_RECURSE IN_GAME_TESTS_SOURCES CONFIGURE_DEPENDS
+      "${IN_GAME_TESTS_ROOT}/*.cs" "${IN_GAME_TESTS_ROOT}/*.axaml")
+    list(FILTER IN_GAME_TESTS_SOURCES EXCLUDE REGEX "[/\\](bin|obj)[/\\]")
+    mu_native_path("${IN_GAME_TESTS_ROOT}/InGameTests.csproj" IN_GAME_TESTS_PROJ_NATIVE)
 
-    # The test server keeps its data in memory; the runner recreates it with
-    # podman or docker, which brings back OpenMU's test data.
+    # Only when the tester's sources change; a client build alone does not
+    # publish it again.
+    add_custom_command(
+      OUTPUT "${IN_GAME_TESTS_STAMP}"
+      COMMAND ${CMAKE_COMMAND} -E env
+              --unset=Platform
+              "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+              "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+              "${DOTNET_EXECUTABLE}" publish "${IN_GAME_TESTS_PROJ_NATIVE}" -c Release -r ${DOTNET_RID}
+              -o "${IN_GAME_TESTS_DIR}" --nologo
+      COMMAND ${CMAKE_COMMAND} -E touch "${IN_GAME_TESTS_STAMP}"
+      DEPENDS ${IN_GAME_TESTS_SOURCES} "${IN_GAME_TESTS_ROOT}/InGameTests.csproj" "${IN_GAME_TESTS_ROOT}/docker-compose.yml"
+      COMMENT "Publishing the in-game tester next to Main"
+      VERBATIM
+    )
+    add_custom_target(InGameTestsTool ALL DEPENDS "${IN_GAME_TESTS_STAMP}")
+    add_dependencies(InGameTestsTool Main)
+
     set(IN_GAME_TESTS_SERVER_ARGS --server "${MU_IN_GAME_TEST_SERVER}")
     if (MU_IN_GAME_TEST_FRESH_SERVER)
       list(APPEND IN_GAME_TESTS_SERVER_ARGS --fresh-server)
     endif()
-    list(APPEND IN_GAME_TESTS_ARGS ${IN_GAME_TESTS_SERVER_ARGS})
-
-    set(IN_GAME_TESTS_RUN
-      ${CMAKE_COMMAND} -E env
-      --unset=Platform
-      "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
-      "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
-      "${DOTNET_EXECUTABLE}" run --project "${CMAKE_CURRENT_SOURCE_DIR}/../tools/InGameTests" -c Release
-      -- --client "$<TARGET_FILE:Main>" --out "${CMAKE_BINARY_DIR}/in-game-test-results")
+    set(IN_GAME_TESTS_ARGS -t "${MU_IN_GAME_TEST_STEP_DELAY}" ${IN_GAME_TESTS_SERVER_ARGS})
+    foreach(scenario IN LISTS MU_IN_GAME_TEST_SCENARIOS)
+      list(APPEND IN_GAME_TESTS_ARGS --scenario "${scenario}")
+    endforeach()
 
     add_custom_target(InGameTests
-      COMMAND ${IN_GAME_TESTS_RUN} ${IN_GAME_TESTS_ARGS}
+      COMMAND "${IN_GAME_TESTS_EXE}" --client "$<TARGET_FILE:Main>" ${IN_GAME_TESTS_ARGS}
       COMMENT "In-game tests against ${MU_IN_GAME_TEST_SERVER}"
       USES_TERMINAL
       VERBATIM
     )
-    add_dependencies(InGameTests Main)
+    add_dependencies(InGameTests InGameTestsTool)
 
-    # InGameTestsGui: the same with a window to choose the tests and how slowly
-    # they run; every run writes a report with a screenshot per step.
-    #   cmake --build <build dir> --config Release --target InGameTestsGui
     add_custom_target(InGameTestsGui
-      COMMAND ${IN_GAME_TESTS_RUN} --gui ${IN_GAME_TESTS_SERVER_ARGS}
+      COMMAND "${IN_GAME_TESTS_EXE}" --gui --client "$<TARGET_FILE:Main>" ${IN_GAME_TESTS_SERVER_ARGS}
       COMMENT "In-game test window"
       USES_TERMINAL
       VERBATIM
     )
-    add_dependencies(InGameTestsGui Main)
+    add_dependencies(InGameTestsGui InGameTestsTool)
   endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
