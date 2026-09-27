@@ -108,9 +108,10 @@ build everything and open it:
 cmake --build out/build/windows-x64-mueditor --config Release --target InGameTestsGui
 ```
 
-The window lists every scenario with a checkbox (**Check all** toggles them all) and
-has a **Wait after each action** field: the milliseconds each client pauses
-after every click, key, walk or warp, so a person can follow what happens;
+The window lists every scenario with a checkbox, grouped by category in boxes
+that fold in and out (it remembers which are folded in); **Check all** toggles
+them all. It has a **Wait after each action** field: the milliseconds each
+client pauses after every click, key, walk or warp, so a person can follow what happens;
 `1000` is easy to watch, `0` runs at full speed. A scenario row can have its
 own wait, which then wins over the field. **Run and write report** runs the
 checked scenarios one after the other, shows each one's current step, and
@@ -125,7 +126,9 @@ tester):
 
 - `report.html`: a table of every scenario there is, with PASS, FAIL, or
   SKIPPED for the ones the run did not include, and below it a section per
-  scenario that opens on a click (**Expand all** opens them all). An open
+  scenario that opens on a click. Both are grouped by category, and a click on
+  a category folds it in or out; **Expand all** and **Collapse all** open or
+  close everything. An open
   section shows the scenario step by step: a step says what is done, what
   should happen then, whether it did and how long it took, with a screenshot
   of every client taken right after it; a failed step has the failure and the

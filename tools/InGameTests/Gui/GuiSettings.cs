@@ -20,6 +20,9 @@ internal sealed class GuiSettings
 
     public Dictionary<string, ScenarioSettings> Scenarios { get; set; } = [];
 
+    /// <summary>The categories folded in in the list, by name.</summary>
+    public List<string> CollapsedCategories { get; set; } = [];
+
     /// <summary>The saved settings, or the defaults when there are none or they cannot be read.</summary>
     public static GuiSettings Load()
     {

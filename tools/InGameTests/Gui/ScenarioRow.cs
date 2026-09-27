@@ -136,10 +136,32 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
     }
 }
 
-/// <summary>The scenarios of one category, under their heading in the window's list.</summary>
-internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<ScenarioRow> rows)
+/// <summary>The scenarios of one category, in a box of the window's list that folds in and out.</summary>
+internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<ScenarioRow> rows, bool isExpanded)
+    : INotifyPropertyChanged
 {
-    public string Title => category.DisplayName();
+    private bool isExpanded = isExpanded;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public ScenarioCategory Category { get; } = category;
+
+    public string Title => this.Category.DisplayName();
+
+    public string Summary => this.Rows.Count == 1 ? "1 test" : $"{this.Rows.Count} tests";
 
     public IReadOnlyList<ScenarioRow> Rows { get; } = rows;
+
+    public bool IsExpanded
+    {
+        get => this.isExpanded;
+        set
+        {
+            if (this.isExpanded != value)
+            {
+                this.isExpanded = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsExpanded)));
+            }
+        }
+    }
 }

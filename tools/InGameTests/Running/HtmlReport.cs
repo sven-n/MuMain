@@ -24,8 +24,23 @@ internal static class HtmlReport
                font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
         main { max-width:1200px; margin:0 auto; }
         h1 { font-size:24px; margin:0 0 4px; } h2 { font-size:18px; margin:0; }
-        h3.category { font-size:15px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:28px 0 -4px; }
-        tr.category th { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding-top:14px; }
+        .category-title { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700; }
+        tr.category th { padding-top:14px; cursor:pointer; user-select:none; }
+        tr.category th .muted { font-weight:400; margin-left:6px; }
+        table.overview { table-layout:fixed; }
+        table.overview col.result { width:110px; } table.overview col.steps { width:70px; }
+        table.overview col.duration { width:100px; } table.overview col.pause { width:150px; }
+        tr.category th::before { content:"▾ "; color:var(--muted); }
+        tbody.collapsed tr.category th::before { content:"▸ "; }
+        tbody.collapsed tr:not(.category) { display:none; }
+        tr.category:hover th { background:var(--hover); }
+        details.group { margin-top:24px; }
+        details.group > summary { list-style:none; cursor:pointer; display:flex; gap:12px; align-items:baseline;
+                                  flex-wrap:wrap; padding:6px 4px; border-radius:6px; }
+        details.group > summary::-webkit-details-marker { display:none; }
+        details.group > summary::before { content:"▸"; color:var(--muted); width:1em; }
+        details.group[open] > summary::before { content:"▾"; }
+        details.group > summary:hover { background:var(--hover); }
         .muted { color:var(--muted); }
         .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:16px 0; }
         table { border-collapse:collapse; width:100%; }
@@ -58,12 +73,20 @@ internal static class HtmlReport
         """;
 
     private const string Script = """
-        const sections = () => document.querySelectorAll('details.scenario');
-        document.getElementById('expand-all').addEventListener('click', () => sections().forEach(d => d.open = true));
-        document.getElementById('collapse-all').addEventListener('click', () => sections().forEach(d => d.open = false));
-        // A scenario linked from the table opens before the page jumps to it.
+        const setAll = open => {
+          document.querySelectorAll('details.group, details.scenario').forEach(d => d.open = open);
+          document.querySelectorAll('tbody.group').forEach(t => t.classList.toggle('collapsed', !open));
+        };
+        document.getElementById('expand-all').addEventListener('click', () => setAll(true));
+        document.getElementById('collapse-all').addEventListener('click', () => setAll(false));
+        // A category row of the table folds its scenarios in and out.
+        document.querySelectorAll('tr.category').forEach(row => row.addEventListener('click', () =>
+          row.closest('tbody').classList.toggle('collapsed')));
+        // A scenario linked from the table opens, with its category, before the page jumps to it.
         const openTarget = () => { const d = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-                                   if (d && d.tagName === 'DETAILS') { d.open = true; d.scrollIntoView(); } };
+                                   if (d && d.tagName === 'DETAILS') {
+                                     const group = d.closest('details.group'); if (group) group.open = true;
+                                     d.open = true; d.scrollIntoView(); } };
         window.addEventListener('hashchange', openTarget); openTarget();
         const zoom = document.getElementById('zoom');
         document.querySelectorAll('figure img').forEach(img => img.addEventListener('click', () => {
@@ -83,39 +106,45 @@ internal static class HtmlReport
             .Append(run.Options.FreshServer ? Encode(" (fresh test data)") : string.Empty)
             .Append("<br>").Append(Encode($"client {run.Options.ClientPath}")).Append("</p>");
 
-        html.Append("<section class=\"card\"><table><thead><tr><th>Scenario</th><th>Result</th><th>Steps</th><th>Duration</th><th>Pause per action</th></tr></thead><tbody>");
-        foreach (var scenario in run.Scenarios)
+        html.Append("<section class=\"card\"><table class=\"overview\"><colgroup><col><col class=\"result\"><col class=\"steps\"><col class=\"duration\"><col class=\"pause\"></colgroup><thead><tr><th>Scenario</th><th>Result</th><th>Steps</th><th>Duration</th><th>Pause per action</th></tr></thead>");
+        foreach (var group in Categories(run))
         {
-            if (IsFirstOfCategory(run, scenario))
+            html.Append("<tbody class=\"group\"><tr class=\"category\"><th colspan=\"5\"><span class=\"category-title\">")
+                .Append(Encode(group.Key.DisplayName())).Append("</span> <span class=\"muted\">").Append(Encode(CategorySummary(group)))
+                .Append("</span></th></tr>");
+            foreach (var scenario in group)
             {
-                html.Append("<tr class=\"category\"><th colspan=\"5\">").Append(Encode(scenario.Category.DisplayName())).Append("</th></tr>");
+                var ran = scenario.Status != ScenarioStatus.Skipped;
+                html.Append("<tr><td><a href=\"#").Append(Encode(scenario.Name)).Append("\">").Append(Encode(scenario.Name)).Append("</a><br><span class=\"muted\">")
+                    .Append(Encode(scenario.Description)).Append("</span></td><td>").Append(Badge(scenario.Status)).Append("</td><td>")
+                    .Append(ran ? scenario.Steps.Count.ToString() : "–").Append("</td><td>")
+                    .Append(ran ? Seconds(scenario.Duration) : "–").Append("</td><td>")
+                    .Append(ran ? $"{scenario.StepDelay.TotalMilliseconds} ms" : "–").Append("</td></tr>");
             }
 
-            var ran = scenario.Status != ScenarioStatus.Skipped;
-            html.Append("<tr><td><a href=\"#").Append(Encode(scenario.Name)).Append("\">").Append(Encode(scenario.Name)).Append("</a><br><span class=\"muted\">")
-                .Append(Encode(scenario.Description)).Append("</span></td><td>").Append(Badge(scenario.Status)).Append("</td><td>")
-                .Append(ran ? scenario.Steps.Count.ToString() : "–").Append("</td><td>")
-                .Append(ran ? Seconds(scenario.Duration) : "–").Append("</td><td>")
-                .Append(ran ? $"{scenario.StepDelay.TotalMilliseconds} ms" : "–").Append("</td></tr>");
+            html.Append("</tbody>");
         }
 
-        html.Append("</tbody></table><p class=\"muted\">")
+        html.Append("</table><p class=\"muted\">")
             .Append(run.Count(ScenarioStatus.Passed)).Append(" passed, ")
             .Append(run.Count(ScenarioStatus.Failed)).Append(" failed, ")
             .Append(run.Count(ScenarioStatus.Skipped)).Append(" skipped</p></section>");
 
         html.Append("<div class=\"toolbar\"><button id=\"expand-all\" type=\"button\">Expand all</button>")
             .Append("<button id=\"collapse-all\" type=\"button\">Collapse all</button>")
-            .Append("<span class=\"muted\">Click a scenario to see its steps and screenshots.</span></div>");
+            .Append("<span class=\"muted\">Click a category or a scenario to open or close it.</span></div>");
 
-        foreach (var scenario in run.Scenarios)
+        // Categories start open, scenarios closed: the page shows what ran and how it went.
+        foreach (var group in Categories(run))
         {
-            if (IsFirstOfCategory(run, scenario))
+            html.Append("<details class=\"group\" open><summary><span class=\"category-title\">").Append(Encode(group.Key.DisplayName()))
+                .Append("</span><span class=\"muted\">").Append(Encode(CategorySummary(group))).Append("</span></summary>");
+            foreach (var scenario in group)
             {
-                html.Append("<h3 class=\"category\">").Append(Encode(scenario.Category.DisplayName())).Append("</h3>");
+                RenderScenario(html, scenario);
             }
 
-            RenderScenario(html, scenario);
+            html.Append("</details>");
         }
 
         html.Append("</main><div id=\"zoom\"><img alt=\"\"></div><script>").Append(Script).Append("</script></body></html>");
@@ -170,10 +199,25 @@ internal static class HtmlReport
         html.Append("</div></details>");
     }
 
-    // The scenarios come grouped by category (TestRun orders them so); a
-    // category's heading goes before its first one.
-    private static bool IsFirstOfCategory(TestRunResult run, ScenarioResult scenario)
-        => run.Scenarios.First(other => other.Category == scenario.Category) == scenario;
+    // The scenarios by category, in the categories' order.
+    private static IEnumerable<IGrouping<ScenarioCategory, ScenarioResult>> Categories(TestRunResult run)
+        => run.Scenarios.GroupBy(scenario => scenario.Category).OrderBy(group => group.Key);
+
+    // "2 scenarios · 1 passed · 1 skipped": next to a category's name.
+    private static string CategorySummary(IGrouping<ScenarioCategory, ScenarioResult> group)
+    {
+        var parts = new List<string> { group.Count() == 1 ? "1 scenario" : $"{group.Count()} scenarios" };
+        foreach (var (status, word) in new[] { (ScenarioStatus.Passed, "passed"), (ScenarioStatus.Failed, "failed"), (ScenarioStatus.Skipped, "skipped") })
+        {
+            var count = group.Count(scenario => scenario.Status == status);
+            if (count > 0)
+            {
+                parts.Add($"{count} {word}");
+            }
+        }
+
+        return string.Join(" · ", parts);
+    }
 
     // The line next to the name while the section is collapsed.
     private static string Summary(ScenarioResult scenario) => scenario.Status switch

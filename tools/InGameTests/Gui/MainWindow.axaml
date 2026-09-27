@@ -36,8 +36,14 @@
         <ItemsControl x:Name="ScenarioList">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="gui:ScenarioGroup">
-              <StackPanel>
-                <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" Opacity="0.7" Margin="10,10,10,0" />
+              <Expander IsExpanded="{Binding IsExpanded}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                        Margin="6,6,6,0">
+                <Expander.Header>
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Summary}" Opacity="0.7" />
+                  </StackPanel>
+                </Expander.Header>
                 <ItemsControl ItemsSource="{Binding Rows}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="gui:ScenarioRow">
@@ -70,7 +76,7 @@
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
-              </StackPanel>
+              </Expander>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>

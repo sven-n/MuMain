@@ -20,6 +20,7 @@ internal sealed partial class MainWindow : Window
     private readonly RunnerOptions startOptions;
     private readonly GuiSettings settings = GuiSettings.Load();
     private readonly ObservableCollection<ScenarioRow> rows = [];
+    private readonly List<ScenarioGroup> groups;
     private CancellationTokenSource? stopRequest;
     private string? reportPath;
 
@@ -47,10 +48,11 @@ internal sealed partial class MainWindow : Window
             this.rows.Add(row);
         }
 
-        this.ScenarioList.ItemsSource = this.rows
+        this.groups = this.rows
             .GroupBy(row => row.Scenario.Category)
-            .Select(group => new ScenarioGroup(group.Key, [.. group]))
+            .Select(group => new ScenarioGroup(group.Key, [.. group], !this.settings.CollapsedCategories.Contains(group.Key.ToString())))
             .ToList();
+        this.ScenarioList.ItemsSource = this.groups;
 
         // The command line wins over what the window remembers.
         this.ClientPathBox.Text = startOptions.ClientPath is not null
@@ -246,6 +248,7 @@ internal sealed partial class MainWindow : Window
         this.settings.Server = this.ServerBox.Text?.Trim();
         this.settings.FreshServer = this.FreshServerBox.IsChecked == true;
         this.settings.StepDelayMilliseconds = TryParseDelay(this.DefaultDelayBox.Text, out var delay) ? delay ?? 0 : 0;
+        this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
         this.settings.Scenarios = this.rows.ToDictionary(
             row => row.Name,
             row => new GuiSettings.ScenarioSettings { Checked = row.IsChecked, Delay = row.DelayText });
@@ -284,7 +287,12 @@ internal sealed partial class MainWindow : Window
         {
             e.Cancel = true;
             this.RunStatusText.Text = "A run is going on: stop it first, and close the window when it has finished.";
+            return;
         }
+
+        // Which categories are folded in is kept even without a run.
+        this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
+        this.settings.Save();
     }
 
     private ScenarioRow Row(string name) => this.rows.First(row => row.Name == name);
