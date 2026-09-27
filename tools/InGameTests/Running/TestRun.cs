@@ -7,14 +7,18 @@ namespace MuMain.Tools.InGameTests.Running;
 /// <summary>A scenario to run, and the pause after each of its client actions.</summary>
 internal sealed record ScenarioSelection(Scenario Scenario, TimeSpan StepDelay);
 
-/// <summary>What a run does: which client, which server, which scenarios, where the results go.</summary>
+/// <summary>
+/// What a run does: which client, which server, which scenarios, where the results go.
+/// <paramref name="AllScenarios"/> are all there are, so the report lists the ones not run as skipped.
+/// </summary>
 internal sealed record TestRunOptions(
     string ClientPath,
     string ServerHost,
     int ServerPort,
     bool FreshServer,
     string OutputFolder,
-    IReadOnlyList<ScenarioSelection> Scenarios);
+    IReadOnlyList<ScenarioSelection> Scenarios,
+    IReadOnlyList<Scenario> AllScenarios);
 
 /// <summary>What a run tells whoever watches it, e.g. the window, while it goes.</summary>
 internal sealed class TestRunListener
@@ -88,16 +92,28 @@ internal static class TestRun
             listener?.ScenarioFinished?.Invoke(result);
         }
 
+        // Every scenario there is, in its order; the ones that did not run as skipped.
+        var selected = options.Scenarios.Select(selection => selection.Scenario.Name).ToHashSet();
+        var reported = options.AllScenarios
+            .Select(scenario => results.FirstOrDefault(result => result.Name == scenario.Name)
+                                ?? ScenarioResult.Skip(scenario, selected.Contains(scenario.Name) ? "the run was stopped before it" : "not selected for this run"))
+            .Concat(results.Where(result => options.AllScenarios.All(scenario => scenario.Name != result.Name)))
+            .ToList();
+
         var reportPath = Path.Combine(folder, "report.html");
-        var run = new TestRunResult(started, options, results, folder, reportPath);
-        await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run), cancellationToken);
-        await File.WriteAllTextAsync(Path.Combine(folder, "results.json"), JsonSerializer.Serialize(Summary(run), JsonOptions), cancellationToken);
-        log.WriteLine($"{results.Count(result => result.Passed)} passed, {results.Count(result => !result.Passed)} failed");
+        var run = new TestRunResult(started, options, reported, folder, reportPath);
+        await File.WriteAllTextAsync(reportPath, HtmlReport.Render(run), CancellationToken.None);
+        await File.WriteAllTextAsync(Path.Combine(folder, "results.json"), JsonSerializer.Serialize(Summary(run), JsonOptions), CancellationToken.None);
+        log.WriteLine($"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, {run.Count(ScenarioStatus.Skipped)} skipped");
         log.WriteLine($"report: {reportPath}");
         return run;
     }
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() },
+    };
 
     // The run without the scenario objects, for tools that read the results.
     private static object Summary(TestRunResult run) => new

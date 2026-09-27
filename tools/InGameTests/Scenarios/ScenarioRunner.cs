@@ -59,7 +59,14 @@ internal sealed class ScenarioRunner(
     }
 
     private ScenarioResult Result(Scenario scenario, bool passed, TimeSpan duration, string? failure, ScenarioContext context)
-        => new(scenario.Name, scenario.Description, passed, duration, clientOptions.StepDelay, failure, [.. context.Steps]);
+        => new(
+            scenario.Name,
+            scenario.Description,
+            passed ? ScenarioStatus.Passed : ScenarioStatus.Failed,
+            duration,
+            clientOptions.StepDelay,
+            failure,
+            [.. context.Steps]);
 
     private async Task SaveFailureAsync(IReadOnlyDictionary<string, GameClient> clients)
     {

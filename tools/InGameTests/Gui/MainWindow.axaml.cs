@@ -138,8 +138,8 @@ internal sealed partial class MainWindow : Window
             var token = this.stopRequest.Token;
             var run = await Task.Run(() => TestRun.RunAsync(options, log, listener, token));
             this.reportPath = run.ReportPath;
-            var passed = run.Scenarios.Count(result => result.Passed);
-            this.RunStatusText.Text = $"{passed} passed, {run.Scenarios.Count - passed} failed · report written";
+            this.RunStatusText.Text = $"{run.Count(ScenarioStatus.Passed)} passed, {run.Count(ScenarioStatus.Failed)} failed, "
+                                      + $"{run.Count(ScenarioStatus.Skipped)} skipped · report written";
         }
         catch (Exception exception) when (exception is InvalidOperationException or IOException)
         {
@@ -195,7 +195,14 @@ internal sealed partial class MainWindow : Window
             return this.Refuse("Check at least one test.");
         }
 
-        return new TestRunOptions(clientPath, host, port, this.FreshServerBox.IsChecked == true, this.startOptions.OutputFolder, selections);
+        return new TestRunOptions(
+            clientPath,
+            host,
+            port,
+            this.FreshServerBox.IsChecked == true,
+            this.startOptions.OutputFolder,
+            selections,
+            Program.AllScenarios);
     }
 
     // Empty is no value; otherwise a whole number of milliseconds, 0 or more.

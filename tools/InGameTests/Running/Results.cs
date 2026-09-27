@@ -1,3 +1,5 @@
+using MuMain.Tools.InGameTests.Scenarios;
+
 namespace MuMain.Tools.InGameTests.Running;
 
 /// <summary>A screenshot one client took after a step.</summary>
@@ -13,15 +15,35 @@ internal sealed record StepResult(
     string? Failure,
     IReadOnlyList<StepScreenshot> Screenshots);
 
+/// <summary>How a scenario went in a run.</summary>
+internal enum ScenarioStatus
+{
+    Passed,
+    Failed,
+
+    /// <summary>Not run: not selected, or the run was stopped before it.</summary>
+    Skipped,
+}
+
 /// <summary>How a scenario went, step by step.</summary>
 internal sealed record ScenarioResult(
     string Name,
     string Description,
-    bool Passed,
+    ScenarioStatus Status,
     TimeSpan Duration,
     TimeSpan StepDelay,
     string? Failure,
-    IReadOnlyList<StepResult> Steps);
+    IReadOnlyList<StepResult> Steps,
+    string? SkipReason = null)
+{
+    public bool Passed => this.Status == ScenarioStatus.Passed;
+
+    public bool Failed => this.Status == ScenarioStatus.Failed;
+
+    /// <summary>A scenario the run did not get to, and why.</summary>
+    public static ScenarioResult Skip(Scenario scenario, string reason)
+        => new(scenario.Name, scenario.Description, ScenarioStatus.Skipped, TimeSpan.Zero, TimeSpan.Zero, null, [], reason);
+}
 
 /// <summary>A whole run: its settings, every scenario's result and where the report is.</summary>
 internal sealed record TestRunResult(
@@ -31,5 +53,8 @@ internal sealed record TestRunResult(
     string Folder,
     string ReportPath)
 {
-    public bool AllPassed => this.Scenarios.All(scenario => scenario.Passed);
+    /// <summary>No scenario failed; skipped ones do not count.</summary>
+    public bool AllPassed => !this.Scenarios.Any(scenario => scenario.Failed);
+
+    public int Count(ScenarioStatus status) => this.Scenarios.Count(scenario => scenario.Status == status);
 }

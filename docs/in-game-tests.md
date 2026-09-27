@@ -88,7 +88,10 @@ Every run, from the window or the command line, writes a folder named after
 its start time into the output folder (`in-game-test-results` in the build
 folder for the build targets):
 
-- `report.html`: every scenario step by step. A step says what is done, what
+- `report.html`: a table of every scenario there is, with PASS, FAIL, or
+  SKIPPED for the ones the run did not include, and below it a section per
+  scenario that opens on a click (**Expand all** opens them all). An open
+  section shows the scenario step by step: a step says what is done, what
   should happen then, whether it did and how long it took, with a screenshot
   of every client taken right after it; a failed step has the failure and the
   screenshot of what the clients showed then. The screenshots are embedded, so

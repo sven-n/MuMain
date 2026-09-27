@@ -64,7 +64,8 @@ internal static class Program
             options.ServerPort,
             options.FreshServer,
             options.OutputFolder,
-            [.. selected.Select(scenario => new ScenarioSelection(scenario, options.StepDelay))]);
+            [.. selected.Select(scenario => new ScenarioSelection(scenario, options.StepDelay))],
+            AllScenarios);
         try
         {
             var run = await TestRun.RunAsync(runOptions, Console.Out, null, CancellationToken.None);
