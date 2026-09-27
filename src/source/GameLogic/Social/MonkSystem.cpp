@@ -114,8 +114,10 @@ void CMonkSystem::LoadModelItemTexture()
     gLoadData.OpenTexture(MODEL_SWORD_32_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_32_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, L"Item\\");
+    // Like the Storm Hard Glove item, the parts use armor textures from Data\Player.
+    const std::wstring stormHardGloveFolders[] = {L"Item\\", L"Player\\"};
+    gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, stormHardGloveFolders);
+    gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, stormHardGloveFolders);
 
     gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, L"player\\");

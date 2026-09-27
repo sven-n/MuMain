@@ -22,31 +22,44 @@ CLoadData::~CLoadData() // OK
 {
 }
 
+namespace
+{
+// "Sword" and 1 give "Sword01.bmd", without a number (-1) "Sword.bmd". Built
+// as a string, because the names can come from the item model files and have
+// any length.
+std::wstring GetModelFileName(const wchar_t* FileName, int i)
+{
+    std::wstring name = FileName;
+    if (i != -1)
+    {
+        if (i < 10)
+        {
+            name += L'0';
+        }
+        name += std::to_wstring(i);
+    }
+    return name + L".bmd";
+}
+} // namespace
+
 void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i)
 {
-    wchar_t Name[64];
-    if (i == -1)
-        mu_swprintf(Name, L"%ls.bmd", FileName);
-    else if (i < 10)
-        mu_swprintf(Name, L"%ls0%d.bmd", FileName, i);
-    else
-        mu_swprintf(Name, L"%ls%d.bmd", FileName, i);
+    const std::wstring Name = GetModelFileName(FileName, i);
 
     bool Success = false;
 
     Models[Type].m_iBMDSeqID = Type;
 
-    Success = Models[Type].Open2(Dir, Name);
+    Success = Models[Type].Open2(Dir, Name.c_str());
 
     if (Success == false)
     {
-        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name, Type);
+        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name.c_str(), Type);
 
         if (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 || wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0)
         {
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls file does not exist.", Name);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
+            const std::wstring Text = Name + L" file does not exist.";
+            MessageBox(g_hWnd, Text.c_str(), NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }
     }
@@ -121,13 +134,13 @@ GLuint UseLoadedTextureOrReportError(int model, const std::wstring& textureFileN
         return pBitmap->BitmapIndex;
     }
 
-    wchar_t szErrorMsg[256] = {0};
-    mu_swprintf(szErrorMsg, L"OpenTexture Failed: %ls of %hs", firstPath.c_str(), Models[model].Name);
-    g_ErrorReport.Write(L"%ls (Model=%d)\r\n", szErrorMsg, model);
+    const std::wstring message =
+        L"OpenTexture Failed: " + firstPath + L" of " + Core::Text::FromUtf8(Models[model].Name);
+    g_ErrorReport.Write(L"%ls (Model=%d)\r\n", message.c_str(), model);
 #ifdef FOR_WORK
-    PopUpErrorCheckMsgBox(szErrorMsg);
+    PopUpErrorCheckMsgBox(message.c_str());
 #else  // FOR_WORK
-    PopUpErrorCheckMsgBox(szErrorMsg, true);
+    PopUpErrorCheckMsgBox(message.c_str(), true);
 #endif // FOR_WORK
     return BITMAP_UNKNOWN;
 }

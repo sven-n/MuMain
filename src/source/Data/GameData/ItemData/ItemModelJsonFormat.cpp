@@ -37,9 +37,39 @@ bool EndsWithIgnoringCase(std::string_view text, std::string_view ending)
                                                       });
 }
 
-bool HasWindowsSeparator(std::string_view path)
+constexpr std::string_view ParentFolder = "..";
+constexpr char DriveSeparator = ':';
+
+// Paths in the model files stay inside the game folder: relative, with '/'
+// between folders, without ".." and without empty folder names. Returns
+// what is wrong, or nothing when the path is fine.
+std::string FindPathProblem(std::string_view path)
 {
-    return path.find(WindowsFolderSeparator) != std::string_view::npos;
+    if (path.find(WindowsFolderSeparator) != std::string_view::npos)
+    {
+        return "must use / between folders";
+    }
+    if (path.front() == FolderSeparator || path.find(DriveSeparator) != std::string_view::npos)
+    {
+        return "must be a relative path";
+    }
+
+    size_t partStart = 0;
+    while (partStart <= path.size())
+    {
+        const size_t partEnd = std::min(path.find(FolderSeparator, partStart), path.size());
+        const std::string_view part = path.substr(partStart, partEnd - partStart);
+        if (part.empty())
+        {
+            return "must not have empty folder names or end with /";
+        }
+        if (part == ParentFolder)
+        {
+            return "must not contain \"..\"";
+        }
+        partStart = partEnd + 1;
+    }
+    return {};
 }
 
 // ---------------------------------------------------------------- writing
@@ -112,9 +142,10 @@ bool ItemModelReader::ReadFile(const OrderedJson& json, std::string& file)
         AddError(Keys::File, "must name a " + std::string(ModelFileExtension) + " file");
         return false;
     }
-    if (HasWindowsSeparator(file))
+    const std::string pathProblem = FindPathProblem(file);
+    if (!pathProblem.empty())
     {
-        AddError(Keys::File, "must use / between folders");
+        AddError(Keys::File, pathProblem);
         return false;
     }
     return true;
@@ -143,10 +174,10 @@ void ItemModelReader::ReadTextureFolders(const OrderedJson& json, std::vector<st
         }
 
         const std::string& folder = entry.get_ref<const std::string&>();
-        if (HasWindowsSeparator(folder) || folder.front() == FolderSeparator || folder.back() == FolderSeparator)
+        const std::string pathProblem = FindPathProblem(folder);
+        if (!pathProblem.empty())
         {
-            AddError(Keys::TextureFolders,
-                     "\"" + folder + "\" must use / between folders and must not start or end with /");
+            AddError(Keys::TextureFolders, "\"" + folder + "\" " + pathProblem);
             continue;
         }
         folders.push_back(folder);

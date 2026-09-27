@@ -66,7 +66,7 @@ bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, s
 // Appends the list entries that start at `position` and its closing ']' to
 // `result`, without the newlines and indentation between the entries (the
 // space after each comma stays). Text in quotes is kept as it is. Returns
-// the position after the ']'.
+// the position after the ']', or the end of the text when there is none.
 size_t AppendListOnOneLine(const std::string& text, size_t position, std::string& result)
 {
     bool inText = false;
@@ -97,6 +97,11 @@ size_t AppendListOnOneLine(const std::string& text, size_t position, std::string
         {
             result += character;
         }
+    }
+    if (position == text.size())
+    {
+        // No closing ']' (the JSON writer always closes its lists).
+        return position;
     }
     result += ']';
     return position + 1;
