@@ -33,6 +33,8 @@ internal static class TestServer
             startInfo.ArgumentList.Add(argument);
         }
 
+        RepairFolderVariables(startInfo);
+
         using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"could not start {tool}");
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(RecreateTimeout);
@@ -42,6 +44,31 @@ internal static class TestServer
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException($"`{Path.GetFileName(tool)} compose up` failed ({process.ExitCode}): {(await errors).Trim()} {(await output).Trim()}");
+        }
+    }
+
+    // podman on Windows finds its connection to the VM through %APPDATA%. Some
+    // terminals start their shells without it (e.g. the one inside the Claude
+    // desktop app), and podman then falls back to a socket that does not exist
+    // and reports "Cannot connect to Podman". The folders come from Windows.
+    private static void RepairFolderVariables(ProcessStartInfo startInfo)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        foreach (var (name, folder) in new[]
+                 {
+                     ("APPDATA", Environment.SpecialFolder.ApplicationData),
+                     ("LOCALAPPDATA", Environment.SpecialFolder.LocalApplicationData),
+                 })
+        {
+            var current = startInfo.Environment.TryGetValue(name, out var value) ? value : null;
+            if (string.IsNullOrEmpty(current) || !Directory.Exists(current))
+            {
+                startInfo.Environment[name] = Environment.GetFolderPath(folder);
+            }
         }
     }
 
