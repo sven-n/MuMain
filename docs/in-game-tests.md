@@ -15,7 +15,8 @@ report each scenario as passed or failed.
    `out/build/windows-x64-mueditor/src/Release/InGameTests.exe`.
 3. In its window, leave **Recreate the test server** checked (it needs podman
    or docker), check the scenarios, and press **Run and write report**;
-   **Open report** shows every step with screenshots, in one file you can attach to a pull request.
+   **Open report** shows every step with screenshots, in one file, and **Open
+   report folder** shows that file, to attach it to a pull request.
 
 The rest of this page explains each part.
 
@@ -117,8 +118,10 @@ field sets the JPEG quality of the step screenshots (1 to 100, default 70):
 lower makes the report smaller, e.g. 40 takes a run of both scenarios from
 about 8 MB to about 5 MB. A scenario row can have its own wait and its own
 quality, which then win over the fields. **Run and write report** runs the
-checked scenarios one after the other, shows each one's current step, and
-**Open report** opens the report of the run. The window remembers its
+checked scenarios one after the other; a bar over the list shows the steps of
+all of them together, and each row its own progress and current step. **Open
+report** opens the report of the run, and **Open report folder** shows the file
+in the file browser, ready to be dragged into a pull request comment. The window remembers its
 settings between runs.
 
 ### The report

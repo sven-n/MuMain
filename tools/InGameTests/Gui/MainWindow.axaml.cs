@@ -23,6 +23,7 @@ internal sealed partial class MainWindow : Window
     private readonly ObservableCollection<ScenarioRow> rows = [];
     private readonly List<ScenarioGroup> groups;
     private CancellationTokenSource? stopRequest;
+    private List<ScenarioRow> runRows = [];
     private string? reportPath;
 
     // For the XAML previewer; the application uses the other constructor.
@@ -77,6 +78,7 @@ internal sealed partial class MainWindow : Window
         this.RunButton.Click += this.OnRun;
         this.StopButton.Click += this.OnStop;
         this.OpenReportButton.Click += this.OnOpenReport;
+        this.OpenReportFolderButton.Click += this.OnOpenReportFolder;
         this.Closing += this.OnClosing;
         this.UpdateSelection();
     }
@@ -137,12 +139,24 @@ internal sealed partial class MainWindow : Window
             row.Queue();
         }
 
+        this.runRows = [.. this.rows.Where(row => row.IsChecked)];
+        this.OverallPanel.IsVisible = true;
+        this.UpdateOverallProgress();
+
         var log = new WindowLog(this.AppendLog);
         var listener = new TestRunListener
         {
             StepStarted = (name, number, title) => Dispatcher.UIThread.Post(() => this.Row(name).StepStarted(number, title)),
-            StepFinished = (name, step) => Dispatcher.UIThread.Post(() => this.Row(name).StepFinished(step)),
-            ScenarioFinished = result => Dispatcher.UIThread.Post(() => this.Row(result.Name).Finished(result)),
+            StepFinished = (name, step) => Dispatcher.UIThread.Post(() =>
+            {
+                this.Row(name).StepFinished(step);
+                this.UpdateOverallProgress();
+            }),
+            ScenarioFinished = result => Dispatcher.UIThread.Post(() =>
+            {
+                this.Row(result.Name).Finished(result);
+                this.UpdateOverallProgress();
+            }),
         };
 
         try
@@ -300,6 +314,7 @@ internal sealed partial class MainWindow : Window
         this.RunButton.IsEnabled = !running;
         this.StopButton.IsEnabled = running;
         this.OpenReportButton.IsEnabled = !running && this.reportPath is not null;
+        this.OpenReportFolderButton.IsEnabled = !running && this.reportPath is not null;
         this.CheckAllButton.IsEnabled = !running;
         this.ScenarioList.IsEnabled = !running;
         this.BrowseButton.IsEnabled = !running;
@@ -318,6 +333,40 @@ internal sealed partial class MainWindow : Window
         {
             Process.Start(new ProcessStartInfo(this.reportPath) { UseShellExecute = true });
         }
+    }
+
+    // The file browser at the report, with the file selected where the system can.
+    private void OnOpenReportFolder(object? sender, RoutedEventArgs e)
+    {
+        if (this.reportPath is null || !File.Exists(this.reportPath))
+        {
+            return;
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            Process.Start("explorer.exe", $"/select,\"{this.reportPath}\"");
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            Process.Start("open", ["-R", this.reportPath]);
+        }
+        else
+        {
+            Process.Start(new ProcessStartInfo(Path.GetDirectoryName(this.reportPath)!) { UseShellExecute = true });
+        }
+    }
+
+    // All steps of the run's tests together. A finished test counts all its
+    // steps, passed or not, so the bar is full when the run is.
+    private void UpdateOverallProgress()
+    {
+        var total = this.runRows.Sum(row => row.StepCount);
+        var done = this.runRows.Sum(row => row.Passed || row.Failed ? row.StepCount : row.CompletedSteps);
+        var finished = this.runRows.Count(row => row.Passed || row.Failed);
+        this.OverallProgress.Maximum = Math.Max(total, 1);
+        this.OverallProgress.Value = done;
+        this.OverallProgress.ProgressTextFormat = $"{done} / {total} steps · {finished} of {this.runRows.Count} tests";
     }
 
     // Closing while clients run would leave them behind.
