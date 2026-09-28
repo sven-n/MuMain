@@ -115,6 +115,18 @@ internal sealed class GameClient : IAsyncDisposable
     /// <summary>The character and everything around it.</summary>
     public Task<JsonElement> StateAsync() => this.SendAsync("state");
 
+    /// <summary>The character's zen.</summary>
+    public async Task<long> ZenAsync() => (await this.StateAsync()).GetProperty("zen").GetInt64();
+
+    /// <summary>
+    /// How many items named <paramref name="name"/> the inventory holds. <c>state</c> lists an
+    /// item under every square it covers, so the squares are divided by the item's size.
+    /// </summary>
+    public async Task<int> CountAsync(string name)
+        => (int)Math.Round(ItemSlots.Of(await this.StateAsync(), "inventory")
+            .Where(item => item.Name == name)
+            .Sum(item => 1.0 / (item.Width * item.Height)));
+
     /// <summary>The names of the open windows.</summary>
     public async Task<IReadOnlyList<string>> OpenWindowsAsync()
     {

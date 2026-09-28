@@ -37,7 +37,9 @@ constexpr NamedWindow Windows[] = {
     {"character", SEASON3B::INTERFACE_CHARACTER},     {"trade", SEASON3B::INTERFACE_TRADE},
     {"storage", SEASON3B::INTERFACE_STORAGE},         {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
     {"mix", SEASON3B::INTERFACE_MIXINVENTORY},        {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
-    {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND},
+    {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND}, {"chat_input", SEASON3B::INTERFACE_CHATINPUTBOX},
+    {"party", SEASON3B::INTERFACE_PARTY},             {"command", SEASON3B::INTERFACE_COMMAND},
+    {"my_shop", SEASON3B::INTERFACE_MYSHOP_INVENTORY}, {"purchase_shop", SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY},
 };
 
 // A point of a window, from its window-local coordinates to window pixels.

@@ -74,7 +74,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `type` (`text`) | type text into the text field that has the focus, as the keyboard's text input does, e.g. an amount into the trade's zen box; `not_open` when no field has the focus |
-| `ui` | the open item windows by name (`message_box` while a dialog waits for Enter or Esc), and the window pixels of named elements: `trade.confirm`, `trade.zen` |
+| `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, and `message_box` while a dialog waits for Enter or Esc — and the window pixels of named elements: `trade.confirm`, `trade.zen` |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`; `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |

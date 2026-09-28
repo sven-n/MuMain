@@ -18,6 +18,7 @@ internal static class Program
     public static readonly Scenario[] AllScenarios =
     [
         new TradeScenario(),
+        new ChatScenario(),
         new IcarusFlyingItemTakeOffScenario(),
     ];
 

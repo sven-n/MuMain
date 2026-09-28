@@ -22,4 +22,10 @@ internal static class TestAccounts
 
     /// <summary><c>trade</c> buyer: level 380 Elf.</summary>
     public static readonly TestCharacter TradeBuyer = new("socket", "socket", "socketElf");
+
+    /// <summary><c>chat</c>: level 51 Dark Knight, at home in Lorencia.</summary>
+    public static readonly TestCharacter ChatFirst = new("test5", "test5", "test5Dk");
+
+    /// <summary><c>chat</c>: level 61 Dark Knight, at home in Lorencia.</summary>
+    public static readonly TestCharacter ChatSecond = new("test6", "test6", "test6Dk");
 }
