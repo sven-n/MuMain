@@ -2977,10 +2977,10 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
 
     mu_swprintf(Text, L"%ls    %ls    %ls    %ls", I18N::Game::Rank, I18N::Game::Character, I18N::Game::Class, I18N::Game::Score);
 
-    int TextColor = (255 << 24) + (21 << 16) + (148 << 8) + (255);
+    DWORD TextColor = ARGB(255, 255, 148, 21);
     pMsgBox->AddMsg(Text, TextColor);
 
-    TextColor = (255 << 24) + (255 << 16) + (255 << 8) + (255);
+    TextColor = CLRDW_WHITE;
 
     for (int i = 0; i < 5; i++)
     {
@@ -2992,7 +2992,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
         pMsgBox->AddMsg(Text, TextColor);
     }
 
-    TextColor = (255 << 24) + (255 << 16) + (0 << 8) + (255);
+    TextColor = ARGB(255, 255, 0, 255);
     pMsgBox->AddMsg(L"    ", TextColor);
     pMsgBox->AddMsg(L"    ", TextColor);
     pMsgBox->AddMsg(L"    ", TextColor);
