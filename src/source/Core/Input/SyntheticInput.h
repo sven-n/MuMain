@@ -69,10 +69,15 @@ void BeginFrame();
 // flight, which may belong to another command.
 void Reset();
 #else
-// Without the control socket there is nothing to inject: the two calls the
-// rest of the client makes (the frame advance and the held-key test) compile
-// to nothing, exactly as the control taps do, so no call site needs a
+// Without the control socket there is nothing to inject: the calls the rest
+// of the client makes (the frame advance, the idle and held-key tests) compile
+// to constants, exactly as the control taps do, so no call site needs a
 // conditional and the injector itself is not built into a player client.
+[[nodiscard]] inline bool IsIdle()
+{
+    return true;
+}
+
 [[nodiscard]] inline bool IsKeyHeld(int)
 {
     return false;

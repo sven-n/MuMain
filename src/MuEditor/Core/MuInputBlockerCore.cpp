@@ -5,6 +5,7 @@
 #include "MuInputBlockerCore.h"
 
 #include "imgui.h"
+#include "Core/Input/SyntheticInput.h"
 #include "UI/NewUI/NewUICommon.h"
 
 CMuInputBlockerCore& CMuInputBlockerCore::GetInstance()
@@ -18,8 +19,10 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     // Block game input ONLY when hovering UI
     ImGuiIO& io = ImGui::GetIO();
 
-    // Only block when hovering or when keyboard input is wanted
-    bool shouldBlockInput = io.WantCaptureMouse || io.WantCaptureKeyboard;
+    // Only block when hovering or when keyboard input is wanted. A key or
+    // click the control socket injects never went through ImGui, whatever the
+    // real pointer hovers.
+    bool shouldBlockInput = (io.WantCaptureMouse || io.WantCaptureKeyboard) && Core::Input::Synthetic::IsIdle();
     
     if (!shouldBlockInput)
         return;

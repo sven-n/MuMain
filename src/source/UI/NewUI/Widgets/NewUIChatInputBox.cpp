@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "UI/Chat/ChatInput.h"
 #include "UI/NewUI/Widgets/NewUIChatInputBox.h"
+#include "Core/Input/SyntheticInput.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -470,8 +471,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
     if (false == IsVisible() && SEASON3B::IsPress(VK_RETURN))
     {
 #ifdef _EDITOR
-        // Don't open chat if editor has keyboard focus
-        if (g_MuEditorCore.IsEnabled())
+        // Don't open chat if editor has keyboard focus. An Enter the control
+        // socket injects never reached the editor, whatever the real pointer
+        // hovers.
+        if (g_MuEditorCore.IsEnabled() && !Core::Input::Synthetic::IsKeyHeld(VK_RETURN))
         {
             ImGuiIO& io = ImGui::GetIO();
             if (io.WantCaptureKeyboard || io.WantCaptureMouse)
