@@ -40,4 +40,10 @@ internal static class TestAccounts
     /// button. The test data gives its excellent gloves and boots 30 of 45 durability.
     /// </summary>
     public static readonly TestCharacter Repairer = new("test9", "test9", "test9Dk");
+
+    /// <summary>
+    /// <c>equip-all-slots</c>: level 400 Dimension Master in Lorencia that wears something in all
+    /// twelve equipment slots and has room in the inventory for each of them.
+    /// </summary>
+    public static readonly TestCharacter Equipper = new("testgm2", "testgm2", "testgm2Sum");
 }

@@ -22,6 +22,7 @@ internal static class Program
         new NpcShopScenario(),
         new RepairScenario(),
         new IcarusFlyingItemTakeOffScenario(),
+        new EquipAllSlotsScenario(),
     ];
 
     // The window's file dialogs need a single-threaded apartment on Windows.
