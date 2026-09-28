@@ -42,11 +42,13 @@ internal sealed class TradeInventoryFullScenario : Scenario
         await context.StepAsync(
             $"The first player logs in as {firstCharacter.Name}",
             $"{firstCharacter.Name} enters the world in Lorencia with no free 2x2 area in its inventory.",
-            () => first.EnterWorldAsync(firstCharacter.Account, firstCharacter.Password, firstCharacter.Name));
+            () => first.EnterWorldAsync(firstCharacter.Account, firstCharacter.Password, firstCharacter.Name),
+            [First]);
         await context.StepAsync(
             $"The second player logs in as {secondCharacter.Name}",
             $"{secondCharacter.Name} enters the world in Lorencia, with no free 2x2 area either.",
-            () => second.EnterWorldAsync(secondCharacter.Account, secondCharacter.Password, secondCharacter.Name));
+            () => second.EnterWorldAsync(secondCharacter.Account, secondCharacter.Password, secondCharacter.Name),
+            [Second]);
         await context.StepAsync(
             "The first player walks to the meeting spot",
             $"{firstCharacter.Name} stands at ({MeetingX},{MeetingY}), a free spot in Lorencia's town, or one tile from it.",
@@ -54,7 +56,8 @@ internal sealed class TradeInventoryFullScenario : Scenario
             {
                 await first.WarpAsync(LorenciaGate, LorenciaMap);
                 await Meeting.WalkToAsync(first, MeetingX, MeetingY);
-            });
+            },
+            [First]);
         await context.StepAsync(
             "The second player walks up to the first",
             $"{secondCharacter.Name} stands next to {firstCharacter.Name}: a trade needs the partner at most one tile away.",
@@ -133,7 +136,8 @@ internal sealed class TradeInventoryFullScenario : Scenario
         await context.StepAsync(
             "The first player asks the second for a trade",
             $"{secondName} gets the request: a dialog asks whether to trade.",
-            () => Trading.RequestAsync(first, second, secondName));
+            () => Trading.RequestAsync(first, second, secondName),
+            [Second]);
         await context.StepAsync(
             "The second player accepts with Enter",
             "The trade window opens for both players.",

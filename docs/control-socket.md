@@ -74,8 +74,8 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `type` (`text`) | type text into the text field that has the focus, as the keyboard's text input does, e.g. an amount into the trade's zen box; `not_open` when no field has the focus |
-| `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, and `message_box` while a dialog waits for Enter or Esc — and the window pixels of named elements: `trade.confirm`, `trade.zen` |
-| `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`; `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
+| `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party` |
+| `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
@@ -96,9 +96,19 @@ character name, class, level, experience, zen, HP/mana/SD/AG with their
 maxima, map number and name, position, alive flag, safe-zone flag, current
 target, the skills the character owns, equipment, inventory, buffs, party,
 the open trade (partner, both offers with their items and zen, both confirm buttons and `my_confirm_wait`, the frames until my button takes clicks again, or `null`) and
-`nearby`. An item carries `slot`, `name`, `level`, `durability`, and its
-`width` and `height` in inventory squares; one that covers several squares is
-listed once for each of them.
+`nearby`. An item carries `slot`, `name`, `level`, `durability`,
+`max_durability`, and its `width` and `height` in inventory squares; one that
+covers several squares is listed once for each of them. While a click would
+repair it (the inventory's repair mode, or an NPC that repairs), a worn item
+also carries `repair_price`, and while an NPC shop is open an inventory item
+carries `sell_price`: both as the item's tooltip shows them.
+
+The shops: `npc_shop` is the open NPC shop (`repair_shop`, `tax_rate`,
+`repair_all_price` at an NPC that repairs, and its goods with `price`, tax
+included) or `null`; `my_shop` is the player's own personal shop (`open`, the
+`title` in its title field, its goods with `price`), `purchase_shop` the
+personal shop the player looks into (`seller`, `title`, goods with `price`) or
+`null`. `repair_mode` says whether a click repairs instead of picking up.
 
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
@@ -135,7 +145,7 @@ release frame has run; a second injection while one is in flight answers
 an observation of the act slot, not a claim on it. The sequence follows
 *rendered* frames, so an injection sent to a client that is not rendering (the
 occluded-window case below) answers `timeout` and is dropped rather than
-delivered late. Not covered: typing text (`say` sends chat), key chords, drags.
+delivered late. Text goes into the focused text field with `type`. Not covered: key chords (Shift+L, Ctrl+Q), drags.
 
 ## Events
 
@@ -152,7 +162,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 | `map` | `map`, `map_name`, `position` |
 | `scene` | `scene` |
 | `view_enter` / `view_leave` | `object` |
-| `party` | `change`, `name` |
+| `party` | `change` (`invited` with the inviter's `name`; `list` with the leader's `name` after every change of the members; `left`; `result` with `result` — `failed`, `denied`, `full`, `user_left`, `other_party`, `left`, `opposing_gens`, `battle_zone`, `battle_zone_off` — when an invitation formed no party) |
 | `trade` | `change` (`requested`, `opened`, `refused`, `unavailable`, `partner_confirm`, `closed`), `name` for a request or an opened trade, `state` (`checked`, `unchecked`, `reset`; `unknown` for a value outside the protocol) for the partner's button, `result` (`completed`, `cancelled`, `inventory_full`, `request_cancelled`, `reinforced_item`) when it closes; `refused` also on the asked side, when a window that forbids trading is open and the client says no by itself |
 | `disconnect` | `reason` |
 | `error` | `command`, `error`, `message` |

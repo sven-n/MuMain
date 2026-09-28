@@ -83,20 +83,34 @@ each time.
 
 ## Test accounts
 
-Every scenario logs in with accounts of its own from OpenMU's test data (the
-password is the account name), so two scenarios never share one. The game
-master accounts `testgm` and `testgm2` stay free for people. The test data
-puts every character in the safe zone of its class's home map, e.g. an Elf in
-Noria.
+Every scenario logs in with characters of its own from OpenMU's test data
+(the password is the account name), so two scenarios never share one. The game
+master account `testgm` stays free for people; `testgm2`'s Dimension Master is
+the only character that wears something in all twelve equipment slots, so
+`equip-all-slots` uses it. The test data puts every character in the safe zone
+of its class's home map, e.g. an Elf in Noria, and the quest characters on one
+tile in Devias.
 
 | Scenario | Account | Character |
 |---|---|---|
 | `trade` | `test300`, `socket` | `test300Dl` (level 300 Dark Lord with Jewels of Bless) sells to `socketElf` |
+| `trade-inventory-full` | `test7`, `test8` | `test7Dw` and `test8Dw` (no free 2x2 area, pad armour and rows of jewels and potions to offer) |
+| `chat` | `test5`, `test6` | `test5Dk` and `test6Dk` |
+| `party` | `test0` to `test4` | `test0Dk` (the leader) invites `test1Dk` to `test4Dk` |
+| `personal-shop` | `quest1`, `quest2` | `quest1Dk` (Jewels of Bless) sells to `quest2Dk`, both with 100,000,000 zen |
+| `npc-shop` | `test7` | `test7Dk` (potions and Jewels of Bless to sell, 25 free squares) |
+| `repair` | `test9` | `test9Dk` (level 91, gloves and boots at 30 of 45 durability) |
 | `icarus-flying-item-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
+| `equip-all-slots` | `testgm2` | `testgm2Sum` (level 400 Dimension Master, all twelve slots worn) |
 
-A new scenario takes an account no other scenario uses. When the test data has
-no account with what a scenario needs, OpenMU's test data gets a new one
+A new scenario takes a character no other scenario uses. When the test data
+has no character with what a scenario needs, OpenMU's test data gets a new one
 (`VersionSeasonSix/TestAccounts`).
+
+OpenMU gives an item of a level above 0, an excellent or an ancient item its
+base durability, so such items in the test data start worn, below their
+maximum: that is what `repair` repairs. An item at 0 durability cannot be made
+in the game without OpenMU's admin panel.
 
 ## Running them
 
@@ -230,7 +244,14 @@ them under these categories.
 
 | Category | Scenario | Checks |
 |---|---|---|
+| Player Interactions | `chat` | Two players meet in Lorencia. One opens the chat box with Enter, types a line and sends it with Enter; the other answers the same way. Both lines show in both chat logs, from the right sender. |
+| Player Interactions | `party` | Five clients. The leader opens the command window with D; for each of four players it clicks Party and right-clicks the player, and the player accepts the invitation with Enter. The party lists grow to five, the leader first, and all five show the same party. |
+| Player Interactions | `personal-shop` | The seller opens its personal shop from the inventory, puts a jewel into it with two clicks, types its price and the shop's title, and opens the shop (a dialog asks, Enter confirms). The buyer opens the shop through the command window (D, Buy, a right-click on the seller), clicks the jewel and confirms: the jewel and the price change owner, and the seller's shop is empty. |
+| Player Interactions | `trade-inventory-full` | Three trades that cannot complete: the second player has no room for the first one's 2x2 item, the first none for the second one's, and neither for what the other offers. Each time both confirm, the trade closes for both with "inventory full", and both keep the same items and zen. |
 | Player Interactions | `trade` | Two clients warp to Lorencia, walk up to each other and open a trade. The seller puts a jewel into the trade window with two clicks, the buyer types an amount of zen into the trade's zen box, both press the confirm button, and both inventories show that jewel and zen changed owner: the buyer has one more jewel and that much less zen, the seller one jewel fewer and that much more zen (sven-n/MuMain#588). |
+| NPC Interactions | `npc-shop` | Talks to Hanzo the Blacksmith with a click on him. Drags a potion stack onto his shop (sold at once) and a Jewel of Bless (a dialog asks, Enter confirms), each for the selling price its tooltip shows, then buys the cheapest of his goods that fits, for its price. |
+| NPC Interactions | `repair` | Repairs the worn gloves with the inventory's repair button, then talks to Hanzo the Blacksmith and repairs the boots with Repair all. Each repair brings the durability back to its maximum and costs zen; the log lists what it cost and what the client showed. |
+| Game Behaviour | `equip-all-slots` | Slot by slot, drags the item of each of the twelve equipment slots onto a free area of the inventory with two clicks, and puts it back on with a right-click on it. |
 | Game Behaviour | `icarus-flying-item-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged. Then the other way round: with the wings back on, right-clicking the Fenrir takes it off, and the wings, now the last flying item, stay on both ways (sven-n/MuMain#631). Both are put back on afterwards. |
 
 ## Writing a scenario
@@ -239,9 +260,9 @@ A scenario is a class in `tools/InGameTests/Scenarios` that derives from
 `Scenario` and is listed in `Program.AllScenarios`. It names the clients it
 needs by role and gets them started and logged out, says its `Category`
 (`PlayerInteractions` for players doing something with each other,
-`GameBehaviour` for how the game treats a player, e.g. the rules of a map; a
-new kind gets a new value in `ScenarioCategory`), and its `StepCount` for
-the progress bar.
+`NpcInteractions` for a player and an NPC, `GameBehaviour` for how the game
+treats a player, e.g. the rules of a map; a new kind gets a new value in
+`ScenarioCategory`), and its `StepCount` for the progress bar.
 
 - **Write it as steps.** Everything a scenario does goes through
   `context.StepAsync(title, expectation, action)`: the title says what is
@@ -249,7 +270,8 @@ the progress bar.
   then, for someone who reads the report without knowing the code ("The trade
   window opens for both characters"), and the action does it and checks that
   it happened. After each step every client takes a screenshot, so a step is
-  one thing a person can see.
+  one thing a person can see; a step of a scenario with many clients can name
+  the ones that show it (`pictured`), which keeps the report small.
 
 - **Test the real input path.** What the scenario checks has to go through the
   same code a player's click or key goes through: `ClickSlotAsync`,
@@ -257,7 +279,14 @@ the progress bar.
   `hotkey` command. Direct commands (`login`, `warp`, `move`, `trade
   request`, `equip`) are fine for the setup.
 - **Ask for pixels, don't hard-code them.** The windows follow the responsive
-  layout; `slot-pixel` and `ui` give the pixels for the current window size.
+  layout; `slot-pixel` and `ui` give the pixels for the current window size,
+  and `nearby` where a player or an NPC is drawn (`Meeting.PixelOfAsync`,
+  `Npcs.TalkAsync`).
+- **Use the shared steps.** `Meeting` walks characters to a spot or to each
+  other, `Trading` requests, accepts and confirms a trade, `Npcs` walks up to
+  an NPC and talks to it, and `Keys.PressUntilAsync` presses a key until its
+  effect shows (an injected key is lost now and then; each extra press is
+  noted in the log).
 - **Wait for the server.** A click is answered some frames later. Use
   `Expect.EventuallyAsync` for something that has to happen, and
   `Expect.StillAfterAsync` for a refusal, where nothing happening is the
@@ -268,12 +297,12 @@ the progress bar.
   which puts the wings back on).
 - **Don't count on where a character stands.** A warp to a town lands anywhere
   in it, so walks take different times from run to run (see
-  `TradeScenario.WalkUpToAsync`).
+  `Meeting.WalkUpToAsync`).
 
 ## Not covered yet
 
-- NPC windows: the chaos machine, storage and the NPC shop need a way to talk
-  to an NPC and open its window.
+- NPC windows other than shops: the chaos machine (sven-n/MuMain#587) and
+  storage. Talking to their NPCs works as in `npc-shop`.
 - The item rule flags, e.g. that an item with `"tradable": false` cannot be put
   into the trade window.
 - Running the tests in CI next to an OpenMU container.

@@ -44,23 +44,28 @@ internal sealed class TradeScenario : Scenario
         await context.StepAsync(
             $"The seller logs in as {sellerCharacter.Name}",
             $"{sellerCharacter.Name} enters the world; the test data puts it in the safe zone of its home map.",
-            () => seller.EnterWorldAsync(sellerCharacter.Account, sellerCharacter.Password, sellerCharacter.Name));
+            () => seller.EnterWorldAsync(sellerCharacter.Account, sellerCharacter.Password, sellerCharacter.Name),
+            [Seller]);
         await context.StepAsync(
             $"The buyer logs in as {buyerCharacter.Name}",
             $"{buyerCharacter.Name} enters the world in the safe zone of its home map.",
-            () => buyer.EnterWorldAsync(buyerCharacter.Account, buyerCharacter.Password, buyerCharacter.Name));
+            () => buyer.EnterWorldAsync(buyerCharacter.Account, buyerCharacter.Password, buyerCharacter.Name),
+            [Buyer]);
         await context.StepAsync(
             "The seller warps to Lorencia",
             $"{sellerCharacter.Name} stands in Lorencia's town. A warp to a town lands anywhere in it.",
-            () => seller.WarpAsync(LorenciaGate, LorenciaMap));
+            () => seller.WarpAsync(LorenciaGate, LorenciaMap),
+            [Seller]);
         await context.StepAsync(
             "The buyer warps to Lorencia",
             $"{buyerCharacter.Name} stands in Lorencia's town, somewhere else than the seller.",
-            () => buyer.WarpAsync(LorenciaGate, LorenciaMap));
+            () => buyer.WarpAsync(LorenciaGate, LorenciaMap),
+            [Buyer]);
         await context.StepAsync(
             "The seller walks to the meeting spot",
             $"{sellerCharacter.Name} stands at ({MeetingX},{MeetingY}), a free spot in Lorencia's town, or one tile from it.",
-            () => Meeting.WalkToAsync(seller, MeetingX, MeetingY));
+            () => Meeting.WalkToAsync(seller, MeetingX, MeetingY),
+            [Seller]);
         await context.StepAsync(
             "The buyer walks up to the seller",
             $"{buyerCharacter.Name} stands on a tile next to {sellerCharacter.Name}: a trade needs the partner at most one tile away.",
@@ -76,7 +81,8 @@ internal sealed class TradeScenario : Scenario
         await context.StepAsync(
             "The seller asks the buyer for a trade",
             $"{buyerCharacter.Name} gets the request: a dialog asks whether to trade with {sellerCharacter.Name}.",
-            () => Trading.RequestAsync(seller, buyer, buyerCharacter.Name));
+            () => Trading.RequestAsync(seller, buyer, buyerCharacter.Name),
+            [Buyer]);
         await context.StepAsync(
             "The buyer accepts with Enter",
             "The trade window opens for both characters, each with the inventory next to it.",

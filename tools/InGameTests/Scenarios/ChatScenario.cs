@@ -42,11 +42,13 @@ internal sealed class ChatScenario : Scenario
         await context.StepAsync(
             $"The first player logs in as {firstCharacter.Name}",
             $"{firstCharacter.Name} enters the world in Lorencia, its home town.",
-            () => first.EnterWorldAsync(firstCharacter.Account, firstCharacter.Password, firstCharacter.Name));
+            () => first.EnterWorldAsync(firstCharacter.Account, firstCharacter.Password, firstCharacter.Name),
+            [First]);
         await context.StepAsync(
             $"The second player logs in as {secondCharacter.Name}",
             $"{secondCharacter.Name} enters the world in Lorencia, somewhere else in the town.",
-            () => second.EnterWorldAsync(secondCharacter.Account, secondCharacter.Password, secondCharacter.Name));
+            () => second.EnterWorldAsync(secondCharacter.Account, secondCharacter.Password, secondCharacter.Name),
+            [Second]);
         await context.StepAsync(
             "The first player walks to the meeting spot",
             $"{firstCharacter.Name} stands at ({MeetingX},{MeetingY}), a free spot in Lorencia's town, or one tile from it.",
@@ -54,7 +56,8 @@ internal sealed class ChatScenario : Scenario
             {
                 await first.WarpAsync(LorenciaGate, LorenciaMap);
                 await Meeting.WalkToAsync(first, MeetingX, MeetingY);
-            });
+            },
+            [First]);
         await context.StepAsync(
             "The second player walks up to the first",
             $"{secondCharacter.Name} stands at most {ChatDistance} tiles from {firstCharacter.Name}: normal chat reaches the players in view.",
@@ -66,7 +69,8 @@ internal sealed class ChatScenario : Scenario
         await context.StepAsync(
             "The first player opens the chat box with Enter",
             "The chat box opens at the bottom of the screen with the cursor in its text field.",
-            () => OpenChatAsync(context, first));
+            () => OpenChatAsync(context, first),
+            [First]);
         await context.StepAsync(
             $"The first player types \"{line}\" and sends it with Enter",
             $"The chat box closes, and the line shows in both chat logs as said by {firstCharacter.Name}.",

@@ -45,7 +45,8 @@ internal sealed class PersonalShopScenario : Scenario
         await context.StepAsync(
             $"The seller logs in as {sellerCharacter.Name}",
             $"{sellerCharacter.Name} enters the world in Devias, where the test data puts the quest characters.",
-            () => seller.EnterWorldAsync(sellerCharacter.Account, sellerCharacter.Password, sellerCharacter.Name));
+            () => seller.EnterWorldAsync(sellerCharacter.Account, sellerCharacter.Password, sellerCharacter.Name),
+            [Seller]);
         await context.StepAsync(
             $"The buyer logs in as {buyerCharacter.Name}",
             $"{buyerCharacter.Name} enters the world next to {sellerCharacter.Name}.",
@@ -53,7 +54,8 @@ internal sealed class PersonalShopScenario : Scenario
             {
                 await buyer.EnterWorldAsync(buyerCharacter.Account, buyerCharacter.Password, buyerCharacter.Name);
                 await Meeting.WalkUpToAsync(buyer, seller, buyerCharacter.Name, PurchaseDistance);
-            });
+            },
+            [Buyer]);
 
         await context.StepAsync(
             "The seller opens the inventory with I and presses its personal shop button",
@@ -187,7 +189,8 @@ internal sealed class PersonalShopScenario : Scenario
                     async () => (await buyer.OpenWindowsAsync()).Contains("message_box"),
                     ServerAnswer,
                     "no dialog asks whether to buy the jewel");
-            });
+            },
+            [Buyer]);
         await context.StepAsync(
             "The buyer confirms with Enter",
             $"The jewel and the zen change owner: {buyerCharacter.Name} has one more jewel and {price} zen less, "
