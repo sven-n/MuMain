@@ -191,12 +191,12 @@ CUIControl::CUIControl()
 {
     m_dwUIID = CreateUIID();
     m_dwParentUIID = 0;
-    SetState(0);
+    CUIControl::SetState(0);
     m_iOptions = 0;
     SetPosition(0, 0);
-    SetSize(100, 100);
-    SetArrangeType();
-    SetResizeType();
+    CUIControl::SetSize(100, 100);
+    CUIControl::SetArrangeType();
+    CUIControl::SetResizeType();
     m_iCoordType = COORDINATE_TYPE_LEFT_TOP;
 }
 
@@ -499,14 +499,14 @@ CUITextListBox<T>::CUITextListBox()
     m_bUseSelectLine = FALSE;
     m_bPressCursorKey = 0;
     m_bNewTypeScrollBar = TRUE;
-    SLSetSelectLine(0);
+    CUITextListBox<T>::SLSetSelectLine(0);
     m_bUseNewUIScrollBar = FALSE;
 }
 
 template <class T>
 CUITextListBox<T>::~CUITextListBox()
 {
-    Clear();
+    CUITextListBox<T>::Clear();
 }
 
 template <class T>
