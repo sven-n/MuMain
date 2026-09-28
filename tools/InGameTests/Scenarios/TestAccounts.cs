@@ -47,6 +47,16 @@ internal static class TestAccounts
     /// </summary>
     public static readonly TestCharacter Equipper = new("testgm2", "testgm2", "testgm2Sum");
 
+    /// <summary>
+    /// <c>trade-inventory-full</c>: level 71 and 81 Dark Wizards in Lorencia. The test data leaves
+    /// nine single free squares and no free 2x2 area in their inventories, and gives each 2x2 pad
+    /// armour pieces and rows of jewels and potions to offer.
+    /// </summary>
+    public static readonly TestCharacter FullTraderFirst = new("test7", "test7", "test7Dw");
+
+    /// <inheritdoc cref="FullTraderFirst"/>
+    public static readonly TestCharacter FullTraderSecond = new("test8", "test8", "test8Dw");
+
     /// <summary><c>party</c> leader: level 1 Dark Knight, at home in Lorencia.</summary>
     public static readonly TestCharacter PartyLeader = new("test0", "test0", "test0Dk");
 
