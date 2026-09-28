@@ -176,7 +176,9 @@ float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
 
     VectorNormalize(vResult);
 
-    const float yawFromPositiveY = std::atan2(vResult[0], vResult[1]) * kRadToDeg;
+    // The monster walks along its angle in the direction (sin, -cos), so the x of the
+    // vector from the target to the monster is negated, like CreateAngle does it.
+    const float yawFromPositiveY = std::atan2(-vResult[0], vResult[1]) * kRadToDeg;
     return UnwindDegrees360(yawFromPositiveY);
 }
 
