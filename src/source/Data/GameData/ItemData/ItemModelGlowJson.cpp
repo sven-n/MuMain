@@ -3,6 +3,8 @@
 #include "ItemModelGlowJson.h"
 #include "ItemModelValueReader.h"
 
+#include <algorithm>
+#include <array>
 #include <limits>
 #include <string>
 
@@ -41,13 +43,20 @@ void WriteMeshes(const ItemGlowMeshes& meshes, const char* meshesKey, const char
 OrderedJson WriteGlow(const ItemGlow& glow)
 {
     OrderedJson json = OrderedJson::object();
-    if (glow.levels.size() == 1)
+    if (glow.levels)
     {
-        json[LevelKey] = glow.levels.front();
-    }
-    else if (!glow.levels.empty())
-    {
-        json[LevelKey] = glow.levels;
+        // One number when the level is the same at every item level.
+        const auto& levels = *glow.levels;
+        const bool sameAtEveryLevel =
+            std::all_of(levels.begin(), levels.end(), [&](int level) { return level == levels.front(); });
+        if (sameAtEveryLevel)
+        {
+            json[LevelKey] = levels.front();
+        }
+        else
+        {
+            json[LevelKey] = levels;
+        }
     }
     if (glow.color != ItemGlow::DefaultColor)
     {
@@ -85,7 +94,8 @@ OrderedJson WriteGlow(const ItemGlow& glow)
 // ---------------------------------------------------------------- reading
 
 // One level for all item levels, or one per item level.
-void ReadLevels(ModelJson::ItemModelValueReader& reader, std::vector<int>& levels)
+void ReadLevels(ModelJson::ItemModelValueReader& reader,
+                std::optional<std::array<int, ItemGlow::ItemLevelCount>>& levels)
 {
     if (!reader.Has(LevelKey))
     {
@@ -97,17 +107,19 @@ void ReadLevels(ModelJson::ItemModelValueReader& reader, std::vector<int>& level
     {
         if (reader.ReadIndex(LevelKey, level, MaxLevel))
         {
-            levels = {level};
+            levels.emplace();
+            levels->fill(level);
         }
     }
     else if (reader.ReadIndexes(LevelKey, perItemLevel, MaxLevel))
     {
-        if (perItemLevel.size() != ItemLevelCount)
+        if (perItemLevel.size() != ItemGlow::ItemLevelCount)
         {
             reader.Error(LevelKey, "must be one level, or a list of one level for each item level 0 to 15");
             return;
         }
-        levels = std::move(perItemLevel);
+        levels.emplace();
+        std::copy(perItemLevel.begin(), perItemLevel.end(), levels->begin());
     }
 }
 
@@ -140,6 +152,30 @@ void Write(const ItemModelDefinition& model, OrderedJson& json)
     {
         json[GlowKey] = std::move(glow);
     }
+}
+
+void ForEachMesh(const ItemGlow& glow, const std::function<void(const std::string& field, int mesh)>& visit)
+{
+    const auto visitIndex = [&](const char* key, const std::optional<int>& mesh)
+    {
+        if (mesh)
+        {
+            visit(std::string(GlowKey) + "." + key, *mesh);
+        }
+    };
+    const auto visitMeshes = [&](const char* meshesKey, const char* hiddenMeshKey, const ItemGlowMeshes& meshes)
+    {
+        for (const int mesh : meshes.only)
+        {
+            visit(std::string(GlowKey) + "." + meshesKey, mesh);
+        }
+        visitIndex(hiddenMeshKey, meshes.hidden);
+    };
+
+    visitMeshes(MeshesKey, HiddenMeshKey, glow.meshes);
+    visitMeshes(ShineMeshesKey, ShineHiddenMeshKey, glow.shineMeshes);
+    visitIndex(ExcellentMeshKey, glow.excellentMesh);
+    visitIndex(ExcellentMeshWithoutSkinKey, glow.excellentMeshWithoutSkin);
 }
 
 void Read(const OrderedJson& json, ItemModelDefinition& model, const ModelJson::ReportIssue& report)

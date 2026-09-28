@@ -11,6 +11,8 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
+#include <set>
+
 class CItemEqualType
 {
 private:
@@ -91,6 +93,7 @@ private:
 
     int m_nTotalCnt;
     tm_ItemEqualType m_mapItemEqualType;
+    std::set<int> m_subItemModels;
     CItemEqualType m_cItemEqualType;
     list_ItemType m_listGloveformSword;
 
@@ -145,6 +148,8 @@ public:
                                int _Select = 0);
     int ModifyTypeSwordformGloves(int _ModelType, int _LeftHand);
     int EqualItemModelType(int _Type);
+    // The left and right models of the sword-form gloves (RegistItem).
+    bool IsSubItemModel(int _Type) const;
     void LoadModelItem();
     void LoadModelItemTexture();
     void MoveBlurEffect(CHARACTER* pCha, OBJECT* pObj, BMD* pModel);

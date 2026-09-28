@@ -4,6 +4,9 @@
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemModelJsonValues.h"
 
+#include <functional>
+#include <string>
+
 // The glow of the item model files:
 //
 //   "glow": { "level": 8, "color": "ice", "meshes": [1], "shineColor": "orange", "shineHiddenMesh": 0,
@@ -22,8 +25,6 @@ constexpr const char* LevelKey = "level";
 constexpr const char* MeshesKey = "meshes";
 constexpr const char* ShineMeshesKey = "shineMeshes";
 
-// A level per item level has one value for each of the levels 0 to 15.
-constexpr size_t ItemLevelCount = 16;
 // Levels above 15 do not glow; arrows +15 glow like 31.
 constexpr int MaxLevel = 31;
 
@@ -32,4 +33,8 @@ void Write(const ItemModelDefinition& model, Json::OrderedJson& json);
 
 // Reads the glow of a model's JSON object into the model.
 void Read(const Json::OrderedJson& json, ItemModelDefinition& model, const ModelJson::ReportIssue& report);
+
+// Calls visit(field, mesh) for every mesh the glow names, with the field as
+// "glow.meshes", "glow.excellentMesh", ...
+void ForEachMesh(const ItemGlow& glow, const std::function<void(const std::string& field, int mesh)>& visit);
 } // namespace Data::Items::GlowJson

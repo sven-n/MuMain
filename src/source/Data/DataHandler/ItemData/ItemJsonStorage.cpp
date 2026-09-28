@@ -164,7 +164,7 @@ std::filesystem::path GetGlowColorsFile()
 GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
 {
     GlowColorsLoadResult result;
-    const std::string source = Effects::GlowColorsFile;
+    const std::string source = file.generic_string();
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {

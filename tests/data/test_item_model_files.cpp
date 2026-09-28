@@ -9,6 +9,7 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelGlowJson.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -49,6 +50,15 @@ const ItemModelDataLoadResult& ShippedModels()
 {
     static const ItemModelDataLoadResult result = LoadItemModelDataDirectory(ModelDirectory);
     return result;
+}
+
+using GlowLevels = std::array<int, ItemGlow::ItemLevelCount>;
+
+GlowLevels SameGlowLevel(int level)
+{
+    GlowLevels levels{};
+    levels.fill(level);
+    return levels;
 }
 
 const GlowColorsLoadResult& ShippedGlowColors()
@@ -304,7 +314,7 @@ TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
         {14, 21, {{{1, 2}, {0.4f, 0.8f}}}, {0.5f, 0.5f}},                                         // Rena
         {14, 24, {{{1}, {0.5f, 0.8f}}}, {0.5f, 0.95f}}, // Broken Sword / Dark Stone
     };
-    g_ItemModelDatabase.Build(ShippedModels().models);
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     for (const Expected& item : expected)
     {
@@ -324,7 +334,7 @@ TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
             CHECK(got.y == want.y);
         }
     }
-    g_ItemModelDatabase.Build({});
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
 namespace
@@ -354,7 +364,7 @@ void CheckGroundDisplay(int modelType, const Render::Items::Display::GroundDispl
 TEST_CASE("Models drawn for items keep the look of the old drawing code [data][items]")
 {
     using namespace Render::Items::Display;
-    g_ItemModelDatabase.Build(ShippedModels().models);
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     // The Rage Fighter armor has inventory models of its own, drawn on the
     // character skeleton with the look of the item.
@@ -396,7 +406,7 @@ TEST_CASE("Models drawn for items keep the look of the old drawing code [data][i
     CHECK_FALSE(GetSmallArchangelWeaponScale(MODEL_DIVINE_STAFF_OF_ARCHANGEL, 0).has_value());
     CHECK_FALSE(GetSmallArchangelWeaponScale(MODEL_EVENT + 12, -1).has_value());
 
-    g_ItemModelDatabase.Build({});
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
 TEST_CASE("Shipped item models keep the glow of the old drawing code [data][items]")
@@ -431,14 +441,14 @@ TEST_CASE("Shipped item models keep the glow of the old drawing code [data][item
 
     // Jewels glow like +8; wings and capes like +0 and without the excellent
     // glow.
-    CHECK(glowOf(14, 13).levels == std::vector<int>{8});
-    CHECK(glowOf(12, 0).levels == std::vector<int>{0});
+    CHECK(glowOf(14, 13).levels == SameGlowLevel(8));
+    CHECK(glowOf(12, 0).levels == SameGlowLevel(0));
     // +1 arrows glow like +3; from +8 they would glow like +17 and up, which
     // is no glow at all.
-    CHECK(glowOf(4, 15).levels == std::vector<int>{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31});
+    CHECK(glowOf(4, 15).levels == GlowLevels{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31});
     // The Devil's Square items glow like half their square, the seventh
     // square like +13.
-    CHECK(glowOf(14, 17).levels == std::vector<int>{0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13});
+    CHECK(glowOf(14, 17).levels == GlowLevels{0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13});
     CHECK_FALSE(glowOf(12, 0).excellent);
     CHECK_FALSE(glowOf(13, 30).excellent);
 }
@@ -449,28 +459,9 @@ TEST_CASE("The glow of shipped item models is on meshes the models have [data][i
 {
     for (const ItemModelDefinition& model : ShippedModels().models)
     {
-        const ItemGlow& glow = model.glow;
-        std::vector<std::pair<const char*, int>> meshes;
-        for (const int mesh : glow.meshes.only)
-        {
-            meshes.emplace_back("meshes", mesh);
-        }
-        for (const int mesh : glow.shineMeshes.only)
-        {
-            meshes.emplace_back("shineMeshes", mesh);
-        }
-        const std::pair<const char*, std::optional<int>> single[] = {
-            {"hiddenMesh", glow.meshes.hidden},
-            {"shineHiddenMesh", glow.shineMeshes.hidden},
-            {"excellentMesh", glow.excellentMesh},
-            {"excellentMeshWithoutSkin", glow.excellentMeshWithoutSkin}};
-        for (const auto& [field, mesh] : single)
-        {
-            if (mesh)
-            {
-                meshes.emplace_back(field, *mesh);
-            }
-        }
+        std::vector<std::pair<std::string, int>> meshes;
+        GlowJson::ForEachMesh(model.glow,
+                              [&](const std::string& field, int mesh) { meshes.emplace_back(field, mesh); });
         if (meshes.empty())
         {
             continue;
@@ -479,7 +470,7 @@ TEST_CASE("The glow of shipped item models is on meshes the models have [data][i
         const std::unique_ptr<BMD> bmd = OpenModelFile(model);
         for (const auto& [field, mesh] : meshes)
         {
-            INFO("(" << model.group << "," << model.number << ") glow." << field << " " << mesh);
+            INFO("(" << model.group << "," << model.number << ") " << field << " " << mesh);
             CHECK(mesh < bmd->NumMeshs);
         }
     }
@@ -501,8 +492,7 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
 {
     using namespace Render::Items::Glow;
     g_GlowColors.Build(ShippedGlowColors().colors);
-    g_ItemModelDatabase.Build(ShippedModels().models);
-    ResolveColors();
+    g_ItemModelDatabase.Build(ShippedModels().models, g_GlowColors);
 
     CHECK(GetLevel(MODEL_ARROWS, 0) == 0);
     CHECK(GetLevel(MODEL_ARROWS, 3) == 7);
@@ -529,7 +519,6 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
     CHECK(HasExcellentGlow(MODEL_PLAYER));
     CHECK_FALSE(HasExcellentGlow(MODEL_WING));
 
-    g_ItemModelDatabase.Build({});
     g_GlowColors.Build({});
-    ResolveColors();
+    g_ItemModelDatabase.Build({}, g_GlowColors);
 }

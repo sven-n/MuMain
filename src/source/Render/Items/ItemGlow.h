@@ -14,19 +14,7 @@ class OBJECT;
 namespace Render::Items::Glow
 {
 using Color = std::array<float, 3>;
-
-// The glow colors of a model, looked up in the glow color list.
-struct Colors
-{
-    Color color{};
-    Color shineColor{};
-    bool shineWhite = false;
-    Color ancientColor{};
-};
-
-// Looks the glow colors of the item models up in the glow color list. Called
-// once the item models and the list are loaded.
-void ResolveColors();
+using Colors = Data::Items::ItemGlowColors;
 
 // The glow of the item model, or the default glow for other models.
 const Data::Items::ItemGlow& Get(int modelType);

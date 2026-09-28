@@ -200,17 +200,25 @@ TEST_CASE("The item model database finds models by item type [data][items]")
     invalid.number = MAX_ITEM_INDEX;
     const std::vector<ItemModelDefinition> models{MakeDarkHorse(), invalid};
     ItemModelDatabase database;
+    Data::Effects::GlowColorList glowColors;
+    const std::vector<Data::Effects::GlowColor> colors{
+        {"orange", {1, 0.5, 0}}, {"white", {1, 1, 1}}, {"azure", {0.1, 0.6, 1}}};
+    glowColors.Build(colors);
 
-    database.Build(models);
+    database.Build(models, glowColors);
 
     CHECK(database.GetModelCount() == 1);
+    // The glow colors are looked up in the list.
+    REQUIRE(database.FindGlowColors(MakeItemType(13, 4)) != nullptr);
+    CHECK(database.FindGlowColors(MakeItemType(13, 4))->color == std::array<float, 3>{1.0f, 0.5f, 0.0f});
+    CHECK(database.FindGlowColors(MakeItemType(13, 5)) == nullptr);
     REQUIRE(database.Find(MakeItemType(13, 4)) != nullptr);
     CHECK(database.Find(MakeItemType(13, 4))->file == "Data/Item/DarkHorseHorn.bmd");
     CHECK(database.Find(MakeItemType(13, 5)) == nullptr);
     CHECK(database.Find(-1) == nullptr);
     CHECK(database.Find(MAX_ITEM) == nullptr);
 
-    database.Build({});
+    database.Build({}, glowColors);
     CHECK(database.GetModelCount() == 0);
     CHECK(database.Find(MakeItemType(13, 4)) == nullptr);
 }

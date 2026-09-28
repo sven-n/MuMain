@@ -5,13 +5,11 @@
 #include "ItemModelLookup.h"
 
 #include "Core/Globals/_enum.h"
-#include "Data/GameData/EffectData/GlowColorList.h"
-#include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Render/Models/ZzzBMD.h"
 
-#include <vector>
+#include <algorithm>
 
 namespace Render::Items::Glow
 {
@@ -26,9 +24,6 @@ const ItemGlow DefaultGlow;
 // The colors of models that are not items (monsters, ...); they stay in code
 // until the monsters get data of their own.
 const Colors OtherModelColors{{1.0f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, false, {0.1f, 0.6f, 1.0f}};
-
-// The glow colors of every item type (ResolveColors).
-std::vector<Colors> g_itemColors;
 
 constexpr int ExcellentGlowRenderType = RENDER_TEXTURE | RENDER_BRIGHT;
 
@@ -71,35 +66,10 @@ void RenderPhoenixSoulInventoryMesh(BMD* b, OBJECT* o, int renderType, float alp
 
 // ------------------------------------------------ colors
 
-Color FindColor(const std::string& name)
-{
-    // Loading stops at names that are not in the list.
-    const Data::Effects::GlowColorValue* value = g_GlowColors.Find(name);
-    if (value == nullptr)
-    {
-        return {};
-    }
-    return {static_cast<float>((*value)[0]), static_cast<float>((*value)[1]), static_cast<float>((*value)[2])};
-}
-
-Colors FindColors(const ItemGlow& glow)
-{
-    return {FindColor(glow.color), FindColor(glow.shineColor), glow.shineWhite, FindColor(glow.ancientColor)};
-}
-
 const Colors& GetItemColors(int itemType)
 {
-    if (!Data::Items::IsValidItemType(itemType) || g_itemColors.empty())
-    {
-        return OtherModelColors;
-    }
-    return g_itemColors[itemType];
-}
-
-// The second models of the Rage Fighter gloves.
-bool IsGloveSecondModel(int modelType)
-{
-    return modelType >= MODEL_SWORD_32_LEFT && modelType <= MODEL_SWORD_35_RIGHT;
+    const Colors* colors = g_ItemModelDatabase.FindGlowColors(itemType);
+    return colors != nullptr ? *colors : OtherModelColors;
 }
 
 void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, int renderType, float alpha, int texture)
@@ -119,20 +89,6 @@ void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, int renderTyp
 }
 } // namespace
 
-void ResolveColors()
-{
-    const Colors defaults = FindColors(DefaultGlow);
-    g_itemColors.assign(MAX_ITEM, defaults);
-    const std::span<const ItemModelDefinition> models = g_ItemModelDatabase.GetAllSlots();
-    for (size_t itemType = 0; itemType < models.size(); ++itemType)
-    {
-        if (models[itemType].Exists())
-        {
-            g_itemColors[itemType] = FindColors(models[itemType].glow);
-        }
-    }
-}
-
 const ItemGlow& Get(int modelType)
 {
     const ItemModelDefinition* model = FindItemModel(modelType);
@@ -145,7 +101,8 @@ const Colors& GetColors(int modelType)
     {
         return GetItemColors(*item);
     }
-    if (IsGloveSecondModel(modelType))
+    // The second models of the Rage Fighter gloves.
+    if (g_CMonkSystem.IsSubItemModel(modelType))
     {
         return GetItemColors(g_CMonkSystem.EqualItemModelType(modelType) - MODEL_ITEM);
     }
@@ -179,16 +136,13 @@ int GetLevel(int modelType, int level)
         return level + WizardsRingGlowLevelOffset;
     }
 
-    const std::vector<int>& levels = Get(modelType).levels;
-    if (levels.size() == 1)
+    const auto& levels = Get(modelType).levels;
+    if (!levels)
     {
-        return levels.front();
+        return level;
     }
-    if (level >= 0 && level < static_cast<int>(levels.size()))
-    {
-        return levels[level];
-    }
-    return level;
+    // Other levels than 0 to 15 (drawn for effects) take the nearest one.
+    return (*levels)[std::clamp(level, 0, static_cast<int>(levels->size()) - 1)];
 }
 
 bool HasExcellentGlow(int modelType)

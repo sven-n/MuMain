@@ -65,11 +65,13 @@ struct ItemGlow
     static constexpr const char* DefaultColor = "orange";
     static constexpr const char* DefaultShineColor = "white";
     static constexpr const char* DefaultAncientColor = "azure";
+    // The item levels 0 to 15.
+    static constexpr size_t ItemLevelCount = 16;
 
-    // The level the item glows like instead of its own: one level for all
-    // item levels (e.g. 8 for jewels, 0 for wings), or one per item level
-    // from 0 to 15 (arrows). Empty: its own level.
-    std::vector<int> levels;
+    // The level the item glows like at each item level instead of its own:
+    // all the same for most items (e.g. 8 for jewels, 0 for wings), one per
+    // level for arrows. None: its own level.
+    std::optional<std::array<int, ItemLevelCount>> levels;
     // The glow of items +7 and up.
     std::string color = DefaultColor;
     ItemGlowMeshes meshes;
@@ -88,6 +90,16 @@ struct ItemGlow
     std::optional<int> excellentMeshWithoutSkin;
 
     bool operator==(const ItemGlow&) const = default;
+};
+
+// The glow colors of an item model, looked up in the glow color list when
+// the models are built (ItemModelDatabase::Build).
+struct ItemGlowColors
+{
+    std::array<float, 3> color{};
+    std::array<float, 3> shineColor{};
+    bool shineWhite = false;
+    std::array<float, 3> ancientColor{};
 };
 
 // The model of one item: which .bmd file is opened for it, where its

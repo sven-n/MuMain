@@ -53,7 +53,8 @@ ItemModelDefinition MakeGlowingModel()
     model.number = 0;
     model.file = "Data/Item/Sword01.bmd";
     ItemGlow& glow = model.glow;
-    glow.levels = {8};
+    glow.levels.emplace();
+    glow.levels->fill(8);
     glow.color = "ice";
     glow.meshes.only = {0, 2};
     glow.shineColor = "orange";
@@ -82,7 +83,7 @@ TEST_CASE("Item model glow values are kept through write and read [data][items]"
 TEST_CASE("An item model can glow like another level for each item level [data][items]")
 {
     ItemModelDefinition arrows = MakeGlowingModel();
-    arrows.glow.levels = {0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31};
+    arrows.glow.levels = {{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31}};
     const std::vector<ItemModelDefinition> models{arrows};
 
     const std::string text = WriteItemModelGroupJson(0, models);
@@ -191,6 +192,11 @@ TEST_CASE("The glow color list is checked [data][effects]")
     // The JSON reader would keep only the last of two equal names.
     CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"gold": [1, 0.7, 0.2], "gold": [1, 1, 0]}})"),
                    ItemDataIssueSeverity::Error, "colors.gold"));
+    // Repeated keys elsewhere are no color names.
+    const std::vector<ItemDataIssue> notes =
+        errorsOf(R"({"formatVersion": 1, "colors": {}, "notes": {"a": 1, "a": 2}})");
+    CHECK(HasIssue(notes, ItemDataIssueSeverity::Warning, "notes"));
+    CHECK_FALSE(HasErrors(notes));
 }
 
 TEST_CASE("Item model glow colors must be in the glow color list [data][items]")

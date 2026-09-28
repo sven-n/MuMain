@@ -60,6 +60,7 @@ CMonkSystem::~CMonkSystem()
 void CMonkSystem::Init()
 {
     m_mapItemEqualType.clear();
+    m_subItemModels.clear();
     memset(&m_cItemEqualType, 0, sizeof(CItemEqualType));
     m_listGloveformSword.clear();
 
@@ -87,6 +88,17 @@ void CMonkSystem::RegistItem()
 
     m_cItemEqualType.SetModelType(MODEL_PHOENIX_SOUL_STAR, MODEL_SWORD_35_LEFT, MODEL_SWORD_35_RIGHT);
     m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
+
+    for (const auto& [modelType, equalType] : m_mapItemEqualType)
+    {
+        m_subItemModels.insert(equalType.GetSubLeftType());
+        m_subItemModels.insert(equalType.GetSubRightType());
+    }
+}
+
+bool CMonkSystem::IsSubItemModel(int _Type) const
+{
+    return m_subItemModels.contains(_Type);
 }
 
 void CMonkSystem::LoadModelItem()

@@ -17,30 +17,46 @@ using Items::Json::OrderedJson;
 
 constexpr const char* ColorsKey = "colors";
 constexpr double MaxColorValue = 1.0;
-// The names of the colors are keys in the object of "colors" in the root.
-constexpr int ColorNameDepth = 2;
+// The keys of the root object, where "colors" is.
+constexpr int RootKeyDepth = 1;
+
+// The keys of an object that the parser is in; only those of "colors" are
+// color names.
+struct ObjectKeys
+{
+    bool isColorList = false;
+    std::set<std::string> keys;
+};
 
 // The JSON reader keeps only the last of two equal keys, so a name that is
 // in the list twice is looked for in the text.
 std::vector<std::string> FindRepeatedColorNames(std::string_view text)
 {
     std::vector<std::string> repeated;
-    std::vector<std::set<std::string>> keysPerObject;
+    std::vector<ObjectKeys> objects;
+    std::string lastRootKey;
     const OrderedJson::parser_callback_t callback =
         [&](int depth, OrderedJson::parse_event_t event, OrderedJson& parsed)
     {
         if (event == OrderedJson::parse_event_t::object_start)
         {
-            keysPerObject.emplace_back();
+            objects.push_back({depth == RootKeyDepth && lastRootKey == ColorsKey, {}});
         }
-        else if (event == OrderedJson::parse_event_t::object_end && !keysPerObject.empty())
+        else if (event == OrderedJson::parse_event_t::object_end && !objects.empty())
         {
-            keysPerObject.pop_back();
+            objects.pop_back();
         }
-        else if (event == OrderedJson::parse_event_t::key && depth == ColorNameDepth && !keysPerObject.empty() &&
-                 !keysPerObject.back().insert(parsed.get<std::string>()).second)
+        else if (event == OrderedJson::parse_event_t::key)
         {
-            repeated.push_back(parsed.get<std::string>());
+            const std::string key = parsed.get<std::string>();
+            if (depth == RootKeyDepth)
+            {
+                lastRootKey = key;
+            }
+            else if (!objects.empty() && objects.back().isColorList && !objects.back().keys.insert(key).second)
+            {
+                repeated.push_back(key);
+            }
         }
         return true;
     };
