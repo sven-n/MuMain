@@ -67,6 +67,14 @@ json WindowRect(const CNewUIObj& window, const RECT& rect)
     return pixels;
 }
 
+// A button's rectangle in its window's coordinates.
+RECT ButtonRect(SEASON3B::CNewUIButton& button)
+{
+    const POINT& position = button.GetPos();
+    const POINT& size = button.GetSize();
+    return {position.x, position.y, position.x + size.x, position.y + size.y};
+}
+
 // Buttons a scenario presses with `click-ui`, by name.
 json Elements()
 {
@@ -75,6 +83,19 @@ json Elements()
     {
         elements["trade.confirm"] = WindowRect(*g_pTrade, g_pTrade->GetMyConfirmRect());
         elements["trade.zen"] = WindowRect(*g_pTrade, g_pTrade->GetZenButtonRect());
+    }
+    if (SEASON3B::CNewUIButton* repair = g_pMyInventory->GetShownRepairButton())
+    {
+        elements["inventory.repair"] = WindowRect(*g_pMyInventory, ButtonRect(*repair));
+    }
+    if (SEASON3B::CNewUIButton* myShop = g_pMyInventory->GetShownMyShopButton())
+    {
+        elements["inventory.my_shop"] = WindowRect(*g_pMyInventory, ButtonRect(*myShop));
+    }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
+    {
+        elements["npc_shop.repair"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairButton()));
+        elements["npc_shop.repair_all"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairAllButton()));
     }
     return elements;
 }
@@ -127,13 +148,15 @@ std::optional<CNewUIInventoryCtrl*> NamedGrid(std::string_view name, int slot)
         return OpenGrid(SEASON3B::INTERFACE_STORAGE, g_pStorageInventory->GetInventoryCtrl());
     if (name == "mix")
         return OpenGrid(SEASON3B::INTERFACE_MIXINVENTORY, g_pMixInventory->GetInventoryCtrl());
+    if (name == "npc_shop")
+        return OpenGrid(SEASON3B::INTERFACE_NPCSHOP, g_pNPCShop->GetInventoryCtrl());
     return std::nullopt;
 }
 
 [[nodiscard]] bool IsKnownGrid(std::string_view name)
 {
     return name == "inventory" || name == "trade" || name == "trade_partner" || name == "storage" || name == "mix" ||
-           name == "equipment";
+           name == "npc_shop" || name == "equipment";
 }
 
 std::string SquarePixel(const Request& request, CNewUIInventoryCtrl& grid, int slot)

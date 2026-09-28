@@ -39,6 +39,9 @@ json DescribeItem(const ITEM& item, int slot)
     described["name"] = ItemName(item);
     described["level"] = item.Level;
     described["durability"] = item.Durability;
+    // What a repair brings the durability back to (a stack's count for potions
+    // and jewels, which are not repaired).
+    described["max_durability"] = CalcMaxDurability(&item, &ItemAttribute[item.Type], item.Level);
     // In inventory squares, so a script can tell whether an item fits somewhere.
     described["width"] = ItemAttribute[item.Type].Width;
     described["height"] = ItemAttribute[item.Type].Height;
@@ -137,9 +140,45 @@ json InventoryArray()
         {
             continue;
         }
-        inventory.push_back(DescribeItem(*item, slot));
+        json described = DescribeItem(*item, slot);
+        // While an NPC shop is open, what it pays for the item, as its tooltip shows.
+        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        {
+            described["sell_price"] = ItemValue(const_cast<ITEM*>(item), 1);
+        }
+        inventory.push_back(std::move(described));
     }
     return inventory;
+}
+
+// The open NPC shop: whether it repairs, and its goods with the price its
+// tooltip shows, tax included; null while no shop is open.
+json NpcShopState()
+{
+    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+    {
+        return nullptr;
+    }
+
+    json shop;
+    shop["repair_shop"] = g_pNPCShop->IsRepairShop();
+    shop["tax_rate"] = g_pNPCShop->GetTaxRate();
+    json items = json::array();
+    SEASON3B::CNewUIInventoryCtrl* grid = g_pNPCShop->GetInventoryCtrl();
+    for (int i = 0; grid != nullptr && i < static_cast<int>(grid->GetNumberOfItems()); ++i)
+    {
+        ITEM* item = grid->GetItem(i);
+        if (item == nullptr)
+        {
+            continue;
+        }
+        json described = DescribeItem(*item, item->y * grid->GetNumberOfColumn() + item->x);
+        const int64_t price = ItemValue(item, 0);
+        described["price"] = price + price * g_pNPCShop->GetTaxRate() / 100;
+        items.push_back(std::move(described));
+    }
+    shop["items"] = std::move(items);
+    return shop;
 }
 
 json PartyArray()
@@ -295,6 +334,10 @@ std::string WorldStateObject()
     state["buffs"] = BuffArray();
     state["party"] = PartyArray();
     state["trade"] = TradeState();
+    state["npc_shop"] = NpcShopState();
+    // Clicks repair items instead of picking them up (the inventory's repair
+    // button, `L`, or an NPC's repair button).
+    state["repair_mode"] = g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON;
     state["nearby"] = NearbyArray();
 
     return state.dump();

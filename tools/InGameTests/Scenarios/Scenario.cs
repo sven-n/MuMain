@@ -9,6 +9,9 @@ internal enum ScenarioCategory
     /// <summary>Players doing something with each other, e.g. trading.</summary>
     PlayerInteractions,
 
+    /// <summary>A player and an NPC, e.g. buying in a shop.</summary>
+    NpcInteractions,
+
     /// <summary>How the game treats a player on its own, e.g. the rules of a map.</summary>
     GameBehaviour,
 }
@@ -19,6 +22,7 @@ internal static class ScenarioCategories
     public static string DisplayName(this ScenarioCategory category) => category switch
     {
         ScenarioCategory.PlayerInteractions => "Player Interactions",
+        ScenarioCategory.NpcInteractions => "NPC Interactions",
         ScenarioCategory.GameBehaviour => "Game Behaviour",
         _ => category.ToString(),
     };

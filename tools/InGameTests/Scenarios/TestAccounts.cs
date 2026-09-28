@@ -28,4 +28,10 @@ internal static class TestAccounts
 
     /// <summary><c>chat</c>: level 61 Dark Knight, at home in Lorencia.</summary>
     public static readonly TestCharacter ChatSecond = new("test6", "test6", "test6Dk");
+
+    /// <summary>
+    /// <c>npc-shop</c>: level 71 Dark Knight in Lorencia with potions and Jewels of Bless to sell,
+    /// and 25 free squares for what it buys.
+    /// </summary>
+    public static readonly TestCharacter NpcShopper = new("test7", "test7", "test7Dk");
 }

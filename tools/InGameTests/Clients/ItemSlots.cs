@@ -18,8 +18,39 @@ internal static class ItemSlots
             ? state.GetProperty("trade").GetProperty(list).EnumerateArray().Select(Read).ToList()
             : [];
 
+    /// <summary>The first slot of the main inventory grid; the equipment comes before it.</summary>
+    public const int FirstInventorySlot = 12;
+
+    /// <summary>The columns and rows of the main inventory grid.</summary>
+    public const int InventoryColumns = 8;
+    public const int InventoryRows = 8;
+
     /// <summary>The item in <paramref name="slot"/>, or null.</summary>
     public static ItemSlot? At(IReadOnlyList<ItemSlot> items, int slot) => items.FirstOrDefault(item => item.Slot == slot);
+
+    /// <summary>
+    /// The top-left slot of the first free <paramref name="width"/> x <paramref name="height"/>
+    /// area of the main inventory grid, row by row; null when there is none.
+    /// </summary>
+    public static int? FreeArea(IReadOnlyList<ItemSlot> inventory, int width, int height)
+    {
+        var used = inventory.Select(entry => entry.Slot).ToHashSet();
+        for (var row = 0; row + height <= InventoryRows; row++)
+        {
+            for (var column = 0; column + width <= InventoryColumns; column++)
+            {
+                var fits = Enumerable.Range(0, height)
+                    .SelectMany(dy => Enumerable.Range(0, width).Select(dx => FirstInventorySlot + ((row + dy) * InventoryColumns) + column + dx))
+                    .All(slot => !used.Contains(slot));
+                if (fits)
+                {
+                    return FirstInventorySlot + (row * InventoryColumns) + column;
+                }
+            }
+        }
+
+        return null;
+    }
 
     private static ItemSlot Read(JsonElement item)
         => new(

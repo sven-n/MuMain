@@ -15,7 +15,6 @@ internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
     private const int HelperSlot = 8;
     private const string IcarusGate = "Icarus";
     private const int IcarusMap = 10;
-    private const int InventoryColumns = 8;
 
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
     // A refused take-off sends nothing, so "still equipped after a while" is the answer.
@@ -175,7 +174,7 @@ internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
         // The first click picks the item up, the second puts it down so that it
         // covers the free area; an equipment item hangs from the cursor by its middle.
         await client.ClickSlotAsync("equipment", slot);
-        await client.DropOnAreaAsync("inventory", freeArea, item.Width, item.Height, InventoryColumns);
+        await client.DropOnAreaAsync("inventory", freeArea, item.Width, item.Height, ItemSlots.InventoryColumns);
         await Expect.StillAfterAsync(
             async () => await EquippedAsync(client, slot) is not null,
             RefusalWait,
@@ -186,28 +185,9 @@ internal sealed class IcarusFlyingItemTakeOffScenario : Scenario
     // fits <paramref name="item"/>. `state` lists an item under every square it
     // covers, so a square is free when no item is listed on it.
     private static async Task<int> FreeAreaAsync(GameClient client, ItemSlot item)
-    {
-        const int FirstInventorySlot = 12;
-        const int Columns = InventoryColumns;
-        const int Rows = 8;
-        var used = ItemSlots.Of(await client.StateAsync(), "inventory").Select(entry => entry.Slot).ToHashSet();
-        for (var row = 0; row + item.Height <= Rows; row++)
-        {
-            for (var column = 0; column + item.Width <= Columns; column++)
-            {
-                var fits = Enumerable.Range(0, item.Height)
-                    .SelectMany(dy => Enumerable.Range(0, item.Width).Select(dx => FirstInventorySlot + ((row + dy) * Columns) + column + dx))
-                    .All(slot => !used.Contains(slot));
-                if (fits)
-                {
-                    return FirstInventorySlot + (row * Columns) + column;
-                }
-            }
-        }
-
-        throw new ScenarioFailedException(
-            $"the inventory has no free {item.Width}x{item.Height} area for '{item.Name}'; a refused take-off would prove nothing");
-    }
+        => ItemSlots.FreeArea(ItemSlots.Of(await client.StateAsync(), "inventory"), item.Width, item.Height)
+           ?? throw new ScenarioFailedException(
+               $"the inventory has no free {item.Width}x{item.Height} area for '{item.Name}'; a refused take-off would prove nothing");
 
     // Puts <paramref name="item"/> back into <paramref name="slot"/> unless it is
     // there: part of the scenario, and what leaves the test account as the
