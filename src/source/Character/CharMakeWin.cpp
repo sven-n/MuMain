@@ -261,12 +261,18 @@ void CCharMakeWin::ReloadRmlTheme()
 
     // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
     const bool wasVisible = m_pRmlDoc->IsVisible();
+    // Destroy() resets the model, so carry the unsent text across the rebuild.
+    const Rml::String charName = m_RmlBinder.GetModel().charName;
+
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    m_RmlBinder.GetModel().charName = charName;
+    m_RmlBinder.MarkDirty("char_name");
+
     SetPosition(m_nOriginX, m_nOriginY);
     UpdateDisplay();
     if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }

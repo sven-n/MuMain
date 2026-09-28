@@ -589,12 +589,20 @@ void mu::ui::window::CChatInputBox::ReloadRmlTheme()
 {
     if (!m_pRmlDoc) return;
 
+    // Destroy() resets the model, so carry the unsent text across the rebuild.
+    const Rml::String chatText = m_RmlBinder.GetModel().chatText;
+    const Rml::String whisperId = m_RmlBinder.GetModel().whisperId;
+
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    m_RmlBinder.GetModel().chatText = chatText;
+    m_RmlBinder.GetModel().whisperId = whisperId;
+    m_RmlBinder.MarkDirty("chat_text");
+    m_RmlBinder.MarkDirty("whisper_id");
 }
 
 void mu::ui::window::CChatInputBox::SyncRmlModel()

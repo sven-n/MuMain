@@ -193,12 +193,23 @@ void CLoginWin::ReloadRmlTheme()
     // The document's own visibility, not CObject::IsVisible() -- Release() hides m_pRmlDoc
     // directly, so the latter goes stale across scene transitions.
     const bool wasVisible = m_pRmlDoc->IsVisible();
+    // Destroy() resets the model, so carry the typed credentials across the rebuild. Emptied
+    // fields would also read as an edit and revoke the saved credentials
+    // (RevokeSavedCredentialsIfEdited()).
+    const Rml::String username = m_RmlBinder.GetModel().username;
+    const Rml::String password = m_RmlBinder.GetModel().password;
+
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    m_RmlBinder.GetModel().username = username;
+    m_RmlBinder.GetModel().password = password;
+    m_RmlBinder.MarkDirty("username");
+    m_RmlBinder.MarkDirty("password");
+
     // The panel's size follows the theme's units (LoginUIScaleRatio()); keep it where
     // CSceneUICoordinator::CreateLoginScene() places it: centred, 2/3 down the free height.
     const SIZE previousSize = m_Size;

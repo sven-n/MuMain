@@ -103,6 +103,13 @@ void CMsgWin::BuildRmlUi()
 
     if (modelCreated)
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
+
+    // Set on every build, so a rebuilt document keeps it; the field only shows in one mode.
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* field = m_pRmlDoc->GetElementById("msgwin_input"))
+            field->SetAttribute("maxlength", kResidentPasswordMaxLength);
+    }
 }
 
 void CMsgWin::ReloadRmlTheme()
@@ -111,12 +118,18 @@ void CMsgWin::ReloadRmlTheme()
 
     // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
     const bool wasVisible = m_pRmlDoc->IsVisible();
+    // Destroy() resets the model, so carry the unsent text across the rebuild.
+    const Rml::String residentPassword = m_RmlBinder.GetModel().residentPassword;
+
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    m_RmlBinder.GetModel().residentPassword = residentPassword;
+    m_RmlBinder.MarkDirty("password_input");
+
     if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
@@ -550,7 +563,6 @@ void CMsgWin::InitResidentNumInput()
     {
         if (Rml::Element* field = m_pRmlDoc->GetElementById("msgwin_input"))
         {
-            field->SetAttribute("maxlength", kResidentPasswordMaxLength);
             // Explicit focus, not an autofocus attribute: this document is reused by every other
             // MSG_WIN_TYPE, and only this one mode has a field to focus.
             field->Focus();

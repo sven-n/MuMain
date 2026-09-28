@@ -317,6 +317,14 @@ since nothing else will. Reference implementations: `CMainFrameWindow::ReloadRml
 (`UI/HUD/MainFrameWindow.cpp`, main + background doc) and `CCharacterInfoWindow::ReloadRmlTheme()`
 (`UI/Character/CharacterInfoWindow.cpp`, main doc only).
 
+**Text the player has typed is not live data.** It exists only in the model, which `Destroy()`
+resets, so no per-frame poll can bring it back. Copy each `data-value` field before `Destroy()`,
+restore it after `BuildRmlUi()`, and `MarkDirty()` it before the rebuilt document is shown
+(`CMyShopInventory`, `CLoginWin`, `CCharMakeWin`, `CMsgWin`, `CChatInputBox`, the MU Helper windows).
+Set the field's limits (`maxlength`, `type`) inside `BuildRmlUi()`, not in the code that opens the
+dialog, so the rebuilt field has them before the value lands. Restore only in the reload path:
+opening a dialog afresh should still clear it.
+
 ## List / repeated rows
 
 RmlUi's `data-for` binding against a `std::vector<T>` model field — the proven pattern for any
