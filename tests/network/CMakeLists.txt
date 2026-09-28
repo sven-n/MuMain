@@ -14,6 +14,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_transform_viewport_entry
+    SOURCES
+        test_transform_viewport_entry.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_connection_library_load
     SOURCES
         test_connection_library_load.cpp
