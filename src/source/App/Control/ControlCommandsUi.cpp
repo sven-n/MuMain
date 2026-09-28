@@ -33,13 +33,20 @@ struct NamedWindow
 
 // The windows `ui` reports when they are open.
 constexpr NamedWindow Windows[] = {
-    {"inventory", SEASON3B::INTERFACE_INVENTORY},     {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
-    {"character", SEASON3B::INTERFACE_CHARACTER},     {"trade", SEASON3B::INTERFACE_TRADE},
-    {"storage", SEASON3B::INTERFACE_STORAGE},         {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
-    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},        {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
-    {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND}, {"chat_input", SEASON3B::INTERFACE_CHATINPUTBOX},
-    {"party", SEASON3B::INTERFACE_PARTY},             {"command", SEASON3B::INTERFACE_COMMAND},
-    {"my_shop", SEASON3B::INTERFACE_MYSHOP_INVENTORY}, {"purchase_shop", SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY},
+    {"inventory", SEASON3B::INTERFACE_INVENTORY},
+    {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
+    {"character", SEASON3B::INTERFACE_CHARACTER},
+    {"trade", SEASON3B::INTERFACE_TRADE},
+    {"storage", SEASON3B::INTERFACE_STORAGE},
+    {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
+    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},
+    {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
+    {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND},
+    {"chat_input", SEASON3B::INTERFACE_CHATINPUTBOX},
+    {"party", SEASON3B::INTERFACE_PARTY},
+    {"command", SEASON3B::INTERFACE_COMMAND},
+    {"my_shop", SEASON3B::INTERFACE_MYSHOP_INVENTORY},
+    {"purchase_shop", SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY},
 };
 
 // A point of a window, from its window-local coordinates to window pixels.
@@ -100,10 +107,12 @@ json Elements()
     }
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
     {
-        elements["command.trade"] = WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_TRADE)));
+        elements["command.trade"] =
+            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_TRADE)));
         elements["command.purchase"] =
             WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PURCHASE)));
-        elements["command.party"] = WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PARTY)));
+        elements["command.party"] =
+            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PARTY)));
     }
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
     {

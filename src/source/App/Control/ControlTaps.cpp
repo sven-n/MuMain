@@ -234,8 +234,8 @@ void RecordPartyInvited(int inviterKey)
 
 void RecordPartyAnswer(int result)
 {
-    constexpr std::string_view Results[] = {"failed",   "denied",        "full",        "user_left",      "other_party",
-                                            "left",     "opposing_gens", "battle_zone", "battle_zone_off"};
+    constexpr std::string_view Results[] = {"failed", "denied",        "full",        "user_left",      "other_party",
+                                            "left",   "opposing_gens", "battle_zone", "battle_zone_off"};
     RecordPartyResult(result >= 0 && result < static_cast<int>(std::size(Results)) ? Results[result] : "unknown");
 }
 

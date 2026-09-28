@@ -23,7 +23,7 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     // click the control socket injects never went through ImGui, whatever the
     // real pointer hovers.
     bool shouldBlockInput = (io.WantCaptureMouse || io.WantCaptureKeyboard) && Core::Input::Synthetic::IsIdle();
-    
+
     if (!shouldBlockInput)
         return;
 

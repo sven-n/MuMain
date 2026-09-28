@@ -1714,13 +1714,13 @@ bool CNewUIMyInventory::IsRepairEnableLevel() const
 
 bool CNewUIMyInventory::AreShopButtonsShown() const
 {
-    return g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_TRADE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false;
+    return g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == false &&
+           g_pNewUISystem->IsVisible(INTERFACE_TRADE) == false &&
+           g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false &&
+           g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false &&
+           g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false &&
+           g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false &&
+           g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false;
 }
 
 CNewUIButton* CNewUIMyInventory::GetShownRepairButton()

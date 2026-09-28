@@ -72,7 +72,8 @@ void AddRepairPrice(json& described, const ITEM& item)
 
     // The tooltip's own function, which picks the NPC or the self-repair price.
     wchar_t text[100] = {};
-    described["repair_price"] = ConvertRepairGold(ItemValue(repaired, 2), item.Durability, maxDurability, item.Type, text);
+    described["repair_price"] =
+        ConvertRepairGold(ItemValue(repaired, 2), item.Durability, maxDurability, item.Type, text);
 }
 
 // The items of a trade grid, by the grid's own slot numbers.
@@ -262,7 +263,8 @@ json PurchaseShopState()
 
     json shop;
     const int seller = g_pPurchaseShopInventory->GetShopCharacterIndex();
-    shop["seller"] = seller >= 0 && seller < MAX_CHARACTERS_CLIENT ? Core::Text::ToUtf8(CharactersClient[seller].ID) : "";
+    shop["seller"] =
+        seller >= 0 && seller < MAX_CHARACTERS_CLIENT ? Core::Text::ToUtf8(CharactersClient[seller].ID) : "";
     shop["title"] = Core::Text::ToUtf8(g_pPurchaseShopInventory->GetTitleText().c_str());
     shop["items"] = PersonalShopItems(g_pPurchaseShopInventory->GetInventoryCtrl(), PSHOPWNDTYPE_PURCHASE);
     return shop;
