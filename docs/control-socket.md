@@ -104,7 +104,12 @@ Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
 percentage of full health (`100` is untouched) and is `null` when the server
 has not told the client that object's health — a threshold test has to allow
-for the null rather than read it as zero.
+for the null rather than read it as zero. A player, monster or NPC also
+carries `pixel`, the window pixel `{x, y}` at the middle of the box the mouse
+picks it by, or `null` while it is not drawn: `click-ui` there talks to an NPC
+or targets a player the way a player's click does. The pixel is taken from the
+last rendered frame, so it lags a moving object by a frame, and a window drawn
+over it catches the click instead.
 
 ### Synthetic input
 

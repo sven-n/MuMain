@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "App/Control/ControlTaps.h"
 #include "Engine/Object/EditObjects.h"
 #include "UI/Chat/Chat.h"
 #include "MainScene.h"
@@ -384,6 +385,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+    App::Control::Frames::RecordWorldCamera();
 }
 
 // DXP-23 diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.

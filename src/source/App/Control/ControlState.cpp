@@ -2,6 +2,8 @@
 #include "App/Control/ControlState.h"
 
 #include "App/Control/ControlObjects.h"
+#include "App/Control/ControlTaps.h"
+#include "Camera/CameraState.h"
 
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -201,6 +203,49 @@ json BuffArray()
     }
     return buffs;
 }
+// The world camera of the last frame, see App::Control::Frames::RecordWorldCamera.
+CameraState g_worldCamera;
+bool g_hasWorldCamera = false;
+
+// Where a character is drawn, in window pixels: the middle of the box the
+// mouse picks it by (Input/Selection.cpp), projected as the mouse ray is cast
+// (CameraProjection::ScreenToWorldRay), so `click-ui` there points at it. Null
+// while it is not drawn, behind the camera or outside the window.
+json ObjectPixel(const OBJECT& object)
+{
+    if (!g_hasWorldCamera || !object.Visible)
+    {
+        return nullptr;
+    }
+
+    const OBB_t& box = object.OBB;
+    vec3_t center;
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        center[axis] = box.StartPos[axis] + (box.XAxis[axis] + box.YAxis[axis] + box.ZAxis[axis]) * 0.5f;
+    }
+
+    vec3_t camera;
+    VectorTransform(center, g_worldCamera.Matrix, camera);
+    if (camera[2] >= 0.0f)
+    {
+        return nullptr;
+    }
+
+    const float x =
+        static_cast<float>(g_worldCamera.ScreenCenterX) - camera[0] / (g_worldCamera.PerspectiveX * camera[2]);
+    const float y =
+        static_cast<float>(g_worldCamera.ScreenCenterY) + camera[1] / (g_worldCamera.PerspectiveY * camera[2]);
+    if (x < 0.0f || y < 0.0f || x >= static_cast<float>(WindowWidth) || y >= static_cast<float>(WindowHeight))
+    {
+        return nullptr;
+    }
+
+    json pixel;
+    pixel["x"] = std::round(x);
+    pixel["y"] = std::round(y);
+    return pixel;
+}
 } // namespace
 
 namespace App::Control
@@ -284,6 +329,7 @@ json NearbyArray()
         // which is what the `float` division left behind).
         const double healthPercent = std::round(character.HealthStatus * 250.0f) * 100.0 / 250.0;
         described["hp_percent"] = character.HealthStatus < 0.0f ? json(nullptr) : json(healthPercent);
+        described["pixel"] = ObjectPixel(character.Object);
         nearby.push_back(std::move(described));
     }
 
@@ -309,3 +355,12 @@ json NearbyArray()
     return nearby;
 }
 } // namespace App::Control
+
+namespace App::Control::Frames
+{
+void RecordWorldCamera()
+{
+    g_worldCamera = g_Camera;
+    g_hasWorldCamera = true;
+}
+} // namespace App::Control::Frames

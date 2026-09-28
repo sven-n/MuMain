@@ -77,6 +77,15 @@ void RecordTradePartnerConfirm(int state);
 void RecordTradeClosed(int result);
 } // namespace App::Control::Events
 
+namespace App::Control::Frames
+{
+// The world camera of this frame, kept where the mouse ray is cast
+// (Scenes/MainScene.cpp). Later in the frame other cameras draw the item
+// previews, so `nearby` projects characters with this copy, the way the mouse
+// picks them.
+void RecordWorldCamera();
+} // namespace App::Control::Frames
+
 #else
 
 #include <cstdint>
@@ -103,5 +112,10 @@ inline void RecordTradeAnswer(int, const char*) {}
 inline void RecordTradePartnerConfirm(int) {}
 inline void RecordTradeClosed(int) {}
 } // namespace App::Control::Events
+
+namespace App::Control::Frames
+{
+inline void RecordWorldCamera() {}
+} // namespace App::Control::Frames
 
 #endif // MU_ENABLE_CONTROL_SOCKET
