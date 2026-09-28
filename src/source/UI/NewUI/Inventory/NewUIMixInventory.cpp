@@ -479,13 +479,16 @@ void CNewUIMixInventory::RenderFrame()
                 mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_TRAINER:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationResurrecting, g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationResurrecting,
+                            g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_OSBOURNE:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationRefining, g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationRefining,
+                            g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_ELPIS:
-                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationRefining, g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::OperationRefining,
+                            g_MixRecipeMgr.GetSuccessRate());
                 break;
             }
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);

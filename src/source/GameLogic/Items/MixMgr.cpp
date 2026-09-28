@@ -676,7 +676,7 @@ void AppendRecipeDetail(wchar_t (&szName)[N], const wchar_t* pszFormat, Args... 
     AppendRecipeText(szName, L" ");
     AppendRecipeText(szName, pszFormat, args...);
 }
-}
+} // namespace
 
 int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixItems, CMixItem* pMixItems)
 {
@@ -748,7 +748,8 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
         else if (pMixRecipeItem->m_iLevelMax == 255)
             AppendRecipeDetail(szTempName, I18N::Game::MixLevelAtLeast, pMixRecipeItem->m_iLevelMin);
         else
-            AppendRecipeDetail(szTempName, I18N::Game::MixLevelRange, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
+            AppendRecipeDetail(szTempName, I18N::Game::MixLevelRange, pMixRecipeItem->m_iLevelMin,
+                               pMixRecipeItem->m_iLevelMax);
 
         if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
         else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
@@ -758,7 +759,8 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
         else if (pMixRecipeItem->m_iOptionMax == 255)
             AppendRecipeDetail(szTempName, I18N::Game::MixOptionAtLeast, pMixRecipeItem->m_iOptionMin);
         else
-            AppendRecipeDetail(szTempName, I18N::Game::MixOptionRange, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax);
+            AppendRecipeDetail(szTempName, I18N::Game::MixOptionRange, pMixRecipeItem->m_iOptionMin,
+                               pMixRecipeItem->m_iOptionMax);
     }
 
     if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)
@@ -770,7 +772,8 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
     else if (pMixRecipeItem->m_iCountMax == 255)
         AppendRecipeDetail(szTempName, I18N::Game::MixCountAtLeast, pMixRecipeItem->m_iCountMin);
     else
-        AppendRecipeDetail(szTempName, I18N::Game::MixCountRange, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax);
+        AppendRecipeDetail(szTempName, I18N::Game::MixCountRange, pMixRecipeItem->m_iCountMin,
+                           pMixRecipeItem->m_iCountMax);
 
     BOOL bPreName = FALSE;
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_EXCELLENT)

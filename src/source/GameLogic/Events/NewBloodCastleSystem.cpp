@@ -142,8 +142,9 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
     // language keeps its own word order across the two lines.
     constexpr int ResultLineLength = 128;
     wchar_t szResultLines[2][ResultLineLength]{};
-    const int iResultLines = CutStr(m_iNumResult ? I18N::Game::BloodCastleQuestCompleted : I18N::Game::BloodCastleQuestFailed,
-        szResultLines[0], 210, 2, ResultLineLength);
+    const int iResultLines =
+        CutStr(m_iNumResult ? I18N::Game::BloodCastleQuestCompleted : I18N::Game::BloodCastleQuestFailed,
+               szResultLines[0], 210, 2, ResultLineLength);
     for (int i = 0; i < iResultLines; ++i)
     {
         // CutStr breaks before the space, so a continued line starts with it.
