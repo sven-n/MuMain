@@ -152,7 +152,8 @@
       "glow": {
         "color": "steelBlue",
         "hiddenMesh": 1
-      }
+      },
+      "renderStyle": "dragonSpear"
     },
     {
       "number": 11,
@@ -169,7 +170,8 @@
       "glow": {
         "color": "leafGreen",
         "meshes": [0, 1]
-      }
+      },
+      "renderStyle": "brova"
     }
   ]
 }

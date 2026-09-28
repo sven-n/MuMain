@@ -52,6 +52,7 @@ ItemModelDefinition MakeDarkHorse()
     model.file = "Data/Item/DarkHorseHorn.bmd";
     model.textureFolders = {"Item", "Skill"};
     model.noneBlendMeshes = {1, 3};
+    model.renderStyle = "darkHorse";
     return model;
 }
 } // namespace
@@ -153,6 +154,21 @@ TEST_CASE("Texture folders and none-blend meshes are checked [data][items]")
     REQUIRE(result.models.size() == 1);
     CHECK(result.models[0].textureFolders.empty());
     CHECK(result.models[0].noneBlendMeshes.empty());
+}
+
+TEST_CASE("The render style of a model is a name [data][items]")
+{
+    const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{MakeDarkHorse()});
+    CHECK(text.find(R"("renderStyle": "darkHorse")") != std::string::npos);
+
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": 3})", "renderStyle"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": "chrome mesh"})", "renderStyle"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": ""})", "renderStyle"));
+
+    // Without a style the model is drawn plainly.
+    const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd"})"));
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].renderStyle.empty());
 }
 
 TEST_CASE("A model with errors is not read [data][items]")

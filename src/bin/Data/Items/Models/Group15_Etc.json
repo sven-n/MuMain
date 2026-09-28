@@ -109,7 +109,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 20,
@@ -123,7 +124,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 21,
@@ -137,7 +139,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 22,
@@ -151,7 +154,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 23,
@@ -165,7 +169,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 24,
@@ -179,7 +184,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 25,
@@ -193,7 +199,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 26,
@@ -207,7 +214,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 27,
@@ -221,7 +229,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 28,
@@ -241,7 +250,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 31,
@@ -251,7 +261,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 32,
@@ -261,7 +272,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 33,
@@ -271,7 +283,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 34,
@@ -281,7 +294,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 35,
@@ -291,7 +305,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     },
     {
       "number": 36,
@@ -301,7 +316,8 @@
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "skillParchment"
     }
   ]
 }

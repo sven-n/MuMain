@@ -100,7 +100,8 @@
       },
       "glow": {
         "hiddenMesh": 2
-      }
+      },
+      "renderStyle": "elementalMace"
     },
     {
       "number": 8,
@@ -116,7 +117,8 @@
       },
       "glow": {
         "color": "steelBlue"
-      }
+      },
+      "renderStyle": "battleScepter"
     },
     {
       "number": 9,
@@ -132,7 +134,8 @@
       },
       "glow": {
         "color": "sand"
-      }
+      },
+      "renderStyle": "masterScepter"
     },
     {
       "number": 10,
@@ -148,7 +151,8 @@
       },
       "glow": {
         "color": "sage"
-      }
+      },
+      "renderStyle": "greatScepter"
     },
     {
       "number": 11,
@@ -161,7 +165,8 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "renderStyle": "lordScepter"
     },
     {
       "number": 12,
@@ -176,7 +181,8 @@
       },
       "glow": {
         "color": "copper"
-      }
+      },
+      "renderStyle": "greatLordScepter"
     },
     {
       "number": 13,
@@ -188,7 +194,8 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "renderStyle": "divineScepterOfArchangel"
     },
     {
       "number": 14,
@@ -204,7 +211,8 @@
       },
       "glow": {
         "color": "olive"
-      }
+      },
+      "renderStyle": "sylphWindBow"
     },
     {
       "number": 15,
@@ -233,7 +241,8 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "renderStyle": "frostMace"
     },
     {
       "number": 17,
@@ -267,7 +276,8 @@
       "glow": {
         "color": "white",
         "meshes": [0]
-      }
+      },
+      "renderStyle": "strikerScepter"
     }
   ]
 }

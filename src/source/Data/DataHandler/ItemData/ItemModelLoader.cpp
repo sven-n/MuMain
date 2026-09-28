@@ -10,6 +10,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -108,6 +109,17 @@ void CheckGlowMeshes(int itemType, const ItemModelDefinition& model)
                           });
 }
 
+void CheckRenderStyle(const ItemModelDefinition& model)
+{
+    if (model.renderStyle.empty() || Render::Items::Styles::Exists(model.renderStyle))
+    {
+        return;
+    }
+    ItemModelProblem problem = MakeProblem(ItemModelProblemType::RenderStyleUnknown, model);
+    problem.renderStyle = model.renderStyle;
+    AddProblem(std::move(problem));
+}
+
 void OpenModel(int itemType, const ItemModelDefinition& model)
 {
     const std::wstring path = ToLoaderPath(model.file);
@@ -122,6 +134,7 @@ void OpenModel(int itemType, const ItemModelDefinition& model)
     }
     MarkNoneBlendMeshes(itemType, model);
     CheckGlowMeshes(itemType, model);
+    CheckRenderStyle(model);
 }
 
 ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)
@@ -178,6 +191,7 @@ template <typename TOpen> void ForEachModel(TOpen&& open)
 void OpenModels()
 {
     ForEachModel(OpenModel);
+    Render::Items::Styles::Assign();
 }
 
 void OpenTextures()

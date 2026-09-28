@@ -3,6 +3,7 @@
 #include "ItemGlow.h"
 #include "ItemDisplay.h"
 #include "ItemModelLookup.h"
+#include "ItemRenderStyles.h"
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
@@ -152,6 +153,10 @@ bool HasExcellentGlow(int modelType)
 
 void RenderGlow(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture)
 {
+    if (Styles::RenderGlow(b, o, modelType, renderType, alpha, texture))
+    {
+        return;
+    }
     if (IsPhoenixSoulInventoryModel(modelType))
     {
         RenderPhoenixSoulInventoryMesh(b, o, renderType, alpha,

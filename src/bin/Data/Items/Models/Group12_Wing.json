@@ -109,7 +109,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "wingsOfDarkness"
     },
     {
       "number": 7,
@@ -446,7 +447,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "wingOfStorm"
     },
     {
       "number": 37,
@@ -495,7 +497,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "wingOfRuin"
     },
     {
       "number": 40,
@@ -512,7 +515,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "capeOfEmperor"
     },
     {
       "number": 41,
@@ -544,7 +548,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "wingsOfDespair"
     },
     {
       "number": 43,
@@ -559,7 +564,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "wingOfDimension"
     },
     {
       "number": 44,
@@ -671,7 +677,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "renderStyle": "capeOfEmperor"
     },
     {
       "number": 60,
@@ -683,7 +690,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeed"
     },
     {
       "number": 61,
@@ -695,7 +703,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeed"
     },
     {
       "number": 62,
@@ -707,7 +716,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeed"
     },
     {
       "number": 63,
@@ -719,7 +729,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeed"
     },
     {
       "number": 64,
@@ -731,7 +742,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeed"
     },
     {
       "number": 65,
@@ -743,7 +755,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeed"
     },
     {
       "number": 70,
@@ -813,7 +826,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 101,
@@ -825,7 +839,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 102,
@@ -837,7 +852,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 103,
@@ -849,7 +865,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 104,
@@ -861,7 +878,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 105,
@@ -873,7 +891,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 106,
@@ -885,7 +904,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 107,
@@ -897,7 +917,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 108,
@@ -909,7 +930,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 109,
@@ -921,7 +943,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 110,
@@ -933,7 +956,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 111,
@@ -945,7 +969,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 112,
@@ -957,7 +982,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 113,
@@ -969,7 +995,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 114,
@@ -981,7 +1008,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 115,
@@ -993,7 +1021,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 116,
@@ -1005,7 +1034,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 117,
@@ -1017,7 +1047,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 118,
@@ -1029,7 +1060,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 119,
@@ -1041,7 +1073,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 120,
@@ -1053,7 +1086,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 121,
@@ -1065,7 +1099,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 122,
@@ -1077,7 +1112,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 123,
@@ -1089,7 +1125,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 124,
@@ -1101,7 +1138,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 125,
@@ -1113,7 +1151,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 126,
@@ -1125,7 +1164,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 127,
@@ -1137,7 +1177,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 128,
@@ -1149,7 +1190,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 129,
@@ -1161,7 +1203,8 @@
       },
       "ground": {
         "scale": 0.6
-      }
+      },
+      "renderStyle": "socketSeedSphere"
     },
     {
       "number": 130,
@@ -1176,7 +1219,8 @@
       "cloth": true,
       "glow": {
         "excellent": false
-      }
+      },
+      "renderStyle": "smallCapeOfLord"
     },
     {
       "number": 131,

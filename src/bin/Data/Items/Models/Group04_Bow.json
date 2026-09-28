@@ -44,7 +44,8 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "renderStyle": "monsterBattleBow"
     },
     {
       "number": 4,
@@ -96,7 +97,8 @@
       },
       "glow": {
         "level": [0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
-      }
+      },
+      "renderStyle": "ammunition"
     },
     {
       "number": 8,
@@ -200,7 +202,8 @@
       },
       "glow": {
         "level": [0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
-      }
+      },
+      "renderStyle": "ammunition"
     },
     {
       "number": 16,
@@ -242,7 +245,8 @@
       },
       "glow": {
         "color": "sand"
-      }
+      },
+      "renderStyle": "archangelStaff"
     },
     {
       "number": 19,
@@ -258,7 +262,8 @@
       },
       "glow": {
         "color": "steelBlue"
-      }
+      },
+      "renderStyle": "greatReignCrossbow"
     },
     {
       "number": 20,
@@ -270,7 +275,8 @@
       },
       "glow": {
         "color": "copper"
-      }
+      },
+      "renderStyle": "arrowViperBow"
     },
     {
       "number": 21,
@@ -284,7 +290,8 @@
       },
       "glow": {
         "color": "leafGreen"
-      }
+      },
+      "renderStyle": "sylphWindBow"
     },
     {
       "number": 22,
@@ -298,7 +305,8 @@
       },
       "glow": {
         "color": "leafGreen"
-      }
+      },
+      "renderStyle": "albatrossBow"
     },
     {
       "number": 23,

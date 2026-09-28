@@ -129,11 +129,6 @@ namespace GameLogic::Items
         return HasTag(pItem, ItemTag::RefineStone);
     }
 
-    bool IsRefineStoneModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::RefineStone);
-    }
-
     bool IsSocketSeedOrSphereType(int itemType)
     {
         return g_ItemDatabase.HasAnyTag(itemType, SocketItemTags);
@@ -154,11 +149,6 @@ namespace GameLogic::Items
         return HasTag(pItem, ItemTag::SocketSeed);
     }
 
-    bool IsSocketSeedModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::SocketSeed);
-    }
-
     bool IsSocketSphere(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::SocketSphere);
@@ -177,11 +167,6 @@ namespace GameLogic::Items
     bool IsSocketSeedSphereType(int itemType)
     {
         return HasTag(itemType, ItemTag::SocketSeedSphere);
-    }
-
-    bool IsSocketSeedSphereModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::SocketSeedSphere);
     }
 
     bool IsHealingPotion(const ITEM* pItem)
@@ -219,11 +204,6 @@ namespace GameLogic::Items
         return HasTag(itemType, ItemTag::ElitePotion);
     }
 
-    bool IsElitePotionModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::ElitePotion);
-    }
-
     bool IsElixir(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::Elixir);
@@ -232,11 +212,6 @@ namespace GameLogic::Items
     bool IsElixirType(int itemType)
     {
         return HasTag(itemType, ItemTag::Elixir);
-    }
-
-    bool IsElixirModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::Elixir);
     }
 
     bool IsBuffScroll(const ITEM* pItem)
@@ -249,11 +224,6 @@ namespace GameLogic::Items
         return HasTag(itemType, ItemTag::BuffScroll);
     }
 
-    bool IsBuffScrollModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::BuffScroll);
-    }
-
     bool IsBattleOrStrengthScroll(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::BattleOrStrengthScroll);
@@ -262,11 +232,6 @@ namespace GameLogic::Items
     bool IsBattleOrStrengthScrollType(int itemType)
     {
         return HasTag(itemType, ItemTag::BattleOrStrengthScroll);
-    }
-
-    bool IsBattleOrStrengthScrollModel(int modelType)
-    {
-        return HasTag(ToItemType(modelType), ItemTag::BattleOrStrengthScroll);
     }
 
     bool IsAmmunition(const ITEM* pItem)

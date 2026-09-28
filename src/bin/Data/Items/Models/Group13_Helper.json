@@ -45,7 +45,8 @@
       "inventory": {
         "rotation": [-90, -90, 0],
         "scale": 0.0015
-      }
+      },
+      "renderStyle": "darkHorse"
     },
     {
       "number": 5,
@@ -55,7 +56,8 @@
         "anchor": [0.5, 0.7],
         "rotation": [-90, -35, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "darkRaven"
     },
     {
       "number": 7,
@@ -63,7 +65,8 @@
       "textureFolders": ["Item"],
       "inventory": {
         "anchor": [0.5, 0.9]
-      }
+      },
+      "renderStyle": "contractSummon"
     },
     {
       "number": 8,
@@ -98,7 +101,8 @@
       "textureFolders": ["Item"],
       "inventory": {
         "anchor": [0.5, 0.8]
-      }
+      },
+      "renderStyle": "lifeStone"
     },
     {
       "number": 12,
@@ -454,7 +458,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "sealOfAscension"
     },
     {
       "number": 44,
@@ -469,7 +474,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "sealOfWealth"
     },
     {
       "number": 45,
@@ -484,7 +490,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "sealOfSustenance"
     },
     {
       "number": 46,
@@ -499,7 +506,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "eventTicket"
     },
     {
       "number": 47,
@@ -514,7 +522,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "eventTicket"
     },
     {
       "number": 48,
@@ -529,7 +538,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "eventTicket"
     },
     {
       "number": 49,
@@ -544,7 +554,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "oldScroll"
     },
     {
       "number": 50,
@@ -562,7 +573,8 @@
       "glow": {
         "level": 0,
         "shineHiddenMesh": 1
-      }
+      },
+      "renderStyle": "illusionSorcererCovenant"
     },
     {
       "number": 51,
@@ -577,7 +589,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.45
-      }
+      },
+      "renderStyle": "scrollOfBlood"
     },
     {
       "number": 52,
@@ -594,7 +607,8 @@
       },
       "glow": {
         "level": 0
-      }
+      },
+      "renderStyle": "condorFlame"
     },
     {
       "number": 53,
@@ -611,7 +625,8 @@
       },
       "glow": {
         "level": 0
-      }
+      },
+      "renderStyle": "condorFeather"
     },
     {
       "number": 54,
@@ -626,7 +641,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 55,
@@ -641,7 +657,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 56,
@@ -656,7 +673,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 57,
@@ -671,7 +689,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 58,
@@ -686,7 +705,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 59,
@@ -701,7 +721,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.2
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 60,
@@ -716,7 +737,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 1.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 61,
@@ -731,7 +753,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "eventTicket"
     },
     {
       "number": 62,
@@ -746,7 +769,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 63,
@@ -761,7 +785,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 64,
@@ -775,7 +800,8 @@
       "ground": {
         "rotation": [0, 0, 70],
         "scale": 0.21
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 65,
@@ -789,7 +815,8 @@
       "ground": {
         "rotation": [0, 0, 70],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 66,
@@ -804,7 +831,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "invitationToSantaVillage"
     },
     {
       "number": 67,
@@ -837,7 +865,8 @@
         "offset": [0.005, -0.05],
         "rotation": [270, -30, 0],
         "scale": 0.0023
-      }
+      },
+      "renderStyle": "talismanOfResurrection"
     },
     {
       "number": 70,
@@ -848,7 +877,8 @@
         "offset": [0.04, 0],
         "rotation": [270, 0, 70],
         "scale": 0.0018
-      }
+      },
+      "renderStyle": "talismanOfMobility"
     },
     {
       "number": 71,
@@ -859,7 +889,8 @@
         "offset": [0, 0.07],
         "rotation": [270, 0, 0],
         "scale": 0.0019
-      }
+      },
+      "renderStyle": "gambleItem"
     },
     {
       "number": 72,
@@ -870,7 +901,8 @@
         "offset": [0, 0.07],
         "rotation": [270, 0, 0],
         "scale": 0.0019
-      }
+      },
+      "renderStyle": "gambleItem"
     },
     {
       "number": 73,
@@ -881,7 +913,8 @@
         "offset": [0, 0.07],
         "rotation": [270, 0, 0],
         "scale": 0.0019
-      }
+      },
+      "renderStyle": "gambleItem"
     },
     {
       "number": 74,
@@ -892,7 +925,8 @@
         "offset": [0, 0.07],
         "rotation": [270, 0, 0],
         "scale": 0.0019
-      }
+      },
+      "renderStyle": "gambleItem"
     },
     {
       "number": 75,
@@ -903,7 +937,8 @@
         "offset": [0, 0.07],
         "rotation": [270, 0, 0],
         "scale": 0.0019
-      }
+      },
+      "renderStyle": "gambleItem"
     },
     {
       "number": 76,
@@ -936,7 +971,8 @@
         "offset": [0.005, 0.035],
         "rotation": [-90, 0, 0],
         "scale": 0.0012
-      }
+      },
+      "renderStyle": "talismanOfGuardian"
     },
     {
       "number": 82,
@@ -947,7 +983,8 @@
         "offset": [0.005, 0.035],
         "rotation": [-90, 0, 0],
         "scale": 0.0012
-      }
+      },
+      "renderStyle": "talismanOfItemProtection"
     },
     {
       "number": 83,
@@ -962,7 +999,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 84,
@@ -977,7 +1015,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 85,
@@ -992,7 +1031,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 86,
@@ -1007,7 +1047,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 87,
@@ -1022,7 +1063,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 88,
@@ -1037,7 +1079,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 89,
@@ -1052,7 +1095,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 90,
@@ -1067,7 +1111,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 91,
@@ -1082,7 +1127,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 92,
@@ -1097,7 +1143,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 93,
@@ -1112,7 +1159,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "sealOfAscension"
     },
     {
       "number": 94,
@@ -1123,7 +1171,8 @@
         "offset": [0.005, 0],
         "rotation": [-90, 0, 0],
         "scale": 0.0021
-      }
+      },
+      "renderStyle": "sealOfWealth"
     },
     {
       "number": 97,
@@ -1138,7 +1187,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "characterCard"
     },
     {
       "number": 98,
@@ -1153,7 +1203,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "characterCard"
     },
     {
       "number": 103,
@@ -1180,7 +1231,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "boostAura"
     },
     {
       "number": 105,
@@ -1195,7 +1247,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "boostAura"
     },
     {
       "number": 106,
@@ -1220,7 +1273,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 109,
@@ -1235,7 +1289,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 110,
@@ -1250,7 +1305,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 111,
@@ -1265,7 +1321,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 112,
@@ -1280,7 +1337,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 113,
@@ -1295,7 +1353,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 114,
@@ -1310,7 +1369,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 115,
@@ -1325,7 +1385,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh1"
     },
     {
       "number": 116,
@@ -1340,7 +1401,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "sealOfWealth"
     },
     {
       "number": 121,
@@ -1355,7 +1417,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "eventTicket"
     },
     {
       "number": 122,
@@ -1366,7 +1429,8 @@
         "offset": [0.01, -0.035],
         "rotation": [290, -20, 0],
         "scale": 0.0033
-      }
+      },
+      "renderStyle": "skeletonTransformationRing"
     },
     {
       "number": 123,
@@ -1407,7 +1471,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "openAccessTicketToDoppelganger"
     },
     {
       "number": 126,
@@ -1422,7 +1487,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "openAccessTicketToVarka"
     },
     {
       "number": 127,
@@ -1437,7 +1503,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "openAccessTicketToVarka7"
     },
     {
       "number": 135,

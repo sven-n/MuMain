@@ -15,6 +15,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Render/Items/ItemGlow.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -521,4 +522,77 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
 
     g_GlowColors.Build({});
     g_ItemModelDatabase.Build({}, g_GlowColors);
+}
+
+TEST_CASE("The render styles of shipped item models exist [data][items]")
+{
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (!model.renderStyle.empty())
+        {
+            INFO("(" << model.group << "," << model.number << ") " << model.renderStyle);
+            CHECK(Render::Items::Styles::Exists(model.renderStyle));
+        }
+    }
+    CHECK_FALSE(Render::Items::Styles::Exists("stormCorw"));
+}
+
+// The looks of the old drawing code (RenderPartObjectBody), recorded per
+// item: spot checks of sets, of shared looks and of items without one.
+TEST_CASE("Shipped item models keep the looks of the old drawing code [data][items]")
+{
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+    const auto styleOf = [&](int group, int number)
+    {
+        const ItemModelDefinition* model = FindModel(models, group, number);
+        REQUIRE(model != nullptr);
+        return model->renderStyle;
+    };
+
+    CHECK(styleOf(0, 0).empty());
+    // A set shares one look.
+    CHECK(styleOf(8, 15) == "stormCrow");
+    CHECK(styleOf(11, 15) == "stormCrow");
+    CHECK(styleOf(12, 36) == "wingOfStorm");
+    // The phase 3 lists that chose a look: elite potions, seed spheres.
+    CHECK(styleOf(14, 70) == "elitePotion");
+    CHECK(styleOf(12, 100) == "socketSeedSphere");
+    // Items with the same recipe share it.
+    CHECK(styleOf(5, 10) == "archangelStaff");
+    CHECK(styleOf(4, 18) == "archangelStaff");
+    // Looks that only apply to some drawings.
+    CHECK(styleOf(0, 31) == "runeBlade");
+    CHECK(styleOf(4, 3) == "monsterBattleBow");
+    CHECK(styleOf(8, 9) == "plateInPcRoom");
+    // The Deadly Staff also glows in its own way.
+    CHECK(styleOf(5, 30) == "deadlyStaff");
+}
+
+TEST_CASE("Render styles that are not for every drawing leave it to the drawing code [data][items]")
+{
+    using namespace Render::Items;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    Styles::Assign();
+
+    BMD model;
+    OBJECT object;
+    object.Type = MODEL_ITEM + ITEM_RUNE_BLADE;
+    // Doppelgangers are drawn plainly.
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE | RENDER_DOPPELGANGER));
+    // The look of the Battle Bow is only for monsters holding it (RENDER_EXTRA),
+    // the one of the plate armor only in a PC room.
+    object.Type = MODEL_ITEM + ITEM_BATTLE_BOW;
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    object.Type = MODEL_ITEM + ITEM_PLATE_ARMOR;
+    object.m_bpcroom = FALSE;
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    // Items without a style are drawn by the drawing code.
+    object.Type = MODEL_ITEM + ITEM_KRIS;
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    // A model without meshes draws nothing, whatever its style.
+    object.Type = MODEL_ITEM + ITEM_STORM_CROW_ARMOR;
+    CHECK(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    Styles::Assign();
 }

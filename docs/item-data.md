@@ -245,6 +245,7 @@ item files hold what client and server share.
 | `inventory` | How the item is drawn in the inventory, see below. Optional. |
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
+| `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 
 `inventory` and `ground` hold these values; a missing value has the
@@ -304,6 +305,30 @@ start with a message, and so does a list without the defaults (`orange`,
 The glow of monsters, and of the event models that level variants are
 drawn with, is still set in code; changing the list does not change them.
 
+`renderStyle` names the look of models that are more than a plain textured
+model: chrome layers, glowing or animated meshes, a texture of their own
+for the inventory, ...
+
+```json
+{ "number": 15, "file": "Data/Player/ArmorMale16.bmd", "textureFolders": ["Player"], "renderStyle": "stormCrow" }
+```
+
+Each look is code, a render style with a name; the names are listed at
+the end of `src/source/Render/Items/ItemRenderStyles.cpp`. Items with the
+same look share a style (the Storm Crow set, the archangel staff and
+crossbow, …), and a few plain looks have names of their own: `textured`
+(drawn with its texture only, whatever the drawing asks for),
+`texturedAllMeshes`, `chromeMesh0` and `chromeMesh1` (a chrome shine on
+one mesh), `onlyMesh0WithoutSkin` and `onlyMesh2WithoutSkin` (in the
+inventory and on the ground only the armor mesh, without the character
+skin). An item without `renderStyle` is drawn plainly. Any item can use
+any style; a new look needs a new style in code.
+
+Some styles only apply to some drawings, and the model is drawn plainly
+otherwise: `runeBlade`, `greatScepter`, `grandSoulShield` and the
+`violentWindToEternalWing…` styles not for doppelgangers, `monsterBattleBow`
+only in the hands of the Metal Balrog and the Orc Archer of Doom, `plateInPcRoom` only in a PC room.
+
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
   the model of another item or with an effect model; that choice, and
@@ -347,6 +372,7 @@ The problems are:
 | A texture is in none of the texture folders, but another model loaded it before; that one is used. The warning names the folder to add to `textureFolders`. | warning |
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
 | A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
+| `renderStyle` names a style that does not exist; the model is drawn plainly. | error |
 
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts

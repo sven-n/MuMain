@@ -62,6 +62,8 @@ std::string DescribeProblem(const ItemModelProblem& problem)
     case ItemModelProblemType::GlowMeshMissing:
         return problem.field + " has mesh " + std::to_string(problem.mesh) + ", but " + problem.modelFile + " has " +
                std::to_string(problem.meshCount) + " meshes";
+    case ItemModelProblemType::RenderStyleUnknown:
+        return "render style " + problem.renderStyle + " does not exist; " + problem.modelFile + " is drawn plainly";
     }
     return {};
 }

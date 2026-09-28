@@ -564,8 +564,16 @@ server with original clients (after phases 6 and B).
        Phoenix Soul Armor (see the last step below), and the Deadly Staff's
        second glow step (a one-off that changes the object, moved in 4c2).
      - **4c2 Render styles:** `renderStyle` names the `RenderPartObjectBody`
-       recipe of an item (about 160 item branches, 133 distinct recipes),
-       including the display-only item lists of phase 3 that choose them.
+       recipe of an item. The 174 item branches become 140 styles in
+       `Render/Items/ItemRenderStyles.cpp` (the recipes unchanged; equal
+       recipes share one style, three that drew like the default are gone),
+       and 346 models name theirs. The display-only item lists of phase 3
+       that chose a recipe go away. Styles that only apply to some drawings
+       (not for doppelgangers, only held by some monsters, only in a PC room)
+       fall back to the plain drawing. A style can also have its own glow
+       pass, which takes the Deadly Staff's glow step out of the glow code.
+       Player transformations, monsters and the other non-item models stay
+       in `RenderPartObjectBody`.
      - **4c3 Particle effects:** `effects` lists the particle effects of
        `RenderPartObjectEffect` (about 80 item branches, 31 distinct).
 

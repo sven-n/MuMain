@@ -22,26 +22,6 @@ bool IsCharacterCardType(int itemType)
            itemType == ITEM_SUMMONER_CHARACTER_CARD;
 }
 
-bool IsAccountServiceItemType(int itemType)
-{
-    return itemType >= ITEM_MASTER_SKILL_RESET && itemType <= ITEM_PREMIUM_PACKAGE;
-}
-
-bool IsDayPassType(int itemType)
-{
-    return itemType >= ITEM_30_DAY_PASS && itemType <= ITEM_90_DAY_PASS_POINTS;
-}
-
-bool IsHourPassType(int itemType)
-{
-    return itemType == ITEM_3_HOUR_PASS || itemType == ITEM_5_HOUR_PASS || itemType == ITEM_10_HOUR_PASS;
-}
-
-bool IsSilverOrGoldKeyType(int itemType)
-{
-    return itemType == ITEM_SILVER_KEY || itemType == ITEM_GOLD_KEY;
-}
-
 bool IsSecromiconQuestItemType(int itemType)
 {
     return itemType >= ITEM_SUSPICIOUS_SCRAP_OF_PAPER && itemType <= ITEM_COMPLETE_SECROMICON;
@@ -50,16 +30,6 @@ bool IsSecromiconQuestItemType(int itemType)
 bool IsSummonerStickType(int itemType)
 {
     return itemType >= ITEM_MISTERY_STICK && itemType <= ITEM_ETERNAL_WING_STICK;
-}
-
-bool IsSummonerSkillParchmentType(int itemType)
-{
-    return itemType >= ITEM_CHAIN_LIGHTNING_PARCHMENT && itemType <= ITEM_INNOVATION_PARCHMENT;
-}
-
-bool IsRageFighterSkillParchmentType(int itemType)
-{
-    return itemType >= ITEM_CHAIN_DRIVE_PARCHMENT && itemType <= ITEM_INCREASE_BLOCK_PARCHMENT;
 }
 } // namespace
 
@@ -100,11 +70,6 @@ bool IsCharacterCard(const ITEM* pItem)
     return IsCharacterCardType(pItem->Type);
 }
 
-bool IsCharacterCardModel(int modelType)
-{
-    return IsCharacterCardType(modelType - MODEL_ITEM);
-}
-
 bool IsDevilSquareItemType(int itemType)
 {
     return itemType == ITEM_DEVILS_EYE || itemType == ITEM_DEVILS_KEY || itemType == ITEM_DEVILS_INVITATION;
@@ -125,19 +90,9 @@ bool IsResetFruit(const ITEM* pItem)
     return IsResetFruitType(pItem->Type);
 }
 
-bool IsResetFruitModel(int modelType)
-{
-    return IsResetFruitType(modelType - MODEL_ITEM);
-}
-
 bool IsHealingOrDivinitySealType(int itemType)
 {
     return itemType == ITEM_SEAL_OF_HEALING || itemType == ITEM_SEAL_OF_DIVINITY;
-}
-
-bool IsHealingOrDivinitySealModel(int modelType)
-{
-    return IsHealingOrDivinitySealType(modelType - MODEL_ITEM);
 }
 
 bool IsEventTicketType(int itemType)
@@ -151,11 +106,6 @@ bool IsEventTicket(const ITEM* pItem)
     return IsEventTicketType(pItem->Type);
 }
 
-bool IsEventTicketModel(int modelType)
-{
-    return IsEventTicketType(modelType - MODEL_ITEM);
-}
-
 bool IsDoppelgangerOrVarkaTicketType(int itemType)
 {
     return itemType == ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER || itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA ||
@@ -165,26 +115,6 @@ bool IsDoppelgangerOrVarkaTicketType(int itemType)
 bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem)
 {
     return IsDoppelgangerOrVarkaTicketType(pItem->Type);
-}
-
-bool IsAccountServiceItemModel(int modelType)
-{
-    return IsAccountServiceItemType(modelType - MODEL_ITEM);
-}
-
-bool IsDayPassModel(int modelType)
-{
-    return IsDayPassType(modelType - MODEL_ITEM);
-}
-
-bool IsHourPassModel(int modelType)
-{
-    return IsHourPassType(modelType - MODEL_ITEM);
-}
-
-bool IsSilverOrGoldKeyModel(int modelType)
-{
-    return IsSilverOrGoldKeyType(modelType - MODEL_ITEM);
 }
 
 bool IsChocolateBoxType(int itemType)
@@ -216,15 +146,5 @@ bool IsSecromiconQuestItem(const ITEM* pItem)
 bool IsSummonerStickModel(int modelType)
 {
     return IsSummonerStickType(modelType - MODEL_ITEM);
-}
-
-bool IsSummonerSkillParchmentModel(int modelType)
-{
-    return IsSummonerSkillParchmentType(modelType - MODEL_ITEM);
-}
-
-bool IsRageFighterSkillParchmentModel(int modelType)
-{
-    return IsRageFighterSkillParchmentType(modelType - MODEL_ITEM);
 }
 } // namespace GameLogic::Items

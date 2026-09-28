@@ -124,6 +124,9 @@ struct ItemModelDefinition
     // of the character. Which capes are drawn as cloth is decided in code.
     bool cloth = false;
     ItemGlow glow;
+    // The look of the model when it is more than a plain textured model: the
+    // name of a render style (Render/Items/ItemRenderStyles). Empty: plain.
+    std::string renderStyle;
 
     bool Exists() const
     {

@@ -158,7 +158,8 @@
       "glow": {
         "color": "blue",
         "ancientColor": "gold"
-      }
+      },
+      "renderStyle": "plateInPcRoom"
     },
     {
       "number": 10,
@@ -260,7 +261,8 @@
       "glow": {
         "color": "lavender",
         "shineColor": "orange"
-      }
+      },
+      "renderStyle": "stormCrow"
     },
     {
       "number": 16,
@@ -348,7 +350,8 @@
       },
       "glow": {
         "color": "steelBlue"
-      }
+      },
+      "renderStyle": "thunderHawk"
     },
     {
       "number": 21,
@@ -400,7 +403,8 @@
       },
       "glow": {
         "color": "slate"
-      }
+      },
+      "renderStyle": "hurricane"
     },
     {
       "number": 24,
@@ -536,7 +540,8 @@
       },
       "glow": {
         "color": "leafGreen"
-      }
+      },
+      "renderStyle": "sylphidRay"
     },
     {
       "number": 32,
@@ -621,7 +626,8 @@
       },
       "glow": {
         "color": "leafGreen"
-      }
+      },
+      "renderStyle": "onlyMesh0WithoutSkin"
     },
     {
       "number": 37,
@@ -673,7 +679,8 @@
       "glow": {
         "color": "emerald",
         "shineColor": "orange"
-      }
+      },
+      "renderStyle": "violentWindToEternalWingPants"
     },
     {
       "number": 40,
@@ -691,7 +698,8 @@
       "glow": {
         "color": "rust",
         "shineColor": "orange"
-      }
+      },
+      "renderStyle": "violentWindToEternalWingPants"
     },
     {
       "number": 41,
@@ -709,7 +717,8 @@
       "glow": {
         "color": "amber",
         "shineColor": "orange"
-      }
+      },
+      "renderStyle": "violentWindToEternalWingPants"
     },
     {
       "number": 42,
@@ -727,7 +736,8 @@
       "glow": {
         "color": "purple",
         "shineColor": "orange"
-      }
+      },
+      "renderStyle": "violentWindToEternalWingPants"
     },
     {
       "number": 43,
@@ -745,7 +755,8 @@
       "glow": {
         "color": "pink",
         "shineColor": "blue"
-      }
+      },
+      "renderStyle": "violentWindToEternalWingPants"
     },
     {
       "number": 44,
@@ -763,7 +774,8 @@
       "glow": {
         "color": "lilac",
         "shineWhite": true
-      }
+      },
+      "renderStyle": "violentWindToEternalWingPants"
     },
     {
       "number": 45,
@@ -865,7 +877,8 @@
       },
       "glow": {
         "color": "moss"
-      }
+      },
+      "renderStyle": "divineAndSuccubusSkin"
     },
     {
       "number": 51,
@@ -916,7 +929,8 @@
       },
       "glow": {
         "color": "magenta"
-      }
+      },
+      "renderStyle": "divineAndSuccubusSkin"
     },
     {
       "number": 59,
@@ -981,7 +995,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 63,
@@ -995,7 +1010,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 64,
@@ -1009,7 +1025,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 65,
@@ -1023,7 +1040,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 66,
@@ -1037,7 +1055,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 67,
@@ -1051,7 +1070,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 68,
@@ -1065,7 +1085,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 69,
@@ -1079,7 +1100,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 70,
@@ -1093,7 +1115,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 71,
@@ -1107,7 +1130,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 72,
@@ -1121,7 +1145,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -50
-      }
+      },
+      "renderStyle": "luckyItem"
     },
     {
       "number": 73,
