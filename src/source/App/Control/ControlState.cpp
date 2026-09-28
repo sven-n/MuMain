@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "GameLogic/Items/ShopRestrictions.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -46,6 +47,31 @@ json DescribeItem(const ITEM& item, int slot)
     described["width"] = ItemAttribute[item.Type].Width;
     described["height"] = ItemAttribute[item.Type].Height;
     return described;
+}
+
+// What repairing the item costs, as its tooltip shows while a click would
+// repair it: at an NPC that repairs, or in the inventory's repair mode (which
+// costs more). Left out for an item at full durability or one that is never
+// repaired.
+void AddRepairPrice(json& described, const ITEM& item)
+{
+    const bool atNpc = g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop();
+    const bool selfRepair = g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON;
+    ITEM* repaired = const_cast<ITEM*>(&item);
+    if ((!atNpc && !selfRepair) || GameLogic::Items::IsRepairBan(repaired))
+    {
+        return;
+    }
+
+    const int maxDurability = CalcMaxDurability(&item, &ItemAttribute[item.Type], item.Level);
+    if (item.Durability >= maxDurability)
+    {
+        return;
+    }
+
+    // The tooltip's own function, which picks the NPC or the self-repair price.
+    wchar_t text[100] = {};
+    described["repair_price"] = ConvertRepairGold(ItemValue(repaired, 2), item.Durability, maxDurability, item.Type, text);
 }
 
 // The items of a trade grid, by the grid's own slot numbers.
@@ -125,7 +151,9 @@ json EquipmentArray()
         {
             continue;
         }
-        equipment.push_back(DescribeItem(item, slot));
+        json described = DescribeItem(item, slot);
+        AddRepairPrice(described, item);
+        equipment.push_back(std::move(described));
     }
     return equipment;
 }
@@ -146,6 +174,7 @@ json InventoryArray()
         {
             described["sell_price"] = ItemValue(const_cast<ITEM*>(item), 1);
         }
+        AddRepairPrice(described, *item);
         inventory.push_back(std::move(described));
     }
     return inventory;
@@ -163,6 +192,11 @@ json NpcShopState()
     json shop;
     shop["repair_shop"] = g_pNPCShop->IsRepairShop();
     shop["tax_rate"] = g_pNPCShop->GetTaxRate();
+    // What "Repair all" costs, as the shop shows it (worked out every frame).
+    if (g_pNPCShop->IsRepairShop())
+    {
+        shop["repair_all_price"] = AllRepairGold;
+    }
     json items = json::array();
     SEASON3B::CNewUIInventoryCtrl* grid = g_pNPCShop->GetInventoryCtrl();
     for (int i = 0; grid != nullptr && i < static_cast<int>(grid->GetNumberOfItems()); ++i)

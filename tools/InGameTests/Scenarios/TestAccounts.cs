@@ -34,4 +34,10 @@ internal static class TestAccounts
     /// and 25 free squares for what it buys.
     /// </summary>
     public static readonly TestCharacter NpcShopper = new("test7", "test7", "test7Dk");
+
+    /// <summary>
+    /// <c>repair</c>: level 91 Dark Knight in Lorencia, high enough for the inventory's repair
+    /// button. The test data gives its excellent gloves and boots 30 of 45 durability.
+    /// </summary>
+    public static readonly TestCharacter Repairer = new("test9", "test9", "test9Dk");
 }

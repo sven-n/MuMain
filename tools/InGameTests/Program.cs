@@ -20,6 +20,7 @@ internal static class Program
         new TradeScenario(),
         new ChatScenario(),
         new NpcShopScenario(),
+        new RepairScenario(),
         new IcarusFlyingItemTakeOffScenario(),
     ];
 
