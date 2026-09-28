@@ -244,6 +244,7 @@ item files hold what client and server share.
 | `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
 | `inventory` | How the item is drawn in the inventory, see below. Optional. |
 | `ground` | How the item lies on the ground, see below. Optional. |
+| `glow` | How the item glows, see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 
 `inventory` and `ground` hold these values; a missing value has the
@@ -266,6 +267,43 @@ The Rage Fighter armors (8,59), (8,60), (8,61) and (8,73) are drawn in the
 inventory with models of their own (`MODEL_ARMORINVEN_*`), with the
 `inventory` values of their entry.
 
+`glow` holds how the item glows. Which glow an item gets for its level,
+excellent options or ancient set is decided by the game; these values
+only set its colors, its meshes and the level it glows like. Colors are
+names from the glow color list, see below.
+
+```json
+"glow": { "color": "ice", "meshes": [2], "shineColor": "orange", "excellentMesh": 2 }
+```
+
+| Value | Meaning | Default |
+|---|---|---|
+| `level` | The level the item glows like instead of its own: one level, e.g. `8` for jewels and `0` for wings, or a list of 16, one for each item level from 0 to 15 (arrows, Devil's Square items). Levels above 15 do not glow. | its level |
+| `color` | Color of the glow of items +7 and up. | `orange` |
+| `meshes` / `hiddenMesh` | The glow is only on these meshes (`[0, 1]`), or on all meshes but this one (`1`). | all meshes |
+| `shineColor` | The extra shine of items +11 and up tints the light of the item with this color. | `white` |
+| `shineWhite` | `true`: the shine is plain white instead. | `false` |
+| `shineMeshes` / `shineHiddenMesh` | Like `meshes` / `hiddenMesh`, for the shine and for the glow of ancient items. | all meshes |
+| `ancientColor` | Color of the glow of ancient items. | `azure` |
+| `excellent` | `false`: excellent items do not glow (wings and capes). | `true` |
+| `excellentMesh` | The excellent glow is only on this mesh. | all meshes |
+| `excellentMeshWithoutSkin` | The same, when the item is drawn without the character, in the inventory and on the ground. | `excellentMesh` |
+
+The glow colors are named in `src/bin/Data/Effects/GlowColors.json`, as
+red, green and blue from 0 to 1:
+
+```json
+{ "formatVersion": 1, "colors": { "orange": [1, 0.5, 0], "gold": [1, 0.7, 0.2] } }
+```
+
+A name has only letters and digits. A new color is added to the list and
+can then be used by any item; a name that is not in the list stops the
+start with a message, and so does a list without the defaults (`orange`,
+`white`, `azure`).
+
+The glow of monsters, and of the event models that level variants are
+drawn with, is still set in code; changing the list does not change them.
+
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
   the model of another item or with an effect model; that choice, and
@@ -280,8 +318,9 @@ inventory with models of their own (`MODEL_ARMORINVEN_*`), with the
 Model files are checked like the item files: invalid JSON, a missing
 `number` or `file`, a file that is not a `.bmd`, a path that leaves the
 game folder (starting with `/`, a drive letter or `..`), `\` in a path,
-display values of the wrong kind (e.g. a rotation with two numbers or a
-scale of 0), or an item with two models stop the start with a message;
+display or glow values of the wrong kind (e.g. a rotation with two
+numbers, a scale of 0 or a color value above 1), or an item with two
+models stop the start with a message;
 unknown fields are warnings. The automated tests also check that every
 model file and texture folder exists, that every texture of a model is in
 one of its texture folders, and that every texture is a `.jpg` or `.tga`
@@ -307,6 +346,7 @@ The problems are:
 | A texture is not a `.jpg` or `.tga` texture; the game cannot load other types. | error |
 | A texture is in none of the texture folders, but another model loaded it before; that one is used. The warning names the folder to add to `textureFolders`. | warning |
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
+| A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
 
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts

@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
-
-#include <functional>
-#include <string>
+#include "Data/GameData/ItemData/ItemModelJsonValues.h"
 
 // The display values of the item model files:
 //
@@ -27,7 +24,7 @@ constexpr const char* AnchorKey = "anchor";
 constexpr const char* OffsetKey = "offset";
 constexpr const char* RotationKey = "rotation";
 
-using ReportIssue = std::function<void(ItemDataIssueSeverity, const std::string& field, const std::string& message)>;
+using ReportIssue = ModelJson::ReportIssue;
 
 // Adds the display values of the model to its JSON object.
 void Write(const ItemModelDefinition& model, Json::OrderedJson& json);

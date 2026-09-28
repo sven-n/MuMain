@@ -5,11 +5,16 @@
 #include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelGlowJson.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemGlow.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -44,6 +49,21 @@ const ItemModelDefinition* FindModel(const std::vector<ItemModelDefinition>& mod
 const ItemModelDataLoadResult& ShippedModels()
 {
     static const ItemModelDataLoadResult result = LoadItemModelDataDirectory(ModelDirectory);
+    return result;
+}
+
+using GlowLevels = std::array<int, ItemGlow::ItemLevelCount>;
+
+GlowLevels SameGlowLevel(int level)
+{
+    GlowLevels levels{};
+    levels.fill(level);
+    return levels;
+}
+
+const GlowColorsLoadResult& ShippedGlowColors()
+{
+    static const GlowColorsLoadResult result = LoadGlowColorsFile(DataDirectory / "Effects" / "GlowColors.json");
     return result;
 }
 
@@ -87,14 +107,19 @@ bool IsInFolders(const std::string& storedName, const std::vector<std::string>& 
                        [&](const std::string& folder) { return GetFolderFiles(folder).contains(storedName); });
 }
 
-// The texture names of the meshes of the model file.
-std::vector<std::string> ReadMeshTextures(const ItemModelDefinition& model)
+std::unique_ptr<BMD> OpenModelFile(const ItemModelDefinition& model)
 {
     const std::filesystem::path path = ClientDirectory / model.file;
     const std::wstring folder = path.parent_path().wstring() + L"/";
     auto bmd = std::make_unique<BMD>();
     REQUIRE(bmd->Open2(folder.c_str(), path.filename().wstring().c_str()));
+    return bmd;
+}
 
+// The texture names of the meshes of the model file.
+std::vector<std::string> ReadMeshTextures(const ItemModelDefinition& model)
+{
+    const std::unique_ptr<BMD> bmd = OpenModelFile(model);
     std::vector<std::string> textures;
     for (int mesh = 0; mesh < bmd->NumMeshs; ++mesh)
     {
@@ -289,7 +314,7 @@ TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
         {14, 21, {{{1, 2}, {0.4f, 0.8f}}}, {0.5f, 0.5f}},                                         // Rena
         {14, 24, {{{1}, {0.5f, 0.8f}}}, {0.5f, 0.95f}}, // Broken Sword / Dark Stone
     };
-    g_ItemModelDatabase.Build(ShippedModels().models);
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     for (const Expected& item : expected)
     {
@@ -309,7 +334,7 @@ TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
             CHECK(got.y == want.y);
         }
     }
-    g_ItemModelDatabase.Build({});
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
 namespace
@@ -339,7 +364,7 @@ void CheckGroundDisplay(int modelType, const Render::Items::Display::GroundDispl
 TEST_CASE("Models drawn for items keep the look of the old drawing code [data][items]")
 {
     using namespace Render::Items::Display;
-    g_ItemModelDatabase.Build(ShippedModels().models);
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     // The Rage Fighter armor has inventory models of its own, drawn on the
     // character skeleton with the look of the item.
@@ -381,5 +406,119 @@ TEST_CASE("Models drawn for items keep the look of the old drawing code [data][i
     CHECK_FALSE(GetSmallArchangelWeaponScale(MODEL_DIVINE_STAFF_OF_ARCHANGEL, 0).has_value());
     CHECK_FALSE(GetSmallArchangelWeaponScale(MODEL_EVENT + 12, -1).has_value());
 
-    g_ItemModelDatabase.Build({});
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("Shipped item models keep the glow of the old drawing code [data][items]")
+{
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+    const auto glowOf = [&](int group, int number) -> const ItemGlow&
+    {
+        const ItemModelDefinition* model = FindModel(models, group, number);
+        REQUIRE(model != nullptr);
+        return model->glow;
+    };
+
+    CHECK(glowOf(0, 0) == ItemGlow{});
+
+    const ItemGlow& lightningSword = glowOf(0, 14);
+    CHECK(lightningSword.color == "blue");
+    CHECK(lightningSword.shineColor == "blue");
+
+    // The glow leaves out one mesh, or is on some meshes only.
+    CHECK(glowOf(2, 7).meshes.hidden == 2);
+    // The glow leaves out the mesh these draw as an effect of their own.
+    CHECK(glowOf(0, 31).meshes.hidden == 2);
+    CHECK(glowOf(3, 10).meshes.hidden == 1);
+    CHECK(glowOf(6, 16).meshes.hidden == 2);
+    CHECK(glowOf(3, 11).meshes.only == std::vector<int>{0, 1});
+
+    // Armor sets: the ancient shine is gold for some, the shine plain white.
+    CHECK(glowOf(7, 3).ancientColor == "gold");
+    CHECK(glowOf(7, 21).shineWhite);
+    CHECK(glowOf(7, 59).excellentMesh == 1);
+    CHECK(glowOf(7, 39).excellentMeshWithoutSkin == 2);
+
+    // Jewels glow like +8; wings and capes like +0 and without the excellent
+    // glow.
+    CHECK(glowOf(14, 13).levels == SameGlowLevel(8));
+    CHECK(glowOf(12, 0).levels == SameGlowLevel(0));
+    // +1 arrows glow like +3; from +8 they would glow like +17 and up, which
+    // is no glow at all.
+    CHECK(glowOf(4, 15).levels == GlowLevels{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31});
+    // The Devil's Square items glow like half their square, the seventh
+    // square like +13.
+    CHECK(glowOf(14, 17).levels == GlowLevels{0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13});
+    CHECK_FALSE(glowOf(12, 0).excellent);
+    CHECK_FALSE(glowOf(13, 30).excellent);
+}
+
+// A mesh the model does not have would leave the glow out without a message
+// (loading only warns about it).
+TEST_CASE("The glow of shipped item models is on meshes the models have [data][items]")
+{
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        std::vector<std::pair<std::string, int>> meshes;
+        GlowJson::ForEachMesh(model.glow,
+                              [&](const std::string& field, int mesh) { meshes.emplace_back(field, mesh); });
+        if (meshes.empty())
+        {
+            continue;
+        }
+
+        const std::unique_ptr<BMD> bmd = OpenModelFile(model);
+        for (const auto& [field, mesh] : meshes)
+        {
+            INFO("(" << model.group << "," << model.number << ") " << field << " " << mesh);
+            CHECK(mesh < bmd->NumMeshs);
+        }
+    }
+}
+
+TEST_CASE("Shipped item model glow colors are in the glow color list [data][items]")
+{
+    CHECK(ShippedGlowColors().issues.empty());
+    std::vector<ItemDataIssue> issues;
+    ValidateItemModelGlowColors(ShippedModels().models, ShippedGlowColors().colors, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+}
+
+TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
+{
+    using namespace Render::Items::Glow;
+    g_GlowColors.Build(ShippedGlowColors().colors);
+    g_ItemModelDatabase.Build(ShippedModels().models, g_GlowColors);
+
+    CHECK(GetLevel(MODEL_ARROWS, 0) == 0);
+    CHECK(GetLevel(MODEL_ARROWS, 3) == 7);
+    CHECK(GetLevel(MODEL_DEVILS_EYE, 5) == 2);
+    CHECK(GetLevel(MODEL_DEVILS_EYE, 7) == 13);
+    // The event models of level variants stay in code.
+    CHECK(GetLevel(MODEL_EVENT + 14, 2) == 9);
+    CHECK(GetLevel(MODEL_ITEM + MakeItemType(14, 13), 0) == 8);
+    CHECK(GetLevel(MODEL_ITEM + MakeItemType(0, 0), 5) == 5);
+
+    // The inventory models of the Rage Fighter armor and the second models of
+    // the Rage Fighter gloves have the colors of their item; their meshes are
+    // their own.
+    const Color copper{0.8f, 0.46f, 0.25f};
+    CHECK(GetColors(MODEL_ITEM + ITEM_SACRED_ARMOR).color == copper);
+    CHECK(GetColors(MODEL_ARMORINVEN_60).color == copper);
+    CHECK(GetColors(MODEL_SWORD_32_LEFT).color == copper);
+    CHECK(Get(MODEL_ARMORINVEN_60) == ItemGlow{});
+    // Models that are not items keep the colors of the drawing code, whatever
+    // the list says.
+    CHECK(GetColors(MODEL_PLAYER).color == Color{1.0f, 0.5f, 0.0f});
+    CHECK(GetColors(MODEL_PLAYER).ancientColor == Color{0.1f, 0.6f, 1.0f});
+    CHECK(Get(MODEL_PLAYER) == ItemGlow{});
+    CHECK(HasExcellentGlow(MODEL_PLAYER));
+    CHECK_FALSE(HasExcellentGlow(MODEL_WING));
+
+    g_GlowColors.Build({});
+    g_ItemModelDatabase.Build({}, g_GlowColors);
 }

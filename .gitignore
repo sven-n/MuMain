@@ -43,6 +43,9 @@ build-linux/
 !src/bin/Data/Items/
 !src/bin/Data/Items/**
 src/bin/Data/Items/**/*.tmp
+# Effect data (JSON), e.g. the glow colors of the items.
+!src/bin/Data/Effects/
+!src/bin/Data/Effects/**
 **/obj/
 *.user
 *.suo

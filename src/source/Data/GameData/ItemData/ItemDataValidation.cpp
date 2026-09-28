@@ -128,4 +128,39 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
         }
     }
 }
+
+void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
+                                 std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
+{
+    std::set<std::string, std::less<>> names;
+    for (const Effects::GlowColor& color : colors)
+    {
+        names.insert(color.name);
+    }
+
+    const std::string colorList = Effects::GlowColorsFile;
+    for (const char* name : {ItemGlow::DefaultColor, ItemGlow::DefaultShineColor, ItemGlow::DefaultAncientColor})
+    {
+        if (!names.contains(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Error, colorList, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "colors", "the default glow color \"" + std::string(name) + "\" is missing"});
+        }
+    }
+
+    for (const ItemModelDefinition& model : models)
+    {
+        const std::pair<const char*, const std::string*> fields[] = {{"glow.color", &model.glow.color},
+                                                                     {"glow.shineColor", &model.glow.shineColor},
+                                                                     {"glow.ancientColor", &model.glow.ancientColor}};
+        for (const auto& [field, name] : fields)
+        {
+            if (!names.contains(*name))
+            {
+                issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, field,
+                                  "\"" + *name + "\" is not in " + colorList});
+            }
+        }
+    }
+}
 } // namespace Data::Items

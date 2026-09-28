@@ -78,6 +78,12 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "blue",
+        "hiddenMesh": 1,
+        "shineColor": "blue",
+        "shineHiddenMesh": 1
       }
     },
     {
@@ -131,6 +137,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white"
       }
     },
     {
@@ -157,6 +166,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "bronze"
       }
     },
     {
@@ -171,6 +183,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "royalBlue"
       }
     },
     {
@@ -185,6 +200,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "grey"
       }
     },
     {
@@ -199,6 +217,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "ochre"
       }
     },
     {
@@ -212,6 +233,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "denim"
       }
     },
     {
@@ -225,6 +249,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -239,6 +266,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "blue"
       }
     },
     {
@@ -253,6 +283,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "rust"
       }
     },
     {
@@ -267,6 +300,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "violet"
       }
     },
     {
@@ -281,6 +317,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white"
       }
     },
     {
@@ -307,6 +346,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -333,6 +375,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -346,6 +391,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "royalBlue"
       }
     },
     {
@@ -359,6 +407,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "meshes": [1]
       }
     },
     {
@@ -373,6 +424,10 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "goldenrod",
+        "meshes": [0]
       }
     },
     {
@@ -387,6 +442,10 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white",
+        "meshes": [0]
       }
     },
     {

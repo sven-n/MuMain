@@ -45,6 +45,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemGlow.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -5882,412 +5883,47 @@ void RenderItems()
 
 void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon)
 {
-    int Color = 0;
-
+    // Monsters keep their colors here; items have theirs in the item model files.
+    std::array<float, 3> color{};
     if (ExtraMon && (Type == MODEL_BALROG || Type == MODEL_BILL_OF_BALROG))
     {
-        Color = 8;
+        color = {0.8f, 0.8f, 1.0f};
     }
-    else if (Type == MODEL_BALROG || Type == MODEL_BILL_OF_BALROG)
+    else if (Type == MODEL_BALROG)
     {
-        Color = 1;
+        color = {1.0f, 0.2f, 0.0f};
     }
-    else if (Type == MODEL_VALKYRIE || Type == MODEL_SILVER_BOW || Type == MODEL_BLUEWING_CROSSBOW)
+    else if (Type == MODEL_VALKYRIE)
     {
-        Color = 5;
+        color = {1.0f, 1.0f, 1.0f};
     }
-    else if (Type == MODEL_LIGHTING_SWORD || Type == MODEL_LEGENDARY_STAFF || (Type >= MODEL_TEAR_OF_ELF && Type < MODEL_POTION + 27))
+    else
     {
-        Color = 2;
+        color = Render::Items::Glow::GetColors(Type).color;
     }
-    else if (Type == MODEL_CELESTIAL_BOW || Type == MODEL_GREAT_REIGN_CROSSBOW)
-    {
-        Color = 9;
-    }
-    else if (Type == MODEL_ORB_OF_GREATER_FORTITUDE)
-    {
-        Color = 2;
-    }
-    else if (Type == MODEL_DIVINE_CB_OF_ARCHANGEL)
-    {
-        Color = 10;
-    }
-    else if (Type == MODEL_DRAGON_SOUL_STAFF)
-    {
-        Color = 5;
-    }
-    else if (Type == MODEL_RUNE_BLADE)
-    {
-        Color = 10;
-    }
-    else if (Type == MODEL_ELEMENTAL_SHIELD)
-    {
-        Color = 6;
-    }
-    else if (Type == MODEL_DRAGON_SPEAR)
-    {
-        Color = 9;
-    }
-    else if (Type == MODEL_BATTLE_SCEPTER)
-    {
-        Color = 9;
-    }
-    else if (Type == MODEL_MASTER_SCEPTER)
-    {
-        Color = 10;
-    }
-    else if (Type == MODEL_GREAT_SCEPTER)
-    {
-        Color = 12;
-    }
-    else if (Type == MODEL_KNIGHT_BLADE)
-    {
-        Color = 10;
-    }
-    else if (Type == MODEL_DARK_REIGN_BLADE)
-    {
-        Color = 5;
-    }
-    else if (Type == MODEL_ARROW_VIPER_BOW)
-    {
-        Color = 16;
-    }
-    else if (Type == MODEL_STAFF_OF_KUNDUN)
-    {
-        Color = 17;
-    }
-    else if (Type == MODEL_GREAT_LORD_SCEPTER)
-    {
-        Color = 16;
-    }
-    else if (Type == MODEL_BONE_BLADE)
-    {
-        Color = 18;
-    }
-    else if (Type == MODEL_GRAND_VIPER_STAFF)
-    {
-        Color = 19;
-    }
-    else if (Type == MODEL_SYLPH_WIND_BOW)
-    {
-        Color = 20;
-    }
-    else if (Type == MODEL_EXPLOSION_BLADE)
-    {
-        Color = 23;
-    }
-    else if (Type == MODEL_SOLEIL_SCEPTER)
-    {
-        Color = 22;
-    }
-    else if (Type == MODEL_DAYBREAK)
-    {
-        Color = 24;
-    }
-    else if (Type == MODEL_PLATINA_STAFF)
-    {
-        Color = 25;
-    }
-    else if (Type == MODEL_ALBATROSS_BOW)
-    {
-        Color = 26;
-    }
-    else if (Type == MODEL_SHINING_SCEPTER)
-    {
-        Color = 28;
-    }
-    else if (Type == MODEL_SWORD_DANCER)
-    {
-        Color = 27;
-    }
-    else if (Type == MODEL_MISTERY_STICK)
-        Color = 24;
-    else if (Type == MODEL_VIOLENT_WIND_STICK)
-        Color = 15;
-    else if (Type == MODEL_RED_WING_STICK)
-        Color = 1;
-    else if (Type == MODEL_ANCIENT_STICK)
-        Color = 3;
-    else if (Type == MODEL_DEMONIC_STICK)
-        Color = 30;
-    else if (Type == MODEL_STORM_BLITZ_STICK)
-        Color = 21;
-    else if (Type == MODEL_ETERNAL_WING_STICK)
-        Color = 5;
-    else if (Type == MODEL_BOOK_OF_NEIL)
-        Color = 1;
-    else if (Type == MODEL_IMPERIAL_SWORD)
-        Color = 8;
-    else if (Type == MODEL_DEADLY_STAFF)
-        Color = 1;
-    else if (Type == MODEL_IMPERIAL_STAFF)
-        Color = 19;
-    else if (Type == MODEL_ABSOLUTE_SCEPTER)
-        Color = 40;
-    else if (Type == MODEL_FROST_BARRIER)
-        Color = 29;
-    else if (Type == MODEL_STINGER_BOW)
-        Color = 35;
-    else if (Type == MODEL_GUARDIAN_SHILED)
-        Color = 36;
-    else if (Type == MODEL_CROSS_SHIELD)
-        Color = 30;
-    else if (Type == MODEL_BEUROBA)
-        Color = 20;
-    else if (Type == MODEL_CHROMATIC_STAFF)
-        Color = 43;
-    else if (Type == MODEL_RAVEN_STICK)
-        Color = 5;
-    else if (Type == MODEL_STRYKER_SCEPTER)
-        Color = 5;
-    else if (Type == MODEL_AIR_LYN_BOW)
-        Color = 36;
-    else if (g_CMonkSystem.EqualItemModelType(Type) == MODEL_SACRED_GLOVE)
-        Color = 16;
-    else if (g_CMonkSystem.EqualItemModelType(Type) == MODEL_STORM_HARD_GLOVE)
-        Color = 42;
-    else if (g_CMonkSystem.EqualItemModelType(Type) == MODEL_PIERCING_BLADE_GLOVE)
-        Color = 18;
-    else if (g_CMonkSystem.EqualItemModelType(Type) == MODEL_PHOENIX_SOUL_STAR)
-        Color = 45;
-    else if (Type == MODEL_ARMORINVEN_60)
-        Color = 16;
-    else if (Type == MODEL_ARMORINVEN_61)
-        Color = 42;
-    else if (Type == MODEL_ARMORINVEN_62)
-        Color = 18;
-    else if (Type == MODEL_ARMORINVEN_74)
-        Color = 45;
-    else//  if ( Type<MODEL_WING )
-    {
-        int ItemType = Type - MODEL_ITEM;
-        if (ItemType / MAX_ITEM_INDEX >= 7 && ItemType / MAX_ITEM_INDEX <= 11)
-        {
-            switch (ItemType % MAX_ITEM_INDEX)
-            {
-            case 1:Color = 1; break;
-            case 9:Color = 2; break;
-            case 12:Color = 2; break;
-            case 3:Color = 3; break;
-            case 13:Color = 4; break;
-            case 4:Color = 5; break;
-            case 14:Color = 5; break;
-            case 6:Color = 6; break;
-            case 15:Color = 7; break;
-            case 16:Color = 10; break;
-            case 17:Color = 9; break;
-            case 18:Color = 5; break;
-            case 19:Color = 9; break;
-            case 20:Color = 9; break;
-            case 21:Color = 16; break;
-            case 22:Color = 17; break;
-            case 23:Color = 11; break;
-            case 24:Color = 16; break;
-            case 25:Color = 11; break;
-            case 26:Color = 12; break;
-            case 27:Color = 10; break;
-            case 28:Color = 15; break;
-            case 29:Color = 18; break;
-            case 30:Color = 19; break;
-            case 31:Color = 20; break;
-            case 32:Color = 21; break;
-            case 33:Color = 22; break;
-            case 34:Color = 24; break;
-            case 35:Color = 25; break;
-            case 36:Color = 26; break;
-            case 37:Color = 27; break;
-            case 38:Color = 28; break;
-            case 39:Color = 29; break;
-            case 40:Color = 30; break;
-            case 41:Color = 31; break;
-            case 42:Color = 32; break;
-            case 43:Color = 33; break;
-            case 44:Color = 34; break;
-            case 45:Color = 36; break;
-            case 46:Color = 42; break;
-            case 47:Color = 37; break;
-            case 48:Color = 1; break;
-            case 49:Color = 35; break;
-            case 50:Color = 39; break;
-            case 51:Color = 40; break;
-            case 52:Color = 36; break;
-            case 53:Color = 41; break;
-            case 59:Color = 16; break;
-            case 60:Color = 42; break;
-            case 61:Color = 18; break;
-            case 73:Color = 45; break;
-            }
-        }
-    }
+
     Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
-    switch (Color)
-    {
-    case 0:Vector(Bright * 1.0f, Bright * 0.5f, Bright * 0.0f, Light); break;
-    case 1:Vector(Bright * 1.0f, Bright * 0.2f, Bright * 0.0f, Light); break;
-    case 2:Vector(Bright * 0.0f, Bright * 0.5f, Bright * 1.0f, Light); break;
-    case 3:Vector(Bright * 0.0f, Bright * 0.5f, Bright * 1.0f, Light); break;
-    case 4:Vector(Bright * 0.0f, Bright * 0.8f, Bright * 0.4f, Light); break;
-    case 5:Vector(Bright * 1.0f, Bright * 1.0f, Bright * 1.0f, Light); break;
-    case 6:Vector(Bright * 0.6f, Bright * 0.8f, Bright * 0.4f, Light); break;
-    case 7:Vector(Bright * 0.9f, Bright * 0.8f, Bright * 1.0f, Light); break;
-    case 8:Vector(Bright * 0.8f, Bright * 0.8f, Bright * 1.0f, Light); break;
-    case 9:Vector(Bright * 0.5f, Bright * 0.5f, Bright * 0.8f, Light); break;
-    case 10:Vector(Bright * 0.75f, Bright * 0.65f, Bright * 0.5f, Light); break;
-    case 11:Vector(Bright * 0.35f, Bright * 0.35f, Bright * 0.6f, Light); break;
-    case 12:Vector(Bright * 0.47f, Bright * 0.67f, Bright * 0.6f, Light); break;
-    case 13:Vector(Bright * 0.0f, Bright * 0.3f, Bright * 0.6f, Light); break;
-    case 14:Vector(Bright * 0.65f, Bright * 0.65f, Bright * 0.55f, Light); break;
-    case 15:Vector(Bright * 0.2f, Bright * 0.3f, Bright * 0.6f, Light); break;
-    case 16:Vector(Bright * 0.8f, Bright * 0.46f, Bright * 0.25f, Light); break;
-    case 17:Vector(Bright * 0.65f, Bright * 0.45f, Bright * 0.3f, Light); break;
-    case 18:Vector(Bright * 0.5f, Bright * 0.4f, Bright * 0.3f, Light); break;
-    case 19:Vector(Bright * 0.37f, Bright * 0.37f, Bright * 1.0f, Light); break;
-    case 20:Vector(Bright * 0.3f, Bright * 0.7f, Bright * 0.3f, Light); break;
-    case 21:Vector(Bright * 0.5f, Bright * 0.4f, Bright * 1.0f, Light); break;
-    case 22:Vector(Bright * 0.45f, Bright * 0.45f, Bright * 0.23f, Light); break;
-    case 23:Vector(Bright * 0.3f, Bright * 0.3f, Bright * 0.45f, Light); break;
-    case 24:Vector(Bright * 0.6f, Bright * 0.5f, Bright * 0.2f, Light); break;
-    case 25:Vector(Bright * 0.6f, Bright * 0.6f, Bright * 0.6f, Light); break;
-    case 26:Vector(Bright * 0.3f, Bright * 0.7f, Bright * 0.3f, Light); break;
-    case 27:Vector(Bright * 0.5f, Bright * 0.6f, Bright * 0.7f, Light); break;
-    case 28:Vector(Bright * 0.45f, Bright * 0.45f, Bright * 0.23f, Light); break;
-    case 29:Vector(Bright * 0.2f, Bright * 0.7f, Bright * 0.3f, Light); break;
-    case 30:Vector(Bright * 0.7f, Bright * 0.3f, Bright * 0.3f, Light); break;
-    case 31:Vector(Bright * 0.7f, Bright * 0.5f, Bright * 0.3f, Light); break;
-    case 32:Vector(Bright * 0.5f, Bright * 0.2f, Bright * 0.7f, Light); break;
-    case 33:Vector(Bright * 0.8f, Bright * 0.4f, Bright * 0.6f, Light); break;
-    case 34:Vector(Bright * 0.6f, Bright * 0.4f, Bright * 0.8f, Light); break;
-    case 35:Vector(Bright * 0.7f, Bright * 0.4f, Bright * 0.4f, Light); break;
-    case 36:Vector(Bright * 0.5f, Bright * 0.5f, Bright * 0.7f, Light); break;
-    case 37:Vector(Bright * 0.7f, Bright * 0.5f, Bright * 0.7f, Light); break;
-    case 38:Vector(Bright * 0.2f, Bright * 0.4f, Bright * 0.7f, Light); break;
-    case 39:Vector(Bright * 0.3f, Bright * 0.6f, Bright * 0.4f, Light); break;
-    case 40:Vector(Bright * 0.7f, Bright * 0.2f, Bright * 0.2f, Light); break;
-    case 41:Vector(Bright * 0.7f, Bright * 0.2f, Bright * 0.7f, Light); break;
-    case 42:Vector(Bright * 0.8f, Bright * 0.4f, Bright * 0.0f, Light); break;
-    case 43:Vector(Bright * 0.8f, Bright * 0.6f, Bright * 0.2f, Light); break;
-    case 44:Vector(Bright * 0.8f, Bright * 0.7f, Bright * 0.4f, Light); break;
-    case 45:Vector(Bright * 0.5f, Bright * 0.8f, Bright * 0.9f, Light); break;
-    }
+    Vector(Bright * color[0], Bright * color[1], Bright * color[2], Light);
 }
 
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon)
 {
-    int Color = 0;
-    if (Type == MODEL_SILVER_BOW || Type == MODEL_BLUEWING_CROSSBOW)
+    const Render::Items::Glow::Colors& colors = Render::Items::Glow::GetColors(Type);
+    if (colors.shineWhite)
     {
-        Color = 2;
+        Vector(1.f, 1.f, 1.f, Light);
+        return;
     }
-    else if (Type == MODEL_LIGHTING_SWORD || Type == MODEL_LEGENDARY_STAFF)
-    {
-        Color = 2;
-    }
-    else if (Type == MODEL_THUNDER_BLADE)
-    {
-        Color = 0;
-    }
-    else if (Type == MODEL_CELESTIAL_BOW)
-    {
-        Color = 0;
-    }
-    else if (Type == MODEL_DRAGON_SOUL_STAFF)
-    {
-        Color = 0;
-    }
-    else if (Type == MODEL_ARMORINVEN_60
-        || Type == MODEL_ARMORINVEN_61
-        || Type == MODEL_ARMORINVEN_62)
-    {
-        Color = 0;
-    }
-    else
-    {
-        int ItemType = Type - MODEL_ITEM;
-        if (ItemType / MAX_ITEM_INDEX >= 7 && ItemType / MAX_ITEM_INDEX <= 11)
-        {
-            switch (ItemType % MAX_ITEM_INDEX)
-            {
-            case 0:Color = 0; break;
-            case 1:Color = 0; break;
-            case 2:Color = 0; break;
-            case 3:Color = 0; break;
-            case 4:Color = 1; break;
-            case 5:Color = 0; break;
-            case 6:Color = 0; break;
-            case 7:Color = 0; break;
-            case 8:Color = 0; break;
-            case 9:Color = 0; break;
-            case 10:Color = 0; break;
-            case 11:Color = 0; break;
-            case 12:Color = 0; break;
-            case 13:Color = 0; break;
-            case 14:Color = 1; break;
-            case 15:Color = 1; break;
-            case 16:Color = 0; break;
-            case 17:Color = 1; break;
-            case 18:Color = 2; break;
-            case 19:Color = 0; break;
-            case 21:Color = 3; break;
-            case 39:Color = 1; break;
-            case 40:Color = 1; break;
-            case 41:Color = 1; break;
-            case 42:Color = 1; break;
-            case 43:Color = 2; break;
-            case 44:Color = 3; break;
-            case 45:Color = 0; break;
-            case 59:Color = 0; break;
-            case 60:Color = 0; break;
-            case 61:Color = 0; break;
-            }
-        }
-    }
+
+    const Render::Items::Glow::Color& color = colors.shineColor;
     Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
-    switch (Color)
-    {
-    case 0: Vector(Bright * 1.0f * Light[0], Bright * 1.0f * Light[1], Bright * 1.0f * Light[2], Light); break;
-    case 1: Vector(Bright * 1.0f * Light[0], Bright * 0.5f * Light[1], Bright * 0.0f * Light[2], Light); break;
-    case 2: Vector(Bright * 0.0f * Light[0], Bright * 0.5f * Light[1], Bright * 1.0f * Light[2], Light); break;
-    case 3: Vector(1.f, 1.f, 1.f, Light);	//
-    }
+    Vector(Bright * color[0] * Light[0], Bright * color[1] * Light[1], Bright * color[2] * Light[2], Light);
 }
 
 void PartObjectColor3(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon)
 {
-    int Color = 0;
-    int ItemType = Type - MODEL_ITEM;
-
-    if (ItemType / MAX_ITEM_INDEX >= 7 && ItemType / MAX_ITEM_INDEX <= 11)
-    {
-        switch (ItemType % MAX_ITEM_INDEX)
-        {
-        case 0:Color = 0; break;
-        case 1:Color = 0; break;
-        case 2:Color = 0; break;
-        case 3:Color = 1; break;
-        case 4:Color = 0; break;
-        case 5:Color = 0; break;
-        case 6:Color = 0; break;
-        case 7:Color = 0; break;
-            //		case 7 :Color=44;break;
-        case 8:Color = 0; break;
-        case 9:Color = 1; break;
-        case 10:Color = 0; break;
-        case 11:Color = 0; break;
-        case 12:Color = 0; break;
-        case 13:Color = 0; break;
-        case 14:Color = 0; break;
-        case 15:Color = 0; break;
-        case 16:Color = 0; break;
-        case 17:Color = 1; break;
-        case 18:Color = 0; break;
-        case 19:Color = 0; break;
-        }
-    }
-    switch (Color)
-    {
-    case 0: Vector(0.1f, 0.6f, 1.0f, Light); break;
-    case 1: Vector(1.f, 0.7f, 0.2f, Light); break;
-    }
+    const Render::Items::Glow::Color& color = Render::Items::Glow::GetColors(Type).ancientColor;
+    Vector(color[0], color[1], color[2], Light);
 }
 
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
@@ -8372,143 +8008,17 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
         PartObjectColor(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
 
-    if (Type == MODEL_ELEMENTAL_MACE)
-    {
-        o->HiddenMesh = 2;
-    }
-
-    if (Type == MODEL_LEGENDARY_STAFF)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1, Texture);
-    else if (Type == MODEL_KNIGHT_BLADE)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1, Texture);
-    else if (Type == MODEL_DARK_REIGN_BLADE)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 0, Texture);
-    else if (Type == MODEL_RUNE_BLADE || Type == MODEL_DRAGON_SPEAR || Type == MODEL_ELEMENTAL_MACE || Type == MODEL_ELEMENTAL_SHIELD)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, Texture);
-    else if (Type >= MODEL_BATTLE_SCEPTER && Type <= MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, Texture);
-    else if (Type == MODEL_FLAMBERGE)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
-    }
-    else if (Type == MODEL_SWORD_BREAKER)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_IMPERIAL_SWORD)
-    {
-        b->RenderMesh(2, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_DEADLY_STAFF)
+    // Stays here until the render styles (phase 4c2): the second mesh shines
+    // again, white, and the object keeps blending it.
+    if (Type == MODEL_DEADLY_STAFF)
     {
         b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, Texture);
         o->BlendMesh = 1;
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        return;
     }
-    else if (Type == MODEL_STAFF + 32)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_FROST_BARRIER)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_GUARDIAN_SHILED)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SERAPHIM_HELM)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_FAITH_HELM)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_HELM + 53)
-    {
-        b->RenderMesh(2, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_CROSS_SHIELD)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_BEUROBA)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_CHROMATIC_STAFF)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_RAVEN_STICK)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_STRYKER_SCEPTER)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_AIR_LYN_BOW)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type >= MODEL_SACRED_GLOVE && Type <= MODEL_PHOENIX_SOUL_STAR)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SACRED_HELM || Type == MODEL_STORM_HARD_HELM)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PIERCING_HELM)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SACRED_ARMOR)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_STORM_HARD_ARMOR)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PIERCING_ARMOR)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PHOENIX_SOUL_HELMET)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PHOENIX_SOUL_ARMOR)
-    {
-        b->RenderMesh(2, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_ARMORINVEN_74)
-    {
-        if (RenderType & RENDER_METAL)
-        {
-            b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        }
-        b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PHOENIX_SOUL_BOOTS)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, Texture);
-    }
-
-    if (Type == MODEL_ELEMENTAL_MACE)
-    {
-        o->HiddenMesh = -1;
-    }
+    Render::Items::Glow::RenderGlow(b, o, Type, RenderType, Alpha, Texture);
 }
 
 void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture)
@@ -8528,86 +8038,7 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     {
         PartObjectColor2(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
-    if (Type == MODEL_LEGENDARY_STAFF)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1, Texture);
-    else if (Type == MODEL_KNIGHT_BLADE)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1, Texture);
-    else if (Type == MODEL_DARK_REIGN_BLADE)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 0, Texture);
-    else if (Type == MODEL_GRAND_SOUL_SHIELD || Type == MODEL_ELEMENTAL_SHIELD)
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, Texture);
-    else if (Type == MODEL_ILLUSION_SORCERER_COVENANT)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1, Texture);
-    }
-    else if (Type == MODEL_CURSED_CASTLE_WATER)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 0, Texture);
-    }
-    else if (Type == MODEL_FLAMBERGE)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5, Texture);
-    }
-    else if (Type == MODEL_FROST_BARRIER)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SERAPHIM_HELM)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_FAITH_HELM)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_HELM + 53)
-    {
-        b->RenderMesh(2, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type >= MODEL_SACRED_GLOVE && Type <= MODEL_PHOENIX_SOUL_STAR)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SACRED_HELM || Type == MODEL_STORM_HARD_HELM)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PIERCING_HELM)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SACRED_ARMOR)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_STORM_HARD_ARMOR)
-    {
-        b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PIERCING_ARMOR)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PHOENIX_SOUL_HELMET)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PHOENIX_SOUL_ARMOR)
-    {
-        b->RenderMesh(2, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_ARMORINVEN_74)
-    {
-        b->RenderMesh(0, RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_PHOENIX_SOUL_BOOTS)
-    {
-        b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, Texture);
-    }
+    Render::Items::Glow::RenderShine(b, o, Type, RenderType, Alpha, Texture);
 }
 
 void NextGradeObjectRender(CHARACTER* c)
@@ -8819,151 +8250,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         return;
     }
 
-    switch (Type)
-    {
-    case MODEL_HORN_OF_DINORANT:Level = 8; break;
-    case MODEL_ELITE_TRANSFER_SKELETON_RING:Level = 13; break;
-    case MODEL_JACK_OLANTERN_TRANSFORMATION_RING:Level = 13; break;
-    case MODEL_CHRISTMAS_TRANSFORMATION_RING:Level = 13; break;
-    case MODEL_CHRISTMAS_STAR:Level = 13; break;
-    case MODEL_GAME_MASTER_TRANSFORMATION_RING:Level = 13; break;
-    case MODEL_TRANSFORMATION_RING:Level = 8; break;
-    case MODEL_CAPE_OF_LORD:
-    case MODEL_CAPE_OF_FIGHTER:
-        Level = 0; break;
-    case MODEL_EVENT + 16: Level = 0; break;
-    case MODEL_JEWEL_OF_BLESS:
-    case MODEL_JEWEL_OF_SOUL:
-    case MODEL_JEWEL_OF_LIFE:
-    case MODEL_JEWEL_OF_GUARDIAN:
-    case MODEL_PACKED_JEWEL_OF_LIFE:
-    case MODEL_PACKED_JEWEL_OF_GUARDIAN:
-    case MODEL_PACKED_JEWEL_OF_CHAOS:
-    case MODEL_COMPILED_CELE:
-    case MODEL_COMPILED_SOUL:
-    case MODEL_JEWEL_OF_CHAOS:Level = 8; break;
-    case MODEL_WING_OF_STORM:
-    case MODEL_WING_OF_ETERNAL:
-    case MODEL_WING_OF_ILLUSION:
-    case MODEL_WING_OF_RUIN:
-    case MODEL_CAPE_OF_EMPEROR:
-    case MODEL_WING_OF_CURSE:
-    case MODEL_WINGS_OF_DESPAIR:
-    case MODEL_WING_OF_DIMENSION:
-    case MODEL_WINGS_OF_SPIRITS:
-    case MODEL_WINGS_OF_SOUL:
-    case MODEL_WINGS_OF_DRAGON:
-    case MODEL_WINGS_OF_DARKNESS:
-    case MODEL_WING:
-    case MODEL_WINGS_OF_HEAVEN:
-    case MODEL_CAPE_OF_OVERRULE:
-    case MODEL_WINGS_OF_SATAN:Level = 0; break;
-    case MODEL_ORB_OF_TWISTING_SLASH:Level = 9; break;
-    case MODEL_ORB_OF_SUMMONING:Level = 0; break;
-    case MODEL_ORB_OF_RAGEFUL_BLOW:
-    case MODEL_ORB_OF_IMPALE:
-    case MODEL_ORB_OF_FIRE_SLASH:
-    case MODEL_ORB_OF_PENETRATION:
-    case MODEL_ORB_OF_ICE_ARROW:
-    case MODEL_ORB_OF_DEATH_STAB:
-    case MODEL_CRYSTAL_OF_DESTRUCTION:
-    case MODEL_CRYSTAL_OF_MULTI_SHOT:
-    case MODEL_CRYSTAL_OF_RECOVERY:
-    case MODEL_CRYSTAL_OF_FLAME_STRIKE:
-    {
-        Level = 9;
-        break;
-    }
-    case MODEL_ORB_OF_GREATER_FORTITUDE:
-        Level = 9;
-        break;
-    case MODEL_POTION + 12:
-        Level = 8;
-        break;
-    case MODEL_DEVILS_EYE:
-    case MODEL_DEVILS_KEY:
-    case MODEL_DEVILS_INVITATION:
-    {
-        if (Level <= 6)
-        {
-            Level /= 2;
-        }
-        else
-        {
-            Level = 13;
-        }
-    }
-    break;
-    case MODEL_REMEDY_OF_LOVE:Level = 9; break;
-    case MODEL_JEWEL_OF_CREATION:Level = 8; break;
-    case MODEL_PACKED_JEWEL_OF_CREATION:Level = 8; break;
-    case MODEL_TEAR_OF_ELF:Level = 8; break;
-    case MODEL_SOUL_SHARD_OF_WIZARD:Level = 8; break;
-    case MODEL_PACKED_GEMSTONE:
-    case MODEL_PACKED_JEWEL_OF_HARMONY:
-    case MODEL_PACKED_LOWER_REFINE_STONE:
-    case MODEL_PACKED_HIGHER_REFINE_STONE:
-    case MODEL_GEMSTONE:
-        Level = 0; break;
-    case MODEL_JEWEL_OF_HARMONY:
-        Level = 0; break;
-    case MODEL_LOWER_REFINE_STONE:
-        Level = 0; break;
-    case MODEL_HIGHER_REFINE_STONE:
-        Level = 0; break;
-    case MODEL_ILLUSION_SORCERER_COVENANT:
-    case MODEL_CURSED_CASTLE_WATER:
-        Level = 0; break;
-    case MODEL_FLAME_OF_CONDOR:
-    case MODEL_FEATHER_OF_CONDOR:
-        Level = 0; break;
-    case MODEL_EVENT + 4:Level = 0; break;
-    case MODEL_EVENT + 6:
-        if (Level == 13)
-        {
-            Level = 13;
-        }
-        else
-        {
-            Level = 9;
-        }
-        break;
-    case MODEL_EVENT + 7:Level = 0; break;
-    case MODEL_EVENT + 8:Level = 0; break;
-    case MODEL_EVENT + 9:Level = 8; break;
-    case MODEL_EVENT + 5:
-    {
-        Level = 0;
-    }
-    break;
-    case MODEL_EVENT + 10:
-        Level = (Level - 8) * 2 + 1;
-        break;
-    case MODEL_EVENT + 11:
-        Level--;
-        break;
-    case MODEL_EVENT + 12:
-        Level = 0;
-        break;
-    case MODEL_EVENT + 13:
-        Level = 0;
-        break;
-    case MODEL_EVENT + 14:
-        Level += 7;
-        break;
-    case MODEL_EVENT + 15:
-        Level = 8;
-        break;
-    case MODEL_EVENT:
-    case MODEL_EVENT + 1:Level = 8; break;
-    case MODEL_BOLT: Level >= 1 ? Level = Level * 2 + 1 : Level = 0; break;
-    case MODEL_ARROWS:Level >= 1 ? Level = Level * 2 + 1 : Level = 0; break;
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-    case MODEL_HELPER + 134:
-        Level = 13;
-        break;
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-    }
+    Level = Render::Items::Glow::GetLevel(Type, Level);
 
     if (g_pOption->GetRenderLevel() < 4)
     {
@@ -9742,61 +9029,12 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             && !g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint)
             )
         {
-            if ((ExcellentFlags & 63) > 0 && (o->Type<MODEL_WING || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
-                && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_WING_OF_DIMENSION)
-                && (o->Type < MODEL_SMALL_CAPE_OF_LORD || MODEL_SMALL_WINGS_OF_SATAN < o->Type)
-                && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE)
-                && (o->Type != MODEL_LITTLE_WARRIORS_CLOAK))
+            if ((ExcellentFlags & 63) > 0 && Render::Items::Glow::HasExcellentGlow(o->Type))
             {
                 Luminosity = sinf(WorldTime * 0.002f) * 0.5f + 0.5f;
                 Vector(Luminosity, Luminosity * 0.3f, 1.f - Luminosity, b->BodyLight);
                 Alpha = 1.f;
-                if (b->HideSkin && MODEL_MISTERY_HELM <= o->Type && MODEL_LILIUM_HELM >= o->Type)
-                {
-                    int anMesh[6] = { 2, 1, 0, 2, 1, 2 };
-                    b->RenderMesh(anMesh[o->Type - (MODEL_MISTERY_HELM)], RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-
-                else if (Type == MODEL_SACRED_HELM || Type == MODEL_STORM_HARD_HELM)
-                {
-                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_PIERCING_HELM)
-                {
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_SACRED_ARMOR)
-                {
-                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_STORM_HARD_ARMOR)
-                {
-                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_PIERCING_ARMOR)
-                {
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_PHOENIX_SOUL_HELMET)
-                {
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_PHOENIX_SOUL_ARMOR)
-                {
-                    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_ARMORINVEN_74)
-                {
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else if (Type == MODEL_PHOENIX_SOUL_BOOTS)
-                {
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
-                else
-                {
-                    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                }
+                Render::Items::Glow::RenderExcellentGlow(b, o, Type, Alpha);
             }
             else if (ancientDiscriminator > 0)
             {

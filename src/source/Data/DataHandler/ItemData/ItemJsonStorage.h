@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
@@ -41,6 +42,18 @@ std::filesystem::path GetItemModelDataDirectory();
 
 // Reads every *.json file in the folder and validates the models.
 ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& directory);
+
+struct GlowColorsLoadResult
+{
+    std::vector<Effects::GlowColor> colors;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Effects/GlowColors.json, relative to the client folder: the named
+// colors of the item glow, see GlowColors.h.
+std::filesystem::path GetGlowColorsFile();
+
+GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file);
 
 enum class ItemDataSaveResult
 {

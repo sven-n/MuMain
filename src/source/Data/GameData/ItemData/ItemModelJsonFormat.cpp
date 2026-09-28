@@ -3,6 +3,7 @@
 #include "ItemModelJsonFormat.h"
 #include "ItemJsonCommon.h"
 #include "ItemModelDisplayJson.h"
+#include "ItemModelGlowJson.h"
 #include "ItemTextureFiles.h"
 
 #include <algorithm>
@@ -79,6 +80,7 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
         json[Keys::NoneBlendMeshes] = model.noneBlendMeshes;
     }
     DisplayJson::Write(model, json);
+    GlowJson::Write(model, json);
     return json;
 }
 
@@ -209,7 +211,8 @@ void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json)
                                                               Keys::NoneBlendMeshes,
                                                               DisplayJson::InventoryKey,
                                                               DisplayJson::GroundKey,
-                                                              DisplayJson::ClothKey};
+                                                              DisplayJson::ClothKey,
+                                                              GlowJson::GlowKey};
     for (const auto& [key, value] : json.items())
     {
         if (!KnownKeys.contains(key))
@@ -237,9 +240,10 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     model.number = m_number;
     ReadTextureFolders(json, model.textureFolders);
     ReadNoneBlendMeshes(json, model.noneBlendMeshes);
-    DisplayJson::Read(json, model,
-                      [this](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
-                      { AddIssue(severity, field, message); });
+    const auto report = [this](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
+    { AddIssue(severity, field, message); };
+    DisplayJson::Read(json, model, report);
+    GlowJson::Read(json, model, report);
     WarnAboutUnknownKeys(json);
     return !m_hasErrors;
 }
@@ -302,6 +306,9 @@ std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefiniti
     text = Json::PutListsOnOneLine(text, DisplayJson::AnchorKey);
     text = Json::PutListsOnOneLine(text, DisplayJson::OffsetKey);
     text = Json::PutListsOnOneLine(text, DisplayJson::RotationKey);
+    text = Json::PutListsOnOneLine(text, GlowJson::LevelKey);
+    text = Json::PutListsOnOneLine(text, GlowJson::MeshesKey);
+    text = Json::PutListsOnOneLine(text, GlowJson::ShineMeshesKey);
     return text + "\n";
 }
 } // namespace Data::Items

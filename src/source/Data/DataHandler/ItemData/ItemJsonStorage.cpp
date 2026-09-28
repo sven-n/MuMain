@@ -156,6 +156,25 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
     return result;
 }
 
+std::filesystem::path GetGlowColorsFile()
+{
+    return std::filesystem::path(Effects::GlowColorsFile);
+}
+
+GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
+{
+    GlowColorsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddError(result.issues, source, "could not be read");
+        return result;
+    }
+    Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
+    return result;
+}
+
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues)
 {

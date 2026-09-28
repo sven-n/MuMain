@@ -132,6 +132,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -145,6 +148,10 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "steelBlue",
+        "hiddenMesh": 1
       }
     },
     {
@@ -158,6 +165,10 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "leafGreen",
+        "meshes": [0, 1]
       }
     }
   ]

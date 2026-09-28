@@ -59,6 +59,9 @@ std::string DescribeProblem(const ItemModelProblem& problem)
     case ItemModelProblemType::NoneBlendMeshMissing:
         return "noneBlendMeshes has mesh " + std::to_string(problem.mesh) + ", but " + problem.modelFile + " has " +
                std::to_string(problem.meshCount) + " meshes";
+    case ItemModelProblemType::GlowMeshMissing:
+        return problem.field + " has mesh " + std::to_string(problem.mesh) + ", but " + problem.modelFile + " has " +
+               std::to_string(problem.meshCount) + " meshes";
     }
     return {};
 }

@@ -25,6 +25,9 @@ enum class ItemModelProblemType
     TextureOutsideFolders,
     // "noneBlendMeshes" names a mesh the model does not have.
     NoneBlendMeshMissing,
+    // The glow names a mesh the model does not have; that glow is not drawn
+    // (or, for a hidden mesh, drawn on all meshes).
+    GlowMeshMissing,
 };
 
 // A problem found while opening an item model or its textures.
@@ -40,8 +43,10 @@ struct ItemModelProblem
     std::vector<std::string> searchedFolders;
     // TextureOutsideFolders: the path of the texture that is used instead.
     std::string usedInstead;
-    // NoneBlendMeshMissing: how many meshes the model has.
+    // NoneBlendMeshMissing, GlowMeshMissing: how many meshes the model has.
     int meshCount = 0;
+    // GlowMeshMissing: the glow value with the mesh, e.g. "glow.meshes".
+    std::string field;
 
     // Only the problems that leave an item without its model or a texture
     // are errors that the player sees; the others are warnings in the log.

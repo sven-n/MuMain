@@ -123,6 +123,19 @@ TEST_CASE("A texture found only outside the texture folders is a warning that na
                    "textureFolders"));
 }
 
+TEST_CASE("A glow on a mesh the model does not have is a warning [data][items]")
+{
+    ItemModelProblem problem = MakeMissingTexture(0, "");
+    problem.type = ItemModelProblemType::GlowMeshMissing;
+    problem.field = "glow.meshes";
+    problem.mesh = 3;
+    problem.meshCount = 3;
+
+    CHECK_FALSE(problem.IsError());
+    CHECK(problem.ToLogString() ==
+          "(0,33): glow.meshes has mesh 3, but Data/Item/Sword34.bmd has 3 meshes " + SwordModels);
+}
+
 TEST_CASE("The item model error message lists the errors only, up to a limit [data][items]")
 {
     const ItemDatabase items = MakeItems();

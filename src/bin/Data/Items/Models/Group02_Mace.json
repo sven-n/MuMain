@@ -97,6 +97,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "hiddenMesh": 2
       }
     },
     {
@@ -110,6 +113,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "steelBlue"
       }
     },
     {
@@ -123,6 +129,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "sand"
       }
     },
     {
@@ -136,6 +145,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "sage"
       }
     },
     {
@@ -161,6 +173,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "copper"
       }
     },
     {
@@ -186,6 +201,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "olive"
       }
     },
     {
@@ -199,6 +217,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "olive"
       }
     },
     {
@@ -225,6 +246,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "crimson"
       }
     },
     {
@@ -239,6 +263,10 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white",
+        "meshes": [0]
       }
     }
   ]

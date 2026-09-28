@@ -28,6 +28,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -56,6 +59,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "blue",
+        "ancientColor": "gold"
       }
     },
     {
@@ -70,6 +77,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "orange"
       }
     },
     {
@@ -98,6 +109,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "lime"
       }
     },
     {
@@ -140,6 +154,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "blue",
+        "ancientColor": "gold"
       }
     },
     {
@@ -182,6 +200,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "blue"
       }
     },
     {
@@ -196,6 +217,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "green"
       }
     },
     {
@@ -210,6 +234,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "orange"
       }
     },
     {
@@ -224,6 +252,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "lavender",
+        "shineColor": "orange"
       }
     },
     {
@@ -238,6 +270,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "sand"
       }
     },
     {
@@ -252,6 +287,11 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "steelBlue",
+        "shineColor": "orange",
+        "ancientColor": "gold"
       }
     },
     {
@@ -266,6 +306,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "blue"
       }
     },
     {
@@ -280,6 +324,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "steelBlue"
       }
     },
     {
@@ -294,6 +341,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "steelBlue"
       }
     },
     {
@@ -308,6 +358,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "copper",
+        "shineWhite": true
       }
     },
     {
@@ -322,6 +376,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "bronze"
       }
     },
     {
@@ -336,6 +393,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "slate"
       }
     },
     {
@@ -350,6 +410,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "copper"
       }
     },
     {
@@ -364,6 +427,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "slate"
       }
     },
     {
@@ -378,6 +444,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "sage"
       }
     },
     {
@@ -392,6 +461,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "sand"
       }
     },
     {
@@ -406,6 +478,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "denim"
       }
     },
     {
@@ -420,6 +495,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "brown"
       }
     },
     {
@@ -434,6 +512,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "royalBlue"
       }
     },
     {
@@ -448,6 +529,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "leafGreen"
       }
     },
     {
@@ -462,6 +546,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "violet"
       }
     },
     {
@@ -476,6 +563,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "olive"
       }
     },
     {
@@ -490,6 +580,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "ochre"
       }
     },
     {
@@ -504,6 +597,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "grey"
       }
     },
     {
@@ -518,6 +614,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "leafGreen"
       }
     },
     {
@@ -532,6 +631,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "mist"
       }
     },
     {
@@ -546,6 +648,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "olive"
       }
     },
     {
@@ -560,6 +665,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "emerald",
+        "shineColor": "orange"
       }
     },
     {
@@ -574,6 +683,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "rust",
+        "shineColor": "orange"
       }
     },
     {
@@ -588,6 +701,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "amber",
+        "shineColor": "orange"
       }
     },
     {
@@ -602,6 +719,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "purple",
+        "shineColor": "orange"
       }
     },
     {
@@ -616,6 +737,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "pink",
+        "shineColor": "blue"
       }
     },
     {
@@ -630,6 +755,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "lilac",
+        "shineWhite": true
       }
     },
     {
@@ -644,6 +773,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "periwinkle"
       }
     },
     {
@@ -658,6 +790,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "darkOrange"
       }
     },
     {
@@ -672,6 +807,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "orchid"
       }
     },
     {
@@ -686,6 +824,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -700,6 +841,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "rose"
       }
     },
     {
@@ -714,6 +858,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "moss"
       }
     },
     {
@@ -728,6 +875,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "crimson"
       }
     },
     {
@@ -742,6 +892,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "periwinkle"
       }
     },
     {
@@ -756,6 +909,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "glow": {
+        "color": "magenta"
       }
     },
     {

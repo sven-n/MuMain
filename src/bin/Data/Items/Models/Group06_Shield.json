@@ -189,6 +189,10 @@
       },
       "ground": {
         "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "lime",
+        "hiddenMesh": 2
       }
     },
     {
@@ -222,6 +226,11 @@
       },
       "ground": {
         "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "emerald",
+        "meshes": [0],
+        "shineMeshes": [0]
       }
     },
     {
@@ -233,6 +242,10 @@
       },
       "ground": {
         "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "periwinkle",
+        "meshes": [0]
       }
     },
     {
@@ -245,6 +258,10 @@
       },
       "ground": {
         "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "rust",
+        "meshes": [0]
       }
     }
   ]

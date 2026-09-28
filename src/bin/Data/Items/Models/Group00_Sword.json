@@ -182,6 +182,10 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "blue",
+        "shineColor": "blue"
       }
     },
     {
@@ -255,6 +259,11 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "sand",
+        "hiddenMesh": 1,
+        "shineHiddenMesh": 1
       }
     },
     {
@@ -267,6 +276,11 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "white",
+        "hiddenMesh": 0,
+        "shineHiddenMesh": 0
       }
     },
     {
@@ -279,6 +293,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "brown"
       }
     },
     {
@@ -291,6 +308,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "dusk"
       }
     },
     {
@@ -305,6 +325,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "ochre"
       }
     },
     {
@@ -317,6 +340,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "mist"
       }
     },
     {
@@ -330,6 +356,10 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "hiddenMesh": 5,
+        "shineHiddenMesh": 5
       }
     },
     {
@@ -342,6 +372,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "meshes": [0]
       }
     },
     {
@@ -355,6 +388,10 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "paleBlue",
+        "meshes": [2]
       }
     },
     {
@@ -367,6 +404,10 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "sand",
+        "hiddenMesh": 2
       }
     },
     {
@@ -381,6 +422,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "copper"
       }
     },
     {
@@ -395,6 +439,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "darkOrange"
       }
     },
     {
@@ -409,6 +456,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "brown"
       }
     },
     {
@@ -423,6 +473,9 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "ice"
       }
     }
   ]

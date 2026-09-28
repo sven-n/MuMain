@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemDisplay.h"
+#include "ItemModelLookup.h"
 
 #include "Core/Globals/_enum.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -19,11 +20,6 @@ using Data::Items::ItemModelDefinition;
 constexpr std::array<float, 3> ToFloats(const std::array<double, 3>& values)
 {
     return {static_cast<float>(values[0]), static_cast<float>(values[1]), static_cast<float>(values[2])};
-}
-
-const ItemModelDefinition* FindItemModel(int modelType)
-{
-    return g_ItemModelDatabase.Find(modelType - MODEL_ITEM);
 }
 
 InventoryDisplay ToInventoryDisplay(const ItemInventoryDisplay& display)
@@ -192,6 +188,15 @@ int GetInventoryModel(int itemType)
         }
     }
     return MODEL_ITEM + itemType;
+}
+
+std::optional<int> GetItemOfInventoryModel(int modelType)
+{
+    if (const ArmorInventoryModel* armor = FindArmorInventoryModel(modelType))
+    {
+        return armor->itemType;
+    }
+    return std::nullopt;
 }
 
 bool IsDrawnOnCharacterSkeleton(int modelType)

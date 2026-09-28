@@ -28,6 +28,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -56,6 +59,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "blue",
+        "ancientColor": "gold"
       }
     },
     {
@@ -70,6 +77,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "orange"
       }
     },
     {
@@ -98,6 +109,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "lime"
       }
     },
     {
@@ -140,6 +154,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "blue",
+        "ancientColor": "gold"
       }
     },
     {
@@ -186,6 +204,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "blue"
       }
     },
     {
@@ -200,6 +221,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "green"
       }
     },
     {
@@ -214,6 +238,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "orange"
       }
     },
     {
@@ -228,6 +256,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "lavender",
+        "shineColor": "orange"
       }
     },
     {
@@ -242,6 +274,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "sand"
       }
     },
     {
@@ -256,6 +291,11 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "steelBlue",
+        "shineColor": "orange",
+        "ancientColor": "gold"
       }
     },
     {
@@ -270,6 +310,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "blue"
       }
     },
     {
@@ -284,6 +328,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "steelBlue"
       }
     },
     {
@@ -298,6 +345,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "steelBlue"
       }
     },
     {
@@ -312,6 +362,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "copper",
+        "shineWhite": true
       }
     },
     {
@@ -326,6 +380,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "bronze"
       }
     },
     {
@@ -340,6 +397,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "slate"
       }
     },
     {
@@ -354,6 +414,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "copper"
       }
     },
     {
@@ -368,6 +431,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "slate"
       }
     },
     {
@@ -382,6 +448,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "sage"
       }
     },
     {
@@ -396,6 +465,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "sand"
       }
     },
     {
@@ -410,6 +482,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "denim"
       }
     },
     {
@@ -426,6 +501,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "brown"
       }
     },
     {
@@ -442,6 +520,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "royalBlue"
       }
     },
     {
@@ -456,6 +537,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "leafGreen"
       }
     },
     {
@@ -470,6 +554,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "violet"
       }
     },
     {
@@ -484,6 +571,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "olive"
       }
     },
     {
@@ -500,6 +590,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "ochre"
       }
     },
     {
@@ -516,6 +609,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "grey"
       }
     },
     {
@@ -532,6 +628,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "leafGreen"
       }
     },
     {
@@ -548,6 +647,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "mist"
       }
     },
     {
@@ -564,6 +666,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "olive"
       }
     },
     {
@@ -580,6 +685,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "emerald",
+        "shineColor": "orange"
       }
     },
     {
@@ -596,6 +705,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "rust",
+        "shineColor": "orange"
       }
     },
     {
@@ -612,6 +725,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "amber",
+        "shineColor": "orange"
       }
     },
     {
@@ -628,6 +745,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "purple",
+        "shineColor": "orange"
       }
     },
     {
@@ -644,6 +765,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "pink",
+        "shineColor": "blue"
       }
     },
     {
@@ -660,6 +785,10 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "lilac",
+        "shineWhite": true
       }
     },
     {
@@ -674,6 +803,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "periwinkle"
       }
     },
     {
@@ -688,6 +820,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "darkOrange"
       }
     },
     {
@@ -702,6 +837,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "orchid"
       }
     },
     {
@@ -716,6 +854,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "red"
       }
     },
     {
@@ -730,6 +871,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "rose"
       }
     },
     {
@@ -744,6 +888,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "moss"
       }
     },
     {
@@ -758,6 +905,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "crimson"
       }
     },
     {
@@ -772,6 +922,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "periwinkle"
       }
     },
     {
@@ -786,6 +939,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "magenta"
       }
     },
     {
@@ -802,6 +958,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "copper",
+        "meshes": [1],
+        "shineMeshes": [1],
+        "excellentMesh": 1
       }
     },
     {
@@ -818,6 +980,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "darkOrange",
+        "meshes": [1],
+        "shineMeshes": [1],
+        "excellentMesh": 1
       }
     },
     {
@@ -834,6 +1002,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "brown",
+        "meshes": [0],
+        "shineMeshes": [0],
+        "excellentMesh": 0
       }
     },
     {
@@ -1004,6 +1178,12 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -100
+      },
+      "glow": {
+        "color": "ice",
+        "meshes": [2],
+        "shineMeshes": [2],
+        "excellentMesh": 2
       }
     }
   ]
