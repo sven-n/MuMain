@@ -46,4 +46,16 @@ internal static class TestAccounts
     /// twelve equipment slots and has room in the inventory for each of them.
     /// </summary>
     public static readonly TestCharacter Equipper = new("testgm2", "testgm2", "testgm2Sum");
+
+    /// <summary><c>party</c> leader: level 1 Dark Knight, at home in Lorencia.</summary>
+    public static readonly TestCharacter PartyLeader = new("test0", "test0", "test0Dk");
+
+    /// <summary><c>party</c> members: Dark Knights of level 11 to 41, at home in Lorencia.</summary>
+    public static readonly TestCharacter[] PartyMembers =
+    [
+        new("test1", "test1", "test1Dk"),
+        new("test2", "test2", "test2Dk"),
+        new("test3", "test3", "test3Dk"),
+        new("test4", "test4", "test4Dk"),
+    ];
 }

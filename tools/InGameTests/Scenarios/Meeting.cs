@@ -105,6 +105,34 @@ internal static class Meeting
         return null;
     }
 
+    /// <summary>
+    /// Where the client of <paramref name="observer"/> draws the character <paramref name="name"/>
+    /// (a player or an NPC), in window pixels: the middle of the box the mouse picks it by. Waits
+    /// until it is on screen.
+    /// </summary>
+    public static async Task<(double X, double Y)> PixelOfAsync(GameClient observer, string name)
+    {
+        (double X, double Y)? pixel = null;
+        await Expect.EventuallyAsync(
+            async () =>
+            {
+                foreach (var entry in (await observer.StateAsync()).GetProperty("nearby").EnumerateArray())
+                {
+                    if (entry.GetProperty("name").GetString() == name
+                        && entry.TryGetProperty("pixel", out var found) && found.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    {
+                        pixel = (found.GetProperty("x").GetDouble(), found.GetProperty("y").GetDouble());
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+            TimeSpan.FromSeconds(10),
+            $"{name} is not on the {observer.Role}'s screen");
+        return pixel!.Value;
+    }
+
     private static bool IsWithin((int X, int Y) position, (int X, int Y) other, int distance)
         => Math.Abs(position.X - other.X) <= distance && Math.Abs(position.Y - other.Y) <= distance;
 

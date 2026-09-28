@@ -7382,6 +7382,7 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
     PartyKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPartyMsgBoxLayout));
+    App::Control::Events::RecordPartyInvited(PartyKey);
 }
 
 void ReceivePartyResult(const BYTE* ReceiveBuffer)
@@ -7418,6 +7419,7 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
         g_pSystemLogBox->AddText(I18N::Game::PartiesAreNotActivatedWithinABattleZone, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
+    App::Control::Events::RecordPartyAnswer(Data->Value);
 }
 
 void ReceivePartyList(const BYTE* ReceiveBuffer)

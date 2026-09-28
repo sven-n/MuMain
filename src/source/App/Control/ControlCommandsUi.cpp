@@ -92,6 +92,13 @@ json Elements()
     {
         elements["inventory.my_shop"] = WindowRect(*g_pMyInventory, ButtonRect(*myShop));
     }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
+    {
+        elements["command.trade"] = WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_TRADE)));
+        elements["command.purchase"] =
+            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PURCHASE)));
+        elements["command.party"] = WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PARTY)));
+    }
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
     {
         elements["npc_shop.repair"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairButton()));

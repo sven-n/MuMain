@@ -222,6 +222,23 @@ void RecordPartyChange(const char* change, const wchar_t* name)
     RecordParty(change != nullptr ? change : "changed", name != nullptr ? name : L"");
 }
 
+void RecordPartyInvited(int inviterKey)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+    const ObjectDescription inviter = App::Control::DescribeGameObject(inviterKey);
+    RecordParty("invited", Core::Text::FromUtf8(inviter.name).c_str());
+}
+
+void RecordPartyAnswer(int result)
+{
+    constexpr std::string_view Results[] = {"failed",   "denied",        "full",        "user_left",      "other_party",
+                                            "left",     "opposing_gens", "battle_zone", "battle_zone_off"};
+    RecordPartyResult(result >= 0 && result < static_cast<int>(std::size(Results)) ? Results[result] : "unknown");
+}
+
 void RecordDisconnected(const char* reason)
 {
     RecordDisconnect(reason != nullptr ? reason : "the server closed the connection");

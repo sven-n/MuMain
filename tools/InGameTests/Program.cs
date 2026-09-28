@@ -19,6 +19,7 @@ internal static class Program
     [
         new TradeScenario(),
         new ChatScenario(),
+        new PartyScenario(),
         new NpcShopScenario(),
         new RepairScenario(),
         new IcarusFlyingItemTakeOffScenario(),

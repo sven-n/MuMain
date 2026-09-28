@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MuMain.Tools.InGameTests.Clients;
 using MuMain.Tools.InGameTests.Control;
 
@@ -45,35 +44,11 @@ internal static class Npcs
     /// </summary>
     public static async Task TalkAsync(GameClient client, Npc npc, string window)
     {
-        var pixel = await PixelAsync(client, npc);
+        var pixel = await Meeting.PixelOfAsync(client, npc.Name);
         await client.SendAsync("click-ui", new { x = pixel.X, y = pixel.Y, button = "left" });
         await Expect.EventuallyAsync(
             async () => (await client.OpenWindowsAsync()).Contains(window),
             ServerAnswer,
             $"a click on {npc.Name} at ({pixel.X},{pixel.Y}) does not open the {window} window");
-    }
-
-    // Where the client draws the NPC; it has to be on screen.
-    private static async Task<(double X, double Y)> PixelAsync(GameClient client, Npc npc)
-    {
-        (double X, double Y)? pixel = null;
-        await Expect.EventuallyAsync(
-            async () =>
-            {
-                foreach (var entry in (await client.StateAsync()).GetProperty("nearby").EnumerateArray())
-                {
-                    if (entry.GetProperty("name").GetString() == npc.Name
-                        && entry.TryGetProperty("pixel", out var found) && found.ValueKind == JsonValueKind.Object)
-                    {
-                        pixel = (found.GetProperty("x").GetDouble(), found.GetProperty("y").GetDouble());
-                        return true;
-                    }
-                }
-
-                return false;
-            },
-            ServerAnswer,
-            $"{npc.Name} is not on the {client.Role}'s screen");
-        return pixel!.Value;
     }
 }

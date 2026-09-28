@@ -33,7 +33,11 @@ internal sealed class ScenarioContext(
     /// what should happen then, for someone reading the report; <paramref name="action"/> does it
     /// and checks the outcome. A step that throws fails the scenario.
     /// </summary>
-    public Task StepAsync(string title, string expectation, Func<Task> action)
+    /// <param name="pictured">
+    /// The roles whose clients take a screenshot after the step, when not all of them show
+    /// something of it; a failed step pictures every client.
+    /// </param>
+    public Task StepAsync(string title, string expectation, Func<Task> action, IReadOnlyCollection<string>? pictured = null)
         => this.StepAsync<object?>(
             title,
             expectation,
@@ -41,10 +45,11 @@ internal sealed class ScenarioContext(
             {
                 await action();
                 return null;
-            });
+            },
+            pictured);
 
-    /// <summary>As <see cref="StepAsync(string, string, Func{Task})"/>, for a step that finds something out.</summary>
-    public async Task<T> StepAsync<T>(string title, string expectation, Func<Task<T>> action)
+    /// <summary>As <see cref="StepAsync(string, string, Func{Task}, IReadOnlyCollection{string})"/>, for a step that finds something out.</summary>
+    public async Task<T> StepAsync<T>(string title, string expectation, Func<Task<T>> action, IReadOnlyCollection<string>? pictured = null)
     {
         var number = this.steps.Count + 1;
         log.WriteLine($"    {number,2}. {title}");
@@ -54,13 +59,13 @@ internal sealed class ScenarioContext(
         {
             var result = await action();
             var duration = stopwatch.Elapsed;
-            this.Finish(new StepResult(number, title, expectation, true, duration, null, await this.CaptureAsync(number)));
+            this.Finish(new StepResult(number, title, expectation, true, duration, null, await this.CaptureAsync(number, pictured)));
             return result;
         }
         catch (Exception exception)
         {
             var duration = stopwatch.Elapsed;
-            this.Finish(new StepResult(number, title, expectation, false, duration, exception.Message, await this.CaptureAsync(number)));
+            this.Finish(new StepResult(number, title, expectation, false, duration, exception.Message, await this.CaptureAsync(number, null)));
             throw;
         }
     }
@@ -71,12 +76,17 @@ internal sealed class ScenarioContext(
         stepFinished?.Invoke(step);
     }
 
-    // Every client, so a trade shows both sides.
-    private async Task<IReadOnlyList<StepScreenshot>> CaptureAsync(int number)
+    // Every client unless the step names some, so a trade shows both sides.
+    private async Task<IReadOnlyList<StepScreenshot>> CaptureAsync(int number, IReadOnlyCollection<string>? pictured)
     {
         var screenshots = new List<StepScreenshot>();
         foreach (var (role, client) in clients)
         {
+            if (pictured is not null && !pictured.Contains(role))
+            {
+                continue;
+            }
+
             var path = Path.GetFullPath(Path.Combine(folder, $"step-{number:00}-{role}.jpg"));
             try
             {

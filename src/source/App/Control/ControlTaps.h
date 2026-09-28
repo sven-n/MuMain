@@ -61,8 +61,15 @@ void RecordViewCleared(const char* reason);
 void RecordViewEnterKey(int key);
 void RecordViewLeaveKey(int key);
 
-// Party membership changes: joined, left, list.
+// Party membership changes: list (the members as the server sent them, `name`
+// the leader) and left.
 void RecordPartyChange(const char* change, const wchar_t* name);
+
+// An invitation to a party, from the character with the server id `inviterKey`.
+void RecordPartyInvited(int inviterKey);
+
+// The server's answer to an invitation that formed no party (0x41 value).
+void RecordPartyAnswer(int result);
 
 // The server closed the session.
 void RecordDisconnected(const char* reason);
@@ -106,6 +113,8 @@ inline void RecordViewCleared(const char*) {}
 inline void RecordViewEnterKey(int) {}
 inline void RecordViewLeaveKey(int) {}
 inline void RecordPartyChange(const char*, const wchar_t*) {}
+inline void RecordPartyInvited(int) {}
+inline void RecordPartyAnswer(int) {}
 inline void RecordDisconnected(const char*) {}
 inline void RecordTradeRequested(const char*, bool) {}
 inline void RecordTradeAnswer(int, const char*) {}

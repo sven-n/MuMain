@@ -101,6 +101,10 @@ void RecordMap(int mapNumber, const wchar_t* mapName, int x, int y);
 void RecordViewEnter(int key);
 void RecordViewLeave(int key);
 void RecordParty(std::string_view change, const wchar_t* name);
+// The server's answer to a party invitation that did not form or grow a
+// party: `result` is failed, denied, full, user_left, other_party, left,
+// opposing_gens, battle_zone, battle_zone_off or unknown.
+void RecordPartyResult(std::string_view result);
 // A trade step: `change` is requested, opened, refused, unavailable,
 // partner_confirm or closed. `name` is the partner (may be empty), `detail`
 // the confirm state or how the trade closed (may be empty).
