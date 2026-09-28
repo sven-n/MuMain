@@ -57,6 +57,15 @@ internal static class TestAccounts
     /// <inheritdoc cref="FullTraderFirst"/>
     public static readonly TestCharacter FullTraderSecond = new("test8", "test8", "test8Dw");
 
+    /// <summary>
+    /// <c>personal-shop</c> seller: level 150 Dark Knight with 100,000,000 zen and Jewels of Bless;
+    /// the quest accounts all start on one tile in Devias.
+    /// </summary>
+    public static readonly TestCharacter ShopSeller = new("quest1", "quest1", "quest1Dk");
+
+    /// <summary><c>personal-shop</c> buyer: level 220 Dark Knight with 100,000,000 zen, next to the seller in Devias.</summary>
+    public static readonly TestCharacter ShopBuyer = new("quest2", "quest2", "quest2Dk");
+
     /// <summary><c>party</c> leader: level 1 Dark Knight, at home in Lorencia.</summary>
     public static readonly TestCharacter PartyLeader = new("test0", "test0", "test0Dk");
 

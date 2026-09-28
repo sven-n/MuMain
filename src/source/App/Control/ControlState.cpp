@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
@@ -215,6 +216,58 @@ json NpcShopState()
     return shop;
 }
 
+// The goods of a personal shop grid with their prices, by the slot numbers
+// the server uses (204 and up); `priceTable` is PSHOPWNDTYPE_SALE for the
+// player's own shop, PSHOPWNDTYPE_PURCHASE for the one it visits.
+json PersonalShopItems(SEASON3B::CNewUIInventoryCtrl* grid, int priceTable)
+{
+    json items = json::array();
+    for (int i = 0; grid != nullptr && i < static_cast<int>(grid->GetNumberOfItems()); ++i)
+    {
+        ITEM* item = grid->GetItem(i);
+        if (item == nullptr)
+        {
+            continue;
+        }
+        const int slot = grid->GetIndexByItem(item);
+        json described = DescribeItem(*item, slot);
+        int price = 0;
+        described["price"] = GetPersonalItemPrice(slot, price, priceTable) ? json(price) : json(nullptr);
+        items.push_back(std::move(described));
+    }
+    return items;
+}
+
+// The player's own personal shop: whether it is open to others, the title in
+// its title field, and its goods with their prices.
+json MyShopState()
+{
+    json shop;
+    shop["open"] = g_pMyShopInventory->IsEnablePersonalShop();
+    wchar_t title[MAX_SHOPTITLE + 1] = {};
+    g_pMyShopInventory->GetTitle(title);
+    shop["title"] = Core::Text::ToUtf8(title);
+    shop["items"] = PersonalShopItems(g_pMyShopInventory->GetInventoryCtrl(), PSHOPWNDTYPE_SALE);
+    return shop;
+}
+
+// The personal shop the player looks into: whose it is, its title and its
+// goods with their prices; null while none is open.
+json PurchaseShopState()
+{
+    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
+    {
+        return nullptr;
+    }
+
+    json shop;
+    const int seller = g_pPurchaseShopInventory->GetShopCharacterIndex();
+    shop["seller"] = seller >= 0 && seller < MAX_CHARACTERS_CLIENT ? Core::Text::ToUtf8(CharactersClient[seller].ID) : "";
+    shop["title"] = Core::Text::ToUtf8(g_pPurchaseShopInventory->GetTitleText().c_str());
+    shop["items"] = PersonalShopItems(g_pPurchaseShopInventory->GetInventoryCtrl(), PSHOPWNDTYPE_PURCHASE);
+    return shop;
+}
+
 json PartyArray()
 {
     json members = json::array();
@@ -369,6 +422,8 @@ std::string WorldStateObject()
     state["party"] = PartyArray();
     state["trade"] = TradeState();
     state["npc_shop"] = NpcShopState();
+    state["my_shop"] = MyShopState();
+    state["purchase_shop"] = PurchaseShopState();
     // Clicks repair items instead of picking them up (the inventory's repair
     // button, `L`, or an NPC's repair button).
     state["repair_mode"] = g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON;

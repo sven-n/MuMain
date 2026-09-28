@@ -92,6 +92,12 @@ json Elements()
     {
         elements["inventory.my_shop"] = WindowRect(*g_pMyInventory, ButtonRect(*myShop));
     }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
+    {
+        elements["my_shop.title"] = WindowRect(*g_pMyShopInventory, g_pMyShopInventory->GetTitleRect());
+        elements["my_shop.open"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetOpenButton()));
+        elements["my_shop.close"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetCloseButton()));
+    }
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
     {
         elements["command.trade"] = WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_TRADE)));
@@ -157,13 +163,17 @@ std::optional<CNewUIInventoryCtrl*> NamedGrid(std::string_view name, int slot)
         return OpenGrid(SEASON3B::INTERFACE_MIXINVENTORY, g_pMixInventory->GetInventoryCtrl());
     if (name == "npc_shop")
         return OpenGrid(SEASON3B::INTERFACE_NPCSHOP, g_pNPCShop->GetInventoryCtrl());
+    if (name == "my_shop")
+        return OpenGrid(SEASON3B::INTERFACE_MYSHOP_INVENTORY, g_pMyShopInventory->GetInventoryCtrl());
+    if (name == "purchase_shop")
+        return OpenGrid(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY, g_pPurchaseShopInventory->GetInventoryCtrl());
     return std::nullopt;
 }
 
 [[nodiscard]] bool IsKnownGrid(std::string_view name)
 {
     return name == "inventory" || name == "trade" || name == "trade_partner" || name == "storage" || name == "mix" ||
-           name == "npc_shop" || name == "equipment";
+           name == "npc_shop" || name == "my_shop" || name == "purchase_shop" || name == "equipment";
 }
 
 std::string SquarePixel(const Request& request, CNewUIInventoryCtrl& grid, int slot)

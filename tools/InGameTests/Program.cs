@@ -21,6 +21,7 @@ internal static class Program
         new TradeInventoryFullScenario(),
         new ChatScenario(),
         new PartyScenario(),
+        new PersonalShopScenario(),
         new NpcShopScenario(),
         new RepairScenario(),
         new IcarusFlyingItemTakeOffScenario(),
