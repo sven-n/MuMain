@@ -36,6 +36,8 @@ public:
     float GetRadius() const { return m_Radius; }
     float GetTotalYaw() const { return m_BaseYaw + m_DeltaYaw; }
     float GetTotalPitch() const { return m_BasePitch + m_DeltaPitch; }
+    float GetDeltaYaw() const { return m_DeltaYaw; }
+    float GetDeltaPitch() const { return m_DeltaPitch; }
 
     // Phase 5: Public accessor for debug display
     void GetTargetPosition(vec3_t outTarget) const;

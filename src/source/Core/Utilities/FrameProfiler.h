@@ -1,6 +1,6 @@
 #pragma once
 
-// Per-frame CPU timing and renderer counters for the $details and $glstats overlays.
+// Per-frame CPU timing and renderer counters for the $glstats overlay.
 // Single render thread only. Reset after every frame's overlays have read the values.
 
 #include <array>

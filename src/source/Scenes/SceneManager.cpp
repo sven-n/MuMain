@@ -51,6 +51,7 @@ FrameTimingState g_frameTiming;
 #include "App/Platform/Windows/Winmain.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
+#include "Camera/OrbitalCamera.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -72,6 +73,8 @@ extern int HeroTile;
 extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
+extern size_t g_LastActiveCharacterCount;
+extern bool g_LastAnimationWasParallel;
 
 namespace
 {
@@ -122,6 +125,7 @@ static constexpr int MIN_FRAMES_FOR_STATS = 10;
 static constexpr float GRAPH_MAX_MS = 33.3f;        // graph Y-axis scale (30fps)
 static constexpr float THRESHOLD_60FPS_MS = 16.67f;  // 60 FPS threshold
 static constexpr float THRESHOLD_40FPS_MS = 25.0f;   // 40 FPS threshold
+static constexpr float MS_PER_SECOND = 1000.0f;
 static constexpr float DEBUG_TEXT_X = 10.0f;          // debug overlay X position
 static constexpr int DEBUG_TEXT_Y_START = 26;         // debug overlay Y start
 static constexpr int DEBUG_TEXT_LINE_HEIGHT = 10;     // line spacing
@@ -678,40 +682,113 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
 }
 
 /**
- * @brief Renders debug information overlay.
- *
- * Shows FPS stats, percentile lows, mouse position, camera info, and frame time graph.
+ * @brief Renders one $details line and moves @p y down to the next one.
  */
-static void RenderDebugInfo()
+static void RenderDebugLine(int& y, const wchar_t* text)
 {
-    if (!g_bShowDebugInfo)
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, text);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+}
+
+static const char* SceneName(EGameScene scene)
+{
+    switch (scene)
+    {
+    case SERVER_LIST_SCENE: return "Server list";
+    case WEBZEN_SCENE:      return "Intro";
+    case LOG_IN_SCENE:      return "Login";
+    case LOADING_SCENE:     return "Loading";
+    case CHARACTER_SCENE:   return "Character select";
+    case MAIN_SCENE:        return "In game";
+    default:                return "Unknown";
+    }
+}
+
+/**
+ * @brief How smoothly the game runs: frame rates, frame time, and the frame time graph.
+ */
+static void RenderPerformanceLines(int& y)
+{
+    wchar_t szLine[128];
+    mu_swprintf(szLine, L"FPS: %.1f now, %.1f average, %.0f peak", FPS_AVG, s_avgFps, s_highestFps);
+    RenderDebugLine(y, szLine);
+
+    mu_swprintf(szLine, L"Slowest 1%%: %.1f FPS   Slowest frame: %.1f FPS", s_onePercentLow, s_slowestFrameFps);
+    RenderDebugLine(y, szLine);
+
+    const float averageFrameMs = (s_avgFps > 0.0f) ? MS_PER_SECOND / s_avgFps : 0.0f;
+    mu_swprintf(szLine, L"Average frame: %.2f ms   VSync: %hs   CPU: %.1f%%",
+        averageFrameMs, IsVSyncEnabled() ? "on" : "off", CPU_AVG);
+    RenderDebugLine(y, szLine);
+
+    mu_swprintf(szLine, L"Last %d frames: %.0f+ FPS green, %.0f+ yellow", FRAME_HISTORY_SIZE,
+        MS_PER_SECOND / THRESHOLD_60FPS_MS, MS_PER_SECOND / THRESHOLD_40FPS_MS);
+    RenderDebugLine(y, szLine);
+
+    const float graphY = (float)y + DEBUG_GRAPH_Y_OFFSET;
+    RenderFrameGraph(DEBUG_TEXT_X, graphY, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+    y = (int)(graphY + DEBUG_GRAPH_HEIGHT + DEBUG_GRAPH_Y_OFFSET);
+}
+
+/**
+ * @brief Where the game is: current scene, mouse, and how many characters it animates.
+ */
+static void RenderSceneLines(int& y)
+{
+    wchar_t szLine[128];
+    mu_swprintf(szLine, L"Scene: %hs", SceneName(SceneFlag));
+    RenderDebugLine(y, szLine);
+
+    mu_swprintf(szLine, L"Mouse: %d, %d, left button %hs", MouseX, MouseY, MouseLButtonPush ? "down" : "up");
+    RenderDebugLine(y, szLine);
+
+    mu_swprintf(szLine, L"Characters animated: %d, on %hs", (int)g_LastActiveCharacterCount,
+        g_LastAnimationWasParallel ? "worker threads" : "the main thread");
+    RenderDebugLine(y, szLine);
+}
+
+/**
+ * @brief What the active camera sees: field of view, angle, and how far it draws and culls.
+ */
+static void RenderCameraLines(int& y)
+{
+    const CameraManager& cameraManager = CameraManager::Instance();
+    wchar_t szLine[128];
+    mu_swprintf(szLine, L"Camera: %hs (F9 switches)", CameraModeToString(cameraManager.GetCurrentMode()));
+    RenderDebugLine(y, szLine);
+
+    const ICamera* camera = cameraManager.GetActiveCamera();
+    if (camera == nullptr)
         return;
 
-    UpdateFrameStats();
+    const CameraConfig& config = camera->GetConfig();
+    mu_swprintf(szLine, L"Field of view: %.1f horizontal, %.1f vertical", config.hFov, g_Camera.FOV);
+    RenderDebugLine(y, szLine);
 
-    BeginBitmap();
+    mu_swprintf(szLine, L"Camera angle: x %.1f, y %.1f, z %.1f",
+        g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
+    RenderDebugLine(y, szLine);
 
-    wchar_t szLine[128];
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0, 0, 0, 100);
-    g_pRenderText->SetTextColor(255, 255, 255, 200);
+    mu_swprintf(szLine, L"View distance: %.0f   Terrain range: %.0f", g_Camera.ViewFar, config.terrainCullRange);
+    RenderDebugLine(y, szLine);
 
-    int y = DEBUG_TEXT_Y_START;
-    mu_swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%",
-        FPS_AVG, s_avgFps, s_highestFps, IsVSyncEnabled(), CPU_AVG);
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    mu_swprintf(szLine, L"Culling planes: near %.0f, far %.0f", config.nearPlane, config.farPlane);
+    RenderDebugLine(y, szLine);
 
-    mu_swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms",
-        s_onePercentLow, s_slowestFrameFps,
-        (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    const auto* orbital = dynamic_cast<const OrbitalCamera*>(camera);
+    if (orbital == nullptr)
+        return;
 
-    mu_swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    mu_swprintf(szLine, L"Orbit: distance %.0f, turned yaw %.1f, pitch %.1f",
+        orbital->GetRadius(), orbital->GetDeltaYaw(), orbital->GetDeltaPitch());
+    RenderDebugLine(y, szLine);
+}
 
-    mu_swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
-
+/**
+ * @brief Which binary is running, on which OS.
+ */
+static void RenderBuildLines(int& y)
+{
     // Compile-time build info: configuration, feature flags, compiler, arch,
     // and the binary's build timestamp. Useful for verifying which build is
     // actually running without having to check executable metadata.
@@ -745,82 +822,48 @@ static void RenderDebugInfo()
 #else
         "x86";
 #endif
+    wchar_t szLine[128];
     mu_swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
              kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(y, szLine);
 
     // Runtime OS name and version (compile-time arch above doesn't capture which
     // OS build the binary is actually running on).
     mu_swprintf(szLine, L"OS: %ls", Core::Platform::GetOSVersionString().c_str());
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(y, szLine);
+}
 
-    // Active camera mode (cycled with F9).
-    mu_swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+/**
+ * @brief Renders the $details overlay: performance, build, scene, and camera, in that order.
+ *
+ * Per-pass CPU timings are in the $glstats overlay.
+ */
+static void RenderDebugInfo()
+{
+    if (!g_bShowDebugInfo)
+        return;
 
-    // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
-    // major render passes in MainScene. Reset just below so next frame starts fresh.
-    using FP = FrameProfiler::Pass;
-    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f  Oth:%5.2f",
-                FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
-                FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
-                FrameProfiler::AccumulatorMs(FP::Effects),
-                FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost
-                                                          // only now (Present split out below, DXP-23)
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    UpdateFrameStats();
 
-    // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
-    // FRAME_PROFILE scope) -- this frame's own value, RenderCurrentScene() already ran above.
-    // Present = PlatformSwapBuffers() self-time, split out of Other so a large reading
-    // unambiguously points at GPU-stall wait rather than HUD render cost -- 1-frame-lagged like
-    // Oth above, since the swap itself only happens after this function returns.
-    mu_swprintf(szLine, L"UI:%6.2f  Present:%6.2f",
-             FrameProfiler::AccumulatorMs(FP::UI),
-             FrameProfiler::AccumulatorMs(FP::Present));
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    BeginBitmap();
 
-    // Move/update-phase cost of particle & effect simulation (UpdateGameEntities(), not the
-    // render-side Effects pass above) — added to gauge whether MoveEffects()/MoveParticles()
-    // are worth parallelizing on a worker thread pool (see feature-ffp-shader-port task memory).
-    mu_swprintf(szLine, L"MoveSim ms  MoveFx:%5.2f  MovePart:%5.2f",
-             FrameProfiler::AccumulatorMs(FP::MoveEffects),
-             FrameProfiler::AccumulatorMs(FP::MoveParticles));
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
 
-    // DXP-20 baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
-    // summed across every body transformed this frame (subset of the Objects/Chars/Items passes
-    // above, not additive with them). Judge the whole GPU-skinning task against this number.
-    mu_swprintf(szLine, L"Skinning ms  Transform:%5.2f", FrameProfiler::AccumulatorMs(FP::Skinning));
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
-
-    // TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — splits the Characters
-    // pass above into "waiting on the animation thread pool" vs "everything else" (actual
-    // per-character RenderMesh calls), and shows whether this tick's animation ran on the
-    // worker thread pool or sequentially on the main thread (PARALLEL_ANIMATION_THRESHOLD = 20
-    // active characters, ZzzCharacter.cpp). Remove once the FPS investigation is resolved.
-    {
-        extern size_t g_LastActiveCharacterCount;
-        extern bool   g_LastAnimationWasParallel;
-        float charWaitMs = FrameProfiler::AccumulatorMs(FP::CharWait);
-        float charRenderMs = FrameProfiler::AccumulatorMs(FP::Characters) - charWaitMs;
-        mu_swprintf(szLine, L"CharDbg  Active:%3d  Parallel:%d  Wait:%5.2f  Render:%5.2f",
-            (int)g_LastActiveCharacterCount, (int)g_LastAnimationWasParallel, charWaitMs, charRenderMs);
-        g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
-    }
-
-    // Frame time graph below text
-    RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+    int y = DEBUG_TEXT_Y_START;
+    RenderPerformanceLines(y);
+    RenderBuildLines(y);
+    RenderSceneLines(y);
+    RenderCameraLines(y);
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
-
-    // MainScene resets profiling after every overlay has read this frame.
 }
 
 /**
  * @brief Renders the $glstats overlay: per-pass CPU and SDL GPU submission statistics.
- * Independent of $details -- reads the same FrameProfiler accumulators but is gated by its own
- * flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
+ * Gated by FrameProfiler::g_CountersEnabled, set via SetShowGLStats().
  */
 static void RenderGLStats()
 {
@@ -841,9 +884,14 @@ static void RenderGLStats()
 
     using Counter = FrameProfiler::Counter;
     using Pass = FrameProfiler::Pass;
+    // The rows after Other are CPU-only: CharWait (waiting on the animation thread pool) and
+    // Skinning (BMD::Transform) are nested inside Chars/Objects/Items, not additive with them;
+    // MoveFx/MovePart are the update-phase effect/particle simulation; Present is the previous
+    // frame's swap, so a large value points at a GPU stall.
     static constexpr Pass kRows[] = {
         Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
         Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
+        Pass::CharWait, Pass::Skinning, Pass::MoveEffects, Pass::MoveParticles, Pass::Present,
     };
 
     mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");

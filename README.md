@@ -16,8 +16,8 @@ What I have done so far:
       * Change FPS-Limit: `$fps <value>`
       * V-Sync: `$vsync on` / `$vsync off`
       * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
-      * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
-      * Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics: `$glstats on` / `$glstats off`
+      * Show a details overlay (FPS, slowest frames, frame time graph, build, scene, mouse, and camera): `$details on` / `$details off`
+      * Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics (including skinning, effect simulation, and present time): `$glstats on` / `$glstats off`
   * 🔥 Rendering uses deferred SDL GPU commands, indexed quads and strips,
     growable per-frame buffers, and safe adjacent draw merging.
   * 🔥 The upstream Core Profile performance series is mapped to SDL GPU (see

@@ -398,44 +398,6 @@ bool DefaultCamera::Update()
         UpdateFrustum();
     }
 
-#ifdef _EDITOR
-    // Debug text rendering to verify camera values (editor only)
-    {
-        g_pRenderText->SetFont(g_hFixFont);
-        g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
-        g_pRenderText->SetBgColor(0, 0, 0, 180);        // Semi-transparent black background
-
-        wchar_t debugText[256];
-        int yPos = 10;
-        const int lineHeight = 15;
-
-        // Camera type and scene
-        swprintf(debugText, 256, L"Camera: DefaultCamera | Scene: %d", (int)SceneFlag);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // State values
-        swprintf(debugText, 256, L"State.ViewFar: %.0f | State.FOV: %.1f", m_State.ViewFar, m_State.FOV);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Config values
-        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.hFov: %.1f", m_Config.farPlane, m_Config.hFov);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Near plane and culling
-        swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
-                 m_Config.nearPlane, m_Config.terrainCullRange);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Rendering value (what BeginOpengl actually uses)
-        swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
-        g_pRenderText->RenderText(10, yPos, debugText);
-    }
-#endif
-
     // Phase 5: Sync camera state to legacy g_Camera global
     // This is needed because BeginOpengl() still uses g_Camera.FOV for perspective setup
     VectorCopy(m_State.Position, g_Camera.Position);
