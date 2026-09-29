@@ -1,0 +1,47 @@
+<rml>
+<head>
+	<title>Window Menu</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="window_menu.rcss"/>
+</head>
+<body data-model="window_menu">
+	<!-- The window menu (CWindowMenu), opened from the bottom HUD: six rows above its right end. A
+	     LayoutMode::Hud window, so #screen is the 640x480 reference screen stretched W/640 x H/480
+	     exactly like the original (non-uniform at wide sizes) and #panel sits at the original's
+	     reference point inside it.
+
+	     Text does not stretch: each label takes the native text renderer's physical size (text_px)
+	     and cancels the stretch with the inverse one, so its glyphs rasterise at the original's
+	     size. The label box is the row's full width times the stretch, so text-align: center
+	     centres it on the row as the original's RT3_SORT_CENTER did.
+
+	     A row click runs the row's action from C++ (windowmenu_select); the hover highlight and
+	     arrows are the row's own :hover. -->
+	<div id="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div id="panel">
+			<div id="back"></div>
+			<div id="frame_up"></div>
+			<div class="frame-middle" style="top: 45px;"></div>
+			<div class="frame-middle" style="top: 60px;"></div>
+			<div class="frame-middle" style="top: 75px;"></div>
+			<div class="frame-middle" style="top: 90px;"></div>
+			<div id="frame_down"></div>
+			<div class="line" style="top: 33px;"></div>
+			<div class="line" style="top: 53px;"></div>
+			<div class="line" style="top: 73px;"></div>
+			<div class="line" style="top: 93px;"></div>
+			<div class="line" style="top: 113px;"></div>
+
+			<div id="rows">
+				<div class="menu-row" data-for="row : rows" data-event-click="windowmenu_select(row.index)">
+					<span class="menu-label" data-style-font-size="text_px + 'px'"
+					      data-style-width="(112 * scale_x) + 'px'"
+					      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{row.label}}</span>
+					<div class="arrow arrow-left"></div>
+					<div class="arrow arrow-right"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

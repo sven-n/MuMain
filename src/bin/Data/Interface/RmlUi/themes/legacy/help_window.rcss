@@ -1,0 +1,27 @@
+/* Legacy theme for CHelpWindow -- RenderTipTextList() with its background, as the original drew
+   the help pages: black at 80% opacity inside a 1-unit opaque black frame, no vertical padding,
+   white rows and a blue bold heading (TEXT_COLOR_BLUE, 128/179/255), centred in the text box
+   (RT3_SORT_CENTER). Box, frame, padding, text sizes and row metrics are bound in physical px
+   (themes/legacy/help_window.rml). */
+
+#help_panel {
+	position: absolute;
+	pointer-events: none;
+	background-color: rgba(0, 0, 0, 204);
+	border-color: #000000;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* display:block required -- RmlUi's default `display` is inline, even for a <div>. */
+.help-line {
+	display: block;
+	color: #ffffff;
+	text-align: center;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+}
+.help-line.heading {
+	color: #80b3ff;
+	font-weight: bold;
+}

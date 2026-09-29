@@ -30,4 +30,22 @@ namespace UI::RmlBridge
         else
             doc->Hide();
     }
+
+    // For a window the original drew over the HUD (help, window menu, command windows): shown
+    // without taking focus, so an open chat field keeps it, and pulled to the front of its
+    // context, above the HUD documents shown before it. Transition only, like the above.
+    inline void SyncDocumentVisibilityInFront(Rml::ElementDocument* doc, bool visible)
+    {
+        if (doc == nullptr || doc->IsVisible() == visible)
+            return;
+
+        if (!visible)
+        {
+            doc->Hide();
+            return;
+        }
+
+        doc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+        doc->PullToFront();
+    }
 }

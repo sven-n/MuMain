@@ -1,0 +1,30 @@
+<rml>
+<head>
+	<title>Party List</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="party_list.rcss"/>
+</head>
+<body>
+	<!-- The party HUD list (CPartyListWindow): one card per member down the right side, left of
+	     the docked panels. root_x/root_y/root_scale come from the dock transform; cards are
+	     reference px, one below the other. C++ keeps Party[], the hovered card (the skill target,
+	     `selected`) and the leave request; the cards themselves take no pointer events, only the
+	     leave buttons do (party_leave). The names are .sharp-text leaves at the native size, shrunk
+	     to their box like the original's (name_text_px). -->
+	<div id="panel" data-model="party_list" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="card" data-for="card : cards" data-class-leader="card.leader" data-class-absent="card.absent"
+		     data-class-defense="card.defense_buff" data-class-selected="card.selected">
+			<div class="card-fill"></div>
+			<div class="card-tint"></div>
+			<div class="card-select"></div>
+			<div class="card-back"></div>
+			<div class="card-flag"></div>
+			<span class="sharp-text card-name" data-style-font-size="card.name_text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{card.name}}</span>
+			<div class="card-health" data-style-width="card.health_length + 'px'"></div>
+			<div class="card-leave" data-if="card.show_leave" data-event-click="party_leave(card.index)"></div>
+		</div>
+	</div>
+</body>
+</rml>

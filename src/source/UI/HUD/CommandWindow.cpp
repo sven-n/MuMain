@@ -15,8 +15,42 @@
 #include "Engine/AI/ZzzAI.h"
 #include "World/MapInfra/MapManager.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// The target box the original drew 5 units right of and below the pointer (newui_cursorid_wnd).
+constexpr int kTargetBoxOffset = 5;
+constexpr int kTitleBoxWidth = 72;
+constexpr int kButtonHeight = 29;
+
+// The button labels, in COMMAND_TYPE order.
+const wchar_t* const* const kCommandLabels[COMMAND_END] = {
+    &I18N::Game::Trade,     &I18N::Game::Buy1124,  &I18N::Game::Party,          &I18N::Game::Whisper,
+    &I18N::Game::Guild,     &I18N::Game::Alliance, &I18N::Game::HostilityGuild, &I18N::Game::SuspendHostilities,
+    &I18N::Game::AddFriend, &I18N::Game::Follow,   &I18N::Game::Duel,           &I18N::Game::SpecialCommands,
+};
+
+template <typename Model, typename Value>
+void SyncField(RmlModelBinder<Model>& binder, Value Model::* field, const char* name, const Value& value)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = value;
+    binder.MarkDirty(name);
+}
+} // namespace
 
 mu::ui::window::CCommandWindow::CCommandWindow()
 {
@@ -43,9 +77,8 @@ bool mu::ui::window::CCommandWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    InitButtons();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -54,7 +87,7 @@ bool mu::ui::window::CCommandWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CCommandWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -63,112 +96,53 @@ void mu::ui::window::CCommandWindow::Release()
     }
 }
 
-void mu::ui::window::CCommandWindow::InitButtons()
-{
-    wchar_t szText[256] = {};
-    mu_swprintf(szText, I18N::Game::CloseS, L"D");
-
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(szText, true);
-
-    for (int i = COMMAND_TRADE; i < COMMAND_END; i++)
-    {
-        m_BtnCommand[i].ChangeButtonImgState(true, IMAGE_COMMAND_BTN, true);
-        m_BtnCommand[i].ChangeButtonInfo(m_Pos.x + (COMMAND_WINDOW_WIDTH / 2 - 108 / 2), (m_Pos.y + 33) + (i * (29 + COMMAND_BTN_INTERVAL_SIZE)), 108, 29);
-    }
-
-    m_BtnCommand[COMMAND_TRADE].ChangeText(&I18N::Game::Trade);
-    m_BtnCommand[COMMAND_PURCHASE].ChangeText(&I18N::Game::Buy1124);
-    m_BtnCommand[COMMAND_PARTY].ChangeText(&I18N::Game::Party);
-    m_BtnCommand[COMMAND_WHISPER].ChangeText(&I18N::Game::Whisper);
-    m_BtnCommand[COMMAND_GUILD].ChangeText(&I18N::Game::Guild);
-    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(&I18N::Game::Alliance);
-    m_BtnCommand[COMMAND_RIVAL].ChangeText(&I18N::Game::HostilityGuild);
-    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(&I18N::Game::SuspendHostilities);
-    m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(&I18N::Game::AddFriend);
-    m_BtnCommand[COMMAND_FOLLOW].ChangeText(&I18N::Game::Follow);
-    m_BtnCommand[COMMAND_SPECIAL].ChangeText(&I18N::Game::SpecialCommands);
-    m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
-}
-
 void mu::ui::window::CCommandWindow::OpenningProcess()
 {
-    if (m_iCurSelectCommand != COMMAND_NONE)
-        SetBtnState(m_iCurSelectCommand, false);
-
     m_iCurSelectCommand = COMMAND_NONE;
     m_iCurMouseCursor = CURSOR_NORMAL;
+    m_PendingCommand = COMMAND_NONE;
 }
 
 void mu::ui::window::CCommandWindow::ClosingProcess()
 {
-    if (m_iCurSelectCommand != COMMAND_NONE)
-        SetBtnState(m_iCurSelectCommand, false);
-
     m_iCurSelectCommand = COMMAND_NONE;
     m_iCurMouseCursor = CURSOR_NORMAL;
+    m_PendingCommand = COMMAND_NONE;
 }
 
-bool mu::ui::window::CCommandWindow::BtnProcess()
+void mu::ui::window::CCommandWindow::PressCommandButton(int command)
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND))
-    {
-        PlayBuffer(SOUND_CLICK01);
-        return true;
-    }
-
-    if (m_BtnExit.UpdateMouseEvent() == true)
+    // The chat commands don't act on the selected character, they open their own list instead.
+    if (command == COMMAND_SPECIAL)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_COMMAND_LIST);
         PlayBuffer(SOUND_CLICK01);
-        return true;
+        return;
     }
 
-    for (int i = COMMAND_TRADE; i < COMMAND_END; i++)
-    {
-        if (m_BtnCommand[i].UpdateMouseEvent() == true)
-        {
-            // The chat commands don't act on the selected character, they open
-            // their own list instead.
-            if (i == COMMAND_SPECIAL)
-            {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
-                g_pNewUISystem->Show(mu::ui::window::INTERFACE_COMMAND_LIST);
-                PlayBuffer(SOUND_CLICK01);
-                return true;
-            }
-
-            if (m_iCurSelectCommand != COMMAND_NONE)
-                SetBtnState(m_iCurSelectCommand, false);
-
-            if (g_CursedTemple->GetInterfaceState(static_cast<int>(mu::ui::window::INTERFACE_COMMAND), i))
-            {
-                m_iCurSelectCommand = i;
-                SetBtnState(m_iCurSelectCommand, true);
-            }
-        }
-    }
-
-    return false;
+    if (g_CursedTemple->GetInterfaceState(static_cast<int>(mu::ui::window::INTERFACE_COMMAND), command))
+        m_iCurSelectCommand = command;
 }
 
 bool mu::ui::window::CCommandWindow::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
+    // Top-right corner close "X" (shared frame): hides + swallows the click. The buttons and the
+    // exit button are RmlUi's.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND))
+    {
+        PlayBuffer(SOUND_CLICK01);
         return false;
+    }
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, COMMAND_WINDOW_WIDTH, COMMAND_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         SetMouseCursor(CURSOR_NORMAL);
         return false;
     }
-    else
-    {
-        if (m_iCurSelectCommand != COMMAND_NONE)
-            SetMouseCursor(CURSOR_IDSELECT);
-    }
+
+    if (m_iCurSelectCommand != COMMAND_NONE)
+        SetMouseCursor(CURSOR_IDSELECT);
 
     return true;
 }
@@ -191,92 +165,192 @@ bool mu::ui::window::CCommandWindow::Update()
 {
     if (IsVisible())
     {
-        SelectCommand();
+        if (m_PendingCommand != COMMAND_NONE)
+        {
+            const int command = m_PendingCommand;
+            m_PendingCommand = COMMAND_NONE;
+            PressCommandButton(command);
+        }
         RunCommand();
     }
 
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CCommandWindow::Render()
 {
-    EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    // Base Window
-    RenderBaseWindow();
-
-    for (int i = COMMAND_TRADE; i < COMMAND_END; i++)
-    {
-        m_BtnCommand[i].SetFont(g_hFont);
-        if (m_iCurSelectCommand != COMMAND_NONE)
-            m_BtnCommand[m_iCurSelectCommand].SetFont(g_hFontBold);
-
-        m_BtnCommand[i].Render();
-    }
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::CommandWindow, 72, 0, RT3_SORT_CENTER);
-
-    if ((m_iCurMouseCursor == CURSOR_IDSELECT) && (m_bSelectedChar == true))
-
-    {
-        CHARACTER* c = &CharactersClient[SelectedCharacter];
-        if (c != NULL && c->Object.Kind == KIND_PLAYER && c != Hero && (c->Object.Type == MODEL_PLAYER || c->Change))
-        {
-            int Width = 128; int Height = 32; int x = (float)MouseX + 5; int y = (float)MouseY + 5;
-            RenderBitmap(BITMAP_COMMAND_WINDOW_BEGIN, x, y, Width, Height);
-
-            g_pRenderText->SetFont(g_hFontBig);
-
-            if (m_bCanCommand)
-            {
-                g_pRenderText->SetTextColor(255, 255, 255, 255);
-            }
-            else
-            {
-                g_pRenderText->SetTextColor(255, 0, 0, 255);
-            }
-            g_pRenderText->SetBgColor(20, 20, 20, 0);
-            g_pRenderText->RenderText(MouseX + 5 + 64, MouseY + 12, c->ID, 0, 0, RT3_WRITE_CENTER);
-
-            g_pRenderText->SetFont(g_hFont);
-        }
-    }
-
-    m_BtnExit.Render();
-    DisableAlphaBlend();
+    // Nothing native left: frame, buttons, title, exit button and the target box at the pointer
+    // are RmlUi. Kept because CObject requires the override.
     return true;
 }
 
-void mu::ui::window::CCommandWindow::RenderBaseWindow()
+void mu::ui::window::CCommandWindow::BuildRmlUi()
 {
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), float(COMMAND_WINDOW_HEIGHT));
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), 64.f);
-    // Stretched, not drawn 1:1 -- the window is taller than the side-piece art now that there are
-    // 12 buttons; a plain vertical border stretches without visible artifacts.
-    RenderImageStretch(IMAGE_COMMAND_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f,
-                       float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f, 0.f, 0.f, 21.f,
-                       float(COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT));
-    RenderImageStretch(IMAGE_COMMAND_BASE_WINDOW_RIGHT, m_Pos.x + float(COMMAND_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f,
-                       21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f, 0.f, 0.f, 21.f,
-                       float(COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT));
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(COMMAND_WINDOW_HEIGHT) - 45.f, float(COMMAND_WINDOW_WIDTH), 45.f);
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "command_window",
+        [this](Rml::DataModelConstructor& c, CommandWindowRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("big_text_px", &model.bigTextPx);
+            c.Bind("title_text_px", &model.titleTextPx);
+            c.Bind("title_line_px", &model.titleLinePx);
+            c.Bind("title_text", &model.titleText);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+
+            auto button = c.RegisterStruct<CommandButtonEntry>();
+            button.RegisterMember("label", &CommandButtonEntry::label);
+            button.RegisterMember("index", &CommandButtonEntry::index);
+            button.RegisterMember("selected", &CommandButtonEntry::selected);
+            button.RegisterMember("label_top", &CommandButtonEntry::labelTop);
+            button.RegisterMember("label_line_px", &CommandButtonEntry::labelLinePx);
+            button.RegisterMember("label_text_px", &CommandButtonEntry::labelTextPx);
+            c.RegisterArray<std::vector<CommandButtonEntry>>();
+            c.Bind("buttons", &model.buttons);
+
+            c.Bind("target_visible", &model.targetVisible);
+            c.Bind("target_left", &model.targetLeft);
+            c.Bind("target_top", &model.targetTop);
+            c.Bind("target_name", &model.targetName);
+            c.Bind("target_in_range", &model.targetInRange);
+
+            c.BindEventCallback("command_press",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingCommand = arguments[0].Get<int>(COMMAND_NONE);
+                                });
+            c.BindEventCallback("command_exit",
+                                [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                {
+                                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
+                                    PlayBuffer(SOUND_CLICK01);
+                                });
+        });
+
+    if (!modelCreated)
+        return;
+
+    CommandWindowRmlModel& model = m_RmlBinder.GetModel();
+    model.titleText = StringUtils::WideToNarrow(I18N::Game::CommandWindow);
+    wchar_t exitText[256] = {};
+    mu_swprintf(exitText, I18N::Game::CloseS, L"D");
+    model.exitTooltip = StringUtils::WideToNarrow(exitText);
+    model.buttons.clear();
+    for (int i = COMMAND_TRADE; i < COMMAND_END; ++i)
+        model.buttons.push_back({StringUtils::WideToNarrow(*kCommandLabels[i]), i});
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                  "Data/Interface/RmlUi/command_window.rml");
+}
+
+void mu::ui::window::CCommandWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CCommandWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::bigTextPx, "big_text_px",
+              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Big, transform));
+    SyncTitle(transform);
+
+    SyncButtons(transform);
+    SyncTarget();
+}
+
+void mu::ui::window::CCommandWindow::SyncTitle(const UI::Scaling::Transform& transform)
+{
+    g_pRenderText->SetFont(g_hFontBold);
+    const int titleWidth = g_pRenderText->MeasureText(I18N::Game::CommandWindow, lstrlen(I18N::Game::CommandWindow)).cx;
+    const float titlePx = UI::Scaling::NativeTextPixelSizeInBox(
+        UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth), static_cast<float>(kTitleBoxWidth));
+    // The shrunk text's box shrinks with it: its top stays at y + 12.
+    const float shrink = titlePx / UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::titleTextPx, "title_text_px", titlePx);
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::titleLinePx, "title_line_px",
+              static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY *
+                  shrink);
+}
+
+void mu::ui::window::CCommandWindow::SyncButtons(const UI::Scaling::Transform& transform)
+{
+    // CButton::Render(): y + (29 / 2 - textHeight / 2), in whole units.
+    const int normalHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    const int boldHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold);
+    const float normalPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
+    const float boldPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+
+    CommandWindowRmlModel& model = m_RmlBinder.GetModel();
+    bool changed = false;
+    for (CommandButtonEntry& button : model.buttons)
+    {
+        CommandButtonEntry updated = button;
+        updated.selected = button.index == m_iCurSelectCommand;
+        const int textHeight = updated.selected ? boldHeight : normalHeight;
+        updated.labelTop = static_cast<float>(kButtonHeight / 2 - textHeight / 2);
+        updated.labelLinePx = static_cast<float>(textHeight) * transform.scaleY;
+        updated.labelTextPx = updated.selected ? boldPx : normalPx;
+
+        changed = changed || updated.selected != button.selected || updated.labelTop != button.labelTop ||
+                  updated.labelLinePx != button.labelLinePx || updated.labelTextPx != button.labelTextPx;
+        button = updated;
+    }
+    if (changed)
+        m_RmlBinder.MarkDirty("buttons");
+}
+
+void mu::ui::window::CCommandWindow::SyncTarget()
+{
+    const CHARACTER* target = (m_iCurMouseCursor == CURSOR_IDSELECT && m_bSelectedChar && SelectedCharacter >= 0)
+                                  ? &CharactersClient[SelectedCharacter]
+                                  : nullptr;
+    const bool visible = target != nullptr && target->Object.Kind == KIND_PLAYER && target != Hero &&
+                         (target->Object.Type == MODEL_PLAYER || target->Change);
+
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::targetVisible, "target_visible", visible);
+    if (!visible)
+        return;
+
+    // MouseX/MouseY are in this window's dock space while CManager runs it, like m_Pos.
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::targetLeft, "target_left",
+              static_cast<float>(MouseX + kTargetBoxOffset - m_Pos.x));
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::targetTop, "target_top",
+              static_cast<float>(MouseY + kTargetBoxOffset - m_Pos.y));
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::targetName, "target_name",
+              Rml::String(StringUtils::WideToNarrow(target->ID)));
+    SyncField(m_RmlBinder, &CommandWindowRmlModel::targetInRange, "target_in_range", m_bCanCommand);
 }
 
 void mu::ui::window::CCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    for (int i = COMMAND_TRADE; i < COMMAND_END; i++)
-    {
-        m_BtnCommand[i].ChangeButtonInfo(m_Pos.x + (COMMAND_WINDOW_WIDTH / 2 - 108 / 2), (m_Pos.y + 33) + ((i - 1) * (29 + COMMAND_BTN_INTERVAL_SIZE)), 108, 29);
-    }
 }
 
 float mu::ui::window::CCommandWindow::GetLayerDepth()
@@ -384,36 +458,9 @@ void mu::ui::window::CCommandWindow::RunCommand()
             }break;
             }
         }
-        if (m_iCurSelectCommand != COMMAND_NONE)
-            SetBtnState(m_iCurSelectCommand, false);
         m_iCurSelectCommand = COMMAND_NONE;
     }
 }
-
-void mu::ui::window::CCommandWindow::SetBtnState(int iBtnType, bool bStateDown)
-{
-    if (bStateDown)
-    {
-        m_BtnCommand[iBtnType].UnRegisterButtonState();
-        m_BtnCommand[iBtnType].RegisterButtonState(BUTTON_STATE_UP, IMAGE_COMMAND_BTN, 2);
-        m_BtnCommand[iBtnType].RegisterButtonState(BUTTON_STATE_OVER, IMAGE_COMMAND_BTN, 2);
-        m_BtnCommand[iBtnType].RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_COMMAND_BTN, 2);
-        m_BtnCommand[iBtnType].ChangeImgIndex(IMAGE_COMMAND_BTN, 2);
-    }
-    else
-    {
-        m_BtnCommand[iBtnType].UnRegisterButtonState();
-        m_BtnCommand[iBtnType].RegisterButtonState(BUTTON_STATE_UP, IMAGE_COMMAND_BTN, 0);
-        m_BtnCommand[iBtnType].RegisterButtonState(BUTTON_STATE_OVER, IMAGE_COMMAND_BTN, 1);
-        m_BtnCommand[iBtnType].RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_COMMAND_BTN, 2);
-        m_BtnCommand[iBtnType].ChangeImgIndex(IMAGE_COMMAND_BTN, 0);
-    }
-}
-
-void mu::ui::window::CCommandWindow::SelectCommand()
-{
-}
-
 int mu::ui::window::CCommandWindow::GetCurCommandType()
 {
     return m_iCurSelectCommand;
@@ -427,30 +474,6 @@ void mu::ui::window::CCommandWindow::SetMouseCursor(int iCursorType)
 int mu::ui::window::CCommandWindow::GetMouseCursor()
 {
     return m_iCurMouseCursor;
-}
-
-void mu::ui::window::CCommandWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_COMMAND_BASE_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_COMMAND_BASE_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_COMMAND_BASE_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_COMMAND_BASE_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_COMMAND_BASE_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_COMMAND_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_cursorid_wnd.jpg", IMAGE_COMMAND_SELECTID_BG, GL_LINEAR);
-}
-
-void mu::ui::window::CCommandWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_BACK);
-    DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_TOP);
-    DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_LEFT);
-    DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_RIGHT);
-    DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT);
-    DeleteBitmap(IMAGE_COMMAND_BTN);
-    DeleteBitmap(IMAGE_COMMAND_SELECTID_BG);
 }
 
 bool mu::ui::window::CCommandWindow::CommandTrade(CHARACTER* pSelectedCha)

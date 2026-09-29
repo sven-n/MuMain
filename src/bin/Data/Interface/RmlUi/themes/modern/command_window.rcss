@@ -1,0 +1,71 @@
+/* Modern theme for CCommandWindow: docked_panel_frame.rcss's forged panel (linked first) at this
+   window's own height, the twelve commands as base.rcss-style modern buttons, the armed command in
+   the gold selected accent. Geometry is the legacy one (reference px under the dock transform). */
+
+#panel { height: 432px; pointer-events: auto; }
+
+#title {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-warm);
+	font-weight: bold;
+	pointer-events: none;
+}
+
+#buttons { position: absolute; left: 41px; top: 33px; width: 108px; }
+.cmd-btn {
+	display: block;
+	position: relative;
+	width: 108px;
+	height: 28px;
+	margin-bottom: 2px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.cmd-btn:hover { border-color: token(accent-steel-hover); }
+.cmd-btn:active { background-color: token(surface-recessed); }
+.cmd-btn.selected { border-color: token(accent-gold); background-color: token(surface-recessed); }
+
+.cmd-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-primary);
+	pointer-events: none;
+}
+.cmd-btn.selected .cmd-label { color: token(accent-gold-hover); font-weight: bold; }
+
+#target {
+	position: absolute;
+	width: 128px;
+	height: 32px;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: none;
+}
+#target_name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 7px;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-primary);
+	pointer-events: none;
+}
+#target.out-of-range #target_name { color: token(semantic-danger); }
+
+/* Exit: base.rcss's shared .modern-icon-btn-px family, this window's own left offset only. */
+.cmd-btn-exit { left: 13px; }
+.tooltip { top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

@@ -247,6 +247,21 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   box back from RmlUi, and the hint ends below its anchor like the native one. Paint order is
   RmlUi's: the icons now follow `main_frame.rml`'s document order instead of the native layer
   depth (the hit targets already did). The skill textures stay loaded for `CUIMuHelper`.
+- **HUD menus and the party list** — **done, both themes (2026-09-27)**: `CHelpWindow`,
+  `CWindowMenu`, `CCommandWindow`, `CQuickCommandWindow`, `CPartyListWindow`. Legacy matches the
+  original at the eight common sizes (paired comparison replays). Worth carrying to the next port:
+
+  - **A document the original drew over the HUD** is shown unfocused and pulled to the front
+    (`UI::RmlBridge::SyncDocumentVisibilityInFront()`), so the location bar and the chat/system
+    logs no longer paint over it and an open chat field keeps its focus.
+  - **Native text drawn into a box shrinks to fit it** (`FontScaleForBounds()`);
+    `UI::Scaling::NativeTextPixelSizeInBox()` gives the size a legacy leaf needs, and its line box
+    shrinks with it.
+  - **`overflow: hidden` does not clip under a panel's `transform: scale()`** in this build; a
+    cropped bar uses `decorator: image(<sprite> scale-none left top)` on an element of the shown
+    width instead.
+  - **A render-only port is fine when other code reads the native state**: the quick command
+    menu keeps its native hover index because the control socket observes it.
 - **`CMoveCommandWindow`** — **done, both themes (2026-09-27)**. The left-docked warp list (`/move`).
   Ported for the scrollbar: this is the window that actually *retires* a hand-rolled one rather than
   decorating a new one. `ThumbYForScrollOffset`/`ScrollOffsetForThumbY`/`UpdateDragState`/

@@ -884,6 +884,25 @@ TEST_CASE("native text pixel size follows the native renderer's typography curve
     UI::Scaling::SetWindowContentScale(previousContentScale);
 }
 
+TEST_CASE("native text in a box shrinks to fit it down to the minimum size [ui][scaling]")
+{
+    const float previousContentScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(1.0f);
+
+    const auto dock = UI::Scaling::DockRightTransform(1024, 768);
+    const float textPx = UI::Scaling::NativeTextPixelSize(FontRole::Bold, dock);
+    CHECK(UI::Scaling::NativeTextPixelSizeInBox(FontRole::Bold, dock, 60.0f, 72.0f) == doctest::Approx(textPx));
+    CHECK(UI::Scaling::NativeTextPixelSizeInBox(FontRole::Bold, dock, 76.0f, 72.0f)
+          == doctest::Approx(textPx * 72.0f / 76.0f));
+
+    const float minimumPx = static_cast<float>(UI::Scaling::CachedFontPointSize(FontRole::Bold)) *
+                            static_cast<float>(UI::Scaling::MinimumFontPointSize(FontRole::Bold)) /
+                            static_cast<float>(UI::Scaling::MaximumFontPointSize(FontRole::Bold));
+    CHECK(UI::Scaling::NativeTextPixelSizeInBox(FontRole::Bold, dock, 1000.0f, 72.0f) == doctest::Approx(minimumPx));
+
+    UI::Scaling::SetWindowContentScale(previousContentScale);
+}
+
 TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scaling]")
 {
     const auto reference = UI::Scaling::PanelTransform(640, 480);

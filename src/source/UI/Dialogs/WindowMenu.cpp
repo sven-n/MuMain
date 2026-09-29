@@ -2,22 +2,41 @@
 #include "stdafx.h"
 #include "UI/Dialogs/WindowMenu.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "UI/Core/WindowCommon.h" // ShowSystemMenuDialog
-#include "UI/Dialogs/CustomMessageBox.h"
-#include "Render/Textures/ZzzTexture.h"
-#include "UI/Widgets/UIControls.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// The row labels, top to bottom (CWindowMenu::MenuEntry order).
+constexpr int kMenuTextIds[CWindowMenu::MENU_MAX_INDEX] = {1741, 1742, 364, 1743, 3055, 3103};
+
+template <typename Model>
+void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* name, float value)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = value;
+    binder.MarkDirty(name);
+}
+} // namespace
 
 mu::ui::window::CWindowMenu::CWindowMenu()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
-    m_iSelectedIndex = -1;
 }
 
 mu::ui::window::CWindowMenu::~CWindowMenu()
@@ -35,7 +54,8 @@ bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -44,7 +64,7 @@ bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CWindowMenu::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -55,93 +75,16 @@ void mu::ui::window::CWindowMenu::Release()
 
 void mu::ui::window::CWindowMenu::SetPos(int x, int y)
 {
+    // Fixed above the bottom HUD's right end, whatever the caller asks for. window_menu.rcss
+    // places #panel at the same reference point.
     m_Pos.x = STANDARD_POS_X;
     m_Pos.y = STANDARD_POS_Y - (20 * (MENU_MAX_INDEX - 4));
 }
 
 bool mu::ui::window::CWindowMenu::UpdateMouseEvent()
 {
-    POINT pt = {m_Pos.x, m_Pos.y + 20};
-
-    for (int i = 0; i < MENU_MAX_INDEX; ++i)
-    {
-        if (CheckMouseIn(pt.x, pt.y, 112, 20) == true)
-        {
-            m_iSelectedIndex = i;
-            break;
-        }
-
-        pt.y += 20.f;
-    }
-
-    if (m_iSelectedIndex > -1 && mu::ui::window::IsRelease(VK_LBUTTON))
-    {
-        switch (m_iSelectedIndex)
-        {
-        case 0:
-        {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
-            mu::ui::window::ShowSystemMenuDialog();
-            return false;
-        }
-        break;
-        case 1:
-        {
-            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_HELP))
-            {
-                g_pHelp->AutoUpdateIndex();
-            }
-            else
-            {
-                g_pNewUISystem->Show(mu::ui::window::INTERFACE_HELP);
-            }
-            return false;
-        }
-        break;
-        case 2:
-        {
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_GUILDINFO);
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
-            return false;
-        }
-        break;
-        case 3:
-        {
-            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MOVEMAP);
-            return false;
-        }
-        break;
-        case 4:
-        {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
-            if (g_pNewUIMiniMap->m_bSuccess == false)
-            {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
-            }
-            else
-                g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MINI_MAP);
-            return false;
-        }
-        break;
-        case 5:
-        {
-            if (g_pNewUIGensRanking->SetGensInfo())
-            {
-                g_pNewUISystem->Show(mu::ui::window::INTERFACE_GENSRANKING);
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
-            }
-            return false;
-        }
-        break;
-        }
-    }
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y + 20, 112, 95 + 20 * (MENU_MAX_INDEX - 5)).Contains(MouseX, MouseY) == false)
-    {
-        m_iSelectedIndex = -1;
-    }
-
-    // Modal: consumes every mouse event while visible so nothing behind it can fire.
+    // Row hover and clicks are RmlUi's. Modal: consumes every mouse event while visible so
+    // nothing behind it can fire.
     return false;
 }
 
@@ -163,95 +106,143 @@ bool mu::ui::window::CWindowMenu::UpdateKeyEvent()
 
 bool mu::ui::window::CWindowMenu::Update()
 {
+    SyncRmlModel();
+
+    if (m_PendingEntry >= 0)
+    {
+        const int entry = m_PendingEntry;
+        m_PendingEntry = -1;
+        if (IsVisible())
+            RunMenuEntry(entry);
+    }
+
     return true;
 }
 
 bool mu::ui::window::CWindowMenu::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-    RenderTexts();
-    RenderArrow();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: frame, rows, hover and arrows are RmlUi. Kept because CObject
+    // requires the override.
     return true;
 }
 
-void mu::ui::window::CWindowMenu::RenderFrame()
+void mu::ui::window::CWindowMenu::RunMenuEntry(int entry)
 {
-    float x, y, width, height;
-
-    x = m_Pos.x;
-    y = m_Pos.y;
-    width = 112.f;
-    height = 105 + (MENU_MAX_INDEX - 4) * 20;
-
-    RenderBitmap(IMAGE_WINDOW_MENU_BACK, x, y, width, height, 0.f, 0.f, width / 256.f, height / 512.f);
-
-    y = m_Pos.y;
-    RenderImage(IMAGE_WINDOW_MENU_FRAME_UP, m_Pos.x, y, 112.f, 45.f);
-    y += 45.f;
-
-    float Middle_TempCnt = (int)((height - 90) / 15) + 1;
-
-    for (int i = 0; i < Middle_TempCnt; ++i)
+    switch (entry)
     {
-        RenderImage(IMAGE_WINDOW_MENU_FRAME_MIDDLE, m_Pos.x, y, 112.f, 15.f);
-        y += 15.f;
-    }
-
-    y = REFERENCE_HEIGHT - 50 - 45;
-
-    RenderImage(IMAGE_WINDOW_MENU_FRAME_DOWN, m_Pos.x, y, 112.f, 45.f);
-
-    y = m_Pos.y + 33.f;
-
-    for (int i = 0; i < MENU_MAX_INDEX - 1; ++i)
-    {
-        RenderImage(IMAGE_WINDOW_MENU_LINE, m_Pos.x + 15.f, y, 82.f, 2.f);
-        y += 20.f;
-    }
-}
-
-void mu::ui::window::CWindowMenu::RenderTexts()
-{
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-
-    int iTextNumber[] = {1741, 1742, 364, 1743, 3055, 3103};
-    float y = m_Pos.y + 20.f;
-    for (int i = 0; i < MENU_MAX_INDEX; ++i)
-    {
-        if (m_iSelectedIndex == i)
-        {
-            g_pRenderText->SetTextColor(255, 255, 0, 255);
-        }
+    case MENU_SYSTEM:
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
+        mu::ui::window::ShowSystemMenuDialog();
+        break;
+    case MENU_HELP:
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_HELP))
+            g_pHelp->AutoUpdateIndex();
         else
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_HELP);
+        break;
+    case MENU_GUILD:
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_GUILDINFO);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
+        break;
+    case MENU_MOVE:
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MOVEMAP);
+        break;
+    case MENU_MINIMAP:
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
+        if (g_pNewUIMiniMap->m_bSuccess == false)
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
+        else
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MINI_MAP);
+        break;
+    case MENU_GENS:
+        if (g_pNewUIGensRanking->SetGensInfo())
         {
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_GENSRANKING);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
         }
-        g_pRenderText->RenderText(m_Pos.x, y, I18N::Game::Lookup(iTextNumber[i]), 112, 0, RT3_SORT_CENTER);
-        y += 20.f;
+        break;
+    default:
+        break;
     }
 }
 
-void mu::ui::window::CWindowMenu::RenderArrow()
+void mu::ui::window::CWindowMenu::BuildRmlUi()
 {
-    if (m_iSelectedIndex < 0)
-    {
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
         return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "window_menu",
+        [this](Rml::DataModelConstructor& c, WindowMenuRmlModel& model)
+        {
+            c.Bind("scale_x", &model.scaleX);
+            c.Bind("scale_y", &model.scaleY);
+            c.Bind("inverse_scale_x", &model.inverseScaleX);
+            c.Bind("inverse_scale_y", &model.inverseScaleY);
+            c.Bind("text_px", &model.textPx);
+
+            auto row = c.RegisterStruct<WindowMenuRowEntry>();
+            row.RegisterMember("label", &WindowMenuRowEntry::label);
+            row.RegisterMember("index", &WindowMenuRowEntry::index);
+            c.RegisterArray<std::vector<WindowMenuRowEntry>>();
+            c.Bind("rows", &model.rows);
+
+            c.BindEventCallback("windowmenu_select",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingEntry = arguments[0].Get<int>(-1);
+                                });
+        });
+
+    if (modelCreated)
+    {
+        WindowMenuRmlModel& model = m_RmlBinder.GetModel();
+        model.rows.clear();
+        for (int i = 0; i < MENU_MAX_INDEX; ++i)
+            model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kMenuTextIds[i])), i});
+
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                      "Data/Interface/RmlUi/window_menu.rml");
     }
+}
 
-    float x, y;
-    x = m_Pos.x + 16.f;
-    y = m_Pos.y + 20.f + (m_iSelectedIndex * 20);
+void mu::ui::window::CWindowMenu::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
 
-    RenderImage(IMAGE_WINDOW_MENU_ARROWL, x, y, 6.f, 9.f);
-    x = m_Pos.x + 90.f;
-    RenderImage(IMAGE_WINDOW_MENU_ARROWR, x, y, 6.f, 9.f);
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CWindowMenu::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // The original drew the menu over the HUD and over every window below its layer depth.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    SyncTransform();
+}
+
+void mu::ui::window::CWindowMenu::SyncTransform()
+{
+    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 }
 
 float mu::ui::window::CWindowMenu::GetLayerDepth()
@@ -266,29 +257,7 @@ float mu::ui::window::CWindowMenu::GetKeyEventOrder()
 
 void mu::ui::window::CWindowMenu::OpenningProcess()
 {
-    m_iSelectedIndex = -1;
+    m_PendingEntry = -1;
 }
 
 void mu::ui::window::CWindowMenu::ClosingProcess() {}
-
-void mu::ui::window::CWindowMenu::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_WINDOW_MENU_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_commamd01.tga", IMAGE_WINDOW_MENU_FRAME_UP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_commamd02.tga", IMAGE_WINDOW_MENU_FRAME_MIDDLE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_commamd03.tga", IMAGE_WINDOW_MENU_FRAME_DOWN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_commamd_Line.jpg", IMAGE_WINDOW_MENU_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_arrow(L).tga", IMAGE_WINDOW_MENU_ARROWL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_WINDOW_MENU_ARROWR, GL_LINEAR);
-}
-
-void mu::ui::window::CWindowMenu::UnloadImages()
-{
-    DeleteBitmap(IMAGE_WINDOW_MENU_BACK);
-    DeleteBitmap(IMAGE_WINDOW_MENU_FRAME_UP);
-    DeleteBitmap(IMAGE_WINDOW_MENU_FRAME_MIDDLE);
-    DeleteBitmap(IMAGE_WINDOW_MENU_FRAME_DOWN);
-    DeleteBitmap(IMAGE_WINDOW_MENU_LINE);
-    DeleteBitmap(IMAGE_WINDOW_MENU_ARROWL);
-    DeleteBitmap(IMAGE_WINDOW_MENU_ARROWR);
-}

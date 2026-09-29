@@ -2,12 +2,47 @@
 #include "stdafx.h"
 #include "UI/Dialogs/HelpWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "Engine/Object/ZzzInventory.h"
+#include "UI/Dialogs/HelpPages.h"
 #include "Audio/DSPlaySound.h"
-#include "I18N/All.h"
+
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// RenderTipTextList(1, 1, ...): the box's left edge is clamped to logical 0 and its top is 1.
+constexpr float kBoxLeft = 0.f;
+constexpr float kBoxTop = 1.f;
+// Its text box is the widest line plus 2 units, inside 1 unit of padding and a 1-unit frame.
+constexpr float kTextBoxSlackUnits = 2.f;
+constexpr float kPaddingUnits = 1.f;
+constexpr float kBorderUnits = 1.f;
+// Each row advances 1.1 text heights; a "\n" row half of that.
+constexpr float kRowAdvance = 1.1f;
+constexpr float kHalfSpacerFraction = 0.5f;
+
+bool SameTransform(const UI::Scaling::Transform& a, const UI::Scaling::Transform& b)
+{
+    return a.scaleX == b.scaleX && a.scaleY == b.scaleY && a.offsetX == b.offsetX && a.offsetY == b.offsetY &&
+           a.typographyScale == b.typographyScale;
+}
+
+float MeasureLogicalWidth(const std::wstring& text, bool bold)
+{
+    g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+    return static_cast<float>(g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx);
+}
+} // namespace
 
 mu::ui::window::CHelpWindow::CHelpWindow()
 {
@@ -33,6 +68,9 @@ bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+
     Show(false);
 
     return true;
@@ -40,6 +78,8 @@ bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CHelpWindow::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
+
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -64,7 +104,7 @@ bool mu::ui::window::CHelpWindow::UpdateKeyEvent()
     {
         if (IsPress(VK_F1) == true)
         {
-            if (++m_iIndex > 1)
+            if (++m_iIndex >= UI::Help::PageCount)
             {
                 g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
                 PlayBuffer(SOUND_CLICK01);
@@ -87,160 +127,128 @@ bool mu::ui::window::CHelpWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CHelpWindow::Update()
 {
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CHelpWindow::Render()
 {
-    EnableAlphaTest();
-
-    // Reference-bind to ZzzInventory.cpp's globals: a naive `extern` here would resolve to
-    // the mu::ui::window::TextList reference instead and crash on write (read-only pointer).
-    wchar_t (&TextList)[50][100] = ::TextList;
-    int (&TextListColor)[50] = ::TextListColor;
-    int (&TextBold)[50] = ::TextBold;
-
-    if (m_iIndex == 0)
-    {
-        int iTextNum = 0;
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        wcscpy(TextList[iTextNum], I18N::Game::KeyFunction);
-        TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-        TextBold[iTextNum] = true;
-        iTextNum++;
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        // Render F1-F4 entries (I18N::Game::Lookup(121..124)) first.
-        for (int i = 0; i < 4; ++i)
-        {
-            wcscpy(TextList[iTextNum], I18N::Game::Lookup(121 + i));
-            TextListColor[iTextNum] = TEXT_COLOR_WHITE;
-            TextBold[iTextNum] = false;
-            iTextNum++;
-        }
-
-        // Engine-added camera/MU Helper hotkey entries, inserted between F4 and the shipped entries.
-        const wchar_t* const extraHelpLines[] = {
-            I18N::Game::F8ToggleMonsterHPBar, I18N::Game::F9Toggle3DCamera,   I18N::Game::F10LockUnlockCameraZoom,
-            I18N::Game::F11ResetCameraView,   I18N::Game::HomeToggleMUHelper, I18N::Game::JToggleChatCommands,
-        };
-        for (const wchar_t* line : extraHelpLines)
-        {
-            wcsncpy_s(TextList[iTextNum], line, 99);
-            TextListColor[iTextNum] = TEXT_COLOR_WHITE;
-            TextBold[iTextNum] = false;
-            iTextNum++;
-        }
-
-        // Render the remaining shipped entries (I18N::Game::Lookup(125..139)).
-        for (int i = 4; i < 19; ++i)
-        {
-            wcscpy(TextList[iTextNum], I18N::Game::Lookup(121 + i));
-            TextListColor[iTextNum] = TEXT_COLOR_WHITE;
-            TextBold[iTextNum] = false;
-            iTextNum++;
-        }
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_CENTER);
-    }
-    else if (m_iIndex == 1)
-    {
-        int iTextNum = 0;
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        wcscpy(TextList[iTextNum], I18N::Game::ChattingInstructions);
-        TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-        TextBold[iTextNum] = true;
-        iTextNum++;
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        for (int i = 0; i < 16; ++i)
-        {
-            wcscpy(TextList[iTextNum], I18N::Game::Lookup(141 + i));
-            TextListColor[iTextNum] = TEXT_COLOR_WHITE;
-            TextBold[iTextNum] = false;
-            iTextNum++;
-        }
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_CENTER);
-    }
-    else if (m_iIndex == 2)
-    {
-        int iTextNum = 0;
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        wcscpy(TextList[iTextNum], I18N::Game::AMPM);
-        TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-        TextBold[iTextNum] = true;
-        iTextNum++;
-
-        for (int i = 0; i < 24; ++i)
-        {
-            wcscpy(TextList[iTextNum], I18N::Game::Lookup(2422 + i));
-            TextListColor[iTextNum] = TEXT_COLOR_WHITE;
-            TextBold[iTextNum] = false;
-            iTextNum++;
-        }
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_LEFT);
-    }
-    else if (m_iIndex == 3)
-    {
-        int iTextNum = 0;
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        wcscpy(TextList[iTextNum], I18N::Game::ChaosCastleDevilSSquare);
-        TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-        TextBold[iTextNum] = true;
-        iTextNum++;
-
-        for (int i = 0; i < 18; ++i)
-        {
-            wcscpy(TextList[iTextNum], I18N::Game::Lookup(2447 + i));
-            if (i == 0 || i == 8 || i == 9)
-            {
-                TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-                TextBold[iTextNum] = true;
-                iTextNum++;
-            }
-            else
-            {
-                TextListColor[iTextNum] = TEXT_COLOR_WHITE;
-                TextBold[iTextNum] = false;
-                iTextNum++;
-            }
-        }
-
-        mu_swprintf(TextList[iTextNum], L"\n");
-        iTextNum++;
-
-        RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_LEFT);
-    }
-
-    DisableAlphaBlend();
+    // Nothing native left: the page is an RmlUi document. Kept because CObject requires it.
     return true;
+}
+
+void mu::ui::window::CHelpWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "help_window",
+                                                 [](Rml::DataModelConstructor& c, HelpWindowRmlModel& model)
+                                                 {
+                                                     c.Bind("panel_x", &model.panelX);
+                                                     c.Bind("panel_y", &model.panelY);
+                                                     c.Bind("content_width", &model.contentWidth);
+                                                     c.Bind("padding_px", &model.paddingPx);
+                                                     c.Bind("border_px", &model.borderPx);
+                                                     c.Bind("text_px", &model.textPx);
+                                                     c.Bind("bold_text_px", &model.boldTextPx);
+
+                                                     auto line = c.RegisterStruct<HelpLineEntry>();
+                                                     line.RegisterMember("text", &HelpLineEntry::text);
+                                                     line.RegisterMember("heading", &HelpLineEntry::heading);
+                                                     line.RegisterMember("half_spacer", &HelpLineEntry::halfSpacer);
+                                                     line.RegisterMember("height_px", &HelpLineEntry::heightPx);
+                                                     line.RegisterMember("gap_px", &HelpLineEntry::gapPx);
+                                                     c.RegisterArray<std::vector<HelpLineEntry>>();
+                                                     c.Bind("lines", &model.lines);
+                                                 });
+
+    if (modelCreated)
+    {
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                      "Data/Interface/RmlUi/help_window.rml");
+    }
+}
+
+void mu::ui::window::CHelpWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+    m_BuiltPage = -1;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CHelpWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // The original drew this page over the location bar and the chat and system logs.
+    const bool visible = IsVisible();
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    if (!visible)
+        return;
+
+    RebuildPageModel(UI::Scaling::GetActiveTransform());
+}
+
+void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform& transform)
+{
+    if (m_BuiltPage == m_iIndex && SameTransform(m_BuiltTransform, transform))
+        return;
+
+    m_BuiltPage = m_iIndex;
+    m_BuiltTransform = transform;
+
+    const std::vector<UI::Help::PageLine> page = UI::Help::BuildPage(m_iIndex);
+    const float normalHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
+    const float boldHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
+
+    HelpWindowRmlModel& model = m_RmlBinder.GetModel();
+    model.lines.clear();
+    model.lines.reserve(page.size());
+
+    float widestLine = 0.f;
+    for (const UI::Help::PageLine& pageLine : page)
+    {
+        HelpLineEntry entry;
+        entry.heading = pageLine.heading;
+        entry.halfSpacer = pageLine.halfSpacer;
+
+        const float rowHeight = (pageLine.heading ? boldHeight : normalHeight) * transform.scaleY;
+        const float advance = rowHeight * kRowAdvance;
+        if (pageLine.halfSpacer)
+        {
+            entry.heightPx = advance * kHalfSpacerFraction;
+        }
+        else
+        {
+            entry.text = StringUtils::WideToNarrow(pageLine.text.c_str());
+            entry.heightPx = rowHeight;
+            entry.gapPx = advance - rowHeight;
+            widestLine = std::max(widestLine, MeasureLogicalWidth(pageLine.text, pageLine.heading));
+        }
+        model.lines.push_back(std::move(entry));
+    }
+
+    model.borderPx = kBorderUnits * transform.scaleX;
+    model.paddingPx = kPaddingUnits * transform.scaleX;
+    model.contentWidth = (widestLine + kTextBoxSlackUnits) * transform.scaleX;
+    model.panelX = UI::Scaling::PositionX(transform, kBoxLeft) - model.borderPx;
+    model.panelY = UI::Scaling::PositionY(transform, kBoxTop) - model.borderPx;
+    model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
+    model.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+
+    for (const char* field :
+         {"lines", "panel_x", "panel_y", "content_width", "padding_px", "border_px", "text_px", "bold_text_px"})
+        m_RmlBinder.MarkDirty(field);
 }
 
 float mu::ui::window::CHelpWindow::GetLayerDepth()
@@ -255,14 +263,14 @@ float mu::ui::window::CHelpWindow::GetKeyEventOrder()
 
 void mu::ui::window::CHelpWindow::OpenningProcess()
 {
-    m_iIndex = 0;
+    m_iIndex = UI::Help::KeyFunctionPage;
 }
 
 void mu::ui::window::CHelpWindow::ClosingProcess() {}
 
 void mu::ui::window::CHelpWindow::AutoUpdateIndex()
 {
-    if (++m_iIndex > 1)
+    if (++m_iIndex >= UI::Help::PageCount)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
     }

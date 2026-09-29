@@ -1,0 +1,65 @@
+/* Modern theme for CWindowMenu: the same six rows at the original's place above the bottom HUD's
+   right end, on the modern forged-panel surface instead of the command frame art. Geometry is the
+   legacy one (reference px under #screen's W/640 x H/480 stretch, see window_menu.rml); the look
+   comes from the modern tokens. */
+
+#screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel {
+	position: absolute;
+	left: 528px;
+	top: 284px;
+	width: 112px;
+	height: 146px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	pointer-events: auto;
+}
+
+#back, #frame_up, .frame-middle, #frame_down, .arrow { display: none; }
+
+.line {
+	position: absolute;
+	left: 15px;
+	width: 82px;
+	height: 1px;
+	background-color: token(metal-mid);
+}
+
+#rows {
+	position: absolute;
+	left: 0;
+	top: 20px;
+	width: 112px;
+}
+.menu-row {
+	display: block;
+	position: relative;
+	width: 112px;
+	height: 20px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+.menu-row:hover { background-color: token(surface-raised); }
+
+.menu-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform-origin: left top;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-primary);
+	pointer-events: none;
+}
+.menu-row:hover .menu-label { color: token(accent-gold-hover); }

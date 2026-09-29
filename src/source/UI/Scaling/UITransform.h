@@ -121,6 +121,11 @@ namespace UI::Scaling
     // Physical pixel size the native text renderer draws `role` text at under `transform` -- what a
     // legacy-theme RmlUi text element must use to match it, independent of the panel's own scale.
     float NativeTextPixelSize(FontRole role, const Transform& transform);
+    // NativeTextPixelSize() for a text drawn into a box (RenderText() with a box width): the
+    // renderer shrinks a text wider than its box to fit it, down to the role's minimum size.
+    // `measuredWidth` is the text's unconstrained width and `boxWidth` the box's, both in the
+    // transform's logical units (what MeasureText() returns).
+    float NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth, float boxWidth);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
     float ContentScaleFromMetrics(float displayScale, float pixelDensity);
