@@ -55,6 +55,16 @@
 	decorator: image(charmake-job-unchecked);
 	color: token(text-dim);
 }
+/* Every job button sits in one column; the tops are the original's own, in CLASS_* order:
+   wizard/knight/elf/summoner run at a 26px pitch, then a gap, then rage-fighter/dark/dark-lord. */
+.job-btn { left: 346px; }
+.job-btn[job="wizard"]       { top: 131px; }
+.job-btn[job="knight"]       { top: 157px; }
+.job-btn[job="elf"]          { top: 183px; }
+.job-btn[job="summoner"]     { top: 209px; }
+.job-btn[job="rage-fighter"] { top: 246px; }
+.job-btn[job="dark"]         { top: 272px; }
+.job-btn[job="dark-lord"]    { top: 298px; }
 .job-btn.checked {
 	decorator: image(charmake-job-checked);
 	color: token(text-primary);

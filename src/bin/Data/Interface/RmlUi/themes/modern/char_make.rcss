@@ -95,6 +95,17 @@
 }
 /* Gold left-accent bar (inset box-shadow, not a border-left -- keeps the 1px border-frame outline
    intact all the way around) -- reference's own .class-btn.is-selected treatment. */
+/* Every job button sits in one column; the tops are the original's own, in CLASS_* order:
+   The pitch is the original's, not this theme's own 24px buttons -- retune if that is ever wanted.
+   wizard/knight/elf/summoner run at a 26px pitch, then a gap, then rage-fighter/dark/dark-lord. */
+.job-btn { left: 346px; }
+.job-btn[job="wizard"]       { top: 131px; }
+.job-btn[job="knight"]       { top: 157px; }
+.job-btn[job="elf"]          { top: 183px; }
+.job-btn[job="summoner"]     { top: 209px; }
+.job-btn[job="rage-fighter"] { top: 246px; }
+.job-btn[job="dark"]         { top: 272px; }
+.job-btn[job="dark-lord"]    { top: 298px; }
 .job-btn.checked {
 	color: token(text-warm);
 	border-color: token(accent-gold-hover);

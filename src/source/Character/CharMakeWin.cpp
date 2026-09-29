@@ -57,10 +57,10 @@ namespace
     constexpr const wchar_t* kDarkLordLeadershipStatValue = L"25";
     constexpr int kDarkLordLeadershipTextId = 1738;
 
-    constexpr int kJobButtonHeight = 26;
-    constexpr int kJobButtonStartY = 131;
-    constexpr int kJobButtonSummonerRow = 3;
-    constexpr int kJobButtonRageFighterY = 246;
+    // Indexed by CLASS_*; each theme's char_make.rcss places the button matching [job=<key>].
+    constexpr const char* kJobKeys[MAX_CLASS] = {
+        "wizard", "knight", "elf", "dark", "dark-lord", "summoner", "rage-fighter"
+    };
     constexpr int kDescSpriteOffsetY = 355;
     constexpr int kStatSpriteOffsetY = 24;
     constexpr int kDescriptionTextOffsetX = 10;
@@ -194,6 +194,8 @@ void CCharMakeWin::BuildRmlUi()
         [this](Rml::DataModelConstructor& c, CharMakeRmlModel& model)
         {
             model.jobs.resize(MAX_CLASS);
+            for (int i = 0; i < MAX_CLASS; ++i)
+                model.jobs[i].key = kJobKeys[i];
 
             // RegisterStruct()/RegisterArray() run against this Create() call's own
             // Rml::DataTypeRegister (RmlModelBinder.h), not one shared across calls -- so this
@@ -201,8 +203,7 @@ void CCharMakeWin::BuildRmlUi()
             // ReloadRmlTheme(); a guard skipping it on a later call would register nothing on
             // that call's (fresh, otherwise-empty) register and break the c.Bind() below.
             auto job = c.RegisterStruct<JobButtonEntry>();
-            job.RegisterMember("rel_left", &JobButtonEntry::relLeft);
-            job.RegisterMember("rel_top", &JobButtonEntry::relTop);
+            job.RegisterMember("key", &JobButtonEntry::key);
             job.RegisterMember("checked", &JobButtonEntry::checked);
             job.RegisterMember("disabled", &JobButtonEntry::disabled);
             job.RegisterMember("label", &JobButtonEntry::label);
@@ -310,37 +311,6 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 
     const int baseX = nXCoord + 346;
     m_asprBack[CMW_SPR_STAT].SetPosition(baseX, nYCoord + kStatSpriteOffsetY);
-
-    constexpr int buttonHeight = kJobButtonHeight;
-    int baseY = nYCoord + kJobButtonStartY;
-
-    auto& jobs = m_RmlBinder.GetModel().jobs;
-    auto pushJobPos = [&](int classIndex, int screenX, int screenY)
-    {
-        if (jobs.empty()) return; // model not created yet (RmlUi not up) -- nothing to push
-        jobs[classIndex].relLeft = screenX - nXCoord;
-        jobs[classIndex].relTop = screenY - nYCoord;
-    };
-
-    for (int classIndex = 0; classIndex < 3; ++classIndex)
-    {
-        const int y = baseY + classIndex * buttonHeight;
-        pushJobPos(classIndex, baseX, y);
-    }
-
-    pushJobPos(CLASS_SUMMONER, baseX, baseY + kJobButtonSummonerRow * buttonHeight);
-
-    baseY = nYCoord + kJobButtonRageFighterY;
-    pushJobPos(CLASS_RAGEFIGHTER, baseX, baseY);
-
-    for (int classIndex = CLASS_DARK; classIndex <= CLASS_DARK_LORD; ++classIndex)
-    {
-        const int row = (classIndex - CLASS_DARK) + 1;
-        const int y = baseY + row * buttonHeight;
-        pushJobPos(classIndex, baseX, y);
-    }
-    if (!jobs.empty())
-        m_RmlBinder.MarkDirty("jobs");
 
     m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + kDescSpriteOffsetY);
 

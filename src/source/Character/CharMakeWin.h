@@ -119,11 +119,9 @@ private:
 
     struct JobButtonEntry
     {
-        // Panel-relative, pushed once from SetPosition() (mirrors the legacy per-class layout
-        // math exactly -- not recomputed per frame, unlike CCharInfoBalloon's genuine 3D-tracking
-        // case).
-        int relLeft = 0;
-        int relTop = 0;
+        // Which class this button is, for the stylesheets to place it by ([job=...]). The set and
+        // its order are fixed (MAX_CLASS entries, CLASS_* order), so every position is static.
+        Rml::String key;
         bool checked = false;
         bool disabled = false;
         Rml::String label;
