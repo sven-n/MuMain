@@ -18,7 +18,9 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -88,8 +90,114 @@ void CmuConsoleDebug::UpdateMainScene()
 }
 
 
+namespace
+{
+// Temporary testing aid for the UI ownership rollout: opens a window that normally needs an NPC,
+// a map or a server state to reach. It only shows the window -- nothing seeds it, so a window fed
+// entirely by the server (the guardsman's siege dates, the senatus' gate list) comes up with empty
+// or default content. Good enough for layout, tabs, hit tests and theme switching; not for data.
+struct DebugWindowName
+{
+    const wchar_t* name;
+    DWORD key;
+};
+
+constexpr DebugWindowName kDebugWindows[] = {
+    {L"guard", mu::ui::window::INTERFACE_GUARDSMAN},
+    {L"senatus", mu::ui::window::INTERFACE_SENATUS},
+    {L"gateman", mu::ui::window::INTERFACE_GATEKEEPER},
+    {L"gateswitch", mu::ui::window::INTERFACE_GATESWITCH},
+    {L"catapult", mu::ui::window::INTERFACE_CATAPULT},
+    {L"crywolf", mu::ui::window::INTERFACE_CRYWOLF},
+    {L"siege", mu::ui::window::INTERFACE_SIEGEWARFARE},
+    {L"guildinfo", mu::ui::window::INTERFACE_GUILDINFO},
+    {L"duelwatch", mu::ui::window::INTERFACE_DUELWATCH},
+    {L"gensranking", mu::ui::window::INTERFACE_GENSRANKING},
+    {L"market", mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA},
+    {L"goldbowman", mu::ui::window::INTERFACE_GOLD_BOWMAN},
+    {L"lena", mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA},
+    {L"masterlevel", mu::ui::window::INTERFACE_MASTER_LEVEL},
+    {L"doppel", mu::ui::window::INTERFACE_DOPPELGANGER_NPC},
+    {L"kanturu", mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC},
+    {L"temple", mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC},
+    {L"empire", mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC},
+    {L"bloodcastle", mu::ui::window::INTERFACE_BLOODCASTLE},
+    {L"devilsquare", mu::ui::window::INTERFACE_DEVILSQUARE},
+    {L"charinfo", mu::ui::window::INTERFACE_CHARACTER},
+    {L"party", mu::ui::window::INTERFACE_PARTY_INFO_WINDOW},
+    {L"pet", mu::ui::window::INTERFACE_PET},
+    {L"quest", mu::ui::window::INTERFACE_MYQUEST},
+    {L"muhelper", mu::ui::window::INTERFACE_MUHELPER},
+    {L"option", mu::ui::window::INTERFACE_OPTION},
+    {L"help", mu::ui::window::INTERFACE_HELP},
+};
+
+void ListDebugWindows()
+{
+    std::wstring line;
+    for (const DebugWindowName& entry : kDebugWindows)
+    {
+        if (!line.empty())
+            line += L' ';
+        line += entry.name;
+        // The log box wraps poorly on very long lines; break every ~70 characters.
+        if (line.size() >= 70)
+        {
+            g_pSystemLogBox->AddText(line.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            line.clear();
+        }
+    }
+    if (!line.empty())
+        g_pSystemLogBox->AddText(line.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(L"add \" full\" to open it the way the game does (asks the server; "
+                             L"some windows cannot take that out of context)",
+                             mu::ui::window::TYPE_SYSTEM_MESSAGE);
+}
+} // namespace
+
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
+    // "$win <name>" toggles a window, "$win list" names them. Temporary; see kDebugWindows above.
+    if (strCommand.compare(0, 4, L"$win") == 0 && strCommand.compare(0, 7, L"$winmsg") != 0)
+    {
+        std::wstring argument = strCommand.size() > 5 ? strCommand.substr(5) : std::wstring();
+        if (argument.empty() || argument == L"list")
+        {
+            ListDebugWindows();
+            return true;
+        }
+
+        // "$win <name> full" goes through CSystem::Show(), which runs the window's
+        // OpeningProcess() -- and several of these ask the server for their contents, which is not
+        // a request the server expects from a character standing nowhere near the NPC. The default
+        // path shows the window itself and sends nothing, so the window comes up with no data but
+        // cannot take the client down with it.
+        bool viaOpeningProcess = false;
+        if (argument.size() > 5 && argument.compare(argument.size() - 5, 5, L" full") == 0)
+        {
+            argument.resize(argument.size() - 5);
+            viaOpeningProcess = true;
+        }
+
+        for (const DebugWindowName& entry : kDebugWindows)
+        {
+            if (argument != entry.name)
+                continue;
+            if (viaOpeningProcess)
+            {
+                g_pNewUISystem->Toggle(entry.key);
+            }
+            else if (mu::ui::window::CManager* manager = g_pNewUISystem->GetNewUIManager())
+            {
+                manager->ShowInterface(entry.key, !manager->IsInterfaceVisible(entry.key));
+            }
+            return true;
+        }
+        g_pSystemLogBox->AddText((L"no such window: " + argument).c_str(),
+                                 mu::ui::window::TYPE_ERROR_MESSAGE);
+        return true;
+    }
+
     if (strCommand.compare(L"$fpscounter on") == 0)
     {
         SetShowFpsCounter(true);
