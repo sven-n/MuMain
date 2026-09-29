@@ -1,0 +1,9 @@
+/* Modern theme for the RenderTipTextList() tables: the same geometry and colours (the table is
+   data, not chrome), in the modern body font. Reference px. */
+
+#panel { position: absolute; transform-origin: left top; width: 640px; height: 480px; font-family: "token(font-body)"; pointer-events: none; }
+.tip-box { position: absolute; }
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.tip-line.centred { text-align: center; }
+.tip-line.right { text-align: right; }
+.tip-line.bold { font-weight: bold; }

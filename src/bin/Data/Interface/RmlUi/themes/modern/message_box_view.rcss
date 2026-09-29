@@ -1,0 +1,31 @@
+/* Modern theme for a native message box drawn by MessageBoxView: the modern panel surface and
+   buttons. Geometry is the legacy one (reference px). */
+
+#panel { position: absolute; transform-origin: left top; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
+#back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 230px;
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+#box_top, .box-middle, #box_bottom { display: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; transform-origin: left top; }
+.box-line.bold { font-weight: bold; }
+
+.box-btn {
+	display: block;
+	position: absolute;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.box-btn:hover { border-color: token(accent-steel-hover); }
+.box-btn:active { background-color: token(surface-recessed); }
+.box-btn.disabled { background-color: token(surface-recessed); }
+.box-label { color: token(text-primary); }
+.box-btn.disabled .box-label { color: token(text-muted); }

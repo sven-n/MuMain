@@ -9,6 +9,8 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "Guild/GuildInfoWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
+#include "UI/Inventory/InventoryCtrl.h"
 
 namespace mu::ui::window
 {
@@ -23,7 +25,7 @@ namespace mu::ui::window
             IMAGE_GUARDWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
             IMAGE_GUARDWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
             IMAGE_GUARDWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GUARDWINDOW_TAB_BTN = CGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,
+            IMAGE_GUARDWINDOW_TAB_BTN = BITMAP_GUILDINFO_BEGIN,
             IMAGE_GUARDWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
 
             IMAGE_GUARDWINDOW_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,

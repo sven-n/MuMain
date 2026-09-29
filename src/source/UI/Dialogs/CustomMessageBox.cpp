@@ -2043,221 +2043,85 @@ bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
 
     CMessageBoxBase::Create(x, y, width, height, fPriority);
 
-    SetButtonInfo();
+    // The original's RenderFrame(): five middle strips, the back 75 units shorter than the box.
+    m_View.Create(5, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT - 75);
 
     return true;
 }
 
 void mu::ui::window::CGuild_ToPerson_Position::Release()
 {
+    m_View.Destroy();
     CMessageBoxBase::Release();
-
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        SAFE_DELETE(*vi);
-    }
-    m_MsgDataList.clear();
 }
 
 bool mu::ui::window::CGuild_ToPerson_Position::Update()
 {
-    m_BtnBlessing.Update();
-    m_BtnSoul.Update();
-    m_BtnOk.Update();
-    m_BtnCancel.Update();
+    // A button RmlUi reported (the original's LButtonUp() checks), sent as the box's event.
+    static constexpr DWORD kButtonEvents[] = {MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING,
+                                              MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL, MSGBOX_EVENT_USER_COMMON_OK,
+                                              MSGBOX_EVENT_USER_COMMON_CANCEL};
+    const int pressed = m_View.TakePressedButton();
+    if (pressed >= 0 && pressed < static_cast<int>(std::size(kButtonEvents)))
+        g_MessageBox->SendEvent(this, kButtonEvents[pressed]);
+
+    // The original's RenderButtons()/RenderTexts(): the appointment chosen (the assistant by
+    // default) sets AppointType and its line, then the question, bold (255, 128, 0), centred
+    // from y 97 one line height + 4 apart.
+    std::vector<std::wstring> texts;
+    wchar_t strText[256] = {};
+    if (COMGEM::m_cGemType == COMGEM::CELE)
+    {
+        mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::AssistM);
+        AppointType = SUBGUILDMASTER;
+        texts.push_back(strText);
+    }
+    if (COMGEM::m_cGemType == COMGEM::SOUL)
+    {
+        mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::BattleM);
+        AppointType = BATTLEMASTER;
+        texts.push_back(strText);
+    }
+    texts.push_back(I18N::Game::DoYouWantToAppoint);
+
+    std::vector<MessageBoxView::Line> lines;
+    g_pRenderText->SetFont(g_hFontBold);
+    int y = static_cast<int>(MSGBOX_TEXT_TOP_BLANK / 2) + 80;
+    for (const std::wstring& text : texts)
+    {
+        const SIZE size = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size()));
+        const int x = static_cast<int>(GetSize().cx / 2) - static_cast<int>(size.cx / 2);
+        lines.push_back({text, static_cast<float>(x), static_cast<float>(y), true, RGBA(255, 128, 0, 255)});
+        y += static_cast<int>(size.cy) + 4;
+    }
+
+    // The original's SetButtonInfo(): the two appointments 114 wide at (57, 30) and (57, 57),
+    // OK and Close at (48, 127) and (112, 127).
+    const float wide = MSGBOX_BTN_EMPTY_SMALL_WIDTH + 50;
+    const std::vector<MessageBoxView::Button> buttons = {
+        {I18N::Game::AppointAsAssistantGuildMaster, 57, 30, wide, MSGBOX_BTN_EMPTY_HEIGHT},
+        {I18N::Game::AppointAsABattleMaster, 57, 57, wide, MSGBOX_BTN_EMPTY_HEIGHT},
+        {I18N::Game::OK, 48, 127, MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT},
+        {I18N::Game::Close388, 112, 127, MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT},
+    };
+    m_View.Sync(GetPos(), lines, buttons);
 
     return true;
 }
 
 bool mu::ui::window::CGuild_ToPerson_Position::Render()
 {
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
+    // Nothing native left: MessageBoxView draws the box. Kept because the base requires it.
     return true;
-}
-
-void mu::ui::window::CGuild_ToPerson_Position::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
-{
-    auto* pMsg = new MSGBOX_TEXTDATA;
-    pMsg->strMsg = strMsg;
-    pMsg->dwColor = dwColor;
-    pMsg->byFontType = byFontType;
-    m_MsgDataList.push_back(pMsg);
 }
 
 void mu::ui::window::CGuild_ToPerson_Position::SetAddCallbackFunc()
 {
-    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
+    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown,
+                    MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
     AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
     AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CGuild_ToPerson_Position::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH + 50;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + 57;//(GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth) + 60;
-    y = GetPos().y + 30;
-    m_BtnBlessing.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnBlessing.SetText(I18N::Game::AppointAsAssistantGuildMaster);
-
-    y += 27;
-    m_BtnSoul.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnSoul.SetText(I18N::Game::AppointAsABattleMaster);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x -= 9;
-    y += 70;
-    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnOk.SetText(I18N::Game::OK);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x += 64;
-    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CGuild_ToPerson_Position::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x;
-    y = GetPos().y + 2.f;
-    width = (GetSize().cx - MSGBOX_BACK_BLANK_WIDTH);
-    height = (GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT) - 75;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    int iCount = 5;
-    for (int i = 0; i < iCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CGuild_ToPerson_Position::RenderTexts()
-{
-    
-    
-
-    float x, y;
-
-    x = GetPos().x; y = (GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2)) + 80;
-
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CGuild_ToPerson_Position::RenderButtons()
-{
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        SAFE_DELETE(*vi);
-    }
-    m_MsgDataList.clear();
-
-    wchar_t strText[256];
-    if (COMGEM::m_cGemType == COMGEM::CELE)
-    {
-        mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::AssistM);
-        AppointType = SUBGUILDMASTER;
-        AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        m_BtnBlessing.Render();
-    }
-    else
-    {
-        m_BtnBlessing.Render();
-    }
-
-    if (COMGEM::m_cGemType == COMGEM::SOUL)
-    {
-        mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::BattleM);
-        AppointType = BATTLEMASTER;
-        AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        m_BtnSoul.Render();
-    }
-    else
-    {
-        m_BtnSoul.Render();
-    }
-
-    m_BtnOk.Render();
-    m_BtnCancel.Render();
-    AddMsg(I18N::Game::DoYouWantToAppoint, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-}
-
-CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CGuild_ToPerson_Position*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnBlessing.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnSoul.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnOk.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_OK);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnCancel.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
 }
 
 CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)

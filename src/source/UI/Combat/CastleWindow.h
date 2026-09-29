@@ -9,6 +9,8 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "Guild/GuildInfoWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "UI/NPCs/NPCShop.h"
 #include "UI/Quests/MyQuestInfoWindow.h"
 
@@ -25,7 +27,7 @@ namespace mu::ui::window
             IMAGE_CASTLEWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
             IMAGE_CASTLEWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
             IMAGE_CASTLEWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_CASTLEWINDOW_TAB_BTN = CGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,
+            IMAGE_CASTLEWINDOW_TAB_BTN = BITMAP_GUILDINFO_BEGIN,
             IMAGE_CASTLEWINDOW_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
             IMAGE_CASTLEWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
             IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)

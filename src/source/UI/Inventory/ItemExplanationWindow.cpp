@@ -6,6 +6,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -36,6 +37,9 @@ bool mu::ui::window::CItemExplanationWindow::Create(CManager* pNewUIMng, int x, 
 
     SetPos(x, y);
 
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
+
     Show(false);
 
     return true;
@@ -43,6 +47,7 @@ bool mu::ui::window::CItemExplanationWindow::Create(CManager* pNewUIMng, int x, 
 
 void mu::ui::window::CItemExplanationWindow::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -79,12 +84,27 @@ bool mu::ui::window::CItemExplanationWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CItemExplanationWindow::Update()
 {
+    // The original drew the table in Render(); its RenderTipTextList() calls now record it
+    // (g_pTipTextListRecord) for the document.
+    TipTextListRecord record;
+    if (IsVisible())
+    {
+        g_pTipTextListRecord = &record;
+        RecordTable();
+        g_pTipTextListRecord = nullptr;
+    }
+    m_View.Sync(IsVisible(), record);
     return true;
 }
 
 bool mu::ui::window::CItemExplanationWindow::Render()
 {
-    EnableAlphaTest();
+    // Nothing native left: the table is RmlUi. Kept because CObject requires the override.
+    return true;
+}
+
+void mu::ui::window::CItemExplanationWindow::RecordTable()
+{
 
     extern int ItemHelp;
     extern wchar_t TextList[50][100];
@@ -127,7 +147,7 @@ bool mu::ui::window::CItemExplanationWindow::Render()
     if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
-        return true;
+        return;
     }
     else if (ItemHelp >= ITEM_SWORD && ItemHelp < ITEM_BOW + MAX_ITEM_INDEX)
     {
@@ -161,7 +181,7 @@ bool mu::ui::window::CItemExplanationWindow::Render()
     else
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
-        return true;
+        return;
     }
 
     if (ItemHelp >= ITEM_BOOK_OF_SAHAMUTT && ItemHelp <= ITEM_STAFF + 29)
@@ -279,7 +299,6 @@ bool mu::ui::window::CItemExplanationWindow::Render()
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
     RenderTipTextList(1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER);
-    EnableAlphaTest();
 
     TextNum = 0;
 
@@ -375,9 +394,6 @@ bool mu::ui::window::CItemExplanationWindow::Render()
         RenderHelpCategory(_COLUMN_TYPE_REQCHA, TabSpace, iLabelHeight);
         RenderHelpLine(_COLUMN_TYPE_REQCHA, L"%3d", TabSpace, L"00000", iDataHeight);
     }
-
-    DisableAlphaBlend();
-    return true;
 }
 
 float mu::ui::window::CItemExplanationWindow::GetLayerDepth()

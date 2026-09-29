@@ -14,7 +14,7 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GB_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_GB_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK, // Reference
             IMAGE_GB_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
             IMAGE_GB_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
             IMAGE_GB_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
@@ -22,7 +22,7 @@ namespace mu::ui::window
             IMAGE_GB_EXCHANGEBTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
             IMAGE_GB_BTN_SERIAL = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
             IMAGE_GB_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GB_EDITBOX = CGuildMakeWindow::IMAGE_GUILDMAKE_EDITBOX,
+            IMAGE_GB_EDITBOX = BITMAP_GUILDMAKE_BEGIN,
         };
 
     private:

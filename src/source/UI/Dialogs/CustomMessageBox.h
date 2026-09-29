@@ -6,6 +6,7 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/MessageBoxView.h"
 
 namespace mu::ui::window
 {
@@ -196,6 +197,8 @@ namespace mu::ui::window
 
     // CDuelMsgBox/CDuelResultMsgBox are now CGenericConfirmDialog's portrait2D field.
 
+    // The guild master's appointment box: assistant or battle master for the selected member, OK
+    // and Close. MessageBoxView draws it; the box keeps its callbacks and the request.
     class CGuild_ToPerson_Position : public CMessageBoxBase
     {
         enum
@@ -223,28 +226,15 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
         void SetAddCallbackFunc();
-        void SetButtonInfo();
 
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // texts
-        type_vector_msgdata m_MsgDataList;
-        // button
-        CMessageBoxButton m_BtnBlessing;
-        CMessageBoxButton m_BtnSoul;
-        CMessageBoxButton m_BtnOk;
-        CMessageBoxButton m_BtnCancel;
+        MessageBoxView m_View;
     };
 
     // CCherryBlossomMsgBox/CLuckyTradeMenuMsgBox/CSeedMasterMenuMsgBox/CSeedInvestigatorMenuMsgBox/

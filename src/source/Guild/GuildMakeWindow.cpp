@@ -12,8 +12,22 @@
 #include "App/Platform/Windows/Local.h"
 #include "UI/Core/WindowSystem.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Guild/GuildMarkPalette.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <cstdio>
+#include <iterator>
+
 extern MARK_t		GuildMark[MAX_MARKS];
 extern int			SelectMarkColor;
+extern unsigned int MarkColor[16];
 
 namespace
 {
@@ -77,77 +91,49 @@ namespace
         }
     }
 
-    void RenderEditGuildMark(int iPos_x, int iPos_y)
+    // RenderGuildColor()'s cell: RenderColorQuadARGB() reads MarkColor[] (built for the mark
+    // texture, red in the low byte) as ARGB, so the editor shows red and blue swapped -- the
+    // original's own look, kept. Index 0 is the black cell with a grey cross.
+    mu::ui::window::GuildMakeCellEntry EditorCell(int index)
     {
-        int i, j;
-        float x, y;
-        for (i = 0; i < 8; ++i)
-        {
-            for (j = 0; j < 8; ++j)
-            {
-                x = (float)iPos_x + j * 15 + 50;
-                y = (float)iPos_y + i * 15 + 100;
-                RenderGuildColor(x + 1, y + 1, 13, 13, GuildMark[MARK_EDIT].Mark[i * 8 + j]);
-            }
-        }
-        for (i = 0; i < 2; ++i)
-        {
-            for (j = 0; j < 8; ++j)
-            {
-                x = (float)iPos_x + j * 20 + 15;
-                y = (float)iPos_y + i * 20 + 260;
-                RenderGuildColor(x + 1, y + 1, 18, 18, i * 8 + j);
-            }
-        }
-        x = (float)iPos_x + 15;
-        y = (float)iPos_y + 230;
-        RenderGuildColor(x + 1, y + 1, 23, 23, SelectMarkColor);
-
-        g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->SetTextColor(230, 230, 230, 255);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->RenderText(iPos_x + 50, iPos_y + 230, I18N::Game::AfterSelectingAColorWith);
-        g_pRenderText->RenderText(iPos_x + 50, iPos_y + 245, I18N::Game::TheMousePleaseDraw);
+        if (index <= 0 || static_cast<std::size_t>(index) >= std::size(MarkColor))
+            return {"#000000ff", true};
+        const unsigned int argb = MarkColor[static_cast<std::size_t>(index)];
+        char color[16] = {};
+        std::snprintf(color, sizeof(color), "#%02x%02x%02x%02x", (argb >> 16) & 0xFFu, (argb >> 8) & 0xFFu,
+                      argb & 0xFFu, (argb >> 24) & 0xFFu);
+        return {color, false};
     }
 
-    void RenderGoldRect(float x, float y, float sx, float sy, int fill = 0)
+    template <typename Model, typename T>
+    void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
     {
-        switch (fill)
-        {
-        case 1:
-            RenderColorQuadARGB(x, y, sx, sy, 0xC892908Du);
-            break;
-        };
-
-        RenderBitmap(BITMAP_INVENTORY + 19, x, y, sx, 2, 10 / 256.f, 5 / 16.f, 170.f / 256.f, 2.f / 16.f);
-        RenderBitmap(BITMAP_INVENTORY + 19, x, y + sy, sx + 1, 2, 10 / 256.f, 5 / 16.f, 170.f / 256.f, 2.f / 16.f);
-        RenderBitmap(BITMAP_INVENTORY, x, y, 2, sy, 1.f / 256.f, 5 / 16.f, 2.f / 256.f, 125.f / 256.f);
-        RenderBitmap(BITMAP_INVENTORY, x + sx, y, 2, sy, 1.f / 256.f, 5 / 16.f, 2.f / 256.f, 125.f / 256.f);
+        Model& model = binder.GetModel();
+        if (model.*field == value)
+            return;
+        model.*field = std::move(value);
+        binder.MarkDirty(name);
     }
 
-    void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
+    bool SameCell(const mu::ui::window::GuildMakeCellEntry& a, const mu::ui::window::GuildMakeCellEntry& b)
+    {
+        return a.color == b.color && a.empty == b.empty && a.left == b.left && a.top == b.top;
+    }
+
+    // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
+    float TextPxInBox(const UI::Scaling::Transform& transform, const wchar_t* text, float boxWidth)
     {
         g_pRenderText->SetFont(g_hFont);
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(color);
-        g_pRenderText->SetBgColor(backcolor);
-        g_pRenderText->RenderText(x, y, text, sx, sy, sort);
-
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
+        const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
+                                                     static_cast<float>(width), boxWidth);
     }
 };
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CGuildMakeWindow::CGuildMakeWindow() : m_pNewUIMng(NULL), m_EditBox(NULL), m_Button(NULL),
-m_GuildMakeState(GUILDMAKE_INFO)
-{
-}
+CGuildMakeWindow::CGuildMakeWindow() : m_pNewUIMng(NULL), m_GuildMakeState(GUILDMAKE_INFO) {}
 
 CGuildMakeWindow::~CGuildMakeWindow()
 {
@@ -159,39 +145,12 @@ bool CGuildMakeWindow::Create(CManager* pNewUIMng, int x, int y)
     if (NULL == pNewUIMng)
         return false;
 
-    LoadImages();
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCGUILDMASTER, this);
     SetPos(x, y);
 
-    m_EditBox = new CUITextInputBox;
-    m_EditBox->Init(g_hWnd, 200, 14, MAXGUILDNAME);
-    m_EditBox->SetPosition(m_Pos.x + 50, m_Pos.y + 66);
-    m_EditBox->SetTextColor(255, 255, 230, 210);
-    m_EditBox->SetBackColor(0, 0, 0, 25);
-    m_EditBox->SetFont(g_hFont);
-    m_EditBox->SetState(UISTATE_NORMAL);
-    m_EditBox->SetOption(UIOPTION_NOLOCALIZEDCHARACTERS);
-    m_Button = new CButton[GUILDMAKEBUTTON_COUNT];
-
-    for (int i = 0; i < GUILDMAKEBUTTON_COUNT; ++i)
-    {
-        if (i == 0)
-        {
-            m_Button[i].ChangeButtonImgState(true, IMAGE_GUILDMAKE_MAKEBUTTON, true);
-            m_Button[i].ChangeButtonInfo(0, 0, 108, 29);
-        }
-        else
-        {
-            m_Button[i].ChangeButtonImgState(true, IMAGE_GUILDMAKE_NEXTBUTTON, true);
-            m_Button[i].ChangeButtonInfo(0, 0, 64, 29);
-        }
-    }
-
-    // Exit Button
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDMAKE_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -200,42 +159,13 @@ bool CGuildMakeWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CGuildMakeWindow::Release()
 {
-    SAFE_DELETE_ARRAY(m_Button);
-    SAFE_DELETE(m_EditBox);
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-
-    UnloadImages();
-}
-
-void CGuildMakeWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUILDMAKE_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GUILDMAKE_MAKEBUTTON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_GUILDMAKE_NEXTBUTTON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUILDMAKE_BACK_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GUILDMAKE_BACK_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GUILDMAKE_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GUILDMAKE_BACK_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GUILDMAKE_BTN_EXIT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_guildmakeeditbox.tga", IMAGE_GUILDMAKE_EDITBOX, GL_LINEAR);
-}
-
-void CGuildMakeWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_GUILDMAKE_EDITBOX);
-    DeleteBitmap(IMAGE_GUILDMAKE_BTN_EXIT);
-    DeleteBitmap(IMAGE_GUILDMAKE_NEXTBUTTON);
-    DeleteBitmap(IMAGE_GUILDMAKE_MAKEBUTTON);
-    DeleteBitmap(IMAGE_GUILDMAKE_BACK_BOTTOM);
-    DeleteBitmap(IMAGE_GUILDMAKE_BACK_RIGHT);
-    DeleteBitmap(IMAGE_GUILDMAKE_BACK_LEFT);
-    DeleteBitmap(IMAGE_GUILDMAKE_BACK_TOP);
-    DeleteBitmap(IMAGE_GUILDMAKE_BACK);
 }
 
 float CGuildMakeWindow::GetLayerDepth()
@@ -246,11 +176,11 @@ float CGuildMakeWindow::GetLayerDepth()
 void CGuildMakeWindow::ClosingProcess()
 {
     // Save any text in the editbox before closing
-    if (m_GuildMakeState == GUILDMAKE_MARK && m_EditBox->GetState() == UISTATE_NORMAL)
+    if (m_GuildMakeState == GUILDMAKE_MARK && m_NameFieldShown)
     {
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
-        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
+        ReadNameField(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
         if (tempText[0] != L'\0')
         {
             // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
@@ -276,68 +206,65 @@ void CGuildMakeWindow::ChangeWindowState(const GUILDMAKE_STATE state)
 
 void CGuildMakeWindow::ChangeEditBox(const UISTATES type)
 {
+    Rml::Element* field = GetNameField();
     if (type == UISTATE_NORMAL)
     {
         // Restore guild name if it exists BEFORE setting state
-        if (GuildMark[MARK_EDIT].GuildName[0] != L'\0')
-        {
-            m_EditBox->SetText(GuildMark[MARK_EDIT].GuildName);
-        }
-        else
-        {
-            m_EditBox->SetText(NULL);
-        }
-        m_EditBox->SetState(type);
-        m_EditBox->GiveFocus();
+        if (field != nullptr)
+            field->SetAttribute("value", StringUtils::WideToNarrow(GuildMark[MARK_EDIT].GuildName));
+        m_NameFieldShown = true;
+        // Focused once the document shows it (SyncRmlModel()), as GiveFocus() did.
+        m_NameFieldFocusPending = true;
     }
     else
     {
-        m_EditBox->SetText(NULL);
-        m_EditBox->SetState(type);
+        if (field != nullptr)
+        {
+            field->SetAttribute("value", Rml::String());
+            field->Blur();
+        }
+        m_NameFieldShown = false;
+        m_NameFieldFocusPending = false;
     }
 }
 
-bool CGuildMakeWindow::UpdateGMInfo()
+Rml::Element* CGuildMakeWindow::GetNameField() const
 {
-    m_Button[GUILDMAKEBUTTON_INFO_MAKE].SetPos(m_Pos.x + ((190 / 2) - (108 / 2)), m_Pos.y + 100);
-    m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(&I18N::Game::CreateGuild);
+    return m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("name_field") : nullptr;
+}
 
-    if (m_Button[GUILDMAKEBUTTON_INFO_MAKE].UpdateMouseEvent())
+void CGuildMakeWindow::ReadNameField(wchar_t* text, int length) const
+{
+    Rml::Element* field = GetNameField();
+    if (field == nullptr || length <= 0)
+        return;
+    const std::wstring value = StringUtils::NarrowToWide(field->GetAttribute<Rml::String>("value", Rml::String()));
+    wcsncpy(text, value.c_str(), static_cast<size_t>(length - 1));
+    text[length - 1] = L'\0';
+}
+
+void CGuildMakeWindow::UpdateGMInfo(GUILDMAKE_BUTTON button)
+{
+    if (button == GUILDMAKEBUTTON_MAKE)
     {
         SocketClient->ToGameServer()->SendGuildMasterAnswer(true);
         ChangeWindowState(GUILDMAKE_MARK);
         ChangeEditBox(UISTATE_NORMAL);
-        return true;
     }
-
-    if (m_BtnExit.UpdateMouseEvent() == true)
+    else if (button == GUILDMAKEBUTTON_EXIT)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
-        return true;
     }
-
-    return false;
 }
 
-bool CGuildMakeWindow::UpdateGMMark()
+void CGuildMakeWindow::UpdateGMMark(GUILDMAKE_BUTTON button)
 {
-    m_EditBox->DoAction();
-
-    UpdateEditGuildMark(m_Pos.x, m_Pos.y);
-
-    //button
-    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(&I18N::Game::Back);
-
-    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].SetPos(m_Pos.x + 110, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(&I18N::Game::Next);
-
-    if (m_Button[GUILDMAKEBUTTON_MARK_LNEXT].UpdateMouseEvent())
+    if (button == GUILDMAKEBUTTON_BACK)
     {
         // Save the current text before going back
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
-        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
+        ReadNameField(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
         if (tempText[0] != L'\0')
         {
             // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
@@ -351,15 +278,13 @@ bool CGuildMakeWindow::UpdateGMMark()
 
         ChangeWindowState(GUILDMAKE_INFO);
         ChangeEditBox(UISTATE_HIDE);
-        return true;
     }
-
-    if (m_Button[GUILDMAKEBUTTON_MARK_RNEXT].UpdateMouseEvent())
+    else if (button == GUILDMAKEBUTTON_NEXT)
     {
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
 
-        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
+        ReadNameField(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
 
         if (CheckSpecialText(tempText) == true)
         {
@@ -375,39 +300,23 @@ bool CGuildMakeWindow::UpdateGMMark()
         }
         else
         {
-            // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
-            // tempText is far larger. An over-length name would otherwise run off
-            // GuildName into the adjacent Mark[] (and, at MARK_EDIT = the last
-            // slot, off the end of GuildMark[]) - worse on Linux where wchar_t is
-            // 4 bytes. Truncate and always null-terminate.
+            // Bounded copy: see above.
             wcsncpy(GuildMark[MARK_EDIT].GuildName, tempText, GuildConstants::GUILD_NAME_BUFFER_SIZE - 1);
             GuildMark[MARK_EDIT].GuildName[GuildConstants::GUILD_NAME_BUFFER_SIZE - 1] = L'\0';
             ChangeWindowState(GUILDMAKE_RESULTINFO);
             ChangeEditBox(UISTATE_HIDE);
-
-            return true;
         }
     }
-
-    return false;
 }
 
-bool CGuildMakeWindow::UpdateGMResultInfo()
+void CGuildMakeWindow::UpdateGMResultInfo(GUILDMAKE_BUTTON button)
 {
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].ChangeText(&I18N::Game::Back);
-
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].SetPos(m_Pos.x + 110, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].ChangeText(&I18N::Game::Next);
-
-    if (m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].UpdateMouseEvent())
+    if (button == GUILDMAKEBUTTON_BACK)
     {
         ChangeWindowState(GUILDMAKE_MARK);
         ChangeEditBox(UISTATE_NORMAL);
-        return true;
     }
-
-    if (m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].UpdateMouseEvent())
+    else if (button == GUILDMAKEBUTTON_NEXT)
     {
         BYTE Mark[32];
         for (int i = 0; i < 64; i++)
@@ -420,71 +329,7 @@ bool CGuildMakeWindow::UpdateGMResultInfo()
 
         SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark, sizeof Mark);
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
-        return true;
     }
-
-    return false;
-}
-
-void CGuildMakeWindow::RenderGMInfo()
-{
-    wchar_t Text[100];
-
-    memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, I18N::Game::DoYouWishToBeTheGuildMaster);
-    RenderText(Text, m_Pos.x, m_Pos.y + 50, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    m_Button[GUILDMAKEBUTTON_INFO_MAKE].Render();
-
-    m_BtnExit.Render();
-}
-
-void CGuildMakeWindow::RenderGMMark()
-{
-    //edit box
-    wchar_t Text[100];
-    memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, I18N::Game::NAME);
-    RenderText(Text, m_Pos.x + 10, m_Pos.y + 66, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_LEFT);
-
-    RenderImage(IMAGE_GUILDMAKE_EDITBOX, m_Pos.x + 45, m_Pos.y + 60, 108.f, 23.f);
-    m_EditBox->Render();
-
-    RenderGoldRect(m_Pos.x + 45, m_Pos.y + 95, 130.f, 130.f);
-    CreateGuildMark(MARK_EDIT);
-    RenderEditGuildMark(m_Pos.x, m_Pos.y);
-
-    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].Render();
-    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].Render();
-}
-
-void CGuildMakeWindow::RenderGMResultInfo()
-{
-    RenderGoldRect(m_Pos.x + 72, m_Pos.y + 70, 53.f, 53.f);
-    CreateGuildMark(MARK_EDIT);
-    RenderBitmap(BITMAP_GUILD, m_Pos.x + 72, m_Pos.y + 74, 48, 48);
-
-    wchar_t Text[100];
-    memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, L"%ls : %ls", I18N::Game::NAME, GuildMark[MARK_EDIT].GuildName);
-    RenderText(Text, m_Pos.x, m_Pos.y + 140, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
-
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].Render();
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].Render();
-}
-
-void CGuildMakeWindow::RenderFrame()
-{
-    RenderImage(IMAGE_GUILDMAKE_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_GUILDMAKE_BACK_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_GUILDMAKE_BACK_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GUILDMAKE_BACK_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GUILDMAKE_BACK_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
-
-    wchar_t Text[100];
-    memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, I18N::Game::Guild);
-    RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
 bool CGuildMakeWindow::UpdateKeyEvent()
@@ -504,6 +349,26 @@ bool CGuildMakeWindow::UpdateKeyEvent()
 
 bool CGuildMakeWindow::Update()
 {
+    // A button RmlUi reported (the original's CButton handling in UpdateMouseEvent()).
+    const GUILDMAKE_BUTTON button = m_PendingButton;
+    m_PendingButton = GUILDMAKEBUTTON_NONE;
+    if (IsVisible() && button != GUILDMAKEBUTTON_NONE)
+    {
+        switch (m_GuildMakeState)
+        {
+        case GUILDMAKE_INFO:
+            UpdateGMInfo(button);
+            break;
+        case GUILDMAKE_MARK:
+            UpdateGMMark(button);
+            break;
+        case GUILDMAKE_RESULTINFO:
+            UpdateGMResultInfo(button);
+            break;
+        }
+    }
+
+    SyncRmlModel();
     return true;
 }
 
@@ -520,21 +385,11 @@ bool CGuildMakeWindow::UpdateMouseEvent()
         return false;
     }
 
-    bool bResult = false;
-
-    switch (m_GuildMakeState)
+    // The buttons are RmlUi's (see Update()); the mark is still painted by the native hit tests
+    // on its grid and palette, which guild_make.rml leaves to the pointer.
+    if (m_GuildMakeState == GUILDMAKE_MARK)
     {
-    case GUILDMAKE_INFO: bResult = UpdateGMInfo();
-        break;
-    case GUILDMAKE_MARK: bResult = UpdateGMMark();
-        break;
-    case GUILDMAKE_RESULTINFO: bResult = UpdateGMResultInfo();
-        break;
-    }
-
-    if (bResult == true)
-    {
-        return false;
+        UpdateEditGuildMark(m_Pos.x, m_Pos.y);
     }
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT).Contains(MouseX, MouseY))
@@ -554,18 +409,183 @@ bool CGuildMakeWindow::UpdateMouseEvent()
 
 bool CGuildMakeWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    switch (m_GuildMakeState)
-    {
-    case GUILDMAKE_INFO: RenderGMInfo(); break;
-    case GUILDMAKE_MARK: RenderGMMark(); break;
-    case GUILDMAKE_RESULTINFO: RenderGMResultInfo(); break;
-    }
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame, the pages, the mark and the name field are RmlUi. Kept
+    // because CObject requires the override.
     return true;
+}
+
+void CGuildMakeWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "guild_make",
+        [this](Rml::DataModelConstructor& c, GuildMakeRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("page", &model.page);
+            c.Bind("title_text", &model.titleText);
+            c.Bind("title_px", &model.titlePx);
+            c.Bind("info_text", &model.infoText);
+            c.Bind("info_px", &model.infoPx);
+            c.Bind("make_text", &model.makeText);
+            c.Bind("back_text", &model.backText);
+            c.Bind("next_text", &model.nextText);
+            c.Bind("name_text", &model.nameText);
+            c.Bind("result_text", &model.resultText);
+            c.Bind("result_px", &model.resultPx);
+            c.Bind("palette_hint_1", &model.paletteHint1);
+            c.Bind("palette_hint_2", &model.paletteHint2);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+            c.Bind("label_top", &model.labelTop);
+            c.Bind("label_line_px", &model.labelLinePx);
+            auto cell = c.RegisterStruct<GuildMakeCellEntry>();
+            cell.RegisterMember("color", &GuildMakeCellEntry::color);
+            cell.RegisterMember("empty", &GuildMakeCellEntry::empty);
+            cell.RegisterMember("left", &GuildMakeCellEntry::left);
+            cell.RegisterMember("top", &GuildMakeCellEntry::top);
+            c.RegisterArray<std::vector<GuildMakeCellEntry>>();
+            c.Bind("cells", &model.cells);
+            c.Bind("palette", &model.palette);
+            c.Bind("selected", &model.selected);
+            c.RegisterArray<std::vector<Rml::String>>();
+            c.Bind("mark_cells", &model.markCells);
+            c.BindEventCallback("guild_make_button",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingButton = static_cast<GUILDMAKE_BUTTON>(arguments[0].Get<int>(-1));
+                                });
+        });
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc =
+        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/guild_make.rml");
+}
+
+void CGuildMakeWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    if (m_NameFieldShown)
+        ChangeEditBox(UISTATE_NORMAL);
+}
+
+void CGuildMakeWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 4.3: over the HUD like every panel the original opened.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncContent();
+
+    if (m_NameFieldFocusPending && m_pRmlDoc->IsVisible() && m_RmlBinder.GetModel().page == GUILDMAKE_MARK)
+    {
+        if (Rml::Element* field = GetNameField())
+        {
+            field->Focus();
+            if (field->IsPseudoClassSet("focus"))
+                m_NameFieldFocusPending = false;
+        }
+    }
+}
+
+void CGuildMakeWindow::SyncContent()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::page, "page", static_cast<int>(m_GuildMakeState));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::titleText, "title_text", StringUtils::WideToNarrow(I18N::Game::Guild));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::titlePx, "title_px", TextPxInBox(transform, I18N::Game::Guild, 190.f));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::infoText, "info_text",
+              StringUtils::WideToNarrow(I18N::Game::DoYouWishToBeTheGuildMaster));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::infoPx, "info_px",
+              TextPxInBox(transform, I18N::Game::DoYouWishToBeTheGuildMaster, 190.f));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::makeText, "make_text",
+              StringUtils::WideToNarrow(I18N::Game::CreateGuild));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::backText, "back_text", StringUtils::WideToNarrow(I18N::Game::Back));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::nextText, "next_text", StringUtils::WideToNarrow(I18N::Game::Next));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::nameText, "name_text", StringUtils::WideToNarrow(I18N::Game::NAME));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::paletteHint1, "palette_hint_1",
+              StringUtils::WideToNarrow(I18N::Game::AfterSelectingAColorWith));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::paletteHint2, "palette_hint_2",
+              StringUtils::WideToNarrow(I18N::Game::TheMousePleaseDraw));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::exitTooltip, "exit_tooltip",
+              StringUtils::WideToNarrow(I18N::Game::Close388));
+    wchar_t result[100] = {};
+    mu_swprintf(result, L"%ls : %ls", I18N::Game::NAME, GuildMark[MARK_EDIT].GuildName);
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::resultText, "result_text", StringUtils::WideToNarrow(result));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::resultPx, "result_px", TextPxInBox(transform, result, 190.f));
+
+    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    const int labelTop = 29 / 2 - lineHeight / 2;
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::labelLinePx, "label_line_px",
+              static_cast<float>(lineHeight) * transform.scaleY);
+
+    if (m_GuildMakeState == GUILDMAKE_INFO)
+        return;
+
+    // The mark: CreateGuildMark(MARK_EDIT) fills MarkColor[], which the editor's cells read.
+    CreateGuildMark(MARK_EDIT);
+    GuildMakeRmlModel& model = m_RmlBinder.GetModel();
+    std::vector<GuildMakeCellEntry> cells;
+    std::vector<Rml::String> markCells;
+    // RenderEditGuildMark(): the 8 x 8 grid of 15-unit cells from (50, 100), the palette's two
+    // rows of 20-unit cells from (15, 260), the selected colour at (15, 230).
+    for (int i = 0; i < Guild::MarkPalette::CellCount; ++i)
+    {
+        GuildMakeCellEntry cell = EditorCell(GuildMark[MARK_EDIT].Mark[i]);
+        cell.left = static_cast<float>(50 + (i % 8) * 15);
+        cell.top = static_cast<float>(100 + (i / 8) * 15);
+        cells.push_back(std::move(cell));
+        markCells.push_back(Guild::MarkPalette::CellColor(GuildMark[MARK_EDIT].Mark[i]));
+    }
+    std::vector<GuildMakeCellEntry> palette;
+    for (int i = 0; i < Guild::MarkPalette::ColorCount; ++i)
+    {
+        GuildMakeCellEntry cell = EditorCell(i);
+        cell.left = static_cast<float>(15 + (i % 8) * 20);
+        cell.top = static_cast<float>(260 + (i / 8) * 20);
+        palette.push_back(std::move(cell));
+    }
+    GuildMakeCellEntry selected = EditorCell(SelectMarkColor);
+    selected.left = 15.f;
+    selected.top = 230.f;
+
+    if (model.cells.size() != cells.size() ||
+        !std::equal(model.cells.begin(), model.cells.end(), cells.begin(), SameCell))
+    {
+        model.cells = std::move(cells);
+        m_RmlBinder.MarkDirty("cells");
+    }
+    if (model.palette.size() != palette.size() ||
+        !std::equal(model.palette.begin(), model.palette.end(), palette.begin(), SameCell))
+    {
+        model.palette = std::move(palette);
+        m_RmlBinder.MarkDirty("palette");
+    }
+    if (!SameCell(model.selected, selected))
+    {
+        model.selected = selected;
+        m_RmlBinder.MarkDirty("selected");
+    }
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::markCells, "mark_cells", std::move(markCells));
 }

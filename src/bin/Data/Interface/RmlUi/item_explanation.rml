@@ -1,0 +1,25 @@
+<rml>
+<head>
+	<title>CItemExplanationWindow</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="tip_text_list.rcss"/>
+</head>
+<body>
+	<!-- CItemExplanationWindow's table, as its RenderTipTextList() calls recorded it (UI/Inventory/TipTextListView.h):
+	     the black frames and fills, each line's coloured text box, the lines in their colours and
+	     fonts, shrunk to their boxes. root_x/root_y/root_scale come from the window's layout;
+	     everything inside is reference px; text is .sharp-text at the native size, counter-scaled
+	     out of the panel. Nothing here is interactive. -->
+	<div id="panel" data-model="item_explanation" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="tip-box" data-for="b : boxes" data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
+		     data-style-width="b.width + 'px'" data-style-height="b.height + 'px'"
+		     data-style-background-color="b.color"></div>
+		<span class="sharp-text tip-line" data-for="l : lines" data-class-bold="l.bold"
+		      data-class-centred="l.align == 1" data-class-right="l.align == 2"
+		      data-style-left="l.left + 'px'" data-style-top="l.top + 'px'" data-style-color="l.color"
+		      data-style-font-size="l.text_px + 'px'" data-style-width="(l.width * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+	</div>
+</body>
+</rml>

@@ -5,6 +5,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Audio/DSPlaySound.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -35,6 +36,9 @@ bool mu::ui::window::CSetItemExplanation::Create(CManager* pNewUIMng, int x, int
 
     SetPos(x, y);
 
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
+
     Show(false);
 
     return true;
@@ -42,6 +46,7 @@ bool mu::ui::window::CSetItemExplanation::Create(CManager* pNewUIMng, int x, int
 
 void mu::ui::window::CSetItemExplanation::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -78,17 +83,27 @@ bool mu::ui::window::CSetItemExplanation::UpdateKeyEvent()
 
 bool mu::ui::window::CSetItemExplanation::Update()
 {
+    // The original drew the table in Render(); its RenderTipTextList() call now records it
+    // (g_pTipTextListRecord) for the document.
+    TipTextListRecord record;
+    if (IsVisible())
+    {
+        g_pTipTextListRecord = &record;
+        RecordTable();
+        g_pTipTextListRecord = nullptr;
+    }
+    m_View.Sync(IsVisible(), record);
     return true;
+}
+
+void mu::ui::window::CSetItemExplanation::RecordTable()
+{
+    g_csItemOption.RenderOptionHelper();
 }
 
 bool mu::ui::window::CSetItemExplanation::Render()
 {
-    EnableAlphaTest();
-
-    g_csItemOption.RenderOptionHelper();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the table is RmlUi. Kept because CObject requires the override.
     return true;
 }
 
