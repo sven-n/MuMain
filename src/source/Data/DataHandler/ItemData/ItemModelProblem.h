@@ -28,6 +28,9 @@ enum class ItemModelProblemType
     // The glow names a mesh the model does not have; that glow is not drawn
     // (or, for a hidden mesh, drawn on all meshes).
     GlowMeshMissing,
+    // "renderStyle" names a style that does not exist; the model is drawn
+    // plainly.
+    RenderStyleUnknown,
 };
 
 // A problem found while opening an item model or its textures.
@@ -47,6 +50,8 @@ struct ItemModelProblem
     int meshCount = 0;
     // GlowMeshMissing: the glow value with the mesh, e.g. "glow.meshes".
     std::string field;
+    // RenderStyleUnknown: the name of the style.
+    std::string renderStyle;
 
     // Only the problems that leave an item without its model or a texture
     // are errors that the player sees; the others are warnings in the log.

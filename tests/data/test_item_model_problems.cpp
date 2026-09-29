@@ -136,6 +136,18 @@ TEST_CASE("A glow on a mesh the model does not have is a warning [data][items]")
           "(0,33): glow.meshes has mesh 3, but Data/Item/Sword34.bmd has 3 meshes " + SwordModels);
 }
 
+TEST_CASE("A render style that does not exist is a warning [data][items]")
+{
+    ItemModelProblem problem = MakeMissingTexture(0, "");
+    problem.type = ItemModelProblemType::RenderStyleUnknown;
+    problem.renderStyle = "stormCorw";
+
+    // The item keeps its model and textures; only its look is lost.
+    CHECK_FALSE(problem.IsError());
+    CHECK(problem.ToLogString() ==
+          "(0,33): render style stormCorw does not exist; Data/Item/Sword34.bmd is drawn plainly " + SwordModels);
+}
+
 TEST_CASE("The item model error message lists the errors only, up to a limit [data][items]")
 {
     const ItemDatabase items = MakeItems();

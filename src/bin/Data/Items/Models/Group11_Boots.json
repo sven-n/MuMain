@@ -108,7 +108,8 @@
       "glow": {
         "color": "blue",
         "ancientColor": "gold"
-      }
+      },
+      "renderStyle": "helperNpcPlate"
     },
     {
       "number": 10,
@@ -176,7 +177,8 @@
       "glow": {
         "color": "lavender",
         "shineColor": "orange"
-      }
+      },
+      "renderStyle": "stormCrow"
     },
     {
       "number": 16,
@@ -239,7 +241,8 @@
       },
       "glow": {
         "color": "steelBlue"
-      }
+      },
+      "renderStyle": "thunderHawk"
     },
     {
       "number": 21,
@@ -276,7 +279,8 @@
       },
       "glow": {
         "color": "slate"
-      }
+      },
+      "renderStyle": "hurricane"
     },
     {
       "number": 24,
@@ -825,7 +829,8 @@
         "meshes": [0],
         "shineMeshes": [0],
         "excellentMesh": 0
-      }
+      },
+      "renderStyle": "phoenixSoulBoots"
     }
   ]
 }

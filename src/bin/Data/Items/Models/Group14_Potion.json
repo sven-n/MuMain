@@ -71,7 +71,8 @@
       "textureFolders": ["Item"],
       "inventory": {
         "anchor": [0.5, 0.5]
-      }
+      },
+      "renderStyle": "siegePotion"
     },
     {
       "number": 8,
@@ -329,7 +330,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "lostMap"
     },
     {
       "number": 29,
@@ -341,7 +343,8 @@
       },
       "ground": {
         "rotation": [90, 0, 70]
-      }
+      },
+      "renderStyle": "symbolOfKundun"
     },
     {
       "number": 31,
@@ -532,7 +535,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.9
-      }
+      },
+      "renderStyle": "pumpkinOfLuck"
     },
     {
       "number": 46,
@@ -635,7 +639,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.2
-      }
+      },
+      "renderStyle": "talismanOfLuck"
     },
     {
       "number": 54,
@@ -649,7 +654,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "chaosCard"
     },
     {
       "number": 58,
@@ -664,7 +670,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket1"
     },
     {
       "number": 59,
@@ -679,7 +686,8 @@
       "ground": {
         "rotation": [90, 90, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket2"
     },
     {
       "number": 60,
@@ -694,7 +702,8 @@
       "ground": {
         "rotation": [90, 90, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket3"
     },
     {
       "number": 61,
@@ -709,7 +718,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket4"
     },
     {
       "number": 62,
@@ -724,7 +734,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket"
     },
     {
       "number": 63,
@@ -757,7 +768,8 @@
       "glow": {
         "level": 0,
         "shineHiddenMesh": 0
-      }
+      },
+      "renderStyle": "cursedCastleWater"
     },
     {
       "number": 65,
@@ -772,7 +784,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.6
-      }
+      },
+      "renderStyle": "deathBeamKnightFlame"
     },
     {
       "number": 66,
@@ -787,7 +800,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "hellMinerHorn"
     },
     {
       "number": 67,
@@ -802,7 +816,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "darkPhoenixFeather"
     },
     {
       "number": 68,
@@ -815,7 +830,8 @@
       "ground": {
         "rotation": [0, 0, -135],
         "scale": 0.6
-      }
+      },
+      "renderStyle": "abyssalEye"
     },
     {
       "number": 70,
@@ -830,7 +846,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.6
-      }
+      },
+      "renderStyle": "elitePotion"
     },
     {
       "number": 71,
@@ -845,7 +862,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.6
-      }
+      },
+      "renderStyle": "elitePotion"
     },
     {
       "number": 72,
@@ -859,7 +877,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 73,
@@ -873,7 +892,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 74,
@@ -887,7 +907,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 75,
@@ -901,7 +922,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 76,
@@ -915,7 +937,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 77,
@@ -929,7 +952,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 78,
@@ -943,7 +967,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 79,
@@ -957,7 +982,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 80,
@@ -971,7 +997,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 81,
@@ -985,7 +1012,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 82,
@@ -999,7 +1027,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 83,
@@ -1014,7 +1043,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket"
     },
     {
       "number": 84,
@@ -1029,7 +1059,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.8
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 85,
@@ -1044,7 +1075,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.9
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 86,
@@ -1059,7 +1091,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 87,
@@ -1074,7 +1107,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 1.3
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 88,
@@ -1089,7 +1123,8 @@
       "ground": {
         "rotation": [180, 180, -45],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 89,
@@ -1104,7 +1139,8 @@
       "ground": {
         "rotation": [30, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 90,
@@ -1119,7 +1155,8 @@
       "ground": {
         "rotation": [30, 0, 90],
         "scale": 0.7
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 91,
@@ -1134,7 +1171,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "summonerCharacterCard"
     },
     {
       "number": 92,
@@ -1148,7 +1186,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "chaosCardGold"
     },
     {
       "number": 93,
@@ -1162,7 +1201,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "chaosCardRare"
     },
     {
       "number": 94,
@@ -1177,7 +1217,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.6
-      }
+      },
+      "renderStyle": "texturedAllMeshes"
     },
     {
       "number": 95,
@@ -1191,7 +1232,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "chaosCardMini"
     },
     {
       "number": 96,
@@ -1206,7 +1248,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.2
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 97,
@@ -1221,7 +1264,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 98,
@@ -1236,7 +1280,8 @@
       "ground": {
         "rotation": [0, 0, 90],
         "scale": 0.5
-      }
+      },
+      "renderStyle": "textured"
     },
     {
       "number": 99,
@@ -1265,7 +1310,8 @@
       "ground": {
         "rotation": [180, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "luckyCoin"
     },
     {
       "number": 101,
@@ -1406,7 +1452,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh0"
     },
     {
       "number": 113,
@@ -1421,7 +1468,8 @@
       "ground": {
         "rotation": [270, 0, -45],
         "scale": 1
-      }
+      },
+      "renderStyle": "chromeMesh0"
     },
     {
       "number": 114,
@@ -1432,7 +1480,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "accountServiceItem"
     },
     {
       "number": 115,
@@ -1443,7 +1492,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "accountServiceItem"
     },
     {
       "number": 116,
@@ -1454,7 +1504,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "accountServiceItem"
     },
     {
       "number": 117,
@@ -1465,7 +1516,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "accountServiceItem"
     },
     {
       "number": 118,
@@ -1476,7 +1528,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "accountServiceItem"
     },
     {
       "number": 119,
@@ -1487,7 +1540,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "accountServiceItem"
     },
     {
       "number": 120,
@@ -1498,7 +1552,8 @@
         "offset": [0.01, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "chromeMesh0"
     },
     {
       "number": 121,
@@ -1507,7 +1562,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "sealedBox"
     },
     {
       "number": 122,
@@ -1516,7 +1572,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "sealedBox"
     },
     {
       "number": 123,
@@ -1525,7 +1582,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "goldenOrSilverBox"
     },
     {
       "number": 124,
@@ -1534,7 +1592,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "goldenOrSilverBox"
     },
     {
       "number": 126,
@@ -1545,7 +1604,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "dayPass"
     },
     {
       "number": 127,
@@ -1556,7 +1616,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "dayPass"
     },
     {
       "number": 128,
@@ -1567,7 +1628,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "dayPass"
     },
     {
       "number": 129,
@@ -1578,7 +1640,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "dayPass"
     },
     {
       "number": 130,
@@ -1589,7 +1652,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "hourPass"
     },
     {
       "number": 131,
@@ -1600,7 +1664,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "hourPass"
     },
     {
       "number": 132,
@@ -1611,7 +1676,8 @@
         "offset": [0, 0.06],
         "rotation": [270, 0, 0],
         "scale": 0.0038
-      }
+      },
+      "renderStyle": "hourPass"
     },
     {
       "number": 133,
@@ -1637,7 +1703,8 @@
         "offset": [0, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "packageBoxA"
     },
     {
       "number": 135,
@@ -1648,7 +1715,8 @@
         "offset": [0, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "packageBoxB"
     },
     {
       "number": 136,
@@ -1659,7 +1727,8 @@
         "offset": [0, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "packageBoxC"
     },
     {
       "number": 137,
@@ -1670,7 +1739,8 @@
         "offset": [0, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "packageBoxD"
     },
     {
       "number": 138,
@@ -1681,7 +1751,8 @@
         "offset": [0, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "packageBoxE"
     },
     {
       "number": 139,
@@ -1692,7 +1763,8 @@
         "offset": [0, 0.05],
         "rotation": [270, 0, 0],
         "scale": 0.005
-      }
+      },
+      "renderStyle": "packageBoxF"
     },
     {
       "number": 140,
@@ -1716,7 +1788,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "jewelryCase"
     },
     {
       "number": 142,
@@ -1725,7 +1798,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "jewelryCase"
     },
     {
       "number": 143,
@@ -1734,7 +1808,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "jewelryCase"
     },
     {
       "number": 144,
@@ -1743,7 +1818,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "renderStyle": "jewelryCase"
     },
     {
       "number": 145,
@@ -1758,7 +1834,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket7"
     },
     {
       "number": 146,
@@ -1773,7 +1850,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket8"
     },
     {
       "number": 147,
@@ -1788,7 +1866,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket9"
     },
     {
       "number": 148,
@@ -1803,7 +1882,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket10"
     },
     {
       "number": 149,
@@ -1818,7 +1898,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket11"
     },
     {
       "number": 150,
@@ -1833,7 +1914,8 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.3
-      }
+      },
+      "renderStyle": "rareItemTicket12"
     },
     {
       "number": 160,

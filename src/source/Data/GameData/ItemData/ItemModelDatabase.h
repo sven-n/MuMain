@@ -54,10 +54,18 @@ public:
         return m_modelCount;
     }
 
+    // Counts the builds; tables taken from the models (e.g. the render
+    // styles) take them again when it changes.
+    int GetVersion() const
+    {
+        return m_version;
+    }
+
 private:
     std::vector<ItemModelDefinition> m_models;
     std::vector<ItemGlowColors> m_glowColors;
     int m_modelCount = 0;
+    int m_version = 0;
 };
 } // namespace Data::Items
 

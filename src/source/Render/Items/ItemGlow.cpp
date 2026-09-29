@@ -3,10 +3,10 @@
 #include "ItemGlow.h"
 #include "ItemDisplay.h"
 #include "ItemModelLookup.h"
+#include "ItemRenderStyles.h"
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
-#include "GameLogic/Social/MonkSystem.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -55,7 +55,7 @@ bool IsPhoenixSoulInventoryModel(int modelType)
     return modelType == MODEL_ARMORINVEN_74;
 }
 
-void RenderPhoenixSoulInventoryMesh(BMD* b, OBJECT* o, int renderType, float alpha, int draws)
+void RenderPhoenixSoulInventoryMesh(BMD* b, OBJECT* o, float alpha, int renderType, int draws)
 {
     for (int draw = 0; draw < draws; ++draw)
     {
@@ -72,7 +72,7 @@ const Colors& GetItemColors(int itemType)
     return colors != nullptr ? *colors : OtherModelColors;
 }
 
-void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, int renderType, float alpha, int texture)
+void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, float alpha, int renderType, int texture)
 {
     if (!meshes.only.empty())
     {
@@ -91,7 +91,7 @@ void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, int renderTyp
 
 const ItemGlow& Get(int modelType)
 {
-    const ItemModelDefinition* model = FindItemModel(modelType);
+    const ItemModelDefinition* model = g_ItemModelDatabase.Find(GetItemTypeOfModel(modelType));
     return model != nullptr ? model->glow : DefaultGlow;
 }
 
@@ -101,12 +101,7 @@ const Colors& GetColors(int modelType)
     {
         return GetItemColors(*item);
     }
-    // The second models of the Rage Fighter gloves.
-    if (g_CMonkSystem.IsSubItemModel(modelType))
-    {
-        return GetItemColors(g_CMonkSystem.EqualItemModelType(modelType) - MODEL_ITEM);
-    }
-    return GetItemColors(modelType - MODEL_ITEM);
+    return GetItemColors(GetItemTypeOfModel(modelType));
 }
 
 int GetLevel(int modelType, int level)
@@ -150,32 +145,36 @@ bool HasExcellentGlow(int modelType)
     return Get(modelType).excellent;
 }
 
-void RenderGlow(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture)
+void RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
 {
+    if (Styles::RenderGlow(b, o, modelType, alpha, renderType, texture))
+    {
+        return;
+    }
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, renderType, alpha,
+        RenderPhoenixSoulInventoryMesh(b, o, alpha, renderType,
                                        (renderType & RENDER_METAL) ? PhoenixSoulInventoryMetalDraws : 1);
         return;
     }
-    RenderMeshes(b, o, Get(modelType).meshes, renderType, alpha, texture);
+    RenderMeshes(b, o, Get(modelType).meshes, alpha, renderType, texture);
 }
 
-void RenderShine(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture)
+void RenderShine(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
 {
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, renderType, alpha, 1);
+        RenderPhoenixSoulInventoryMesh(b, o, alpha, renderType, 1);
         return;
     }
-    RenderMeshes(b, o, Get(modelType).shineMeshes, renderType, alpha, texture);
+    RenderMeshes(b, o, Get(modelType).shineMeshes, alpha, renderType, texture);
 }
 
 void RenderExcellentGlow(BMD* b, OBJECT* o, int modelType, float alpha)
 {
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, ExcellentGlowRenderType, alpha, 1);
+        RenderPhoenixSoulInventoryMesh(b, o, alpha, ExcellentGlowRenderType, 1);
         return;
     }
 
