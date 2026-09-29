@@ -120,6 +120,28 @@ int SendAll(SOCKET handle, std::string_view payload)
     return ::send(handle, payload.data(), static_cast<int>(payload.size()), 0);
 }
 
+// A test that writes more than the socket buffer holds, from the same thread
+// that reads it, needs a client that never blocks: a blocking send() waits
+// for a read that cannot start. macOS gives an AF_UNIX stream 8 KiB by
+// default, less than one of the chunks these tests write.
+bool MakeNonBlocking(SOCKET handle)
+{
+    u_long nonBlocking = 1;
+    return ioctlsocket(handle, FIONBIO, &nonBlocking) != SOCKET_ERROR;
+}
+
+// Bytes a non-blocking client's send() took: 0 while the socket buffer is
+// full, until the connection reads from it; -1 when the socket failed.
+int SendWhatFits(SOCKET handle, std::string_view payload)
+{
+    const int sent = SendAll(handle, payload);
+    if (sent < 0 && WSAGetLastError() == WSAEWOULDBLOCK)
+    {
+        return 0;
+    }
+    return sent;
+}
+
 // The listener is non-blocking, so a connection may not be queued yet when
 // Accept() is first called; poll briefly instead of sleeping a fixed time.
 std::unique_ptr<Core::Platform::LocalSocketConnection> AcceptWithin(Core::Platform::LocalSocketListener& listener,
@@ -139,7 +161,8 @@ std::unique_ptr<Core::Platform::LocalSocketConnection> AcceptWithin(Core::Platfo
 
 // Pushes a payload in through chunks, buffering each one on the connection
 // without draining lines: how a pipelining script and the frame loop that
-// only serves a few requests per frame interleave.
+// only serves a few requests per frame interleave. The client must be
+// non-blocking (MakeNonBlocking).
 bool BufferInto(SOCKET client, Core::Platform::LocalSocketConnection& connection, std::string_view payload)
 {
     constexpr std::size_t ChunkBytes = 16 * 1024;
@@ -147,8 +170,8 @@ bool BufferInto(SOCKET client, Core::Platform::LocalSocketConnection& connection
     while (offset < payload.size())
     {
         const std::size_t size = std::min(ChunkBytes, payload.size() - offset);
-        const int sent = SendAll(client, payload.substr(offset, size));
-        if (sent <= 0)
+        const int sent = SendWhatFits(client, payload.substr(offset, size));
+        if (sent < 0)
         {
             return false;
         }
@@ -469,6 +492,7 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
 
     const SOCKET client = ConnectTo(path);
     REQUIRE(client != INVALID_SOCKET);
+    REQUIRE(MakeNonBlocking(client));
     auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
     REQUIRE(connection != nullptr);
 
@@ -495,8 +519,8 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     while (offset < batch.size())
     {
         const std::size_t size = std::min(ChunkBytes, batch.size() - offset);
-        const int sent = SendAll(client, batch.substr(offset, size));
-        REQUIRE(sent > 0);
+        const int sent = SendWhatFits(client, batch.substr(offset, size));
+        REQUIRE(sent >= 0);
         offset += static_cast<std::size_t>(sent);
         REQUIRE(connection->ReadAvailable());
         while (connection->TakeLine(line))
@@ -530,6 +554,7 @@ TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-so
 
     const SOCKET client = ConnectTo(path);
     REQUIRE(client != INVALID_SOCKET);
+    REQUIRE(MakeNonBlocking(client));
     auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
     REQUIRE(connection != nullptr);
 
@@ -554,8 +579,8 @@ TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-so
     while (offset < batch.size())
     {
         const std::size_t size = std::min(ChunkBytes, batch.size() - offset);
-        const int sent = SendAll(client, batch.substr(offset, size));
-        REQUIRE(sent > 0);
+        const int sent = SendWhatFits(client, batch.substr(offset, size));
+        REQUIRE(sent >= 0);
         offset += static_cast<std::size_t>(sent);
 
         REQUIRE(connection->ReadAvailable());
