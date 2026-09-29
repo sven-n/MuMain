@@ -6501,8 +6501,8 @@ void MoveCharactersClient()
     MoveBlurs();
 }
 
-// TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — active-character count and
-// which animation path was taken this tick, read by the debug HUD (SceneManager.cpp).
+// Active-character count and which animation path this tick took (worker thread pool or
+// the main thread), shown as "Characters animated" by the $details overlay (SceneManager.cpp).
 size_t g_LastActiveCharacterCount = 0;
 bool g_LastAnimationWasParallel = false;
 
@@ -6522,6 +6522,7 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     }
 
     g_LastActiveCharacterCount = activeChars.size();
+    g_LastAnimationWasParallel = false;
 
     if (activeChars.empty()) return;
 

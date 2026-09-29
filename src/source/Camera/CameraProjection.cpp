@@ -3,6 +3,7 @@
 #include "CameraState.h"
 #include "CameraConfig.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "UI/Scaling/UITransform.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -11,6 +12,7 @@ extern int OpenglWindowX;
 extern int OpenglWindowY;
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
+extern EGameScene SceneFlag;
 
 // Actual viewport dimensions (distinct from OpenglWindowWidth/Height which are full window)
 static int s_ViewportWidth = 0;
@@ -34,6 +36,13 @@ void CameraProjection::SetupPerspective(CameraState& state, float fov, float asp
     float fovRad = fov * 0.5f * Q_PI / 180.0f;
     state.PerspectiveX = tanf(fovRad) / (float)(vpWidth / 2) * aspect;
     state.PerspectiveY = tanf(fovRad) / (float)(vpHeight / 2);
+}
+
+float CameraProjection::WorldAspectRatio()
+{
+    if (SceneFlag == MAIN_SCENE)
+        return UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    return static_cast<float>(WindowWidth) / WindowHeight;
 }
 
 void CameraProjection::SetViewport(int x, int y, int width, int height)

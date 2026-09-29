@@ -33,6 +33,7 @@
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include <SDL3/SDL.h>
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -1537,9 +1538,19 @@ MSG MainLoop()
 
                 RequestDiagnosticFrameCapture();
                 ApplyPendingVSyncPreference();
-                mu::GetRenderer().BeginFrame();
+                // Present in $glstats: the frame boundary, where a VSync or GPU wait shows up
+                // (the swapchain acquire in BeginFrame(), submit and present in EndFrame()).
+                // RenderScene() reads and resets the profiler, so it shows the last EndFrame()
+                // together with this BeginFrame().
+                {
+                    FRAME_PROFILE(Present);
+                    mu::GetRenderer().BeginFrame();
+                }
                 RenderScene(g_hDC);
-                mu::GetRenderer().EndFrame();
+                {
+                    FRAME_PROFILE(Present);
+                    mu::GetRenderer().EndFrame();
+                }
                 ConsumeDiagnosticFrameCapture();
             }
         }

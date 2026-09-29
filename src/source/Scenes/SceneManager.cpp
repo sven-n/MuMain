@@ -8,6 +8,8 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <cmath>
+#include <iterator>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -51,7 +53,8 @@ FrameTimingState g_frameTiming;
 #include "App/Platform/Windows/Winmain.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
-#include "Camera/OrbitalCamera.h"
+#include "Camera/CameraProjection.h"
+#include "Scenes/SceneNames.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -98,6 +101,10 @@ static bool g_bShowFpsCounter = false;
 
 void SetShowDebugInfo(bool enabled)
 {
+    // The statistics only sample while the overlay draws: restart them, or the first frame
+    // would count all the time the overlay was off as one slow frame.
+    if (enabled && !g_bShowDebugInfo)
+        ResetFrameStats();
     g_bShowDebugInfo = enabled;
     if (enabled) g_bShowFpsCounter = false;
 }
@@ -682,26 +689,28 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
 }
 
 /**
- * @brief Renders one $details line and moves @p y down to the next one.
+ * @brief Renders one overlay line at @p x and moves @p y down to the next one.
  */
-static void RenderDebugLine(int& y, const wchar_t* text)
+static void RenderDebugLine(float x, int& y, const wchar_t* text)
 {
-    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, text);
+    g_pRenderText->RenderText(static_cast<int>(x), y, text);
     y += DEBUG_TEXT_LINE_HEIGHT;
 }
 
-static const char* SceneName(EGameScene scene)
+/**
+ * @brief Restarts the frame statistics when the scene changes.
+ *
+ * Loading screens never reach the overlay, so the first frame of a new scene would otherwise
+ * count the whole load as one slow frame; the previous scene's frames say nothing about this one.
+ */
+static void RestartFrameStatsOnSceneChange()
 {
-    switch (scene)
-    {
-    case SERVER_LIST_SCENE: return "Server list";
-    case WEBZEN_SCENE:      return "Intro";
-    case LOG_IN_SCENE:      return "Login";
-    case LOADING_SCENE:     return "Loading";
-    case CHARACTER_SCENE:   return "Character select";
-    case MAIN_SCENE:        return "In game";
-    default:                return "Unknown";
-    }
+    static EGameScene s_statsScene = SceneFlag;
+    if (SceneFlag == s_statsScene)
+        return;
+
+    ResetFrameStats();
+    s_statsScene = SceneFlag;
 }
 
 /**
@@ -710,20 +719,20 @@ static const char* SceneName(EGameScene scene)
 static void RenderPerformanceLines(int& y)
 {
     wchar_t szLine[128];
-    mu_swprintf(szLine, L"FPS: %.1f now, %.1f average, %.0f peak", FPS_AVG, s_avgFps, s_highestFps);
-    RenderDebugLine(y, szLine);
+    mu_swprintf(szLine, L"FPS: %.1f recent, %.1f average, %.0f peak", FPS_AVG, s_avgFps, s_highestFps);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     mu_swprintf(szLine, L"Slowest 1%%: %.1f FPS   Slowest frame: %.1f FPS", s_onePercentLow, s_slowestFrameFps);
-    RenderDebugLine(y, szLine);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     const float averageFrameMs = (s_avgFps > 0.0f) ? MS_PER_SECOND / s_avgFps : 0.0f;
-    mu_swprintf(szLine, L"Average frame: %.2f ms   VSync: %hs   CPU: %.1f%%",
-        averageFrameMs, IsVSyncEnabled() ? "on" : "off", CPU_AVG);
-    RenderDebugLine(y, szLine);
+    mu_swprintf(szLine, L"Average frame: %.2f ms   VSync: %hs   CPU: %.1f%%", averageFrameMs,
+                IsVSyncEnabled() ? "on" : "off", CPU_AVG);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     mu_swprintf(szLine, L"Last %d frames: %.0f+ FPS green, %.0f+ yellow", FRAME_HISTORY_SIZE,
-        MS_PER_SECOND / THRESHOLD_60FPS_MS, MS_PER_SECOND / THRESHOLD_40FPS_MS);
-    RenderDebugLine(y, szLine);
+                MS_PER_SECOND / THRESHOLD_60FPS_MS, MS_PER_SECOND / THRESHOLD_40FPS_MS);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     const float graphY = (float)y + DEBUG_GRAPH_Y_OFFSET;
     RenderFrameGraph(DEBUG_TEXT_X, graphY, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
@@ -736,15 +745,15 @@ static void RenderPerformanceLines(int& y)
 static void RenderSceneLines(int& y)
 {
     wchar_t szLine[128];
-    mu_swprintf(szLine, L"Scene: %hs", SceneName(SceneFlag));
-    RenderDebugLine(y, szLine);
+    mu_swprintf(szLine, L"Scene: %hs", Scenes::NamesOf(SceneFlag).displayName);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
-    mu_swprintf(szLine, L"Mouse: %d, %d, left button %hs", MouseX, MouseY, MouseLButtonPush ? "down" : "up");
-    RenderDebugLine(y, szLine);
+    mu_swprintf(szLine, L"Mouse: %d, %d, left button %hs", MouseX, MouseY, MouseLButton ? "down" : "up");
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     mu_swprintf(szLine, L"Characters animated: %d, on %hs", (int)g_LastActiveCharacterCount,
-        g_LastAnimationWasParallel ? "worker threads" : "the main thread");
-    RenderDebugLine(y, szLine);
+                g_LastAnimationWasParallel ? "worker threads" : "the main thread");
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 }
 
 /**
@@ -755,33 +764,35 @@ static void RenderCameraLines(int& y)
     const CameraManager& cameraManager = CameraManager::Instance();
     wchar_t szLine[128];
     mu_swprintf(szLine, L"Camera: %hs (F9 switches)", CameraModeToString(cameraManager.GetCurrentMode()));
-    RenderDebugLine(y, szLine);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     const ICamera* camera = cameraManager.GetActiveCamera();
     if (camera == nullptr)
         return;
 
     const CameraConfig& config = camera->GetConfig();
-    mu_swprintf(szLine, L"Field of view: %.1f horizontal, %.1f vertical", config.hFov, g_Camera.FOV);
-    RenderDebugLine(y, szLine);
+    // config.hFov is the width at the 4:3 reference aspect; wider windows see more to the sides.
+    const float shownHorizontalFov = VFovToHFov(g_Camera.FOV, CameraProjection::WorldAspectRatio());
+    mu_swprintf(szLine, L"Field of view: %.1f wide, %.1f tall (%.1f at 4:3)", shownHorizontalFov, g_Camera.FOV,
+                config.hFov);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
-    mu_swprintf(szLine, L"Camera angle: x %.1f, y %.1f, z %.1f",
-        g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
-    RenderDebugLine(y, szLine);
+    mu_swprintf(szLine, L"Camera angle: x %.1f, y %.1f, z %.1f", g_Camera.Angle[0], g_Camera.Angle[1],
+                g_Camera.Angle[2]);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     mu_swprintf(szLine, L"View distance: %.0f   Terrain range: %.0f", g_Camera.ViewFar, config.terrainCullRange);
-    RenderDebugLine(y, szLine);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
-    mu_swprintf(szLine, L"Culling planes: near %.0f, far %.0f", config.nearPlane, config.farPlane);
-    RenderDebugLine(y, szLine);
+    // In game the cameras draw as far as they cull; the login screen draws less than it culls.
+    if (std::lround(config.farPlane) == std::lround(g_Camera.ViewFar))
+        mu_swprintf(szLine, L"Culling planes: near %.0f, far = view distance", config.nearPlane);
+    else
+        mu_swprintf(szLine, L"Culling planes: near %.0f, far %.0f", config.nearPlane, config.farPlane);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
-    const auto* orbital = dynamic_cast<const OrbitalCamera*>(camera);
-    if (orbital == nullptr)
-        return;
-
-    mu_swprintf(szLine, L"Orbit: distance %.0f, turned yaw %.1f, pitch %.1f",
-        orbital->GetRadius(), orbital->GetDeltaYaw(), orbital->GetDeltaPitch());
-    RenderDebugLine(y, szLine);
+    if (camera->DescribeState(szLine, std::size(szLine)))
+        RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 }
 
 /**
@@ -825,12 +836,12 @@ static void RenderBuildLines(int& y)
     wchar_t szLine[128];
     mu_swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
              kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
-    RenderDebugLine(y, szLine);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 
     // Runtime OS name and version (compile-time arch above doesn't capture which
     // OS build the binary is actually running on).
     mu_swprintf(szLine, L"OS: %ls", Core::Platform::GetOSVersionString().c_str());
-    RenderDebugLine(y, szLine);
+    RenderDebugLine(DEBUG_TEXT_X, y, szLine);
 }
 
 /**
@@ -843,6 +854,7 @@ static void RenderDebugInfo()
     if (!g_bShowDebugInfo)
         return;
 
+    RestartFrameStatsOnSceneChange();
     UpdateFrameStats();
 
     BeginBitmap();
@@ -886,17 +898,17 @@ static void RenderGLStats()
     using Pass = FrameProfiler::Pass;
     // The rows after Other are CPU-only: CharWait (waiting on the animation thread pool) and
     // Skinning (BMD::Transform) are nested inside Chars/Objects/Items, not additive with them;
-    // MoveFx/MovePart are the update-phase effect/particle simulation; Present is the previous
-    // frame's swap, so a large value points at a GPU stall.
+    // MoveFx/MovePart are the update-phase effect/particle simulation; Present is the frame
+    // boundary (Winmain.cpp), so a large value points at a VSync or GPU wait.
     static constexpr Pass kRows[] = {
-        Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
-        Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
-        Pass::CharWait, Pass::Skinning, Pass::MoveEffects, Pass::MoveParticles, Pass::Present,
+        Pass::Terrain,  Pass::Objects,     Pass::Characters,    Pass::Items,
+        Pass::Effects,  Pass::Sprites,     Pass::Particles,     Pass::Joints,
+        Pass::UI,       Pass::Overlay,     Pass::Other,         Pass::CharWait,
+        Pass::Skinning, Pass::MoveEffects, Pass::MoveParticles, Pass::Present,
     };
 
     mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     for (Pass pass : kRows)
     {
@@ -906,55 +918,46 @@ static void RenderGLStats()
                     FrameProfiler::AccumulatorMs(pass), FrameProfiler::CounterValue(pass, Counter::DrawCalls),
                     FrameProfiler::CounterValue(pass, Counter::MergedDraws),
                     FrameProfiler::CounterValue(pass, Counter::Merged2DDraws), vertexKilobytes);
-        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-        y += DEBUG_TEXT_LINE_HEIGHT;
+        RenderDebugLine(x, y, szLine);
     }
 
     const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
     mu_swprintf(szLine, L"SDL GPU: %hs", mu::GetRenderer().GetGPUDriverName());
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u 2D:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
                 stats.submittedDrawCalls, stats.mergedDrawCalls, stats.merged2DDrawCalls, stats.commandCount,
                 stats.vertexBytes / 1024);
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(szLine, L"CPU frame:%5.2f replay:%5.2f submit:%5.2f ms", stats.frameMilliseconds,
                 stats.replayMilliseconds, stats.submitMilliseconds);
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(szLine, L"Textures upload:%u create:%u release:%u", stats.textureUploads, stats.textureCreates,
                 stats.textureReleases);
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(szLine, L"Bind Pipe:%u Samp:%u VU:%u FU:%u", stats.pipelineBinds, stats.samplerBinds,
                 stats.vertexUniformPushes, stats.fragmentUniformPushes);
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(szLine, L"2D Merge:%u Glyph upload:%u", stats.merged2DDrawCalls,
                 FrameProfiler::CounterValue(Counter::GlyphUploads));
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(szLine, L"Skin GPU:%u CPU-ineligible:%u Failed:%u",
                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     const auto batchDraws = FrameProfiler::CounterValue(Counter::BatchDraws);
     const auto batchVertices = FrameProfiler::CounterValue(Counter::BatchVertices);
     const float verticesPerBatch =
         batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.0f;
     mu_swprintf(szLine, L"Batch Draw:%u Vtx:%u Vtx/Draw:%.1f", batchDraws, batchVertices, verticesPerBatch);
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     mu_swprintf(
         szLine, L"Break Tex:%u Blend:%u Depth:%u Prog:%u Uni:%u Mtx:%u Draw:%u Other:%u",
@@ -962,8 +965,7 @@ static void RenderGLStats()
         FrameProfiler::CounterValue(Counter::BatchBreakDepth), FrameProfiler::CounterValue(Counter::BatchBreakProgram),
         FrameProfiler::CounterValue(Counter::BatchBreakUniform), FrameProfiler::CounterValue(Counter::BatchBreakMatrix),
         FrameProfiler::CounterValue(Counter::BatchBreakDraw), FrameProfiler::CounterValue(Counter::BatchBreakOther));
-    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-    y += DEBUG_TEXT_LINE_HEIGHT;
+    RenderDebugLine(x, y, szLine);
 
     static constexpr Pass kBatchRows[] = {Pass::Sprites, Pass::Particles, Pass::Joints, Pass::UI};
     for (Pass pass : kBatchRows)
@@ -981,8 +983,7 @@ static void RenderGLStats()
                     FrameProfiler::CounterValue(pass, Counter::BatchBreakTexture),
                     FrameProfiler::CounterValue(pass, Counter::BatchBreakBlend),
                     FrameProfiler::CounterValue(pass, Counter::BatchBreakDraw));
-        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
-        y += DEBUG_TEXT_LINE_HEIGHT;
+        RenderDebugLine(x, y, szLine);
     }
 
     g_pRenderText->SetFont(g_hFont);

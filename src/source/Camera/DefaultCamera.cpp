@@ -22,7 +22,6 @@
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "UI/Scaling/UITransform.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/Legacy/UIManager.h"
@@ -89,13 +88,6 @@ namespace
     };
     constexpr int PLAYER_ZOOM_LEVEL_DEFAULT = 3;
     constexpr int PLAYER_ZOOM_LEVEL_COUNT   = static_cast<int>(std::size(PLAYER_ZOOM_LADDER));
-
-    float CurrentViewportAspect()
-    {
-        if (SceneFlag == MAIN_SCENE)
-            return UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
-        return static_cast<float>(WindowWidth) / WindowHeight;
-    }
 }
 
 DefaultCamera::DefaultCamera(CameraState& state)
@@ -885,7 +877,7 @@ void DefaultCamera::UpdateFrustum()
     VectorNormalize(up);
 
     // Build frustum from current configuration
-    const float aspectRatio = CurrentViewportAspect();
+    const float aspectRatio = CameraProjection::WorldAspectRatio();
 
     // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
     // (Override was already applied at the top of this function.)
@@ -960,7 +952,7 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     // Check aspect ratio change (window resize / runtime resolution switch).
     // Frustum width depends on aspect; without this the cache would stay valid
     // through a resize and culling at the screen edges would go stale.
-    const float aspectRatio = CurrentViewportAspect();
+    const float aspectRatio = CameraProjection::WorldAspectRatio();
     if (fabs(aspectRatio - m_FrustumCache.AspectRatio) > EPSILON)
     {
         return true;

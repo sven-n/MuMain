@@ -8,6 +8,7 @@
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/SceneNames.h"
 #include "UI/Legacy/UIControls.h"
 
 #include "MuGitCommit.h"
@@ -378,22 +379,7 @@ namespace App::Control::Commands
 {
 std::string_view CurrentSceneName()
 {
-    switch (SceneFlag)
-    {
-    case SERVER_LIST_SCENE:
-        return "server_list";
-    case WEBZEN_SCENE:
-        return "webzen";
-    case LOG_IN_SCENE:
-        return "login";
-    case LOADING_SCENE:
-        return "loading";
-    case CHARACTER_SCENE:
-        return "character_list";
-    case MAIN_SCENE:
-        return "world";
-    }
-    return "unknown";
+    return Scenes::NamesOf(SceneFlag).id;
 }
 
 void SetBuildIdentifier(std::string identifier)

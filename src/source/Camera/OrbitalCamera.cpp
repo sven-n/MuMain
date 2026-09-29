@@ -7,7 +7,6 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include <cmath>
 
-#include "UI/Legacy/UIControls.h"
 #include "UI/Scaling/UITransform.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "CameraDebugLog.h"
@@ -457,6 +456,12 @@ bool OrbitalCamera::Update()
     }
 
     return false; // Camera not locked
+}
+
+bool OrbitalCamera::DescribeState(wchar_t* text, std::size_t textSize) const
+{
+    swprintf(text, textSize, L"Orbit: distance %.0f, turned yaw %.1f, pitch %.1f", m_Radius, m_DeltaYaw, m_DeltaPitch);
+    return true;
 }
 
 void OrbitalCamera::HandleInput()
