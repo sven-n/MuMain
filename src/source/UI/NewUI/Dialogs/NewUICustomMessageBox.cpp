@@ -2451,7 +2451,11 @@ bool SEASON3B::CBloodCastleResultMsgBox::Create(float fPriority)
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
     y = 100;
     width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
+    // A result sentence which wraps to more lines than usual needs more rows.
+    const int extraHeight = matchEvent::GetResultExtraHeight();
+    m_nMiddleCount = static_cast<int>(MIDDLE_COUNT) + (extraHeight + static_cast<int>(MSGBOX_MIDDLE_HEIGHT) - 1) /
+                                                          static_cast<int>(MSGBOX_MIDDLE_HEIGHT);
+    height = MSGBOX_TOP_HEIGHT + (m_nMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
     CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
@@ -2497,7 +2501,7 @@ void SEASON3B::CBloodCastleResultMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < MIDDLE_COUNT; ++i)
+    for (int i = 0; i < m_nMiddleCount; ++i)
     {
         RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
