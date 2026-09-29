@@ -60,7 +60,10 @@
 .s-bottom { height: 3px; decorator: image(gi-scroll-bottom); }
 .thumb { position: absolute; width: 15px; height: 30px; decorator: image(gi-thumb); }
 
-.line-box { position: absolute; background-color: #ffffff; }
+/* The original drew these boxes (officer rows, the selected row) without setting a colour, so they
+   took whatever the frame left: in practice the scroll bar's rgb(106, 97, 88), sometimes white,
+   which hid the member text. The grey-brown it normally shows, always (an original defect fixed). */
+.line-box { position: absolute; background-color: rgb(106, 97, 88); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
 .gi-text.centred { text-align: center; }

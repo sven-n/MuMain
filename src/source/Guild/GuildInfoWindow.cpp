@@ -806,8 +806,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             const float listWidth = static_cast<float>(m_GuildMember.GetWidth());
             const float lineWidth = listWidth - 13 + 1;
             // CUINewGuildMemberListBox::RenderDataLine(): the master, assistant and battle master
-            // lines and the selected line on a white box (shared finding GW1), the selected
-            // line's text black; the role centred on 70 units, the server number in (255, 196, 0).
+            // lines and the selected line on a box (its colour: guild_info.rcss .line-box), the
+            // selected line's text black; the role centred on 70 units, the server number in (255, 196, 0).
             m_GuildMember.ForEachRenderLine(
                 [&](int line, const GUILDLIST_TEXT& item, bool selected)
                 {
