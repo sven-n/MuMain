@@ -54,7 +54,8 @@ pattern later but are not part of this work.
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model. Phase 12 (level variants as items of their own) then shares models without loading them twice. |
-| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. |
+| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
+| D25 | Looks in data | Items keep referencing their looks by name (the render style and the effects; the glow colors already are names in data). What a named look is made of moves from code into data files in `Data/Effects/` (phase 13): a list of building blocks, namely draw passes (mesh or body, flags, texture, color, alpha, texture scrolling), things placed on bones (sprites, particles, lightning between two bones, effects), animated object values (glow mesh brightness, hidden mesh, texture scrolling), timing (pulses, random chances per frame) and conditions (item level, doppelganger, ...). The drawing code runs these lists; the item data written in phase 4 stays valid. A named look is shared: changing it changes every item that uses it, so the editor lists the items of a look and warns with that list before a change to a shared look is saved. The particle and effect types themselves (the particle system of `ZzzEffect`) become data as well, as a project with its own design document (phase 14). |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
@@ -378,7 +379,8 @@ table:
 | **Requirements** | Level and stat requirements, allowed classes. |
 | **Rules** | Flags as a matrix (items × tradable, droppable, storable, sellable, …) for bulk editing. |
 | **Categories** | Tag-centered view: pick a tag, see and change its items. |
-| **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24). |
+| **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
+| **Look editor** (phase 13) | Edits a named look (D25) as its list of building blocks, with a live preview of the model and its animations. Shows the skeleton with every bone's number and its name from the `.bmd` file, highlights the bones the look uses, and picks bones by clicking them instead of looking up numbers in the model file. Lists all items that use the look; saving a change to a look that other items share shows a warning with the list of those items. A new look starts as a copy of another. |
 | **Translations** | Items × languages grid, filter for missing translations. |
 | **OpenMU sync** | Import, diff and export of the exchange file. |
 
@@ -401,7 +403,7 @@ in both repos (as separate PRs, one per repo).
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
-| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9), including add/remove items. |
+| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9), including add/remove items; the looks of an item and the items that share a look (read only). |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
 | 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
@@ -411,7 +413,8 @@ in both repos (as separate PRs, one per repo).
 | 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
 | 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, 4d, A | Move items into new groups for the new client; level variants become items of their own; legacy ids for the original client (D21). |
 | D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
-| 13 | Cleanup | Client | MuMain | all | The glow of the Phoenix Soul inventory model, then remove this document. |
+| 13 | Looks in data | Client | MuMain | 4c, 6 | What the named render styles and effects are made of moves from code into `Data/Effects/` as building blocks (D25), with the look editor in MuEditor (preview, bones, the items that use a look). |
+| 14 | Cleanup | Client | MuMain | all | The glow of the Phoenix Soul inventory model, the follow-up design documents, then remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -583,8 +586,11 @@ server with original clients (after phases 6 and B).
        loaded their models); their recipe (textured, then
        `RENDER_BRIGHT | RENDER_CHROME2`) comes back as a style with their
        model entries.
-     - **4c3 Particle effects:** `effects` lists the particle effects of
-       `RenderPartObjectEffect` (about 80 item branches, 31 distinct).
+     - **4c3 Particle effects:** `effects` names the particle effects of
+       `RenderPartObjectEffect` (about 80 item branches, 31 distinct). Each
+       effect is named code, like the render styles; which values they
+       take (bones, colors, sizes) comes with phase 13, when what the named
+       looks are made of moves into data (D25).
 
    Verified like phase 3: one-time comparisons of the old and the new code
    (which files and texture folders are loaded for each model; the
@@ -621,6 +627,10 @@ server with original clients (after phases 6 and B).
    a filter for missing translations) and missing-translation warnings.
    The names themselves are part of phase 2 (D17).
 6. **Editors**: the MuEditor tools from section 9, including add/remove.
+   The model tool shows the looks of an item (glow, render style, effects)
+   and lists the items that share a look. It only reads the model data,
+   so it needs no change to the drawing code; the looks themselves are
+   edited from phase 13 on.
 7. **Item sync, client side**: MuEditor import/export of the item exchange
    file and diff.
 
@@ -740,7 +750,23 @@ server with original clients (after phases 6 and B).
       strength, command), the Orb of Summoning (which summon) and the
       Transformation Ring (which monster). The level chooses a kind, not a
       tier; to decide then.
-13. **Cleanup**, once the work has landed:
+13. **Looks in data** (D25): what the named render styles and effects are
+    made of moves from code into data files in `Data/Effects/`, as lists
+    of building blocks, one look at a time; the item data keeps naming
+    them. Particle and effect types are referenced by name and stay code
+    until their own design document. Effects place sprites and particles
+    on bones of the model, so they follow its animation. Bones are values
+    by number, as in the code: the names in the `.bmd` files are export
+    names that do not help to find a bone (of the 778 item model files,
+    340 have the biped skeleton with names like "Bip01 L Hand", 249 only
+    names like `Bone01`, `Box02` or `zx12`, and in 396 the bone called
+    "BoneNN" is not bone NN); the look editor shows numbers and names
+    together, and the model loader checks that the bones exist. The lists
+    are resolved when loading (textures, bones, particle types), so
+    drawing is not slower. Verified like phase 4c: every look draws and
+    spawns the same things with the same values as its code did, per item
+    and level. The look editor of section 9 comes with it.
+14. **Cleanup**, once the work has landed:
     - The glow of the inventory model of the Phoenix Soul Armor
       (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
       for an item that glows differently from its item: only on its first
@@ -749,6 +775,15 @@ server with original clients (after phases 6 and B).
       other inventory models (probably a copy-paste leftover; to keep or to
       drop then). Left for last because it only shows in the inventory and
       is easiest to check once everything else is in data.
+    - Follow-up design documents for what these phases leave in code,
+      written before this one is removed:
+      - the particle and effect system of `ZzzEffect` as data: the particle
+        and effect types with their behavior and values, so looks
+        (phase 13) can use new ones without code;
+      - the looks of monsters and NPCs as data: their glow (still the
+        colors of the drawing code), render styles and effects, including
+        the plate look of the helper NPCs (`helperNpcPlate`, which belongs
+        to the NPCs, not to the items) and the player transformations.
     - Remove this document.
 
 ## Open questions
