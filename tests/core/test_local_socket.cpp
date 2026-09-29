@@ -60,6 +60,11 @@ constexpr std::chrono::milliseconds StallTimeout{5000};
 // Pause between two polls of a socket that had nothing to offer.
 constexpr std::chrono::milliseconds PollInterval{2};
 
+// How long a writer has to stay held off before the pacing case takes the
+// connection as paused: a connection that is still reading lets it send
+// again on the very next pass.
+constexpr std::chrono::milliseconds PauseSettleTimeout{200};
+
 // Winsock has to be started before the first socket call; the shim makes both
 // calls no-ops on POSIX.
 void EnsureSocketLibrary()
@@ -651,22 +656,31 @@ TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-so
         batch += command;
     }
 
-    // Written in chunks with the reader and a consumer interleaved, the way
-    // the frame loop does it: the writer is never blocked out and nothing
-    // is dropped.
     const std::size_t lines = batch.size() / command.size();
-    const Delivery delivery = SendWhileServing(client, *connection, batch, Drain::Lines);
-    REQUIRE(delivery.bytesSent == batch.size());
-    const std::size_t taken =
-        delivery.linesTaken + TakeLinesWithin(*connection, lines - delivery.linesTaken, std::chrono::milliseconds(500));
 
-    // Everything sent arrived, in order, and the connection is still open:
-    // a fast writer is paced rather than dropped.
-    CHECK(taken == lines);
+    // Nothing is served at first, like a frame loop that has fallen behind.
+    // The connection reads up to the pause mark and stops there; the kernel
+    // buffer fills behind it and the writer is held off, not dropped.
+    const Delivery behind = SendWhileServing(client, *connection, batch, Drain::Nothing, PauseSettleTimeout);
     CHECK(connection->IsOpen());
+    REQUIRE(behind.bytesSent < batch.size());
 
-    // Draining makes room, and the connection is still there to read more.
-    REQUIRE(connection->ReadAvailable());
+    // What is buffered reached the pause mark, and stopped within one read
+    // of it.
+    const std::size_t pausedLines = TakeBufferedLines(*connection);
+    const std::size_t pausedBytes = pausedLines * command.size();
+    CHECK(pausedBytes >= Core::Platform::LocalSocketConnection::ReadPauseBytes);
+    CHECK(pausedBytes < Core::Platform::LocalSocketConnection::ReadPauseBytes +
+                            Core::Platform::LocalSocketConnection::ReadChunkBytes);
+
+    // Served again, it picks up where it paused: the rest of the batch goes
+    // out, every line arrives and the connection is still open.
+    const std::string_view rest = std::string_view(batch).substr(behind.bytesSent);
+    const Delivery caughtUp = SendWhileServing(client, *connection, rest, Drain::Lines);
+    REQUIRE(caughtUp.bytesSent == rest.size());
+    const std::size_t served = pausedLines + caughtUp.linesTaken;
+    const std::size_t taken = served + TakeLinesWithin(*connection, lines - served, std::chrono::milliseconds(500));
+    CHECK(taken == lines);
     CHECK(connection->IsOpen());
 
     closesocket(client.handle);
