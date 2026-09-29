@@ -70,11 +70,29 @@ namespace SEASON3B
         void ProcessOpening();
         bool ProcessClosing();
 
+        // For the control socket: the answers of the page on screen that a
+        // click acts on, the row each is clicked in (window-local, as
+        // UpdateSelTextMouseEvent hits them), and the Proceed and Close buttons.
+        int GetAnswerCount() const;
+        RECT GetAnswerRect(int answer);
+        // Proceed is drawn while the quest is in progress.
+        bool IsCompleteShown();
+        CNewUIButton& GetCompleteButton()
+        {
+            return m_btnComplete;
+        }
+        CNewUIButton& GetCloseButton()
+        {
+            return m_btnClose;
+        }
+
     private:
         void LoadImages();
         void UnloadImages();
 
         bool UpdateSelTextMouseEvent();
+        // The top of the first answer row.
+        int AnswerTop();
         void RenderBackImage();
         void RenderText();
         bool RenderItemMobText();

@@ -22,9 +22,11 @@ internal sealed class GameClient : IAsyncDisposable
     private readonly ControlConnection control;
     private readonly TimeSpan stepDelay;
 
-    private GameClient(string role, Process process, ControlConnection control, TimeSpan stepDelay)
+    private GameClient(string role, Process process, ControlConnection control, TimeSpan stepDelay, ClientOptions options)
     {
         this.Role = role;
+        this.ServerHost = options.ServerHost;
+        this.ServerPort = options.ServerPort;
         this.process = process;
         this.control = control;
         this.stepDelay = stepDelay;
@@ -35,6 +37,11 @@ internal sealed class GameClient : IAsyncDisposable
 
     /// <summary>The scenario's name for this client, e.g. "seller".</summary>
     public string Role { get; }
+
+    /// <summary>The game server the client logs in to.</summary>
+    public string ServerHost { get; }
+
+    public int ServerPort { get; }
 
     /// <summary>Starts a client and waits until its control socket answers.</summary>
     public static async Task<GameClient> StartAsync(ClientOptions options, string role, CancellationToken cancellationToken)
@@ -56,7 +63,7 @@ internal sealed class GameClient : IAsyncDisposable
         try
         {
             control = await ConnectAsync(socketPath, process, options.StartTimeout, cancellationToken);
-            var client = new GameClient(role, process, control, options.StepDelay);
+            var client = new GameClient(role, process, control, options.StepDelay, options);
             var ping = await client.SendAsync("ping");
             if (ping.TryGetProperty("commit", out var commit) && commit.GetString() is { } hash)
             {
@@ -115,12 +122,28 @@ internal sealed class GameClient : IAsyncDisposable
     /// <summary>The character and everything around it.</summary>
     public Task<JsonElement> StateAsync() => this.SendAsync("state");
 
+    /// <summary>The character's zen.</summary>
+    public async Task<long> ZenAsync() => (await this.StateAsync()).GetProperty("zen").GetInt64();
+
+    /// <summary>
+    /// How many items named <paramref name="name"/> the inventory holds. <c>state</c> lists an
+    /// item under every square it covers, so the squares are divided by the item's size.
+    /// </summary>
+    public async Task<int> CountAsync(string name)
+        => (int)Math.Round(ItemSlots.Of(await this.StateAsync(), "inventory")
+            .Where(item => item.Name == name)
+            .Sum(item => 1.0 / (item.Width * item.Height)));
+
     /// <summary>The names of the open windows.</summary>
     public async Task<IReadOnlyList<string>> OpenWindowsAsync()
     {
         var ui = await this.SendAsync("ui");
         return ui.GetProperty("windows").EnumerateArray().Select(window => window.GetString()!).ToList();
     }
+
+    /// <summary>Whether <c>ui</c> reports the element <paramref name="name"/>, i.e. it is shown now.</summary>
+    public async Task<bool> HasElementAsync(string name)
+        => (await this.SendAsync("ui")).GetProperty("elements").TryGetProperty(name, out _);
 
     /// <summary>Opens the inventory with its key, unless it is open already.</summary>
     public async Task OpenInventoryAsync()

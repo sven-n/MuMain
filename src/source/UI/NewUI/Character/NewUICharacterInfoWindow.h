@@ -79,7 +79,15 @@ namespace SEASON3B
         float GetLayerDepth();	//. 5.1f
         void OpenningProcess();
 
+        // A stat's "+" button (STAT_STRENGTH, ...), for the control socket;
+        // null while it is not shown: without level-up points, and the command
+        // button for anyone but a Dark Lord.
+        CNewUIButton* GetShownStatButton(int stat);
+
     private:
+        // The "+" buttons shown: strength, agility, vitality, energy, and
+        // command for a Dark Lord.
+        int StatButtonCount() const;
         void LoadImages();
         void UnloadImages();
         void ResetEquipmentLevel();

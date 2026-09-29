@@ -336,6 +336,52 @@ void RecordParty(std::string_view change, const wchar_t* name)
     Push("party", fields);
 }
 
+void RecordPartyResult(std::string_view result)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    json fields;
+    fields["change"] = "result";
+    fields["result"] = result;
+    Push("party", fields);
+}
+
+void RecordQuestChange(int quest, std::string_view state)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    json fields;
+    fields["change"] = "state";
+    fields["quest"] = quest;
+    fields["state"] = state;
+    Push("quest", fields);
+}
+
+void RecordQuestReward(std::string_view name, std::string_view reward, std::optional<int> amount, int characterClass)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    json fields;
+    fields["change"] = "reward";
+    fields["name"] = name;
+    fields["reward"] = reward;
+    if (amount)
+    {
+        fields["amount"] = *amount;
+    }
+    fields["class"] = characterClass;
+    Push("quest", fields);
+}
+
 void RecordTrade(std::string_view change, std::string_view name, std::string_view detail)
 {
     if (!IsEnabled())

@@ -95,6 +95,10 @@ namespace SEASON3B
         bool m_bRepairEnableLevel;
         bool m_bMyShopOpen;
 
+        // The repair and personal-shop buttons hide while a window that trades
+        // or stores items is open.
+        bool AreShopButtonsShown() const;
+
     public:
         CNewUIMyInventory();
         virtual ~CNewUIMyInventory();
@@ -115,6 +119,10 @@ namespace SEASON3B
         void ResetMouseLButton() override;
         int  FindEmptySlot(ITEM* pItem) const override;
         bool IsRepairEnableLevel() const override;
+        // The repair and personal-shop buttons, for the control socket; null
+        // while the button is not shown.
+        CNewUIButton* GetShownRepairButton();
+        CNewUIButton* GetShownMyShopButton();
 
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
         void DeleteItem(int iIndex) const;

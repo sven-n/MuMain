@@ -33,11 +33,21 @@ struct NamedWindow
 
 // The windows `ui` reports when they are open.
 constexpr NamedWindow Windows[] = {
-    {"inventory", SEASON3B::INTERFACE_INVENTORY},     {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
-    {"character", SEASON3B::INTERFACE_CHARACTER},     {"trade", SEASON3B::INTERFACE_TRADE},
-    {"storage", SEASON3B::INTERFACE_STORAGE},         {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
-    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},        {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
+    {"inventory", SEASON3B::INTERFACE_INVENTORY},
+    {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
+    {"character", SEASON3B::INTERFACE_CHARACTER},
+    {"trade", SEASON3B::INTERFACE_TRADE},
+    {"storage", SEASON3B::INTERFACE_STORAGE},
+    {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
+    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},
+    {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
     {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND},
+    {"chat_input", SEASON3B::INTERFACE_CHATINPUTBOX},
+    {"party", SEASON3B::INTERFACE_PARTY},
+    {"command", SEASON3B::INTERFACE_COMMAND},
+    {"my_shop", SEASON3B::INTERFACE_MYSHOP_INVENTORY},
+    {"purchase_shop", SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY},
+    {"npc_quest", SEASON3B::INTERFACE_NPCQUEST},
 };
 
 // A point of a window, from its window-local coordinates to window pixels.
@@ -65,6 +75,14 @@ json WindowRect(const CNewUIObj& window, const RECT& rect)
     return pixels;
 }
 
+// A button's rectangle in its window's coordinates.
+RECT ButtonRect(SEASON3B::CNewUIButton& button)
+{
+    const POINT& position = button.GetPos();
+    const POINT& size = button.GetSize();
+    return {position.x, position.y, position.x + size.x, position.y + size.y};
+}
+
 // Buttons a scenario presses with `click-ui`, by name.
 json Elements()
 {
@@ -73,6 +91,56 @@ json Elements()
     {
         elements["trade.confirm"] = WindowRect(*g_pTrade, g_pTrade->GetMyConfirmRect());
         elements["trade.zen"] = WindowRect(*g_pTrade, g_pTrade->GetZenButtonRect());
+    }
+    if (SEASON3B::CNewUIButton* repair = g_pMyInventory->GetShownRepairButton())
+    {
+        elements["inventory.repair"] = WindowRect(*g_pMyInventory, ButtonRect(*repair));
+    }
+    if (SEASON3B::CNewUIButton* myShop = g_pMyInventory->GetShownMyShopButton())
+    {
+        elements["inventory.my_shop"] = WindowRect(*g_pMyInventory, ButtonRect(*myShop));
+    }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
+    {
+        elements["my_shop.title"] = WindowRect(*g_pMyShopInventory, g_pMyShopInventory->GetTitleRect());
+        elements["my_shop.open"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetOpenButton()));
+        elements["my_shop.close"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetCloseButton()));
+    }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST))
+    {
+        for (int answer = 0; answer < g_pNPCQuest->GetAnswerCount(); ++answer)
+        {
+            elements["npc_quest.answer." + std::to_string(answer)] =
+                WindowRect(*g_pNPCQuest, g_pNPCQuest->GetAnswerRect(answer));
+        }
+        if (g_pNPCQuest->IsCompleteShown())
+        {
+            elements["npc_quest.complete"] = WindowRect(*g_pNPCQuest, ButtonRect(g_pNPCQuest->GetCompleteButton()));
+        }
+        elements["npc_quest.close"] = WindowRect(*g_pNPCQuest, ButtonRect(g_pNPCQuest->GetCloseButton()));
+    }
+    constexpr std::string_view StatNames[] = {"strength", "agility", "vitality", "energy", "command"};
+    for (int stat = 0; stat < static_cast<int>(std::size(StatNames)); ++stat)
+    {
+        if (SEASON3B::CNewUIButton* button = g_pCharacterInfoWindow->GetShownStatButton(stat))
+        {
+            elements["character.stat." + std::string(StatNames[stat])] =
+                WindowRect(*g_pCharacterInfoWindow, ButtonRect(*button));
+        }
+    }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
+    {
+        elements["command.trade"] =
+            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_TRADE)));
+        elements["command.purchase"] =
+            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PURCHASE)));
+        elements["command.party"] =
+            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PARTY)));
+    }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
+    {
+        elements["npc_shop.repair"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairButton()));
+        elements["npc_shop.repair_all"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairAllButton()));
     }
     return elements;
 }
@@ -125,13 +193,19 @@ std::optional<CNewUIInventoryCtrl*> NamedGrid(std::string_view name, int slot)
         return OpenGrid(SEASON3B::INTERFACE_STORAGE, g_pStorageInventory->GetInventoryCtrl());
     if (name == "mix")
         return OpenGrid(SEASON3B::INTERFACE_MIXINVENTORY, g_pMixInventory->GetInventoryCtrl());
+    if (name == "npc_shop")
+        return OpenGrid(SEASON3B::INTERFACE_NPCSHOP, g_pNPCShop->GetInventoryCtrl());
+    if (name == "my_shop")
+        return OpenGrid(SEASON3B::INTERFACE_MYSHOP_INVENTORY, g_pMyShopInventory->GetInventoryCtrl());
+    if (name == "purchase_shop")
+        return OpenGrid(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY, g_pPurchaseShopInventory->GetInventoryCtrl());
     return std::nullopt;
 }
 
 [[nodiscard]] bool IsKnownGrid(std::string_view name)
 {
     return name == "inventory" || name == "trade" || name == "trade_partner" || name == "storage" || name == "mix" ||
-           name == "equipment";
+           name == "npc_shop" || name == "my_shop" || name == "purchase_shop" || name == "equipment";
 }
 
 std::string SquarePixel(const Request& request, CNewUIInventoryCtrl& grid, int slot)
@@ -205,7 +279,8 @@ std::string SlotPixel(const Request& request, std::unique_ptr<Act>&)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "unknown `grid` `" + grid +
-                               "`; known: inventory, equipment, trade, trade_partner, storage, mix");
+                               "`; known: inventory, equipment, trade, trade_partner, storage, mix, npc_shop, my_shop, "
+                               "purchase_shop");
     }
     if (grid == "equipment")
     {

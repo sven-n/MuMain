@@ -18,7 +18,21 @@ internal static class Program
     public static readonly Scenario[] AllScenarios =
     [
         new TradeScenario(),
+        new TradeInventoryFullScenario(),
+        new ChatScenario(),
+        new PartyScenario(),
+        new PersonalShopScenario(),
+        new NpcShopScenario(),
+        new RepairScenario(),
         new IcarusFlyingItemTakeOffScenario(),
+        new EquipAllSlotsScenario(),
+        new QuestBladeKnightScenario(),
+        new QuestSoulMasterScenario(),
+        new QuestMuseElfScenario(),
+        new QuestHeroStatusScenario(museElf: false),
+        new QuestHeroStatusScenario(museElf: true),
+        new QuestComboScenario(),
+        new QuestEvidenceOfStrengthScenario(),
     ];
 
     // The window's file dialogs need a single-threaded apartment on Windows.

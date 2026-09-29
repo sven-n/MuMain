@@ -61,8 +61,21 @@ void RecordViewCleared(const char* reason);
 void RecordViewEnterKey(int key);
 void RecordViewLeaveKey(int key);
 
-// Party membership changes: joined, left, list.
+// Party membership changes: list (the members as the server sent them, `name`
+// the leader) and left.
 void RecordPartyChange(const char* change, const wchar_t* name);
+
+// An invitation to a party, from the character with the server id `inviterKey`.
+void RecordPartyInvited(int inviterKey);
+
+// The server's answer to an invitation that formed no party (0x41 value).
+void RecordPartyAnswer(int result);
+
+// Legacy quest packets: a quest's new state as the client decoded it from A1,
+// or A2 when the server took the step (QUEST_STATE: 1 active, 2 complete,
+// 3 not started), and a reward (A3) for the character with the server id `key`.
+void RecordQuestStateChanged(int quest, int state);
+void RecordQuestPrize(int key, int reward, int amount);
 
 // The server closed the session.
 void RecordDisconnected(const char* reason);
@@ -76,6 +89,15 @@ void RecordTradeAnswer(int answer, const char* name);
 void RecordTradePartnerConfirm(int state);
 void RecordTradeClosed(int result);
 } // namespace App::Control::Events
+
+namespace App::Control::Frames
+{
+// The world camera of this frame, kept where the mouse ray is cast
+// (Scenes/MainScene.cpp). Later in the frame other cameras draw the item
+// previews, so `nearby` projects characters with this copy, the way the mouse
+// picks them.
+void RecordWorldCamera();
+} // namespace App::Control::Frames
 
 #else
 
@@ -97,11 +119,20 @@ inline void RecordViewCleared(const char*) {}
 inline void RecordViewEnterKey(int) {}
 inline void RecordViewLeaveKey(int) {}
 inline void RecordPartyChange(const char*, const wchar_t*) {}
+inline void RecordPartyInvited(int) {}
+inline void RecordPartyAnswer(int) {}
+inline void RecordQuestStateChanged(int, int) {}
+inline void RecordQuestPrize(int, int, int) {}
 inline void RecordDisconnected(const char*) {}
 inline void RecordTradeRequested(const char*, bool) {}
 inline void RecordTradeAnswer(int, const char*) {}
 inline void RecordTradePartnerConfirm(int) {}
 inline void RecordTradeClosed(int) {}
 } // namespace App::Control::Events
+
+namespace App::Control::Frames
+{
+inline void RecordWorldCamera() {}
+} // namespace App::Control::Frames
 
 #endif // MU_ENABLE_CONTROL_SOCKET

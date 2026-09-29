@@ -12,6 +12,7 @@ namespace MuMain.Tools.InGameTests.Gui;
 internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
 {
     private bool isChecked = true;
+    private bool isEditable = true;
     private string delayText = string.Empty;
     private string qualityText = string.Empty;
     private RowState state = RowState.Idle;
@@ -42,6 +43,16 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
         get => this.isChecked;
         set => this.Set(ref this.isChecked, value);
     }
+
+    /// <summary>Whether the check box and the fields take input: not while a run goes on.</summary>
+    public bool IsEditable
+    {
+        get => this.isEditable;
+        set => this.Set(ref this.isEditable, value);
+    }
+
+    /// <summary>The test that runs now: its row is highlighted and scrolled into view.</summary>
+    public bool IsCurrent => this.state == RowState.Running;
 
     /// <summary>Milliseconds to pause after each action; empty takes the run's value.</summary>
     public string DelayText
@@ -85,6 +96,9 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
         this.Change(this.isChecked ? RowState.Waiting : RowState.Idle, 0, 0, string.Empty);
     }
 
+    /// <summary>The run got to this test: its clients start.</summary>
+    public void Started() => this.Change(RowState.Running, 0, 0, "starting the clients");
+
     public void StepStarted(int number, string title)
         => this.Change(RowState.Running, number - 1, 0, $"step {number} of {this.StepCount}: {title}");
 
@@ -126,6 +140,7 @@ internal sealed class ScenarioRow(Scenario scenario) : INotifyPropertyChanged
                  {
                      nameof(this.CompletedSteps), nameof(this.ProgressText), nameof(this.ShowsProgress),
                      nameof(this.Passed), nameof(this.Failed), nameof(this.FailedText), nameof(this.Detail),
+                     nameof(this.IsCurrent),
                  })
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -149,6 +164,7 @@ internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<Sce
     : INotifyPropertyChanged
 {
     private bool isExpanded = isExpanded;
+    private bool isEditable = true;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -159,6 +175,36 @@ internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<Sce
     public string Summary => this.Rows.Count == 1 ? "1 test" : $"{this.Rows.Count} tests";
 
     public IReadOnlyList<ScenarioRow> Rows { get; } = rows;
+
+    /// <summary>"Check all" while a test of the category is unchecked, else "Uncheck all".</summary>
+    public string ToggleText => this.Rows.All(row => row.IsChecked) ? "Uncheck all" : "Check all";
+
+    /// <summary>Whether the toggle takes clicks: not while a run goes on.</summary>
+    public bool IsEditable
+    {
+        get => this.isEditable;
+        set
+        {
+            if (this.isEditable != value)
+            {
+                this.isEditable = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsEditable)));
+            }
+        }
+    }
+
+    /// <summary>Checks every test of the category, or unchecks them all when all are checked.</summary>
+    public void ToggleAll()
+    {
+        var check = this.Rows.Any(row => !row.IsChecked);
+        foreach (var row in this.Rows)
+        {
+            row.IsChecked = check;
+        }
+    }
+
+    /// <summary>A test of the category was checked or unchecked.</summary>
+    public void SelectionChanged() => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ToggleText)));
 
     public bool IsExpanded
     {

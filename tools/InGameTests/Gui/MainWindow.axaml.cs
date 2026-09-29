@@ -22,6 +22,10 @@ internal sealed partial class MainWindow : Window
     private readonly GuiSettings settings = GuiSettings.Load();
     private readonly ObservableCollection<ScenarioRow> rows = [];
     private readonly List<ScenarioGroup> groups;
+    // Categories a run unfolded to show its test; they are saved folded, as the user left them.
+    private readonly HashSet<ScenarioGroup> unfoldedByRun = [];
+    // The row controls by row, to scroll the running test into view.
+    private readonly Dictionary<ScenarioRow, Avalonia.Controls.Control> rowControls = [];
     private CancellationTokenSource? stopRequest;
     private List<ScenarioRow> runRows = [];
     private string? reportPath;
@@ -119,7 +123,23 @@ internal sealed partial class MainWindow : Window
         if (e.PropertyName == nameof(ScenarioRow.IsChecked))
         {
             this.UpdateSelection();
+            if (sender is ScenarioRow row)
+            {
+                this.groups?.FirstOrDefault(group => group.Rows.Contains(row))?.SelectionChanged();
+            }
         }
+    }
+
+    // A category's own "Check all" / "Uncheck all"; the button sits in the
+    // header, so the click must not also fold the category in or out.
+    private void OnToggleGroup(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: ScenarioGroup group })
+        {
+            group.ToggleAll();
+        }
+
+        e.Handled = true;
     }
 
     private void UpdateSelection()
@@ -176,7 +196,19 @@ internal sealed partial class MainWindow : Window
         var log = new WindowLog(this.AppendLog);
         var listener = new TestRunListener
         {
-            StepStarted = (name, number, title) => Dispatcher.UIThread.Post(() => this.Row(name).StepStarted(number, title)),
+            ScenarioStarted = name => Dispatcher.UIThread.Post(() =>
+            {
+                var row = this.Row(name);
+                row.Started();
+                this.ShowCurrent(row, "starting the clients");
+                this.ScrollIntoView(row);
+            }),
+            StepStarted = (name, number, title) => Dispatcher.UIThread.Post(() =>
+            {
+                var row = this.Row(name);
+                row.StepStarted(number, title);
+                this.ShowCurrent(row, $"step {number} of {row.StepCount}: {title}");
+            }),
             StepFinished = (name, step) => Dispatcher.UIThread.Post(() =>
             {
                 this.Row(name).StepFinished(step);
@@ -336,22 +368,75 @@ internal sealed partial class MainWindow : Window
         this.settings.ScreenshotQuality = TryParseQuality(this.DefaultQualityBox.Text, out var quality) && quality is { } value
             ? value
             : Clients.ClientOptions.DefaultScreenshotQuality;
-        this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
+        this.settings.CollapsedCategories = this.CollapsedCategories();
         this.settings.Scenarios = this.rows.ToDictionary(
             row => row.Name,
             row => new GuiSettings.ScenarioSettings { Checked = row.IsChecked, Delay = row.DelayText, Quality = row.QualityText });
         this.settings.Save();
     }
 
+    // While a run goes on the list still scrolls and folds; only what would
+    // change the run is locked.
     private void SetRunning(bool running)
     {
         this.RunButton.IsEnabled = !running;
         this.StopButton.IsEnabled = running;
         this.OpenReportButton.IsEnabled = !running && this.reportPath is not null;
-        this.OpenReportFolderButton.IsEnabled = !running;
         this.CheckAllButton.IsEnabled = !running;
-        this.ScenarioList.IsEnabled = !running;
         this.BrowseButton.IsEnabled = !running;
+        foreach (var row in this.rows)
+        {
+            row.IsEditable = !running;
+        }
+
+        foreach (var group in this.groups)
+        {
+            group.IsEditable = !running;
+        }
+
+        if (!running)
+        {
+            this.CurrentLabel.IsVisible = false;
+            this.CurrentText.IsVisible = false;
+        }
+    }
+
+    // The test that runs now and what it does, above the list.
+    private void ShowCurrent(ScenarioRow row, string what)
+    {
+        this.CurrentLabel.IsVisible = true;
+        this.CurrentText.IsVisible = true;
+        this.CurrentText.Text = $"{row.Name} · {what}";
+    }
+
+    // Opens the test's category and scrolls its row into view, once, when it
+    // starts; the list stays free to scroll while it runs.
+    private void ScrollIntoView(ScenarioRow row)
+    {
+        var group = this.groups.First(candidate => candidate.Rows.Contains(row));
+        if (!group.IsExpanded)
+        {
+            this.unfoldedByRun.Add(group);
+            group.IsExpanded = true;
+        }
+        if (this.rowControls.TryGetValue(row, out var control))
+        {
+            Dispatcher.UIThread.Post(() => control.BringIntoView(), DispatcherPriority.Background);
+        }
+    }
+
+    // A row's control, when its category first opens; a test that started in a
+    // folded category scrolls into view once its row exists.
+    private void OnRowLoaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Avalonia.Controls.Control { DataContext: ScenarioRow row } control)
+        {
+            this.rowControls[row] = control;
+            if (row.IsCurrent)
+            {
+                Dispatcher.UIThread.Post(() => control.BringIntoView(), DispatcherPriority.Background);
+            }
+        }
     }
 
     private void OnStop(object? sender, RoutedEventArgs e)
@@ -454,11 +539,15 @@ internal sealed partial class MainWindow : Window
         }
 
         // Which categories are folded in is kept even without a run.
-        this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
+        this.settings.CollapsedCategories = this.CollapsedCategories();
         this.settings.Save();
     }
 
     private ScenarioRow Row(string name) => this.rows.First(row => row.Name == name);
+
+    // The folded categories as the user left them: one a run unfolded counts as folded.
+    private List<string> CollapsedCategories()
+        => [.. this.groups.Where(group => !group.IsExpanded || this.unfoldedByRun.Contains(group)).Select(group => group.Category.ToString())];
 
     private void AppendLog(string text)
     {

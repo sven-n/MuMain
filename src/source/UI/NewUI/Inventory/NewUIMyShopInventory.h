@@ -72,6 +72,22 @@ namespace SEASON3B
 
         CNewUIInventoryCtrl* GetInventoryCtrl() const;
 
+        // For the control socket: the Open and Close buttons, and the title field.
+        CNewUIButton& GetOpenButton()
+        {
+            return m_Button[MYSHOPINVENTORY_OPEN];
+        }
+        CNewUIButton& GetCloseButton()
+        {
+            return m_Button[MYSHOPINVENTORY_CLOSE];
+        }
+        RECT GetTitleRect()
+        {
+            return {m_EditBox->GetPosition_x(), m_EditBox->GetPosition_y(),
+                    m_EditBox->GetPosition_x() + m_EditBox->GetWidth(),
+                    m_EditBox->GetPosition_y() + m_EditBox->GetHeight()};
+        }
+
     public:
         void ChangeSourceIndex(int sindex);
         const int GetSourceIndex();

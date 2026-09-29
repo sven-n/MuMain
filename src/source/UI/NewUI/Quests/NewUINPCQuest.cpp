@@ -100,22 +100,41 @@ bool CNewUINPCQuest::UpdateMouseEvent()
     return true;
 }
 
+int CNewUINPCQuest::AnswerTop()
+{
+    const BYTE byCurQuestState = g_csQuest.getQuestState2(int(g_csQuest.GetCurrQuestIndex()));
+    if (byCurQuestState != QUEST_ING)
+    {
+        return m_Pos.y + 250;
+    }
+
+    const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
+    return m_Pos.y + 66 + (NUM_LINE_CMB - iTotalLine) * 18 / 2 + 18 * g_iNumLineMessageBoxCustom;
+}
+
+int CNewUINPCQuest::GetAnswerCount() const
+{
+    return GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript).numAnswer;
+}
+
+RECT CNewUINPCQuest::GetAnswerRect(int answer)
+{
+    const int top = AnswerTop() + 18 * answer;
+    return {m_Pos.x, top, m_Pos.x + NPCQUEST_WIDTH, top + 18};
+}
+
+bool CNewUINPCQuest::IsCompleteShown()
+{
+    return g_csQuest.getQuestState2(int(g_csQuest.GetCurrQuestIndex())) == QUEST_ING;
+}
+
 bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 {
     BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
-    BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
 
     bool bErrorMessage = false;
     int iButtonPush = -1;
-    int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
-    int yPos = m_Pos.y + 66 + (NUM_LINE_CMB - iTotalLine) * 18 / 2;
-
-    yPos += 18 * g_iNumLineMessageBoxCustom;
-
-    if (byCurQuestState != QUEST_ING)
-    {
-        yPos = m_Pos.y + 250;
-    }
+    const int yPos = AnswerTop();
 
     if (SEASON3B::IsRelease(VK_LBUTTON))
     {

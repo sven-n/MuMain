@@ -78,6 +78,11 @@ namespace SEASON3B
         void ClosingProcess();
 
         int	GetCurCommandType();
+        // A command's button (COMMAND_TRADE, COMMAND_PARTY, ...), for the control socket.
+        CNewUIButton& GetCommandButton(int command)
+        {
+            return m_BtnCommand[command];
+        }
 
         void SetMouseCursor(int iCursorType);
         int	 GetMouseCursor();

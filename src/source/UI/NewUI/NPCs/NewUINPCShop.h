@@ -101,6 +101,20 @@ namespace SEASON3B
         void SetSellingItem(bool bFlag);
         bool IsSellingItem();
 
+        // For the control socket: the shop's grid and its repair buttons.
+        CNewUIInventoryCtrl* GetInventoryCtrl() const
+        {
+            return m_pNewInventoryCtrl;
+        }
+        CNewUIButton& GetRepairButton()
+        {
+            return m_BtnRepair;
+        }
+        CNewUIButton& GetRepairAllButton()
+        {
+            return m_BtnRepairAll;
+        }
+
     private:
         void Init();
         void SetButtonInfo();

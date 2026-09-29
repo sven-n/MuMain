@@ -14,6 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <cstring>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -220,6 +221,54 @@ void RecordViewLeaveKey(int key)
 void RecordPartyChange(const char* change, const wchar_t* name)
 {
     RecordParty(change != nullptr ? change : "changed", name != nullptr ? name : L"");
+}
+
+void RecordPartyInvited(int inviterKey)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+    const ObjectDescription inviter = App::Control::DescribeGameObject(inviterKey);
+    RecordParty("invited", Core::Text::FromUtf8(inviter.name).c_str());
+}
+
+void RecordPartyAnswer(int result)
+{
+    constexpr std::string_view Results[] = {"failed", "denied",        "full",        "user_left",      "other_party",
+                                            "left",   "opposing_gens", "battle_zone", "battle_zone_off"};
+    RecordPartyResult(result >= 0 && result < static_cast<int>(std::size(Results)) ? Results[result] : "unknown");
+}
+
+void RecordQuestStateChanged(int quest, int state)
+{
+    // The client's QUEST_STATE values: 1 active, 2 complete, 3 not started.
+    constexpr std::string_view States[] = {"none", "active", "complete", "not_started"};
+    RecordQuestChange(quest, state >= 0 && state < static_cast<int>(std::size(States)) ? States[state] : "unknown");
+}
+
+void RecordQuestPrize(int key, int reward, int amount)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    // The reward codes of the legacy quest prize packet, from 200 on.
+    constexpr std::string_view Rewards[] = {"level_up_points", "second_class", "points_per_level", "combo",
+                                            "third_class"};
+    constexpr int FirstReward = 200;
+    const int offset = reward - FirstReward;
+    const std::string_view name =
+        offset >= 0 && offset < static_cast<int>(std::size(Rewards)) ? Rewards[offset] : "unknown";
+    const int index = FindCharacterIndex(key);
+    const bool known = index >= 0 && index < MAX_CHARACTERS_CLIENT;
+    // For a class change the packet's number is the server's class code, not
+    // an amount; the event names the new class instead.
+    const bool classChange = name == "second_class" || name == "third_class";
+    RecordQuestReward(known ? Core::Text::ToUtf8(CharactersClient[index].ID) : std::string(), name,
+                      classChange ? std::nullopt : std::optional<int>(amount),
+                      known ? static_cast<int>(CharactersClient[index].Class) : -1);
 }
 
 void RecordDisconnected(const char* reason)

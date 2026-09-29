@@ -7371,6 +7371,7 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
     PartyKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPartyMsgBoxLayout));
+    App::Control::Events::RecordPartyInvited(PartyKey);
 }
 
 void ReceivePartyResult(const BYTE* ReceiveBuffer)
@@ -7407,6 +7408,7 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
         g_pSystemLogBox->AddText(I18N::Game::PartiesAreNotActivatedWithinABattleZone, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
+    App::Control::Events::RecordPartyAnswer(Data->Value);
 }
 
 void ReceivePartyList(const BYTE* ReceiveBuffer)
@@ -10402,6 +10404,7 @@ void ReceiveQuestState(const BYTE* ReceiveBuffer)
     g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
     g_pNewUISystem->HideAll();
     g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCQUEST);
+    App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex, g_csQuest.getQuestState2(Data->m_byQuestIndex));
 }
 
 void ReceiveQuestResult(const BYTE* ReceiveBuffer)
@@ -10413,6 +10416,8 @@ void ReceiveQuestResult(const BYTE* ReceiveBuffer)
         g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
         g_pNewUISystem->HideAll();
         g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCQUEST);
+        App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex,
+                                                      g_csQuest.getQuestState2(Data->m_byQuestIndex));
     }
 }
 
@@ -10564,6 +10569,7 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
     default:
         break;
     }
+    App::Control::Events::RecordQuestPrize(Key, Data->m_byReparation, Data->m_byNumber);
 }
 
 void ReceiveQuestMonKillInfo(const BYTE* ReceiveBuffer)

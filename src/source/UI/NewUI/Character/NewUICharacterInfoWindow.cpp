@@ -169,16 +169,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 
     if (CharacterAttribute->LevelUpPoint > 0)
     {
-        int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
-        int iCount = 0;
-        if (iBaseClass == CLASS_DARK_LORD)
-        {
-            iCount = 5;
-        }
-        else
-        {
-            iCount = 4;
-        }
+        const int iCount = StatButtonCount();
         for (int i = 0; i < iCount; ++i)
         {
             if (m_BtnStat[i].UpdateMouseEvent() == true)
@@ -1528,16 +1519,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderButtons()
 {
-    int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
-    int iCount = 0;
-    if (iBaseClass == CLASS_DARK_LORD)
-    {
-        iCount = 5;
-    }
-    else
-    {
-        iCount = 4;
-    }
+    const int iCount = StatButtonCount();
 
     if (CharacterAttribute->LevelUpPoint > 0)
     {
@@ -1657,4 +1639,20 @@ void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
     Hero->BodyPart[BODYPART_BOOTS].Level = pItem[EQUIPMENT_BOOTS].Level;
 
     CheckFullSet(Hero);
+}
+
+SEASON3B::CNewUIButton* SEASON3B::CNewUICharacterInfoWindow::GetShownStatButton(int stat)
+{
+    if (!IsVisible() || CharacterAttribute->LevelUpPoint <= 0 || stat < 0)
+    {
+        return nullptr;
+    }
+
+    return stat < StatButtonCount() ? &m_BtnStat[stat] : nullptr;
+}
+
+int SEASON3B::CNewUICharacterInfoWindow::StatButtonCount() const
+{
+    // Command is a Dark Lord's stat only.
+    return gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD ? 5 : 4;
 }
