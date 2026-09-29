@@ -13,6 +13,10 @@
 # The jobs only build and run the tests; they upload nothing. The workflow
 # uses GitHub's own actions only, so it runs under a repository setting that
 # allows no other actions.
+#
+# Each test gets five minutes (ctest --timeout; the slowest takes about 30
+# seconds). A test that hangs then fails under its own name instead of
+# holding the job until GitHub cancels it after six hours.
 name: Fork CI
 
 on:
@@ -114,6 +118,7 @@ jobs:
         run: >
           ctest --test-dir out/build/fork-ci-windows --build-config Release
           --output-on-failure
+          --timeout 300
           --no-tests=error
 
   linux-editor:
@@ -169,6 +174,7 @@ jobs:
         run: >
           ctest --test-dir out/build/fork-ci-linux-editor --build-config Release
           --output-on-failure
+          --timeout 300
           --no-tests=error
 
   macos-editor:
@@ -214,4 +220,5 @@ jobs:
         run: >
           ctest --test-dir out/build/fork-ci-macos-editor --build-config Release
           --output-on-failure
+          --timeout 300
           --no-tests=error
