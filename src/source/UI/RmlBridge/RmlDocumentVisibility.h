@@ -48,4 +48,23 @@ namespace UI::RmlBridge
         doc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
         doc->PullToFront();
     }
+
+    // For a window the original drew under nearly every other window (the duel and battle-soccer
+    // boards, layer depth 1.1 / 1.8): shown without taking focus and pushed behind every other
+    // document of its context, so the location bar, the logs and any panel draw over it as they did
+    // over the original. Transition only, like the above.
+    inline void SyncDocumentVisibilityBehind(Rml::ElementDocument* doc, bool visible)
+    {
+        if (doc == nullptr || doc->IsVisible() == visible)
+            return;
+
+        if (!visible)
+        {
+            doc->Hide();
+            return;
+        }
+
+        doc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+        doc->PushToBack();
+    }
 }

@@ -5,17 +5,20 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Events/BattleSoccerScoreRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
+// The battle-soccer / guild-war scoreboard. battle_soccer_score.rml draws it; C++ keeps its
+// position and feeds the teams' scores, marks and names.
 class CBattleSoccerScore : public CObject
 {
-public:
-    enum IMAGE_LIST
-    {
-        IMAGE_BSS_BACK = BITMAP_INTERFACE_NEW_BATTLE_SOCCER_SCORE_BEGIN,
-    };
-
 private:
     enum
     {
@@ -42,14 +45,17 @@ public:
 
     float GetLayerDepth(); //. 1.8f
 
-private:
-    void LoadImages();
-    void UnloadImages();
+    void ReloadRmlTheme();
 
-    void RenderBackImage();
-    void RenderContents();
+private:
+    void BuildRmlUi();
+    void SyncRmlModel();
+    void SyncTeams();
 
     int FindGuildMark(wchar_t* pszGuildName);
+
+    RmlModelBinder<BattleSoccerScoreRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
 };
 } // namespace mu::ui::window
 

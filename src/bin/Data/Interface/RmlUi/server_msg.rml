@@ -1,0 +1,24 @@
+<rml>
+<head>
+	<title>Server Message</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="server_msg.rcss"/>
+</head>
+<body>
+	<!-- The character list's server message window (CServerMsgWin): the frame (translucent centre,
+	     top and bottom strips, side pieces as tall as the line count) and up to five lines in the
+	     fixed font. Real pixels, like the original (Legacy layout: root_scale stays 1). C++ keeps
+	     the lines; nothing here is interactive. -->
+	<div id="panel" data-model="server_msg" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div id="centre" data-style-height="(side_height + 6) + 'px'"></div>
+		<div id="top"></div>
+		<div id="bottom" data-style-top="(side_height + 6) + 'px'"></div>
+		<div id="left" data-style-height="side_height + 'px'"></div>
+		<div id="right" data-style-height="side_height + 'px'"></div>
+		<span class="sharp-text server-line" data-for="line, i : lines" data-style-top="(12 + i * 20) + 'px'"
+		      data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line}}</span>
+	</div>
+</body>
+</rml>

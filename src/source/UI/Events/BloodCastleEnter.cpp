@@ -8,11 +8,16 @@
 
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
+#include "Core/Text/TextLineWrap.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <string>
+#include <vector>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CEnterBloodCastle::CEnterBloodCastle()
+CEnterBloodCastle::CEnterBloodCastle() : m_View("blood_castle_enter", "Data/Interface/RmlUi/blood_castle_enter.rml")
 {
     m_pNewUIMng = NULL;
     memset(&m_Pos, 0, sizeof(POINT));
@@ -20,8 +25,6 @@ CEnterBloodCastle::CEnterBloodCastle()
 
     m_iNumActiveBtn = 1;
     m_BtnEnterStartPos.x = m_BtnEnterStartPos.y = 0;
-    m_dwBtnTextColor[0] = RGBA(150, 150, 150, 255);
-    m_dwBtnTextColor[1] = RGBA(255, 255, 255, 255);
 
     m_iBloodCastleLimitLevel[0][0] = 15;  m_iBloodCastleLimitLevel[0][1] = 80;
     m_iBloodCastleLimitLevel[1][0] = 81;  m_iBloodCastleLimitLevel[1][1] = 130;
@@ -59,21 +62,8 @@ bool CEnterBloodCastle::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    // Exit Button
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_ENTERBC_BASE_WINDOW_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
-
-    // Enter Button
-    int iVal = 0;
-    for (int i = 0; i < MAX_ENTER_GRADE; i++)
-    {
-        iVal = ENTER_BTN_VAL * i;
-        m_BtnEnter[i].ChangeButtonImgState(true, IMAGE_ENTERBC_BASE_WINDOW_BTN_ENTER, true);
-        m_BtnEnter[i].ChangeButtonInfo(m_BtnEnterStartPos.x, m_BtnEnterStartPos.y + iVal, 180, 29);
-    }
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -84,7 +74,7 @@ bool CEnterBloodCastle::Create(CManager* pNewUIMng, int x, int y)
 // Release
 void CEnterBloodCastle::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -104,13 +94,6 @@ void CEnterBloodCastle::SetPos(int x, int y)
 
     SetBtnPos(m_Pos.x + 6, m_Pos.y + 125);
 
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-
-    for (int i = 0; i < MAX_ENTER_GRADE; i++)
-    {
-        int iVal = ENTER_BTN_VAL * i;
-        m_BtnEnter[i].ChangeButtonInfo(m_BtnEnterStartPos.x, m_BtnEnterStartPos.y + iVal, 180, 29);
-    }
 }
 
 //---------------------------------------------------------------------------------------------
@@ -183,65 +166,41 @@ int CEnterBloodCastle::CheckLimitLV(int iIndex)
 
 bool CEnterBloodCastle::Update()
 {
+    m_View.Sync(IsVisible(), m_Pos);
+
+    // Clicks RmlUi reported: the exit button hides the window, the enabled level button asks the
+    // server to enter that level band (the original's BtnProcess()).
+    const bool exitPressed = m_View.TakeExitPressed();
+    const int pressed = m_View.TakePressedButton();
     if (!IsVisible())
         return true;
+    if (exitPressed)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
+        return true;
+    }
+    if (pressed >= 0 && pressed == m_iNumActiveBtn)
+    {
+        SocketClient->ToGameServer()->SendBloodCastleEnterRequest(m_iNumActiveBtn + 1, 0xFF);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
+    }
 
     return true;
 }
 
 bool CEnterBloodCastle::Render()
 {
-    EnableAlphaTest();
-
-    // Base Window
-    RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(ENTERBC_BASE_WINDOW_WIDTH), float(ENTERBC_BASE_WINDOW_HEIGHT));
-    RenderImage(IMAGE_ENTERBC_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(ENTERBC_BASE_WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_ENTERBC_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(ENTERBC_BASE_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_ENTERBC_BASE_WINDOW_RIGHT, m_Pos.x + float(ENTERBC_BASE_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(ENTERBC_BASE_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(ENTERBC_BASE_WINDOW_HEIGHT) - 45.f, float(ENTERBC_BASE_WINDOW_WIDTH), 45.f);
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(0xFFFFFFFF);
-    g_pRenderText->SetBgColor(0x00000000);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::MessengerOfArchangel, 72, 0, RT3_SORT_CENTER);
-    g_pRenderText->SetFont(g_hFont);
-
-    wchar_t txtline[NUM_LINE_CMB][MAX_LENGTH_CMB] = { 0 };
-    int tl = SeparateTextIntoLines(I18N::Game::YourWillToHelpTheArchangel, txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
-    for (int j = 0; j < tl; ++j)
-    {
-        g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + j * 20, txtline[j], 190, 0, RT3_SORT_CENTER);
-    }
-
-    for (int i = 0; i < MAX_ENTER_GRADE; i++)
-    {
-        m_BtnEnter[i].Render();
-    }
-
-    m_BtnExit.Render();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
+    // requires the override.
     return true;
 }
 
 bool CEnterBloodCastle::BtnProcess()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
+    // Top-right corner close "X" (shared frame). Hides + swallows the click. The exit and level
+    // buttons are RmlUi's (see Update()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_BLOODCASTLE))
         return true;
-
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
-        return true;
-    }
-
-    if ((m_iNumActiveBtn != -1) && (m_BtnEnter[m_iNumActiveBtn].UpdateMouseEvent() == true))
-    {
-        SocketClient->ToGameServer()->SendBloodCastleEnterRequest(m_iNumActiveBtn + 1, 0xFF);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
-    }
 
     return false;
 }
@@ -255,12 +214,6 @@ void CEnterBloodCastle::OpenningProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
-    for (int i = 0; i < MAX_ENTER_GRADE; i++)
-    {
-        m_BtnEnter[i].ChangeTextColor(m_dwBtnTextColor[ENTERBTN_DISABLE]);
-        m_BtnEnter[i].Lock();
-    }
-
     int iLimitLVIndex = 0;
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
         || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
@@ -270,24 +223,21 @@ void CEnterBloodCastle::OpenningProcess()
 
     m_iNumActiveBtn = CheckLimitLV(iLimitLVIndex);
 
-    m_BtnEnter[m_iNumActiveBtn].UnLock();
-    m_BtnEnter[m_iNumActiveBtn].ChangeTextColor(m_dwBtnTextColor[ENTERBTN_ENABLE]);
-
+    // Every button locked (grey, never hovered) but the hero's band.
+    std::vector<EventEntryView::Button> buttons(MAX_ENTER_GRADE);
     wchar_t sztext[255] = { 0, };
-
     for (int i = 0; i < MAX_ENTER_GRADE - 1; i++)
     {
         mu_swprintf(sztext, I18N::Game::CastleDLevelDD, i + 1
             , m_iBloodCastleLimitLevel[(iLimitLVIndex * MAX_ENTER_GRADE) + i][0]
             , m_iBloodCastleLimitLevel[(iLimitLVIndex * MAX_ENTER_GRADE) + i][1]);
-        m_BtnEnter[i].SetFont(g_hFontBold);
-        m_BtnEnter[i].ChangeText(sztext);
+        buttons[i].label = sztext;
     }
-
     mu_swprintf(sztext, I18N::Game::CastleNoDMasterLevel, 8);
+    buttons[MAX_ENTER_GRADE - 1].label = sztext;
+    buttons[m_iNumActiveBtn].enabled = true;
 
-    m_BtnEnter[MAX_ENTER_GRADE - 1].SetFont(g_hFontBold);
-    m_BtnEnter[MAX_ENTER_GRADE - 1].ChangeText(sztext);
+    SetViewContent(buttons);
 }
 
 void CEnterBloodCastle::ClosingProcess()
@@ -295,24 +245,21 @@ void CEnterBloodCastle::ClosingProcess()
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-void CEnterBloodCastle::LoadImages()
+void CEnterBloodCastle::ReloadRmlTheme()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ENTERBC_BASE_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_ENTERBC_BASE_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_ENTERBC_BASE_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_ENTERBC_BASE_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_ENTERBC_BASE_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_ENTERBC_BASE_WINDOW_BTN_EXIT, GL_LINEAR);				// Exit Button
-    LoadBitmap(L"Interface\\newui_btn_empty_big.tga", IMAGE_ENTERBC_BASE_WINDOW_BTN_ENTER, GL_LINEAR);		// Enter Button
+    m_View.ReloadTheme();
 }
 
-void CEnterBloodCastle::UnloadImages()
+void CEnterBloodCastle::SetViewContent(const std::vector<EventEntryView::Button>& buttons)
 {
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_BACK);
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_TOP);
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_LEFT);
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_RIGHT);
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_BTN_EXIT);		// Exit Button
-    DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_BTN_ENTER);	// Enter Button
+    // The description, cut into lines of at most MAX_LENGTH_CMB characters, 20 units apart.
+    wchar_t txtline[NUM_LINE_CMB][MAX_LENGTH_CMB] = {0};
+    const int tl =
+        SeparateTextIntoLines(I18N::Game::YourWillToHelpTheArchangel, txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+    std::vector<std::wstring> lines;
+    for (int j = 0; j < tl; ++j)
+        lines.emplace_back(txtline[j]);
+
+    m_View.SetContent(I18N::Game::MessengerOfArchangel, lines, float(m_EnterUITextPos.y - m_Pos.y), 20.f, buttons,
+                      float(m_BtnEnterStartPos.y - m_Pos.y), float(ENTER_BTN_VAL));
 }

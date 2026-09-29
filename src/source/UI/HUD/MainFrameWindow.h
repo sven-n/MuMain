@@ -255,6 +255,11 @@ namespace mu::ui::window
     class CMainFrameWindow : public CObject, public I3DRenderObj
     {
     public:
+        // Pulls this window's RmlUi document (gauges, buttons, skill row and grid, their hints) in
+        // front of every other main-context document -- for an overlay the original drew below
+        // the bottom HUD (CMiniMap), after that overlay pulled itself to the front.
+        void PullRmlDocumentToFront();
+
         enum IMAGE_LIST
         {
             // Gauge/button textures are loaded by RmlUi directly (see main_frame.rcss's

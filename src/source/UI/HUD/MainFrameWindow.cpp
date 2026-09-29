@@ -2424,3 +2424,9 @@ void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
     // whether this window itself is visible.
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, show);
 }
+
+void mu::ui::window::CMainFrameWindow::PullRmlDocumentToFront()
+{
+    if (m_pRmlDoc != nullptr && m_pRmlDoc->IsVisible())
+        m_pRmlDoc->PullToFront();
+}

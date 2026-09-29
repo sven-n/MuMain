@@ -1,0 +1,6 @@
+/* Modern frame of the right-docked entry windows with a 3D item preview: docked_panel_frame.rcss's
+   forged panel (linked first) and a thin separator where the legacy line sits. Background
+   context: painted before the native 3D preview. */
+
+#panel { pointer-events: none; }
+.line { position: absolute; left: 10px; top: 230px; width: 170px; height: 1px; background-color: token(border-frame); }

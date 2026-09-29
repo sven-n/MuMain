@@ -1,36 +1,33 @@
 
 #pragma once
 
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Dialogs/MessageBox.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
-#include "UI/Widgets/Window/Button.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/ChatCommandRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "GameLogic/Commands/ChatCommandTemplate.h"
 
-#include <memory>
+#include <string>
 #include <vector>
+
+namespace Rml
+{
+class Element;
+class ElementDocument;
+} // namespace Rml
 
 namespace mu::ui::window
 {
 // Lets the player pick a server-advertised chat command instead of typing it; shows one
-// page at a time (commands, parameters, or saved templates).
+// page at a time (commands, parameters, or saved templates). chat_command.rml draws it, the
+// parameter value field included; C++ keeps the pages, the values, the wheel, the keys and the
+// commands sent.
 class CChatCommandWindow : public CObject
 {
     // Frame art is drawn for width 190; a wider window would stretch and distort it.
-    enum eIMAGE_LIST
-    {
-        IMAGE_CHATCOMMAND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
-        IMAGE_CHATCOMMAND_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-        IMAGE_CHATCOMMAND_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-        IMAGE_CHATCOMMAND_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-        IMAGE_CHATCOMMAND_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-        IMAGE_CHATCOMMAND_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-        IMAGE_CHATCOMMAND_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
-    };
-
     enum eWINDOW_SIZE
     {
         WINDOW_WIDTH = 190,
@@ -119,10 +116,6 @@ private:
     static std::vector<std::wstring> SplitValidValues(const std::wstring& validValues);
     bool AreRequiredValuesSet() const;
 
-    void InitButtons();
-    void LoadImages();
-    void UnloadImages();
-
     int GetScrollableRowCount() const;
     // Wrapped once on page entry; measuring against the font every frame would be wasteful.
     void WrapDescriptionOfSelected();
@@ -139,16 +132,16 @@ private:
         return m_page != PAGE_TEMPLATES;
     }
 
-    bool UpdateCommandPageMouseEvent();
-    bool UpdateParameterPageMouseEvent();
-    bool UpdateTemplatePageMouseEvent();
+    // A click RmlUi reported (the original's UpdateMouseEvent() branches), handled in Update().
+    void HandleHit(ChatCommandAction action, int index);
 
-    void RenderBaseWindow();
-    void RenderTitle();
-    void RenderCommandPage();
-    void RenderParameterPage();
-    void RenderParameter(size_t parameterIndex, int y);
-    void RenderTemplatePage();
+    void BuildRmlUi();
+    void ReloadRmlTheme();
+    void SyncRmlModel();
+    void SyncContent();
+    void SyncValueField();
+    Rml::Element* GetValueField() const;
+    std::wstring ReadValueField() const;
 
 private:
     CManager* m_pNewUIMng;
@@ -162,14 +155,23 @@ private:
     // The value of every parameter of the selected command, in its order.
     std::vector<std::wstring> m_parameterValues;
     std::vector<std::wstring> m_descriptionLines;
-    // One box is enough: it is moved onto whichever parameter is edited.
-    std::unique_ptr<CUITextInputBox> m_pValueInput;
+    // One field is enough: it is moved onto whichever parameter is edited.
     int m_editedParameter;
+    bool m_valueFieldFocusPending = false;
 
     std::vector<GameLogic::Commands::ChatCommandTemplate> m_templates;
 
-    CButton m_BtnExit;
-    CButton m_BtnLeft;
-    CButton m_BtnRight;
+    RmlModelBinder<ChatCommandRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    // Clicks RmlUi reported since the last Update().
+    struct PendingHit
+    {
+        ChatCommandAction action;
+        int index;
+    };
+    std::vector<PendingHit> m_pendingHits;
+    bool m_pendingExit = false;
+    bool m_pendingLeft = false;
+    bool m_pendingRight = false;
 };
 } // namespace mu::ui::window

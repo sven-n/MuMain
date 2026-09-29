@@ -119,6 +119,10 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     Rml::LoadFontFace("fonts/DejaVuSans.ttf");
     Rml::LoadFontFace("fonts/DejaVuSans-Bold.ttf");
 
+    // The native fixed-width face (kBundledFixedFont, BundledFonts.h), for text the original drew
+    // with g_hFixFont -- the character list's server messages (server_msg.rcss).
+    Rml::LoadFontFace("fonts/Cousine-Regular.ttf");
+
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
     ApplyUIScale(m_Context, windowWidth, windowHeight);
 

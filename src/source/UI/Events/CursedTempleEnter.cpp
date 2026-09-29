@@ -19,6 +19,17 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Widgets/UIControls.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -32,25 +43,13 @@ namespace
     const int EnterMinLevel[EnterLevelCount] = { 220, 271, 321, 351, 381 };
     const int EnterMaxLevel[EnterLevelCount] = { 270, 320, 350, 380, 400 };
 
-    void DrawText(wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
+    // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
+    float TextPxInBox(UI::Scaling::FontRole role, const UI::Scaling::Transform& transform, const wchar_t* text,
+                      float boxWidth)
     {
-        if (isbold)
-        {
-            g_pRenderText->SetFont(g_hFontBold);
-        }
-        else
-        {
-            g_pRenderText->SetFont(g_hFont);
-        }
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(textcolor);
-        g_pRenderText->SetBgColor(textbackcolor);
-        g_pRenderText->RenderText(textposx, textposy, text, fontboxwidth, 0, textsort);
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
+        g_pRenderText->SetFont(role == UI::Scaling::FontRole::Bold ? g_hFontBold : g_hFont);
+        const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), boxWidth);
     }
 }
 
@@ -64,7 +63,8 @@ bool mu::ui::window::CCursedTempleEnter::Create(CManager* pNewUIMng, int x, int 
 
     SetPos(x, y);
 
-    SetButtonInfo();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -87,6 +87,7 @@ void mu::ui::window::CCursedTempleEnter::Initialize()
 
 void mu::ui::window::CCursedTempleEnter::Destroy()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -94,24 +95,6 @@ void mu::ui::window::CCursedTempleEnter::Destroy()
     }
 }
 
-void mu::ui::window::CCursedTempleEnter::SetButtonInfo()
-{
-    float x;
-    x = m_Pos.x + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
-    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonImgState(true, CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
-
-    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
-
-    // 2147 "입장하기"
-    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeText(&I18N::Game::Enter);
-
-    x = m_Pos.x + (CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
-    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonImgState(true, CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
-
-    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
-    // 1002 "닫기"
-    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(&I18N::Game::Close388);
-}
 
 bool mu::ui::window::CCursedTempleEnter::CheckEnterLevel(int& enterlevel)
 {
@@ -181,32 +164,7 @@ bool mu::ui::window::CCursedTempleEnter::CheckInventory(BYTE& itempos, int enter
 
 bool mu::ui::window::CCursedTempleEnter::UpdateMouseEvent()
 {
-    if (m_Button[CURSEDTEMPLEENTER_OPEN].UpdateMouseEvent())
-    {
-        int  EnterLevel = -1;
-        bool Result = false;
-
-        // CheckHeroLevl
-        Result = CheckEnterLevel(EnterLevel);
-
-        if (Result)
-        {
-            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), 0xFF);
-        }
-        else
-        {
-            g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, mu::ui::window::TYPE_ERROR_MESSAGE);
-        }
-
-        return false;
-    }
-
-    if (m_Button[CURSEDTEMPLEENTER_EXIT].UpdateMouseEvent())
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
-        return false;
-    }
-
+    // The Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, CURSEDTEMPLE_ENTER_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
@@ -231,111 +189,42 @@ bool mu::ui::window::CCursedTempleEnter::UpdateKeyEvent()
 
 bool mu::ui::window::CCursedTempleEnter::Update()
 {
+    SyncRmlModel();
+
+    // Clicks RmlUi reported (the original's button handling in UpdateMouseEvent()).
+    const bool enter = m_PendingEnter;
+    const bool close = m_PendingClose;
+    m_PendingEnter = m_PendingClose = false;
+    if (!IsVisible())
+        return true;
+    if (enter)
+    {
+        int EnterLevel = -1;
+        if (CheckEnterLevel(EnterLevel))
+        {
+            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), 0xFF);
+        }
+        else
+        {
+            g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch,
+                                     mu::ui::window::TYPE_ERROR_MESSAGE);
+        }
+        return true;
+    }
+    if (close)
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
     return true;
 }
 
-void mu::ui::window::CCursedTempleEnter::RenderText()
-{
-    wchar_t Text[100];
 
-    memset(&Text, 0, sizeof(wchar_t));
-
-    mu_swprintf(Text, I18N::Game::DoYouWishToGoToTheIllusionTemple);
-    DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, true);
-
-    int enterlevel = -1;
-
-    if (CheckEnterLevel(enterlevel))
-    {
-        memset(&Text, 0, sizeof(Text));
-
-        mu_swprintf(Text, I18N::Game::TheDIllusionTemple, enterlevel);
-        DrawText(Text, m_Pos.x + 3, m_Pos.y + 42, 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
-
-        for (int i = 0; i < EnterLevelCount + 1; ++i)
-        {
-            memset(&Text, 0, sizeof(Text));
-
-            if (i == 5)
-            {
-                wcscpy(Text, I18N::Game::MasterLevel);
-            }
-            else
-            {
-                mu_swprintf(Text, I18N::Game::LevelDD, EnterMinLevel[i], EnterMaxLevel[i]);
-            }
-
-            if (enterlevel == i + 1)
-            {
-                DisableAlphaBlend();
-                mu_swprintf(Text, L"%ls %ls", Text, I18N::Game::EntranceEnabled);
-                DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0xff0000ff, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
-                EnableAlphaTest();
-            }
-            else
-            {
-                mu_swprintf(Text, L"%ls %ls", Text, I18N::Game::EntranceDisabled);
-                DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
-            }
-        }
-
-        memset(&Text, 0, sizeof(char));
-        mu_swprintf(Text, I18N::Game::CurrentMembersD, m_EnterCount);
-        DrawText(Text, m_Pos.x + 3, m_Pos.y + 70 + ((EnterLevelCount + 1) * 15), 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
-    }
-    else
-    {
-        memset(&Text, 0, sizeof(char));
-        mu_swprintf(Text, I18N::Game::YouMustBeOfTheMinimumLevel220ToEnterTheZone);
-        DrawText(Text, m_Pos.x, m_Pos.y + 52, 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, false);
-    }
-}
-
-void mu::ui::window::CCursedTempleEnter::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = CURSEDTEMPLE_ENTER_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = CURSEDTEMPLE_ENTER_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < 9; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y + CURSEDTEMPLE_ENTER_WINDOW_HEIGHT - 77; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
-}
 
 bool mu::ui::window::CCursedTempleEnter::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-    RenderText();
-    RenderButtons();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
+    // requires the override.
     return true;
 }
 
-void mu::ui::window::CCursedTempleEnter::RenderButtons()
-{
-    for (int i = 0; i < CURSEDTEMPLEENTER_MAXBUTTONCOUNT; ++i)
-    {
-        // 버튼 렌더링
-        m_Button[i].Render();
-    }
-}
 
 //ServerMessage
 void mu::ui::window::CCursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo)
@@ -356,5 +245,156 @@ void mu::ui::window::CCursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE
         {
             m_EnterCount = data->btUserCount[enterlevel - 1];
         }
+    }
+}
+
+void mu::ui::window::CCursedTempleEnter::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "cursed_temple_enter",
+        [this](Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("bold_text_px", &model.boldTextPx);
+            c.Bind("line_height_px", &model.lineHeightPx);
+            c.Bind("title", &model.title);
+            auto line = c.RegisterStruct<CursedTempleEnterLineEntry>();
+            line.RegisterMember("text", &CursedTempleEnterLineEntry::text);
+            line.RegisterMember("top", &CursedTempleEnterLineEntry::top);
+            line.RegisterMember("left", &CursedTempleEnterLineEntry::left);
+            line.RegisterMember("width", &CursedTempleEnterLineEntry::width);
+            line.RegisterMember("text_px", &CursedTempleEnterLineEntry::textPx);
+            line.RegisterMember("highlighted", &CursedTempleEnterLineEntry::highlighted);
+            line.RegisterMember("red", &CursedTempleEnterLineEntry::red);
+            c.RegisterArray<std::vector<CursedTempleEnterLineEntry>>();
+            c.Bind("lines", &model.lines);
+            c.Bind("enter_text", &model.enterText);
+            c.Bind("close_text", &model.closeText);
+            c.Bind("label_top", &model.labelTop);
+            c.Bind("label_line_px", &model.labelLinePx);
+            c.BindEventCallback("temple_enter", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingEnter = true; });
+            c.BindEventCallback("temple_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingClose = true; });
+        });
+
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                  "Data/Interface/RmlUi/cursed_temple_enter.rml");
+}
+
+void mu::ui::window::CCursedTempleEnter::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CCursedTempleEnter::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 10.3: over the HUD and the panels.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncLines();
+}
+
+void mu::ui::window::CCursedTempleEnter::SyncLines()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    CursedTempleEnterRmlModel updated = m_RmlBinder.GetModel();
+    updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
+    updated.labelTop = static_cast<float>(23 / 2 - lineHeight / 2);
+    updated.labelLinePx = updated.lineHeightPx;
+    updated.title = StringUtils::WideToNarrow(I18N::Game::DoYouWishToGoToTheIllusionTemple);
+    updated.enterText = StringUtils::WideToNarrow(I18N::Game::Enter);
+    updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
+
+    // The original's RenderText(): with a level band, the temple, the six bands (the hero's on a
+    // red text box) and the members; else the minimum-level notice.
+    auto addLine = [&](const wchar_t* text, float left, float top, float width, bool highlighted, bool red)
+    {
+        updated.lines.push_back({StringUtils::WideToNarrow(text), top, left, width,
+                                 TextPxInBox(UI::Scaling::FontRole::Normal, transform, text, width), highlighted, red});
+    };
+    updated.lines.clear();
+    wchar_t Text[100] = {};
+    int enterlevel = -1;
+    if (CheckEnterLevel(enterlevel))
+    {
+        mu_swprintf(Text, I18N::Game::TheDIllusionTemple, enterlevel);
+        addLine(Text, 3.f, 42.f, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false, false);
+        for (int i = 0; i < EnterLevelCount + 1; ++i)
+        {
+            wchar_t band[100] = {};
+            if (i == 5)
+                wcscpy(band, I18N::Game::MasterLevel);
+            else
+                mu_swprintf(band, I18N::Game::LevelDD, EnterMinLevel[i], EnterMaxLevel[i]);
+            const bool heroBand = enterlevel == i + 1;
+            mu_swprintf(Text, L"%ls %ls", band, heroBand ? I18N::Game::EntranceEnabled : I18N::Game::EntranceDisabled);
+            addLine(Text, 3.f, 67.f + static_cast<float>(i * 15), CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, heroBand,
+                    false);
+        }
+        mu_swprintf(Text, I18N::Game::CurrentMembersD, m_EnterCount);
+        addLine(Text, 3.f, 70.f + static_cast<float>((EnterLevelCount + 1) * 15), CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10,
+                false, true);
+    }
+    else
+    {
+        addLine(I18N::Game::YouMustBeOfTheMinimumLevel220ToEnterTheZone, 0.f, 52.f, CURSEDTEMPLE_ENTER_WINDOW_WIDTH,
+                false, true);
+    }
+
+    CursedTempleEnterRmlModel& model = m_RmlBinder.GetModel();
+    auto sync = [&](auto field, const char* name)
+    {
+        if (!(model.*field == updated.*field))
+        {
+            model.*field = updated.*field;
+            m_RmlBinder.MarkDirty(name);
+        }
+    };
+    sync(&CursedTempleEnterRmlModel::boldTextPx, "bold_text_px");
+    sync(&CursedTempleEnterRmlModel::lineHeightPx, "line_height_px");
+    sync(&CursedTempleEnterRmlModel::labelTop, "label_top");
+    sync(&CursedTempleEnterRmlModel::labelLinePx, "label_line_px");
+    sync(&CursedTempleEnterRmlModel::title, "title");
+    sync(&CursedTempleEnterRmlModel::enterText, "enter_text");
+    sync(&CursedTempleEnterRmlModel::closeText, "close_text");
+    const bool sameLines = model.lines.size() == updated.lines.size() &&
+                           std::equal(model.lines.begin(), model.lines.end(), updated.lines.begin(),
+                                      [](const CursedTempleEnterLineEntry& a, const CursedTempleEnterLineEntry& b)
+                                      {
+                                          return a.text == b.text && a.top == b.top && a.left == b.left &&
+                                                 a.width == b.width && a.textPx == b.textPx &&
+                                                 a.highlighted == b.highlighted && a.red == b.red;
+                                      });
+    if (!sameLines)
+    {
+        model.lines = std::move(updated.lines);
+        m_RmlBinder.MarkDirty("lines");
     }
 }

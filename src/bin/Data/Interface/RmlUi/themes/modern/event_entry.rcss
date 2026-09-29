@@ -1,0 +1,55 @@
+/* Modern theme for the right-docked event entry windows (CEnterBloodCastle, CEnterDevilSquare):
+   docked_panel_frame.rcss's forged panel (linked first), the level buttons as modern buttons, the
+   hero's band in the steel accent and the locked ones dimmed. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+#panel { pointer-events: auto; }
+
+#title {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-warm);
+	font-weight: bold;
+	pointer-events: none;
+}
+
+.entry-line {
+	display: block;
+	position: absolute;
+	left: 3px;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-primary);
+	pointer-events: none;
+}
+
+.entry-btn {
+	display: block;
+	position: absolute;
+	left: 6px;
+	width: 180px;
+	height: 28px;
+	background-color: token(surface-recessed);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.entry-btn.enabled { background-color: token(surface-raised); }
+.entry-btn.enabled:hover { border-color: token(accent-steel-hover); }
+.entry-btn.enabled:active { background-color: token(surface-recessed); }
+
+.entry-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	text-align: center;
+	white-space: nowrap;
+	font-weight: bold;
+	color: token(text-muted);
+	pointer-events: none;
+}
+.entry-btn.enabled .entry-label { color: token(text-primary); }

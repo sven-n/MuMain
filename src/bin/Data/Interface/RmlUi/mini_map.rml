@@ -1,0 +1,49 @@
+<rml>
+<head>
+	<title>Mini Map</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="mini_map.rcss"/>
+</head>
+<body data-model="mini_map">
+	<!-- The full-screen mini map (CMiniMap, Tab or the window menu's Map row). The original drew it
+	     in physical pixels: the map texture and its markers turned 45 degrees around the window
+	     centre (RenderBitRotate/RenderPointRotate), the frame under the Hud layout's W/640 x H/480
+	     stretch. C++ builds every turned quad as a CSS matrix() in physical px (MiniMapLayout.h);
+	     .screen carries the stretch for the frame, the hero arrow and the close button.
+
+	     The native bottom HUD art still draws before this context and the original drew the HUD
+	     over the map, so the map may only paint outside the HUD's band: each .clip is one such
+	     region (above the band, and beside it at wide sizes) holding a full copy of the picture,
+	     offset back to window coordinates by .world. -->
+	<div class="clip" data-for="clip : clips" data-style-left="clip.left + 'px'" data-style-top="clip.top + 'px'"
+	     data-style-width="clip.width + 'px'" data-style-height="clip.height + 'px'">
+		<div class="world" data-style-left="clip.world_left + 'px'" data-style-top="clip.world_top + 'px'">
+			<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+				<div class="dim"></div>
+			</div>
+			<img class="map" data-attr-src="map_source" data-style-transform="map_transform"/>
+			<div class="marker" data-for="marker : markers" data-class-portal="marker.portal"
+			     data-style-width="marker.size + 'px'" data-style-height="marker.size + 'px'"
+			     data-style-transform="marker.transform"></div>
+			<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+				<div class="hero"></div>
+				<div class="edge-top" data-for="left : edge_tiles" data-style-left="left + 'px'"></div>
+				<div class="edge-bottom" data-for="left : edge_tiles" data-style-left="left + 'px'"></div>
+			</div>
+			<div class="edge-side" data-for="line : side_lines" data-style-transform="line"></div>
+			<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+				<div class="corner corner-tl"></div>
+				<div class="corner corner-tr"></div>
+				<div class="corner corner-bl"></div>
+				<div class="corner corner-br"></div>
+				<div class="hit"></div>
+				<div class="close" data-event-click="minimap_close"></div>
+			</div>
+			<div class="hint" data-if="hint_visible" data-style-left="hint_left + 'px'" data-style-top="hint_top + 'px'"
+			     data-style-width="hint_width + 'px'" data-style-height="hint_height + 'px'">
+				<span class="hint-text" data-style-font-size="text_px + 'px'" data-style-line-height="hint_height + 'px'">{{hint_text}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

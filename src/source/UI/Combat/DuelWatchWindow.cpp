@@ -1,23 +1,48 @@
-
 #include "stdafx.h"
 #include "UI/Combat/DuelWatchWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
-#include "Render/Models/ZzzBMD.h"
-#include "Render/Effects/ZzzEffect.h"
-#include "Engine/Object/ZzzObject.h"
-#include "Engine/Object/ZzzInventory.h"
-#include "Engine/Object/ZzzInterface.h"
-#include "Engine/Object/ZzzInfomation.h"
-#include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
-
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Combat/DuelMgr.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+constexpr int kRoomCount = 4;
+
+// RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
+float TextPxInBox(UI::Scaling::FontRole role, const UI::Scaling::Transform& transform, const wchar_t* text,
+                  int boxWidth)
+{
+    g_pRenderText->SetFont(role == UI::Scaling::FontRole::Bold ? g_hFontBold : g_hFont);
+    const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+    return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width),
+                                                 static_cast<float>(boxWidth));
+}
+
+template <typename Model, typename T>
+void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+} // namespace
 
 CDuelWatchWindow::CDuelWatchWindow()
 {
@@ -40,32 +65,20 @@ bool CDuelWatchWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    for (int i = 0; i < 4; ++i)
-    {
+    for (int i = 0; i < kRoomCount; ++i)
         m_bChannelEnable[i] = FALSE;
-        InitButton(m_BtnChannel + i, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 100 + i * 90, I18N::Game::Watch);
-    }
+
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CDuelWatchWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
-{
-    pNewUIButton->ChangeText(pCaption);
-    pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    pNewUIButton->ChangeButtonImgState(true, IMAGE_DUELWATCHWINDOW_BUTTON, true);
-    pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
-
 void CDuelWatchWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -102,6 +115,7 @@ bool CDuelWatchWindow::UpdateKeyEvent()
             return false;
         }
     }
+
     return true;
 }
 
@@ -109,85 +123,29 @@ bool CDuelWatchWindow::Update()
 {
     if (IsVisible())
     {
-        for (int i = 0; i < 4; ++i)
-        {
-            if (g_DuelMgr.IsDuelChannelEnabled(i))
-                m_bChannelEnable[i] = TRUE;
-            else
-                m_bChannelEnable[i] = FALSE;
-
-            if (m_bChannelEnable[i] == TRUE && g_DuelMgr.IsDuelChannelJoinable(i))
-            {
-                m_BtnChannel[i].UnLock();
-                m_BtnChannel[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-                m_BtnChannel[i].ChangeTextColor(RGBA(255, 255, 255, 255));
-            }
-            else
-            {
-                m_BtnChannel[i].Lock();
-                m_BtnChannel[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-                m_BtnChannel[i].ChangeTextColor(RGBA(100, 100, 100, 255));
-            }
-        }
+        for (int i = 0; i < kRoomCount; ++i)
+            m_bChannelEnable[i] = g_DuelMgr.IsDuelChannelEnabled(i) ? TRUE : FALSE;
     }
+
+    SyncRmlModel();
+
+    // A Watch click RmlUi reported: join that colosseum, if its duel is still open to spectators
+    // (the original's BtnProcess() on an unlocked button).
+    const int join = m_PendingJoin;
+    m_PendingJoin = -1;
+    if (IsVisible() && join >= 0 && join < kRoomCount && m_bChannelEnable[join] == TRUE &&
+        g_DuelMgr.IsDuelChannelJoinable(join))
+    {
+        SocketClient->ToGameServer()->SendDuelChannelJoinRequest(static_cast<BYTE>(join));
+    }
+
     return true;
 }
 
 bool CDuelWatchWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    wchar_t szText[256];
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190, 0, RT3_SORT_CENTER);
-
-    RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130, 188.f, 21.f);
-    RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130 + 90, 188.f, 21.f);
-    RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130 + 90 + 90, 188.f, 21.f);
-
-    int i = 0;
-    g_pRenderText->SetFont(g_hFontBold);
-    for (i = 0; i < 4; ++i)
-    {
-        g_pRenderText->SetTextColor(255, 255, 128, 255);
-        mu_swprintf(szText, I18N::Game::ColosseumD, i + 1);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 20, szText, 190, 0, RT3_SORT_CENTER);
-
-        ptOrigin.y += 90;
-    }
-
-    ptOrigin.y = m_Pos.y + 50;
-    g_pRenderText->SetFont(g_hFont);
-    for (i = 0; i < 4; ++i)
-    {
-        if (m_bChannelEnable[i] == TRUE)
-        {
-            g_pRenderText->SetTextColor(255, 50, 50, 255);
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, L"VS", 190, 0, RT3_SORT_CENTER);
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y + 35, g_DuelMgr.GetDuelChannelUserID1(i), 70, 0, RT3_SORT_CENTER);
-            g_pRenderText->RenderText(ptOrigin.x + 100, ptOrigin.y + 35, g_DuelMgr.GetDuelChannelUserID2(i), 70, 0, RT3_SORT_CENTER);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, I18N::Game::NoDuelOn, 190, 0, RT3_SORT_CENTER);
-        }
-
-        ptOrigin.y += 90;
-    }
-
-    for (i = 0; i < 4; ++i)
-    {
-        m_BtnChannel[i].Render();
-    }
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame, the rooms and the Watch buttons are RmlUi. Kept because
+    // CObject requires the override.
     return true;
 }
 
@@ -205,61 +163,150 @@ float CDuelWatchWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CDuelWatchWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_DUELWATCHWINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_DUELWATCHWINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_DUELWATCHWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_DUELWATCHWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_DUELWATCHWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_DUELWATCHWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_DUELWATCHWINDOW_LINE, GL_LINEAR);
-}
-
-void CDuelWatchWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_RIGHT);
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_LEFT);
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_TOP);
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_BACK);
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_BUTTON);
-    DeleteBitmap(IMAGE_DUELWATCHWINDOW_LINE);
-}
-
-void CDuelWatchWindow::RenderFrame()
-{
-    RenderImage(IMAGE_DUELWATCHWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_DUELWATCHWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_DUELWATCHWINDOW_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_DUELWATCHWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_DUELWATCHWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-
-    wchar_t szText[256] = { 0, };
-    float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
-    float fLine_y = 13.0f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    mu_swprintf(szText, L"%ls", I18N::Game::DoorkeeperTitus);
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
-}
-
 bool CDuelWatchWindow::BtnProcess()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // Top-right corner close "X" (shared frame): hides + swallows the click. The Watch buttons are
+    // RmlUi's (see Update()).
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DUELWATCH);
+    return false;
+}
 
-    for (BYTE i = 0; i < 4; ++i)
-    {
-        if (m_BtnChannel[i].UpdateMouseEvent() == true)
+void CDuelWatchWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "duel_watch",
+        [this](Rml::DataModelConstructor& c, DuelWatchRmlModel& model)
         {
-            SocketClient->ToGameServer()->SendDuelChannelJoinRequest(i);
-            return true;
-        }
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("bold_text_px", &model.boldTextPx);
+            c.Bind("title", &model.title);
+            c.Bind("subtitle", &model.subtitle);
+            c.Bind("subtitle_px", &model.subtitlePx);
+            c.Bind("vs_text", &model.vsText);
+            c.Bind("no_duel_text", &model.noDuelText);
+            c.Bind("watch_text", &model.watchText);
+            c.Bind("label_top", &model.labelTop);
+            c.Bind("label_line_px", &model.labelLinePx);
+
+            auto room = c.RegisterStruct<DuelWatchRoomEntry>();
+            room.RegisterMember("index", &DuelWatchRoomEntry::index);
+            room.RegisterMember("heading", &DuelWatchRoomEntry::heading);
+            room.RegisterMember("running", &DuelWatchRoomEntry::running);
+            room.RegisterMember("player1", &DuelWatchRoomEntry::player1);
+            room.RegisterMember("player2", &DuelWatchRoomEntry::player2);
+            room.RegisterMember("player1_px", &DuelWatchRoomEntry::player1Px);
+            room.RegisterMember("player2_px", &DuelWatchRoomEntry::player2Px);
+            room.RegisterMember("joinable", &DuelWatchRoomEntry::joinable);
+            c.RegisterArray<std::vector<DuelWatchRoomEntry>>();
+            c.Bind("rooms", &model.rooms);
+
+            c.BindEventCallback("duelwatch_join",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingJoin = arguments[0].Get<int>(-1);
+                                });
+        });
+
+    if (!modelCreated)
+        return;
+
+    DuelWatchRmlModel& model = m_RmlBinder.GetModel();
+    model.title = StringUtils::WideToNarrow(I18N::Game::DoorkeeperTitus);
+    model.subtitle = StringUtils::WideToNarrow(I18N::Game::SelectAnColosseumYouDLikeToWatch);
+    model.vsText = "VS";
+    model.noDuelText = StringUtils::WideToNarrow(I18N::Game::NoDuelOn);
+    model.watchText = StringUtils::WideToNarrow(I18N::Game::Watch);
+    model.rooms.clear();
+    for (int i = 0; i < kRoomCount; ++i)
+    {
+        wchar_t heading[256] = {};
+        mu_swprintf(heading, I18N::Game::ColosseumD, i + 1);
+        DuelWatchRoomEntry entry;
+        entry.index = i;
+        entry.heading = StringUtils::WideToNarrow(heading);
+        model.rooms.push_back(std::move(entry));
     }
 
-    return false;
+    m_pRmlDoc =
+        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/duel_watch.rml");
+}
+
+void CDuelWatchWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void CDuelWatchWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+
+    // CButton::Render(): label top y + (23 / 2 - h / 2), whole units, h the native line height.
+    {
+        const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+        const float labelTop = static_cast<float>(23 / 2 - lineHeight / 2);
+        const float labelLinePx = static_cast<float>(lineHeight) * UI::Scaling::GetActiveTransform().scaleY;
+        auto& labelModel = m_RmlBinder.GetModel();
+        if (labelModel.labelTop != labelTop || labelModel.labelLinePx != labelLinePx)
+        {
+            labelModel.labelTop = labelTop;
+            labelModel.labelLinePx = labelLinePx;
+            m_RmlBinder.MarkDirty("label_top");
+            m_RmlBinder.MarkDirty("label_line_px");
+        }
+    }
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncField(m_RmlBinder, &DuelWatchRmlModel::boldTextPx, "bold_text_px",
+              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+    SyncField(m_RmlBinder, &DuelWatchRmlModel::subtitlePx, "subtitle_px",
+              TextPxInBox(UI::Scaling::FontRole::Bold, transform, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190));
+
+    DuelWatchRmlModel& model = m_RmlBinder.GetModel();
+    bool changed = false;
+    for (DuelWatchRoomEntry& room : model.rooms)
+    {
+        const bool running = m_bChannelEnable[room.index] == TRUE;
+        const bool joinable = running && g_DuelMgr.IsDuelChannelJoinable(room.index);
+        const wchar_t* name1 = running ? g_DuelMgr.GetDuelChannelUserID1(room.index) : L"";
+        const wchar_t* name2 = running ? g_DuelMgr.GetDuelChannelUserID2(room.index) : L"";
+        Rml::String player1 = StringUtils::WideToNarrow(name1);
+        Rml::String player2 = StringUtils::WideToNarrow(name2);
+        const float player1Px = TextPxInBox(UI::Scaling::FontRole::Normal, transform, name1, 70);
+        const float player2Px = TextPxInBox(UI::Scaling::FontRole::Normal, transform, name2, 70);
+        if (room.running != running || room.joinable != joinable || room.player1 != player1 ||
+            room.player2 != player2 || room.player1Px != player1Px || room.player2Px != player2Px)
+        {
+            room.running = running;
+            room.joinable = joinable;
+            room.player1 = std::move(player1);
+            room.player2 = std::move(player2);
+            room.player1Px = player1Px;
+            room.player2Px = player2Px;
+            changed = true;
+        }
+    }
+    if (changed)
+        m_RmlBinder.MarkDirty("rooms");
 }

@@ -1,0 +1,37 @@
+/* Modern theme for CDuelWatchWindow: docked_panel_frame.rcss's forged panel (linked first), the
+   Watch buttons as modern buttons, locked ones dimmed. Geometry is the legacy one (reference px
+   under the dock transform). */
+
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+
+#title { left: 15px; top: 13px; font-weight: bold; color: token(text-warm); }
+#subtitle { left: 0; top: 50px; font-weight: bold; color: token(text-primary); }
+
+.line { position: absolute; left: 10px; width: 170px; height: 1px; margin-top: 10px; background-color: token(border-frame); }
+
+.room { display: block; position: absolute; left: 0; width: 190px; height: 90px; }
+.room-heading { left: 0; top: 70px; font-weight: bold; color: token(accent-gold); }
+.room-vs { left: 0; top: 85px; color: #ff3232; }
+.room-player { top: 85px; color: token(text-primary); }
+.room-player-1 { left: 20px; }
+.room-player-2 { left: 100px; }
+.room-empty { left: 0; top: 85px; color: token(text-primary); }
+
+.watch-btn {
+	display: block;
+	position: absolute;
+	left: 68px;
+	top: 100px;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-recessed);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.watch-btn.enabled { background-color: token(surface-raised); }
+.watch-btn.enabled:hover { border-color: token(accent-steel-hover); }
+.watch-label { left: 0; color: token(text-muted); }
+.watch-btn.enabled .watch-label { color: token(text-primary); }

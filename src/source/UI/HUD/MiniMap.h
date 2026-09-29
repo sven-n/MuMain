@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "UI/Core/WindowObject.h"
@@ -7,78 +6,70 @@
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Widgets/Window/Button.h"
+#include "UI/HUD/MiniMapRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/Widgets/Window/Tooltip.h"
+
+#include <string>
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
-    class CMiniMap : public CObject
-    {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_MINIMAP_INTERFACE = BITMAP_MINI_MAP_BEGIN,
-        };
+// The full-screen mini map. mini_map.rml draws it; C++ keeps the world's marker data, the
+// hero's position, the turned quads of the map and its markers (MiniMapLayout.h), the marker
+// name hint, Tab/Escape and the close request.
+class CMiniMap : public CObject
+{
+public:
+    bool m_bSuccess;
 
-        enum MASTER_DATA
-        {
-            SKILL_ICON_DATA_WDITH = 4,
-            SKILL_ICON_DATA_HEIGHT = 8,
-            SKILL_ICON_WIDTH = 20,
-            SKILL_ICON_HEIGHT = 28,
-            SKILL_ICON_STARTX1 = 75,
-            SKILL_ICON_STARTY1 = 75,
-        };
+    CMiniMap();
+    virtual ~CMiniMap();
 
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_SCROLL_BTN_DOWN,
-        };
+    bool Create(CManager* pNewUIMng, int x, int y);
+    void Release();
 
-    private:
-       std::wstring		m_TooltipText;
-        HFONT					m_hToolTipFont;
-        DWORD					m_TooltipTextColor;
+    void SetPos(int x, int y);
+    // Kept for RenderPointRotate() (ZzzOpenglUtil.cpp), which no longer has a caller.
+    void SetBtnPos(int Num, float x, float y, float nx, float ny);
 
-        CManager* m_pNewUIMng;
-        POINT					m_Pos;
-        POINT					m_Width;
-        POINT					m_MiniWidth;
-        POINT					m_Lenth[6];
-        int						m_MiniPos;
-        CButton			m_BtnExit;
-        MINI_MAP				m_Mini_Map_Data[MAX_MINI_MAP_DATA];
-        float					m_Btn_Loc[MAX_MINI_MAP_DATA][4];
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool Update();
+    bool Render();
 
-    public:
-        bool					m_bSuccess;
-        CMiniMap();
-        virtual ~CMiniMap();
+    float GetLayerDepth(); //. 8.1f
 
-        bool Create(CManager* pNewUIMng, int x, int y);
-        void Release();
+    void OpenningProcess();
+    void ClosingProcess();
+    void LoadImages(const wchar_t* Filename);
+    void UnloadImages();
 
-        void SetPos(int x, int y);
-        void SetBtnPos(int Num, float x, float y, float nx, float ny);
+    void ReloadRmlTheme();
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+private:
+    void BuildRmlUi();
+    void SyncRmlModel();
+    void SyncScreen();
+    void SyncMap();
+    void SyncHint();
+    void SyncClips();
 
-        float GetLayerDepth();	//. 8.1f
+    CManager* m_pNewUIMng;
+    MINI_MAP m_Mini_Map_Data[MAX_MINI_MAP_DATA];
+    float m_Btn_Loc[MAX_MINI_MAP_DATA][4];
 
-        void OpenningProcess();
-        void ClosingProcess();
-        void OpenMasterLevel(const wchar_t* filename);
-        CButton m_BtnToolTip;
-        void LoadImages(const wchar_t* Filename);
-        void UnloadImages();
+    // The world folder (e.g. L"World1") whose mini_map texture the document shows.
+    std::wstring m_WorldName;
+    // m_BtnExit's hint ("Close", above the button).
+    CTooltip m_ExitTooltip;
 
-    private:
-        void Render_Text();
-        void Render_Icon();
-        void Render_Scroll();
-        bool Check_Mouse(int mx, int my);
-        bool Check_Btn(int mx, int my);
-    };
+    RmlModelBinder<MiniMapRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    bool m_PendingClose = false;
+};
 }

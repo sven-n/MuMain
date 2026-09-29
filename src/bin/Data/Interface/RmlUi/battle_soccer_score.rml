@@ -1,0 +1,29 @@
+<rml>
+<head>
+	<title>Battle Soccer</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="battle_soccer_score.rcss"/>
+</head>
+<body data-model="battle_soccer_score">
+	<!-- The battle-soccer / guild-war scoreboard (CBattleSoccerScore) above the bottom HUD's right
+	     end: two lines of score, guild mark and name. A LayoutMode::Hud window, so .screen is the
+	     640x480 reference screen stretched W/640 x H/480 like the original and #panel sits at the
+	     window's reference position (m_Pos). Text does not stretch: each value takes the native
+	     bold text size and cancels the stretch. A guild mark is its 8 x 8 cells, one reference px
+	     each (the original's 8 x 8 emblem texture, nearest filtered). Takes no pointer events. -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+			<div id="back"></div>
+			<div class="team" data-for="team, i : teams" data-class-red="team.red" data-style-top="(33 + i * 22) + 'px'">
+				<span class="team-text team-score" data-style-font-size="bold_text_px + 'px'"
+				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{team.score}}</span>
+				<div class="mark" data-if="team.mark.size > 0">
+					<div class="mark-cell" data-for="cell : team.mark" data-style-background-color="cell"></div>
+				</div>
+				<span class="team-text team-name" data-style-font-size="bold_text_px + 'px'"
+				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{team.name}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

@@ -9,6 +9,7 @@
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/MessageBox.h"
+#include "UI/Events/EventEntryView.h"
 
 namespace mu::ui::window
 {
@@ -54,12 +55,11 @@ namespace mu::ui::window
         POINT						m_BtnEnterStartPos;
         POINT						m_EnterUITextPos;
 
-        CButton				m_BtnExit;				// Exit Button Class
-        CButton				m_BtnEnter[MAX_ENTER_GRADE];			// Blood Castle Enter Button
+        // The window's RmlUi document (entry frame, lines, level buttons, exit).
+        EventEntryView m_View;
 
         int							m_iBloodCastleLimitLevel[MAX_ENTER_GRADE * 2][2];
-        int							m_iNumActiveBtn;		// 활성화 되어있는 버튼
-        DWORD						m_dwBtnTextColor[2];	// 0 - Disabled, 1 - Enable
+        int m_iNumActiveBtn; // the enabled button: the hero's level band
 
     public:
         CEnterBloodCastle();
@@ -82,10 +82,12 @@ namespace mu::ui::window
         void OpenningProcess();
         void ClosingProcess();
 
+        void ReloadRmlTheme();
+
     private:
         void SetBtnPos(int x, int y);
-        void LoadImages();
-        void UnloadImages();
+        // The title and description lines of the original's Render(), with the level buttons.
+        void SetViewContent(const std::vector<EventEntryView::Button>& buttons);
 
         int	CheckLimitLV(int iIndex);
     };
