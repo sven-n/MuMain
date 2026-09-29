@@ -6274,7 +6274,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             Position[0] += rand() % 64 - 32.f;
             Position[1] += rand() % 64 - 32.f;
             Position[2] += 50.f;
-            VectorScale(Position, FPS_ANIMATION_FACTOR, Position)
+            VectorScale(Position, FPS_ANIMATION_FACTOR, Position);
 
             CreateParticle(BITMAP_WATERFALL_5, Position, o->Angle, Light, 1);
         }
