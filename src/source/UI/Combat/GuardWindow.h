@@ -64,8 +64,12 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
+    // The radio group is the tabs' hit test only; m_iNumCurOpenTab is the tab itself, and the one
+    // thing the page and the document's highlight both read. Write it through SetCurOpenTab().
     CRadioGroupButton m_TabBtn;
     int m_iNumCurOpenTab; // ���� �����ִ� �ǹ�ư��ȣ
+
+    void SetCurOpenTab(int iTab);
 
     RmlModelBinder<GuardWindowRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;

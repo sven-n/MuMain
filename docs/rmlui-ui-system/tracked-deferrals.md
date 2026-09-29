@@ -315,14 +315,18 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
 
 ### The rest, in remediation order
 
-**P0 — the one place two layers can disagree at runtime.**
+**P0 — the one place two layers could disagree at runtime. Fixed.**
 
-- **Guard / Castle hold the current tab three times**: `m_TabBtn` (the natively hit-tested
-  authority), `m_iNumCurOpenTab` (a C++ mirror written only when `UpdateMouseEvent()` reports a
-  change), and `tabs[i].selected` in the model. The *highlight* derives from the first, the *page*
-  switches on the second, and `OpeningProcess()` writes both by hand to keep them in step. If they
-  diverge, the highlighted tab and the visible page disagree with nothing asserting otherwise.
-  `PetInfoWindow` and `MuHelperConfigWindow` hold the same state once, in `model.activeTab`.
+- **Guard / Castle held the current tab three times**: `m_TabBtn` (the natively hit-tested
+  authority), `m_iNumCurOpenTab` (a C++ mirror written only when `UpdateMouseEvent()` reported a
+  change), and `tabs[i].selected` in the model. The *highlight* derived from the first, the *page*
+  switched on the second, and `OpeningProcess()` wrote both by hand to keep them in step.
+  Both windows now route every write through one private `SetCurOpenTab()` that sets the member and
+  tells the radio group to follow, and the model's `selected` reads the member. The widget is
+  written to and never read from -- `GetCurButtonIndex()` has no callers in either file -- so it is
+  an input device reporting an edge, not a second copy of the state. Same shape
+  `PetInfoWindow`/`MuHelperConfigWindow` already had in `model.activeTab`; the difference is that
+  those two have no native control to drift from.
 
 **P1 — leaks that get copied into the next port.**
 

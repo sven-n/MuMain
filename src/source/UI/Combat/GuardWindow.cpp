@@ -62,7 +62,7 @@ bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
     // The tabs stay a native radio group for their hit tests; guard_window.rml draws them.
     m_TabBtn.CreateRadioGroup(3, BITMAP_GUILDINFO_BEGIN);
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 84.f, 56, 22);
-    m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
+    SetCurOpenTab(m_iNumCurOpenTab);
 
     BuildRmlUi();
     UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
@@ -88,6 +88,14 @@ void CGuardWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+}
+
+// The only writer of the open tab: the radio group follows it, never the other way round, so the
+// highlight the document draws and the page it draws cannot disagree.
+void CGuardWindow::SetCurOpenTab(int iTab)
+{
+    m_iNumCurOpenTab = iTab;
+    m_TabBtn.ChangeFrame(iTab);
 }
 
 bool CGuardWindow::UpdateMouseEvent()
@@ -143,7 +151,7 @@ bool CGuardWindow::Update()
         const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
         if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
         {
-            m_iNumCurOpenTab = iNumCurOpenTab;
+            SetCurOpenTab(iNumCurOpenTab);
 
             if (iNumCurOpenTab == TAB_REGISTER_INFO)
             {
@@ -172,8 +180,7 @@ bool CGuardWindow::Render()
 
 void CGuardWindow::OpeningProcess()
 {
-    m_iNumCurOpenTab = TAB_SIEGE_INFO;
-    m_TabBtn.ChangeFrame(TAB_SIEGE_INFO);
+    SetCurOpenTab(TAB_SIEGE_INFO);
 
     SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
 }
@@ -531,7 +538,7 @@ void CGuardWindow::SyncContent()
     {
         const SIZE size = g_pRenderText->MeasureText(tabLabels[i], static_cast<int>(wcslen(tabLabels[i])));
         tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]), static_cast<float>(56 / 2 - size.cx / 2),
-                        i == m_TabBtn.GetCurButtonIndex()});
+                        i == m_iNumCurOpenTab});
     }
 
     const float y = y0 + 125;

@@ -71,7 +71,7 @@ bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
     // The tabs stay a native radio group for their hit tests; castle_window.rml draws them.
     m_TabBtn.CreateRadioGroup(4, BITMAP_GUILDINFO_BEGIN);
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 32.f, 40, 22);
-    m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
+    SetCurOpenTab(m_iNumCurOpenTab);
 
     BuildRmlUi();
     UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
@@ -96,6 +96,14 @@ void CCastleWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+}
+
+// The only writer of the open tab: the radio group follows it, never the other way round, so the
+// highlight the document draws and the page it draws cannot disagree.
+void CCastleWindow::SetCurOpenTab(int iTab)
+{
+    m_iNumCurOpenTab = iTab;
+    m_TabBtn.ChangeFrame(iTab);
 }
 
 bool CCastleWindow::UpdateMouseEvent()
@@ -158,7 +166,7 @@ bool CCastleWindow::Update()
         const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
         if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
         {
-            m_iNumCurOpenTab = iNumCurOpenTab;
+            SetCurOpenTab(iNumCurOpenTab);
 
             if (iNumCurOpenTab == TAB_CASTLE_MIX)
             {
@@ -182,8 +190,7 @@ bool CCastleWindow::Render()
 
 void CCastleWindow::OpeningProcess()
 {
-    m_iNumCurOpenTab = TAB_GATE_MANAGING;
-    m_TabBtn.ChangeFrame(TAB_GATE_MANAGING);
+    SetCurOpenTab(TAB_GATE_MANAGING);
 
     g_SenatusInfo.SetCurrGate(0);
     g_SenatusInfo.SetCurrStatue(0);
@@ -767,7 +774,7 @@ void CCastleWindow::SyncContent()
         tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]), static_cast<float>(40 / 2 - size.cx / 2),
                         UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
                                                               static_cast<float>(size.cx), 40.f),
-                        i == m_TabBtn.GetCurButtonIndex()});
+                        i == m_iNumCurOpenTab});
     }
 
     // The gate and statue pages share their layout (RenderGateManagingTab(),
