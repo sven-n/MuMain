@@ -41,6 +41,12 @@ struct MessageBoxViewListRowEntry
     bool selected = false;
 };
 
+// One strip of the message box's frame: "middle" or "divider".
+struct MessageBoxViewStripEntry
+{
+    Rml::String kind;
+};
+
 struct MessageBoxViewRmlModel
 {
     // The message box manager's layout -- UI::Scaling::GetActiveTransform() while it runs.
@@ -50,9 +56,9 @@ struct MessageBoxViewRmlModel
 
     int middleCount = 0;           // 15-unit middle strips between the 67-unit top and 50-unit bottom
     float backHeight = 0.f;        // the newui_msgbox_back fill from y 2, 222 wide
-    std::vector<float> middles;    // each middle strip's top
-    float bottomTop = 0.f;         // newui_msgbox_bottom's top
-    float dividerTop = -1.f;       // newui_Message_Line (223 x 21) between the strips; negative: none
+    // The frame's strips in order, each saying only what it is; the theme stacks them and owns
+    // every height. "middle" is a plain strip, "divider" the rule between two sections.
+    std::vector<MessageBoxViewStripEntry> strips;
     std::vector<float> separators; // newui_separate_line (205 x 2) tops, 13 from the left
     std::vector<MessageBoxViewLineEntry> lines;
     // CProgressMsgBox's bar: newui_Bar_switch01 (160 x 18) centred at progressTop, the

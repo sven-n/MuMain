@@ -11,7 +11,8 @@
 	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 }
-#box_top, .box-middle, #box_bottom, #box_divider { display: none; }
+/* This theme draws its own panel, so the legacy sprite frame has nothing to stack. */
+#frame { display: none; }
 .box-separator { position: absolute; left: 13px; width: 205px; height: 1px; background-color: token(border-frame); }
 
 #progress_back { position: absolute; left: 35px; width: 160px; height: 18px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }

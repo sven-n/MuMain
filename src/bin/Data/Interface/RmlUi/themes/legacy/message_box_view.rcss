@@ -23,10 +23,14 @@
 
 #panel { position: absolute; transform-origin: left top; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
 #back { position: absolute; left: 0; top: 2px; width: 222px; decorator: image(box-back); }
-#box_top { position: absolute; left: 0; top: 0; width: 230px; height: 67px; decorator: image(box-top); }
-.box-middle { position: absolute; left: 0; width: 230px; height: 15px; decorator: image(box-middle); }
-#box_bottom { position: absolute; left: 0; width: 230px; height: 50px; decorator: image(box-bottom); }
-#box_divider { position: absolute; left: 0; width: 223px; height: 21px; decorator: image(box-divider); }
+/* The frame stacks by flow: the cap, then one element per strip C++ reported, then the foot. Their
+   heights are this theme's sprite heights and live only here -- C++ used to add them up itself. */
+#frame { position: absolute; left: 0; top: 0; width: 230px; }
+#box_top { display: block; width: 230px; height: 67px; decorator: image(box-top); }
+#box_bottom { display: block; width: 230px; height: 50px; decorator: image(box-bottom); }
+.box-strip { display: block; }
+.box-strip--middle { width: 230px; height: 15px; decorator: image(box-middle); }
+.box-strip--divider { width: 223px; height: 21px; decorator: image(box-divider); }
 .box-separator { position: absolute; left: 13px; width: 205px; height: 2px; decorator: image(box-separator); }
 
 /* CProgressMsgBox's bar, centred: its fill stretched to the elapsed fraction of 150 units. */

@@ -61,9 +61,12 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
             c.Bind("bold_text_px", &model.boldTextPx);
             c.Bind("back_height", &model.backHeight);
             c.RegisterArray<std::vector<float>>();
-            c.Bind("middles", &model.middles);
-            c.Bind("bottom_top", &model.bottomTop);
-            c.Bind("divider_top", &model.dividerTop);
+            if (auto strip = c.RegisterStruct<MessageBoxViewStripEntry>())
+            {
+                strip.RegisterMember("kind", &MessageBoxViewStripEntry::kind);
+            }
+            c.RegisterArray<std::vector<MessageBoxViewStripEntry>>();
+            c.Bind("strips", &model.strips);
             c.Bind("separators", &model.separators);
             c.Bind("progress_shown", &model.progressShown);
             c.Bind("progress_top", &model.progressTop);
@@ -133,43 +136,33 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
 
 void mu::ui::window::MessageBoxView::SetFrame(int middleCount, float backHeight, int middlesAboveDivider)
 {
-    // The strips from the top's 67 units, 15 apart; the divider's 21 units after the first
-    // middlesAboveDivider of them.
-    constexpr float kTopHeight = 67.f;
-    constexpr float kMiddleHeight = 15.f;
-    constexpr float kDividerHeight = 21.f;
-    std::vector<float> middles;
-    float y = kTopHeight;
-    float dividerTop = -1.f;
+    // The strips in order: middleCount plain ones, with the divider after the first
+    // middlesAboveDivider of them (or last, when that count reaches the end). Each strip's height
+    // and the stacking are the theme's -- these say only what is there and in what order.
+    std::vector<MessageBoxViewStripEntry> strips;
+    strips.reserve(static_cast<size_t>(middleCount) + 1);
     for (int i = 0; i < middleCount; ++i)
     {
         if (i == middlesAboveDivider)
-        {
-            dividerTop = y;
-            y += kDividerHeight;
-        }
-        middles.push_back(y);
-        y += kMiddleHeight;
+            strips.push_back({"divider"});
+        strips.push_back({"middle"});
     }
     if (middlesAboveDivider >= middleCount)
-    {
-        dividerTop = y;
-        y += kDividerHeight;
-    }
+        strips.push_back({"divider"});
 
     MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
-    if (model.middleCount == middleCount && model.backHeight == backHeight && model.middles == middles &&
-        model.dividerTop == dividerTop && model.bottomTop == y)
+    const bool sameStrips =
+        model.strips.size() == strips.size() &&
+        std::equal(model.strips.begin(), model.strips.end(), strips.begin(),
+                   [](const MessageBoxViewStripEntry& a, const MessageBoxViewStripEntry& b)
+                   { return a.kind == b.kind; });
+    if (model.middleCount == middleCount && model.backHeight == backHeight && sameStrips)
         return;
     model.middleCount = middleCount;
     model.backHeight = backHeight;
-    model.middles = std::move(middles);
-    model.dividerTop = dividerTop;
-    model.bottomTop = y;
+    model.strips = std::move(strips);
     m_RmlBinder.MarkDirty("back_height");
-    m_RmlBinder.MarkDirty("middles");
-    m_RmlBinder.MarkDirty("divider_top");
-    m_RmlBinder.MarkDirty("bottom_top");
+    m_RmlBinder.MarkDirty("strips");
 }
 
 void mu::ui::window::MessageBoxView::SetSeparators(const std::vector<float>& tops)

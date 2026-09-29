@@ -16,10 +16,12 @@
 	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back" data-style-height="back_height + 'px'"></div>
-		<div id="box_top"></div>
-		<div class="box-middle" data-for="m : middles" data-style-top="m + 'px'"></div>
-		<div id="box_divider" data-if="divider_top >= 0" data-style-top="divider_top + 'px'"></div>
-		<div id="box_bottom" data-style-top="bottom_top + 'px'"></div>
+		<!-- The frame's strips stack in flow inside #frame; only their order comes from C++. -->
+		<div id="frame">
+			<div id="box_top"></div>
+			<div data-for="p : strips" data-attr-class="'box-strip box-strip--' + p.kind"></div>
+			<div id="box_bottom"></div>
+		</div>
 		<div class="box-separator" data-for="s : separators" data-style-top="s + 'px'"></div>
 
 		<div id="progress_back" data-if="progress_shown" data-style-top="progress_top + 'px'"></div>

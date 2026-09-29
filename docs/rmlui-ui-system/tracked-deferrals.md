@@ -382,13 +382,18 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
   a display-list document rather than the same edit, so it belongs with that finding.
 **P2 — bounded cleanup.**
 
-- **Layout arithmetic shipped as a coordinate.** `GuardWindow`/`CastleWindow`'s
-  `23 / 2 - lineHeight / 2` and `56 / 2 - size.cx / 2`; `MessageBoxView::SetFrame()`'s
-  `y += kMiddleHeight` nine-slice stacking, whose 67/15/21 are *legacy sprite* dimensions and so
-  pin modern's dialog frame to strip heights it does not draw. `message_box_view.rml` is the
-  extreme — 40 non-root bound geometry properties, and no layout of its own. Note the genuine
-  carve-out: inside a `.sharp-text` block layout height and rendered height disagree, which
-  explains `button_label_top` but not `divider_top` or a button's `left`.
+- **Layout arithmetic shipped as a coordinate.** `MessageBoxView::SetFrame()`'s
+  `y += kMiddleHeight` nine-slice stacking is **done**: 67/15/21/50 were *legacy sprite* dimensions
+  added up in C++ and published as `middles`/`divider_top`/`bottom_top`, which pinned modern's
+  dialog frame to strip heights it does not draw. C++ now publishes `strips` -- the sequence, each
+  entry saying only `"middle"` or `"divider"` -- and the pieces stack by flow inside `#frame`, with
+  every height in legacy's own RCSS. Modern, which already hid all four pieces, now hides `#frame`
+  and is unaffected by construction.
+  **Still open**: `GuardWindow`/`CastleWindow`'s `23 / 2 - lineHeight / 2` and
+  `56 / 2 - size.cx / 2` label centring, and `message_box_view.rml`'s remaining bound geometry
+  (`l.top`, `b.left`/`b.top`, the list and its scrollbar). Note the genuine carve-out on the
+  centring: inside a `.sharp-text` block layout height and rendered height disagree, which explains
+  `button_label_top` -- it does not explain a button's `left`.
 - **C++ choosing which decorative pieces exist. Fixed.** `GuardWindowRmlModel::listFrame` was an
   int C++ set to 0/1/2, and the document switched whole blocks of frame edges on it, each carrying
   literal `style="left: 11px; top: 111px; ..."` in *shared* markup -- so neither theme could move an
