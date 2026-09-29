@@ -10423,8 +10423,7 @@ void ReceiveQuestState(const BYTE* ReceiveBuffer)
     g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
     g_pNewUISystem->HideAll();
     g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCQUEST);
-    App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex,
-                                                  g_csQuest.getQuestState2(Data->m_byQuestIndex));
+    App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex, g_csQuest.getQuestState2(Data->m_byQuestIndex));
 }
 
 void ReceiveQuestResult(const BYTE* ReceiveBuffer)
@@ -10437,7 +10436,7 @@ void ReceiveQuestResult(const BYTE* ReceiveBuffer)
         g_pNewUISystem->HideAll();
         g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCQUEST);
         App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex,
-                                                  g_csQuest.getQuestState2(Data->m_byQuestIndex));
+                                                      g_csQuest.getQuestState2(Data->m_byQuestIndex));
     }
 }
 

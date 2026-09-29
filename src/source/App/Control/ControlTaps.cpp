@@ -258,7 +258,8 @@ void RecordQuestPrize(int key, int reward, int amount)
                                             "third_class"};
     constexpr int FirstReward = 200;
     const int offset = reward - FirstReward;
-    const std::string_view name = offset >= 0 && offset < static_cast<int>(std::size(Rewards)) ? Rewards[offset] : "unknown";
+    const std::string_view name =
+        offset >= 0 && offset < static_cast<int>(std::size(Rewards)) ? Rewards[offset] : "unknown";
     const int index = FindCharacterIndex(key);
     const bool known = index >= 0 && index < MAX_CHARACTERS_CLIENT;
     RecordQuestReward(known ? Core::Text::ToUtf8(CharactersClient[index].ID) : std::string(), name, amount,
