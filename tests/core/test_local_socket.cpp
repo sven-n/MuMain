@@ -2,8 +2,8 @@
 // Linux alike.
 //
 // The listener is exercised against a real socket file in a temporary
-// directory; the "client" is a plain blocking socket created by the test, so
-// nothing here needs a window, a renderer or the game's globals.
+// directory; the "client" is a plain socket created by the test, so nothing
+// here needs a window, a renderer or the game's globals.
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "\[core\]\[local-socket\]"
 
@@ -45,6 +45,21 @@
 
 namespace
 {
+// Bytes the send loops below hand the socket in one call: twice macOS's
+// default AF_UNIX buffer, so a partial send is the normal case there.
+constexpr std::size_t ChunkBytes = 16 * 1024;
+
+// Send buffer asked for on a LargeWriteClient: less than one chunk on every
+// platform (Linux doubles what it is given).
+constexpr int ClientSendBufferBytes = 4 * 1024;
+
+// How long a send loop waits for a client that cannot get a byte out before
+// it gives up, instead of spinning until ctest stops the case.
+constexpr std::chrono::milliseconds StallTimeout{5000};
+
+// Pause between two polls of a socket that had nothing to offer.
+constexpr std::chrono::milliseconds PollInterval{2};
+
 // Winsock has to be started before the first socket call; the shim makes both
 // calls no-ops on POSIX.
 void EnsureSocketLibrary()
@@ -89,7 +104,10 @@ std::filesystem::path MakeSocketDirectory()
     return directory;
 }
 
-// Blocking client side, standing in for a test script.
+// Client side, standing in for a test script. It blocks, which suits only
+// payloads the kernel buffers whole: the connection is read on this same
+// thread, so a send() that has to wait for it never returns. Larger payloads
+// need ConnectForLargeWrites.
 SOCKET ConnectTo(const std::string& path)
 {
     EnsureSocketLibrary();
@@ -115,21 +133,41 @@ SOCKET ConnectTo(const std::string& path)
     return handle;
 }
 
-// send()/recv() take an int length on Winsock and a size_t on POSIX.
-int SendAll(SOCKET handle, std::string_view payload)
+// A client that may send more than the socket buffer holds. Only
+// ConnectForLargeWrites makes one, and only SendWhileServing takes one, so
+// a large payload cannot go out through a blocking client by mistake.
+struct LargeWriteClient
+{
+    SOCKET handle = INVALID_SOCKET;
+};
+
+// Non-blocking, because a send() that had to wait for the connection would
+// wait for a read that can only run on this thread. With a send buffer
+// smaller than one chunk, so every platform takes the partial sends that
+// macOS's 8 KiB default forces, not only macOS.
+LargeWriteClient ConnectForLargeWrites(const std::string& path)
+{
+    const SOCKET handle = ConnectTo(path);
+    REQUIRE(handle != INVALID_SOCKET);
+    const int bufferBytes = ClientSendBufferBytes;
+    REQUIRE(::setsockopt(handle, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<const char*>(&bufferBytes),
+                         static_cast<int>(sizeof(bufferBytes))) == 0);
+    REQUIRE(Core::Platform::NonBlockingSocket::Enable(handle));
+    return LargeWriteClient{handle};
+}
+
+// One send() call, which may take only part of the payload. send()/recv()
+// take an int length on Winsock and a size_t on POSIX.
+int SendOnce(SOCKET handle, std::string_view payload)
 {
     return ::send(handle, payload.data(), static_cast<int>(payload.size()), 0);
 }
 
 // Bytes a non-blocking client's send() took: 0 while the socket buffer is
 // full, until the connection reads from it; -1 when the socket failed.
-// A test that writes more than the buffer holds, from the same thread that
-// reads it, needs such a client: a blocking send() waits for a read that
-// cannot start. macOS gives an AF_UNIX stream 8 KiB by default, less than
-// one of the chunks these tests write.
-int SendWhatFits(SOCKET handle, std::string_view payload)
+int SendWhatFits(const LargeWriteClient& client, std::string_view payload)
 {
-    const int sent = SendAll(handle, payload);
+    const int sent = SendOnce(client.handle, payload);
     if (sent < 0 && Core::Platform::NonBlockingSocket::WouldBlock(WSAGetLastError()))
     {
         return 0;
@@ -149,34 +187,98 @@ std::unique_ptr<Core::Platform::LocalSocketConnection> AcceptWithin(Core::Platfo
         {
             return connection;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        std::this_thread::sleep_for(PollInterval);
     }
     return nullptr;
 }
 
-// Pushes a payload in through chunks, buffering each one on the connection
-// without draining lines: how a pipelining script and the frame loop that
-// only serves a few requests per frame interleave. The client must be
-// non-blocking (NonBlockingSocket::Enable).
-bool BufferInto(SOCKET client, Core::Platform::LocalSocketConnection& connection, std::string_view payload)
+// Takes every complete line already buffered on the connection.
+std::size_t TakeBufferedLines(Core::Platform::LocalSocketConnection& connection)
 {
-    constexpr std::size_t ChunkBytes = 16 * 1024;
-    std::size_t offset = 0;
-    while (offset < payload.size())
+    std::size_t taken = 0;
+    std::string line;
+    while (connection.TakeLine(line))
     {
-        const std::size_t size = std::min(ChunkBytes, payload.size() - offset);
-        const int sent = SendWhatFits(client, payload.substr(offset, size));
+        ++taken;
+    }
+    return taken;
+}
+
+// Whether SendWhileServing takes the lines it buffers as they arrive.
+enum class Drain
+{
+    Lines,   // a frame loop that keeps up
+    Nothing, // a frame loop that has fallen behind
+};
+
+// How far SendWhileServing got.
+struct Delivery
+{
+    std::size_t bytesSent = 0;
+    std::size_t linesTaken = 0;
+};
+
+// Sends a payload in chunks with the connection reading between them: how a
+// pipelining script and the frame loop interleave. Stops once the payload is
+// out, when the socket fails or the connection closes, or when the client
+// has not got a byte out for `stallTimeout`: a connection that stopped
+// reading, which would otherwise keep this loop going forever.
+Delivery SendWhileServing(const LargeWriteClient& client, Core::Platform::LocalSocketConnection& connection,
+                          std::string_view payload, Drain drain, std::chrono::milliseconds stallTimeout = StallTimeout)
+{
+    Delivery delivery;
+    auto lastProgress = std::chrono::steady_clock::now();
+    while (delivery.bytesSent < payload.size())
+    {
+        const std::size_t size = std::min(ChunkBytes, payload.size() - delivery.bytesSent);
+        const int sent = SendWhatFits(client, payload.substr(delivery.bytesSent, size));
         if (sent < 0)
         {
-            return false;
+            break;
         }
-        offset += static_cast<std::size_t>(sent);
+        delivery.bytesSent += static_cast<std::size_t>(sent);
         if (!connection.ReadAvailable())
         {
-            return false;
+            break;
         }
+        if (drain == Drain::Lines)
+        {
+            delivery.linesTaken += TakeBufferedLines(connection);
+        }
+
+        const auto now = std::chrono::steady_clock::now();
+        if (sent > 0)
+        {
+            lastProgress = now;
+            continue;
+        }
+        if (now - lastProgress >= stallTimeout)
+        {
+            break;
+        }
+        std::this_thread::sleep_for(PollInterval);
     }
-    return true;
+    return delivery;
+}
+
+// Takes lines until `expected` have arrived, the connection closes or the
+// timeout passes: the end of a stream may still be on its way when the last
+// send() returns.
+std::size_t TakeLinesWithin(Core::Platform::LocalSocketConnection& connection, std::size_t expected,
+                            std::chrono::milliseconds timeout)
+{
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    std::size_t taken = 0;
+    while (true)
+    {
+        const bool open = connection.ReadAvailable();
+        taken += TakeBufferedLines(connection);
+        if (taken >= expected || !open || std::chrono::steady_clock::now() >= deadline)
+        {
+            return taken;
+        }
+        std::this_thread::sleep_for(PollInterval);
+    }
 }
 
 bool ReadLineWithin(Core::Platform::LocalSocketConnection& connection, std::string& line,
@@ -196,7 +298,7 @@ bool ReadLineWithin(Core::Platform::LocalSocketConnection& connection, std::stri
             // line yet" for a connection that can never produce one.
             return false;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        std::this_thread::sleep_for(PollInterval);
     }
     return false;
 }
@@ -223,7 +325,7 @@ TEST_CASE("Local socket serves a line round-trip [core][local-socket]")
 
     const std::string request = R"({"cmd":"ping"})"
                                 "\n";
-    REQUIRE(SendAll(client, request) == static_cast<int>(request.size()));
+    REQUIRE(SendOnce(client, request) == static_cast<int>(request.size()));
 
     std::string line;
     REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
@@ -266,7 +368,7 @@ TEST_CASE("Local socket splits and preserves partial lines [core][local-socket]"
 
     // Two complete lines (one with a CRLF terminator) plus an unterminated tail.
     const std::string payload = "first\r\nsecond\nthi";
-    REQUIRE(SendAll(client, payload) == static_cast<int>(payload.size()));
+    REQUIRE(SendOnce(client, payload) == static_cast<int>(payload.size()));
 
     std::string line;
     REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
@@ -279,7 +381,7 @@ TEST_CASE("Local socket splits and preserves partial lines [core][local-socket]"
     CHECK_FALSE(connection->TakeLine(line));
 
     const std::string rest = "rd\n";
-    REQUIRE(SendAll(client, rest) == static_cast<int>(rest.size()));
+    REQUIRE(SendOnce(client, rest) == static_cast<int>(rest.size()));
     REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
     CHECK(line == "third");
 
@@ -410,7 +512,7 @@ TEST_CASE("Local socket refuses a path another listener is serving [core][local-
     const SOCKET client = ConnectTo(path);
     REQUIRE(client != INVALID_SOCKET);
     const std::string probe = "{\"cmd\":\"ping\"}\n";
-    REQUIRE(SendAll(client, probe) == static_cast<int>(probe.size()));
+    REQUIRE(SendOnce(client, probe) == static_cast<int>(probe.size()));
 
     std::string line;
     std::unique_ptr<Core::Platform::LocalSocketConnection> served;
@@ -463,7 +565,7 @@ TEST_CASE("Local socket reports a closed peer [core][local-socket]")
     while (!connection->PeerClosed() && std::chrono::steady_clock::now() < deadline)
     {
         connection->ReadAvailable();
-        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        std::this_thread::sleep_for(PollInterval);
     }
     CHECK(connection->PeerClosed());
     CHECK_FALSE(connection->HasLine());
@@ -485,9 +587,7 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     std::string error;
     REQUIRE(listener.Listen(path, error));
 
-    const SOCKET client = ConnectTo(path);
-    REQUIRE(client != INVALID_SOCKET);
-    REQUIRE(Core::Platform::NonBlockingSocket::Enable(client));
+    const LargeWriteClient client = ConnectForLargeWrites(path);
     auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
     REQUIRE(connection != nullptr);
 
@@ -504,25 +604,13 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     }
     REQUIRE(batch.size() > Core::Platform::LocalSocketConnection::MaxPendingInputBytes);
 
-    // Served as it arrives, the way the frame loop does: reading pauses
-    // once a frame's worth of complete lines is waiting, so the batch is
-    // taken in several passes rather than all at once.
-    constexpr std::size_t ChunkBytes = 16 * 1024;
-    std::size_t offset = 0;
-    std::size_t taken = 0;
-    std::string line;
-    while (offset < batch.size())
-    {
-        const std::size_t size = std::min(ChunkBytes, batch.size() - offset);
-        const int sent = SendWhatFits(client, batch.substr(offset, size));
-        REQUIRE(sent >= 0);
-        offset += static_cast<std::size_t>(sent);
-        REQUIRE(connection->ReadAvailable());
-        while (connection->TakeLine(line))
-        {
-            ++taken;
-        }
-    }
+    // Served as it arrives, the way a frame loop that keeps up does: the
+    // batch is taken in many passes, and its complete lines never count
+    // against the cap on an unterminated one.
+    const Delivery delivery = SendWhileServing(client, *connection, batch, Drain::Lines);
+    REQUIRE(delivery.bytesSent == batch.size());
+    const std::size_t taken =
+        delivery.linesTaken + TakeLinesWithin(*connection, lines - delivery.linesTaken, std::chrono::milliseconds(500));
     CHECK(connection->IsOpen());
     CHECK(taken == lines);
 
@@ -530,10 +618,11 @@ TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [cor
     // Comfortably past the cap: crossing it on the last byte of the payload
     // would depend on that byte having arrived before ReadAvailable() runs.
     const std::string blob(Core::Platform::LocalSocketConnection::MaxPendingInputBytes + (64 * 1024), 'x');
-    CHECK_FALSE(BufferInto(client, *connection, blob));
+    const Delivery cutOff = SendWhileServing(client, *connection, blob, Drain::Nothing);
+    CHECK(cutOff.bytesSent < blob.size());
     CHECK_FALSE(connection->IsOpen());
 
-    closesocket(client);
+    closesocket(client.handle);
     listener.Close();
     std::filesystem::remove_all(directory);
 }
@@ -547,9 +636,7 @@ TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-so
     std::string error;
     REQUIRE(listener.Listen(path, error));
 
-    const SOCKET client = ConnectTo(path);
-    REQUIRE(client != INVALID_SOCKET);
-    REQUIRE(Core::Platform::NonBlockingSocket::Enable(client));
+    const LargeWriteClient client = ConnectForLargeWrites(path);
     auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
     REQUIRE(connection != nullptr);
 
@@ -566,36 +653,23 @@ TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-so
 
     // Written in chunks with the reader and a consumer interleaved, the way
     // the frame loop does it: the writer is never blocked out and nothing
-    // is dropped, while the buffer stays at the pause mark.
-    constexpr std::size_t ChunkBytes = 16 * 1024;
-    std::size_t offset = 0;
-    std::size_t taken = 0;
-    std::string line;
-    while (offset < batch.size())
-    {
-        const std::size_t size = std::min(ChunkBytes, batch.size() - offset);
-        const int sent = SendWhatFits(client, batch.substr(offset, size));
-        REQUIRE(sent >= 0);
-        offset += static_cast<std::size_t>(sent);
-
-        REQUIRE(connection->ReadAvailable());
-        REQUIRE(connection->IsOpen());
-        while (connection->TakeLine(line))
-        {
-            ++taken;
-        }
-    }
+    // is dropped.
+    const std::size_t lines = batch.size() / command.size();
+    const Delivery delivery = SendWhileServing(client, *connection, batch, Drain::Lines);
+    REQUIRE(delivery.bytesSent == batch.size());
+    const std::size_t taken =
+        delivery.linesTaken + TakeLinesWithin(*connection, lines - delivery.linesTaken, std::chrono::milliseconds(500));
 
     // Everything sent arrived, in order, and the connection is still open:
     // a fast writer is paced rather than dropped.
-    CHECK(taken == batch.size() / command.size());
+    CHECK(taken == lines);
     CHECK(connection->IsOpen());
 
     // Draining makes room, and the connection is still there to read more.
     REQUIRE(connection->ReadAvailable());
     CHECK(connection->IsOpen());
 
-    closesocket(client);
+    closesocket(client.handle);
     listener.Close();
     std::filesystem::remove_all(directory);
 }
