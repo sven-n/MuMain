@@ -7,6 +7,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -237,4 +238,9 @@ int mu::ui::window::EventItemEntryView::TakePressedButton()
 Rml::Element* mu::ui::window::EventItemEntryView::GetElementById(const char* id) const
 {
     return m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById(id) : nullptr;
+}
+
+void mu::ui::window::EventItemEntryView::RefreshPanelSize(float& width, float& height) const
+{
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", width, height);
 }

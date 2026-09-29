@@ -65,6 +65,11 @@ public:
     // An element of the main document (a window's own text field), or nullptr before Build().
     Rml::Element* GetElementById(const char* id) const;
 
+    // #panel's own live RCSS size, for the owner's native hit test. Leaves both alone when the
+    // document isn't up or laid out yet, so seed them with the window's own fallback constants
+    // (UI::RmlBridge::RefreshLogicalPanelSize()'s convention, which this forwards to).
+    void RefreshPanelSize(float& width, float& height) const;
+
 private:
     void SyncTexts();
     void SyncButtons();

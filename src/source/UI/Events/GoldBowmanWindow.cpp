@@ -133,7 +133,14 @@ bool CGoldBowmanWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY))
+    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
+    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    float panelWidth = INVENTORY_WIDTH;
+    float panelHeight = INVENTORY_HEIGHT;
+    m_View.RefreshPanelSize(panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                      static_cast<int>(panelHeight))
+            .Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

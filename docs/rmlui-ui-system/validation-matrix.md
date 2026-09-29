@@ -90,6 +90,20 @@ exempt in principle, they simply have no such conversion to get wrong.
 | `CMoveCommandWindow` | dock-left | panel rectangle blocks world clicks along its whole height; warp rows click; close bar clicks. The only `LayoutMode::DockLeft` window, and the only one whose `#panel` height is bound per-frame rather than fixed, so its hit box is the one most likely to disagree with what is drawn |
 | `CMuHelperConfigWindow` | docked | tabs, the six skill slots (left-click opens the picker, right-click clears), range +/−, the extra-item list's wheel (claimed only over the list), corner × |
 | `CMuHelperDetailWindow` | docked | the three gauges: click, wheel and drag set the level only on their own page, and the level matches where the fill is drawn |
+| `CGuardWindow` | docked | tabs, the three action buttons, corner ×; the panel blocks world clicks over its whole rectangle |
+| `CCastleWindow` | docked | four tabs, action buttons, the tax arrows, the gate/statue icon grid, corner × |
+| `CGatemanWindow` | docked | the mode's buttons, corner × |
+| `CGateSwitchWindow` | docked | its buttons, corner × |
+| `CDuelWatchWindow` | docked | room rows, corner × |
+| `CUnitedMarketPlaceWindow` | docked | its buttons, corner × |
+| `CDoppelGangerWindow` | docked | the enter button, corner × |
+| `CGoldBowmanWindow` | docked | the serial field's focus + typing, Register, corner × |
+| `CGoldBowmanLena` | docked | Register, corner × |
+
+The nine rows above joined this table when they stopped hit-testing against their own
+`INVENTORY_WIDTH = 190` literal and started reading `#panel`'s live size like the inventory family
+already did. Before that they were not in scope because they had no conversion to get wrong — they
+were simply wrong in a different way, against a constant no theme could change.
 
 ## Axes deliberately not covered yet
 

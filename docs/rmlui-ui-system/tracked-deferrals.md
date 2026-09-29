@@ -348,13 +348,24 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
   and CryWolf's banner fade as `RGBA(255,255,255,alpha)` where a bound opacity would leave the
   colour to the theme. `CCharacterInfoWindow`'s own derived-stat rows (`line.color`) stay out --
   they are display-list, not a value with a meaning.
-- **`kLayoutPanelWidth` exists three times.** `WindowSystem.cpp`'s `constexpr int kLayoutPanelWidth
-  = 190` decides where the next dock column starts; both themes' `docked_panel_frame.rcss`
-  independently declare `width: 190px` for how wide the panel draws. A theme widening its dock
-  overlaps its neighbour and nothing notices. The irony worth citing when fixing it: this same
-  family already reads its panel size back out of RCSS for hit-testing, via
-  `RefreshLogicalPanelSize()` — the right direction exists here and is simply not used for
-  placement.
+- **`kLayoutPanelWidth` and `INVENTORY_WIDTH = 190` exist in thirteen places.** Both themes'
+  `docked_panel_frame.rcss` declare `width: 190px` for how wide the panel draws; `WindowSystem.cpp`'s
+  `constexpr int kLayoutPanelWidth = 190` decides where the next dock column starts; and eleven
+  window headers declare their own `INVENTORY_WIDTH = 190`.
+  **The hit-test half is done**: the nine windows that still fed the literal to `WindowGeometry`
+  (`CastleWindow`, `DuelWatchWindow`, `GuardWindow`, `DoppelGangerWindow`, `GateSwitchWindow`,
+  `GoldBowmanLena`, `GoldBowmanWindow`, `UnitedMarketPlaceWindow`, `GatemanWindow`) now read
+  `#panel`'s live size through `RefreshLogicalPanelSize()` with the constant kept as the documented
+  first-frame fallback, exactly as the inventory family already did. The three that reach their
+  document through `EventItemEntryView` do it through a new `RefreshPanelSize()` on that view, so
+  the view keeps owning its document. All nine are now rows in `validation-matrix.md`.
+  **Deferred, and not fixable the same way**: `PanelColumnX()`. Its ~59 call sites all run inside
+  `Create()`, before any document exists, so there is nothing to read back -- dock *placement*
+  legitimately flows C++ -> RmlUi (`m_Pos` -> `root_x`), only dock *sizing* can flow back.
+  Inverting it means each panel self-placing after first layout, which is a layout-system change
+  and collides with drag persistence (`GetWindowPosition` seeds the same `x`/`y`). What remains is
+  "C++ owns column spacing, RCSS owns drawn width" -- one-directional, but still two numbers that
+  must agree. Revisit when something actually needs panels to self-place.
 - **`CChatLogWindow` fuses three layers into one string.** `snprintf(backColor, ...,
   "rgba(0,0,0,%d)", alpha)` composes a user preference (the cycled transparency), a semantic state
   (frame shown) and a theme decision (the backdrop is black). The header comment records the fusion
