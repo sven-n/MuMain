@@ -6,6 +6,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
+#include "GameLogic/Events/Cinematic/DirectionTurning.h"
 
 #include "Audio/DSPlaySound.h"
 
@@ -21,20 +22,6 @@ static CDirection Direction;
 
 namespace
 {
-constexpr float kPi = 3.14159265358979323846f;
-constexpr float kRadToDeg = 180.0f / kPi;
-// The degrees a monster of a direction turns in one frame at the reference fps. The monsters
-// turn fast, so that a group starts to walk together instead of one monster after the other.
-constexpr float kMonsterTurnStepDegrees = 30.0f;
-
-float UnwindDegrees360(float degrees)
-{
-    degrees = std::fmod(degrees, 360.0f);
-    if (degrees < 0.0f)
-        degrees += 360.0f;
-    return degrees;
-}
-
 CHARACTER* FindLiveCharacterByKey(int key)
 {
     auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
@@ -168,22 +155,8 @@ void CDirection::DeleteMonster()
 
 float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
 {
-    vec3_t vTemp, vTemp2, vResult;
-    float fx = (float)(x * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
-    float fy = (float)(y * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
-
-    Vector(fx, fy, 0.0f, vTemp);
-    Vector(c->Object.Position[0], c->Object.Position[1], 0.0f, vTemp2);
-
-    VectorSubtract(vTemp2, vTemp, vResult);
-    Vector(0.0f, 1.0f, 0.0f, vTemp2);
-
-    VectorNormalize(vResult);
-
-    // The monster walks along its angle in the direction (sin, -cos), so the x of the
-    // vector from the target to the monster is negated, like CreateAngle does it.
-    const float yawFromPositiveY = std::atan2(-vResult[0], vResult[1]) * kRadToDeg;
-    return UnwindDegrees360(yawFromPositiveY);
+    return GameLogic::Cinematic::CalculateAngleToTile(c->Object.Position[0], c->Object.Position[1], x, y,
+                                                      TERRAIN_SCALE);
 }
 
 void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni,
@@ -299,46 +272,26 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
 
     if (!bNext)
     {
-        int iResult = 0;
-
         if (stl_Monster[Index].m_bAngleCheck)
         {
-            int iAngle1 = (int)CalculateAngle(c, x, y, Angle);
-            int iAngle2 = (int)c->Object.Angle[2];
+            // The monster turns towards its target first. When it's aligned, its heading is exactly the direction
+            // to the target, so that it arrives at the target tile at any frame rate.
+            const float targetAngle = CalculateAngle(c, x, y, Angle);
+            const float turnStep = GameLogic::Cinematic::kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR;
+            if (!GameLogic::Cinematic::TurnTowards(c->Object.Angle[2], targetAngle, turnStep))
+            {
+                c->Blood = false;
+                SetAction(&c->Object, MONSTER01_STOP1);
+                return false;
+            }
 
-            if ((iAngle1 - Angle) > 180)
-                iAngle1 = iAngle1 - 360;
-
-            iResult = iAngle1 - iAngle2;
-            c->Blood = false;
-        }
-
-        if (iResult <= 3 && iResult >= -3)
-        {
-            c->Blood = true;
             stl_Monster[Index].m_bAngleCheck = false;
         }
 
-        if (c->Blood)
-        {
-            c->MoveSpeed = Speed;
-            SetAction(&c->Object, MONSTER01_WALK);
-            MoveCharacterPosition(c);
-        }
-        else
-        {
-            // The step is limited to the remaining angle, so that a monster doesn't turn past its direction.
-            const bool isTurningLeft = iResult > 3 && iResult <= 180;
-            const int remainingAngle = isTurningLeft ? iResult : (iResult > 180 ? 360 - iResult : -iResult);
-            const float turnStep =
-                (std::min)(kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR, static_cast<float>(remainingAngle));
-            if (isTurningLeft)
-                c->Object.Angle[2] += turnStep;
-            else
-                c->Object.Angle[2] -= turnStep;
-
-            SetAction(&c->Object, MONSTER01_STOP1);
-        }
+        c->Blood = true;
+        c->MoveSpeed = Speed;
+        SetAction(&c->Object, MONSTER01_WALK);
+        MoveCharacterPosition(c);
     }
     else
     {
