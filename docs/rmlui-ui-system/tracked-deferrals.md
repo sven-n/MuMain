@@ -221,6 +221,24 @@ ways, and only the first is self-announcing:
   - The open skill picker passes clicks through to the world everywhere except its icons.
   - The extra-item list is always shown reverse-alphabetically. Native showed that only after a
     reload, and insertion order before.
+- **The presentation-in-models pattern is wider than the four windows named for it** (found
+  2026-09-30, scanning the ports merged from `origin`). Same shape, not yet addressed:
+  `ChatCommandWindow`'s `edit_color` pushes a compile-time constant colour through the model;
+  the event and siege windows bind `banner_color`/`logo_color`/`kills_color`/`time_color`/
+  `timer_color`/`skill_color`, and CryWolf expresses a banner fade as `RGBA(255,255,255,alpha)`
+  where a bound opacity or a class would do; and roughly twenty static chrome coordinates
+  (`label_top`, `divider_top`, `tab_label_top`, `box_left`, `rank_label_left`, `logo_left`,
+  `arrows_left`, `statue_bar_left`, `progress_top`, `hint_left`, `tooltip_top`, ...) are bound from
+  C++ across those same windows. Minimap and world markers (`hero_left`, `target_left`,
+  `ice_walker_left`, `cursor_left`) are **not** in this set -- they are genuinely per-frame data.
+  Not scanned yet: presentation classes standing in for form-control semantics, and any gating on a
+  theme name rather than a declared capability.
+- **New ports mirror the native list's scrollbar geometry into their models**
+  (`GuardWindow`, `MixInventory`, `MessageBoxView`: `thumb_top`, `scroll_top`, `thumb_dragged`, read
+  from `CUITextListBox::GetScrollBarGeometry()`). Not hand-rolled scroll maths -- the native list is
+  still the one tracked below -- but it recreates the "RmlUi draws, native decides" split that
+  `CMoveCommandWindow` retired by adopting `.scroll-pane`, so it widens that deferral instead of
+  narrowing it.
 - **`COptionWindow`'s volume slider is a gold-thumb slider**; native drew the same fill gauge
   (`newui_option_volume01/02`) the MU Helper's detail window now draws in both themes. The gauge
   pieces are in `mu_helper_common.rcss` if the options window is revisited.
