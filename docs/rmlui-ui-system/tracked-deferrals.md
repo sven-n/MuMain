@@ -344,10 +344,13 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
   `CalculateAll()` and recomputes the total, so it cannot fold into two booleans. It confirmed the
   cost of the old shape too: modern's `#name { color: token(text-warm) }` had never taken effect,
   and both themes were given the same palette so the change is ownership only, not a redesign.
-  **Still open**: `ChatCommandWindow`'s `edit_color` (a compile-time constant through the model),
-  and CryWolf's banner fade as `RGBA(255,255,255,alpha)` where a bound opacity would leave the
-  colour to the theme. `CCharacterInfoWindow`'s own derived-stat rows (`line.color`) stay out --
-  they are display-list, not a value with a meaning.
+  **`ChatCommandWindow` and CryWolf done too**: `edit_color` was a `constexpr` travelling through a
+  per-frame model field to become an inline property, so it is simply a `color` on `#value_field` in
+  both themes now; and CryWolf's banner fade is a bound `banner_opacity` rather than
+  `RGBA(255,255,255,alpha)`, which leaves the banner's colour to the theme instead of pinning it
+  white in C++. `CCharacterInfoWindow`'s own derived-stat rows (`line.color`) stay out -- they are
+  display-list, not a value with a meaning -- and so does CryWolf's `timer_color`, which is
+  semantic but sits in that window's display-list half.
 - **`kLayoutPanelWidth` and `INVENTORY_WIDTH = 190` exist in thirteen places.** Both themes'
   `docked_panel_frame.rcss` declare `width: 190px` for how wide the panel draws; `WindowSystem.cpp`'s
   `constexpr int kLayoutPanelWidth = 190` decides where the next dock column starts; and eleven

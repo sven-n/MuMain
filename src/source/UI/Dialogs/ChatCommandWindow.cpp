@@ -51,8 +51,6 @@ constexpr TextColor FavouriteColor = {255, 220, 120};
 constexpr TextColor DescriptionColor = {200, 220, 255};
 constexpr TextColor MissingValueColor = {255, 150, 150};
 constexpr TextColor ActionColor = {150, 210, 255};
-// The value field's text: CUITextInputBox::SetTextColor(255, 255, 230, 210).
-const DWORD ValueFieldColor = RGBA(255, 255, 230, 210);
 
 DWORD ToRgba(const TextColor& color)
 {
@@ -757,7 +755,6 @@ void mu::ui::window::CChatCommandWindow::BuildRmlUi()
 
             c.Bind("editing", &model.editing);
             c.Bind("edit_top", &model.editTop);
-            c.Bind("edit_color", &model.editColor);
             c.Bind("has_left_button", &model.hasLeftButton);
             c.Bind("has_right_button", &model.hasRightButton);
             c.Bind("left_text", &model.leftText);
@@ -1013,7 +1010,6 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
     }
     SyncField(m_RmlBinder, &ChatCommandRmlModel::editing, "editing", editing);
     SyncField(m_RmlBinder, &ChatCommandRmlModel::editTop, "edit_top", editTop);
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::editColor, "edit_color", UI::RmlBridge::RgbaToCss(ValueFieldColor));
 
     // The left and right buttons: CButton::Render()'s label in the normal font, white.
     SyncField(m_RmlBinder, &ChatCommandRmlModel::hasLeftButton, "has_left_button", HasLeftButton());

@@ -250,7 +250,7 @@ void mu::ui::window::CCryWolf::BuildRmlUi()
                                                      c.Bind("result_visible", &model.resultVisible);
                                                      c.Bind("banner_left", &model.bannerLeft);
                                                      c.Bind("banner_src", &model.bannerSrc);
-                                                     c.Bind("banner_color", &model.bannerColor);
+                                                     c.Bind("banner_opacity", &model.bannerOpacity);
                                                      c.Bind("rank_label_left", &model.rankLabelLeft);
                                                      c.Bind("rank_details_visible", &model.rankDetailsVisible);
                                                      c.Bind("rank_letter_src", &model.rankLetterSrc);
@@ -320,8 +320,7 @@ void mu::ui::window::CCryWolf::SyncResult(CryWolfRmlModel& updated)
 
     updated.resultVisible = true;
     updated.bannerSrc = InterfaceImage(Add_Num == 11 ? "icon_success.tga" : "icon_failure.tga");
-    const BYTE alpha = static_cast<BYTE>(std::clamp(A_Value, 0.f, 1.f) * 255.f);
-    updated.bannerColor = UI::RmlBridge::RgbaToCss(RGBA(255, 255, 255, alpha));
+    updated.bannerOpacity = std::clamp(A_Value, 0.f, 1.f);
     if ((Delay * 15) > 479)
     {
         updated.bannerLeft = 150.f;
@@ -562,7 +561,7 @@ void mu::ui::window::CCryWolf::SyncView()
     sync(&CryWolfRmlModel::resultVisible, "result_visible");
     sync(&CryWolfRmlModel::bannerLeft, "banner_left");
     sync(&CryWolfRmlModel::bannerSrc, "banner_src");
-    sync(&CryWolfRmlModel::bannerColor, "banner_color");
+    sync(&CryWolfRmlModel::bannerOpacity, "banner_opacity");
     sync(&CryWolfRmlModel::rankLabelLeft, "rank_label_left");
     sync(&CryWolfRmlModel::rankDetailsVisible, "rank_details_visible");
     sync(&CryWolfRmlModel::rankLetterSrc, "rank_letter_src");

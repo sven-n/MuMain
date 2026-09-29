@@ -56,7 +56,6 @@ struct ChatCommandRmlModel
     // The value field of the parameter being edited (the original's CUITextInputBox).
     bool editing = false;
     float editTop = 0.f;
-    Rml::String editColor;
 
     bool hasLeftButton = false;
     bool hasRightButton = false;

@@ -15,7 +15,7 @@
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
 		<div id="result" data-if="result_visible">
 			<img id="banner" data-attr-src="banner_src" data-attr-rect="'0 0 328 93'"
-			     data-style-left="banner_left + 'px'" data-style-image-color="banner_color"/>
+			     data-style-left="banner_left + 'px'" data-style-opacity="banner_opacity"/>
 			<img id="rank_table" src="../../../icon_Rank_table.tga" rect="0 0 195 140"/>
 			<img id="rank_label" src="../../../icon_Rank_rank.tga" rect="0 0 110 27"
 			     data-style-left="rank_label_left + 'px'"/>

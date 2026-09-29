@@ -40,7 +40,7 @@
 		     data-event-click="chat_command_hit(h.action, h.index)"></div>
 
 		<input id="value_field" type="text" class="text-field sharp-text" data-class-editing="editing"
-		       data-style-top="edit_top + 'px'" data-style-color="edit_color" data-style-font-size="text_px + 'px'"
+		       data-style-top="edit_top + 'px'" data-style-font-size="text_px + 'px'"
 		       data-style-width="(142 * root_scale) + 'px'" data-style-height="(14 * root_scale) + 'px'"
 		       data-style-line-height="(14 * root_scale) + 'px'"
 		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>

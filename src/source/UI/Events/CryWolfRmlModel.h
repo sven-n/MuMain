@@ -39,7 +39,7 @@ struct CryWolfRmlModel
     bool resultVisible = false;
     float bannerLeft = 0.f;
     Rml::String bannerSrc;
-    Rml::String bannerColor; // its pulsing alpha
+    float bannerOpacity = 1.f; // the banner's fade; the theme owns its colour
     float rankLabelLeft = 0.f;
     bool rankDetailsVisible = false;
     Rml::String rankLetterSrc; // empty for a rank the original had no letter for
