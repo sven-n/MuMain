@@ -202,22 +202,10 @@ internal sealed class TradeInventoryFullScenario : Scenario
     // The first free place of the 8x4 trade grid for the item; marks it used.
     private static int TradeSlotFor(ItemSlot item, HashSet<int> used)
     {
-        for (var row = 0; row + item.Height <= TradeRows; row++)
-        {
-            for (var column = 0; column + item.Width <= TradeColumns; column++)
-            {
-                var squares = Enumerable.Range(0, item.Height)
-                    .SelectMany(dy => Enumerable.Range(0, item.Width).Select(dx => ((row + dy) * TradeColumns) + column + dx))
-                    .ToList();
-                if (squares.All(square => !used.Contains(square)))
-                {
-                    used.UnionWith(squares);
-                    return (row * TradeColumns) + column;
-                }
-            }
-        }
-
-        throw new ScenarioFailedException($"the trade window has no room for '{item.Name}'");
+        var slot = ItemSlots.FreeArea(used, item.Width, item.Height, TradeColumns, TradeRows, 0)
+                   ?? throw new ScenarioFailedException($"the trade window has no room for '{item.Name}'");
+        used.UnionWith(ItemSlots.Squares(slot, item.Width, item.Height, TradeColumns));
+        return slot;
     }
 
     private static async Task ExpectUnchangedAsync(GameClient client, Holdings had)

@@ -67,6 +67,15 @@ public:
                                int* outX, int* outY);
 
     /**
+     * @brief Projects a world position to window pixels, as ScreenToWorldRay
+     *        casts the mouse ray back (WorldToScreen without its 640x480
+     *        conversion and integer steps)
+     *
+     * @return false when the position is behind the camera
+     */
+    static bool WorldToWindowPixel(const CameraState& state, const vec3_t worldPos, float* outX, float* outY);
+
+    /**
      * @brief Transforms position relative to camera (pixel coordinates)
      *
      * Replaces TransformPosition(). Returns coordinates in actual pixel space.

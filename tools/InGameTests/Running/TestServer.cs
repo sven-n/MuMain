@@ -97,7 +97,10 @@ internal static class TestServer
         {
             try
             {
-                var (exitCode, output, errors) = await RunConnectedAsync(tool, ["logs", ContainerName], TextWriter.Null, cancellationToken);
+                // The recent lines: Marlon moves every one to three hours, and
+                // the server writes far fewer lines than this in that time.
+                var (exitCode, output, errors) = await RunConnectedAsync(
+                    tool, ["logs", "--tail", RecentLogLines, ContainerName], TextWriter.Null, cancellationToken);
                 if (exitCode == 0)
                 {
                     return LastSpawn(output + Environment.NewLine + errors, name);
@@ -110,6 +113,68 @@ internal static class TestServer
         }
 
         return null;
+    }
+
+    private const string RecentLogLines = "20000";
+
+    /// <summary>
+    /// How long the test server's container has been running; null when the server is not the
+    /// test server or the container cannot be asked.
+    /// </summary>
+    public static async Task<TimeSpan?> UptimeAsync(string host, int port, CancellationToken cancellationToken)
+    {
+        if (!IsTestServer(host, port))
+        {
+            return null;
+        }
+
+        foreach (var tool in FindContainerTools())
+        {
+            try
+            {
+                var (exitCode, output, _) = await RunConnectedAsync(
+                    tool, ["inspect", ContainerName, "--format", "{{.State.StartedAt}}"], TextWriter.Null, cancellationToken);
+                if (exitCode == 0 && ParseStartedAt(output) is { } started)
+                {
+                    return DateTimeOffset.UtcNow - started;
+                }
+            }
+            catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception)
+            {
+                // Try the next tool.
+            }
+        }
+
+        return null;
+    }
+
+    // podman writes "2026-09-29 17:15:20.123456789 +0000 UTC", docker "2026-09-29T17:15:20.123456789Z".
+    private static readonly System.Text.RegularExpressions.Regex StartedAtFormat = new(
+        "(?<date>\\d{4}-\\d{2}-\\d{2})[T ](?<time>\\d{2}:\\d{2}:\\d{2})(?:\\.(?<fraction>\\d+))?\\s*(?<zone>Z|[+-]\\d{2}:?\\d{2})?",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    private static DateTimeOffset? ParseStartedAt(string text)
+    {
+        var match = StartedAtFormat.Match(text);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        var fraction = match.Groups["fraction"].Success ? match.Groups["fraction"].Value.PadRight(7, '0')[..7] : "0000000";
+        var zone = match.Groups["zone"].Value switch
+        {
+            "" or "Z" => "+00:00",
+            var offset when offset.Contains(':') => offset,
+            var offset => offset[..3] + ":" + offset[3..],
+        };
+        return DateTimeOffset.TryParse(
+            $"{match.Groups["date"].Value}T{match.Groups["time"].Value}.{fraction}{zone}",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None,
+            out var started)
+            ? started
+            : null;
     }
 
     // "New merchant "Marlon - Id: 827 - Position: 136, 88" has been created on "0 - Lorencia". ... Scope=["GameServer: 0", ...]"

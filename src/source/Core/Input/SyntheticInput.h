@@ -49,6 +49,14 @@ enum class MouseButton : std::uint8_t
 // answers once this turns true again.
 [[nodiscard]] bool IsIdle();
 
+// Whether a key or click the control socket injects is in flight. It never
+// went through ImGui, so the editor's checks of the real pointer and keyboard
+// must not claim this frame's input for the editor.
+[[nodiscard]] inline bool IsInjecting()
+{
+    return !IsIdle();
+}
+
 // Identifies the injection most recently accepted: every `PressKey` or
 // `Click` that returns true gets a value of its own. A command reads it when
 // its injection is scheduled and compares later, so it can tell its own
@@ -76,6 +84,11 @@ void Reset();
 [[nodiscard]] inline bool IsIdle()
 {
     return true;
+}
+
+[[nodiscard]] inline bool IsInjecting()
+{
+    return false;
 }
 
 [[nodiscard]] inline bool IsKeyHeld(int)

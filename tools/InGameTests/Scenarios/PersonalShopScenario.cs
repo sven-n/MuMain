@@ -93,12 +93,18 @@ internal sealed class PersonalShopScenario : Scenario
             async () =>
             {
                 await seller.SendAsync("type", new { text = Price.ToString(CultureInfo.InvariantCulture) });
+                // Enter closes the dialog at once; the jewel goes into the shop
+                // with the server's answer, so it is waited for, not pressed for.
                 await Keys.PressUntilAsync(
                     context,
                     seller,
                     "enter",
+                    async () => !(await seller.OpenWindowsAsync()).Contains("message_box"),
+                    "the price dialog does not take Enter");
+                await Expect.EventuallyAsync(
                     async () => MyShopItems(await seller.StateAsync()).Any(item => item.Name == JewelName && item.Price == Price),
-                    $"the jewel is not in the shop for {price} zen after Enter");
+                    ServerAnswer,
+                    $"the jewel is not in the shop for {price} zen");
             },
             [Seller]);
         await context.StepAsync(

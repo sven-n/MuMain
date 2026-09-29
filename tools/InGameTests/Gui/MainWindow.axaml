@@ -78,8 +78,18 @@
       <TextBlock x:Name="SelectionText" VerticalAlignment="Center" Opacity="0.75" />
     </StackPanel>
 
+    <!-- Run -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+      <Button x:Name="RunButton" Content="Run and write report" Classes="accent" />
+      <Button x:Name="StopButton" Content="Stop after this test" IsEnabled="False" />
+      <Button x:Name="OpenReportButton" Content="Open report" IsEnabled="False" />
+      <Button x:Name="OpenReportFolderButton" Content="Open report folder"
+              ToolTip.Tip="Shows the report of the last run in the file browser, e.g. to drag it into a pull request comment; before a run, the folder the reports go to" />
+      <TextBlock x:Name="RunStatusText" VerticalAlignment="Center" TextWrapping="Wrap" />
+    </StackPanel>
+
     <!-- The tests take the room there is; the log keeps its height below them -->
-    <Grid RowDefinitions="*,Auto,6,170" MinHeight="260">
+    <Grid RowDefinitions="*,6,170" MinHeight="260">
       <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="6">
         <ScrollViewer x:Name="ScenarioScroll">
           <ItemsControl x:Name="ScenarioList">
@@ -144,20 +154,10 @@
         </ScrollViewer>
       </Border>
 
-      <!-- Run -->
-      <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,12">
-        <Button x:Name="RunButton" Content="Run and write report" Classes="accent" />
-        <Button x:Name="StopButton" Content="Stop after this test" IsEnabled="False" />
-        <Button x:Name="OpenReportButton" Content="Open report" IsEnabled="False" />
-        <Button x:Name="OpenReportFolderButton" Content="Open report folder"
-                ToolTip.Tip="Shows the report of the last run in the file browser, e.g. to drag it into a pull request comment; before a run, the folder the reports go to" />
-        <TextBlock x:Name="RunStatusText" VerticalAlignment="Center" TextWrapping="Wrap" />
-      </StackPanel>
-
       <!-- Drag to give the tests or the log more room -->
-      <GridSplitter Grid.Row="2" ResizeDirection="Rows" Background="Transparent" />
+      <GridSplitter Grid.Row="1" ResizeDirection="Rows" Background="Transparent" />
 
-      <TextBox x:Name="LogBox" Grid.Row="3" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+      <TextBox x:Name="LogBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
                FontFamily="Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace" FontSize="12" />
     </Grid>
   </DockPanel>

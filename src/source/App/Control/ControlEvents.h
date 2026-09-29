@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -109,8 +110,9 @@ void RecordPartyResult(std::string_view result);
 void RecordQuestChange(int quest, std::string_view state);
 // A legacy quest reward for the character `name`: `reward` is
 // level_up_points, second_class, points_per_level, combo, third_class or
-// unknown; `characterClass` is its class afterwards.
-void RecordQuestReward(std::string_view name, std::string_view reward, int amount, int characterClass);
+// unknown, with its `amount` where it has one; `characterClass` is the
+// character's class afterwards.
+void RecordQuestReward(std::string_view name, std::string_view reward, std::optional<int> amount, int characterClass);
 // A trade step: `change` is requested, opened, refused, unavailable,
 // partner_confirm or closed. `name` is the partner (may be empty), `detail`
 // the confirm state or how the trade closed (may be empty).

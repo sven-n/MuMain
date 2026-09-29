@@ -474,7 +474,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
         // Don't open chat if editor has keyboard focus. An Enter the control
         // socket injects never reached the editor, whatever the real pointer
         // hovers.
-        if (g_MuEditorCore.IsEnabled() && !Core::Input::Synthetic::IsKeyHeld(VK_RETURN))
+        if (g_MuEditorCore.IsEnabled() && !Core::Input::Synthetic::IsInjecting())
         {
             ImGuiIO& io = ImGui::GetIO();
             if (io.WantCaptureKeyboard || io.WantCaptureMouse)

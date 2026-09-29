@@ -33,24 +33,34 @@ internal static class ItemSlots
     /// area of the main inventory grid, row by row; null when there is none.
     /// </summary>
     public static int? FreeArea(IReadOnlyList<ItemSlot> inventory, int width, int height)
+        => FreeArea(inventory.Select(entry => entry.Slot).ToHashSet(), width, height, InventoryColumns, InventoryRows, FirstInventorySlot);
+
+    /// <summary>
+    /// The top-left slot of the first <paramref name="width"/> x <paramref name="height"/> area of
+    /// a grid (<paramref name="columns"/> x <paramref name="rows"/>, slots numbered row by row from
+    /// <paramref name="firstSlot"/>) that none of the <paramref name="used"/> squares covers; null
+    /// when there is none.
+    /// </summary>
+    public static int? FreeArea(IReadOnlySet<int> used, int width, int height, int columns, int rows, int firstSlot)
     {
-        var used = inventory.Select(entry => entry.Slot).ToHashSet();
-        for (var row = 0; row + height <= InventoryRows; row++)
+        for (var row = 0; row + height <= rows; row++)
         {
-            for (var column = 0; column + width <= InventoryColumns; column++)
+            for (var column = 0; column + width <= columns; column++)
             {
-                var fits = Enumerable.Range(0, height)
-                    .SelectMany(dy => Enumerable.Range(0, width).Select(dx => FirstInventorySlot + ((row + dy) * InventoryColumns) + column + dx))
-                    .All(slot => !used.Contains(slot));
+                var fits = Squares(firstSlot + (row * columns) + column, width, height, columns).All(slot => !used.Contains(slot));
                 if (fits)
                 {
-                    return FirstInventorySlot + (row * InventoryColumns) + column;
+                    return firstSlot + (row * columns) + column;
                 }
             }
         }
 
         return null;
     }
+
+    /// <summary>The squares an item of <paramref name="width"/> x <paramref name="height"/> covers from <paramref name="topLeft"/>.</summary>
+    public static IEnumerable<int> Squares(int topLeft, int width, int height, int columns)
+        => Enumerable.Range(0, height).SelectMany(dy => Enumerable.Range(0, width).Select(dx => topLeft + (dy * columns) + dx));
 
     private static ItemSlot Read(JsonElement item)
         => new(

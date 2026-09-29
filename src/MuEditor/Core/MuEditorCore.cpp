@@ -502,8 +502,9 @@ void CMuEditorCore::Update()
 
         // A click the control socket injects is somewhere else than the real
         // pointer, which is what ImGui's mouse position follows.
-        if (Core::Input::Synthetic::IsIdle() && io.MousePos.x >= buttonX && io.MousePos.x <= (buttonX + buttonWidth) &&
-            io.MousePos.y >= buttonY && io.MousePos.y <= (buttonY + buttonHeight))
+        if (!Core::Input::Synthetic::IsInjecting() && io.MousePos.x >= buttonX &&
+            io.MousePos.x <= (buttonX + buttonWidth) && io.MousePos.y >= buttonY &&
+            io.MousePos.y <= (buttonY + buttonHeight))
         {
             // Mouse is over button - block game input for this frame
             extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;

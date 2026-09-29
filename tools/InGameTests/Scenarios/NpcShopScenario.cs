@@ -164,19 +164,11 @@ internal sealed class NpcShopScenario : Scenario
     // A square of the shop no goods cover: a drop there sells the item.
     private static async Task<int> FreeShopSquareAsync(GameClient client)
     {
-        var used = new HashSet<int>();
-        foreach (var goods in ShopItems(await client.StateAsync()))
-        {
-            for (var dy = 0; dy < goods.Height; dy++)
-            {
-                for (var dx = 0; dx < goods.Width; dx++)
-                {
-                    used.Add(goods.Slot + (dy * ShopColumns) + dx);
-                }
-            }
-        }
-
-        return Enumerable.Range(0, ShopColumns * ShopRows).Reverse().First(square => !used.Contains(square));
+        var used = ShopItems(await client.StateAsync())
+            .SelectMany(goods => ItemSlots.Squares(goods.Slot, goods.Width, goods.Height, ShopColumns))
+            .ToHashSet();
+        return ItemSlots.FreeArea(used, 1, 1, ShopColumns, ShopRows, 0)
+               ?? throw new ScenarioFailedException("the shop has no free square to drop an item on");
     }
 
     private const int ShopColumns = 8;

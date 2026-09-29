@@ -113,8 +113,13 @@ internal sealed class RepairScenario : Scenario
     // An equipped item and what repairing it costs now, if the client shows a price.
     private sealed record Worn(string Name, int Durability, int MaxDurability, long? RepairPrice);
 
+    // Right after entering the world the equipment may still be on its way.
     private static async Task<Worn> WornAsync(GameClient client, int slot)
     {
+        await Expect.EventuallyAsync(
+            async () => ItemSlots.At(ItemSlots.Of(await client.StateAsync(), "equipment"), slot) is not null,
+            ServerAnswer,
+            $"nothing is equipped in slot {slot}; the OpenMU test data equips {TestAccounts.Repairer.Name} there");
         foreach (var item in (await client.StateAsync()).GetProperty("equipment").EnumerateArray())
         {
             if (item.GetProperty("slot").GetInt32() != slot)

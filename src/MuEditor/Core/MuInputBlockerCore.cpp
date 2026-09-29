@@ -22,7 +22,7 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     // Only block when hovering or when keyboard input is wanted. A key or
     // click the control socket injects never went through ImGui, whatever the
     // real pointer hovers.
-    bool shouldBlockInput = (io.WantCaptureMouse || io.WantCaptureKeyboard) && Core::Input::Synthetic::IsIdle();
+    bool shouldBlockInput = (io.WantCaptureMouse || io.WantCaptureKeyboard) && !Core::Input::Synthetic::IsInjecting();
 
     if (!shouldBlockInput)
         return;

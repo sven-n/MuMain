@@ -115,7 +115,8 @@ is the client's number, e.g. 1 Dark Knight, 8 Blade Knight, 12 Blade Master),
 `level_up_points`, `stats` (`strength`, `agility`, `vitality`, `energy`,
 `command`, without bonuses), `combo` (the Blade Knight's combo from Marlon),
 `quests` (the seven legacy quests with `index`, `name` and `state`:
-`active`, `complete`, `not_started` or `none`), and `npc_quest`, the quest
+`active`, `complete`, `not_started`, `none`, or `unknown` for a value outside
+these, as in the `quest` events), and `npc_quest`, the quest
 dialog on screen (`quest`, `page`, `text`, `need_zen`, and its `answers`, each
 with its `text` and `action`: `next` turns the page, `accept` takes the quest,
 `complete` hands it in, `close` ends the talk) or `null`.
@@ -172,7 +173,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 | `map` | `map`, `map_name`, `position` |
 | `scene` | `scene` |
 | `view_enter` / `view_leave` | `object` |
-| `quest` | `change`: `state` with the legacy `quest` and its new `state` (`active`, `complete`, `not_started`), or `reward` with the character's `name`, the `reward` (`level_up_points`, `second_class`, `points_per_level`, `combo`, `third_class`), its `amount` and the character's `class` afterwards |
+| `quest` | `change`: `state` with the legacy `quest` and its new `state` (`active`, `complete`, `not_started`, `none`, `unknown`), or `reward` with the character's `name`, the `reward` (`level_up_points`, `second_class`, `points_per_level`, `combo`, `third_class`), its `amount` (none for the two class changes, whose new class is `class`) and the character's `class` afterwards; the client records the rewards of every player in view, so a script matches its own `name` |
 | `party` | `change` (`invited` with the inviter's `name`; `list` with the leader's `name` after every change of the members; `left`; `result` with `result` — `failed`, `denied`, `full`, `user_left`, `other_party`, `left`, `opposing_gens`, `battle_zone`, `battle_zone_off` — when an invitation formed no party) |
 | `trade` | `change` (`requested`, `opened`, `refused`, `unavailable`, `partner_confirm`, `closed`), `name` for a request or an opened trade, `state` (`checked`, `unchecked`, `reset`; `unknown` for a value outside the protocol) for the partner's button, `result` (`completed`, `cancelled`, `inventory_full`, `request_cancelled`, `reinforced_item`) when it closes; `refused` also on the asked side, when a window that forbids trading is open and the client says no by itself |
 | `disconnect` | `reason` |

@@ -363,7 +363,7 @@ void RecordQuestChange(int quest, std::string_view state)
     Push("quest", fields);
 }
 
-void RecordQuestReward(std::string_view name, std::string_view reward, int amount, int characterClass)
+void RecordQuestReward(std::string_view name, std::string_view reward, std::optional<int> amount, int characterClass)
 {
     if (!IsEnabled())
     {
@@ -374,7 +374,10 @@ void RecordQuestReward(std::string_view name, std::string_view reward, int amoun
     fields["change"] = "reward";
     fields["name"] = name;
     fields["reward"] = reward;
-    fields["amount"] = amount;
+    if (amount)
+    {
+        fields["amount"] = *amount;
+    }
     fields["class"] = characterClass;
     Push("quest", fields);
 }

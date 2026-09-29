@@ -279,7 +279,8 @@ std::string SlotPixel(const Request& request, std::unique_ptr<Act>&)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "unknown `grid` `" + grid +
-                               "`; known: inventory, equipment, trade, trade_partner, storage, mix");
+                               "`; known: inventory, equipment, trade, trade_partner, storage, mix, npc_shop, my_shop, "
+                               "purchase_shop");
     }
     if (grid == "equipment")
     {

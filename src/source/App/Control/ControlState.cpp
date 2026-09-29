@@ -3,6 +3,7 @@
 
 #include "App/Control/ControlObjects.h"
 #include "App/Control/ControlTaps.h"
+#include "Camera/CameraProjection.h"
 #include "Camera/CameraState.h"
 
 #include "Core/Text/Utf8.h"
@@ -79,10 +80,17 @@ void AddRepairPrice(json& described, const ITEM& item)
         return;
     }
 
+    // No value yet (a Dark Lord pet whose data has not arrived): the tooltip
+    // shows no price either.
+    const int64_t value = ItemValue(repaired, 2);
+    if (value < 0)
+    {
+        return;
+    }
+
     // The tooltip's own function, which picks the NPC or the self-repair price.
     wchar_t text[100] = {};
-    described["repair_price"] =
-        ConvertRepairGold(ItemValue(repaired, 2), item.Durability, maxDurability, item.Type, text);
+    described["repair_price"] = ConvertRepairGold(value, item.Durability, maxDurability, item.Type, text);
 }
 
 // The items of a trade grid, by the grid's own slot numbers.
@@ -302,8 +310,12 @@ json LegacyQuestArray()
         case QUEST_NO:
             quest["state"] = "not_started";
             break;
-        default:
+        case QUEST_NONE:
             quest["state"] = "none";
+            break;
+        default:
+            // QUEST_READY and QUEST_ERROR; the events name them the same.
+            quest["state"] = "unknown";
             break;
         }
         quests.push_back(std::move(quest));
@@ -442,17 +454,13 @@ json ObjectPixel(const OBJECT& object)
         center[axis] = box.StartPos[axis] + (box.XAxis[axis] + box.YAxis[axis] + box.ZAxis[axis]) * 0.5f;
     }
 
-    vec3_t camera;
-    VectorTransform(center, g_worldCamera.Matrix, camera);
-    if (camera[2] >= 0.0f)
+    float x = 0.0f;
+    float y = 0.0f;
+    if (!CameraProjection::WorldToWindowPixel(g_worldCamera, center, &x, &y))
     {
         return nullptr;
     }
 
-    const float x =
-        static_cast<float>(g_worldCamera.ScreenCenterX) - camera[0] / (g_worldCamera.PerspectiveX * camera[2]);
-    const float y =
-        static_cast<float>(g_worldCamera.ScreenCenterY) + camera[1] / (g_worldCamera.PerspectiveY * camera[2]);
     if (x < 0.0f || y < 0.0f || x >= static_cast<float>(WindowWidth) || y >= static_cast<float>(WindowHeight))
     {
         return nullptr;

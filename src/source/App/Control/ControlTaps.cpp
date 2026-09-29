@@ -14,6 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <cstring>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -262,7 +263,11 @@ void RecordQuestPrize(int key, int reward, int amount)
         offset >= 0 && offset < static_cast<int>(std::size(Rewards)) ? Rewards[offset] : "unknown";
     const int index = FindCharacterIndex(key);
     const bool known = index >= 0 && index < MAX_CHARACTERS_CLIENT;
-    RecordQuestReward(known ? Core::Text::ToUtf8(CharactersClient[index].ID) : std::string(), name, amount,
+    // For a class change the packet's number is the server's class code, not
+    // an amount; the event names the new class instead.
+    const bool classChange = name == "second_class" || name == "third_class";
+    RecordQuestReward(known ? Core::Text::ToUtf8(CharactersClient[index].ID) : std::string(), name,
+                      classChange ? std::nullopt : std::optional<int>(amount),
                       known ? static_cast<int>(CharactersClient[index].Class) : -1);
 }
 

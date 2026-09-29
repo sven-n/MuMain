@@ -86,6 +86,20 @@ void CameraProjection::WorldToScreen(const CameraState& state, const vec3_t worl
     *outY = *outY * REFERENCE_HEIGHT / (int)WindowHeight;
 }
 
+bool CameraProjection::WorldToWindowPixel(const CameraState& state, const vec3_t worldPos, float* outX, float* outY)
+{
+    vec3_t transformPos;
+    VectorTransform(worldPos, state.Matrix, transformPos);
+    if (transformPos[2] >= 0.0f)
+    {
+        return false;
+    }
+
+    *outX = static_cast<float>(state.ScreenCenterX) - transformPos[0] / (state.PerspectiveX * transformPos[2]);
+    *outY = static_cast<float>(state.ScreenCenterY) + transformPos[1] / (state.PerspectiveY * transformPos[2]);
+    return true;
+}
+
 void CameraProjection::TransformPosition(const CameraState& state, const vec3_t position,
                                           vec3_t outWorldPosition, int* outX, int* outY)
 {

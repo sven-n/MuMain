@@ -22,6 +22,8 @@ internal sealed partial class MainWindow : Window
     private readonly GuiSettings settings = GuiSettings.Load();
     private readonly ObservableCollection<ScenarioRow> rows = [];
     private readonly List<ScenarioGroup> groups;
+    // Categories a run unfolded to show its test; they are saved folded, as the user left them.
+    private readonly HashSet<ScenarioGroup> unfoldedByRun = [];
     // The row controls by row, to scroll the running test into view.
     private readonly Dictionary<ScenarioRow, Avalonia.Controls.Control> rowControls = [];
     private CancellationTokenSource? stopRequest;
@@ -366,7 +368,7 @@ internal sealed partial class MainWindow : Window
         this.settings.ScreenshotQuality = TryParseQuality(this.DefaultQualityBox.Text, out var quality) && quality is { } value
             ? value
             : Clients.ClientOptions.DefaultScreenshotQuality;
-        this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
+        this.settings.CollapsedCategories = this.CollapsedCategories();
         this.settings.Scenarios = this.rows.ToDictionary(
             row => row.Name,
             row => new GuiSettings.ScenarioSettings { Checked = row.IsChecked, Delay = row.DelayText, Quality = row.QualityText });
@@ -412,7 +414,11 @@ internal sealed partial class MainWindow : Window
     private void ScrollIntoView(ScenarioRow row)
     {
         var group = this.groups.First(candidate => candidate.Rows.Contains(row));
-        group.IsExpanded = true;
+        if (!group.IsExpanded)
+        {
+            this.unfoldedByRun.Add(group);
+            group.IsExpanded = true;
+        }
         if (this.rowControls.TryGetValue(row, out var control))
         {
             Dispatcher.UIThread.Post(() => control.BringIntoView(), DispatcherPriority.Background);
@@ -533,11 +539,15 @@ internal sealed partial class MainWindow : Window
         }
 
         // Which categories are folded in is kept even without a run.
-        this.settings.CollapsedCategories = [.. this.groups.Where(group => !group.IsExpanded).Select(group => group.Category.ToString())];
+        this.settings.CollapsedCategories = this.CollapsedCategories();
         this.settings.Save();
     }
 
     private ScenarioRow Row(string name) => this.rows.First(row => row.Name == name);
+
+    // The folded categories as the user left them: one a run unfolded counts as folded.
+    private List<string> CollapsedCategories()
+        => [.. this.groups.Where(group => !group.IsExpanded || this.unfoldedByRun.Contains(group)).Select(group => group.Category.ToString())];
 
     private void AppendLog(string text)
     {

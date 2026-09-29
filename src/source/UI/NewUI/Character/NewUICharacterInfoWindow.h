@@ -85,6 +85,9 @@ namespace SEASON3B
         CNewUIButton* GetShownStatButton(int stat);
 
     private:
+        // The "+" buttons shown: strength, agility, vitality, energy, and
+        // command for a Dark Lord.
+        int StatButtonCount() const;
         void LoadImages();
         void UnloadImages();
         void ResetEquipmentLevel();

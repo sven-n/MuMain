@@ -143,15 +143,19 @@ internal static class Quests
             () => $"quest {quest} is {now}, not {state}");
     }
 
-    /// <summary>A quest reward event since <paramref name="since"/>; its amount.</summary>
+    /// <summary>
+    /// A quest reward of the client's own character since <paramref name="since"/>; its amount,
+    /// 0 for a reward without one. The client also records the rewards of players in view.
+    /// </summary>
     public static async Task<int> RewardAsync(GameClient client, string reward, long since)
     {
+        var name = (await client.StateAsync()).GetProperty("character").GetString() ?? string.Empty;
         var found = await client.WaitForEventAsync(
             "quest",
-            new Dictionary<string, string> { ["change"] = "reward", ["reward"] = reward },
+            new Dictionary<string, string> { ["change"] = "reward", ["reward"] = reward, ["name"] = name },
             since,
             ServerAnswer);
-        return found.GetProperty("event").GetProperty("amount").GetInt32();
+        return found.GetProperty("event").TryGetProperty("amount", out var amount) ? amount.GetInt32() : 0;
     }
 
     /// <summary>
@@ -177,29 +181,31 @@ internal static class Quests
     }
 
     // A freshly started test server puts Marlon somewhere some 20 s after it
-    // starts, and a quick scenario can ask before that: on the test server the
-    // log is asked again for a while.
+    // starts, and a quick scenario can ask before that: while the container is
+    // that young the log is asked again. An older one without the line (e.g.
+    // set up before its compose file logged the moves) gets no wait.
     private static async Task<Running.WanderingNpcSpot?> MarlonFromLogAsync(GameClient client)
     {
-        if (!Running.TestServer.IsTestServer(client.ServerHost, client.ServerPort))
-        {
-            return null;
-        }
-
-        var deadline = DateTime.UtcNow + MarlonSpawnWait;
         while (true)
         {
             var spot = await Running.TestServer.WanderingNpcAsync(client.ServerHost, client.ServerPort, "Marlon", CancellationToken.None);
-            if (spot is not null || DateTime.UtcNow >= deadline)
+            if (spot is not null)
             {
                 return spot;
+            }
+
+            var uptime = await Running.TestServer.UptimeAsync(client.ServerHost, client.ServerPort, CancellationToken.None);
+            if (uptime is null || uptime > MarlonSpawnDelay)
+            {
+                return null;
             }
 
             await Task.Delay(TimeSpan.FromSeconds(2));
         }
     }
 
-    private static readonly TimeSpan MarlonSpawnWait = TimeSpan.FromSeconds(30);
+    // How long after its start OpenMU may take to place Marlon, with room to spare.
+    private static readonly TimeSpan MarlonSpawnDelay = TimeSpan.FromSeconds(60);
 
     private static async Task<Npc> SearchMarlonAsync(GameClient client)
     {
