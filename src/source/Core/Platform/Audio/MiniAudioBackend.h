@@ -96,6 +96,7 @@ private:
 
     ma_sound m_musicSound{};
     bool m_musicLoaded = false;
+    // Separators-normalized track name, not the resolved path — see IsSameMusicTrack().
     std::string m_currentMusicName;
     bool m_initialized = false;
 };

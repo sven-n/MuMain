@@ -129,3 +129,69 @@ TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
     backend->Shutdown();
     std::filesystem::remove_all(testDirectory);
 }
+
+namespace
+{
+// Initializes the backend on a device-less engine so music can be streamed without audio hardware.
+void InitNoDeviceEngine(mu::MiniAudioBackend& backend)
+{
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend.m_engine) == MA_SUCCESS);
+    backend.m_initialized = true;
+}
+
+// Writes Data/Music/track.wav under a fresh temp directory and returns that directory.
+std::filesystem::path CreateMusicAsset()
+{
+    constexpr std::array<unsigned char, 46> wav = {
+        'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
+        0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
+        0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path testDirectory =
+        std::filesystem::temp_directory_path() / ("mu_audio_music_" + std::to_string(timestamp));
+    const std::filesystem::path assetPath = testDirectory / "Data" / "Music" / "track.wav";
+    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
+    std::ofstream file(assetPath, std::ios::binary);
+    REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+    return testDirectory;
+}
+} // namespace
+
+TEST_CASE("a named music stop matches a Windows-spelled track name [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path testDirectory = CreateMusicAsset();
+
+    // Spelled like the MUSIC_* constants: backslashes and a case that differs from the file on disk.
+    const std::string track = testDirectory.string() + "\\data\\music\\track.wav";
+    backend->PlayMusic(track.c_str(), false);
+    REQUIRE_FALSE(backend->IsEndMusic());
+
+    backend->StopMusic(track.c_str(), false);
+    CHECK(backend->IsEndMusic());
+
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
+
+TEST_CASE("a track stopped by name plays again when replayed [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path testDirectory = CreateMusicAsset();
+
+    const std::string track = testDirectory.string() + "\\data\\music\\track.wav";
+    backend->PlayMusic(track.c_str(), false);
+    backend->StopMusic(track.c_str(), false);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK_FALSE(backend->IsEndMusic());
+
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
