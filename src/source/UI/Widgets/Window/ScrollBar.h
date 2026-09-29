@@ -95,6 +95,16 @@ namespace mu::ui::window
         void SetMaxPos(int iMaxPos);
 
         int GetCurPos() { return m_iCurPos; }
+
+        // Where Render() draws the thumb (newui_scroll_on, or newui_scroll_off while inactive).
+        const POINT& GetScrollBtnPos() const
+        {
+            return m_ptScrollBtnPos;
+        }
+        bool IsScrollBtnActive() const
+        {
+            return m_bScrollBtnActive;
+        }
         void SetCurPos(int iMoveValue);
     };
 }

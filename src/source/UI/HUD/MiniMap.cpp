@@ -9,19 +9,98 @@
 #include "Audio/DSPlaySound.h"
 
 #include "Guild/GuildInfoWindow.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Inventory/MyInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "World/MapInfra/MapManager.h"
+
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/HUD/MiniMapLayout.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+#include <cstdio>
 
 extern BYTE m_OccupationState;
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
+namespace
+{
+// The original's close button (m_BtnExit): (640 - 27, 3), 30 x 25 reference units.
+constexpr int kCloseX = REFERENCE_WIDTH - 27;
+constexpr int kCloseY = 3;
+constexpr int kCloseWidth = 30;
+constexpr int kCloseHeight = 25;
+// The part of the screen the original's mouse handler kept to itself.
+constexpr int kMapAreaHeight = 430;
+// Marker sizes, physical px (RenderPointRotate() never scaled them).
+constexpr float kNpcSize = 15.f;
+constexpr float kPortalSize = 30.f;
+// The side border tiles: 35 x 6 reference units, 20 down each side, turned a quarter.
+constexpr float kTileWidth = 35.f;
+constexpr float kTileHeight = 6.f;
+constexpr int kSideTiles = 20;
+constexpr int kEdgeTiles = 25;
+// .edge-side's element size in mini_map.rcss (the tile's texel rectangle).
+constexpr float kSideElementWidth = 41.7f;
+constexpr float kSideElementHeight = 8.f;
+// The bottom HUD band the native HUD art covers, in BottomHudCenterTransform reference units.
+constexpr float kHudBandTop = 429.f;
+
+template <typename Model, typename T>
+void Sync(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+
+Rml::String MatrixText(const UI::MiniMap::CssMatrix& m)
+{
+    char buffer[192];
+    std::snprintf(buffer, sizeof(buffer), "matrix(%.5f, %.5f, %.5f, %.5f, %.3f, %.3f)", m.a, m.b, m.c, m.d, m.e, m.f);
+    return buffer;
+}
+
+UI::MiniMap::Screen CurrentScreen()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    return {static_cast<float>(WindowWidth),
+            static_cast<float>(WindowHeight),
+            transform.scaleX,
+            transform.scaleY,
+            transform.offsetX,
+            transform.offsetY};
+}
+
+// The marker the original drew: Kind 1 an NPC (hidden in Crywolf while it is occupied, but the
+// one at 228/48), Kind 2 a gate.
+bool MarkerDrawn(const MINI_MAP& data)
+{
+    if (data.Kind == 2)
+        return true;
+    return !(gMapManager.WorldActive == WD_34CRYWOLF_1ST && m_OccupationState > 0) ||
+           (data.Location[0] == 228 && data.Location[1] == 48 && gMapManager.WorldActive == WD_34CRYWOLF_1ST);
+}
+} // namespace
+
 mu::ui::window::CMiniMap::CMiniMap()
 {
     m_pNewUIMng = NULL;
+    m_bSuccess = false;
+    for (auto& data : m_Mini_Map_Data)
+        data.Kind = 0;
+    for (auto& box : m_Btn_Loc)
+        box[0] = box[1] = box[2] = box[3] = 0.f;
 }
 
 mu::ui::window::CMiniMap::~CMiniMap()
@@ -37,38 +116,20 @@ bool mu::ui::window::CMiniMap::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MINI_MAP, this);
 
-    LoadBitmap(L"Interface\\mini_map_ui_corner.tga", IMAGE_MINIMAP_INTERFACE + 1, GL_LINEAR);
-    LoadBitmap(L"Interface\\mini_map_ui_line.jpg", IMAGE_MINIMAP_INTERFACE + 2, GL_LINEAR);
-    LoadBitmap(L"Interface\\mini_map_ui_cha.tga", IMAGE_MINIMAP_INTERFACE + 3, GL_LINEAR);
-    LoadBitmap(L"Interface\\mini_map_ui_portal.tga", IMAGE_MINIMAP_INTERFACE + 4, GL_LINEAR);
-    LoadBitmap(L"Interface\\mini_map_ui_npc.tga", IMAGE_MINIMAP_INTERFACE + 5, GL_LINEAR);
-    LoadBitmap(L"Interface\\mini_map_ui_cancel.tga", IMAGE_MINIMAP_INTERFACE + 6, GL_LINEAR);
-
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_MINIMAP_INTERFACE + 6, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 610, 3, 85, 85);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "�ݱ�"
+    m_ExitTooltip.SetText(&I18N::Game::Close388);
+    m_ExitTooltip.SetAnchorAbove(true);
 
     SetPos(x, y);
-
-    m_Lenth[0].x = 800;
-    m_Lenth[1].x = 1000;
-    m_Lenth[2].x = 1200;
-    m_Lenth[3].x = 1400;
-    m_Lenth[4].x = 1600;
-    m_Lenth[5].x = 1800;
-    m_Lenth[0].y = 800;
-    m_Lenth[1].y = 1000;
-    m_Lenth[2].y = 1200;
-    m_Lenth[3].y = 1400;
-    m_Lenth[4].y = 1600;
-    m_Lenth[5].y = 1800;
-    m_MiniPos = 0;
     m_bSuccess = false;
+
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     return true;
 }
 
 void mu::ui::window::CMiniMap::ClosingProcess()
 {
+    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
@@ -79,16 +140,13 @@ float mu::ui::window::CMiniMap::GetLayerDepth()
 
 void mu::ui::window::CMiniMap::OpenningProcess()
 {
+    m_PendingClose = false;
 }
 
 void mu::ui::window::CMiniMap::Release()
 {
-    UnloadImages();
-
-    for (int i = 1; i < 7; i++)
-    {
-        DeleteBitmap(IMAGE_MINIMAP_INTERFACE + i);
-    }
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 
     if (m_pNewUIMng)
     {
@@ -99,7 +157,7 @@ void mu::ui::window::CMiniMap::Release()
 
 void mu::ui::window::CMiniMap::SetPos(int x, int y)
 {
-    m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 27, 3, 30, 25);
+    // Full screen; mini_map.rcss places the close button at the original's (640 - 27, 3).
 }
 
 void mu::ui::window::CMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)
@@ -126,81 +184,21 @@ bool mu::ui::window::CMiniMap::UpdateKeyEvent()
 
 bool mu::ui::window::CMiniMap::Render()
 {
-    float Rot = 45.f;
-
-    if (m_bSuccess == false)
-        return m_bSuccess;
-
-    EnableAlphaTest();
-    RenderColor(0, 0, REFERENCE_WIDTH, 430, 0.85f, 1);
-    DisableAlphaBlend();
-    EnableAlphaTest();
-
-    auto Ty = (float)(((float)Hero->PositionX / 256.f) * m_Lenth[m_MiniPos].y);
-    auto Tx = (float)(((float)Hero->PositionY / 256.f) * m_Lenth[m_MiniPos].x);
-    float Ty1;
-    float Tx1;
-    float uvxy = (41.7f / 64.f);
-    float uvxy_Line = 8.f / 8.f;
-    float Ui_wid = 35.f;
-    float Ui_Hig = 6.f;
-    float Rot_Loc = 45.f;
-    int i = 0;
-
-    RenderBitRotate(IMAGE_MINIMAP_INTERFACE, m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x, m_Lenth[m_MiniPos].y, Rot);
-
-    int NpcWidth = 15;
-    int NpcWidthP = 30;
-    for (i = 0; i < MAX_MINI_MAP_DATA; i++)
-    {
-        if (m_Mini_Map_Data[i].Kind > 0)
-        {
-            Ty1 = (float)(((float)m_Mini_Map_Data[i].Location[0] / 256.f) * m_Lenth[m_MiniPos].y);
-            Tx1 = (float)(((float)m_Mini_Map_Data[i].Location[1] / 256.f) * m_Lenth[m_MiniPos].x);
-            Rot_Loc = (float)m_Mini_Map_Data[i].Rotation;
-
-            if (m_Mini_Map_Data[i].Kind == 1) //npc
-            {
-                if (!(gMapManager.WorldActive == WD_34CRYWOLF_1ST && m_OccupationState > 0) || (m_Mini_Map_Data[i].Location[0] == 228 && m_Mini_Map_Data[i].Location[1] == 48 && gMapManager.WorldActive == WD_34CRYWOLF_1ST))
-                    RenderPointRotate(IMAGE_MINIMAP_INTERFACE + 5, Tx1, Ty1, NpcWidth, NpcWidth, m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x, m_Lenth[m_MiniPos].y, Rot, Rot_Loc, 17.5f / 32.f, 17.5f / 32.f, i);
-            }
-            else
-                if (m_Mini_Map_Data[i].Kind == 2)
-                    RenderPointRotate(IMAGE_MINIMAP_INTERFACE + 4, Tx1, Ty1, NpcWidthP, NpcWidthP, m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x, m_Lenth[m_MiniPos].y, Rot, Rot_Loc, 17.5f / 32.f, 17.5f / 32.f, 100 + i);
-        }
-        else
-            break;
-    }
-
-    float Ch_wid = 12;
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 3, 325, 230, Ch_wid, Ch_wid, 0.f, 0.f, 17.5f / 32.f, 17.5f / 32.f);
-
-    for (i = 0; i < 25; i++)
-    {
-        RenderImage(IMAGE_MINIMAP_INTERFACE + 2, i * Ui_wid, 0, Ui_wid, Ui_Hig, 0.f, 1.f, uvxy, -uvxy_Line);
-        RenderImage(IMAGE_MINIMAP_INTERFACE + 2, i * Ui_wid, 430 - Ui_Hig, Ui_wid, Ui_Hig, 0.f, 0.f, uvxy, uvxy_Line);
-    }
-    for (i = 0; i < 20; i++)
-    {
-        RenderBitmapRotate(IMAGE_MINIMAP_INTERFACE + 2, (Ui_Hig / 2.f), i * (Ui_wid - 3.f), Ui_wid, Ui_Hig, -90.f, 0.f, 0.f, uvxy, uvxy_Line);
-        RenderBitmapRotate(IMAGE_MINIMAP_INTERFACE + 2, REFERENCE_WIDTH - (Ui_Hig / 2.f), i * (Ui_wid - 3.f), Ui_wid, Ui_Hig, 90.f, 0.f, 0.f, uvxy, uvxy_Line);
-    }
-
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, 0, 0, Ui_wid, Ui_wid, 0.f, 0.f, uvxy, uvxy);
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, REFERENCE_WIDTH - Ui_wid, 0, Ui_wid, Ui_wid, uvxy, 0.f, -uvxy, uvxy);
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, 0, 430 - Ui_wid, Ui_wid, Ui_wid, 0.f, uvxy, uvxy, -uvxy);
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, REFERENCE_WIDTH - Ui_wid, 430 - Ui_wid, Ui_wid, Ui_wid, uvxy, uvxy, -uvxy, -uvxy);
-
-    m_BtnExit.Render(true);
-
-    DisableAlphaBlend();
-
-    Check_Btn(MouseX, MouseY);
-    return true;
+    // Nothing native left: the map, its markers, the frame and the hint are RmlUi. Kept because
+    // CObject requires the override.
+    return m_bSuccess;
 }
 
 bool mu::ui::window::CMiniMap::Update()
 {
+    SyncRmlModel();
+
+    if (m_PendingClose)
+    {
+        m_PendingClose = false;
+        if (IsVisible())
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
+    }
     return true;
 }
 
@@ -214,14 +212,15 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
     if (pFile == NULL)
     {
         m_bSuccess = false;
+        m_WorldName.clear();
         return;
     }
     else
     {
         m_bSuccess = true;
         fclose(pFile);
-        mu_swprintf(Fname, L"%ls\\mini_map.tga", Filename);
-        LoadBitmap(Fname, IMAGE_MINIMAP_INTERFACE, GL_LINEAR);
+        // The texture itself is loaded by the document (mini_map.rml's .map).
+        m_WorldName = Filename;
     }
 
     mu_swprintf(Fname, L"Data\\Local\\%ls\\Minimap\\Minimap_%ls_%ls.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
@@ -258,7 +257,6 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
             for (i = 0; i < MAX_MINI_MAP_DATA; i++)
             {
                 BuxConvert(pSeek, Size);
-                //memcpy(&(m_Mini_Map_Data[i]), pSeek, Size);
 
                 MINI_MAP_FILE current{ };
                 auto target = &(m_Mini_Map_Data[i]);
@@ -266,9 +264,6 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
                 memcpy(target, pSeek, Size);
 
                 CMultiLanguage::ConvertFromUtf8(target->Name, current.Name);
-                /*int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, NULL, 0);
-                MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, target->Name, wchars_num);
-                target->Name[wchars_num] = L'\0';*/
                 pSeek += Size;
             }
         }
@@ -279,75 +274,263 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
 
 void mu::ui::window::CMiniMap::UnloadImages()
 {
-    DeleteBitmap(IMAGE_MINIMAP_INTERFACE);
+    m_WorldName.clear();
 }
 
 bool mu::ui::window::CMiniMap::UpdateMouseEvent()
 {
-    bool ret = true;
-
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
-        return true;
-    }
-
-    if (IsPress(VK_LBUTTON))
-    {
-        ret = Check_Mouse(MouseX, MouseY);
-        if (ret == false)
-        {
-            PlayBuffer(SOUND_CLICK01);
-        }
-    }
-
-    if (CheckMouseIn(0, 0, REFERENCE_WIDTH, 430))
-    {
+    // The close button's click is RmlUi's (minimap_close); like the original, the pointer over the
+    // top 430 rows goes to nothing behind the map.
+    if (CheckMouseIn(0, 0, REFERENCE_WIDTH, kMapAreaHeight))
         return false;
-    }
-
-    return ret;
-}
-
-bool mu::ui::window::CMiniMap::Check_Mouse(int mx, int my)
-{
     return true;
 }
 
-bool mu::ui::window::CMiniMap::Check_Btn(int mx, int my)
+void mu::ui::window::CMiniMap::BuildRmlUi()
 {
-    int i = 0;
-    for (i = 0; i < MAX_MINI_MAP_DATA; i++)
-    {
-        if (m_Mini_Map_Data[i].Kind > 0)
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "mini_map",
+        [this](Rml::DataModelConstructor& c, MiniMapRmlModel& model)
         {
-            if (mx > m_Btn_Loc[i][0] && mx < (m_Btn_Loc[i][0] + m_Btn_Loc[i][2]) && my > m_Btn_Loc[i][1] && my < (m_Btn_Loc[i][1] + m_Btn_Loc[i][3]))
-            {
-                m_TooltipText = (std::wstring)m_Mini_Map_Data[i].Name;
-                g_pRenderText->SetFont(g_hFont);
-                const SIZE Fontsize = g_pRenderText->MeasureText(
-                    m_TooltipText.c_str(), static_cast<int>(m_TooltipText.size()));
+            c.Bind("scale_x", &model.scaleX);
+            c.Bind("scale_y", &model.scaleY);
+            c.Bind("text_px", &model.textPx);
 
-                int x = m_Btn_Loc[i][0] + ((m_Btn_Loc[i][2] / 2) - (Fontsize.cx / 2));
-                int y = m_Btn_Loc[i][1] + m_Btn_Loc[i][3] + 2;
+            auto clip = c.RegisterStruct<MiniMapClipEntry>();
+            clip.RegisterMember("left", &MiniMapClipEntry::left);
+            clip.RegisterMember("top", &MiniMapClipEntry::top);
+            clip.RegisterMember("width", &MiniMapClipEntry::width);
+            clip.RegisterMember("height", &MiniMapClipEntry::height);
+            clip.RegisterMember("world_left", &MiniMapClipEntry::worldLeft);
+            clip.RegisterMember("world_top", &MiniMapClipEntry::worldTop);
+            c.RegisterArray<std::vector<MiniMapClipEntry>>();
+            c.Bind("clips", &model.clips);
 
-                y = m_Btn_Loc[i][1] - (Fontsize.cy + 2);
+            c.Bind("map_source", &model.mapSource);
+            c.Bind("map_transform", &model.mapTransform);
 
-                DWORD backuptextcolor = g_pRenderText->GetTextColor();
-                DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
+            auto marker = c.RegisterStruct<MiniMapMarkerEntry>();
+            marker.RegisterMember("portal", &MiniMapMarkerEntry::portal);
+            marker.RegisterMember("size", &MiniMapMarkerEntry::size);
+            marker.RegisterMember("transform", &MiniMapMarkerEntry::transform);
+            c.RegisterArray<std::vector<MiniMapMarkerEntry>>();
+            c.Bind("markers", &model.markers);
 
-                g_pRenderText->SetTextColor(RGBA(255, 255, 255, 255));
-                g_pRenderText->SetBgColor(RGBA(0, 0, 0, 180));
-                g_pRenderText->RenderText(x, y, m_TooltipText.c_str(), Fontsize.cx + 6, 0, RT3_SORT_CENTER);
+            c.RegisterArray<std::vector<Rml::String>>();
+            c.Bind("side_lines", &model.sideLines);
+            c.RegisterArray<std::vector<float>>();
+            c.Bind("edge_tiles", &model.edgeTiles);
 
-                g_pRenderText->SetTextColor(backuptextcolor);
-                g_pRenderText->SetBgColor(backuptextbackcolor);
+            c.Bind("hint_visible", &model.hintVisible);
+            c.Bind("hint_text", &model.hintText);
+            c.Bind("hint_left", &model.hintLeft);
+            c.Bind("hint_top", &model.hintTop);
+            c.Bind("hint_width", &model.hintWidth);
+            c.Bind("hint_height", &model.hintHeight);
 
-                return true;
-            }
-        }
-        else
-            break;
+            c.BindEventCallback("minimap_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingClose = true; });
+        });
+
+    if (modelCreated)
+    {
+        MiniMapRmlModel& model = m_RmlBinder.GetModel();
+        model.edgeTiles.clear();
+        for (int i = 0; i < kEdgeTiles; ++i)
+            model.edgeTiles.push_back(static_cast<float>(i) * kTileWidth);
+
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                      "Data/Interface/RmlUi/mini_map.rml");
     }
-    return false;
+}
+
+void mu::ui::window::CMiniMap::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CMiniMap::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    const bool visible = IsVisible() && m_bSuccess && Hero != nullptr;
+    // Over the location bar, the logs and the buff strip, under the bottom HUD: the stacking table
+    // (UI/RmlBridge/RmlStackingOrder.cpp) orders it as the original's layer depths did.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+
+    if (!visible)
+    {
+        UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
+        return;
+    }
+
+    SyncScreen();
+    SyncClips();
+    SyncMap();
+    SyncHint();
+    m_ExitTooltip.Render(kCloseX, kCloseY, kCloseWidth, kCloseHeight);
+}
+
+void mu::ui::window::CMiniMap::SyncScreen()
+{
+    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    Sync(m_RmlBinder, &MiniMapRmlModel::scaleX, "scale_x", transform.scaleX);
+    Sync(m_RmlBinder, &MiniMapRmlModel::scaleY, "scale_y", transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+
+    // The border tiles depend on the screen alone: rebuilt when it changes, or when a theme reload
+    // left the model empty.
+    const UI::MiniMap::Screen screen = CurrentScreen();
+    if (screen == m_SideLinesScreen && !m_RmlBinder.GetModel().sideLines.empty())
+        return;
+    m_SideLinesScreen = screen;
+    std::vector<Rml::String> sideLines;
+    sideLines.reserve(kSideTiles * 2);
+    for (int i = 0; i < kSideTiles; ++i)
+    {
+        const float y = static_cast<float>(i) * (kTileWidth - 3.f);
+        sideLines.push_back(MatrixText(UI::MiniMap::ElementToQuad(
+            UI::MiniMap::RotatedQuad(screen, kTileHeight / 2.f, y, kTileWidth, kTileHeight, -90.f), kSideElementWidth,
+            kSideElementHeight)));
+        sideLines.push_back(MatrixText(UI::MiniMap::ElementToQuad(
+            UI::MiniMap::RotatedQuad(screen, REFERENCE_WIDTH - kTileHeight / 2.f, y, kTileWidth, kTileHeight, 90.f),
+            kSideElementWidth, kSideElementHeight)));
+    }
+    Sync(m_RmlBinder, &MiniMapRmlModel::sideLines, "side_lines", std::move(sideLines));
+}
+
+void mu::ui::window::CMiniMap::SyncClips()
+{
+    // The native bottom HUD art (CMainFrameWindow's left and centre bands, drawn before this
+    // context) covers [0, 640] x [429, 480] under BottomHudCenterTransform; the original drew it over
+    // the map, so the map paints only outside that band.
+    const auto hud = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+    const float width = static_cast<float>(WindowWidth);
+    const float height = static_cast<float>(WindowHeight);
+    const float bandTop = std::clamp(hud.offsetY + kHudBandTop * hud.scaleY, 0.f, height);
+    const float bandLeft = std::clamp(hud.offsetX, 0.f, width);
+    const float bandRight = std::clamp(hud.offsetX + REFERENCE_WIDTH * hud.scaleX, 0.f, width);
+
+    std::vector<MiniMapClipEntry> clips;
+    clips.push_back({0.f, 0.f, width, bandTop, 0.f, 0.f});
+    if (bandLeft > 0.f && bandTop < height)
+        clips.push_back({0.f, bandTop, bandLeft, height - bandTop, 0.f, -bandTop});
+    if (bandRight < width && bandTop < height)
+        clips.push_back({bandRight, bandTop, width - bandRight, height - bandTop, -bandRight, -bandTop});
+
+    MiniMapRmlModel& model = m_RmlBinder.GetModel();
+    const bool same =
+        model.clips.size() == clips.size() &&
+        std::equal(clips.begin(), clips.end(), model.clips.begin(),
+                   [](const MiniMapClipEntry& a, const MiniMapClipEntry& b)
+                   { return a.left == b.left && a.top == b.top && a.width == b.width && a.height == b.height; });
+    if (same)
+        return;
+    model.clips = std::move(clips);
+    m_RmlBinder.MarkDirty("clips");
+}
+
+void mu::ui::window::CMiniMap::SyncMap()
+{
+    const UI::MiniMap::Screen screen = CurrentScreen();
+    const float length = UI::MiniMap::MapLength;
+    const float heroY = (static_cast<float>(Hero->PositionX) / 256.f) * length;
+    const float heroX = (static_cast<float>(Hero->PositionY) / 256.f) * length;
+
+    // Relative to the document: themes/<theme>/mini_map.rml -> Data/<World>/mini_map.tga.
+    Rml::String source;
+    if (!m_WorldName.empty())
+        source = "../../../../" + StringUtils::WideToNarrow(m_WorldName.c_str()) + "/mini_map.tga";
+    Sync(m_RmlBinder, &MiniMapRmlModel::mapSource, "map_source", std::move(source));
+
+    Sync(m_RmlBinder, &MiniMapRmlModel::mapTransform, "map_transform",
+         MatrixText(UI::MiniMap::ElementToQuad(
+             UI::MiniMap::MapQuad(screen, heroX, heroY, length, UI::MiniMap::MapRotation), length, length)));
+
+    std::vector<MiniMapMarkerEntry> markers;
+    for (int i = 0; i < MAX_MINI_MAP_DATA; i++)
+    {
+        const MINI_MAP& data = m_Mini_Map_Data[i];
+        if (data.Kind <= 0)
+            break;
+        if (data.Kind != 1 && data.Kind != 2)
+            continue;
+
+        const bool portal = data.Kind == 2;
+        const float size = portal ? kPortalSize : kNpcSize;
+        const float pointY = (static_cast<float>(data.Location[0]) / 256.f) * length;
+        const float pointX = (static_cast<float>(data.Location[1]) / 256.f) * length;
+        const UI::MiniMap::Marker marker =
+            UI::MiniMap::MarkerQuad(screen, heroX, heroY, pointX, pointY, size, static_cast<float>(data.Rotation),
+                                    length, UI::MiniMap::MapRotation, portal);
+        if (!MarkerDrawn(data))
+            continue;
+        // RenderPointRotate() stored the name hint's box of every marker it drew.
+        SetBtnPos(i, marker.hitBox[0], marker.hitBox[1], marker.hitBox[2], marker.hitBox[3]);
+        markers.push_back({portal, size, MatrixText(UI::MiniMap::ElementToQuad(marker.quad, size, size))});
+    }
+
+    MiniMapRmlModel& model = m_RmlBinder.GetModel();
+    const bool same = model.markers.size() == markers.size() &&
+                      std::equal(markers.begin(), markers.end(), model.markers.begin(),
+                                 [](const MiniMapMarkerEntry& a, const MiniMapMarkerEntry& b)
+                                 { return a.portal == b.portal && a.size == b.size && a.transform == b.transform; });
+    if (!same)
+    {
+        model.markers = std::move(markers);
+        m_RmlBinder.MarkDirty("markers");
+    }
+}
+
+void mu::ui::window::CMiniMap::SyncHint()
+{
+    // Check_Btn(): the first marker whose stored box holds the pointer shows its name above that
+    // box, white on RGBA(0, 0, 0, 180), in a box 6 units wider than the text, starting where the
+    // text would be centred on the box (so the text sits 3 units right of centre).
+    bool found = false;
+    std::wstring name;
+    float left = 0.f, top = 0.f, width = 0.f, height = 0.f;
+    for (int i = 0; i < MAX_MINI_MAP_DATA && !found; i++)
+    {
+        if (m_Mini_Map_Data[i].Kind <= 0)
+            break;
+        const float* box = m_Btn_Loc[i];
+        if (MouseX > box[0] && MouseX < (box[0] + box[2]) && MouseY > box[1] && MouseY < (box[1] + box[3]))
+        {
+            found = true;
+            name = m_Mini_Map_Data[i].Name;
+            g_pRenderText->SetFont(g_hFont);
+            const SIZE size = g_pRenderText->MeasureText(name.c_str(), static_cast<int>(name.size()));
+            // The original's int / float mix: the text half-width in whole units.
+            const int x = static_cast<int>(box[0] + ((box[2] / 2) - static_cast<float>(size.cx / 2)));
+            const int y = static_cast<int>(box[1] - static_cast<float>(size.cy + 2));
+            const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+            left = UI::Scaling::PositionX(transform, static_cast<float>(x));
+            top = UI::Scaling::PositionY(transform, static_cast<float>(y));
+            width = UI::Scaling::SizeX(transform, static_cast<float>(size.cx + 6));
+            height = UI::Scaling::SizeY(transform, static_cast<float>(size.cy));
+        }
+    }
+
+    Sync(m_RmlBinder, &MiniMapRmlModel::hintVisible, "hint_visible", found);
+    if (!found)
+        return;
+    Sync(m_RmlBinder, &MiniMapRmlModel::hintText, "hint_text", StringUtils::WideToNarrow(name.c_str()));
+    Sync(m_RmlBinder, &MiniMapRmlModel::hintLeft, "hint_left", left);
+    Sync(m_RmlBinder, &MiniMapRmlModel::hintTop, "hint_top", top);
+    Sync(m_RmlBinder, &MiniMapRmlModel::hintWidth, "hint_width", width);
+    Sync(m_RmlBinder, &MiniMapRmlModel::hintHeight, "hint_height", height);
 }

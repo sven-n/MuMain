@@ -1,0 +1,41 @@
+/* Modern theme for CCursedTempleEnter: the modern panel surface instead of the message-box art,
+   modern buttons, the hero's band in the steel accent. Geometry is the legacy one (reference px
+   under the Dialog transform). */
+
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 252px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	pointer-events: auto;
+}
+
+#back, #frame_top, .frame-middle, #frame_bottom { display: none; }
+#line { position: absolute; left: 10px; top: 185px; width: 210px; height: 1px; background-color: token(border-frame); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+#title { left: 0; top: 13px; font-weight: bold; color: token(text-warm); }
+.temple-line { color: #ffffff; }
+.temple-line.red { color: #ff0000; }
+.temple-highlight { position: absolute; background-color: token(accent-steel); pointer-events: none; }
+
+.temple-btn {
+	display: block;
+	position: absolute;
+	top: 203px;
+	width: 54px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.temple-btn:hover { border-color: token(accent-steel-hover); }
+.temple-btn:active { background-color: token(surface-recessed); }
+#btn_enter { left: 30px; }
+#btn_close { left: 145px; }
+.temple-label { left: 0; color: token(text-primary); }

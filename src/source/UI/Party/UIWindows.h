@@ -6,6 +6,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Network/Server/WSclient.h"
 #include "Dotnet/Connection.h"
+#include <memory>
 #include <mutex>
 
 #define WM_CHATROOMMSG_BEGIN (WM_USER + 0x100)
@@ -53,6 +54,10 @@ enum UIADDWINDOWOPTION
 };
 
 const int UIPHOTOVIEWER_CANCONTROL = 1;
+
+class FriendWindowRmlBuilder;
+class FriendWindowViews;
+class CUIPhotoViewer;
 
 class CUIBaseWindow : public CUIControl
 {
@@ -118,8 +123,39 @@ public:
         return TRUE;
     }
 
+    // RmlUi presentation (UI/Party/FriendWindowView.h): a window type whose HasRmlView() is true
+    // is not drawn by CUIWindowMgr::Render(); its document is built every frame from
+    // CollectRmlView() -- Render()'s frame and title bar around CollectRmlContent() -- instead.
+    virtual bool HasRmlView() const
+    {
+        return false;
+    }
+    void CollectRmlView(FriendWindowRmlBuilder& view);
+    // The text field the RmlUi view shows in the given field slot (FriendWindowFieldLayout), or
+    // nullptr; the native field keeps the value, the focus requests and the Enter / Tab handling.
+    virtual CUITextInputBox* GetRmlTextField(int slot)
+    {
+        (void)slot;
+        return nullptr;
+    }
+    // The native 3D content drawn over the RmlUi view (the letter windows' CUIPhotoViewer, their
+    // RenderOver()), or nullptr: the view leaves its box to an underlay under the native pass.
+    virtual CUIPhotoViewer* GetRmlPhoto()
+    {
+        return nullptr;
+    }
+    // The photo viewer's box clipped to the window's back (reference px), which the view leaves
+    // to its underlay; false without a photo viewer or window background.
+    bool GetRmlUnderlayRect(float& left, float& top, float& right, float& bottom);
+    // CUIWindowMgr::Render() for a window with an RmlUi view: RenderOver() only.
+    void RenderRmlOverlay();
+
 protected:
     BOOL DoMouseAction();
+    virtual void CollectRmlContent(FriendWindowRmlBuilder& view)
+    {
+        (void)view;
+    }
 
     virtual void InitControls() = 0;
 
@@ -216,8 +252,17 @@ public:
         return m_dwRoomNumber;
     }
     void Lock(BOOL bFlag);
+    bool HasRmlView() const override
+    {
+        return true;
+    }
+    CUITextInputBox* GetRmlTextField(int slot) override
+    {
+        return slot == 0 ? &m_TextInputBox : nullptr;
+    }
 
 protected:
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
@@ -289,6 +334,7 @@ public:
 
 protected:
     void RenderPhotoCharacter();
+    void RenderHelpText();
     int SetPhotoPose(int iCurrentAni, int iMoveDir = 0);
 
 protected:
@@ -327,8 +373,17 @@ public:
     virtual void InitControls() {}
     virtual void Refresh();
     void SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t* pLetterText);
+    bool HasRmlView() const override
+    {
+        return true;
+    }
+    CUIPhotoViewer* GetRmlPhoto() override
+    {
+        return m_iShowType >= 2 ? &m_Photo : nullptr;
+    }
 
 protected:
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
     virtual void RenderSub();
     virtual void RenderOver();
     virtual BOOL HandleMessage();
@@ -370,9 +425,32 @@ public:
     }
 
     virtual BOOL CloseCheck();
+    bool HasRmlView() const override
+    {
+        return true;
+    }
+    CUITextInputBox* GetRmlTextField(int slot) override
+    {
+        switch (slot)
+        {
+        case 0:
+            return &m_MailtoInputBox;
+        case 1:
+            return &m_TitleInputBox;
+        case 2:
+            return &m_TextInputBox;
+        default:
+            return nullptr;
+        }
+    }
+    CUIPhotoViewer* GetRmlPhoto() override
+    {
+        return m_iShowType == 1 ? &m_Photo : nullptr;
+    }
 
 protected:
     void InitControls() override;
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
     virtual void RenderSub();
     virtual void RenderOver();
     virtual BOOL HandleMessage();
@@ -468,6 +546,8 @@ protected:
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
     virtual void DoMouseActionSub();
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
+    void SyncControlLayout();
 
 protected:
     CUIChatPalListBox m_PalListBox;
@@ -501,6 +581,8 @@ public:
 
 protected:
     virtual void RenderSub();
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
+    void SyncControlLayout();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
     virtual void DoMouseActionSub();
@@ -577,6 +659,8 @@ protected:
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
     virtual void DoMouseActionSub();
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
+    void SyncControlLayout();
 
 protected:
     CUILetterListBox m_LetterListBox;
@@ -640,10 +724,17 @@ public:
     {
         return m_iTabIndex;
     }
+    bool HasRmlView() const override
+    {
+        return true;
+    }
 
 protected:
     virtual void InitControls() {}
     virtual void RenderSub();
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
+    void SyncTabLayout();
+    void RenderTabStrip();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
     virtual void DoMouseActionSub();
@@ -669,9 +760,18 @@ public:
         m_TextInputBox.SetText(pszText);
         m_TextInputBox.GiveFocus(TRUE);
     }
+    bool HasRmlView() const override
+    {
+        return true;
+    }
+    CUITextInputBox* GetRmlTextField(int slot) override
+    {
+        return slot == 0 ? &m_TextInputBox : nullptr;
+    }
 
 protected:
     void InitControls() override;
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
@@ -697,9 +797,19 @@ public:
     virtual void Refresh();
 
     void SaveID(const wchar_t* pszText);
+    bool HasRmlView() const override
+    {
+        return true;
+    }
+    // The window the answer goes to (Init()'s dwParentID; the question itself has no parent).
+    DWORD GetReturnWindowUIID() const
+    {
+        return m_dwReturnWindowUIID;
+    }
 
 protected:
     virtual void InitControls() {}
+    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
@@ -726,6 +836,12 @@ public:
                     int iOption = UIADDWND_NULL);
     void RemoveWindow(DWORD dwUIID);
     void Render();
+    // Builds the RmlUi documents of the windows with an RmlUi view (CUIBaseWindow::HasRmlView())
+    // and shows them in the draw order Render() uses; hides them all when !familyShown.
+    void SyncRmlViews(bool familyShown);
+    // True while an RmlUi input of the window holds the keyboard: the native field handed its
+    // focus to the input (FriendWindowView::SyncFields()), so CUITextInputBox no longer reports it.
+    bool RmlFieldHasFocus(DWORD dwUIID) const;
     void DoAction();
     void ShowHideWindow(DWORD dwUIID, BOOL bShowWindow);
     void HideAllWindow(BOOL bHide, BOOL bMainClose = FALSE);
@@ -818,6 +934,7 @@ public:
     BOOL m_bRenderFrame;
 
 protected:
+    std::unique_ptr<FriendWindowViews> m_pRmlViews;
     BOOL m_bWindowsEnable;
     DWORD m_dwMainWindowUIID;
     WndMap m_WindowMap;

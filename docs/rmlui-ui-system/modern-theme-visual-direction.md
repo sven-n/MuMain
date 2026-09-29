@@ -84,7 +84,8 @@ forced onto every screen, only where a real recessed well needed one.
 
 | Token | Value | Use |
 |---|---|---|
-| `surface-deep` | `#060706` | Full-screen dim backdrop (`#backdrop`) |
+| `surface-deep` | `#060706` | Deepest panel body (the move list, the master level tree) |
+| `surface-backdrop` | `rgba(6, 7, 6, 160)` | Full-screen dim backdrop (`#backdrop`): translucent, the scene stays visible behind the dialog |
 | `surface-recessed` | `#0a0c0b` | Base/sunken panel background (`.modern-panel`) |
 | `surface-panel` | `#111310` | Default panel body (`.modern-frame`'s own base tone) |
 | `surface-raised` | `#20221d` | Raised/header chrome — available for a future header-band treatment, not yet forced onto an existing window |

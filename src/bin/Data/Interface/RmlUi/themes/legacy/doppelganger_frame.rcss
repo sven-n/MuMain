@@ -1,0 +1,40 @@
+/* Legacy theme for CDoppelGangerFrame, reproducing its Render(): Double_back (227 x 87) at the
+   window's position; the texts centred on 110 units from x 117 (the monsters that passed at y 13,
+   "Time left" at y 38, the time at y 50 in the big font, bold), in their bound colours; the gauge
+   pieces at y 78, 7 high; the Ice Walker (Double_Micon01, 13 x 7) at y 77; the party markers at
+   y 79 (Double_Baricon04 for the hero, Double_Baricon01 for a member, 9 x 8). Reference px
+   relative to the window's top-left, under .screen's W/640 x H/480 stretch. */
+
+@spritesheet frame-back-sheet { src: "../../../Double_back.tga"; frame-back: 0px 0px 227px 87px; }
+@spritesheet frame-hero-sheet { src: "../../../Double_Baricon04.tga"; frame-hero: 0px 0px 9px 8px; }
+@spritesheet frame-member-sheet { src: "../../../Double_Baricon01.tga"; frame-member: 0px 0px 9px 8px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 227px; height: 87px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 227px; height: 87px; decorator: image(frame-back); }
+
+.frame-text {
+	display: block;
+	position: absolute;
+	left: 117px;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+}
+.frame-text.big { font-weight: bold; }
+
+.bar { position: absolute; top: 78px; height: 7px; }
+#icewalker { position: absolute; top: 77px; width: 13px; height: 7px; }
+.marker { position: absolute; top: 79px; width: 9px; height: 8px; decorator: image(frame-member); }
+.marker.hero { decorator: image(frame-hero); }

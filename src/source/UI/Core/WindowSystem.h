@@ -290,6 +290,7 @@ namespace mu::ui::window
         CDuelWindow* GetUI_NewDuelWindow() const;
         CSiegeWarfare* GetUI_NewSiegeWarfare() const;
         CItemEnduranceInfo* GetUI_NewItemEnduranceInfo() const;
+        CNameWindow* GetUI_NewNameWindow() const;
         CBuffStrip* GetUI_BuffStrip() const;
         CCursedTempleEnter* GetUI_NewCursedTempleEnterWindow() const;
         CCursedTempleSystem* GetUI_NewCursedTempleWindow() const;
@@ -378,6 +379,7 @@ namespace mu::ui::window
 #define g_pDuelWindow mu::ui::window::CSystem::GetInstance()->GetUI_NewDeulWindow()
 #define g_pSiegeWarfare mu::ui::window::CSystem::GetInstance()->GetUI_NewSiegeWarfare()
 #define g_pItemEnduranceInfo mu::ui::window::CSystem::GetInstance()->GetUI_NewItemEnduranceInfo()
+#define g_pNameWindow mu::ui::window::CSystem::GetInstance()->GetUI_NewNameWindow()
 #define g_pBuffStrip mu::ui::window::CSystem::GetInstance()->GetUI_BuffStrip()
 #define g_pCursedTempleEnterWindow mu::ui::window::CSystem::GetInstance()->GetUI_NewCursedTempleEnterWindow()
 #define g_pCursedTempleWindow mu::ui::window::CSystem::GetInstance()->GetUI_NewCursedTempleWindow()

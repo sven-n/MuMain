@@ -13,6 +13,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
@@ -618,6 +619,9 @@ void mu::ui::window::CChatLogWindow::BuildRmlUi()
             c.Bind("back_color", &model.backColor);
             c.Bind("show_frame", &model.showFrame);
             c.Bind("pointed_index", &model.pointedIndex);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("line_px", &model.linePx);
+            c.Bind("row_px", &model.rowPx);
 
             // Drag the handle above the window to resize it in native's own 3-line steps. The
             // stepping stays in UpdateMouseEvent() where the pointer's absolute Y already lives;
@@ -650,11 +654,17 @@ void mu::ui::window::CChatLogWindow::ReloadRmlTheme()
     m_bLinesDirty = true; // next SyncRmlModel() repopulates the fresh document
 }
 
+void mu::ui::window::CChatLogWindow::SyncDocVisibility(bool sceneAllowsShow)
+{
+    m_bSceneAllowsShow = sceneAllowsShow;
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowChatLog && sceneAllowsShow);
+}
+
 void mu::ui::window::CChatLogWindow::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowChatLog);
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowChatLog && m_bSceneAllowsShow);
 
     ChatLogRmlModel& model = m_RmlBinder.GetModel();
 
@@ -690,6 +700,8 @@ void mu::ui::window::CChatLogWindow::SyncRmlModel()
         model.backColor = backColor;
         m_RmlBinder.MarkDirty("back_color");
     }
+
+    SyncNativeLineGeometry();
 
     if (m_bLinesDirty)
     {
@@ -731,6 +743,31 @@ void mu::ui::window::CChatLogWindow::SyncRmlModel()
     }
 
     UpdatePointedLine();
+}
+
+// Native's RenderMessages(): each line drawn with RenderText() at the native text size, its
+// background as tall as the measured text (MeasureText("Q").cy, logical), one line every
+// SCROLL_MIDDLE_PART_HEIGHT; the row pitch follows the well, which is sized in dp.
+void mu::ui::window::CChatLogWindow::SyncNativeLineGeometry()
+{
+    const auto transform = UI::Scaling::GetActiveTransform();
+    g_pRenderText->SetFont(g_hFont);
+    const int textHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
+    const float dpRatio = RmlUiRuntime::Instance().GetContext()->GetDensityIndependentPixelRatio();
+
+    ChatLogRmlModel& model = m_RmlBinder.GetModel();
+    auto syncFloat = [&](float ChatLogRmlModel::* field, const char* name, float value)
+    {
+        if (model.*field != value)
+        {
+            model.*field = value;
+            m_RmlBinder.MarkDirty(name);
+        }
+    };
+    syncFloat(&ChatLogRmlModel::textPx, "text_px",
+              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
+    syncFloat(&ChatLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
+    syncFloat(&ChatLogRmlModel::rowPx, "row_px", SCROLL_MIDDLE_PART_HEIGHT * dpRatio);
 }
 
 void mu::ui::window::CChatLogWindow::RebuildLineModel()
@@ -807,8 +844,11 @@ void mu::ui::window::CChatLogWindow::UpdatePointedLine()
                 if (child == nullptr)
                     continue;
 
+                // The whole row (native tested SCROLL_MIDDLE_PART_HEIGHT), including the gap under
+                // a line whose background is only as tall as its text (legacy chat_log.rml).
                 const Rml::Vector2f pos = child->GetAbsoluteOffset();
-                const float h = child->GetOffsetHeight();
+                const float h =
+                    child->GetOffsetHeight() + child->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Bottom);
                 if (py >= pos.y && py < pos.y + h)
                 {
                     // Only a line carrying a sender is a target, matching native -- an
@@ -1212,6 +1252,11 @@ void mu::ui::window::CSystemLogWindow::BuildRmlUi()
 
             c.Bind("lines", &model.lines);
             c.Bind("back_color", &model.backColor);
+            c.Bind("panel_x", &model.panelX);
+            c.Bind("panel_y", &model.panelY);
+            c.Bind("row_px", &model.rowPx);
+            c.Bind("line_px", &model.linePx);
+            c.Bind("text_px", &model.textPx);
         });
 
     if (modelCreated)
@@ -1235,12 +1280,18 @@ void mu::ui::window::CSystemLogWindow::ReloadRmlTheme()
     m_bLinesDirty = true;
 }
 
+void mu::ui::window::CSystemLogWindow::SyncDocVisibility(bool sceneAllowsShow)
+{
+    m_bSceneAllowsShow = sceneAllowsShow;
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowMessages && sceneAllowsShow);
+}
+
 void mu::ui::window::CSystemLogWindow::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
     // m_bShowMessages is the input box's own "system messages" toggle; IsVisible() is the window's.
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowMessages);
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowMessages && m_bSceneAllowsShow);
 
     SystemLogRmlModel& model = m_RmlBinder.GetModel();
 
@@ -1253,12 +1304,42 @@ void mu::ui::window::CSystemLogWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("back_color");
     }
 
+    SyncNativeGeometry();
+
     if (m_bLinesDirty)
     {
         m_bLinesDirty = false;
         RebuildLineModel();
         m_RmlBinder.MarkDirty("lines");
     }
+}
+
+// Native's RenderMessages(): the first line at the window position plus FONT_LEADING on both axes,
+// one row every MeasureText("Q").cy * 1.2 (logical), each line's background as tall as the text.
+void mu::ui::window::CSystemLogWindow::SyncNativeGeometry()
+{
+    const auto transform = UI::Scaling::GetActiveTransform();
+    g_pRenderText->SetFont(g_hFont);
+    const int textHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
+    const int rowHeight = std::max(1, static_cast<int>(static_cast<float>(textHeight) * 1.2f));
+
+    SystemLogRmlModel& model = m_RmlBinder.GetModel();
+    auto syncFloat = [&](float SystemLogRmlModel::* field, const char* name, float value)
+    {
+        if (model.*field != value)
+        {
+            model.*field = value;
+            m_RmlBinder.MarkDirty(name);
+        }
+    };
+    syncFloat(&SystemLogRmlModel::panelX, "panel_x",
+              UI::Scaling::PositionX(transform, static_cast<float>(m_WndPos.x + FONT_LEADING)));
+    syncFloat(&SystemLogRmlModel::panelY, "panel_y",
+              UI::Scaling::PositionY(transform, static_cast<float>(m_WndPos.y + FONT_LEADING)));
+    syncFloat(&SystemLogRmlModel::rowPx, "row_px", UI::Scaling::SizeY(transform, static_cast<float>(rowHeight)));
+    syncFloat(&SystemLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
+    syncFloat(&SystemLogRmlModel::textPx, "text_px",
+              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
 }
 
 void mu::ui::window::CSystemLogWindow::RebuildLineModel()

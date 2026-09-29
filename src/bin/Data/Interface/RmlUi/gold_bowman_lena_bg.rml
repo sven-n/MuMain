@@ -1,0 +1,18 @@
+<rml>
+<head>
+	<title>Golden Archer's Rena registration (CGoldBowmanLena) background</title>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="gold_bowman_bg.rcss"/>
+</head>
+<body>
+	<!-- Background-context document of gold_bowman_lena.rml: the docked frame, painted before the
+	     native windows so the two 3D Rena draw over it. Never interactive. -->
+	<div id="panel" data-model="gold_bowman_lena_bg" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+	</div>
+</body>
+</rml>

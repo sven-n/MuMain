@@ -26,7 +26,6 @@ mu::ui::window::CSiegeWarCommander::~CSiegeWarCommander() {}
 bool mu::ui::window::CSiegeWarCommander::OnCreate(int x, int y)
 {
     InitCmdGroupBtn();
-    InitCmdBtn();
     return true;
 }
 
@@ -40,33 +39,27 @@ bool mu::ui::window::CSiegeWarCommander::OnUpdate()
     return true;
 }
 
-bool mu::ui::window::CSiegeWarCommander::OnRender()
+// The original's OnRender(): the dots of everyone in view and of the guild's members, the chosen
+// command under the pointer, the teams' commands, the team buttons and, for a chosen team, its
+// command buttons.
+void mu::ui::window::CSiegeWarCommander::OnFillRmlModel(SiegeWarfareRmlModel& model)
 {
-    EnableAlphaTest();
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    RenderCharPosInMiniMap();
-    RenderGuildMemberPosInMiniMap();
-    DisableAlphaBlend();
-    EnableAlphaTest();
+    FillCharacterDots(model);
+    FillGuildMemberDots(model);
 
-    if (m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand != -1 && m_bMouseInMiniMap == true)
+    model.cursorVisible = m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand != -1 && m_bMouseInMiniMap;
+    if (model.cursorVisible)
     {
-        RenderCmdIconAtMouse();
+        model.cursorLeft = static_cast<float>(MouseX);
+        model.cursorTop = static_cast<float>(MouseY);
+        model.cursorCommand = m_iCurSelectBtnCommand;
+        model.cursorTeam = std::to_string(m_iCurSelectBtnGroup + 1);
     }
 
-    RenderCmdIconInMiniMap();
-    RenderCmdGroupBtn();
-
+    FillCommands(model);
+    FillTeamButtons(model);
     if (m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand == -1)
-    {
-        RenderCmdBtn();
-    }
-
-    DisableAlphaBlend();
-
-    return true;
+        FillCommandButtons(model);
 }
 
 bool mu::ui::window::CSiegeWarCommander::OnUpdateMouseEvent()
@@ -115,21 +108,8 @@ bool mu::ui::window::CSiegeWarCommander::OnBtnProcess()
     {
         if (m_BtnCommandGroup[i].UpdateMouseEvent())
         {
-            if (m_iCurSelectBtnGroup != -1)
-            {
-                SetBtnState(m_iCurSelectBtnGroup, false);
-            }
-
-            if (m_iCurSelectBtnGroup == i)
-            {
-                m_iCurSelectBtnGroup = -1;
-                SetBtnState(i, false);
-            }
-            else
-            {
-                m_iCurSelectBtnGroup = i;
-                SetBtnState(i, true);
-            }
+            // A chosen team's button shows its down row (FillTeamButtons()).
+            m_iCurSelectBtnGroup = m_iCurSelectBtnGroup == i ? -1 : i;
 
             m_iCurSelectBtnCommand = -1;
 
@@ -161,34 +141,20 @@ void mu::ui::window::CSiegeWarCommander::OnSetPos(int x, int y)
 
 void mu::ui::window::CSiegeWarCommander::InitCmdGroupBtn()
 {
-    int iVal = 0;
-    wchar_t sztext[255] = {
-        0,
-    };
-
+    // The buttons only hit-test and keep their up / over / down state here; siege_warfare.rml
+    // draws them.
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
-        iVal = i * MINIMAP_BTN_GROUP_HEIGHT;
-        m_BtnCommandGroup[i].ChangeButtonImgState(true, IMAGE_MINIMAP_BTN_GROUP, true);
-        m_BtnCommandGroup[i].ChangeButtonInfo(m_BtnCommandGroupPos.x, m_BtnCommandGroupPos.y + iVal,
+        m_BtnCommandGroup[i].ChangeButtonInfo(m_BtnCommandGroupPos.x,
+                                              m_BtnCommandGroupPos.y + i * MINIMAP_BTN_GROUP_HEIGHT,
                                               MINIMAP_BTN_GROUP_WIDTH, MINIMAP_BTN_GROUP_HEIGHT);
-        mu_swprintf(sztext, L"%d", i + 1);
-        m_BtnCommandGroup[i].ChangeText(sztext);
     }
 }
 
-void mu::ui::window::CSiegeWarCommander::InitCmdBtn()
+// Everyone in view except those with the siege side's buff, as a dot (the original's
+// RenderCharPosInMiniMap(); its per-kind colour branches were empty).
+void mu::ui::window::CSiegeWarCommander::FillCharacterDots(SiegeWarfareRmlModel& model)
 {
-    for (int i = 0; i < MINIMAP_CMD_MAX; i++)
-    {
-        m_BtnCommand[i].ChangeButtonImgState(true, IMAGE_MINIMAP_BTN_COMMAND, true);
-    }
-}
-
-void mu::ui::window::CSiegeWarCommander::RenderCharPosInMiniMap()
-{
-    float fPosX, fPosY;
-
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -196,165 +162,51 @@ void mu::ui::window::CSiegeWarCommander::RenderCharPosInMiniMap()
             (c->Object.Kind == KIND_PLAYER || c->Object.Kind == KIND_MONSTER || c->Object.Kind == KIND_NPC))
         {
             OBJECT* o = &c->Object;
-
             if (g_isCharacterBuff(o, static_cast<eBuffState>(m_dwBuffState)))
-            {
                 continue;
-            }
-            else
-            {
-                if (o->Kind == KIND_NPC || o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE)
-                {
-                }
-                else
-                {
-                }
-            }
 
-            fPosX = ((c->PositionX)) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
-            fPosY = (256 - (c->PositionY)) / m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y;
-            RenderColor(fPosX, fPosY, 3, 3);
+            const POINT pos = MiniMapPoint(c->PositionX, c->PositionY);
+            model.dots.push_back({static_cast<float>(pos.x), static_cast<float>(pos.y)});
         }
     }
 }
 
-void mu::ui::window::CSiegeWarCommander::RenderGuildMemberPosInMiniMap()
+// The guild members the server reports, inside the map only (RenderGuildMemberPosInMiniMap()).
+void mu::ui::window::CSiegeWarCommander::FillGuildMemberDots(SiegeWarfareRmlModel& model)
 {
-    std::vector<VisibleUnitLocation>::iterator UnitIterator;
-    POINT Pos;
-    memset(&Pos, 0, sizeof(POINT));
-
-    for (UnitIterator = m_vGuildMemberLocationBuffer.begin(); UnitIterator != m_vGuildMemberLocationBuffer.end();
-         ++UnitIterator)
+    for (const VisibleUnitLocation& unit : m_vGuildMemberLocationBuffer)
     {
-        switch (UnitIterator->bIndex)
-        {
-        case 0:
-            break;
-
-        case 1:
-            break;
-
-        case 2:
-            break;
-        }
-        Pos.x = (UnitIterator->x) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
-        Pos.y = (256 - UnitIterator->y) / m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y;
-
-        if (Pos.x < m_MiniMapPos.x || Pos.x > m_MiniMapPos.x + 128 || Pos.y < m_MiniMapPos.y ||
-            Pos.y > m_MiniMapPos.y + 128)
-        {
+        const POINT pos = MiniMapPoint(unit.x, unit.y);
+        if (pos.x < m_MiniMapPos.x || pos.x > m_MiniMapPos.x + 128 || pos.y < m_MiniMapPos.y ||
+            pos.y > m_MiniMapPos.y + 128)
             continue;
-        }
-
-        RenderColor(Pos.x, Pos.y, 3, 3);
+        model.dots.push_back({static_cast<float>(pos.x), static_cast<float>(pos.y)});
     }
 }
 
-void mu::ui::window::CSiegeWarCommander::RenderCmdIconAtMouse()
-{
-    int iWidth, iHeight;
-    wchar_t szText[256] = {
-        0,
-    };
-
-    switch (m_iCurSelectBtnCommand)
-    {
-    case 0:
-        iWidth = COMMAND_ATTACK_WIDTH;
-        iHeight = COMMAND_ATTACK_HEIGHT;
-        break;
-    case 1:
-        iWidth = COMMAND_DEFENCE_WIDTH;
-        iHeight = COMMAND_DEFENCE_HEIGHT;
-        break;
-    case 2:
-        iWidth = COMMAND_WAIT_WIDTH;
-        iHeight = COMMAND_WAIT_HEIGHT;
-        break;
-    }
-
-    mu_swprintf(szText, L"%d", m_iCurSelectBtnGroup + 1);
-    g_pRenderText->RenderText(MouseX - 13, MouseY - 6, szText);
-    RenderImage(IMAGE_COMMAND_ATTACK + m_iCurSelectBtnCommand, MouseX - 8, MouseY - 8, iWidth, iHeight);
-}
-
-void mu::ui::window::CSiegeWarCommander::RenderCmdGroupBtn()
+void mu::ui::window::CSiegeWarCommander::FillTeamButtons(SiegeWarfareRmlModel& model)
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
-        m_BtnCommandGroup[i].SetFont(g_hFontBold);
-        m_BtnCommandGroup[i].ChangeAlpha(m_fMiniMapAlpha);
-        m_BtnCommandGroup[i].Render();
+        CButton& button = m_BtnCommandGroup[i];
+        model.teams.push_back({static_cast<float>(button.GetPos().x), static_cast<float>(button.GetPos().y),
+                               i == m_iCurSelectBtnGroup ? 2 : ButtonFrame(button), std::to_string(i + 1)});
     }
 }
 
-void mu::ui::window::CSiegeWarCommander::RenderCmdBtn()
+// The three command buttons beside the chosen team (teams 6 and 7 share team 5's row, as in the
+// original's RenderCmdBtn()); they hit-test where they were last shown.
+void mu::ui::window::CSiegeWarCommander::FillCommandButtons(SiegeWarfareRmlModel& model)
 {
-    if (m_iCurSelectBtnGroup < 5)
+    const int row = std::min(m_iCurSelectBtnGroup, 4);
+    for (int i = 0; i < MINIMAP_CMD_MAX; i++)
     {
-        for (int i = 0; i < MINIMAP_CMD_MAX; i++)
-        {
-            m_BtnCommand[i].ChangeButtonInfo(m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH,
-                                             m_BtnCommandGroupPos.y +
-                                                 (m_iCurSelectBtnGroup * MINIMAP_BTN_GROUP_HEIGHT) +
-                                                 (i * MINIMAP_BTN_GROUP_HEIGHT),
-                                             MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT);
-            m_BtnCommand[i].ChangeAlpha(m_fMiniMapAlpha);
-            m_BtnCommand[i].Render();
-        }
-        RenderImage(IMAGE_COMMAND_ATTACK, m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH + 8,
-                    m_BtnCommandGroupPos.y + (m_iCurSelectBtnGroup * MINIMAP_BTN_GROUP_HEIGHT) + 5,
-                    COMMAND_ATTACK_WIDTH, COMMAND_ATTACK_HEIGHT);
-        RenderImage(IMAGE_COMMAND_DEFENCE, m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH + 8,
-                    m_BtnCommandGroupPos.y + (m_iCurSelectBtnGroup * MINIMAP_BTN_GROUP_HEIGHT) +
-                        MINIMAP_BTN_GROUP_HEIGHT + 3,
-                    COMMAND_DEFENCE_WIDTH, COMMAND_DEFENCE_HEIGHT);
-        RenderImage(IMAGE_COMMAND_WAIT, m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH + 10,
-                    m_BtnCommandGroupPos.y + (m_iCurSelectBtnGroup * MINIMAP_BTN_GROUP_HEIGHT) +
-                        (2 * MINIMAP_BTN_GROUP_HEIGHT) + 5,
-                    COMMAND_WAIT_WIDTH, COMMAND_WAIT_HEIGHT);
-    }
-    else
-    {
-        for (int i = 0; i < MINIMAP_CMD_MAX; i++)
-        {
-            m_BtnCommand[i].ChangeButtonInfo(m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH,
-                                             m_BtnCommandGroupPos.y + (4 * MINIMAP_BTN_GROUP_HEIGHT) +
-                                                 (i * MINIMAP_BTN_GROUP_HEIGHT),
-                                             MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT);
-            m_BtnCommand[i].ChangeAlpha(m_fMiniMapAlpha);
-            m_BtnCommand[i].Render();
-        }
-        RenderImage(IMAGE_COMMAND_ATTACK, m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH + 8,
-                    m_BtnCommandGroupPos.y + (4 * MINIMAP_BTN_GROUP_HEIGHT) + 5, COMMAND_ATTACK_WIDTH,
-                    COMMAND_ATTACK_HEIGHT);
-        RenderImage(IMAGE_COMMAND_DEFENCE, m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH + 8,
-                    m_BtnCommandGroupPos.y + (4 * MINIMAP_BTN_GROUP_HEIGHT) + MINIMAP_BTN_GROUP_HEIGHT + 3,
-                    COMMAND_DEFENCE_WIDTH, COMMAND_DEFENCE_HEIGHT);
-        RenderImage(IMAGE_COMMAND_WAIT, m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH + 10,
-                    m_BtnCommandGroupPos.y + (4 * MINIMAP_BTN_GROUP_HEIGHT) + (2 * MINIMAP_BTN_GROUP_HEIGHT) + 5,
-                    COMMAND_WAIT_WIDTH, COMMAND_WAIT_HEIGHT);
-    }
-}
-
-void mu::ui::window::CSiegeWarCommander::SetBtnState(int iBtnType, bool bStateDown)
-{
-    if (bStateDown)
-    {
-        m_BtnCommandGroup[iBtnType].UnRegisterButtonState();
-        m_BtnCommandGroup[iBtnType].RegisterButtonState(BUTTON_STATE_UP, IMAGE_MINIMAP_BTN_GROUP, 2);
-        m_BtnCommandGroup[iBtnType].RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MINIMAP_BTN_GROUP, 2);
-        m_BtnCommandGroup[iBtnType].RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MINIMAP_BTN_GROUP, 2);
-        m_BtnCommandGroup[iBtnType].ChangeImgIndex(IMAGE_MINIMAP_BTN_GROUP, 2);
-    }
-    else
-    {
-        m_BtnCommandGroup[iBtnType].UnRegisterButtonState();
-        m_BtnCommandGroup[iBtnType].RegisterButtonState(BUTTON_STATE_UP, IMAGE_MINIMAP_BTN_GROUP, 0);
-        m_BtnCommandGroup[iBtnType].RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MINIMAP_BTN_GROUP, 1);
-        m_BtnCommandGroup[iBtnType].RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MINIMAP_BTN_GROUP, 2);
-        m_BtnCommandGroup[iBtnType].ChangeImgIndex(IMAGE_MINIMAP_BTN_GROUP, 0);
+        CButton& button = m_BtnCommand[i];
+        button.ChangeButtonInfo(m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH,
+                                m_BtnCommandGroupPos.y + (row + i) * MINIMAP_BTN_GROUP_HEIGHT,
+                                MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT);
+        model.orders.push_back(
+            {static_cast<float>(button.GetPos().x), static_cast<float>(button.GetPos().y), ButtonFrame(button), {}});
     }
 }
 
@@ -368,16 +220,4 @@ void mu::ui::window::CSiegeWarCommander::SetGuildMemberLocation(BYTE type, int x
     VisibleUnitLocation vLocation = {type, (BYTE)x, (BYTE)y};
 
     m_vGuildMemberLocationBuffer.push_back(vLocation);
-}
-
-void mu::ui::window::CSiegeWarCommander::OnLoadImages()
-{
-    LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_group.tga", IMAGE_MINIMAP_BTN_GROUP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_Command.tga", IMAGE_MINIMAP_BTN_COMMAND, GL_LINEAR);
-}
-
-void mu::ui::window::CSiegeWarCommander::OnUnloadImages()
-{
-    DeleteBitmap(IMAGE_MINIMAP_BTN_GROUP);
-    DeleteBitmap(IMAGE_MINIMAP_BTN_COMMAND);
 }

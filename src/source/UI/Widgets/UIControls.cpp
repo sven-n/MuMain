@@ -4886,19 +4886,24 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
     int iPos_x = m_iPos_x + 4;
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
-    wchar_t oText[MAX_GLOBAL_TEXT_STRING] = { 0, };
-
-    const ITEM* pItem = FindInventoryItemBySlot(m_TextListIter->m_iInvenIdx);
-    if (pItem)
-    {
-        int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-        mu_swprintf(oText, L"%ls,  %d", I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), (m_TextListIter->m_cLevel + 1) * 10);
-    }
-
-    g_pRenderText->RenderText(iPos_x + 2, iPos_y, oText);
+    g_pRenderText->RenderText(iPos_x + 2, iPos_y, GetLineText(*m_TextListIter).c_str());
 
     DisableAlphaBlend();
     return TRUE;
+}
+
+std::wstring CUIUnmixgemList::GetLineText(const UNMIX_TEXT& line) const
+{
+    wchar_t oText[MAX_GLOBAL_TEXT_STRING] = { 0, };
+
+    const ITEM* pItem = FindInventoryItemBySlot(line.m_iInvenIdx);
+    if (pItem)
+    {
+        int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
+        mu_swprintf(oText, L"%ls,  %d", I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)),
+                    (line.m_cLevel + 1) * 10);
+    }
+    return oText;
 }
 
 BOOL CUIUnmixgemList::DoLineMouseAction(int iLineNumber)

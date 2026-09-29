@@ -51,11 +51,12 @@
 .id-text-your { left: 34px; top: 48px; font-size: 12px; }
 .id-text-my   { left: 11px; top: 253px; font-size: 12px; }
 
+/* Right edge at 179px; 69px wide so "Lv.About 400" fits (nowrap text overflows to the right). */
 .level-text {
 	position: absolute;
-	left: 130px;
+	left: 110px;
 	top: 48px;
-	width: 49px;
+	width: 69px;
 	text-align: right;
 	font-weight: 500;
 	font-size: 11px;
@@ -201,7 +202,7 @@
 	pointer-events: none;
 	font-family: "token(font-body)";
 }
-.notice-line1 { left: 34px; top: 198px; }
+.notice-line1 { left: 40px; top: 198px; } /* clear of the "Warning" label (11..37px) */
 .notice-line2 { top: 206px; }
 .notice-line3 { top: 213px; }
 

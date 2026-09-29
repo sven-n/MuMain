@@ -1,0 +1,50 @@
+<rml>
+<head>
+	<title>Guard NPC</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="gateman.rcss"/>
+</head>
+<body>
+	<!-- The castle gatekeeper (CGatemanWindow), docked right: the guest, guild member or guild
+	     master page. For the master: the public checkbox (hit-tested natively), the fee backdrop
+	     and the fee arrows. root_x/root_y/root_scale come from the dock transform; everything
+	     inside is reference px; text is .sharp-text at the native size, counter-scaled out of the
+	     panel. C++ keeps the gatekeeper state and every request; a click is queued with
+	     gateman_button(n). -->
+	<div id="panel" data-model="gateman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<div data-if="master_mode">
+			<div id="checkbox"><div id="check_mark" data-if="is_public"></div></div>
+			<div id="fee_back"></div>
+			<div class="fee-btn fee-up" data-event-click="gateman_button(2)"></div>
+			<div class="fee-btn fee-down" data-event-click="gateman_button(3)"></div>
+		</div>
+
+		<span class="sharp-text gk-text" data-for="t : texts" data-class-bold="t.bold"
+		      data-class-centred="t.align == 1" data-class-right="t.align == 2"
+		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
+		      data-style-font-size="t.text_px + 'px'"
+		      data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+
+		<div class="gk-btn" data-for="b : buttons" data-class-locked="b.locked"
+		     data-style-left="b.left + 'px'" data-style-top="b.top + 'px'" data-event-click="gateman_button(b.id)">
+			<span class="sharp-text gk-label" data-style-font-size="text_px + 'px'" data-style-top="label_top + 'px'"
+			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="gateman_button(4)"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+	</div>
+</body>
+</rml>

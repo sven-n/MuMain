@@ -1,0 +1,85 @@
+/* Legacy theme for CGuildInfoWindow, reproducing its Render(): the docked_panel_frame.rcss frame
+   (linked first; newui_item_back01 top); the tab strip (newui_guild_tab01, 166 x 22 at (12, 68))
+   with the current tab's newui_guild_tab02 (56 x 22); the item tables from newui_item_table01/02
+   corners and newui_item_table03 edges at the original's offsets; the fills (black, and
+   (21, 21, 21) / (59, 59, 59) at alpha 150); the announcement tab head (newui_guild_tab03); the
+   scroll tracks (newui_scrollbar_up / m / down) and the newui_scroll_on thumb; the guild mark
+   39 x 39 at (74, 106) and the alliance marks 8 x 8; each list line's RenderColor() box in white
+   (g_renderColor); the texts in the normal font in their bound colours; the 64 x 29
+   newui_btn_empty_small buttons with a white label; the exit button. Reference px inside
+   #panel. */
+
+@spritesheet gi-tab-list-sheet { src: "../../../newui_guild_tab01.tga"; gi-tab-list: 0px 0px 166px 22px; }
+@spritesheet gi-tab-point-sheet { src: "../../../newui_guild_tab02.tga"; gi-tab-point: 0px 0px 56px 22px; }
+@spritesheet gi-tab-head-sheet { src: "../../../newui_guild_tab03.tga"; gi-tab-head: 0px 0px 63px 26px; }
+@spritesheet gi-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; gi-edge-top: 0px 0px 1px 14px; }
+@spritesheet gi-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; gi-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet gi-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; gi-edge-left: 0px 0px 14px 1px; }
+@spritesheet gi-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; gi-edge-right: 0px 0px 14px 1px; }
+@spritesheet gi-scroll-top-sheet { src: "../../../newui_scrollbar_up.tga"; gi-scroll-top: 0px 0px 7px 3px; }
+@spritesheet gi-scroll-mid-sheet { src: "../../../newui_scrollbar_m.tga"; gi-scroll-mid: 0px 0px 7px 15px; }
+@spritesheet gi-scroll-bottom-sheet { src: "../../../newui_scrollbar_down.tga"; gi-scroll-bottom: 0px 0px 7px 3px; }
+@spritesheet gi-thumb-sheet { src: "../../../newui_scroll_on.tga"; gi-thumb: 0px 0px 15px 30px; }
+@spritesheet gi-btn-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	gi-btn-up: 0px 0px 64px 29px;
+	gi-btn-over: 0px 29px 64px 29px;
+	gi-btn-down: 0px 58px 64px 29px;
+}
+
+.frame-top { decorator: image(docked-bg-top-b); }
+/* The tabs, the list lines and the scroll thumbs are hit-tested natively. */
+#panel { pointer-events: none; }
+
+#tab_list { position: absolute; left: 12px; top: 68px; width: 166px; height: 22px; decorator: image(gi-tab-list); }
+#tab_point { position: absolute; top: 68px; width: 56px; height: 22px; decorator: image(gi-tab-point); }
+#tab_head { position: absolute; left: 11px; top: 237px; width: 63px; height: 25px; decorator: image(gi-tab-head); }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }
+.t-edge-top { height: 14px; decorator: image(gi-edge-top); }
+.t-edge-bottom { height: 14px; decorator: image(gi-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(gi-edge-left); }
+.t-edge-right { width: 14px; decorator: image(gi-edge-right); }
+.t-corner { width: 14px; height: 14px; }
+.t-tl { decorator: image(docked-corner-tl); }
+.t-tr { decorator: image(docked-corner-tr); }
+.t-bl { decorator: image(docked-corner-bl); }
+.t-br { decorator: image(docked-corner-br); }
+.fill { position: absolute; }
+
+#guild_mark { position: absolute; left: 74px; top: 106px; width: 39px; height: 39px; }
+.mark-cell { float: left; width: 4.875px; height: 4.875px; }
+.line-mark { position: absolute; width: 8px; height: 8px; }
+.line-mark-cell { float: left; width: 1px; height: 1px; }
+
+.scroll { position: absolute; left: 0; width: 190px; height: 0; }
+.s-top, .s-mid, .s-bottom { position: absolute; width: 7px; }
+.s-top { height: 3px; decorator: image(gi-scroll-top); }
+.s-mid { height: 15px; decorator: image(gi-scroll-mid); }
+.s-bottom { height: 3px; decorator: image(gi-scroll-bottom); }
+.thumb { position: absolute; width: 15px; height: 30px; decorator: image(gi-thumb); }
+
+/* The original drew these boxes (officer rows, the selected row) without setting a colour, so they
+   took whatever the frame left: in practice the scroll bar's rgb(106, 97, 88), sometimes white,
+   which hid the member text. The grey-brown it normally shows, always (an original defect fixed). */
+.line-box { position: absolute; background-color: rgb(106, 97, 88); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.gi-text.centred { text-align: center; }
+.gi-text.right { text-align: right; }
+.gi-text.bold { font-weight: bold; }
+
+.gi-btn {
+	display: block;
+	position: absolute;
+	width: 64px;
+	height: 29px;
+	decorator: image(gi-btn-up);
+	pointer-events: auto;
+}
+.gi-btn:hover { decorator: image(gi-btn-over); }
+.gi-btn:active { decorator: image(gi-btn-down); }
+.gi-label { left: 0; text-align: center; color: #ffffff; }
+.tooltip { display: none; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

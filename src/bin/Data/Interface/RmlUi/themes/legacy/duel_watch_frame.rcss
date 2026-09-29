@@ -1,0 +1,63 @@
+/* Legacy theme for CDuelWatchMainFrameWindow, reproducing its Render(): menu_pk_01 (256 x 51) at
+   (0, 429), menu_pk_02 (128 x 51) at (256, 429), menu_pk_03 (256 x 51) at (384, 429); the gauge
+   pieces where C++ places them (their textures unscaled from texel 0, the left health bar
+   mirrored); a score mark (menu_pk_bt02, 16 x 17) per point at y 460; the names centred on 55
+   units at y 465 in the bold font, white; the exit button newui_exit_00 (36 x 29) at (604, 451),
+   registered without an over image, so hovering keeps the up row and pressing shows the second.
+   Reference px under .screen's W/640 x H/480 stretch. */
+
+@spritesheet dwf-back1-sheet { src: "../../../menu_pk_01.jpg"; dwf-back1: 0px 0px 256px 51px; }
+@spritesheet dwf-back2-sheet { src: "../../../menu_pk_02.jpg"; dwf-back2: 0px 0px 128px 51px; }
+@spritesheet dwf-back3-sheet { src: "../../../menu_pk_03.jpg"; dwf-back3: 0px 0px 256px 51px; }
+@spritesheet dwf-score-sheet { src: "../../../menu_pk_bt02.tga"; dwf-score: 0px 0px 16px 17px; }
+@spritesheet dwf-exit-sheet
+{
+	src: "../../../newui_exit_00.tga";
+	dwf-exit-up: 0px 0px 36px 29px;
+	dwf-exit-down: 0px 29px 36px 29px;
+}
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#back1 { position: absolute; left: 0; top: 429px; width: 256px; height: 51px; decorator: image(dwf-back1); }
+#back2 { position: absolute; left: 256px; top: 429px; width: 128px; height: 51px; decorator: image(dwf-back2); }
+#back3 { position: absolute; left: 384px; top: 429px; width: 256px; height: 51px; decorator: image(dwf-back3); }
+
+#fight { position: absolute; left: 0; top: 0; width: 640px; height: 480px; }
+.gauge { position: absolute; }
+.gauge.mirrored { transform: scale(-1, 1); }
+
+.score { position: absolute; top: 460px; width: 16px; height: 17px; decorator: image(dwf-score); }
+
+.name {
+	display: block;
+	position: absolute;
+	top: 465px;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+	font-family: "token(font-body)";
+	font-weight: bold;
+	color: #ffffff;
+}
+
+#exit {
+	position: absolute;
+	left: 604px;
+	top: 451px;
+	width: 36px;
+	height: 29px;
+	decorator: image(dwf-exit-up);
+	pointer-events: auto;
+}
+#exit:active { decorator: image(dwf-exit-down); }

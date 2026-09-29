@@ -1,0 +1,29 @@
+/* Modern theme for the notices: the legacy geometry, blink and colours (see the legacy theme) on
+   the modern panel surface. */
+
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+.notice-row {
+	position: absolute;
+	left: 0;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.notice-text {
+	display: inline-block;
+	font-weight: bold;
+	white-space: nowrap;
+	background-color: token(surface-panel);
+}
+
+.notice-text--gold { color: rgb(255, 200, 80); }
+.notice-text--gold-dim { color: rgba(255, 200, 80, 128); }
+.notice-text--green { color: rgb(100, 255, 200); }

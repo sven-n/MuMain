@@ -1,0 +1,121 @@
+/* Modern theme for CMiniMap. The map, its markers and the hero arrow are game data rather than
+   chrome, so the modern theme draws the same picture as the legacy one (same geometry, see
+   mini_map.rml and themes/legacy/mini_map.rcss); only the hint takes the modern body font. */
+
+@spritesheet mm-line-sheet { src: "../../../mini_map_ui_line.jpg"; mm-line: 0px 0px 41.7px 8px; }
+@spritesheet mm-corner-sheet { src: "../../../mini_map_ui_corner.tga"; mm-corner: 0px 0px 41.7px 41.7px; }
+@spritesheet mm-hero-sheet { src: "../../../mini_map_ui_cha.tga"; mm-hero: 0px 0px 17.5px 17.5px; }
+@spritesheet mm-npc-sheet { src: "../../../mini_map_ui_npc.tga"; mm-npc: 0px 0px 17.5px 17.5px; }
+@spritesheet mm-portal-sheet { src: "../../../mini_map_ui_portal.tga"; mm-portal: 0px 0px 17.5px 17.5px; }
+@spritesheet mm-close-sheet { src: "../../../mini_map_ui_cancel.tga"; mm-close: 0px 0px 36px 29px; }
+
+body { pointer-events: none; }
+
+.clip {
+	position: absolute;
+	overflow: hidden;
+	/* The map and the markers are transformed and overflow nothing in layout terms: without
+	   clip: always RmlUi would not clip them at all. The .clip itself is untransformed, so this is a
+	   scissor rectangle. */
+	clip: always;
+	pointer-events: none;
+}
+.world {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+/* The Hud stretch: reference px, scaled from the window's top-left. */
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+/* RenderColor(0, 0, 640, 430, 0.85, 1): black at alpha 216 (0.85 * 255, truncated). */
+.dim { position: absolute; left: 0; top: 0; width: 640px; height: 430px; background-color: #000000d8; }
+
+/* The world's map texture, 800 map pixels square, placed by its matrix. */
+.map {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 800px;
+	height: 800px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.marker {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform-origin: left top;
+	decorator: image(mm-npc);
+	pointer-events: none;
+}
+.marker.portal { decorator: image(mm-portal); }
+
+/* RenderImage(cha, 325, 230, 12, 12). */
+.hero { position: absolute; left: 325px; top: 230px; width: 12px; height: 12px; decorator: image(mm-hero); }
+
+/* 35 x 6 tiles: the top row with the texture upside down (v from 1 to 0), the bottom one at
+   430 - 6. */
+.edge-top, .edge-bottom { position: absolute; width: 35px; height: 6px; }
+.edge-top { top: 0; decorator: image(mm-line flip-vertical); }
+.edge-bottom { top: 424px; decorator: image(mm-line); }
+
+/* The side tiles, turned a quarter around their centres by their matrix. */
+.edge-side {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 41.7px;
+	height: 8px;
+	transform-origin: left top;
+	decorator: image(mm-line);
+	pointer-events: none;
+}
+
+/* 35 x 35 corners, mirrored by negative texture widths/heights in the original. */
+.corner { position: absolute; width: 35px; height: 35px; }
+.corner-tl { left: 0; top: 0; decorator: image(mm-corner); }
+.corner-tr { left: 605px; top: 0; decorator: image(mm-corner flip-horizontal); }
+.corner-bl { left: 0; top: 395px; decorator: image(mm-corner flip-vertical); }
+.corner-br { left: 605px; top: 395px; decorator: image(mm-corner rotate-180); }
+
+/* The original's UpdateMouseEvent() kept the pointer over the top 430 rows to itself. */
+.hit { position: absolute; left: 0; top: 0; width: 640px; height: 430px; pointer-events: auto; }
+
+/* m_BtnExit: (640 - 27, 3), 30 x 25; the original's button never changed its picture. */
+.close {
+	position: absolute;
+	left: 613px;
+	top: 3px;
+	width: 30px;
+	height: 25px;
+	decorator: image(mm-close);
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Check_Btn(): the marker's name, white on 70% black, centred in its box. */
+.hint {
+	position: absolute;
+	background-color: #000000b4;
+	pointer-events: none;
+}
+.hint-text {
+	display: block;
+	width: 100%;
+	font-family: "token(font-body)";
+	color: #ffffff;
+	text-align: center;
+	white-space: nowrap;
+}

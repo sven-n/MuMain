@@ -1,0 +1,29 @@
+<rml>
+<head>
+	<title>Reconnect</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="reconnect_dialog.rcss"/>
+</head>
+<body data-model="reconnect_dialog">
+	<!-- The auto-reconnect dialog (UI/Dialogs/ReconnectDialog.h): the screen dim, then the
+	     message-box panel with its status lines, progress gauge and Cancel. root_x/root_y/root_scale
+	     come from the transform the overlay draws in; everything inside #panel is reference px;
+	     text is .sharp-text at the native size, counter-scaled out of the panel. Only Cancel takes
+	     the pointer (the original let every other click through). -->
+	<div id="dim" data-style-opacity="dim_alpha"></div>
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div id="back"></div>
+		<div id="box_top"></div>
+		<div id="box_middle"></div>
+		<div id="box_bottom"></div>
+		<div id="progress_back"></div>
+		<div id="progress_bar" data-if="progress_width > 0" data-style-width="progress_width + 'px'"></div>
+		<div id="cancel" data-event-mousedown="reconnect_cancel"></div>
+		<span class="sharp-text line" data-for="l : lines" data-class-bold="l.bold"
+		      data-style-left="l.left + 'px'" data-style-top="l.top + 'px'"
+		      data-style-font-size="(l.bold ? bold_text_px : text_px) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+	</div>
+</body>
+</rml>

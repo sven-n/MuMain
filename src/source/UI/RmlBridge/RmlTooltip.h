@@ -17,12 +17,10 @@
 // (RenderItemInfo()/RenderTipTextList(), the one with the z-order bug this exists to fix).
 //
 // Lives in RmlUiRuntime's main context -- the same one every ordinary window and
-// CGenericConfirmDialog use -- and its document root carries an explicit z-index (see
-// tooltip.rcss), which is what actually fixes the z-order bug: a document with the default
-// z-index:auto (every other document in this codebase) paints in plain DOM/show order among
-// itself, so a native tooltip queued through the legacy 3D-camera effect system could always be
-// painted over by RmlUi's own "renders once, last, every frame" main-context pass. An explicit
-// z-index sidesteps that entirely -- see RmlTooltip.cpp's own comment for the full reasoning.
+// CGenericConfirmDialog use -- and the stacking table (RmlStackingOrder.cpp) puts it above every
+// window's document and under the message boxes, which is what fixes the z-order bug: a native
+// tooltip queued through the legacy 3D-camera effect system could always be painted over by
+// RmlUi's own "renders once, last, every frame" main-context pass.
 namespace UI::RmlBridge::Tooltip
 {
     // Superset of every color capability across the five prior mechanisms -- the item tooltip's
@@ -122,6 +120,16 @@ namespace UI::RmlBridge::Tooltip
         // content (RenderTipTextList()'s `Tab * 2`), 0 for "widest line". Only a theme that
         // reproduces the original layout applies it (legacy tooltip.rml, as a minimum width).
         float fixedWidth = 0.0f;
+
+        // The box around the lines: RenderTipTextList()'s (a 1-unit frame, 2 units of side padding)
+        // or the plain one a button drew its hover text in (CNewUIButton: 3 units of side padding,
+        // no frame, black at 180/255). Only a theme that reproduces the original layout applies it.
+        enum class Box
+        {
+            TipTextList,
+            ButtonHint
+        };
+        Box box = Box::TipTextList;
 
         // The transform the caller converted its anchor with, when it is not the ambient
         // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's BottomHudCenterTransform).

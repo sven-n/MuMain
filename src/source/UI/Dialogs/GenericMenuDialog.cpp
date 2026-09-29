@@ -61,6 +61,8 @@ void CGenericMenuDialog::BuildRmlUi()
             button.RegisterMember("compact", &MenuButtonEntry::compact);
             button.RegisterMember("cols2", &MenuButtonEntry::cols2);
             button.RegisterMember("native_top", &MenuButtonEntry::nativeTop);
+            button.RegisterMember("native_button_gap", &MenuButtonEntry::nativeButtonGap);
+            button.RegisterMember("narrow", &MenuButtonEntry::narrow);
             button.RegisterMember("lines_below", &MenuButtonEntry::linesBelow);
             c.RegisterArray<std::vector<MenuButtonEntry>>();
             c.Bind("buttons", &model.buttons);
@@ -353,7 +355,17 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.compact = button.compact;
         entry.cols2 = (m_Active.columns == 2) && !button.compact;
         entry.nativeTop = static_cast<float>(button.nativeTop);
+        entry.narrow = button.narrow;
         entry.linesBelow = button.linesBelow;
+        const float lineAdvance = static_cast<float>(m_Active.nativeFrame.lineAdvance);
+        if (button.nativeTop > 0 && button.nativeLinesTop > 0 && lineAdvance > 0.f && !button.linesBelow)
+        {
+            // The cell starts at the first line's box, which is centred on the 9-unit glyphs like
+            // generic_menu_dialog.rml's .gmd-lines; the button keeps its own native offset.
+            entry.nativeTop = static_cast<float>(button.nativeLinesTop) - (lineAdvance - 9.f) / 2.f;
+            entry.nativeButtonGap = static_cast<float>(button.nativeTop) - entry.nativeTop -
+                                    static_cast<float>(button.lines.size()) * lineAdvance;
+        }
         newButtons.push_back(std::move(entry));
     }
     bool buttonsChanged = newButtons.size() != model.buttons.size();
@@ -363,7 +375,8 @@ void CGenericMenuDialog::SyncRmlModel()
         const auto& b = model.buttons[i];
         buttonsChanged = a.label != b.label || a.tooltip != b.tooltip || a.hasTooltip != b.hasTooltip ||
                          a.enabled != b.enabled || a.compact != b.compact || a.cols2 != b.cols2 ||
-                         a.nativeTop != b.nativeTop || a.linesBelow != b.linesBelow || a.lines.size() != b.lines.size();
+                         a.nativeTop != b.nativeTop || a.nativeButtonGap != b.nativeButtonGap || a.narrow != b.narrow ||
+                         a.linesBelow != b.linesBelow || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
             buttonsChanged = !SameLine(a.lines[j], b.lines[j]);
     }

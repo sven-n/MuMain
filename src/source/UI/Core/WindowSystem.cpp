@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/MessageBox.h"
+#include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -1770,8 +1771,14 @@ void CSystem::SyncMainSceneHudVisibility()
         m_pMuHelperBar->SyncDocVisibility(sceneAllowsShow);
     if (m_pBuffStrip)
         m_pBuffStrip->SyncDocVisibility(sceneAllowsShow);
+    if (m_pNewItemEnduranceInfo)
+        m_pNewItemEnduranceInfo->SyncDocVisibility(sceneAllowsShow);
     if (m_pNewMainFrameWindow)
         m_pNewMainFrameWindow->SyncDocVisibility(sceneAllowsShow);
+    if (m_pNewChatLogWindow)
+        m_pNewChatLogWindow->SyncDocVisibility(sceneAllowsShow);
+    if (m_pNewSystemLogWindow)
+        m_pNewSystemLogWindow->SyncDocVisibility(sceneAllowsShow);
 }
 
 void CSystem::UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey)
@@ -1878,6 +1885,9 @@ bool CSystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
 
 bool CSystem::Update()
 {
+    // Before any window syncs its document: see ResumeMainSceneDocuments().
+    UI::RmlBridge::ResumeMainSceneDocuments();
+
     if (m_pNewItemMng)
     {
         m_pNewItemMng->Update();
@@ -2386,6 +2396,11 @@ CSiegeWarfare* CSystem::GetUI_NewSiegeWarfare() const
 CItemEnduranceInfo* CSystem::GetUI_NewItemEnduranceInfo() const
 {
     return m_pNewItemEnduranceInfo;
+}
+
+CNameWindow* CSystem::GetUI_NewNameWindow() const
+{
+    return m_pNewNameWindow;
 }
 
 CBuffStrip* CSystem::GetUI_BuffStrip() const

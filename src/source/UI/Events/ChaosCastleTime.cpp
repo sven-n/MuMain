@@ -6,6 +6,7 @@
 #include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Events/MatchEvent.h"
 #include "I18N/All.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -15,6 +16,9 @@ CChaosCastleTime::CChaosCastleTime()
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iTime = 0;
+    // The original left the text unset until the first time packet: shown before it, it drew
+    // whatever the buffer held.
+    m_szTime[0] = L'\0';
     m_iTimeState = CC_TIME_STATE_NORMAL;
     m_iMaxKillMonster = MAX_KILL_MONSTER;
     m_iKilledMonster = 0;
@@ -35,7 +39,8 @@ bool CChaosCastleTime::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -44,7 +49,7 @@ bool CChaosCastleTime::Create(CManager* pNewUIMng, int x, int y)
 
 void CChaosCastleTime::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -78,46 +83,50 @@ bool CChaosCastleTime::UpdateKeyEvent()
 bool CChaosCastleTime::Update()
 {
     if (!IsVisible())
+    {
+        SyncView();
         return true;
+    }
 
     if (gMapManager.InChaosCastle() == false)
     {
         Show(false);
     }
 
+    SyncView();
     return true;
 }
 
 bool CChaosCastleTime::Render()
 {
-    EnableAlphaTest();
-
-    wchar_t szText[256] = {};
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(255, 150, 0, 255);
-
-    RenderImage(IMAGE_CHAOSCASTLE_TIME_WINDOW, m_Pos.x, m_Pos.y,
-        float(CHAOSCASTLE_TIME_WINDOW_WIDTH), float(CHAOSCASTLE_TIME_WINDOW_HEIGHT));
-
-    if (m_iMaxKillMonster != MAX_KILL_MONSTER)
-    {
-        mu_swprintf(szText, I18N::Game::CharacterDD, m_iKilledMonster, m_iMaxKillMonster);
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, szText, CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-    }
-
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 38, I18N::Game::TimeLeft, CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-
-    if (m_iTimeState == CC_TIME_STATE_IMMINENCE)
-        g_pRenderText->SetTextColor(255, 32, 32, 255);
-
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 50, m_szTime, CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame and the texts are RmlUi (SyncView()). Kept because CObject
+    // requires the override.
     return true;
+}
+
+void CChaosCastleTime::SyncView()
+{
+    // The original's Render(): the kill count once a target was received, "Time left", the time.
+    const bool shown = IsVisible();
+    std::wstring kills;
+    if (shown)
+    {
+        if (m_iMaxKillMonster != MAX_KILL_MONSTER)
+        {
+            wchar_t szText[256] = {};
+            mu_swprintf(szText, I18N::Game::CharacterDD, m_iKilledMonster, m_iMaxKillMonster);
+            kills = szText;
+        }
+    }
+    // (255, 150, 0), the time red (255, 32, 32) under five minutes.
+    const unsigned long orange = RGBA(255, 150, 0, 255);
+    m_View.Sync(shown, m_Pos, {kills, orange}, {I18N::Game::TimeLeft, orange},
+                {m_szTime, m_iTimeState == CC_TIME_STATE_IMMINENCE ? RGBA(255, 32, 32, 255) : orange});
+}
+
+void CChaosCastleTime::ReloadRmlTheme()
+{
+    m_View.ReloadTheme();
 }
 
 bool CChaosCastleTime::BtnProcess()
@@ -136,16 +145,6 @@ void CChaosCastleTime::OpenningProcess()
 
 void CChaosCastleTime::ClosingProcess()
 {
-}
-
-void CChaosCastleTime::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_CHAOSCASTLE_TIME_WINDOW, GL_LINEAR);
-}
-
-void CChaosCastleTime::UnloadImages()
-{
-    DeleteBitmap(IMAGE_CHAOSCASTLE_TIME_WINDOW);
 }
 
 void CChaosCastleTime::SetTime(int iTime)

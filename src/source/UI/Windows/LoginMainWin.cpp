@@ -13,11 +13,13 @@
 #include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
+#include <cmath>
 #include <functional>
 
 extern unsigned int WindowWidth, WindowHeight;
@@ -26,6 +28,14 @@ namespace
 {
     // This bar's own bounding-box height, used only for the click-gate rect below.
     constexpr int kBtnHeight = 30;
+
+    // The buttons' height in login_main.rcss's units (px, or the legacy theme's scene-window rem).
+    int ButtonBarHeight()
+    {
+        return static_cast<int>(
+            std::lround(kBtnHeight * UI::RmlBridge::SceneWindowPixelRatio(static_cast<int>(WindowWidth),
+                                                                          static_cast<int>(WindowHeight))));
+    }
 
     // Self-owning click->callback listener; simpler than an RmlModelBinder for two click slots.
     class ClickCallbackListener : public Rml::EventListener
@@ -55,7 +65,7 @@ void CLoginMainWin::Create()
     // Reads WindowWidth, not CInput::Instance().GetScreenWidth() -- the latter can go stale and
     // misplace #btn_credit, which anchors off #panel's right edge using this exact value.
     m_Size.cx = static_cast<int>(WindowWidth) - 30 * 2;
-    m_Size.cy = kBtnHeight;
+    m_Size.cy = ButtonBarHeight();
     m_ptPos.x = m_ptPos.y = 0;
 
     // Guarded so the document is loaded once, ever, and only repositioned/resized afterward.
@@ -90,7 +100,10 @@ void CLoginMainWin::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
-    SetPosition(m_ptPos.x, m_ptPos.y);
+    // Bottom-anchored (CSceneUICoordinator::CreateLoginScene()): the bar's height follows the theme.
+    const int previousHeight = m_Size.cy;
+    m_Size.cy = ButtonBarHeight();
+    SetPosition(m_ptPos.x, m_ptPos.y + previousHeight - m_Size.cy);
     if (m_pRmlDoc) { if (wasVisible) m_pRmlDoc->Show(); else m_pRmlDoc->Hide(); }
 }
 

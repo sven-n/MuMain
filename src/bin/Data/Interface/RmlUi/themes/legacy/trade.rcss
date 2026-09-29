@@ -108,10 +108,11 @@
 
 /* Other player's confirmation -- display-only, matches ProcessBtns() never hit-testing it. */
 .confirm-your { left: 146px; top: 186px; cursor: default; pointer-events: none; }
-/* My own confirmation -- clickable (trade_my_confirm_click). Red ring while m_nMyTradeWait > 0,
-   approximating the former RenderImage() red color-multiply cooldown tint. */
+/* My own confirmation -- clickable (trade_my_confirm_click). While m_nMyTradeWait > 0 the original
+   drew the sprite multiplied by RGBA(255, 0, 0, 255) (CNewUITrade::RenderBackImage()); image-color
+   multiplies the image decorator the same way. */
 .confirm-my { left: 144px; top: 390px; cursor: pointer; pointer-events: auto; }
-.confirm-my.waiting .checkbox-box { box-shadow: 0 0 0 2px rgba(220, 40, 40, 220); }
+.confirm-my.waiting .checkbox-box { image-color: rgb(255, 0, 0); }
 
 @spritesheet trade-btn-exit-sheet { src: "../../../newui_exit_00.tga";    trade-btn-exit: 0px 0px 36px 29px; }
 @spritesheet trade-btn-zen-sheet  { src: "../../../newui_Bt_money01.tga"; trade-btn-zen:  0px 0px 36px 29px; }
@@ -127,23 +128,27 @@
 .trade-btn-exit { left: 13px;  decorator: image(trade-btn-exit); }
 .trade-btn-zen  { left: 104px; decorator: image(trade-btn-zen); }
 
+/* Button hints as docked_panel_frame.rcss draws them (CNewUIButton::Render()): a transparent
+   120-wide row (content centre at left + 4 + 60) anchored 2 above the button by its bottom
+   edge; the inner .tooltip-text span carries the black 180/255 box, text width + 6. */
 .tooltip {
 	display: none;
 	position: absolute;
-	top: 375px;
+	bottom: 39px; /* 429 - 390 */
 	width: 120px;
 	white-space: nowrap;
-	background-color: token(surface-tooltip);
 	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
 	font-size: 1em;
+	text-align: center;
 	pointer-events: none;
 	z-index: 1;
 }
-.tooltip-exit { left: -20px; }
-.tooltip-zen  { left: 60px; }
+.tooltip.sharp-text { transform-origin: left bottom; }
+.tooltip-text { background-color: rgba(0, 0, 0, 180); }
+.tooltip-exit { left: -30px; }
+.tooltip-zen  { left: 61px; }
 #btn_exit:hover ~ .tooltip-exit,
 #btn_zen:hover ~ .tooltip-zen {
 	display: block;

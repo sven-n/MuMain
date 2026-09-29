@@ -1,6 +1,8 @@
 /* Legacy theme for the login dialog -- decorators point at the original CWin sprite art
    (login_back.tga, login_me.tga). #panel's left/top come from C++ to track the window's real
-   pixel origin; children use fixed-pixel offsets relative to it. */
+   pixel origin; children use fixed-pixel offsets relative to it. Sizes are the original's pixels in
+   rem (login.rml's body is "scene-window-scale": 1rem = one original pixel, growing like the native text,
+   RmlNativeText.h); the text inside #panel ("native-text") is at the native text size. */
 
 @spritesheet login-back-sheet
 {
@@ -32,10 +34,9 @@ body {
 
 #panel {
 	position: absolute;
-	width: 329dp;
-	height: 245dp;
+	width: 329rem;
+	height: 245rem;
 	font-family: "token(font-body)";
-	font-size: 12dp;
 	color: token(text-primary);
 	decorator: image(login-back-image);
 }
@@ -49,9 +50,9 @@ body {
 .label {
 	position: absolute;
 }
-.label-server  { left: 111dp; top: 80dp; }
-.label-account { left: 30dp; top: 113dp; }
-.label-password{ left: 30dp; top: 139dp; }
+.label-server  { left: 111rem; top: 80rem; }
+.label-account { left: 30rem; top: 113rem; }
+.label-password{ left: 30rem; top: 139rem; }
 
 /* Username/password fields. Placement/size only -- appearance comes from base.rcss's shared
    .text-field, minus the fill/border, since .input-frame's sprite art already draws each field's visual. Box sits
@@ -59,8 +60,8 @@ body {
    and the text colour matches its SetTextColor(255, 230, 210). */
 .login-field {
 	position: absolute;
-	width: 140dp;
-	height: 16dp;
+	width: 140rem;
+	height: 16rem;
 	padding: 0;
 	font-family: "token(font-body)";
 	color: token(text-narrative);
@@ -69,31 +70,31 @@ body {
 	box-shadow: none;
 	decorator: none;
 }
-.login-field-account  { left: 115dp; top: 112dp; }
-.login-field-password { left: 115dp; top: 137dp; }
+.login-field-account  { left: 115rem; top: 112rem; }
+.login-field-password { left: 115rem; top: 137rem; }
 
 .input-frame {
 	position: absolute;
-	width: 156dp;
-	height: 23dp;
+	width: 156rem;
+	height: 23rem;
 	decorator: image(login-input-frame-image);
 	pointer-events: none;
 }
-.input-account  { left: 109dp; top: 106dp; }
-.input-password { left: 109dp; top: 131dp; }
+.input-account  { left: 109rem; top: 106rem; }
+.input-password { left: 109rem; top: 131rem; }
 
 .checkbox-row {
 	position: absolute;
 	cursor: pointer;
 	pointer-events: auto;
 }
-.checkbox-remember-me  { left: 109dp; top: 156dp; }
-.checkbox-save-password{ left: 109dp; top: 176dp; }
+.checkbox-remember-me  { left: 109rem; top: 156rem; }
+.checkbox-save-password{ left: 109rem; top: 176rem; }
 
 .checkbox-box {
 	display: inline-block;
-	width: 16dp;
-	height: 16dp;
+	width: 16rem;
+	height: 16rem;
 	decorator: image(login-checkbox-unchecked);
 }
 .checkbox-box.checked {
@@ -107,8 +108,8 @@ body {
 
 .checkbox-label {
 	position: absolute;
-	left: 21dp;
-	top: 1dp;
+	left: 21rem;
+	top: 1rem;
 	white-space: nowrap;
 }
 
@@ -127,29 +128,22 @@ body {
 	login-cancel-active: 0px 60px 54px 30px;
 }
 
-/* dp throughout (was px) -- #panel and every other sibling element in this file (labels,
-   input-frame, checkbox rows) are already dp, which scales with the user's own UI-scale setting;
-   a px-sized/positioned button doesn't, and drifts out of step with the (dp-scaled) panel at any
-   scale other than 100% -- dp and px are not interchangeable in this build. bottom:15dp (not a
-   fixed top) anchors these to #panel's own bottom edge the same way
-   option_window.rcss's .option-close-btn and generic_confirm_dialog.rcss's own buttons already
-   do, instead of a fixed offset from the top that drifts away from the bottom edge as the panel's
-   own (dp-scaled) height changes relative to it. 15dp preserves the original top:200px's visual
-   position exactly at 100% scale (245dp panel - 200dp - 30dp button height = 15dp). */
+/* bottom:15rem anchors these to #panel's own bottom edge: 245 panel - 200 top - 30 button = 15, the
+   original's top:200. */
 .btn {
 	position: absolute;
-	width: 54dp;
-	height: 30dp;
+	width: 54rem;
+	height: 30rem;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 30dp;
+	line-height: 30rem;
 	cursor: pointer;
 	color: transparent;
 	pointer-events: auto;
-	bottom: 15dp;
+	bottom: 15rem;
 }
 .btn-ok {
-	left: 150dp;
+	left: 150rem;
 	decorator: image(login-ok-idle);
 }
 .btn-ok:hover {
@@ -159,7 +153,7 @@ body {
 	decorator: image(login-ok-active);
 }
 .btn-cancel {
-	left: 211dp;
+	left: 211rem;
 	decorator: image(login-cancel-idle);
 }
 .btn-cancel:hover {
@@ -169,13 +163,12 @@ body {
 	decorator: image(login-cancel-active);
 }
 
-/* dp, not px -- same reasoning as .btn above. Sits below #panel's own bottom edge by design (top:
-   252dp vs a 245dp-tall panel), not bottom-anchored to it -- this is overflow content, not a
-   panel-relative element like the buttons. */
+/* Sits below #panel's own bottom edge by design (top: 252 vs a 245-tall panel), not bottom-anchored
+   to it -- this is overflow content, not a panel-relative element like the buttons. */
 .trust-warning {
 	position: absolute;
-	left: 30dp;
-	top: 252dp;
-	width: 280dp;
+	left: 30rem;
+	top: 252rem;
+	width: 280rem;
 	color: token(accent-gold);
 }

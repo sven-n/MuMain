@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "RmlTheme.h"
 #include "RmlNativeText.h"
+#include "RmlStackingOrder.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Factory.h>
 
@@ -16,6 +18,8 @@
 #include <regex>
 #include <sstream>
 #include <unordered_map>
+
+extern EGameScene SceneFlag;
 
 namespace UI::RmlBridge
 {
@@ -222,6 +226,12 @@ namespace UI::RmlBridge
         return std::string("Data/Interface/RmlUi/themes/") + ToLower(themeName) + "/" + documentName;
     }
 
+    bool ThemeProvidesDocument(const char* documentName)
+    {
+        std::ifstream file(ThemedDocumentSourceUrl(documentName, GetActiveThemeName()), std::ios::binary);
+        return file.good();
+    }
+
     std::vector<std::string> DiscoverAvailableThemes()
     {
         std::vector<std::string> themes;
@@ -255,7 +265,35 @@ namespace UI::RmlBridge
         return displayName;
     }
 
+    namespace
+    {
+    // Set on the document element of every main-scene document, see
+    // SuspendMainSceneDocumentsOutsideMainScene().
+    constexpr const char* MainSceneDocumentAttribute = "data-main-scene-document";
+    bool s_mainSceneDocumentsSuspended = false;
+
+    template <typename Visit> void ForEachMainSceneDocument(Visit&& visit)
+    {
+        for (int contextIndex = 0; contextIndex < Rml::GetNumContexts(); ++contextIndex)
+        {
+            Rml::Context* context = Rml::GetContext(contextIndex);
+            for (int documentIndex = 0; documentIndex < context->GetNumDocuments(); ++documentIndex)
+            {
+                Rml::ElementDocument* document = context->GetDocument(documentIndex);
+                if (document->HasAttribute(MainSceneDocumentAttribute))
+                    visit(document);
+            }
+        }
+    }
+    } // namespace
+
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath)
+    {
+        return LoadThemedDocument(context, documentPath, std::string(), std::string());
+    }
+
+    Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath,
+                                             const std::string& modelPlaceholder, const std::string& modelName)
     {
         // documentPath's basename (the part after the last '/') is what the per-theme source URL
         // needs -- e.g. "Data/Interface/RmlUi/login.rml" -> "login.rml".
@@ -291,15 +329,67 @@ namespace UI::RmlBridge
         // <link href> against sourceUrl's directory (always themes/<theme>/), matching what
         // RmlUi's own LoadDocumentFromMemory(rmlText, sourceUrl) resolves it against internally,
         // regardless of which path the RML text itself was actually read from.
-        const std::string rmlText = InlineTokenizedStylesheet(buffer.str(), sourceUrl);
+        std::string rmlText = InlineTokenizedStylesheet(buffer.str(), sourceUrl);
+        if (!modelPlaceholder.empty())
+        {
+            for (size_t at = rmlText.find(modelPlaceholder); at != std::string::npos;
+                 at = rmlText.find(modelPlaceholder, at + modelName.size()))
+                rmlText.replace(at, modelPlaceholder.size(), modelName);
+        }
 
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(rmlText, sourceUrl);
         ApplyNativeTextSize(doc);
+        ApplyStackingDepth(doc, documentName);
+        ApplyDocumentScene(doc, documentName);
         if (!doc)
             g_ErrorReport.Write(L"> [RmlTheme] Failed to load '%hs' as theme '%hs' (source url '%hs').\r\n",
                 documentPath, GetActiveThemeName().c_str(), sourceUrl.c_str());
 
         return doc;
+    }
+
+    void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName)
+    {
+        if (document == nullptr)
+            return;
+
+        const std::optional<float> depth = StackingDepthForDocument(documentName);
+        if (!depth)
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] No stacking depth for '%hs'.\r\n", documentName.c_str());
+            return;
+        }
+        document->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(*depth, Rml::Unit::NUMBER));
+    }
+
+    void ApplyDocumentScene(Rml::ElementDocument* document, const std::string& documentName)
+    {
+        if (document != nullptr && SceneForDocument(documentName) == DocumentScene::Main)
+            document->SetAttribute(MainSceneDocumentAttribute, true);
+    }
+
+    void SuspendMainSceneDocumentsOutsideMainScene()
+    {
+        if (SceneFlag == MAIN_SCENE)
+            return;
+
+        ForEachMainSceneDocument(
+            [](Rml::ElementDocument* document)
+            {
+                if (document->GetLocalProperty(Rml::PropertyId::Display) == nullptr)
+                    document->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+            });
+        s_mainSceneDocumentsSuspended = true;
+    }
+
+    void ResumeMainSceneDocuments()
+    {
+        if (!s_mainSceneDocumentsSuspended)
+            return;
+
+        s_mainSceneDocumentsSuspended = false;
+        ForEachMainSceneDocument([](Rml::ElementDocument* document)
+                                 { document->RemoveProperty(Rml::PropertyId::Display); });
     }
 
     Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath)

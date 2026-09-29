@@ -1,0 +1,25 @@
+/* Modern theme for CCursedTempleSystem: the Illusion Temple art has no modern counterpart yet, so it
+   keeps the legacy theme's images, geometry and colours (see themes/legacy/cursed_temple_system.rcss). */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+.sprite { position: absolute; }
+
+.tutorial-line {
+	display: block;
+	position: absolute;
+	left: 140px;
+	transform-origin: left top;
+	white-space: nowrap;
+}

@@ -1,0 +1,54 @@
+/* Modern theme for CCryWolf: the Crywolf art has no modern counterpart yet, so it keeps the legacy
+   theme's images, geometry and colours (see themes/legacy/crywolf.rcss). */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+img { position: absolute; }
+
+#banner { top: 50px; width: 329px; height: 94px; }
+#rank_table { left: 230px; top: 150px; width: 196px; height: 141px; }
+#rank_label { top: 188px; width: 110px; height: 28px; }
+#rank_letter { left: 370px; top: 188px; width: 29px; height: 28px; }
+#exp_label { left: 229px; top: 235px; width: 60px; height: 19px; }
+.exp-digit { width: 15px; height: 19px; }
+
+#main { left: 518px; top: 278px; width: 122px; height: 119px; }
+.altar { width: 13px; height: 13px; }
+#dark_elf_icon { left: 623px; top: 358px; width: 15px; height: 15px; }
+#plate { left: 538px; top: 392px; width: 104px; height: 37px; }
+#balgass_icon { left: 623px; top: 379px; width: 15px; height: 15px; }
+#balgass_bar { left: 548px; top: 388px; height: 8px; }
+.timer-digit { width: 14px; height: 14px; }
+#statue_bar { top: 323px; height: 30px; }
+
+.hud-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+	color: #ff9415;
+}
+#dark_elf_text { left: 482px; top: 359px; }
+#balgass_text { left: 500px; top: 380px; }
+
+.notice {
+	display: block;
+	position: absolute;
+	left: 190px;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	background-color: rgba(0, 0, 0, 170);
+}

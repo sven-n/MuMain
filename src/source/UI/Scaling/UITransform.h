@@ -121,6 +121,31 @@ namespace UI::Scaling
     // Physical pixel size the native text renderer draws `role` text at under `transform` -- what a
     // legacy-theme RmlUi text element must use to match it, independent of the panel's own scale.
     float NativeTextPixelSize(FontRole role, const Transform& transform);
+    // NativeTextPixelSize() for a text drawn into a box (RenderText() with a box width): the
+    // renderer shrinks a text wider than its box to fit it, down to the role's minimum size.
+    // `measuredWidth` is the text's unconstrained width and `boxWidth` the box's, both in the
+    // transform's logical units (what MeasureText() returns).
+    float NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth, float boxWidth);
+    // Physical pixel size of the renderer's smallest `role` text (MinimumFontPointSize()).
+    float MinimumTextPixelSize(FontRole role);
+    // The box rule behind NativeTextPixelSizeInBox() for any text size: `textPx` scaled by
+    // boxWidth / measuredWidth when the text is wider than its box, but not below `minimumPx`
+    // (nor above `textPx`). `measuredWidth` is the text's width at `textPx`, in the box's units.
+    float FitTextPixelSizeToWidth(float textPx, float measuredWidth, float boxWidth, float minimumPx);
+    // How much a window the original drew at fixed pixels (login form, server list, system menu,
+    // login/character scene buttons) grows in the legacy theme: as much as the native dialog text
+    // (NativeTextPixelSize(), LayoutMode::Dialog) has grown against its size at 1024x768, never
+    // below 1 -- the original's own size up to 1280x720, larger only where the text is larger.
+    float SceneWindowScale(int windowWidth, int windowHeight);
+    // The rule behind SceneWindowScale() for any text size: textPx / referenceTextPx, not below 1.
+    float TextGrowthScale(float textPx, float referenceTextPx);
+    // How the original scaled its character scene button bar (laid out for 800x600): by
+    // min(W/800, H/600), clamped to [1, 2] (UI::CharacterSelection::CalculateLayout()).
+    float SceneBarScale(int windowWidth, int windowHeight);
+    // The same for a box with a height too (RenderText() with a box height the text is taller than,
+    // e.g. the Devil Square rank headers' height of 3): the smaller of the two fits, down to the minimum.
+    float NativeTextPixelSizeInBounds(FontRole role, const Transform& transform, float measuredWidth,
+                                      float measuredHeight, float boxWidth, float boxHeight);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
     float ContentScaleFromMetrics(float displayScale, float pixelDensity);

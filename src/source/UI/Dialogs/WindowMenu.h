@@ -5,66 +5,74 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
-#include "UI/Dialogs/MessageBox.h"
+#include "UI/Dialogs/WindowMenuRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
-    class CWindowMenu : public CObject
+class CWindowMenu : public CObject
+{
+public:
+    // The rows, top to bottom.
+    enum MenuEntry
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_WINDOW_MENU_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_WINDOW_MENU_FRAME_UP = BITMAP_WINDOW_MENU_BEGIN,
-            IMAGE_WINDOW_MENU_FRAME_MIDDLE,
-            IMAGE_WINDOW_MENU_FRAME_DOWN,
-            IMAGE_WINDOW_MENU_LINE,
-            IMAGE_WINDOW_MENU_ARROWL,
-            IMAGE_WINDOW_MENU_ARROWR,
-        };
-#ifdef PBG_ADD_GENSRANKING
-        enum
-        {
-            // �߰��ÿ� MENU_MAX_INDEX�ø��� ������ �ڵ� ����
-            MENU_MAX_INDEX = 6,
-            STANDARD_POS_X = REFERENCE_WIDTH - 112,
-            STANDARD_POS_Y = REFERENCE_HEIGHT - 156,
-        };
-#endif //PBG_ADD_GENSRANKING
-    public:
-        CWindowMenu();
-        virtual ~CWindowMenu();
-
-        bool Create(CManager* pNewUIMng, int x, int y);
-        void Release();
-
-        void SetPos(int x, int y);
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
-
-        float GetLayerDepth();	//. 10.0f
-        float GetKeyEventOrder();	// 10.f;
-
-        void OpenningProcess();
-        void ClosingProcess();
-
-    private:
-        void LoadImages();
-        void UnloadImages();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderArrow();
-
-    private:
-        CManager* m_pNewUIMng;
-        POINT						m_Pos;
-
-        int m_iSelectedIndex;
+        MENU_SYSTEM = 0,
+        MENU_HELP,
+        MENU_GUILD,
+        MENU_MOVE,
+        MENU_MINIMAP,
+        MENU_GENS,
+        MENU_MAX_INDEX,
     };
-}
+    enum
+    {
+        STANDARD_POS_X = REFERENCE_WIDTH - 112,
+        STANDARD_POS_Y = REFERENCE_HEIGHT - 156,
+    };
+
+public:
+    CWindowMenu();
+    virtual ~CWindowMenu();
+
+    bool Create(CManager* pNewUIMng, int x, int y);
+    void Release();
+
+    void SetPos(int x, int y);
+
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool Update();
+    bool Render();
+
+    float GetLayerDepth();    //. 10.0f
+    float GetKeyEventOrder(); // 10.f;
+
+    void OpenningProcess();
+    void ClosingProcess();
+
+    void ReloadRmlTheme();
+
+private:
+    void BuildRmlUi();
+    void SyncRmlModel();
+    void SyncTransform();
+    // What a click on the row did in the original; runs from Update(), outside RmlUi's own event
+    // dispatch, since most rows open or close other documents.
+    void RunMenuEntry(int entry);
+
+private:
+    CManager* m_pNewUIMng;
+    POINT m_Pos;
+
+    RmlModelBinder<WindowMenuRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    int m_PendingEntry = -1;
+};
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUIWINDOWMENU_H__26535D16_A947_4BC3_B129_59F0EFFBA04E__INCLUDED_)

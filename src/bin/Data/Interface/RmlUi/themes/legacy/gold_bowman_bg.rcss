@@ -1,0 +1,10 @@
+/* Legacy frame of the Golden Archer's windows (CGoldBowmanWindow, CGoldBowmanLena):
+   docked_panel_frame.rcss's pieces (linked first) with the newui_item_back04 top, as their
+   RenderFrame() drew, and the lucky number field's newui_guildmakeeditbox back (108 x 23 at
+   (45, 255)). Background context. */
+
+@spritesheet gb-serial-back-sheet { src: "../../../newui_guildmakeeditbox.tga"; gb-serial-back: 0px 0px 108px 23px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+#serial_back { position: absolute; left: 45px; top: 255px; width: 108px; height: 23px; decorator: image(gb-serial-back); }
+#panel { pointer-events: none; }

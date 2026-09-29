@@ -1,0 +1,39 @@
+/* Legacy theme for the login scene lines, reproducing NewRenderLogInScene(): the MU logo drawn
+   under alpha test at its fade level (colour and alpha), over its glow image added to the world
+   (EnableAlphaBlend(), native Glow blend) at the glow's own level; the texts in the normal font,
+   white on a rgba(0, 0, 0, 128) box sized to the text. */
+
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+#logo { position: absolute; pointer-events: none; }
+#logo-glow {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	decorator: additive-image(#ffffff ../../../../Logo/MU-logo_g.jpg);
+}
+#logo-image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+.line {
+	position: absolute;
+	left: 0;
+	white-space: nowrap;
+	pointer-events: none;
+	transform-origin: left top;
+}
+.line--copyright { text-align: right; transform-origin: right top; }
+
+.line-text {
+	display: inline-block;
+	white-space: pre;
+	color: rgb(255, 255, 255);
+	background-color: rgba(0, 0, 0, 128);
+}

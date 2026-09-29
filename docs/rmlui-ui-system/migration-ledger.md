@@ -55,14 +55,14 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | `CMainFrameWindow` (+ nested `CSkillList`) | `CObject`-tier + live-3D | Done | Hybrid RmlUi/native 3D | `STATUS.md` "What's migrated" — 3-phase port; skill icons/boxes RmlUi since 2026-09-27 (`ResolveSkillIcon()`, `skill_icons.rcss`), only the item-hotkey potions stay native 3D |
 | `CBuffStrip` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated"; the `data-for` pilot |
 | `CMuHelperBar` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated" |
-| `CHotKey` | `CObject`-tier | Not started | TBD | Not the same class as `CItemHotKey` (a nested type inside `CMainFrameWindow`, already ported as part of Phase 3) — verify relationship before scoping |
-| `CGensRanking` | `CObject`-tier | Not started | TBD | Aliases `CCharacterInfoWindow`'s texture slots (`STATUS.md`) — check for coupling before porting either independently |
-| `CCommandWindow` | `CObject`-tier | Not started | TBD | |
-| `CQuickCommandWindow` | `CObject`-tier | Not started | TBD | |
+| `CHotKey` | `CObject`-tier | Nothing to port | — | `CHotKey::Render()` only returns true: the window handles hotkeys and draws nothing (verified 2026-09-28). Not the same class as `CItemHotKey`, a nested type inside `CMainFrameWindow`, already ported with it |
+| `CGensRanking` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `gens_ranking.rml` + both themes. |
+| `CCommandWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `command_window.rml` + both themes (modern overrides the markup for its forged shell). Right-docked; `docked_panel_frame.rcss`'s frame at this window's own 432 height. The twelve `CButton`s are gone: RmlUi draws up/over/down frames and the armed command pressed and bold; C++ keeps the armed command, the right-click that runs it, the cursor state and the corner-close hit test. The target box at the pointer is part of the same document. Title shrunk to its 72-unit box via `UI::Scaling::NativeTextPixelSizeInBox()`. |
+| `CQuickCommandWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `quick_command.rml` + both themes. Render-only port: placement at the pointer, the hover index and the clicks stay native (the control socket's quick-peer observation reads the same index), the document mirrors them and takes no pointer events. |
 | `CMoveCommandWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `move_command.rml` + both themes. The left-docked warp list (`/move`), and the **second consumer of `base.rcss`'s `.scroll-pane`** — the one that actually retires a hand-rolled scrollbar: `ThumbYForScrollOffset`/`ScrollOffsetForThumbY`/`UpdateDragState`/`MaximumScrollOffset`/`ClampScrollOffset` and the three-state `MOVECOMMAND_MOUSE_EVENT` drag machine are all deleted, along with their five unit tests and this window's whole `IMAGE_LIST` (it aliased `CChatLogWindow::IMAGE_SCROLL_*`, which is why that enum was kept two commits earlier; it loaded its own `LoadBitmap` copies, so the coupling was compile-time only). `UI::MoveCommand::CalculateLayout()` stays — the window genuinely derives its height from the dock column, that is real intent, not scroll bookkeeping. **The only `LayoutMode::DockLeft` window in the game**, so it has no dock neighbours to match and links no shared frame partial; modern borrows `docked_panel_frame.rcss`'s forged vocabulary at rail scale rather than its 190x429 dialog chrome. First `.scroll-pane` consumer inside a `transform: scale(root_scale)` panel — see `component-catalog.md`'s new counter-scale note for the technique and what it costs. |
 | `CChatLogWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `chat_log.rml` + both themes. First consumer of `base.rcss`'s `.scroll-pane`, and the first list in this codebase bound with `data-attr-class` (a per-line class composed in the model, instead of nine `data-class-*` attributes). RmlUi owns the fill, the lines, the wheel and the scrollbar; C++ keeps the message vectors, the filters, the 3-line-step resize, and the pointed-line hit test. `AddText()`'s 333 call sites are untouched -- it was always a data API. See `STATUS.md` for the DOM-scroll decision and what it cost. |
 | `CSystemLogWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `system_log.rml` + both themes. The top-left system/error overlay, ported right after the `CChatLogWindow` it shares a file with, and reusing its `ChatLogLineEntry` line shape. Simpler in three ways that are easy to get wrong by copying its file-mate: it grows DOWNWARD from a fully static origin (`Create()` at (0,80), `m_WndSize.cy` never recomputed, `SetPosition()` never called), it has only two colours (system-blue vs error-red for everything else, not a per-type map), and its row pitch is font-derived (`MeasureText(L"Q").cy * 1.2`) so RCSS's own `line-height` default of 1.2 reproduces it by doing nothing. No scrolling and no interaction at all, so the whole panel is `pointer-events: none`. |
-| `CMiniMap` | `CObject`-tier | Not started | TBD | |
+| `CMiniMap` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `mini_map.rml` + both themes. The map texture and its markers were quads turned 45 degrees in physical pixels (`RenderBitRotate`/`RenderPointRotate`); `UI/HUD/MiniMapLayout` rebuilds them and places each element with a CSS `matrix()`. Pulled in front of the HUD documents, the main frame's document pulled back in front of it; the map paints only outside the native HUD band (clip regions with `clip: always`, a copy of the picture each). |
 | `CMasterLevel` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated" (2026-09-27): `master_level.rml`, `MasterSkillTreeLayout`, `master_skill_icons.rcss`; its learn confirm draws above the tree since plain dialog chrome paints from the main context (`a7798a62`) |
 | `CMuHelperConfigWindow` (was `CUIMuHelper`) + `CMuHelperDetailWindow` (was `CMuHelperExt`) + `CMuHelperSkillPicker` (was `CMuHelperSkillList`) | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `mu_helper_config.rml`, `mu_helper_detail.rml`, `mu_helper_skill_picker.rml` + both themes; shared pieces in `themes/*/mu_helper_common.rcss`. The bot's *configuration* windows (hotkey `Z`, and the `CMuHelperBar` config button), now in `UI/MuHelper/`. Config and detail are docked `PanelColumnX(1)`/`(2)` panels on the `character_info` recipe; the picker is a borderless flyout whose fan-out layout stays in C++. Every control has one fixed position per id, so the config window is static RML positioned by RCSS, and which class sees which control is one tested table, `UI::MuHelper::ResolveClassFeatures()`, bound as flags — never RCSS. The detail window's fill gauges keep native C++ input (click, wheel, drag) over RmlUi art. Deleted: `UI/Core/WindowMuHelper.h/.cpp` (~3,400 lines), `CUIExtraItemListBox`, 44 leaked `CButton`/`CCheckBox`, the dead `RenderSkillInfo` tooltip chain. Native bugs fixed on the way (see `tracked-deferrals.md`'s divergence audit): pick-all/pick-selected now truly exclusive, a skill condition page opened with no radio set now gets a default, the potion gauge's hit test no longer runs on every page, the buff interval is no longer saved as 0 from other pages, right-clicking a number plate no longer writes past the slot array. Native `CUIMuHelper::Show()` released every `CUITextInputBox`'s focus as a side effect, which hid the dead startup box `g_pMercenaryInputBox` holding focus from launch; the port removed that box (and the equally dead `CUILoginInputBox`) rather than keep the side effect. |
 
@@ -71,7 +71,7 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
 | `CCharacterInfoWindow` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated"; frame/shell shared with `CMyQuestInfoWindow`/`CPetInfoWindow`/`CPartyInfoWindow` via `docked_panel_frame.rcss` (2026-09-19, see `STATUS.md`'s dock-neighbor gap note) |
-| `CNameWindow` | `CObject`-tier | Not started | TBD | |
+| `CNameWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `world_labels.rml` + both themes (`UI::Character::WorldLabelLayer`): pooled label elements in the background context, behind its other documents, filled in `PrepareBackgroundLayer()` from what the unchanged native label code draws under an `Overlay2DRecordScope` (names, balloons, shop titles, Gens marks, health bars, item names, macro bar, event times); glow-blended quads through `additive-fill(...)`. |
 | `CPetInfoWindow` | `CObject`-tier | Done (2026-09-19) | RmlUi-only 2D | No live-3D content (pure text/icon/bar), same shape as `CCharacterInfoWindow`. The docking coupling this row used to flag as unverified turned out to be real but harmless: `WindowSystem.cpp`'s existing native show/hide choreography (`INTERFACE_PET` forces `INTERFACE_CHARACTER` open and vice versa on close) needed zero changes — it only ever reads/writes `m_Pos`/`IsVisible()`, same as before the port. `CCharacterInfoWindow::RmlClickPet()` already called `Toggle(INTERFACE_PET)` before this port landed (a contract waiting to be fulfilled). Group boxes (`RenderGroupBox()`'s 9-slice tiling) reproduced as corner-bracket sprites + flat fills in legacy, a single flat `token(surface-panel)` rect in modern — same simplification `character_info.rcss`'s own summary box already established, not a literal 1px-tile port. Its modern theme initially shipped flatter than `CCharacterInfoWindow`'s forged-dialog look (a conscious effort tradeoff), then unified with it same-day once the shared `docked_panel_frame.rcss` partial existed — see `STATUS.md`'s dock-neighbor gap note. |
 
 ### Inventory / Shop / Trade
@@ -80,21 +80,21 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 |---|---|---|---|---|
 | `CMyInventory` | `CObject`-tier + live-3D | Done | Hybrid RmlUi/native 3D | `STATUS.md` "What's migrated" |
 | `CTrade`, `CStorageInventory`, `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`, `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd` | `CObject`-tier + live-3D | Done (2026-09-13) | Hybrid RmlUi/native 3D | `STATUS.md` "Rest of the inventory family" |
-| `CItemExplanationWindow` | `CObject`-tier | Not started | TBD | |
-| `CItemEnduranceInfo` | `CObject`-tier | Not started | TBD | |
-| `CSetItemExplanation` | `CObject`-tier | Not started | TBD | |
-| `CUnitedMarketPlaceWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Not started | TBD (likely Hybrid) | `component-catalog.md`: "not in this family [inventory `C3DRenderMng` group] — no `CInventoryCtrl`/item grid... still native, but not blocked by anything here" |
-| `CInGameShop` | `CObject`-tier, has live-3D render calls | Not started | TBD (likely Hybrid) | Several of its sub-dialogs (`MsgBoxIGS*`) already call `CGenericConfirmDialog` for individual confirms — the shop shell itself is still fully native |
+| `CItemExplanationWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `item_explanation.rml` through `UI/Inventory/TipTextListView`. Never showed in the original (block-scope externs read `ItemHelp` through a same-named reference, and widths other than 640/800/1024/1280 divided by zero); both fixed. |
+| `CItemEnduranceInfo` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `item_endurance.rml` + both themes: the durability icons (dock right), the pet HP frame and the arrow / summon lines (screen overlay). Hit tests stay in C++; main context behind its other documents. |
+| `CSetItemExplanation` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `set_item_explanation.rml` through `UI/Inventory/TipTextListView`. |
+| `CUnitedMarketPlaceWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-27): `united_market_place.rml` + both themes; RmlUi-only 2D (the 3D hook draws nothing) | TBD (likely Hybrid) | `component-catalog.md`: "not in this family [inventory `C3DRenderMng` group] — no `CInventoryCtrl`/item grid... still native, but not blocked by anything here" |
+| `CInGameShop` | `CObject`-tier, has live-3D render calls | Stays native | — | Not ported: OpenMU has no cash shop server side, so there is nothing to port against. Several of its sub-dialogs (`MsgBoxIGS*`) already call `CGenericConfirmDialog` for individual confirms; the shop shell is still fully native |
 
 ### Party / Guild
 
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
-| `CPartyListWindow` | `CObject`-tier | Not started | TBD | Different class from `CPartyInfoWindow` below — the always-on HUD mini list, fixed position, not the full management window. Aliases `IMAGE_PARTY_FLAG`/`IMAGE_PARTY_EXIT`'s numeric slot IDs from `CPartyInfoWindow::IMAGE_LIST` (loads its own copies of the same files independently, doesn't depend on `CPartyInfoWindow::LoadImages()` having run) — a real compile-time coupling to keep in mind if this window is ever trimmed further. |
+| `CPartyListWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `party_list.rml` + both themes. Different class from `CPartyInfoWindow` below — the always-on HUD mini list. Cards, tints, flag, health bar and leave buttons are RmlUi; C++ keeps `Party[]`, the hovered card (the skill target `Selection.cpp` reads) and the leave request. Names use `NativeTextPixelSizeInBox()` for their 48/58-unit boxes; the health bar crops its sprite with `scale-none` (overflow clipping does not work under a transformed panel). No longer aliases `CPartyInfoWindow`'s image slots. |
 | `CPartyInfoWindow` | `CObject`-tier | Done (2026-09-19) | RmlUi-only 2D | No live-3D content, same shape as `CCharacterInfoWindow`. Looser docking than `CPetInfoWindow`: opens standalone (just closes Character/Inventory first via `HideAllGroupA()`), no forced pairing — `WindowSystem.cpp` needed zero changes. Member rows (`RenderMemberStatue`'s `iIndex * 71` pixel math) ported to a `data-for` list stacked via normal block flow (`height: 71px` per row) instead of computed offsets — first repeated-row list in this codebase built directly against a live global array (`Party[]`/`PartyNumber`) each frame rather than a cached snapshot, since the row count is small (`MAX_PARTYS` = 5). `IMAGE_LIST` enum and `LoadImages()`/`UnloadImages()` kept despite the window no longer rendering through the legacy bitmap-atlas system, same reason `CCharacterInfoWindow` kept its own — `CPartyListWindow` aliases two of this window's texture slot IDs. Frame/shell now shared with `CCharacterInfoWindow`/`CMyQuestInfoWindow`/`CPetInfoWindow` via `docked_panel_frame.rcss` (both themes) — see `STATUS.md`'s dock-neighbor gap note for why this exists. |
-| `CFriendWindow` | `CObject`-tier | Stays native (transitional stopgap) | Native-only (stopgap) | `building-new-ui.md`'s own reference-shape table and "`UIWindows.cpp`/`CFriendWindow` pattern" section — thin adapter over a live legacy subsystem (friend/mail/chat-room), not excluded from a future port, just not scheduled |
-| `CGuildMakeWindow` | `CObject`-tier | Not started | TBD | |
-| `CGuildInfoWindow` | `CObject`-tier | Not started | TBD | Already a `CGenericConfirmDialog` caller for its alliance-master-can't-leave notice — the window shell itself is still fully native |
+| `CFriendWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D; `CUIPhotoViewer` native 3D | `friend_window.rml` + both themes, one document and data model per open window of `CUIWindowMgr` (`UI/Party/FriendWindowView`). A window type opts in with `HasRmlView()`; `CollectRmlView()` updates its parts (frame, title bar, tabs, lists, scroll bars, buttons, check boxes) every frame from the native geometry, in place (an unchanged frame formats nothing); hit tests, drags, resizing and messages stay native. Ported: the main window with its friends list, letter box and window list tabs; `CUITextInputWindow` (add friend), `CUIQuestionWindow`, `CUILetterWriteWindow`, `CUILetterReadWindow`, `CUIChatWindow`. Text fields are RmlUi `<input>` / `<textarea>` elements of the window's document (`GetRmlTextField()`); the native `CUITextInputBox` keeps the value, focus requests and Enter / Tab. The letter windows' photo viewer is drawn natively after the window (`RenderOver()`), over an underlay document in the background context |
+| `CGuildMakeWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `guild_make.rml` + both themes. |
+| `CGuildInfoWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `guild_info.rml` + both themes with its list widgets; the alliance-master notice stays `CGenericConfirmDialog`. |
 
 ### Quests
 
@@ -111,45 +111,45 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 |---|---|---|---|---|
 | `CNPCShop` | `CObject`-tier + live-3D | Done | Hybrid RmlUi/native 3D | Listed under Inventory/Shop above |
 | `CNPCDialogue` | `CObject`-tier | Done | RmlUi-only 2D | The window a quest-giving NPC actually opens first (`ProcessOpening()`/`ReceiveQuestByNPCEPList`/`ReceiveQuestByEtcEPList`) — was the source of a modern-theme "looks legacy" report, since it had zero RmlUi/theme participation before this port; only after picking a step from it does the server push a `PMSG_QUEST_STEP_INFO` that opens the already-ported `CQuestProgress`/`CQuestProgressByEtc` above. Own `npc_dialogue.rml`/`.rcss` (not shared with `quest_progress.rcss` despite reusing the same `Quest_bt_L/R.tga` sprite asset — the layout isn't a near-identical sibling: two independently paginated lists in one document, an NPC-word pager (top) and a sel-text pager (bottom) whose rows come from either `GetNPCDlgAnswer()` or quest-list-mode's `SetQuestListText()` quest subjects, both reduced to the same `{text, index}` row shape via `NPCDialogueRmlModel`). The "page to the end reveals the list" gate is preserved exactly (now a same-click side effect, matching the native single-button double-duty). Retires all 5 `CButton`s and every native `Render*()` call — no hybrid native-draw boundary left at all, unlike `CQuestProgress`'s reward-item popup. Gens contribute-point banner (NPC 543/544) and the Gens join/secede/reward flows (`ASG_ADD_GENS_SYSTEM`/`PBG_ADD_GENSRANKING`, unconditionally on in this build) are untouched native logic, just reactively synced into the model. Fixed a fragile-transitive-include situation this same session's earlier `QuestProgress.h` cleanup had patched around: `NPCDialogue.h` no longer needs `MessageBox.h`/`MyInventory.h`/`MyQuestInfoWindow.h`/`QuestProgress.h`/`Button.h` at all (those were only for texture-slot enum aliasing and the now-removed `CButton` members). Build verified (`RelWithDebInfo`) and confirmed working in-game. |
-| `CGatemanWindow` | `CObject`-tier | Not started | TBD | |
-| `CEmpireGuardianTimer` | `CObject`-tier | Not started | TBD | |
-| `CEmpireGuardianNPC` | `CObject`-tier + live-3D (`I3DRenderObj`) | Not started | TBD (likely Hybrid) | |
+| `CGatemanWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `gateman.rml` + both themes, right-docked; guest, staff and master pages. |
+| `CEmpireGuardianTimer` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `empire_guardian_timer.rml` through `UI/Events/EventTimerView` (`event_timer.rcss`, shared with the Blood Castle and Chaos Castle timers). |
+| `CEmpireGuardianNPC` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-27) | Hybrid | `empire_guardian_enter.rml` (texts, buttons) + `empire_guardian_enter_bg.rml` (frame, background context) through `UI/Events/EventItemEntryView`, shared with `CDoppelGangerWindow`; Gaion's Order stays a native 3D preview over the frame. |
 
 ### Combat / Duel
 
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
-| `CCastleWindow` | `CObject`-tier | Not started | TBD | Already a `CGenericConfirmDialog` caller for a sub-dialog — shell itself still native |
-| `CGuardWindow` | `CObject`-tier | Not started | TBD | Same as above |
-| `CDuelWindow` | `CObject`-tier | Not started | TBD | |
-| `CDuelWatchWindow` | `CObject`-tier | Not started | TBD | |
-| `CDuelWatchUserListWindow` | `CObject`-tier | Not started | TBD | |
-| `CDuelWatchMainFrameWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Not started | TBD (likely Hybrid) | |
-| `CSiegeWarfare` | `CObject`-tier | Not started | TBD | |
+| `CCastleWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `castle_window.rml` + both themes (Senatus: gate, statue and tax pages); its buy/repair confirmations stay `CGenericConfirmDialog`. The treasury no longer draws twice from a `%I64d` format. |
+| `CGuardWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `guard_window.rml` + both themes with its guild lists; the owner line and the period's tab labels show (the original lost the first to an unterminated buffer and froze the second). |
+| `CDuelWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `duel_window.rml` + both themes, in the **background context** behind its other documents: the original drew it under every panel (layer 1.1). |
+| `CDuelWatchWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `duel_watch.rml` + both themes; right-docked, `docked_panel_frame.rcss`. |
+| `CDuelWatchUserListWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `duel_watch_spectators.rml` + both themes: a `Pk_box` per spectator above the spectator frame's right end; takes no pointer events (C++ keeps the pointer over the boxes from the world). The boxes' fill is the colour the original's `RenderColor()` left current (measured). |
+| `CDuelWatchMainFrameWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-28) | RmlUi-only 2D (the 3D hook draws nothing) | `duel_watch_frame.rml` + both themes, in the main frame's place while the duel-watch buff is on: frame, health/shield gauges with their catch-up effect bars (the catch-up stays in C++, `Update()`), score marks, names, the exit button (RmlUi click queued, C++ keeps its tooltip and the channel quit request). Fixed: the right shield bar's catch-up speed was measured against the left fighter's shield. |
+| `CSiegeWarfare` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `siege_warfare.rml` + both themes, background context behind its other documents (layer depth 1.6); observer, soldier and commander fill one model (`SiegeWarfareRmlModel`), buttons still hit-test natively. |
 
-### Events (all not started — small, self-contained per-event status/timer windows)
+### Events (small, self-contained per-event status/timer windows)
 
 | Component | Category | Notes |
 |---|---|---|
-| `CCatapultWindow` | `CObject`-tier | |
-| `CEnterBloodCastle` | `CObject`-tier | |
-| `CBattleSoccerScore` | `CObject`-tier | |
-| `CBloodCastle` | `CObject`-tier | |
-| `CChaosCastleTime` | `CObject`-tier | |
-| `CCursedTempleResult` | `CObject`-tier | |
-| `CCryWolf` | `CObject`-tier | |
-| `CCursedTempleSystem` | `CObject`-tier | |
-| `CCursedTempleEnter` | `CObject`-tier | |
-| `CDoppelGangerFrame` | `CObject`-tier | |
-| `CDoppelGangerWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | TBD (likely Hybrid) |
-| `CEnterDevilSquare` | `CObject`-tier | |
-| `CGateSwitchWindow` | `CObject`-tier | |
-| `CGoldBowmanLena` | `CObject`-tier, incidental 3D render call | Signal is an NPC-model render, not necessarily a Hybrid-shape icon — verify at port time |
-| `CGoldBowmanWindow` | `CObject`-tier | |
-| `CExchangeLuckyCoin` | `CObject`-tier | |
-| `CRegistrationLuckyCoin` | `CObject`-tier, incidental 3D render call | Same caveat as `CGoldBowmanLena` |
-| `CKanturu2ndEnterNpc` | `CObject`-tier | |
-| `CKanturuInfoWindow` | `CObject`-tier | |
+| `CCatapultWindow` | `CObject`-tier | Done (2026-09-28): `catapult.rml` + both themes, right-docked |
+| `CEnterBloodCastle` | `CObject`-tier | Done (2026-09-27): `blood_castle_enter.rml` through `UI/Events/EventEntryView` (shared with `CEnterDevilSquare`, `event_entry.rcss`) |
+| `CBattleSoccerScore` | `CObject`-tier | Done (2026-09-27): `battle_soccer_score.rml`, background context like `CDuelWindow`; guild marks as 8 x 8 cells (`Guild::MarkPalette`) |
+| `CBloodCastle` | `CObject`-tier | Done (2026-09-28): `blood_castle_time.rml` through `UI/Events/EventTimerView` |
+| `CChaosCastleTime` | `CObject`-tier | Done (2026-09-28): `chaos_castle_time.rml` through `UI/Events/EventTimerView` |
+| `CCursedTempleResult` | `CObject`-tier | Done (2026-09-27): `cursed_temple_result.rml` + both themes; the fading banner blends from the start, where the native alpha test (0.25) hid its first moments |
+| `CCryWolf` | `CObject`-tier | Done (2026-09-28): `crywolf.rml` + both themes (battle panel, result banner, rank/exp digits, ready notice; main context, pulled to the front); the in-render yes/no box only the unused `MoveMvp_Interface()` opened is not ported |
+| `CCursedTempleSystem` | `CObject`-tier | Done (2026-09-28): `cursed_temple_system.rml` + both themes: the Illusion Temple HUD (time, mini map and markers, skill panel, score effect, tutorial) in RmlUi |
+| `CCursedTempleEnter` | `CObject`-tier | Done (2026-09-27): `cursed_temple_enter.rml` + both themes |
+| `CDoppelGangerFrame` | `CObject`-tier | Done (2026-09-28): `doppelganger_frame.rml` + both themes, background context; gauge and markers still step 0.01 a frame in C++ |
+| `CDoppelGangerWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-27), Hybrid: `doppelganger_enter.rml` + `doppelganger_enter_bg.rml` (frame in the background context, under the native 3D preview) through `UI/Events/EventItemEntryView` |
+| `CEnterDevilSquare` | `CObject`-tier | Done (2026-09-27): `devil_square_enter.rml` through `UI/Events/EventEntryView` |
+| `CGateSwitchWindow` | `CObject`-tier | Done (2026-09-28): `gate_switch.rml` + both themes, right-docked |
+| `CGoldBowmanLena` | `CObject`-tier, incidental 3D render call | Done (2026-09-28): `gold_bowman_lena.rml` + `gold_bowman_lena_bg.rml` through `UI/Events/EventItemEntryView` |
+| `CGoldBowmanWindow` | `CObject`-tier | Done (2026-09-28): `gold_bowman.rml` + `gold_bowman_bg.rml` through `UI/Events/EventItemEntryView`; the number field is an RmlUi text input |
+| `CExchangeLuckyCoin` | `CObject`-tier | Done (2026-09-28): `lucky_coin_exchange.rml` + `_bg` through `UI/Events/EventItemEntryView` |
+| `CRegistrationLuckyCoin` | `CObject`-tier, incidental 3D render call | Done (2026-09-28): `lucky_coin_registration.rml` + `_bg` through `UI/Events/EventItemEntryView`; the coin stays a native 3D model |
+| `CKanturu2ndEnterNpc` | `CObject`-tier | Done (2026-09-28): `kanturu_enter.rml` + both themes |
+| `CKanturuInfoWindow` | `CObject`-tier | Done (2026-09-28): `kanturu_info.rml` + both themes (boss-battle HUD) |
 
 ### Options / System
 
@@ -159,10 +159,10 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 50–200 % ladder, re-applied live by resizing the window to its current size, which is also this
 window's first hover tooltip: a plain `.option-row-tip` sibling shown by an RCSS `:hover` rule, no
 C++ hover callback, see `layout-and-scaling.md`'s "Global UI scale" section). The close button is built directly in C++ into `window_shell`'s own `#window_shell_footer` anchor (a direct `#panel` child, sibling of `#content`, matching `generic_confirm_dialog`'s own button placement) rather than authored as `{{}}`-bound RML — see `engine-findings.md`'s new "moving an already-parsed element doesn't preserve a `{{}}` text binding" entry for why. All 5 dropdowns ended up as a custom `data-for`/`data-class`/`data-event-click` control (`.option-dropdown` family) instead of RmlUi's native `<select>` — see `engine-findings.md`'s new native-`<select>` entry; three separate rounds of fixing the native widget's missing sub-element styling never got clicking an option to reliably commit. Also fixed along the way: two scenes (`LoginScene.cpp`/`CharacterScene.cpp`) that manually pump this window while it's shown outside `MAIN_SCENE` were missing an `Update()` call, leaving every bound label blank the first time the window opened before ever visiting the main scene (`engine-findings.md`'s new persistent-document-manual-pump entry); a native, unrelated bug in `CServerMsgWin::Release()` not resetting its own visibility flag, which produced a one-frame flicker at its last position when a server notice was showing at the exact moment of the character-select→main-scene transition. |
-| `CServerMsgWin` | `CObject`-tier | Not started | TBD | Sibling of the already-done `CMsgWin` (same folder, same era) but has zero RmlUi call sites — still fully native, not yet a distinct port target. **Bug fixed in passing (2026-09-19)**, unrelated to porting: `Release()` never reset its own `CObject` visibility flag (every sibling window torn down in the same `CSceneUICoordinator::CreateMainScene()` sweep does), so a notice visible at the exact moment of the character-select→main-scene transition kept rendering for a frame against already-released sprites — a stray upper-left flicker. Fixed by resetting the flag directly in `Release()`. |
-| `CChatCommandWindow` | `CObject`-tier | Not started | TBD | |
-| `CHelpWindow` | `CObject`-tier | Not started | TBD | |
-| `CWindowMenu` | `CObject`-tier | Not started | TBD | |
+| `CServerMsgWin` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `server_msg.rml` + both themes, real pixels like the original (`LayoutMode::Legacy`), the lines in the native fixed face (Cousine, now registered with RmlUi). Earlier note: **Bug fixed in passing (2026-09-19)**, unrelated to porting: `Release()` never reset its own `CObject` visibility flag (every sibling window torn down in the same `CSceneUICoordinator::CreateMainScene()` sweep does), so a notice visible at the exact moment of the character-select→main-scene transition kept rendering for a frame against already-released sprites — a stray upper-left flicker. Fixed by resetting the flag directly in `Release()`. |
+| `CChatCommandWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `chat_command.rml` + both themes. Its parameter value field is an RmlUi `<input>` (was a `CUITextInputBox`): the window claims RmlUi's text-input identity through `SetRelatedWnd()` while it is focused, as `CChatInputBox` does, and filters digits for numeric parameters. |
+| `CHelpWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `help_window.rml` + both themes (legacy overrides the markup to bind the native `RenderTipTextList()` metrics). Pages built by `UI::Help::BuildPage()`; shown unfocused and pulled to the front (`SyncDocumentVisibilityInFront()`), so the HUD documents no longer cover it. The two unreachable pages (clock, event times) are dropped. |
+| `CWindowMenu` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `window_menu.rml` + both themes. A `LayoutMode::Hud` window: the document carries the W/640 x H/480 stretch; hover and arrows are `:hover`, row clicks are queued and run from `Update()`. |
 | `CCreditWin` | `CObject`-tier | Done | RmlUi-only 2D | Flagged by the 2026-09-16 audit as an apparently-shipped port that had never been logged; **confirmed and recorded in `STATUS.md` 2026-09-26** — `credit_win.rml` plus both themes' `.rcss`, `LoadThemedDocument` + theme-reload registration, and no native `RenderImage`/`RenderText`/`CSprite` calls left. The port was real; only the record was missing. |
 
 ### Excluded from this ledger (infrastructure / reusable widgets, not standalone "components")
@@ -196,49 +196,70 @@ been individually ported. What's left, by current grep of the two headers:
 
 | Component | Status | Target primitive | Detail pointer |
 |---|---|---|---|
-| `CGuild_ToPerson_Position` | Stays native | Bespoke (simultaneous radio-select) | `component-catalog.md`'s Dialog section |
-| `CGemIntegrationDisjointMsgBox` | Stays native | Bespoke (embedded live inventory list-selection widget) | `component-catalog.md`'s Dialog section |
-| `CQuestCountLimitMsgBoxLayout` (`CCommonMessageBox`) | Not started | TBD | |
-| `CBloodCastleResultMsgBoxLayout` | Not started | TBD | |
-| `CDevilSquareRankMsgBoxLayout` | Not started | TBD | |
-| `CChaosCastleResultMsgBoxLayout` | Not started | TBD | |
-| `CCrownSwitchPopLayout`, `CCrownSwitchPushLayout`, `CCrownSwitchOtherPushLayout` (`CProgressMsgBox`) | Not started | TBD | Share one underlying shape class |
-| `CSealRegisterStartLayout`, `CSealRegisterSuccessLayout`, `CSealRegisterFailLayout`, `CSealRegisterOtherLayout`, `CSealRegisterOtherCampLayout` (`CProgressMsgBox`) | Not started | TBD | Share one underlying shape class |
-| `CCrownDefenseRemoveLayout`, `CCrownDefenseCreateLayout` (`CProgressMsgBox`) | Not started | TBD | Share one underlying shape class |
-| `CCursedTempleHolicItemGetLayout`, `CCursedTempleHolicItemSaveLayout` (`CCursedTempleProgressMsgBox`) | Not started | TBD | Share one underlying shape class |
+| `CGuild_ToPerson_Position` | Done (2026-09-28) | RmlUi (shared `UI/Dialogs/MessageBoxView`) | `component-catalog.md`'s Dialog section |
+| `CGemIntegrationDisjointMsgBox` | Done (2026-09-28) | RmlUi (shared `MessageBoxView` with a list part for its `CUIUnmixgemList`) | The list keeps its native hit tests, selection and scrolling |
+| `CQuestCountLimitMsgBoxLayout` (`CCommonMessageBox`) | Compiled out | — | Its only creator, `ReceiveQuestLimitResult()`, is under `ASG_ADD_TIME_LIMIT_QUEST`, which this build does not define |
+| `CBloodCastleResultMsgBoxLayout` | Done (2026-09-28) | RmlUi (`MessageBoxView`) | Texts from the match object's `CollectMatchResult()`, which the native drawing uses too |
+| `CDevilSquareRankMsgBoxLayout` | Done (2026-09-28) | RmlUi (`MessageBoxView`) | As above |
+| `CChaosCastleResultMsgBoxLayout` | Done (2026-09-28) | RmlUi (`MessageBoxView`) | As above |
+| `CCrownSwitchPopLayout`, `CCrownSwitchPushLayout`, `CCrownSwitchOtherPushLayout` (`CProgressMsgBox`) | Done (2026-09-28) | RmlUi (`MessageBoxView` with frame and progress bar) | Share one underlying shape class |
+| `CSealRegisterStartLayout`, `CSealRegisterSuccessLayout`, `CSealRegisterFailLayout`, `CSealRegisterOtherLayout`, `CSealRegisterOtherCampLayout` (`CProgressMsgBox`) | Done (2026-09-28) | RmlUi (`MessageBoxView`) | Share one underlying shape class |
+| `CCrownDefenseRemoveLayout`, `CCrownDefenseCreateLayout` (`CProgressMsgBox`) | Done (2026-09-28) | RmlUi (`MessageBoxView`) | Share one underlying shape class |
+| `CCursedTempleHolicItemGetLayout`, `CCursedTempleHolicItemSaveLayout` (`CCursedTempleProgressMsgBox`) | Done (2026-09-28) | RmlUi (`MessageBoxView`, the `CProgressMsgBox` view) | Share one underlying shape class |
 
 Also present: `C3DItemCommonMsgBox` (`CommonMessageBox.h`) — a `CMessageBoxBase` shape class with
-live-3D item content, no `...Layout` instantiation found using it directly in the current grep;
-verify whether it's still a live shape before scoping a port.
+live-3D item content; its only user is the cash shop's `MsgBoxIGSStorageItemInfo`, so it stays with
+`CInGameShop` (verified 2026-09-28).
 
 ## `CUIControl` list family (`UI/Widgets/UIControls.h`)
 
-The `data-for` binding pattern is proven (`component-catalog.md`'s "List / repeated rows") on 2 of
-18 `CUITextListBox<T>` instantiations, and a third (`CUIExtraItemListBox`) was deleted with its only
-user. The other 15 are the tracked deferral in `tracked-deferrals.md`.
+The `data-for` binding pattern is proven (`component-catalog.md`'s "List / repeated rows"); the list
+widgets retire with their host windows. As of 2026-09-28 only the three cash shop lists that stay
+with `CInGameShop` still draw natively.
 
 | Component | Row type | Status | Detail pointer |
 |---|---|---|---|
 | `CUICurQuestListBox` | `SCurQuestItem` | Done | `component-catalog.md` — `CMyQuestInfoWindow`'s quest list |
 | `CUIQuestContentsListBox` | `SQuestContents` | Done | `component-catalog.md` — same window |
-| `CUIGuildListBox` | `GUILDLIST_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUISimpleChatListBox` | `WHISPER_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUILetterTextListBox` | `LETTER_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIChatPalListBox` | `GUILDLIST_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIWindowListBox` | `WINDOWLIST_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUILetterListBox` | `LETTERLIST_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUISocketListBox` | `SOCKETLIST_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIGuildNoticeListBox` | `GUILDLOG_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUINewGuildMemberListBox` | `GUILDLIST_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIUnionGuildListBox` | `UNIONGUILD_TEXT` | Not started | `tracked-deferrals.md` |
+| `CUIGuildListBox` | `GUILDLIST_TEXT` | Unused | Only an `extern` declaration in `ZzzInventory.cpp` is left; no window draws it |
+| `CUISimpleChatListBox` | `WHISPER_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
+| `CUILetterTextListBox` | `LETTER_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
+| `CUIChatPalListBox` | `GUILDLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
+| `CUIWindowListBox` | `WINDOWLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
+| `CUILetterListBox` | `LETTERLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
+| `CUISocketListBox` | `SOCKETLIST_TEXT` | Done (2026-09-28) | `mix_inventory.rml` (`SyncSocketListModel()`); hit tests, selection and scrolling stay native |
+| `CUIGuildNoticeListBox` | `GUILDLOG_TEXT` | Done (2026-09-28) | `CGuildInfoWindow` port (`guild_info.rml`) |
+| `CUINewGuildMemberListBox` | `GUILDLIST_TEXT` | Done (2026-09-28) | `CGuildInfoWindow` port (`guild_info.rml`) |
+| `CUIUnionGuildListBox` | `UNIONGUILD_TEXT` | Done (2026-09-28) | `CGuildInfoWindow` port (`guild_info.rml`) |
 | `CUIExtraItemListBox` | `FILTERLIST_TEXT` | Deleted | Its only user, the MU Helper config window, now binds a `data-for` list in a `.scroll-pane` |
-| `CUIUnmixgemList` | `UNMIX_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIBCDeclareGuildListBox` | `BCDECLAREGUILD_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIBCGuildListBox` | `BCGUILD_TEXT` | Not started | `tracked-deferrals.md` |
-| `CUIMoveCommandListBox` | `MOVECOMMAND_TEXT` | Not started | `tracked-deferrals.md` |
+| `CUIUnmixgemList` | `UNMIX_TEXT` | Done (2026-09-28) | The list part of `CGemIntegrationDisjointMsgBox`'s `MessageBoxView`; hit tests, selection and scrolling stay native |
+| `CUIBCDeclareGuildListBox` | `BCDECLAREGUILD_TEXT` | Done (2026-09-28) | `CGuardWindow` port (`guard_window.rml`) |
+| `CUIBCGuildListBox` | `BCGUILD_TEXT` | Done (2026-09-28) | `CGuardWindow` port (`guard_window.rml`) |
+| `CUIMoveCommandListBox` | `MOVECOMMAND_TEXT` | Unused | No user left; `CMoveCommandWindow` binds its own `data-for` list |
 | `CUIInGameShopListBox` | `IGS_StorageItem` | Not started | `tracked-deferrals.md` |
 | `CUIBuyingListBox` | `IGS_BuyList` | Not started | `tracked-deferrals.md` |
 | `CUIPackCheckBuyingListBox` | `IGS_SelectBuyItem` | Not started | `tracked-deferrals.md` |
+
+## Native surfaces outside the window classes
+
+UI drawn by free functions or scene code rather than by one of the classes above (audited
+2026-09-28 from the remaining `RenderBitmap`/`RenderImage`/`RenderText`/`RenderColor` callers).
+
+| Surface | Native code | Status |
+|---|---|---|
+| Centre-screen notice lines | `UI::Notices::Render()` | Done (2026-09-28): `notices.rml`, main context above every document but the tooltip |
+| Map name banner | `CUIMapName::Render()` | Done (2026-09-28): `map_name.rml`, background context |
+| Party members' HP bars over their heads | `RenderPartyHP()` | Done (2026-09-28): recorded by the world-label layer (`CNameWindow::PrepareBackgroundLayer()`) |
+| Tournament countdown | `RenderTournamentInterface()` | Left native: unreachable with OpenMU (its F3 22 / F3 23 packets are defined but never sent) |
+| Kanturu final result banner | `M39Kanturu3rd::RenderKanturu3rdinterface()` | Done (2026-09-28): recorded by the world-label layer |
+| Siege crown switch lines, build-time bars | `RenderSwichState()`, `battleCastle::RenderBuildTimes()` | Done (2026-09-28): recorded by the world-label layer |
+| Hellas object labels | `RenderObjectDescription()` | Done (2026-09-28): recorded by the world-label layer |
+| Reconnect dialog | `UI::Reconnect::RenderDialog()` | Done (2026-09-28): `reconnect_dialog.rml`, main context above every document |
+| Login scene logo, copyright and version lines | `NewRenderLogInScene()` | Done (2026-09-28): `login_scene.rml` (`Scenes::LoginOverlay`), main context behind its other documents |
+| Loading screen art | `LoadingScene()` → `loading.rml` | Done (upstream Phase 1 pilot; art paths and texel rects fixed 2026-09-28). `CLoadingScene` is never instantiated |
+| Photo viewer help text | `CUIPhotoViewer::RenderHelpText()` | Done (2026-09-28): the shared RmlUi tooltip |
+| Mouse cursor | `RenderCursor()` | Stays native: drawn after RmlUi's pass so the pointer stays on top |
+| FPS counter, debug info, GL stats, `ImeInput`/`Whisper` debug text | `SceneManager.cpp`, `ImeInput.cpp`, `Whisper.cpp` | Stays native: developer overlays, not player UI |
 
 ## Using this ledger
 

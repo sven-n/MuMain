@@ -11,6 +11,50 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME help_pages_tests
+    SOURCES test_help_pages.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME guild_mark_palette_tests
+    SOURCES
+        test_guild_mark_palette.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Guild/GuildMarkPalette.cpp
+)
+
+mu_add_test(
+    NAME rml_premultiply_tests
+    SOURCES
+        test_rml_premultiply.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/RmlUi/RmlPremultiply.cpp
+)
+
+mu_add_test(
+    NAME mini_map_layout_tests
+    SOURCES
+        test_mini_map_layout.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/MiniMapLayout.cpp
+)
+
+mu_add_test(
+    NAME rml_stacking_order_tests
+    SOURCES
+        test_rml_stacking_order.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/RmlBridge/RmlStackingOrder.cpp
+)
+target_compile_definitions(rml_stacking_order_tests PRIVATE
+    MU_CLIENT_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/source"
+)
+
+mu_add_test(
+    NAME party_list_layout_tests
+    SOURCES
+        test_party_list_layout.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Party/PartyListLayout.cpp
+)
+
+mu_add_test(
     NAME text_search_tests
     SOURCES
         test_text_search.cpp
@@ -105,4 +149,24 @@ mu_add_test(
         test_skill_icon_atlas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/SkillIconAtlas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
+)
+
+mu_add_test(
+    NAME rml_draggable_tests
+    SOURCES test_rml_draggable.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_model_binder_tests
+    SOURCES test_rml_model_binder.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_document_scene_tests
+    SOURCES
+        test_rml_document_scene.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
 )

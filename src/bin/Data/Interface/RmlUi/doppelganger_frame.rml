@@ -1,0 +1,30 @@
+<rml>
+<head>
+	<title>Doppelganger frame (CDoppelGangerFrame)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="doppelganger_frame.rcss"/>
+</head>
+<body data-model="doppelganger_frame">
+	<!-- The Doppelganger event HUD (CDoppelGangerFrame): the frame, the monsters that passed, "Time
+	     left", the time, the monsters' progress gauge (yellow, orange, red by how many passed), the
+	     Ice Walker's marker and the party members' markers on the path. A LayoutMode::Hud window, so
+	     .screen is the 640x480 reference screen stretched W/640 x H/480 like the original and #panel
+	     sits at the window's reference position. Text does not stretch: each line takes its native
+	     size and cancels the stretch. In the background context, behind its other documents (the
+	     original drew it under every panel). Takes no pointer events. -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+			<div id="back"></div>
+			<span class="frame-text" data-for="t : texts" data-class-big="t.big" data-style-top="t.top + 'px'"
+			      data-style-color="t.color" data-style-font-size="t.text_px + 'px'"
+			      data-style-width="(110 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{t.text}}</span>
+			<img class="bar" data-for="b : bars" data-attr-src="b.src" data-attr-rect="b.rect"
+			     data-style-left="b.left + 'px'" data-style-width="b.width + 'px'"/>
+			<img id="icewalker" src="../../../Double_Micon01.tga" data-if="ice_walker_visible"
+			     data-style-left="ice_walker_left + 'px'"/>
+			<div class="marker" data-for="m : markers" data-class-hero="m.hero" data-style-left="m.left + 'px'"></div>
+		</div>
+	</div>
+</body>
+</rml>

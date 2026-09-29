@@ -1,0 +1,10 @@
+/* Legacy frame of the right-docked entry windows with a 3D item preview (CDoppelGangerWindow,
+   CEmpireGuardianNPC): docked_panel_frame.rcss's pieces (linked first) with the newui_item_back01
+   top, and the newui_myquest_Line separator (188 x 21) at (1, 220). Background context: painted
+   before the native 3D preview. */
+
+@spritesheet item-entry-line-sheet { src: "../../../newui_myquest_Line.tga"; item-entry-line: 0px 0px 188px 21px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: none; }
+.line { position: absolute; left: 1px; top: 220px; width: 188px; height: 21px; decorator: image(item-entry-line); }

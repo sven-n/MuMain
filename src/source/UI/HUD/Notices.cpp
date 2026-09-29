@@ -8,6 +8,15 @@
 #include "UI/Core/WindowSystem.h"        // g_pNewUISystem
 #include "Engine/AI/ZzzAI.h"             // FPS_ANIMATION_FACTOR
 #include "Engine/Object/ZzzInterface.h"  // CutText
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/HUD/NoticesRmlModel.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+
+#include <RmlUi/Core/ElementDocument.h>
 
 namespace
 {
@@ -28,6 +37,16 @@ namespace
     float  s_time = NOTICE_LIFETIME;
     float  s_blinkPhase = 0.f;
     Notice s_notices[MAX_NOTICE];
+
+    // The notices in RmlUi (notices.rml): one main-context document above every other document but
+    // the tooltip (the original drew the notices after every window). Render() fills it; Move(),
+    // which runs once per frame before the scene draws, hides it when the scene stopped calling
+    // Render() (the loading scene draws no notices).
+    RmlModelBinder<UI::Notices::NoticesRmlModel> s_binder;
+    Rml::ElementDocument* s_document = nullptr;
+    bool s_renderedThisFrame = false;
+    bool s_themeReloadRegistered = false;
+    const int s_themeReloadOwner = 0; // the theme-reload registration's owner key
 
     // Shift the buffer up by one when it is full so the newest line fits.
     void Scroll()
@@ -82,6 +101,10 @@ namespace UI::Notices
 
     void Move()
     {
+        if (!s_renderedThisFrame)
+            UI::RmlBridge::SyncDocumentVisibility(s_document, false);
+        s_renderedThisFrame = false;
+
         s_time -= FPS_ANIMATION_FACTOR;
         if (s_time <= 0)
         {
@@ -90,13 +113,97 @@ namespace UI::Notices
         }
     }
 
-    void Render()
+    namespace
     {
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
-            return;
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+    Rml::Context* NoticesContext()
+    {
+        return RmlUiRuntime::Instance().GetContext();
+    }
 
+    void BuildView();
+
+    void ReloadTheme()
+    {
+        if (s_document == nullptr)
+            return;
+        s_binder.Destroy(NoticesContext());
+        NoticesContext()->UnloadDocument(s_document);
+        s_document = nullptr;
+        BuildView();
+    }
+
+    void BuildView()
+    {
+        if (s_document != nullptr || !RmlUiRuntime::Instance().IsCreated() || NoticesContext() == nullptr)
+            return;
+
+        const bool modelCreated = s_binder.Create(NoticesContext(), "notices",
+                                                  [](Rml::DataModelConstructor& c, NoticesRmlModel& model)
+                                                  {
+                                                      c.Bind("row_width", &model.rowWidth);
+                                                      c.Bind("text_px", &model.textPx);
+                                                      c.Bind("line_height_px", &model.lineHeightPx);
+                                                      auto line = c.RegisterStruct<NoticeLineEntry>();
+                                                      line.RegisterMember("text", &NoticeLineEntry::text);
+                                                      line.RegisterMember("kind", &NoticeLineEntry::kind);
+                                                      line.RegisterMember("top", &NoticeLineEntry::top);
+                                                      c.RegisterArray<std::vector<NoticeLineEntry>>();
+                                                      c.Bind("lines", &model.lines);
+                                                  });
+        if (modelCreated)
+            s_document = UI::RmlBridge::LoadThemedDocument(NoticesContext(), "Data/Interface/RmlUi/notices.rml");
+        if (s_document != nullptr && !s_themeReloadRegistered)
+        {
+            UI::RmlBridge::RegisterForThemeReload(&s_themeReloadOwner, [] { ReloadTheme(); });
+            s_themeReloadRegistered = true;
+        }
+    }
+
+    template <typename T> void SyncField(T NoticesRmlModel::* field, const char* name, T value)
+    {
+        auto& model = s_binder.GetModel();
+        if (model.*field == value)
+            return;
+        model.*field = std::move(value);
+        s_binder.MarkDirty(name);
+    }
+
+    // The original's per-line draw: RenderText(320, 300 + i * 13) centred, bold, on a
+    // half-transparent black box sized to the text; empty lines draw nothing.
+    void SyncView(bool visible)
+    {
+        UI::RmlBridge::SyncDocumentVisibility(s_document, visible);
+        if (!visible)
+            return;
+
+        const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+        g_pRenderText->SetFont(g_hFontBold);
+        const SIZE lineSize = g_pRenderText->MeasureText(L"Q", 1);
+        SyncField(&NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
+        SyncField(&NoticesRmlModel::textPx, "text_px",
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+        SyncField(&NoticesRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineSize.cy) * transform.scaleY);
+
+        std::vector<NoticeLineEntry> lines;
+        for (int i = 0; i < MAX_NOTICE; i++)
+        {
+            const Notice& n = s_notices[i];
+            if (n.Text[0] == L'\0')
+                continue;
+            NoticeLineEntry line;
+            line.text = StringUtils::WideToNarrow(n.Text);
+            if (n.Color == 0)
+                line.kind = (int)s_blinkPhase % 10 < 5 ? "gold-dim" : "gold";
+            else
+                line.kind = "green";
+            line.top = UI::Scaling::PositionY(transform, static_cast<float>(300 + i * 13));
+            lines.push_back(std::move(line));
+        }
+        SyncField(&NoticesRmlModel::lines, "lines", std::move(lines));
+    }
+
+    void RenderNative()
+    {
         EnableAlphaTest();
 
         g_pRenderText->SetFont(g_hFontBold);
@@ -124,6 +231,26 @@ namespace UI::Notices
 
             g_pRenderText->RenderText(320, 300 + i * 13, n->Text, 0, 0, RT3_WRITE_CENTER);
         }
+    }
+    } // namespace
+
+    void Render()
+    {
+        s_renderedThisFrame = true;
+
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
+        {
+            UI::RmlBridge::SyncDocumentVisibility(s_document, false);
+            return;
+        }
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+        BuildView();
+        if (s_document != nullptr)
+            SyncView(true);
+        else
+            RenderNative();
 
         s_blinkPhase += FPS_ANIMATION_FACTOR;
     }

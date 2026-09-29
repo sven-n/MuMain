@@ -12,6 +12,30 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+#include <string>
+
+namespace
+{
+// RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
+float KanturuTextPxInBox(UI::Scaling::FontRole role, const UI::Scaling::Transform& transform, const wchar_t* text,
+                         float boxWidth)
+{
+    g_pRenderText->SetFont(role == UI::Scaling::FontRole::Bold ? g_hFontBold : g_hFont);
+    const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+    return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), boxWidth);
+}
+} // namespace
+
 mu::ui::window::CKanturu2ndEnterNpc::CKanturu2ndEnterNpc()
 {
     m_pNewUIMng = NULL;
@@ -51,9 +75,8 @@ bool mu::ui::window::CKanturu2ndEnterNpc::Create(CManager* pNewUIMng, int x, int
 
     SetPos(x, y);
 
-    LoadImages();
-
-    SetButtonInfo();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -62,7 +85,7 @@ bool mu::ui::window::CKanturu2ndEnterNpc::Create(CManager* pNewUIMng, int x, int
 
 void mu::ui::window::CKanturu2ndEnterNpc::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -79,11 +102,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::SetPos(int x, int y)
 
 bool mu::ui::window::CKanturu2ndEnterNpc::UpdateMouseEvent()
 {
-    if (BtnProcess() == true)
-    {
-        return false;
-    }
-
+    // The Refresh, Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, KANTURU2ND_ENTER_WINDOW_WIDTH, KANTURU2ND_ENTER_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
@@ -109,6 +128,36 @@ bool mu::ui::window::CKanturu2ndEnterNpc::UpdateKeyEvent()
 
 bool mu::ui::window::CKanturu2ndEnterNpc::Update()
 {
+    // The Refresh button unlocks a second after its click (the original's BtnProcess()).
+    if (m_RefreshLocked && timeGetTime() - m_dwRefreshButtonGapTime > KANTURU2ND_REFRESHBUTTON_GAPTIME)
+    {
+        m_RefreshLocked = false;
+    }
+
+    SyncRmlModel();
+
+    // Clicks RmlUi reported, handled like the original's BtnProcess().
+    const bool refresh = m_PendingRefresh;
+    const bool enter = m_PendingEnter;
+    const bool close = m_PendingClose;
+    m_PendingRefresh = m_PendingEnter = m_PendingClose = false;
+
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == true)
+    {
+        if (refresh && !m_RefreshLocked)
+        {
+            ProcessRefresh();
+        }
+        else if (enter && !m_EnterLocked)
+        {
+            ProcessEnter();
+        }
+        else if (close)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
+        }
+    }
+
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == true)
     {
         if (timeGetTime() - m_dwRefreshTime > KANTURU2ND_REFRESH_GAPTIME)
@@ -122,14 +171,8 @@ bool mu::ui::window::CKanturu2ndEnterNpc::Update()
 
 bool mu::ui::window::CKanturu2ndEnterNpc::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    RenderTexts();
-
-    RenderButtons();
-
+    // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
+    // requires the override.
     return true;
 }
 
@@ -206,18 +249,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
 
     m_byState = btState;
 
-    if (btEnter == 1)
-    {
-        m_BtnEnter.UnLock();
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeTextColor(RGBA(255, 255, 255, 255));
-    }
-    else
-    {
-        m_BtnEnter.Lock();
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeTextColor(RGBA(100, 100, 100, 255));
-    }
+    m_EnterLocked = btEnter != 1;
 
     if (btState == KANTURU_STATE_TOWER)
     {
@@ -261,7 +293,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
                 }
                 else
                 {
-                    if (m_BtnEnter.IsLock() == false)
+                    if (!m_EnterLocked)
                     {
                         wcscpy(m_strStateText[0], I18N::Game::YouMayNowEnter);
                     }
@@ -302,7 +334,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
             }
             else
             {
-                if (m_BtnEnter.IsLock() == false)
+                if (!m_EnterLocked)
                 {
                     wcscpy(m_strStateText[0], I18N::Game::YouMayNowEnter);
 
@@ -373,9 +405,14 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
     m_bEnterRequest = false;
     CreateMessageBox(btResult);
 
-    m_pNpcObject->AnimationFrame = 0;
+    // The original dereferenced the gateway NPC unchecked: an entry answer before the client had
+    // seen the NPC (the pointer is set when the NPC enters the viewport) crashed it.
     m_bNpcAnimation = false;
-    SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_STOP);
+    if (m_pNpcObject)
+    {
+        m_pNpcObject->AnimationFrame = 0;
+        SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_STOP);
+    }
 
     DeleteJoint(BITMAP_JOINT_ENERGY, NULL);
 
@@ -394,205 +431,215 @@ void mu::ui::window::CKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
     m_bEnterRequest = true;
 }
 
-void mu::ui::window::CKanturu2ndEnterNpc::LoadImages()
+void mu::ui::window::CKanturu2ndEnterNpc::ProcessRefresh()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_KANTURU2ND_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_KANTURU2ND_MIDDLE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_msgbox_bottom.tga", IMAGE_KANTURU2ND_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_KANTURU2ND_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_KANTURU2ND_BTN, GL_LINEAR);
+    SendRequestKanturu3rdInfo();
+
+    m_RefreshLocked = true;
+    m_dwRefreshButtonGapTime = timeGetTime();
 }
 
-void mu::ui::window::CKanturu2ndEnterNpc::UnloadImages()
+void mu::ui::window::CKanturu2ndEnterNpc::ProcessEnter()
 {
-    DeleteBitmap(IMAGE_KANTURU2ND_TOP);
-    DeleteBitmap(IMAGE_KANTURU2ND_MIDDLE);
-    DeleteBitmap(IMAGE_KANTURU2ND_BOTTOM);
-    DeleteBitmap(IMAGE_KANTURU2ND_BACK);
-    DeleteBitmap(IMAGE_KANTURU2ND_BTN);
-}
-
-void mu::ui::window::CKanturu2ndEnterNpc::SetButtonInfo()
-{
-    m_BtnRefresh.ChangeText(&I18N::Game::Refresh);
-    m_BtnRefresh.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnRefresh.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
-    m_BtnRefresh.ChangeButtonInfo(m_Pos.x + 17, m_Pos.y + 220, 53, 23);
-    m_BtnRefresh.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnRefresh.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-
-    m_BtnEnter.ChangeText(&I18N::Game::Enter);
-    m_BtnEnter.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnEnter.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
-    m_BtnEnter.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 220, 53, 23);
-    m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-
-    m_BtnClose.ChangeText(&I18N::Game::Close388);
-    m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnClose.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 157, m_Pos.y + 220, 53, 23);
-    m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
-
-bool mu::ui::window::CKanturu2ndEnterNpc::BtnProcess()
-{
-    if (m_BtnRefresh.IsLock() == true)
-    {
-        if (timeGetTime() - m_dwRefreshButtonGapTime > KANTURU2ND_REFRESHBUTTON_GAPTIME)
-        {
-            m_BtnRefresh.UnLock();
-            m_BtnRefresh.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnRefresh.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-    }
-    else if (m_BtnRefresh.UpdateMouseEvent() == true)
-    {
-        SendRequestKanturu3rdInfo();
-
-        m_BtnRefresh.Lock();
-        m_BtnRefresh.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        m_BtnRefresh.ChangeTextColor(RGBA(100, 100, 100, 255));
-
-        m_dwRefreshButtonGapTime = timeGetTime();
-        return true;
-    }
-
-    if (m_BtnEnter.UpdateMouseEvent() == true)
-    {
-        if (m_pNpcObject)
-        {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
-
-            if (m_byState == KANTURU_STATE_TOWER)
-            {
-                SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
-                m_bNpcAnimation = true;
-                return true;
-            }
-
-            ITEM* pItemHelper, * pItemRingLeft, * pItemRingRight, * pItemWing;
-            pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-            pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-            pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-            pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
-
-            if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
-            {
-                CreateMessageBox(POPUP_UNIRIA);
-                return true;
-            }
-
-            if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type)
-                || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
-            {
-                CreateMessageBox(POPUP_CHANGERING);
-                return true;
-            }
-
-            if (!((pItemWing->Type >= ITEM_WINGS_OF_ELF && pItemWing->Type <= ITEM_WINGS_OF_DARKNESS)
-                || (pItemWing->Type >= ITEM_WING_OF_STORM && pItemWing->Type <= ITEM_WING_OF_DIMENSION)
-                || (ITEM_WING + 130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING + 134)
-                || pItemHelper->Type == ITEM_HORN_OF_DINORANT
-                || pItemHelper->Type == ITEM_DARK_HORSE_ITEM
-                || pItemWing->Type == ITEM_CAPE_OF_LORD
-                || pItemHelper->Type == ITEM_HORN_OF_FENRIR
-                || (pItemWing->Type >= ITEM_CAPE_OF_FIGHTER && pItemWing->Type <= ITEM_CAPE_OF_OVERRULE)
-                || (pItemWing->Type == ITEM_WING + 135)))
-            {
-                CreateMessageBox(POPUP_NOT_HELPER);
-                return true;
-            }
-
-            if (pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT)
-            {
-                SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
-                m_bNpcAnimation = true;
-            }
-            else
-            {
-                CreateMessageBox(POPUP_NOT_MUNSTONE);
-                return true;
-            }
-        }
-
-        return true;
-    }
-
-    if (m_BtnClose.UpdateMouseEvent() == true)
+    if (m_pNpcObject)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
 
-        return true;
-    }
-    return false;
-}
-
-void mu::ui::window::CKanturu2ndEnterNpc::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = m_Pos.x; y = m_Pos.y + 2.f, width = KANTURU2ND_ENTER_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = KANTURU2ND_ENTER_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(IMAGE_KANTURU2ND_BACK, x, y, width, height);
-
-    x = m_Pos.x; y = m_Pos.y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(IMAGE_KANTURU2ND_TOP, x, y, width, height);
-
-    x = m_Pos.x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < 10; ++i)
-    {
-        RenderImage(IMAGE_KANTURU2ND_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = m_Pos.x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(IMAGE_KANTURU2ND_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CKanturu2ndEnterNpc::RenderButtons()
-{
-    m_BtnEnter.Render();
-    m_BtnRefresh.Render();
-    m_BtnClose.Render();
-}
-
-void mu::ui::window::CKanturu2ndEnterNpc::RenderTexts()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(0xFF49B0FF);
-    g_pRenderText->SetBgColor(0);
-
-    int iTextY = m_Pos.y + 30;
-    int iLine;
-    wchar_t strTemp[3][52];
-    ZeroMemory(strTemp, sizeof(strTemp));
-    iLine = SeparateTextIntoLines(m_strSubject, strTemp[0], 3, 52);
-    for (int i = 0; i < iLine; i++)
-    {
-        g_pRenderText->RenderText(m_Pos.x, iTextY, strTemp[i], KANTURU2ND_ENTER_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-        iTextY += 12;
-    }
-
-    iTextY += 20;
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(0xFF61F191);
-
-    for (int i = 0; i < m_iStateTextNum; i++)
-    {
-        iLine = SeparateTextIntoLines(m_strStateText[i], strTemp[0], 3, 52);
-        for (int j = 0; j < iLine; j++)
+        if (m_byState == KANTURU_STATE_TOWER)
         {
-            g_pRenderText->RenderText(m_Pos.x, iTextY, strTemp[j], KANTURU2ND_ENTER_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-            iTextY += 12;
+            SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
+            m_bNpcAnimation = true;
+            return;
         }
 
-        iTextY += 15;
+        ITEM *pItemHelper, *pItemRingLeft, *pItemRingRight, *pItemWing;
+        pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+        pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
+        pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
+        pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-        g_pRenderText->SetTextColor(CLRDW_BR_YELLOW);
+        if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
+        {
+            CreateMessageBox(POPUP_UNIRIA);
+            return;
+        }
 
-        ZeroMemory(strTemp[i], sizeof(strTemp[i]));
+        if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) ||
+            g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
+        {
+            CreateMessageBox(POPUP_CHANGERING);
+            return;
+        }
+
+        if (!((pItemWing->Type >= ITEM_WINGS_OF_ELF && pItemWing->Type <= ITEM_WINGS_OF_DARKNESS) ||
+              (pItemWing->Type >= ITEM_WING_OF_STORM && pItemWing->Type <= ITEM_WING_OF_DIMENSION) ||
+              (ITEM_WING + 130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING + 134) ||
+              pItemHelper->Type == ITEM_HORN_OF_DINORANT || pItemHelper->Type == ITEM_DARK_HORSE_ITEM ||
+              pItemWing->Type == ITEM_CAPE_OF_LORD || pItemHelper->Type == ITEM_HORN_OF_FENRIR ||
+              (pItemWing->Type >= ITEM_CAPE_OF_FIGHTER && pItemWing->Type <= ITEM_CAPE_OF_OVERRULE) ||
+              (pItemWing->Type == ITEM_WING + 135)))
+        {
+            CreateMessageBox(POPUP_NOT_HELPER);
+            return;
+        }
+
+        if (pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT)
+        {
+            SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
+            m_bNpcAnimation = true;
+        }
+        else
+        {
+            CreateMessageBox(POPUP_NOT_MUNSTONE);
+            return;
+        }
+    }
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "kanturu_enter",
+        [this](Rml::DataModelConstructor& c, KanturuEnterRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            auto line = c.RegisterStruct<KanturuEnterLineEntry>();
+            line.RegisterMember("text", &KanturuEnterLineEntry::text);
+            line.RegisterMember("top", &KanturuEnterLineEntry::top);
+            line.RegisterMember("text_px", &KanturuEnterLineEntry::textPx);
+            line.RegisterMember("bold", &KanturuEnterLineEntry::bold);
+            line.RegisterMember("tone", &KanturuEnterLineEntry::tone);
+            c.RegisterArray<std::vector<KanturuEnterLineEntry>>();
+            c.Bind("lines", &model.lines);
+            c.Bind("refresh_text", &model.refreshText);
+            c.Bind("enter_text", &model.enterText);
+            c.Bind("close_text", &model.closeText);
+            c.Bind("refresh_locked", &model.refreshLocked);
+            c.Bind("enter_locked", &model.enterLocked);
+            c.Bind("label_top", &model.labelTop);
+            c.Bind("label_line_px", &model.labelLinePx);
+            c.BindEventCallback("kanturu_refresh", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingRefresh = true; });
+            c.BindEventCallback("kanturu_enter", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingEnter = true; });
+            c.BindEventCallback("kanturu_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingClose = true; });
+        });
+
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                  "Data/Interface/RmlUi/kanturu_enter.rml");
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 10.1: over the HUD and the panels.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncContent();
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    KanturuEnterRmlModel updated = m_RmlBinder.GetModel();
+    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    // CButton::Render()'s whole-unit centring.
+    const int labelTopUnits = 23 / 2 - lineHeight / 2;
+    updated.labelTop = static_cast<float>(labelTopUnits);
+    updated.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
+    updated.refreshText = StringUtils::WideToNarrow(I18N::Game::Refresh);
+    updated.enterText = StringUtils::WideToNarrow(I18N::Game::Enter);
+    updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
+    updated.refreshLocked = m_RefreshLocked;
+    updated.enterLocked = m_EnterLocked;
+
+    // The original's RenderTexts(): the subject bold, split into lines of 52 characters, 12 units
+    // apart from y 30; 20 units below it the state texts, the first in green, the others bright
+    // yellow, 15 units between two texts.
+    updated.lines.clear();
+    auto addLine = [&](const wchar_t* text, float top, bool bold, int tone)
+    {
+        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        updated.lines.push_back({StringUtils::WideToNarrow(text), top,
+                                 KanturuTextPxInBox(role, transform, text, KANTURU2ND_ENTER_WINDOW_WIDTH), bold, tone});
+    };
+    float textY = 30.f;
+    wchar_t separated[3][52] = {};
+    int lineCount = SeparateTextIntoLines(m_strSubject, separated[0], 3, 52);
+    for (int i = 0; i < lineCount; i++)
+    {
+        addLine(separated[i], textY, true, 0);
+        textY += 12.f;
+    }
+    textY += 20.f;
+    for (int i = 0; i < m_iStateTextNum; i++)
+    {
+        ZeroMemory(separated, sizeof(separated));
+        lineCount = SeparateTextIntoLines(m_strStateText[i], separated[0], 3, 52);
+        for (int j = 0; j < lineCount; j++)
+        {
+            addLine(separated[j], textY, false, i == 0 ? 1 : 2);
+            textY += 12.f;
+        }
+        textY += 15.f;
+    }
+
+    KanturuEnterRmlModel& model = m_RmlBinder.GetModel();
+    auto sync = [&](auto field, const char* name)
+    {
+        if (!(model.*field == updated.*field))
+        {
+            model.*field = updated.*field;
+            m_RmlBinder.MarkDirty(name);
+        }
+    };
+    sync(&KanturuEnterRmlModel::labelTop, "label_top");
+    sync(&KanturuEnterRmlModel::labelLinePx, "label_line_px");
+    sync(&KanturuEnterRmlModel::refreshText, "refresh_text");
+    sync(&KanturuEnterRmlModel::enterText, "enter_text");
+    sync(&KanturuEnterRmlModel::closeText, "close_text");
+    sync(&KanturuEnterRmlModel::refreshLocked, "refresh_locked");
+    sync(&KanturuEnterRmlModel::enterLocked, "enter_locked");
+    const bool sameLines = model.lines.size() == updated.lines.size() &&
+                           std::equal(model.lines.begin(), model.lines.end(), updated.lines.begin(),
+                                      [](const KanturuEnterLineEntry& a, const KanturuEnterLineEntry& b)
+                                      {
+                                          return a.text == b.text && a.top == b.top && a.textPx == b.textPx &&
+                                                 a.bold == b.bold && a.tone == b.tone;
+                                      });
+    if (!sameLines)
+    {
+        model.lines = std::move(updated.lines);
+        m_RmlBinder.MarkDirty("lines");
     }
 }
 
@@ -621,7 +668,8 @@ bool mu::ui::window::CKanturuInfoWindow::Create(CManager* pNewUIMng, int x, int 
 
     SetPos(x, y);
 
-    LoadImages();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -630,7 +678,7 @@ bool mu::ui::window::CKanturuInfoWindow::Create(CManager* pNewUIMng, int x, int 
 
 void mu::ui::window::CKanturuInfoWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -665,77 +713,161 @@ bool mu::ui::window::CKanturuInfoWindow::Update()
         }
     }
 
+    SyncView();
     return true;
 }
 
 bool mu::ui::window::CKanturuInfoWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    RenderInfo();
-
+    // Nothing native left: the frame, the texts and the digits are RmlUi (SyncView()). Kept
+    // because CObject requires the override.
     return true;
 }
 
-void mu::ui::window::CKanturuInfoWindow::RenderFrame()
+namespace
 {
-    RenderImage(IMAGE_KANTURUINFO_WINDOW, m_Pos.x, m_Pos.y, 99.f, 78.f);
+// The original drew the HUD under every panel (layer depth 1.92): the document sits in the
+// background context, behind its other documents.
+Rml::Context* KanturuInfoContext()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
+    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
 }
 
-void mu::ui::window::CKanturuInfoWindow::RenderInfo()
+template <typename T>
+void SyncInfoField(RmlModelBinder<mu::ui::window::KanturuInfoRmlModel>& binder,
+                   T mu::ui::window::KanturuInfoRmlModel::* field, const char* name, T value)
 {
-    g_pRenderText->SetFont(g_hFontBold);
+    auto& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
 
+// RenderNumber(x, y, number, 1.f): 8.4-unit digits centred on x, 6.72 units apart.
+void AddNumberDigits(std::vector<mu::ui::window::KanturuInfoDigitEntry>& digits, float x, int number)
+{
+    const std::string text = std::to_string(number);
+    const float width = 12.f * 0.7f;
+    float left = x - width * static_cast<float>(text.size()) / 2;
+    for (const char digit : text)
+    {
+        if (digit < '0' || digit > '9')
+        {
+            left += width * 0.8f; // a minus sign: the original drew the cell before '0'
+            continue;
+        }
+        digits.push_back({left, std::to_string((digit - '0') * 12) + " 0 12 14"});
+        left += width * 0.8f;
+    }
+}
+} // namespace
+
+void mu::ui::window::CKanturuInfoWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(KanturuInfoContext(), "kanturu_info",
+                                                 [](Rml::DataModelConstructor& c, KanturuInfoRmlModel& model)
+                                                 {
+                                                     c.Bind("scale_x", &model.scaleX);
+                                                     c.Bind("scale_y", &model.scaleY);
+                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
+                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
+                                                     c.Bind("bold_text_px", &model.boldTextPx);
+                                                     c.Bind("panel_x", &model.panelX);
+                                                     c.Bind("panel_y", &model.panelY);
+                                                     c.Bind("users_text", &model.usersText);
+                                                     c.Bind("monsters_text", &model.monstersText);
+                                                     c.Bind("colon_visible", &model.colonVisible);
+                                                     auto digit = c.RegisterStruct<KanturuInfoDigitEntry>();
+                                                     digit.RegisterMember("left", &KanturuInfoDigitEntry::left);
+                                                     digit.RegisterMember("rect", &KanturuInfoDigitEntry::rect);
+                                                     c.RegisterArray<std::vector<KanturuInfoDigitEntry>>();
+                                                     c.Bind("digits", &model.digits);
+                                                 });
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(KanturuInfoContext(), "Data/Interface/RmlUi/kanturu_info.rml");
+}
+
+void mu::ui::window::CKanturuInfoWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = KanturuInfoContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CKanturuInfoWindow::SyncView()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::boldTextPx, "bold_text_px",
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
+
+    // The original's RenderInfo(): the characters, then the monsters or, while Maya fights, the boss.
     wchar_t strText[256];
     mu_swprintf(strText, I18N::Game::CharacterD, UserCount);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(134, 134, 199, 255);
-    g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 15, strText);
-
-    if (g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA1
-        || g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA2
-        || g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA3)
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::usersText, "users_text", StringUtils::WideToNarrow(strText));
+    if (g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA1 ||
+        g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA2 ||
+        g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA3)
     {
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::MonsterBoss2182);
+        wcscpy(strText, I18N::Game::MonsterBoss2182);
     }
     else
     {
         mu_swprintf(strText, I18N::Game::MonsterD, MonsterCount);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, strText);
     }
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::monstersText, "monsters_text", StringUtils::WideToNarrow(strText));
 
-    int iCurrentTime = (GetTickCount() - m_dwSyncTime) / 1000;
-    int iPastSecond = m_iSecond - iCurrentTime;
+    // The time left since the last SetTime(). The original showed 0 seconds for the whole last
+    // minute (it took the seconds modulo 60 * minutes); the seconds are taken modulo 60 here.
+    const int iPastSecond = m_iSecond - static_cast<int>((GetTickCount() - m_dwSyncTime) / 1000);
+    const int iRemaining = std::max(iPastSecond, 0);
+    m_iMinute = iRemaining / 60;
+    const int iSecond = iRemaining % 60;
 
-    m_iMinute = iPastSecond / 60;
-    int iSecond;
-
-    if (m_iMinute <= 0)
+    if (timeGetTime() - m_dwColonTime > 500)
     {
-        iSecond = 0;
+        m_dwColonTime = timeGetTime();
+        m_bColonVisible = !m_bColonVisible;
     }
-    else
-    {
-        iSecond = iPastSecond % (60 * m_iMinute);
-    }
+    SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::colonVisible, "colon_visible", m_bColonVisible);
 
-    static DWORD dwTime = timeGetTime();
-    static bool bRender = true;
-    if (timeGetTime() - dwTime > 500)
+    std::vector<KanturuInfoDigitEntry> digits;
+    AddNumberDigits(digits, 35.f, m_iMinute);
+    AddNumberDigits(digits, 65.f, iSecond);
+    auto& model = m_RmlBinder.GetModel();
+    const bool same = model.digits.size() == digits.size() &&
+                      std::equal(model.digits.begin(), model.digits.end(), digits.begin(),
+                                 [](const KanturuInfoDigitEntry& a, const KanturuInfoDigitEntry& b)
+                                 { return a.left == b.left && a.rect == b.rect; });
+    if (!same)
     {
-        dwTime = timeGetTime();
-        bRender = !bRender;
+        model.digits = std::move(digits);
+        m_RmlBinder.MarkDirty("digits");
     }
-
-    if (bRender)
-    {
-        g_pRenderText->RenderText(m_Pos.x + 48, m_Pos.y + 57, L":");
-    }
-
-    mu::ui::window::RenderNumber(m_Pos.x + 35, m_Pos.y + 55, m_iMinute, 1.f);
-    mu::ui::window::RenderNumber(m_Pos.x + 65, m_Pos.y + 55, iSecond, 1.f);
 }
 
 float mu::ui::window::CKanturuInfoWindow::GetLayerDepth()
@@ -746,16 +878,6 @@ float mu::ui::window::CKanturuInfoWindow::GetLayerDepth()
 float mu::ui::window::CKanturuInfoWindow::GetKeyEventOrder()
 {
     return 9.1f;
-}
-
-void mu::ui::window::CKanturuInfoWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_Figure_kantru.tga", IMAGE_KANTURUINFO_WINDOW, GL_LINEAR);
-}
-
-void mu::ui::window::CKanturuInfoWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_KANTURUINFO_WINDOW);
 }
 
 void mu::ui::window::CKanturuInfoWindow::SetTime(int iTimeLimit)

@@ -32,6 +32,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Scaling/UITransform.h"
+#include "LoginSceneOverlay.h"
 
 // External declarations
 extern int DeleteGuildIndex;
@@ -341,6 +342,38 @@ void NewMoveLogInScene()
     g_ConsoleDebug->UpdateMainScene();
 }
 
+// The logo (tour mode) and the bottom lines, drawn natively when RmlUi is not available, in the
+// text state NewRenderLogInScene() sets.
+static void RenderLoginSceneLinesNative(bool tourMode, const wchar_t* version)
+{
+    if (tourMode)
+    {
+        EnableAlphaBlend();
+        const BYTE glowLevel = static_cast<BYTE>(std::clamp(g_fMULogoAlpha - 0.3f, 0.f, 1.f) * 255.f);
+        RenderColorBitmap(BITMAP_LOG_IN + 17, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f, 0.f, 0.f,
+                          1.f, 1.f, RGBA(glowLevel, glowLevel, glowLevel, glowLevel));
+        EnableAlphaTest();
+        const BYTE logoLevel = static_cast<BYTE>(std::clamp(g_fMULogoAlpha, 0.f, 1.f) * 255.f);
+        RenderColorBitmap(BITMAP_LOG_IN + 16, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f, 0.f, 0.f,
+                          1.f, 1.f, RGBA(logoLevel, logoLevel, logoLevel, logoLevel));
+    }
+
+    SIZE Size;
+    wchar_t Text[100];
+
+    wcscpy_s(Text, 100, I18N::Game::CCopyright2001Webzen);
+    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
+    g_pRenderText->RenderText(335 - Size.cx, REFERENCE_HEIGHT - Size.cy - 1, Text);
+
+    wcscpy_s(Text, 100, I18N::Game::AllRightsReserved);
+
+    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
+    g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy - 1, Text);
+
+    Size = g_pRenderText->MeasureText(version, lstrlen(version));
+    g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy - 1, version);
+}
+
 bool NewRenderLogInScene(HDC hDC)
 {
     if (!InitLogIn) return false;
@@ -411,45 +444,29 @@ bool NewRenderLogInScene(HDC hDC)
     EndSprite();
     BeginBitmap();
 
-    if (CCameraMove::GetInstancePtr()->IsTourMode())
+    const bool tourMode = CCameraMove::GetInstancePtr()->IsTourMode();
+    if (tourMode)
     {
         g_fMULogoAlpha += 0.02f;
         if (g_fMULogoAlpha > 10.0f) g_fMULogoAlpha = 10.0f;
-
-        EnableAlphaBlend();
-        const BYTE glowLevel = static_cast<BYTE>(std::clamp(g_fMULogoAlpha - 0.3f, 0.f, 1.f) * 255.f);
-        RenderColorBitmap(BITMAP_LOG_IN + 17, 320.0f - 128.0f * 0.8f, 25.0f,
-            256.0f * 0.8f, 128.0f * 0.8f, 0.f, 0.f, 1.f, 1.f,
-            RGBA(glowLevel, glowLevel, glowLevel, glowLevel));
-        EnableAlphaTest();
-        const BYTE logoLevel = static_cast<BYTE>(std::clamp(g_fMULogoAlpha, 0.f, 1.f) * 255.f);
-        RenderColorBitmap(BITMAP_LOG_IN + 16, 320.0f - 128.0f * 0.8f, 25.0f,
-            256.0f * 0.8f, 128.0f * 0.8f, 0.f, 0.f, 1.f, 1.f,
-            RGBA(logoLevel, logoLevel, logoLevel, logoLevel));
     }
 
-    SIZE Size;
-    wchar_t Text[100];
-
+    // The text state the native lines set, which RenderInfomation() below draws with.
     g_pRenderText->SetFont(g_hFont);
 
     InputTextWidth = 256;
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
-    wcscpy_s(Text, 100, I18N::Game::CCopyright2001Webzen);
-    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
-    g_pRenderText->RenderText(335 - Size.cx, REFERENCE_HEIGHT - Size.cy - 1, Text);
+    wchar_t version[100];
+    swprintf_s(version, 100, I18N::Game::VerS, m_ExeVersion);
 
-    wcscpy_s(Text, 100, I18N::Game::AllRightsReserved);
-
-    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
-    g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy - 1, Text);
-
-    swprintf_s(Text, 100, I18N::Game::VerS, m_ExeVersion);
-
-    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
-    g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy - 1, Text);
+    // The logo and the bottom lines in RmlUi (login_scene.rml); natively without RmlUi.
+    if (!Scenes::LoginOverlay::Render(tourMode, g_fMULogoAlpha, I18N::Game::CCopyright2001Webzen,
+                                      I18N::Game::AllRightsReserved, version))
+    {
+        RenderLoginSceneLinesNative(tourMode, version);
+    }
 
     RenderInfomation();
 

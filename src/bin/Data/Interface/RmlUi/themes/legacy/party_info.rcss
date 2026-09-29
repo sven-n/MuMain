@@ -51,6 +51,12 @@
 .gbox-corner-br { left: 156px; top: 56px; decorator: image(docked-corner-br); }
 .gbox-title-fill { left: 3px; top: 2px; width: 62px; height: 20px; }
 .gbox-content-fill { left: 3px; top: 22px; width: 163px; height: 43px; }
+.party-edge-title-top   { left: 6px;   top: 0;    width: 58px; }
+.party-edge-title-right { left: 56px;  top: 6px;  height: 14px; }
+.party-edge-top         { left: 65px;  top: 20px; width: 94px; }
+.party-edge-right       { left: 156px; top: 26px; height: 36px; }
+.party-edge-bottom      { left: 6px;   top: 56px; width: 158px; }
+.party-edge-left        { left: 0;     top: 6px;  height: 56px; }
 
 .party-name {
 	display: block;

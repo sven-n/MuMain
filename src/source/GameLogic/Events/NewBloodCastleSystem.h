@@ -22,6 +22,7 @@ public:
     virtual void SetMatchResult(const int iNumDevil, const int iMyRank, const MatchResult* pMatchResult,
                                 const int Success = false);
     virtual void RenderMatchResult(void);
+    virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const;
 };
 }; // namespace SEASON3B
 

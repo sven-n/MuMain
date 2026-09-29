@@ -57,6 +57,11 @@ namespace mu::ui::window
                                             // false = the larger action-button style
             int nativeTop = 0;              // native box's button y offset (with nativeFrame);
                                             // 0 = flow
+            int nativeLinesTop = 0;         // with nativeTop: y offset of the first of `lines`'
+                                            // text above the button, one nativeFrame.lineAdvance
+                                            // apart (CChaosMixMenuMsgBox); 0 = flow
+            bool narrow = false;            // MSGBOX_BTN_EMPTY_WIDTH (108) instead of the menus'
+                                            // usual + 20 (CGemIntegrationMsgBox)
             bool linesBelow = false;        // `lines` sit under the button (CTrainerRecoverMsgBox)
             std::function<void()> onClick;  // fires, then the dialog closes -- every native
                                             // button in this family destroys its own box on click,
@@ -156,7 +161,9 @@ namespace mu::ui::window
             bool enabled = true;
             bool compact = false;
             bool cols2 = false;     // GenericMenuConfig::columns == 2 && !compact -- see its comment
-            float nativeTop = 0.f;  // MenuButton::nativeTop
+            float nativeTop = 0.f;  // the cell's top: MenuButton::nativeTop, or its lines' top
+            float nativeButtonGap = 0.f; // native-placed lines above the button: lines end to button
+            bool narrow = false;
             bool linesBelow = false;
         };
         struct GenericMenuRmlModel

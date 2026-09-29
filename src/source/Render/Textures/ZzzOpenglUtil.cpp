@@ -5,6 +5,8 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/Overlay2DRecorder.h"
+#include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -1110,14 +1112,27 @@ static inline std::uint32_t ArgbToAbgr(unsigned int argb)
     return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+Render::Renderer::RecordedBlend CurrentRecordedBlend()
+{
+    return AlphaBlendType == 3   ? Render::Renderer::RecordedBlend::Additive
+           : AlphaBlendType == 0 ? Render::Renderer::RecordedBlend::Opaque
+                                 : Render::Renderer::RecordedBlend::Alpha;
+}
+
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
 {
-    DisableTexture();
-
     x = ConvertPositionX(x);
     y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+
+    if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
+    {
+        recorder->RecordQuad({x, y, Width, Height, argbColor, CurrentRecordedBlend()});
+        return;
+    }
+
+    DisableTexture();
     y = WindowHeight - y;
 
     const std::uint32_t color = ArgbToAbgr(argbColor);
@@ -1196,6 +1211,26 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
     {
         Width = ConvertX(Width);
         Height = ConvertY(Height);
+    }
+
+    if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
+    {
+        if (BITMAP_t* bitmap = Bitmaps.GetTexture(Texture))
+        {
+            Render::Renderer::RecordedBitmap record;
+            record.fileName = bitmap->FileName;
+            record.x = x;
+            record.y = y;
+            record.width = Width;
+            record.height = Height;
+            record.sourceX = u * bitmap->Width;
+            record.sourceY = v * bitmap->Height;
+            record.sourceWidth = uWidth * bitmap->Width;
+            record.sourceHeight = vHeight * bitmap->Height;
+            record.alpha = (Alpha > 0.0f && Alpha < 1.0f) ? Alpha : 1.0f;
+            recorder->RecordBitmap(record);
+        }
+        return;
     }
 
     BindTexture(Texture);

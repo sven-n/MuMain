@@ -15,6 +15,17 @@
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -45,32 +56,18 @@ bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3
 
     SetPos(x, y);
 
-    LoadImages();
-
-    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 230, I18N::Game::Warp3016);
-
-    m_BtnClose.ChangeButtonImgState(true, IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE);
-    m_BtnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_BtnClose.ChangeToolTipText(&I18N::Game::Close388, true);
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CUnitedMarketPlaceWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
-{
-    pNewUIButton->ChangeText(pCaption);
-    pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    pNewUIButton->ChangeButtonImgState(true, IMAGE_UNITEDMARKETPLACEWINDOW_BUTTON, true);
-    pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
 
 void CUnitedMarketPlaceWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUI3DRenderMng)
     {
@@ -118,30 +115,24 @@ bool CUnitedMarketPlaceWindow::UpdateKeyEvent()
 
 bool CUnitedMarketPlaceWindow::Update()
 {
-    if (IsVisible())
+    SyncRmlModel();
+
+    // Clicks RmlUi reported (the original's BtnProcess()): Warp asks the server for the market and
+    // locks the button; the exit button hides the window.
+    const bool warp = m_PendingWarp;
+    const bool exit = m_PendingExit;
+    m_PendingWarp = m_PendingExit = false;
+    if (!IsVisible())
+        return true;
+    if (warp && m_bIsEnterButtonLocked != TRUE)
     {
-        // 		for (int i = 0; i < 4; ++i)
-        // 		{
-        // 			if (g_DuelMgr.IsDuelChannelEnabled(i))
-        // 				m_bChannelEnable[i] = TRUE;
-        // 			else
-        // 				m_bChannelEnable[i] = FALSE;
-        //
-        // 			// ��ư ���
-        // 			if (m_bChannelEnable[i] == TRUE && g_DuelMgr.IsDuelChannelJoinable(i))
-        // 			{
-        // 				m_BtnChannel[i].UnLock();
-        // 				m_BtnChannel[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        // 				m_BtnChannel[i].ChangeTextColor(RGBA(255, 255, 255, 255));
-        // 			}
-        // 			else
-        // 			{
-        // 				m_BtnChannel[i].Lock();
-        // 				m_BtnChannel[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        // 				m_BtnChannel[i].ChangeTextColor(RGBA(100, 100, 100, 255));
-        // 			}
-        // 		}
+        LoadingWorld = 9999999;
+        SocketClient->ToGameServer()->SendEnterMarketPlaceRequest();
+        m_bIsEnterButtonLocked = true;
+        return true;
     }
+    if (exit)
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
     return true;
 }
 
@@ -152,54 +143,8 @@ bool CUnitedMarketPlaceWindow::IsVisible() const
 
 bool CUnitedMarketPlaceWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    //char szText[256];
-
-    if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
-    {
-        g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 10, I18N::Game::WillYouBeGoingBackToTownNow, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, I18N::Game::HaveAnotherGreatDay, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 50, I18N::Game::AndStayPositiveAtAllTimes, 190, 0, RT3_SORT_CENTER);
-
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 130, I18N::Game::WouldYouLikeToGoToTown, 190, 0, RT3_SORT_CENTER);
-    }
-    else
-    {
-        g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 10, I18N::Game::IfYouGoToTheMarketInLorencia, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, I18N::Game::YouLlFindManyItemsYouNeed, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 50, I18N::Game::AvailableForPurchase, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 70, I18N::Game::IfYouHaveItemsYouWantToSell, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 90, I18N::Game::YouCanSellThem, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 110, I18N::Game::AtTheMarket, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 130, I18N::Game::WouldYouLikeToGoToTheMarket, 190, 0, RT3_SORT_CENTER);
-    }
-
-    if (m_bIsEnterButtonLocked == TRUE)
-    {
-        m_BtnEnter.Lock();
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeTextColor(RGBA(100, 100, 100, 255));
-    }
-    else
-    {
-        m_BtnEnter.UnLock();
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeTextColor(RGBA(255, 255, 255, 255));
-    }
-    m_BtnEnter.Render();
-    m_BtnClose.Render();
-
-    DisableAlphaBlend();
+    // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
+    // requires the override.
     return true;
 }
 
@@ -233,69 +178,14 @@ float CUnitedMarketPlaceWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CUnitedMarketPlaceWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_UNITEDMARKETPLACEWINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_UNITEDMARKETPLACEWINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_UNITEDMARKETPLACEWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_UNITEDMARKETPLACEWINDOW_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE, GL_LINEAR);
-}
 
-void CUnitedMarketPlaceWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT);
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_LEFT);
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_TOP);
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_BACK);
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_BUTTON);
-    DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_LINE);
-}
 
-void CUnitedMarketPlaceWindow::RenderFrame()
-{
-    RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-
-    wchar_t szText[256] = { 0, };
-    float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
-    float fLine_y = 13.0f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    mu_swprintf(szText, L"%ls", I18N::Game::Julia);
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
-}
 
 bool CUnitedMarketPlaceWindow::BtnProcess()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // Top-right corner close "X" (shared frame): hides + swallows the click. The Warp and exit
+    // buttons are RmlUi's (see Update()).
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
-
-    if (m_BtnEnter.UpdateMouseEvent() == true)
-    {
-        LoadingWorld = 9999999;
-
-        SocketClient->ToGameServer()->SendEnterMarketPlaceRequest();
-        m_bIsEnterButtonLocked = true;
-
-        return true;
-    }
-
-    if (m_BtnClose.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
-    }
-
     return false;
 }
 
@@ -311,4 +201,136 @@ void CUnitedMarketPlaceWindow::SetRemainTime(int iTime)
 void CUnitedMarketPlaceWindow::LockEnterButton(BOOL bLock)
 {
     m_bIsEnterButtonLocked = bLock;
+}
+
+void CUnitedMarketPlaceWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "united_market_place",
+        [this](Rml::DataModelConstructor& c, UnitedMarketPlaceRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("bold_text_px", &model.boldTextPx);
+            c.Bind("title", &model.title);
+            auto line = c.RegisterStruct<UnitedMarketPlaceLineEntry>();
+            line.RegisterMember("text", &UnitedMarketPlaceLineEntry::text);
+            line.RegisterMember("top", &UnitedMarketPlaceLineEntry::top);
+            c.RegisterArray<std::vector<UnitedMarketPlaceLineEntry>>();
+            c.Bind("lines", &model.lines);
+            c.Bind("warp_text", &model.warpText);
+            c.Bind("label_top", &model.labelTop);
+            c.Bind("label_line_px", &model.labelLinePx);
+            c.Bind("warp_locked", &model.warpLocked);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+            c.BindEventCallback("market_warp", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingWarp = true; });
+            c.BindEventCallback("market_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingExit = true; });
+        });
+
+    if (!modelCreated)
+        return;
+
+    UnitedMarketPlaceRmlModel& model = m_RmlBinder.GetModel();
+    model.title = StringUtils::WideToNarrow(I18N::Game::Julia);
+    model.warpText = StringUtils::WideToNarrow(I18N::Game::Warp3016);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                  "Data/Interface/RmlUi/united_market_place.rml");
+}
+
+void CUnitedMarketPlaceWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void CUnitedMarketPlaceWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+
+    // CButton::Render(): label top y + (23 / 2 - h / 2), whole units, h the native line height.
+    {
+        const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+        const float labelTop = static_cast<float>(23 / 2 - lineHeight / 2);
+        const float labelLinePx = static_cast<float>(lineHeight) * UI::Scaling::GetActiveTransform().scaleY;
+        auto& labelModel = m_RmlBinder.GetModel();
+        if (labelModel.labelTop != labelTop || labelModel.labelLinePx != labelLinePx)
+        {
+            labelModel.labelTop = labelTop;
+            labelModel.labelLinePx = labelLinePx;
+            m_RmlBinder.MarkDirty("label_top");
+            m_RmlBinder.MarkDirty("label_line_px");
+        }
+    }
+    UnitedMarketPlaceRmlModel& model = m_RmlBinder.GetModel();
+    const float boldPx =
+        UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, UI::Scaling::GetActiveTransform());
+    if (model.boldTextPx != boldPx)
+    {
+        model.boldTextPx = boldPx;
+        m_RmlBinder.MarkDirty("bold_text_px");
+    }
+    const bool locked = m_bIsEnterButtonLocked == TRUE;
+    if (model.warpLocked != locked)
+    {
+        model.warpLocked = locked;
+        m_RmlBinder.MarkDirty("warp_locked");
+    }
+
+    // In the market, the way back to town; elsewhere, the market (the original's Render()). Every 20
+    // units from y 60, the last one at y 180.
+    std::vector<const wchar_t*> texts;
+    if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
+        texts = {I18N::Game::WillYouBeGoingBackToTownNow,
+                 I18N::Game::HaveAnotherGreatDay,
+                 I18N::Game::AndStayPositiveAtAllTimes,
+                 nullptr,
+                 nullptr,
+                 nullptr,
+                 I18N::Game::WouldYouLikeToGoToTown};
+    else
+        texts = {I18N::Game::IfYouGoToTheMarketInLorencia,
+                 I18N::Game::YouLlFindManyItemsYouNeed,
+                 I18N::Game::AvailableForPurchase,
+                 I18N::Game::IfYouHaveItemsYouWantToSell,
+                 I18N::Game::YouCanSellThem,
+                 I18N::Game::AtTheMarket,
+                 I18N::Game::WouldYouLikeToGoToTheMarket};
+    std::vector<UnitedMarketPlaceLineEntry> lines;
+    for (std::size_t i = 0; i < texts.size(); ++i)
+    {
+        if (texts[i] != nullptr)
+            lines.push_back({StringUtils::WideToNarrow(texts[i]), 60.f + 20.f * static_cast<float>(i)});
+    }
+    const bool same = lines.size() == model.lines.size() &&
+                      std::equal(lines.begin(), lines.end(), model.lines.begin(),
+                                 [](const UnitedMarketPlaceLineEntry& a, const UnitedMarketPlaceLineEntry& b)
+                                 { return a.text == b.text && a.top == b.top; });
+    if (!same)
+    {
+        model.lines = std::move(lines);
+        m_RmlBinder.MarkDirty("lines");
+    }
 }

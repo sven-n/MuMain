@@ -1,0 +1,94 @@
+/* Modern theme for CSiegeWarfare: the same geometry as the legacy theme (see siege_warfare.rml
+   and themes/legacy/siege_warfare.rcss), with the frame, the time frame and the buttons drawn as
+   modern surfaces instead of the original's art; the map, the dots, the command icons and the
+   skill cell stay the game's own pictures. */
+
+@spritesheet sw-attack-sheet { src: "../../../i_attack.tga"; sw-attack: 0px 0px 13px 13px; }
+@spritesheet sw-defence-sheet { src: "../../../i_defense.tga"; sw-defence: 0px 0px 18px 15px; }
+@spritesheet sw-wait-sheet { src: "../../../i_wait.tga"; sw-wait: 0px 0px 11px 12px; }
+@spritesheet sw-skill-sheet { src: "../../../newui_SW_BattleSkill_Frame.tga"; sw-skill: 0px 0px 128px 53px; }
+@spritesheet sw-scroll-up-sheet {
+	src: "../../../newui_Bt_skill_scroll_up.jpg";
+	sw-scroll-up-up: 0px 0px 15px 13px;
+	sw-scroll-up-over: 0px 13px 15px 13px;
+	sw-scroll-up-down: 0px 26px 15px 13px;
+}
+@spritesheet sw-scroll-down-sheet {
+	src: "../../../newui_Bt_skill_scroll_dn.jpg";
+	sw-scroll-down-up: 0px 0px 15px 13px;
+	sw-scroll-down-over: 0px 13px 15px 13px;
+	sw-scroll-down-down: 0px 26px 15px 13px;
+}
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+.text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	color: #ffffff;
+}
+.text.bold { font-weight: bold; }
+.button-label { left: 0; top: 0; text-align: center; }
+
+#frame { position: absolute; width: 154px; height: 162px; }
+#map { position: absolute; left: 25px; top: 28px; width: 128px; height: 128px; }
+#frame_art { position: absolute; left: 24px; top: 27px; width: 130px; height: 130px; border: 1px token(border-frame); }
+#time_frame { position: absolute; left: 20px; top: 158px; width: 134px; height: 37px; background-color: token(surface-panel); border: 1px token(border-frame); border-radius: token(radius-sm); }
+#time { left: 20px; top: 168px; text-align: center; }
+
+.dot { position: absolute; width: 3px; height: 3px; background-color: rgb(106, 97, 88); }
+#hero { position: absolute; width: 3px; height: 3px; background-color: #ffff00; }
+
+.command { position: absolute; width: 0; height: 0; }
+.command-team { left: -12px; top: -5px; }
+.command-icon { position: absolute; left: -7px; top: -7px; width: 11px; height: 11px; }
+
+.cursor { position: absolute; width: 0; height: 0; }
+.cursor-team { left: -13px; top: -6px; }
+.cursor-icon { position: absolute; left: -8px; top: -8px; }
+.cursor-icon.attack { width: 13px; height: 13px; }
+.cursor-icon.defence { width: 18px; height: 15px; }
+.cursor-icon.wait { width: 11px; height: 12px; }
+
+.team { position: absolute; width: 26px; height: 22px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
+.team.over { background-color: token(accent-steel-hover); }
+.team.down { background-color: token(surface-recessed); }
+
+.order { position: absolute; width: 30px; height: 22px; }
+.order-button { position: absolute; left: 0; top: 0; width: 30px; height: 22px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
+.order-button.over { background-color: token(accent-steel-hover); }
+.order-button.down { background-color: token(surface-recessed); }
+.order-icon { position: absolute; }
+.order-icon.attack { left: 8px; top: 5px; width: 13px; height: 13px; decorator: image(sw-attack); }
+.order-icon.defence { left: 8px; top: 3px; width: 18px; height: 15px; decorator: image(sw-defence); }
+.order-icon.wait { left: 10px; top: 5px; width: 11px; height: 12px; decorator: image(sw-wait); }
+
+#skill { position: absolute; width: 128px; height: 53px; }
+#skill_frame { position: absolute; left: 0; top: 0; width: 128px; height: 53px; decorator: image(sw-skill); }
+#skill_icon { position: absolute; left: 26px; top: 21px; width: 20px; height: 28px; }
+.kills-needed { left: 78px; top: 28px; }
+.kills-now { left: 97px; top: 28px; }
+.scroll { position: absolute; left: 48px; width: 15px; height: 13px; }
+.scroll-up { top: 21px; decorator: image(sw-scroll-up-up); }
+.scroll-up.over { decorator: image(sw-scroll-up-over); }
+.scroll-up.down { decorator: image(sw-scroll-up-down); }
+.scroll-down { top: 36px; decorator: image(sw-scroll-down-up); }
+.scroll-down.over { decorator: image(sw-scroll-down-over); }
+.scroll-down.down { decorator: image(sw-scroll-down-down); }
+
+#alpha_button { position: absolute; width: 38px; height: 23px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
+#alpha_button.over { background-color: token(accent-steel-hover); }
+#alpha_button.down { background-color: token(surface-recessed); }

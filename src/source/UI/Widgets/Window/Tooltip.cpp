@@ -88,12 +88,17 @@ void mu::ui::window::CTooltip::Render(int x, int y, int width, int height, int o
     line.text = StringUtils::WideToNarrow(m_text.c_str());
     config.lines.push_back(std::move(line));
 
-    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(x + width / 2 + offsetX));
+    // CNewUIButton::Render(): the box starts at the rect's centre minus half the text width and is
+    // the text width plus 6 units wide, so its centre lies 3 units right of the rect's; it ends 2
+    // units above the rect, or starts 2 units below it.
+    config.box = UI::RmlBridge::Tooltip::Config::Box::ButtonHint;
+    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(x + width / 2 + 3 + offsetX));
     config.centerHorizontally = true;
     config.anchor = m_anchorAbove ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
                                    : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft;
     config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // original RenderTextWithColors() call always passed RT3_SORT_CENTER.
-    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>((m_anchorAbove ? y : (y + height + 2)) + offsetY));
+    config.anchorY = UI::Scaling::PositionY(activeTransform,
+                                            static_cast<float>((m_anchorAbove ? y - 2 : (y + height + 2)) + offsetY));
 
     UI::RmlBridge::Tooltip::Show(config, this);
 }

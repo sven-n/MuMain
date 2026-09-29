@@ -1,0 +1,33 @@
+/* Modern theme for CHelpWindow -- the key and chat help pages in the modern tooltip's surface
+   (themes/modern/tooltip.rcss): same fill, frame, radius and text tokens. The box keeps the
+   original's place (C++ binds its top-left in physical px) and sizes its own width and rows. */
+
+#help_panel {
+	position: absolute;
+	pointer-events: none;
+	width: 240dp;
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
+	padding: 3dp 5dp;
+}
+
+/* display:block required -- RmlUi's default `display` is inline, even for a <div>. */
+.help-line {
+	display: block;
+	color: token(text-primary);
+	text-align: center;
+	white-space: nowrap;
+	min-height: 1.2em;
+	line-height: 1.2em;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+}
+.help-line.heading {
+	color: token(text-warm);
+	font-weight: bold;
+}
+.help-line.half-spacer {
+	min-height: 0.6em;
+	height: 0.6em;
+}

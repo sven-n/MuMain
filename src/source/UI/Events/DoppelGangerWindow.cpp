@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 #include "Audio/DSPlaySound.h"
 
@@ -45,29 +46,17 @@ bool CDoppelGangerWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRend
 
     SetPos(x, y);
 
-    LoadImages();
-
-    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 190, I18N::Game::Enter);
-    InitButton(&m_BtnClose, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 360, I18N::Game::Close388);
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CDoppelGangerWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
-{
-    pNewUIButton->ChangeText(pCaption);
-    pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    pNewUIButton->ChangeButtonImgState(true, IMAGE_DOPPELGANGERWINDOW_BUTTON, true);
-    pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
-
 void CDoppelGangerWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUI3DRenderMng)
     {
@@ -115,8 +104,19 @@ bool CDoppelGangerWindow::UpdateKeyEvent()
 
 bool CDoppelGangerWindow::Update()
 {
-    if (IsVisible())
+    SyncView();
+
+    // A click RmlUi reported (the original's button handling in BtnProcess()).
+    const int pressed = m_View.TakePressedButton();
+    if (!IsVisible())
+        return true;
+    if (pressed == 0)
     {
+        SocketClient->ToGameServer()->SendDoppelgangerEnterRequest(0xFF);
+    }
+    else if (pressed == 1)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
     }
     return true;
 }
@@ -128,63 +128,49 @@ bool CDoppelGangerWindow::IsVisible() const
 
 bool CDoppelGangerWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    wchar_t szText[256];
-
-    g_pRenderText->SetFont(g_hFont);
-    wchar_t szTextOut[2][300];
-    CutStr(I18N::Game::OnlyThoseInPossessionOfAMirrorOfDimensions, szTextOut[0], 140, 2, 300);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTextOut[0], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 15, szTextOut[1], 190, 0, RT3_SORT_CENTER);
-    CutStr(I18N::Game::MayPassThroughTheDoppelgangerGate, szTextOut[0], 100, 2, 300);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, szTextOut[0], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 45, szTextOut[1], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 60, I18N::Game::WillYouShowMeYourMirror, 190, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 120, I18N::Game::MirrorOfDimensions, 190, 0, RT3_SORT_CENTER);
-
-    if (m_bIsEnterButtonLocked == TRUE)
-    {
-        m_BtnEnter.Lock();
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(100, 100, 100, 255));
-        m_BtnEnter.ChangeTextColor(RGBA(100, 100, 100, 255));
-    }
-    else
-    {
-        m_BtnEnter.UnLock();
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(255, 255, 255, 255));
-        m_BtnEnter.ChangeTextColor(RGBA(255, 255, 255, 255));
-    }
-    m_BtnEnter.Render();
-
-    RenderImage(IMAGE_DOPPELGANGERWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130 + 90, 188.f, 21.f);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, I18N::Game::EntryTime, 190, 0, RT3_SORT_CENTER);
-    if (m_iRemainTime == 0)
-    {
-        mu_swprintf(szText, I18N::Game::YouMayNowEnter);
-    }
-    else
-    {
-        mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, m_iRemainTime);
-    }
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 230, szText, 190, 0, RT3_SORT_CENTER);
-
-    m_BtnClose.Render();
-
-    DisableAlphaBlend();
-
+    // Nothing native left but the 3D preview (Render3D()): the frame, the texts and the buttons
+    // are RmlUi. Kept because CObject requires the override.
     return true;
+}
+
+void CDoppelGangerWindow::SyncView()
+{
+    if (IsVisible())
+    {
+        // The original's Render(): every text in (220, 220, 220), the colour RenderFrame() left
+        // set. Both descriptions are cut into one buffer, the second over the first without a
+        // terminator, so a shorter line keeps the tail of the longer one ("the...sion of a") --
+        // shared with the original, kept. The original also dropped the second line of each cut
+        // (finding EV1): that came from its uninitialised stack buffer, not from its layout, so
+        // those lines are kept here.
+        const DWORD color = RGBA(220, 220, 220, 255);
+        const float originY = 50.f;
+        wchar_t szTextOut[2][300] = {};
+        std::vector<EventItemEntryView::Text> texts;
+        texts.push_back({I18N::Game::Lugard, 15.f, 13.f, 160.f, true, color});
+        g_pRenderText->SetFont(g_hFont);
+        CutStr(I18N::Game::OnlyThoseInPossessionOfAMirrorOfDimensions, szTextOut[0], 140, 2, 300);
+        texts.push_back({szTextOut[0], 0.f, originY, 190.f, false, color});
+        texts.push_back({szTextOut[1], 0.f, originY + 15, 190.f, false, color});
+        CutStr(I18N::Game::MayPassThroughTheDoppelgangerGate, szTextOut[0], 100, 2, 300);
+        texts.push_back({szTextOut[0], 0.f, originY + 30, 190.f, false, color});
+        texts.push_back({szTextOut[1], 0.f, originY + 45, 190.f, false, color});
+        texts.push_back({I18N::Game::WillYouShowMeYourMirror, 0.f, originY + 60, 190.f, false, color});
+        texts.push_back({I18N::Game::MirrorOfDimensions, 0.f, originY + 120, 190.f, true, color});
+        texts.push_back({I18N::Game::EntryTime, 0.f, originY + 210, 190.f, false, color});
+        wchar_t szText[256] = {};
+        if (m_iRemainTime == 0)
+            mu_swprintf(szText, I18N::Game::YouMayNowEnter);
+        else
+            mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, m_iRemainTime);
+        texts.push_back({szText, 0.f, originY + 230, 190.f, false, color});
+        m_View.SetTexts(std::move(texts));
+
+        const float buttonX = static_cast<float>(INVENTORY_WIDTH) / 2 - 27;
+        m_View.SetButtons({{I18N::Game::Enter, buttonX, 190.f, m_bIsEnterButtonLocked == TRUE},
+                           {I18N::Game::Close388, buttonX, 360.f, false}});
+    }
+    m_View.Sync(IsVisible(), m_Pos);
 }
 
 void CDoppelGangerWindow::Render3D()
@@ -217,63 +203,11 @@ float CDoppelGangerWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CDoppelGangerWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_DOPPELGANGERWINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_DOPPELGANGERWINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_DOPPELGANGERWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_DOPPELGANGERWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_DOPPELGANGERWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_DOPPELGANGERWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_DOPPELGANGERWINDOW_LINE, GL_LINEAR);
-}
-
-void CDoppelGangerWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_RIGHT);
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_LEFT);
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_TOP);
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_BACK);
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_BUTTON);
-    DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_LINE);
-}
-
-void CDoppelGangerWindow::RenderFrame()
-{
-    RenderImage(IMAGE_DOPPELGANGERWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_DOPPELGANGERWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_DOPPELGANGERWINDOW_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_DOPPELGANGERWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_DOPPELGANGERWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-
-    wchar_t szText[256] = { 0, };
-    float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
-    float fLine_y = 13.0f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    mu_swprintf(szText, L"%ls", I18N::Game::Lugard);
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
-}
-
 bool CDoppelGangerWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // The Enter and Close buttons are RmlUi's (see Update()).
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
-
-    if (m_BtnEnter.UpdateMouseEvent() == true)
-    {
-        SocketClient->ToGameServer()->SendDoppelgangerEnterRequest(0xFF);
-        return true;
-    }
-
-    if (m_BtnClose.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
-    }
 
     return false;
 }

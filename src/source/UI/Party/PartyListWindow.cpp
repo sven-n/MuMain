@@ -12,6 +12,15 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Camera/CameraProjection.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Party/PartyListLayout.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -20,9 +29,7 @@ CPartyListWindow::CPartyListWindow()
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_bActive = false;
-    m_iVal = 24;
-    m_iLimitUserIDHeight[0] = 48;
-    m_iLimitUserIDHeight[1] = 58;
+    m_iVal = UI::Party::List::CardSpacing;
     m_iSelectedCharacter = -1;
 
     for (int i = 0; i < MAX_PARTYS; i++)
@@ -47,15 +54,8 @@ bool CPartyListWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    // Exit Party Button Initialize
-    for (int i = 0; i < MAX_PARTYS; i++)
-    {
-        int iVal = i * m_iVal;
-        m_BtnPartyExit[i].ChangeButtonImgState(true, IMAGE_PARTY_LIST_EXIT);
-        m_BtnPartyExit[i].ChangeButtonInfo(m_Pos.x + 63, m_Pos.y + 3 + iVal, 11, 11);
-    }
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(true);
 
@@ -64,7 +64,7 @@ bool CPartyListWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CPartyListWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -77,12 +77,6 @@ void CPartyListWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-
-    for (int i = 0; i < MAX_PARTYS; i++)
-    {
-        int iVal = i * m_iVal;
-        m_BtnPartyExit[i].ChangeButtonInfo(m_Pos.x + 63, m_Pos.y + 3 + iVal, 11, 11);
-    }
 }
 
 void CPartyListWindow::SetPos(int x)
@@ -124,15 +118,7 @@ bool CPartyListWindow::BtnProcess()
     {
         int iVal = i * m_iVal;
 
-        if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
-        {
-            if (m_BtnPartyExit[i].UpdateMouseEvent())
-            {
-                g_pPartyInfoWindow->LeaveParty(i);
-                return true;
-            }
-        }
-
+        // The leave buttons are RmlUi's (party_leave); the card hover stays here.
         if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y + iVal, PARTY_LIST_WINDOW_WIDTH, PARTY_LIST_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         {
             m_iSelectedCharacter = i;
@@ -181,6 +167,18 @@ bool CPartyListWindow::UpdateKeyEvent()
 
 bool CPartyListWindow::Update()
 {
+    if (m_PendingLeave >= 0)
+    {
+        const int member = m_PendingLeave;
+        m_PendingLeave = -1;
+        if (member < PartyNumber && CanLeave(member))
+            g_pPartyInfoWindow->LeaveParty(member);
+    }
+
+    // Before the reset below: Party[].index still holds what last frame's character pass found,
+    // which is what the original's Render() read.
+    SyncRmlModel();
+
     if (PartyNumber <= 0)
     {
         m_bActive = false;
@@ -199,93 +197,131 @@ bool CPartyListWindow::Update()
 
 bool CPartyListWindow::Render()
 {
-    if (!m_bActive)
-        return true;
+    // Nothing native left: the cards are RmlUi. Kept because CObject requires the override.
+    return true;
+}
 
-    EnableAlphaTest();
+bool CPartyListWindow::CanLeave(int member) const
+{
+    // The leader may remove anyone; everyone else only themselves.
+    return !wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[member].Name, Hero->ID);
+}
+
+void CPartyListWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "party_list",
+        [this](Rml::DataModelConstructor& c, PartyListRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+
+            auto card = c.RegisterStruct<PartyListCardEntry>();
+            card.RegisterMember("name", &PartyListCardEntry::name);
+            card.RegisterMember("name_text_px", &PartyListCardEntry::nameTextPx);
+            card.RegisterMember("leader", &PartyListCardEntry::leader);
+            card.RegisterMember("absent", &PartyListCardEntry::absent);
+            card.RegisterMember("defense_buff", &PartyListCardEntry::defenseBuff);
+            card.RegisterMember("selected", &PartyListCardEntry::selected);
+            card.RegisterMember("show_leave", &PartyListCardEntry::showLeave);
+            card.RegisterMember("health_length", &PartyListCardEntry::healthLength);
+            card.RegisterMember("index", &PartyListCardEntry::index);
+            c.RegisterArray<std::vector<PartyListCardEntry>>();
+            c.Bind("cards", &model.cards);
+
+            c.BindEventCallback("party_leave",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingLeave = arguments[0].Get<int>(-1);
+                                });
+        });
+
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                      "Data/Interface/RmlUi/party_list.rml");
+}
+
+void CPartyListWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void CPartyListWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    const bool visible = IsVisible() && PartyNumber > 0;
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    if (!visible)
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    SyncCards(UI::Scaling::GetActiveTransform());
+}
+
+void CPartyListWindow::SyncCards(const UI::Scaling::Transform& transform)
+{
+    using namespace UI::Party::List;
 
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    for (int i = 0; i < PartyNumber; i++)
+    std::vector<PartyListCardEntry> cards;
+    cards.reserve(static_cast<size_t>(PartyNumber));
+    for (int i = 0; i < PartyNumber; ++i)
     {
-        int iVal = i * m_iVal;
-
-        RenderColorQuadARGB(float(m_Pos.x + 2), float(m_Pos.y + 2 + iVal), PARTY_LIST_WINDOW_WIDTH - 3,
-            PARTY_LIST_WINDOW_HEIGHT - 6, 0xE6000000u);
-        EnableAlphaTest();
-
-        if (Party[i].index == -1)
+        const PARTY_t& member = Party[i];
+        PartyListCardEntry card;
+        card.index = i;
+        card.name = StringUtils::WideToNarrow(member.Name);
+        card.leader = i == 0;
+        card.absent = member.index == -1;
+        card.selected = !card.absent && m_iSelectedCharacter == i;
+        card.showLeave = CanLeave(i);
+        card.healthLength = HealthBarLength(member.stepHP);
+        if (member.index >= 0 && member.index < MAX_CHARACTERS_CLIENT)
         {
-            RenderColorQuadARGB(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3,
-                PARTY_LIST_WINDOW_HEIGHT - 6, 0x804D0000u);
-            EnableAlphaTest();
-        }
-        else
-        {
-            if (Party[i].index >= 0 && Party[i].index < MAX_CHARACTERS_CLIENT)
-            {
-                CHARACTER* pChar = &CharactersClient[Party[i].index];
-                OBJECT* pObj = &pChar->Object;
-
-                if (g_isCharacterBuff(pObj, eBuff_Defense) == true)
-                {
-                    RenderColorQuadARGB(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3,
-                        PARTY_LIST_WINDOW_HEIGHT - 6, 0x3333FF33u);
-                    EnableAlphaTest();
-                }
-            }
-            if (m_iSelectedCharacter != -1 && m_iSelectedCharacter == i)
-            {
-                RenderColorQuadARGB(m_Pos.x + 2, m_Pos.y + 2 + iVal, PARTY_LIST_WINDOW_WIDTH - 3,
-                    PARTY_LIST_WINDOW_HEIGHT - 6, 0xB3666666u);
-                EnableAlphaTest();
-            }
+            OBJECT* memberObject = &CharactersClient[member.index].Object;
+            card.defenseBuff = g_isCharacterBuff(memberObject, eBuff_Defense);
         }
 
-        RenderImage(IMAGE_PARTY_LIST_BACK, m_Pos.x, m_Pos.y + iVal, PARTY_LIST_WINDOW_WIDTH, PARTY_LIST_WINDOW_HEIGHT);
+        const float nameBox = static_cast<float>(card.leader ? LeaderNameBoxWidth : MemberNameBoxWidth);
+        const float nameWidth = static_cast<float>(g_pRenderText->MeasureText(member.Name, lstrlen(member.Name)).cx);
+        card.nameTextPx =
+            UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform, nameWidth, nameBox);
 
-        if (i == 0)
-        {
-            if (Party[i].index == -1)
-            {
-                g_pRenderText->SetTextColor(RGBA(128, 75, 11, 255));
-            }
-            else
-            {
-                g_pRenderText->SetTextColor(RGBA(255, 148, 22, 255));
-            }
-
-            RenderImage(IMAGE_PARTY_LIST_FLAG, m_Pos.x + 53, m_Pos.y + 3, 9, 10);
-            g_pRenderText->RenderText(m_Pos.x + 4, m_Pos.y + 4 + iVal, Party[i].Name, m_iLimitUserIDHeight[0], 0, RT3_SORT_LEFT);
-        }
-        else
-        {
-            if (Party[i].index == -1)
-            {
-                g_pRenderText->SetTextColor(RGBA(128, 128, 128, 255));
-            }
-            else
-            {
-                g_pRenderText->SetTextColor(RGBA(255, 255, 255, 255));
-            }
-            g_pRenderText->RenderText(m_Pos.x + 4, m_Pos.y + 4 + iVal, Party[i].Name, m_iLimitUserIDHeight[1], 0, RT3_SORT_LEFT);
-        }
-
-        int iStepHP = std::min<int>(10, Party[i].stepHP);
-        float fLife = ((float)iStepHP / (float)10) * (float)PARTY_LIST_HP_BAR_WIDTH;
-        RenderImage(IMAGE_PARTY_LIST_HPBAR, m_Pos.x + 4, m_Pos.y + 16 + iVal, fLife, 3);
-
-        if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
-        {
-            m_BtnPartyExit[i].Render();
-        }
+        cards.push_back(std::move(card));
     }
 
-    DisableAlphaBlend();
+    PartyListRmlModel& model = m_RmlBinder.GetModel();
+    const bool changed = cards.size() != model.cards.size() ||
+                         !std::equal(cards.begin(), cards.end(), model.cards.begin(),
+                                     [](const PartyListCardEntry& a, const PartyListCardEntry& b)
+                                     {
+                                         return a.name == b.name && a.nameTextPx == b.nameTextPx &&
+                                                a.absent == b.absent && a.defenseBuff == b.defenseBuff &&
+                                                a.selected == b.selected && a.showLeave == b.showLeave &&
+                                                a.healthLength == b.healthLength;
+                                     });
+    if (!changed)
+        return;
 
-    return true;
+    model.cards = std::move(cards);
+    m_RmlBinder.MarkDirty("cards");
 }
 
 void mu::ui::window::CPartyListWindow::RenderPartyHPOnHead()
@@ -387,20 +423,4 @@ bool CPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
     }
 
     return false;
-}
-
-void CPartyListWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_party_flag.tga", IMAGE_PARTY_LIST_FLAG, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_party_x.tga", IMAGE_PARTY_LIST_EXIT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_party_back.tga", IMAGE_PARTY_LIST_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_party_hpbar.jpg", IMAGE_PARTY_LIST_HPBAR, GL_LINEAR);
-}
-
-void CPartyListWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_PARTY_LIST_FLAG);
-    DeleteBitmap(IMAGE_PARTY_LIST_EXIT);
-    DeleteBitmap(IMAGE_PARTY_LIST_BACK);
-    DeleteBitmap(IMAGE_PARTY_LIST_HPBAR);
 }

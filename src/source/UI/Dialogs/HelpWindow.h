@@ -5,6 +5,14 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
+#include "UI/Dialogs/HelpWindowRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/Scaling/UITransform.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
@@ -31,12 +39,24 @@ public:
     void ClosingProcess();
 
     void AutoUpdateIndex();
+    void ReloadRmlTheme();
 
 private:
+    void BuildRmlUi();
+    void SyncRmlModel();
+    // Rebuilds the rows and the box when the page or the Dialog transform changed since the last
+    // build: the text is measured with the native renderer, so it is not redone every frame.
+    void RebuildPageModel(const UI::Scaling::Transform& transform);
+
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
     int m_iIndex;
+
+    RmlModelBinder<HelpWindowRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    int m_BuiltPage = -1;
+    UI::Scaling::Transform m_BuiltTransform{};
 };
 } // namespace mu::ui::window
 

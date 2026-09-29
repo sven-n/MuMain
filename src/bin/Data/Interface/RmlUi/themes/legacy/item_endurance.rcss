@@ -1,0 +1,66 @@
+/* Legacy theme for CItemEnduranceInfo, reproducing its Render(). Left column (#pets, screen
+   overlay transform, reference px): each pet / summon HP frame is a rgba(0, 0, 0, 179) fill
+   (0xB3000000) inset 2, the 57 x 23 frame art and the left part of the 49 x 3 health bar at
+   (4, 16); its name in the normal font, white, centred on the frame 5 below its top. The elf's
+   arrow count is orange (255, 160, 0) on a rgba(0, 0, 0, 180) box sized to the text. Right
+   (#icons, dock-right transform, reference px): 23 x 23 icons, tinted by durability band with
+   RenderColorQuadARGB()'s ARGB words (0x80FFFF00, 0x80FF8000, 0x80FF3300, 0x80FF0000). The
+   hovered icon's tooltip is bold on a rgba(0, 0, 0, 128) box, coloured by band. */
+
+@spritesheet endurance-pet-back-sheet { src: "../../../newui_Pet_Back.tga"; endurance-pet-back: 0px 0px 57px 23px; }
+@spritesheet endurance-boots-sheet { src: "../../../newui_durable_boots.tga"; endurance-boots: 0px 0px 23px 23px; }
+@spritesheet endurance-cap-sheet { src: "../../../newui_durable_cap.tga"; endurance-cap: 0px 0px 23px 23px; }
+@spritesheet endurance-gloves-sheet { src: "../../../newui_durable_gloves.tga"; endurance-gloves: 0px 0px 23px 23px; }
+@spritesheet endurance-lower-sheet { src: "../../../newui_durable_lower.tga"; endurance-lower: 0px 0px 23px 23px; }
+@spritesheet endurance-necklace-sheet { src: "../../../newui_durable_necklace.tga"; endurance-necklace: 0px 0px 23px 23px; }
+@spritesheet endurance-ring-sheet { src: "../../../newui_durable_ring.tga"; endurance-ring: 0px 0px 23px 23px; }
+@spritesheet endurance-shield-sheet { src: "../../../newui_durable_shield.tga"; endurance-shield: 0px 0px 23px 23px; }
+@spritesheet endurance-upper-sheet { src: "../../../newui_durable_upper.tga"; endurance-upper: 0px 0px 23px 23px; }
+@spritesheet endurance-weapon-sheet { src: "../../../newui_durable_weapon.tga"; endurance-weapon: 0px 0px 23px 23px; }
+@spritesheet endurance-wing-sheet { src: "../../../newui_durable_wing.tga"; endurance-wing: 0px 0px 23px 23px; }
+
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+#pets, #icons { position: absolute; width: 0; height: 0; transform-origin: left top; pointer-events: none; }
+
+.pet { position: absolute; left: 0; width: 57px; height: 23px; }
+.pet-fill { position: absolute; left: 2px; top: 2px; width: 53px; height: 13px; background-color: rgba(0, 0, 0, 179); }
+.pet-frame { position: absolute; left: 0; top: 0; width: 57px; height: 23px; decorator: image(endurance-pet-back); }
+/* An <img> whose source rect is its width (item_endurance.rml): the texture's left part, unstretched. */
+.pet-bar { position: absolute; left: 4px; top: 16px; height: 3px; }
+
+.icon { position: absolute; width: 23px; height: 23px; }
+.icon-art { position: absolute; left: 0; top: 0; width: 23px; height: 23px; }
+.icon-art--boots { decorator: image(endurance-boots); }
+.icon-art--cap { decorator: image(endurance-cap); }
+.icon-art--gloves { decorator: image(endurance-gloves); }
+.icon-art--lower { decorator: image(endurance-lower); }
+.icon-art--necklace { decorator: image(endurance-necklace); }
+.icon-art--ring { decorator: image(endurance-ring); }
+.icon-art--shield { decorator: image(endurance-shield); }
+.icon-art--upper { decorator: image(endurance-upper); }
+.icon-art--weapon { decorator: image(endurance-weapon); }
+.icon-art--wing { decorator: image(endurance-wing); }
+.icon-tint { position: absolute; top: 0; height: 23px; }
+.icon-tint--half { background-color: rgba(255, 255, 0, 128); }
+.icon-tint--third { background-color: rgba(255, 128, 0, 128); }
+.icon-tint--fifth { background-color: rgba(255, 51, 0, 128); }
+.icon-tint--zero { background-color: rgba(255, 0, 0, 128); }
+
+.text-row { position: absolute; width: 600px; text-align: center; white-space: nowrap; pointer-events: none; }
+#arrows-row { position: absolute; white-space: nowrap; pointer-events: none; }
+
+.pet-name { display: inline-block; white-space: nowrap; color: #ffffff; }
+#arrows { display: inline-block; white-space: nowrap; color: rgb(255, 160, 0); background-color: rgba(0, 0, 0, 180); }
+
+.tooltip { display: inline-block; white-space: nowrap; font-weight: bold; background-color: rgba(0, 0, 0, 128); }
+.tooltip--half { color: rgb(255, 255, 0); }
+.tooltip--third { color: rgb(255, 168, 0); }
+.tooltip--fifth { color: rgb(255, 83, 0); }
+.tooltip--zero { color: rgb(255, 0, 0); }

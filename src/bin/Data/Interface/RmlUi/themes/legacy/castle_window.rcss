@@ -1,0 +1,104 @@
+/* Legacy theme for CCastleWindow (Senatus), reproducing its RenderFrame(), tabs and pages: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the four newui_guild_tab04
+   tabs drawn 40 x 22 (the sprite's left 40 px, one unit apart from (12, 32); the selected one on
+   its second row, its label white, the others (181, 181, 181)), RenderOutlineUpper() /
+   RenderOutlineLower()'s newui_item_table01 / 02 / 03 pieces, senatusmap (160 x 165 of 256),
+   gate_button1 / 2 and suho_button1 / 2 (24 x 24 of 32), newui_myquest_Line (188 x 21),
+   newui_item_money2 (170 x 24), the boxes and texts in their bound colours, the 53 x 23
+   newui_btn_empty_very_small buttons (locked ones tinted (100, 100, 100) with a grey label, never
+   hovered), the tax arrows (newui_Bt_scroll_up / dn, 15 x 13: up / over / down) at x 158 and the
+   exit button at (13, 391). Reference px inside #panel. */
+
+@spritesheet cw-tab-sheet
+{
+	src: "../../../newui_guild_tab04.tga";
+	cw-tab-up: 0px 0px 40px 22px;
+	cw-tab-down: 0px 22px 40px 22px;
+}
+@spritesheet cw-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	cw-btn-up: 0px 0px 53px 23px;
+	cw-btn-over: 0px 23px 53px 23px;
+	cw-btn-down: 0px 46px 53px 23px;
+}
+@spritesheet cw-up-sheet
+{
+	src: "../../../newui_Bt_scroll_up.jpg";
+	cw-up-up: 0px 0px 15px 13px;
+	cw-up-over: 0px 13px 15px 13px;
+	cw-up-down: 0px 26px 15px 13px;
+}
+@spritesheet cw-dn-sheet
+{
+	src: "../../../newui_Bt_scroll_dn.jpg";
+	cw-dn-up: 0px 0px 15px 13px;
+	cw-dn-over: 0px 13px 15px 13px;
+	cw-dn-down: 0px 26px 15px 13px;
+}
+@spritesheet cw-tl-sheet { src: "../../../newui_item_table01(L).tga"; cw-tl: 0px 0px 14px 14px; }
+@spritesheet cw-tr-sheet { src: "../../../newui_item_table01(R).tga"; cw-tr: 0px 0px 14px 14px; }
+@spritesheet cw-bl-sheet { src: "../../../newui_item_table02(L).tga"; cw-bl: 0px 0px 14px 14px; }
+@spritesheet cw-br-sheet { src: "../../../newui_item_table02(R).tga"; cw-br: 0px 0px 14px 14px; }
+@spritesheet cw-top-sheet { src: "../../../newui_item_table03(Up).tga"; cw-top: 0px 0px 1px 14px; }
+@spritesheet cw-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; cw-bottom: 0px 0px 1px 14px; }
+@spritesheet cw-left-sheet { src: "../../../newui_item_table03(L).tga"; cw-left: 0px 0px 14px 1px; }
+@spritesheet cw-right-sheet { src: "../../../newui_item_table03(R).tga"; cw-right: 0px 0px 14px 1px; }
+@spritesheet cw-map-sheet { src: "../../../senatusmap.jpg"; cw-map: 0px 0px 160px 165px; }
+@spritesheet cw-gate-on-sheet { src: "../../../gate_button1.jpg"; cw-gate-on: 0px 0px 24px 24px; }
+@spritesheet cw-gate-off-sheet { src: "../../../gate_button2.jpg"; cw-gate-off: 0px 0px 24px 24px; }
+@spritesheet cw-statue-on-sheet { src: "../../../suho_button1.jpg"; cw-statue-on: 0px 0px 24px 24px; }
+@spritesheet cw-statue-off-sheet { src: "../../../suho_button2.jpg"; cw-statue-off: 0px 0px 24px 24px; }
+@spritesheet cw-line-sheet { src: "../../../newui_myquest_Line.tga"; cw-line: 0px 0px 188px 21px; }
+@spritesheet cw-money-sheet { src: "../../../newui_item_money2.tga"; cw-money: 0px 0px 170px 24px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+/* The tabs and the icon picks are hit-tested natively. */
+#panel { pointer-events: none; }
+
+.cw-tab { position: absolute; top: 32px; width: 40px; height: 22px; decorator: image(cw-tab-up); }
+.cw-tab.selected { decorator: image(cw-tab-down); }
+.cw-tab-label { color: #b5b5b5; }
+.cw-tab-label.selected { color: #ffffff; }
+
+.cw-slot { display: block; position: absolute; left: 0; top: 0; }
+.cw-img, .cw-box { position: absolute; }
+.t-tl { decorator: image(cw-tl); }
+.t-tr { decorator: image(cw-tr); }
+.t-bl { decorator: image(cw-bl); }
+.t-br { decorator: image(cw-br); }
+.t-top { decorator: image(cw-top); }
+.t-bottom { decorator: image(cw-bottom); }
+.t-left { decorator: image(cw-left); }
+.t-right { decorator: image(cw-right); }
+.map { decorator: image(cw-map); }
+.gate-on { decorator: image(cw-gate-on); }
+.gate-off { decorator: image(cw-gate-off); }
+.statue-on { decorator: image(cw-statue-on); }
+.statue-off { decorator: image(cw-statue-off); }
+.line { decorator: image(cw-line); }
+.money { decorator: image(cw-money); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.cw-text.centred { text-align: center; }
+.cw-text.right { text-align: right; }
+.cw-text.bold { font-weight: bold; }
+
+.cw-btn { display: block; position: absolute; width: 53px; height: 23px; decorator: image(cw-btn-up); pointer-events: auto; }
+.cw-btn:hover { decorator: image(cw-btn-over); }
+.cw-btn:active { decorator: image(cw-btn-down); }
+.cw-btn.locked, .cw-btn.locked:hover, .cw-btn.locked:active { decorator: image(cw-btn-up); image-color: #646464; }
+.cw-label { left: 0; text-align: center; color: #ffffff; }
+.cw-btn.locked .cw-label { color: #646464; }
+
+.tax-btn { position: absolute; left: 158px; width: 15px; height: 13px; pointer-events: auto; }
+.tax-up { decorator: image(cw-up-up); }
+.tax-up:hover { decorator: image(cw-up-over); }
+.tax-up:active { decorator: image(cw-up-down); }
+.tax-down { decorator: image(cw-dn-up); }
+.tax-down:hover { decorator: image(cw-dn-over); }
+.tax-down:active { decorator: image(cw-dn-down); }
+
+#btn_exit { top: 391px; pointer-events: auto; }
+.tooltip { display: none; bottom: 38px; } /* 429 - 391 */
+#btn_exit:hover ~ .tooltip-exit { display: block; }

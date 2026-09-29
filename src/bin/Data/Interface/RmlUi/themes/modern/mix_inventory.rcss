@@ -1,7 +1,7 @@
 /* Modern theme for CMixInventory's chrome -- header/Mix button are vector forged-metal chrome
    (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Recipe-result content
-   (SyncMixContentModel(), MixInventory.cpp) is RmlUi too now. Inventory grid and the socket list
-   box (a real interactive widget) stay fully native. */
+   (SyncMixContentModel(), MixInventory.cpp) and the socket list box are RmlUi too now. Only the
+   inventory grid stays fully native. */
 
 #panel {
 	position: absolute;
@@ -53,6 +53,22 @@
 	color: token(text-primary);
 }
 .mix-socket-prompt { color: token(text-secondary); }
+/* Socket list (attach / detach socket mixes): the legacy box and rows in the modern tokens, the
+   scroll bar as guard_window.rcss's modern one. Hit-tested natively. */
+.socket-list-box, .socket-line, .socket-scroll-track, .socket-thumb { position: absolute; pointer-events: none; }
+.socket-list-box { background-color: token(surface-recessed); }
+.socket-line {
+	height: 13px;
+	padding-left: 8px;
+	line-height: 13px;
+	white-space: nowrap;
+	font-size: 11px;
+	color: token(text-primary);
+}
+.socket-line.selected { background-color: token(surface-raised); color: token(text-warm); }
+.socket-scroll-track { width: 3px; background-color: token(surface-recessed); }
+.socket-thumb { width: 9px; height: 30px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+.socket-thumb.dragged { background-color: token(accent-steel-hover); }
 /* .mix-line's display: block outranks base.rcss's .hidden (same specificity, later rule), so a
    hidden line kept showing its last text -- the previous mix type's prediction, success rate and
    socket prompt. */

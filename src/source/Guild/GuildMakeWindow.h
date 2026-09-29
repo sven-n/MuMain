@@ -6,29 +6,25 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UIGuildMaster.h"
+#include "Guild/GuildMakeRmlModel.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class Element;
+class ElementDocument;
+} // namespace Rml
 
 namespace mu::ui::window
 {
     class CManager;
+    // The guild master NPC's guild creation window (intro, name and mark editor, summary), docked
+    // right. guild_make.rml draws it, the name field included; C++ keeps the pages, the mark
+    // painting (native hit tests on the grid and palette), the checks and the requests.
     class CGuildMakeWindow : public CObject
     {
     public:
-        enum IMAGE_LIST
-        {
-            IMAGE_GUILDMAKE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_GUILDMAKE_MAKEBUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_GUILDMAKE_NEXTBUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
-            IMAGE_GUILDMAKE_BACK_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GUILDMAKE_BACK_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GUILDMAKE_BACK_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GUILDMAKE_BACK_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GUILDMAKE_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GUILDMAKE_EDITBOX = BITMAP_GUILDMAKE_BEGIN,
-        };
-
         enum
         {
             GUILDMAKE_WIDTH = 190,
@@ -47,17 +43,14 @@ namespace mu::ui::window
             MAXGUILDNAME = 8,
         };
 
-        enum
+        // The buttons RmlUi reports (guild_make.rml's guild_make_button(n)).
+        enum GUILDMAKE_BUTTON
         {
-            GUILDMAKEBUTTON_INFO_MAKE = 0,
-
-            GUILDMAKEBUTTON_MARK_LNEXT,
-            GUILDMAKEBUTTON_MARK_RNEXT,
-
-            GUILDMAKEBUTTON_RESULTINFO_LNEXT,
-            GUILDMAKEBUTTON_RESULTINFO_RNEXT,
-
-            GUILDMAKEBUTTON_COUNT,
+            GUILDMAKEBUTTON_NONE = -1,
+            GUILDMAKEBUTTON_MAKE = 0,
+            GUILDMAKEBUTTON_BACK,
+            GUILDMAKEBUTTON_NEXT,
+            GUILDMAKEBUTTON_EXIT,
         };
 
     public:
@@ -69,28 +62,27 @@ namespace mu::ui::window
 
         void ClosingProcess();
 
-    private:
-        void LoadImages();
-        void UnloadImages();
-
     public:
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
 
     private:
-        bool UpdateGMInfo();
-        bool UpdateGMMark();
-        bool UpdateGMResultInfo();
+        void UpdateGMInfo(GUILDMAKE_BUTTON button);
+        void UpdateGMMark(GUILDMAKE_BUTTON button);
+        void UpdateGMResultInfo(GUILDMAKE_BUTTON button);
 
     public:
         bool Render();
 
+        void ReloadRmlTheme();
+
     private:
-        void RenderFrame();
-        void RenderGMInfo();
-        void RenderGMMark();
-        void RenderGMResultInfo();
+        void BuildRmlUi();
+        void SyncRmlModel();
+        void SyncContent();
+        Rml::Element* GetNameField() const;
+        void ReadNameField(wchar_t* text, int length) const;
 
     public:
         void SetPos(int x, int y);
@@ -107,9 +99,12 @@ namespace mu::ui::window
         POINT					m_Pos;
         GUILDMAKE_STATE			m_GuildMakeState;
 
-        CUITextInputBox* m_EditBox;
-        CButton* m_Button;
-        CButton			m_BtnExit;
+        // The name field (the original's CUITextInputBox): shown on the mark page only.
+        bool m_NameFieldShown = false;
+        bool m_NameFieldFocusPending = false;
+        RmlModelBinder<GuildMakeRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        GUILDMAKE_BUTTON m_PendingButton = GUILDMAKEBUTTON_NONE;
     };
 
     inline

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UIWindows.h"
+#include "UI/Party/FriendWindowView.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -20,6 +21,9 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
@@ -226,6 +230,13 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
                 m_WindowMapIter = m_WindowMap.begin();
             }
         }
+
+        // The default place (0, 332) and the cascade put a window's lower part under the bottom
+        // HUD, where its buttons cannot be reached (an original defect): keep it above the HUD.
+        const int contentHeight =
+            static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+        if (iPos_y + pbw->GetHeight() > contentHeight)
+            iPos_y = std::max(contentHeight - pbw->GetHeight(), 0);
     }
     pbw->SetPosition(iPos_x, iPos_y);
 
@@ -315,9 +326,14 @@ void CUIWindowMgr::Render()
         m_WindowMapIter = m_WindowMap.find(*m_WindowArrangeListIter);
         if (m_WindowMapIter != m_WindowMap.end())
         {
-            if (m_WindowMapIter->second->GetState() != UISTATE_HIDE &&
-                m_WindowMapIter->second->GetState() != UISTATE_READY)
-                m_WindowMapIter->second->Render();
+            CUIBaseWindow* window = m_WindowMapIter->second;
+            if (window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY)
+            {
+                if (!window->HasRmlView())
+                    window->Render();
+                else
+                    window->RenderRmlOverlay();
+            }
         }
     }
     m_bRenderFrame = TRUE;
@@ -539,7 +555,8 @@ void CUIWindowMgr::HandleMessage()
             m_WindowArrangeListIter = m_WindowArrangeList.end();
             --m_WindowArrangeListIter;
 
-            const bool inputOwnsSelection = CUITextInputBox::IsFocusedForParent(m_WorkMessage.m_iParam1);
+            const bool inputOwnsSelection = CUITextInputBox::IsFocusedForParent(m_WorkMessage.m_iParam1) ||
+                                            RmlFieldHasFocus(m_WorkMessage.m_iParam1);
             if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1
                 || (GetFocus() == g_hWnd && !inputOwnsSelection))
             {
@@ -1062,6 +1079,12 @@ void CUIBaseWindow::Render()
         DisableAlphaBlend();
     }
 
+    RenderOver();
+}
+
+void CUIBaseWindow::RenderRmlOverlay()
+{
+    EnableAlphaTest();
     RenderOver();
 }
 
@@ -2105,6 +2128,7 @@ CUIPhotoViewer::CUIPhotoViewer()
 
 CUIPhotoViewer::~CUIPhotoViewer()
 {
+    UI::RmlBridge::Tooltip::Hide(this);
     g_SummonSystem.RemoveEquipEffects(&m_PhotoChar);
     DeleteCloth(&m_PhotoChar, &m_PhotoChar.Object);
 }
@@ -2504,6 +2528,47 @@ extern int  TextListColor[50];
 extern int  TextBold[50];
 extern SIZE Size[50];
 
+// The help the "?" icon toggles: three white lines left-aligned in a box centred on the viewer,
+// its bottom lines ending at the viewer's bottom (RenderTipTextList(..., RT3_SORT_LEFT)), on the
+// shared RmlUi tooltip; natively only without RmlUi.
+void CUIPhotoViewer::RenderHelpText()
+{
+    const wchar_t* const help[] = {I18N::Game::WheelButtonZoomInOut, I18N::Game::LeftClickRotation,
+                                   I18N::Game::RightClickDefault};
+    g_pRenderText->SetFont(g_hFont);
+    const SIZE TextSize = g_pRenderText->MeasureText(L"Z", 1);
+    const int sx = m_iPos_x + m_iWidth / 2;
+    const int sy = m_iPos_y + m_iHeight - static_cast<int>(std::size(help)) * (TextSize.cy + 2);
+
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
+        UI::RmlBridge::Tooltip::Config config;
+        for (const wchar_t* text : help)
+        {
+            UI::RmlBridge::Tooltip::Line line;
+            line.text = StringUtils::WideToNarrow(text);
+            config.lines.push_back(std::move(line));
+        }
+        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
+        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
+        config.centerHorizontally = true; // RenderTipTextList() centres the box on sx.
+        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Left; // RT3_SORT_LEFT
+        UI::RmlBridge::Tooltip::Show(config, this);
+        return;
+    }
+
+    TextNum = 0;
+    for (const wchar_t* text : help)
+    {
+        mu_swprintf(TextList[TextNum], L"%ls", text);
+        TextListColor[TextNum] = 0;
+        TextBold[TextNum] = false;
+        TextNum++;
+    }
+    RenderTipTextList(sx, sy, TextNum, 0, RT3_SORT_LEFT);
+}
+
 void CUIPhotoViewer::Render()
 {
     if (m_bIsWebzenMail == TRUE)
@@ -2549,18 +2614,12 @@ void CUIPhotoViewer::Render()
         if (m_bHelpEnable == FALSE)
         {
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 1, m_iPos_y + m_iHeight - 17, 16.0f, 16.0f, 0.f, 0.f, 16.f / 16.f, 16.f / 16.f);
+            UI::RmlBridge::Tooltip::Hide(this);
         }
         else
         {
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 2, m_iPos_y + m_iHeight - 16, 15.0f, 15.0f, 0.f, 0.f, 15.f / 16.f, 15.f / 16.f);
-
-            TextNum = 0;
-            mu_swprintf(TextList[TextNum], I18N::Game::WheelButtonZoomInOut); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::LeftClickRotation); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::RightClickDefault); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            g_pRenderText->SetFont(g_hFont);
-            const SIZE TextSize = g_pRenderText->MeasureText(L"Z", 1);
-            RenderTipTextList(m_iPos_x + m_iWidth / 2, m_iPos_y + m_iHeight - TextNum * (TextSize.cy + 2), TextNum, 0, RT3_SORT_LEFT);
+            RenderHelpText();
         }
     }
 }
@@ -3430,7 +3489,7 @@ const wchar_t* CUIFriendListTabWindow::GetCurrentSelectedFriend(BYTE* pNumber, B
     }
 }
 
-void CUIFriendListTabWindow::RenderSub()
+void CUIFriendListTabWindow::SyncControlLayout()
 {
     if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
     {
@@ -3446,6 +3505,11 @@ void CUIFriendListTabWindow::RenderSub()
             m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
         }
     }
+}
+
+void CUIFriendListTabWindow::RenderSub()
+{
+    SyncControlLayout();
 
     EnableAlphaTest();
     SetLineColor(7);
@@ -3999,7 +4063,7 @@ DWORD CUIChatRoomListTabWindow::GetCurrentSelectedWindow()
     else return m_WindowListBox.GetSelectedText()->m_dwUIID;
 }
 
-void CUIChatRoomListTabWindow::RenderSub()
+void CUIChatRoomListTabWindow::SyncControlLayout()
 {
     if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
     {
@@ -4011,6 +4075,11 @@ void CUIChatRoomListTabWindow::RenderSub()
             m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
         }
     }
+}
+
+void CUIChatRoomListTabWindow::RenderSub()
+{
+    SyncControlLayout();
 
     EnableAlphaTest();
     SetLineColor(7);
@@ -4356,7 +4425,7 @@ void CUILetterBoxTabWindow::PrevNextCursorMove(int iMove)
     m_LetterListBox.SLSetSelectLine(iMove);
 }
 
-void CUILetterBoxTabWindow::RenderSub()
+void CUILetterBoxTabWindow::SyncControlLayout()
 {
     if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
     {
@@ -4373,6 +4442,11 @@ void CUILetterBoxTabWindow::RenderSub()
             m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
         }
     }
+}
+
+void CUILetterBoxTabWindow::RenderSub()
+{
+    SyncControlLayout();
 
     EnableAlphaTest();
     SetLineColor(7);
@@ -4720,6 +4794,28 @@ void RenderTabLine(int iPos_x, int iPos_y, int iTabWidth, int iTabHeight, int iT
 
 void CUIFriendWindow::RenderSub()
 {
+    SyncTabLayout();
+
+    switch (m_iTabIndex)
+    {
+    case 0:
+        m_FriendListWnd.Render();
+        break;
+    case 1:
+        m_LetterBoxWnd.Render();
+        break;
+    case 2:
+        m_ChatRoomListWnd.Render();
+        break;
+    default:
+        break;
+    }
+
+    RenderTabStrip();
+}
+
+void CUIFriendWindow::SyncTabLayout()
+{
     if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
     {
         m_FriendListWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
@@ -4739,22 +4835,10 @@ void CUIFriendWindow::RenderSub()
             m_LetterBoxWnd.SetState(UISTATE_RESIZE);
         }
     }
+}
 
-    switch (m_iTabIndex)
-    {
-    case 0:
-        m_FriendListWnd.Render();
-        break;
-    case 1:
-        m_LetterBoxWnd.Render();
-        break;
-    case 2:
-        m_ChatRoomListWnd.Render();
-        break;
-    default:
-        break;
-    }
-
+void CUIFriendWindow::RenderTabStrip()
+{
     EnableAlphaTest();
 
     SetLineColor(7);

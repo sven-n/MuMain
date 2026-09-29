@@ -1,0 +1,57 @@
+/* Legacy theme for CChatCommandWindow, reproducing its RenderBaseWindow()/pages/buttons: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top) stretched to the full dock
+   height (432: the side pieces stretched between the top and the bottom, the bottom at 387); the
+   texts left-aligned in their boxes in their own colours (bound), the title bold and centred; each
+   parameter value in a black box at alpha 160; the value field transparent, its text
+   (255, 255, 230) at alpha 210; the 64 x 29 left and right buttons (newui_btn_empty_small up /
+   over / down) at y 358 with a white label; the exit button. Reference px inside #panel. */
+
+@spritesheet cc-btn-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	cc-btn-up: 0px 0px 64px 29px;
+	cc-btn-over: 0px 29px 64px 29px;
+	cc-btn-down: 0px 58px 64px 29px;
+}
+
+.frame-top { decorator: image(docked-bg-top-b); }
+.frame-left, .frame-right { height: 323px; }
+.frame-bottom { top: 387px; }
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.cc-text.centred, #title { text-align: center; }
+#title { font-weight: bold; }
+
+.value-box { position: absolute; background-color: rgba(0, 0, 0, 160); pointer-events: none; }
+.hit { position: absolute; pointer-events: auto; }
+
+#value_field {
+	display: none;
+	left: 24px;
+	padding: 0;
+	border-width: 0;
+	border-radius: 0;
+	background-color: transparent;
+	pointer-events: auto;
+}
+#value_field.editing { display: block; }
+
+.cc-btn {
+	display: block;
+	position: absolute;
+	top: 358px;
+	width: 64px;
+	height: 29px;
+	decorator: image(cc-btn-up);
+	pointer-events: auto;
+}
+.cc-btn:hover { decorator: image(cc-btn-over); }
+.cc-btn:active { decorator: image(cc-btn-down); }
+#btn_left { left: 22px; }
+#btn_right { left: 104px; }
+.cc-label { left: 0; text-align: center; color: #ffffff; }
+
+/* docked_panel_frame.rcss's exit tooltip, hidden until hovered (.sharp-text above shows it). */
+.tooltip { display: none; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

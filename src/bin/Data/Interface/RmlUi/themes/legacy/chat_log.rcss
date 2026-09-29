@@ -89,11 +89,14 @@
 #lines scrollbarvertical { width: 0; }
 #panel.framed #lines scrollbarvertical { width: 15dp; }
 
+/* No padding: native's background quad is exactly the measured text (RenderText() without a box).
+   Text size, height and the 15-unit row pitch come from chat_log.rml's bindings. flex-shrink 0:
+   with an explicit height, a flex item would otherwise shrink to fit a full well and the rows
+   would crowd together instead of scrolling. */
 .chat-line {
 	display: block;
-	line-height: 15dp;
 	white-space: nowrap;
-	padding: 0 2dp;
+	flex-shrink: 0;
 }
 
 /* Per-type colours -- native's SetBgColor/SetTextColor pairs, verbatim. */

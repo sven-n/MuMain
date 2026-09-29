@@ -1,0 +1,38 @@
+/* Modern theme for the login scene lines: the logo is the game's own artwork and the lines are
+   the original's, so the modern theme keeps the legacy geometry, fade and colours (see the legacy
+   theme). */
+
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+#logo { position: absolute; pointer-events: none; }
+#logo-glow {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	decorator: additive-image(#ffffff ../../../../Logo/MU-logo_g.jpg);
+}
+#logo-image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+.line {
+	position: absolute;
+	left: 0;
+	white-space: nowrap;
+	pointer-events: none;
+	transform-origin: left top;
+}
+.line--copyright { text-align: right; transform-origin: right top; }
+
+.line-text {
+	display: inline-block;
+	white-space: pre;
+	color: rgb(255, 255, 255);
+	background-color: rgba(0, 0, 0, 128);
+}

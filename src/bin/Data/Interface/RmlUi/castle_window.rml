@@ -1,0 +1,69 @@
+<rml>
+<head>
+	<title>Senatus</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="castle_window.rcss"/>
+</head>
+<body>
+	<!-- The Senatus (CCastleWindow), docked right: the title, the Castle Gate / Guardian Statue /
+	     Tax / Store tabs and the tab's page. The page is one list of pieces in the original's paint
+	     order (table edges, the castle map, the gate and statue icons with their level bars, the
+	     backdrops, the texts, the separator line, the money strip), then the buttons and, on the
+	     Tax tab, the four tax arrows. The tabs and the icon picks are hit-tested natively, so
+	     #panel leaves the pointer alone outside the buttons.
+	     root_x/root_y/root_scale come from the dock transform; everything inside is reference px;
+	     text is .sharp-text at the native size, counter-scaled out of the panel. A button click is
+	     queued with senatus_button(n). -->
+	<div id="panel" data-model="castle_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected" data-style-left="(12 + i * 41) + 'px'"></div>
+		<!-- The labels over every tab: a label wider than its tab ("Castle Gate", "Guardian
+		     Statue") starts left of it and runs over its neighbours, as in the original client
+		     (the minimum font size cannot fit it into 40 px; wider tabs would be a redesign). -->
+		<span class="sharp-text cw-tab-label" data-for="t, i : tabs" data-class-selected="t.selected"
+		      data-style-left="(12 + i * 41 + t.label_left) + 'px'" data-style-top="(32 + tab_label_top) + 'px'"
+		      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+
+		<div class="cw-slot" data-for="p : pieces">
+			<div data-if="p.kind == 0" data-attr-class="'cw-img ' + p.sprite" data-style-left="p.left + 'px'"
+			     data-style-top="p.top + 'px'" data-style-width="p.width + 'px'" data-style-height="p.height + 'px'"></div>
+			<div data-if="p.kind == 1" class="cw-box" data-style-left="p.left + 'px'" data-style-top="p.top + 'px'"
+			     data-style-width="p.width + 'px'" data-style-height="p.height + 'px'"
+			     data-style-background-color="p.color"></div>
+			<span data-if="p.kind == 2" class="sharp-text cw-text" data-class-bold="p.bold"
+			      data-class-centred="p.align == 1" data-class-right="p.align == 2"
+			      data-style-left="p.left + 'px'" data-style-top="p.top + 'px'" data-style-color="p.color"
+			      data-style-font-size="p.text_px + 'px'"
+			      data-style-width="p.width == 0 ? 'auto' : (p.width * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{p.text}}</span>
+		</div>
+
+		<div class="cw-btn" data-for="b : buttons" data-class-locked="b.locked" data-style-left="b.left + 'px'"
+		     data-style-top="b.top + 'px'" data-event-click="senatus_button(b.id)">
+			<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		</div>
+
+		<div data-if="tax_arrows">
+			<div class="tax-btn tax-up" style="top: 73px;" data-event-click="senatus_button(7)"></div>
+			<div class="tax-btn tax-down" style="top: 86px;" data-event-click="senatus_button(8)"></div>
+			<div class="tax-btn tax-up" style="top: 101px;" data-event-click="senatus_button(9)"></div>
+			<div class="tax-btn tax-down" style="top: 114px;" data-event-click="senatus_button(10)"></div>
+		</div>
+
+		<div id="btn_exit" data-event-click="senatus_button(11)"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+	</div>
+</body>
+</rml>

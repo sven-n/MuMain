@@ -2,13 +2,11 @@
    skill's 20x28 icon centred in it -- (32 - 20) / 2 = 6 across, (38 - 28) / 2 = 5 down. Plain
    reference px throughout: #panel carries transform: scale(root_scale). */
 
-/* Above the docked MU Helper documents, which stack at z-index:auto in show order. The flyout
-   overlaps the detail window's column, and RmlUi hit-tests documents independently of CManager --
-   without this, a click on an icon could also land on a control underneath. Below the shared
-   tooltip's 9999. */
+/* Above the docked MU Helper documents by the stacking table (5.2 over 3.4). The flyout overlaps
+   the detail window's column, and RmlUi hit-tests documents independently of CManager -- below
+   them, a click on an icon could also land on a control underneath. */
 body {
 	position: absolute;
-	z-index: 1;
 }
 
 @spritesheet mhsp-box-sheet { src: "../../../newui_skillbox.jpg"; mhsp-box: 0px 0px 32px 38px; }

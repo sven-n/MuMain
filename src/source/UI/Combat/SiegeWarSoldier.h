@@ -17,7 +17,6 @@ public:
 private:
     virtual bool OnCreate(int x, int y);
     virtual bool OnUpdate();
-    virtual bool OnRender();
     virtual void OnRelease();
 
     virtual bool OnUpdateMouseEvent();
@@ -25,10 +24,7 @@ private:
     virtual bool OnBtnProcess();
     virtual void OnSetPos(int x, int y);
 
-    virtual void OnLoadImages();
-    virtual void OnUnloadImages();
-
-    void RenderCharPosInMiniMap();
+    void OnFillRmlModel(SiegeWarfareRmlModel& model) override;
 };
 } // namespace mu::ui::window
 

@@ -1,0 +1,60 @@
+/* Modern theme for CChatCommandWindow: docked_panel_frame.rcss's forged panel (linked first) at the
+   full dock height, modern buttons and value boxes. Geometry is the legacy one (reference px under
+   the dock transform). */
+
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.cc-text.centred, #title { text-align: center; }
+#title { font-weight: bold; }
+
+.value-box {
+	position: absolute;
+	background-color: token(surface-recessed);
+	border-radius: token(radius-sm)px;
+	pointer-events: none;
+}
+.hit { position: absolute; pointer-events: auto; }
+
+#value_field {
+	display: none;
+	left: 24px;
+	padding: 0;
+	border-width: 0;
+	background-color: transparent;
+	pointer-events: auto;
+}
+#value_field.editing { display: block; }
+
+.cc-btn {
+	display: block;
+	position: absolute;
+	top: 358px;
+	width: 64px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.cc-btn:hover { border-color: token(accent-steel-hover); }
+.cc-btn:active { background-color: token(surface-recessed); }
+#btn_left { left: 22px; }
+#btn_right { left: 104px; }
+.cc-label { left: 0; text-align: center; color: token(text-primary); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

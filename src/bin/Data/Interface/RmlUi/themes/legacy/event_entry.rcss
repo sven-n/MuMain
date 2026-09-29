@@ -1,0 +1,63 @@
+/* Legacy theme for the right-docked event entry windows (CEnterBloodCastle, CEnterDevilSquare),
+   reproducing their Render(): the docked_panel_frame.rcss frame (linked first; newui_item_back01
+   top), the bold white title in its 72-unit box at (60, 12), the description lines in the normal
+   font centred on 190 units from x 3, the 180 x 29 level buttons (newui_btn_empty_big: up, over,
+   down) with bold labels -- grey (150, 150, 150) and never hovered while locked, white on the
+   hero's band -- and the exit button. Coordinates are reference px inside #panel. */
+
+@spritesheet entry-btn-sheet
+{
+	src: "../../../newui_btn_empty_big.tga";
+	entry-btn-up: 0px 0px 180px 29px;
+	entry-btn-over: 0px 29px 180px 29px;
+	entry-btn-down: 0px 58px 180px 29px;
+}
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+#title {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	font-weight: bold;
+	pointer-events: none;
+}
+
+.entry-line {
+	display: block;
+	position: absolute;
+	left: 3px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+
+.entry-btn {
+	display: block;
+	position: absolute;
+	left: 6px;
+	width: 180px;
+	height: 29px;
+	decorator: image(entry-btn-up);
+	pointer-events: auto;
+}
+.entry-btn.enabled:hover { decorator: image(entry-btn-over); }
+.entry-btn.enabled:active { decorator: image(entry-btn-down); }
+
+.entry-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	text-align: center;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #969696;
+	pointer-events: none;
+}
+.entry-btn.enabled .entry-label { color: #ffffff; }

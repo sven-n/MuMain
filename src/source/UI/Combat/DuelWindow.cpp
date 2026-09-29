@@ -1,15 +1,42 @@
 
 #include "stdafx.h"
 #include "UI/Combat/DuelWindow.h"
-#include "Render/Textures/ZzzTexture.h"
-#include "Engine/Object/ZzzInventory.h"
-#include "Render/Models/ZzzBMD.h"
-#include "Engine/Object/ZzzCharacter.h"
-#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Combat/DuelMgr.h"
+
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <string>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// The original drew this board under every panel (layer depth 1.1 / 1.8), and a docked panel's
+// frame is painted in the background context before the native windows (my_inventory_bg.rml...):
+// only a document in that same context, behind the others, stays under it. Like the original, the
+// location bar, the logs and every native window then draw over the board.
+Rml::Context* BoardContext()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
+    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
+}
+
+template <typename Model, typename T>
+void Sync(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+} // namespace
 
 mu::ui::window::CDuelWindow::CDuelWindow()
 {
@@ -32,7 +59,8 @@ bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -41,6 +69,8 @@ bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CDuelWindow::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
+
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -66,42 +96,15 @@ bool mu::ui::window::CDuelWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CDuelWindow::Update()
 {
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CDuelWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-    RenderContents();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the back, the names and the scores are RmlUi. Kept because CObject
+    // requires the override.
     return true;
-}
-
-void mu::ui::window::CDuelWindow::RenderFrame()
-{
-    RenderImage(IMAGE_DUEL_BACK, m_Pos.x, m_Pos.y, 131, 70);
-}
-
-void mu::ui::window::CDuelWindow::RenderContents()
-{
-    wchar_t strMyScore[12];
-    wchar_t strDuelScore[12];
-    mu_swprintf(strMyScore, L"%d", g_DuelMgr.GetScore(DUEL_HERO));
-    mu_swprintf(strDuelScore, L"%d", g_DuelMgr.GetScore(DUEL_ENEMY));
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(0, 0, 0, 255);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(0, 150, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 55, m_Pos.y + 33, g_DuelMgr.GetDuelPlayerID(DUEL_HERO));
-    g_pRenderText->RenderText(m_Pos.x + 31, m_Pos.y + 33, strMyScore);
-    g_pRenderText->SetTextColor(255, 25, 25, 255);
-    g_pRenderText->RenderText(m_Pos.x + 55, m_Pos.y + 56, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
-    g_pRenderText->RenderText(m_Pos.x + 31, m_Pos.y + 56, strDuelScore);
 }
 
 float mu::ui::window::CDuelWindow::GetLayerDepth()
@@ -109,12 +112,69 @@ float mu::ui::window::CDuelWindow::GetLayerDepth()
     return 1.1f;
 }
 
-void mu::ui::window::CDuelWindow::LoadImages()
+void mu::ui::window::CDuelWindow::BuildRmlUi()
 {
-    LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_DUEL_BACK, GL_LINEAR);
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(BoardContext(), "duel_window",
+                                                 [](Rml::DataModelConstructor& c, DuelWindowRmlModel& model)
+                                                 {
+                                                     c.Bind("scale_x", &model.scaleX);
+                                                     c.Bind("scale_y", &model.scaleY);
+                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
+                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
+                                                     c.Bind("bold_text_px", &model.boldTextPx);
+                                                     c.Bind("panel_x", &model.panelX);
+                                                     c.Bind("panel_y", &model.panelY);
+                                                     c.Bind("hero_name", &model.heroName);
+                                                     c.Bind("hero_score", &model.heroScore);
+                                                     c.Bind("enemy_name", &model.enemyName);
+                                                     c.Bind("enemy_score", &model.enemyScore);
+                                                 });
+
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(BoardContext(), "Data/Interface/RmlUi/duel_window.rml");
 }
 
-void mu::ui::window::CDuelWindow::UnloadImages()
+void mu::ui::window::CDuelWindow::ReloadRmlTheme()
 {
-    DeleteBitmap(IMAGE_DUEL_BACK);
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = BoardContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CDuelWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 1.1: behind every other document of the background context (see BoardContext()).
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    Sync(m_RmlBinder, &DuelWindowRmlModel::scaleX, "scale_x", transform.scaleX);
+    Sync(m_RmlBinder, &DuelWindowRmlModel::scaleY, "scale_y", transform.scaleY);
+    Sync(m_RmlBinder, &DuelWindowRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    Sync(m_RmlBinder, &DuelWindowRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    Sync(m_RmlBinder, &DuelWindowRmlModel::boldTextPx, "bold_text_px",
+         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+    Sync(m_RmlBinder, &DuelWindowRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    Sync(m_RmlBinder, &DuelWindowRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
+
+    Sync(m_RmlBinder, &DuelWindowRmlModel::heroName, "hero_name",
+         Rml::String(StringUtils::WideToNarrow(g_DuelMgr.GetDuelPlayerID(DUEL_HERO))));
+    Sync(m_RmlBinder, &DuelWindowRmlModel::enemyName, "enemy_name",
+         Rml::String(StringUtils::WideToNarrow(g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY))));
+    Sync(m_RmlBinder, &DuelWindowRmlModel::heroScore, "hero_score", std::to_string(g_DuelMgr.GetScore(DUEL_HERO)));
+    Sync(m_RmlBinder, &DuelWindowRmlModel::enemyScore, "enemy_score", std::to_string(g_DuelMgr.GetScore(DUEL_ENEMY)));
 }

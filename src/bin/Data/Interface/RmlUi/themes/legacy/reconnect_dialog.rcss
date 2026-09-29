@@ -1,0 +1,36 @@
+/* Legacy theme for the reconnect dialog, reproducing UI::Reconnect's native drawing: a black dim
+   over the whole screen (its alpha bound), then a 230 x 122 message-box panel -- newui_msgbox_back
+   (222 x 112 from y 2), newui_msgbox_top (67), one newui_msgbox_middle strip stretched to 5,
+   newui_msgbox_bottom (50) --, the newui_Bar_switch01 gauge (160 x 18 at 35, 66) with its
+   newui_Bar_switch02 fill (inset 5, up to 150 x 8), the newui_button_cancel button (54 x 30 at
+   88, 86; its hover row 30 below) and the lines in (230, 220, 200). Above every other document,
+   the tooltip included: the original drew it after the whole frame. Reference px inside #panel. */
+
+@spritesheet rc-back-sheet { src: "../../../newui_msgbox_back.jpg"; rc-back: 0px 0px 222px 242px; }
+@spritesheet rc-top-sheet { src: "../../../newui_msgbox_top.tga"; rc-top: 0px 0px 230px 67px; }
+@spritesheet rc-middle-sheet { src: "../../../newui_msgbox_middle.tga"; rc-middle: 0px 0px 230px 15px; }
+@spritesheet rc-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; rc-bottom: 0px 0px 230px 50px; }
+@spritesheet rc-progress-back-sheet { src: "../../../newui_Bar_switch01.jpg"; rc-progress-back: 0px 0px 160px 18px; }
+@spritesheet rc-progress-bar-sheet { src: "../../../newui_Bar_switch02.jpg"; rc-progress-bar: 0px 0px 150px 8px; }
+@spritesheet rc-cancel-sheet
+{
+	src: "../../../newui_button_cancel.tga";
+	rc-cancel: 0px 0px 54px 30px;
+	rc-cancel-over: 0px 30px 54px 30px;
+}
+
+body { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; font-family: "token(font-body)"; }
+#dim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-color: #000000; pointer-events: none; }
+#panel { position: absolute; transform-origin: left top; width: 230px; height: 122px; pointer-events: none; }
+#back { position: absolute; left: 0; top: 2px; width: 222px; height: 112px; decorator: image(rc-back); }
+#box_top { position: absolute; left: 0; top: 0; width: 230px; height: 67px; decorator: image(rc-top); }
+#box_middle { position: absolute; left: 0; top: 67px; width: 230px; height: 5px; decorator: image(rc-middle); }
+#box_bottom { position: absolute; left: 0; top: 72px; width: 230px; height: 50px; decorator: image(rc-bottom); }
+#progress_back { position: absolute; left: 35px; top: 66px; width: 160px; height: 18px; decorator: image(rc-progress-back); }
+#progress_bar { position: absolute; left: 40px; top: 71px; height: 8px; decorator: image(rc-progress-bar); }
+#cancel { position: absolute; left: 88px; top: 86px; width: 54px; height: 30px; decorator: image(rc-cancel); pointer-events: auto; }
+#cancel:hover { decorator: image(rc-cancel-over); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; }
+.line { color: rgb(230, 220, 200); }
+.line.bold { font-weight: bold; }

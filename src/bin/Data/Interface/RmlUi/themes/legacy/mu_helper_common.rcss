@@ -10,8 +10,8 @@
 
 /* The docked family's exit sits at (13, 392); the MU Helper's at (20, 388). */
 #btn_exit { left: 20px; top: 388px; }
-.tooltip { top: 361px; }
-.tooltip-exit { left: -17px; }
+.tooltip { bottom: 41px; } /* 429 - 388 */
+.tooltip-exit { left: -18px; }
 
 .mh-text {
 	display: block;
@@ -20,6 +20,9 @@
 	color: token(text-primary);
 	pointer-events: none;
 }
+/* .mh-text's display:block has the same specificity as base.rcss's .hidden and comes later, so a
+   data-class-hidden page header or tab label would stay on screen over its sibling. */
+.mh-text.hidden { display: none; }
 .mh-text.mh-center { text-align: center; }
 .mh-text.mh-bold { font-weight: bold; }
 

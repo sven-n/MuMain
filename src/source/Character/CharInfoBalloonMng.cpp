@@ -9,8 +9,6 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Core/SceneUICoordinator.h"
-#include "UI/Windows/SysMenuWin.h"
-#include "CharMakeWin.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 // Replaces CUIMng's old `CCharInfoBalloonMng m_CharInfoBalloonMng;` member, same convention as
@@ -147,28 +145,11 @@ bool CCharInfoBalloonMng::Render()
     for (auto& balloon : m_charInfoBalloons)
         balloon.Render();
 
-    // Before this migration, this manager's Render() drew the balloons as ordinary legacy 2D
-    // content, in the same pass and *before* CSceneUICoordinator::Render()'s CWin list (CCharMakeWin, CMsgWin,
-    // CSysMenuWin) -- so those windows' own legacy drawing correctly painted over the balloons
-    // whenever they were open. RmlUi renders unconditionally last in the frame now, so that
-    // relationship inverted: with nothing telling it otherwise, a balloon would paint on top of
-    // the character-creation dialog, a CMsgWin confirmation prompt, or the system menu instead of
-    // being covered by them, since all three are themselves drawn earlier in the frame (their own
-    // panels are RmlUi too, and either way none has any relationship to *when* RmlUi's pass runs).
-    // Restore the original visual hierarchy explicitly: hide the whole balloon document while any
-    // of the three is shown, since all of them used to legitimately cover it. g_SysMenuWin added
-    // when its own CUIMng/CNewUIManager-merger migration surfaced this exact symptom (the menu
-    // painting behind the balloon) -- this check needs the same treatment for every future
-    // CHARACTER_SCENE-relevant migration too, same as the IsCursorOnUI() fold-in elsewhere. This
-    // registered adapter's own GetLayerDepth() can't replace
-    // this check even now that every window involved is a CObject: that depth-sort only orders
-    // *this manager's own* dispatch, not RmlUi's separate, always-last compositor pass, so a
-    // permanent explicit toggle is still the only fix (same reasoning as CLoginWin's own
-    // credits/sysmenu render-side gates -- see its Render()'s comment).
-    const bool shouldHide = g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, !shouldHide);
-    if (shouldHide)
-        return true;
+    // The original drew the balloons before the scene's windows (CUIMng::Render()), so the
+    // character-creation dialog, a message window and the system menu covered them while the
+    // balloons stayed visible around them. The stacking table (RmlStackingOrder.cpp) keeps that
+    // order: the balloon document sits under the scene windows' documents.
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, true);
 
     SyncRmlModel();
     return true;

@@ -1,0 +1,52 @@
+<rml>
+<head>
+	<title>Command Window</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="command_window.rcss"/>
+</head>
+<body>
+	<!-- The command window (CCommandWindow, D): twelve buttons that arm a command for the next
+	     right-click on a player, docked right. root_x/root_y/root_scale come from the dock transform
+	     (UI::Scaling::GetActiveTransform()), as party_info.rml's #panel does; everything inside is
+	     reference px. Text is a .sharp-text layer: native size, counter-scaled out of the panel.
+
+	     C++ keeps the armed command (`selected`, drawn pressed and bold), the right-click that runs
+	     it, the corner close hit test and Escape; a button click is queued with command_press. The
+	     target box follows the pointer while a command is armed over a player. -->
+	<div id="panel" data-model="command_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="title_text_px + 'px'"
+		      data-style-line-height="title_line_px + 'px'" data-style-width="(72 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+
+		<div id="buttons">
+			<div class="cmd-btn" data-for="b : buttons" data-class-selected="b.selected"
+			     data-event-click="command_press(b.index)">
+				<span class="sharp-text cmd-label" data-style-top="b.label_top + 'px'"
+				      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"
+				      data-style-width="(108 * root_scale) + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{b.label}}</span></span>
+			</div>
+		</div>
+
+		<div id="btn_exit" data-event-click="command_exit"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+
+		<div id="target" data-if="target_visible" data-class-out-of-range="!target_in_range"
+		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">
+			<span class="sharp-text" id="target_name" data-style-font-size="big_text_px + 'px'"
+			      data-style-width="(128 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{target_name}}</span>
+		</div>
+	</div>
+</body>
+</rml>

@@ -92,25 +92,30 @@
 .stor-btn-lock.locked-mode { decorator: image(stor-lock-locked); }
 .stor-btn-expand { left: 124px; decorator: image(stor-btn-expand); }
 
+/* Button hints as docked_panel_frame.rcss draws them (CNewUIButton::Render()): a transparent
+   120-wide row (content centre at left + 4 + 60, 3 right of the button's centre) anchored 2 above
+   the button by its bottom edge; the inner .tooltip-text span carries the black 180/255 box, text
+   width + 6. */
 .tooltip {
 	display: none;
 	position: absolute;
-	top: 375px;
+	bottom: 38px; /* 429 - 391 */
 	width: 120px;
 	white-space: nowrap;
-	background-color: token(surface-tooltip);
 	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
 	font-size: 1em;
+	text-align: center;
 	pointer-events: none;
 	z-index: 1;
 }
+.tooltip.sharp-text { transform-origin: left bottom; }
+.tooltip-text { background-color: rgba(0, 0, 0, 180); }
 .tooltip-insert { left: -30px; }
 .tooltip-take   { left: 7px; }
 .tooltip-lock   { left: 44px; }
-.tooltip-expand { left: 60px; }
+.tooltip-expand { left: 81px; }
 
 #btn_insert:hover ~ .tooltip-insert,
 #btn_take:hover ~ .tooltip-take,

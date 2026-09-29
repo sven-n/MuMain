@@ -11,12 +11,6 @@ namespace mu::ui::window
     class CSiegeWarCommander : public CSiegeWarBase
     {
     public:
-        enum IMAGE_LIST
-        {
-            IMAGE_MINIMAP_BTN_GROUP = CSiegeWarBase::IMAGE_SIEGEWAR_BASE_FRAME_END,	// newui_SW_Minimap_Bt_group.tga	(26, 22)
-            IMAGE_MINIMAP_BTN_COMMAND,														// newui_SW_Minimap_Bt_Command.tga	(30, 22)
-        };
-
         enum FRAME_SIZE
         {
             MINIMAP_BTN_GROUP_WIDTH = 26,
@@ -53,7 +47,6 @@ namespace mu::ui::window
     private:
         virtual bool OnCreate(int x, int y);
         virtual bool OnUpdate();
-        virtual bool OnRender();
         virtual void OnRelease();
 
         virtual bool OnUpdateMouseEvent();
@@ -61,19 +54,14 @@ namespace mu::ui::window
         virtual bool OnBtnProcess();
         virtual void OnSetPos(int x, int y);
 
-        virtual void OnLoadImages();
-        virtual void OnUnloadImages();
+        void OnFillRmlModel(SiegeWarfareRmlModel& model) override;
 
-        void InitDestKill();
         void InitCmdGroupBtn();
-        void InitCmdBtn();
-        void RenderCharPosInMiniMap();
-        void RenderGuildMemberPosInMiniMap();
-        void RenderCmdIconAtMouse();
-        void RenderCmdGroupBtn();
-        void RenderCmdBtn();
 
-        void SetBtnState(int iBtnType, bool bStateDown);
+        void FillCharacterDots(SiegeWarfareRmlModel& model);
+        void FillGuildMemberDots(SiegeWarfareRmlModel& model);
+        void FillTeamButtons(SiegeWarfareRmlModel& model);
+        void FillCommandButtons(SiegeWarfareRmlModel& model);
 
     public:
         void ClearGuildMemberLocation(void);

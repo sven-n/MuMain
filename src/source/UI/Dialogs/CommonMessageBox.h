@@ -100,6 +100,10 @@ namespace mu::ui::window
         void AddBlank(int iAddLine);
 
         void SetEnable(bool bEnable) { m_bEnable = bEnable; }
+        bool IsEnabled() const
+        {
+            return m_bEnable;
+        }
 
         void SetPos(float x, float y) { m_x = x; m_y = y; }
         float GetPosX() { return m_x; }

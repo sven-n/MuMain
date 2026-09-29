@@ -42,7 +42,9 @@
 
 		<!-- base.rcss's .scroll-pane: RmlUi owns the scroll position, the wheel and the scrollbar
 		     drag, replacing the hand-rolled thumb/track math this window used to carry. -->
-		<div id="list" class="scroll-pane"
+		<!-- no-scroll: every row fits, so the original drew its thumb disabled (MaximumScrollOffset). -->
+		<div id="list" class="scroll-pane" data-event-mousescroll="movecommand_wheel"
+		     data-class-no-scroll="rows.size * row_height + list_tail <= list_height + 0.5"
 		     data-style-font-size="text_px + 'px'"
 		     data-style-width="(list_width * root_scale) + 'px'"
 		     data-style-height="(list_height * root_scale) + 'px'"
@@ -62,6 +64,9 @@
 				<span class="col col-level" data-class-unmet="row.level_unmet">{{row.req_level}}</span>
 				<span class="col col-zen" data-class-unmet="row.zen_unmet">{{row.req_zen}}</span>
 			</div>
+			<!-- The part of a row the list's height leaves over: with it the list scrolls in whole
+			     rows to its end, where the original kept its rows at the top. -->
+			<div style="display: block;" data-style-height="(list_tail * root_scale) + 'px'"></div>
 		</div>
 
 		<div id="close_bar"

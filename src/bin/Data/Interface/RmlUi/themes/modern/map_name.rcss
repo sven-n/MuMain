@@ -1,0 +1,8 @@
+/* Modern theme for CUIMapName: the map name images are the game's own artwork, so the modern theme
+   keeps the legacy geometry and fade (see the legacy theme). */
+
+body { pointer-events: none; }
+
+#banner { position: absolute; width: 166px; height: 90px; pointer-events: none; }
+#name { position: absolute; left: 0; top: 0; width: 166px; height: 90px; }
+#strife { position: absolute; left: 0; top: -28px; width: 166px; height: 28px; }

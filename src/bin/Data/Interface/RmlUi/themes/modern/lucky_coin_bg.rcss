@@ -1,0 +1,4 @@
+/* Modern frame of Delgado's lucky coin windows: docked_panel_frame.rcss's forged panel (linked
+   first). Background context. */
+
+#panel { pointer-events: none; }

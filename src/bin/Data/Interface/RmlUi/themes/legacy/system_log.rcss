@@ -29,12 +29,11 @@
 	align-items: flex-start;
 }
 
-/* line-height is deliberately not set: RCSS already defaults to 1.2 relative to font-size, which
-   is exactly native's own `MeasureText(L"Q").cy * 1.2` row pitch. */
+/* No padding: native's background quad is exactly the measured text (RenderText() without a box).
+   Position, pitch, height and text size come from system_log.rml's bindings. */
 .syslog-line {
 	display: block;
 	white-space: nowrap;
-	padding: 0 2dp;
 }
 
 /* Native's two colours: system messages blue, everything else the error red. The shared black

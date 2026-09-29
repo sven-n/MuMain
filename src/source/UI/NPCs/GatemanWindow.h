@@ -5,83 +5,80 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Window/Button.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Combat/CastleWindow.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/NPCs/GatemanRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
-    class CGatemanWindow : public CObject
+// The castle gatekeeper, docked right: the guest, guild member or guild master page.
+// gateman.rml draws it; C++ keeps the gatekeeper state (CUIGateKeeper), the public toggle's
+// native hit test, Escape and every request.
+class CGatemanWindow : public CObject
+{
+public:
+    // The buttons RmlUi reports (gateman_button(n)).
+    enum GATEMAN_BUTTON
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_GATEMANWINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_GATEMANWINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GATEMANWINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GATEMANWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GATEMANWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GATEMANWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GATEMANWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
-
-            IMAGE_GATEMANWINDOW_SCROLL_UP_BTN = CCastleWindow::IMAGE_CASTLEWINDOW_SCROLL_UP_BTN,
-            IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN = CCastleWindow::IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN,
-        };
-
-    private:
-        enum
-        {
-            INVENTORY_WIDTH = 190,
-            INVENTORY_HEIGHT = 429,
-        };
-
-        CManager* m_pNewUIMng;
-        POINT m_Pos;
-
-        CButton m_BtnExit;
-
-        CButton m_BtnEnter;			// 입장 버튼
-        CButton m_BtnSet;				// 입장료 설정 버튼
-        CButton m_BtnFeeUp;			// 입장료 up
-        CButton m_BtnFeeDn;			// 입장료 down
-
-    public:
-        CGatemanWindow();
-        virtual ~CGatemanWindow();
-
-        bool Create(CManager* pNewUIMng, int x, int y);
-        void Release();
-
-        void SetPos(int x, int y);
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
-
-        void OpeningProcess();
-        void ClosingProcess();
-
-        float GetLayerDepth();	//. 5.0f
-
-    private:
-        void LoadImages();
-        void UnloadImages();
-
-        void RenderFrame();
-        bool BtnProcess();
-
-        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
-
-        void UpdateGuildMasterMode();
-        void UpdateGuildMemeberMode();
-        void UpdateGuestMode();
-
-        void RenderGuildMasterMode();
-        void RenderGuildMemeberMode();
-        void RenderGuestMode();
+        GATEMAN_BUTTON_NONE = -1,
+        GATEMAN_BUTTON_ENTER = 0,
+        GATEMAN_BUTTON_SET,
+        GATEMAN_BUTTON_FEE_UP,
+        GATEMAN_BUTTON_FEE_DOWN,
+        GATEMAN_BUTTON_EXIT,
     };
+
+private:
+    enum
+    {
+        INVENTORY_WIDTH = 190,
+        INVENTORY_HEIGHT = 429,
+    };
+
+    CManager* m_pNewUIMng;
+    POINT m_Pos;
+
+    RmlModelBinder<GatemanRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    GATEMAN_BUTTON m_PendingButton = GATEMAN_BUTTON_NONE;
+
+public:
+    CGatemanWindow();
+    virtual ~CGatemanWindow();
+
+    bool Create(CManager* pNewUIMng, int x, int y);
+    void Release();
+
+    void SetPos(int x, int y);
+
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool Update();
+    bool Render();
+
+    void OpeningProcess();
+    void ClosingProcess();
+
+    float GetLayerDepth(); //. 5.0f
+
+    void ReloadRmlTheme();
+
+private:
+    bool BtnProcess();
+
+    void UpdateGuildMasterMode(GATEMAN_BUTTON button);
+    void UpdateGuildMemeberMode(GATEMAN_BUTTON button);
+    void UpdateGuestMode(GATEMAN_BUTTON button);
+
+    void BuildRmlUi();
+    void SyncRmlModel();
+    void SyncContent();
+};
 }
 
 #endif // !defined(AFX_NEWGATEMANWINDOW_H__F53A1778_D5C8_4EB6_BE74_0A9A16D1FF26__INCLUDED_)

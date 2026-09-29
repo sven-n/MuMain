@@ -1,0 +1,37 @@
+/* Modern theme for CBattleSoccerScore: the same two lines at the original's place above the bottom
+   HUD's right end, on the modern panel surface instead of the figure-ground art (geometry as the
+   legacy theme, see battle_soccer_score.rml). */
+
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 131px; height: 70px; font-family: "token(font-body)"; background-color: token(surface-panel); border: 1px token(border-frame); }
+#back { display: none; }
+
+.team { display: block; position: absolute; left: 30px; width: 100px; height: 8px; }
+.team-text {
+	display: block;
+	position: absolute;
+	top: 0;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #0096ff;
+	background-color: #00000080;
+}
+.team.red .team-text { color: #ff3c00; }
+.team-score { left: 0; }
+.team-name { left: 33px; }
+
+.mark { position: absolute; left: 21px; top: 0; width: 8px; height: 8px; }
+.mark-cell { display: block; float: left; width: 1px; height: 1px; }

@@ -8,72 +8,82 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Widgets/Window/Button.h"
+#include "UI/Events/CursedTempleEnterRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
-    class CCursedTempleEnter : public CObject
+// The Illusion Temple entry window. cursed_temple_enter.rml draws it; C++ keeps the level check,
+// the member count, Escape and the entry request.
+class CCursedTempleEnter : public CObject
+{
+public:
+    static constexpr float CURSEDTEMPLE_ENTER_WINDOW_WIDTH = 230.0f;
+    static constexpr float CURSEDTEMPLE_ENTER_WINDOW_HEIGHT = 252.0f;
+
+    enum
     {
-    public:
-
-        static constexpr float CURSEDTEMPLE_ENTER_WINDOW_WIDTH = 230.0f;
-        static constexpr float CURSEDTEMPLE_ENTER_WINDOW_HEIGHT = 252.0f;
-
-        enum
-        {
-            CURSEDTEMPLEENTER_OPEN = 0,
-            CURSEDTEMPLEENTER_EXIT,
-            CURSEDTEMPLEENTER_MAXBUTTONCOUNT,
-        };
-
-    public:
-        CCursedTempleEnter();
-        virtual ~CCursedTempleEnter();
-
-        bool Create(CManager* pNewUIMng, int x, int y);
-
-    private:
-        void SetButtonInfo();
-
-    public:
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-
-    public:
-        bool CheckEnterLevel(int& enterlevel);
-        bool CheckEnterItem(ITEM* p, int enterlevel);
-        bool CheckInventory(BYTE& itempos, int enterlevel);
-
-    public:
-        bool Render();
-
-    private:
-        void RenderFrame();
-        void RenderText();
-        void RenderButtons();
-
-    public:
-        void SetPos(int x, int y);
-
-    public:
-        const POINT& GetPos() const;
-        float GetLayerDepth();	//. 5.0f
-
-    public:
-        void SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo);
-        void ReceiveCursedTempleEnterInfo(const BYTE* cursedtempleinfo);
-
-    private:
-        void Initialize();
-        void Destroy();
-
-    private:
-        CManager* m_pNewUIMng;
-        POINT					m_Pos;
-        CButton			m_Button[CURSEDTEMPLEENTER_MAXBUTTONCOUNT];
-        int						m_EnterTime;
-        int						m_EnterCount;
+        CURSEDTEMPLEENTER_OPEN = 0,
+        CURSEDTEMPLEENTER_EXIT,
+        CURSEDTEMPLEENTER_MAXBUTTONCOUNT,
     };
+
+public:
+    CCursedTempleEnter();
+    virtual ~CCursedTempleEnter();
+
+    bool Create(CManager* pNewUIMng, int x, int y);
+
+public:
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool Update();
+
+public:
+    bool CheckEnterLevel(int& enterlevel);
+    bool CheckEnterItem(ITEM* p, int enterlevel);
+    bool CheckInventory(BYTE& itempos, int enterlevel);
+
+public:
+    bool Render();
+
+    void ReloadRmlTheme();
+
+private:
+    void BuildRmlUi();
+    void SyncRmlModel();
+    void SyncLines();
+
+public:
+    void SetPos(int x, int y);
+
+public:
+    const POINT& GetPos() const;
+    float GetLayerDepth(); //. 5.0f
+
+public:
+    void SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo);
+    void ReceiveCursedTempleEnterInfo(const BYTE* cursedtempleinfo);
+
+private:
+    void Initialize();
+    void Destroy();
+
+private:
+    CManager* m_pNewUIMng;
+    POINT m_Pos;
+    RmlModelBinder<CursedTempleEnterRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    bool m_PendingEnter = false;
+    bool m_PendingClose = false;
+    int m_EnterTime;
+    int m_EnterCount;
+};
 
     inline
         float CCursedTempleEnter::GetLayerDepth()

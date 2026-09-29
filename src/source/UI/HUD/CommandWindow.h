@@ -4,14 +4,17 @@
 
 #pragma once
 
-#include "UI/Inventory/MyInventory.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/HUD/CommandWindowRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/Scaling/UITransform.h"
+#include "Engine/Object/ZzzCharacter.h"
 
-#define MAX_COMMAND_BTN (12)
-
-#define COMMAND_BTN_INTERVAL_SIZE	(1)
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
@@ -19,19 +22,6 @@ namespace mu::ui::window
     {
     public:
         static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
-
-        enum eIMAGE_LIST
-        {
-            // Base Window (Reference)
-            IMAGE_COMMAND_BASE_WINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,				//. newui_msgbox_back.jpg
-            IMAGE_COMMAND_BASE_WINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,			//. newui_item_back01.tga	(190,64)
-            IMAGE_COMMAND_BASE_WINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,			//. newui_item_back02-l.tga	(21,320)
-            IMAGE_COMMAND_BASE_WINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,		//. newui_item_back02-r.tga	(21,320)
-            IMAGE_COMMAND_BASE_WINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,		//. newui_item_back03.tga	(190,45)
-            IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,		//. newui_exit_00.tga
-            IMAGE_COMMAND_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,						//. newui_btn_empty.tga
-            IMAGE_COMMAND_SELECTID_BG = BITMAP_COMMAND_WINDOW_BEGIN,								//. newUI_cursorid_wnd.jpg	(128,32)
-        };
 
         enum eCOMMAND_WINDOW_SIZE
         {
@@ -45,14 +35,16 @@ namespace mu::ui::window
         CManager* m_pNewUIMng;
         POINT						m_Pos;
 
-        // RadioGroupButton
-        CButton				m_BtnCommand[MAX_COMMAND_BTN];
-        // Exit Button
-        CButton				m_BtnExit;
         int							m_iCurSelectCommand;
         int							m_iCurMouseCursor;
         bool						m_bSelectedChar;
         bool						m_bCanCommand;
+
+        RmlModelBinder<CommandWindowRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        // A button press, queued by RmlUi's click and run from Update(), outside RmlUi's own
+        // event dispatch (Special opens another window).
+        int m_PendingCommand = COMMAND_NONE;
 
     public:
         CCommandWindow();
@@ -68,7 +60,7 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        bool BtnProcess();
+        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 4.6f
 
@@ -92,13 +84,13 @@ namespace mu::ui::window
         bool CommandFollow(int iSelectedChaIndex);
         int CommandDual(CHARACTER* pSelectedCha);
     private:
-        void LoadImages();
-        void UnloadImages();
-        void InitButtons();
-        void RenderBaseWindow();
+        void BuildRmlUi();
+        void SyncRmlModel();
+        void SyncTitle(const UI::Scaling::Transform& transform);
+        void SyncButtons(const UI::Scaling::Transform& transform);
+        void SyncTarget();
+        void PressCommandButton(int command);
         void RunCommand();
-        void SelectCommand();
-        void SetBtnState(int iBtnType, bool bStateDown);
     };
 };
 

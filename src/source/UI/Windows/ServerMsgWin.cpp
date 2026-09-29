@@ -9,7 +9,19 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/UsefulDef.h"
 
-#define WE_CENTER_SPR_POS 3
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+namespace
+{
+// A side piece of the frame (server_ex02, 3 x 4) is drawn once per step, five steps per line.
+constexpr int kSideStepHeight = 4;
+} // namespace
 
 CServerMsgWin g_ServerMsgWin;
 
@@ -25,26 +37,14 @@ void CServerMsgWin::Create()
 {
     Release();
 
-    // 5-part composite background.
-    SImgInfo aiiDescBg[BG_MAX] = {{BITMAP_LOG_IN + 11, 0, 0, 4, 4},
-                                  {BITMAP_LOG_IN + 12, 0, 0, 512, 6},
-                                  {BITMAP_LOG_IN + 12, 0, 6, 512, 6},
-                                  {BITMAP_LOG_IN + 13, 0, 0, 3, 4},
-                                  {BITMAP_LOG_IN + 13, 3, 0, 3, 4}};
-
-    m_aSprBg[BG_CENTER].Create(&aiiDescBg[0], 0, 0, true);
-    m_aSprBg[BG_TOP].Create(&aiiDescBg[1]);
-    m_aSprBg[BG_BOTTOM].Create(&aiiDescBg[2]);
-    m_aSprBg[BG_LEFT].Create(&aiiDescBg[3], 0, 0, true);
-    m_aSprBg[BG_RIGHT].Create(&aiiDescBg[4], 0, 0, true);
-
-    m_aSprBg[BG_CENTER].SetSize(m_aSprBg[BG_TOP].GetWidth() - WE_CENTER_SPR_POS * 2, 0, X);
-
     m_ptPos.x = m_ptPos.y = 0;
     m_nBgSideNow = 1;
 
     ::memset(m_aszMsg, 0, sizeof(wchar_t) * SMW_MSG_LINE_MAX * SMW_MSG_ROW_MAX);
     m_nMsgLine = 0;
+
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_MESSAGE, this);
     Show(false);
@@ -52,28 +52,16 @@ void CServerMsgWin::Create()
 
 void CServerMsgWin::Release()
 {
-    // Reset the base CObject visibility flag directly (not this class's own Show(), which would
-    // also touch the sprites below after they're already gone) -- every sibling window released
-    // alongside this one at the character-select -> main-scene transition
-    // (CSceneUICoordinator::CreateMainScene()) explicitly hides itself in its own Release(); this
-    // one didn't, so if a server notice was showing at that exact moment, the render sweep kept
-    // calling this window's own Render() against now-released sprites (plus the still-cached
-    // message text) for a frame or two afterward -- a stray flash at whatever position this
-    // window was last shown at (upper-left, see CSceneUICoordinator's own SetPosition call).
+    // Hidden at once (not on the next Update(), which a released scene no longer runs): every
+    // sibling window released at the character-select -> main-scene transition
+    // (CSceneUICoordinator::CreateMainScene()) hides itself in its own Release(), so a server
+    // notice showing at that moment must not linger either.
     mu::ui::window::CObject::Show(false);
-    for (auto& sprite : m_aSprBg)
-        sprite.Release();
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, false);
 }
 
 void CServerMsgWin::SetPosition(int nXCoord, int nYCoord)
 {
-    m_aSprBg[BG_TOP].SetPosition(nXCoord, nYCoord);
-    m_aSprBg[BG_CENTER].SetPosition(nXCoord + WE_CENTER_SPR_POS, nYCoord + WE_CENTER_SPR_POS);
-    m_aSprBg[BG_LEFT].SetPosition(nXCoord, nYCoord + m_aSprBg[BG_TOP].GetHeight());
-    m_aSprBg[BG_RIGHT].SetPosition(nXCoord + m_aSprBg[BG_TOP].GetWidth() - m_aSprBg[BG_RIGHT].GetWidth(),
-                                   m_aSprBg[BG_LEFT].GetYPos());
-    m_aSprBg[BG_BOTTOM].SetPosition(nXCoord, m_aSprBg[BG_LEFT].GetYPos() + m_aSprBg[BG_LEFT].GetHeight());
-
     m_ptPos.x = nXCoord;
     m_ptPos.y = nYCoord;
 }
@@ -82,30 +70,14 @@ int CServerMsgWin::SetLine(int nLine)
 {
     nLine = LIMIT(nLine, 1, SMW_MSG_LINE_MAX * 5);
 
-    if (m_nBgSideNow == nLine)
-        return m_nBgSideNow;
-
-    int nOldLine = m_nBgSideNow;
+    const int nOldLine = m_nBgSideNow;
     m_nBgSideNow = nLine;
-
-    int nBgSideHeight = m_aSprBg[BG_LEFT].GetTexHeight() * m_nBgSideNow;
-
-    m_aSprBg[BG_LEFT].SetSize(0, nBgSideHeight, Y);
-    m_aSprBg[BG_RIGHT].SetSize(0, nBgSideHeight, Y);
-
-    m_aSprBg[BG_BOTTOM].SetPosition(0, m_aSprBg[BG_LEFT].GetYPos() + m_aSprBg[BG_LEFT].GetHeight(), Y);
-
-    const int nHeight = m_aSprBg[BG_TOP].GetHeight() + m_aSprBg[BG_BOTTOM].GetHeight() + nBgSideHeight;
-    m_aSprBg[BG_CENTER].SetSize(0, nHeight - WE_CENTER_SPR_POS * 2, Y);
-
     return nOldLine;
 }
 
 void CServerMsgWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    for (auto& sprite : m_aSprBg)
-        sprite.Show(bShow);
 }
 
 void CServerMsgWin::AddMsg(wchar_t* pszMsg)
@@ -126,16 +98,85 @@ void CServerMsgWin::AddMsg(wchar_t* pszMsg)
 
 bool CServerMsgWin::Render()
 {
-    for (auto& sprite : m_aSprBg)
-        sprite.Render();
-
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
-
-    // LayoutMode::Legacy keeps the transform identity here, so real-pixel coords need no rescaling.
-    for (int i = 0; i < m_nMsgLine; ++i)
-        g_pRenderText->RenderText(m_ptPos.x + 11, m_ptPos.y + 12 + i * 20, m_aszMsg[i]);
-
+    // Nothing native left: the frame and the lines are RmlUi. Kept because CObject requires the
+    // override.
     return true;
+}
+
+bool CServerMsgWin::Update()
+{
+    SyncRmlModel();
+    return true;
+}
+
+void CServerMsgWin::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_msg",
+                                                 [](Rml::DataModelConstructor& c, ServerMsgRmlModel& model)
+                                                 {
+                                                     c.Bind("root_x", &model.rootX);
+                                                     c.Bind("root_y", &model.rootY);
+                                                     c.Bind("root_scale", &model.rootScale);
+                                                     c.Bind("text_px", &model.textPx);
+                                                     c.Bind("side_height", &model.sideHeight);
+                                                     c.RegisterArray<std::vector<Rml::String>>();
+                                                     c.Bind("lines", &model.lines);
+                                                 });
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc =
+        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_msg.rml");
+}
+
+void CServerMsgWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void CServerMsgWin::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 10: over the character-list scene's other windows.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    // LayoutMode::Legacy keeps the transform identity here: real pixels, as the original drew.
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_ptPos);
+    ServerMsgRmlModel& model = m_RmlBinder.GetModel();
+    const float textPx =
+        UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Fixed, UI::Scaling::GetActiveTransform());
+    if (model.textPx != textPx)
+    {
+        model.textPx = textPx;
+        m_RmlBinder.MarkDirty("text_px");
+    }
+    const float sideHeight = static_cast<float>(kSideStepHeight * m_nBgSideNow);
+    if (model.sideHeight != sideHeight)
+    {
+        model.sideHeight = sideHeight;
+        m_RmlBinder.MarkDirty("side_height");
+    }
+    std::vector<Rml::String> lines;
+    for (int i = 0; i < m_nMsgLine; ++i)
+        lines.push_back(StringUtils::WideToNarrow(m_aszMsg[i]));
+    if (model.lines != lines)
+    {
+        model.lines = std::move(lines);
+        m_RmlBinder.MarkDirty("lines");
+    }
 }

@@ -8,6 +8,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -16,8 +17,6 @@ CExchangeLuckyCoin::CExchangeLuckyCoin()
 {
     m_pNewUIMng = NULL;
     memset(&m_Pos, 0, sizeof(POINT));
-    memset(&m_TextPos, 0, sizeof(POINT));
-    memset(&m_FirstBtnPos, 0, sizeof(POINT));
 }
 
 CExchangeLuckyCoin::~CExchangeLuckyCoin()
@@ -35,26 +34,8 @@ bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    // Exit Button
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT, true);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + ((EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2) - (MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2)), m_Pos.y + 360,
-        MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT);
-    m_BtnExit.ChangeText(&I18N::Game::Close388);
-
-    // Exchange Button
-    m_BtnExchange[0].ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, true);
-    m_BtnExchange[0].SetFont(g_hFontBold);
-    m_BtnExchange[0].ChangeText(&I18N::Game::Exchange10Coins);
-
-    m_BtnExchange[1].ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, true);
-    m_BtnExchange[1].SetFont(g_hFontBold);
-    m_BtnExchange[1].ChangeText(&I18N::Game::Exchange20Coins);
-
-    m_BtnExchange[2].ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, true);
-    m_BtnExchange[2].SetFont(g_hFontBold);
-    m_BtnExchange[2].ChangeText(&I18N::Game::Exchange30Coins);
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
 
     Show(false);
 
@@ -63,7 +44,7 @@ bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
 
 void CExchangeLuckyCoin::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -76,24 +57,6 @@ void CExchangeLuckyCoin::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-    m_TextPos.x = m_Pos.x;
-    m_TextPos.y = m_Pos.y + 80;
-
-    SetBtnPos(m_Pos.x + ((EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2) - (MSGBOX_BTN_EMPTY_WIDTH / 2)), m_Pos.y + 220);
-
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-
-    for (int i = 0; i < MAX_EXCHANGE_BTN; i++)
-    {
-        int iVal = EXCHANGE_BTN_VAL * i;
-        m_BtnExchange[i].ChangeButtonInfo(m_FirstBtnPos.x, m_FirstBtnPos.y + iVal, MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT);
-    }
-}
-
-void CExchangeLuckyCoin::SetBtnPos(int x, int y)
-{
-    m_FirstBtnPos.x = x;
-    m_FirstBtnPos.y = y;
 }
 
 bool CExchangeLuckyCoin::UpdateMouseEvent()
@@ -123,93 +86,71 @@ bool CExchangeLuckyCoin::UpdateKeyEvent()
 
 bool CExchangeLuckyCoin::Update()
 {
+    SyncView();
+
+    // A click RmlUi reported (the original's button handling in BtnProcess()).
+    const int pressed = m_View.TakePressedButton();
     if (!IsVisible())
         return true;
-
+    if (pressed >= 0 && pressed < MAX_EXCHANGE_BTN)
+    {
+        LockExchangeBtn();
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(static_cast<BYTE>(10 * (pressed + 1)));
+    }
+    else if (pressed == MAX_EXCHANGE_BTN)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
+    }
     return true;
 }
 
 bool CExchangeLuckyCoin::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-    RenderTexts();
-    RenderBtn();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
+    // requires the override.
     return true;
 }
 
-void CExchangeLuckyCoin::RenderFrame()
+void CExchangeLuckyCoin::SyncView()
 {
-    RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK, m_Pos.x, m_Pos.y, float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH), float(EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT));
-    RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP, m_Pos.x, m_Pos.y, float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT, m_Pos.x + float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT) - 45.f, float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH), 45.f);
-}
-
-void CExchangeLuckyCoin::RenderTexts()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 25, I18N::Game::LuckyCoinExchange, 190, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->RenderText(m_TextPos.x, m_Pos.y + 200, I18N::Game::Exchange1940, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->RenderText(m_TextPos.x, m_TextPos.y, I18N::Game::Warning, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    int iTextPosy = m_TextPos.y + (EXCHANGE_TEXT_VAL * 2);
-    g_pRenderText->RenderText(m_TextPos.x, iTextPosy, I18N::Game::ExchangedLuckyCoins, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-    iTextPosy += EXCHANGE_TEXT_VAL;
-    g_pRenderText->RenderText(m_TextPos.x, iTextPosy, I18N::Game::WillNotBeReturned, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
-}
-
-void CExchangeLuckyCoin::RenderBtn()
-{
-    for (int i = 0; i < MAX_EXCHANGE_BTN; i++)
+    if (IsVisible())
     {
-        m_BtnExchange[i].Render();
+        // The original's RenderTexts(): the title and "Exchange" bold white, the warning bold
+        // yellow at y 80, the notice white two and three lines (14 units) below it.
+        const DWORD white = RGBA(255, 255, 255, 255);
+        const float width = EXCHANGE_LUCKYCOIN_WINDOW_WIDTH;
+        const float textTop = 80.f;
+        m_View.SetTexts({{I18N::Game::LuckyCoinExchange, 0.f, 25.f, width, true, white},
+                         {I18N::Game::Exchange1940, 0.f, 200.f, width, true, white},
+                         {I18N::Game::Warning, 0.f, textTop, width, true, RGBA(255, 255, 0, 255)},
+                         {I18N::Game::ExchangedLuckyCoins, 0.f, textTop + EXCHANGE_TEXT_VAL * 2, width, false, white},
+                         {I18N::Game::WillNotBeReturned, 0.f, textTop + EXCHANGE_TEXT_VAL * 3, width, false, white}});
+
+        // The original's buttons: the three 108 x 29 newui_btn_empty exchange buttons with a bold
+        // label from y 220, 33 units apart; Close, 64 x 29 newui_btn_empty_small, at y 360.
+        const float exchangeX = EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2 - MSGBOX_BTN_EMPTY_WIDTH / 2;
+        const float closeX = EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2 - MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2;
+        std::vector<EventItemEntryView::Button> buttons;
+        const wchar_t* labels[MAX_EXCHANGE_BTN] = {I18N::Game::Exchange10Coins, I18N::Game::Exchange20Coins,
+                                                   I18N::Game::Exchange30Coins};
+        for (int i = 0; i < MAX_EXCHANGE_BTN; i++)
+        {
+            buttons.push_back({labels[i], exchangeX, 220.f + EXCHANGE_BTN_VAL * i, m_ExchangeLocked,
+                               MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT, true, "wide"});
+        }
+        buttons.push_back({I18N::Game::Close388, closeX, 360.f, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
+                           MSGBOX_BTN_EMPTY_HEIGHT, false, "small"});
+        m_View.SetButtons(buttons);
     }
-    m_BtnExit.Render();
+    m_View.Sync(IsVisible(), m_Pos);
 }
 
 bool CExchangeLuckyCoin::BtnProcess()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
+    // Top-right corner close "X" (shared frame). Hides + swallows the click. The exchange and
+    // Close buttons are RmlUi's (see Update()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN))
         return true;
-
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
-        return true;
-    }
-
-    if (m_BtnExchange[0].UpdateMouseEvent() == true)
-    {
-        LockExchangeBtn();
-        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(10);
-    }
-
-    if (m_BtnExchange[1].UpdateMouseEvent() == true)
-    {
-        LockExchangeBtn();
-        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(20);
-    }
-
-    if (m_BtnExchange[2].UpdateMouseEvent() == true)
-    {
-        LockExchangeBtn();
-        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(30);
-    }
 
     return false;
 }
@@ -236,40 +177,10 @@ void CExchangeLuckyCoin::ClosingProcess()
 
 void CExchangeLuckyCoin::LockExchangeBtn()
 {
-    for (int i = 0; i < 3; i++)
-    {
-        m_BtnExchange[i].Lock();
-        m_BtnExchange[i].ChangeTextColor(0xff808080);
-    }
+    m_ExchangeLocked = true;
 }
 
 void CExchangeLuckyCoin::UnLockExchangeBtn()
 {
-    for (int i = 0; i < 3; i++)
-    {
-        m_BtnExchange[i].UnLock();
-        m_BtnExchange[i].ChangeTextColor(0xffffffff);
-    }
-}
-
-void CExchangeLuckyCoin::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT, GL_LINEAR);	// Exit Button
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, GL_LINEAR);				// Exchange Button
-}
-
-void CExchangeLuckyCoin::UnloadImages()
-{
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK);
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP);
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT);
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT);
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT);		// Exit Button
-    DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN);			// Exchange Button
+    m_ExchangeLocked = false;
 }

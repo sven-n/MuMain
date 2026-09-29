@@ -8,9 +8,10 @@
    old sprite geometry to fit the real 38dp metal header rail; top-anchored buttons shift down by
    the same 31dp, bottom-anchored ones are unaffected since the growth is all at the top.
 
-   #btn_option/#btn_close's `bottom` values are the old "distance from panel bottom to button
-   TOP" (86/52) minus the button's 30dp height -- CSS `bottom` measures to the BOTTOM edge, so
-   using 86/52 directly would overlap #btn_select_server above. */
+   A .btn is 32dp tall (30dp content + its 1dp border; RmlUi sizes the content box). The buttons
+   sit 4dp apart: #btn_exit_game/#btn_select_server from the top, #btn_option/#btn_close from the
+   bottom, and .compact (no #btn_select_server, login scene) is 36dp shorter so the gap between
+   #btn_exit_game and #btn_option stays 4dp. */
 #panel {
 	width: 213dp;
 	height: 218dp;
@@ -29,10 +30,10 @@
 		inset 0 0 0 3dp rgba(120, 115, 90, 190);
 }
 #panel.compact {
-	height: 186dp;
+	height: 182dp;
 }
 
-#btn_exit_game    { left: 52dp; top: 64dp; }
-#btn_select_server{ left: 52dp; top: 98dp; }
+#btn_exit_game    { left: 52dp; top: 58dp; }
+#btn_select_server{ left: 52dp; top: 94dp; }
 #btn_option       { left: 52dp; bottom: 56dp; }
-#btn_close        { left: 52dp; bottom: 22dp; }
+#btn_close        { left: 52dp; bottom: 20dp; }

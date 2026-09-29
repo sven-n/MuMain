@@ -1,0 +1,58 @@
+<rml>
+<head>
+	<title>Duel Watch</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="duel_watch.rcss"/>
+</head>
+<body>
+	<!-- Doorkeeper Titus's colosseum list (CDuelWatchWindow), docked right: four colosseums, each
+	     with its duel (or "No duel on.") and a Watch button, enabled only for a duel open to
+	     spectators. root_x/root_y/root_scale come from the dock transform; everything inside is
+	     reference px; text is .sharp-text at the native size, counter-scaled out of the panel.
+	     C++ keeps the rooms (g_DuelMgr), the corner close, Escape and the join request; a Watch
+	     click is queued with duelwatch_join. -->
+	<div id="panel" data-model="duel_watch" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="bold_text_px + 'px'"
+		      data-style-width="(160 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
+		<span class="sharp-text" id="subtitle" data-style-font-size="subtitle_px + 'px'"
+		      data-style-width="(190 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{subtitle}}</span>
+
+		<div class="line" style="top: 130px;"></div>
+		<div class="line" style="top: 220px;"></div>
+		<div class="line" style="top: 310px;"></div>
+
+		<div class="room" data-for="room : rooms" data-style-top="(room.index * 90) + 'px'">
+			<span class="sharp-text room-heading" data-style-font-size="bold_text_px + 'px'"
+			      data-style-width="(190 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{room.heading}}</span>
+			<span class="sharp-text room-vs" data-if="room.running" data-style-font-size="text_px + 'px'"
+			      data-style-width="(190 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{vs_text}}</span>
+			<span class="sharp-text room-player room-player-1" data-if="room.running"
+			      data-style-font-size="room.player1_px + 'px'" data-style-width="(70 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{room.player1}}</span>
+			<span class="sharp-text room-player room-player-2" data-if="room.running"
+			      data-style-font-size="room.player2_px + 'px'" data-style-width="(70 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{room.player2}}</span>
+			<span class="sharp-text room-empty" data-if="!room.running" data-style-font-size="text_px + 'px'"
+			      data-style-width="(190 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{no_duel_text}}</span>
+			<div class="watch-btn" data-class-enabled="room.joinable" data-event-click="duelwatch_join(room.index)">
+				<span class="sharp-text watch-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(53 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{watch_text}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

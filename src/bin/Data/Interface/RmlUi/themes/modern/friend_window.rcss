@@ -1,0 +1,66 @@
+/* Modern theme for the friends family's windows (friend_window.rml): the same parts and geometry
+   as the legacy theme (reference px inside #window), drawn as a flat modern panel -- surfaces and
+   borders in the modern tokens, flat buttons, scroll bar and check boxes; the title bar and the
+   control buttons keep the window art. */
+
+@spritesheet fw-size-sheet
+{
+	src: "../../../win_size.jpg";
+	fw-minimize: 0px 0px 9px 9px;
+	fw-maximize: 9px 0px 9px 9px;
+	fw-restore: 9px 9px 9px 9px;
+	fw-close: 0px 9px 9px 9px;
+}
+@spritesheet fw-resize-sheet { src: "../../../win_resize.tga"; fw-resize-grip: 0px 0px 9px 9px; }
+@spritesheet fw-mail-sheet
+{
+	src: "../../../win_mail.tga";
+	fw-letter-unread: 0px 0px 13px 9px;
+	fw-letter-read: 0px 9px 13px 10px;
+}
+
+#window { position: absolute; width: 0; height: 0; pointer-events: none; transform-origin: left top; font-family: "token(font-body)"; }
+.slot { display: block; }
+.part { position: absolute; }
+
+.window-back { background-color: token(surface-panel); }
+.frame-outer, .frame-inner, .frame-corner { background-color: token(border-frame); }
+.frame-band, .panel { background-color: token(surface-recessed); }
+.separator, .scroll-track, .header-divider { background-color: token(border-frame); }
+.tab-on, .list-header { background-color: token(surface-raised); }
+.tab-off { background-color: token(surface-recessed); }
+.row-selected, .row-selected.after-check-box { background-color: token(accent-steel); }
+.check-edge { background-color: token(border-frame); }
+.check-mark { background-color: token(accent-gold); }
+.title-bar { background-color: token(surface-raised); }
+.title-edge-light, .title-edge, .title-edge-back, .title-edge-right-top, .title-edge-right,
+.title-edge-right-bottom { background-color: token(border-frame); }
+
+.control-minimize { decorator: image(fw-minimize); }
+.control-maximize { decorator: image(fw-maximize); }
+.control-restore { decorator: image(fw-restore); }
+.control-close { decorator: image(fw-close); }
+.resize-grip { decorator: image(fw-resize-grip); }
+.button { background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm)px; }
+.button.pressed { background-color: token(accent-steel); }
+.button.disabled { background-color: token(surface-recessed); }
+.scroll-up, .scroll-down { background-color: token(surface-raised); border: 1px token(border-frame); }
+.scroll-up.pressed, .scroll-down.pressed { background-color: token(accent-steel); }
+.scroll-thumb { background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+.scroll-thumb-top, .scroll-thumb-bottom { display: none; }
+.letter-unread { decorator: image(fw-letter-unread); }
+.letter-read { decorator: image(fw-letter-read); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+/* Native text keeps its spaces (the server column's "%2d Server" is right-aligned by one). */
+.fw-text { white-space: pre; }
+.fw-text.bold { font-weight: bold; }
+.fw-text.centred { text-align: center; }
+.fw-text.clip { overflow: hidden; }
+
+.field-back { background-color: token(surface-recessed); }
+.fw-field { display: none; position: absolute; padding: 0; border-width: 0; background-color: transparent;
+	pointer-events: none; text-align: left; white-space: pre; font-family: "token(font-body)"; }
+.fw-field.shown { display: block; }
+.fw-field selection { color: token(surface-control); background-color: token(text-selected); }
+.fw-field-multiline { white-space: pre-wrap; overflow-y: auto; }

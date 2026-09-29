@@ -1,0 +1,55 @@
+/* Modern theme for a native message box drawn by MessageBoxView: the modern panel surface and
+   buttons. Geometry is the legacy one (reference px). */
+
+#panel { position: absolute; transform-origin: left top; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
+#back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 230px;
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+#box_top, .box-middle, #box_bottom, #box_divider { display: none; }
+.box-separator { position: absolute; left: 13px; width: 205px; height: 1px; background-color: token(border-frame); }
+
+#progress_back { position: absolute; left: 35px; width: 160px; height: 18px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#progress_bar { position: absolute; left: 40px; height: 8px; background-color: token(accent-steel); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; transform-origin: left top; }
+.box-line { white-space: pre; }
+.box-line.bold { font-weight: bold; }
+
+.box-btn {
+	display: block;
+	position: absolute;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.box-btn:hover { border-color: token(accent-steel-hover); }
+.box-btn:active { background-color: token(surface-recessed); }
+.box-btn.disabled { background-color: token(surface-recessed); }
+.box-label { color: token(text-primary); }
+.box-btn.disabled .box-label { color: token(text-muted); }
+
+/* CGemIntegrationDisjointMsgBox's list: the legacy geometry in the modern tokens. */
+#panel.list-shown { pointer-events: none; }
+#list { position: absolute; pointer-events: none; }
+#list_box, .list-scroll-up, .list-scroll-down, .list-track, .list-thumb, .list-thumb-top, .list-thumb-bottom, .list-row {
+	position: absolute;
+	pointer-events: none;
+}
+#list_box { left: -1px; top: -1px; background-color: token(surface-recessed); }
+.list-scroll-up, .list-scroll-down { width: 13px; height: 13px; background-color: token(surface-raised); border: 1px token(border-frame); }
+.list-scroll-up { top: -1px; }
+.list-scroll-up.pressed, .list-scroll-down.pressed { background-color: token(accent-steel); }
+.list-track { width: 1px; background-color: token(border-frame); }
+.list-thumb, .list-thumb-top, .list-thumb-bottom { width: 11px; }
+.list-thumb { background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+.list-thumb-top, .list-thumb-bottom { display: none; }
+.list-row { left: 0; height: 13px; }
+.list-row.selected { background-color: token(accent-steel); }
+.list-row-text { left: 6px; top: 3px; white-space: pre; color: token(text-primary); }

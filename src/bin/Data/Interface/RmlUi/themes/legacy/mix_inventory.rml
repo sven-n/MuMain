@@ -5,17 +5,20 @@
 	<link type="text/rcss" href="mix_inventory.rcss"/>
 </head>
 <body data-model="mix_inventory">
-	<!-- Window frame/title/Mix button/recipe-result content are all RmlUi now
-	     (SyncMixContentModel(), MixInventory.cpp). Only the inventory grid and the socket list box
-	     (a real interactive widget, not presentation) stay fully native. Background lives in
-	     mix_inventory_bg.rml instead, since it must paint behind the native 3D icons. -->
+	<!-- Window frame/title/Mix button/recipe-result content and the socket list box are all RmlUi
+	     now (SyncMixContentModel(), SyncSocketListModel(), MixInventory.cpp). Only the inventory
+	     grid stays fully native. Background lives in mix_inventory_bg.rml instead, since it must
+	     paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<!-- Text laid out where native RenderFrame()/RenderMixDescriptions() drew it: the title a
 		     little lower when there is no tax line, the recipe block at 49, the prediction/source/
 		     status list at 203 (15 apart, advice after one blank line), the descriptions at their own
-		     native offsets (d.top). -->
+		     native offsets (d.top). In the socket mixes the list is 10 apart: the seed sphere
+		     application's wrapped prediction and sources (seven rows, eight at 800x600) end at the
+		     socket prompt at 280 instead of running into it and the socket list, as they do in the
+		     original. -->
 		<span class="sharp-text" id="title" data-class-low="!show_tax_rate"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
@@ -40,14 +43,14 @@
 		</div>
 
 		<div class="mix-list sharp-text" data-class-hidden="!show_recipe"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
 			<div class="mix-list-line mix-prediction" data-class-hidden="!show_prediction"><span
 			     class="mix-text">{{prediction_text}}</span></div>
 			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text"
 			     data-style-color="s.color">{{s.text}}</span></div>
 			<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="s : status_lines"><span class="mix-text"
 			     data-style-color="s.color">{{s.text}}</span></div>
-			<div class="mix-advice" data-style-margin-top="(15 * root_scale) + 'px'">
+			<div class="mix-advice" data-style-margin-top="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
 				<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="a : advice_lines"><span class="mix-text"
 				     data-style-color="a.color">{{a.text}}</span></div>
 			</div>
@@ -64,10 +67,32 @@
 		<div class="sharp-text mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">{{socket_prompt_text}}</div>
 
+		<!-- The socket list of the attach / detach socket mixes (CUISocketListBox::Render()): its box,
+		     a 13 px row per shown line (filled when selected), the new-style scroll bar at its right
+		     edge. The lines and the thumb are hit-tested natively. -->
+		<div data-if="show_socket_list">
+			<div class="socket-list-box" data-style-left="(socket_list_left - 1) + 'px'" data-style-top="(socket_list_top - 1) + 'px'"
+			     data-style-width="(socket_list_width + 1) + 'px'" data-style-height="(socket_list_height + 2) + 'px'"></div>
+			<div class="socket-line" data-for="l : socket_lines" data-class-selected="l.selected"
+			     data-style-left="socket_list_left + 'px'" data-style-top="l.top + 'px'"
+			     data-style-width="(socket_list_width - 12) + 'px'">
+				<span class="sharp-text socket-line-text" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+			</div>
+			<div class="socket-scroll-top" data-style-left="(socket_list_left + socket_list_width - 8) + 'px'"
+			     data-style-top="socket_scroll_top + 'px'"></div>
+			<div class="socket-scroll-mid" data-style-left="(socket_list_left + socket_list_width - 8) + 'px'"
+			     data-style-top="(socket_scroll_top + 3) + 'px'" data-style-height="(socket_scroll_height - 6) + 'px'"></div>
+			<div class="socket-scroll-bottom" data-style-left="(socket_list_left + socket_list_width - 8) + 'px'"
+			     data-style-top="(socket_scroll_top + socket_scroll_height - 3) + 'px'"></div>
+			<div class="socket-thumb" data-class-dragged="socket_thumb_dragged"
+			     data-style-left="(socket_list_left + socket_list_width - 12) + 'px'" data-style-top="socket_thumb_top + 'px'"></div>
+		</div>
+
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-class-locked="mix_locked"
 		     data-event-click="mix_inventory_mix_click"></div>
 		<span class="sharp-text tooltip tooltip-mix"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{mix_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{mix_tooltip}}</span></span>
 	</div>
 </body>
 </rml>

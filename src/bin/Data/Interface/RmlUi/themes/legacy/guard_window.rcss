@@ -1,0 +1,69 @@
+/* Legacy theme for CGuardWindow, reproducing its RenderFrame(), tabs and pages: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the three newui_guild_tab04
+   tabs (56 x 22, one unit apart from (12, 84); the selected one on its second row, its label white,
+   the others (181, 181, 181)), the texts in their bound fonts and colours, the List tab's
+   newui_item_table03 edges, the backdrops and lines' boxes in their bound colours, the scroll track
+   (newui_scrollbar_up / m / down) and newui_scroll_on thumb (tinted (200, 200, 200) while dragged),
+   the 53 x 23 newui_btn_empty_very_small buttons at x 68 (locked ones tinted (100, 100, 100) with a
+   grey label, never hovered), the exit button at (13, 391). Reference px inside #panel. */
+
+@spritesheet gd-tab-sheet
+{
+	src: "../../../newui_guild_tab04.tga";
+	gd-tab-up: 0px 0px 56px 22px;
+	gd-tab-down: 0px 22px 56px 22px;
+}
+@spritesheet gd-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	gd-btn-up: 0px 0px 53px 23px;
+	gd-btn-over: 0px 23px 53px 23px;
+	gd-btn-down: 0px 46px 53px 23px;
+}
+@spritesheet gd-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; gd-edge-top: 0px 0px 1px 14px; }
+@spritesheet gd-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; gd-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet gd-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; gd-edge-left: 0px 0px 14px 1px; }
+@spritesheet gd-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; gd-edge-right: 0px 0px 14px 1px; }
+@spritesheet gd-scroll-top-sheet { src: "../../../newui_scrollbar_up.tga"; gd-scroll-top: 0px 0px 7px 3px; }
+@spritesheet gd-scroll-mid-sheet { src: "../../../newui_scrollbar_m.tga"; gd-scroll-mid: 0px 0px 7px 15px; }
+@spritesheet gd-scroll-bottom-sheet { src: "../../../newui_scrollbar_down.tga"; gd-scroll-bottom: 0px 0px 7px 3px; }
+@spritesheet gd-thumb-sheet { src: "../../../newui_scroll_on.tga"; gd-thumb: 0px 0px 15px 30px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+/* The tabs, the list lines and the scroll thumb are hit-tested natively. */
+#panel { pointer-events: none; }
+
+.gd-tab { position: absolute; top: 84px; width: 56px; height: 22px; decorator: image(gd-tab-up); }
+.gd-tab.selected { decorator: image(gd-tab-down); }
+.gd-tab-label { color: #b5b5b5; }
+.gd-tab.selected .gd-tab-label { color: #ffffff; }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right { position: absolute; }
+.t-edge-top { width: 161px; height: 14px; decorator: image(gd-edge-top); }
+.t-edge-bottom { width: 161px; height: 14px; decorator: image(gd-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(gd-edge-left); }
+.t-edge-right { width: 14px; decorator: image(gd-edge-right); }
+.gd-box { position: absolute; }
+
+.s-top, .s-mid, .s-bottom { position: absolute; left: 167px; width: 7px; }
+.s-top { height: 3px; decorator: image(gd-scroll-top); }
+.s-mid { decorator: image(gd-scroll-mid); }
+.s-bottom { height: 3px; decorator: image(gd-scroll-bottom); }
+.thumb { position: absolute; left: 163px; width: 15px; height: 30px; decorator: image(gd-thumb); }
+.thumb.dragged { image-color: #c8c8c8; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.gd-text.centred { text-align: center; }
+.gd-text.right { text-align: right; }
+.gd-text.bold { font-weight: bold; }
+
+.gd-btn { display: block; position: absolute; left: 68px; width: 53px; height: 23px; decorator: image(gd-btn-up); pointer-events: auto; }
+.gd-btn:hover { decorator: image(gd-btn-over); }
+.gd-btn:active { decorator: image(gd-btn-down); }
+.gd-btn.locked, .gd-btn.locked:hover, .gd-btn.locked:active { decorator: image(gd-btn-up); image-color: #646464; }
+.gd-label { left: 0; text-align: center; color: #ffffff; }
+.gd-btn.locked .gd-label { color: #646464; }
+
+#btn_exit { top: 391px; pointer-events: auto; }
+.tooltip { display: none; bottom: 38px; } /* 429 - 391 */
+#btn_exit:hover ~ .tooltip-exit { display: block; }

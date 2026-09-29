@@ -18,6 +18,18 @@
 #include "Guild/UIGuildInfo.h"
 #include "UI/Events/UIGuardsMan.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -45,44 +57,25 @@ bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    LoadScrollBarImages();
 
-    std::list<const wchar_t* const*> ltext;
-    ltext.push_back(&I18N::Game::Status);
-    ltext.push_back(&I18N::Game::Register);
-    ltext.push_back(&I18N::Game::List);
-
-    m_TabBtn.CreateRadioGroup(3, IMAGE_GUARDWINDOW_TAB_BTN);
-    m_TabBtn.ChangeRadioText(ltext);
+    // The tabs stay a native radio group for their hit tests; guard_window.rml draws them.
+    m_TabBtn.CreateRadioGroup(3, BITMAP_GUILDINFO_BEGIN);
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 84.f, 56, 22);
     m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
 
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_GUARDWINDOW_EXIT_BTN, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
-
-    InitButton(&m_BtnProclaim, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 120, &I18N::Game::Announce);
-    InitButton(&m_BtnRegister, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 200, &I18N::Game::Register);
-    InitButton(&m_BtnGiveUp, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 370, &I18N::Game::AbandonCastleSiege);
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CGuardWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* const* pCaptionSlot)
-{
-    pNewUIButton->ChangeText(pCaptionSlot);
-    pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    pNewUIButton->ChangeButtonImgState(true, IMAGE_GUARDWINDOW_BUTTON, true);
-    pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
-
 void CGuardWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    UnloadScrollBarImages();
 
     if (m_pNewUIMng)
     {
@@ -99,18 +92,10 @@ void CGuardWindow::SetPos(int x, int y)
 
 bool CGuardWindow::UpdateMouseEvent()
 {
-    switch (m_iNumCurOpenTab)
-    {
-    case TAB_SIEGE_INFO:
-        UpdateSeigeInfoTab();
-        break;
-    case TAB_REGISTER:
-        UpdateRegisterTab();
-        break;
-    case TAB_REGISTER_INFO:
-        UpdateRegisterInfoTab();
-        break;
-    }
+    // The guild lists keep their native scrolling and line clicks; the buttons are RmlUi's (see
+    // Update()).
+    if (m_iNumCurOpenTab == TAB_REGISTER_INFO)
+        UpdateRegisterInfoLists();
 
     if (true == BtnProcess())
         return false;
@@ -138,68 +123,50 @@ bool CGuardWindow::UpdateKeyEvent()
 
 bool CGuardWindow::Update()
 {
+    // A button RmlUi reported (the original's CButton handling in UpdateMouseEvent()).
+    const GUARD_BUTTON button = m_PendingButton;
+    m_PendingButton = GUARD_BUTTON_NONE;
+    if (IsVisible() && button == GUARD_BUTTON_EXIT)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUARDSMAN);
+    }
+    else if (IsVisible() && button != GUARD_BUTTON_NONE)
+    {
+        if (m_iNumCurOpenTab == TAB_REGISTER)
+            UpdateRegisterTab(button);
+        else if (m_iNumCurOpenTab == TAB_REGISTER_INFO)
+            UpdateRegisterInfoTab(button);
+    }
+
     if (IsVisible())
     {
-        int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
-
-        if (iNumCurOpenTab == RADIOGROUPEVENT_NONE)
-            return true;
-
-        m_iNumCurOpenTab = iNumCurOpenTab;
-
-        if (iNumCurOpenTab == TAB_REGISTER_INFO)
+        const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
+        if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
         {
-            if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
+            m_iNumCurOpenTab = iNumCurOpenTab;
+
+            if (iNumCurOpenTab == TAB_REGISTER_INFO)
             {
-                SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
-            }
-            else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
-            {
-                SocketClient->ToGameServer()->SendCastleOwnerListRequest();
+                if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
+                {
+                    SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
+                }
+                else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
+                {
+                    SocketClient->ToGameServer()->SendCastleOwnerListRequest();
+                }
             }
         }
     }
+
+    SyncRmlModel();
     return true;
 }
+
 bool CGuardWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    static std::list<const wchar_t* const*> ltext;
-    if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE)
-    {
-        ltext.push_back(&I18N::Game::Status);
-        ltext.push_back(&I18N::Game::Announce);
-        ltext.push_back(&I18N::Game::List);
-    }
-    else
-    {
-        ltext.push_back(&I18N::Game::Status);
-        ltext.push_back(&I18N::Game::Register);
-        ltext.push_back(&I18N::Game::List);
-    }
-    m_TabBtn.ChangeRadioText(ltext);
-
-    m_TabBtn.Render();
-
-    switch (m_iNumCurOpenTab)
-    {
-    case TAB_SIEGE_INFO:
-        RenderSeigeInfoTab();
-        break;
-    case TAB_REGISTER:
-        RenderRegisterTab();
-        break;
-    case TAB_REGISTER_INFO:
-        RenderRegisterInfoTab();
-        break;
-    }
-
-    m_BtnExit.Render();
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame, the tabs, the pages, the lists' lines and the buttons are
+    // RmlUi. Kept because CObject requires the override.
     return true;
 }
 
@@ -224,44 +191,17 @@ float CGuardWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CGuardWindow::LoadImages()
+void CGuardWindow::LoadScrollBarImages()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUARDWINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUARDWINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GUARDWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GUARDWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GUARDWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GUARDWINDOW_EXIT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_guild_tab04.tga", IMAGE_GUARDWINDOW_TAB_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_GUARDWINDOW_BUTTON, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_GUARDWINDOW_TOP_PIXEL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_GUARDWINDOW_BOTTOM_PIXEL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_GUARDWINDOW_LEFT_PIXEL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_GUARDWINDOW_RIGHT_PIXEL, GL_LINEAR);
-
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_GUARDWINDOW_SCROLL_TOP);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
     LoadBitmap(L"Interface\\newui_scrollbar_down.tga", IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
     LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
 }
-void CGuardWindow::UnloadImages()
+
+void CGuardWindow::UnloadScrollBarImages()
 {
-    DeleteBitmap(IMAGE_GUARDWINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_GUARDWINDOW_RIGHT);
-    DeleteBitmap(IMAGE_GUARDWINDOW_LEFT);
-    DeleteBitmap(IMAGE_GUARDWINDOW_TOP);
-    DeleteBitmap(IMAGE_GUARDWINDOW_BACK);
-    DeleteBitmap(IMAGE_GUARDWINDOW_EXIT_BTN);
-    DeleteBitmap(IMAGE_GUARDWINDOW_TAB_BTN);
-    DeleteBitmap(IMAGE_GUARDWINDOW_BUTTON);
-
-    DeleteBitmap(IMAGE_GUARDWINDOW_TOP_PIXEL);
-    DeleteBitmap(IMAGE_GUARDWINDOW_BOTTOM_PIXEL);
-    DeleteBitmap(IMAGE_GUARDWINDOW_RIGHT_PIXEL);
-    DeleteBitmap(IMAGE_GUARDWINDOW_LEFT_PIXEL);
-
     DeleteBitmap(IMAGE_GUARDWINDOW_SCROLL_TOP);
     DeleteBitmap(IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
     DeleteBitmap(IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
@@ -269,75 +209,29 @@ void CGuardWindow::UnloadImages()
     DeleteBitmap(IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
 }
 
-void CGuardWindow::RenderFrame()
-{
-    RenderImage(IMAGE_GUARDWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_GUARDWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_GUARDWINDOW_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GUARDWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GUARDWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-
-    wchar_t szText[256] = { 0, };
-    float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
-    float fLine_y = 13.0f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    mu_swprintf(szText, L"%ls", I18N::Game::GuardNPC);
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
-
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    g_pRenderText->SetFont(g_hFontBold);
-
-    if (m_szOwnerGuildMaster[0])
-    {
-        mu_swprintf(szText, I18N::Game::OfficialSealOfKingS, m_szOwnerGuildMaster);
-    }
-    else
-    {
-        mu_swprintf(szText, I18N::Game::OfficialSealOfKingS, I18N::Game::None);
-    }
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
-
-    ptOrigin.y += 15;
-    if (m_szOwnerGuild[0])
-    {
-        mu_swprintf(szText, I18N::Game::AffiliatedGuildS, m_szOwnerGuild);
-    }
-    else
-    {
-        mu_swprintf(szText, I18N::Game::AffiliatedGuildS, I18N::Game::None);
-    }
-
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
-}
-
 bool CGuardWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GUARDSMAN);
 
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUARDSMAN);
-        return true;
-    }
-
     return false;
 }
 
-void CGuardWindow::UpdateSeigeInfoTab()
+bool CGuardWindow::ProclaimLocked() const
 {
+    // RenderRegisterTab(): the owner guild (or its alliance) cannot announce.
+    return !wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, m_szOwnerGuild) ||
+           !wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, m_szOwnerGuild);
 }
 
-void CGuardWindow::UpdateRegisterTab()
+void CGuardWindow::UpdateRegisterTab(GUARD_BUTTON button)
 {
     switch (m_eTimeType)
     {
     case CASTLESIEGE_STATE_REGSIEGE:
-        if (m_BtnProclaim.UpdateMouseEvent() == true)
+        // The button exists (and is unlocked) only for a guild master not yet registered.
+        if (button == GUARD_BUTTON_PROCLAIM && Hero->GuildStatus == G_MASTER && !g_GuardsMan.HasRegistered() &&
+            !ProclaimLocked())
         {
             if (g_GuardsMan.IsSufficentDeclareLevel())
             {
@@ -355,7 +249,7 @@ void CGuardWindow::UpdateRegisterTab()
         }
         break;
     case CASTLESIEGE_STATE_REGMARK:
-        if (m_BtnRegister.UpdateMouseEvent() == true)
+        if (button == GUARD_BUTTON_REGISTER && g_GuardsMan.HasRegistered() && g_GuardsMan.GetMyMarkCount() > 0)
         {
             int nMarkSlot = g_GuardsMan.GetMyMarkSlotIndex();
             if (nMarkSlot != -1)
@@ -367,13 +261,11 @@ void CGuardWindow::UpdateRegisterTab()
     }
 }
 
-void CGuardWindow::UpdateRegisterInfoTab()
+void CGuardWindow::UpdateRegisterInfoLists()
 {
     if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
     {
-        //g_dwActiveUIID = m_DeclareGuildListBox.GetUIID();
         m_DeclareGuildListBox.DoAction();
-        //g_dwActiveUIID = 0;
         if (PressKey(VK_PRIOR))
             m_DeclareGuildListBox.Scrolling(-1 * m_DeclareGuildListBox.GetBoxSize());
         if (PressKey(VK_NEXT))
@@ -381,249 +273,24 @@ void CGuardWindow::UpdateRegisterInfoTab()
     }
     else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
     {
-        //g_dwActiveUIID = m_DeclareGuildListBox.GetUIID();
         m_GuildListBox.DoAction();
-        //g_dwActiveUIID = 0;
         if (PressKey(VK_PRIOR))
             m_GuildListBox.Scrolling(-1 * m_GuildListBox.GetBoxSize());
         if (PressKey(VK_NEXT))
             m_GuildListBox.Scrolling(m_GuildListBox.GetBoxSize());
     }
-
-    if (g_GuardsMan.HasRegistered() &&
-        CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType && m_eTimeType <= CASTLESIEGE_STATE_REGMARK
-        && Hero->GuildStatus == G_MASTER)
-    {
-        if (m_BtnGiveUp.UpdateMouseEvent() == true)
-        {
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
-            cfg.lines.push_back({ I18N::Game::AreYouReallyWantToQuitTheSiegeWargare, false });
-            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest(); };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-        }
-    }
 }
 
-void CGuardWindow::RenderSeigeInfoTab()
+void CGuardWindow::UpdateRegisterInfoTab(GUARD_BUTTON button)
 {
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
-    wchar_t szTemp[256];
-
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szTemp, I18N::Game::StartingUUUUU, m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour, m_byStartMinute);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
-
-    ptOrigin.y += 14;
-    mu_swprintf(szTemp, I18N::Game::UntillUUUUU, m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
-
-    ptOrigin.y += 14;
-    switch (m_eTimeType)
+    if (button == GUARD_BUTTON_GIVE_UP && g_GuardsMan.HasRegistered() && CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType &&
+        m_eTimeType <= CASTLESIEGE_STATE_REGMARK && Hero->GuildStatus == G_MASTER)
     {
-    case CASTLESIEGE_STATE_NONE:
-    case CASTLESIEGE_STATE_IDLE_1:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegePeriodIsOver, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_REGSIEGE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegeRegistrationPeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_IDLE_2:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::StandbyPeriodForSignRegistration, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_REGMARK:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PeriodForSignRegistration, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_IDLE_3:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::StandbyPeriodForAnnouncement, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_NOTIFY:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AnnouncementPeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_READYSIEGE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegePreparationPeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_STARTSIEGE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegePeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_ENDSIEGE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::TrucePeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_ENDCYCLE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegeIsOver, 190, 0, RT3_SORT_CENTER);
-        break;
-    }
-
-    if (m_eTimeType < CASTLESIEGE_STATE_STARTSIEGE)
-    {
-        ptOrigin.y += 35;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ExpectedSiegePeriodIs, 190, 0, RT3_SORT_CENTER);
-
-        ptOrigin.y += 14;
-        mu_swprintf(szTemp, I18N::Game::UUUUU, m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay, m_bySiegeStartHour, m_bySiegeStartMinute);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
-
-        ptOrigin.y += 35;
-        mu_swprintf(szTemp, I18N::Game::UUURemainedForTheNextStage, m_dwStateLeftSec / 3600, (m_dwStateLeftSec % 3600) / 60, (m_dwStateLeftSec % 3600) % 60);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
-    }
-}
-
-void CGuardWindow::RenderRegisterTab()
-{
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
-    g_pRenderText->SetFont(g_hFont);
-
-    switch (m_eTimeType)
-    {
-    case CASTLESIEGE_STATE_NONE:
-    case CASTLESIEGE_STATE_IDLE_1:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegePeriodIsOver, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_REGSIEGE:
-        if (Hero->GuildStatus == G_MASTER)
-        {
-            if (!g_GuardsMan.HasRegistered())
-            {
-                if (!wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, m_szOwnerGuild)
-                    || !wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, m_szOwnerGuild))
-                {
-                    m_BtnProclaim.Lock();
-                    m_BtnProclaim.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-                    m_BtnProclaim.ChangeTextColor(RGBA(100, 100, 100, 255));
-                }
-                else
-                {
-                    m_BtnProclaim.UnLock();
-                    m_BtnProclaim.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-                    m_BtnProclaim.ChangeTextColor(RGBA(255, 255, 255, 255));
-                }
-                m_BtnProclaim.Render();
-            }
-            else
-            {
-                g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Announced, 190, 0, RT3_SORT_CENTER);
-            }
-        }
-        else
-        {
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::NotAGuildMaster, 190, 0, RT3_SORT_CENTER);
-        }
-        break;
-    case CASTLESIEGE_STATE_IDLE_2:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::StandbyPeriodForSignRegistration, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_REGMARK:
-    {
-        if (g_GuardsMan.HasRegistered())
-        {
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::RegisterTheAcquiredSign, 190, 0, RT3_SORT_CENTER);
-            ptOrigin.y += 30;
-
-            int nMarkCount = g_GuardsMan.GetMyMarkCount();
-            wchar_t szBuffer[256];
-            mu_swprintf(szBuffer, I18N::Game::AcquiredNoOfSignU, nMarkCount);
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
-
-            ptOrigin.y += 14;
-            mu_swprintf(szBuffer, I18N::Game::RegisteredNoOfSignU, g_GuardsMan.GetRegMarkCount());
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
-
-            if (nMarkCount > 0)
-            {
-                m_BtnRegister.UnLock();
-                m_BtnRegister.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-                m_BtnRegister.ChangeTextColor(RGBA(255, 255, 255, 255));
-            }
-            else
-            {
-                m_BtnRegister.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-                m_BtnRegister.ChangeTextColor(RGBA(100, 100, 100, 255));
-                m_BtnRegister.Lock();
-            }
-            m_BtnRegister.Render();
-        }
-        else
-        {
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ThisGuildIsNotRegisteredInCastleSiege, 190, 0, RT3_SORT_CENTER);
-        }
-    }
-    break;
-    case CASTLESIEGE_STATE_IDLE_3:
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AnnouncementAndRegistrationPeriod, 190, 0, RT3_SORT_CENTER);
-        ptOrigin.y += 14;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::HasEnded, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_NOTIFY:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AnnouncementPeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_READYSIEGE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegePreparationPeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_STARTSIEGE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegePeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_ENDSIEGE:
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::TrucePeriod, 190, 0, RT3_SORT_CENTER);
-        break;
-    case CASTLESIEGE_STATE_ENDCYCLE:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SiegeIsOver, 190, 0, RT3_SORT_CENTER);
-        break;
-    }
-}
-
-void CGuardWindow::RenderRegisterInfoTab()
-{
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
-    g_pRenderText->SetFont(g_hFontBold);
-
-    if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
-    {
-        EnableAlphaTest();
-        RenderImage(IMAGE_GUARDWINDOW_LEFT_PIXEL, ptOrigin.x + 11, ptOrigin.y - 14, 14, 255);
-        RenderImage(IMAGE_GUARDWINDOW_RIGHT_PIXEL, ptOrigin.x + 166, ptOrigin.y - 14, 14, 255);
-        RenderImage(IMAGE_GUARDWINDOW_TOP_PIXEL, ptOrigin.x + 14, ptOrigin.y - 14, 161, 14);
-        RenderImage(IMAGE_GUARDWINDOW_BOTTOM_PIXEL, ptOrigin.x + 14, ptOrigin.y + 232, 161, 14);
-        DisableAlphaBlend();
-
-        m_DeclareGuildListBox.Render();
-    }
-    else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
-    {
-        EnableAlphaTest();
-        RenderImage(IMAGE_GUARDWINDOW_LEFT_PIXEL, ptOrigin.x + 11, ptOrigin.y - 14, 14, 215);
-        RenderImage(IMAGE_GUARDWINDOW_RIGHT_PIXEL, ptOrigin.x + 166, ptOrigin.y - 14, 14, 215);
-        RenderImage(IMAGE_GUARDWINDOW_TOP_PIXEL, ptOrigin.x + 14, ptOrigin.y - 14, 161, 14);
-        RenderImage(IMAGE_GUARDWINDOW_BOTTOM_PIXEL, ptOrigin.x + 14, ptOrigin.y + 192, 161, 14);
-
-        RenderImage(IMAGE_GUARDWINDOW_LEFT_PIXEL, ptOrigin.x + 11, ptOrigin.y + 220, 14, 25);
-        RenderImage(IMAGE_GUARDWINDOW_RIGHT_PIXEL, ptOrigin.x + 166, ptOrigin.y + 220, 14, 25);
-        RenderImage(IMAGE_GUARDWINDOW_TOP_PIXEL, ptOrigin.x + 14, ptOrigin.y + 220, 161, 14);
-        RenderImage(IMAGE_GUARDWINDOW_BOTTOM_PIXEL, ptOrigin.x + 14, ptOrigin.y + 237, 161, 14);
-        DisableAlphaBlend();
-
-        m_GuildListBox.Render();
-    }
-    else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY)
-    {
-        wchar_t szBuffer[256];
-        mu_swprintf(szBuffer, I18N::Game::OnDD3Pm, 1, 1);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
-        ptOrigin.y += 14;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::CastleSiegeWillStart, 190, 0, RT3_SORT_CENTER);
-    }
-    else if (m_eTimeType == CASTLESIEGE_STATE_ENDSIEGE)
-    {
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::TrucePeriod, 190, 0, RT3_SORT_CENTER);
-    }
-
-    if (g_GuardsMan.HasRegistered() &&
-        CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType && m_eTimeType <= CASTLESIEGE_STATE_REGMARK
-        && Hero->GuildStatus == G_MASTER)
-    {
-        m_BtnGiveUp.Render();
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.showCancel = true;
+        cfg.lines.push_back({I18N::Game::AreYouReallyWantToQuitTheSiegeWargare, false});
+        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 }
 
@@ -631,8 +298,11 @@ void CGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
 {
     if (!Info)	return;
 
-    memset(m_szOwnerGuild, 0, sizeof(char) * 9);
-    memset(m_szOwnerGuildMaster, 0, sizeof(char) * 11);
+    // Whole buffers: the original cleared 9 and 11 bytes of these wchar_t arrays, so a name
+    // converted without room for its terminator kept stack garbage after it (the original lost
+    // the "Official seal of king" line to a ten-character guild master).
+    memset(m_szOwnerGuild, 0, sizeof(m_szOwnerGuild));
+    memset(m_szOwnerGuildMaster, 0, sizeof(m_szOwnerGuildMaster));
 
     m_eTimeType = (CASTLESIEGE_STATE)Info->cCastleSiegeState;
     CMultiLanguage::ConvertFromUtf8(m_szOwnerGuild, Info->cOwnerGuild, MAX_GUILDNAME);
@@ -709,4 +379,459 @@ void CGuardWindow::RenderScrollBar(int iPos_x, int iPos_y, BOOL bIsClicked)
         ? RGBA(200, 200, 200, 255)
         : RGBA(255, 255, 255, 255);
     RenderImage(IMAGE_GUARDWINDOW_SCROLLBAR_ON, iPos_x, iPos_y, 15, 30, 0.f, 0.f, scrollBarColor);
+}
+
+void CGuardWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "guard_window",
+        [this](Rml::DataModelConstructor& c, GuardWindowRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("line_height_px", &model.lineHeightPx);
+            c.Bind("button_label_top", &model.buttonLabelTop);
+            c.Bind("tab_label_top", &model.tabLabelTop);
+            auto tab = c.RegisterStruct<GuardTabEntry>();
+            tab.RegisterMember("label", &GuardTabEntry::label);
+            tab.RegisterMember("label_left", &GuardTabEntry::labelLeft);
+            tab.RegisterMember("selected", &GuardTabEntry::selected);
+            c.RegisterArray<std::vector<GuardTabEntry>>();
+            c.Bind("tabs", &model.tabs);
+            c.Bind("list_frame", &model.listFrame);
+            c.Bind("scroll_shown", &model.scrollShown);
+            c.Bind("scroll_top", &model.scrollTop);
+            c.Bind("scroll_height", &model.scrollHeight);
+            c.Bind("thumb_top", &model.thumbTop);
+            c.Bind("thumb_dragged", &model.thumbDragged);
+            auto box = c.RegisterStruct<GuardBoxEntry>();
+            box.RegisterMember("left", &GuardBoxEntry::left);
+            box.RegisterMember("top", &GuardBoxEntry::top);
+            box.RegisterMember("width", &GuardBoxEntry::width);
+            box.RegisterMember("height", &GuardBoxEntry::height);
+            box.RegisterMember("color", &GuardBoxEntry::color);
+            c.RegisterArray<std::vector<GuardBoxEntry>>();
+            c.Bind("boxes", &model.boxes);
+            auto text = c.RegisterStruct<GuardTextEntry>();
+            text.RegisterMember("text", &GuardTextEntry::text);
+            text.RegisterMember("left", &GuardTextEntry::left);
+            text.RegisterMember("top", &GuardTextEntry::top);
+            text.RegisterMember("width", &GuardTextEntry::width);
+            text.RegisterMember("text_px", &GuardTextEntry::textPx);
+            text.RegisterMember("align", &GuardTextEntry::align);
+            text.RegisterMember("bold", &GuardTextEntry::bold);
+            text.RegisterMember("color", &GuardTextEntry::color);
+            c.RegisterArray<std::vector<GuardTextEntry>>();
+            c.Bind("texts", &model.texts);
+            auto button = c.RegisterStruct<GuardButtonEntry>();
+            button.RegisterMember("label", &GuardButtonEntry::label);
+            button.RegisterMember("id", &GuardButtonEntry::id);
+            button.RegisterMember("top", &GuardButtonEntry::top);
+            button.RegisterMember("locked", &GuardButtonEntry::locked);
+            c.RegisterArray<std::vector<GuardButtonEntry>>();
+            c.Bind("buttons", &model.buttons);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+            c.BindEventCallback("guard_button",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingButton = static_cast<GUARD_BUTTON>(arguments[0].Get<int>(-1));
+                                });
+        });
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                  "Data/Interface/RmlUi/guard_window.rml");
+}
+
+void CGuardWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void CGuardWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 5: over the HUD like every panel the original opened.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncContent();
+}
+
+void CGuardWindow::SyncContent()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    const float x0 = static_cast<float>(m_Pos.x);
+    const float y0 = static_cast<float>(m_Pos.y);
+    std::vector<GuardTextEntry> texts;
+    std::vector<GuardBoxEntry> boxes;
+    std::vector<GuardButtonEntry> buttons;
+    // RenderText(x, y, text, width, 0, sort) in window coordinates, in the font and colour the
+    // original had set at that point (its draws leak them from one call to the next).
+    bool bold = true;
+    DWORD color = RGBA(220, 220, 220, 255);
+    auto addText = [&](const wchar_t* text, float x, float y, float width, int align)
+    {
+        if (text == nullptr || text[0] == L'\0')
+            return;
+        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+        const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        const float px =
+            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
+                        : UI::Scaling::NativeTextPixelSize(role, transform);
+        texts.push_back(
+            {StringUtils::WideToNarrow(text), x - x0, y - y0, width, px, align, bold, UI::RmlBridge::RgbaToCss(color)});
+    };
+    // RT3_WRITE_RIGHT_TO_LEFT: the text ends at x.
+    auto addTextEndingAt = [&](const wchar_t* text, float x, float y) { addText(text, x - 200, y, 200, 2); };
+    auto addCentred = [&](const wchar_t* text, float y) { addText(text, x0, y, 190, 1); };
+    auto addBox = [&](float x, float y, float width, float height, DWORD rgba)
+    { boxes.push_back({x - x0, y - y0, width, height, UI::RmlBridge::RgbaToCss(rgba)}); };
+    auto addButton = [&](GUARD_BUTTON id, const wchar_t* label, float top, bool locked)
+    { buttons.push_back({StringUtils::WideToNarrow(label), id, top, locked}); };
+    wchar_t szText[256] = {};
+
+    // RenderFrame(): the title and the owner lines, bold (220, 220, 220).
+    addText(I18N::Game::GuardNPC, x0 + 15, y0 + 13, 160, 1);
+    mu_swprintf(szText, I18N::Game::OfficialSealOfKingS,
+                m_szOwnerGuildMaster[0] ? m_szOwnerGuildMaster : I18N::Game::None);
+    addCentred(szText, y0 + 50);
+    mu_swprintf(szText, I18N::Game::AffiliatedGuildS, m_szOwnerGuild[0] ? m_szOwnerGuild : I18N::Game::None);
+    addCentred(szText, y0 + 65);
+
+    // The tabs: the second one's label follows the period. (The original pushed the labels into a
+    // static list every frame and so kept the first frame's for the whole session.)
+    const wchar_t* tabLabels[] = {
+        I18N::Game::Status, m_eTimeType == CASTLESIEGE_STATE_REGSIEGE ? I18N::Game::Announce : I18N::Game::Register,
+        I18N::Game::List};
+    std::vector<GuardTabEntry> tabs;
+    g_pRenderText->SetFont(g_hFont);
+    for (int i = 0; i < 3; ++i)
+    {
+        const SIZE size = g_pRenderText->MeasureText(tabLabels[i], static_cast<int>(wcslen(tabLabels[i])));
+        tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]), static_cast<float>(56 / 2 - size.cx / 2),
+                        i == m_TabBtn.GetCurButtonIndex()});
+    }
+
+    const float y = y0 + 125;
+    int listFrame = 0;
+    TextListScrollBarGeometry scroll{};
+    bool scrollShown = false;
+    switch (m_iNumCurOpenTab)
+    {
+    case TAB_SIEGE_INFO:
+    {
+        // RenderSeigeInfoTab().
+        bold = false;
+        wchar_t szTemp[256] = {};
+        mu_swprintf(szTemp, I18N::Game::StartingUUUUU, m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour,
+                    m_byStartMinute);
+        addCentred(szTemp, y);
+        mu_swprintf(szTemp, I18N::Game::UntillUUUUU, m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute);
+        addCentred(szTemp, y + 14);
+        const wchar_t* period = nullptr;
+        switch (m_eTimeType)
+        {
+        case CASTLESIEGE_STATE_NONE:
+        case CASTLESIEGE_STATE_IDLE_1:
+            period = I18N::Game::SiegePeriodIsOver;
+            break;
+        case CASTLESIEGE_STATE_REGSIEGE:
+            period = I18N::Game::SiegeRegistrationPeriod;
+            break;
+        case CASTLESIEGE_STATE_IDLE_2:
+            period = I18N::Game::StandbyPeriodForSignRegistration;
+            break;
+        case CASTLESIEGE_STATE_REGMARK:
+            period = I18N::Game::PeriodForSignRegistration;
+            break;
+        case CASTLESIEGE_STATE_IDLE_3:
+            period = I18N::Game::StandbyPeriodForAnnouncement;
+            break;
+        case CASTLESIEGE_STATE_NOTIFY:
+            period = I18N::Game::AnnouncementPeriod;
+            break;
+        case CASTLESIEGE_STATE_READYSIEGE:
+            period = I18N::Game::SiegePreparationPeriod;
+            break;
+        case CASTLESIEGE_STATE_STARTSIEGE:
+            period = I18N::Game::SiegePeriod;
+            break;
+        case CASTLESIEGE_STATE_ENDSIEGE:
+            period = I18N::Game::TrucePeriod;
+            break;
+        case CASTLESIEGE_STATE_ENDCYCLE:
+            period = I18N::Game::SiegeIsOver;
+            break;
+        default:
+            break;
+        }
+        addCentred(period, y + 28);
+        if (m_eTimeType < CASTLESIEGE_STATE_STARTSIEGE)
+        {
+            addCentred(I18N::Game::ExpectedSiegePeriodIs, y + 63);
+            mu_swprintf(szTemp, I18N::Game::UUUUU, m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay,
+                        m_bySiegeStartHour, m_bySiegeStartMinute);
+            addCentred(szTemp, y + 77);
+            mu_swprintf(szTemp, I18N::Game::UUURemainedForTheNextStage, m_dwStateLeftSec / 3600,
+                        (m_dwStateLeftSec % 3600) / 60, (m_dwStateLeftSec % 3600) % 60);
+            addCentred(szTemp, y + 112);
+        }
+        break;
+    }
+    case TAB_REGISTER:
+    {
+        // RenderRegisterTab().
+        bold = false;
+        switch (m_eTimeType)
+        {
+        case CASTLESIEGE_STATE_NONE:
+        case CASTLESIEGE_STATE_IDLE_1:
+            addCentred(I18N::Game::SiegePeriodIsOver, y);
+            break;
+        case CASTLESIEGE_STATE_REGSIEGE:
+            if (Hero->GuildStatus == G_MASTER)
+            {
+                if (!g_GuardsMan.HasRegistered())
+                    addButton(GUARD_BUTTON_PROCLAIM, I18N::Game::Announce, 120, ProclaimLocked());
+                else
+                    addCentred(I18N::Game::Announced, y);
+            }
+            else
+            {
+                addCentred(I18N::Game::NotAGuildMaster, y);
+            }
+            break;
+        case CASTLESIEGE_STATE_IDLE_2:
+            addCentred(I18N::Game::StandbyPeriodForSignRegistration, y);
+            break;
+        case CASTLESIEGE_STATE_REGMARK:
+            if (g_GuardsMan.HasRegistered())
+            {
+                addCentred(I18N::Game::RegisterTheAcquiredSign, y);
+                const int nMarkCount = g_GuardsMan.GetMyMarkCount();
+                mu_swprintf(szText, I18N::Game::AcquiredNoOfSignU, nMarkCount);
+                addCentred(szText, y + 30);
+                mu_swprintf(szText, I18N::Game::RegisteredNoOfSignU, g_GuardsMan.GetRegMarkCount());
+                addCentred(szText, y + 44);
+                addButton(GUARD_BUTTON_REGISTER, I18N::Game::Register, 200, nMarkCount <= 0);
+            }
+            else
+            {
+                addCentred(I18N::Game::ThisGuildIsNotRegisteredInCastleSiege, y);
+            }
+            break;
+        case CASTLESIEGE_STATE_IDLE_3:
+            bold = true;
+            addCentred(I18N::Game::AnnouncementAndRegistrationPeriod, y);
+            addCentred(I18N::Game::HasEnded, y + 14);
+            break;
+        case CASTLESIEGE_STATE_NOTIFY:
+            addCentred(I18N::Game::AnnouncementPeriod, y);
+            break;
+        case CASTLESIEGE_STATE_READYSIEGE:
+            addCentred(I18N::Game::SiegePreparationPeriod, y);
+            break;
+        case CASTLESIEGE_STATE_STARTSIEGE:
+            addCentred(I18N::Game::SiegePeriod, y);
+            break;
+        case CASTLESIEGE_STATE_ENDSIEGE:
+            bold = true;
+            addCentred(I18N::Game::TrucePeriod, y);
+            break;
+        case CASTLESIEGE_STATE_ENDCYCLE:
+            addCentred(I18N::Game::SiegeIsOver, y);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+    case TAB_REGISTER_INFO:
+    {
+        // RenderRegisterInfoTab() and the lists' RenderInterface()/RenderDataLine(): the list's
+        // backdrop and selected lines black at 40 % (SetLineColor(7, 0.4f), the colour the render
+        // left set), the headers in the tab's bold (220, 220, 220), the lines in the normal font.
+        const DWORD black40 = RGBA(0, 0, 0, 102);
+        const DWORD textColor = RGBA(230, 220, 200, 255);
+        if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
+        {
+            listFrame = 1;
+            CUIBCDeclareGuildListBox& list = m_DeclareGuildListBox;
+            const float lx = static_cast<float>(list.GetPosition_x());
+            const float ly = static_cast<float>(list.GetPosition_y());
+            const float lw = static_cast<float>(list.GetWidth());
+            const float lh = static_cast<float>(list.GetHeight());
+            addBox(lx - 1, ly - lh - 1, lw + 1, lh + 2, black40);
+            scroll = list.GetScrollBarGeometry();
+            scrollShown = true;
+            addText(I18N::Game::NAME, lx + 5, ly - lh - 12, 0, 0);
+            addText(I18N::Game::NoReg, lx + 50, ly - lh - 12, 0, 0);
+            addText(I18N::Game::Stat, lx + 98, ly - lh - 12, 0, 0);
+            addText(I18N::Game::Order, lx + 123, ly - lh - 12, 0, 0);
+            bold = false;
+            list.ForEachRenderLine(
+                [&](int line, const BCDECLAREGUILD_TEXT& item, bool selected)
+                {
+                    // Only the hero's own guild or alliance is listed.
+                    if (wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, item.szName) != 0 &&
+                        wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, item.szName) != 0)
+                        return false;
+                    const float ry = static_cast<float>(list.GetRenderLinePos_y(line));
+                    if (selected)
+                        addBox(lx, ry - 3, lw - 13 + 1, 13, black40);
+                    color = selected ? RGBA(0, 0, 0, 255) : textColor;
+                    addText(item.szName, lx + 6, ry, 0, 0);
+                    wchar_t cell[64] = {};
+                    mu_swprintf(cell, L"%d", item.nCount);
+                    addTextEndingAt(cell, lx + 74, ry);
+                    addTextEndingAt(item.byIsGiveUp ? I18N::Game::Failed : I18N::Game::Processing, lx + 124, ry);
+                    mu_swprintf(cell, L"%u", item.bySeqNum);
+                    addTextEndingAt(cell, lx + 144, ry);
+                    return true;
+                });
+        }
+        else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
+        {
+            listFrame = 2;
+            CUIBCGuildListBox& list = m_GuildListBox;
+            const float lx = static_cast<float>(list.GetPosition_x());
+            const float ly = static_cast<float>(list.GetPosition_y());
+            const float lw = static_cast<float>(list.GetWidth());
+            const float lh = static_cast<float>(list.GetHeight());
+            addBox(lx - 1, ly - lh - 1, lw + 1, lh + 2, black40);
+            addBox(lx - 1, ly + 25 - 1, lw - 100 + 1, 20, RGBA(146, 134, 121, 102));
+            addBox(lx - 1 + lw - 100 + 1, ly + 25 - 1, lw - 60, 20, black40);
+            scroll = list.GetScrollBarGeometry();
+            scrollShown = true;
+            addText(I18N::Game::NAME, lx + 5, ly - lh - 12, 0, 0);
+            addText(I18N::Game::Camp, lx + 80, ly - lh - 12, 0, 0);
+            addText(I18N::Game::Maintain, lx + 120, ly - lh - 12, 0, 0);
+            addText(I18N::Game::Score, lx + 18, ly + 31 - 1, 0, 0);
+            bold = false;
+            list.ForEachRenderLine(
+                [&](int line, const BCGUILD_TEXT& item, bool selected)
+                {
+                    const float ry = static_cast<float>(list.GetRenderLinePos_y(line));
+                    if (selected || item.byJoinSide == 1)
+                        addBox(lx, ry - 3, lw - 13 + 1, 13, black40);
+                    color = selected ? RGBA(0, 0, 0, 255) : textColor;
+                    addText(item.szName, lx + 6, ry, 0, 0);
+                    addTextEndingAt(item.byJoinSide == 1 ? I18N::Game::DefendingTeam : I18N::Game::InvadingTeam,
+                                    lx + 104, ry);
+                    addTextEndingAt(item.byGuildInvolved == 1 ? I18N::Game::Maintain : I18N::Game::Assist, lx + 141,
+                                    ry);
+                    if (list.Select_Guild == line)
+                    {
+                        color = textColor;
+                        wchar_t info[300] = {};
+                        if (item.byJoinSide == 1)
+                            mu_swprintf(info, L"--");
+                        else
+                            mu_swprintf(info, L"%ls :     %d", item.szName, item.iGuildScore);
+                        addText(info, lx + 60, ly + 31 - 1, 0, 0);
+                    }
+                });
+        }
+        else if (m_eTimeType == CASTLESIEGE_STATE_ENDSIEGE)
+        {
+            addCentred(I18N::Game::TrucePeriod, y);
+        }
+
+        if (g_GuardsMan.HasRegistered() && CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType &&
+            m_eTimeType <= CASTLESIEGE_STATE_REGMARK && Hero->GuildStatus == G_MASTER)
+            addButton(GUARD_BUTTON_GIVE_UP, I18N::Game::AbandonCastleSiege, 370, false);
+        break;
+    }
+    default:
+        break;
+    }
+
+    GuardWindowRmlModel& model = m_RmlBinder.GetModel();
+    auto sync = [&](auto field, const char* name, auto value)
+    {
+        if (!(model.*field == value))
+        {
+            model.*field = std::move(value);
+            m_RmlBinder.MarkDirty(name);
+        }
+    };
+    const bool sameTabs =
+        model.tabs.size() == tabs.size() &&
+        std::equal(model.tabs.begin(), model.tabs.end(), tabs.begin(),
+                   [](const GuardTabEntry& a, const GuardTabEntry& b)
+                   { return a.label == b.label && a.labelLeft == b.labelLeft && a.selected == b.selected; });
+    if (!sameTabs)
+    {
+        model.tabs = std::move(tabs);
+        m_RmlBinder.MarkDirty("tabs");
+    }
+    const bool sameBoxes = model.boxes.size() == boxes.size() &&
+                           std::equal(model.boxes.begin(), model.boxes.end(), boxes.begin(),
+                                      [](const GuardBoxEntry& a, const GuardBoxEntry& b)
+                                      {
+                                          return a.left == b.left && a.top == b.top && a.width == b.width &&
+                                                 a.height == b.height && a.color == b.color;
+                                      });
+    if (!sameBoxes)
+    {
+        model.boxes = std::move(boxes);
+        m_RmlBinder.MarkDirty("boxes");
+    }
+    const bool sameTexts = model.texts.size() == texts.size() &&
+                           std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
+                                      [](const GuardTextEntry& a, const GuardTextEntry& b)
+                                      {
+                                          return a.text == b.text && a.left == b.left && a.top == b.top &&
+                                                 a.width == b.width && a.textPx == b.textPx && a.align == b.align &&
+                                                 a.bold == b.bold && a.color == b.color;
+                                      });
+    if (!sameTexts)
+    {
+        model.texts = std::move(texts);
+        m_RmlBinder.MarkDirty("texts");
+    }
+    const bool sameButtons =
+        model.buttons.size() == buttons.size() &&
+        std::equal(model.buttons.begin(), model.buttons.end(), buttons.begin(),
+                   [](const GuardButtonEntry& a, const GuardButtonEntry& b)
+                   { return a.label == b.label && a.id == b.id && a.top == b.top && a.locked == b.locked; });
+    if (!sameButtons)
+    {
+        model.buttons = std::move(buttons);
+        m_RmlBinder.MarkDirty("buttons");
+    }
+    sync(&GuardWindowRmlModel::listFrame, "list_frame", listFrame);
+    // RenderScrollBarFrame() at the list's right edge - 8 over the track, the thumb at - 12.
+    sync(&GuardWindowRmlModel::scrollShown, "scroll_shown", scrollShown);
+    sync(&GuardWindowRmlModel::scrollTop, "scroll_top", scroll.rangeTop - y0);
+    sync(&GuardWindowRmlModel::scrollHeight, "scroll_height", scroll.rangeBottom - scroll.rangeTop);
+    sync(&GuardWindowRmlModel::thumbTop, "thumb_top", scroll.thumbTop - y0);
+    sync(&GuardWindowRmlModel::thumbDragged, "thumb_dragged", scroll.dragged && MouseLButtonPush);
+    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    sync(&GuardWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    sync(&GuardWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
+    sync(&GuardWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
+    sync(&GuardWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

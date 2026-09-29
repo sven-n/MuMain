@@ -25,6 +25,17 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Scaling/UITransform.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/StringUtilities.h>
+
+#include <string>
+
 extern int TextNum;
 extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
@@ -252,6 +263,9 @@ bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng, int x, int
 
     SetButtonInfo();
 
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+
     Show(false);
 
     return true;
@@ -276,6 +290,7 @@ void mu::ui::window::CCursedTempleSystem::Initialize()
 
 void mu::ui::window::CCursedTempleSystem::Destroy()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
     UnloadImages();
 
     if (m_pNewUIMng)
@@ -728,6 +743,7 @@ bool mu::ui::window::CCursedTempleSystem::Update()
 {
     UpdateScore();
     UpdateTutorialStep();
+    SyncView();
 
     return true;
 }
@@ -749,52 +765,165 @@ namespace
     }
 }
 
-void mu::ui::window::CCursedTempleSystem::RenderSkill()
+namespace
 {
-    EnableAlphaTest();
+// The original drew the HUD at layer depth 1.5, under nearly every panel: the document sits in the
+// background context, behind its other documents.
+Rml::Context* CursedTempleContext()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
+    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
+}
 
-    float Width, Height, fU, fV, x, y;
-    int iSkillIndex;
+// A file of Data/Interface, relative to cursed_temple_system.rml.
+Rml::String InterfaceImage(const std::string& file)
+{
+    return "../../../" + file;
+}
 
-    int CursedTempleCurSkillType = Hero->m_CursedTempleCurSkill;
+Rml::String TexelRect(float x, float y, float width, float height)
+{
+    return Rml::CreateString("%g %g %g %g", x, y, width, height);
+}
 
-    int MaxKillCount = SkillAttribute[CursedTempleCurSkillType].KillCount;
+const Rml::String White = "rgba(255, 255, 255, 255)";
 
-    if (m_SkillPoint >= MaxKillCount)
+void AddSprite(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector4f& box, const std::string& file,
+               const Rml::String& rect, const Rml::String& color = White)
+{
+    sprites.push_back({box.x, box.y, box.z, box.w, InterfaceImage(file), rect, color});
+}
+
+// RenderNumber(x, y, number, scale): newui_number1's 12 x 14 texel digits, 12 x 16 units times
+// (scale - 0.3), centred on x and 0.8 of a digit apart.
+template <int ScalePercent>
+void AddNumber(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector2f& centre, int number)
+{
+    constexpr float scale = static_cast<float>(ScalePercent) / 100.f;
+    const float width = 12.f * (scale - 0.3f);
+    const float height = 16.f * (scale - 0.3f);
+    const std::string text = std::to_string(number);
+    float left = centre.x - width * static_cast<float>(text.size()) / 2;
+    for (const char digit : text)
     {
-        iSkillIndex = IMAGE_SKILL2;
+        if (digit >= '0' && digit <= '9')
+            AddSprite(sprites, {left, centre.y, width, height}, "newui_number1.tga",
+                      TexelRect(static_cast<float>((digit - '0') * 12), 0.f, 12.f, 14.f));
+        left += width * 0.8f;
     }
-    else
+}
+
+// RenderNumber2D(x, y, number, 8, 8): FontTest's 16 x 16 texel digit cells, 8 x 8 units, centred on
+// x and 5.6 units apart.
+void AddNumber2D(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector2f& centre, int number)
+{
+    const std::string text = std::to_string(number);
+    float left = centre.x - 8.f * static_cast<float>(text.size()) / 2;
+    for (const char digit : text)
     {
-        iSkillIndex = IMAGE_NON_SKILL2;
+        if (digit >= '0' && digit <= '9')
+            AddSprite(sprites, {left, centre.y, 8.f, 8.f}, "FontTest.tga",
+                      TexelRect(static_cast<float>((digit - '0') * 16), 0.f, 16.f, 16.f));
+        left += 8.f * 0.7f;
     }
+}
 
-    x = 512.f + 27.f;
-    y = 258.f - 58.f;
-    Width = 20.f;
-    Height = 28.f;
-    fU = (8 + (CursedTempleCurSkillType - 210)) * (Width / 256.f);
-    fV = 0;
-    RenderBitmap(iSkillIndex, x, y, Width, Height, fU, fV, Width / 256.f, Height / 256.f);
+// A CButton registered with ChangeButtonImgState(true, image, true): its up, over and down frames
+// stacked vertically, drawn in the button's colour.
+void AddButton(std::vector<CursedTempleSpriteEntry>& sprites, CButton& button, const std::string& file, float alpha)
+{
+    const POINT& pos = button.GetPos();
+    const POINT& size = button.GetSize();
+    int frame = 0;
+    if (button.GetBTState() == BUTTON_STATE_OVER)
+        frame = 1;
+    else if (button.GetBTState() == BUTTON_STATE_DOWN)
+        frame = 2;
+    const BYTE a = static_cast<BYTE>(255.f * alpha);
+    AddSprite(
+        sprites,
+        {static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(size.x), static_cast<float>(size.y)},
+        file,
+        TexelRect(0.f, static_cast<float>(frame * size.y), static_cast<float>(size.x), static_cast<float>(size.y)),
+        UI::RmlBridge::RgbaToCss(RGBA(255, 255, 255, a)));
+}
+} // namespace
 
-    RenderNumber(x + 55.f, y + 8.f, MaxKillCount, 1.f);
+void mu::ui::window::CCursedTempleSystem::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
 
-    RenderNumber(x + 77.f, y + 8.f, m_SkillPoint, 1.f);
+    const bool modelCreated = m_RmlBinder.Create(CursedTempleContext(), "cursed_temple_system",
+                                                 [](Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model)
+                                                 {
+                                                     auto sprite = c.RegisterStruct<CursedTempleSpriteEntry>();
+                                                     sprite.RegisterMember("left", &CursedTempleSpriteEntry::left);
+                                                     sprite.RegisterMember("top", &CursedTempleSpriteEntry::top);
+                                                     sprite.RegisterMember("width", &CursedTempleSpriteEntry::width);
+                                                     sprite.RegisterMember("height", &CursedTempleSpriteEntry::height);
+                                                     sprite.RegisterMember("src", &CursedTempleSpriteEntry::src);
+                                                     sprite.RegisterMember("rect", &CursedTempleSpriteEntry::rect);
+                                                     sprite.RegisterMember("color", &CursedTempleSpriteEntry::color);
+                                                     c.RegisterArray<std::vector<CursedTempleSpriteEntry>>();
+                                                     auto line = c.RegisterStruct<CursedTempleTextEntry>();
+                                                     line.RegisterMember("top", &CursedTempleTextEntry::top);
+                                                     line.RegisterMember("text", &CursedTempleTextEntry::text);
+                                                     line.RegisterMember("color", &CursedTempleTextEntry::color);
+                                                     line.RegisterMember("text_px", &CursedTempleTextEntry::textPx);
+                                                     c.RegisterArray<std::vector<CursedTempleTextEntry>>();
 
-    x = 512.f + 50; y = 201.f;
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos(x, y);
+                                                     c.Bind("scale_x", &model.scaleX);
+                                                     c.Bind("scale_y", &model.scaleY);
+                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
+                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
+                                                     c.Bind("sprites", &model.sprites);
+                                                     c.Bind("tutorial_lines", &model.tutorialLines);
+                                                 });
+    if (modelCreated)
+        m_pRmlDoc =
+            UI::RmlBridge::LoadThemedDocument(CursedTempleContext(), "Data/Interface/RmlUi/cursed_temple_system.rml");
+}
+
+void mu::ui::window::CCursedTempleSystem::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = CursedTempleContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+// The original RenderSkill(): the current skill's icon (grey until enough kill points), the kill
+// points it needs and has, the skill up and down buttons, and the three hover tooltips.
+void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpriteEntry>& sprites)
+{
+    const int CursedTempleCurSkillType = Hero->m_CursedTempleCurSkill;
+    const int MaxKillCount = SkillAttribute[CursedTempleCurSkillType].KillCount;
+
+    float x = 512.f + 27.f;
+    float y = 258.f - 58.f;
+    AddSprite(sprites, {x, y, 20.f, 28.f}, m_SkillPoint >= MaxKillCount ? "newui_skill2.jpg" : "newui_non_skill2.jpg",
+              TexelRect(static_cast<float>((8 + (CursedTempleCurSkillType - 210)) * 20), 0.f, 20.f, 28.f));
+    AddNumber<100>(sprites, {x + 55.f, y + 8.f}, MaxKillCount);
+    AddNumber<100>(sprites, {x + 77.f, y + 8.f}, m_SkillPoint);
+
+    m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos(512 + 50, 201);
     m_Button[CURSEDTEMPLERESULT_SKILLUP].ChangeAlpha(m_Alph);
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].Render();
-
-    x = 512.f + 50; y = 203.f + 11;
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].SetPos(x, y);
+    AddButton(sprites, m_Button[CURSEDTEMPLERESULT_SKILLUP], "newui_ctskillup.jpg", m_Alph);
+    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].SetPos(512 + 50, 203 + 11);
     m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeAlpha(m_Alph);
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].Render();
+    AddButton(sprites, m_Button[CURSEDTEMPLERESULT_SKILLDOWN], "newui_ctskilldown.jpg", m_Alph);
 
     bool anyTooltipHovered = false;
-
-    x = 512.f + 28; y = 258.f - 55.f; Width = 18; Height = 24;
-    if (CheckMouseIn(x, y, Width, Height))
+    constexpr float Width = 18;
+    constexpr float Height = 24;
+    x = 512.f + 28;
+    y = 258.f - 55.f;
+    if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
     {
         anyTooltipHovered = true;
         TextNum = 0;
@@ -804,27 +933,26 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
             TextList[i][0] = 0;
         }
 
-        wchar_t skillname[100];
-        memset(&skillname, 0, sizeof(char));
-
         SKILL_ATTRIBUTE* p = &SkillAttribute[CursedTempleCurSkillType];
-        wcscpy(skillname, p->Name);
-        mu_swprintf(TextList[TextNum], L"%ls", skillname);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+        TextListColor[TextNum] = TEXT_COLOR_BLUE;
+        TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
+        mu_swprintf(TextList[TextNum], L"\n");
+        TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
-        TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls",
+                    I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
+        TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
+        TextNum++;
 
         ShowSkillHoverTooltip(x, y - 20, TextNum);
     }
 
-    x = 512.f + 28 + 55; y = 258.f - 55.f; Width = 18; Height = 24;
-    if (CheckMouseIn(x, y, Width, Height))
+    x = 512.f + 28 + 55;
+    if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
     {
         anyTooltipHovered = true;
-
         TextNum = 0;
         ZeroMemory(TextListColor, 20 * sizeof(int));
         for (int i = 0; i < 30; i++)
@@ -839,11 +967,10 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
         ShowSkillHoverTooltip(x, y - 20, TextNum);
     }
 
-    x = 512.f + 28 + 77; y = 258.f - 55.f; Width = 18; Height = 24;
-    if (CheckMouseIn(x, y, Width, Height))
+    x = 512.f + 28 + 77;
+    if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
     {
         anyTooltipHovered = true;
-
         TextNum = 0;
         ZeroMemory(TextListColor, 20 * sizeof(int));
         for (int i = 0; i < 30; i++)
@@ -862,273 +989,229 @@ void mu::ui::window::CCursedTempleSystem::RenderSkill()
     {
         UI::RmlBridge::Tooltip::Hide(&kSkillHoverTooltipOwner);
     }
-
-    DisableAlphaBlend();
 }
 
-void mu::ui::window::CCursedTempleSystem::RenderGameTime()
+// The original RenderGameTime(): the frame, the colon dot, the minutes and the seconds.
+void mu::ui::window::CCursedTempleSystem::SyncGameTime(std::vector<CursedTempleSpriteEntry>& sprites)
 {
-    float x, y, Width, Height;
+    AddSprite(sprites, {506.f, 393.f, 134.f, 37.f}, "newui_ctgametimeframe.tga", TexelRect(0.f, 0.f, 134.f, 37.f));
+    AddSprite(sprites, {507.5f + (134.f / 2), 407.5f, 3.f, 9.f}, "dot.tga", TexelRect(0.f, 0.f, 3.f, 9.f));
 
-    EnableAlphaTest();
-
-    x = 506.f; y = 393.f; Width = 134.f; Height = 37.f;
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_GAMETIME, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 64.f);
-
-    x = 507.5f + (134.f / 2); y = 407.5f; Width = 3.f; Height = 9.0f;
-    RenderBitmap(BITMAP_INTERFACE_EX + 44, x, y, Width, Height, 0.f, 0.f, Width / 4.f, Height / 16.f);
-
-    int minute = m_EventMapTime / 60;
-    int second = m_EventMapTime % 60;
-
-    x = 507.5f + (134.f / 2); y = 404.5f;
-    RenderNumber(x - 15.f, y, minute, 1.1f);
-    RenderNumber(x + 20.f, y, second, 1.1f);
-
-    x = 507.5f + (134.f / 2); y = 404.5f;
-    RenderNumber(x - 15.f, y, minute, 1.1f);
-    RenderNumber(x + 20.f, y, second, 1.1f);
-
-    DisableAlphaBlend();
+    const int minute = static_cast<int>(m_EventMapTime / 60);
+    const int second = static_cast<int>(m_EventMapTime % 60);
+    const float x = 507.5f + (134.f / 2);
+    const float y = 404.5f;
+    // The original drew the digits twice over each other.
+    AddNumber<110>(sprites, {x - 15.f, y}, minute);
+    AddNumber<110>(sprites, {x + 20.f, y}, second);
+    AddNumber<110>(sprites, {x - 15.f, y}, minute);
+    AddNumber<110>(sprites, {x + 20.f, y}, second);
 }
 
-void mu::ui::window::CCursedTempleSystem::RenderMiniMap()
+// The original RenderMiniMap(): the skill panel's frame, the map and its frame, the fixed NPC and
+// box markers, the party, the sacred item's carrier, the transparency button, the hero, the
+// transparency and the two teams' points.
+void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites)
 {
-    float x, y, Width, Height;
-
     m_Scale = 1.56f;
 
-    EnableAlphaTest();
+    AddSprite(sprites, {512.f, 232.f - 53.f, 128.f, 53.f}, "newui_ctskillframe.tga", TexelRect(0.f, 0.f, 128.f, 53.f));
+    AddSprite(sprites, {512.f, 263.f, 128.f, 128.f}, "newui_ctminmap.jpg", TexelRect(0.f, 0.f, 128.f, 128.f));
+    AddSprite(sprites, {512.f, 232.f, 128.f, 165.f}, "newui_ctminmapframe.tga", TexelRect(0.f, 0.f, 128.f, 165.f));
 
-
-    x = 512.f; y = 232.f - 53.f; Width = 128.f; Height = 53.f;
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SKILLFRAME, x, y, Width, Height, 0.f, 0.f, Width / 128.f, Height / 64.f);
-
-    x = 512.f; y = 263.f; Width = 128.f; Height = 128.f;
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAP, x, y, Width, Height, 0.f, 0.f, 1.f, 1.f);
-
-    x = 512.f; y = 232.f; Width = 128.f; Height = 165.f;
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME, x, y, Width, Height, 0.f, 0.f, Width / 128.f, Height / 256.f);
-
-    float npc_x = MiniMapPos(138, 44, m_Scale, AXIS_X);
-    float npc_y = MiniMapPos(138, 44, m_Scale, AXIS_Y);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_NPC,
-        npc_x, npc_y, 9.0f, 9.0f, 0.f, 0.f, 9.f / 16.f, 9.f / 16.f);
-
-    npc_x = MiniMapPos(138, 58, m_Scale, AXIS_X);
-    npc_y = MiniMapPos(138, 58, m_Scale, AXIS_Y);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_HOLYITEM,
-        npc_x, npc_y, 9.0f, 8.0f, 0.f, 0.f, 9.f / 16.f, 8.f / 8.f);
-
-    npc_x = MiniMapPos(192, 113, m_Scale, AXIS_X);
-    npc_y = MiniMapPos(192, 113, m_Scale, AXIS_Y);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_HOLYITEM,
-        npc_x, npc_y, 9.0f, 8.0f, 0.f, 0.f, 9.f / 16.f, 8.f / 8.f);
-
-    npc_x = MiniMapPos(193, 126, m_Scale, AXIS_X);
-    npc_y = MiniMapPos(193, 126, m_Scale, AXIS_Y);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_NPC,
-        npc_x, npc_y, 9.0f, 9.0f, 0.f, 0.f, 9.f / 16.f, 9.f / 16.f);
+    const auto marker = [&](float tileX, float tileY, const Rml::Vector2f& size, const char* file)
+    {
+        AddSprite(
+            sprites,
+            {MiniMapPos(tileX, tileY, m_Scale, AXIS_X), MiniMapPos(tileX, tileY, m_Scale, AXIS_Y), size.x, size.y},
+            file, TexelRect(0.f, 0.f, size.x, size.y));
+    };
+    marker(138, 44, {9.f, 9.f}, "newui_ctminmap_TeamB_npc.tga");
+    marker(138, 58, {9.f, 8.f}, "newui_ctminmap_TeamB_box.tga");
+    marker(192, 113, {9.f, 8.f}, "newui_ctminmap_TeamA_box.tga");
+    marker(193, 126, {9.f, 9.f}, "newui_ctminmap_TeamA_npc.tga");
 
     for (int k = 0; k < m_CursedTempleMyTeamCount; ++k)
     {
-        PMSG_CURSED_TAMPLE_PARTY_POS* p = &m_CursedTempleMyTeam[k];
+        const PMSG_CURSED_TAMPLE_PARTY_POS* p = &m_CursedTempleMyTeam[k];
 
-        if (p->wPartyUserIndex == 0xffff) continue;
+        if (p->wPartyUserIndex == 0xffff)
+            continue;
 
         if (p->wPartyUserIndex != Hero->Key && p->wPartyUserIndex != m_HolyItemPlayerIndex)
         {
-            float pcX = MiniMapPos(p->btX, p->btY, m_Scale, AXIS_X);
-            float pcY = MiniMapPos(p->btX, p->btY, m_Scale, AXIS_Y);
-
-            if (m_MyTeam == SEASON3A::eTeam_Allied)
-            {
-                RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_PC,
-                    pcX - 3.f, pcY - 3.f, 7.0f, 7.0f, 0.f, 0.f, 7.f / 8.f, 7.f / 8.f);
-            }
-            else
-            {
-                RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_PC,
-                    pcX - 3.f, pcY - 3.f, 7.0f, 7.0f, 0.f, 0.f, 7.f / 8.f, 7.f / 8.f);
-            }
+            const float pcX = MiniMapPos(p->btX, p->btY, m_Scale, AXIS_X);
+            const float pcY = MiniMapPos(p->btX, p->btY, m_Scale, AXIS_Y);
+            AddSprite(sprites, {pcX - 3.f, pcY - 3.f, 7.f, 7.f},
+                      m_MyTeam == SEASON3A::eTeam_Allied ? "newui_ctminmap_TeamB_member.tga"
+                                                         : "newui_ctminmap_TeamA_member.tga",
+                      TexelRect(0.f, 0.f, 7.f, 7.f));
         }
     }
 
-    //  성물 위치
     if (m_HolyItemPlayerIndex != 0xffff && m_HolyItemPlayerIndex != Hero->Key)
     {
-        float holypcX = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_X);
-        float holypcY = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_Y);
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HOLYITEM_PC,
-            holypcX - 5.f, holypcY - 5.f, 14.0f, 14.0f, 0.f, 0.f, 14.f / 16.f, 14.f / 16.f);
+        const float holypcX = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_X);
+        const float holypcY = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_Y);
+        AddSprite(sprites, {holypcX - 5.f, holypcY - 5.f, 14.f, 14.f}, "newui_ctminmap_Relic.tga",
+                  TexelRect(0.f, 0.f, 14.f, 14.f));
     }
 
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeAlpha(m_Alph);
-    m_Button[CURSEDTEMPLERESULT_ALPH].Render();
+    AddButton(sprites, m_Button[CURSEDTEMPLERESULT_ALPH], "newui_Bt_clearness_illusion.jpg", m_Alph);
 
+    const auto heroX = static_cast<float>(Hero->PositionX);
+    const auto heroY = static_cast<float>(Hero->PositionY);
+    const float hero_x = MiniMapPos(heroX, heroY, m_Scale, AXIS_X);
+    const float hero_y = MiniMapPos(heroX, heroY, m_Scale, AXIS_Y);
+    AddSprite(sprites, {hero_x - 4, hero_y - 4, 11.f, 11.f}, "newui_ctminmap_Hero.tga",
+              TexelRect(0.f, 0.f, 11.f, 11.f));
 
-    // 히어로
-    x = (Hero->PositionX);
-    y = (Hero->PositionY);
-    float hero_x = MiniMapPos(x, y, m_Scale, AXIS_X);
-    float hero_y = MiniMapPos(x, y, m_Scale, AXIS_Y);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HERO,
-        hero_x - 4, hero_y - 4, 11.0f, 11.0f, 0.f, 0.f, 11.f / 16.f, 11.f / 16.f);
-
-    // 알파 값
-    RenderNumber2D(517.f + 15.f, 246.f, static_cast<int>(m_Alph * 100), 8, 8);
-    // 점수
-    RenderNumber2D(517.f + 66.f, 246.f, m_AlliedPoint, 8, 8);
-    RenderNumber2D(517.f + 110.f, 246.f, m_IllusionPoint, 8, 8);
-
-
-    DisableAlphaBlend();
-
-#ifdef _DEBUG
-    // 미니맵 좌표 수정 할때 필요 하니..놔 둘것...
-/*
-    for ( int j = 0; j < 7; ++j )
-    {
-        RenderColorQuadARGB(MiniMapPos(posX[j], posY[j], m_Scale, AXIS_X),
-            MiniMapPos(posX[j], posY[j], m_Scale, AXIS_Y), 3, 3, 0xFFFF0000u);
-    }
-    DisableAlphaBlend();
-*/
-#endif //_DEBUG
+    AddNumber2D(sprites, {517.f + 15.f, 246.f}, static_cast<int>(m_Alph * 100));
+    AddNumber2D(sprites, {517.f + 66.f, 246.f}, m_AlliedPoint);
+    AddNumber2D(sprites, {517.f + 110.f, 246.f}, m_IllusionPoint);
 }
 
-void mu::ui::window::CCursedTempleSystem::RenderScore()
+// The original RenderScore(): the two teams' points in big digits between their banners, shown for
+// a while after a team scores.
+void mu::ui::window::CCursedTempleSystem::SyncScore(std::vector<CursedTempleSpriteEntry>& sprites)
 {
-    if (!m_IsScoreEffect) return;
+    if (!m_IsScoreEffect)
+        return;
 
-    ::EnableAlphaTest();
+    const Rml::String digitRect = TexelRect(0.f, 0.f, 56.f, 66.f);
+    const auto digit = [&](const char* team, int value, float left)
+    {
+        AddSprite(sprites, {left, 160.f, 56.f, 66.f},
+                  std::string("newui_ctscore") + team + "num" + std::to_string(value) + ".tga", digitRect);
+    };
 
-    // 뮤연합군 점수
     if (m_AlliedPoint / 10 != 0)
     {
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER + (m_AlliedPoint / 10),
-            196, 160.f, 56.0f, 66.0f, 0.f, 0.f, 56.f / 64.f, 66.f / 128.f);
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER + (m_AlliedPoint % 10),
-            253, 160.f, 56.0f, 66.0f, 0.f, 0.f, 56.f / 64.f, 66.f / 128.f);
+        digit("allied", m_AlliedPoint / 10 % 10, 196.f);
+        digit("allied", m_AlliedPoint % 10, 253.f);
     }
     else
     {
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER + (m_AlliedPoint % 10),
-            224, 160.f, 56.0f, 66.0f, 0.f, 0.f, 56.f / 64.f, 66.f / 128.f);
+        digit("allied", m_AlliedPoint % 10, 224.f);
     }
 
-    // :
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS1 + (m_IllusionPoint / 10),
-        310, 168.f, 20.0f, 45.0f, 0.f, 0.f, 20.f / 32.f, 45.f / 64.f);
+    // The colon. The original picked the image after newui_ctscorevs1 by the illusion team's tens
+    // (a banner from ten points on); the colon is always drawn here.
+    AddSprite(sprites, {310.f, 168.f, 20.f, 45.f}, "newui_ctscorevs1.tga", TexelRect(0.f, 0.f, 20.f, 45.f));
 
-    // 환영교단 점수
     if (m_IllusionPoint / 10 != 0)
     {
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER + (m_IllusionPoint / 10),
-            331, 160.f, 56.0f, 66.0f, 0.f, 0.f, 56.f / 64.f, 66.f / 128.f);
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER + (m_IllusionPoint % 10),
-            388, 160.f, 56.0f, 66.0f, 0.f, 0.f, 56.f / 64.f, 66.f / 128.f);
+        digit("illusion", m_IllusionPoint / 10 % 10, 331.f);
+        digit("illusion", m_IllusionPoint % 10, 388.f);
     }
     else
     {
-        RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER + (m_IllusionPoint % 10),
-            358, 160.f, 56.0f, 66.0f, 0.f, 0.f, 56.f / 64.f, 66.f / 128.f);
+        digit("illusion", m_IllusionPoint % 10, 358.f);
     }
 
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_GAAIL, 232.f, 115.f, 40.0f, 36.0f, 0.f, 0.f, 40.f / 64.f, 36.f / 64.f);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS0, 292.f, 123.f, 49.0f, 27.0f, 0.f, 0.f, 49.f / 64.f, 27.f / 32.f);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_GAAIL, 367.f, 115.f, 40.0f, 36.0f, 0.f, 0.f, 40.f / 64.f, 36.f / 64.f);
-
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_LEFT, 133.f, 115.f, 67.0f, 125.0f, 0.f, 0.f, 67.f / 128.f, 125.f / 128.f);
-    RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_RIGHT, 445.f, 115.f, 67.0f, 125.0f, 0.f, 0.f, 67.f / 128.f, 125.f / 128.f);
-
-    ::DisableAlphaBlend();
+    AddSprite(sprites, {232.f, 115.f, 40.f, 36.f}, "newui_ctscorealliedgaail.tga", TexelRect(0.f, 0.f, 40.f, 36.f));
+    AddSprite(sprites, {292.f, 123.f, 49.f, 27.f}, "newui_ctscorevs0.tga", TexelRect(0.f, 0.f, 49.f, 27.f));
+    AddSprite(sprites, {367.f, 115.f, 40.f, 36.f}, "newui_ctscoreillsiongaail.tga", TexelRect(0.f, 0.f, 40.f, 36.f));
+    AddSprite(sprites, {133.f, 115.f, 67.f, 125.f}, "newui_ctscoreleft.tga", TexelRect(0.f, 0.f, 67.f, 125.f));
+    AddSprite(sprites, {445.f, 115.f, 67.f, 125.f}, "newui_ctscoreright.tga", TexelRect(0.f, 0.f, 67.f, 125.f));
 }
 
-void mu::ui::window::CCursedTempleSystem::RenderTutorialStep()
+// The original RenderTutorialStep(): the step's title and three lines at (140, 50), 14 px apart,
+// each in a 300 px box.
+void mu::ui::window::CCursedTempleSystem::SyncTutorialStep(std::vector<CursedTempleTextEntry>& lines)
 {
-    if (!m_IsTutorialStep) return;
+    if (!m_IsTutorialStep)
+        return;
 
-    TextNum = 0;
-    ZeroMemory(TextListColor, 20 * sizeof(int));
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = 0;
-    }
-
+    const wchar_t* texts[5] = {};
     if (m_TutorialStepState == 0)
     {
-        wcscpy(TextList[TextNum], I18N::Game::STEP1BattleBegins);
-        TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        mu_swprintf(TextList[TextNum], L"");
-        TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::TheStoneStatueAppearsRandomlyFromOneOfTheTwoLocations);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::TheSacredItemMayBeAchievedByClickingOnTheStoneStatue);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::BeCautiousOfTheFactThat);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
+        texts[0] = I18N::Game::STEP1BattleBegins;
+        texts[2] = I18N::Game::TheStoneStatueAppearsRandomlyFromOneOfTheTwoLocations;
+        texts[3] = I18N::Game::TheSacredItemMayBeAchievedByClickingOnTheStoneStatue;
+        texts[4] = I18N::Game::BeCautiousOfTheFactThat;
     }
     else if (m_TutorialStepState == 1)
     {
-        wcscpy(TextList[TextNum], I18N::Game::STEP2StorageOfTheSacredItem);
-        TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        mu_swprintf(TextList[TextNum], L"");
-        TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::ClickOnTheStorageOfThe);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::TheGoalIsToAchieveAsManyPointsAsPossibleWithinTheGivenPeriod);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::TheStoneStatueReappearsAfterTheStorageLookForTheStatue);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
+        texts[0] = I18N::Game::STEP2StorageOfTheSacredItem;
+        texts[2] = I18N::Game::ClickOnTheStorageOfThe;
+        texts[3] = I18N::Game::TheGoalIsToAchieveAsManyPointsAsPossibleWithinTheGivenPeriod;
+        texts[4] = I18N::Game::TheStoneStatueReappearsAfterTheStorageLookForTheStatue;
     }
     else if (m_TutorialStepState == 2)
     {
-        wcscpy(TextList[TextNum], I18N::Game::STEP3OfficialSkills);
-        TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        mu_swprintf(TextList[TextNum], L"");
-        TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::YouMayAchieveTheKillPoints);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::MouseWheelButtonChangeSkillTypesShiftMouseRightClickUse);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], I18N::Game::ThereAre4TypesOfSkills);
-        TextListColor[TextNum] = 0xFFffffff; ++TextNum;
+        texts[0] = I18N::Game::STEP3OfficialSkills;
+        texts[2] = I18N::Game::YouMayAchieveTheKillPoints;
+        texts[3] = I18N::Game::MouseWheelButtonChangeSkillTypesShiftMouseRightClickUse;
+        texts[4] = I18N::Game::ThereAre4TypesOfSkills;
     }
 
-    ::EnableAlphaTest();
-    for (int j = 0; j < TextNum; ++j)
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    g_pRenderText->SetFont(g_hFont);
+    for (int j = 0; j < 5; ++j)
     {
-        DrawText(TextList[j], 140, 50 + (j * 14), TextListColor[j], 0x00000000, RT3_SORT_LEFT, 300, false);
+        if (texts[j] == nullptr)
+            continue;
+        const std::wstring text = texts[j];
+        const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
+        lines.push_back({static_cast<float>(50 + (j * 14)), StringUtils::WideToNarrow(text.c_str()),
+                         UI::RmlBridge::RgbaToCss(j == 0 ? 0xFF49B0FF : 0xFFffffff),
+                         UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
+                                                               static_cast<float>(width), 300.f)});
     }
-    ::DisableAlphaBlend();
+}
+
+void mu::ui::window::CCursedTempleSystem::SyncView()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // The original's check for a map change out of the event without the event's own hide.
+    if (IsVisible() && gMapManager.IsCursedTemple() == false)
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+
+    const bool visible = IsVisible();
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, visible);
+    if (!visible)
+        return;
+
+    std::vector<CursedTempleSpriteEntry> sprites;
+    // The original's condition: drawn unless every one of these windows is open.
+    if (!g_pCharacterInfoWindow->IsVisible() || !g_pMyInventory->IsVisible() || !g_pGuildInfoWindow->IsVisible() ||
+        !g_pWindowMgr->IsVisible() || !g_pPartyInfoWindow->IsVisible() || !g_pMyQuestInfoWindow->IsVisible())
+    {
+        SyncGameTime(sprites);
+        SyncMiniMap(sprites);
+        SyncSkill(sprites);
+    }
+    SyncScore(sprites);
+    std::vector<CursedTempleTextEntry> lines;
+    SyncTutorialStep(lines);
+
+    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    CursedTempleSystemRmlModel& model = m_RmlBinder.GetModel();
+    const auto sync = [&](auto CursedTempleSystemRmlModel::* field, auto value, const char* name)
+    {
+        if (model.*field == value)
+            return;
+        model.*field = std::move(value);
+        m_RmlBinder.MarkDirty(name);
+    };
+    sync(&CursedTempleSystemRmlModel::scaleX, transform.scaleX, "scale_x");
+    sync(&CursedTempleSystemRmlModel::scaleY, transform.scaleY, "scale_y");
+    sync(&CursedTempleSystemRmlModel::inverseScaleX, 1.0f / transform.scaleX, "inverse_scale_x");
+    sync(&CursedTempleSystemRmlModel::inverseScaleY, 1.0f / transform.scaleY, "inverse_scale_y");
+    sync(&CursedTempleSystemRmlModel::sprites, std::move(sprites), "sprites");
+    sync(&CursedTempleSystemRmlModel::tutorialLines, std::move(lines), "tutorial_lines");
 }
 
 bool mu::ui::window::CCursedTempleSystem::Render()
 {
-    // 환영사원 이벤트 도중 비정상적으로 맵 이동 됐을 경우를 위한 예외 처리
-    if (gMapManager.IsCursedTemple() == false)
-    {
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM) == true)
-        {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
-        }
-
-        return true;
-    }
-
-    if (!g_pCharacterInfoWindow->IsVisible() || !g_pMyInventory->IsVisible()
-        || !g_pGuildInfoWindow->IsVisible() || !g_pWindowMgr->IsVisible()
-        || !g_pPartyInfoWindow->IsVisible() || !g_pMyQuestInfoWindow->IsVisible())
-    {
-        RenderGameTime();
-        RenderMiniMap();
-        RenderSkill();
-    }
-
-    RenderScore();
-    RenderTutorialStep();
-
+    // Nothing native left: the HUD is RmlUi (SyncView()). Kept because CObject requires the
+    // override.
     return true;
 }
 

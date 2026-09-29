@@ -122,6 +122,9 @@ bool mu::ui::window::CFriendWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CFriendWindow::Update()
 {
+    // The windows' RmlUi documents (FriendWindowView.h), also while the family is hidden.
+    if (m_pFriendWindowMgr)
+        m_pFriendWindowMgr->SyncRmlViews(IsVisible());
     return true;
 }
 

@@ -6,6 +6,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Text/SDLTtfColorPack.h"
 #include "Render/Text/SdlTtfGpuTextProperties.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -303,6 +304,25 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     {
         textSize->cx = static_cast<LONG>(std::lround(metrics.width / metrics.transform.scaleX));
         textSize->cy = static_cast<LONG>(std::lround(metrics.height / metrics.transform.scaleY));
+    }
+
+    if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
+    {
+        Render::Renderer::RecordedText record;
+        record.boxX = layout.renderX;
+        record.boxY = layout.screenY;
+        record.boxWidth = layout.boxWidth;
+        record.boxHeight = layout.boxHeight;
+        record.backColor = m_backColor;
+        record.backBlend = CurrentRecordedBlend();
+        record.textX = layout.renderX + layout.alignmentOffset;
+        record.textPixelSize = static_cast<float>(UI::Scaling::CachedFontPointSize(m_activeRole)) * metrics.scale;
+        record.lineHeight = metrics.height;
+        record.bold = m_activeRole == UI::Scaling::FontRole::Bold;
+        record.textColor = m_textColor;
+        record.utf8 = m_utf8Scratch;
+        recorder->RecordText(record);
+        return;
     }
 
     const int windowHeight = renderer.GetCachedWindowHeight();

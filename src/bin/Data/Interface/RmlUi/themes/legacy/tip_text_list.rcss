@@ -1,0 +1,10 @@
+/* Legacy theme for the RenderTipTextList() tables (CItemExplanationWindow, CSetItemExplanation):
+   the boxes in their bound colours (the black frame, the black fill at 0.8, the dark text boxes)
+   and the lines in their bound colours, left / centred / right in their boxes. Reference px. */
+
+#panel { position: absolute; transform-origin: left top; width: 640px; height: 480px; font-family: "token(font-body)"; pointer-events: none; }
+.tip-box { position: absolute; }
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.tip-line.centred { text-align: center; }
+.tip-line.right { text-align: right; }
+.tip-line.bold { font-weight: bold; }

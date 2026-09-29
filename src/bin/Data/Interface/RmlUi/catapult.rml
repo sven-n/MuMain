@@ -1,0 +1,58 @@
+<rml>
+<head>
+	<title>Catapult</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="catapult.rcss"/>
+</head>
+<body>
+	<!-- The castle siege catapult (CCatapultWindow), docked right: the side's title, three lines,
+	     the target areas in their table (the chosen one locked), Shoot (locked until an area is
+	     chosen) and the exit button. root_x/root_y/root_scale come from the dock transform;
+	     everything inside is reference px; text is .sharp-text at the native size, counter-scaled
+	     out of the panel. C++ keeps the area and the fire request; a click is queued with
+	     catapult_area(n), catapult_fire or catapult_exit. -->
+	<div id="panel" data-model="catapult" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text cp-title" data-style-font-size="title_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
+		<span class="sharp-text cp-line" data-for="l, i : lines" data-style-top="(50 + i * 15) + 'px'"
+		      data-style-font-size="l.text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+
+		<div class="t-corner t-tl" style="left: 12px; top: 116px;"></div>
+		<div class="t-corner t-tr" style="left: 166px; top: 116px;"></div>
+		<div class="t-edge-top" style="left: 25px; top: 116px; width: 141px;"></div>
+		<div class="t-edge-left" style="left: 12px; top: 129px; height: 100px;"></div>
+		<div class="t-edge-right" style="left: 166px; top: 129px; height: 100px;"></div>
+		<div class="t-corner t-bl" style="left: 12px; top: 223px;"></div>
+		<div class="t-corner t-br" style="left: 166px; top: 223px;"></div>
+		<div class="t-edge-bottom" style="left: 25px; top: 223px; width: 141px;"></div>
+
+		<div class="cp-area" data-for="a : areas" data-class-big="a.big" data-class-locked="a.locked"
+		     data-style-left="a.left + 'px'" data-style-top="a.top + 'px'" data-event-click="catapult_area(a.index)">
+			<span class="sharp-text cp-label cp-area-label" data-style-font-size="a.label_px + 'px'"
+			      data-style-left="a.label_left + 'px'" data-style-top="a.label_top + 'px'"
+			      data-style-line-height="line_height_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{a.label}}</span>
+		</div>
+
+		<div id="btn_fire" data-class-locked="fire_locked" data-event-click="catapult_fire">
+			<span class="sharp-text cp-label" data-style-font-size="text_px + 'px'" data-style-top="fire_label_top + 'px'"
+			      data-style-line-height="line_height_px + 'px'" data-style-width="(108 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{fire_text}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="catapult_exit"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+	</div>
+</body>
+</rml>

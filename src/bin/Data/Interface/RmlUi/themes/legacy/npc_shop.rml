@@ -14,19 +14,19 @@
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"><span class="native-fit">{{title}}</span></span>
 		<span class="sharp-text" id="tax_rate"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{tax_rate_text}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"><span class="native-fit">{{tax_rate_text}}</span></span>
 
 		<div id="btn_repair" class="shop-btn shop-btn-repair" data-class-hidden="!repair_visible"
 		     data-event-click="npc_shop_repair_click"></div>
 		<span class="sharp-text tooltip tooltip-repair"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{repair_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{repair_tooltip}}</span></span>
 
 		<div id="btn_repair_all" class="shop-btn shop-btn-repair-all" data-class-hidden="!repair_visible"
 		     data-event-click="npc_shop_repair_all_click"></div>
 		<span class="sharp-text tooltip tooltip-repair-all"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{repair_all_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{repair_all_tooltip}}</span></span>
 
 		<div id="repair_money_bg" class="repair-money" data-class-hidden="!repair_visible"></div>
 		<span id="repair_all_label" class="sharp-text repair-money-label" data-class-hidden="!repair_visible"

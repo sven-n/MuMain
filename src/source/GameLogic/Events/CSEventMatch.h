@@ -6,10 +6,36 @@
 
 #include <chrono>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "Network/Server/WSclient.h"
 
 using MatchClock = std::chrono::steady_clock;
+
+// One text of an event's result box, as RenderMatchResult() draws it: RenderText(x, y, text,
+// boxWidth, boxHeight, sort) in reference units, in its font (or the one left set) and colour.
+struct MatchResultText
+{
+    enum class Font
+    {
+        Unchanged,
+        Normal,
+        Bold,
+    };
+
+    std::wstring text;
+    int x = 0;
+    int y = 0;
+    int boxWidth = 0;
+    int boxHeight = 0;
+    int sort = RT3_SORT_LEFT;
+    Font font = Font::Unchanged;
+    DWORD color = 0; // RGBA()
+};
+
+// Draws the texts natively (g_pRenderText), in order.
+void RenderMatchResultTexts(const std::vector<MatchResultText>& texts);
 
 class CSBaseMatch
 {
@@ -28,7 +54,8 @@ protected:
     int         m_iMyResult;
     MatchResult m_MatchResult[11];
 
-    POINT		m_PosResult;
+    // As clearMatchInfo() sets it: a result before any state is placed as in a running event.
+    POINT m_PosResult{REFERENCE_WIDTH - 230 / 2, 100};
 
     bool    getEqualMonster(int addV);
 
@@ -70,6 +97,8 @@ public:
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) = 0;
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) = 0;
     virtual void    RenderMatchResult(void) = 0;
+    // The texts RenderMatchResult() draws (none for an event without a result box).
+    virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const {}
 };
 
 class CSDevilSquareMatch : public CSBaseMatch
@@ -85,6 +114,7 @@ public:
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
     virtual void    RenderMatchResult(void);
+    virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const;
 };
 
 class CCursedTempleMatch : public CSBaseMatch

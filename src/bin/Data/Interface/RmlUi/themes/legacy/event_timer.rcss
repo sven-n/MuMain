@@ -1,0 +1,34 @@
+/* Legacy theme for the event time HUDs (CBloodCastle, CChaosCastleTime, CEmpireGuardianTimer),
+   reproducing their Render(): newui_Figure_blood (124 x 81) at the window's position, then,
+   centred on the window's box in their bound colours, a first line at y 13 and a second at y 38
+   in the normal font, and the time at y 50 in the big font (bold). Reference px relative to the
+   window's top-left, under .screen's W/640 x H/480 stretch. */
+
+@spritesheet timer-back-sheet { src: "../../../newui_Figure_blood.tga"; timer-back: 0px 0px 124px 81px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 124px; height: 81px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 124px; height: 81px; decorator: image(timer-back); }
+
+.timer-text {
+	display: block;
+	position: absolute;
+	left: 0;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+}
+#kills { top: 13px; }
+#time_left { top: 38px; }
+#time { top: 50px; font-weight: bold; }

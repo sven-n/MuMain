@@ -354,7 +354,8 @@ void mu::ui::window::CMyQuestInfoWindow::SetSelQuestRequestReward()
     // This window appends the reward rows after other content already in m_ContentRows (the quest
     // summary, above) -- push the leading spacer here rather than in the shared helper, which
     // CQuestProgress/CQuestProgressByEtc's own reward list (nothing precedes it) don't want.
-    m_ContentRows.push_back({" ", UI::Quests::RewardModel::RowStyle::Plain, 0, nullptr});
+    m_ContentRows.push_back(
+        {UI::Quests::RewardModel::BlankRowText, UI::Quests::RewardModel::RowStyle::Plain, 0, nullptr});
 
     bool unusedRequestComplete = false;
     std::vector<UI::Quests::RewardModel::RowData> rows =

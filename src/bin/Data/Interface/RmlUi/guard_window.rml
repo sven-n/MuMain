@@ -1,0 +1,78 @@
+<rml>
+<head>
+	<title>Guard NPC</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="guard_window.rcss"/>
+</head>
+<body>
+	<!-- The castle guardsman (CGuardWindow), docked right: the owner lines, the Status /
+	     Register (Announce) / List tabs and the tab's page; on the List tab the guild list's
+	     frame, backdrops, lines and scroll bar. The tabs, the list lines and the scroll thumb are
+	     hit-tested natively, so #panel leaves the pointer alone outside the buttons.
+	     root_x/root_y/root_scale come from the dock transform; everything inside is reference px;
+	     text is .sharp-text at the native size, counter-scaled out of the panel. A button click is
+	     queued with guard_button(n). -->
+	<div id="panel" data-model="guard_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<div class="gd-tab" data-for="t, i : tabs" data-class-selected="t.selected" data-style-left="(12 + i * 57) + 'px'">
+			<span class="sharp-text gd-tab-label" data-style-left="t.label_left + 'px'" data-style-top="tab_label_top + 'px'"
+			      data-style-font-size="text_px + 'px'" data-style-line-height="line_height_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+		</div>
+
+		<div data-if="list_frame == 1">
+			<div class="t-edge-left" style="left: 11px; top: 111px; height: 255px;"></div>
+			<div class="t-edge-right" style="left: 166px; top: 111px; height: 255px;"></div>
+			<div class="t-edge-top" style="left: 14px; top: 111px;"></div>
+			<div class="t-edge-bottom" style="left: 14px; top: 357px;"></div>
+		</div>
+		<div data-if="list_frame == 2">
+			<div class="t-edge-left" style="left: 11px; top: 111px; height: 215px;"></div>
+			<div class="t-edge-right" style="left: 166px; top: 111px; height: 215px;"></div>
+			<div class="t-edge-top" style="left: 14px; top: 111px;"></div>
+			<div class="t-edge-bottom" style="left: 14px; top: 317px;"></div>
+			<div class="t-edge-left" style="left: 11px; top: 345px; height: 25px;"></div>
+			<div class="t-edge-right" style="left: 166px; top: 345px; height: 25px;"></div>
+			<div class="t-edge-top" style="left: 14px; top: 345px;"></div>
+			<div class="t-edge-bottom" style="left: 14px; top: 362px;"></div>
+		</div>
+
+		<div class="gd-box" data-for="b : boxes" data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
+		     data-style-width="b.width + 'px'" data-style-height="b.height + 'px'"
+		     data-style-background-color="b.color"></div>
+
+		<div data-if="scroll_shown">
+			<div class="s-top" data-style-top="scroll_top + 'px'"></div>
+			<div class="s-mid" data-style-top="(scroll_top + 3) + 'px'" data-style-height="(scroll_height - 6) + 'px'"></div>
+			<div class="s-bottom" data-style-top="(scroll_top + scroll_height - 3) + 'px'"></div>
+			<div class="thumb" data-class-dragged="thumb_dragged" data-style-top="thumb_top + 'px'"></div>
+		</div>
+
+		<span class="sharp-text gd-text" data-for="t : texts" data-class-bold="t.bold"
+		      data-class-centred="t.align == 1" data-class-right="t.align == 2"
+		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
+		      data-style-font-size="t.text_px + 'px'"
+		      data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+
+		<div class="gd-btn" data-for="b : buttons" data-class-locked="b.locked" data-style-top="b.top + 'px'"
+		     data-event-click="guard_button(b.id)">
+			<span class="sharp-text gd-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="guard_button(3)"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+	</div>
+</body>
+</rml>

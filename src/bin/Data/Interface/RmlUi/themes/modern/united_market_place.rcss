@@ -1,0 +1,32 @@
+/* Modern theme for CUnitedMarketPlaceWindow: docked_panel_frame.rcss's forged panel (linked
+   first), the Warp button as a modern button, dimmed while locked. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+#panel { pointer-events: auto; }
+
+#title, .market-line, #warp_label {
+	display: block;
+	position: absolute;
+	white-space: nowrap;
+	text-align: center;
+	pointer-events: none;
+}
+#title { left: 15px; top: 13px; font-weight: bold; color: token(text-warm); }
+.market-line { left: 0; color: token(text-primary); }
+
+#warp {
+	display: block;
+	position: absolute;
+	left: 68px;
+	top: 230px;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#warp:hover { border-color: token(accent-steel-hover); }
+#warp.locked, #warp.locked:hover { background-color: token(surface-recessed); border-color: token(border-frame); }
+#warp_label { left: 0; color: token(text-primary); }
+#warp.locked #warp_label { color: token(text-muted); }

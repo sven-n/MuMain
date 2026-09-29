@@ -29,17 +29,17 @@
 
 		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click"></div>
 		<span class="sharp-text tooltip tooltip-exit"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
 
 		<div id="btn_open" class="shop-btn shop-btn-open" data-class-locked="open_locked"
 		     data-event-click="my_shop_open_click"></div>
 		<span class="sharp-text tooltip tooltip-open"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{open_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{open_tooltip}}</span></span>
 
 		<div id="btn_close" class="shop-btn shop-btn-close" data-class-locked="close_locked"
 		     data-event-click="my_shop_close_click"></div>
 		<span class="sharp-text tooltip tooltip-close"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{close_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{close_tooltip}}</span></span>
 
 		<!-- Former RenderTextInfo() -- fixed instructional text at the same reference-pixel offsets
 		     the native RenderText() calls used, static except still_opening's visibility. Colors are

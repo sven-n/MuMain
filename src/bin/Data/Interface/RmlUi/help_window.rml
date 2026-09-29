@@ -1,0 +1,19 @@
+<rml>
+<head>
+	<title>Help</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="help_window.rcss"/>
+</head>
+<!-- The F1 help window (CHelpWindow): the key page, then the chat page. C++ builds the rows
+     (text, heading flag, half-height spacers) and places the box where the original's
+     RenderTipTextList(1, 1, ...) put it under the Dialog layout, in physical px -- this document
+     carries no transform of its own. The legacy theme overrides this markup to take the original's
+     native row metrics and text sizes as well (themes/legacy/help_window.rml). -->
+<body data-model="help_window">
+	<div id="help_panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+		<div class="help-line" data-for="line : lines"
+		     data-class-heading="line.heading" data-class-half-spacer="line.half_spacer"
+		>{{line.text}}</div>
+	</div>
+</body>
+</rml>

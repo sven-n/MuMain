@@ -12,6 +12,7 @@
 namespace Rml
 {
     class ElementDocument;
+    class Event;
 }
 
 namespace UI::MoveCommand
@@ -120,5 +121,8 @@ namespace mu::ui::window
         // Warps to the list entry at `row` (a position in m_listMoveInfoData, as pushed into
         // MoveCommandRowEntry::index), if the character still meets its requirements.
         void RmlClickWarp(int row);
+        // Scrolls the list one row per wheel notch, as the original did, instead of RmlUi's own
+        // 80 dp step.
+        void RmlWheelList(Rml::Event& event);
     };
 };

@@ -1,0 +1,79 @@
+/* Modern theme for CCastleWindow (Senatus): docked_panel_frame.rcss's forged panel (linked
+   first), flat tabs, table frames as hairlines in the modern tokens, modern buttons and tax
+   arrows. The castle map, the gate / statue icons and the money strip keep their game art.
+   Geometry is the legacy one (reference px under the dock transform). */
+
+@spritesheet cw-map-sheet { src: "../../../senatusmap.jpg"; cw-map: 0px 0px 160px 165px; }
+@spritesheet cw-gate-on-sheet { src: "../../../gate_button1.jpg"; cw-gate-on: 0px 0px 24px 24px; }
+@spritesheet cw-gate-off-sheet { src: "../../../gate_button2.jpg"; cw-gate-off: 0px 0px 24px 24px; }
+@spritesheet cw-statue-on-sheet { src: "../../../suho_button1.jpg"; cw-statue-on: 0px 0px 24px 24px; }
+@spritesheet cw-statue-off-sheet { src: "../../../suho_button2.jpg"; cw-statue-off: 0px 0px 24px 24px; }
+@spritesheet cw-money-sheet { src: "../../../newui_item_money2.tga"; cw-money: 0px 0px 170px 24px; }
+
+#panel { pointer-events: none; }
+
+.cw-tab { position: absolute; top: 32px; width: 40px; height: 22px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+.cw-tab.selected { background-color: token(surface-raised); border: 1px token(accent-steel); }
+.cw-tab-label { color: token(text-muted); }
+.cw-tab-label.selected { color: token(text-primary); }
+
+.cw-slot { display: block; position: absolute; left: 0; top: 0; }
+.cw-img, .cw-box { position: absolute; }
+.t-tl, .t-tr, .t-bl, .t-br { display: none; }
+.t-top, .t-bottom { height: 1px; margin-top: 6px; background-color: token(border-frame); }
+.t-left, .t-right { width: 1px; margin-left: 6px; background-color: token(border-frame); }
+.map { decorator: image(cw-map); }
+.gate-on { decorator: image(cw-gate-on); }
+.gate-off { decorator: image(cw-gate-off); }
+.statue-on { decorator: image(cw-statue-on); }
+.statue-off { decorator: image(cw-statue-off); }
+.line { height: 1px; margin-top: 10px; background-color: token(border-frame); }
+.money { decorator: image(cw-money); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.cw-text.centred { text-align: center; }
+.cw-text.right { text-align: right; }
+.cw-text.bold { font-weight: bold; }
+
+.cw-btn {
+	display: block;
+	position: absolute;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.cw-btn:hover { border-color: token(accent-steel-hover); }
+.cw-btn.locked { background-color: token(surface-recessed); border-color: token(border-frame); }
+.cw-label { left: 0; text-align: center; color: token(text-primary); }
+.cw-btn.locked .cw-label { color: token(text-muted); }
+
+.tax-btn {
+	position: absolute;
+	left: 158px;
+	width: 15px;
+	height: 12px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.tax-btn:hover { border-color: token(accent-steel-hover); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

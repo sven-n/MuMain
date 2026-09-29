@@ -1,0 +1,41 @@
+/* Modern theme for CKanturu2ndEnterNpc: the modern panel surface instead of the message-box art,
+   modern buttons. Geometry is the legacy one (reference px under the Dialog transform). */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 267px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	pointer-events: auto;
+}
+
+#back, #frame_top, .frame-middle, #frame_bottom { display: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+.kanturu-line { left: 0; color: token(text-warm); }
+.kanturu-line.bold { font-weight: bold; }
+.kanturu-line.tone-state { color: #91f161; }
+.kanturu-line.tone-note { color: token(text-primary); }
+
+.kanturu-btn {
+	display: block;
+	position: absolute;
+	top: 220px;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.kanturu-btn:hover { border-color: token(accent-steel-hover); }
+.kanturu-btn:active { background-color: token(surface-recessed); }
+.kanturu-btn.locked, .kanturu-btn.locked:hover, .kanturu-btn.locked:active { background-color: token(surface-recessed); border-color: token(border-frame); }
+#btn_refresh { left: 17px; }
+#btn_enter { left: 87px; }
+#btn_close { left: 157px; }
+.kanturu-label { left: 0; color: token(text-primary); }
+.kanturu-btn.locked .kanturu-label { color: token(text-muted); }

@@ -6,49 +6,56 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/MessageBoxView.h"
 
 namespace mu::ui::window
 {
-    class CGemIntegrationDisjointMsgBox : public CMessageBoxBase
-    {
-    public:
-        CGemIntegrationDisjointMsgBox();
-        virtual ~CGemIntegrationDisjointMsgBox();
+// The jewel dismantling box (Lahap's Dismantle Jewel): MessageBoxView draws it and its list
+// (COMGEM::m_UnmixTarList, a CUIUnmixgemList); the list keeps its native hit tests, selection
+// and scrolling (COMGEM::MoveUnMixList()). Native drawing only without the RmlUi document.
+class CGemIntegrationDisjointMsgBox : public CMessageBoxBase
+{
+public:
+    CGemIntegrationDisjointMsgBox();
+    virtual ~CGemIntegrationDisjointMsgBox();
 
-        bool Create(float fPriority = 3.f);
-        void Release();
+    bool Create(float fPriority = 3.f);
+    void Release();
 
-        bool Update();
-        bool Render();
+    bool Update();
+    bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
-    private:
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-        void ChangeMiddleFrameSmall();
-        void ChangeMiddleFrameBig();
+private:
+    void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
+    void SetAddCallbackFunc();
+    void SetButtonInfo();
+    void ChangeMiddleFrameSmall();
+    void ChangeMiddleFrameBig();
 
-        void RenderFrame();
-        void RenderTexts();
-        void RenderGemList();
-        void RenderButtons();
+    void RenderFrame();
+    void RenderTexts();
+    void RenderGemList();
+    void RenderButtons();
+    // RenderFrame() .. RenderGemList() as the view's frame, lines, buttons and list.
+    void SyncView();
 
-        int m_iMiddleFrameCount;
+    int m_iMiddleFrameCount;
+    MessageBoxView m_View;
 
-        // texts
-        type_vector_msgdata m_MsgDataList;
-        // button
-        CMessageBoxButton m_BtnBlessing;
-        CMessageBoxButton m_BtnSoul;
-        CMessageBoxButton m_BtnDisjoint;
-        CMessageBoxButton m_BtnCancel;
-    };
+    // texts
+    type_vector_msgdata m_MsgDataList;
+    // button
+    CMessageBoxButton m_BtnBlessing;
+    CMessageBoxButton m_BtnSoul;
+    CMessageBoxButton m_BtnDisjoint;
+    CMessageBoxButton m_BtnCancel;
+};
 
     // CSystemMenuMsgBox/CSystemMenuMsgBoxLayout are now ShowSystemMenuDialog() (WindowCommon.h),
     // on CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
@@ -61,6 +68,7 @@ namespace mu::ui::window
         virtual ~CBloodCastleResultMsgBox();
 
         bool Create(float fPriority = 3.f);
+        void Release();
 
         bool Update();
         bool Render();
@@ -72,6 +80,7 @@ namespace mu::ui::window
         void RenderFrame();
 
         CMessageBoxButton m_BtnOk;
+        MessageBoxView m_View; // draws the box (SyncMatchResultView()); native only without it
     };
 
     class CDevilSquareRankMsgBox : public CMessageBoxBase
@@ -83,6 +92,7 @@ namespace mu::ui::window
         virtual ~CDevilSquareRankMsgBox();
 
         bool Create(float fPriority = 3.f);
+        void Release();
 
         bool Update();
         bool Render();
@@ -94,6 +104,7 @@ namespace mu::ui::window
         void RenderFrame();
 
         CMessageBoxButton m_BtnOk;
+        MessageBoxView m_View; // draws the box (SyncMatchResultView()); native only without it
     };
 
     class CChaosCastleResultMsgBox : public CMessageBoxBase
@@ -104,6 +115,7 @@ namespace mu::ui::window
         virtual ~CChaosCastleResultMsgBox();
 
         bool Create(float fPriority = 3.f);
+        void Release();
 
         bool Update();
         bool Render();
@@ -115,12 +127,15 @@ namespace mu::ui::window
         void RenderFrame();
 
         CMessageBoxButton m_BtnOk;
+        MessageBoxView m_View; // draws the box (SyncMatchResultView()); native only without it
     };
 
     // CChaosMixMenuMsgBox/CTrainerMenuMsgBox/CTrainerRecoverMsgBox are now
     // ShowChaosMixMenuDialog()/ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() (WindowCommon.h),
     // all on CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
 
+    // A notice with a progress bar that closes itself when the bar is full (the castle siege seal,
+    // crown switch and crown defence notices). MessageBoxView draws it.
     class CProgressMsgBox : public CMessageBoxBase
     {
     public:
@@ -142,9 +157,7 @@ namespace mu::ui::window
         void SetAddCallbackFunc();
         int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
 
-        void RenderFrame();
-        void RenderTexts();
-        void RenderProgress();
+        void SyncView();
 
     private:
         type_vector_msgdata m_MsgDataList;
@@ -152,6 +165,7 @@ namespace mu::ui::window
         DWORD m_dwStartTime;
         DWORD m_dwEndTime;
         DWORD m_dwElapseTime;
+        MessageBoxView m_View;
     };
 
     class CCursedTempleProgressMsgBox : public CMessageBoxBase
@@ -183,6 +197,7 @@ namespace mu::ui::window
         void RenderProgress();
 
         bool CheckHeroAction();
+        void SyncView();
 
     private:
         type_vector_msgdata m_MsgDataList;
@@ -192,10 +207,13 @@ namespace mu::ui::window
         DWORD m_dwElapseTime;
 
         DWORD m_dwNpcIndex;
+        MessageBoxView m_View; // draws the box (as CProgressMsgBox's); native only without it
     };
 
     // CDuelMsgBox/CDuelResultMsgBox are now CGenericConfirmDialog's portrait2D field.
 
+    // The guild master's appointment box: assistant or battle master for the selected member, OK
+    // and Close. MessageBoxView draws it; the box keeps its callbacks and the request.
     class CGuild_ToPerson_Position : public CMessageBoxBase
     {
         enum
@@ -223,28 +241,15 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
         void SetAddCallbackFunc();
-        void SetButtonInfo();
 
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // texts
-        type_vector_msgdata m_MsgDataList;
-        // button
-        CMessageBoxButton m_BtnBlessing;
-        CMessageBoxButton m_BtnSoul;
-        CMessageBoxButton m_BtnOk;
-        CMessageBoxButton m_BtnCancel;
+        MessageBoxView m_View;
     };
 
     // CCherryBlossomMsgBox/CLuckyTradeMenuMsgBox/CSeedMasterMenuMsgBox/CSeedInvestigatorMenuMsgBox/

@@ -1,0 +1,61 @@
+/* Modern theme for CGuildInfoWindow: docked_panel_frame.rcss's forged panel (linked first), flat
+   tabs, tables and scroll tracks in the modern tokens, modern buttons. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+#panel { pointer-events: none; }
+
+#tab_list { position: absolute; left: 12px; top: 68px; width: 166px; height: 22px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#tab_point { position: absolute; top: 68px; width: 56px; height: 22px; background-color: token(surface-raised); border: 1px token(accent-steel); border-radius: token(radius-sm)px; }
+#tab_head { position: absolute; left: 11px; top: 237px; width: 63px; height: 25px; background-color: token(surface-raised); }
+
+.t-edge-top, .t-edge-bottom { position: absolute; height: 1px; margin-top: 6px; background-color: token(border-frame); }
+.t-edge-left, .t-edge-right { position: absolute; width: 1px; margin-left: 6px; background-color: token(border-frame); }
+.t-corner { display: none; }
+.fill { position: absolute; }
+
+#guild_mark { position: absolute; left: 74px; top: 106px; width: 39px; height: 39px; }
+.mark-cell { float: left; width: 4.875px; height: 4.875px; }
+.line-mark { position: absolute; width: 8px; height: 8px; }
+.line-mark-cell { float: left; width: 1px; height: 1px; }
+
+.scroll { position: absolute; left: 0; width: 190px; height: 0; }
+.s-top, .s-bottom { display: none; }
+.s-mid { position: absolute; width: 3px; height: 15px; margin-left: 2px; background-color: token(surface-recessed); }
+.thumb { position: absolute; width: 9px; height: 30px; margin-left: 3px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+
+.line-box { position: absolute; background-color: token(accent-steel); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.gi-text.centred { text-align: center; }
+.gi-text.right { text-align: right; }
+.gi-text.bold { font-weight: bold; }
+
+.gi-btn {
+	display: block;
+	position: absolute;
+	width: 64px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.gi-btn:hover { border-color: token(accent-steel-hover); }
+.gi-btn:active { background-color: token(surface-recessed); }
+.gi-label { left: 0; text-align: center; color: token(text-primary); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

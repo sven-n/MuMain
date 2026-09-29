@@ -34,6 +34,7 @@ namespace mu::ui::window
         // row height; #panel and its children are authored in the same reference units.
         float panelHeight = 0.f;
         float listHeight = 0.f;
+        float listTail = 0.f; // listHeight modulo rowHeight
         float listWidth = 0.f;
         float rowWidth = 0.f;
         float rowHeight = 0.f;

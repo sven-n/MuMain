@@ -12,7 +12,7 @@
      line divs below, in order, with no other sibling before them -- RmlTooltip.cpp's
      width-measurement pass indexes panel->GetChild(i) against config.lines[i] directly. -->
 <body data-model="tooltip" data-style-left="pos_x + 'px'" data-style-top="pos_y + 'px'">
-	<div id="tooltip_panel" data-class-tt-centered="center_text"
+	<div id="tooltip_panel" data-class-tt-centered="center_text" data-class-tt-button-hint="button_hint"
 	     data-style-border-width="border_px + 'px'" data-style-min-width="fixed_width_px + 'px'"
 	     data-style-padding-left="padding_px + 'px'" data-style-padding-right="padding_px + 'px'">
 		<div class="tt-line" data-for="line : lines"

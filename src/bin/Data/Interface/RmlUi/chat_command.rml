@@ -1,0 +1,68 @@
+<rml>
+<head>
+	<title>Chat Commands</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="chat_command.rcss"/>
+</head>
+<body>
+	<!-- The chat command window (CChatCommandWindow), docked right, full dock height: the title,
+	     then one page -- the commands, the selected command's description and parameters (each
+	     value in a dark box; a typed value in the value field), or the saved templates -- and the
+	     left / right buttons and the exit button. root_x/root_y/root_scale come from the dock
+	     transform; everything inside is reference px; text is .sharp-text at the native size,
+	     counter-scaled out of the panel. C++ keeps the pages, the values, the wheel, the keys and
+	     the commands; a click is queued with chat_command_hit(action, index), chat_command_left,
+	     chat_command_right or chat_command_exit. -->
+	<div id="panel" data-model="chat_command" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-height="window_height + 'px'" data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<div class="value-box" data-for="h : hits" data-if="h.value_box"
+		     data-style-left="h.left + 'px'" data-style-top="h.top + 'px'"
+		     data-style-width="h.width + 'px'" data-style-height="h.height + 'px'"></div>
+
+		<span class="sharp-text cc-text" id="title" data-style-left="title.left + 'px'" data-style-top="title.top + 'px'"
+		      data-style-color="title.color" data-style-font-size="title.text_px + 'px'"
+		      data-style-width="(title.width * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
+		<span class="sharp-text cc-text" data-for="t : texts" data-class-centred="t.centred"
+		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
+		      data-style-font-size="t.text_px + 'px'" data-style-width="(t.width * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+
+		<div class="hit" data-for="h : hits" data-if="h.action != 0"
+		     data-style-left="h.left + 'px'" data-style-top="h.top + 'px'"
+		     data-style-width="h.width + 'px'" data-style-height="h.height + 'px'"
+		     data-event-click="chat_command_hit(h.action, h.index)"></div>
+
+		<input id="value_field" type="text" class="text-field sharp-text" data-class-editing="editing"
+		       data-style-top="edit_top + 'px'" data-style-color="edit_color" data-style-font-size="text_px + 'px'"
+		       data-style-width="(142 * root_scale) + 'px'" data-style-height="(14 * root_scale) + 'px'"
+		       data-style-line-height="(14 * root_scale) + 'px'"
+		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>
+
+		<div class="cc-btn" id="btn_left" data-if="has_left_button" data-event-click="chat_command_left">
+			<span class="sharp-text cc-label" data-style-font-size="text_px + 'px'"
+			      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+			      data-style-line-height="label_line_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{left_text}}</span>
+		</div>
+		<div class="cc-btn" id="btn_right" data-if="has_right_button" data-event-click="chat_command_right">
+			<span class="sharp-text cc-label" data-style-font-size="text_px + 'px'"
+			      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+			      data-style-line-height="label_line_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{right_text}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="chat_command_exit"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+	</div>
+</body>
+</rml>

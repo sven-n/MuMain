@@ -167,9 +167,9 @@
    same convention as my_quest_info.rcss. */
 .btn-exit-label { display: none; }
 
-.tooltip-quest { left: 13px; }
-.tooltip-pet { left: 50px; }
-.tooltip-masterlevel { left: 87px; }
+.tooltip-quest { left: 12px; }
+.tooltip-pet { left: 49px; }
+.tooltip-masterlevel { left: 86px; }
 
 #btn_quest:hover ~ .tooltip-quest,
 #btn_pet:hover ~ .tooltip-pet,

@@ -1,0 +1,24 @@
+<rml>
+<head>
+	<title>Illusion Temple HUD (CCursedTempleSystem)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="cursed_temple_system.rcss"/>
+</head>
+<body data-model="cursed_temple_system">
+	<!-- The Illusion Temple HUD (CCursedTempleSystem): the time, the mini map with its markers and
+	     transparency button, the skill panel, the score effect and the tutorial step. A
+	     LayoutMode::Hud window drawn at fixed 640x480 reference positions, so .screen is that screen
+	     stretched W/640 x H/480 like the original; C++ lists the images in the original's drawing
+	     order. Text does not stretch: it takes the native size and cancels the stretch. In the
+	     background context, behind its other documents (the original drew it under nearly every
+	     panel). Takes no pointer events: the buttons' input stays native. -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<img class="sprite" data-for="s : sprites" data-attr-src="s.src" data-attr-rect="s.rect"
+		     data-style-left="s.left + 'px'" data-style-top="s.top + 'px'"
+		     data-style-width="s.width + 'px'" data-style-height="s.height + 'px'" data-style-image-color="s.color"/>
+		<span class="tutorial-line" data-for="l : tutorial_lines" data-style-top="l.top + 'px'" data-style-color="l.color"
+		      data-style-font-size="l.text_px + 'px'"
+		      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{l.text}}</span>
+	</div>
+</body>
+</rml>

@@ -85,6 +85,11 @@ namespace UI::RmlBridge
     // does exist, per Rml::Context::LoadDocumentFromMemory's source_url contract.
     std::string ThemedDocumentSourceUrl(const char* documentName, const std::string& themeName);
 
+    // True if the active theme has its own themes/<theme>/<documentName> markup. For a document only
+    // some themes have (the modern top-right button row, main_frame_top.rml): its owner loads it
+    // only when this says so, by directory convention rather than by theme name.
+    bool ThemeProvidesDocument(const char* documentName);
+
     // Reads `documentPath` (e.g. "Data/Interface/RmlUi/login.rml") from disk and instantiates it
     // against the currently active theme's stylesheet via LoadDocumentFromMemory. This is the one
     // entry point every migrated window should use instead of calling Context::LoadDocument
@@ -92,6 +97,35 @@ namespace UI::RmlBridge
     // built on this helper, not a per-window special case. Returns nullptr if the file couldn't
     // be read or the document failed to parse (logged via g_ErrorReport either way).
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath);
+
+    // LoadThemedDocument() for a document instantiated once per window (the friends family's
+    // chat rooms and letters): every occurrence of `modelPlaceholder` in the markup (its
+    // data-model name) becomes `modelName`, so each instance binds its own data model.
+    Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath,
+                                             const std::string& modelPlaceholder, const std::string& modelName);
+
+    // Sets the original's layer depth of `documentName` (e.g. "loading.rml", RmlStackingOrder.h)
+    // as the document's z-index. LoadThemedDocument() does this for every document it loads; call
+    // it only for a document loaded some other way.
+    void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName);
+
+    // Scene gate (RmlStackingOrder.h, DocumentScene). The original drew CNewUIManager's windows
+    // only while the main scene ran; the main-scene windows sync their documents from their own
+    // Update(), which stops with the main scene, so a document open at logout kept rendering over
+    // character selection. Outside the main scene every main-scene document is suspended
+    // (display: none -- never drawn, never hit; its own Show()/Hide() state is kept, and a Show()
+    // while suspended has no effect).
+    //
+    // Marks `documentName`'s document as a main-scene one when the stacking table says so;
+    // LoadThemedDocument() does this for every document it loads.
+    void ApplyDocumentScene(Rml::ElementDocument* document, const std::string& documentName);
+    // Every frame before RmlUi updates and renders (RmlUiRuntime::Update()): outside the main
+    // scene, suspends every marked document, including one loaded since (a theme switch).
+    void SuspendMainSceneDocumentsOutsideMainScene();
+    // At the start of CSystem::Update(), before the windows sync their documents: lifts the
+    // suspension, so a window closed meanwhile hides its document in the same frame instead of
+    // showing it for one.
+    void ResumeMainSceneDocuments();
 
     // LoadThemedDocument() against RmlUiRuntime::Instance().GetBackgroundContext(). Starts hidden,
     // same as LoadThemedDocument() itself -- the caller's own SyncRmlModel() shows/hides it against

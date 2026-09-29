@@ -1,0 +1,80 @@
+/* Legacy theme for CCommandWindow, reproducing the original's RenderBaseWindow(), its twelve
+   CButtons, the title, the exit button and the target box at the pointer. The frame is
+   docked_panel_frame.rcss's (linked first) at this window's own height: DockLogicalBottom (432)
+   rather than 429, with the 320-texel side pieces stretched over 323 units and the bottom piece
+   at 432 - 45, as RenderBaseWindow() drew them. Coordinates are reference px inside #panel. */
+
+@spritesheet cmd-btn-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	cmd-btn-up: 0px 0px 108px 29px;
+	cmd-btn-over: 0px 29px 108px 29px;
+	cmd-btn-down: 0px 58px 108px 29px;
+}
+@spritesheet cmd-target-sheet { src: "../../../newui_cursorid_wnd.jpg"; cmd-target: 0px 0px 128px 32px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { height: 432px; pointer-events: auto; }
+.tooltip { bottom: 40px; } /* 432 - 392 */
+.frame-left, .frame-right { height: 323px; }
+.frame-bottom { top: 387px; }
+
+/* RenderText(x + 60, y + 12, title, 72, 0, RT3_SORT_CENTER), bold white. */
+#title {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	font-weight: bold;
+	pointer-events: none;
+}
+
+/* InitButtons(): 108x29, centred on the 190-wide panel (x 41), from y 33, 30 apart. */
+#buttons { position: absolute; left: 41px; top: 33px; width: 108px; }
+.cmd-btn {
+	display: block;
+	position: relative;
+	width: 108px;
+	height: 29px;
+	margin-bottom: 1px;
+	decorator: image(cmd-btn-up);
+	pointer-events: auto;
+}
+.cmd-btn:hover { decorator: image(cmd-btn-over); }
+.cmd-btn:active, .cmd-btn.selected { decorator: image(cmd-btn-down); }
+
+/* CButton::Render(): the label centred in the button box, white; the armed command's in bold. */
+.cmd-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+.cmd-btn.selected .cmd-label { font-weight: bold; }
+
+/* The target box: newui_cursorid_wnd (128x32) at the pointer + 5; the name in the big font,
+   centred on the box 7 units below its top, white, or red (255, 0, 0) out of reach. */
+#target {
+	position: absolute;
+	width: 128px;
+	height: 32px;
+	decorator: image(cmd-target);
+	pointer-events: none;
+}
+#target_name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 7px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+#target.out-of-range #target_name { color: #ff0000; }

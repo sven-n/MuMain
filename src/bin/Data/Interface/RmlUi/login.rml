@@ -4,10 +4,10 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="login.rcss"/>
 </head>
-<body>
+<body class="scene-window-scale">
 	<!-- Theme-neutral reference login panel; themes/modern/login.rml forks it for modern's
 	     decoration -- keep ids/data-model/event names in sync, LoginWin.cpp binds both by name. -->
-	<div id="panel" data-model="login">
+	<div id="panel" class="native-text" data-model="login">
 		<div class="frame-accent"></div>
 		<div class="login-content"></div>
 		<div class="header-glow"></div>

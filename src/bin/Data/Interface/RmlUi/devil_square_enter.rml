@@ -1,0 +1,45 @@
+<rml>
+<head>
+	<title>Devil Square entry (CEnterDevilSquare)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="event_entry.rcss"/>
+</head>
+<body>
+	<!-- The Devil Square entry (CEnterDevilSquare) window, docked right: the title, the description lines, one button per level
+	     band (only the hero's is enabled) and the exit button. Shared shape with the other event
+	     entry windows (UI/Events/EventEntryView.h, event_entry.rcss). root_x/root_y/root_scale come
+	     from the dock transform; everything inside is reference px; text is .sharp-text at the
+	     native size, counter-scaled out of the panel. C++ keeps the level check, the corner close,
+	     Escape and the entry request; a click is queued with entry_press / entry_exit. -->
+	<div id="panel" data-model="devil_square_enter" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="title_text_px + 'px'"
+		      data-style-line-height="title_line_px + 'px'" data-style-width="(72 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+
+		<span class="sharp-text entry-line" data-for="line : lines" data-style-top="line.top + 'px'"
+		      data-style-font-size="line.text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
+
+		<div class="entry-btn" data-for="b : buttons" data-class-enabled="b.enabled" data-style-top="b.top + 'px'"
+		     data-event-click="entry_press(b.index)">
+			<span class="sharp-text entry-label" data-style-top="b.label_top + 'px'"
+			      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"
+			      data-style-width="(180 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="entry_exit"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+	</div>
+</body>
+</rml>

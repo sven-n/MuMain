@@ -25,6 +25,9 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     //. 크라이울프 레이드 관련 MVP
     void ChangeBackGroundMusic(int World);
     void RenderNoticesCryWolf();
+    // The ready-state notice's four lines (the page turns every ten seconds); false outside the
+    // ready state. Advances the page timer, so call it once per frame.
+    bool AdvanceNoticeTexts(std::wstring (&texts)[4]);
     void CryWolfMVPInit();
     int IsCryWolf1stMVPStart();
     bool IsCryWolf1stMVPStatePeace();

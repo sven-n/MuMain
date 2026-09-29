@@ -1,0 +1,230 @@
+#include "stdafx.h"
+
+#include "UI/Events/EventEntryView.h"
+
+#include "I18N/All.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+using namespace mu::ui::window;
+
+namespace
+{
+constexpr int kTitleBoxWidth = 72;
+constexpr int kLineBoxWidth = 190;
+constexpr int kButtonHeight = 29;
+
+template <typename Model, typename T>
+void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+} // namespace
+
+mu::ui::window::EventEntryView::EventEntryView(const char* modelName, const char* documentPath)
+    : m_ModelName(modelName), m_DocumentPath(documentPath)
+{
+}
+
+void mu::ui::window::EventEntryView::Build()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), m_ModelName,
+        [this](Rml::DataModelConstructor& c, EventEntryRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("title_text_px", &model.titleTextPx);
+            c.Bind("title_line_px", &model.titleLinePx);
+            c.Bind("title_text", &model.titleText);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+
+            auto line = c.RegisterStruct<EventEntryLineEntry>();
+            line.RegisterMember("text", &EventEntryLineEntry::text);
+            line.RegisterMember("top", &EventEntryLineEntry::top);
+            line.RegisterMember("text_px", &EventEntryLineEntry::textPx);
+            c.RegisterArray<std::vector<EventEntryLineEntry>>();
+            c.Bind("lines", &model.lines);
+
+            auto button = c.RegisterStruct<EventEntryButtonEntry>();
+            button.RegisterMember("label", &EventEntryButtonEntry::label);
+            button.RegisterMember("index", &EventEntryButtonEntry::index);
+            button.RegisterMember("enabled", &EventEntryButtonEntry::enabled);
+            button.RegisterMember("top", &EventEntryButtonEntry::top);
+            button.RegisterMember("label_top", &EventEntryButtonEntry::labelTop);
+            button.RegisterMember("label_line_px", &EventEntryButtonEntry::labelLinePx);
+            button.RegisterMember("label_text_px", &EventEntryButtonEntry::labelTextPx);
+            c.RegisterArray<std::vector<EventEntryButtonEntry>>();
+            c.Bind("buttons", &model.buttons);
+
+            c.BindEventCallback("entry_press",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PressedButton = arguments[0].Get<int>(-1);
+                                });
+            c.BindEventCallback("entry_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_ExitPressed = true; });
+        });
+
+    if (!modelCreated)
+        return;
+
+    EventEntryRmlModel& model = m_RmlBinder.GetModel();
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), m_DocumentPath);
+}
+
+void mu::ui::window::EventEntryView::ReloadTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    const EventEntryRmlModel content = m_RmlBinder.GetModel();
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    Build();
+    EventEntryRmlModel& model = m_RmlBinder.GetModel();
+    model.titleText = content.titleText;
+    model.lines = content.lines;
+    model.buttons = content.buttons;
+    // The new document was bound to the empty model; the restored text sizes equal the ones
+    // SyncTextSizes() computes, so nothing else marks these dirty.
+    m_RmlBinder.MarkDirty("title_text");
+    m_RmlBinder.MarkDirty("lines");
+    m_RmlBinder.MarkDirty("buttons");
+}
+
+void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std::vector<std::wstring>& lines,
+                                                float firstLineTop, float lineSpacing,
+                                                const std::vector<Button>& buttons, float firstButtonTop,
+                                                float buttonSpacing)
+{
+    Build();
+    m_Title = title != nullptr ? title : L"";
+    m_LineTexts = lines;
+
+    EventEntryRmlModel& model = m_RmlBinder.GetModel();
+    model.titleText = StringUtils::WideToNarrow(m_Title.c_str());
+    model.lines.clear();
+    for (std::size_t i = 0; i < lines.size(); ++i)
+        model.lines.push_back(
+            {StringUtils::WideToNarrow(lines[i].c_str()), firstLineTop + lineSpacing * static_cast<float>(i), 0.f});
+    model.buttons.clear();
+    for (std::size_t i = 0; i < buttons.size(); ++i)
+    {
+        EventEntryButtonEntry entry;
+        entry.label = StringUtils::WideToNarrow(buttons[i].label.c_str());
+        entry.index = static_cast<int>(i);
+        entry.enabled = buttons[i].enabled;
+        entry.top = firstButtonTop + buttonSpacing * static_cast<float>(i);
+        model.buttons.push_back(std::move(entry));
+    }
+    m_RmlBinder.MarkDirty("title_text");
+    m_RmlBinder.MarkDirty("lines");
+    m_RmlBinder.MarkDirty("buttons");
+}
+
+void mu::ui::window::EventEntryView::Sync(bool visible, const POINT& pos)
+{
+    Build();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 4.0/4.1: over the HUD like every panel the original opened.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    if (!visible)
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncTextSizes();
+}
+
+void mu::ui::window::EventEntryView::SyncTextSizes()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    EventEntryRmlModel& model = m_RmlBinder.GetModel();
+
+    // RenderText(x + 60, y + 12, title, 72, 0, RT3_SORT_CENTER), bold: shrunk to fit its box, its
+    // top staying at y + 12.
+    g_pRenderText->SetFont(g_hFontBold);
+    const int titleWidth = g_pRenderText->MeasureText(m_Title.c_str(), static_cast<int>(m_Title.size())).cx;
+    const float boldPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    const float titlePx = UI::Scaling::NativeTextPixelSizeInBox(
+        UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth), static_cast<float>(kTitleBoxWidth));
+    SyncField(m_RmlBinder, &EventEntryRmlModel::titleTextPx, "title_text_px", titlePx);
+    SyncField(m_RmlBinder, &EventEntryRmlModel::titleLinePx, "title_line_px",
+              static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY *
+                  (titlePx / boldPx));
+
+    // The description lines: the normal font, each shrunk to the 190-unit box if wider.
+    g_pRenderText->SetFont(g_hFont);
+    bool linesChanged = false;
+    for (std::size_t i = 0; i < model.lines.size() && i < m_LineTexts.size(); ++i)
+    {
+        const std::wstring& text = m_LineTexts[i];
+        const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
+        const float px = UI::Scaling::NativeTextPixelSizeInBox(
+            UI::Scaling::FontRole::Normal, transform, static_cast<float>(width), static_cast<float>(kLineBoxWidth));
+        if (model.lines[i].textPx != px)
+        {
+            model.lines[i].textPx = px;
+            linesChanged = true;
+        }
+    }
+    if (linesChanged)
+        m_RmlBinder.MarkDirty("lines");
+
+    // CButton::Render(): the bold label at x + (180 / 2 - w / 2), y + (29 / 2 - h / 2), whole units.
+    const int boldHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold);
+    bool buttonsChanged = false;
+    for (EventEntryButtonEntry& button : model.buttons)
+    {
+        const float labelTop = static_cast<float>(kButtonHeight / 2 - boldHeight / 2);
+        const float linePx = static_cast<float>(boldHeight) * transform.scaleY;
+        if (button.labelTop != labelTop || button.labelLinePx != linePx || button.labelTextPx != boldPx)
+        {
+            button.labelTop = labelTop;
+            button.labelLinePx = linePx;
+            button.labelTextPx = boldPx;
+            buttonsChanged = true;
+        }
+    }
+    if (buttonsChanged)
+        m_RmlBinder.MarkDirty("buttons");
+}
+
+int mu::ui::window::EventEntryView::TakePressedButton()
+{
+    const int pressed = m_PressedButton;
+    m_PressedButton = -1;
+    const EventEntryRmlModel& model = m_RmlBinder.GetModel();
+    if (pressed < 0 || pressed >= static_cast<int>(model.buttons.size()) || !model.buttons[pressed].enabled)
+        return -1;
+    return pressed;
+}
+
+bool mu::ui::window::EventEntryView::TakeExitPressed()
+{
+    const bool pressed = m_ExitPressed;
+    m_ExitPressed = false;
+    return pressed;
+}

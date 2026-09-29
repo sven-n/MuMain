@@ -35,69 +35,24 @@ bool mu::ui::window::CSiegeWarSoldier::OnUpdate()
     return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnRender
-bool mu::ui::window::CSiegeWarSoldier::OnRender()
-{
-    EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    // 모든 캐릭터의 위치
-    RenderCharPosInMiniMap();
-
-    DisableAlphaBlend();
-
-    EnableAlphaTest();
-
-    // 지도상의 명령 Icon
-    RenderCmdIconInMiniMap();
-
-    DisableAlphaBlend();
-
-    return true;
-}
-
-//---------------------------------------------------------------------------------------------
-// OnCreate
 void mu::ui::window::CSiegeWarSoldier::OnSetPos(int x, int y) {}
 
-//---------------------------------------------------------------------------------------------
-// RenderCharPosInMiniMap
-// 미니맵에 모든 캐릭터를 렌더
-void mu::ui::window::CSiegeWarSoldier::RenderCharPosInMiniMap()
+// Everyone else in view, as a dot, then the teams' commands (the original's OnRender(): its
+// per-kind colour branches were empty, so every dot takes the same colour).
+void mu::ui::window::CSiegeWarSoldier::OnFillRmlModel(SiegeWarfareRmlModel& model)
 {
-    float fPosX, fPosY;
-
-    // 미니멥에 플레이어 렌더
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
         if (c != NULL && c->Object.Live && c != Hero &&
             (c->Object.Kind == KIND_PLAYER || c->Object.Kind == KIND_MONSTER || c->Object.Kind == KIND_NPC))
         {
-            OBJECT* o = &c->Object;
-
-            if (g_isCharacterBuff(o, static_cast<eBuffState>(m_dwBuffState)))
-            {
-            }
-            else
-            {
-            }
-            if (o->Kind == KIND_NPC)
-            {
-            }
-            else if (o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE)
-            {
-            }
-
-            fPosX = ((c->PositionX)) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
-            fPosY = (256 - (c->PositionY)) / m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y;
-            RenderColor(fPosX, fPosY, 3, 3);
+            const POINT pos = MiniMapPoint(c->PositionX, c->PositionY);
+            model.dots.push_back({static_cast<float>(pos.x), static_cast<float>(pos.y)});
         }
     }
+
+    FillCommands(model);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -122,11 +77,3 @@ bool mu::ui::window::CSiegeWarSoldier::OnBtnProcess()
 {
     return false;
 }
-
-//---------------------------------------------------------------------------------------------
-// OnLoadImages
-void mu::ui::window::CSiegeWarSoldier::OnLoadImages() {}
-
-//---------------------------------------------------------------------------------------------
-// OnUnloadImages
-void mu::ui::window::CSiegeWarSoldier::OnUnloadImages() {}

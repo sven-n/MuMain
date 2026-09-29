@@ -247,6 +247,154 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   box back from RmlUi, and the hint ends below its anchor like the native one. Paint order is
   RmlUi's: the icons now follow `main_frame.rml`'s document order instead of the native layer
   depth (the hit targets already did). The skill textures stay loaded for `CUIMuHelper`.
+- **Guild and social windows** — **done, both themes (2026-09-28)**: `CServerMsgWin`,
+  `CGuildMakeWindow`, `CGuildInfoWindow` with its lists, `CGuild_ToPerson_Position`, `CGensRanking`,
+  `CItemExplanationWindow`, `CSetItemExplanation`. The friends family (`CFriendWindow`, 2026-09-28): the
+  main window with its three tabs, the add-friend and question dialogs, the letter read / write
+  windows and the chat rooms are RmlUi; the letters' photo viewer stays native 3D. Worth carrying
+  to the next port:
+
+  - **A toolkit of draggable native windows** (`CUIWindowMgr`) ports window by window without
+    touching its logic: each window's `Render()` gets a `CollectRmlView()` twin that emits the same
+    geometry as named parts into a per-window document, synced from `Update()`; code that lived in
+    the render functions (child layout messages, scroll bar computation, `InitControls()`) moves to
+    functions both paths call. Native text keeps its spaces (`white-space: pre`).
+  - **A native text field can stay the field's model** while an RmlUi `<input>` shows it and takes
+    the keyboard (`FriendWindowView::SyncFields()`): a native `GiveFocus()` moves the focus to the
+    input with the native caret and selection -- only once the input is laid out, RmlUi drops the
+    focus of an element nobody can see --, typed text goes back to the native field, a value the
+    window sets goes to the input, and Enter / Tab pressed in the input run the native field's key
+    handling. The window's code is unchanged.
+  - **Native 3D inside an RmlUi window** (the letters' photo viewer) is still drawn after the
+    window; the document leaves the 3D box open and an underlay document in the background context
+    paints the window's back under it.
+
+  - **A block-scope `extern` inside `mu::ui::window`** declares a namespace member, not the global:
+    UIManager.cpp defines same-named references there (`ItemHelp`, `TextList`, ...), so such an
+    extern reads the reference's pointer bits. Use the globals.
+  - **Windows the original never showed** (the item help) can still carry the original's latent
+    crashes (a division by a width it did not list); exercise every size once it draws.
+- **Castle siege windows** — **done, both themes (2026-09-28)**: `CProgressMsgBox` (seal, crown
+  switch and crown defence notices), `CGateSwitchWindow`, `CCatapultWindow`, `CGatemanWindow`,
+  `CGuardWindow` with its guild lists, `CCastleWindow` (Senatus) and `CSiegeWarfare` (the Valley of
+  Loren HUD). Legacy matches the original in paired comparison replays (notices and NPC windows at
+  800x600 to 1920x1080; the Senatus against the real server's replies and the HUD's observer
+  variant by hand at all eight sizes; the HUD's soldier and commander variants by code). Worth carrying to the next port:
+
+  - **A HUD the original drew under every window** (the siege HUD, layer depth 1.6) goes in the
+    background context like the duel and battle-soccer boards; a main-context document covered
+    the still-native durability warnings.
+  - **A texture the original cut with UVs** (the siege mini map's scrolled, zoomed window) is an
+    `<img rect="x y w h">` in texels bound from C++; no clipping box needed.
+  - **A native button can keep its input** (`CButton` hit-test and up / over / down state) while
+    RmlUi draws it from the reported row, when the window's input is native anyway.
+- **Event HUDs, event NPC windows and the duel spectator** — **done, both themes (2026-09-28)**:
+  `CKanturu2ndEnterNpc`, `CKanturuInfoWindow`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin`,
+  `CGoldBowmanWindow`, `CGoldBowmanLena`, `CBloodCastle`, `CChaosCastleTime`,
+  `CDoppelGangerFrame`, `CEmpireGuardianTimer`,
+  `CCryWolf`, `CCursedTempleSystem`, `CDuelWatchMainFrameWindow`, `CDuelWatchUserListWindow`.
+  Legacy matches the original at the eight sizes (paired replays or hand probes over injected
+  packets; the event maps by a client-only map change). Worth carrying to the next port:
+
+  - **Animations the original stepped in `Render()`** (gauges and markers moving 0.01 a frame, the
+    spectator gauges' catch-up bars) move to `Update()`; the view only mirrors the result, so a
+    comparison waits for them to settle.
+  - **Entry windows with an item and buttons** share `UI/Events/EventItemEntryView` (texts with
+    per-line alignment, per-button size and label font, a background document for the frame under
+    a native 3D preview).
+  - **A bar drawn mirrored** (negative texture width) is an `<img rect>` with `transform:
+    scale(-1, 1)`; `rect` takes the texels the original sampled.
+- **The remaining native 2D surfaces** — **done, both themes (2026-09-28)**: the centre-screen
+  notices, the map name banner, `CItemEnduranceInfo`, the party HP bars over heads, the mix
+  window's socket list, the jewel (dis)assembly box and its list, the photo viewer's help text,
+  the reconnect dialog, the Blood Castle / Devil Square / Chaos Castle result boxes, the Illusion
+  Temple relic progress box, the Kanturu result banner, the siege crown switch lines and build-time
+  bars, the Kalima object labels, the login scene's logo and bottom lines, and the loading
+  screen's art (its RmlUi document drew white quads). The tournament countdown stays native
+  (OpenMU never sends its packets). Left native on purpose: the mouse cursor, live 3D content,
+  `CInGameShop`, developer overlays (`migration-ledger.md`'s "Native surfaces outside the window
+  classes"). Legacy matches the original at the eight sizes (suites where they exist, hand probes
+  over injected packets otherwise). Worth carrying to the next port:
+
+  - **World-anchored or shared legacy drawing** (party HP bars, Kanturu banner, siege lines, Kalima
+    labels) goes through the world-label layer's `Overlay2DRecordScope`, not a new document.
+  - **Text the native renderer draws small** is rasterised at the font's cached size and scaled
+    down; RmlUi laid out at that size directly comes out wider (up to 4 % on a long line). Lay the
+    line out at `CachedFontPointSize()` and `transform: scale()` it to the native size (the login
+    scene lines).
+  - **A bitmap drawn under `EnableAlphaBlend()`** (BlendMode::Glow, ONE, ONE) is
+    `decorator: additive-image(<colour> <image>)` (`Render/RmlUi/RmlAdditiveImageDecorator`),
+    times the element's opacity.
+  - **A texture the loader padded** is wider than its art: take the art by its texels with
+    `<img rect>`, as the native sprite took it by texture coordinates (the loading screen).
+  - **Image paths** in a themed document resolve from the theme folder
+    (`../../../../Logo/…` for `Data/Logo`); an absolute `/Interface/…` path misses the `Data`
+    folder and draws an untextured (white) quad.
+- **World labels (`CNameWindow`)** — **done, both themes (2026-09-28)**: names, chat balloons,
+  guild and union lines, shop titles, Gens marks, the selected monster's name and bar, the F8
+  health bars, ground item names, the macro bar and event times. Legacy matches the original with
+  the world rendered (paired `name-labels` / `name-labels-monster` replays at the eight sizes).
+  Worth carrying to the next port:
+
+  - **Drawing spread over shared legacy code** can move without a second copy of its rules: record
+    it (`Render::Renderer::Overlay2DRecordScope` makes `RenderText()`, `RenderColorQuadARGB()` and
+    `RenderBitmap()` report physical rectangles, colours, text sizes and blend state instead of
+    drawing) and replay the records into pooled elements that only get the properties that changed.
+  - **Labels under every window, with this frame's camera**: `CObject::PrepareBackgroundLayer()`
+    runs right before the background context renders, which is before every window.
+  - **`EnableAlphaBlend()` adds** (BlendMode::Glow is ONE, ONE): `decorator: additive-fill(<colour>)`
+    reproduces it; a plain `background-color` turns such a quad opaque.
+- **Event, duel and map windows** — **done, both themes (2026-09-27)**: `CMiniMap`, `CDuelWindow`,
+  `CBattleSoccerScore`, `CDuelWatchWindow`, `CEnterBloodCastle`, `CEnterDevilSquare`,
+  `CCursedTempleEnter`, `CCursedTempleResult`, `CDoppelGangerWindow`, `CEmpireGuardianNPC`,
+  `CUnitedMarketPlaceWindow`, `CChatCommandWindow`; then `CServerMsgWin` (character list). Legacy
+  matches the original at the eight common sizes (paired comparison replays). Worth carrying to the
+  next port:
+
+  - **A window with a live 3D preview** (Doppelganger, Imperial Guardian) puts its frame in a
+    background-context document, painted before the native 3D pass, and its texts and buttons in a
+    main-context one (`UI/Events/EventItemEntryView`).
+  - **A native text box can become an RmlUi `<input>`** in the window's own document (the chat
+    command list's value field): claim RmlUi's text-input identity through `SetRelatedWnd()` while
+    it has focus so the window's key handling still runs; filter a numeric field's value in C++.
+  - **A fading sprite drawn under the native alpha test (0.25)** stays invisible for the first
+    moments of its fade; RmlUi blends it from the start (the Illusion Temple result banner). Compare
+    settled frames.
+  - **Fixed-width text** (`g_hFixFont`) is the Cousine face, registered with RmlUi for it.
+
+  - **RmlUi blends premultiplied**; textures loaded from game files are premultiplied on load now
+    (`RmlUiRenderInterface::LoadTexture`). A straight-alpha texture with coloured transparent
+    pixels drew as a solid box (the mini map's markers) and every semi-transparent edge was too
+    bright.
+  - **A quad the original turned in physical pixels** (`RenderBitRotate`/`RenderPointRotate`/
+    `RenderBitmapRotate`, non-uniform Hud stretch) is reproduced exactly with a CSS `matrix()`
+    built from three of its corners (`UI/HUD/MiniMapLayout`).
+  - **RmlUi does not clip transformed content that does not overflow in layout terms**; an
+    untransformed clipping box needs `clip: always` (then it is a scissor rectangle).
+  - **Data expressions have no unary minus**: bind `-x` from C++.
+  - **A window the original drew under every panel** (duel and battle-soccer boards) lives in the
+    background context, behind its other documents: a docked panel's frame is painted there, so
+    a main-context document would draw over it however far back it is pushed.
+  - **An overlay the original drew under the bottom HUD** (the mini map) stays under the main
+    frame's document by the stacking table and must not paint over the still-native left/centre
+    HUD art.
+  - **RenderText() shrinks a text wider than its box** (player names, event lines): use
+    `NativeTextPixelSizeInBox()` per text, not only for titles.
+- **HUD menus and the party list** — **done, both themes (2026-09-27)**: `CHelpWindow`,
+  `CWindowMenu`, `CCommandWindow`, `CQuickCommandWindow`, `CPartyListWindow`. Legacy matches the
+  original at the eight common sizes (paired comparison replays). Worth carrying to the next port:
+
+  - **A document the original drew over the HUD** is shown unfocused and pulled to the front
+    (`UI::RmlBridge::SyncDocumentVisibilityInFront()`), so the location bar and the chat/system
+    logs no longer paint over it and an open chat field keeps its focus.
+  - **Native text drawn into a box shrinks to fit it** (`FontScaleForBounds()`);
+    `UI::Scaling::NativeTextPixelSizeInBox()` gives the size a legacy leaf needs, and its line box
+    shrinks with it.
+  - **`overflow: hidden` does not clip under a panel's `transform: scale()`** in this build; a
+    cropped bar uses `decorator: image(<sprite> scale-none left top)` on an element of the shown
+    width instead.
+  - **A render-only port is fine when other code reads the native state**: the quick command
+    menu keeps its native hover index because the control socket observes it.
 - **`CMoveCommandWindow`** — **done, both themes (2026-09-27)**. The left-docked warp list (`/move`).
   Ported for the scrollbar: this is the window that actually *retires* a hand-rolled one rather than
   decorating a new one. `ThumbYForScrollOffset`/`ScrollOffsetForThumbY`/`UpdateDragState`/
@@ -349,6 +497,44 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 7. Uses reusable components/primitives where they exist; doesn't invent a new one-off mechanism
    when an existing pattern already covers the need — though see "Known gaps," several of the
    principles' presumed primitives don't exist yet on this branch.
+8. A new document gets its original window's layer depth in the stacking table (below).
+
+## Stacking order
+
+Every document's `z-index` is the layer depth of the original window (or render pass) it
+replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set by `LoadThemedDocument()`.
+The original drew its windows in ascending `GetLayerDepth()` order, then the notices, the scene
+windows (`CUIMng`), the login scene's message box and the reconnect dialog; RmlUi sorts a context's
+documents by `z-index` and keeps show/focus order only among equal depths, so
+`SyncDocumentVisibilityInFront()`/`Behind()` and focus now only order documents of one depth. The
+same numbers order the background context. Passes outside the window list: object descriptions
+and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
+loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
+and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
+chat log, the friends window and the HUD hid its rows. The modern theme's top-right button row
+is its own document (`main_frame_top.rml`, 1.05: over the names, under every window, which dock
+over that corner). Native parts (item grids, 3D items) keep
+the native order and stay under the main context. `rml_stacking_order_tests` checks that every
+document the sources name has an entry.
+
+## Legacy parity fixes (2026-09-29)
+
+Differences to the original found by the paired comparison suites and fixed in shared places, so
+a new port inherits them:
+
+- **Scene gate.** A window `CSystem` updates only in the main scene still has a live document in
+  every scene: gate it like the HUD documents (`CSystem::SyncMainSceneHudVisibility()`); the chat
+  and system logs are.
+- **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
+  bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself (the move
+  list: `CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
+- **Button hover text.** `CTooltip` uses the shared tooltip's `Config::Box::ButtonHint`
+  (`CNewUIButton`'s unframed box, 2 units off its rect); the framed box is for `RenderTipTextList()`.
+- **Hangul.** NanumGothic is a fallback face, so Korean game text draws in any family.
+- **Alpha test.** Art the original drew under `EnableAlphaTest()` (reference 0.25) stays invisible
+  while its fade is below a quarter (the Illusion Temple banner).
+- **Scene windows re-created per visit.** A `Create()` that resets model fields must mark them
+  dirty (the login fields) and reset what the original reset (the server list's chosen group).
 
 ## Findings worth knowing before the next port
 
@@ -591,9 +777,9 @@ for "the full architecture is in place":
   (the live in-game Options window, opened by `CSysMenuWin`'s Option button per the "Coexistence
   patterns" note in `README.md`) had zero RmlUi call sites at the time despite reading as though it
   might already be replaced — **since ported and shipped (2026-09-19), see `migration-ledger.md`'s
-  own row** — and `CServerMsgWin` (sibling of the already-done `CMsgWin`) is likewise still fully
-  native and not yet a distinct port target (a real, unrelated visibility bug in it was found and
-  fixed along the way, see its own ledger row — not a port). Conversely,
+  own row** — and `CServerMsgWin` (sibling of the already-done `CMsgWin`) was likewise still fully
+  native (a real, unrelated visibility bug in it was found and fixed along the way) — **since ported
+  (2026-09-27), see its ledger row**. Conversely,
   `CCreditWin` turned out to already be a real, shipped RmlUi port (`credit_win.rml`) that was never
   logged in this file's own "What's migrated" list above — now listed there.
 - ~~`MuPlatform::Initialize()`/`CreatePlatformWindow()`/`GetWindow()`/`Shutdown()`/

@@ -170,45 +170,53 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
 
 void CNewChaosCastleSystem::RenderMatchResult(void)
 {
+    EnableAlphaTest();
+    g_pRenderText->SetBgColor(0, 0, 0, 0);
+
+    std::vector<MatchResultText> texts;
+    CollectMatchResult(texts);
+    RenderMatchResultTexts(texts);
+
+    DisableAlphaBlend();
+}
+
+void CNewChaosCastleSystem::CollectMatchResult(std::vector<MatchResultText>& texts) const
+{
     int x = REFERENCE_WIDTH / 2;
     int yPos = m_PosResult.y + 40;
     wchar_t lpszStr[256] = {};
 
-    EnableAlphaTest();
+    auto add = [&texts, x](int y, const wchar_t* text, MatchResultText::Font font, DWORD color)
+    { texts.push_back({text, x, y, 0, 0, RT3_WRITE_CENTER, font, color}); };
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(128, 255, 128, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
+    const DWORD green = RGBA(128, 255, 128, 255);
     if (m_iNumResult)
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::TheSpiritOfTheGuardHasBeenPurified, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, I18N::Game::TheSpiritOfTheGuardHasBeenPurified, MatchResultText::Font::Normal, green);
         yPos += 16;
         mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::CongratulationsYouHaveSuccessfully);
-        g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, lpszStr, MatchResultText::Font::Normal, green);
     }
     else
     {
         mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::UnfortunatelyYouHaveFailed);
-        g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, lpszStr, MatchResultText::Font::Normal, green);
         yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::TryAgainNextTime, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, I18N::Game::TryAgainNextTime, MatchResultText::Font::Normal, green);
     }
     yPos += 30;
 
-    MatchResult* pResult = &m_MatchResult[0];
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(210, 255, 210, 255);
+    const MatchResult* pResult = &m_MatchResult[0];
+    const DWORD rewardColor = RGBA(210, 255, 210, 255);
 
     mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
+    add(yPos, lpszStr, MatchResultText::Font::Bold, rewardColor);
+    yPos += 20;
 
     mu_swprintf(lpszStr, I18N::Game::MonsterKillCountD, pResult->m_iScore);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
+    add(yPos, lpszStr, MatchResultText::Font::Bold, rewardColor);
+    yPos += 20;
 
     mu_swprintf(lpszStr, I18N::Game::PlayersKillCountD, pResult->m_iZen);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 24;
-
-    DisableAlphaBlend();
+    add(yPos, lpszStr, MatchResultText::Font::Bold, rewardColor);
 }

@@ -1,0 +1,14 @@
+/* Modern frame of the Golden Archer's windows: docked_panel_frame.rcss's forged panel (linked
+   first) and the lucky number field's recessed back. Background context. */
+
+#serial_back {
+	position: absolute;
+	left: 45px;
+	top: 255px;
+	width: 108px;
+	height: 23px;
+	background-color: token(surface-recessed);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+#panel { pointer-events: none; }

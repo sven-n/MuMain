@@ -8,19 +8,22 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "Render/Sprites/Sprite.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/Windows/ServerMsgRmlModel.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 #define SMW_MSG_LINE_MAX 5
 #define SMW_MSG_ROW_MAX 83
 
 // Purely passive/non-interactive message log; never becomes CUIMng's "active" window.
+// server_msg.rml draws it (the frame sized to the line count, the lines in the fixed font).
 class CServerMsgWin : public mu::ui::window::CObject
 {
-    enum { BG_CENTER, BG_TOP, BG_BOTTOM, BG_LEFT, BG_RIGHT, BG_MAX };
-
 protected:
-    // 5-part 9-slice-style composite background.
-    CSprite m_aSprBg[BG_MAX];
     POINT m_ptPos;
     int m_nBgSideNow;
 
@@ -39,6 +42,7 @@ public:
 
     // mu::ui::window::IObject
     bool Render() override;
+    bool Update() override;
     // Never consumes -- purely passive message log, never intercepted clicks even as a CWin.
     bool UpdateMouseEvent() override { return true; }
     bool UpdateKeyEvent() override { return true; }
@@ -47,6 +51,14 @@ public:
 
 protected:
     int SetLine(int nLine);
+
+private:
+    void BuildRmlUi();
+    void ReloadRmlTheme();
+    void SyncRmlModel();
+
+    RmlModelBinder<ServerMsgRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
 };
 
 extern CServerMsgWin g_ServerMsgWin;

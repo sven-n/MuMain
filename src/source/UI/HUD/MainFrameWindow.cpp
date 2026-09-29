@@ -307,7 +307,12 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
             });
 
         if (modelCreated)
+        {
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/main_frame.rml");
+            if (m_pRmlDoc && UI::RmlBridge::ThemeProvidesDocument("main_frame_top.rml"))
+                m_pRmlTopDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                                 "Data/Interface/RmlUi/main_frame_top.rml");
+        }
 
         // Gated on ThemeProvidesOwnIconChrome() (see m_BgRmlBinder's header comment) -- themes
         // without that capability don't ship main_frame_bg.rml.
@@ -348,6 +353,11 @@ void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
+    if (m_pRmlTopDoc)
+    {
+        context->UnloadDocument(m_pRmlTopDoc);
+        m_pRmlTopDoc = nullptr;
+    }
 
     if (m_pRmlBgDoc)
     {
@@ -383,6 +393,8 @@ void mu::ui::window::CMainFrameWindow::Release()
     // Hide directly since RmlUi renders last in the frame regardless of scene (see CMuHelperBar::Release()).
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
+    if (m_pRmlTopDoc)
+        m_pRmlTopDoc->Hide();
 
     // Not load-bearing like m_pRmlDoc's Hide() above -- unreachable once RemoveUIObj() takes effect. Hidden anyway, defensively.
     if (m_pRmlBgDoc)
@@ -2418,6 +2430,7 @@ void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
     const bool show = IsVisible() && sceneAllowsShow;
 
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, show);
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlTopDoc, show);
 
     // m_pRmlBgDoc needs the same gate: CManager::Render()'s centralized RenderBackgroundLayer()
     // call replays whatever's Show()n in the shared background context every frame, regardless of

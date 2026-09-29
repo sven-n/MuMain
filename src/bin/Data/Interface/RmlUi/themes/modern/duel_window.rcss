@@ -1,0 +1,37 @@
+/* Modern theme for CDuelWindow: the same names and scores at the original's place above the bottom
+   HUD's right end, on the modern panel surface instead of the figure-ground art. Geometry is the
+   legacy one (reference px under .screen's W/640 x H/480 stretch, see duel_window.rml). */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel {
+	position: absolute;
+	width: 131px;
+	height: 70px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+}
+#back { display: none; }
+
+.duel-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+}
+.duel-text.hero { color: #0096ff; top: 33px; }
+.duel-text.enemy { color: #ff1919; top: 56px; }
+#hero_name, #enemy_name { left: 55px; }
+#hero_score, #enemy_score { left: 31px; }

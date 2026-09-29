@@ -1,0 +1,103 @@
+/* Modern theme for CGensRanking: docked_panel_frame.rcss's forged panel (linked first), the mark on
+   a recessed panel, flat boxes and scroll track in the modern tokens. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+@spritesheet gens-d-sheet
+{
+	src: "../../../Gens_mark_D_new.tga";
+	gens-d-0: 0px 0px 50px 69px;
+	gens-d-1: 50px 0px 50px 69px;
+	gens-d-2: 100px 0px 50px 69px;
+	gens-d-3: 150px 0px 50px 69px;
+	gens-d-4: 200px 0px 50px 69px;
+	gens-d-5: 0px 69px 50px 69px;
+	gens-d-6: 50px 69px 50px 69px;
+	gens-d-7: 100px 69px 50px 69px;
+	gens-d-8: 150px 69px 50px 69px;
+	gens-d-9: 200px 69px 50px 69px;
+	gens-d-10: 0px 138px 50px 69px;
+	gens-d-11: 50px 138px 50px 69px;
+	gens-d-12: 100px 138px 50px 69px;
+	gens-d-13: 150px 138px 50px 69px;
+}
+@spritesheet gens-v-sheet
+{
+	src: "../../../Gens_mark_V_new.tga";
+	gens-v-0: 0px 0px 50px 69px;
+	gens-v-1: 50px 0px 50px 69px;
+	gens-v-2: 100px 0px 50px 69px;
+	gens-v-3: 150px 0px 50px 69px;
+	gens-v-4: 200px 0px 50px 69px;
+	gens-v-5: 0px 69px 50px 69px;
+	gens-v-6: 50px 69px 50px 69px;
+	gens-v-7: 100px 69px 50px 69px;
+	gens-v-8: 150px 69px 50px 69px;
+	gens-v-9: 200px 69px 50px 69px;
+	gens-v-10: 0px 138px 50px 69px;
+	gens-v-11: 50px 138px 50px 69px;
+	gens-v-12: 100px 138px 50px 69px;
+	gens-v-13: 150px 138px 50px 69px;
+}
+
+#panel { pointer-events: none; }
+
+#rank_back { position: absolute; left: 13px; top: 60px; width: 170px; height: 88px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#mark { position: absolute; left: 30.5px; top: 69.5px; width: 50px; height: 69px; }
+#mark.gens-d-0 { decorator: image(gens-d-0); }
+#mark.gens-d-1 { decorator: image(gens-d-1); }
+#mark.gens-d-2 { decorator: image(gens-d-2); }
+#mark.gens-d-3 { decorator: image(gens-d-3); }
+#mark.gens-d-4 { decorator: image(gens-d-4); }
+#mark.gens-d-5 { decorator: image(gens-d-5); }
+#mark.gens-d-6 { decorator: image(gens-d-6); }
+#mark.gens-d-7 { decorator: image(gens-d-7); }
+#mark.gens-d-8 { decorator: image(gens-d-8); }
+#mark.gens-d-9 { decorator: image(gens-d-9); }
+#mark.gens-d-10 { decorator: image(gens-d-10); }
+#mark.gens-d-11 { decorator: image(gens-d-11); }
+#mark.gens-d-12 { decorator: image(gens-d-12); }
+#mark.gens-d-13 { decorator: image(gens-d-13); }
+#mark.gens-v-0 { decorator: image(gens-v-0); }
+#mark.gens-v-1 { decorator: image(gens-v-1); }
+#mark.gens-v-2 { decorator: image(gens-v-2); }
+#mark.gens-v-3 { decorator: image(gens-v-3); }
+#mark.gens-v-4 { decorator: image(gens-v-4); }
+#mark.gens-v-5 { decorator: image(gens-v-5); }
+#mark.gens-v-6 { decorator: image(gens-v-6); }
+#mark.gens-v-7 { decorator: image(gens-v-7); }
+#mark.gens-v-8 { decorator: image(gens-v-8); }
+#mark.gens-v-9 { decorator: image(gens-v-9); }
+#mark.gens-v-10 { decorator: image(gens-v-10); }
+#mark.gens-v-11 { decorator: image(gens-v-11); }
+#mark.gens-v-12 { decorator: image(gens-v-12); }
+#mark.gens-v-13 { decorator: image(gens-v-13); }
+.text-back { position: absolute; left: 13px; width: 170px; height: 21px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+
+.fill { position: absolute; background-color: token(surface-recessed); }
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
+
+.s-top, .s-bottom { display: none; }
+.s-mid { position: absolute; left: 172px; width: 3px; height: 15px; background-color: token(surface-recessed); }
+.thumb { position: absolute; left: 169px; width: 9px; height: 30px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+.thumb.off { background-color: token(surface-raised); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.gr-text.centred { text-align: center; }
+.gr-text.right { text-align: right; }
+.gr-text.bold { font-weight: bold; }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }
