@@ -1,5 +1,13 @@
 #pragma once
 
+#include "UI/HUD/MapNameRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
+
 typedef std::map<int, std::wstring> ImgPathMap;
 
 namespace UI::MapName
@@ -45,4 +53,16 @@ public:
 
 protected:
     void InitImgPathMap();
+
+    // The banner in RmlUi (map_name.rml): background context, behind every other document (the
+    // original drew it before every window). Render() fills it; the native drawing is the fallback
+    // when RmlUi is not available.
+    void BuildRmlUi();
+    void ReloadRmlTheme();
+    void SyncView();
+    void RenderNative();
+
+    RmlModelBinder<UI::MapName::MapNameRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    bool m_themeReloadRegistered = false;
 };

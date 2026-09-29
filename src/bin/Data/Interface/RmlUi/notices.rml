@@ -1,0 +1,20 @@
+<rml>
+<head>
+	<title>Notices</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="notices.rcss"/>
+</head>
+<body data-model="notices">
+	<!-- The centre-screen notice lines (UI::Notices): up to six lines, each centred on the
+	     original's x 320 (a row from 0 to twice that centre, text centred in it) at its own top,
+	     on a box sized to its text. Positions and sizes are physical px computed in C++ from the
+	     transform the native text used; the colour follows the line's kind. Takes no pointer
+	     events. -->
+	<div class="notice-row" data-for="line : lines"
+	     data-style-top="line.top + 'px'" data-style-width="row_width + 'px'">
+		<span data-attr-class="'notice-text notice-text--' + line.kind"
+		      data-style-font-size="text_px + 'px'"
+		      data-style-line-height="line_height_px + 'px'">{{line.text}}</span>
+	</div>
+</body>
+</rml>

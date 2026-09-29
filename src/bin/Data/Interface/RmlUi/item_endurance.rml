@@ -1,0 +1,48 @@
+<rml>
+<head>
+	<title>Item endurance (CItemEnduranceInfo)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_endurance.rcss"/>
+</head>
+<body data-model="item_endurance">
+	<!-- The item endurance HUD (CItemEnduranceInfo). Left column: the pet / summon HP frames under
+	     the screen overlay transform (#pets, reference px inside). Right: the durability warning
+	     icons of worn gear under the dock-right transform (#icons, reference px inside). Texts are
+	     physical px at the native text size: the frames' names, the elf's arrow count line and the
+	     hovered icon's tooltip. Behind the other documents of its context (the original drew it at
+	     layer depth 3.5, under the panels). Takes no pointer events: C++ keeps the hit tests. -->
+	<div id="pets" data-style-left="left_x + 'px'" data-style-top="left_y + 'px'"
+	     data-style-transform="'scale(' + left_scale_x + ', ' + left_scale_y + ')'">
+		<div class="pet" data-for="pet : pets" data-style-top="pet.top + 'px'">
+			<div class="pet-fill"></div>
+			<div class="pet-frame"></div>
+			<!-- The bar shows the texture's left part, it does not stretch it (RenderImage() with a
+			     shorter width): the source rect is as wide as the element, texel for reference px. -->
+			<img class="pet-bar" src="../../../newui_Pet_HpBar.jpg" data-attr-rect="'0 0 ' + pet.bar_width + ' 3'"
+			     data-style-width="pet.bar_width + 'px'"/>
+		</div>
+	</div>
+	<div id="icons" data-style-left="right_x + 'px'" data-style-top="right_y + 'px'"
+	     data-style-transform="'scale(' + right_scale_x + ', ' + right_scale_y + ')'">
+		<div class="icon" data-for="icon : icons" data-style-left="icon.left + 'px'" data-style-top="icon.top + 'px'">
+			<div data-if="icon.image != ''" data-attr-class="'icon-art icon-art--' + icon.image"></div>
+			<div data-attr-class="'icon-tint icon-tint--' + icon.band"
+			     data-style-left="icon.tint_left + 'px'" data-style-width="icon.tint_width + 'px'"></div>
+		</div>
+	</div>
+	<div class="text-row" data-for="pet : pets" data-style-left="(pet.name_centre_x - 300) + 'px'"
+	     data-style-top="pet.name_top + 'px'">
+		<span class="pet-name" data-style-font-size="text_px + 'px'"
+		      data-style-line-height="line_height_px + 'px'">{{pet.name}}</span>
+	</div>
+	<div id="arrows-row" data-if="arrows != ''" data-style-left="arrows_left + 'px'" data-style-top="arrows_top + 'px'">
+		<span id="arrows" data-style-font-size="text_px + 'px'"
+		      data-style-line-height="line_height_px + 'px'">{{arrows}}</span>
+	</div>
+	<div class="text-row" data-if="tooltip != ''" data-style-left="(tooltip_centre_x - 300) + 'px'"
+	     data-style-top="tooltip_top + 'px'">
+		<span data-attr-class="'tooltip tooltip--' + tooltip_band" data-style-font-size="bold_text_px + 'px'"
+		      data-style-line-height="bold_line_height_px + 'px'">{{tooltip}}</span>
+	</div>
+</body>
+</rml>

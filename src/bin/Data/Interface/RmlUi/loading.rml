@@ -4,11 +4,14 @@
 	<link type="text/rcss" href="loading.rcss"/>
 </head>
 <body>
+	<!-- CLoadingScene's four 800x600-reference tiles (400 x 512 over 400 x 88). Each image is taken
+	     by its own texels (`rect`), as the native sprites took it by texture coordinates: the
+	     loader pads a texture, so the whole texture is wider than the art. -->
 	<div id="bg">
-		<img class="tile tile-top-left" src="/Interface/LSBg01.JPG"/>
-		<img class="tile tile-top-right" src="/Interface/LSBg02.JPG"/>
-		<img class="tile tile-bottom-left" src="/Interface/LSBg03.JPG"/>
-		<img class="tile tile-bottom-right" src="/Interface/LSBg04.JPG"/>
+		<img class="tile tile-top-left" src="../LSBg01.JPG" rect="0 0 400 512"/>
+		<img class="tile tile-top-right" src="../LSBg02.JPG" rect="0 0 400 512"/>
+		<img class="tile tile-bottom-left" src="../LSBg03.JPG" rect="0 0 400 88"/>
+		<img class="tile tile-bottom-right" src="../LSBg04.JPG" rect="0 0 400 88"/>
 	</div>
 </body>
 </rml>

@@ -124,51 +124,54 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
 
 void CNewBloodCastleSystem::RenderMatchResult(void)
 {
-    int x = REFERENCE_WIDTH / 2;
-    int yPos = m_PosResult.y + 40;
-
     EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(128, 255, 128, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
+    std::vector<MatchResultText> texts;
+    CollectMatchResult(texts);
+    RenderMatchResultTexts(texts);
+
+    DisableAlphaBlend();
+}
+
+void CNewBloodCastleSystem::CollectMatchResult(std::vector<MatchResultText>& texts) const
+{
+    int x = REFERENCE_WIDTH / 2;
+    int yPos = m_PosResult.y + 40;
     wchar_t lpszStr[256] = {};
 
+    auto add = [&texts, x](int y, const wchar_t* text, MatchResultText::Font font, DWORD color)
+    { texts.push_back({text, x, y, 0, 0, RT3_WRITE_CENTER, font, color}); };
+
+    const DWORD green = RGBA(128, 255, 128, 255);
     if (m_iNumResult)
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, I18N::Game::CompletedTheBloodCastleQuest, MatchResultText::Font::Normal, green);
         yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CongratulationsYouHaveSuccessfully, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, I18N::Game::CongratulationsYouHaveSuccessfully, MatchResultText::Font::Normal, green);
     }
     else
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, I18N::Game::ToCompleteTheBloodCastleQuest, MatchResultText::Font::Normal, green);
         yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::UnfortunatelyYouHaveFailed, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, I18N::Game::UnfortunatelyYouHaveFailed, MatchResultText::Font::Normal, green);
     }
 
     yPos += 30;
 
-    MatchResult* pResult = &m_MatchResult[0];
+    const MatchResult* pResult = &m_MatchResult[0];
 
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(210, 255, 210, 255);
     mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
+    add(yPos, lpszStr, MatchResultText::Font::Bold, RGBA(210, 255, 210, 255));
     yPos += 24;
 
     if (m_iNumResult)
     {
-        g_pRenderText->SetTextColor(255, 210, 210, 255);
         mu_swprintf(lpszStr, I18N::Game::RewardedZenD, pResult->m_iZen);
-        g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
+        add(yPos, lpszStr, MatchResultText::Font::Bold, RGBA(255, 210, 210, 255));
         yPos += 24;
     }
 
-    g_pRenderText->SetTextColor(210, 210, 255, 255);
     mu_swprintf(lpszStr, I18N::Game::BloodCastlePointD, pResult->m_iScore);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
-
-    DisableAlphaBlend();
+    add(yPos, lpszStr, MatchResultText::Font::Bold, RGBA(210, 210, 255, 255));
 }

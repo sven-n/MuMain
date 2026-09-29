@@ -331,6 +331,7 @@ public:
 
 protected:
     void RenderPhotoCharacter();
+    void RenderHelpText();
     int SetPhotoPose(int iCurrentAni, int iMoveDir = 0);
 
 protected:

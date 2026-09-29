@@ -611,7 +611,9 @@ static void RenderMainSceneUI()
 {
     Input::Selection::SelectObjects();
     BeginBitmap();
-    RenderObjectDescription();
+    // Recorded into the world-label layer instead when it is available (CNameWindow).
+    if (g_pNameWindow == nullptr || !g_pNameWindow->RecordsInterfaceOverlays())
+        RenderObjectDescription();
 
     if (g_Camera.TopViewEnable == false)
     {

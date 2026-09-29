@@ -304,6 +304,32 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     a native 3D preview).
   - **A bar drawn mirrored** (negative texture width) is an `<img rect>` with `transform:
     scale(-1, 1)`; `rect` takes the texels the original sampled.
+- **The remaining native 2D surfaces** — **done, both themes (2026-09-28)**: the centre-screen
+  notices, the map name banner, `CItemEnduranceInfo`, the party HP bars over heads, the mix
+  window's socket list, the jewel (dis)assembly box and its list, the photo viewer's help text,
+  the reconnect dialog, the Blood Castle / Devil Square / Chaos Castle result boxes, the Illusion
+  Temple relic progress box, the Kanturu result banner, the siege crown switch lines and build-time
+  bars, the Kalima object labels, the login scene's logo and bottom lines, and the loading
+  screen's art (its RmlUi document drew white quads). The tournament countdown stays native
+  (OpenMU never sends its packets). Left native on purpose: the mouse cursor, live 3D content,
+  `CInGameShop`, developer overlays (`migration-ledger.md`'s "Native surfaces outside the window
+  classes"). Legacy matches the original at the eight sizes (suites where they exist, hand probes
+  over injected packets otherwise). Worth carrying to the next port:
+
+  - **World-anchored or shared legacy drawing** (party HP bars, Kanturu banner, siege lines, Kalima
+    labels) goes through the world-label layer's `Overlay2DRecordScope`, not a new document.
+  - **Text the native renderer draws small** is rasterised at the font's cached size and scaled
+    down; RmlUi laid out at that size directly comes out wider (up to 4 % on a long line). Lay the
+    line out at `CachedFontPointSize()` and `transform: scale()` it to the native size (the login
+    scene lines).
+  - **A bitmap drawn under `EnableAlphaBlend()`** (BlendMode::Glow, ONE, ONE) is
+    `decorator: additive-image(<colour> <image>)` (`Render/RmlUi/RmlAdditiveImageDecorator`),
+    times the element's opacity.
+  - **A texture the loader padded** is wider than its art: take the art by its texels with
+    `<img rect>`, as the native sprite took it by texture coordinates (the loading screen).
+  - **Image paths** in a themed document resolve from the theme folder
+    (`../../../../Logo/…` for `Data/Logo`); an absolute `/Interface/…` path misses the `Data`
+    folder and draws an untextured (white) quad.
 - **World labels (`CNameWindow`)** — **done, both themes (2026-09-28)**: names, chat balloons,
   guild and union lines, shop titles, Gens marks, the selected monster's name and bar, the F8
   health bars, ground item names, the macro bar and event times. Legacy matches the original with

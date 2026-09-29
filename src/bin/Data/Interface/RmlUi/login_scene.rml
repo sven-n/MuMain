@@ -1,0 +1,37 @@
+<rml>
+<head>
+	<title>Login scene lines</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="login_scene.rcss"/>
+</head>
+<body data-model="login_scene">
+	<!-- What NewRenderLogInScene() draws over the login scene's world: in tour mode the MU logo,
+	     its glow added to the world behind it, both fading in; the copyright line right-aligned on
+	     the original's x 335 and "All Rights Reserved." left-aligned on it; the version line at the
+	     left edge; all three on the bottom edge, white on a half-transparent black box sized to the
+	     text. Positions and sizes are physical px computed in C++ from the transform the native
+	     drawing used; the text is laid out at the font's cached size and scaled down to the native
+	     size, as the native renderer draws it, so the lines keep its width at every size. Behind every other document of its context (the original drew these before
+	     every window). Takes no pointer events. -->
+	<div id="logo" data-if="logo_visible" data-style-left="logo_left + 'px'" data-style-top="logo_top + 'px'"
+	     data-style-width="logo_width + 'px'" data-style-height="logo_height + 'px'">
+		<div id="logo-glow" data-style-opacity="glow_level"></div>
+		<img id="logo-image" src="../../../../Logo/MU-logo.tga" data-style-opacity="logo_level"
+		     data-style-image-color="logo_color"/>
+	</div>
+	<div class="line line--copyright" data-style-top="line_top + 'px'" data-style-width="split_x + 'px'"
+	     data-style-transform="'scale(' + font_scale + ')'">
+		<span class="line-text" data-style-font-size="text_px + 'px'"
+		      data-style-line-height="line_height_px + 'px'">{{copyright}}</span>
+	</div>
+	<div class="line" data-style-top="line_top + 'px'" data-style-left="split_x + 'px'"
+	     data-style-transform="'scale(' + font_scale + ')'">
+		<span class="line-text" data-style-font-size="text_px + 'px'"
+		      data-style-line-height="line_height_px + 'px'">{{rights}}</span>
+	</div>
+	<div class="line" data-style-top="line_top + 'px'" data-style-transform="'scale(' + font_scale + ')'">
+		<span class="line-text" data-style-font-size="text_px + 'px'"
+		      data-style-line-height="line_height_px + 'px'">{{version}}</span>
+	</div>
+</body>
+</rml>

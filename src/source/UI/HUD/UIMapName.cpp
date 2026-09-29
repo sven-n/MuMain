@@ -7,6 +7,15 @@
 #include "World/MapInfra/MapManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Sprites/GlobalBitmap.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+#include <string>
 
 #ifdef ASG_ADD_GENS_SYSTEM
 #include "Engine/Object/ZzzInventory.h"
@@ -199,9 +208,20 @@ void CUIMapName::Render()
 {
     Update();
 
+    BuildRmlUi();
+    if (m_pRmlDoc != nullptr)
+    {
+        SyncView();
+        return;
+    }
+
     if (HIDE == m_eState)
         return;
+    RenderNative();
+}
 
+void CUIMapName::RenderNative()
+{
     const float imageX = UI::MapName::PhysicalLeft(WindowWidth);
     const float imageY = kImageTop * g_fScreenRate_y;
 
@@ -220,4 +240,97 @@ void CUIMapName::Render()
         UI::MapName::ImageHeight / 128.0f, false, false, m_fAlpha);
 
     ::DisableAlphaBlend();
+}
+
+namespace
+{
+Rml::Context* MapNameContext()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
+    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
+}
+
+// "/Data/Local/Eng/ImgsMapName/x.tga": the loaded bitmap's own file name, absolute to the file
+// interface root, as CGlobalBitmap loaded it.
+Rml::String BitmapSource(GLuint bitmapIndex)
+{
+    BITMAP_t* bitmap = Bitmaps.GetTexture(bitmapIndex);
+    if (bitmap == nullptr)
+        return {};
+    Rml::String source = "/";
+    for (const wchar_t* c = bitmap->FileName; *c != L'\0'; ++c)
+        source.push_back(*c == L'\\' ? '/' : static_cast<char>(*c));
+    return source;
+}
+
+template <typename T>
+void SyncMapNameField(RmlModelBinder<UI::MapName::MapNameRmlModel>& binder, T UI::MapName::MapNameRmlModel::* field,
+                      const char* name, T value)
+{
+    auto& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+} // namespace
+
+void CUIMapName::BuildRmlUi()
+{
+    if (m_pRmlDoc != nullptr || !RmlUiRuntime::Instance().IsCreated() || MapNameContext() == nullptr)
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(MapNameContext(), "map_name",
+                                                 [](Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model)
+                                                 {
+                                                     c.Bind("left", &model.left);
+                                                     c.Bind("top", &model.top);
+                                                     c.Bind("alpha", &model.alpha);
+                                                     c.Bind("image_source", &model.imageSource);
+                                                     c.Bind("strife", &model.strife);
+                                                     c.Bind("strife_source", &model.strifeSource);
+                                                 });
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(MapNameContext(), "Data/Interface/RmlUi/map_name.rml");
+    if (m_pRmlDoc != nullptr && !m_themeReloadRegistered)
+    {
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+        m_themeReloadRegistered = true;
+    }
+}
+
+void CUIMapName::ReloadRmlTheme()
+{
+    if (m_pRmlDoc == nullptr)
+        return;
+    Rml::Context* context = MapNameContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+    BuildRmlUi();
+}
+
+// The original's Render(): the map's name image at physical ((W - 166) / 2, 220 * H / 480), 166 x 90
+// unscaled, and on a Gens battle map the strife banner (166 x 28) right above it, both at the fade
+// alpha. Fixed: the original's texture coordinates assume textures padded to 256 x 128 (256 x 32),
+// but the images load at their own 166 x 90 (166 x 28), so it magnified their top-left 108 x 63
+// texels non-uniformly (1.55 x 1.42); the port shows the whole image 1:1.
+void CUIMapName::SyncView()
+{
+    const bool visible = HIDE != m_eState;
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, visible);
+    if (!visible)
+        return;
+
+    using UI::MapName::MapNameRmlModel;
+    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::left, "left", UI::MapName::PhysicalLeft(WindowWidth));
+    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::top, "top", kImageTop * g_fScreenRate_y);
+    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::alpha, "alpha", std::clamp(m_fAlpha, 0.0f, 1.0f));
+    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::imageSource, "image_source",
+                     BitmapSource(BITMAP_INTERFACE_EX + 45));
+#ifdef ASG_ADD_GENS_SYSTEM
+    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::strife, "strife", m_bStrife);
+    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::strifeSource, "strife_source",
+                     m_bStrife ? BitmapSource(BITMAP_INTERFACE_EX + 47) : Rml::String());
+#endif // ASG_ADD_GENS_SYSTEM
 }

@@ -1,4 +1,4 @@
-/* Legacy theme for a native message box drawn by MessageBoxView (CGuild_ToPerson_Position):
+/* Legacy theme for a native message box drawn by MessageBoxView (CGuild_ToPerson_Position, ...):
    newui_msgbox_back (222 wide from y 2, bound height), newui_msgbox_top (230 x 67), the
    newui_msgbox_middle strips (230 x 15), newui_msgbox_bottom (230 x 50); the lines in their bound
    colour and font; newui_btn_empty_small buttons (up / over / down, 64 x 29 rows) stretched to
@@ -9,6 +9,8 @@
 @spritesheet box-top-sheet { src: "../../../newui_msgbox_top.tga"; box-top: 0px 0px 230px 67px; }
 @spritesheet box-middle-sheet { src: "../../../newui_msgbox_middle.tga"; box-middle: 0px 0px 230px 15px; }
 @spritesheet box-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; box-bottom: 0px 0px 230px 50px; }
+@spritesheet box-divider-sheet { src: "../../../newui_Message_Line.tga"; box-divider: 0px 0px 223px 21px; }
+@spritesheet box-separator-sheet { src: "../../../newui_separate_line.jpg"; box-separator: 0px 0px 205px 2px; }
 @spritesheet box-progress-back-sheet { src: "../../../newui_Bar_switch01.jpg"; box-progress-back: 0px 0px 160px 18px; }
 @spritesheet box-progress-bar-sheet { src: "../../../newui_Bar_switch02.jpg"; box-progress-bar: 0px 0px 150px 8px; }
 @spritesheet box-btn-sheet
@@ -24,12 +26,16 @@
 #box_top { position: absolute; left: 0; top: 0; width: 230px; height: 67px; decorator: image(box-top); }
 .box-middle { position: absolute; left: 0; width: 230px; height: 15px; decorator: image(box-middle); }
 #box_bottom { position: absolute; left: 0; width: 230px; height: 50px; decorator: image(box-bottom); }
+#box_divider { position: absolute; left: 0; width: 223px; height: 21px; decorator: image(box-divider); }
+.box-separator { position: absolute; left: 13px; width: 205px; height: 2px; decorator: image(box-separator); }
 
 /* CProgressMsgBox's bar, centred: its fill stretched to the elapsed fraction of 150 units. */
 #progress_back { position: absolute; left: 35px; width: 160px; height: 18px; decorator: image(box-progress-back); }
 #progress_bar { position: absolute; left: 40px; height: 8px; decorator: image(box-progress-bar); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; }
+/* pre: RenderText() keeps leading and repeated spaces (the result tables' padded numbers). */
+.box-line { white-space: pre; }
 .box-line.bold { font-weight: bold; }
 
 .box-btn { display: block; position: absolute; decorator: image(box-btn-up); pointer-events: auto; }
@@ -38,3 +44,54 @@
 .box-btn.disabled, .box-btn.disabled:hover, .box-btn.disabled:active { decorator: image(box-btn-up); image-color: #99999999; }
 .box-label { color: #ffffff; }
 .box-btn.disabled .box-label { color: #808080; }
+
+/* newui_button_ok (54 x 30 rows: up / over / down) stretched to the button's box; the art is lettered,
+   so the label is hidden. */
+@spritesheet box-btn-ok-sheet
+{
+	src: "../../../newui_button_ok.tga";
+	box-btn-ok-up: 0px 0px 54px 30px;
+	box-btn-ok-over: 0px 30px 54px 30px;
+	box-btn-ok-down: 0px 60px 54px 30px;
+}
+.box-btn.ok-art { decorator: image(box-btn-ok-up); }
+.box-btn.ok-art:hover { decorator: image(box-btn-ok-over); }
+.box-btn.ok-art:active { decorator: image(box-btn-ok-down); }
+.box-btn.ok-art .box-label { display: none; }
+
+/* CGemIntegrationDisjointMsgBox's list (CUIUnmixgemList::RenderInterface() / RenderDataLine()):
+   the box black at 40 % (SetLineColor(7, 0.4f)) from (-1, -1); the win_scrollbar arrows (a held
+   arrow is the other one turned by 180 degrees), the two 1 px track lines in SetLineColor(2) and
+   the thumb stretched with its 1 px caps; the selected row filled in the colour the interface
+   left set (SetLineColor(2)) with black text, the others (230, 220, 200), the text at 6, 3 in its
+   13 px row. Hit-tested natively. */
+@spritesheet box-list-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	box-list-scroll-up: 0px 3px 13px 13px;
+	box-list-scroll-down: 0px 16px 13px 13px;
+	box-list-thumb-top: 0px 0px 11px 1px;
+	box-list-thumb: 0px 1px 11px 1px;
+	box-list-thumb-bottom: 0px 2px 11px 1px;
+}
+#panel.list-shown { pointer-events: none; }
+#list { position: absolute; pointer-events: none; }
+#list_box, .list-scroll-up, .list-scroll-down, .list-track, .list-thumb, .list-thumb-top, .list-thumb-bottom, .list-row {
+	position: absolute;
+	pointer-events: none;
+}
+#list_box { left: -1px; top: -1px; background-color: rgba(0, 0, 0, 102); }
+.list-scroll-up, .list-scroll-down { width: 13px; height: 13px; }
+.list-scroll-up { top: -1px; decorator: image(box-list-scroll-up); }
+.list-scroll-up.pressed { decorator: image(box-list-scroll-down); transform: rotate(180deg); }
+.list-scroll-down { decorator: image(box-list-scroll-down); }
+.list-scroll-down.pressed { decorator: image(box-list-scroll-up); transform: rotate(180deg); }
+.list-track { width: 1px; background-color: rgb(106, 97, 88); }
+.list-thumb, .list-thumb-top, .list-thumb-bottom { width: 11px; }
+.list-thumb { decorator: image(box-list-thumb); }
+.list-thumb-top { height: 1px; decorator: image(box-list-thumb-top); }
+.list-thumb-bottom { height: 1px; decorator: image(box-list-thumb-bottom); }
+.list-row { left: 0; height: 13px; }
+.list-row.selected { background-color: rgb(106, 97, 88); }
+.list-row-text { left: 6px; top: 3px; white-space: pre; color: #e6dcc8; }
+.list-row.selected .list-row-text { color: #000000; }

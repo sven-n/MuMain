@@ -42,9 +42,20 @@ namespace mu::ui::window
 
         CUISocketListBox m_SocketListBox;
 
-        // Window frame/title/Mix button/recipe-result content are all RmlUi now. Only the
-        // inventory grid and the socket list box (CUISocketListBox, a real interactive widget, not
-        // presentation) stay fully native -- same reasoning as CStorageInventoryExt for the grid.
+        // Window frame/title/Mix button/recipe-result content and the socket list box's drawing
+        // are all RmlUi now. Only the inventory grid stays fully native -- same reasoning as
+        // CStorageInventoryExt for the grid; the socket list keeps its native hit tests,
+        // selection and scrolling (m_SocketListBox.DoAction()).
+        //
+        // A line CUISocketListBox::RenderDataLine() draws: its 13 px row box (filled when
+        // selected) at `top`, reference px from the window's top.
+        struct SocketListLine
+        {
+            Rml::String text;
+            float top = 0.f;
+            bool selected = false;
+            bool operator==(const SocketListLine&) const = default;
+        };
         struct MixLine
         {
             Rml::String text;
@@ -99,6 +110,14 @@ namespace mu::ui::window
 
             bool showSocketPrompt = false;
             Rml::String socketPromptText;
+
+            // CUISocketListBox::Render() (attach / detach socket mixes): the list's box and its
+            // new-style scroll bar (track and thumb tops, reference px from the window's corner).
+            bool showSocketList = false;
+            float socketListLeft = 0.f, socketListTop = 0.f, socketListWidth = 0.f, socketListHeight = 0.f;
+            std::vector<SocketListLine> socketLines;
+            float socketScrollTop = 0.f, socketScrollHeight = 0.f, socketThumbTop = 0.f;
+            bool socketThumbDragged = false;
         };
         RmlModelBinder<MixInventoryRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -166,6 +185,8 @@ namespace mu::ui::window
         // Former RenderFrame()/RenderMixDescriptions() native text -- see its own comment
         // (MixInventory.cpp) for the full per-field translation.
         void SyncMixContentModel();
+        // Former CUISocketListBox::Render() of m_SocketListBox, as the model's socket_* fields.
+        void SyncSocketListModel();
 
         void CheckMixInventory();
         bool Mix();

@@ -1770,6 +1770,8 @@ void CSystem::SyncMainSceneHudVisibility()
         m_pMuHelperBar->SyncDocVisibility(sceneAllowsShow);
     if (m_pBuffStrip)
         m_pBuffStrip->SyncDocVisibility(sceneAllowsShow);
+    if (m_pNewItemEnduranceInfo)
+        m_pNewItemEnduranceInfo->SyncDocVisibility(sceneAllowsShow);
     if (m_pNewMainFrameWindow)
         m_pNewMainFrameWindow->SyncDocVisibility(sceneAllowsShow);
 }
@@ -2386,6 +2388,11 @@ CSiegeWarfare* CSystem::GetUI_NewSiegeWarfare() const
 CItemEnduranceInfo* CSystem::GetUI_NewItemEnduranceInfo() const
 {
     return m_pNewItemEnduranceInfo;
+}
+
+CNameWindow* CSystem::GetUI_NewNameWindow() const
+{
+    return m_pNewNameWindow;
 }
 
 CBuffStrip* CSystem::GetUI_BuffStrip() const

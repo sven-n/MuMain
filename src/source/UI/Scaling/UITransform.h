@@ -126,6 +126,10 @@ namespace UI::Scaling
     // `measuredWidth` is the text's unconstrained width and `boxWidth` the box's, both in the
     // transform's logical units (what MeasureText() returns).
     float NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth, float boxWidth);
+    // The same for a box with a height too (RenderText() with a box height the text is taller than,
+    // e.g. the Devil Square rank headers' height of 3): the smaller of the two fits, down to the minimum.
+    float NativeTextPixelSizeInBounds(FontRole role, const Transform& transform, float measuredWidth,
+                                      float measuredHeight, float boxWidth, float boxHeight);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
     float ContentScaleFromMetrics(float displayScale, float pixelDensity);

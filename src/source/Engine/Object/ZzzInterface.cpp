@@ -2499,7 +2499,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     return  false;
                 }
 
-                int iTextSize = 0;
+                int iTextSize = 3; // a bare "/n" clears the macro instead of writing before the row
                 for (int j = 3; j <= (int)wcslen(Text); j++)
                 {
                     MacroText[i][j - 3] = Text[j];
@@ -3696,15 +3696,21 @@ void RenderInterface(bool Render)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
     RenderOutSides();
-    RenderPartyHP();
-
-    RenderSwichState();
-    battleCastle::RenderBuildTimes();
+    // The overlays below are recorded into the world-label layer instead when it is available
+    // (CNameWindow::PrepareBackgroundLayer()).
+    const bool overlaysRecorded = g_pNameWindow != nullptr && g_pNameWindow->RecordsInterfaceOverlays();
+    if (!overlaysRecorded)
+    {
+        RenderPartyHP();
+        RenderSwichState();
+        battleCastle::RenderBuildTimes();
+    }
 
     g_pUIMapName->Render();		// rozy
 
     //	M34CryWolf1st::Render_Mvp_Interface();
-    M39Kanturu3rd::RenderKanturu3rdinterface();
+    if (!overlaysRecorded)
+        M39Kanturu3rd::RenderKanturu3rdinterface();
     //	M34CryWolf1st::Sub_Interface();
 }
 

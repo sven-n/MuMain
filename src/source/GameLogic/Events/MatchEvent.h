@@ -72,6 +72,13 @@ namespace matchEvent
             g_csMatchInfo->RenderMatchResult();
         }
     }
+    inline void CollectResult(std::vector<MatchResultText>& texts)
+    {
+        if (g_csMatchInfo != NULL)
+        {
+            g_csMatchInfo->CollectMatchResult(texts);
+        }
+    }
     inline void SetPosition(int ix, int iy)
     {
         if (g_csMatchInfo != NULL)

@@ -28,6 +28,12 @@ namespace mu::ui::window
         void PrepareBackgroundLayer() override;
         void Show(bool bShow) override;
 
+        // True when the world-label layer draws RenderInterface()'s overlays -- the party members'
+        // HP bars over their heads, the siege crown switch lines and build-time bars, the Kanturu
+        // result banner -- and the Kalima object labels (RenderObjectDescription()), recorded under
+        // the name labels as the original drew them before them; the main scene then leaves them out.
+        bool RecordsInterfaceOverlays() const;
+
         float GetLayerDepth();		// 1.0f
 
     private:

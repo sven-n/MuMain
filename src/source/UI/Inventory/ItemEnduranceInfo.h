@@ -6,6 +6,13 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Inventory/ItemEnduranceRmlModel.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
@@ -83,6 +90,9 @@ namespace mu::ui::window
         void OpenningProcess();
         void ClosingProcess();
 
+        // Hides the document outside the main scene (CSystem::SyncMainSceneHudVisibility()).
+        void SyncDocVisibility(bool sceneAllowsShow);
+
     private:
         void LoadImages();
         void UnloadImages();
@@ -100,6 +110,21 @@ namespace mu::ui::window
         bool RenderSummonMonsterLife(int iX, int iY);
         bool RenderNumArrow(int iX, int iY);
         bool RenderItemEndurance(int ix, int iY);
+
+        // The HUD in RmlUi (item_endurance.rml): main context, behind its other documents (the
+        // original drew it at layer depth 3.5, under the panels). Render() fills it; the native
+        // drawing is the fallback when RmlUi is not available.
+        void BuildRmlUi();
+        void ReloadRmlTheme();
+        void SyncView();
+        void SyncLeftColumn();
+        void SyncIcons();
+        void SyncTooltip();
+
+        RmlModelBinder<UI::ItemEndurance::ItemEnduranceRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        bool m_themeReloadRegistered = false;
+        bool m_sceneAllowsShow = false;
     };
 }
 

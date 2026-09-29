@@ -29,6 +29,7 @@ FrameTimingState g_frameTiming;
 #include "CharacterScene.h"
 #include "MainScene.h"
 #include "LoadingScene.h"
+#include "LoginSceneOverlay.h"
 #include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -480,6 +481,7 @@ void UpdateSceneState()
 
     UpdateActiveScene();
     UI::Notices::Move();
+    Scenes::LoginOverlay::HideOutsideLoginScene();
     HandleScreenshotCapture();
 }
 

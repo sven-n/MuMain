@@ -4,6 +4,7 @@
 #include "RmlUiRenderInterface.h"
 #include "RmlUiSystemInterface.h"
 #include "Render/RmlUi/RmlAdditiveFillDecorator.h"
+#include "Render/RmlUi/RmlAdditiveImageDecorator.h"
 
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/Element.h>
@@ -97,6 +98,7 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     Rml::SetTextInputHandler(m_TextInputMethodEditor.get());
 
     Render::RmlUi::RegisterAdditiveFillDecorator();
+    Render::RmlUi::RegisterAdditiveImageDecorator();
 
     // Reuses the same bundled fonts this engine already ships for its portable text shim
     // (fonts/LiberationSans-*.ttf, copied next to the exe by the same asset-copy step as

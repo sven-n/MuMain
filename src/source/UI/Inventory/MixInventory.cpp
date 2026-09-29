@@ -146,6 +146,22 @@ void CMixInventory::BuildRmlUi()
                 c.Bind("show_socket_prompt", &model.showSocketPrompt);
                 c.Bind("socket_prompt_text", &model.socketPromptText);
 
+                c.Bind("show_socket_list", &model.showSocketList);
+                c.Bind("socket_list_left", &model.socketListLeft);
+                c.Bind("socket_list_top", &model.socketListTop);
+                c.Bind("socket_list_width", &model.socketListWidth);
+                c.Bind("socket_list_height", &model.socketListHeight);
+                auto socketLine = c.RegisterStruct<SocketListLine>();
+                socketLine.RegisterMember("text", &SocketListLine::text);
+                socketLine.RegisterMember("top", &SocketListLine::top);
+                socketLine.RegisterMember("selected", &SocketListLine::selected);
+                c.RegisterArray<std::vector<SocketListLine>>();
+                c.Bind("socket_lines", &model.socketLines);
+                c.Bind("socket_scroll_top", &model.socketScrollTop);
+                c.Bind("socket_scroll_height", &model.socketScrollHeight);
+                c.Bind("socket_thumb_top", &model.socketThumbTop);
+                c.Bind("socket_thumb_dragged", &model.socketThumbDragged);
+
                 c.BindEventCallback("mix_inventory_mix_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
@@ -420,10 +436,10 @@ bool CMixInventory::Render()
     // Frame background panel is RmlUi, routed through the background context (see
     // MixInventoryBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer()
     // call before this window's own Render()/Render3D() run. Recipe/tax-rate/success-rate content
-    // is RmlUi too now (SyncMixContentModel()) -- only the socket list box below is still a real
-    // native interactive widget, not presentation.
+    // is RmlUi too now (SyncMixContentModel()), and so is the socket list box's drawing
+    // (SyncSocketListModel()); it draws natively only without the RmlUi document.
     const int mixType = g_MixRecipeMgr.GetMixInventoryType();
-    if (mixType == SEASON3A::MIXTYPE_ATTACH_SOCKET || mixType == SEASON3A::MIXTYPE_DETACH_SOCKET)
+    if (!m_pRmlDoc && (mixType == SEASON3A::MIXTYPE_ATTACH_SOCKET || mixType == SEASON3A::MIXTYPE_DETACH_SOCKET))
         m_SocketListBox.Render();
 
     if (m_pNewInventoryCtrl)
@@ -511,6 +527,70 @@ void CMixInventory::SyncRmlModel()
     syncBool(&MixInventoryRmlModel::mixLocked, "mix_locked", GetMixState() == MIX_REQUESTED);
 
     SyncMixContentModel();
+    SyncSocketListModel();
+}
+
+void CMixInventory::SyncSocketListModel()
+{
+    auto& model = m_RmlBinder.GetModel();
+    auto syncFloat = [&](float MixInventoryRmlModel::* field, const char* boundName, float value)
+    {
+        if (model.*field != value)
+        {
+            model.*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    auto syncBool = [&](bool MixInventoryRmlModel::* field, const char* boundName, bool value)
+    {
+        if (model.*field != value)
+        {
+            model.*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+
+    const int mixType = g_MixRecipeMgr.GetMixInventoryType();
+    const bool shown = mixType == SEASON3A::MIXTYPE_ATTACH_SOCKET || mixType == SEASON3A::MIXTYPE_DETACH_SOCKET;
+    syncBool(&MixInventoryRmlModel::showSocketList, "show_socket_list", shown);
+    if (!shown)
+        return;
+
+    // CUISocketListBox::RenderInterface(): the box from (x - 1, y - height - 1), width + 1 by
+    // height + 2, black at 40 % (SetLineColor(7, 0.4f)); the scroll track at the right edge - 8,
+    // the thumb at - 12, tinted while dragged. RenderDataLine(): each shown line's 13 px row from
+    // GetRenderLinePos_y() - 3, width - 13 + 1 wide, the selected one filled in the colour the
+    // interface left set (the same black 40 %) with black text, the others (230, 220, 200); the
+    // text 8 px in, at GetRenderLinePos_y().
+    const float x0 = static_cast<float>(m_Pos.x);
+    const float y0 = static_cast<float>(m_Pos.y);
+    CUISocketListBox& list = m_SocketListBox;
+    const float lx = static_cast<float>(list.GetPosition_x());
+    const float ly = static_cast<float>(list.GetPosition_y());
+    const float lh = static_cast<float>(list.GetHeight());
+    syncFloat(&MixInventoryRmlModel::socketListLeft, "socket_list_left", lx - x0);
+    syncFloat(&MixInventoryRmlModel::socketListTop, "socket_list_top", ly - lh - y0);
+    syncFloat(&MixInventoryRmlModel::socketListWidth, "socket_list_width", static_cast<float>(list.GetWidth()));
+    syncFloat(&MixInventoryRmlModel::socketListHeight, "socket_list_height", lh);
+
+    const TextListScrollBarGeometry scroll = list.GetScrollBarGeometry();
+    syncFloat(&MixInventoryRmlModel::socketScrollTop, "socket_scroll_top", scroll.rangeTop - y0);
+    syncFloat(&MixInventoryRmlModel::socketScrollHeight, "socket_scroll_height", scroll.rangeBottom - scroll.rangeTop);
+    syncFloat(&MixInventoryRmlModel::socketThumbTop, "socket_thumb_top", scroll.thumbTop - y0);
+    syncBool(&MixInventoryRmlModel::socketThumbDragged, "socket_thumb_dragged", scroll.dragged && MouseLButtonPush);
+
+    std::vector<SocketListLine> lines;
+    list.ForEachRenderLine(
+        [&](int line, const SOCKETLIST_TEXT& item, bool selected)
+        {
+            lines.push_back({StringUtils::WideToNarrow(item.m_szText),
+                             static_cast<float>(list.GetRenderLinePos_y(line)) - 3.f - y0, selected});
+        });
+    if (lines != model.socketLines)
+    {
+        model.socketLines = std::move(lines);
+        m_RmlBinder.MarkDirty("socket_lines");
+    }
 }
 
 float CMixInventory::GetLayerDepth()
@@ -535,7 +615,7 @@ void CMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwPa
 void CMixInventory::LoadImages()
 {
     // Frame/top/sides/bottom + Mix button sprites are RmlUi now (mix_inventory[_bg].rcss);
-    // these scrollbar images remain for m_SocketListBox, which stays fully native.
+    // these scrollbar images remain for m_SocketListBox's native drawing (the no-RmlUi fallback).
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
     LoadBitmap(L"Interface\\newui_scrollbar_down.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);

@@ -11,6 +11,15 @@
 #include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
 #include "I18N/All.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Dialogs/ReconnectDialogRmlModel.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+
+#include <RmlUi/Core/ElementDocument.h>
 
 namespace UI::Reconnect
 {
@@ -21,6 +30,16 @@ namespace
     // Frozen game frame captured at disconnect, shown during the re-login phase.
     std::uint32_t s_backgroundTex = 0;
     bool s_hasBackground = false;
+
+    // The dialog in RmlUi (reconnect_dialog.rml): one main-context document above every other
+    // document, the tooltip included, as the original drew it after the whole frame. RenderDialog()
+    // fills it every frame and hides it while no reconnect runs. The frozen frame stays native
+    // (a scene background, drawn before RmlUi's pass); the dim over it is the document's.
+    RmlModelBinder<ReconnectDialogRmlModel> s_binder;
+    Rml::ElementDocument* s_document = nullptr;
+    bool s_cancelClicked = false;
+    bool s_themeReloadRegistered = false;
+    const int s_themeReloadOwner = 0; // the theme-reload registration's owner key
 
     // Native message-box frame slice sizes (match CCommonMessageBox).
     constexpr float MSGBOX_WIDTH = 230.0f;
@@ -167,6 +186,113 @@ namespace
         }
     }
 
+    // ---- RmlUi rendering --------------------------------------------------------
+
+    Rml::Context* DialogContext()
+    {
+        return RmlUiRuntime::Instance().GetContext();
+    }
+
+    void BuildView();
+
+    void ReloadTheme()
+    {
+        if (s_document == nullptr)
+            return;
+        s_binder.Destroy(DialogContext());
+        DialogContext()->UnloadDocument(s_document);
+        s_document = nullptr;
+        BuildView();
+    }
+
+    void BuildView()
+    {
+        if (s_document != nullptr || !RmlUiRuntime::Instance().IsCreated() || DialogContext() == nullptr)
+            return;
+
+        const bool modelCreated = s_binder.Create(
+            DialogContext(), "reconnect_dialog",
+            [](Rml::DataModelConstructor& c, ReconnectDialogRmlModel& model)
+            {
+                c.Bind("dim_alpha", &model.dimAlpha);
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+                c.Bind("text_px", &model.textPx);
+                c.Bind("bold_text_px", &model.boldTextPx);
+                auto line = c.RegisterStruct<ReconnectLineEntry>();
+                line.RegisterMember("text", &ReconnectLineEntry::text);
+                line.RegisterMember("left", &ReconnectLineEntry::left);
+                line.RegisterMember("top", &ReconnectLineEntry::top);
+                line.RegisterMember("bold", &ReconnectLineEntry::bold);
+                c.RegisterArray<std::vector<ReconnectLineEntry>>();
+                c.Bind("lines", &model.lines);
+                c.Bind("progress_width", &model.progressWidth);
+                c.BindEventCallback("reconnect_cancel", [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                    { s_cancelClicked = true; });
+            });
+        if (modelCreated)
+            s_document =
+                UI::RmlBridge::LoadThemedDocument(DialogContext(), "Data/Interface/RmlUi/reconnect_dialog.rml");
+        if (s_document != nullptr && !s_themeReloadRegistered)
+        {
+            UI::RmlBridge::RegisterForThemeReload(&s_themeReloadOwner, [] { ReloadTheme(); });
+            s_themeReloadRegistered = true;
+        }
+    }
+
+    template <typename T> void SyncField(T ReconnectDialogRmlModel::* field, const char* name, T value)
+    {
+        auto& model = s_binder.GetModel();
+        if (model.*field == value)
+            return;
+        model.*field = std::move(value);
+        s_binder.MarkDirty(name);
+    }
+
+    // DrawStatusTexts(): the title (bold), the step and the countdown, each centred in the panel's
+    // width.
+    std::vector<ReconnectLineEntry> StatusLines()
+    {
+        ReconnectManager& mgr = ReconnectManager::Instance();
+        std::vector<ReconnectLineEntry> lines;
+        auto add = [&lines](const wchar_t* text, float top, bool bold)
+        {
+            g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+            const SIZE size = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text)));
+            const float left = size.cx < PANEL_W ? (PANEL_W - static_cast<float>(size.cx)) / 2.0f : 0.0f;
+            lines.push_back({StringUtils::WideToNarrow(text), left, top - PANEL_Y, bold});
+        };
+        add(I18N::Game::ConnectionLost, TITLE_Y, true);
+        add(StepLabel(mgr.GetPhase()), STEP_Y, false);
+        const int seconds = mgr.GetCountdownSeconds();
+        if (seconds > 0)
+        {
+            wchar_t countdown[64];
+            mu_swprintf(countdown, I18N::Game::RetryingInSeconds, seconds);
+            add(countdown, COUNTDOWN_Y, false);
+        }
+        return lines;
+    }
+
+    // DrawBackdrop()'s dim and DrawNative()'s panel, gauge and Cancel.
+    void SyncView(float dimAlpha, float fraction)
+    {
+        UI::RmlBridge::SyncDocumentVisibilityInFront(s_document, true);
+
+        const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+        SyncField(&ReconnectDialogRmlModel::dimAlpha, "dim_alpha", dimAlpha);
+        SyncField(&ReconnectDialogRmlModel::rootX, "root_x", UI::Scaling::PositionX(transform, PANEL_X));
+        SyncField(&ReconnectDialogRmlModel::rootY, "root_y", UI::Scaling::PositionY(transform, PANEL_Y));
+        SyncField(&ReconnectDialogRmlModel::rootScale, "root_scale", transform.scaleX);
+        SyncField(&ReconnectDialogRmlModel::textPx, "text_px",
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
+        SyncField(&ReconnectDialogRmlModel::boldTextPx, "bold_text_px",
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+        SyncField(&ReconnectDialogRmlModel::lines, "lines", StatusLines());
+        SyncField(&ReconnectDialogRmlModel::progressWidth, "progress_width", PROG_BAR_MAX_W * fraction);
+    }
+
     // ---- Native (message-box textured) rendering ----------------------------
 
     void DrawNative(bool cancelHovered)
@@ -239,6 +365,31 @@ void RenderDialog()
     ReconnectManager& mgr = ReconnectManager::Instance();
     if (!mgr.IsActive())
     {
+        UI::RmlBridge::SyncDocumentVisibility(s_document, false);
+        s_cancelClicked = false;
+        return;
+    }
+
+    BuildView();
+    if (s_document != nullptr)
+    {
+        // Natively only the frozen frame (the re-login phase); the dim, panel and Cancel are the
+        // document's. Cancel is its click, as the original's press on the button.
+        const bool probing = mgr.GetPhase() == ReconnectManager::Phase::Probing;
+        const bool frozenFrame = !probing && s_hasBackground && s_backgroundTex != 0;
+        if (frozenFrame)
+        {
+            BeginBitmap();
+            RenderColorBitmap(static_cast<int>(s_backgroundTex), 0.0f, 0.0f, REFERENCE_WIDTH, REFERENCE_HEIGHT, 0.0f,
+                              0.0f, 1.0f, 1.0f, 0xFFFFFFFF);
+            EndBitmap();
+        }
+        SyncView(probing || frozenFrame ? DIM_ALPHA : OPAQUE_ALPHA, Progress());
+        if (s_cancelClicked)
+        {
+            s_cancelClicked = false;
+            mgr.RequestCancel();
+        }
         return;
     }
 

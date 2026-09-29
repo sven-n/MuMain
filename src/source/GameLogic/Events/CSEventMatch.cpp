@@ -219,7 +219,29 @@ void CSDevilSquareMatch::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE d
     return;
 }
 
+void RenderMatchResultTexts(const std::vector<MatchResultText>& texts)
+{
+    for (const MatchResultText& text : texts)
+    {
+        if (text.font == MatchResultText::Font::Normal)
+            g_pRenderText->SetFont(g_hFont);
+        else if (text.font == MatchResultText::Font::Bold)
+            g_pRenderText->SetFont(g_hFontBold);
+        g_pRenderText->SetTextColor(text.color);
+        g_pRenderText->RenderText(text.x, text.y, text.text.c_str(), text.boxWidth, text.boxHeight, text.sort);
+    }
+}
+
 void CSDevilSquareMatch::RenderMatchResult(void)
+{
+    g_pRenderText->SetBgColor(0);
+
+    std::vector<MatchResultText> texts;
+    CollectMatchResult(texts);
+    RenderMatchResultTexts(texts);
+}
+
+void CSDevilSquareMatch::CollectMatchResult(std::vector<MatchResultText>& texts) const
 {
     int xPos[6] = { m_PosResult.x, };
     xPos[1] = xPos[0] + 15;
@@ -230,98 +252,62 @@ void CSDevilSquareMatch::RenderMatchResult(void)
 
     int yPos = m_PosResult.y + 40;
 
-    g_pRenderText->SetBgColor(0);
-
     wchar_t lpszStr[256] { 0 };
+    // The font is the one left set (the original sets none).
+    auto add = [&texts](int x, int y, const wchar_t* text, DWORD color, int boxWidth = 0, int boxHeight = 0,
+                        int sort = RT3_SORT_LEFT)
+    { texts.push_back({text, x, y, boxWidth, boxHeight, sort, MatchResultText::Font::Unchanged, color}); };
 
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(xPos[2], yPos, I18N::Game::Congratulations);
+    const DWORD white = RGBA(255, 255, 255, 255);
+    add(xPos[2], yPos, I18N::Game::Congratulations, white);
     yPos += 16;
     WriteWide(lpszStr, I18N::Game::SYourBraveryIsProvenInDevilSquare, Hero->ID);
-    g_pRenderText->RenderText((xPos[2]), yPos, lpszStr);
+    add(xPos[2], yPos, lpszStr, white);
     yPos += 24;
 
-    g_pRenderText->SetTextColor(0, 255, 0, 255);
-    g_pRenderText->RenderText(xPos[2], yPos, I18N::Game::Rank, xPos[3] - xPos[1], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[3], yPos, I18N::Game::Point, xPos[4] - xPos[3], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[4], yPos, I18N::Game::EXP, xPos[5] - xPos[4], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[5], yPos, I18N::Game::Reward, (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
+    // The headers pass their width as the box width and RT3_SORT_CENTER as its height: left-aligned.
+    const DWORD green = RGBA(0, 255, 0, 255);
+    add(xPos[2], yPos, I18N::Game::Rank, green, xPos[3] - xPos[1], RT3_SORT_CENTER);
+    add(xPos[3], yPos, I18N::Game::Point, green, xPos[4] - xPos[3], RT3_SORT_CENTER);
+    add(xPos[4], yPos, I18N::Game::EXP, green, xPos[5] - xPos[4], RT3_SORT_CENTER);
+    add(xPos[5], yPos, I18N::Game::Reward, green, (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
     yPos += 20;
 
     int yStartPos = yPos;
 
+    auto addRow = [&](int rank, const MatchResult& result, DWORD color)
+    {
+        WriteWide(lpszStr, L"%2d", rank);
+        add(xPos[1], yPos, lpszStr, color);
+
+        std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
+        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<const char*>(result.m_lpID), MAX_USERNAME_SIZE);
+        add(xPos[2], yPos, lpszStr, color);
+
+        WriteWide(lpszStr, L"%10lu", result.m_iScore);
+        add(xPos[3], yPos, lpszStr, color);
+
+        WriteWide(lpszStr, L"%6lu", result.m_dwExp);
+        add(xPos[4], yPos, lpszStr, color);
+
+        WriteWide(lpszStr, L"%6lu", result.m_iZen);
+        add(xPos[5], yPos, lpszStr, color);
+    };
+
+    const DWORD myColor = RGBA(200, 120, 0, 255); // "my result"
     for (int i = 0; i < m_iNumResult; ++i)
     {
-        MatchResult* pResult = &m_MatchResult[i];
-
-        // Highlight "my result" with a different color
-        if (i == m_iMyResult - 1)
-        {
-            g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color for "my result"
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(255, 255, 0, 255); // Normal color for others
-        }
-
-        // Render rank number (index + 1 for display)
-        WriteWide(lpszStr, L"%2d", i + 1);
-        g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
-
-        // Render player ID
-        std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
-        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(pResult->m_lpID), MAX_USERNAME_SIZE);
-        g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
-
-        // Render score
-        WriteWide(lpszStr, L"%10lu", pResult->m_iScore);
-        g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
-
-        // Render experience
-        WriteWide(lpszStr, L"%6lu", pResult->m_dwExp);
-        g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
-
-        // Render Zen
-        WriteWide(lpszStr, L"%6lu", pResult->m_iZen);
-        g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
-
-        // Increment yPos for the next row
+        addRow(i + 1, m_MatchResult[i], i == m_iMyResult - 1 ? myColor : RGBA(255, 255, 0, 255));
         yPos += 16;
     }
 
-    // Render a special section for "my result"
+    // A section for "my result" at a fixed position under the table.
     if (m_iMyResult > 0 && m_iMyResult <= m_iNumResult)
     {
-        int myIndex = m_iMyResult - 1; // Convert to zero-based index
-        MatchResult* myResult = &m_MatchResult[myIndex];
-
-        yPos = yStartPos + 16 * 10; // Fixed position for the special section
-        g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color
-
-        // "My Ranking" label
-        g_pRenderText->RenderText(xPos[0], yPos, I18N::Game::MyInfo, 230, 0, RT3_SORT_CENTER);
+        yPos = yStartPos + 16 * 10;
+        add(xPos[0], yPos, I18N::Game::MyInfo, myColor, 230, 0, RT3_SORT_CENTER);
         yPos += 20;
-
-        // Render my rank
-        WriteWide(lpszStr, L"%2d", m_iMyResult);
-        g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
-
-        // Render my ID
-        std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
-        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(myResult->m_lpID), MAX_USERNAME_SIZE);
-        g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
-
-        // Render my score
-        WriteWide(lpszStr, L"%10lu", myResult->m_iScore);
-        g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
-
-        // Render my experience
-        WriteWide(lpszStr, L"%6lu", myResult->m_dwExp);
-        g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
-
-        // Render my Zen
-        WriteWide(lpszStr, L"%6lu", myResult->m_iZen);
-        g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
+        addRow(m_iMyResult, m_MatchResult[m_iMyResult - 1], myColor);
     }
 }
 
