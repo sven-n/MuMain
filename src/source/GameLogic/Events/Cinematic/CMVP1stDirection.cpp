@@ -321,14 +321,14 @@ void CMVP1STDirection::BeginDirection2()
         }
         else if (g_Direction.m_iCheckTime == 2)
         {
+            // The whole army marches at the same time like in the original client, so every
+            // monster is moved in each frame instead of stopping at the first one still walking.
             bool allMovesSucceeded = true;
             for (const auto& command : kBeginDirection2MoveCommands)
             {
-                if (!g_Direction.MoveCreatedMonster(command.index, command.x, command.y, command.angle, command.speed))
-                {
-                    allMovesSucceeded = false;
-                    break;
-                }
+                const bool arrived =
+                    g_Direction.MoveCreatedMonster(command.index, command.x, command.y, command.angle, command.speed);
+                allMovesSucceeded = allMovesSucceeded && arrived;
             }
 
             if (allMovesSucceeded)

@@ -23,6 +23,8 @@ namespace
 {
 constexpr float kPi = 3.14159265358979323846f;
 constexpr float kRadToDeg = 180.0f / kPi;
+// The degrees a monster of a direction turns in one frame at the reference fps.
+constexpr float kMonsterTurnStepDegrees = 3.0f;
 
 float UnwindDegrees360(float degrees)
 {
@@ -134,7 +136,8 @@ bool CDirection::DirectionCameraMove()
 
         VectorScale(m_vResult, m_fCount, vTemp);
         VectorAdd(m_v1stPosition, vTemp, m_vCameraPosition);
-        m_fCount += m_fCameraSpeed;
+        // The camera speed is the distance per frame at the reference fps.
+        m_fCount += m_fCameraSpeed * FPS_ANIMATION_FACTOR;
 
         if (m_fLength <= VectorLength(vTemp))
         {
@@ -323,10 +326,11 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
         }
         else
         {
+            const float turnStep = kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR;
             if (iResult > 3 && iResult <= 180)
-                c->Object.Angle[2] += 3.0f;
+                c->Object.Angle[2] += turnStep;
             else
-                c->Object.Angle[2] -= 3.0f;
+                c->Object.Angle[2] -= turnStep;
 
             SetAction(&c->Object, MONSTER01_STOP1);
         }
