@@ -221,6 +221,15 @@ ways, and only the first is self-announcing:
   - The open skill picker passes clicks through to the world everywhere except its icons.
   - The extra-item list is always shown reverse-alphabetically. Native showed that only after a
     reload, and insertion order before.
+- **`CNPCQuest`'s message/answer tops stay in its model.** The other three windows in that pass
+  (party colours, the buff strip's slots, the job buttons) moved to RCSS; this one cannot follow
+  without changing what ships. `message_top` is a genuine per-instance value -- native centres the
+  message-plus-answer block by its line count -- and legacy's separate `answers_top` exists because
+  flow does not stack counter-scaled text layers (see `engine-findings.md`). The non-in-progress
+  anchor at 250 is absolute while its block's top is data-driven, so expressing it declaratively
+  needs either another bound number or the answers markup duplicated per quest state. Revisit if
+  legacy's text ever stops being counter-scaled, or alongside a `.sharp-text` flow container that
+  reconciles layout height with the counter-scale.
 - **The presentation-in-models pattern is wider than the four windows named for it** (found
   2026-09-30, scanning the ports merged from `origin`). Same shape, not yet addressed:
   `ChatCommandWindow`'s `edit_color` pushes a compile-time constant colour through the model;

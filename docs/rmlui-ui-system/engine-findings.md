@@ -466,6 +466,15 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   entries pointing at freed memory, and unloading the document crashed in `DetachAllEvents()`.
   A listener registered for more than one event, or on more than one element, needs the same count.
 
+- **Counter-scaled text layers cannot be stacked by ordinary flow.** A `.sharp-text` block carries
+  `scale(1 / root_scale)` with its `line-height` bound as `18 * root_scale` px, so its rendered
+  height is the native one but its *layout* box is `root_scale` times taller -- `transform` is
+  render-time only and never enters layout (the same property behind the slider finding below). A
+  sibling placed after it in flow is therefore pushed down by the pre-transform height, and the gap
+  grows with the UI scale. So two counter-scaled blocks that must sit one above the other each need
+  their own `top`, which is why `npc_quest.rml`'s messages and answers are positioned separately in
+  legacy while the modern fork, whose text scales with its panel, holds both in one flow container.
+
 - **`<input type="range">` computes the wrong value inside a `transform: scale()` panel, while still
   hit-testing correctly.** `WidgetSlider::AbsolutePositionToBarPosition()` takes the raw mouse pixel
   from the event and divides it against `track->GetAbsoluteOffset()` and `track->GetBox().GetSize()`,
