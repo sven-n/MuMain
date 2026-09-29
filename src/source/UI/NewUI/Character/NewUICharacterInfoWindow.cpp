@@ -1658,3 +1658,14 @@ void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
 
     CheckFullSet(Hero);
 }
+
+SEASON3B::CNewUIButton* SEASON3B::CNewUICharacterInfoWindow::GetShownStatButton(int stat)
+{
+    if (!IsVisible() || CharacterAttribute->LevelUpPoint <= 0 || stat < 0)
+    {
+        return nullptr;
+    }
+
+    const int count = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD ? 5 : 4;
+    return stat < count ? &m_BtnStat[stat] : nullptr;
+}

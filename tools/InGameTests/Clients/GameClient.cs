@@ -134,6 +134,10 @@ internal sealed class GameClient : IAsyncDisposable
         return ui.GetProperty("windows").EnumerateArray().Select(window => window.GetString()!).ToList();
     }
 
+    /// <summary>Whether <c>ui</c> reports the element <paramref name="name"/>, i.e. it is shown now.</summary>
+    public async Task<bool> HasElementAsync(string name)
+        => (await this.SendAsync("ui")).GetProperty("elements").TryGetProperty(name, out _);
+
     /// <summary>Opens the inventory with its key, unless it is open already.</summary>
     public async Task OpenInventoryAsync()
     {

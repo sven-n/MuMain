@@ -71,6 +71,12 @@ void RecordPartyInvited(int inviterKey);
 // The server's answer to an invitation that formed no party (0x41 value).
 void RecordPartyAnswer(int result);
 
+// Legacy quest packets: a quest's new state as the client decoded it from A1,
+// or A2 when the server took the step (QUEST_STATE: 1 active, 2 complete,
+// 3 not started), and a reward (A3) for the character with the server id `key`.
+void RecordQuestStateChanged(int quest, int state);
+void RecordQuestPrize(int key, int reward, int amount);
+
 // The server closed the session.
 void RecordDisconnected(const char* reason);
 
@@ -115,6 +121,8 @@ inline void RecordViewLeaveKey(int) {}
 inline void RecordPartyChange(const char*, const wchar_t*) {}
 inline void RecordPartyInvited(int) {}
 inline void RecordPartyAnswer(int) {}
+inline void RecordQuestStateChanged(int, int) {}
+inline void RecordQuestPrize(int, int, int) {}
 inline void RecordDisconnected(const char*) {}
 inline void RecordTradeRequested(const char*, bool) {}
 inline void RecordTradeAnswer(int, const char*) {}

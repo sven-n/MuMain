@@ -67,6 +67,30 @@ internal static class TestAccounts
     /// <summary><c>personal-shop</c> buyer: level 220 Dark Lord with 100,000,000 zen, next to the seller in Devias.</summary>
     public static readonly TestCharacter ShopBuyer = new("quest2", "quest2", "quest2Dl");
 
+    /// <summary>
+    /// <c>quest-blade-knight</c>: level 150 Dark Knight in Devias, next to Sebina, with the Scroll
+    /// of Emperor and the Broken Sword. The quest characters are all first class, with 100,000,000 zen.
+    /// </summary>
+    public static readonly TestCharacter QuestKnight = new("quest1", "quest1", "quest1Dk");
+
+    /// <summary><c>quest-soul-master</c>: level 150 Dark Wizard with the Scroll of Emperor and the Soul Shard of Wizard.</summary>
+    public static readonly TestCharacter QuestWizard = new("quest1", "quest1", "quest1Dw");
+
+    /// <summary><c>quest-muse-elf</c>: level 150 Elf with the Scroll of Emperor and the Tear of Elf.</summary>
+    public static readonly TestCharacter QuestElf = new("quest1", "quest1", "quest1Elf");
+
+    /// <summary><c>quest-combo</c>: level 220 Dark Knight with Sebina's items, the Ring of Honor and the Dark Stone.</summary>
+    public static readonly TestCharacter ComboKnight = new("quest2", "quest2", "quest2Dk");
+
+    /// <summary><c>quest-hero-status-wizard</c>: level 400 Dark Wizard with Sebina's items and the Ring of Honor.</summary>
+    public static readonly TestCharacter HeroWizard = new("quest3", "quest3", "quest3Dw");
+
+    /// <summary><c>quest-hero-status-elf</c>: level 400 Elf with Sebina's items and the Ring of Honor.</summary>
+    public static readonly TestCharacter HeroElf = new("quest3", "quest3", "quest3Elf");
+
+    /// <summary><c>quest-evidence-of-strength</c>: level 400 Dark Lord with Devin's three items.</summary>
+    public static readonly TestCharacter EvidenceLord = new("quest3", "quest3", "quest3Dl");
+
     /// <summary><c>party</c> leader: level 1 Dark Knight, at home in Lorencia.</summary>
     public static readonly TestCharacter PartyLeader = new("test0", "test0", "test0Dk");
 

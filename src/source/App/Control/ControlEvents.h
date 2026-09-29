@@ -105,6 +105,12 @@ void RecordParty(std::string_view change, const wchar_t* name);
 // party: `result` is failed, denied, full, user_left, other_party, left,
 // opposing_gens, battle_zone, battle_zone_off or unknown.
 void RecordPartyResult(std::string_view result);
+// A legacy quest's new state: active, complete, not_started or none.
+void RecordQuestChange(int quest, std::string_view state);
+// A legacy quest reward for the character `name`: `reward` is
+// level_up_points, second_class, points_per_level, combo, third_class or
+// unknown; `characterClass` is its class afterwards.
+void RecordQuestReward(std::string_view name, std::string_view reward, int amount, int characterClass);
 // A trade step: `change` is requested, opened, refused, unavailable,
 // partner_confirm or closed. `name` is the partner (may be empty), `detail`
 // the confirm state or how the trade closed (may be empty).

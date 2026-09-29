@@ -89,7 +89,10 @@ master account `testgm` stays free for people; `testgm2`'s Dimension Master is
 the only character that wears something in all twelve equipment slots, so
 `equip-all-slots` uses it. The test data puts every character in the safe zone
 of its class's home map, e.g. an Elf in Noria, and the quest characters on one
-tile in Devias.
+tile in Devias, next to Sebina the Priest and Apostle Devin. The quest
+characters are all first class with 100,000,000 zen; a class change or a
+finished quest lasts until the test server is recreated, so the quest
+scenarios need `--fresh-server` (or **Recreate the test server**) to run again.
 
 | Scenario | Account | Character |
 |---|---|---|
@@ -102,6 +105,9 @@ tile in Devias.
 | `repair` | `test9` | `test9Dk` (level 91, gloves and boots at 30 of 45 durability) |
 | `icarus-flying-item-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
 | `equip-all-slots` | `testgm2` | `testgm2Sum` (level 400 Dimension Master, all twelve slots worn) |
+| `quest-blade-knight`, `quest-soul-master`, `quest-muse-elf` | `quest1` | `quest1Dk`, `quest1Dw`, `quest1Elf` (level 150, first class, with Sebina's items) |
+| `quest-combo` | `quest2` | `quest2Dk` (level 220, with Sebina's items, the Ring of Honor and the Dark Stone) |
+| `quest-hero-status-wizard`, `quest-hero-status-elf`, `quest-evidence-of-strength` | `quest3` | `quest3Dw`, `quest3Elf` (level 400, with Sebina's items and the Ring of Honor), `quest3Dl` (with Devin's three items) |
 
 A new scenario takes a character no other scenario uses. When the test data
 has no character with what a scenario needs, OpenMU's test data gets a new one
@@ -257,6 +263,13 @@ them under these categories.
 | NPC Interactions | `npc-shop` | Talks to Hanzo the Blacksmith with a click on him. Drags a potion stack onto his shop (sold at once) and a Jewel of Bless (a dialog asks, Enter confirms), each for the selling price its tooltip shows, then buys the cheapest of his goods that fits, for its price. |
 | NPC Interactions | `repair` | Repairs the worn gloves with the inventory's repair button, then talks to Hanzo the Blacksmith and repairs the boots with Repair all. Each repair brings the durability back to its maximum and costs zen; the log lists what it cost and what the client showed. |
 | Game Behaviour | `equip-all-slots` | Slot by slot, drags the item of each of the twelve equipment slots onto a free area of the inventory with two clicks, and puts it back on with a right-click on it. |
+| Quests | `quest-blade-knight` | Talks to Sebina the Priest with a click, goes through her conversation with clicks on its answers, takes "Find the Scroll of the Emperor" (1,000,000 zen) and hands the scroll in (+10 level-up points); then "Three Treasures of MU" (2,000,000 zen) with the Broken Sword: +10 points and the Dark Knight becomes a Blade Knight. One point then goes to strength with the character window's "+". |
+| Quests | `quest-soul-master` | The same two quests with the Soul Shard of Wizard: the Dark Wizard becomes a Soul Master. |
+| Quests | `quest-muse-elf` | The same two quests with the Tear of Elf: the Elf becomes a Muse Elf. |
+| Quests | `quest-hero-status-wizard` | A level 400 Dark Wizard becomes a Soul Master, looks for Marlon (he wanders between Devias, Lorencia, Noria and Atlans) and hands him the Ring of Honor for "Gain Hero Status": one more level-up point per level, which the server pays for the 180 levels above 220 at once. |
+| Quests | `quest-hero-status-elf` | The same for a level 400 Elf, which also learns Infinity Arrow. |
+| Quests | `quest-combo` | A level 220 Dark Knight becomes a Blade Knight, gains hero status from Marlon and hands him the Dark Stone for "Secret of Dark Stone": the combo, which is still there after logging out and in again. |
+| Quests | `quest-evidence-of-strength` | A level 400 Dark Lord hands Apostle Devin the three items of "Evidence of Strength", the first quest towards the third class: +20 level-up points. |
 | Game Behaviour | `icarus-flying-item-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged. Then the other way round: with the wings back on, right-clicking the Fenrir takes it off, and the wings, now the last flying item, stay on both ways (sven-n/MuMain#631). Both are put back on afterwards. |
 
 ## Writing a scenario
@@ -308,6 +321,10 @@ treats a player, e.g. the rules of a map; a new kind gets a new value in
 
 - NPC windows other than shops: the chaos machine (sven-n/MuMain#587) and
   storage. Talking to their NPCs works as in `npc-shop`.
+- The third class change itself: Devin's quests after "Evidence of Strength"
+  need 20 kills each of three monsters of the Barracks of Balgass (75,000 to
+  90,000 health) and one of the Dark Elf in its refuge (1,500,000), which the
+  quest characters of the test data cannot do in a test.
 - The item rule flags, e.g. that an item with `"tradable": false` cannot be put
   into the trade window.
 - Running the tests in CI next to an OpenMU container.

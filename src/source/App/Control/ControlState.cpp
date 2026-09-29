@@ -13,6 +13,9 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "Character/CharacterManager.h"
+#include "GameLogic/Quests/CSQuest.h"
+#include "GameLogic/Quests/DialogStructure.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "Network/Server/WSclient.h"
@@ -24,6 +27,12 @@
 
 #include <cmath>
 #include <utility>
+
+// The quest dialog's page, text and answers (Scenes/SceneCore.cpp).
+extern int g_iNumLineMessageBoxCustom;
+extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+extern wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
+extern int g_iCurrentDialogScript;
 
 namespace
 {
@@ -270,6 +279,86 @@ json PurchaseShopState()
     return shop;
 }
 
+// The legacy quests (0 and 1 the second class, 2 and 3 Marlon's, 4 to 6 the
+// third class) with their state as the server told the client.
+json LegacyQuestArray()
+{
+    constexpr int LegacyQuestCount = 7;
+    json quests = json::array();
+    for (int index = 0; index < LegacyQuestCount; ++index)
+    {
+        json quest;
+        quest["index"] = index;
+        const wchar_t* title = g_csQuest.getQuestTitle(static_cast<BYTE>(index));
+        quest["name"] = title != nullptr ? Core::Text::ToUtf8(title) : "";
+        switch (g_csQuest.getQuestState2(index))
+        {
+        case QUEST_ING:
+            quest["state"] = "active";
+            break;
+        case QUEST_END:
+            quest["state"] = "complete";
+            break;
+        case QUEST_NO:
+            quest["state"] = "not_started";
+            break;
+        default:
+            quest["state"] = "none";
+            break;
+        }
+        quests.push_back(std::move(quest));
+    }
+    return quests;
+}
+
+// The quest dialog on screen: the quest, the page, its text and the answers
+// a click acts on; null while it is closed.
+json NpcQuestState()
+{
+    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST))
+    {
+        return nullptr;
+    }
+
+    json dialog;
+    dialog["quest"] = g_csQuest.GetCurrQuestIndex();
+    dialog["page"] = g_iCurrentDialogScript;
+    std::wstring text;
+    for (int line = 0; line < g_iNumLineMessageBoxCustom; ++line)
+    {
+        text += (line > 0 ? L" " : L"") + std::wstring(g_lpszMessageBoxCustom[line]);
+    }
+    dialog["text"] = Core::Text::ToUtf8(text.c_str());
+    // Each answer with what a click on it does: `next` shows another page,
+    // `accept` starts the quest, `complete` hands it in, `close` ends the talk.
+    json answers = json::array();
+    const auto& entry = GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript);
+    for (int answer = 0; answer < g_pNPCQuest->GetAnswerCount(); ++answer)
+    {
+        json described;
+        described["text"] = Core::Text::ToUtf8(g_lpszDialogAnswer[answer][0]);
+        switch (entry.answers[answer].returnCode)
+        {
+        case 1:
+            described["action"] = "accept";
+            break;
+        case 2:
+            described["action"] = "close";
+            break;
+        case 3:
+            described["action"] = "complete";
+            break;
+        default:
+            described["action"] = entry.answers[answer].link > 0 ? "next" : "none";
+            break;
+        }
+        answers.push_back(std::move(described));
+    }
+    dialog["answers"] = std::move(answers);
+    dialog["need_zen"] = g_csQuest.GetNeedZen();
+    return dialog;
+}
+
 json PartyArray()
 {
     json members = json::array();
@@ -391,10 +480,20 @@ std::string WorldStateObject()
 
     state["character"] = Core::Text::ToUtf8(CharacterAttribute->Name);
     state["class"] = static_cast<int>(CharacterAttribute->Class);
+    state["class_name"] = Core::Text::ToUtf8(gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
     state["level"] = CharacterAttribute->Level;
     state["experience"] = CharacterAttribute->Experience;
     state["next_experience"] = CharacterAttribute->NextExperience;
     state["zen"] = CharacterMachine != nullptr ? CharacterMachine->Gold : 0;
+    // Points the player can add to a stat with the character window's "+" buttons.
+    state["level_up_points"] = CharacterAttribute->LevelUpPoint;
+    state["stats"] = {{"strength", CharacterAttribute->Strength},
+                      {"agility", CharacterAttribute->Dexterity},
+                      {"vitality", CharacterAttribute->Vitality},
+                      {"energy", CharacterAttribute->Energy},
+                      {"command", CharacterAttribute->Charisma}};
+    // The Blade Knight's combo, from Marlon's "Secret of Dark Stone".
+    state["combo"] = Hero->byExtensionSkill == 1;
 
     state["hp"] = CharacterAttribute->Life;
     state["max_hp"] = CharacterAttribute->LifeMax;
@@ -429,6 +528,8 @@ std::string WorldStateObject()
     // Clicks repair items instead of picking them up (the inventory's repair
     // button, `L`, or an NPC's repair button).
     state["repair_mode"] = g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON;
+    state["quests"] = LegacyQuestArray();
+    state["npc_quest"] = NpcQuestState();
     state["nearby"] = NearbyArray();
 
     return state.dump();

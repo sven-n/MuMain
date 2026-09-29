@@ -14,6 +14,9 @@ internal enum ScenarioCategory
 
     /// <summary>How the game treats a player on its own, e.g. the rules of a map.</summary>
     GameBehaviour,
+
+    /// <summary>The quests: class changes and their rewards.</summary>
+    Quests,
 }
 
 /// <summary>The names the window and the report show for the categories.</summary>
@@ -24,6 +27,7 @@ internal static class ScenarioCategories
         ScenarioCategory.PlayerInteractions => "Player Interactions",
         ScenarioCategory.NpcInteractions => "NPC Interactions",
         ScenarioCategory.GameBehaviour => "Game Behaviour",
+        ScenarioCategory.Quests => "Quests",
         _ => category.ToString(),
     };
 }

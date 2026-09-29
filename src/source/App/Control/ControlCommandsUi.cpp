@@ -47,6 +47,7 @@ constexpr NamedWindow Windows[] = {
     {"command", SEASON3B::INTERFACE_COMMAND},
     {"my_shop", SEASON3B::INTERFACE_MYSHOP_INVENTORY},
     {"purchase_shop", SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY},
+    {"npc_quest", SEASON3B::INTERFACE_NPCQUEST},
 };
 
 // A point of a window, from its window-local coordinates to window pixels.
@@ -104,6 +105,28 @@ json Elements()
         elements["my_shop.title"] = WindowRect(*g_pMyShopInventory, g_pMyShopInventory->GetTitleRect());
         elements["my_shop.open"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetOpenButton()));
         elements["my_shop.close"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetCloseButton()));
+    }
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST))
+    {
+        for (int answer = 0; answer < g_pNPCQuest->GetAnswerCount(); ++answer)
+        {
+            elements["npc_quest.answer." + std::to_string(answer)] =
+                WindowRect(*g_pNPCQuest, g_pNPCQuest->GetAnswerRect(answer));
+        }
+        if (g_pNPCQuest->IsCompleteShown())
+        {
+            elements["npc_quest.complete"] = WindowRect(*g_pNPCQuest, ButtonRect(g_pNPCQuest->GetCompleteButton()));
+        }
+        elements["npc_quest.close"] = WindowRect(*g_pNPCQuest, ButtonRect(g_pNPCQuest->GetCloseButton()));
+    }
+    constexpr std::string_view StatNames[] = {"strength", "agility", "vitality", "energy", "command"};
+    for (int stat = 0; stat < static_cast<int>(std::size(StatNames)); ++stat)
+    {
+        if (SEASON3B::CNewUIButton* button = g_pCharacterInfoWindow->GetShownStatButton(stat))
+        {
+            elements["character.stat." + std::string(StatNames[stat])] =
+                WindowRect(*g_pCharacterInfoWindow, ButtonRect(*button));
+        }
     }
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
     {

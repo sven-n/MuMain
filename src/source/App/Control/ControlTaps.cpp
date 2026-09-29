@@ -239,6 +239,32 @@ void RecordPartyAnswer(int result)
     RecordPartyResult(result >= 0 && result < static_cast<int>(std::size(Results)) ? Results[result] : "unknown");
 }
 
+void RecordQuestStateChanged(int quest, int state)
+{
+    // The client's QUEST_STATE values: 1 active, 2 complete, 3 not started.
+    constexpr std::string_view States[] = {"none", "active", "complete", "not_started"};
+    RecordQuestChange(quest, state >= 0 && state < static_cast<int>(std::size(States)) ? States[state] : "unknown");
+}
+
+void RecordQuestPrize(int key, int reward, int amount)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    // The reward codes of the legacy quest prize packet, from 200 on.
+    constexpr std::string_view Rewards[] = {"level_up_points", "second_class", "points_per_level", "combo",
+                                            "third_class"};
+    constexpr int FirstReward = 200;
+    const int offset = reward - FirstReward;
+    const std::string_view name = offset >= 0 && offset < static_cast<int>(std::size(Rewards)) ? Rewards[offset] : "unknown";
+    const int index = FindCharacterIndex(key);
+    const bool known = index >= 0 && index < MAX_CHARACTERS_CLIENT;
+    RecordQuestReward(known ? Core::Text::ToUtf8(CharactersClient[index].ID) : std::string(), name, amount,
+                      known ? static_cast<int>(CharactersClient[index].Class) : -1);
+}
+
 void RecordDisconnected(const char* reason)
 {
     RecordDisconnect(reason != nullptr ? reason : "the server closed the connection");
