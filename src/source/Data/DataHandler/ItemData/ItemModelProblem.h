@@ -58,7 +58,7 @@ struct ItemModelProblem
     bool IsError() const
     {
         return type == ItemModelProblemType::ModelFileMissing || type == ItemModelProblemType::TextureMissing ||
-               type == ItemModelProblemType::TextureTypeUnsupported || type == ItemModelProblemType::RenderStyleUnknown;
+               type == ItemModelProblemType::TextureTypeUnsupported;
     }
 
     // One line that names the item (with its name from `items`), the model

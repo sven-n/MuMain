@@ -1,14 +1,20 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 // Opens the item models of the item model database (Data/Items/Models) into
 // the model slots MODEL_ITEM + item type, and loads their textures. The model
 // data must be loaded first (CItemDataHandler::LoadModels).
 namespace Data::Items::ModelLoader
 {
-// Opens the .bmd file of every item model.
-void OpenModels();
+// Whether a render style of this name exists (the render styles are drawing
+// code, Render::Items::Styles::Exists).
+using RenderStyleExists = bool (*)(std::string_view name);
+
+// Opens the .bmd file of every item model; `renderStyleExists` checks the
+// "renderStyle" names.
+void OpenModels(RenderStyleExists renderStyleExists);
 
 // Loads the textures of every item model from its texture folders.
 void OpenTextures();

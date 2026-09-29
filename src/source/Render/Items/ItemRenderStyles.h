@@ -11,20 +11,17 @@ class OBJECT;
 // (Data/Items/Models, "renderStyle"). Items with the same look share a style.
 namespace Render::Items::Styles
 {
-// Whether there is a render style of this name.
+// Whether there is a render style of this name. The model loader checks the
+// names of the model entries with it.
 bool Exists(std::string_view name);
 
-// Takes the render styles of the item models from the item model database.
-// Called when the models are opened; names that are not styles are drawn
-// plainly (the model loader reports them).
-void Assign();
-
-// Draws the model with the render style of its item. False when the item has
-// no style, or its style is not for this drawing (e.g. a doppelganger); the
-// drawing code then draws the model itself.
+// Draws the model with the render style of its item (the styles are taken
+// from the item model database after each build of it). False when the item
+// has no style, or its style is not for this drawing (e.g. a doppelganger);
+// the drawing code then draws the model itself.
 bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType);
 
 // Draws the glow pass of items +7 and up for the few render styles that glow
 // differently from their "glow" values. False for the others.
-bool RenderGlow(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture);
+bool RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture);
 } // namespace Render::Items::Styles

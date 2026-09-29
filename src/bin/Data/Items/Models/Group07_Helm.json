@@ -746,7 +746,7 @@
         "meshes": [1],
         "shineMeshes": [1]
       },
-      "renderStyle": "divineHelm"
+      "renderStyle": "onlyMesh1WithoutSkin"
     },
     {
       "number": 51,
@@ -819,7 +819,7 @@
         "shineMeshes": [1],
         "excellentMesh": 1
       },
-      "renderStyle": "sacredFireOrStormJahadHelm"
+      "renderStyle": "onlyMesh1WithoutSkin"
     },
     {
       "number": 60,
@@ -839,7 +839,7 @@
         "shineMeshes": [1],
         "excellentMesh": 1
       },
-      "renderStyle": "sacredFireOrStormJahadHelm"
+      "renderStyle": "onlyMesh1WithoutSkin"
     },
     {
       "number": 61,

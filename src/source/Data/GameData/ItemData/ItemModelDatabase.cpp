@@ -39,6 +39,7 @@ void ItemModelDatabase::Build(std::span<const ItemModelDefinition> models, const
     std::fill(m_models.begin(), m_models.end(), ItemModelDefinition{});
     std::fill(m_glowColors.begin(), m_glowColors.end(), ItemGlowColors{});
     m_modelCount = 0;
+    ++m_version;
     for (const ItemModelDefinition& model : models)
     {
         if (!IsValidItemId(model.group, model.number))

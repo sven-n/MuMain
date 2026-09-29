@@ -319,10 +319,18 @@ same look share a style (the Storm Crow set, the archangel staff and
 crossbow, …), and a few plain looks have names of their own: `textured`
 (drawn with its texture only, whatever the drawing asks for),
 `texturedAllMeshes`, `chromeMesh0` and `chromeMesh1` (a chrome shine on
-one mesh), `onlyMesh0WithoutSkin` and `onlyMesh2WithoutSkin` (in the
-inventory and on the ground only the armor mesh, without the character
-skin). An item without `renderStyle` is drawn plainly. Any item can use
-any style; a new look needs a new style in code.
+one mesh), `onlyMesh0WithoutSkin`, `onlyMesh1WithoutSkin` and
+`onlyMesh2WithoutSkin` (in the inventory and on the ground only the armor
+mesh, without the character skin). Styles that only differ in a texture
+share their code, with the texture in the list of names (the package
+boxes, the tickets, the chaos cards, …). An item without `renderStyle` is
+drawn plainly; a new look needs a new style in code.
+
+Most styles fit any item. The ones that pick a mesh, a texture or a color
+for each of their items only know those items and draw other items
+plainly: `violentWindToEternalWingHelm`, `…Armor` and `…Pants` (items 39
+to 44), `socketSeed`, `socketSeedSphere`, `characterCard` and
+`divineAndSuccubusSkin`.
 
 Some styles only apply to some drawings, and the model is drawn plainly
 otherwise: `runeBlade`, `greatScepter`, `grandSoulShield` and the
@@ -372,7 +380,7 @@ The problems are:
 | A texture is in none of the texture folders, but another model loaded it before; that one is used. The warning names the folder to add to `textureFolders`. | warning |
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
 | A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
-| `renderStyle` names a style that does not exist; the model is drawn plainly. | error |
+| `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
 
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts

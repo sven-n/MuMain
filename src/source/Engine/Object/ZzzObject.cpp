@@ -5929,12 +5929,6 @@ void PartObjectColor3(int Type, float Alpha, float Bright, vec3_t Light, bool Ex
 
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    // Items are drawn with the render style of their model entry.
-    if (Render::Items::Styles::Render(b, o, Type, Alpha, RenderType))
-    {
-        return;
-    }
-
     if (Type == MODEL_ANGEL && b->NumMeshs)
     {
         b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -6350,6 +6344,13 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->TransformPosition(o->BoneTransform[12], vRelativePos, vPos, true);
         CreateSprite(BITMAP_SHINY + 1, vPos, 0.9f, vLight, o, -WorldTime * 0.08f);
         CreateSprite(BITMAP_LIGHT + 3, vPos, 0.8f, vLight2, o, WorldTime * 0.3f);
+    }
+    // Items are drawn with the render style of their model entry, after the
+    // player transformations: a transformed Rage Fighter draws its sword-form
+    // gloves with the look of the transformation.
+    else if (Render::Items::Styles::Render(b, o, Type, Alpha, RenderType))
+    {
+        // drawn by the style
     }
     else if (o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMLEFT ||
         o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT ||

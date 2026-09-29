@@ -10,7 +10,6 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
-#include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -109,9 +108,9 @@ void CheckGlowMeshes(int itemType, const ItemModelDefinition& model)
                           });
 }
 
-void CheckRenderStyle(const ItemModelDefinition& model)
+void CheckRenderStyle(const ItemModelDefinition& model, RenderStyleExists renderStyleExists)
 {
-    if (model.renderStyle.empty() || Render::Items::Styles::Exists(model.renderStyle))
+    if (model.renderStyle.empty() || renderStyleExists(model.renderStyle))
     {
         return;
     }
@@ -120,7 +119,7 @@ void CheckRenderStyle(const ItemModelDefinition& model)
     AddProblem(std::move(problem));
 }
 
-void OpenModel(int itemType, const ItemModelDefinition& model)
+void OpenModel(int itemType, const ItemModelDefinition& model, RenderStyleExists renderStyleExists)
 {
     const std::wstring path = ToLoaderPath(model.file);
     const size_t nameStart = path.find_last_of(LoaderSeparator) + 1; // 0 when there is no folder
@@ -134,7 +133,7 @@ void OpenModel(int itemType, const ItemModelDefinition& model)
     }
     MarkNoneBlendMeshes(itemType, model);
     CheckGlowMeshes(itemType, model);
-    CheckRenderStyle(model);
+    CheckRenderStyle(model, renderStyleExists);
 }
 
 ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)
@@ -188,10 +187,10 @@ template <typename TOpen> void ForEachModel(TOpen&& open)
 }
 } // namespace
 
-void OpenModels()
+void OpenModels(RenderStyleExists renderStyleExists)
 {
-    ForEachModel(OpenModel);
-    Render::Items::Styles::Assign();
+    ForEachModel([renderStyleExists](int itemType, const ItemModelDefinition& model)
+                 { OpenModel(itemType, model, renderStyleExists); });
 }
 
 void OpenTextures()

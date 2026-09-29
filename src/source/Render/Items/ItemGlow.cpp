@@ -7,7 +7,6 @@
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
-#include "GameLogic/Social/MonkSystem.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -92,7 +91,7 @@ void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, int renderTyp
 
 const ItemGlow& Get(int modelType)
 {
-    const ItemModelDefinition* model = FindItemModel(modelType);
+    const ItemModelDefinition* model = g_ItemModelDatabase.Find(GetItemTypeOfModel(modelType));
     return model != nullptr ? model->glow : DefaultGlow;
 }
 
@@ -102,12 +101,7 @@ const Colors& GetColors(int modelType)
     {
         return GetItemColors(*item);
     }
-    // The second models of the Rage Fighter gloves.
-    if (g_CMonkSystem.IsSubItemModel(modelType))
-    {
-        return GetItemColors(g_CMonkSystem.EqualItemModelType(modelType) - MODEL_ITEM);
-    }
-    return GetItemColors(modelType - MODEL_ITEM);
+    return GetItemColors(GetItemTypeOfModel(modelType));
 }
 
 int GetLevel(int modelType, int level)
@@ -153,7 +147,7 @@ bool HasExcellentGlow(int modelType)
 
 void RenderGlow(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture)
 {
-    if (Styles::RenderGlow(b, o, modelType, renderType, alpha, texture))
+    if (Styles::RenderGlow(b, o, modelType, alpha, renderType, texture))
     {
         return;
     }

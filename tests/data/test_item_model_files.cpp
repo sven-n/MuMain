@@ -14,7 +14,9 @@
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Items/ItemDisplay.h"
+#include "GameLogic/Social/MonkSystem.h"
 #include "Render/Items/ItemGlow.h"
+#include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 
@@ -505,8 +507,8 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
     CHECK(GetLevel(MODEL_ITEM + MakeItemType(0, 0), 5) == 5);
 
     // The inventory models of the Rage Fighter armor and the second models of
-    // the Rage Fighter gloves have the colors of their item; their meshes are
-    // their own.
+    // the Rage Fighter gloves have the colors of their item; the inventory
+    // models draw their own meshes.
     const Color copper{0.8f, 0.46f, 0.25f};
     CHECK(GetColors(MODEL_ITEM + ITEM_SACRED_ARMOR).color == copper);
     CHECK(GetColors(MODEL_ARMORINVEN_60).color == copper);
@@ -572,27 +574,135 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
 {
     using namespace Render::Items;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
-    Styles::Assign();
 
+    // A model without meshes draws nothing, so the styles only decide here.
     BMD model;
     OBJECT object;
-    object.Type = MODEL_ITEM + ITEM_RUNE_BLADE;
+    const auto drawsWithStyle = [&](int modelType, int renderType)
+    {
+        object.Type = modelType;
+        return Styles::Render(&model, &object, modelType, 1.f, renderType);
+    };
+
     // Doppelgangers are drawn plainly.
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE | RENDER_DOPPELGANGER));
+    for (const int itemType :
+         {ITEM_RUNE_BLADE, ITEM_GREAT_SCEPTER, ITEM_GRAND_SOUL_SHIELD, ITEM_MISTERY_HELM, ITEM_LILIUM_ARMOR})
+    {
+        INFO("item type " << itemType);
+        CHECK(drawsWithStyle(MODEL_ITEM + itemType, RENDER_TEXTURE));
+        CHECK_FALSE(drawsWithStyle(MODEL_ITEM + itemType, RENDER_TEXTURE | RENDER_DOPPELGANGER));
+    }
     // The look of the Battle Bow is only for monsters holding it (RENDER_EXTRA),
-    // the one of the plate armor only in a PC room.
-    object.Type = MODEL_ITEM + ITEM_BATTLE_BOW;
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
-    object.Type = MODEL_ITEM + ITEM_PLATE_ARMOR;
+    // the one of the plate set only in a PC room (the helm: the armor also
+    // puts a light on the bones of the object).
+    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE | RENDER_EXTRA));
+    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE));
+    object.m_bpcroom = TRUE;
+    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_HELM, RENDER_TEXTURE));
     object.m_bpcroom = FALSE;
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
-    // Items without a style are drawn by the drawing code.
-    object.Type = MODEL_ITEM + ITEM_KRIS;
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
-    // A model without meshes draws nothing, whatever its style.
-    object.Type = MODEL_ITEM + ITEM_STORM_CROW_ARMOR;
-    CHECK(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_HELM, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_ARMOR, RENDER_TEXTURE));
+    // Items without a style, and models that are not items, are drawn by the
+    // drawing code.
+    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_KRIS, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(MODEL_PLAYER, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_STORM_CROW_ARMOR, RENDER_TEXTURE));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
-    Styles::Assign();
+}
+
+TEST_CASE("The second models of the Rage Fighter gloves are drawn like their glove [data][items]")
+{
+    using namespace Render::Items;
+    // The same pairs as the Rage Fighter code.
+    for (int modelType = MODEL_SWORD_32_LEFT; modelType <= MODEL_SWORD_35_RIGHT; ++modelType)
+    {
+        INFO("model " << modelType);
+        CHECK(MODEL_ITEM + GetItemTypeOfModel(modelType) == g_CMonkSystem.EqualItemModelType(modelType));
+    }
+    CHECK(GetItemTypeOfModel(MODEL_ITEM + ITEM_KRIS) == ITEM_KRIS);
+    CHECK(GetItemTypeOfModel(MODEL_PLAYER) == -1);
+
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    BMD model;
+    OBJECT object;
+    // They take the style of their glove.
+    object.Type = MODEL_SWORD_35_LEFT;
+    CHECK(Styles::Render(&model, &object, MODEL_SWORD_35_LEFT, 1.f, RENDER_TEXTURE));
+    CHECK(Styles::Render(&model, &object, MODEL_SWORD_35_RIGHT, 1.f, RENDER_TEXTURE));
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [data][items]")
+{
+    using namespace Render::Items;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+
+    // The glow of its style keeps the object blending the second mesh; other
+    // items glow with their "glow" values.
+    BMD model;
+    OBJECT object;
+    object.BlendMesh = -1;
+    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_DEADLY_STAFF, RENDER_TEXTURE, 1.f, BITMAP_CHROME);
+    CHECK(object.BlendMesh == 1);
+    object.BlendMesh = -1;
+    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_KRIS, RENDER_TEXTURE, 1.f, BITMAP_CHROME);
+    CHECK(object.BlendMesh == -1);
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("Styles that pick something per item draw other items plainly [data][items]")
+{
+    using namespace Render::Items;
+    struct Case
+    {
+        int group;
+        int number;
+        const char* renderStyle;
+        bool drawnWithStyle;
+    };
+    // Each of these styles has a mesh, texture or color for each of its items.
+    const Case cases[] = {
+        {7, 39, "violentWindToEternalWingHelm", true},
+        {7, 50, "violentWindToEternalWingHelm", false},
+        {8, 44, "violentWindToEternalWingArmor", true},
+        {8, 45, "violentWindToEternalWingArmor", false},
+        {9, 38, "violentWindToEternalWingPants", false},
+        {12, 65, "socketSeed", true},
+        {12, 66, "socketSeed", false},
+        {12, 129, "socketSeedSphere", true},
+        {12, 99, "socketSeedSphere", false},
+        {13, 97, "characterCard", true},
+        {13, 96, "characterCard", false},
+        {8, 53, "divineAndSuccubusSkin", true},
+        {8, 54, "divineAndSuccubusSkin", false},
+    };
+    std::vector<ItemModelDefinition> models;
+    for (const Case& item : cases)
+    {
+        ItemModelDefinition model;
+        model.group = item.group;
+        model.number = item.number;
+        model.file = "Data/Item/Test.bmd";
+        model.renderStyle = item.renderStyle;
+        models.push_back(model);
+    }
+    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+
+    // Without the character skin (inventory, ground) the sets draw one mesh.
+    BMD model;
+    model.HideSkin = true;
+    OBJECT object;
+    for (const Case& item : cases)
+    {
+        INFO("(" << item.group << "," << item.number << ") " << item.renderStyle);
+        object.Type = MODEL_ITEM + MakeItemType(item.group, item.number);
+        CHECK(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE) == item.drawnWithStyle);
+    }
+
+    // The styles follow the database when it is built again.
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    object.Type = MODEL_ITEM + MakeItemType(12, 65);
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
 }

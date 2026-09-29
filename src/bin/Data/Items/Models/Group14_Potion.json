@@ -1249,7 +1249,7 @@
         "rotation": [0, 0, 90],
         "scale": 0.2
       },
-      "renderStyle": "talismanOfChaosAssembly"
+      "renderStyle": "textured"
     },
     {
       "number": 97,

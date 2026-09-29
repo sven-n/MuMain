@@ -16,7 +16,8 @@ namespace Render::Items::Glow
 using Color = std::array<float, 3>;
 using Colors = Data::Items::ItemGlowColors;
 
-// The glow of the item model, or the default glow for other models.
+// The glow of the item model (the second models of the Rage Fighter gloves
+// take the glow of their glove), or the default glow for other models.
 const Data::Items::ItemGlow& Get(int modelType);
 
 // The glow colors of the item model, or of the item a model is drawn for
