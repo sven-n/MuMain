@@ -94,9 +94,9 @@ namespace mu::ui::window
     {
         float panelHeight = 100.0f;  // dp -- 15 * showing lines + 10, native's own UpdateWndSize()
         float clientHeight = 90.0f;  // dp -- the scrolling well inside it
-        // Frame state and the user's transparency setting composed into one CSS colour, so no
-        // static RCSS rule competes with either -- see legacy/chat_log.rcss.
-        Rml::String backColor = "rgba(0,0,0,0)";
+        // The user's transparency setting on its own, 0..1. Frame state is showFrame below and
+        // the backdrop's colour is the theme's -- three separate owners, not one composed string.
+        float backAlpha = 0.f;
         bool showFrame = false;
         // Index of the line under the cursor, or -1. Drives .chat-line--pointed; C++ resolves it
         // because the lines themselves are pointer-events:none (see chat_log.rcss).

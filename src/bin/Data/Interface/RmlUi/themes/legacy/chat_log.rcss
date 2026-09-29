@@ -19,11 +19,23 @@
 	pointer-events: none;
 }
 
-/* The window fill is bound, not set here: native only paints it while the frame is shown
-   (RenderBackground()'s m_bShowFrame guard) AND its alpha is the user's own transparency setting,
-   cycled 0.2..0.9 by the input box's transparency button. C++ composes both facts into one
-   back_color string, so there is no static rule to fight with it. `.framed` remains only for the
-   one per-type colour below that genuinely depends on frame state. */
+/* The window fill, split three ways: whether it paints at all is frame state (.framed, native's
+   own RenderBackground() m_bShowFrame guard), how opaque it is comes from the user's cycled
+   transparency setting as a bound opacity, and the colour itself is this theme's. #backdrop sits
+   behind #lines so the fade never touches the text. */
+#backdrop {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 0;
+	background-color: rgb(0, 0, 0);
+}
+#panel.framed #backdrop { display: block; }
+/* Above the backdrop, and unfaded. */
+#lines { position: relative; z-index: 1; }
 
 /* Drag target for the 3-line-step resize. Native draws newui_Scrollbar_stretch across the full
    window width, 10 tall, sitting just above the top edge. */

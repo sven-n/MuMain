@@ -616,7 +616,7 @@ void mu::ui::window::CChatLogWindow::BuildRmlUi()
             c.Bind("lines", &model.lines);
             c.Bind("panel_height", &model.panelHeight);
             c.Bind("client_height", &model.clientHeight);
-            c.Bind("back_color", &model.backColor);
+            c.Bind("back_alpha", &model.backAlpha);
             c.Bind("show_frame", &model.showFrame);
             c.Bind("pointed_index", &model.pointedIndex);
             c.Bind("text_px", &model.textPx);
@@ -688,17 +688,13 @@ void mu::ui::window::CChatLogWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("show_frame");
     }
 
-    // Frame state and the transparency setting composed into one colour: native only fills the
-    // background while the frame is shown, and the alpha is the user's own cycled setting.
-    const int alpha = m_bShowFrame
-        ? static_cast<int>(std::clamp(GetBackAlpha(), 0.0f, 1.0f) * 255.0f)
-        : 0;
-    char backColor[48] = { 0, };
-    snprintf(backColor, sizeof(backColor), "rgba(0,0,0,%d)", alpha);
-    if (model.backColor != backColor)
+    // The user's cycled transparency setting, nothing else: whether the backdrop paints at all is
+    // show_frame's job (.framed in the RCSS) and its colour is the theme's.
+    const float backAlpha = std::clamp(GetBackAlpha(), 0.0f, 1.0f);
+    if (model.backAlpha != backAlpha)
     {
-        model.backColor = backColor;
-        m_RmlBinder.MarkDirty("back_color");
+        model.backAlpha = backAlpha;
+        m_RmlBinder.MarkDirty("back_alpha");
     }
 
     SyncNativeLineGeometry();

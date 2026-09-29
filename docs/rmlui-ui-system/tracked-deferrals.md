@@ -369,13 +369,17 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
   and collides with drag persistence (`GetWindowPosition` seeds the same `x`/`y`). What remains is
   "C++ owns column spacing, RCSS owns drawn width" -- one-directional, but still two numbers that
   must agree. Revisit when something actually needs panels to self-place.
-- **`CChatLogWindow` fuses three layers into one string.** `snprintf(backColor, ...,
-  "rgba(0,0,0,%d)", alpha)` composes a user preference (the cycled transparency), a semantic state
-  (frame shown) and a theme decision (the backdrop is black). The header comment records the fusion
-  as deliberate, "so no static RCSS rule competes with either" — accurate about the mechanism, and
-  exactly the coupling §11 exists to prevent. Neither theme can make the chat backdrop anything but
-  black.
-
+- **`CChatLogWindow` fused three layers into one string. Fixed.** `snprintf(backColor, ...,
+  "rgba(0,0,0,%d)", alpha)` composed a user preference (the cycled transparency), a semantic state
+  (frame shown) and a theme decision (the backdrop is black); its header comment recorded the
+  fusion as deliberate, "so no static RCSS rule competes with either" -- accurate about the
+  mechanism, and exactly the coupling §11 exists to prevent. Now three owners: `show_frame` drives
+  `.framed`, `back_alpha` is the user's setting alone as a bound opacity, and each theme colours a
+  `#backdrop` child that sits behind `#lines` so the fade never reaches the text.
+  **`CSystemLogWindow`'s own `back_color` stays** -- deliberately, not overlooked. Its transparency
+  is a *per-line* background on the very element that holds the line's text, so the same split needs
+  a backdrop element behind every row of a per-frame `data-for` list. That is a structural change to
+  a display-list document rather than the same edit, so it belongs with that finding.
 **P2 — bounded cleanup.**
 
 - **Layout arithmetic shipped as a coordinate.** `GuardWindow`/`CastleWindow`'s
