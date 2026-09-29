@@ -565,7 +565,7 @@ TEST_CASE("Shipped item models keep the looks of the old drawing code [data][ite
     // Looks that only apply to some drawings.
     CHECK(styleOf(0, 31) == "runeBlade");
     CHECK(styleOf(4, 3) == "monsterBattleBow");
-    CHECK(styleOf(8, 9) == "plateInPcRoom");
+    CHECK(styleOf(8, 9) == "helperNpcPlate");
     // The Deadly Staff also glows in its own way.
     CHECK(styleOf(5, 30) == "deadlyStaff");
 }
@@ -593,8 +593,9 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
         CHECK_FALSE(drawsWithStyle(MODEL_ITEM + itemType, RENDER_TEXTURE | RENDER_DOPPELGANGER));
     }
     // The look of the Battle Bow is only for monsters holding it (RENDER_EXTRA),
-    // the one of the plate set only in a PC room (the helm: the armor also
-    // puts a light on the bones of the object).
+    // the one of the plate set only for the helper NPCs, whose object has the
+    // PC room flag (the helm: the armor also puts a light on the bones of the
+    // object).
     CHECK(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE | RENDER_EXTRA));
     CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE));
     object.m_bpcroom = TRUE;

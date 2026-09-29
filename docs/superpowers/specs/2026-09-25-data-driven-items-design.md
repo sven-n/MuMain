@@ -571,7 +571,7 @@ server with original clients (after phases 6 and B).
        texture in the list of names), and 346 models name theirs. The
        display-only item lists of phase 3 that chose a recipe go away.
        Styles that only apply to some drawings (not for doppelgangers, only
-       held by some monsters, only in a PC room) fall back to the plain
+       held by some monsters, only on the helper NPCs) fall back to the plain
        drawing, and so do styles that pick a mesh, texture or color per item
        for other items. A style can also have its own glow pass, which takes
        the Deadly Staff's glow step out of the glow code. Player

@@ -109,7 +109,7 @@
         "color": "blue",
         "ancientColor": "gold"
       },
-      "renderStyle": "plateInPcRoom"
+      "renderStyle": "helperNpcPlate"
     },
     {
       "number": 10,

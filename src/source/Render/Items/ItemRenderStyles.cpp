@@ -1273,9 +1273,10 @@ bool RenderAmmunition(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return true;
 }
 
-bool RenderPlateInPcRoom(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+bool RenderHelperNpcPlate(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    // Only in a PC room; otherwise drawn plainly.
+    // Only on the helper NPCs (Luke and Leo the Helper, Helper Ellen), the only
+    // characters with the flag of the PC room look; otherwise drawn plainly.
     if (o->m_bpcroom != TRUE)
     {
         return false;
@@ -1789,7 +1790,7 @@ const RenderStyle RenderStyles[] = {
     {"contractSummon", RenderContractSummon},
     {"lifeStone", RenderLifeStone},
     {"ammunition", RenderAmmunition},
-    {"plateInPcRoom", RenderPlateInPcRoom},
+    {"helperNpcPlate", RenderHelperNpcPlate},
     {"socketSeed", RenderSocketSeed},
     {"socketSeedSphere", RenderSocketSeedSphere},
     {"gambleItem", RenderGambleItem},

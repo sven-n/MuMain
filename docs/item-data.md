@@ -335,7 +335,9 @@ to 44), `socketSeed`, `socketSeedSphere`, `characterCard` and
 Some styles only apply to some drawings, and the model is drawn plainly
 otherwise: `runeBlade`, `greatScepter`, `grandSoulShield` and the
 `violentWindToEternalWing…` styles not for doppelgangers, `monsterBattleBow`
-only in the hands of the Metal Balrog and the Orc Archer of Doom, `plateInPcRoom` only in a PC room.
+only in the hands of the Metal Balrog and the Orc Archer of Doom,
+`helperNpcPlate` only on the helper NPCs (Luke and Leo the Helper, Helper
+Ellen; in the code the flag of a PC room look, which no player gets).
 
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
