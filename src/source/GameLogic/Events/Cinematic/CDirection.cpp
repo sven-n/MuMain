@@ -23,8 +23,9 @@ namespace
 {
 constexpr float kPi = 3.14159265358979323846f;
 constexpr float kRadToDeg = 180.0f / kPi;
-// The degrees a monster of a direction turns in one frame at the reference fps.
-constexpr float kMonsterTurnStepDegrees = 3.0f;
+// The degrees a monster of a direction turns in one frame at the reference fps. The monsters
+// turn fast, so that a group starts to walk together instead of one monster after the other.
+constexpr float kMonsterTurnStepDegrees = 30.0f;
 
 float UnwindDegrees360(float degrees)
 {
@@ -326,8 +327,12 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
         }
         else
         {
-            const float turnStep = kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR;
-            if (iResult > 3 && iResult <= 180)
+            // The step is limited to the remaining angle, so that a monster doesn't turn past its direction.
+            const bool isTurningLeft = iResult > 3 && iResult <= 180;
+            const int remainingAngle = isTurningLeft ? iResult : (iResult > 180 ? 360 - iResult : -iResult);
+            const float turnStep =
+                (std::min)(kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR, static_cast<float>(remainingAngle));
+            if (isTurningLeft)
                 c->Object.Angle[2] += turnStep;
             else
                 c->Object.Angle[2] -= turnStep;
