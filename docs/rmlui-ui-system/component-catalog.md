@@ -124,6 +124,10 @@ shop name, `CCharMakeWin`'s character name, `CGenericConfirmDialog`'s `Mode::Tex
    order, so a field placed where an old zero-size position anchor sat renders *behind* the frame —
    no visible text or caret, which reads as "can't focus" even though hover and focus are correct.
 
+For a field that can be disabled, bind `data-attrif-disabled` to its semantic state and style
+`:disabled`. A dimmed class or an overlay alone does not prevent focus or editing. Chat's whisper
+target uses `data-attrif-disabled="!whisper_send"`, keeping its value when whispering is off.
+
 Division of ownership:
 
 - **RML/RmlUi** owns the edit buffer, focus, caret, selection, IME composition display, text

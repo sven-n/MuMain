@@ -222,8 +222,8 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
         else
         {
             m_bWhisperSend = false;
-            // The field stays in the DOM (greyed, under the blocked wash -- see chat_input.rcss),
-            // so focus has to be moved off it explicitly.
+            // RmlUi disables the recipient field through its binding. Keep typing in the
+            // message field when whispering is switched off.
             if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHATINPUTBOX))
             {
                 FocusField("chat_field");

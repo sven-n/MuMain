@@ -863,6 +863,11 @@ for "the full architecture is in place":
   verified against a real build (`RelWithDebInfo`); in-engine smoke test (`$theme modern`/
   `$theme legacy` at the login/character-select screens, no live server needed) still pending —
   the `MAIN_SCENE` HUD tier additionally needs a live server to exercise.
+- **Whisper target input (2026-09-29):** turning whispering off now disables the recipient field
+  instead of only dimming it, so it can no longer be clicked or tabbed into. Turning it back on
+  preserves the recipient. Both themes style the control's own disabled state, and legacy restates
+  its background because `base.rcss`'s `.text-field:disabled` would otherwise paint an opaque
+  surface over the bar art. Verified in-game, both themes.
 - ~~A theme reload cleared unsent text in Login, CharMake, MsgWin and the chat box.~~ **Fixed
   2026-09-29**: each now carries its fields across the rebuild (`component-catalog.md`'s "Theming").
   At Login it was worse than lost text: the emptied fields read as an edit, so the next check

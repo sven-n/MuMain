@@ -110,8 +110,13 @@
 }
 
 /* Whispering off: native stops rendering the widget and repaints its text at alpha 100 under a
-   red wash, so the target stays readable but obviously inactive. */
-.cib-whisper-field.blocked { color: rgba(255, 255, 255, 100); }
+   red wash, so the target stays readable but obviously inactive. The background is restated here
+   because base.rcss's .text-field:disabled would otherwise paint an opaque surface over the bar
+   art this field is meant to show through. */
+.cib-whisper-field:disabled {
+	color: rgba(255, 255, 255, 100);
+	background-color: rgba(0, 0, 0, 25);
+}
 #whisper_block {
 	position: absolute;
 	left: 2dp;

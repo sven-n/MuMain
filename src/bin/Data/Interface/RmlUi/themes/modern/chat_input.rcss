@@ -76,7 +76,7 @@
 	font-size: 11dp;
 }
 
-.cib-whisper-field.blocked { color: token(text-disabled); }
+.cib-whisper-field:disabled { color: token(text-disabled); }
 #whisper_block {
 	position: absolute;
 	left: 2dp;
