@@ -87,6 +87,13 @@ add_test(
 )
 
 add_test(
+    NAME coin_heap_skin_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_BMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_coin_heap_skin.cmake"
+)
+
+add_test(
     NAME checked_in_shader_blob_validation
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SHADER_BLOB_DIR=${MU_SHADER_COMPILED_DIR}"
