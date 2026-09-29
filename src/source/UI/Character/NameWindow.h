@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
+#include "UI/Character/WorldLabelLayer.h"
 
 namespace mu::ui::window
 {
@@ -24,11 +25,18 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        void PrepareBackgroundLayer() override;
+        void Show(bool bShow) override;
 
         float GetLayerDepth();		// 1.0f
 
     private:
+        // Everything this window draws; recorded into m_labelLayer (RmlUi) when it is available,
+        // drawn natively otherwise.
+        void RenderLabels();
         void RenderName();
+
+        UI::Character::WorldLabelLayer m_labelLayer;
 
         CManager* m_pNewUIMng;		// UI manager
         POINT m_Pos;					// window position

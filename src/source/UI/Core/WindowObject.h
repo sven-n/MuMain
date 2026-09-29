@@ -78,6 +78,11 @@ namespace mu::ui::window
         virtual bool UpdateWhileActive() { return true; }
 
         virtual float GetKeyEventOrder() { return 3.0f; }		//. Default
+
+        // Called every frame for each visible object, under its layout transform, by the manager
+        // that drives RmlUi's background context, right before that context renders: a document
+        // filled here shows this frame's state under every window (CNameWindow's world labels).
+        virtual void PrepareBackgroundLayer() {}
     };
 }
 

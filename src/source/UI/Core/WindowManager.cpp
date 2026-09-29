@@ -246,6 +246,18 @@ bool mu::ui::window::CManager::Render()
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
     auto vecUI = m_vecUI;
 
+    if (m_bDrivesBackgroundLayer)
+    {
+        for (CObject* object : vecUI)
+        {
+            if (!object->IsVisible())
+                continue;
+            const auto transform = UI::Scaling::TransformForLayout(object->GetLayoutMode(), WindowWidth, WindowHeight);
+            UI::Scaling::ScopedActiveTransform layout(transform, true);
+            object->PrepareBackgroundLayer();
+        }
+    }
+
     auto vi = vecUI.begin();
     for (; vi != vecUI.end(); vi++)
     {

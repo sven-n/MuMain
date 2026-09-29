@@ -99,6 +99,8 @@ bool mu::ui::window::CNameWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
+    m_labelLayer.Create();
+
     Show(true);
 
     return true;
@@ -106,6 +108,8 @@ bool mu::ui::window::CNameWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CNameWindow::Release()
 {
+    m_labelLayer.Release();
+
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -144,7 +148,36 @@ bool mu::ui::window::CNameWindow::Update()
     return true;
 }
 
+void mu::ui::window::CNameWindow::Show(bool bShow)
+{
+    CObject::Show(bShow);
+    if (!bShow)
+        m_labelLayer.Hide();
+}
+
+void mu::ui::window::CNameWindow::PrepareBackgroundLayer()
+{
+    // Recorded before the background context renders this frame, so the labels use this frame's
+    // camera and selection and sit under every window, as the original's depth-1.0 window did.
+    if (!m_labelLayer.Create())
+        return;
+
+    m_labelLayer.BeginFrame();
+    {
+        Render::Renderer::Overlay2DRecordScope record(&m_labelLayer);
+        RenderLabels();
+    }
+    m_labelLayer.EndFrame();
+}
+
 bool mu::ui::window::CNameWindow::Render()
+{
+    if (!m_labelLayer.IsAvailable())
+        RenderLabels();
+    return true;
+}
+
+void mu::ui::window::CNameWindow::RenderLabels()
 {
     EnableAlphaTest();
     RenderName();
@@ -154,8 +187,6 @@ bool mu::ui::window::CNameWindow::Render()
     RenderMonsterHealthBars();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
-
-    return true;
 }
 
 void mu::ui::window::CNameWindow::RenderName()

@@ -3,6 +3,7 @@
 #include "RmlUiRuntime.h"
 #include "RmlUiRenderInterface.h"
 #include "RmlUiSystemInterface.h"
+#include "Render/RmlUi/RmlAdditiveFillDecorator.h"
 
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/Element.h>
@@ -94,6 +95,8 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // (matches every vendored sample backend's own ordering).
     m_TextInputMethodEditor = std::make_unique<TextInputMethodEditor_SDL>();
     Rml::SetTextInputHandler(m_TextInputMethodEditor.get());
+
+    Render::RmlUi::RegisterAdditiveFillDecorator();
 
     // Reuses the same bundled fonts this engine already ships for its portable text shim
     // (fonts/LiberationSans-*.ttf, copied next to the exe by the same asset-copy step as

@@ -271,6 +271,20 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     `<img rect="x y w h">` in texels bound from C++; no clipping box needed.
   - **A native button can keep its input** (`CButton` hit-test and up / over / down state) while
     RmlUi draws it from the reported row, when the window's input is native anyway.
+- **World labels (`CNameWindow`)** — **done, both themes (2026-09-28)**: names, chat balloons,
+  guild and union lines, shop titles, Gens marks, the selected monster's name and bar, the F8
+  health bars, ground item names, the macro bar and event times. Legacy matches the original with
+  the world rendered (paired `name-labels` / `name-labels-monster` replays at the eight sizes).
+  Worth carrying to the next port:
+
+  - **Drawing spread over shared legacy code** can move without a second copy of its rules: record
+    it (`Render::Renderer::Overlay2DRecordScope` makes `RenderText()`, `RenderColorQuadARGB()` and
+    `RenderBitmap()` report physical rectangles, colours, text sizes and blend state instead of
+    drawing) and replay the records into pooled elements that only get the properties that changed.
+  - **Labels under every window, with this frame's camera**: `CObject::PrepareBackgroundLayer()`
+    runs right before the background context renders, which is before every window.
+  - **`EnableAlphaBlend()` adds** (BlendMode::Glow is ONE, ONE): `decorator: additive-fill(<colour>)`
+    reproduces it; a plain `background-color` turns such a quad opaque.
 - **Event, duel and map windows** — **done, both themes (2026-09-27)**: `CMiniMap`, `CDuelWindow`,
   `CBattleSoccerScore`, `CDuelWatchWindow`, `CEnterBloodCastle`, `CEnterDevilSquare`,
   `CCursedTempleEnter`, `CCursedTempleResult`, `CDoppelGangerWindow`, `CEmpireGuardianNPC`,
