@@ -123,9 +123,11 @@ build everything and open it:
 cmake --build out/build/windows-x64-mueditor --config Release --target InGameTestsGui
 ```
 
-The window lists every scenario with a checkbox, grouped by category in boxes
-that fold in and out (it remembers which are folded in); **Check all** toggles
-them all. It has a **Wait after each action** field: the milliseconds each
+The window lists every scenario on one line with a checkbox, grouped by
+category in boxes that fold in and out (it remembers which are folded in);
+hovering a description shows it in full, and **Check all** toggles them all.
+The list takes the window's free height; the divider above the log below it
+can be dragged. It has a **Wait after each action** field: the milliseconds each
 client pauses after every click, key, walk or warp, so a person can follow what happens;
 `1000` is easy to watch, `0` runs at full speed. The **Screenshot quality**
 field sets the JPEG quality of the step screenshots (1 to 100, default 70):
@@ -133,8 +135,11 @@ lower makes the report smaller, e.g. 40 takes a run of both scenarios from
 about 8 MB to about 5 MB. A scenario row can have its own wait and its own
 quality, which then win over the fields. **Run and write report** runs the
 checked scenarios one after the other; a bar over the list shows the steps of
-all of them together (and at the end PASSED in green, or FAILED in red), and
-each row its own progress and current step. **Open report** opens the report of
+all of them together (and at the end PASSED in green, or FAILED in red), a
+**Now** line below it the running scenario and its step, and each row its own
+progress. The running scenario's row is highlighted and scrolled into view
+when it starts; the list stays free to scroll and fold while the run goes on,
+only the checkboxes and fields wait for its end. **Open report** opens the report of
 the run, and **Open report folder** shows the file in the file browser, ready to
 be dragged into a pull request comment (before a run: the folder the reports go
 to). The window remembers its
