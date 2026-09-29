@@ -67,8 +67,11 @@
 	text-align: center;
 	font-weight: bold;
 	font-size: 1em;
+	color: token(text-primary);
 	pointer-events: none;
 }
+/* The leader's name: native's own pure green, the one place this window departs from text-primary. */
+.party-name.leader { color: rgb(0, 255, 0); }
 .party-flag {
 	position: absolute;
 	left: 136px;

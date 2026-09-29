@@ -32,7 +32,7 @@
 			<div class="party-row" data-for="m : members">
 				<div class="gbox-content-fill"></div>
 
-				<span class="party-name" data-style-color="m.name_color">{{m.name}}</span>
+				<span class="party-name" data-class-leader="m.is_leader">{{m.name}}</span>
 				<div class="party-flag" data-class-hidden="!m.is_leader"></div>
 				<span class="party-map">{{m.map_text}}</span>
 				<span class="party-coord">{{m.coord_text}}</span>

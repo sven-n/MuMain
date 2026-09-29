@@ -97,7 +97,7 @@ namespace mu::ui::window
         // One member "status card" row -- mirrors RenderMemberStatue()'s per-slot rendering.
         struct PartyMemberRow
         {
-            Rml::String name, nameColor;
+            Rml::String name;
             Rml::String mapText, coordText, hpText;
             float hpPercent = 0.f;
             bool isLeader = false;

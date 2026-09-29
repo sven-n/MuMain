@@ -42,7 +42,7 @@
 				<div class="gbox-edge gbox-edge-bottom party-edge-bottom"></div>
 				<div class="gbox-edge gbox-edge-left party-edge-left"></div>
 
-				<span class="sharp-text party-name" data-style-color="m.name_color"
+				<span class="sharp-text party-name" data-class-leader="m.is_leader"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{m.name}}</span>
 				<div class="party-flag" data-class-hidden="!m.is_leader"></div>
 				<span class="sharp-text party-map"

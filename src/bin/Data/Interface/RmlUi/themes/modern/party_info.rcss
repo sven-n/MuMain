@@ -52,8 +52,11 @@
 	font-weight: bold;
 	font-size: 12px;
 	font-family: "token(font-body)";
+	color: token(text-primary);
 	pointer-events: none;
 }
+/* accent-gold is this theme's emphasis colour; legacy keeps native's green instead. */
+.party-name.leader { color: token(accent-gold); }
 .party-flag {
 	position: absolute;
 	left: 136px;

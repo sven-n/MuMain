@@ -80,7 +80,6 @@ void CPartyInfoWindow::BuildRmlUi()
 
                 auto member = c.RegisterStruct<PartyMemberRow>();
                 member.RegisterMember("name", &PartyMemberRow::name);
-                member.RegisterMember("name_color", &PartyMemberRow::nameColor);
                 member.RegisterMember("map_text", &PartyMemberRow::mapText);
                 member.RegisterMember("coord_text", &PartyMemberRow::coordText);
                 member.RegisterMember("hp_text", &PartyMemberRow::hpText);
@@ -295,7 +294,6 @@ void CPartyInfoWindow::SyncRmlModel()
         PartyMemberRow row;
         row.index = i;
         row.name = StringUtils::WideToNarrow(pMember->Name);
-        row.nameColor = (i == 0) ? "rgba(0,255,0,255)" : "rgba(255,255,255,255)";
         row.mapText = StringUtils::WideToNarrow(gMapManager.GetMapName(pMember->Map));
 
         mu_swprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
