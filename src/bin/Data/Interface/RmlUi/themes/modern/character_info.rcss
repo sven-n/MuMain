@@ -32,20 +32,22 @@
 	pointer-events: none;
 }
 
+/* 10px, one line each: the longest lines (a level-400 EXP pair, the fruit counts) fit the 165px
+   summary box; the level-up points get a line of their own (beside the level they overlapped). */
 .level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
 	display: block;
 	position: absolute;
 	left: 18px;
-	font-size: 12px;
+	font-size: 10px;
 	font-family: "token(font-body)";
 	white-space: nowrap;
 	pointer-events: none;
 }
-.level-text { top: 58px; color: token(accent-gold-hover); font-weight: bold; }
-.levelup-point-text { top: 58px; left: 110px; color: token(accent-gold-hover); font-weight: bold; }
-.exp-text { top: 75px; color: token(text-primary); }
-.point-probability-text { top: 88px; color: token(accent-steel-hover); }
-.point-text { top: 101px; color: token(accent-steel-hover); }
+.level-text { top: 51px; color: token(accent-gold-hover); font-weight: bold; }
+.levelup-point-text { top: 63px; color: token(accent-gold-hover); font-weight: bold; }
+.exp-text { top: 76px; color: token(text-primary); }
+.point-probability-text { top: 89px; color: token(accent-steel-hover); }
+.point-text { top: 102px; color: token(accent-steel-hover); }
 
 .attr-textbox {
 	position: absolute;

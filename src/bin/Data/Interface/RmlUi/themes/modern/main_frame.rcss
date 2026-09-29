@@ -1,6 +1,7 @@
-/* Modern theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. Same layout/
-   transform group as themes/legacy/main_frame.rcss; only the visual treatment differs here --
-   flat background-color/border shapes instead of legacy sprite art.
+/* Modern theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars (the 5 corner buttons are in
+   main_frame_top.rcss). Same layout/transform group as themes/legacy/main_frame.rcss; only the
+   visual treatment differs here -- flat background-color/border shapes instead of legacy sprite
+   art.
 
    .slot-frame (shared border/radius) and .slot-fill (translucent dark backing) give every
    slot-like element one consistent look. .slot-fill only applies to elements RmlUi fully owns --
@@ -149,97 +150,6 @@
    .tooltip-hp/-sd/-mp/-ag rules above, so declared after them it wins the tie and overrides their
    `bottom: auto`, leaving a top+bottom-constrained box with no height set (handled ungracefully
    by this engine). */
-
-/* #top_right_row / #buttons_top: the top-right system-button panel. #top_right_row is a
-   full-width flex row anchored at screen (0,0); `justify-content:flex-end` pushes #buttons_top to
-   the right edge. #buttons_top visually echoes mu_helper_bar.rcss's panel/button styling
-   (values copied, not shared -- the documents stay independent). */
-#top_right_row {
-	width: 100%;
-	display: flex;
-	justify-content: flex-end;
-}
-#buttons_top {
-	position: relative;
-	width: 256dp;
-	height: 24dp;
-	font-family: "token(font-body)";
-	background-color: rgba(15, 16, 13, 190);
-	border: 1dp token(border-frame);
-	border-radius: token(radius-sm)dp;
-}
-.frame-btn-top {
-	position: absolute;
-	top: 4dp;
-	width: 48dp;
-	height: 16dp;
-	cursor: pointer;
-	pointer-events: auto;
-	text-align: center;
-	line-height: 16dp;
-	font-family: "token(font-body)";
-	background-color: token(surface-control);
-	border: 1dp token(border-frame);
-	border-radius: 2dp;
-	color: #ffffff;
-	font-weight: bold;
-	font-effect: outline(1dp #000000);
-	font-size: 8dp;
-}
-.frame-btn-top:hover,
-.frame-btn-top.open {
-	background-color: token(accent-steel);
-	border: 1dp token(accent-steel);
-}
-#btn_cshop_top    { left: 4dp;   }
-#btn_chainfo_top  { left: 54dp;  }
-#btn_myinven_top  { left: 104dp; }
-#btn_friend_top   { left: 154dp; }
-#btn_window_top   { left: 204dp; }
-
-.alert-dot-top {
-	position: absolute;
-	top: -2dp;
-	right: -2dp;
-	width: 6dp;
-	height: 6dp;
-	border-radius: token(radius-sm)dp;
-	background-color: token(semantic-warning);
-	border: 1dp rgba(0, 0, 0, 150);
-	pointer-events: none;
-}
-
-/* Same translateX(-50%)-on-display:none-toggle bug as the tooltips above -- explicit width and a
-   precomputed static `left` instead of a transform. */
-.tooltip-top {
-	display: none;
-	position: absolute;
-	top: 28dp;
-	width: 100dp;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	color: #ffffff;
-	padding: 2dp 4dp;
-	border-radius: token(radius-sm)dp;
-	font-family: "token(font-body)";
-	font-size: 11dp;
-	pointer-events: none;
-}
-/* left = button center minus half the tooltip's width. */
-#tooltip_cshop_top    { left: -22dp; } /* button center 28dp */
-#tooltip_chainfo_top  { left: 28dp;  } /* button center 78dp */
-#tooltip_myinven_top  { left: 78dp;  } /* button center 128dp */
-#tooltip_friend_top   { left: 128dp; } /* button center 178dp */
-#tooltip_window_top   { left: 178dp; } /* button center 228dp */
-#btn_cshop_top:hover ~ #tooltip_cshop_top,
-#btn_chainfo_top:hover ~ #tooltip_chainfo_top,
-#btn_myinven_top:hover ~ #tooltip_myinven_top,
-#btn_friend_top:hover ~ #tooltip_friend_top,
-#btn_window_top:hover ~ #tooltip_window_top {
-	display: block;
-	z-index: 1;
-}
 
 /* EXP: nested inside #bars, same reference span as legacy (x=0-640). pointer-events:auto is
    required so #exp:hover .tooltip below can fire. */

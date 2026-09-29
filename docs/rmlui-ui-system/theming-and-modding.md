@@ -77,7 +77,10 @@ doesn't have to live in the shared, theme-neutral file (the Core Principle secti
 and
 [`themes/modern/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/modern/main_frame.rml)
 — because modern's bottom-HUD button row moved to a genuinely different place in the document
-(a top-right panel, `#top_right_row`, echoing `mu_helper_bar`'s styling) while legacy's stayed
+(a top-right panel, `#top_right_row`, echoing `mu_helper_bar`'s styling; since the stacking table
+it is a document of its own, `themes/modern/main_frame_top.rml`, bound to the same model and
+loaded only when the theme has that file, so it stacks under the windows docked over that corner
+while the bars stay over them) while legacy's stayed
 nested inside `#bars` where the original bottom-HUD button row always was. Two things were tried
 and rejected first: CSS-only hiding (`display: none` on modern's copy of the old row leaked
 through no matter how it was hardened) and a `data-if` bound to a C++-set "is modern" model

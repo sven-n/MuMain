@@ -226,6 +226,12 @@ namespace UI::RmlBridge
         return std::string("Data/Interface/RmlUi/themes/") + ToLower(themeName) + "/" + documentName;
     }
 
+    bool ThemeProvidesDocument(const char* documentName)
+    {
+        std::ifstream file(ThemedDocumentSourceUrl(documentName, GetActiveThemeName()), std::ios::binary);
+        return file.good();
+    }
+
     std::vector<std::string> DiscoverAvailableThemes()
     {
         std::vector<std::string> themes;

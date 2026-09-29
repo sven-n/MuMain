@@ -85,6 +85,11 @@ namespace UI::RmlBridge
     // does exist, per Rml::Context::LoadDocumentFromMemory's source_url contract.
     std::string ThemedDocumentSourceUrl(const char* documentName, const std::string& themeName);
 
+    // True if the active theme has its own themes/<theme>/<documentName> markup. For a document only
+    // some themes have (the modern top-right button row, main_frame_top.rml): its owner loads it
+    // only when this says so, by directory convention rather than by theme name.
+    bool ThemeProvidesDocument(const char* documentName);
+
     // Reads `documentPath` (e.g. "Data/Interface/RmlUi/login.rml") from disk and instantiates it
     // against the currently active theme's stylesheet via LoadDocumentFromMemory. This is the one
     // entry point every migrated window should use instead of calling Context::LoadDocument

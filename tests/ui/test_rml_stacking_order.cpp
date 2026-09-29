@@ -88,6 +88,9 @@ TEST_CASE("documents stack as the original's windows did [ui][stacking]")
     // The window menu over the help; the bottom HUD over the full map.
     CHECK(Depth("window_menu.rml") > Depth("help_window.rml"));
     CHECK(Depth("main_frame.rml") > Depth("mini_map.rml"));
+    // The modern top-right button row under every window, over the names.
+    CHECK(Depth("main_frame_top.rml") > Depth("world_labels.rml"));
+    CHECK(Depth("main_frame_top.rml") < Depth("duel_window.rml"));
     // Names under the duel board, the duel board under the panels (TODO 45, 48).
     CHECK(Depth("world_labels.rml") < Depth("duel_window.rml"));
     CHECK(Depth("duel_window.rml") < Depth("my_inventory_bg.rml"));

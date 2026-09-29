@@ -9,8 +9,15 @@
    level only. Nesting position:absolute under a bottom/right-anchored wrapper made these buttons
    vanish entirely on this engine. */
 
+/* Full-screen positioning container (as in the legacy theme): the buttons and captions anchor to
+   its bottom edge, so without a size they were laid out above the window's top edge. */
 #panel {
 	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
 	font-family: "token(font-body)";
 	font-size: 14dp;
 }

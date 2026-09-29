@@ -511,7 +511,9 @@ same numbers order the background context. Passes outside the window list: objec
 and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
 loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
 and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
-chat log, the friends window and the HUD hid its rows. Native parts (item grids, 3D items) keep
+chat log, the friends window and the HUD hid its rows. The modern theme's top-right button row
+is its own document (`main_frame_top.rml`, 1.05: over the names, under every window, which dock
+over that corner). Native parts (item grids, 3D items) keep
 the native order and stay under the main context. `rml_stacking_order_tests` checks that every
 document the sources name has an entry.
 

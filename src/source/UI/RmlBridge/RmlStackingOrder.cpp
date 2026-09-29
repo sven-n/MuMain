@@ -33,6 +33,8 @@ constexpr DocumentPlacement Placements[] = {
     {"map_name.rml", BeforeWindowsDepth, MainScene},
     {"buff_strip.rml", 0.95f, MainScene},
     {"world_labels.rml", 1.0f, MainScene},
+    // The modern theme's top-right button row: under every window, which dock over it.
+    {"main_frame_top.rml", 1.05f, MainScene},
     {"duel_window.rml", 1.1f, MainScene},
     {"blood_castle_time.rml", 1.2f, MainScene},
     {"doppelganger_frame.rml", 1.2f, MainScene},

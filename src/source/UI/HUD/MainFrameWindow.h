@@ -426,6 +426,10 @@ namespace mu::ui::window
         };
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
+        // A theme's top-right button row (main_frame_top.rml, modern only), bound to m_RmlBinder's
+        // model: a document of its own so it stacks under the windows docked over that corner
+        // while the bars stay over them (RmlStackingOrder.cpp).
+        Rml::ElementDocument* m_pRmlTopDoc = nullptr;
 
         // The left/center HUD-strip background must render BEHIND the legacy 3D-composited
         // item/skill icons, which always paint after m_pRmlDoc's "main" context -- so it lives in

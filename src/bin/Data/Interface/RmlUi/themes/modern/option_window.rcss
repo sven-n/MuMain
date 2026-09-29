@@ -42,8 +42,9 @@
 	background-color: token(surface-panel);
 	border-radius: token(radius-sm)dp;
 }
+/* flex-basis auto: the tabs share the row by label width, so "Gameplay" is not clipped. */
 .option-tab-btn {
-	flex: 1 1 0;
+	flex: 1 1 auto;
 	margin: 0 1.5dp;
 	height: 26dp;
 	line-height: 26dp;
