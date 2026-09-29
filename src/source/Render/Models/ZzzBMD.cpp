@@ -1253,6 +1253,11 @@ int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
 
     Mesh_t* m = &Meshs[meshIndex];
 
+    // DXP-20 inc4: RenderZen's Transform() defers skinning, and VertexTransform is shared scratch.
+    // Without this the heap copies whatever mesh 0 another model left there, often the hero's after
+    // its shadow or a skill effect materialized it: an opaque gold plate over the character.
+    EnsureCpuVertices(meshIndex);
+
     for (int j = 0; j < m->NumTriangles; j++)
     {
         const auto triangle = &m->Triangles[j];
