@@ -484,7 +484,9 @@ master tree and the MU Helper windows (`UI::MuHelper::SkillIconDecorator()`, alw
 A *gauge*, native's fill-by-level slider (`newui_option_volume01` back, `volume02` fill clipped to
 `level * 10%`), is built in `mu_helper_common.rcss` (`.mh-gauge`/`.mh-gauge-fill`). Legacy uses one
 sprite rect per level (`mh-gauge-fill-1..10`), because a clipped wrapper doesn't clip absolutely-positioned children
-here. The input stays in C++. Move it to `base.rcss` when a second window needs it.
+here. The input stays in C++, and a stock `<input type="range">` is not a drop-in replacement
+inside a root-transformed panel — see `engine-findings.md` and its `tracked-deferrals.md` row.
+Move it to `base.rcss` when a second window needs it.
 
 ## Does not exist as a reusable primitive yet
 

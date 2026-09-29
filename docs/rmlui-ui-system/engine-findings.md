@@ -457,6 +457,18 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   that is no longer visible. `Blur()` on an element that isn't the focus only clears its parent's
   pointer, so the document then remembers the parent.
 
+- **`<input type="range">` computes the wrong value inside a `transform: scale()` panel, while still
+  hit-testing correctly.** `WidgetSlider::AbsolutePositionToBarPosition()` takes the raw mouse pixel
+  from the event and divides it against `track->GetAbsoluteOffset()` and `track->GetBox().GetSize()`,
+  neither of which applies a CSS transform. Input hit-testing *does* project through transforms
+  (`Context::GetElementAtPoint()` calls `Element::Project()`), so the control looks alive — it
+  hovers, it takes the press — and then maps that press through unscaled geometry. At 100% the two
+  agree and everything looks right; at any other UI scale the value is wrong by both an offset and a
+  gain. `COptionWindow`'s sliders are unaffected because that panel sizes in `dp`, which resolves
+  into the layout box itself, rather than scaling via a transform. Before putting a slider inside a
+  root-transformed panel (the whole docked family), give it a hit area that is laid out in real
+  pixels, outside the transform.
+
 ## `CObject`/`CManager`/`LayoutMode` gotchas
 
 Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but
