@@ -38,6 +38,16 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME rml_stacking_order_tests
+    SOURCES
+        test_rml_stacking_order.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/RmlBridge/RmlStackingOrder.cpp
+)
+target_compile_definitions(rml_stacking_order_tests PRIVATE
+    MU_CLIENT_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/source"
+)
+
+mu_add_test(
     NAME party_list_layout_tests
     SOURCES
         test_party_list_layout.cpp

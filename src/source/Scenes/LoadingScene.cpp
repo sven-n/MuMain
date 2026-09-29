@@ -15,6 +15,7 @@
 #include "SceneCommon.h"
 #include "UI/Dialogs/ReconnectDialog.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 
@@ -122,6 +123,7 @@ void LoadingScene(HDC hDC)
         if (RmlUiRuntime::Instance().IsCreated())
         {
             s_rmlLoadingDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/loading.rml");
+            UI::RmlBridge::ApplyStackingDepth(s_rmlLoadingDoc, "loading.rml");
             if (s_rmlLoadingDoc)
                 s_rmlLoadingDoc->Show();
         }

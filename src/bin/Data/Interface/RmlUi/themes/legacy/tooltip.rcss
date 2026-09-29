@@ -1,13 +1,11 @@
-/* Shared tooltip document -- see RmlTooltip.h's own comment. z-index is the actual z-order fix:
-   every other document in this codebase relies on z-index:auto (DOM/show order), so an explicit
-   positive value here guarantees this always paints above all of them, regardless of which window
-   or dialog most recently took focus. RmlTooltip.cpp sets #tooltip_panel's width explicitly in
+/* Shared tooltip document -- see RmlTooltip.h's own comment. Its z-index (above every window,
+   under the message boxes) comes from the stacking table, UI/RmlBridge/RmlStackingOrder.cpp.
+   RmlTooltip.cpp sets #tooltip_panel's width explicitly in
    C++ (measured against this file's own font) -- see its own comment for why shrink-to-fit isn't
    used here. */
 body {
 	position: absolute;
 	pointer-events: none;
-	z-index: 9999;
 }
 
 /* RenderTipTextList() with a background: a black box at 80% opacity inside a 1-unit opaque black

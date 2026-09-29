@@ -1,0 +1,82 @@
+#include <doctest.h>
+
+#include "UI/RmlBridge/RmlStackingOrder.h"
+
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <regex>
+#include <set>
+#include <string>
+
+using UI::RmlBridge::StackingDepthForDocument;
+
+namespace
+{
+float Depth(const char* documentName)
+{
+    const auto depth = StackingDepthForDocument(documentName);
+    REQUIRE_MESSAGE(depth.has_value(), documentName);
+    return *depth;
+}
+
+// Every "Data/Interface/RmlUi/<name>.rml" the client sources name.
+std::set<std::string> DocumentsNamedInSources()
+{
+    const std::regex documentPath(R"(Data/Interface/RmlUi/([a-z_]+\.rml))");
+    std::set<std::string> names;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(MU_CLIENT_SOURCE_DIR))
+    {
+        const auto extension = entry.path().extension();
+        if (!entry.is_regular_file() || (extension != ".cpp" && extension != ".h"))
+            continue;
+        std::ifstream file(entry.path());
+        const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        for (std::sregex_iterator it(text.begin(), text.end(), documentPath), end; it != end; ++it)
+            names.insert((*it)[1].str());
+    }
+    return names;
+}
+} // namespace
+
+TEST_CASE("every document the client loads has a stacking depth [ui][stacking]")
+{
+    const std::set<std::string> names = DocumentsNamedInSources();
+    CHECK(names.size() > 100);
+    for (const std::string& name : names)
+        CHECK_MESSAGE(StackingDepthForDocument(name).has_value(), name);
+}
+
+TEST_CASE("documents stack as the original's windows did [ui][stacking]")
+{
+    // The original's order: the logs over the friends windows; friends over character and inventory.
+    CHECK(Depth("chat_log.rml") > Depth("friend_window.rml"));
+    CHECK(Depth("system_log.rml") > Depth("friend_window.rml"));
+    CHECK(Depth("friend_window.rml") > Depth("character_info.rml"));
+    CHECK(Depth("friend_window.rml") > Depth("my_inventory.rml"));
+    // TODO 34: chat over the pet window and the quest journal.
+    CHECK(Depth("chat_log.rml") > Depth("pet_info.rml"));
+    CHECK(Depth("chat_log.rml") > Depth("my_quest_info.rml"));
+    // TODO 33: help, move list and full map over the location bar.
+    CHECK(Depth("help_window.rml") > Depth("mu_helper_bar.rml"));
+    CHECK(Depth("move_command.rml") > Depth("mu_helper_bar.rml"));
+    CHECK(Depth("mini_map.rml") > Depth("mu_helper_bar.rml"));
+    // The window menu over the help; the bottom HUD over the full map.
+    CHECK(Depth("window_menu.rml") > Depth("help_window.rml"));
+    CHECK(Depth("main_frame.rml") > Depth("mini_map.rml"));
+    // Names under the duel board, the duel board under the panels (TODO 45, 48).
+    CHECK(Depth("world_labels.rml") < Depth("duel_window.rml"));
+    CHECK(Depth("duel_window.rml") < Depth("my_inventory_bg.rml"));
+    CHECK(Depth("world_labels.rml") < Depth("my_inventory_bg.rml"));
+    // TODO 44: the message box over the tooltip; the tooltip over every window.
+    CHECK(Depth("message_box_view.rml") > Depth("tooltip.rml"));
+    CHECK(Depth("tooltip.rml") > Depth("chat_command.rml"));
+    // Notices over the message and result boxes, under the loading screen and the scene windows.
+    CHECK(Depth("notices.rml") > Depth("message_box_view.rml"));
+    CHECK(Depth("notices.rml") > Depth("generic_confirm_dialog.rml"));
+    CHECK(Depth("loading.rml") > Depth("notices.rml"));
+    CHECK(Depth("sys_menu.rml") > Depth("notices.rml"));
+    CHECK(Depth("reconnect_dialog.rml") > Depth("loading.rml"));
+    // A window's background document shares its depth.
+    CHECK(Depth("my_inventory_bg.rml") == Depth("my_inventory.rml"));
+}

@@ -2,11 +2,10 @@
    rather than native's newui_skillbox art. The skill icons themselves are game art and identical in
    both themes (skill_icons.rcss). Plain reference px: #panel carries transform: scale(root_scale). */
 
-/* Above the docked MU Helper documents (z-index:auto, show order) so RmlUi's own hit test stops at
-   the flyout rather than reaching a control underneath it. Below the shared tooltip's 9999. */
+/* Above the docked MU Helper documents by the stacking table (5.2 over 3.4), so RmlUi's own hit
+   test stops at the flyout rather than reaching a control underneath it. */
 body {
 	position: absolute;
-	z-index: 1;
 }
 
 #panel {

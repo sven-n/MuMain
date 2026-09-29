@@ -6,7 +6,6 @@ body {
 	left: 0;
 	top: 0;
 	pointer-events: none;
-	z-index: 9000;
 	font-family: "token(font-body)";
 }
 

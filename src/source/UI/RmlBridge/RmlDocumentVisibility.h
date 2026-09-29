@@ -32,8 +32,9 @@ namespace UI::RmlBridge
     }
 
     // For a window the original drew over the HUD (help, window menu, command windows): shown
-    // without taking focus, so an open chat field keeps it, and pulled to the front of its
-    // context, above the HUD documents shown before it. Transition only, like the above.
+    // without taking focus, so an open chat field keeps it, and pulled to the front of the
+    // documents of its depth (the stacking table, RmlStackingOrder.h, orders the depths).
+    // Transition only, like the above.
     inline void SyncDocumentVisibilityInFront(Rml::ElementDocument* doc, bool visible)
     {
         if (doc == nullptr || doc->IsVisible() == visible)
@@ -50,9 +51,9 @@ namespace UI::RmlBridge
     }
 
     // For a window the original drew under nearly every other window (the duel and battle-soccer
-    // boards, layer depth 1.1 / 1.8): shown without taking focus and pushed behind every other
-    // document of its context, so the location bar, the logs and any panel draw over it as they did
-    // over the original. Transition only, like the above.
+    // boards, layer depth 1.1 / 1.8): shown without taking focus and pushed behind the other
+    // documents of its depth (the stacking table orders the depths). Transition only, like the
+    // above.
     inline void SyncDocumentVisibilityBehind(Rml::ElementDocument* doc, bool visible)
     {
         if (doc == nullptr || doc->IsVisible() == visible)

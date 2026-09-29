@@ -99,6 +99,11 @@ namespace UI::RmlBridge
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath,
                                              const std::string& modelPlaceholder, const std::string& modelName);
 
+    // Sets the original's layer depth of `documentName` (e.g. "loading.rml", RmlStackingOrder.h)
+    // as the document's z-index. LoadThemedDocument() does this for every document it loads; call
+    // it only for a document loaded some other way.
+    void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName);
+
     // LoadThemedDocument() against RmlUiRuntime::Instance().GetBackgroundContext(). Starts hidden,
     // same as LoadThemedDocument() itself -- the caller's own SyncRmlModel() shows/hides it against
     // IsVisible(), same as its root_x/root_y/root_scale sync (MyInventory.h's MyInventoryBgRmlModel

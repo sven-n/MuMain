@@ -375,9 +375,9 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   - **A window the original drew under every panel** (duel and battle-soccer boards) lives in the
     background context, behind its other documents: a docked panel's frame is painted there, so
     a main-context document would draw over it however far back it is pushed.
-  - **An overlay the original drew under the bottom HUD** (the mini map) pulls the main frame's
-    document back in front of it (`CMainFrameWindow::PullRmlDocumentToFront()`) and must not
-    paint over the still-native left/centre HUD art.
+  - **An overlay the original drew under the bottom HUD** (the mini map) stays under the main
+    frame's document by the stacking table and must not paint over the still-native left/centre
+    HUD art.
   - **RenderText() shrinks a text wider than its box** (player names, event lines): use
     `NativeTextPixelSizeInBox()` per text, not only for titles.
 - **HUD menus and the party list** — **done, both themes (2026-09-27)**: `CHelpWindow`,
@@ -497,6 +497,23 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 7. Uses reusable components/primitives where they exist; doesn't invent a new one-off mechanism
    when an existing pattern already covers the need — though see "Known gaps," several of the
    principles' presumed primitives don't exist yet on this branch.
+8. A new document gets its original window's layer depth in the stacking table (below).
+
+## Stacking order
+
+Every document's `z-index` is the layer depth of the original window (or render pass) it
+replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set by `LoadThemedDocument()`.
+The original drew its windows in ascending `GetLayerDepth()` order, then the notices, the scene
+windows (`CUIMng`), the login scene's message box and the reconnect dialog; RmlUi sorts a context's
+documents by `z-index` and keeps show/focus order only among equal depths, so
+`SyncDocumentVisibilityInFront()`/`Behind()` and focus now only order documents of one depth. The
+same numbers order the background context. Passes outside the window list: object descriptions
+and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
+loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
+and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
+chat log, the friends window and the HUD hid its rows. Native parts (item grids, 3D items) keep
+the native order and stay under the main context. `rml_stacking_order_tests` checks that every
+document the sources name has an entry.
 
 ## Findings worth knowing before the next port
 

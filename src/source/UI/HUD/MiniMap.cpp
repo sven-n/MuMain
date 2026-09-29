@@ -366,13 +366,9 @@ void mu::ui::window::CMiniMap::SyncRmlModel()
         return;
 
     const bool visible = IsVisible() && m_bSuccess && Hero != nullptr;
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    // The original drew the map over the location bar, the logs, the buff strip and every window
-    // below its layer depth, and under the bottom HUD: in front of the documents shown so far,
-    // then the main frame's document back in front of it.
+    // Over the location bar, the logs and the buff strip, under the bottom HUD: the stacking table
+    // (UI/RmlBridge/RmlStackingOrder.cpp) orders it as the original's layer depths did.
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
-    if (visible && !wasVisible && g_pMainFrame != nullptr)
-        g_pMainFrame->PullRmlDocumentToFront();
 
     if (!visible)
     {

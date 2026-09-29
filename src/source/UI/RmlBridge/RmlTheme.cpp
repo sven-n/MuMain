@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "RmlTheme.h"
 #include "RmlNativeText.h"
+#include "RmlStackingOrder.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -307,11 +308,26 @@ namespace UI::RmlBridge
 
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(rmlText, sourceUrl);
         ApplyNativeTextSize(doc);
+        ApplyStackingDepth(doc, documentName);
         if (!doc)
             g_ErrorReport.Write(L"> [RmlTheme] Failed to load '%hs' as theme '%hs' (source url '%hs').\r\n",
                 documentPath, GetActiveThemeName().c_str(), sourceUrl.c_str());
 
         return doc;
+    }
+
+    void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName)
+    {
+        if (document == nullptr)
+            return;
+
+        const std::optional<float> depth = StackingDepthForDocument(documentName);
+        if (!depth)
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] No stacking depth for '%hs'.\r\n", documentName.c_str());
+            return;
+        }
+        document->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(*depth, Rml::Unit::NUMBER));
     }
 
     Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath)
