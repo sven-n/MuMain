@@ -55,7 +55,6 @@ namespace mu::ui::window
         struct BuffEntry
         {
             // Pre-computed pixel grid-slot position, bound as plain values (no arithmetic in RML).
-            float slotLeft = 0.0f, slotTop = 0.0f;
             // Full decorator string, e.g. "image(atlas1-23)", selecting a named @spritesheet rect
             // from buff_strip.rcss (one rect per 20x28 tile; BuildIconDecorator() in BuffStrip.cpp
             // generates the name). Bound wholesale via data-style-decorator.

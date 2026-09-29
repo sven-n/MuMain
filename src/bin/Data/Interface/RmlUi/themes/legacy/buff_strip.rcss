@@ -192,17 +192,24 @@
 }
 
 /* The left edge is native's (strip_left, buff_strip.rml): no .center-x centring transform. */
+/* 8 slots per row, as native's own counters produced: 8 x 20dp + 7 x 5dp fits 200dp, a 9th does
+   not. Row pitch is the slot height plus the same gap. */
 #panel {
 	transform: none;
 	top: 15dp;
 	width: 200dp;
+	display: flex;
+	flex-wrap: wrap;
+	column-gap: 5dp;
+	row-gap: 5dp;
 	font-family: "token(font-body)";
 	font-size: 1rem;
 	pointer-events: none;
 }
 
 .buff-slot {
-	position: absolute;
+	/* relative, not absolute: it flows in #panel and still anchors its own tooltip. */
+	position: relative;
 	width: 20dp;
 	height: 28dp;
 }

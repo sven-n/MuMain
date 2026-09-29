@@ -10,8 +10,7 @@
      in bold blue, the description in white and the remaining duration in purple, centred. -->
 <body class="native-text" data-model="buff_strip">
 	<div id="panel" class="center-x" data-style-left="strip_left + 'px'">
-		<div class="buff-slot" data-for="buff : buffs"
-		     data-style-left="buff.slot_left + 'dp'" data-style-top="buff.slot_top + 'dp'">
+		<div class="buff-slot" data-for="buff : buffs">
 			<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
 			<div class="tooltip">
 				<div class="tooltip-box" data-style-line-height="tooltip_line_px + 'px'">

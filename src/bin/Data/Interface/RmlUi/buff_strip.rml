@@ -5,10 +5,9 @@
 	<link type="text/rcss" href="buff_strip.rcss"/>
 </head>
 <body class="native-text" data-model="buff_strip">
-	<!-- Buff icon strip, centered; each .buff-slot is positioned via C++-computed slot_left/slot_top (dp). -->
+	<!-- Buff icon strip, centered; #panel wraps the slots into rows (buff_strip.rcss). -->
 	<div id="panel" class="center-x">
-		<div class="buff-slot" data-for="buff : buffs"
-		     data-style-left="buff.slot_left + 'dp'" data-style-top="buff.slot_top + 'dp'">
+		<div class="buff-slot" data-for="buff : buffs">
 			<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
 			<span class="tooltip">{{buff.tooltip}}</span>
 		</div>

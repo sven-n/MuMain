@@ -22,11 +22,6 @@ using namespace mu::ui::window;
 
 namespace
 {
-    const float BUFF_IMG_WIDTH = 20.0f;
-    const float BUFF_IMG_HEIGHT = 28.0f;
-    const int BUFF_MAX_LINE_COUNT = 8;
-    const int BUFF_IMG_SPACE = 5;
-
     // Picks the highest tier of each buff family; buffs sort to the front, debuffs to the back.
     eBuffState NormalizeBuffState(eBuffState raw)
     {
@@ -240,8 +235,6 @@ void CBuffStrip::BuildRmlUi()
             // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
             // call, including from ReloadRmlTheme() -- no guard here.
             auto buff = c.RegisterStruct<BuffEntry>();
-            buff.RegisterMember("slot_left", &BuffEntry::slotLeft);
-            buff.RegisterMember("slot_top", &BuffEntry::slotTop);
             buff.RegisterMember("decorator", &BuffEntry::decorator);
             buff.RegisterMember("tooltip", &BuffEntry::tooltip);
             buff.RegisterMember("tooltip_title", &BuffEntry::tooltipTitle);
@@ -323,13 +316,11 @@ void CBuffStrip::SyncRmlModel()
     model.buffs.clear();
     model.buffs.reserve(buffstate.size());
 
-    int buffwidthcount = 0, buffheightcount = 0;
+    // Slot positions are the stylesheets' own: #panel wraps its 20x28 slots at 8 per row, which is
+    // what native's own counters produced. Order here is the order they appear.
     for (eBuffState buff : buffstate)
     {
         BuffEntry entry;
-
-        entry.slotLeft = static_cast<float>(buffwidthcount) * (BUFF_IMG_WIDTH + BUFF_IMG_SPACE);
-        entry.slotTop = static_cast<float>(buffheightcount) * (BUFF_IMG_HEIGHT + BUFF_IMG_SPACE);
 
         entry.decorator = BuildIconDecorator(buff);
         TooltipTexts tooltip = BuildTooltip(buff);
@@ -339,12 +330,6 @@ void CBuffStrip::SyncRmlModel()
         entry.tooltipDuration = std::move(tooltip.duration);
 
         model.buffs.push_back(entry);
-
-        if (++buffwidthcount >= BUFF_MAX_LINE_COUNT)
-        {
-            buffwidthcount = 0;
-            ++buffheightcount;
-        }
     }
 
     m_RmlBinder.MarkDirty("buffs");
