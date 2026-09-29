@@ -240,8 +240,11 @@ ways, and only the first is self-announcing:
   `arrows_left`, `statue_bar_left`, `progress_top`, `hint_left`, `tooltip_top`, ...) are bound from
   C++ across those same windows. Minimap and world markers (`hero_left`, `target_left`,
   `ice_walker_left`, `cursor_left`) are **not** in this set -- they are genuinely per-frame data.
-  Not scanned yet: presentation classes standing in for form-control semantics, and any gating on a
-  theme name rather than a declared capability.
+  **Superseded 2026-09-30** by the ownership-boundary entry below, which scanned the whole migrated
+  set rather than only the ports merged from `origin`, and found this pattern to be one symptom of
+  a porting *method*. The two items left unscanned here were both closed by that pass: presentation
+  classes standing in for form-control semantics turned up nothing beyond the whisper field already
+  fixed in `b7584681`, and no C++ branch anywhere gates on a theme name (§30 is clean).
 - **New ports mirror the native list's scrollbar geometry into their models**
   (`GuardWindow`, `MixInventory`, `MessageBoxView`: `thumb_top`, `scroll_top`, `thumb_dragged`, read
   from `CUITextListBox::GetScrollBarGeometry()`). Not hand-rolled scroll maths -- the native list is
@@ -260,3 +263,130 @@ corner brackets plus a flat fill, a recorded and reasonable simplification of `R
 has already been found worth reverting by someone looking specifically for it. That is the argument
 for the audit, and also the reason to treat "recorded simplification" as a finding rather than a
 resolution.
+
+## Tracked deferral: the C++ ↔ RML/RCSS ownership boundary
+
+Audited 2026-09-30, across the migrated set (the ledger's 109 `Done` rows, 166 RML documents).
+Analysis only; nothing was changed. The prescriptive half — what a *new* window must do — is in
+[`building-new-ui.md`](building-new-ui.md)'s "Ownership" section and should be read first; this
+entry is the remediation backlog for what already shipped.
+
+**The conclusion, so the backlog is read in proportion.** Game behaviour has not leaked into RML
+and needs no work: every type reaching a data model is a purpose-built view struct (~98 of them,
+no gameplay/renderer/protocol object among them), and the action callbacks that take a
+markup-supplied index re-validate the rule in C++ before acting. Presentation and layout have
+leaked out of RCSS at scale: 87 of 166 documents bind at least one non-root-transform
+`left`/`top`/`width`/`height` from C++, and 32 of the ~77 binder-owning translation units register
+presentation members (`left`, `top`, `px`, `color`, `bold`, `align`) on their model structs — 175
+such registrations.
+
+**What makes it structural rather than untidy.** A `data-style-*` binding is an inline property,
+and this build resolves inline properties ahead of every stylesheet rule with no `!important`
+escape (`engine-findings.md`). Each of those bindings is therefore a property **no theme can
+override at all**, silently.
+
+### The root pattern, which most of the rest follow from
+
+**A port that transcribes the window's own native `Render()` into the model.** The model stops
+being a view model and becomes a draw list; the document becomes a generic replayer over
+`data-for`. `GuardWindowRmlModel.h`'s `GuardTextEntry {text, left, top, width, textPx, align,
+bold, color}` is `RenderText()` with its arguments renamed, and the producing side is literal
+(`addText(I18N::Game::GuardNPC, x0 + 15, y0 + 13, 160, 1)`). Neither theme can move that title,
+restyle it or realign it.
+
+The decisive detail is that `CGuardWindow::Render()` paints nothing — its own comment says so. The
+native controls are retained for **hit-testing and data**, not rendering, so §2's native-geometry
+exception does not apply, and the flow runs the wrong way (C++ constant → RmlUi position) for the
+whole window.
+
+Affected, by the presentation-member scan: `GuardWindow`, `CastleWindow`, `SiegeWarfare`,
+`GuildInfoWindow`, `GuildMakeWindow`, `GensRanking`, `GatemanWindow`, `MessageBoxView`,
+`ChatCommandWindow`, `ReconnectDialog`, `CatapultWindow`, `CryWolf`, `CursedTempleEnter`/`Result`/
+`System`, `DoppelGangerFrame`, `EventEntryView`, `EventItemEntryView`, `EventTimerView`,
+`KanturuEvent`, `DuelWatch{MainFrame,UserList}Window`, `MasterLevel`, `Notices`,
+`InventoryExtension`, `ItemEnduranceInfo`, `MixInventory`, `TipTextListView`,
+`UnitedMarketPlaceWindow`, `FriendWindowView`, `MiniMap`, `MainFrameWindow`, `MuHelperSkillPicker`.
+Not every member in those files is a leak — `MiniMap`'s markers and `WorldLabelLayer`'s projected
+labels are genuine per-frame data; the leak is the static chrome riding in the same structs.
+
+Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `left`/`top`/`width`/
+`height`/`font-size`/`color` straight onto the element, sourced from a native `CUITextInputBox`'s
+`GetPosition_x()`/`GetTextColor()`.
+
+### The rest, in remediation order
+
+**P0 — the one place two layers can disagree at runtime.**
+
+- **Guard / Castle hold the current tab three times**: `m_TabBtn` (the natively hit-tested
+  authority), `m_iNumCurOpenTab` (a C++ mirror written only when `UpdateMouseEvent()` reports a
+  change), and `tabs[i].selected` in the model. The *highlight* derives from the first, the *page*
+  switches on the second, and `OpeningProcess()` writes both by hand to keep them in step. If they
+  diverge, the highlighted tab and the visible page disagree with nothing asserting otherwise.
+  `PetInfoWindow` and `MuHelperConfigWindow` hold the same state once, in `model.activeTab`.
+
+**P1 — leaks that get copied into the next port.**
+
+- **The display-list port above.** Highest leverage precisely because it is a *method*: applied to
+  a window it produces every other finding here at once, and it has been applied 32 times. Worth
+  ruling on before the next port more than retrofitting the existing 32.
+- **Colour decided in C++ where the semantic value is in hand.** `CharacterInfoWindow.cpp` alone
+  has 57 `MakeColorRgba` calls: `GetPlayerColorRgba(pk)` maps PK level straight to literals, and
+  the stat blocks map potion-buffed / item-boosted / base to three colours, repeated for all five
+  stats. The correct translation already ships in the neighbouring family — `gold_tier`,
+  `level_bucket` and `cost_tier` classify in C++ and let `base.rcss`/`trade.rcss` own the colour —
+  so this is an unevenly applied house pattern, not an open design question. Also here:
+  `ChatCommandWindow`'s `edit_color` (a compile-time constant through the model), and CryWolf's
+  banner fade as `RGBA(255,255,255,alpha)` where a bound opacity would leave the colour to the
+  theme.
+- **`kLayoutPanelWidth` exists three times.** `WindowSystem.cpp`'s `constexpr int kLayoutPanelWidth
+  = 190` decides where the next dock column starts; both themes' `docked_panel_frame.rcss`
+  independently declare `width: 190px` for how wide the panel draws. A theme widening its dock
+  overlaps its neighbour and nothing notices. The irony worth citing when fixing it: this same
+  family already reads its panel size back out of RCSS for hit-testing, via
+  `RefreshLogicalPanelSize()` — the right direction exists here and is simply not used for
+  placement.
+- **`CChatLogWindow` fuses three layers into one string.** `snprintf(backColor, ...,
+  "rgba(0,0,0,%d)", alpha)` composes a user preference (the cycled transparency), a semantic state
+  (frame shown) and a theme decision (the backdrop is black). The header comment records the fusion
+  as deliberate, "so no static RCSS rule competes with either" — accurate about the mechanism, and
+  exactly the coupling §11 exists to prevent. Neither theme can make the chat backdrop anything but
+  black.
+
+**P2 — bounded cleanup.**
+
+- **Layout arithmetic shipped as a coordinate.** `GuardWindow`/`CastleWindow`'s
+  `23 / 2 - lineHeight / 2` and `56 / 2 - size.cx / 2`; `MessageBoxView::SetFrame()`'s
+  `y += kMiddleHeight` nine-slice stacking, whose 67/15/21 are *legacy sprite* dimensions and so
+  pin modern's dialog frame to strip heights it does not draw. `message_box_view.rml` is the
+  extreme — 40 non-root bound geometry properties, and no layout of its own. Note the genuine
+  carve-out: inside a `.sharp-text` block layout height and rendered height disagree, which
+  explains `button_label_top` but not `divider_top` or a button's `left`.
+- **C++ choosing which decorative pieces exist.** `GuardWindowRmlModel::listFrame` is an int C++
+  sets to 0/1/2 and the document switches whole blocks of frame edges on, each carrying literal
+  `style="left: 11px; top: 111px; ..."` in *shared* markup. The state behind it ("the list has a
+  footer row") is semantic and could be exposed as such. Same family: the `std::string style` field
+  on the event-window button structs, carrying `"exit"` (semantic) alongside `"wide"` (a size
+  picked in C++).
+- **`CGenericConfirmDialog`'s `kInputFieldWidth`/`kInputFieldHeight` (150x18)** are duplicated into
+  both themes' `.gcd-input-anchor`, as its own comment states. The stated reason — the anchor "only
+  supplies position" — is what `RefreshLogicalAnchorPosition()`'s sibling already solves for 21
+  other windows.
+
+### Deliberately not on this list
+
+`.sharp-text` counter-scaled tops, `MiniMap`/`WorldLabelLayer` marker coordinates, and
+`TitleSceneUI`'s loading bar (pushed as real `px` because the scene's background is still native
+sprites on an 800x600-reference per-axis scale `dp` cannot reproduce). Each is a justified hybrid
+with an explicit, recorded constraint. The last one has an expiry, though, and nothing currently
+links the two: it ends when those background sprites port.
+
+### Worth more than any individual fix
+
+A check that flags a `data-style-left`/`top`/`width`/`height` bound to anything but `root_*` would
+make the two populations of document distinguishable mechanically. Today nothing does: a developer
+editing RCSS on a display-list window gets no warning, no parse error and no visible change — they
+get silence, and go looking in C++. `Tools/check_rml_rcss_drift.py` is the natural home — it
+already parses both sides of this exact seam (every `Bind()` name against every copy of the
+document that can load), so the marginal cost is a rule, not a new scanner. It would need an
+allowlist for the genuine per-frame binders named above, which is itself the point: the list of
+windows entitled to bind geometry becomes explicit and reviewed instead of implicit.

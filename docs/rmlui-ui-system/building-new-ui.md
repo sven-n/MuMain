@@ -72,6 +72,62 @@ See `ui-target-architecture.md` Section H item 15 for the full reasoning behind 
    applied one layer earlier (wrapping the object lifecycle before the render target changes at
    all).
 
+## Ownership: what the C++ side of a window may own
+
+`architecture-principles.md` §1 states the split; this section is the concrete test to apply while
+writing, derived from an ownership audit of the migrated windows (findings and affected screens in
+[`tracked-deferrals.md`](tracked-deferrals.md)'s ownership-boundary entry). The audit found game
+behaviour well contained in C++ and presentation widely leaked out of RCSS — so these rules are
+about the second direction, which is where new code actually goes wrong.
+
+**Why it is a hard rule and not a preference.** `data-style-*` writes an *inline* property, and
+this build resolves inline properties before any stylesheet rule with no `!important` escape
+anywhere (see `engine-findings.md`). A coordinate or colour bound from the model is one **no theme
+can ever override** — not by specificity, not by shipping its own copy of the document. Nothing
+warns: the theme's rule simply has no effect.
+
+1. **A model field is a fact about the game or the UI's state, never a rendering of it.** Expose
+   `pk_level`, not `name_color`; `str_source = "potion" | "item" | "base"`, not `str_value_color`.
+   The shape to copy already ships: `gold_tier` and `level_bucket` classify in C++ and let each
+   theme own the colour (`base.rcss`'s `.gold-*`, `trade.rcss`'s `.level-bucket-*`).
+2. **Never bind a coordinate that does not change with the data.** Static chrome positions belong
+   in RCSS, addressed by id. Bind the root transform and genuinely per-frame values (marker
+   positions, projected world labels) — nothing else.
+3. **If you are writing `a / 2 - b / 2` or `y += stripHeight`, you are writing RCSS in C++.**
+   Centering and stacking are what the layout engine is for.
+4. **A constant that appears in both C++ and RCSS is a bug waiting.** Author it in RCSS and read it
+   back with `UI::RmlBridge::RefreshLogicalPanelSize()` / `RefreshLogicalAnchorPosition()`
+   (`RmlBridge/RmlPanelGeometry.h`). That applies to a native companion widget's own size too, not
+   just a panel's.
+5. **Do not transcribe the native `Render()` into a list of `{text, x, y, width, align, bold,
+   color}`.** That turns the model into a draw list and the document into a replayer, and it takes
+   every one of these rules down with it. Reverse-engineer the layout intent
+   (`architecture-principles.md` §2) and author it by id instead.
+6. **Keeping a native control for hit-testing or data does not license C++ to own its
+   presentation.** Once the window's `Render()` paints nothing, §2's native-geometry exception
+   (RCSS owns geometry → C++ reads it → native follows) no longer covers that window — and the
+   inverted flow, C++ constant → RmlUi position, is the thing that exception exists to avoid.
+7. **State gets one authority.** Hold a selection or current tab in the model and let both the
+   highlight and the page read it. Do not mirror a native control's index into a C++ member and
+   keep the two in step by hand.
+8. **Let markup request; make C++ decide.** A markup-supplied action name or index is fine —
+   re-check the rule in C++ regardless, the way `CCharacterInfoWindow::RmlClickIncreaseStat()`
+   re-checks `LevelUpPoint` and the class-dependent stat range before sending anything.
+9. **Keep user preference, semantic state and theme decision in separate fields.** Bind an alpha
+   and a boolean; let RCSS own the colour. Composing them into one CSS string hands the theme's
+   share to C++ permanently.
+10. **Branch on a declared theme capability, never a theme name** (§30) — `theme.ini`'s
+    `[Capabilities]`, read via `ThemeProvidesOwnIconChrome()`/`ThemeUsesNativeTextSize()`. Better
+    still, check for the content itself (`ThemeProvidesDocument()`) when that can answer.
+11. **Expose a purpose-built view model, never a game object.** Currently true of all ~98
+    registered structs — don't be the first exception.
+
+**Two documents to compare before choosing a shape.** `mu_helper_config.rml` and
+`guard_window.rml` are the same kind of window — same dock, same `docked_panel_frame.rcss`, both
+tabbed, both with a native control retained underneath. The first binds *only* its root transform
+and places ~65 controls by id in RCSS; the second binds its every label position, size, alignment,
+weight and colour, and its RCSS can change almost nothing. Copy the first.
+
 ## Widget cheat sheet (native-only content on new `mu::ui::window::CObject` windows)
 
 Applies only to content that must stay native (see the note above) — for anything with an RmlUi
@@ -155,3 +211,8 @@ way the native-3D/world-overlay boundary is. Wrap, don't reimplement, until that
 - [`architecture-principles.md`](architecture-principles.md) — the overarching design philosophy.
 - [`component-catalog.md`](component-catalog.md) — the RmlUi/RCSS-layer component catalog, the
   parallel axis to this doc's C++ object layer.
+- [`engine-findings.md`](engine-findings.md) — why the Ownership section's rules are hard rules:
+  a `data-style-*` binding is an inline property, and inline beats every stylesheet rule in this
+  build with no `!important` escape.
+- [`tracked-deferrals.md`](tracked-deferrals.md) — the ownership-boundary entry: which shipped
+  windows already violate those rules, and in what order they are worth fixing.

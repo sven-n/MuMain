@@ -57,6 +57,17 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
 - **`dp` and `px` are not interchangeable in `data-style-*` position bindings.** `dp` is scaled by
   the user's UI-scale setting, `px` never is — a `+'px'` binding drifts out of step with
   `dp`-sized siblings at any UI scale other than 100%.
+- **A `data-style-*` binding is an inline property, and an inline property beats every stylesheet
+  rule in this build with no `!important` escape.** `ElementStyle::GetLocalProperty()`
+  (`Source/Core/ElementStyle.cpp`) returns the inline dictionary's entry first and only consults
+  the element's RCSS definition when there is none; importance is never compared, and RmlUi's
+  parser has no `!important` for a theme to reach for. So a property a window binds from its model
+  is not merely "hard to override" — **no theme, mod or user stylesheet can override it at all**,
+  including one shipping its own copy of the document. This is what makes C++-side presentation a
+  capability loss rather than an untidiness, and it is the reason `building-new-ui.md`'s ownership
+  rules treat "bind only what actually varies with data" as a hard rule. The root transform
+  (`root_x`/`root_y`/`root_scale`) and the `.sharp-text` counter-scale are the accepted exceptions:
+  both are the scaling bridge itself, which no theme should be overriding.
 - **An absolutely-positioned, `display:block`, multi-line (`white-space:pre-line`) box needs an
   explicit `width`** — left to shrink-to-fit, this build's width computation undersizes to the
   longest *word*, not the longest *line*.
