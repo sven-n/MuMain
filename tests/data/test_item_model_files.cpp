@@ -607,6 +607,8 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
     CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_KRIS, RENDER_TEXTURE));
     CHECK_FALSE(drawsWithStyle(MODEL_PLAYER, RENDER_TEXTURE));
     CHECK(drawsWithStyle(MODEL_ITEM + ITEM_STORM_CROW_ARMOR, RENDER_TEXTURE));
+    // A style that shares its recipe, with a texture of its own.
+    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_SEAL_OF_WEALTH, RENDER_TEXTURE));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -643,10 +645,10 @@ TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [dat
     BMD model;
     OBJECT object;
     object.BlendMesh = -1;
-    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_DEADLY_STAFF, RENDER_TEXTURE, 1.f, BITMAP_CHROME);
+    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_DEADLY_STAFF, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
     CHECK(object.BlendMesh == 1);
     object.BlendMesh = -1;
-    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_KRIS, RENDER_TEXTURE, 1.f, BITMAP_CHROME);
+    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
     CHECK(object.BlendMesh == -1);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});

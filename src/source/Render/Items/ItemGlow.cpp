@@ -55,7 +55,7 @@ bool IsPhoenixSoulInventoryModel(int modelType)
     return modelType == MODEL_ARMORINVEN_74;
 }
 
-void RenderPhoenixSoulInventoryMesh(BMD* b, OBJECT* o, int renderType, float alpha, int draws)
+void RenderPhoenixSoulInventoryMesh(BMD* b, OBJECT* o, float alpha, int renderType, int draws)
 {
     for (int draw = 0; draw < draws; ++draw)
     {
@@ -72,7 +72,7 @@ const Colors& GetItemColors(int itemType)
     return colors != nullptr ? *colors : OtherModelColors;
 }
 
-void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, int renderType, float alpha, int texture)
+void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, float alpha, int renderType, int texture)
 {
     if (!meshes.only.empty())
     {
@@ -145,7 +145,7 @@ bool HasExcellentGlow(int modelType)
     return Get(modelType).excellent;
 }
 
-void RenderGlow(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture)
+void RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
 {
     if (Styles::RenderGlow(b, o, modelType, alpha, renderType, texture))
     {
@@ -153,28 +153,28 @@ void RenderGlow(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, i
     }
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, renderType, alpha,
+        RenderPhoenixSoulInventoryMesh(b, o, alpha, renderType,
                                        (renderType & RENDER_METAL) ? PhoenixSoulInventoryMetalDraws : 1);
         return;
     }
-    RenderMeshes(b, o, Get(modelType).meshes, renderType, alpha, texture);
+    RenderMeshes(b, o, Get(modelType).meshes, alpha, renderType, texture);
 }
 
-void RenderShine(BMD* b, OBJECT* o, int modelType, int renderType, float alpha, int texture)
+void RenderShine(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
 {
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, renderType, alpha, 1);
+        RenderPhoenixSoulInventoryMesh(b, o, alpha, renderType, 1);
         return;
     }
-    RenderMeshes(b, o, Get(modelType).shineMeshes, renderType, alpha, texture);
+    RenderMeshes(b, o, Get(modelType).shineMeshes, alpha, renderType, texture);
 }
 
 void RenderExcellentGlow(BMD* b, OBJECT* o, int modelType, float alpha)
 {
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, ExcellentGlowRenderType, alpha, 1);
+        RenderPhoenixSoulInventoryMesh(b, o, alpha, ExcellentGlowRenderType, 1);
         return;
     }
 

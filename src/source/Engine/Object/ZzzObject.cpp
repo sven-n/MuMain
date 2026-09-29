@@ -5927,6 +5927,64 @@ void PartObjectColor3(int Type, float Alpha, float Bright, vec3_t Light, bool Ex
     Vector(color[0], color[1], color[2], Light);
 }
 
+// The models RenderPartObjectBody draws without a render style: a few that
+// are not items, and the plain drawing.
+static void RenderModelWithoutStyle(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    if (o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT ||
+        o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT ||
+        o->Type == MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT ||
+        o->Type == MODEL_15GRADE_ARMOR_OBJ_HEAD || o->Type == MODEL_15GRADE_ARMOR_OBJ_PANTLEFT ||
+        o->Type == MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT)
+    {
+        float fLight, texCoordU;
+
+        fLight = 0.8f - absf(sinf(WorldTime * 0.0018f) * 0.5f);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLight - 0.1f, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        texCoordU = absf(sinf(WorldTime * 0.0005f));
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLight - 0.3f, texCoordU, o->BlendMeshTexCoordV,
+                      BITMAP_RGB_MIX);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_CHROME4, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+    }
+    else if (Type == MODEL_SWORD_35_WING)
+    {
+        float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_BRIGHT, o->Alpha * fLumi, 0, o->BlendMeshLight * fLumi, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_PHOENIXSOULWING);
+
+        Vector(.15f, 1.f, .25f, b->BodyLight);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        Vector(1.f, 1.f, 1.f, b->BodyLight);
+        b->RenderMesh(1, RENDER_CHROME3 | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        Vector(1.f, 1.f, 1.f, b->BodyLight);
+    }
+    else if (Type == MODEL_ARMORINVEN_74)
+    {
+        vec3_t Light;
+        VectorCopy(b->BodyLight, Light);
+        float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, -1);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha * fLumi, o->BlendMesh, o->BlendMeshLight * fLumi,
+                      (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
+        VectorCopy(Light, b->BodyLight);
+    }
+    else
+    {
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+    }
+}
+
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
     if (Type == MODEL_ANGEL && b->NumMeshs)
@@ -6345,57 +6403,15 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         CreateSprite(BITMAP_SHINY + 1, vPos, 0.9f, vLight, o, -WorldTime * 0.08f);
         CreateSprite(BITMAP_LIGHT + 3, vPos, 0.8f, vLight2, o, WorldTime * 0.3f);
     }
-    // Items are drawn with the render style of their model entry, after the
-    // player transformations: a transformed Rage Fighter draws its sword-form
-    // gloves with the look of the transformation.
-    else if (Render::Items::Styles::Render(b, o, Type, Alpha, RenderType))
-    {
-        // drawn by the style
-    }
-    else if (o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMLEFT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYLEFT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_HEAD ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_PANTLEFT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT)
-    {
-        float fLight, texCoordU;
-
-        fLight = 0.8f - absf(sinf(WorldTime * 0.0018f) * 0.5f);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLight - 0.1f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        texCoordU = absf(sinf(WorldTime * 0.0005f));
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLight - 0.3f, texCoordU, o->BlendMeshTexCoordV, BITMAP_RGB_MIX);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_CHROME4, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    }
-    else if (Type == MODEL_SWORD_35_WING)
-    {
-        float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_BRIGHT, o->Alpha * fLumi, 0, o->BlendMeshLight * fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PHOENIXSOULWING);
-
-        Vector(.15f, 1.f, .25f, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderMesh(1, RENDER_CHROME3 | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-    }
-    else if (Type == MODEL_ARMORINVEN_74)
-    {
-        vec3_t Light;
-        VectorCopy(b->BodyLight, Light);
-        float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha * fLumi, o->BlendMesh, o->BlendMeshLight * fLumi, (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
-        VectorCopy(Light, b->BodyLight);
-    }
     else
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        // Items are drawn with the render style of their model entry, after
+        // the player transformations: a transformed Rage Fighter draws its
+        // sword-form gloves with the look of the transformation.
+        if (!Render::Items::Styles::Render(b, o, Type, Alpha, RenderType))
+        {
+            RenderModelWithoutStyle(b, o, Type, Alpha, RenderType);
+        }
     }
 }
 
@@ -6448,7 +6464,7 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
         PartObjectColor(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
 
-    Render::Items::Glow::RenderGlow(b, o, Type, RenderType, Alpha, Texture);
+    Render::Items::Glow::RenderGlow(b, o, Type, Alpha, RenderType, Texture);
 }
 
 void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture)
@@ -6468,7 +6484,7 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     {
         PartObjectColor2(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
-    Render::Items::Glow::RenderShine(b, o, Type, RenderType, Alpha, Texture);
+    Render::Items::Glow::RenderShine(b, o, Type, Alpha, RenderType, Texture);
 }
 
 void NextGradeObjectRender(CHARACTER* c)
