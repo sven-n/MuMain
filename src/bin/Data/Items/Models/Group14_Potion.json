@@ -503,7 +503,7 @@
       "glow": {
         "level": 0
       },
-      "effect": "harmonyShine"
+      "renderStyle": "harmonyShine"
     },
     {
       "number": 43,
@@ -788,8 +788,7 @@
         "level": 0,
         "shineHiddenMesh": 0
       },
-      "renderStyle": "cursedCastleWater",
-      "effect": "cursedCastleWater"
+      "renderStyle": "cursedCastleWater"
     },
     {
       "number": 65,

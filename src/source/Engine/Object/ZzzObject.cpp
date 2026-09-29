@@ -6724,6 +6724,16 @@ static Render::Items::Effects::Result ApplyEventModelEffect(BMD* b, OBJECT* o, i
     return Result::None;
 }
 
+// Items have the effect of their model entry; the event models of level
+// variants have theirs in ApplyEventModelEffect.
+Render::Items::Effects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
+                                                     int ItemLevel)
+{
+    const Render::Items::Effects::Result effect = Render::Items::Effects::Apply(b, o, Type, Alpha, Level);
+    return effect != Render::Items::Effects::Result::None ? effect
+                                                          : ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
+}
+
 extern float g_Luminosity;
 
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags,
@@ -6791,14 +6801,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         Level = std::min<int>(Level, g_pOption->GetRenderLevel() * 2 + 5);
     }
 
-    // Items have the effect of their model entry; the event models of level
-    // variants have theirs in ApplyEventModelEffect.
-    Render::Items::Effects::Result effect = Render::Items::Effects::Apply(b, o, Type, Alpha, Level);
-    if (effect == Render::Items::Effects::Result::None)
-    {
-        effect = ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
-    }
-    if (effect == Render::Items::Effects::Result::Drawn)
+    if (ApplyPartObjectEffect(b, o, Type, Alpha, Level, ItemLevel) == Render::Items::Effects::Result::Drawn)
     {
         return;
     }
@@ -6852,11 +6855,25 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         }
         else if (Level < 3)
         {
-            // Some items shine below +3 (the effect of their model entry).
-            if (!Render::Items::Effects::RenderBelowPlus3(b, o, Type, Alpha, RenderType, Light))
+            // Some items shine below +3; their render style says how.
+            const Render::Items::Styles::ShineBelowPlus3* shine = Render::Items::Styles::FindShineBelowPlus3(Type);
+            if (shine == nullptr)
             {
                 VectorCopy(Light, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            }
+            else if (shine->light)
+            {
+                const float factor = *shine->light;
+                Vector(Light[0] * factor, Light[1] * factor, Light[2] * factor, b->BodyLight);
+            }
+            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            if (shine != nullptr)
+            {
+                for (const Render::Items::Styles::ShineBelowPlus3::Pass& pass : shine->passes)
+                {
+                    RenderPartObjectBodyColor2(b, o, Type, pass.alpha, pass.renderType | (RenderType & RENDER_EXTRA),
+                                               pass.bright);
+                }
             }
         }
         else if (Level < 5)

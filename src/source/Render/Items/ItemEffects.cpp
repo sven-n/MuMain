@@ -1,12 +1,11 @@
 #include "stdafx.h"
 
 #include "ItemEffects.h"
-#include "ItemModelLookup.h"
+#include "ItemModelTable.h"
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "Engine/Object/ZzzObject.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
 
@@ -20,14 +19,11 @@ namespace
 // An effect runs before the model is drawn, and may change the level the
 // model glows like. Drawn: it drew the model itself, nothing more is drawn.
 using EffectFunction = Result (*)(BMD* b, OBJECT* o, int Type, float Alpha, int& Level);
-// Draws the model below +3 instead of the plain drawing.
-using ShineFunction = void (*)(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float* Light);
 
 struct ItemEffect
 {
     const char* name;
-    EffectFunction apply = nullptr;
-    ShineFunction renderBelowPlus3 = nullptr;
+    EffectFunction apply;
 };
 
 // ------------------------------------------------ the effects
@@ -47,18 +43,15 @@ Result ApplyMeshesPerLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     Vector(1.f, 1.f, 1.f, b->BodyLight);
     b->StreamMesh = 0;
     b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    if (Level == 1)
+    switch (Level)
     {
-    }
-    else if (Level == 2)
-    {
+    case 2:
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
         b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, BITMAP_CHROME);
-    }
-    else if (Level == 3)
-    {
+        break;
+    case 3:
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
@@ -66,6 +59,7 @@ Result ApplyMeshesPerLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
                       o->BlendMeshTexCoordV, BITMAP_CHROME);
         b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, BITMAP_CHROME);
+        break;
     }
     b->StreamMesh = -1;
     return Result::Drawn;
@@ -173,10 +167,10 @@ Result ApplyBloodBone(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                   o->BlendMeshTexCoordV, o->HiddenMesh);
     Vector(.9f, .1f, .1f, b->BodyLight);
-    Models[o->Type].StreamMesh = 0;
+    b->StreamMesh = 0;
     b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                   o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
-    Models[o->Type].StreamMesh = -1;
+    b->StreamMesh = -1;
     return Result::Drawn;
 }
 
@@ -556,31 +550,6 @@ Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
     return Result::Applied;
 }
 
-// ------------------------------------------------ the shine below +3
-
-void RenderCursedCastleWater(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float* Light)
-{
-    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-    RenderPartObjectBodyColor2(b, o, Type, 0.5f, RENDER_TEXTURE | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 0.5f);
-    RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-}
-
-void RenderHarmonyShine(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float* Light)
-{
-    VectorCopy(Light, b->BodyLight);
-    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-    RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-    RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-}
-
-void RenderSealShine(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float* Light)
-{
-    Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-    RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-    RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-}
-
 // ------------------------------------------------ the names
 
 const ItemEffect ItemEffects[] = {
@@ -611,9 +580,6 @@ const ItemEffect ItemEffects[] = {
     {"wingOfIllusion", ApplyWingOfIllusion},
     {"wingOfRuin", ApplyWingOfRuin},
     {"wingOfDimension", ApplyWingOfDimension},
-    {"cursedCastleWater", nullptr, RenderCursedCastleWater},
-    {"harmonyShine", nullptr, RenderHarmonyShine},
-    {"sealShine", nullptr, RenderSealShine},
 };
 
 const ItemEffect* FindEffect(std::string_view name)
@@ -641,21 +607,6 @@ bool Exists(std::string_view name)
 Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level)
 {
     const ItemEffect* effect = g_itemEffects.Find(modelType);
-    if (effect == nullptr || effect->apply == nullptr)
-    {
-        return Result::None;
-    }
-    return effect->apply(b, o, modelType, alpha, level);
-}
-
-bool RenderBelowPlus3(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, float* light)
-{
-    const ItemEffect* effect = g_itemEffects.Find(modelType);
-    if (effect == nullptr || effect->renderBelowPlus3 == nullptr)
-    {
-        return false;
-    }
-    effect->renderBelowPlus3(b, o, modelType, alpha, renderType, light);
-    return true;
+    return effect != nullptr ? effect->apply(b, o, modelType, alpha, level) : Result::None;
 }
 } // namespace Render::Items::Effects

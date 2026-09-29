@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemRenderStyles.h"
-#include "ItemModelLookup.h"
+#include "ItemModelTable.h"
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
@@ -9,9 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
-#include <span>
 #include <string_view>
-#include <vector>
 
 namespace Render::Items::Styles
 {
@@ -34,10 +32,17 @@ struct RenderStyle
     {
     }
 
+    // Styles that shine below +3.
+    constexpr RenderStyle(const char* styleName, StyleFunction recipe, const ShineBelowPlus3& shineBelowPlus3)
+        : name(styleName), render(recipe), shine(&shineBelowPlus3)
+    {
+    }
+
     // Styles that share a recipe and only differ in its texture; they cannot
     // leave the texture out.
-    constexpr RenderStyle(const char* styleName, TexturedStyleFunction recipe, int recipeTexture)
-        : name(styleName), texturedRender(recipe), texture(recipeTexture)
+    constexpr RenderStyle(const char* styleName, TexturedStyleFunction recipe, int recipeTexture,
+                          const ShineBelowPlus3* shineBelowPlus3 = nullptr)
+        : name(styleName), texturedRender(recipe), texture(recipeTexture), shine(shineBelowPlus3)
     {
     }
 
@@ -52,9 +57,26 @@ struct RenderStyle
     TexturedStyleFunction texturedRender = nullptr;
     int texture = 0;
     GlowFunction glow = nullptr;
+    const ShineBelowPlus3* shine = nullptr;
 };
 
+// ------------------------------------------------ the shine below +3
+
+constexpr ShineBelowPlus3 HarmonyShine{
+    1.f, {{{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f}, {1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f}}}};
+constexpr ShineBelowPlus3 SealShine{
+    0.9f, {{{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f}, {1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f}}}};
+// Drawn with the light the model has.
+constexpr ShineBelowPlus3 CursedCastleWaterShine{
+    std::nullopt, {{{0.5f, RENDER_TEXTURE | RENDER_BRIGHT, 0.5f}, {1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f}}}};
+
 // ------------------------------------------------ the recipes
+
+// For styles that only shine below +3: the drawing code draws the model.
+bool RenderPlainly(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    return false;
+}
 
 bool RenderStormCrow(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
@@ -1719,9 +1741,10 @@ const RenderStyle RenderStyles[] = {
     {"guardianShield", RenderGuardianShield},
     {"crossShield", RenderCrossShield},
     {"oldScroll", RenderOldScroll},
-    {"illusionSorcererCovenant", RenderIllusionSorcererCovenant},
+    {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, HarmonyShine},
     {"scrollOfBlood", RenderScrollOfBlood},
-    {"cursedCastleWater", RenderCursedCastleWater},
+    {"cursedCastleWater", RenderCursedCastleWater, CursedCastleWaterShine},
+    {"harmonyShine", RenderPlainly, HarmonyShine},
     {"condorFlame", RenderCondorFlame},
     {"condorFeather", RenderCondorFeather},
     {"deathBeamKnightFlame", RenderThirdClassQuestItem, BITMAP_ITEM_EFFECT_DBSTONE_R},
@@ -1736,9 +1759,9 @@ const RenderStyle RenderStyles[] = {
     {"rareItemTicket4", RenderRareItemTicket, BITMAP_RAREITEM4_R},
     {"rareItemTicket", RenderRareItemTicket, BITMAP_RAREITEM5_R},
     {"talismanOfLuck", RenderTalismanOfLuck},
-    {"sealOfAscension", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT43},
-    {"sealOfWealth", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT44},
-    {"sealOfSustenance", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT45},
+    {"sealOfAscension", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT43, &SealShine},
+    {"sealOfWealth", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT44, &SealShine},
+    {"sealOfSustenance", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT45, &SealShine},
     {"elitePotion", RenderElitePotion},
     {"textured", RenderTextured},
     {"rareItemTicket7", RenderRareItemTicket, BITMAP_RAREITEM7},
@@ -1851,6 +1874,12 @@ bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType)
 {
     const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr && style->Render(b, o, modelType, alpha, renderType);
+}
+
+const ShineBelowPlus3* FindShineBelowPlus3(int modelType)
+{
+    const RenderStyle* style = g_itemStyles.Find(modelType);
+    return style != nullptr ? style->shine : nullptr;
 }
 
 bool RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)

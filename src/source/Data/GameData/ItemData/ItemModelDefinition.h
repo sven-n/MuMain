@@ -127,7 +127,7 @@ struct ItemModelDefinition
     // The look of the model when it is more than a plain textured model: the
     // name of a render style (Render/Items/ItemRenderStyles). Empty: plain.
     std::string renderStyle;
-    // What the model does besides being drawn (sprites and particles on its
+    // What the model does before it is drawn (sprites and particles on its
     // bones, a pulsing glow mesh, its own drawing, ...): the name of an item
     // effect (Render/Items/ItemEffects). Empty: none.
     std::string effect;

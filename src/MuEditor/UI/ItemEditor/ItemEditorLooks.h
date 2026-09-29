@@ -8,7 +8,9 @@ class CItemEditorLooks
 {
 public:
     // Shown above the item table; `itemType` is the selected item, -1 for none.
-    static void Render(int itemType);
+    // Returns the item clicked in a list of the items that share a look, -1
+    // for none.
+    static int Render(int itemType);
 };
 
 #endif // _EDITOR

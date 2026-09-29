@@ -5,9 +5,9 @@
 class BMD;
 class OBJECT;
 
-// What item models do besides being drawn: sprites, particles and lightning
-// on their bones, a pulsing glow mesh, a mesh hidden by level, their own
-// drawing instead of the plain one, the shine of some items below +3. Each
+// What item models do before they are drawn: sprites, particles and
+// lightning on their bones, a pulsing glow mesh, a mesh hidden by level, the
+// level they glow like, or their own drawing instead of the usual one. Each
 // effect is code with a name; the model entry of an item names its effect
 // (Data/Items/Models, "effect"). Items with the same effect share it.
 namespace Render::Items::Effects
@@ -30,8 +30,4 @@ enum class Result
 // taken from the item model database after each build of it). It may change
 // the level the model glows like.
 Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level);
-
-// Draws the model below +3 for the effects that shine then, instead of the
-// plain drawing. False for the others.
-bool RenderBelowPlus3(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, float* light);
 } // namespace Render::Items::Effects

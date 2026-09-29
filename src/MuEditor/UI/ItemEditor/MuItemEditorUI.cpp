@@ -158,8 +158,13 @@ void CMuItemEditorUI::Render(bool& showEditor)
         ImGui::Checkbox(I18N::Editor::FreezeIndexName, &m_bFreezeColumns);
         ImGui::Separator();
 
-        // The looks of the selected item (read only).
-        CItemEditorLooks::Render(m_selectedRow);
+        // The looks of the selected item (read only); clicking an item there
+        // selects it.
+        const int clickedItem = CItemEditorLooks::Render(m_selectedRow);
+        if (clickedItem >= 0)
+        {
+            SelectItem(clickedItem);
+        }
 
         // Convert search to lowercase for case-insensitive search
         std::string searchLower = m_szItemSearchBuffer;
@@ -175,6 +180,17 @@ void CMuItemEditorUI::Render(bool& showEditor)
         CItemEditorPopups::RenderAll();
     }
     ImGui::End();
+}
+
+void CMuItemEditorUI::SelectItem(int itemIndex)
+{
+    std::string searchLower = m_szItemSearchBuffer;
+    std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
+    if (!CItemEditorTable::IsListed(itemIndex, searchLower) && CItemEditorTable::IsListed(itemIndex, ""))
+    {
+        m_szItemSearchBuffer[0] = '\0';
+    }
+    CItemEditorTable::RequestScrollToIndex(itemIndex);
 }
 
 void CMuItemEditorUI::RenderSearchBar()

@@ -11,12 +11,18 @@ namespace Data::Items::ModelLoader
 // Whether a look of this name exists.
 using LookExists = bool (*)(std::string_view name);
 
+// No look exists: a check that is left out reports all names.
+inline bool NoLookExists(std::string_view)
+{
+    return false;
+}
+
 // The looks that exist; they are drawing code (Render::Items::Styles::Exists,
 // Render::Items::Effects::Exists).
 struct LookNames
 {
-    LookExists renderStyle;
-    LookExists effect;
+    LookExists renderStyle = NoLookExists;
+    LookExists effect = NoLookExists;
 };
 
 // Opens the .bmd file of every item model; `lookNames` checks the names of

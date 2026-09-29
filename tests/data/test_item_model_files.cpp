@@ -13,6 +13,7 @@
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ZzzObject.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Render/Items/ItemEffects.h"
@@ -27,6 +28,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <utility>
@@ -745,12 +747,9 @@ TEST_CASE("Shipped item models keep the effects of the old drawing code [data][i
     // Items with the same code share it.
     CHECK(effectOf(14, 7) == "hiddenMeshByLevel");
     CHECK(effectOf(13, 7) == "hiddenMeshByLevel");
-    // The shine below +3.
-    CHECK(effectOf(13, 43) == "sealShine");
-    CHECK(effectOf(13, 94) == "sealShine");
-    CHECK(effectOf(14, 42) == "harmonyShine");
-    CHECK(effectOf(13, 50) == "harmonyShine");
-    CHECK(effectOf(14, 64) == "cursedCastleWater");
+    // The shine below +3 is part of the render style.
+    CHECK(effectOf(13, 43).empty());
+    CHECK(effectOf(14, 64).empty());
 
     // The socket seeds and spheres and zen glow like level 0, whatever their
     // level (the old code set their level to 0, or drew zen plainly).
@@ -801,14 +800,84 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     object.Type = MODEL_PLAYER;
     CHECK(Effects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
 
-    // The shine below +3 of the seals; other items are drawn plainly.
-    vec3_t light = {1.f, 1.f, 1.f};
-    object.Type = MODEL_ITEM + ITEM_KRIS;
-    CHECK_FALSE(Effects::RenderBelowPlus3(&model, &object, object.Type, 1.f, RENDER_TEXTURE, light));
-    object.Type = MODEL_ITEM + MakeItemType(13, 43);
-    CHECK(Effects::RenderBelowPlus3(&model, &object, object.Type, 1.f, RENDER_TEXTURE, light));
-
     // The effects follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     CHECK(apply(MakeItemType(14, 0), level) == Result::None);
+}
+
+// The drawing below +3 of the old RenderPartObjectEffect: the light of the
+// item (scaled), the model, then two shine passes (RenderPartObjectBodyColor2).
+TEST_CASE("Some render styles shine below +3 like the old drawing code [data][items]")
+{
+    using namespace Render::Items;
+    using Shine = Styles::ShineBelowPlus3;
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+
+    const Shine::Pass chrome2{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f};
+    const Shine::Pass chrome4{1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f};
+    const auto shineOf = [](int group, int number)
+    { return Styles::FindShineBelowPlus3(MODEL_ITEM + MakeItemType(group, number)); };
+    const auto sameAs =
+        [](const Shine* shine, std::optional<float> light, const Shine::Pass& first, const Shine::Pass& second)
+    {
+        const auto samePass = [](const Shine::Pass& a, const Shine::Pass& b)
+        { return a.alpha == b.alpha && a.renderType == b.renderType && a.bright == b.bright; };
+        return shine != nullptr && shine->light == light && samePass(shine->passes[0], first) &&
+               samePass(shine->passes[1], second);
+    };
+
+    // The seals: the light at 0.9.
+    for (const auto& [group, number] : {std::pair{13, 43}, {13, 44}, {13, 45}, {13, 93}, {13, 94}, {13, 116}})
+    {
+        INFO("(" << group << "," << number << ")");
+        CHECK(sameAs(shineOf(group, number), 0.9f, chrome2, chrome4));
+    }
+    // The Illusion Sorcerer Covenant, the Jewel of Harmony and the Moonstone
+    // Pendant: the light as it is.
+    for (const auto& [group, number] : {std::pair{13, 50}, {14, 42}, {13, 38}})
+    {
+        INFO("(" << group << "," << number << ")");
+        CHECK(sameAs(shineOf(group, number), 1.f, chrome2, chrome4));
+    }
+    // The water of the Cursed Castle keeps the light the model has.
+    CHECK(sameAs(shineOf(14, 64), std::nullopt, Shine::Pass{0.5f, RENDER_TEXTURE | RENDER_BRIGHT, 0.5f}, chrome4));
+
+    // Other items are drawn plainly below +3; so are the Jewel of Harmony and
+    // the Moonstone Pendant above it (their style only shines).
+    CHECK(shineOf(0, 0) == nullptr);
+    CHECK(shineOf(12, 37) == nullptr);
+    BMD model;
+    OBJECT object;
+    object.Type = MODEL_ITEM + MakeItemType(14, 42);
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("The effect of a model is the one of its item, or of its event model [data][items]")
+{
+    using Render::Items::Effects::Result;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+
+    BMD model;
+    OBJECT object;
+    int level = 3;
+    // An item with an effect: its effect, whatever the object is.
+    object.Type = MODEL_EVENT + 11;
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + MakeItemType(14, 0), 1.f, level, 3) == Result::Applied);
+    CHECK(level == 7);
+    // The event models of level variants have theirs in the drawing code: they
+    // only run when the item has no effect.
+    object.Type = MODEL_EVENT + 11;
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, level, 0) == Result::Drawn);
+    object.Type = MODEL_EVENT + 18;
+    object.BlendMesh = -1;
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_EVENT + 18, 1.f, level, 0) == Result::Applied);
+    CHECK(object.BlendMesh == 1);
+    // Neither.
+    object.Type = MODEL_ITEM + ITEM_KRIS;
+    CHECK(ApplyPartObjectEffect(&model, &object, object.Type, 1.f, level, 0) == Result::None);
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }

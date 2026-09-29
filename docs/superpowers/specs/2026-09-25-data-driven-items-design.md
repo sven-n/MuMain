@@ -590,17 +590,21 @@ server with original clients (after phases 6 and B).
        loaded their models); their recipe (textured, then
        `RENDER_BRIGHT | RENDER_CHROME2`) comes back as a style with their
        model entries.
-     - **4c3 Item effects:** `effect` names what the model does besides
-       being drawn, from the type chain of `RenderPartObjectEffect`: 29 item
-       branches for 80 items become 27 effects in
+     - **4c3 Item effects:** `effect` names what the model does before it
+       is drawn, from the type chain of `RenderPartObjectEffect`: 29 item
+       branches for 81 items; 28 of them become 27 effects for 42 items in
        `Render/Items/ItemEffects.cpp` (moved unchanged; the Siege Potion and
-       the Contract share one), and the shine of 10 items below +3 becomes
-       three more (`harmonyShine`, `sealShine`, `cursedCastleWater`). An
-       effect places sprites, particles and lightning on bones, changes
-       values of the drawing (a pulsing glow mesh, a mesh hidden by level,
-       the level potions glow like), or draws the model itself. The socket
-       seeds and spheres and zen need no effect: they glow like level 0
+       the Contract share one). An effect places sprites, particles and
+       lightning on bones, changes values of the drawing (a pulsing glow
+       mesh, a mesh hidden by level, the level potions glow like), or draws
+       the model itself. The socket seeds and spheres (the 39 items of the
+       last branch) and zen need no effect: they glow like level 0
        (`"glow": {"level": 0}`), which is what their level checks did. The
+       shine of 10 items below +3 (two more shine passes) becomes values of
+       their render style, which the drawing code applies: the seals, the
+       Illusion Sorcerer Covenant and the Cursed Castle water have a style
+       already, the Jewel of Harmony and the Moonstone Pendant get
+       `harmonyShine` (138 styles now). The
        effects of the event models of level variants stay in
        `RenderPartObjectEffect` (no model entries yet). Which values the
        effects take (bones, colors, sizes) comes with phase 13, when what
