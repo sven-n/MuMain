@@ -14,9 +14,10 @@
 # uses GitHub's own actions only, so it runs under a repository setting that
 # allows no other actions.
 #
-# Each test gets five minutes (ctest --timeout; the slowest takes about 30
-# seconds). A test that hangs then fails under its own name instead of
-# holding the job until GitHub cancels it after six hours.
+# Each job gets 90 minutes (timeout-minutes; the slowest, Windows, takes
+# about 35), and each test case its own limit from tests/CMakeLists.txt. A
+# step that hangs then fails in time instead of holding the job until GitHub
+# cancels it after six hours.
 name: Fork CI
 
 on:
@@ -36,6 +37,7 @@ jobs:
     name: Windows x64 Release, editor ${{ matrix.editor }}
     if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -118,13 +120,13 @@ jobs:
         run: >
           ctest --test-dir out/build/fork-ci-windows --build-config Release
           --output-on-failure
-          --timeout 300
           --no-tests=error
 
   linux-editor:
     name: Linux x64 Release, editor ON
     if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
@@ -174,13 +176,13 @@ jobs:
         run: >
           ctest --test-dir out/build/fork-ci-linux-editor --build-config Release
           --output-on-failure
-          --timeout 300
           --no-tests=error
 
   macos-editor:
     name: macOS arm64 Release, editor ON
     if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
@@ -220,5 +222,4 @@ jobs:
         run: >
           ctest --test-dir out/build/fork-ci-macos-editor --build-config Release
           --output-on-failure
-          --timeout 300
           --no-tests=error
