@@ -6725,6 +6725,64 @@ void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, itemData);
 }
 
+namespace
+{
+// The message a finished combination writes to the system log: a format and,
+// where the format has a placeholder, the operation it names.
+struct MixResultText
+{
+    const wchar_t* Format;
+    const wchar_t* Operation;
+};
+
+MixResultText GetMixResultText(int mixType, bool succeeded)
+{
+    switch (mixType)
+    {
+    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
+    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
+    case SEASON3A::MIXTYPE_GOBLIN_ADD380:
+    case SEASON3A::MIXTYPE_EXTRACT_SEED:
+    case SEASON3A::MIXTYPE_SEED_SPHERE:
+        return {succeeded ? I18N::Game::ChaosCombinationHasSucceeded : I18N::Game::ChaosCombinationHasFailed, nullptr};
+    case SEASON3A::MIXTYPE_OSBOURNE:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed, I18N::Game::OperationRefining};
+    case SEASON3A::MIXTYPE_JERRIDON:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed, I18N::Game::OperationRestoring};
+    case SEASON3A::MIXTYPE_ELPIS:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed2112, I18N::Game::OperationRefining};
+    case SEASON3A::MIXTYPE_CHAOS_CARD:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed2112,
+                I18N::Game::OperationChaosCardCombination};
+    case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed2112,
+                I18N::Game::OperationCherryBlossomAssembly};
+    default:
+        return {nullptr, nullptr};
+    }
+}
+
+void AddMixResultMessage(bool succeeded)
+{
+    const MixResultText text = GetMixResultText(g_MixRecipeMgr.GetMixInventoryType(), succeeded);
+    if (text.Format == nullptr)
+    {
+        return;
+    }
+
+    const auto messageType = succeeded ? SEASON3B::TYPE_SYSTEM_MESSAGE : SEASON3B::TYPE_ERROR_MESSAGE;
+    if (text.Operation == nullptr)
+    {
+        g_pSystemLogBox->AddText(text.Format, messageType);
+        return;
+    }
+
+    wchar_t szText[256] = {};
+    mu_swprintf(szText, text.Format, text.Operation);
+    g_pSystemLogBox->AddText(szText, messageType);
+}
+} // namespace
+
 void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
@@ -6750,44 +6808,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             break;
         }
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        wchar_t szText[256] = {
-            0,
-        };
-        switch (g_MixRecipeMgr.GetMixInventoryType())
-        {
-        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        case SEASON3A::MIXTYPE_SEED_SPHERE:
-            mu_swprintf(szText, I18N::Game::ChaosCombinationHasFailed);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-            // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, I18N::Game::ResurrectionFailed);	// 부활 실패
-            // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            // 				break;
-        case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::OperationRefining);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::OperationRestoring);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_ELPIS:
-            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::OperationRefining);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHAOS_CARD:
-            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::OperationChaosCardCombination);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::OperationCherryBlossomAssembly);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        }
+        AddMixResultMessage(false);
     }
     break;
     case 1:
@@ -6798,44 +6819,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             break;
         }
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        wchar_t szText[256] = {
-            0,
-        };
-        switch (g_MixRecipeMgr.GetMixInventoryType())
-        {
-        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        case SEASON3A::MIXTYPE_SEED_SPHERE:
-            mu_swprintf(szText, I18N::Game::ChaosCombinationHasSucceeded);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-            // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, I18N::Game::ResurrectionSuccessful);
-            // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            // 				break;
-        case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::OperationRefining);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::OperationRestoring);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_ELPIS:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::OperationRefining);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHAOS_CARD:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::OperationChaosCardCombination);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::OperationCherryBlossomAssembly);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        }
+        AddMixResultMessage(true);
 
         g_pMixInventory->DeleteAllItems();
         g_pMixInventory->InsertItem(0, itemData);
@@ -10775,54 +10759,58 @@ void ReceiveReward(const BYTE* ReceiveBuffer)
 }
 #endif // PBG_ADD_GENSRANKING
 
+namespace
+{
+// The stat a fruit changes and the text id which names it.
+struct FruitStat
+{
+    WORD* Value;
+    int TextIndex;
+};
+
+FruitStat GetFruitStat(BYTE fruit)
+{
+    switch (fruit)
+    {
+    case 0:
+        return {&CharacterAttribute->Energy, 168};
+    case 1:
+        return {&CharacterAttribute->Vitality, 169};
+    case 2:
+        return {&CharacterAttribute->Dexterity, 167};
+    case 3:
+        return {&CharacterAttribute->Strength, 166};
+    case 4:
+        return {&CharacterAttribute->Charisma, 1900};
+    default:
+        return {nullptr, 0};
+    }
+}
+
+void ShowFruitStatMessage(const wchar_t* format, const FruitStat& stat, WORD point)
+{
+    wchar_t text[MAX_GLOBAL_TEXT_STRING];
+    mu_swprintf(text, format, I18N::Game::Lookup(stat.TextIndex), point);
+    SEASON3B::CreateOkMessageBox(text);
+}
+} // namespace
+
 void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_USE_STAT_FRUIT)ReceiveBuffer;
 
     BYTE result = Data->result;
-    BYTE fruit = Data->btFruitType;
     WORD point = Data->btStatValue;
-
-    wchar_t strText[MAX_GLOBAL_TEXT_STRING];
+    const FruitStat stat = GetFruitStat(Data->btFruitType);
 
     switch (result)
     {
     case 0x00:
-        if (fruit >= 0 && fruit <= 4)
+        if (stat.Value != nullptr)
         {
-            int index;
-
-            switch (fruit)
-            {
-            case 0:
-                CharacterAttribute->Energy += point;
-                index = 168;
-                break;
-
-            case 1:
-                CharacterAttribute->Vitality += point;
-                index = 169;
-                break;
-
-            case 2:
-                CharacterAttribute->Dexterity += point;
-                index = 167;
-                break;
-
-            case 3:
-                CharacterAttribute->Strength += point;
-                index = 166;
-                break;
-            case 4:
-                CharacterAttribute->Charisma += point;
-                index = 1900;
-                break;
-            }
-
+            *stat.Value += point;
             CharacterAttribute->AddPoint += point;
-
-            mu_swprintf(strText, I18N::Game::FruitStatIncreased, I18N::Game::Lookup(index), point);
-            SEASON3B::CreateOkMessageBox(strText);
+            ShowFruitStatMessage(I18N::Game::FruitStatIncreased, stat, point);
         }
         break;
 
@@ -10834,43 +10822,12 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         SEASON3B::CreateOkMessageBox(I18N::Game::FruitStatCannotIncrease);
         break;
     case 0x03:
-        if (fruit >= 0 && fruit <= 4)
+        if (stat.Value != nullptr)
         {
-            int index;
-
-            switch (fruit)
-            {
-            case 0:
-                CharacterAttribute->Energy -= point;
-                index = 168;
-                break;
-
-            case 1:
-                CharacterAttribute->Vitality -= point;
-                index = 169;
-                break;
-
-            case 2:
-                CharacterAttribute->Dexterity -= point;
-                index = 167;
-                break;
-
-            case 3:
-                CharacterAttribute->Strength -= point;
-                index = 166;
-                break;
-            case 4:
-                CharacterAttribute->Charisma -= point;
-                index = 1900;
-                break;
-            }
-
+            *stat.Value -= point;
             CharacterAttribute->LevelUpPoint += point;
             CharacterAttribute->wMinusPoint += point;
-
-            wchar_t strText[128];
-            mu_swprintf(strText, I18N::Game::FruitStatDecreased, I18N::Game::Lookup(index), point);
-            SEASON3B::CreateOkMessageBox(strText);
+            ShowFruitStatMessage(I18N::Game::FruitStatDecreased, stat, point);
         }
         break;
 
@@ -10882,42 +10839,11 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         SEASON3B::CreateOkMessageBox(I18N::Game::FruitStatCannotDecrease);
         break;
     case 0x06:
-        if (fruit >= 0 && fruit <= 4)
+        if (stat.Value != nullptr)
         {
-            wchar_t Text[MAX_GLOBAL_TEXT_STRING];
-            int index;
-
-            switch (fruit)
-            {
-            case 0:
-                CharacterAttribute->Energy -= point;
-                index = 168;
-                break;
-
-            case 1:
-                CharacterAttribute->Vitality -= point;
-                index = 169;
-                break;
-
-            case 2:
-                CharacterAttribute->Dexterity -= point;
-                index = 167;
-                break;
-
-            case 3:
-                CharacterAttribute->Strength -= point;
-                index = 166;
-                break;
-            case 4:
-                CharacterAttribute->Charisma -= point;
-                index = 1900;
-                break;
-            }
-
+            *stat.Value -= point;
             CharacterAttribute->LevelUpPoint += point;
-
-            mu_swprintf(Text, I18N::Game::FruitStatDecreased, I18N::Game::Lookup(index), point);
-            SEASON3B::CreateOkMessageBox(Text);
+            ShowFruitStatMessage(I18N::Game::FruitStatDecreased, stat, point);
         }
         break;
     case 0x07:
