@@ -139,7 +139,9 @@ cmake --build out/build/windows-x64-mueditor --config Release --target InGameTes
 
 The window lists every scenario on one line with a checkbox, grouped by
 category in boxes that fold in and out (it remembers which are folded in);
-hovering a description shows it in full, and **Check all** toggles them all.
+hovering a description shows it in full, and **Check all** toggles them all;
+each category's header has its own **Check all** / **Uncheck all** for its
+tests.
 The list takes the window's free height; the divider above the log below it
 can be dragged. It has a **Wait after each action** field: the milliseconds each
 client pauses after every click, key, walk or warp, so a person can follow what happens;

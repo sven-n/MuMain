@@ -89,8 +89,11 @@
                           Margin="6,4,6,0" Padding="4,2">
                   <Expander.Header>
                     <StackPanel Orientation="Horizontal" Spacing="10">
-                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                      <TextBlock Text="{Binding Summary}" Opacity="0.7" />
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Summary}" Opacity="0.7" VerticalAlignment="Center" />
+                      <!-- Checks or unchecks the tests of this category only -->
+                      <Button Content="{Binding ToggleText}" IsEnabled="{Binding IsEditable}" Click="OnToggleGroup"
+                              Padding="8,1" MinHeight="0" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0" />
                     </StackPanel>
                   </Expander.Header>
                   <ItemsControl ItemsSource="{Binding Rows}">

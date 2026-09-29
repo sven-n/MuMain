@@ -121,7 +121,23 @@ internal sealed partial class MainWindow : Window
         if (e.PropertyName == nameof(ScenarioRow.IsChecked))
         {
             this.UpdateSelection();
+            if (sender is ScenarioRow row)
+            {
+                this.groups?.FirstOrDefault(group => group.Rows.Contains(row))?.SelectionChanged();
+            }
         }
+    }
+
+    // A category's own "Check all" / "Uncheck all"; the button sits in the
+    // header, so the click must not also fold the category in or out.
+    private void OnToggleGroup(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: ScenarioGroup group })
+        {
+            group.ToggleAll();
+        }
+
+        e.Handled = true;
     }
 
     private void UpdateSelection()
@@ -369,6 +385,11 @@ internal sealed partial class MainWindow : Window
         foreach (var row in this.rows)
         {
             row.IsEditable = !running;
+        }
+
+        foreach (var group in this.groups)
+        {
+            group.IsEditable = !running;
         }
 
         if (!running)

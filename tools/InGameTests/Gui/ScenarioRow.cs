@@ -164,6 +164,7 @@ internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<Sce
     : INotifyPropertyChanged
 {
     private bool isExpanded = isExpanded;
+    private bool isEditable = true;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -174,6 +175,36 @@ internal sealed class ScenarioGroup(ScenarioCategory category, IReadOnlyList<Sce
     public string Summary => this.Rows.Count == 1 ? "1 test" : $"{this.Rows.Count} tests";
 
     public IReadOnlyList<ScenarioRow> Rows { get; } = rows;
+
+    /// <summary>"Check all" while a test of the category is unchecked, else "Uncheck all".</summary>
+    public string ToggleText => this.Rows.All(row => row.IsChecked) ? "Uncheck all" : "Check all";
+
+    /// <summary>Whether the toggle takes clicks: not while a run goes on.</summary>
+    public bool IsEditable
+    {
+        get => this.isEditable;
+        set
+        {
+            if (this.isEditable != value)
+            {
+                this.isEditable = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsEditable)));
+            }
+        }
+    }
+
+    /// <summary>Checks every test of the category, or unchecks them all when all are checked.</summary>
+    public void ToggleAll()
+    {
+        var check = this.Rows.Any(row => !row.IsChecked);
+        foreach (var row in this.Rows)
+        {
+            row.IsChecked = check;
+        }
+    }
+
+    /// <summary>A test of the category was checked or unchecked.</summary>
+    public void SelectionChanged() => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ToggleText)));
 
     public bool IsExpanded
     {
