@@ -78,17 +78,12 @@
 			<div class="modern-header-title">{{title}}</div>
 		</div>
 	</div>
-	<!-- Optional footer anchor, sibling of #content -- a direct #panel child, same relationship
-	     generic_confirm_dialog.rcss's own .gcd-btn-primary/etc have to #panel (not nested inside
-	     .gcd-body). #content is a single splice target (Template::ParseTemplate only resolves one
-	     content id), so a consumer can't author an element here directly; empty and inert by
-	     default (harmless for generic_menu_dialog, which never touches it) until a consumer builds
-	     into it in C++ (Rml::ElementDocument::CreateElement() + AppendChild(), NOT authored as
-	     `{{}}`-bound RML markup elsewhere and moved here after load -- that was tried first
-	     (option_window.rml's close button) and never rendered its label text: RmlUi's
-	     text-interpolation DataView is only created at an element's original XML parse, and
-	     re-attaching to a new parent doesn't recreate it, only re-scans attributes for data-*
-	     bindings) -- see COptionWindow::BuildRmlUi() for the current worked example. -->
+	<!-- A footer anchor for a consumer that needs an element outside #content (the template's only
+	     splice target). Currently unused: Options, its one former consumer, declares its close
+	     button in #content instead, whose fixed box already ends on this line. Build into it in C++
+	     (CreateElement() + AppendChild()) rather than authoring `{{}}`-bound markup elsewhere and
+	     moving it here -- a moved element never re-creates its text-interpolation binding, see
+	     engine-findings.md. -->
 	<div id="window_shell_footer" class="window-shell-footer"></div>
 </body>
 </template>

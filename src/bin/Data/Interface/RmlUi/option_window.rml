@@ -44,12 +44,11 @@
      stay visible (window_shell.rcss hit this exact bug for its own header rail first). The tab row
      and all six panels are direct children of this one <body> -- window_shell.rml's #content is a
      single flex-column slot with no way to address more than one region, so tab switching is
-     purely a visibility toggle on siblings, not a structural split. The close button is NOT
-     markup here -- COptionWindow::BuildRmlUi() builds it directly in C++ inside window_shell.rml's
-     own #window_shell_footer instead (a `{{close_label}}` text node moved there via
-     UI::RmlBridge::PromoteToWindowShellFooter() after load never rendered its label -- RmlUi's
-     text-interpolation DataView is only created at that node's original parse, and re-attaching to
-     a new parent doesn't recreate it, see OptionWindow.h's own comment on m_pCloseButtonEl). -->
+     purely a visibility toggle on siblings, not a structural split. The close button is declared
+     here, at the bottom of #content, rather than spliced into the shell's footer: #content is a
+     fixed rectangle whose bottom edge is the footer's own, so `bottom: 0` puts the button in the
+     same place without moving an already-bound element (moving one never re-creates its
+     text-interpolation binding -- see engine-findings.md). -->
 <body template="window_shell" data-model="option_window">
 	<div class="option-tab-row">
 		<div class="option-tab-btn" data-class-active-tab="active_tab == 0" data-event-click="option_select_tab(0)">{{tab_gameplay_label}}</div>
@@ -59,6 +58,8 @@
 		<div class="option-tab-btn" data-class-active-tab="active_tab == 4" data-event-click="option_select_tab(4)">{{tab_ui_label}}</div>
 		<div class="option-tab-btn" data-class-active-tab="active_tab == 5" data-event-click="option_select_tab(5)">{{tab_general_label}}</div>
 	</div>
+
+	<div class="btn btn-cancel option-close-btn" data-event-click="option_click_close">{{close_label}}</div>
 
 	<!-- Tab 0: Gameplay -->
 	<div class="option-tab-panel" data-class-hidden="active_tab != 0">

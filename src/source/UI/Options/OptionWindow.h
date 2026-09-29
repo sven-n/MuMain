@@ -200,8 +200,7 @@ namespace mu::ui::window
 
             bool hasTitle = true;
             Rml::String title;
-            // No closeLabel/close_label field here -- the close button isn't part of this
-            // document's declarative markup anymore, see m_pCloseButtonEl's own comment.
+            Rml::String closeLabel;
 
             // Tab state -- bound/diffed first, matching MyQuestInfoWindow's own convention for its
             // own activeTab field (see BuildRmlUi()/SyncRmlModel()). 0=Gameplay, 1=Audio, 2=Video,
@@ -313,21 +312,6 @@ namespace mu::ui::window
         // never drift from wherever `.center-both` (or a future positioned/dragged mode) actually
         // put the panel, in either theme.
         Rml::Element* m_pPanelEl = nullptr;
-
-        // Built directly in C++ (BuildRmlUi()) inside window_shell.rml's own #window_shell_footer,
-        // not authored as `{{close_label}}` markup in option_window.rml -- a `{{}}`-bound text node
-        // that gets moved to a new parent via UI::RmlBridge::PromoteToWindowShellFooter() (as this
-        // element originally was) never renders its text: the DataView responsible for that
-        // substitution is only created once, at the original element's initial XML parse, and
-        // RmlUi's own re-attach path (Element::SetDataModel() -> ApplyDataViewsControllers()) only
-        // rescans an element's *attributes* for new bindings, never plain text content -- so the
-        // text-interpolation view is simply never recreated after the move (found live: the button
-        // rendered with no label at all, in both themes). Building it here instead sidesteps the
-        // whole DataView-survives-a-reparent question -- its label is set imperatively via
-        // SetInnerRML() in SyncRmlModel() (diffed against m_lastCloseButtonLabel), and its click is
-        // a plain Rml::EventListener (see BuildRmlUi()'s own comment), not a data-event-click.
-        Rml::Element* m_pCloseButtonEl = nullptr;
-        Rml::String m_lastCloseButtonLabel;
 
     private:
         CManager* m_pNewUIMng;

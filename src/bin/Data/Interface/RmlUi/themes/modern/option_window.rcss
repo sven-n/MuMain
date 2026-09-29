@@ -349,16 +349,10 @@
 	bottom: 100%;
 }
 
-/* Not authored in option_window.rml at all -- COptionWindow::BuildRmlUi() builds this element
-   directly in C++ inside window_shell.rml's own #window_shell_footer (a `{{close_label}}` version
-   of this div, moved into the footer after load, never rendered its label -- see
-   OptionWindow.h's own comment on m_pCloseButtonEl). .btn already defaults to position:absolute
-   (base.rcss) -- kept, not overridden to static, since the close button is meant to sit at a
-   FIXED spot regardless of which tab is active, not flow after whatever that tab's own last row
-   happens to be (which would otherwise shift its position as the active tab's row count changes).
-   bottom:0 here resolves against the footer's own box (window_shell.rcss's own
-   .window-shell-footer, itself position:absolute against #panel). left:50%+transform centers it
-   horizontally the same way .center-both does. */
+/* The close button sits at the bottom of #content, which window_shell.rcss gives a fixed box
+   (left/right/top/bottom all set), so this stays put as the active tab's row count changes.
+   bottom:0 lands on the same line the shell's own footer occupies; left:50% plus the transform
+   centres it the way .center-both does. */
 .option-close-btn {
 	left: 50%;
 	bottom: 0;

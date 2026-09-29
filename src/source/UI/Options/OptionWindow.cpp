@@ -164,24 +164,6 @@ static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 static const int s_FpsCapValues[] = { 24, 30, 60, 120, 144, -1 };
 static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapValues[0]);
 
-namespace
-{
-    // Self-owning, same pattern as RmlDraggable.cpp's own DragMoveListener -- deletes itself in
-    // OnDetach() per RmlUi's AddEventListener contract, so the caller never needs to track or clean
-    // it up. Used for the close button (m_pCloseButtonEl) instead of a data-event-click binding
-    // since that element isn't part of this document's declarative markup/data model wiring
-    // anymore -- see m_pCloseButtonEl's own comment in OptionWindow.h.
-    class ClickListener : public Rml::EventListener
-    {
-    public:
-        explicit ClickListener(std::function<void()> onClick) : m_OnClick(std::move(onClick)) {}
-        void ProcessEvent(Rml::Event&) override { if (m_OnClick) m_OnClick(); }
-        void OnDetach(Rml::Element*) override { delete this; }
-    private:
-        std::function<void()> m_OnClick;
-    };
-}
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -264,6 +246,7 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
 
             c.Bind("has_title", &model.hasTitle);
             c.Bind("title", &model.title);
+            c.Bind("close_label", &model.closeLabel);
 
             c.Bind("active_tab", &model.activeTab);
             c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
@@ -344,6 +327,9 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
             c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
             c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
+
+            c.BindEventCallback("option_click_close",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
 
             c.BindEventCallback("option_select_tab",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -432,24 +418,6 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/option_window.rml");
     m_pPanelEl = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
-
-    // Built directly here, not as option_window.rml markup -- a direct #panel child like
-    // generic_confirm_dialog.rcss's own buttons, living in window_shell's shared footer anchor
-    // (a sibling of #content, since #content is window_shell's only splice target and this button
-    // must sit outside it). See m_pCloseButtonEl's own comment in OptionWindow.h for why this
-    // isn't authored as `{{close_label}}` RML markup instead.
-    m_pCloseButtonEl = nullptr;
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* footer = m_pRmlDoc->GetElementById("window_shell_footer"))
-        {
-            Rml::ElementPtr btn = m_pRmlDoc->CreateElement("div");
-            m_pCloseButtonEl = footer->AppendChild(std::move(btn));
-            m_pCloseButtonEl->SetClassNames("btn btn-cancel option-close-btn");
-            m_pCloseButtonEl->AddEventListener(Rml::EventId::Click, new ClickListener([this]() { RmlClickClose(); }));
-        }
-    }
-    m_lastCloseButtonLabel.clear();
 }
 
 void mu::ui::window::COptionWindow::InitResolutionCombo()
@@ -1266,16 +1234,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         }
     };
     syncLabel(model.title, "title", I18N::Game::Option385);
-    // Imperative, not a bound field -- see m_pCloseButtonEl's own comment for why.
-    if (m_pCloseButtonEl)
-    {
-        const Rml::String closeLabelText = StringUtils::WideToNarrow(I18N::Game::Close);
-        if (m_lastCloseButtonLabel != closeLabelText)
-        {
-            m_lastCloseButtonLabel = closeLabelText;
-            m_pCloseButtonEl->SetInnerRML(closeLabelText);
-        }
-    }
+    syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
     syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
     syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
     syncLabel(model.tabVideoLabel, "tab_video_label", I18N::Game::Video);
