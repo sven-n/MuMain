@@ -134,7 +134,10 @@
 		<div id="btn_init" class="mh-btn-igs" data-event-click="muhelper_button('init')"></div><span id="btn_init_label" class="sharp-text mh-text mh-center mh-btn-label mh-btn-label-igs" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(52 * root_scale) + 'px'" data-style-height="(26 * root_scale) + 'px'" data-style-line-height="(26 * root_scale) + 'px'">{{labels.init}}</span>
 
 		<div id="btn_exit" data-event-click="muhelper_button('close')"></div>
-		<span class="tooltip tooltip-exit">{{labels.close_tip}}</span>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{labels.close_tip}}</span></span>
 	</div>
 </body>
 </rml>

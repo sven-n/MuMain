@@ -6,6 +6,7 @@
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Widgets/Window/Button.h"
+#include "UI/HUD/MiniMapLayout.h"
 #include "UI/HUD/MiniMapRmlModel.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/Widgets/Window/Tooltip.h"
@@ -71,5 +72,7 @@ private:
     RmlModelBinder<MiniMapRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     bool m_PendingClose = false;
+    // The screen the border tiles' matrices were built for (SyncScreen()).
+    UI::MiniMap::Screen m_SideLinesScreen;
 };
 }

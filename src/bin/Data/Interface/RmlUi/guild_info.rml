@@ -137,14 +137,14 @@
 			<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
 			      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
 			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{b.label}}</span></span>
 		</div>
 
 		<div id="btn_exit" data-event-click="guild_info_button(6)"></div>
 		<span class="sharp-text tooltip tooltip-exit"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
 	</div>
 </body>
 </rml>

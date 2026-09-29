@@ -54,12 +54,12 @@ namespace UI::Quests::RewardModel
             }
             else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
             {
-                rows.push_back({" ", RowStyle::Plain, 0, nullptr});
+                rows.push_back({BlankRowText, RowStyle::Plain, 0, nullptr});
                 nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
             }
             else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
             {
-                rows.push_back({" ", RowStyle::Plain, 0, nullptr});
+                rows.push_back({BlankRowText, RowStyle::Plain, 0, nullptr});
                 nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
             }
             else
@@ -105,6 +105,7 @@ namespace UI::Quests::RewardModel
     Entry ToEntry(const RowData& row, int index)
     {
         const bool clickable = row.pItem && (row.dwType == QUEST_REQUEST_ITEM || row.dwType == QUEST_REWARD_ITEM);
-        return Entry{row.text, StyleKey(row.style), false, index, clickable};
+        // GetRequestRewardText() draws its headings in g_hFontBold.
+        return Entry{row.text, StyleKey(row.style), row.style == RowStyle::Heading, index, clickable};
     }
 }

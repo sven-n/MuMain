@@ -144,6 +144,9 @@ public:
     {
         return nullptr;
     }
+    // The photo viewer's box clipped to the window's back (reference px), which the view leaves
+    // to its underlay; false without a photo viewer or window background.
+    bool GetRmlUnderlayRect(float& left, float& top, float& right, float& bottom);
     // CUIWindowMgr::Render() for a window with an RmlUi view: RenderOver() only.
     void RenderRmlOverlay();
 
@@ -798,6 +801,11 @@ public:
     {
         return true;
     }
+    // The window the answer goes to (Init()'s dwParentID; the question itself has no parent).
+    DWORD GetReturnWindowUIID() const
+    {
+        return m_dwReturnWindowUIID;
+    }
 
 protected:
     virtual void InitControls() {}
@@ -831,6 +839,9 @@ public:
     // Builds the RmlUi documents of the windows with an RmlUi view (CUIBaseWindow::HasRmlView())
     // and shows them in the draw order Render() uses; hides them all when !familyShown.
     void SyncRmlViews(bool familyShown);
+    // True while an RmlUi input of the window holds the keyboard: the native field handed its
+    // focus to the input (FriendWindowView::SyncFields()), so CUITextInputBox no longer reports it.
+    bool RmlFieldHasFocus(DWORD dwUIID) const;
     void DoAction();
     void ShowHideWindow(DWORD dwUIID, BOOL bShowWindow);
     void HideAllWindow(BOOL bHide, BOOL bMainClose = FALSE);

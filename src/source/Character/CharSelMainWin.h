@@ -11,6 +11,7 @@
 #include "UI/Core/WindowObject.h"
 #include "Render/Sprites/Sprite.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/Scaling/UITransform.h"
 
 #define CSMW_SPR_DECO 0
 #define CSMW_SPR_INFO 1
@@ -76,10 +77,7 @@ namespace UI::CharacterSelection
 
     inline Layout CalculateLayout(int screenWidth, int screenHeight)
     {
-        const float scale = std::clamp(
-            std::min(static_cast<float>(screenWidth) / NativeWidth,
-                     static_cast<float>(screenHeight) / NativeHeight),
-            1.0f, 2.0f);
+        const float scale = UI::Scaling::SceneBarScale(screenWidth, screenHeight);
         const int outerMargin = Scale(NativeOuterMargin, scale);
         const int buttonWidth = Scale(NativeButtonWidth, scale);
         const int buttonHeight = Scale(NativeButtonHeight, scale);
@@ -122,20 +120,18 @@ namespace UI::CharacterSelection
     // Fixed, dp-anchored counterpart to CalculateLayout() above, mirroring char_sel_main.rcss's
     // layout-and-scaling retrofit exactly.
     // CalculateLayout() (upstream's auto-scale-to-fit-800x600 system) is no longer used by this
-    // window: once the RmlUi visuals switched from mirroring that resolution-proportional rect to
-    // fixed-dp/anchor-class CSS positioning, continuing to position the legacy CSprite hit-test
-    // objects via CalculateLayout()'s math left them visually detached from the buttons actually
-    // on screen at any resolution other than a coincidental match -- a real, confirmed
-    // bug, not a cosmetic one: this window's own bounding rect (below) must cover every element
-    // positioned above, or hovering the info-bar/deco alone would wrongly fall through to the
+    // window outside the legacy theme: once the RmlUi visuals switched from mirroring that
+    // resolution-proportional rect to fixed-dp/anchor-class CSS positioning, continuing to position
+    // the legacy CSprite hit-test objects via CalculateLayout()'s math left them visually detached
+    // from the buttons actually on screen at any resolution other than a coincidental match -- a
+    // real, confirmed bug, not a cosmetic one: this window's own bounding rect (below) must cover
+    // every element positioned above, or hovering the info-bar/deco alone would wrongly fall through to the
     // legacy world-click handler (previously via CUIMng::IsCursorOnUI(), now via
     // UpdateMouseEvent()'s own rect claim -- the same established pattern CServerSelWin's own
-    // migration follows). uiScale must be the same
-    // combined ratio RmlUi's own `dp` unit uses (Rml::Context::SetDensityIndependentPixelRatio(),
-    // RmlUiRuntime.cpp's ApplyUIScale()) -- UI::Scaling::CompanionRatio(screenWidth, screenHeight)
-    // (UITransform.cpp) computes it (UIScalePercent times UI::Scaling::ViewportFitScale(), not
-    // UIScalePercent alone), so these rects always match the RmlUi buttons
-    // pixel-for-pixel regardless of screen resolution or UI-scale setting.
+    // migration follows). uiScale must be the ratio the other themes' char_sel_main.rcss `dp` uses:
+    // UI::Scaling::CompanionRatio(screenWidth, screenHeight), so these rects always match the RmlUi
+    // buttons pixel-for-pixel regardless of screen resolution or UI-scale setting. The legacy theme
+    // lays the bar out like the original instead, CalculateLayout() above (char_sel_main.rcss).
     inline Layout CalculateFixedAnchorLayout(int screenWidth, int screenHeight, float uiScale)
     {
         const int buttonWidth = Scale(NativeButtonWidth, uiScale);
@@ -183,19 +179,18 @@ namespace Rml { class ElementDocument; }
 // ApplyLayout() pushing a computed rect anymore. ApplyLayout() still runs, but only feeds the
 // legacy CSprite bookkeeping objects, and does so via
 // UI::CharacterSelection::CalculateFixedAnchorLayout() (mirroring the RCSS's own fixed-dp math)
-// rather than the older CalculateLayout() (upstream's auto-scale-to-fit-800x600 system, kept above
-// for reference/potential reuse elsewhere but no longer used by this window) -- see
+// rather than the older CalculateLayout() (upstream's auto-scale-to-fit-800x600 system, the
+// original's layout, which the legacy theme's RCSS reproduces and uses instead) -- see
 // CalculateFixedAnchorLayout()'s own comment for why using the mismatched old math was a real,
 // user-visible bug (Delete silently no-op'ing) and not just a style inconsistency.
 //
-// Migrated off CWin onto mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
-// (CServerSelWin's established pattern), not the whole screen, since the world behind this bar
-// must stay clickable/rotatable. Its own Update() additionally skips all button-click processing
-// while CCharMakeWin/CMsgWin/CSysMenuWin is shown (see their own GetLayerDepth() comments) --
-// this is the actual fix for a real, reported bug: the legacy CWin::m_bActive gate this used to
-// rely on for that exact purpose doesn't reliably deactivate on a timely basis (same class of
-// issue CLoginMainWin/CSysMenuWin's own "act immediately" RmlClick*() methods already document),
-// letting the Menu button fire while CCharMakeWin was still open.
+// Migrated off CWin onto mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only within its own bounding
+// rect (CServerSelWin's established pattern), not the whole screen, since the world behind this bar must stay
+// clickable/rotatable. Its own Update() additionally skips all button-click processing while
+// CCharMakeWin/CMsgWin/CSysMenuWin is shown (see their own GetLayerDepth() comments) -- this is the actual fix for a
+// real, reported bug: the legacy CWin::m_bActive gate this used to rely on for that exact purpose doesn't reliably
+// deactivate on a timely basis (same class of issue CLoginMainWin/CSysMenuWin's own "act immediately" RmlClick*()
+// methods already document), letting the Menu button fire while CCharMakeWin was still open.
 class CCharSelMainWin : public mu::ui::window::CObject
 {
 protected:

@@ -11,11 +11,13 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlNativeText.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
+#include <cmath>
 
 // Caps how many groups a server can grow this window's data to.
 namespace
@@ -37,6 +39,10 @@ CServerSelWin::~CServerSelWin()
 void CServerSelWin::Create()
 {
     Release();
+
+    // Create() runs on every entry to the login scene: start with no group chosen, so the list
+    // does not reopen on the group an earlier visit picked.
+    m_iSelectServerBtnIndex = -1;
 
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
@@ -339,11 +345,16 @@ bool CServerSelWin::UpdateMouseEvent()
     if (!IsVisible())
         return true;
 
-    const int nLeft = (static_cast<int>(WindowWidth) - kPanelWidth) / 2;
-    const int nTop = (static_cast<int>(WindowHeight) - kPanelHeight) / 2;
+    // server_select.rcss is in px, or in the legacy theme's scene-window rem (RmlNativeText.h).
+    const float scale =
+        UI::RmlBridge::SceneWindowPixelRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    const int panelWidth = static_cast<int>(std::lround(kPanelWidth * scale));
+    const int panelHeight = static_cast<int>(std::lround(kPanelHeight * scale));
+    const int nLeft = (static_cast<int>(WindowWidth) - panelWidth) / 2;
+    const int nTop = (static_cast<int>(WindowHeight) - panelHeight) / 2;
 
     RECT rc;
-    ::SetRect(&rc, nLeft, nTop, nLeft + kPanelWidth, nTop + kPanelHeight);
+    ::SetRect(&rc, nLeft, nTop, nLeft + panelWidth, nTop + panelHeight);
     if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
         return false;
 

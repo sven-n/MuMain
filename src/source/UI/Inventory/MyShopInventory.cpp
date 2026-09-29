@@ -299,9 +299,12 @@ void mu::ui::window::CMyShopInventory::BuildRmlUi()
                     {
                         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
                     });
-                c.BindEventCallback("my_shop_open_click",
+                c.BindEventCallback(
+                    "my_shop_open_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
+                        if (m_bOpenLocked) // a locked CNewUIButton shows its hint but takes no click
+                            return;
                         wchar_t shopTitle[MAX_SHOPTITLE + 1]{};
                         GetTitle(shopTitle);
                         if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
@@ -339,14 +342,16 @@ void mu::ui::window::CMyShopInventory::BuildRmlUi()
                         }
                     });
                 c.BindEventCallback("my_shop_close_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        SocketClient->ToGameServer()->SendPlayerShopClose();
+                                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                    {
+                                        if (!m_EnablePersonalShop) // locked until the shop is open
+                                            return;
+                                        SocketClient->ToGameServer()->SendPlayerShopClose();
 
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
-                    });
+                                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
+                                    });
             });
 
         if (modelCreated)

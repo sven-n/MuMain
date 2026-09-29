@@ -102,6 +102,13 @@ namespace mu::ui::window
         // because the lines themselves are pointer-events:none (see chat_log.rcss).
         int pointedIndex = -1;
         Rml::Vector<ChatLogLineEntry> lines;
+
+        // The native renderer's line geometry in physical px (the legacy theme's chat_log.rml):
+        // the text size, each line's background height (the measured text) and the 15-unit row
+        // pitch of the dp-sized well.
+        float textPx = 0.f;
+        float linePx = 0.f;
+        float rowPx = 0.f;
     };
 
     class CChatLogWindow : public CObject
@@ -162,6 +169,7 @@ namespace mu::ui::window
 
         MESSAGE_TYPE		m_CurrentRenderMsgType;
         bool				m_bShowChatLog;
+        bool m_bSceneAllowsShow = false;
         int		m_iCurrentRenderEndLine;
         float	m_fBackAlpha;
 
@@ -173,6 +181,7 @@ namespace mu::ui::window
 
         void BuildRmlUi();
         void SyncRmlModel();
+        void SyncNativeLineGeometry();
         // Rebuilds the bound line list from the currently-selected message vector. Kept
         // index-aligned with that vector (undrawable entries become blanks rather than being
         // skipped) because chat_line_rightclick() resolves a sender by array index.
@@ -251,6 +260,10 @@ namespace mu::ui::window
         bool UpdateMouseEvent() override;
         bool UpdateKeyEvent() override;
         bool Update() override;
+        // Hides the document outside the main scene (CSystem::SyncMainSceneHudVisibility()): the
+        // window is only updated there, but its document would keep drawing in every scene.
+        void SyncDocVisibility(bool sceneAllowsShow);
+
         bool Render() override;
 
         float GetLayerDepth() override;	//. 6.1f
@@ -278,6 +291,15 @@ namespace mu::ui::window
         // this is a per-line colour, not a panel fill.
         Rml::String backColor = "rgba(0,0,0,153)";
         Rml::Vector<ChatLogLineEntry> lines;
+
+        // The native renderer's geometry under the window's layout, in physical px (the legacy
+        // theme's system_log.rml): the first line's origin, the row pitch, each line's background
+        // height and the text size.
+        float panelX = 0.f;
+        float panelY = 0.f;
+        float rowPx = 0.f;
+        float linePx = 0.f;
+        float textPx = 0.f;
     };
 
     class CSystemLogWindow : public CObject
@@ -309,11 +331,13 @@ namespace mu::ui::window
         int		m_iCurrentRenderEndLine;
         float	m_fBackAlpha;
         bool    m_bShowMessages;
+        bool m_bSceneAllowsShow = false;
 
         void Init();
 
         void BuildRmlUi();
         void SyncRmlModel();
+        void SyncNativeGeometry();
         void RebuildLineModel();
 
         RmlModelBinder<SystemLogRmlModel> m_RmlBinder;
@@ -342,6 +366,10 @@ namespace mu::ui::window
         bool UpdateMouseEvent() override;
         bool UpdateKeyEvent() override;
         bool Update() override;
+        // Hides the document outside the main scene (CSystem::SyncMainSceneHudVisibility()): the
+        // window is only updated there, but its document would keep drawing in every scene.
+        void SyncDocVisibility(bool sceneAllowsShow);
+
         bool Render() override;
 
         float GetLayerDepth() override;

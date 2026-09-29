@@ -168,6 +168,11 @@ body {
 /* A layer anchored by its right edge (right: N, auto width) scales back around that edge. */
 .sharp-text.sharp-right { transform-origin: right top; }
 
+/* Text the original drew with a box width (RenderText()'s box): one line across its parent's
+   content box, shrunk by the bridge when it is wider (RmlNativeTextFit.h). Wrap the text in it
+   inside the element that has the box and the font size. */
+.native-fit { display: block; white-space: nowrap; }
+
 /* Scrolling content pane. Apply to whatever element owns the scrollable content; RmlUi then
    generates the scrollbar itself as real child elements, styled below.
 
@@ -238,7 +243,9 @@ body {
 .scroll-pane scrollbarvertical slidertrack {
 	decorator: ninepatch(legacy-scroll-track, legacy-scroll-track-inner);
 }
+/* Native's thumb keeps its sprite's size at every list length (a knob, not a proportional bar). */
 .scroll-pane scrollbarvertical sliderbar {
+	height: 30dp;
 	decorator: ninepatch(legacy-scroll-thumb, legacy-scroll-thumb-inner);
 }
 /* Native tints the thumb down while it's held (RGBA(179,179,179) in RenderFrame()); brightness()

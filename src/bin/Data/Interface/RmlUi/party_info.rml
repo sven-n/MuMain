@@ -27,13 +27,20 @@
 
 		<div class="party-list" data-class-hidden="!has_party">
 			<div class="party-row" data-for="m : members">
+				<!-- RenderGroupBox(x, y, 170, 70, 70, 20): the fills, the corners, then the edges. -->
+				<div class="gbox-title-fill"></div>
+				<div class="gbox-content-fill"></div>
 				<div class="gbox-corner gbox-corner-tl"></div>
 				<div class="gbox-corner gbox-corner-tr-title"></div>
 				<div class="gbox-corner gbox-corner-tr"></div>
 				<div class="gbox-corner gbox-corner-bl"></div>
 				<div class="gbox-corner gbox-corner-br"></div>
-				<div class="gbox-title-fill"></div>
-				<div class="gbox-content-fill"></div>
+				<div class="gbox-edge gbox-edge-top party-edge-title-top"></div>
+				<div class="gbox-edge gbox-edge-right party-edge-title-right"></div>
+				<div class="gbox-edge gbox-edge-top party-edge-top"></div>
+				<div class="gbox-edge gbox-edge-right party-edge-right"></div>
+				<div class="gbox-edge gbox-edge-bottom party-edge-bottom"></div>
+				<div class="gbox-edge gbox-edge-left party-edge-left"></div>
 
 				<span class="sharp-text party-name" data-style-color="m.name_color"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{m.name}}</span>
@@ -54,7 +61,7 @@
 
 		<div id="btn_exit" data-event-click="party_click_exit"></div>
 		<span class="sharp-text tooltip tooltip-exit"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
 	</div>
 </body>
 </rml>

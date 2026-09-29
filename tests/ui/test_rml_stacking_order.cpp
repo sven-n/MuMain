@@ -9,6 +9,8 @@
 #include <set>
 #include <string>
 
+using UI::RmlBridge::DocumentScene;
+using UI::RmlBridge::SceneForDocument;
 using UI::RmlBridge::StackingDepthForDocument;
 
 namespace
@@ -45,6 +47,28 @@ TEST_CASE("every document the client loads has a stacking depth [ui][stacking]")
     CHECK(names.size() > 100);
     for (const std::string& name : names)
         CHECK_MESSAGE(StackingDepthForDocument(name).has_value(), name);
+}
+
+TEST_CASE("every document the client loads has a scene [ui][stacking]")
+{
+    for (const std::string& name : DocumentsNamedInSources())
+        CHECK_MESSAGE(SceneForDocument(name).has_value(), name);
+}
+
+TEST_CASE("only the main scene's windows are suspended outside it [ui][stacking]")
+{
+    // CNewUIManager's windows, the HUD, the world labels and their tooltip and message boxes.
+    for (const char* name : {"my_inventory.rml", "my_inventory_bg.rml", "move_command.rml", "friend_window.rml",
+                             "blood_castle_enter.rml", "duel_window.rml", "siege_warfare.rml", "main_frame.rml",
+                             "world_labels.rml", "map_name.rml", "tooltip.rml", "message_box_view.rml",
+                             "generic_confirm_dialog.rml"})
+        CHECK_MESSAGE(SceneForDocument(name) == DocumentScene::Main, name);
+    // Shown and hidden by their own scene's code: the scene windows, the notices, the loading
+    // screens and the reconnect dialog.
+    for (const char* name : {"login_scene.rml", "login.rml", "server_select.rml", "char_sel_main.rml",
+                             "char_make.rml", "char_info_balloon.rml", "msg_win.rml", "sys_menu.rml",
+                             "notices.rml", "loading.rml", "title_scene.rml", "reconnect_dialog.rml"})
+        CHECK_MESSAGE(SceneForDocument(name) == DocumentScene::Any, name);
 }
 
 TEST_CASE("documents stack as the original's windows did [ui][stacking]")

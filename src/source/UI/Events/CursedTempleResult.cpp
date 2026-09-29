@@ -310,11 +310,14 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
 
     // The original's RenderResultPanel(): the banner centred on the reference width, 110 units
-    // above the window, fading in.
+    // above the window, fading in. It drew under the alpha test (EnableAlphaTest(), GL_GREATER
+    // 0.25), so the banner stayed invisible until the fade passed a quarter.
+    constexpr float kAlphaTestReference = 0.25f;
     updated.banner = m_WinState;
     const int bannerX = (REFERENCE_WIDTH - 360) / 2;
     updated.bannerLeft = static_cast<float>(bannerX - m_Pos.x);
-    updated.bannerAlpha = std::clamp(m_ResultEffectAlph, 0.f, 1.f);
+    const float fade = std::clamp(m_ResultEffectAlph, 0.f, 1.f);
+    updated.bannerAlpha = fade > kAlphaTestReference ? fade : 0.f;
 
     // The original's RenderText(): centred texts shrunk to the window's width, then one row per
     // player, its cells left-aligned at fixed offsets (long names run into the next cell, as

@@ -31,7 +31,7 @@
 				<span class="sharp-text cmd-label" data-style-top="b.label_top + 'px'"
 				      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"
 				      data-style-width="(108 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{b.label}}</span></span>
 			</div>
 		</div>
 
@@ -39,7 +39,7 @@
 		<span class="sharp-text tooltip tooltip-exit"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
 
 		<div id="target" data-if="target_visible" data-class-out-of-range="!target_in_range"
 		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">

@@ -35,8 +35,8 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
@@ -49,14 +49,14 @@ extern unsigned int WindowWidth, WindowHeight;
 
 namespace
 {
-    // Scales fixed reference-pixel offsets (legacy bounding box, CUITextInputBox placement) to stay
-    // aligned with login.rcss's dp values. Reads WindowWidth/WindowHeight, not
-    // CInput::Instance().GetScreenWidth/Height() -- the latter doesn't reliably match the values
-    // RmlUiRuntime::OnResize() uses, which caused the panel/input box to visibly drift off-position.
-    float LoginUIScaleRatio()
-    {
-        return UI::Scaling::CompanionRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
-    }
+// Scales the original's pixel sizes (the legacy bounding box) like login.rcss's own units
+// (UI::RmlBridge::SceneWindowRatio()). Reads WindowWidth/WindowHeight, not
+// CInput::Instance().GetScreenWidth/Height() -- the latter doesn't reliably match the values
+// RmlUiRuntime::OnResize() uses, which caused the panel/input box to visibly drift off-position.
+float LoginUIScaleRatio()
+{
+    return UI::RmlBridge::SceneWindowRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+}
 
     int ScaledOffset(int value, float ratio)
     {
@@ -97,7 +97,7 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    // Tracks login.rcss's #panel width/height (329dp/245dp) by the same ratio rather than a fixed
+    // Tracks login.rcss's #panel width/height (329 x 245 original pixels) by the same ratio rather than a fixed
     // 329x245, so UpdateMouseEvent()'s hit-test rect (m_Size) doesn't go stale against RmlUi's
     // auto-fitting visuals.
     const float uiScale = LoginUIScaleRatio();
@@ -116,6 +116,10 @@ void CLoginWin::Create()
         model.password = StringUtils::WideToNarrow(m_Password);
         m_bRememberMeChecked = true;
     }
+    // Create() runs on every entry to the login scene, but the document outlives it: push the
+    // fresh values into the fields, or they keep what an earlier visit typed.
+    m_RmlBinder.MarkDirty("username");
+    m_RmlBinder.MarkDirty("password");
 
     // The password is only pre-filled and re-saved when the player previously
     // opted in on a trusted machine.
@@ -195,7 +199,13 @@ void CLoginWin::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
-    SetPosition(m_ptPos.x, m_ptPos.y);
+    // The panel's size follows the theme's units (LoginUIScaleRatio()); keep it where
+    // CSceneUICoordinator::CreateLoginScene() places it: centred, 2/3 down the free height.
+    const SIZE previousSize = m_Size;
+    const float uiScale = LoginUIScaleRatio();
+    m_Size.cx = ScaledOffset(329, uiScale);
+    m_Size.cy = ScaledOffset(245, uiScale);
+    SetPosition(m_ptPos.x + (previousSize.cx - m_Size.cx) / 2, m_ptPos.y + (previousSize.cy - m_Size.cy) * 2 / 3);
     if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 

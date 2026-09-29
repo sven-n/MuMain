@@ -49,6 +49,9 @@ struct LoginSceneRmlModel
 RmlModelBinder<LoginSceneRmlModel> s_binder;
 Rml::ElementDocument* s_document = nullptr;
 bool s_themeReloadRegistered = false;
+std::wstring s_copyrightSource;
+std::wstring s_rightsSource;
+std::wstring s_versionSource;
 const int s_themeReloadOwner = 0; // the theme-reload registration's owner key
 
 Rml::Context* LoginSceneContext()
@@ -111,6 +114,16 @@ template <typename T> void SyncField(T LoginSceneRmlModel::* field, const char* 
     s_binder.MarkDirty(name);
 }
 
+// A line's text, converted only when the native string changed (or a theme reload emptied the
+// model): the overlay syncs every frame of the login scene.
+void SyncText(Rml::String LoginSceneRmlModel::* field, const char* name, const wchar_t* text, std::wstring& source)
+{
+    if (source == text && !(s_binder.GetModel().*field).empty())
+        return;
+    source = text;
+    SyncField(field, name, StringUtils::WideToNarrow(text));
+}
+
 // The native levels: a BYTE from the clamped fade value, as RGBA(level, level, level, level).
 float Level(float fade)
 {
@@ -143,11 +156,15 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
         SyncField(&LoginSceneRmlModel::logoHeight, "logo_height", UI::Scaling::SizeY(transform, logoHeight));
         SyncField(&LoginSceneRmlModel::glowLevel, "glow_level", Level(logoAlpha - 0.3f));
         const float logoLevel = Level(logoAlpha);
+        // The colour follows the level; formatted only when the fade moves it.
+        if (s_binder.GetModel().logoLevel != logoLevel || s_binder.GetModel().logoColor.empty())
+        {
+            char color[32];
+            const long channel = std::lround(logoLevel * 255.f);
+            std::snprintf(color, sizeof(color), "rgb(%ld, %ld, %ld)", channel, channel, channel);
+            SyncField(&LoginSceneRmlModel::logoColor, "logo_color", Rml::String(color));
+        }
         SyncField(&LoginSceneRmlModel::logoLevel, "logo_level", logoLevel);
-        char color[32];
-        const long channel = std::lround(logoLevel * 255.f);
-        std::snprintf(color, sizeof(color), "rgb(%ld, %ld, %ld)", channel, channel, channel);
-        SyncField(&LoginSceneRmlModel::logoColor, "logo_color", Rml::String(color));
     }
 
     // The lines: RenderText() at (335 - width, 480 - height - 1), (335, ...) and (0, ...). The
@@ -164,9 +181,9 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
     SyncField(&LoginSceneRmlModel::lineTop, "line_top",
               UI::Scaling::PositionY(transform, static_cast<float>(REFERENCE_HEIGHT - lineSize.cy - 1)));
     SyncField(&LoginSceneRmlModel::splitX, "split_x", UI::Scaling::PositionX(transform, 335.0f));
-    SyncField(&LoginSceneRmlModel::copyright, "copyright", StringUtils::WideToNarrow(copyright));
-    SyncField(&LoginSceneRmlModel::rights, "rights", StringUtils::WideToNarrow(rights));
-    SyncField(&LoginSceneRmlModel::version, "version", StringUtils::WideToNarrow(version));
+    SyncText(&LoginSceneRmlModel::copyright, "copyright", copyright, s_copyrightSource);
+    SyncText(&LoginSceneRmlModel::rights, "rights", rights, s_rightsSource);
+    SyncText(&LoginSceneRmlModel::version, "version", version, s_versionSource);
     return true;
 }
 

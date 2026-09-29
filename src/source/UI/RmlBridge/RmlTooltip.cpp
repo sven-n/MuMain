@@ -60,6 +60,7 @@ namespace UI::RmlBridge::Tooltip
             float borderPx = 0.0f;
             float paddingPx = 0.0f;
             float fixedWidthPx = 0.0f;
+            bool buttonHint = false;
         };
 
         // RenderTipTextList() (ZzzInventory.cpp) layout: each row is one text height tall and the
@@ -69,6 +70,8 @@ namespace UI::RmlBridge::Tooltip
         constexpr float kNativeHalfSpacerFraction = 0.5f;
         constexpr float kNativePaddingUnits = 2.0f;
         constexpr float kNativeBorderUnits = 1.0f;
+        // A button's hover text (CNewUIButton::Render()): a box 6 units wider than the text, no frame.
+        constexpr float kButtonHintPaddingUnits = 3.0f;
 
         // Row heights come from the native text renderer itself (MeasureText's logical height,
         // as RenderTipTextList() uses), not from RmlUi's font metrics, which round differently.
@@ -77,8 +80,9 @@ namespace UI::RmlBridge::Tooltip
             const UI::Scaling::Transform transform = config.transform.value_or(UI::Scaling::GetActiveTransform());
             model.fixedWidthPx = config.fixedWidth * transform.scaleX;
             model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
-            model.borderPx = kNativeBorderUnits * transform.scaleX;
-            model.paddingPx = kNativePaddingUnits * transform.scaleX;
+            model.buttonHint = (config.box == Config::Box::ButtonHint);
+            model.borderPx = model.buttonHint ? 0.0f : kNativeBorderUnits * transform.scaleX;
+            model.paddingPx = (model.buttonHint ? kButtonHintPaddingUnits : kNativePaddingUnits) * transform.scaleX;
 
             // The native line height follows the active transform: measure under the chosen one.
             float normalHeight = 0.0f;
@@ -177,6 +181,7 @@ namespace UI::RmlBridge::Tooltip
                     c.Bind("border_px", &model.borderPx);
                     c.Bind("padding_px", &model.paddingPx);
                     c.Bind("fixed_width_px", &model.fixedWidthPx);
+                    c.Bind("button_hint", &model.buttonHint);
                 });
 
             if (modelCreated)
@@ -228,6 +233,7 @@ namespace UI::RmlBridge::Tooltip
         s_RmlBinder.MarkDirty("border_px");
         s_RmlBinder.MarkDirty("padding_px");
         s_RmlBinder.MarkDirty("fixed_width_px");
+        s_RmlBinder.MarkDirty("button_hint");
 
         s_pRmlDoc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
 

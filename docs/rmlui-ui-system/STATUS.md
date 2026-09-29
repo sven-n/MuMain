@@ -515,6 +515,25 @@ chat log, the friends window and the HUD hid its rows. Native parts (item grids,
 the native order and stay under the main context. `rml_stacking_order_tests` checks that every
 document the sources name has an entry.
 
+## Legacy parity fixes (2026-09-29)
+
+Differences to the original found by the paired comparison suites and fixed in shared places, so
+a new port inherits them:
+
+- **Scene gate.** A window `CSystem` updates only in the main scene still has a live document in
+  every scene: gate it like the HUD documents (`CSystem::SyncMainSceneHudVisibility()`); the chat
+  and system logs are.
+- **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
+  bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself (the move
+  list: `CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
+- **Button hover text.** `CTooltip` uses the shared tooltip's `Config::Box::ButtonHint`
+  (`CNewUIButton`'s unframed box, 2 units off its rect); the framed box is for `RenderTipTextList()`.
+- **Hangul.** NanumGothic is a fallback face, so Korean game text draws in any family.
+- **Alpha test.** Art the original drew under `EnableAlphaTest()` (reference 0.25) stays invisible
+  while its fade is below a quarter (the Illusion Temple banner).
+- **Scene windows re-created per visit.** A `Create()` that resets model fields must mark them
+  dirty (the login fields) and reset what the original reset (the server list's chosen group).
+
 ## Findings worth knowing before the next port
 
 Moved to [`engine-findings.md`](engine-findings.md) (2026-09-16) -- empirical, engine-specific

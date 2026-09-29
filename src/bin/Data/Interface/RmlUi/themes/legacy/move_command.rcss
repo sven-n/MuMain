@@ -56,6 +56,19 @@
 	/* Native's kListOffsetY. */
 	top: 38px;
 	transform-origin: left top;
+	/* Native drew the track at every list length, also when every row fits (large windows). */
+	overflow: hidden scroll;
+}
+
+/* With nothing to scroll native drew the disabled thumb (newui_scroll_off) at the track's top. */
+@spritesheet mc-thumb-off-sheet
+{
+	src: "../../../newui_scroll_off.tga";
+	mc-thumb-off: 0px 0px 15px 30px;
+	mc-thumb-off-inner: 0px 14px 15px 2px;
+}
+#list.no-scroll scrollbarvertical sliderbar {
+	decorator: ninepatch(mc-thumb-off, mc-thumb-off-inner);
 }
 
 /* Native gives each row's text the TOP of its slot (RenderText(x, itemY)), so the row carries a

@@ -11,7 +11,22 @@
 // both the main and the background context. See docs/rmlui-ui-system/STATUS.md, "Stacking order".
 namespace UI::RmlBridge
 {
+// The scene whose windows a document belongs to. The original drew CNewUIManager's windows only in
+// the main scene, a document renders in every scene: outside the main scene the main-scene
+// documents are suspended (RmlTheme.h, SuspendMainSceneDocumentsOutsideMainScene()). The login,
+// character and loading scenes' documents, the notices and the reconnect dialog are shown and
+// hidden by their own scene's enter/exit code, in whatever scene that is: Any.
+enum class DocumentScene
+{
+    Main,
+    Any,
+};
+
 // Depth for a document file name such as "chat_log.rml" (no directory); none for a name the
 // table does not know (such a document keeps z-index:auto, under every listed one).
 std::optional<float> StackingDepthForDocument(std::string_view documentName);
+
+// Scene for a document file name, from the same table; none for a name the table does not know
+// (such a document is never suspended).
+std::optional<DocumentScene> SceneForDocument(std::string_view documentName);
 } // namespace UI::RmlBridge

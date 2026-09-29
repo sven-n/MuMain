@@ -14,6 +14,8 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/RmlBridge/RmlNativeText.h"
+#include "UI/RmlBridge/RmlNativeTextFit.h"
+#include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/FrameProfiler.h"
 
 namespace
@@ -114,7 +116,10 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // guess -- CCreditWin.rcss's font-family must match it exactly). Broader CJK/Cyrillic RmlUi
     // text coverage beyond this one face is a separate, pre-existing gap (every other ported
     // window's legacy theme still hardcodes "Liberation Sans"), not something this addresses.
-    Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf");
+    // Also a fallback face, after Liberation Sans: Hangul the chosen face lacks (text the game
+    // data still carries in Korean, such as the lucky item menu) draws from it instead of as
+    // boxes, as the native text renderer drew it.
+    Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf", true);
 
     // Third, explicitly-named face -- already bundled for the legacy GDI text shim's own font
     // picker (BundledFonts.h) but never previously registered with RmlUi. Loaded for its Unicode
@@ -215,8 +220,10 @@ void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
     FRAME_PROFILE(RmlUiUpdate);
+    UI::RmlBridge::SuspendMainSceneDocumentsOutsideMainScene();
     ReleaseStrandedFieldFocus();
     m_Context->Update();
+    UI::RmlBridge::FitNativeTextToBoxes(m_Context);
 }
 
 void RmlUiRuntime::ReleaseStrandedFieldFocus()
@@ -401,6 +408,7 @@ void RmlUiRuntime::RenderBackgroundLayer()
     {
         FRAME_PROFILE(RmlUiUpdate);
         m_BackgroundContext->Update();
+        UI::RmlBridge::FitNativeTextToBoxes(m_BackgroundContext);
     }
     {
         FRAME_PROFILE(RmlUiRender);
@@ -430,6 +438,7 @@ void RmlUiRuntime::RenderDialogBackgroundLayer()
     {
         FRAME_PROFILE(RmlUiUpdate);
         m_DialogBackgroundContext->Update();
+        UI::RmlBridge::FitNativeTextToBoxes(m_DialogBackgroundContext);
     }
     {
         FRAME_PROFILE(RmlUiRender);

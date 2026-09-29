@@ -150,3 +150,23 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/SkillIconAtlas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
 )
+
+mu_add_test(
+    NAME rml_draggable_tests
+    SOURCES test_rml_draggable.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_model_binder_tests
+    SOURCES test_rml_model_binder.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_document_scene_tests
+    SOURCES
+        test_rml_document_scene.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)

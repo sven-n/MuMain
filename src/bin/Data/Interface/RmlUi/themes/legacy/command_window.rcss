@@ -15,6 +15,7 @@
 
 .frame-top { decorator: image(docked-bg-top-b); }
 #panel { height: 432px; pointer-events: auto; }
+.tooltip { bottom: 40px; } /* 432 - 392 */
 .frame-left, .frame-right { height: 323px; }
 .frame-bottom { top: 387px; }
 

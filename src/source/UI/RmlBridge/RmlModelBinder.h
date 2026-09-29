@@ -38,25 +38,34 @@ class RmlModelBinder
 public:
     // RegisterFn: void(Rml::DataModelConstructor&, Model&) -- binds each field the RML template
     // needs, exactly once, at creation time.
+    //
+    // Idempotent: while this binder still holds the model `modelName` in `context` (its document
+    // failed to load, so the window's build step runs again), Create() keeps that model and returns
+    // true, so the caller retries only its document load -- a later frame, a restored asset or a
+    // theme switch can still bring the window up.
     template <typename RegisterFn>
     bool Create(Rml::Context* context, const Rml::String& modelName, RegisterFn&& registerFields)
     {
+        if (m_Handle && m_Context == context && m_ModelName == modelName)
+            return true;
+
         // Own type register per model, not the context's shared default one: the shared
         // register keeps every RegisterStruct<T>()/RegisterArray<C>() for the context's lifetime,
         // so a second Create() after Destroy() (ReloadRmlTheme()) would get "Struct type already
         // declared" and a null StructHandle whose RegisterMember() dereferences it. A fresh
         // register per Create() makes the registration function re-runnable; struct types are
-        // then per model, which is how every window here uses them anyway.
-        m_TypeRegister = std::make_unique<Rml::DataTypeRegister>();
-        Rml::DataModelConstructor constructor = context->CreateDataModel(modelName, m_TypeRegister.get());
+        // then per model, which is how every window here uses them anyway. It replaces the held
+        // register only once its model exists: a failed Create() must not free the register a
+        // model created earlier still points to.
+        auto typeRegister = std::make_unique<Rml::DataTypeRegister>();
+        Rml::DataModelConstructor constructor = context->CreateDataModel(modelName, typeRegister.get());
         if (!constructor)
-        {
-            m_TypeRegister.reset();
             return false;
-        }
 
+        m_TypeRegister = std::move(typeRegister);
         registerFields(constructor, m_Model);
         m_Handle = constructor.GetModelHandle();
+        m_Context = context;
         m_ModelName = modelName;
         return true;
     }
@@ -73,6 +82,7 @@ public:
         m_TypeRegister.reset(); // after the model, which holds a raw pointer to it
         m_Model = Model{};
         m_Handle = Rml::DataModelHandle{};
+        m_Context = nullptr;
         m_ModelName.clear();
     }
 
@@ -96,5 +106,6 @@ private:
     Model m_Model{};
     std::unique_ptr<Rml::DataTypeRegister> m_TypeRegister;
     Rml::DataModelHandle m_Handle;
+    Rml::Context* m_Context = nullptr;
     Rml::String m_ModelName;
 };

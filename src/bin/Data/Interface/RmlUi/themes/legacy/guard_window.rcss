@@ -65,5 +65,5 @@
 .gd-btn.locked .gd-label { color: #646464; }
 
 #btn_exit { top: 391px; pointer-events: auto; }
-.tooltip { display: none; }
+.tooltip { display: none; bottom: 38px; } /* 429 - 391 */
 #btn_exit:hover ~ .tooltip-exit { display: block; }

@@ -21,6 +21,9 @@ body {
 	padding-bottom: 0;
 }
 
+/* A button's hover text (CNewUIButton::Render()): no frame (border_px 0), black at 180/255. */
+#tooltip_panel.tt-button-hint { background-color: rgba(0, 0, 0, 180); }
+
 /* display:block required -- RmlUi's default `display` is inline, not block, even for a <div>. */
 .tt-line {
 	display: block;

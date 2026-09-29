@@ -103,9 +103,12 @@ public:
 private:
     void BuildRmlUi();
     void SyncRmlModel();
-    void ApplyRmlModel(SiegeWarfareRmlModel next);
+    void ApplyRmlModel(const SiegeWarfareRmlModel& next);
 
     RmlModelBinder<SiegeWarfareRmlModel> m_RmlBinder;
+    // The frame's values, filled in place every frame: its collections keep their storage, and it
+    // holds last frame's values where FillRmlModel() leaves a field alone.
+    SiegeWarfareRmlModel m_NextRmlModel;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
 };
 }

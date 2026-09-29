@@ -7,6 +7,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Factory.h>
 
@@ -17,6 +18,8 @@
 #include <regex>
 #include <sstream>
 #include <unordered_map>
+
+extern EGameScene SceneFlag;
 
 namespace UI::RmlBridge
 {
@@ -256,6 +259,28 @@ namespace UI::RmlBridge
         return displayName;
     }
 
+    namespace
+    {
+    // Set on the document element of every main-scene document, see
+    // SuspendMainSceneDocumentsOutsideMainScene().
+    constexpr const char* MainSceneDocumentAttribute = "data-main-scene-document";
+    bool s_mainSceneDocumentsSuspended = false;
+
+    template <typename Visit> void ForEachMainSceneDocument(Visit&& visit)
+    {
+        for (int contextIndex = 0; contextIndex < Rml::GetNumContexts(); ++contextIndex)
+        {
+            Rml::Context* context = Rml::GetContext(contextIndex);
+            for (int documentIndex = 0; documentIndex < context->GetNumDocuments(); ++documentIndex)
+            {
+                Rml::ElementDocument* document = context->GetDocument(documentIndex);
+                if (document->HasAttribute(MainSceneDocumentAttribute))
+                    visit(document);
+            }
+        }
+    }
+    } // namespace
+
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath)
     {
         return LoadThemedDocument(context, documentPath, std::string(), std::string());
@@ -309,6 +334,7 @@ namespace UI::RmlBridge
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(rmlText, sourceUrl);
         ApplyNativeTextSize(doc);
         ApplyStackingDepth(doc, documentName);
+        ApplyDocumentScene(doc, documentName);
         if (!doc)
             g_ErrorReport.Write(L"> [RmlTheme] Failed to load '%hs' as theme '%hs' (source url '%hs').\r\n",
                 documentPath, GetActiveThemeName().c_str(), sourceUrl.c_str());
@@ -328,6 +354,36 @@ namespace UI::RmlBridge
             return;
         }
         document->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(*depth, Rml::Unit::NUMBER));
+    }
+
+    void ApplyDocumentScene(Rml::ElementDocument* document, const std::string& documentName)
+    {
+        if (document != nullptr && SceneForDocument(documentName) == DocumentScene::Main)
+            document->SetAttribute(MainSceneDocumentAttribute, true);
+    }
+
+    void SuspendMainSceneDocumentsOutsideMainScene()
+    {
+        if (SceneFlag == MAIN_SCENE)
+            return;
+
+        ForEachMainSceneDocument(
+            [](Rml::ElementDocument* document)
+            {
+                if (document->GetLocalProperty(Rml::PropertyId::Display) == nullptr)
+                    document->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+            });
+        s_mainSceneDocumentsSuspended = true;
+    }
+
+    void ResumeMainSceneDocuments()
+    {
+        if (!s_mainSceneDocumentsSuspended)
+            return;
+
+        s_mainSceneDocumentsSuspended = false;
+        ForEachMainSceneDocument([](Rml::ElementDocument* document)
+                                 { document->RemoveProperty(Rml::PropertyId::Display); });
     }
 
     Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath)

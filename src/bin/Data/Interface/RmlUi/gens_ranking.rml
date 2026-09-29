@@ -12,9 +12,10 @@
 	     (their lines and thumb are bound here); the thumb is dragged natively, so #panel leaves the
 	     pointer alone outside the exit button. root_x/root_y/root_scale come from the dock
 	     transform; everything inside is reference px; text is .sharp-text at the native size,
-	     counter-scaled out of the panel. -->
+	     counter-scaled out of the panel. The window's layout is Hud (the original stretched it per
+	     axis): root_scale is x, root_scale_y is y. -->
 	<div id="panel" data-model="gens_ranking" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ', ' + root_scale_y + ')'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -56,13 +57,13 @@
 		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
 		      data-style-font-size="t.text_px + 'px'"
 		      data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{t.text}}</span>
 
 		<div id="btn_exit" data-event-click="gens_ranking_exit"></div>
 		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'" data-style-font-size="text_px + 'px'"
 		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
+		      data-style-padding="(2 * root_scale_y) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
 	</div>
 </body>
 </rml>

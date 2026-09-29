@@ -94,6 +94,16 @@
 	width: auto;
 	margin: 0;
 }
+/* CChaosMixMenuMsgBox: each recipe's lines at their own native offsets above its button, one
+   line each as native draws them (a wrapped line would run into the button). */
+#panel.native-frame .gmd-button-cell.native-lines .gmd-line {
+	white-space: nowrap;
+	margin-bottom: 0;
+}
+/* A native box drew each of its centred lines with RenderText(x + 10, y, text, MSGBOX_WIDTH - 20,
+   0, RT3_SORT_CENTER): one line in a 210-wide box, shrunk to it when wider (base.rcss .native-fit).
+   The content box is 198 wide (16 inset), so the box reaches 6 past it on each side. */
+#panel.native-frame .gmd-line .native-fit { margin: 0 -6dp; }
 /* CTrainerRecoverMsgBox draws each pet's status line under its button. */
 .gmd-button-cell.lines-below { flex-direction: column-reverse; }
 #panel.native-frame .gmd-button-cell.lines-below .gmd-line { line-height: 18dp; margin: 0; }
@@ -206,6 +216,7 @@
 }
 .gmd-btn:hover { decorator: image(msgbox-btn-empty-hover); }
 .gmd-btn:active { decorator: image(msgbox-btn-empty-active); }
+.gmd-btn.narrow { width: 108dp; } /* MSGBOX_BTN_EMPTY_WIDTH (CGemIntegrationMsgBox) */
 .gmd-btn.compact { width: 64dp; decorator: image(msgbox-btn-empty-small-idle); }
 .gmd-btn.compact:hover { decorator: image(msgbox-btn-empty-small-hover); }
 .gmd-btn.compact:active { decorator: image(msgbox-btn-empty-small-active); }

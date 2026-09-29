@@ -262,7 +262,7 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
         return;
 
     // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
-    SiegeWarfareRmlModel next = m_RmlBinder.GetModel();
+    SiegeWarfareRmlModel& next = m_NextRmlModel;
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     next.scaleX = transform.scaleX;
     next.scaleY = transform.scaleY;
@@ -271,17 +271,17 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
     next.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     next.bigTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Big, transform);
     m_pSiegeWarUI->FillRmlModel(next);
-    ApplyRmlModel(std::move(next));
+    ApplyRmlModel(next);
 }
 
-void mu::ui::window::CSiegeWarfare::ApplyRmlModel(SiegeWarfareRmlModel next)
+void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& next)
 {
     SiegeWarfareRmlModel& model = m_RmlBinder.GetModel();
-    const auto sync = [this](auto& field, auto& value, const char* name)
+    const auto sync = [this](auto& field, const auto& value, const char* name)
     {
         if (field == value)
             return;
-        field = std::move(value);
+        field = value;
         m_RmlBinder.MarkDirty(name);
     };
     sync(model.scaleX, next.scaleX, "scale_x");

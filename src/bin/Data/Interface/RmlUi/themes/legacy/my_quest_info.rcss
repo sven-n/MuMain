@@ -166,8 +166,8 @@
    shared label span is redundant. */
 .btn-exit-label { display: none; }
 
-.tooltip-open   { left: 13px; }
-.tooltip-giveup { left: 50px; }
+.tooltip-open   { left: 12px; }
+.tooltip-giveup { left: 49px; }
 
 #btn_quest_open:hover ~ .tooltip-open,
 #btn_quest_giveup:hover ~ .tooltip-giveup {

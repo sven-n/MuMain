@@ -391,7 +391,12 @@ void mu::ui::window::CMiniMap::SyncScreen()
     Sync(m_RmlBinder, &MiniMapRmlModel::scaleY, "scale_y", transform.scaleY);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
+    // The border tiles depend on the screen alone: rebuilt when it changes, or when a theme reload
+    // left the model empty.
     const UI::MiniMap::Screen screen = CurrentScreen();
+    if (screen == m_SideLinesScreen && !m_RmlBinder.GetModel().sideLines.empty())
+        return;
+    m_SideLinesScreen = screen;
     std::vector<Rml::String> sideLines;
     sideLines.reserve(kSideTiles * 2);
     for (int i = 0; i < kSideTiles; ++i)

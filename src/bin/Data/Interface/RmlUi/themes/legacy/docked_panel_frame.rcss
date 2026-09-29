@@ -20,6 +20,10 @@
 @spritesheet docked-corner-tr-sheet { src: "../../../newui_item_table01(R).tga"; docked-corner-tr: 0px 0px 14px 14px; }
 @spritesheet docked-corner-bl-sheet { src: "../../../newui_item_table02(L).tga"; docked-corner-bl: 0px 0px 14px 14px; }
 @spritesheet docked-corner-br-sheet { src: "../../../newui_item_table02(R).tga"; docked-corner-br: 0px 0px 14px 14px; }
+@spritesheet docked-edge-top-sheet    { src: "../../../newui_item_table03(Up).tga"; docked-edge-top:    0px 0px 1px 14px; }
+@spritesheet docked-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; docked-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet docked-edge-left-sheet   { src: "../../../newui_item_table03(L).tga";  docked-edge-left:   0px 0px 14px 1px; }
+@spritesheet docked-edge-right-sheet  { src: "../../../newui_item_table03(R).tga";  docked-edge-right:  0px 0px 14px 1px; }
 
 @spritesheet docked-exit-btn-sheet { src: "../../../newui_exit_00.tga"; docked-exit-btn: 0px 0px 36px 29px; }
 
@@ -49,6 +53,13 @@
    ".gbox-dh-corner-tl") supplies left/top and picks which corner sprite via
    image(docked-corner-tl/tr/bl/br). */
 .gbox-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
+/* RenderGroupBox()'s edge strips (the table03 sprites stretched along each side), drawn after the
+   corners; each window supplies left/top and the free length. */
+.gbox-edge { position: absolute; pointer-events: none; }
+.gbox-edge-top { height: 14px; decorator: image(docked-edge-top); }
+.gbox-edge-bottom { height: 14px; decorator: image(docked-edge-bottom); }
+.gbox-edge-left { width: 14px; decorator: image(docked-edge-left); }
+.gbox-edge-right { width: 14px; decorator: image(docked-edge-right); }
 .gbox-title-fill { position: absolute; background-color: token(surface-panel-title); pointer-events: none; }
 .gbox-content-fill { position: absolute; background-color: token(surface-panel-content); pointer-events: none; }
 .gbox-title-text {
@@ -77,20 +88,30 @@
 }
 #btn_exit:hover { filter: brightness(1.25); }
 
+/* Button hints, CNewUIButton::Render() with a top-positioned tooltip: one line in a black 180/255
+   box as wide as the text + 6, its bottom 2 above the button and its centre 3 right of the
+   button's. The .tooltip row is a transparent 110-wide strip (content centre at left + 4 + 55),
+   anchored by its bottom edge (padding-bottom 2 = the gap above the button); its inner
+   .tooltip-text span carries the box. A sharp-text row binds its width, padding and the span's
+   padding in the RML (physical pixels) and scales back around its bottom edge. */
 .tooltip {
 	display: none;
 	position: absolute;
-	top: 365px;
+	bottom: 37px; /* 429 - 392 */
 	width: 110px;
 	white-space: nowrap;
-	background-color: token(surface-tooltip);
 	color: token(text-primary);
 	padding: 2px 4px;
-	border-radius: token(radius-sm)px;
 	font-size: 1em;
 	text-align: center;
 	pointer-events: none;
 	z-index: 1;
 }
-.tooltip-exit { left: -24px; }
+.tooltip.sharp-text { text-align: center; transform-origin: left bottom; }
+.tooltip-text {
+	padding: 0 3px;
+	background-color: rgba(0, 0, 0, 180);
+}
+/* A button's hint row starts at its left edge + 18 + 3 - 59. */
+.tooltip-exit { left: -25px; }
 #btn_exit:hover ~ .tooltip-exit { display: block; }

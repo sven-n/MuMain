@@ -121,6 +121,16 @@ namespace UI::RmlBridge::Tooltip
         // reproduces the original layout applies it (legacy tooltip.rml, as a minimum width).
         float fixedWidth = 0.0f;
 
+        // The box around the lines: RenderTipTextList()'s (a 1-unit frame, 2 units of side padding)
+        // or the plain one a button drew its hover text in (CNewUIButton: 3 units of side padding,
+        // no frame, black at 180/255). Only a theme that reproduces the original layout applies it.
+        enum class Box
+        {
+            TipTextList,
+            ButtonHint
+        };
+        Box box = Box::TipTextList;
+
         // The transform the caller converted its anchor with, when it is not the ambient
         // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's BottomHudCenterTransform).
         // Show() takes the native text size and row metrics from it.

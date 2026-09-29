@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="login_main.rcss"/>
 </head>
-<body>
+<body class="scene-window-scale">
 	<!-- Each .btn-icon-item wrapper only shows a caption in modern theme; legacy positions the
 	     button directly via .btn-icon-menu/.btn-icon-credit and leaves the wrapper unstyled.
 

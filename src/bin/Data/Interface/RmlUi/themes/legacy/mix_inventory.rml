@@ -15,7 +15,10 @@
 		<!-- Text laid out where native RenderFrame()/RenderMixDescriptions() drew it: the title a
 		     little lower when there is no tax line, the recipe block at 49, the prediction/source/
 		     status list at 203 (15 apart, advice after one blank line), the descriptions at their own
-		     native offsets (d.top). -->
+		     native offsets (d.top). In the socket mixes the list is 10 apart: the seed sphere
+		     application's wrapped prediction and sources (seven rows, eight at 800x600) end at the
+		     socket prompt at 280 instead of running into it and the socket list, as they do in the
+		     original. -->
 		<span class="sharp-text" id="title" data-class-low="!show_tax_rate"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 
@@ -40,14 +43,14 @@
 		</div>
 
 		<div class="mix-list sharp-text" data-class-hidden="!show_recipe"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
 			<div class="mix-list-line mix-prediction" data-class-hidden="!show_prediction"><span
 			     class="mix-text">{{prediction_text}}</span></div>
 			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text"
 			     data-style-color="s.color">{{s.text}}</span></div>
 			<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="s : status_lines"><span class="mix-text"
 			     data-style-color="s.color">{{s.text}}</span></div>
-			<div class="mix-advice" data-style-margin-top="(15 * root_scale) + 'px'">
+			<div class="mix-advice" data-style-margin-top="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
 				<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="a : advice_lines"><span class="mix-text"
 				     data-style-color="a.color">{{a.text}}</span></div>
 			</div>
@@ -89,7 +92,7 @@
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-class-locked="mix_locked"
 		     data-event-click="mix_inventory_mix_click"></div>
 		<span class="sharp-text tooltip tooltip-mix"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{mix_tooltip}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{mix_tooltip}}</span></span>
 	</div>
 </body>
 </rml>

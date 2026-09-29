@@ -105,6 +105,11 @@ void mu::ui::window::EventEntryView::ReloadTheme()
     model.titleText = content.titleText;
     model.lines = content.lines;
     model.buttons = content.buttons;
+    // The new document was bound to the empty model; the restored text sizes equal the ones
+    // SyncTextSizes() computes, so nothing else marks these dirty.
+    m_RmlBinder.MarkDirty("title_text");
+    m_RmlBinder.MarkDirty("lines");
+    m_RmlBinder.MarkDirty("buttons");
 }
 
 void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std::vector<std::wstring>& lines,

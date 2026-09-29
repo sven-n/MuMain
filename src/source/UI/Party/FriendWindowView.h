@@ -15,6 +15,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace Rml
 {
@@ -107,6 +108,15 @@ private:
     std::array<FriendWindowFieldLayout, FriendWindowFieldLayout::SlotCount> m_Fields{};
 };
 
+// A rectangle in native reference px.
+struct FriendWindowRect
+{
+    float left = 0.f;
+    float top = 0.f;
+    float right = 0.f;
+    float bottom = 0.f;
+};
+
 // One window's document.
 class FriendWindowView
 {
@@ -117,10 +127,16 @@ public:
     FriendWindowView& operator=(const FriendWindowView&) = delete;
 
     // Rebuilds the document from the window (nullptr or !shown: hidden). Returns true when the
-    // document became visible this frame.
-    bool Sync(CUIBaseWindow* window, bool shown);
+    // document became visible this frame. shades: the underlays of the windows in front of this
+    // one; their back is drawn over this window there, as the original drew their back over it.
+    bool Sync(CUIBaseWindow* window, bool shown, const std::vector<FriendWindowRect>& shades = {});
     void PullToFront();
     void ReloadTheme();
+    // True while one of the window's inputs holds the keyboard the native field handed it.
+    bool HasFieldFocus() const
+    {
+        return m_KeyboardSlot >= 0;
+    }
 
     // A key pressed in the slot's field (its keydown listener): Enter and Tab go to the native
     // field, as they did when it had the keyboard. Returns true if the key was used.
@@ -161,6 +177,10 @@ private:
     Rml::ElementDocument* m_pUnderDoc = nullptr;
     RmlModelBinder<FriendWindowRmlModel> m_UnderBinder;
     std::array<Field, FriendWindowFieldLayout::SlotCount> m_Fields;
+    // The slot whose input holds the keyboard (-1: none). A native field kept its focus through
+    // clicks elsewhere until something released it; RmlUi moves its focus to whatever is clicked,
+    // so SyncFields() gives it back while this is set.
+    int m_KeyboardSlot = -1;
 };
 
 // The documents of every window of the manager with an RmlUi view.
@@ -172,6 +192,7 @@ public:
 
     // windows: the manager's windows in draw order (back to front); nullptr entries are skipped.
     void Sync(const std::list<CUIBaseWindow*>& windows, bool familyShown);
+    bool HasFieldFocus(DWORD windowUIID) const;
 
 private:
     std::map<DWORD, std::unique_ptr<FriendWindowView>> m_Views;

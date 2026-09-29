@@ -26,6 +26,10 @@ enum class RowStyle
     RandomReward,
 };
 
+// The native lists' blank separator row (AddText(L" ")) as U+00A0: RmlUi collapses a lone ASCII
+// space and the row would lose its line.
+inline constexpr const char* BlankRowText = "\xC2\xA0";
+
 // Raw native data a click handler needs (ITEM*/type) -- kept separate from the display-only
 // Entry pushed into RmlUi, same split CMyQuestInfoWindow's own ContentRowData already used.
 struct RowData

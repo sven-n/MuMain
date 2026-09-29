@@ -10,6 +10,8 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 
+#include <algorithm>
+
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Elements/ElementFormControlInput.h>
@@ -350,6 +352,7 @@ void FriendWindowView::Build()
 
 void FriendWindowView::Unload()
 {
+    m_KeyboardSlot = -1;
     if (!RmlUiRuntime::Instance().IsCreated())
     {
         // The context and its documents are gone already.
@@ -396,10 +399,11 @@ void FriendWindowView::ReloadTheme()
     Build();
 }
 
-bool FriendWindowView::Sync(CUIBaseWindow* window, bool shown)
+bool FriendWindowView::Sync(CUIBaseWindow* window, bool shown, const std::vector<FriendWindowRect>& shades)
 {
     if (window == nullptr || !shown)
     {
+        m_KeyboardSlot = -1;
         for (Field& field : m_Fields)
         {
             if (field.element && field.element->IsPseudoClassSet("focus"))
@@ -421,6 +425,18 @@ bool FriendWindowView::Sync(CUIBaseWindow* window, bool shown)
     FriendWindowRmlBuilder builder(window->GetPosition_x(), window->GetPosition_y(), m_Binder.GetModel().parts,
                                    m_UnderBinder.GetModel().parts);
     window->CollectRmlView(builder);
+    // A window in front leaves its photo viewer's box to an underlay under the native pass, which
+    // is under this document too: its back is drawn over this window here instead.
+    const float windowRight = static_cast<float>(window->GetPosition_x() + window->GetWidth());
+    const float windowBottom = static_cast<float>(window->GetPosition_y() + window->GetHeight());
+    for (const FriendWindowRect& shade : shades)
+    {
+        const float left = std::max(shade.left, static_cast<float>(window->GetPosition_x()));
+        const float top = std::max(shade.top, static_cast<float>(window->GetPosition_y()));
+        const float right = std::min(shade.right, windowRight);
+        const float bottom = std::min(shade.bottom, windowBottom);
+        builder.Fill("window-back", left, top, right - left, bottom - top);
+    }
     if (builder.Finish())
         m_Binder.MarkDirty("parts");
 
@@ -442,7 +458,12 @@ bool FriendWindowView::Sync(CUIBaseWindow* window, bool shown)
 
     const bool wasVisible = m_pDoc->IsVisible();
     UI::RmlBridge::SyncDocumentVisibility(m_pDoc, true);
-    SyncFields(*window, builder, g_pWindowMgr->GetTopWindowUIID() == m_WindowUIID);
+    // The window keeps its field's keyboard under its own question (the letter's quit question),
+    // as the native field kept its focus there.
+    const DWORD topUIID = g_pWindowMgr->GetTopWindowUIID();
+    const auto* question = dynamic_cast<const CUIQuestionWindow*>(g_pWindowMgr->GetWindow(topUIID));
+    SyncFields(*window, builder,
+               topUIID == m_WindowUIID || (question != nullptr && question->GetReturnWindowUIID() == m_WindowUIID));
     return !wasVisible;
 }
 
@@ -499,6 +520,8 @@ void FriendWindowView::SyncFields(CUIBaseWindow& window, const FriendWindowRmlBu
         {
             if (field.element->IsPseudoClassSet("focus"))
                 field.element->Blur();
+            if (m_KeyboardSlot == slot)
+                m_KeyboardSlot = -1;
             continue;
         }
 
@@ -543,11 +566,25 @@ void FriendWindowView::SyncFields(CUIBaseWindow& window, const FriendWindowRmlBu
                     area->SetSelectionRange(ToSelectionIndex(box->GetSelectionAnchor()),
                                             ToSelectionIndex(box->GetCaret()));
                 CUITextInputBox::ReleaseFocus();
+                m_KeyboardSlot = slot;
             }
         }
-        else if (!topWindow && field.element->IsPseudoClassSet("focus"))
+        else if (!topWindow)
         {
-            field.element->Blur();
+            if (field.element->IsPseudoClassSet("focus"))
+                field.element->Blur();
+            if (m_KeyboardSlot == slot)
+                m_KeyboardSlot = -1;
+        }
+        else if (m_KeyboardSlot == slot && !field.element->IsPseudoClassSet("focus"))
+        {
+            // A click elsewhere moved the RmlUi focus away: the native field kept it, so take it
+            // back -- unless another field (native, or an RmlUi input such as the chat line) took
+            // the keyboard, which released it.
+            if (CUITextInputBox::GetFocusedPortable() == nullptr && !RmlUiRuntime::Instance().IsTextInputActive())
+                field.element->Focus();
+            else
+                m_KeyboardSlot = -1;
         }
     }
 }
@@ -601,17 +638,38 @@ void FriendWindowViews::Sync(const std::list<CUIBaseWindow*>& windows, bool fami
             it = m_Views.erase(it);
     }
 
-    bool restack = false;
-    std::list<DWORD> order;
+    const auto isShown = [familyShown](CUIBaseWindow* window)
+    { return familyShown && window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY; };
+
+    // The underlays of the shown windows, back to front: each is drawn over the windows behind it.
+    std::vector<FriendWindowRect> shades;
+    std::vector<size_t> shadesInFront; // per window: the first of `shades` that is in front of it
     for (CUIBaseWindow* window : windows)
     {
+        FriendWindowRect rect;
+        if (window != nullptr && window->HasRmlView() && isShown(window) &&
+            window->GetRmlUnderlayRect(rect.left, rect.top, rect.right, rect.bottom))
+        {
+            shades.push_back(rect);
+        }
+        shadesInFront.push_back(shades.size());
+    }
+
+    bool restack = false;
+    std::list<DWORD> order;
+    std::vector<FriendWindowRect> windowShades;
+    size_t index = 0;
+    for (CUIBaseWindow* window : windows)
+    {
+        const size_t firstShade = shadesInFront[index++];
         if (window == nullptr || !window->HasRmlView())
             continue;
         auto& view = m_Views[window->GetUIID()];
         if (!view)
             view = std::make_unique<FriendWindowView>(window->GetUIID());
-        const bool shown = familyShown && window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY;
-        if (view->Sync(window, shown))
+        const bool shown = isShown(window);
+        windowShades.assign(shades.begin() + static_cast<std::ptrdiff_t>(firstShade), shades.end());
+        if (view->Sync(window, shown, windowShades))
             restack = true;
         if (shown)
             order.push_back(window->GetUIID());
@@ -624,6 +682,17 @@ void FriendWindowViews::Sync(const std::list<CUIBaseWindow*>& windows, bool fami
             m_Views[uiid]->PullToFront();
         m_Order = std::move(order);
     }
+}
+
+bool FriendWindowViews::HasFieldFocus(DWORD windowUIID) const
+{
+    const auto it = m_Views.find(windowUIID);
+    return it != m_Views.end() && it->second && it->second->HasFieldFocus();
+}
+
+bool CUIWindowMgr::RmlFieldHasFocus(DWORD dwUIID) const
+{
+    return m_pRmlViews && m_pRmlViews->HasFieldFocus(dwUIID);
 }
 
 void CUIWindowMgr::SyncRmlViews(bool familyShown)

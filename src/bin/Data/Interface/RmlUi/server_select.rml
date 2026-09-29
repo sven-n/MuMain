@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="server_select.rcss"/>
 </head>
-<body data-model="server_select">
+<body class="scene-window-scale" data-model="server_select">
 	<div id="panel" class="center-both">
 		<div id="columns">
 			<!-- Left column: all server groups in one merged, order-preserving list (no more

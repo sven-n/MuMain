@@ -382,6 +382,7 @@ void CGensRanking::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("root_scale_y", &model.rootScaleY);
             c.Bind("text_px", &model.textPx);
             c.Bind("mark_sprite", &model.markSprite);
             auto text = c.RegisterStruct<GensRankingTextEntry>();
@@ -432,6 +433,13 @@ void CGensRanking::SyncRmlModel()
         return;
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    GensRankingRmlModel& model = m_RmlBinder.GetModel();
+    const float scaleY = UI::Scaling::GetActiveTransform().scaleY;
+    if (model.rootScaleY != scaleY)
+    {
+        model.rootScaleY = scaleY;
+        m_RmlBinder.MarkDirty("root_scale_y");
+    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
     SyncContent();
 }

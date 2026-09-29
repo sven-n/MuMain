@@ -27,7 +27,6 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -90,6 +89,21 @@ namespace
 
 CCharSelMainWin g_CharSelMainWin;
 
+namespace
+{
+// The legacy theme lays the bar out like the original (char_sel_main.rcss's scene-bar-scale rem and
+// anchor line); the other themes in `dp` from the window's bottom edge.
+UI::CharacterSelection::Layout ThemedLayout()
+{
+    const int screenWidth = static_cast<int>(WindowWidth);
+    const int screenHeight = static_cast<int>(WindowHeight);
+    if (UI::RmlBridge::ThemeUsesNativeTextSize())
+        return UI::CharacterSelection::CalculateLayout(screenWidth, screenHeight);
+    return UI::CharacterSelection::CalculateFixedAnchorLayout(screenWidth, screenHeight,
+                                                              UI::Scaling::CompanionRatio(screenWidth, screenHeight));
+}
+} // namespace
+
 CCharSelMainWin::CCharSelMainWin()
 {
 }
@@ -109,10 +123,7 @@ void CCharSelMainWin::Create()
     // copy of the screen size not reliably matching WindowWidth/WindowHeight (the exact values
     // RmlUiRuntime::OnResize() uses), fixed there and proactively fixed here too -- both the
     // layout dimensions and the ratio need the authoritative real window size, not just the ratio.
-    const int screenWidth = static_cast<int>(WindowWidth);
-    const int screenHeight = static_cast<int>(WindowHeight);
-    const auto layout = UI::CharacterSelection::CalculateFixedAnchorLayout(
-        screenWidth, screenHeight, UI::Scaling::CompanionRatio(screenWidth, screenHeight));
+    const auto layout = ThemedLayout();
 
     m_asprBack[CSMW_SPR_DECO].Create(
         UI::CharacterSelection::NativeDecorationWidth,
@@ -185,6 +196,7 @@ void CCharSelMainWin::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    ApplyLayout(ThemedLayout());
     if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 

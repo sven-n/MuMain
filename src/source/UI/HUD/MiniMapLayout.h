@@ -46,6 +46,8 @@ struct Screen
     float scaleY = 1.f;
     float offsetX = 0.f;
     float offsetY = 0.f;
+
+    bool operator==(const Screen&) const = default;
 };
 
 // The matrix that maps an element of elementWidth x elementHeight onto the quad.

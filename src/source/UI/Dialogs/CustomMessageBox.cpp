@@ -1090,7 +1090,8 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     wchar_t szText[256] = { 0, };
 
     GenericMenuConfig cfg;
-    cfg.nativeFrame = {60, 13};
+    // Native CChaosMixMenuMsgBox: lines 15 apart, each recipe's lines above its button.
+    cfg.nativeFrame = {60, 13, 0, 15};
     cfg.title = I18N::Game::SelectMethodOfCombination;
     cfg.highlightTitle = true;
     // No shared summary lines -- native interleaves each recipe's own blurb directly above its
@@ -1104,6 +1105,8 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     btnGeneralMix.lines.push_back({ szText, false });
     mu_swprintf(szText, I18N::Game::FenrirSHornScrollOfBloodCondorSFeather, Hero->ID);
     btnGeneralMix.lines.push_back({ szText, false });
+    btnGeneralMix.nativeLinesTop = 40;
+    btnGeneralMix.nativeTop = 85;
     btnGeneralMix.onClick = [] { g_MixRecipeMgr.SetMixType(0); };
     cfg.buttons.push_back(std::move(btnGeneralMix));
 
@@ -1113,6 +1116,8 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     btnChaosMix.lines.push_back({ szText, false });
     mu_swprintf(szText, I18N::Game::ChaosNatureBow, Hero->ID);
     btnChaosMix.lines.push_back({ szText, false });
+    btnChaosMix.nativeLinesTop = 125;
+    btnChaosMix.nativeTop = 155;
     btnChaosMix.onClick = [] { g_MixRecipeMgr.SetMixType(1); };
     cfg.buttons.push_back(std::move(btnChaosMix));
 
@@ -1120,6 +1125,8 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     btnMix380.label = I18N::Game::ItemOptionCombination;
     mu_swprintf(szText, I18N::Game::Add380ItemOption, Hero->ID);
     btnMix380.lines.push_back({ szText, false });
+    btnMix380.nativeLinesTop = 210;
+    btnMix380.nativeTop = 225;
     btnMix380.onClick = [] { g_MixRecipeMgr.SetMixType(2); };
     cfg.buttons.push_back(std::move(btnMix380));
 
@@ -1568,6 +1575,8 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
 
     GenericMenuConfig::MenuButton btnUnity;
     btnUnity.label = I18N::Game::JewelCombination;
+    btnUnity.nativeTop = 60; // native BTN_TOP_BLANK, then BTN_GAP 40 apart
+    btnUnity.narrow = true;
     btnUnity.onClick = []
     {
         COMGEM::SetMode(COMGEM::ATTACH);
@@ -1577,6 +1586,8 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
 
     GenericMenuConfig::MenuButton btnDisjoint;
     btnDisjoint.label = I18N::Game::DismantleJewel;
+    btnDisjoint.nativeTop = 100;
+    btnDisjoint.narrow = true;
     btnDisjoint.onClick = []
     {
         COMGEM::SetMode(COMGEM::DETACH);
@@ -1600,6 +1611,7 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
     GenericMenuConfig::MenuButton btnExit;
     btnExit.label = I18N::Game::Close388;
     btnExit.compact = true;
+    btnExit.nativeTop = 140;
     btnExit.onClick = exitFn;
     cfg.buttons.push_back(std::move(btnExit));
     cfg.onCancel = exitFn;

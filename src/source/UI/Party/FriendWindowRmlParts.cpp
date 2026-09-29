@@ -107,6 +107,23 @@ DWORD ChatTextColor(int type)
 }
 } // namespace
 
+bool CUIBaseWindow::GetRmlUnderlayRect(float& left, float& top, float& right, float& bottom)
+{
+    CUIPhotoViewer* photo = GetRmlPhoto();
+    if (photo == nullptr || m_iOptions == UIWINDOWSTYLE_NULL)
+        return false;
+    const auto x = static_cast<float>(m_iPos_x);
+    const auto w = static_cast<float>(m_iWidth);
+    const float backTop = static_cast<float>(m_iPos_y) + 5;
+    const float backBottom =
+        backTop + static_cast<float>(CheckOption(UIWINDOWSTYLE_FRAME) ? m_iHeight - 10 : m_iHeight);
+    left = std::clamp(static_cast<float>(photo->GetPosition_x()), x, x + w);
+    right = std::clamp(static_cast<float>(photo->GetPosition_x() + photo->GetWidth()), left, x + w);
+    top = std::clamp(static_cast<float>(photo->GetPosition_y()), backTop, backBottom);
+    bottom = std::clamp(static_cast<float>(photo->GetPosition_y() + photo->GetHeight()), top, backBottom);
+    return true;
+}
+
 void CUIBaseWindow::CollectRmlView(FriendWindowRmlBuilder& view)
 {
     std::call_once(_controlsInitialized, [this]() { InitControls(); });
@@ -120,8 +137,8 @@ void CUIBaseWindow::CollectRmlView(FriendWindowRmlBuilder& view)
     {
         const float backTop = y + 5;
         const float backHeight = CheckOption(UIWINDOWSTYLE_FRAME) ? h - 10 : h;
-        CUIPhotoViewer* photo = GetRmlPhoto();
-        if (photo == nullptr)
+        float px = 0.f, py = 0.f, pr = 0.f, pb = 0.f;
+        if (!GetRmlUnderlayRect(px, py, pr, pb))
         {
             view.Fill("window-back", x, backTop, w, backHeight);
         }
@@ -130,11 +147,6 @@ void CUIBaseWindow::CollectRmlView(FriendWindowRmlBuilder& view)
             // The photo viewer's 3D character is drawn natively after the RmlUi background layer
             // and before this document: its box's share of the back goes under it, the rest stays
             // here around it.
-            const float px = std::clamp(static_cast<float>(photo->GetPosition_x()), x, x + w);
-            const float pr = std::clamp(static_cast<float>(photo->GetPosition_x() + photo->GetWidth()), px, x + w);
-            const float py = std::clamp(static_cast<float>(photo->GetPosition_y()), backTop, backTop + backHeight);
-            const float pb =
-                std::clamp(static_cast<float>(photo->GetPosition_y() + photo->GetHeight()), py, backTop + backHeight);
             view.Fill("window-back", x, backTop, w, py - backTop);
             view.Fill("window-back", x, py, px - x, pb - py);
             view.Fill("window-back", pr, py, x + w - pr, pb - py);

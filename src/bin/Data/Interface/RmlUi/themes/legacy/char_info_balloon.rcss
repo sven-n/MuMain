@@ -12,7 +12,8 @@
 	width: 118px;
 	height: 54px;
 	pointer-events: none;
-	font-family: "token(font-body)";
+	/* The original drew the three lines in the fixed font (g_hFixFont). */
+	font-family: Cousine;
 	color: token(text-primary);
 }
 .balloon-bg {
