@@ -97,7 +97,7 @@ tile in Devias.
 | `trade-inventory-full` | `test7`, `test8` | `test7Dw` and `test8Dw` (no free 2x2 area, pad armour and rows of jewels and potions to offer) |
 | `chat` | `test5`, `test6` | `test5Dk` and `test6Dk` |
 | `party` | `test0` to `test4` | `test0Dk` (the leader) invites `test1Dk` to `test4Dk` |
-| `personal-shop` | `quest1`, `quest2` | `quest1Dk` (Jewels of Bless) sells to `quest2Dk`, both with 100,000,000 zen |
+| `personal-shop` | `quest1`, `quest2` | `quest1Dl` (Jewels of Bless) sells to `quest2Dl`, both with 100,000,000 zen |
 | `npc-shop` | `test7` | `test7Dk` (potions and Jewels of Bless to sell, 25 free squares) |
 | `repair` | `test9` | `test9Dk` (level 91, gloves and boots at 30 of 45 durability) |
 | `icarus-flying-item-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
