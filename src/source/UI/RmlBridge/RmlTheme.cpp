@@ -257,6 +257,12 @@ namespace UI::RmlBridge
 
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath)
     {
+        return LoadThemedDocument(context, documentPath, std::string(), std::string());
+    }
+
+    Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath,
+                                             const std::string& modelPlaceholder, const std::string& modelName)
+    {
         // documentPath's basename (the part after the last '/') is what the per-theme source URL
         // needs -- e.g. "Data/Interface/RmlUi/login.rml" -> "login.rml".
         const std::string path(documentPath);
@@ -291,7 +297,13 @@ namespace UI::RmlBridge
         // <link href> against sourceUrl's directory (always themes/<theme>/), matching what
         // RmlUi's own LoadDocumentFromMemory(rmlText, sourceUrl) resolves it against internally,
         // regardless of which path the RML text itself was actually read from.
-        const std::string rmlText = InlineTokenizedStylesheet(buffer.str(), sourceUrl);
+        std::string rmlText = InlineTokenizedStylesheet(buffer.str(), sourceUrl);
+        if (!modelPlaceholder.empty())
+        {
+            for (size_t at = rmlText.find(modelPlaceholder); at != std::string::npos;
+                 at = rmlText.find(modelPlaceholder, at + modelName.size()))
+                rmlText.replace(at, modelPlaceholder.size(), modelName);
+        }
 
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(rmlText, sourceUrl);
         ApplyNativeTextSize(doc);

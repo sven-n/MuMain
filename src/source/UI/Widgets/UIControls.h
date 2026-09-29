@@ -294,6 +294,16 @@ public:
     virtual BOOL DoMouseAction();
     virtual void Render();
 
+    // What Render() draws: the caption, and the pressed look (m_bMouseState).
+    const wchar_t* GetCaption() const
+    {
+        return m_pszCaption;
+    }
+    bool IsPressedLook() const
+    {
+        return m_bMouseState == TRUE;
+    }
+
 protected:
     DWORD m_dwButtonID;
     wchar_t* m_pszCaption;
@@ -313,6 +323,8 @@ struct TextListScrollBarGeometry
     float rangeBottom = 0.f;
     float thumbTop = 0.f;
     bool dragged = false;
+    float thumbHeight = 0.f; // ComputeLegacyScrollBar() only
+    float barWidth = 0.f;
 };
 
 template <class T> class CUITextListBox : public CUIControl
@@ -360,16 +372,16 @@ public:
         return m_iSelectLineNum;
     }
 
-    // The lines Render() draws, in its order: visit(line, item, selected) with line 0 the first
-    // drawn. For windows that draw the list elsewhere (RmlUi) and keep this control for its data,
-    // scrolling and line clicks. A visit returning false skips the item without using up its line,
-    // as a RenderDataLine() returning FALSE does.
+    // The lines Render() draws (a multiline list's wrapped ones), in its order: visit(line, item,
+    // selected) with line 0 the first drawn. For windows that draw the list elsewhere (RmlUi) and keep
+    // this control for its data, scrolling and line clicks. A visit returning false skips the item
+    // without using up its line, as a RenderDataLine() returning FALSE does.
     template <typename Visit> void ForEachRenderLine(Visit&& visit)
     {
         MoveRenderLine();
         for (int i = 0; i < m_iNumRenderLine; ++i, ++m_TextListIter)
         {
-            if (m_TextListIter == m_TextList.end())
+            if (m_TextListIter == (m_bUseMultiline == TRUE ? m_RenderTextList.end() : m_TextList.end()))
                 break;
             const bool selected = SLGetSelectLineNum() == m_iCurrentRenderEndLine + i + 1;
             if constexpr (std::is_void_v<decltype(visit(i, *m_TextListIter, selected))>)
@@ -387,6 +399,15 @@ public:
         if (!dragged)
             ComputeScrollBar();
         return {m_fScrollBarRange_top, m_fScrollBarRange_bottom, m_fScrollBarPos_y, dragged};
+    }
+
+    // The old-style scroll bar the friends family's lists draw: RenderInterface() computes it every
+    // frame, also while the thumb is dragged.
+    TextListScrollBarGeometry ComputeLegacyScrollBar()
+    {
+        ComputeScrollBar();
+        return {m_fScrollBarRange_top,        m_fScrollBarRange_bottom, m_fScrollBarPos_y,
+                GetState() == UISTATE_SCROLL, m_fScrollBarHeight,       m_fScrollBarWidth};
     }
 
 protected:
@@ -498,6 +519,8 @@ protected:
         return TRUE;
     }
     void CalcLineNum();
+
+public:
     virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
@@ -544,12 +567,16 @@ public:
         return iResult;
     }
     void MakeTitleText(wchar_t* pszTitleText);
+    int GetLayout() const
+    {
+        return m_iLayoutType;
+    }
+    virtual int GetRenderLinePos_y(int iLineNumber);
 
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
 
 protected:
     int m_iLayoutType;
@@ -570,12 +597,12 @@ public:
     {
         return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
     }
+    virtual int GetRenderLinePos_y(int iLineNumber);
 
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
 class CUILetterListBox : public CUITextListBox<LETTERLIST_TEXT>
@@ -616,12 +643,12 @@ public:
         }
         return iResult;
     }
+    virtual int GetRenderLinePos_y(int iLineNumber);
 
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
 
 protected:
     int m_iColumnWidth[4];
@@ -1116,6 +1143,48 @@ public:
 
     // Caret rect in reference pixels for positioning the IME candidate window; false if not the focused field or not yet rendered.
     bool GetCaretArea(int& x, int& y, int& w, int& h) const;
+
+    // For a window that shows this field as an RmlUi <input> (UI/Party/FriendWindowView.h): the
+    // value, caret and look it would render, and the value typed there (cut to the text limit,
+    // caret at its end; unlike SetText() also longer than MAX_TEXT_LENGTH, as typing allows).
+    const std::wstring& GetValue() const
+    {
+        return m_portableText;
+    }
+    void SetValueFromField(const std::wstring& value)
+    {
+        m_portableText = value;
+        if (m_iMaxLength > 0 && static_cast<int>(m_portableText.length()) > m_iMaxLength)
+            m_portableText.resize(m_iMaxLength);
+        m_iCaret = static_cast<int>(m_portableText.length());
+        m_iSelAnchor = m_iCaret;
+        m_iFirstVisible = 0;
+        m_composition.clear();
+    }
+    int GetCaret() const
+    {
+        return m_iCaret;
+    }
+    int GetSelectionAnchor() const
+    {
+        return m_iSelAnchor;
+    }
+    int GetTextLimit() const
+    {
+        return m_iMaxLength;
+    }
+    DWORD GetTextColor() const
+    {
+        return m_dwTextColor;
+    }
+    DWORD GetBackColor() const
+    {
+        return m_dwBackColor;
+    }
+    DWORD GetSelectBackColor() const
+    {
+        return m_dwSelectBackColor;
+    }
 
 protected:
     virtual BOOL DoMouseAction();

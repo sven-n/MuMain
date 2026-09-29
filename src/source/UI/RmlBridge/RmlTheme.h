@@ -93,6 +93,12 @@ namespace UI::RmlBridge
     // be read or the document failed to parse (logged via g_ErrorReport either way).
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath);
 
+    // LoadThemedDocument() for a document instantiated once per window (the friends family's
+    // chat rooms and letters): every occurrence of `modelPlaceholder` in the markup (its
+    // data-model name) becomes `modelName`, so each instance binds its own data model.
+    Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath,
+                                             const std::string& modelPlaceholder, const std::string& modelName);
+
     // LoadThemedDocument() against RmlUiRuntime::Instance().GetBackgroundContext(). Starts hidden,
     // same as LoadThemedDocument() itself -- the caller's own SyncRmlModel() shows/hides it against
     // IsVisible(), same as its root_x/root_y/root_scale sync (MyInventory.h's MyInventoryBgRmlModel

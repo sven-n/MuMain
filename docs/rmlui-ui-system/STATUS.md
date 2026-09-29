@@ -249,8 +249,25 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   depth (the hit targets already did). The skill textures stay loaded for `CUIMuHelper`.
 - **Guild and social windows** — **done, both themes (2026-09-28)**: `CServerMsgWin`,
   `CGuildMakeWindow`, `CGuildInfoWindow` with its lists, `CGuild_ToPerson_Position`, `CGensRanking`,
-  `CItemExplanationWindow`, `CSetItemExplanation`. The friends family (`CFriendWindow`, letters, chat
-  rooms) is still native, scheduled for its own run. Worth carrying to the next port:
+  `CItemExplanationWindow`, `CSetItemExplanation`. The friends family (`CFriendWindow`, 2026-09-28): the
+  main window with its three tabs, the add-friend and question dialogs, the letter read / write
+  windows and the chat rooms are RmlUi; the letters' photo viewer stays native 3D. Worth carrying
+  to the next port:
+
+  - **A toolkit of draggable native windows** (`CUIWindowMgr`) ports window by window without
+    touching its logic: each window's `Render()` gets a `CollectRmlView()` twin that emits the same
+    geometry as named parts into a per-window document, synced from `Update()`; code that lived in
+    the render functions (child layout messages, scroll bar computation, `InitControls()`) moves to
+    functions both paths call. Native text keeps its spaces (`white-space: pre`).
+  - **A native text field can stay the field's model** while an RmlUi `<input>` shows it and takes
+    the keyboard (`FriendWindowView::SyncFields()`): a native `GiveFocus()` moves the focus to the
+    input with the native caret and selection -- only once the input is laid out, RmlUi drops the
+    focus of an element nobody can see --, typed text goes back to the native field, a value the
+    window sets goes to the input, and Enter / Tab pressed in the input run the native field's key
+    handling. The window's code is unchanged.
+  - **Native 3D inside an RmlUi window** (the letters' photo viewer) is still drawn after the
+    window; the document leaves the 3D box open and an underlay document in the background context
+    paints the window's back under it.
 
   - **A block-scope `extern` inside `mu::ui::window`** declares a namespace member, not the global:
     UIManager.cpp defines same-named references there (`ItemHelp`, `TextList`, ...), so such an
