@@ -26,21 +26,17 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
 		</div>
 
-		<div data-if="list_frame == 1">
-			<div class="t-edge-left" style="left: 11px; top: 111px; height: 255px;"></div>
-			<div class="t-edge-right" style="left: 166px; top: 111px; height: 255px;"></div>
-			<div class="t-edge-top" style="left: 14px; top: 111px;"></div>
-			<div class="t-edge-bottom" style="left: 14px; top: 357px;"></div>
-		</div>
-		<div data-if="list_frame == 2">
-			<div class="t-edge-left" style="left: 11px; top: 111px; height: 215px;"></div>
-			<div class="t-edge-right" style="left: 166px; top: 111px; height: 215px;"></div>
-			<div class="t-edge-top" style="left: 14px; top: 111px;"></div>
-			<div class="t-edge-bottom" style="left: 14px; top: 317px;"></div>
-			<div class="t-edge-left" style="left: 11px; top: 345px; height: 25px;"></div>
-			<div class="t-edge-right" style="left: 166px; top: 345px; height: 25px;"></div>
-			<div class="t-edge-top" style="left: 14px; top: 345px;"></div>
-			<div class="t-edge-bottom" style="left: 14px; top: 362px;"></div>
+		<!-- The guild list's frame. One shape; `with-footer` shortens the main box and adds the
+		     summary row's own box under it. Every edge is placed by the theme. -->
+		<div class="gd-list-frame" data-if="list_shown" data-class-with-footer="list_has_footer">
+			<div class="t-edge-left gd-list-edge-left"></div>
+			<div class="t-edge-right gd-list-edge-right"></div>
+			<div class="t-edge-top gd-list-edge-top"></div>
+			<div class="t-edge-bottom gd-list-edge-bottom"></div>
+			<div class="t-edge-left gd-foot-edge-left" data-if="list_has_footer"></div>
+			<div class="t-edge-right gd-foot-edge-right" data-if="list_has_footer"></div>
+			<div class="t-edge-top gd-foot-edge-top" data-if="list_has_footer"></div>
+			<div class="t-edge-bottom gd-foot-edge-bottom" data-if="list_has_footer"></div>
 		</div>
 
 		<div class="gd-box" data-for="b : boxes" data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"

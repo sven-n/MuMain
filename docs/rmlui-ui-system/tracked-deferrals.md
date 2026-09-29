@@ -389,12 +389,18 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
   extreme — 40 non-root bound geometry properties, and no layout of its own. Note the genuine
   carve-out: inside a `.sharp-text` block layout height and rendered height disagree, which
   explains `button_label_top` but not `divider_top` or a button's `left`.
-- **C++ choosing which decorative pieces exist.** `GuardWindowRmlModel::listFrame` is an int C++
-  sets to 0/1/2 and the document switches whole blocks of frame edges on, each carrying literal
-  `style="left: 11px; top: 111px; ..."` in *shared* markup. The state behind it ("the list has a
-  footer row") is semantic and could be exposed as such. Same family: the `std::string style` field
-  on the event-window button structs, carrying `"exit"` (semantic) alongside `"wide"` (a size
-  picked in C++).
+- **C++ choosing which decorative pieces exist. Fixed.** `GuardWindowRmlModel::listFrame` was an
+  int C++ set to 0/1/2, and the document switched whole blocks of frame edges on it, each carrying
+  literal `style="left: 11px; top: 111px; ..."` in *shared* markup -- so neither theme could move an
+  edge. It is two booleans now, `list_shown` and `list_has_footer`, which is what the state actually
+  was: whether the guild list is on screen, and whether it has a summary row under it. One frame
+  shape in the RML, every edge placed by each theme's own RCSS, and `.with-footer` shortens the main
+  box. `CCastleWindow`'s four tax arrows came along -- they were `style="top: 73px"` and friends, and
+  are now `#tax_chaos_up`/`#tax_chaos_down`/`#tax_npc_up`/`#tax_npc_down` positioned per theme.
+  Neither document has an inline `style=` left.
+  Still in this family: the `std::string style` field on the event-window button structs, carrying
+  `"exit"` (semantic) alongside `"wide"` (a size picked in C++). One word in one struct, no practical
+  consequence; fold it into whatever next touches `MessageBoxView`.
 - **`CGenericConfirmDialog`'s `kInputFieldWidth`/`kInputFieldHeight` (150x18)** are duplicated into
   both themes' `.gcd-input-anchor`, as its own comment states. The stated reason — the anchor "only
   supplies position" — is what `RefreshLogicalAnchorPosition()`'s sibling already solves for 21

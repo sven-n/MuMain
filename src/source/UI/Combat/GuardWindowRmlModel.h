@@ -60,7 +60,10 @@ struct GuardWindowRmlModel
 
     std::vector<GuardTabEntry> tabs;
     // The List tab's frame: 0 none, 1 the declared guilds (registration), 2 the siege guilds.
-    int listFrame = 0;
+    // Whether the guild list is on screen, and whether it has its own summary row underneath.
+    // Its frame is the theme's to draw; these two say what there is to frame.
+    bool listShown = false;
+    bool listHasFooter = false;
     bool scrollShown = false;
     float scrollTop = 0.f; // the track, reference px
     float scrollHeight = 0.f;

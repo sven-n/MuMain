@@ -51,6 +51,10 @@
 .cw-btn.locked .cw-label { color: token(text-muted); }
 
 .tax-btn {
+#tax_chaos_up   { top: 73px; }
+#tax_chaos_down { top: 86px; }
+#tax_npc_up     { top: 101px; }
+#tax_npc_down   { top: 114px; }
 	position: absolute;
 	left: 158px;
 	width: 15px;

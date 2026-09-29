@@ -92,6 +92,10 @@
 .cw-btn.locked .cw-label { color: #646464; }
 
 .tax-btn { position: absolute; left: 158px; width: 15px; height: 13px; pointer-events: auto; }
+#tax_chaos_up   { top: 73px; }
+#tax_chaos_down { top: 86px; }
+#tax_npc_up     { top: 101px; }
+#tax_npc_down   { top: 114px; }
 .tax-up { decorator: image(cw-up-up); }
 .tax-up:hover { decorator: image(cw-up-over); }
 .tax-up:active { decorator: image(cw-up-down); }

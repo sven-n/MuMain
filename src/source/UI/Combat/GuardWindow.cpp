@@ -418,7 +418,8 @@ void CGuardWindow::BuildRmlUi()
             tab.RegisterMember("selected", &GuardTabEntry::selected);
             c.RegisterArray<std::vector<GuardTabEntry>>();
             c.Bind("tabs", &model.tabs);
-            c.Bind("list_frame", &model.listFrame);
+            c.Bind("list_shown", &model.listShown);
+            c.Bind("list_has_footer", &model.listHasFooter);
             c.Bind("scroll_shown", &model.scrollShown);
             c.Bind("scroll_top", &model.scrollTop);
             c.Bind("scroll_height", &model.scrollHeight);
@@ -550,7 +551,8 @@ void CGuardWindow::SyncContent()
     }
 
     const float y = y0 + 125;
-    int listFrame = 0;
+    bool listShown = false;
+    bool listHasFooter = false;
     TextListScrollBarGeometry scroll{};
     bool scrollShown = false;
     switch (m_iNumCurOpenTab)
@@ -692,7 +694,7 @@ void CGuardWindow::SyncContent()
         const DWORD textColor = RGBA(230, 220, 200, 255);
         if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
         {
-            listFrame = 1;
+            listShown = true;
             CUIBCDeclareGuildListBox& list = m_DeclareGuildListBox;
             const float lx = static_cast<float>(list.GetPosition_x());
             const float ly = static_cast<float>(list.GetPosition_y());
@@ -729,7 +731,8 @@ void CGuardWindow::SyncContent()
         }
         else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
         {
-            listFrame = 2;
+            listShown = true;
+            listHasFooter = true;
             CUIBCGuildListBox& list = m_GuildListBox;
             const float lx = static_cast<float>(list.GetPosition_x());
             const float ly = static_cast<float>(list.GetPosition_y());
@@ -837,7 +840,8 @@ void CGuardWindow::SyncContent()
         model.buttons = std::move(buttons);
         m_RmlBinder.MarkDirty("buttons");
     }
-    sync(&GuardWindowRmlModel::listFrame, "list_frame", listFrame);
+    sync(&GuardWindowRmlModel::listShown, "list_shown", listShown);
+    sync(&GuardWindowRmlModel::listHasFooter, "list_has_footer", listHasFooter);
     // RenderScrollBarFrame() at the list's right edge - 8 over the track, the thumb at - 12.
     sync(&GuardWindowRmlModel::scrollShown, "scroll_shown", scrollShown);
     sync(&GuardWindowRmlModel::scrollTop, "scroll_top", scroll.rangeTop - y0);

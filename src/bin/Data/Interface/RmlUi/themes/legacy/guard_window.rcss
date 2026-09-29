@@ -67,3 +67,18 @@
 #btn_exit { top: 391px; pointer-events: auto; }
 .tooltip { display: none; bottom: 38px; } /* 429 - 391 */
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* The guild list's frame, placed here rather than inline in the shared RML. The main box is
+   shorter when the summary row is present, which is what `.with-footer` says. */
+.gd-list-frame { position: static; }
+.gd-list-edge-left   { left: 11px;  top: 111px; height: 255px; }
+.gd-list-edge-right  { left: 166px; top: 111px; height: 255px; }
+.gd-list-edge-top    { left: 14px;  top: 111px; }
+.gd-list-edge-bottom { left: 14px;  top: 357px; }
+.with-footer .gd-list-edge-left,
+.with-footer .gd-list-edge-right  { height: 215px; }
+.with-footer .gd-list-edge-bottom { top: 317px; }
+.gd-foot-edge-left   { left: 11px;  top: 345px; height: 25px; }
+.gd-foot-edge-right  { left: 166px; top: 345px; height: 25px; }
+.gd-foot-edge-top    { left: 14px;  top: 345px; }
+.gd-foot-edge-bottom { left: 14px;  top: 362px; }

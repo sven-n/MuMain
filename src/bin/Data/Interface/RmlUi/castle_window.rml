@@ -53,10 +53,10 @@
 		</div>
 
 		<div data-if="tax_arrows">
-			<div class="tax-btn tax-up" style="top: 73px;" data-event-click="senatus_button(7)"></div>
-			<div class="tax-btn tax-down" style="top: 86px;" data-event-click="senatus_button(8)"></div>
-			<div class="tax-btn tax-up" style="top: 101px;" data-event-click="senatus_button(9)"></div>
-			<div class="tax-btn tax-down" style="top: 114px;" data-event-click="senatus_button(10)"></div>
+			<div id="tax_chaos_up" class="tax-btn tax-up" data-event-click="senatus_button(7)"></div>
+			<div id="tax_chaos_down" class="tax-btn tax-down" data-event-click="senatus_button(8)"></div>
+			<div id="tax_npc_up" class="tax-btn tax-up" data-event-click="senatus_button(9)"></div>
+			<div id="tax_npc_down" class="tax-btn tax-down" data-event-click="senatus_button(10)"></div>
 		</div>
 
 		<div id="btn_exit" data-event-click="senatus_button(11)"></div>
