@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <cstdint>
+#include <cstring>
 #include <cmath>
 #include <cassert>
 #include <set>
@@ -1916,7 +1917,8 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         vec3_t L = { (float)(cos(WorldTime * 0.001f)), (float)(sin(WorldTime * 0.002f)), 1.f };
         for (int j = 0; j < m->NumNormals; j++)
         {
-            if (j > MAX_VERTICES) break;
+            if (j >= MAX_VERTICES)
+                break;
             float* Normal = NormalTransform[i][j];
 
             if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2)
@@ -2462,7 +2464,8 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         for (int j = 0; j < m->NumNormals; j++)
         {
             //			Normal_t *np = &m->Normals[j];
-            if (j > MAX_VERTICES) break;
+            if (j >= MAX_VERTICES)
+                break;
             float* Normal = NormalTransform[i][j];
 
             if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2)
@@ -3153,8 +3156,10 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         //// wprintf(L"[Open2] Version: %d\n", Version);
         // The on-disk size field is 32-bit; `long` is 8 bytes on LP64 (Linux
         // x64), which would read past the field and produce a garbage size.
-        std::int32_t encSize = *(std::int32_t*)(fileData.get() + ptr); ptr += sizeof(std::int32_t);
-        unsigned char* encData = fileData.get() + ptr;
+        std::int32_t encSize = 0;
+        std::memcpy(&encSize, &fileData[ptr], sizeof(encSize));
+        ptr += sizeof(std::int32_t);
+        unsigned char* encData = &fileData[ptr];
         //// wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
 
         long decSize = MapFileDecrypt(nullptr, encData, encSize);
@@ -3183,7 +3188,7 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     }
     else
     {
-        wprintf(L"[Open2] Unknown BMD version: %ld\n in %.64s\n", Version, ModelPath);
+        wprintf(L"[Open2] Unknown BMD version: %d\n in %.64s\n", static_cast<int>(Version), ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }
