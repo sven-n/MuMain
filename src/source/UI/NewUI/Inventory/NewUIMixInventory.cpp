@@ -16,6 +16,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
+#include "Core/Text/WideFormat.h"
 
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/SocketSystem.h"
@@ -461,7 +462,7 @@ void CNewUIMixInventory::RenderFrame()
             g_pRenderText->SetTextColor(255, 255, 48, 255);
             g_pRenderText->SetBgColor(40, 40, 40, 128);
             mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
-            mu_swprintf(szText, L"%ls + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
+            Core::Text::AppendFormatted(szText, L" + %d%%", g_MixRecipeMgr.GetPlusChaosRate());
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
             g_pRenderText->SetTextColor(210, 230, 255, 255);
         }
