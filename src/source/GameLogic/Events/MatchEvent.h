@@ -72,6 +72,14 @@ namespace matchEvent
             g_csMatchInfo->RenderMatchResult();
         }
     }
+    inline int GetResultExtraHeight(void)
+    {
+        if (g_csMatchInfo != NULL)
+        {
+            return g_csMatchInfo->GetResultExtraHeight();
+        }
+        return 0;
+    }
     inline void SetPosition(int ix, int iy)
     {
         if (g_csMatchInfo != NULL)

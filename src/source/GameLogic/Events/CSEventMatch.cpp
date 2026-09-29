@@ -10,6 +10,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "CSEventMatch.h"
 #include "I18N/All.h"
+#include "Core/Text/WideFormat.h"
 
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -41,23 +42,6 @@ void WriteWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
     }
 
     std::swprintf(buffer, static_cast<std::size_t>(N), format, args...);
-}
-
-template <std::size_t N, typename... Args>
-void AppendWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
-{
-    if (format == nullptr)
-    {
-        return;
-    }
-
-    const std::size_t currentLength = std::wcslen(buffer);
-    if (currentLength >= N)
-    {
-        return;
-    }
-
-    std::swprintf(buffer + currentLength, static_cast<std::size_t>(N - currentLength), format, args...);
 }
 } // namespace
 
@@ -172,7 +156,7 @@ void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
 
     if (iSecondTime >= 0)
     {
-        AppendWide(lpszStr, L" %.2d", iSecondTime);
+        Core::Text::AppendFormatted(lpszStr, L" %.2d", iSecondTime);
     }
 
     if (iMinute < 5)
@@ -181,7 +165,7 @@ void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
     }
     if (iMinute < 15)
     {
-        AppendWide(lpszStr, L": %.2d", static_cast<int>(WorldTime) % 60);
+        Core::Text::AppendFormatted(lpszStr, L": %.2d", static_cast<int>(WorldTime) % 60);
     }
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->RenderText(static_cast<int>(x), static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);

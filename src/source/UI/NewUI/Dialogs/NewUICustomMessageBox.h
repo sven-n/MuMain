@@ -411,6 +411,7 @@ namespace SEASON3B
         void RenderFrame();
 
         CNewUIMessageBoxButton m_BtnOk;
+        int m_nMiddleCount = static_cast<int>(MIDDLE_COUNT);
     };
 
     class CDevilSquareRankMsgBox : public CNewUIMessageBoxBase

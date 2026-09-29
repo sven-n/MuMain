@@ -427,6 +427,55 @@ bool CQuestMng::IsRequestRewardQS(DWORD dwQuestIndex)
         return false;
 }
 
+namespace
+{
+// m_szText is a small fixed array and translators decide the length of these
+// lines, so every write is bounded and truncates instead of overrunning it.
+template <typename... Args> void FormatRequestRewardText(SRequestRewardText& line, const wchar_t* format, Args... args)
+{
+    _snwprintf_s(line.m_szText, QM_MAX_REQUEST_REWARD_TEXT_LEN, _TRUNCATE, format, args...);
+}
+
+void FormatRewardText(SRequestRewardText& line, const SQuestReward& reward)
+{
+    switch (reward.m_dwType)
+    {
+    case QUEST_REWARD_NONE:
+        FormatRequestRewardText(line, L"%ls", I18N::Game::None);
+        break;
+
+    case QUEST_REWARD_EXP:
+        FormatRequestRewardText(line, I18N::Game::QuestRewardExp, static_cast<unsigned long>(reward.m_dwValue));
+        break;
+
+    case QUEST_REWARD_ZEN:
+        FormatRequestRewardText(line, I18N::Game::QuestRewardZen, static_cast<unsigned long>(reward.m_dwValue));
+        break;
+
+    case QUEST_REWARD_ITEM:
+        wchar_t szItemName[32];
+        ::GetItemName((int)reward.m_pItem->Type, reward.m_pItem->Level, szItemName);
+        FormatRequestRewardText(line, I18N::Game::QuestRewardItem, szItemName,
+                                static_cast<unsigned long>(reward.m_dwValue));
+        break;
+
+    case QUEST_REWARD_BUFF:
+    {
+        const BuffInfo buffinfo = g_BuffInfo((eBuffState)reward.m_wIndex);
+        FormatRequestRewardText(line, I18N::Game::QuestRewardBuffBonus, buffinfo.s_BuffName,
+                                static_cast<unsigned long>(reward.m_dwValue));
+    }
+    break;
+
+#ifdef ASG_ADD_GENS_SYSTEM
+    case QUEST_REWARD_CONTRIBUTE:
+        FormatRequestRewardText(line, I18N::Game::ContributionLu, static_cast<unsigned long>(reward.m_dwValue));
+        break;
+#endif // ASG_ADD_GENS_SYSTEM
+    }
+}
+} // namespace
+
 bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, DWORD dwQuestIndex)
 {
     SQuestRequestReward* pRequestReward = &m_mapQuestRequestReward[dwQuestIndex];
@@ -442,7 +491,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
     aDest[nLine].m_hFont = g_hFontBold;
     aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
-    wcscpy(aDest[nLine++].m_szText, I18N::Game::Requirements);
+    FormatRequestRewardText(aDest[nLine++], L"%ls", I18N::Game::Requirements);
 
     SQuestRequest* pRequestInfo;
     for (i = 0; i < pRequestReward->m_byRequestCount; ++i, ++nLine)
@@ -459,7 +508,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         {
         case QUEST_REQUEST_NONE:
             aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
-            wcscpy(aDest[nLine].m_szText, I18N::Game::None);
+            FormatRequestRewardText(aDest[nLine], L"%ls", I18N::Game::None);
             break;
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
@@ -479,32 +528,34 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (pRequestInfo->m_dwType)
             {
             case QUEST_REQUEST_MONSTER:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Mon.: %ls x %lu/%lu",
-                    ::getMonsterName(int(pRequestInfo->m_wIndex)),
-                    MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
-                    pRequestInfo->m_dwValue);
+                FormatRequestRewardText(
+                    aDest[nLine], I18N::Game::QuestRequirementMonster, ::getMonsterName(int(pRequestInfo->m_wIndex)),
+                    static_cast<unsigned long>(MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
                 break;
             case QUEST_REQUEST_ITEM:
             {
                 wchar_t szItemName[32];
                 ::GetItemName((int)pRequestInfo->m_pItem->Type,
                     (pRequestInfo->m_pItem->Level, szItemName);
-                ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
-                    MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
-                    pRequestInfo->m_dwValue);
+                FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementItem, szItemName,
+                    static_cast<unsigned long>(MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
             }
             break;
             case QUEST_REQUEST_LEVEL:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Level: %lu %ls",
-                    pRequestInfo->m_dwValue, I18N::Game::Minimum);
+                FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementLevel,
+                                        static_cast<unsigned long>(pRequestInfo->m_dwValue));
                 break;
             case QUEST_REQUEST_ZEN:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Zen : %lu", pRequestInfo->m_dwValue);
+                FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementZen,
+                                        static_cast<unsigned long>(pRequestInfo->m_dwValue));
                 break;
             case QUEST_REQUEST_PVP_POINT:
-                mu_swprintf(aDest[nLine].m_szText, I18N::Game::EnemyGensMemberXLuLu,
-                    MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
-                    pRequestInfo->m_dwValue);
+                FormatRequestRewardText(
+                    aDest[nLine], I18N::Game::EnemyGensMemberXLuLu,
+                    static_cast<unsigned long>(MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
                 break;
             }
             break;
@@ -524,10 +575,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
             {
                 auto text = getMonsterName(int(pRequestInfo->m_wIndex));
-                mu_swprintf(aDest[nLine].m_szText, L"Mon.: %ls x %lu/%lu",
-                    text,
-                    MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
-                    pRequestInfo->m_dwValue);
+                FormatRequestRewardText(
+                    aDest[nLine], I18N::Game::QuestRequirementMonster, text,
+                    static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
             }
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
@@ -545,8 +596,8 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::mu_swprintf(aDest[nLine].m_szText, L"Skill: %ls",
-                SkillAttribute[pRequestInfo->m_wIndex].Name);
+            FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementSkill,
+                                    SkillAttribute[pRequestInfo->m_wIndex].Name);
             break;
 
 #ifndef ASG_ADD_TIME_LIMIT_QUEST
@@ -562,9 +613,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             wchar_t szItemName[32];
             ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
                 szItemName);
-            ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
-                MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
-                pRequestInfo->m_dwValue);
+            FormatRequestRewardText(
+                aDest[nLine], I18N::Game::QuestRequirementItem, szItemName,
+                static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
+                static_cast<unsigned long>(pRequestInfo->m_dwValue));
             break;
 
         case QUEST_REQUEST_LEVEL:
@@ -576,8 +628,8 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::mu_swprintf(aDest[nLine].m_szText, L"Level: %lu %ls",
-                pRequestInfo->m_dwValue, I18N::Game::Minimum);
+            FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementLevel,
+                                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
@@ -597,10 +649,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (dwQuestIndex)
             {
             case 0x10009:
-                ::mu_swprintf(aDest[nLine].m_szText, L"%ls", I18N::Game::OpenCharacterStatsCWindow);
+                FormatRequestRewardText(aDest[nLine], L"%ls", I18N::Game::OpenCharacterStatsCWindow);
                 break;
             case 0x1000F:
-                ::mu_swprintf(aDest[nLine].m_szText, L"%ls", I18N::Game::OpenInventoryIVWindow);
+                FormatRequestRewardText(aDest[nLine], L"%ls", I18N::Game::OpenInventoryIVWindow);
                 break;
             }
             break;
@@ -620,7 +672,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
             const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRequestInfo->m_wIndex);
-            ::mu_swprintf(aDest[nLine].m_szText, L"Bonus: %ls", buffinfo.s_BuffName);
+            FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementBuff, buffinfo.s_BuffName);
         }
         break;
 
@@ -662,8 +714,8 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 #else	// ASG_ADD_TIME_LIMIT_QUEST
             DWORD curValue = MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue);
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
-            mu_swprintf(aDest[nLine].m_szText, I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex,
-                curValue, pRequestInfo->m_dwValue);
+            FormatRequestRewardText(aDest[nLine], I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex, curValue,
+                                    pRequestInfo->m_dwValue);
         }
         break;
 
@@ -700,7 +752,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 nTextIndex = 3081;
                 break;
             }
-            mu_swprintf(aDest[nLine].m_szText, I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex);
+            FormatRequestRewardText(aDest[nLine], I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex);
         }
         break;
         }
@@ -714,9 +766,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
     for (j = 0; j < 2; ++j)
     {
         if (0 == j && pRequestReward->m_byGeneralRewardCount)
-            ::wcscpy(aDest[nLine].m_szText, I18N::Game::Reward);
+            FormatRequestRewardText(aDest[nLine], L"%ls", I18N::Game::Reward);
         else if (1 == j && pRequestReward->m_byRandRewardCount)
-            mu_swprintf(aDest[nLine].m_szText, I18N::Game::RandomRewardLuDifferentKinds, pRequestReward->m_byRandGiveCount);
+            FormatRequestRewardText(aDest[nLine], I18N::Game::RandomRewardLuDifferentKinds,
+                                    static_cast<unsigned long>(pRequestReward->m_byRandGiveCount));
         else
             continue;
         aDest[nLine].m_hFont = g_hFontBold;
@@ -736,42 +789,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             aDest[nLine].m_wIndex = pRewardInfo->m_wIndex;
             aDest[nLine].m_pItem = pRewardInfo->m_pItem;
 
-            switch (pRewardInfo->m_dwType)
-            {
-            case QUEST_REWARD_NONE:
-                ::wcscpy(aDest[nLine].m_szText, I18N::Game::None);
-                break;
-
-            case QUEST_REWARD_EXP:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Exp.: %lu", pRewardInfo->m_dwValue);
-                break;
-
-            case QUEST_REWARD_ZEN:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Zen: %lu", pRewardInfo->m_dwValue);
-                break;
-
-            case QUEST_REWARD_ITEM:
-                wchar_t szItemName[32];
-                ::GetItemName((int)pRewardInfo->m_pItem->Type, pRewardInfo->m_pItem->Level,
-                    szItemName);
-                ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu",
-                    szItemName, pRewardInfo->m_dwValue);
-                break;
-
-            case QUEST_REWARD_BUFF:
-            {
-                const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRewardInfo->m_wIndex);
-                ::mu_swprintf(aDest[nLine].m_szText, L"Bonus: %ls x %lu%ls", buffinfo.s_BuffName,
-                    pRewardInfo->m_dwValue, I18N::Game::Minute);
-            }
-            break;
-
-#ifdef ASG_ADD_GENS_SYSTEM
-            case QUEST_REWARD_CONTRIBUTE:
-                mu_swprintf(aDest[nLine].m_szText, I18N::Game::ContributionLu, pRewardInfo->m_dwValue);
-                break;
-#endif	// ASG_ADD_GENS_SYSTEM
-            }
+            FormatRewardText(aDest[nLine], *pRewardInfo);
             aDest[nLine].m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN - 1] = 0;
         }
     }

@@ -76,8 +76,11 @@ int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelW
         }
         else
         {
-            // we can copy that to the destination
+            // we can copy that to the destination. std::wstring::copy does not append a
+            // terminator, so write it ourselves: callers reuse the same buffer for several
+            // lines, and without it a shorter line keeps the tail of the previous one.
             tempString.copy(pTextOut, tempString.length(), 0);
+            pTextOut[tempString.length()] = L'\0';
             iLineIndex++;
             processedSourceCharacters += tempString.length();
 
@@ -188,12 +191,12 @@ CUIControl::CUIControl()
 {
     m_dwUIID = CreateUIID();
     m_dwParentUIID = 0;
-    SetState(0);
+    CUIControl::SetState(0);
     m_iOptions = 0;
     SetPosition(0, 0);
-    SetSize(100, 100);
-    SetArrangeType();
-    SetResizeType();
+    CUIControl::SetSize(100, 100);
+    CUIControl::SetArrangeType();
+    CUIControl::SetResizeType();
     m_iCoordType = COORDINATE_TYPE_LEFT_TOP;
 }
 
@@ -496,14 +499,14 @@ CUITextListBox<T>::CUITextListBox()
     m_bUseSelectLine = FALSE;
     m_bPressCursorKey = 0;
     m_bNewTypeScrollBar = TRUE;
-    SLSetSelectLine(0);
+    CUITextListBox<T>::SLSetSelectLine(0);
     m_bUseNewUIScrollBar = FALSE;
 }
 
 template <class T>
 CUITextListBox<T>::~CUITextListBox()
 {
-    Clear();
+    CUITextListBox<T>::Clear();
 }
 
 template <class T>

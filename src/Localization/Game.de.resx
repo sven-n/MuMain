@@ -12888,4 +12888,148 @@
   <data name="DefaultFont" xml:space="preserve">
     <value>Standard</value>
   </data>
+  <data name="MixLevelAtLeast" xml:space="preserve">
+    <value>+%d Minimum</value>
+  </data>
+  <data name="MixLevelAtMost" xml:space="preserve">
+    <value>+%d Maximal</value>
+  </data>
+  <data name="MixOption" xml:space="preserve">
+    <value>+%d Option</value>
+  </data>
+  <data name="MixOptionAtLeast" xml:space="preserve">
+    <value>+%d Option Minimum</value>
+  </data>
+  <data name="MixOptionAtMost" xml:space="preserve">
+    <value>+%d Option Maximal</value>
+  </data>
+  <data name="MixOptionRange" xml:space="preserve">
+    <value>+%d~%d Option</value>
+  </data>
+  <data name="MixCount" xml:space="preserve">
+    <value>%d Menge</value>
+  </data>
+  <data name="MixCountAtLeast" xml:space="preserve">
+    <value>%d Menge Minimum</value>
+  </data>
+  <data name="MixCountAtMost" xml:space="preserve">
+    <value>%d Menge Maximal</value>
+  </data>
+  <data name="MixCountRange" xml:space="preserve">
+    <value>%d~%d Menge</value>
+  </data>
+  <data name="SummonedMonsterOwner" xml:space="preserve">
+    <value>%ls von %ls</value>
+  </data>
+  <data name="CancelSkillQuestion" xml:space="preserve">
+    <value>%ls Möchten Sie stornieren?</value>
+  </data>
+  <data name="JewelCombinationSucceeded" xml:space="preserve">
+    <value>Juwelenkombination war erfolgreich.</value>
+  </data>
+  <data name="JewelCombinationFailed" xml:space="preserve">
+    <value>Juwelenkombination ist fehlgeschlagen.</value>
+  </data>
+  <data name="JewelDismantlingSucceeded" xml:space="preserve">
+    <value>Juwel demontieren war erfolgreich.</value>
+  </data>
+  <data name="JewelDismantlingFailed" xml:space="preserve">
+    <value>Juwel demontieren ist fehlgeschlagen.</value>
+  </data>
+  <data name="ZoneDCleared" xml:space="preserve">
+    <value>%d Zone gelöscht</value>
+  </data>
+  <data name="QuestRewardBuffBonus" xml:space="preserve">
+    <value>Bonus: %ls x %lu Minute</value>
+  </data>
+  <data name="CrownSwitchD" xml:space="preserve">
+    <value>Kronenschalter %d</value>
+  </data>
+  <data name="FruitStatIncreased" xml:space="preserve">
+    <value>(%s Fruit) stat %d Punkte wurden Erstellen.</value>
+  </data>
+  <data name="FruitStatDecreased" xml:space="preserve">
+    <value>(%s Fruit) stat %d Punkte wurden Verringern.</value>
+  </data>
+  <data name="FruitStatCannotIncrease" xml:space="preserve">
+    <value>Dieser Status kann nicht mehr Erstellen sein.</value>
+  </data>
+  <data name="FruitStatCannotDecrease" xml:space="preserve">
+    <value>Dieser Status kann nicht mehr Verringern sein.</value>
+  </data>
+  <data name="StatPointsAdded" xml:space="preserve">
+    <value>Erstellen</value>
+  </data>
+  <data name="StatPointsRemoved" xml:space="preserve">
+    <value>Verringern</value>
+  </data>
+  <data name="QuestCompletedSuccessfully" xml:space="preserve">
+    <value>Du hast die Quest erfolgreich abgeschlossen.</value>
+  </data>
+  <data name="QuestFailedUnfortunately" xml:space="preserve">
+    <value>Die Suche Leider ist Ihnen das nicht gelungen</value>
+  </data>
+  <data name="RequestHasFailed" xml:space="preserve">
+    <value>Leider ist Ihnen das nicht gelungen</value>
+  </data>
+  <data name="QuestRequirementMonster" xml:space="preserve">
+    <value>Mon.: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementItem" xml:space="preserve">
+    <value>Item: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementLevel" xml:space="preserve">
+    <value>Level: %lu Minimum</value>
+  </data>
+  <data name="QuestRequirementZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardExp" xml:space="preserve">
+    <value>Exp.: %lu</value>
+  </data>
+  <data name="QuestRewardZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardItem" xml:space="preserve">
+    <value>Item: %ls x %lu</value>
+  </data>
+  <data name="OperationRefining" xml:space="preserve">
+    <value>Verfeinern</value>
+  </data>
+  <data name="OperationRestoring" xml:space="preserve">
+    <value>Wiederherstellen</value>
+  </data>
+  <data name="OperationChaosCardCombination" xml:space="preserve">
+    <value>Chaos-Kartenkombination</value>
+  </data>
+  <data name="OperationCherryBlossomAssembly" xml:space="preserve">
+    <value>Zusammenbau der Kirschblütenzweige</value>
+  </data>
+  <data name="OperationRegistration" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="OperationResurrecting" xml:space="preserve">
+    <value>Auferstehung</value>
+  </data>
+  <data name="BloodCastleQuestCompleted" xml:space="preserve">
+    <value>Glückwunsch! Sie haben erfolgreich hat die Blood Castle-Quest abgeschlossen!</value>
+  </data>
+  <data name="BloodCastleQuestFailed" xml:space="preserve">
+    <value>Leider ist Ihnen das nicht gelungen um die Blood Castle Quest abzuschließen.</value>
+  </data>
+  <data name="MixLevel" xml:space="preserve">
+    <value>+%d</value>
+  </data>
+  <data name="MixLevelRange" xml:space="preserve">
+    <value>+%d~%d</value>
+  </data>
+  <data name="FruitCaption" xml:space="preserve">
+    <value>( %ls Fruit )</value>
+  </data>
+  <data name="QuestRequirementSkill" xml:space="preserve">
+    <value>Skill: %ls</value>
+  </data>
+  <data name="QuestRequirementBuff" xml:space="preserve">
+    <value>Bonus: %ls</value>
+  </data>
 </root>

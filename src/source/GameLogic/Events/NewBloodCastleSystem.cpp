@@ -11,8 +11,20 @@
 #include "Audio/DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
+#include "Core/Text/TextLineWrap.h"
 
 using namespace SEASON3B;
+
+namespace
+{
+// Layout of the result box, relative to its top edge.
+constexpr int ResultTextTop = 40;
+constexpr int ResultTextWidth = 210;
+constexpr int ResultLineHeight = 16;
+constexpr int ResultSectionGap = 14;
+// The result box is sized for this many lines; each further line makes it taller.
+constexpr int ResultFittingLines = 2;
+} // namespace
 
 CNewBloodCastleSystem::CNewBloodCastleSystem()
 {
@@ -31,6 +43,7 @@ void CNewBloodCastleSystem::SetMatchResult(const int iNumDevilRank, const int iM
 
     m_iNumResult = Success;
     memcpy(m_MatchResult, pMatchResult, sizeof(MatchResult));
+    WrapResultText();
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBloodCastleResultMsgBoxLayout));
 }
 
@@ -124,10 +137,27 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
     }
 }
 
+// One sentence per outcome, wrapped to the width of the result box once when the
+// result arrives, so every language keeps its own word order across the lines.
+void CNewBloodCastleSystem::WrapResultText()
+{
+    g_pRenderText->SetFont(g_hFont);
+    m_ResultLines =
+        WrapTextToWidth(m_iNumResult ? I18N::Game::BloodCastleQuestCompleted : I18N::Game::BloodCastleQuestFailed,
+                        ResultTextWidth, [](const wchar_t* text, size_t length)
+                        { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; });
+}
+
+int CNewBloodCastleSystem::GetResultExtraHeight() const
+{
+    const int extraLines = static_cast<int>(m_ResultLines.size()) - ResultFittingLines;
+    return extraLines > 0 ? extraLines * ResultLineHeight : 0;
+}
+
 void CNewBloodCastleSystem::RenderMatchResult(void)
 {
     int x = REFERENCE_WIDTH / 2;
-    int yPos = m_PosResult.y + 40;
+    int yPos = m_PosResult.y + ResultTextTop;
 
     EnableAlphaTest();
 
@@ -137,20 +167,13 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
 
     wchar_t lpszStr[256] = {};
 
-    if (m_iNumResult)
+    for (const auto& line : m_ResultLines)
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CongratulationsYouHaveSuccessfully, 0, 0, RT3_WRITE_CENTER);
-    }
-    else
-    {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::UnfortunatelyYouHaveFailed, 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, line.c_str(), 0, 0, RT3_WRITE_CENTER);
+        yPos += ResultLineHeight;
     }
 
-    yPos += 30;
+    yPos += ResultSectionGap;
 
     MatchResult* pResult = &m_MatchResult[0];
 

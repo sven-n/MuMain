@@ -70,6 +70,11 @@ public:
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) = 0;
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) = 0;
     virtual void    RenderMatchResult(void) = 0;
+    // Height the result box needs on top of its fixed layout.
+    virtual int GetResultExtraHeight() const
+    {
+        return 0;
+    }
 };
 
 class CSDevilSquareMatch : public CSBaseMatch
