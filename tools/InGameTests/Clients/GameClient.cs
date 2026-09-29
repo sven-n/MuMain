@@ -22,9 +22,11 @@ internal sealed class GameClient : IAsyncDisposable
     private readonly ControlConnection control;
     private readonly TimeSpan stepDelay;
 
-    private GameClient(string role, Process process, ControlConnection control, TimeSpan stepDelay)
+    private GameClient(string role, Process process, ControlConnection control, TimeSpan stepDelay, ClientOptions options)
     {
         this.Role = role;
+        this.ServerHost = options.ServerHost;
+        this.ServerPort = options.ServerPort;
         this.process = process;
         this.control = control;
         this.stepDelay = stepDelay;
@@ -35,6 +37,11 @@ internal sealed class GameClient : IAsyncDisposable
 
     /// <summary>The scenario's name for this client, e.g. "seller".</summary>
     public string Role { get; }
+
+    /// <summary>The game server the client logs in to.</summary>
+    public string ServerHost { get; }
+
+    public int ServerPort { get; }
 
     /// <summary>Starts a client and waits until its control socket answers.</summary>
     public static async Task<GameClient> StartAsync(ClientOptions options, string role, CancellationToken cancellationToken)
@@ -56,7 +63,7 @@ internal sealed class GameClient : IAsyncDisposable
         try
         {
             control = await ConnectAsync(socketPath, process, options.StartTimeout, cancellationToken);
-            var client = new GameClient(role, process, control, options.StepDelay);
+            var client = new GameClient(role, process, control, options.StepDelay, options);
             var ping = await client.SendAsync("ping");
             if (ping.TryGetProperty("commit", out var commit) && commit.GetString() is { } hash)
             {

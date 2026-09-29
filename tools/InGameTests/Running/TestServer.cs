@@ -81,11 +81,72 @@ internal static class TestServer
         return null;
     }
 
+    /// <summary>
+    /// Where the test server put the wandering NPC <paramref name="name"/> (e.g. Marlon) last,
+    /// on the game server the clients log in to, from its log; null when the server is not
+    /// the test server, or its log does not say.
+    /// </summary>
+    public static async Task<WanderingNpcSpot?> WanderingNpcAsync(string host, int port, string name, CancellationToken cancellationToken)
+    {
+        if (!IsTestServer(host, port))
+        {
+            return null;
+        }
+
+        foreach (var tool in FindContainerTools())
+        {
+            try
+            {
+                var (exitCode, output, errors) = await RunConnectedAsync(tool, ["logs", ContainerName], TextWriter.Null, cancellationToken);
+                if (exitCode == 0)
+                {
+                    return LastSpawn(output + Environment.NewLine + errors, name);
+                }
+            }
+            catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception)
+            {
+                // Try the next tool.
+            }
+        }
+
+        return null;
+    }
+
+    // "New merchant "Marlon - Id: 827 - Position: 136, 88" has been created on "0 - Lorencia". ... Scope=["GameServer: 0", ...]"
+    private static readonly System.Text.RegularExpressions.Regex SpawnLine = new(
+        "New merchant \"(?<name>.+?) - Id: \\d+ - Position: (?<x>\\d+), (?<y>\\d+)\" has been created on \"(?<map>\\d+) - (?<mapName>[^\"]*)\".*?GameServer: (?<server>\\d+)",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    private static WanderingNpcSpot? LastSpawn(string log, string name)
+    {
+        WanderingNpcSpot? last = null;
+        foreach (var line in log.Split('\n'))
+        {
+            var match = SpawnLine.Match(line);
+            if (match.Success && match.Groups["name"].Value == name
+                && int.Parse(match.Groups["server"].Value, System.Globalization.CultureInfo.InvariantCulture) == TestGameServer)
+            {
+                last = new WanderingNpcSpot(
+                    int.Parse(match.Groups["map"].Value, System.Globalization.CultureInfo.InvariantCulture),
+                    match.Groups["mapName"].Value,
+                    int.Parse(match.Groups["x"].Value, System.Globalization.CultureInfo.InvariantCulture),
+                    int.Parse(match.Groups["y"].Value, System.Globalization.CultureInfo.InvariantCulture));
+            }
+        }
+
+        return last;
+    }
+
     private const string ContainerName = "mumain-in-game-tests-openmu";
     private const int TestServerPort = 56901;
+    // The game server behind the published port: the first one of -demo's three, on 55901.
+    private const int TestGameServer = 0;
 
     private static bool IsLoopback(string host)
         => host is "127.0.0.1" or "localhost" or "::1";
+
+    /// <summary>Whether <paramref name="host"/>:<paramref name="port"/> is the test server of docker-compose.yml.</summary>
+    public static bool IsTestServer(string host, int port) => port == TestServerPort && IsLoopback(host);
 
     // Runs the container tool. podman keeps the connection to its machine in a
     // file that can be missing (e.g. the machine was set up by a program whose
@@ -242,3 +303,6 @@ internal static class TestServer
             .OfType<string>();
     }
 }
+
+/// <summary>Where a wandering NPC stands: its map by number and name, and its tile.</summary>
+internal sealed record WanderingNpcSpot(int Map, string MapName, int X, int Y);

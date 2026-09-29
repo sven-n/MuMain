@@ -90,8 +90,8 @@ internal static class QuestSteps
         var paid = Math.Max(0, level - 220);
         await context.StepAsync(
             "Look for Marlon",
-            "Marlon wanders between Devias, Lorencia, Noria and Atlans. The character warps to his spots, the map it is on "
-            + "first, until it finds him, and walks up to him.",
+            "Marlon wanders between Devias, Lorencia, Noria and Atlans. The test server's log says where he is now; the "
+            + "character warps to that map and walks up to him (on another server it looks on his spots until it finds him).",
             async () => context.Note($"Marlon is at {await FindMarlonNoteAsync(client)}"));
         await context.StepAsync(
             "Talk to Marlon with a click on him",
@@ -268,9 +268,9 @@ internal static class QuestSteps
 
     private static async Task<string> FindMarlonNoteAsync(GameClient client)
     {
-        var marlon = await Quests.FindMarlonAsync(client);
+        var (marlon, how) = await Quests.FindMarlonAsync(client);
         var state = await client.StateAsync();
-        return $"({marlon.X},{marlon.Y}) in {state.GetProperty("map_name").GetString()}";
+        return $"({marlon.X},{marlon.Y}) in {state.GetProperty("map_name").GetString()}, found by {how}";
     }
 
     // Marlon where the character sees him now.

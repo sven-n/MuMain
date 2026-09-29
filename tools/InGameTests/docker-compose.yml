@@ -28,6 +28,13 @@ services:
       org.opencontainers.image.source: "https://github.com/MUnique/OpenMU"
     # The image starts with -autostart; -demo is added to it.
     command: ["-demo"]
+    # Where the wandering NPCs are: OpenMU logs every move of Marlon (and the
+    # wandering merchants) at Debug level, with the game server it happened on
+    # in the scope. The tester reads the log to walk straight to Marlon instead
+    # of looking for him on all four of his maps.
+    environment:
+      Serilog__MinimumLevel__Override__WanderingMerchantsPlugIn: "Debug"
+      Serilog__WriteTo__0__Args__outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] [{SourceContext}] {Message} {Properties}{NewLine}{Exception}"
     ports:
       # Loopback only: the test data's accounts have public passwords.
       - "127.0.0.1:56901:55901"

@@ -155,10 +155,53 @@ internal static class Quests
     }
 
     /// <summary>
-    /// Looks for Marlon on his spots, the map the character is on first, and walks up to him.
-    /// Returns where he stands.
+    /// Walks up to Marlon and returns where he stands, and how he was found. The test server's
+    /// log says on which of his spots it put him last; without it (another server), or when he
+    /// is not there, the character looks on his spots, the map it is on first.
     /// </summary>
-    public static async Task<Npc> FindMarlonAsync(GameClient client)
+    public static async Task<(Npc Marlon, string How)> FindMarlonAsync(GameClient client)
+    {
+        var logged = await MarlonFromLogAsync(client);
+        if (logged is not null && MarlonSpots.FirstOrDefault(candidate => candidate.Map == logged.Map) is { Gate: not null } known)
+        {
+            await client.WarpAsync(known.Gate, known.Map);
+            var spot = known.Spot with { X = logged.X, Y = logged.Y };
+            await Npcs.WalkUpToAsync(client, spot);
+            if (await SeenAsync(client, spot.Name) is { } position)
+            {
+                return (spot with { X = position.X, Y = position.Y }, "the test server's log");
+            }
+        }
+
+        return (await SearchMarlonAsync(client), logged is null ? "a search of his spots" : "a search of his spots; he was not where the log said");
+    }
+
+    // A freshly started test server puts Marlon somewhere some 20 s after it
+    // starts, and a quick scenario can ask before that: on the test server the
+    // log is asked again for a while.
+    private static async Task<Running.WanderingNpcSpot?> MarlonFromLogAsync(GameClient client)
+    {
+        if (!Running.TestServer.IsTestServer(client.ServerHost, client.ServerPort))
+        {
+            return null;
+        }
+
+        var deadline = DateTime.UtcNow + MarlonSpawnWait;
+        while (true)
+        {
+            var spot = await Running.TestServer.WanderingNpcAsync(client.ServerHost, client.ServerPort, "Marlon", CancellationToken.None);
+            if (spot is not null || DateTime.UtcNow >= deadline)
+            {
+                return spot;
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
+    private static readonly TimeSpan MarlonSpawnWait = TimeSpan.FromSeconds(30);
+
+    private static async Task<Npc> SearchMarlonAsync(GameClient client)
     {
         var map = (await client.StateAsync()).GetProperty("map").GetInt32();
         foreach (var (gate, spotMap, spot) in MarlonSpots.OrderBy(candidate => candidate.Map == map ? 0 : 1))

@@ -76,6 +76,14 @@ file with the connection to the machine is missing (`podman system connection
 list` is empty); the runner then connects as `podman machine inspect` describes
 the machine, so nothing has to be set up by hand.
 
+Marlon, whom the hero status and combo quests need, wanders between four
+spots in Devias, Lorencia, Noria and Atlans: OpenMU puts him on a random one
+some 20 seconds after it starts and moves him every one to three hours. The
+compose file has OpenMU log each of his moves (Debug level for its
+`WanderingMerchantsPlugIn`, with the game server in every line), and the
+tester reads the container's log to walk straight to him; without the log it
+looks on his spots, which takes about a minute.
+
 The tests also run against any other
 OpenMU with the test data, but then they start from whatever state the last
 run left: `trade`, for one, moves a jewel from `test300Dl` to `socketElf`
@@ -266,7 +274,7 @@ them under these categories.
 | Quests | `quest-blade-knight` | Talks to Sebina the Priest with a click, goes through her conversation with clicks on its answers, takes "Find the Scroll of the Emperor" (1,000,000 zen) and hands the scroll in (+10 level-up points); then "Three Treasures of MU" (2,000,000 zen) with the Broken Sword: +10 points and the Dark Knight becomes a Blade Knight. One point then goes to strength with the character window's "+". |
 | Quests | `quest-soul-master` | The same two quests with the Soul Shard of Wizard: the Dark Wizard becomes a Soul Master. |
 | Quests | `quest-muse-elf` | The same two quests with the Tear of Elf: the Elf becomes a Muse Elf. |
-| Quests | `quest-hero-status-wizard` | A level 400 Dark Wizard becomes a Soul Master, looks for Marlon (he wanders between Devias, Lorencia, Noria and Atlans) and hands him the Ring of Honor for "Gain Hero Status": one more level-up point per level, which the server pays for the 180 levels above 220 at once. |
+| Quests | `quest-hero-status-wizard` | A level 400 Dark Wizard becomes a Soul Master, goes to Marlon (he wanders between Devias, Lorencia, Noria and Atlans; the test server's log says where he is) and hands him the Ring of Honor for "Gain Hero Status": one more level-up point per level, which the server pays for the 180 levels above 220 at once. |
 | Quests | `quest-hero-status-elf` | The same for a level 400 Elf, which also learns Infinity Arrow. |
 | Quests | `quest-combo` | A level 220 Dark Knight becomes a Blade Knight, gains hero status from Marlon and hands him the Dark Stone for "Secret of Dark Stone": the combo, which is still there after logging out and in again. |
 | Quests | `quest-evidence-of-strength` | A level 400 Dark Lord hands Apostle Devin the three items of "Evidence of Strength", the first quest towards the third class: +20 level-up points. |
