@@ -7,6 +7,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME wide_format_tests
+    SOURCES
+        test_wide_format.cpp
+)
+
+mu_add_test(
     NAME sdl_ttf_text_cache_tests
     SOURCES
         test_sdl_ttf_text_cache.cpp
