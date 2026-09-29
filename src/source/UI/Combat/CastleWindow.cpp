@@ -19,8 +19,31 @@
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/Combat/UISenatus.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+#include <cmath>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// A RenderColorQuadARGB() colour (alpha in the high byte) as a CSS colour.
+Rml::String ArgbToCss(unsigned int argb)
+{
+    return "rgba(" + std::to_string((argb >> 16) & 0xFF) + ", " + std::to_string((argb >> 8) & 0xFF) + ", " +
+           std::to_string(argb & 0xFF) + ", " + std::to_string((argb >> 24) & 0xFF) + ")";
+}
+} // namespace
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -45,58 +68,22 @@ bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    std::list<const wchar_t* const*> ltext;
-    ltext.push_back(&I18N::Game::CastleGate);
-    ltext.push_back(&I18N::Game::GuardianStatue);
-    ltext.push_back(&I18N::Game::Tax);
-    ltext.push_back(&I18N::Game::Store1640);
-
-    m_TabBtn.CreateRadioGroup(4, IMAGE_CASTLEWINDOW_TAB_BTN);
-    m_TabBtn.ChangeRadioText(ltext);
+    // The tabs stay a native radio group for their hit tests; castle_window.rml draws them.
+    m_TabBtn.CreateRadioGroup(4, BITMAP_GUILDINFO_BEGIN);
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 32.f, 40, 22);
     m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
 
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_EXIT_BTN, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
-
-    InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, I18N::Game::Buy1124);
-    InitButton(&m_BtnRepair, m_Pos.x + 110, m_Pos.y + 260, I18N::Game::Repair);
-    InitButton(&m_BtnUpgradeHP, m_Pos.x + 110, m_Pos.y + 310, I18N::Game::Improve);
-    InitButton(&m_BtnUpgradeDefense, m_Pos.x + 110, m_Pos.y + 334, I18N::Game::Improve);
-    InitButton(&m_BtnUpgradeRecover, m_Pos.x + 110, m_Pos.y + 358, I18N::Game::Improve);
-    InitButton(&m_BtnApplyTax, m_Pos.x + 120, m_Pos.y + 133, I18N::Game::Apply);
-    InitButton(&m_BtnWithdraw, m_Pos.x + 120, m_Pos.y + 322, I18N::Game::Withdraw);
-
-    m_BtnChaosTaxUp.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, true);
-    m_BtnChaosTaxDn.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, true);
-    m_BtnNPCTaxUp.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, true);
-    m_BtnNPCTaxDn.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, true);
-    m_BtnChaosTaxUp.ChangeButtonInfo(m_Pos.x + 158, m_Pos.y + 73, 15, 13);
-    m_BtnChaosTaxDn.ChangeButtonInfo(m_Pos.x + 158, m_Pos.y + 86, 15, 13);
-    m_BtnNPCTaxUp.ChangeButtonInfo(m_Pos.x + 158, m_Pos.y + 101, 15, 13);
-    m_BtnNPCTaxDn.ChangeButtonInfo(m_Pos.x + 158, m_Pos.y + 114, 15, 13);
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CCastleWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
-{
-    pNewUIButton->ChangeText(pCaption);
-    pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    pNewUIButton->ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_BUTTON, true);
-    pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
-
 void CCastleWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -113,18 +100,9 @@ void CCastleWindow::SetPos(int x, int y)
 
 bool CCastleWindow::UpdateMouseEvent()
 {
-    switch (m_iNumCurOpenTab)
-    {
-    case TAB_GATE_MANAGING:
-        UpdateGateManagingTab();
-        break;
-    case TAB_STATUE_MANAGING:
-        UpdateStatueManagingTab();
-        break;
-    case TAB_TAX_MANAGING:
-        UpdateTaxManagingTab();
-        break;
-    }
+    // The gate and statue picks keep their native hit tests; the buttons are RmlUi's (see
+    // Update()).
+    UpdateIconPick();
 
     if (true == BtnProcess())
         return false;
@@ -152,49 +130,53 @@ bool CCastleWindow::UpdateKeyEvent()
 
 bool CCastleWindow::Update()
 {
-    if (IsVisible())
+    // A button RmlUi reported (the original's CButton handling in UpdateMouseEvent()).
+    const SENATUS_BUTTON button = m_PendingButton;
+    m_PendingButton = SENATUS_BUTTON_NONE;
+    if (IsVisible() && button == SENATUS_BUTTON_EXIT)
     {
-        int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
-
-        if (iNumCurOpenTab == RADIOGROUPEVENT_NONE)
-            return true;
-
-        m_iNumCurOpenTab = iNumCurOpenTab;
-
-        if (iNumCurOpenTab == TAB_CASTLE_MIX)
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
+    }
+    else if (IsVisible() && button != SENATUS_BUTTON_NONE && !ButtonLocked(button))
+    {
+        switch (m_iNumCurOpenTab)
         {
-            g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CASTLE_SENIOR);
-            //	 		g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+        case TAB_GATE_MANAGING:
+            UpdateGateManagingTab(button);
+            break;
+        case TAB_STATUE_MANAGING:
+            UpdateStatueManagingTab(button);
+            break;
+        case TAB_TAX_MANAGING:
+            UpdateTaxManagingTab(button);
+            break;
         }
     }
-    return true;
-}
-bool CCastleWindow::Render()
-{
-    EnableAlphaTest();
 
-    RenderFrame();
-
-    m_TabBtn.Render();
-
-    switch (m_iNumCurOpenTab)
+    if (IsVisible())
     {
-    case TAB_GATE_MANAGING:
-        RenderGateManagingTab();
-        break;
-    case TAB_STATUE_MANAGING:
-        RenderStatueManagingTab();
-        break;
-    case TAB_TAX_MANAGING:
-        RenderTaxManagingTab();
-        break;
+        const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
+        if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
+        {
+            m_iNumCurOpenTab = iNumCurOpenTab;
+
+            if (iNumCurOpenTab == TAB_CASTLE_MIX)
+            {
+                g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CASTLE_SENIOR);
+                //	 		g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+            }
+        }
     }
 
-    m_BtnExit.Render();
+    SyncRmlModel();
+    return true;
+}
 
-    DisableAlphaBlend();
-
+bool CCastleWindow::Render()
+{
+    // Nothing native left: the frame, the tabs, the pages and the buttons are RmlUi. Kept
+    // because CObject requires the override.
     return true;
 }
 
@@ -221,87 +203,58 @@ float CCastleWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CCastleWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CASTLEWINDOW_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CASTLEWINDOW_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CASTLEWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CASTLEWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CASTLEWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CASTLEWINDOW_EXIT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_guild_tab04.tga", IMAGE_CASTLEWINDOW_TAB_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_CASTLEWINDOW_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_CASTLEWINDOW_BUTTON, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT);
-    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT);
-    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT);
-    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT);
-    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL);
-    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL);
-    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL);
-    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL);
-
-    LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_CASTLEWINDOW_MONEY, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_scroll_up.jpg", IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_scroll_dn.jpg", IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
-}
-void CCastleWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_CASTLEWINDOW_BOTTOM);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_RIGHT);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_LEFT);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TOP);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_BACK);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_EXIT_BTN);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TAB_BTN);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_LINE);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_BUTTON);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_MONEY);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_SCROLL_UP_BTN);
-    DeleteBitmap(IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN);
-}
-
-void CCastleWindow::RenderFrame()
-{
-    RenderImage(IMAGE_CASTLEWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_CASTLEWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_CASTLEWINDOW_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CASTLEWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CASTLEWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-
-    wchar_t szText[256] = { 0, };
-    float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
-    float fLine_y = 13.0f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    mu_swprintf(szText, L"%ls", I18N::Game::SeniorNPC);
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
-}
-
 bool CCastleWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_SENATUS);
 
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
-        return true;
-    }
-
     return false;
+}
+
+bool CCastleWindow::ButtonLocked(SENATUS_BUTTON button) const
+{
+    // A locked CButton ignored clicks; the lock is the one the page was last drawn with.
+    const std::vector<CastleButtonEntry>& buttons = m_RmlBinder.GetModel().buttons;
+    const auto it = std::find_if(buttons.begin(), buttons.end(),
+                                 [button](const CastleButtonEntry& entry) { return entry.id == button; });
+    return it != buttons.end() && it->locked;
+}
+
+void CCastleWindow::UpdateIconPick()
+{
+    if (!MouseLButtonPush)
+        return;
+
+    const POINT ptOrigin = {m_Pos.x, m_Pos.y + 55 + 6 + 12};
+    if (!CheckMouseIn(ptOrigin.x + 15, ptOrigin.y, 160.f, 165.f))
+        return;
+
+    if (m_iNumCurOpenTab == TAB_GATE_MANAGING)
+    {
+        if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 35, 24, 24))
+            g_SenatusInfo.SetCurrGate(0);
+        else if (CheckMouseIn(ptOrigin.x + 64, ptOrigin.y + 83, 24, 24))
+            g_SenatusInfo.SetCurrGate(1);
+        else if (CheckMouseIn(ptOrigin.x + 100, ptOrigin.y + 83, 24, 24))
+            g_SenatusInfo.SetCurrGate(2);
+        else if (CheckMouseIn(ptOrigin.x + 48, ptOrigin.y + 135, 24, 24))
+            g_SenatusInfo.SetCurrGate(3);
+        else if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 135, 24, 24))
+            g_SenatusInfo.SetCurrGate(4);
+        else if (CheckMouseIn(ptOrigin.x + 116, ptOrigin.y + 135, 24, 24))
+            g_SenatusInfo.SetCurrGate(5);
+    }
+    else if (m_iNumCurOpenTab == TAB_STATUE_MANAGING)
+    {
+        if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 20, 24, 24))
+            g_SenatusInfo.SetCurrStatue(0);
+        else if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 65, 24, 24))
+            g_SenatusInfo.SetCurrStatue(1);
+        else if (CheckMouseIn(ptOrigin.x + 64, ptOrigin.y + 110, 24, 24))
+            g_SenatusInfo.SetCurrStatue(2);
+        else if (CheckMouseIn(ptOrigin.x + 100, ptOrigin.y + 110, 24, 24))
+            g_SenatusInfo.SetCurrStatue(3);
+    }
 }
 
 namespace
@@ -346,31 +299,10 @@ namespace
     }
 }
 
-void CCastleWindow::UpdateGateManagingTab()
+void CCastleWindow::UpdateGateManagingTab(SENATUS_BUTTON button)
 {
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 + 6 + 12 };
-
-    if (MouseLButtonPush)
-    {
-        if (CheckMouseIn(ptOrigin.x + 15, ptOrigin.y, 160.f, 165.f))
-        {
-            if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 35, 24, 24))
-                g_SenatusInfo.SetCurrGate(0);
-            else if (CheckMouseIn(ptOrigin.x + 64, ptOrigin.y + 83, 24, 24))
-                g_SenatusInfo.SetCurrGate(1);
-            else if (CheckMouseIn(ptOrigin.x + 100, ptOrigin.y + 83, 24, 24))
-                g_SenatusInfo.SetCurrGate(2);
-            else if (CheckMouseIn(ptOrigin.x + 48, ptOrigin.y + 135, 24, 24))
-                g_SenatusInfo.SetCurrGate(3);
-            else if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 135, 24, 24))
-                g_SenatusInfo.SetCurrGate(4);
-            else if (CheckMouseIn(ptOrigin.x + 116, ptOrigin.y + 135, 24, 24))
-                g_SenatusInfo.SetCurrGate(5);
-        }
-    }
-
     wchar_t szText[256] = { 0, };
-    if (m_BtnBuy.UpdateMouseEvent() == true)
+    if (button == SENATUS_BUTTON_BUY)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
         mu::ui::window::GenericDialogConfig cfg;
@@ -385,7 +317,7 @@ void CCastleWindow::UpdateGateManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnRepair.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_REPAIR)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
         mu::ui::window::GenericDialogConfig cfg;
@@ -400,7 +332,7 @@ void CCastleWindow::UpdateGateManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_UPGRADE_HP)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_HP);
 
@@ -421,7 +353,7 @@ void CCastleWindow::UpdateGateManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_UPGRADE_DEFENSE)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE);
 
@@ -444,27 +376,10 @@ void CCastleWindow::UpdateGateManagingTab()
     }
 }
 
-void CCastleWindow::UpdateStatueManagingTab()
+void CCastleWindow::UpdateStatueManagingTab(SENATUS_BUTTON button)
 {
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 + 6 + 12 };
-
-    if (MouseLButtonPush)
-    {
-        if (CheckMouseIn(ptOrigin.x + 15, ptOrigin.y, 160.f, 165.f))
-        {
-            if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 20, 24, 24))
-                g_SenatusInfo.SetCurrStatue(0);
-            else if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 65, 24, 24))
-                g_SenatusInfo.SetCurrStatue(1);
-            else if (CheckMouseIn(ptOrigin.x + 64, ptOrigin.y + 110, 24, 24))
-                g_SenatusInfo.SetCurrStatue(2);
-            else if (CheckMouseIn(ptOrigin.x + 100, ptOrigin.y + 110, 24, 24))
-                g_SenatusInfo.SetCurrStatue(3);
-        }
-    }
-
     wchar_t szText[256] = { 0, };
-    if (m_BtnBuy.UpdateMouseEvent() == true)
+    if (button == SENATUS_BUTTON_BUY)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_STATUE);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
@@ -479,7 +394,7 @@ void CCastleWindow::UpdateStatueManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnRepair.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_REPAIR)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_STATUE);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
@@ -494,7 +409,7 @@ void CCastleWindow::UpdateStatueManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_UPGRADE_HP)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_HP);
 
@@ -515,7 +430,7 @@ void CCastleWindow::UpdateStatueManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_UPGRADE_DEFENSE)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE);
 
@@ -536,7 +451,7 @@ void CCastleWindow::UpdateStatueManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnUpgradeRecover.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_UPGRADE_RECOVER)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER);
 
@@ -559,10 +474,10 @@ void CCastleWindow::UpdateStatueManagingTab()
     }
 }
 
-void CCastleWindow::UpdateTaxManagingTab()
+void CCastleWindow::UpdateTaxManagingTab(SENATUS_BUTTON button)
 {
     wchar_t szText[256] = { 0, };
-    if (m_BtnApplyTax.UpdateMouseEvent() == true)
+    if (button == SENATUS_BUTTON_APPLY_TAX)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_APPLY_TAX);
         wchar_t szChaosTaxText[256] = { 0, };
@@ -578,7 +493,7 @@ void CCastleWindow::UpdateTaxManagingTab()
         cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnWithdraw.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_WITHDRAW)
     {
         // Numeric Mode::Text amount entry. Reads its own typed amount directly
         // (GetInputText()), not via ExecuteCastleMsgBoxRequest()'s generic switch -- that helper
@@ -606,423 +521,454 @@ void CCastleWindow::UpdateTaxManagingTab()
         };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
-    else if (m_BtnChaosTaxUp.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_CHAOS_TAX_UP)
     {
         g_SenatusInfo.PlusChaosTaxRate(1);
     }
-    else if (m_BtnChaosTaxDn.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_CHAOS_TAX_DOWN)
     {
         g_SenatusInfo.PlusChaosTaxRate(-1);
     }
-    else if (m_BtnNPCTaxUp.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_NPC_TAX_UP)
     {
         g_SenatusInfo.PlusNormalTaxRate(1);
     }
-    else if (m_BtnNPCTaxDn.UpdateMouseEvent() == true)
+    else if (button == SENATUS_BUTTON_NPC_TAX_DOWN)
     {
         g_SenatusInfo.PlusNormalTaxRate(-1);
     }
 }
 
-void CCastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void CCastleWindow::BuildRmlUi()
 {
-    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
-    float fBoxWidth = fWidth;
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
 
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT, ptOrigin.x + fBoxWidth + 4, ptOrigin.y - 4, 14, 14);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL, ptOrigin.x + 25, ptOrigin.y - 4, fBoxWidth - 21, 14);
-    RenderColorQuadARGB(ptOrigin.x + 15, ptOrigin.y - 3, fBoxWidth - 2, 15, 0x4D000000u);
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "castle_window",
+        [this](Rml::DataModelConstructor& c, CastleWindowRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("line_height_px", &model.lineHeightPx);
+            c.Bind("button_label_top", &model.buttonLabelTop);
+            c.Bind("tab_label_top", &model.tabLabelTop);
+            auto tab = c.RegisterStruct<CastleTabEntry>();
+            tab.RegisterMember("label", &CastleTabEntry::label);
+            tab.RegisterMember("label_left", &CastleTabEntry::labelLeft);
+            tab.RegisterMember("text_px", &CastleTabEntry::textPx);
+            tab.RegisterMember("selected", &CastleTabEntry::selected);
+            c.RegisterArray<std::vector<CastleTabEntry>>();
+            c.Bind("tabs", &model.tabs);
+            auto piece = c.RegisterStruct<CastlePieceEntry>();
+            piece.RegisterMember("kind", &CastlePieceEntry::kind);
+            piece.RegisterMember("sprite", &CastlePieceEntry::sprite);
+            piece.RegisterMember("left", &CastlePieceEntry::left);
+            piece.RegisterMember("top", &CastlePieceEntry::top);
+            piece.RegisterMember("width", &CastlePieceEntry::width);
+            piece.RegisterMember("height", &CastlePieceEntry::height);
+            piece.RegisterMember("color", &CastlePieceEntry::color);
+            piece.RegisterMember("text", &CastlePieceEntry::text);
+            piece.RegisterMember("text_px", &CastlePieceEntry::textPx);
+            piece.RegisterMember("align", &CastlePieceEntry::align);
+            piece.RegisterMember("bold", &CastlePieceEntry::bold);
+            c.RegisterArray<std::vector<CastlePieceEntry>>();
+            c.Bind("pieces", &model.pieces);
+            auto button = c.RegisterStruct<CastleButtonEntry>();
+            button.RegisterMember("label", &CastleButtonEntry::label);
+            button.RegisterMember("id", &CastleButtonEntry::id);
+            button.RegisterMember("left", &CastleButtonEntry::left);
+            button.RegisterMember("top", &CastleButtonEntry::top);
+            button.RegisterMember("locked", &CastleButtonEntry::locked);
+            c.RegisterArray<std::vector<CastleButtonEntry>>();
+            c.Bind("buttons", &model.buttons);
+            c.Bind("tax_arrows", &model.taxArrows);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+            c.BindEventCallback("senatus_button",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingButton = static_cast<SENATUS_BUTTON>(arguments[0].Get<int>(-1));
+                                });
+        });
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+                                                  "Data/Interface/RmlUi/castle_window.rml");
 }
 
-void CCastleWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void CCastleWindow::ReloadRmlTheme()
 {
-    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
-    float fBoxWidth = fWidth;
-    float fBoxHeight = fHeight;
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
 
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL, ptOrigin.x + 12, ptOrigin.y + 9, 14, fBoxHeight);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL, ptOrigin.x + fBoxWidth + 4, ptOrigin.y + 9, 14, fBoxHeight);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x + 15, ptOrigin.y + 3, fBoxWidth - 2, 14);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT, ptOrigin.x + 12, ptOrigin.y + fBoxHeight + 3, 14, 14);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT, ptOrigin.x + fBoxWidth + 4, ptOrigin.y + fBoxHeight + 3, 14, 14);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x + 25, ptOrigin.y + fBoxHeight + 3, fBoxWidth - 21, 14);
+    BuildRmlUi();
 }
 
-void CCastleWindow::RenderGateManagingTab()
+void CCastleWindow::SyncRmlModel()
 {
-    LPPMSG_NPCDBLIST pNPCInfo = &g_SenatusInfo.GetCurrGateInfo();
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 };
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
 
-    g_pRenderText->SetFont(g_hFontBold);
+    // Layer depth 5: over the HUD like every panel the original opened.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
 
-    ptOrigin.y += 6;
-    RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 165);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PurchaseAndRepair, 190, 0, RT3_SORT_CENTER);
-    RenderBitmap(BITMAP_INTERFACE_EX + 35, ptOrigin.x + 15, ptOrigin.y + 12, 160.f, 165.f, 0.f, 0.f, 160.f / 256.f, 165.f / 256.f);
-    RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 165);
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncContent();
+}
 
-    ptOrigin.y += 12;
-    RenderCastleItem(ptOrigin.x + 82, ptOrigin.y + 35, &g_SenatusInfo.GetGateInfo(0));
-    RenderCastleItem(ptOrigin.x + 64, ptOrigin.y + 83, &g_SenatusInfo.GetGateInfo(1));
-    RenderCastleItem(ptOrigin.x + 100, ptOrigin.y + 83, &g_SenatusInfo.GetGateInfo(2));
-    RenderCastleItem(ptOrigin.x + 48, ptOrigin.y + 135, &g_SenatusInfo.GetGateInfo(3));
-    RenderCastleItem(ptOrigin.x + 82, ptOrigin.y + 135, &g_SenatusInfo.GetGateInfo(4));
-    RenderCastleItem(ptOrigin.x + 116, ptOrigin.y + 135, &g_SenatusInfo.GetGateInfo(5));
+void CCastleWindow::SyncContent()
+{
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    const float x0 = static_cast<float>(m_Pos.x);
+    const float y0 = static_cast<float>(m_Pos.y);
+    std::vector<CastlePieceEntry> pieces;
+    std::vector<CastleButtonEntry> buttons;
 
+    // RenderText(x, y, text, width, 0, sort) in window coordinates, in the font and colour the
+    // original had set at that point (its draws leak them from one call to the next).
+    bool bold = true;
+    DWORD color = RGBA(220, 220, 220, 255);
+    auto addText = [&](const wchar_t* text, float x, float y, float width, int align)
+    {
+        if (text == nullptr || text[0] == L'\0')
+            return;
+        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+        const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        const float px =
+            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
+                        : UI::Scaling::NativeTextPixelSize(role, transform);
+        CastlePieceEntry entry;
+        entry.kind = CastlePieceEntry::KIND_TEXT;
+        entry.left = x - x0;
+        entry.top = y - y0;
+        entry.width = width;
+        entry.color = UI::RmlBridge::RgbaToCss(color);
+        entry.text = StringUtils::WideToNarrow(text);
+        entry.textPx = px;
+        entry.align = align;
+        entry.bold = bold;
+        pieces.push_back(std::move(entry));
+    };
+    auto addImage = [&](const char* sprite, float x, float y, float width, float height)
+    {
+        CastlePieceEntry entry;
+        entry.kind = CastlePieceEntry::KIND_IMAGE;
+        entry.sprite = sprite;
+        entry.left = x - x0;
+        entry.top = y - y0;
+        entry.width = width;
+        entry.height = height;
+        pieces.push_back(std::move(entry));
+    };
+    // RenderColorQuadARGB(); a zero or negative size (an empty level bar) draws nothing.
+    auto addBox = [&](float x, float y, float width, float height, unsigned int argb)
+    {
+        if (!(width > 0.f) || !(height > 0.f))
+            return;
+        CastlePieceEntry entry;
+        entry.kind = CastlePieceEntry::KIND_BOX;
+        entry.left = x - x0;
+        entry.top = y - y0;
+        entry.width = width;
+        entry.height = height;
+        entry.color = ArgbToCss(argb);
+        pieces.push_back(std::move(entry));
+    };
+    auto addButton = [&](SENATUS_BUTTON id, const wchar_t* label, float x, float y, bool locked)
+    { buttons.push_back({StringUtils::WideToNarrow(label), id, x - x0, y - y0, locked}); };
+    // RenderOutlineUpper() / RenderOutlineLower(): a table's title bar and its frame.
+    auto outlineUpper = [&](float x, float y, float width)
+    {
+        addImage("t-tl", x + 12, y - 4, 14, 14);
+        addImage("t-tr", x + width + 4, y - 4, 14, 14);
+        addImage("t-top", x + 25, y - 4, width - 21, 14);
+        addBox(x + 15, y - 3, width - 2, 15, 0x4D000000u);
+    };
+    auto outlineLower = [&](float x, float y, float width, float height)
+    {
+        addImage("t-left", x + 12, y + 9, 14, height);
+        addImage("t-right", x + width + 4, y + 9, 14, height);
+        addImage("t-bottom", x + 15, y + 3, width - 2, 14);
+        addImage("t-bl", x + 12, y + height + 3, 14, 14);
+        addImage("t-br", x + width + 4, y + height + 3, 14, 14);
+        addImage("t-bottom", x + 25, y + height + 3, width - 21, 14);
+    };
+    // RenderCastleItem(): a gate or statue icon with its level bars when it stands.
+    auto castleItem = [&](float x, float y, LPPMSG_NPCDBLIST pInfo)
+    {
+        const int nHPBlockSize = 24 / (g_SenatusInfo.GetMaxHPLevel() + 1);
+        const int nDefenseBlockSize = 24 / (g_SenatusInfo.GetMaxDefenseLevel() + 1);
+        const int nRecoverBlockSize = 24 / (g_SenatusInfo.GetMaxRecoverLevel() + 1);
+        const float fHPRate = pInfo->iNpcMaxHp > 0 ? pInfo->iNpcHp / static_cast<float>(pInfo->iNpcMaxHp) : 0.f;
+
+        if (g_SenatusInfo.IsGate(pInfo))
+        {
+            if (pInfo->btNpcLive)
+            {
+                const int nHP = g_SenatusInfo.GetHPLevel(pInfo);
+                const int nDefense = g_SenatusInfo.GetDefenseLevel(pInfo);
+                addBox(x, y - 10, static_cast<float>(nHPBlockSize * (nHP + 1)), 3, 0xFFFFFFFFu);
+                addBox(x, y - 5, 24, 3, 0xFFFFFFFFu);
+                addBox(x, y - 10, (nHPBlockSize * (nHP + 1)) * fHPRate, 3, 0xFFFF0000u);
+                addBox(x, y - 10, 24, 1, 0xFF000000u);
+                addBox(x, y - 7, 24, 1, 0xFF000000u);
+                addBox(x, y - 10, 1, 3, 0xFF000000u);
+                addBox(x + 24, y - 10, 1, 3, 0xFF000000u);
+                addBox(x, y - 5, static_cast<float>(nDefenseBlockSize * (nDefense + 1)), 3, 0xFF00FF00u);
+            }
+            addImage(pInfo->iNpcIndex == g_SenatusInfo.GetCurrGate() + 1 ? "gate-on" : "gate-off", x, y, 24, 24);
+        }
+        if (g_SenatusInfo.IsStatue(pInfo))
+        {
+            if (pInfo->btNpcLive)
+            {
+                const int nHP = g_SenatusInfo.GetHPLevel(pInfo);
+                const int nDefense = g_SenatusInfo.GetDefenseLevel(pInfo);
+                const int nRecover = g_SenatusInfo.GetRecoverLevel(pInfo);
+                addBox(x, y - 15, static_cast<float>(nHPBlockSize * (nHP + 1)), 3, 0xFFFFFFFFu);
+                addBox(x, y - 10, 24, 3, 0xFFFFFFFFu);
+                addBox(x, y - 5, 24, 3, 0xFFFFFFFFu);
+                addBox(x, y - 15, (nHPBlockSize * (nHP + 1)) * fHPRate, 3, 0xFFFF0000u);
+                addBox(x, y - 10, static_cast<float>(nDefenseBlockSize * (nDefense + 1)), 3, 0xFF00FF00u);
+                addBox(x, y - 5, static_cast<float>(nRecoverBlockSize * (nRecover + 1)), 3, 0xFFFFFF00u);
+            }
+            addImage(pInfo->iNpcIndex == g_SenatusInfo.GetCurrStatue() + 1 ? "statue-on" : "statue-off", x, y, 24, 24);
+        }
+    };
+    wchar_t szTemp[256] = {};
+
+    // RenderFrame(): the title, bold (220, 220, 220).
+    addText(I18N::Game::SeniorNPC, x0 + 15, y0 + 13, 160, 1);
+
+    // The tabs (labels in the normal font): a label wider than its tab starts left of it, from
+    // the whole-unit centre of its full width, shrunk towards the tab's 40 px down to the minimum
+    // font size, and runs over its neighbours ("Castle Gate", "Guardian Statue"), as in the
+    // original client.
+    const wchar_t* tabLabels[] = {I18N::Game::CastleGate, I18N::Game::GuardianStatue, I18N::Game::Tax,
+                                  I18N::Game::Store1640};
+    std::vector<CastleTabEntry> tabs;
     g_pRenderText->SetFont(g_hFont);
-
-    ptOrigin.y += 173;
-    if (pNPCInfo->btNpcLive == 0)
+    for (int i = 0; i < 4; ++i)
     {
-        m_BtnBuy.Render();
+        const SIZE size = g_pRenderText->MeasureText(tabLabels[i], static_cast<int>(wcslen(tabLabels[i])));
+        tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]), static_cast<float>(40 / 2 - size.cx / 2),
+                        UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
+                                                              static_cast<float>(size.cx), 40.f),
+                        i == m_TabBtn.GetCurButtonIndex()});
     }
-    else
+
+    // The gate and statue pages share their layout (RenderGateManagingTab(),
+    // RenderStatueManagingTab()).
+    auto gateOrStatuePage = [&](bool statue)
     {
-        if (g_SenatusInfo.IsGateRepairable())
+        LPPMSG_NPCDBLIST pNPCInfo = statue ? &g_SenatusInfo.GetCurrStatueInfo() : &g_SenatusInfo.GetCurrGateInfo();
+        const float x = x0;
+        float y = y0 + 55 + 6;
+
+        outlineUpper(x, y, 160);
+        addText(I18N::Game::PurchaseAndRepair, x, y, 190, 1);
+        addImage("map", x + 15, y + 12, 160, 165);
+        outlineLower(x, y, 160, 165);
+
+        y += 12;
+        if (statue)
         {
-            m_BtnRepair.UnLock();
-            m_BtnRepair.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnRepair.ChangeTextColor(RGBA(255, 255, 255, 255));
+            castleItem(x + 82, y + 20, &g_SenatusInfo.GetStatueInfo(0));
+            castleItem(x + 82, y + 65, &g_SenatusInfo.GetStatueInfo(1));
+            castleItem(x + 64, y + 110, &g_SenatusInfo.GetStatueInfo(2));
+            castleItem(x + 100, y + 110, &g_SenatusInfo.GetStatueInfo(3));
         }
         else
         {
-            m_BtnRepair.Lock();
-            m_BtnRepair.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnRepair.ChangeTextColor(RGBA(100, 100, 100, 255));
-        }
-        if (g_SenatusInfo.IsGateHPUpgradable())
-        {
-            m_BtnUpgradeHP.UnLock();
-            m_BtnUpgradeHP.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnUpgradeHP.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-        else
-        {
-            m_BtnUpgradeHP.Lock();
-            m_BtnUpgradeHP.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnUpgradeHP.ChangeTextColor(RGBA(100, 100, 100, 255));
-        }
-        if (g_SenatusInfo.IsGateDefeseUpgradable())
-        {
-            m_BtnUpgradeDefense.UnLock();
-            m_BtnUpgradeDefense.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnUpgradeDefense.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-        else
-        {
-            m_BtnUpgradeDefense.Lock();
-            m_BtnUpgradeDefense.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnUpgradeDefense.ChangeTextColor(RGBA(100, 100, 100, 255));
+            castleItem(x + 82, y + 35, &g_SenatusInfo.GetGateInfo(0));
+            castleItem(x + 64, y + 83, &g_SenatusInfo.GetGateInfo(1));
+            castleItem(x + 100, y + 83, &g_SenatusInfo.GetGateInfo(2));
+            castleItem(x + 48, y + 135, &g_SenatusInfo.GetGateInfo(3));
+            castleItem(x + 82, y + 135, &g_SenatusInfo.GetGateInfo(4));
+            castleItem(x + 116, y + 135, &g_SenatusInfo.GetGateInfo(5));
         }
 
-        m_BtnRepair.Render();
-        m_BtnUpgradeHP.Render();
-        m_BtnUpgradeDefense.Render();
+        y += 173;
+        if (pNPCInfo->btNpcLive == 0)
+        {
+            addButton(SENATUS_BUTTON_BUY, I18N::Game::Buy1124, x0 + INVENTORY_WIDTH / 2 - 27, y0 + 250, false);
+            return;
+        }
 
-        g_pRenderText->SetBgColor(0x00000000);
-        g_pRenderText->SetTextColor(0xFFFFFFFF);
+        const bool repairable = statue ? g_SenatusInfo.IsStatueRepairable() : g_SenatusInfo.IsGateRepairable();
+        const bool hpUpgradable = statue ? g_SenatusInfo.IsStatueHPUpgradable() : g_SenatusInfo.IsGateHPUpgradable();
+        const bool defenseUpgradable =
+            statue ? g_SenatusInfo.IsStatueDefeseUpgradable() : g_SenatusInfo.IsGateDefeseUpgradable();
+        addButton(SENATUS_BUTTON_REPAIR, I18N::Game::Repair, x0 + 110, y0 + 260, !repairable);
+        addButton(SENATUS_BUTTON_UPGRADE_HP, I18N::Game::Improve, x0 + 110, y0 + 310, !hpUpgradable);
+        addButton(SENATUS_BUTTON_UPGRADE_DEFENSE, I18N::Game::Improve, x0 + 110, y0 + 334, !defenseUpgradable);
+        if (statue)
+            addButton(SENATUS_BUTTON_UPGRADE_RECOVER, I18N::Game::Improve, x0 + 110, y0 + 358,
+                      !g_SenatusInfo.IsStatueRecoverUpgradable());
 
-        wchar_t szTemp[256];
+        bold = false;
+        color = RGBA(255, 255, 255, 255);
         mu_swprintf(szTemp, I18N::Game::DURDD, pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
         InsertComma(szTemp, pNPCInfo->iNpcHp);
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
-        g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
-        ptOrigin.y += 13;
+        addText(szTemp, x + 20, y, 0, 0);
+        y += 13;
         mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
-        g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
+        addText(szTemp, x + 20, y, 0, 0);
+        if (statue)
+        {
+            y += 13;
+            mu_swprintf(szTemp, I18N::Game::RRD, g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
+            addText(szTemp, x + 20, y, 0, 0);
+            y += 22;
+        }
+        else
+        {
+            y += 35;
+        }
 
-        ptOrigin.y += 35;
-        RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 78);
-        RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 78);
+        outlineUpper(x, y, 160);
+        outlineLower(x, y, 160, 78);
+        bold = true;
+        addText(I18N::Game::Improve, x, y, 190, 1);
+        bold = false;
 
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Improve, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->SetFont(g_hFont);
-
-        ptOrigin.y += 24;
+        y += 24;
         mu_swprintf(szTemp, I18N::Game::DURD, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
-        g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
-        ptOrigin.y += 23;
+        addText(szTemp, x + 30, y, 0, 0);
+        y += 23;
         mu_swprintf(szTemp, I18N::Game::DPD1564, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
-        g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
-    }
-}
+        addText(szTemp, x + 30, y, 0, 0);
+        if (statue)
+        {
+            y += 23;
+            mu_swprintf(szTemp, I18N::Game::RRD1565, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
+            InsertComma(szTemp, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
+            addText(szTemp, x + 30, y, 0, 0);
+        }
+    };
 
-void CCastleWindow::RenderStatueManagingTab()
-{
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 };
-    LPPMSG_NPCDBLIST pNPCInfo = &g_SenatusInfo.GetCurrStatueInfo();
-
-    g_pRenderText->SetFont(g_hFontBold);
-
-    ptOrigin.y += 6;
-    RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 165);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PurchaseAndRepair, 190, 0, RT3_SORT_CENTER);
-    RenderBitmap(BITMAP_INTERFACE_EX + 35, ptOrigin.x + 15, ptOrigin.y + 12, 160.f, 165.f, 0.f, 0.f, 160.f / 256.f, 165.f / 256.f);
-    RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 165);
-
-    ptOrigin.y += 12;
-    RenderCastleItem(ptOrigin.x + 82, ptOrigin.y + 20, &g_SenatusInfo.GetStatueInfo(0));
-    RenderCastleItem(ptOrigin.x + 82, ptOrigin.y + 65, &g_SenatusInfo.GetStatueInfo(1));
-    RenderCastleItem(ptOrigin.x + 64, ptOrigin.y + 110, &g_SenatusInfo.GetStatueInfo(2));
-    RenderCastleItem(ptOrigin.x + 100, ptOrigin.y + 110, &g_SenatusInfo.GetStatueInfo(3));
-
-    g_pRenderText->SetFont(g_hFont);
-
-    ptOrigin.y += 173;
-    if (pNPCInfo->btNpcLive == 0)
+    switch (m_iNumCurOpenTab)
     {
-        m_BtnBuy.Render();
-    }
-    else
+    case TAB_GATE_MANAGING:
+        gateOrStatuePage(false);
+        break;
+    case TAB_STATUE_MANAGING:
+        gateOrStatuePage(true);
+        break;
+    case TAB_TAX_MANAGING:
     {
-        if (g_SenatusInfo.IsStatueRepairable())
-        {
-            m_BtnRepair.UnLock();
-            m_BtnRepair.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnRepair.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-        else
-        {
-            m_BtnRepair.Lock();
-            m_BtnRepair.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnRepair.ChangeTextColor(RGBA(100, 100, 100, 255));
-        }
-        if (g_SenatusInfo.IsStatueHPUpgradable())
-        {
-            m_BtnUpgradeHP.UnLock();
-            m_BtnUpgradeHP.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnUpgradeHP.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-        else
-        {
-            m_BtnUpgradeHP.Lock();
-            m_BtnUpgradeHP.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnUpgradeHP.ChangeTextColor(RGBA(100, 100, 100, 255));
-        }
-        if (g_SenatusInfo.IsStatueDefeseUpgradable())
-        {
-            m_BtnUpgradeDefense.UnLock();
-            m_BtnUpgradeDefense.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnUpgradeDefense.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-        else
-        {
-            m_BtnUpgradeDefense.Lock();
-            m_BtnUpgradeDefense.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnUpgradeDefense.ChangeTextColor(RGBA(100, 100, 100, 255));
-        }
-        if (g_SenatusInfo.IsStatueRecoverUpgradable())
-        {
-            m_BtnUpgradeRecover.UnLock();
-            m_BtnUpgradeRecover.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-            m_BtnUpgradeRecover.ChangeTextColor(RGBA(255, 255, 255, 255));
-        }
-        else
-        {
-            m_BtnUpgradeRecover.Lock();
-            m_BtnUpgradeRecover.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-            m_BtnUpgradeRecover.ChangeTextColor(RGBA(100, 100, 100, 255));
-        }
+        // RenderTaxManagingTab().
+        const float x = x0;
+        float y = y0 + 55 + 6;
+        color = RGBA(255, 255, 255, 255);
 
-        m_BtnRepair.Render();
-        m_BtnUpgradeHP.Render();
-        m_BtnUpgradeDefense.Render();
-        m_BtnUpgradeRecover.Render();
+        addBox(x + 15, y + 14, 150, 24, 0x80666666u);
+        addBox(x + 15, y + 42, 150, 24, 0x80666666u);
+        outlineUpper(x, y, 160);
+        bold = true;
+        addText(I18N::Game::AdjustTaxRate, x, y, 190, 1);
+        outlineLower(x, y, 160, 55);
+        addImage("t-bottom", x + 15, y + 30, 160 - 2, 14);
 
-        g_pRenderText->SetTextColor(0xFFFFFFFF);
-        g_pRenderText->SetBgColor(0);
+        y += 23;
+        bold = false;
+        mu_swprintf(szTemp, I18N::Game::ChaosCombinationGoblinDD, g_SenatusInfo.GetRealTaxRateChaos(),
+                    g_SenatusInfo.GetChaosTaxRate());
+        addText(szTemp, x, y, 175, 1);
+        y += 25;
+        mu_swprintf(szTemp, I18N::Game::NPCDD, g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
+        addText(szTemp, x, y, 175, 1);
 
-        wchar_t szTemp[256];
-        mu_swprintf(szTemp, I18N::Game::DURDD, pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
-        InsertComma(szTemp, pNPCInfo->iNpcHp);
-        InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
-        g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
-        ptOrigin.y += 13;
-        mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
-        g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
-        ptOrigin.y += 13;
-        mu_swprintf(szTemp, I18N::Game::RRD, g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
-        g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
+        addButton(SENATUS_BUTTON_APPLY_TAX, I18N::Game::Apply, x0 + 120, y0 + 133, false);
 
-        ptOrigin.y += 22;
-        RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 78);
-        RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 78);
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Improve, 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->SetFont(g_hFont);
+        y += 53;
+        addText(I18N::Game::OnlyTheLordOfTheCastle, x + 15, y, 160, 1);
+        y += 13;
+        addText(I18N::Game::CanAdjustTheTaxRate, x + 15, y, 160, 1);
+        y += 13;
+        addText(I18N::Game::TaxAdjustmentAvailable, x + 15, y, 160, 1);
 
-        ptOrigin.y += 24;
-        mu_swprintf(szTemp, I18N::Game::DURD, g_SenatusInfo.GetNextAddHP(pNPCInfo));
-        InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
-        g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
-        ptOrigin.y += 23;
-        mu_swprintf(szTemp, I18N::Game::DPD1564, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
-        InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
-        g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
-        ptOrigin.y += 23;
-        mu_swprintf(szTemp, I18N::Game::RRD1565, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
-        InsertComma(szTemp, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
-        g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
+        bold = true;
+        color = 0xFF947BBB;
+        y += 20;
+        // Formats: "3%%" in some languages.
+        mu_swprintf(szTemp, I18N::Game::DuringTrucePeriod);
+        addText(szTemp, x + 15, y, 160, 1);
+        y += 12;
+        mu_swprintf(szTemp, I18N::Game::MaximumTaxRates3);
+        addText(szTemp, x + 15, y, 160, 1);
+        y += 12;
+        addText(I18N::Game::NPCsInclude, x + 15, y, 160, 1);
+        y += 12;
+        addText(I18N::Game::ElfLalaPotionGirl, x + 15, y, 160, 1);
+        y += 12;
+        addText(I18N::Game::WizardArenaGuard, x + 15, y, 160, 1);
+        y += 12;
+        addText(I18N::Game::AndEtc, x + 15, y, 160, 1);
+
+        y += 10;
+        addImage("line", x + 1, y, 188, 21);
+
+        // Still bold: the colour went back to white, the font did not.
+        color = RGBA(255, 255, 255, 255);
+        y += 18;
+        addImage("money", x + 10, y, 170, 24);
+        mu_swprintf(szTemp, I18N::Game::Zen);
+        addText(szTemp, x + 14, y + 7, 0, 0);
+        // The original formatted "%I64d", which this platform reads as a 64-wide padded field
+        // and drew the amount twice, the second copy past the strip; fixed.
+        ConvertGold64(g_SenatusInfo.GetCastleMoney(), szTemp);
+        addText(szTemp, x + 90, y + 7, 80, 2);
+
+        addButton(SENATUS_BUTTON_WITHDRAW, I18N::Game::Withdraw, x0 + 120, y0 + 322, false);
+
+        color = 0xFF947BBB;
+        y += 54;
+        addText(I18N::Game::TaxBelongsToTheCastle, x + 15, y, 160, 1);
+        y += 12;
+        addText(I18N::Game::AndCanBeUsed, x + 15, y, 160, 1);
+        y += 12;
+        addText(I18N::Game::ToOperateTheCastle, x + 15, y, 160, 1);
+        break;
     }
-}
+    default:
+        break;
+    }
 
-void CCastleWindow::RenderTaxManagingTab()
-{
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 };
-    g_pRenderText->SetTextColor(0xFFFFFFFF);
-    g_pRenderText->SetBgColor(0);
-
-    ptOrigin.y += 6;
-
-    EnableAlphaTest();
-    RenderColorQuadARGB(ptOrigin.x + 15, ptOrigin.y + 14, 150, 24, 0x80666666u);
-    RenderColorQuadARGB(ptOrigin.x + 15, ptOrigin.y + 42, 150, 24, 0x80666666u);
-
-    RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 55);
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AdjustTaxRate, 190, 0, RT3_SORT_CENTER);
-
-    RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 55);
-    RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x + 15, ptOrigin.y + 30, 160 - 2, 14);
-
-    m_BtnChaosTaxUp.Render();
-    m_BtnChaosTaxDn.Render();
-    m_BtnNPCTaxUp.Render();
-    m_BtnNPCTaxDn.Render();
-
-    wchar_t szTemp[256];
-    ptOrigin.y += 23;
-    g_pRenderText->SetFont(g_hFont);
-
-    mu_swprintf(szTemp, I18N::Game::ChaosCombinationGoblinDD, g_SenatusInfo.GetRealTaxRateChaos(), g_SenatusInfo.GetChaosTaxRate());
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 25;
-
-    mu_swprintf(szTemp, I18N::Game::NPCDD, g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER);
-
-    m_BtnApplyTax.Render();
-
-    ptOrigin.y += 53;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::OnlyTheLordOfTheCastle, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 13;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::CanAdjustTheTaxRate, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 13;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::TaxAdjustmentAvailable, 160, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(0xFF947BBB);
-
-    ptOrigin.y += 20;
-    mu_swprintf(szTemp, I18N::Game::DuringTrucePeriod);
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER);
-
-    ptOrigin.y += 12;
-    mu_swprintf(szTemp, I18N::Game::MaximumTaxRates3);
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER);
-
-    ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::NPCsInclude, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::ElfLalaPotionGirl, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::WizardArenaGuard, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::AndEtc, 160, 0, RT3_SORT_CENTER);
-
-    ptOrigin.y += 10;
-    RenderBitmap(IMAGE_CASTLEWINDOW_LINE, ptOrigin.x + 1, ptOrigin.y,
-        188.f, 21, 0.f, 0.f, 188 / 256.f, 21 / 32.f);
-
-    g_pRenderText->SetTextColor(0xFFFFFFFF);
-
-    ptOrigin.y += 18;
-    RenderImage(IMAGE_CASTLEWINDOW_MONEY, ptOrigin.x + 10, ptOrigin.y, 170.f, 24.f);
-
-    mu_swprintf(szTemp, I18N::Game::Zen);
-    g_pRenderText->RenderText(ptOrigin.x + 14, ptOrigin.y + 7, szTemp);
-
-    //wchar_t szGoldText[32];
-    //ConvertGold(g_SenatusInfo.GetCastleMoney(),szGoldText);
-
-    mu_swprintf(szTemp, L"%I64d", g_SenatusInfo.GetCastleMoney());
-    InsertComma64(szTemp, g_SenatusInfo.GetCastleMoney());
-    g_pRenderText->RenderText(ptOrigin.x + 90, ptOrigin.y + 7, szTemp, 80, 0, RT3_SORT_RIGHT);
-
-    m_BtnWithdraw.Render();
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(0xFF947BBB);
-
-    ptOrigin.y += 54;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::TaxBelongsToTheCastle, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::AndCanBeUsed, 160, 0, RT3_SORT_CENTER);
-    ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::ToOperateTheCastle, 160, 0, RT3_SORT_CENTER);
-}
-
-void CCastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo)
-{
-    const int nHPBlockSize = 24 / (g_SenatusInfo.GetMaxHPLevel() + 1);
-    const int nDefenseBlockSize = 24 / (g_SenatusInfo.GetMaxDefenseLevel() + 1);
-    const int nRecoverBlockSize = 24 / (g_SenatusInfo.GetMaxRecoverLevel() + 1);
-
-    if (g_SenatusInfo.IsGate(pInfo))	// ����
+    CastleWindowRmlModel& model = m_RmlBinder.GetModel();
+    auto sync = [&](auto field, const char* name, auto value)
     {
-        if (pInfo->btNpcLive)
+        if (!(model.*field == value))
         {
-            int nHP = g_SenatusInfo.GetHPLevel(pInfo);
-            int nDefense = g_SenatusInfo.GetDefenseLevel(pInfo);
-            float fHPRate = pInfo->iNpcHp / (float)pInfo->iNpcMaxHp;
-
-            DisableAlphaBlend();
-
-            RenderColorQuadARGB(nPosX, nPosY - 10, nHPBlockSize * (nHP + 1), 3, 0xFFFFFFFFu);
-            RenderColorQuadARGB(nPosX, nPosY - 5, 24, 3, 0xFFFFFFFFu);
-            RenderColorQuadARGB(nPosX, nPosY - 10, (nHPBlockSize * (nHP + 1)) * fHPRate, 3, 0xFFFF0000u);
-            RenderColorQuadARGB(nPosX, nPosY - 10, 24, 1, 0xFF000000u);
-            RenderColorQuadARGB(nPosX, nPosY - 7, 24, 1, 0xFF000000u);
-            RenderColorQuadARGB(nPosX, nPosY - 10, 1, 3, 0xFF000000u);
-            RenderColorQuadARGB(nPosX + 24, nPosY - 10, 1, 3, 0xFF000000u);
-            RenderColorQuadARGB(nPosX, nPosY - 5, nDefenseBlockSize * (nDefense + 1), 3, 0xFF00FF00u);
+            model.*field = std::move(value);
+            m_RmlBinder.MarkDirty(name);
         }
-
-        if (pInfo->iNpcIndex == g_SenatusInfo.GetCurrGate() + 1)
-            RenderBitmap(BITMAP_INTERFACE_EX + 37, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f / 32.f, 24.f / 32.f);
-        else
-            RenderBitmap(BITMAP_INTERFACE_EX + 36, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f / 32.f, 24.f / 32.f);
-    }
-    if (g_SenatusInfo.IsStatue(pInfo))
-    {
-        if (pInfo->btNpcLive)
-        {
-            int nHP = g_SenatusInfo.GetHPLevel(pInfo);
-            int nDefense = g_SenatusInfo.GetDefenseLevel(pInfo);
-            int nRecover = g_SenatusInfo.GetRecoverLevel(pInfo);
-            float fHPRate = pInfo->iNpcHp / (float)pInfo->iNpcMaxHp;
-
-            DisableAlphaBlend();
-
-            RenderColorQuadARGB(nPosX, nPosY - 15, nHPBlockSize * (nHP + 1), 3, 0xFFFFFFFFu);
-            RenderColorQuadARGB(nPosX, nPosY - 10, 24, 3, 0xFFFFFFFFu);
-            RenderColorQuadARGB(nPosX, nPosY - 5, 24, 3, 0xFFFFFFFFu);
-            RenderColorQuadARGB(nPosX, nPosY - 15, (nHPBlockSize * (nHP + 1)) * fHPRate, 3, 0xFFFF0000u);
-            RenderColorQuadARGB(nPosX, nPosY - 10, nDefenseBlockSize * (nDefense + 1), 3, 0xFF00FF00u);
-            RenderColorQuadARGB(nPosX, nPosY - 5, nRecoverBlockSize * (nRecover + 1), 3, 0xFFFFFF00u);
-        }
-
-        if (pInfo->iNpcIndex == g_SenatusInfo.GetCurrStatue() + 1)
-            RenderBitmap(BITMAP_INTERFACE_EX + 39, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f / 32.f, 24.f / 32.f);
-        else
-            RenderBitmap(BITMAP_INTERFACE_EX + 38, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f / 32.f, 24.f / 32.f);
-    }
-    EnableAlphaTest();
+    };
+    sync(&CastleWindowRmlModel::tabs, "tabs", std::move(tabs));
+    sync(&CastleWindowRmlModel::pieces, "pieces", std::move(pieces));
+    sync(&CastleWindowRmlModel::buttons, "buttons", std::move(buttons));
+    sync(&CastleWindowRmlModel::taxArrows, "tax_arrows", m_iNumCurOpenTab == TAB_TAX_MANAGING);
+    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    sync(&CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    sync(&CastleWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
+    sync(&CastleWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
+    sync(&CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
 
 void CCastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
@@ -1034,25 +980,11 @@ void CCastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
     wcscpy_s(szTemp, 256, pszText);
     wchar_t* pszTextBegin = szTemp;
     wchar_t* pszTextFound = wcsstr(szTemp, szNumber);
+    if (pszTextFound == nullptr)
+        return; // the number is not in the text (the original dereferenced null here)
     wchar_t* pszTextNext = pszTextFound + wcslen(szNumber);
     *pszTextFound = '\0';
     ConvertGold(dwNumber, szNumber);
-
-    mu_swprintf(pszText, L"%ls%ls%ls", pszTextBegin, szNumber, pszTextNext);
-}
-
-void CCastleWindow::InsertComma64(wchar_t* pszText, __int64 iNumber)
-{
-    wchar_t szNumber[32];
-    mu_swprintf(szNumber, L"%I64d", iNumber);
-
-    wchar_t szTemp[256];
-    wcscpy_s(szTemp, 256, pszText);
-    wchar_t* pszTextBegin = szTemp;
-    wchar_t* pszTextFound = wcsstr(szTemp, szNumber);
-    wchar_t* pszTextNext = pszTextFound + wcslen(szNumber);
-    *pszTextFound = '\0';
-    ConvertGold64(iNumber, szNumber);
 
     mu_swprintf(pszText, L"%ls%ls%ls", pszTextBegin, szNumber, pszTextNext);
 }

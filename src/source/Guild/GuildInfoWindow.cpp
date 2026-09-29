@@ -129,7 +129,7 @@ void SyncField(RmlModelBinder<GuildInfoRmlModel>& binder, T GuildInfoRmlModel::*
     model.*field = std::move(value);
     binder.MarkDirty(name);
 }
-}
+} // namespace
 
 int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
 {

@@ -1,0 +1,56 @@
+/* Modern theme for CGuardWindow: docked_panel_frame.rcss's forged panel (linked first), flat tabs,
+   list frame and scroll track in the modern tokens, modern buttons. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+#panel { pointer-events: none; }
+
+.gd-tab { position: absolute; top: 84px; width: 56px; height: 22px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+.gd-tab.selected { background-color: token(surface-raised); border: 1px token(accent-steel); }
+.gd-tab-label { color: token(text-muted); }
+.gd-tab.selected .gd-tab-label { color: token(text-primary); }
+
+.t-edge-top, .t-edge-bottom { position: absolute; width: 161px; height: 1px; margin-top: 6px; background-color: token(border-frame); }
+.t-edge-left, .t-edge-right { position: absolute; width: 1px; margin-left: 6px; background-color: token(border-frame); }
+.gd-box { position: absolute; }
+
+.s-top, .s-bottom { display: none; }
+.s-mid { position: absolute; left: 169px; width: 3px; background-color: token(surface-recessed); }
+.thumb { position: absolute; left: 166px; width: 9px; height: 30px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+.thumb.dragged { background-color: token(accent-steel-hover); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.gd-text.centred { text-align: center; }
+.gd-text.right { text-align: right; }
+.gd-text.bold { font-weight: bold; }
+
+.gd-btn {
+	display: block;
+	position: absolute;
+	left: 68px;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.gd-btn:hover { border-color: token(accent-steel-hover); }
+.gd-btn.locked { background-color: token(surface-recessed); border-color: token(border-frame); }
+.gd-label { left: 0; text-align: center; color: token(text-primary); }
+.gd-btn.locked .gd-label { color: token(text-muted); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

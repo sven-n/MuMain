@@ -13,6 +13,9 @@
 }
 #box_top, .box-middle, #box_bottom { display: none; }
 
+#progress_back { position: absolute; left: 35px; width: 160px; height: 18px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#progress_bar { position: absolute; left: 40px; height: 8px; background-color: token(accent-steel); }
+
 .sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; transform-origin: left top; }
 .box-line.bold { font-weight: bold; }
 

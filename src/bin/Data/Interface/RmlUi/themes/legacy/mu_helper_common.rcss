@@ -20,6 +20,9 @@
 	color: token(text-primary);
 	pointer-events: none;
 }
+/* .mh-text's display:block has the same specificity as base.rcss's .hidden and comes later, so a
+   data-class-hidden page header or tab label would stay on screen over its sibling. */
+.mh-text.hidden { display: none; }
 .mh-text.mh-center { text-align: center; }
 .mh-text.mh-bold { font-weight: bold; }
 

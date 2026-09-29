@@ -929,6 +929,7 @@ bool mu::ui::window::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority
     CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetAddCallbackFunc();
+    m_View.Create(0, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT);
 
     m_dwElapseTime = dwElapseTime;
     m_dwStartTime = timeGetTime();
@@ -941,6 +942,7 @@ bool mu::ui::window::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority
 
 void mu::ui::window::CProgressMsgBox::Release()
 {
+    m_View.Destroy();
 }
 
 void mu::ui::window::CProgressMsgBox::SetAddCallbackFunc()
@@ -998,92 +1000,39 @@ bool mu::ui::window::CProgressMsgBox::Update()
         g_MessageBox->SendEvent(this, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS);
     }
 
+    SyncView();
     return true;
 }
 
 bool mu::ui::window::CProgressMsgBox::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-    RenderTexts();
-    RenderProgress();
-
-    DisableAlphaBlend();
-
+    // Nothing native left: MessageBoxView draws the box. Kept because the base requires it.
     return true;
 }
 
-void mu::ui::window::CProgressMsgBox::RenderFrame()
+void mu::ui::window::CProgressMsgBox::SyncView()
 {
-    float x, y, width, height;
+    // The original's RenderFrame(): a middle strip per line past two, the back 10 units short.
+    const int middles = m_MsgDataList.size() > 2 ? static_cast<int>(m_MsgDataList.size()) - 2 : 0;
+    m_View.SetFrame(middles, static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT);
 
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    if (m_MsgDataList.size() > 2)
+    // RenderTexts(): each line centred on the box from y 35, one line height + 4 apart.
+    std::vector<MessageBoxView::Line> lines;
+    int y = static_cast<int>(MSGBOX_TEXT_TOP_BLANK);
+    for (const MSGBOX_TEXTDATA* message : m_MsgDataList)
     {
-        int iCount = m_MsgDataList.size() - 2;
-        for (int i = 0; i < iCount; ++i)
-        {
-            RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-            y += height;
-        }
+        const bool bold = message->byFontType == MSGBOX_FONT_BOLD;
+        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+        const SIZE size = g_pRenderText->MeasureText(message->strMsg.c_str(), static_cast<int>(message->strMsg.size()));
+        const int x = static_cast<int>(MSGBOX_WIDTH / 2) - static_cast<int>(size.cx / 2);
+        lines.push_back({message->strMsg, static_cast<float>(x), static_cast<float>(y), bold, message->dwColor});
+        y += static_cast<int>(size.cy) + 4;
     }
 
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CProgressMsgBox::RenderTexts()
-{
-    
-
-    float x, y;
-
-    x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CProgressMsgBox::RenderProgress()
-{
-    DWORD dwTime = timeGetTime();
-    float fProgress = (float)(dwTime - m_dwStartTime) / m_dwElapseTime;
-
-    float x, y;
-    x = GetPos().x + MSGBOX_WIDTH / 2 - 160.f / 2;
-    y = GetPos().y + GetSize().cy - 50.f;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BG, x, y, 160.f, 18.f);
-    x += 5.f;
-    y += 5.f;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
+    // RenderProgress(): the elapsed fraction, 50 units above the box's bottom.
+    const float fraction = static_cast<float>(timeGetTime() - m_dwStartTime) / static_cast<float>(m_dwElapseTime);
+    m_View.SetProgress(static_cast<float>(GetSize().cy) - 50.f, fraction);
+    m_View.Sync(GetPos(), lines, {});
 }
 
 CALLBACK_RESULT mu::ui::window::CProgressMsgBox::ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)

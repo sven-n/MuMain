@@ -122,6 +122,8 @@ namespace mu::ui::window
     // ShowChaosMixMenuDialog()/ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() (WindowCommon.h),
     // all on CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
 
+    // A notice with a progress bar that closes itself when the bar is full (the castle siege seal,
+    // crown switch and crown defence notices). MessageBoxView draws it.
     class CProgressMsgBox : public CMessageBoxBase
     {
     public:
@@ -143,9 +145,7 @@ namespace mu::ui::window
         void SetAddCallbackFunc();
         int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
 
-        void RenderFrame();
-        void RenderTexts();
-        void RenderProgress();
+        void SyncView();
 
     private:
         type_vector_msgdata m_MsgDataList;
@@ -153,6 +153,7 @@ namespace mu::ui::window
         DWORD m_dwStartTime;
         DWORD m_dwEndTime;
         DWORD m_dwElapseTime;
+        MessageBoxView m_View;
     };
 
     class CCursedTempleProgressMsgBox : public CMessageBoxBase

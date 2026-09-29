@@ -1,0 +1,46 @@
+/* Modern theme for CGatemanWindow: docked_panel_frame.rcss's forged panel (linked first), modern
+   buttons and checkbox, a locked Enter dimmed. Geometry is the legacy one (reference px under the
+   dock transform). */
+
+#panel { pointer-events: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+.gk-text.centred { text-align: center; }
+.gk-text.right { text-align: right; }
+.gk-text.bold { font-weight: bold; }
+
+#checkbox { position: absolute; left: 35px; top: 110px; width: 9px; height: 9px; border: 1px token(border-frame); box-sizing: border-box; background-color: token(surface-recessed); }
+#check_mark { position: absolute; left: 1px; top: 1px; width: 5px; height: 5px; background-color: token(accent-steel); }
+#fee_back { position: absolute; left: 20px; top: 180px; width: 90px; height: 30px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+
+.fee-btn, .gk-btn {
+	position: absolute;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.fee-btn { left: 118px; width: 15px; height: 12px; }
+.fee-up { top: 180px; }
+.fee-down { top: 196px; }
+.gk-btn { display: block; width: 53px; height: 22px; }
+.fee-btn:hover, .gk-btn:hover { border-color: token(accent-steel-hover); }
+.gk-btn.locked { background-color: token(surface-recessed); border-color: token(border-frame); }
+.gk-label { left: 0; text-align: center; color: token(text-primary); }
+.gk-btn.locked .gk-label { color: token(text-muted); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

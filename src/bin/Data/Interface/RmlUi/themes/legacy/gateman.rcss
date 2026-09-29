@@ -1,0 +1,62 @@
+/* Legacy theme for CGatemanWindow, reproducing its RenderFrame() and pages: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the texts in their bound
+   fonts and colours, the master's RenderCheckBox() (a 9 x 9 (146, 134, 121) outline at (35, 110),
+   win_check's 5 x 5 mark when public), the fee backdrop (black at alpha 77, 90 x 30 at (20, 180)),
+   the fee arrows (newui_Bt_scroll_up / dn, 15 x 13: up / over / down) at (118, 180) / (118, 196),
+   the 53 x 23 newui_btn_empty_very_small buttons (a locked Enter tinted (100, 100, 100) with a
+   grey label, never hovered), the exit button at (13, 391). Reference px inside #panel. */
+
+@spritesheet gk-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	gk-btn-up: 0px 0px 53px 23px;
+	gk-btn-over: 0px 23px 53px 23px;
+	gk-btn-down: 0px 46px 53px 23px;
+}
+@spritesheet gk-up-sheet
+{
+	src: "../../../newui_Bt_scroll_up.jpg";
+	gk-up-up: 0px 0px 15px 13px;
+	gk-up-over: 0px 13px 15px 13px;
+	gk-up-down: 0px 26px 15px 13px;
+}
+@spritesheet gk-dn-sheet
+{
+	src: "../../../newui_Bt_scroll_dn.jpg";
+	gk-dn-up: 0px 0px 15px 13px;
+	gk-dn-over: 0px 13px 15px 13px;
+	gk-dn-down: 0px 26px 15px 13px;
+}
+@spritesheet gk-check-sheet { src: "../../../win_check.tga"; gk-check: 0px 0px 5px 5px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+/* The public checkbox is hit-tested natively. */
+#panel { pointer-events: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.gk-text.centred { text-align: center; }
+.gk-text.right { text-align: right; }
+.gk-text.bold { font-weight: bold; }
+
+#checkbox { position: absolute; left: 35px; top: 110px; width: 9px; height: 9px; border: 1px #928679; box-sizing: border-box; }
+#check_mark { position: absolute; left: 1px; top: 1px; width: 5px; height: 5px; decorator: image(gk-check); }
+#fee_back { position: absolute; left: 20px; top: 180px; width: 90px; height: 30px; background-color: rgba(0, 0, 0, 77); }
+
+.fee-btn { position: absolute; left: 118px; width: 15px; height: 13px; pointer-events: auto; }
+.fee-up { top: 180px; decorator: image(gk-up-up); }
+.fee-up:hover { decorator: image(gk-up-over); }
+.fee-up:active { decorator: image(gk-up-down); }
+.fee-down { top: 196px; decorator: image(gk-dn-up); }
+.fee-down:hover { decorator: image(gk-dn-over); }
+.fee-down:active { decorator: image(gk-dn-down); }
+
+.gk-btn { display: block; position: absolute; width: 53px; height: 23px; decorator: image(gk-btn-up); pointer-events: auto; }
+.gk-btn:hover { decorator: image(gk-btn-over); }
+.gk-btn:active { decorator: image(gk-btn-down); }
+.gk-btn.locked, .gk-btn.locked:hover, .gk-btn.locked:active { decorator: image(gk-btn-up); image-color: #646464; }
+.gk-label { left: 0; text-align: center; color: #ffffff; }
+.gk-btn.locked .gk-label { color: #646464; }
+
+#btn_exit { top: 391px; pointer-events: auto; }
+.tooltip { display: none; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

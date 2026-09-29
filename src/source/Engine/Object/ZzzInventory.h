@@ -159,32 +159,6 @@ void RepairAllGold(void);
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
-// What RenderTipTextList() would draw, in reference px: its black frame and fill, and each line
-// (RenderText() at x, y in a box of boxWidth with `sort`; a coloured text box behind it when
-// bgColor is set). While g_pTipTextListRecord is set, RenderTipTextList() records into it instead of
-// drawing -- for windows that draw the table through RmlUi (CItemExplanationWindow,
-// CSetItemExplanation).
-struct TipTextListRecord
-{
-    struct Box
-    {
-        float x, y, width, height;
-        unsigned int argb;
-    };
-    struct Line
-    {
-        std::wstring text;
-        float x, y, boxWidth, height;
-        int sort;
-        bool bold;
-        unsigned int color;   // RGBA()
-        unsigned int bgColor; // RGBA(), 0 = none
-    };
-    std::vector<Box> boxes;
-    std::vector<Line> lines;
-};
-extern TipTextListRecord* g_pTipTextListRecord;
-
 // Converts the TextList/TextListColor/TextBold globals above (as any RenderTipTextList() caller
 // already populates them) into UI::RmlBridge::Tooltip's own Line list -- shared by every tooltip
 // call site still building its content the legacy TextList way, so each one doesn't hand-roll the

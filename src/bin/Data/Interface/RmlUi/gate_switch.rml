@@ -1,0 +1,59 @@
+<rml>
+<head>
+	<title>Castle Gate Switch</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="gate_switch.rcss"/>
+</head>
+<body>
+	<!-- The castle gate switch (CGateSwitchWindow), docked right: the title, the three lines (the
+	     warning on a red text box), the gate picture (closed or open) in its table, Open / Close
+	     and the exit button. root_x/root_y/root_scale come from the dock transform; everything
+	     inside is reference px; text is .sharp-text at the native size, counter-scaled out of the
+	     panel. C++ keeps the gate state and the request; a click is queued with
+	     gate_switch_toggle / gate_switch_exit. -->
+	<div id="panel" data-model="gate_switch" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="title_px + 'px'"
+		      data-style-width="(160 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
+		<div class="sharp-text gs-line" style="top: 50px;" data-style-font-size="bold_text_px + 'px'"
+		     data-style-width="(300 * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line1}}</div>
+		<div class="sharp-text gs-line" style="top: 67px;" data-style-font-size="bold_text_px + 'px'"
+		     data-style-width="(300 * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line2}}</div>
+		<div class="sharp-text gs-line" style="top: 84px;" data-style-font-size="bold_text_px + 'px'"
+		     data-style-width="(300 * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="gs-warning">{{warning}}</span></div>
+
+		<div class="t-corner t-tl" style="left: 12px; top: 116px;"></div>
+		<div class="t-corner t-tr" style="left: 166px; top: 116px;"></div>
+		<div class="t-edge-top" style="left: 25px; top: 116px; width: 141px;"></div>
+		<div class="t-edge-left" style="left: 12px; top: 129px; height: 159px;"></div>
+		<div class="t-edge-right" style="left: 166px; top: 129px; height: 159px;"></div>
+		<div class="t-corner t-bl" style="left: 12px; top: 282px;"></div>
+		<div class="t-corner t-br" style="left: 166px; top: 282px;"></div>
+		<div class="t-edge-bottom" style="left: 25px; top: 282px; width: 141px;"></div>
+		<div id="gate" data-class-opened="gate_opened"></div>
+
+		<div id="btn_toggle" data-event-click="gate_switch_toggle">
+			<span class="sharp-text gs-label" data-style-font-size="text_px + 'px'"
+			      data-style-width="(108 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+			      data-style-line-height="label_line_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{button_text}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="gate_switch_exit"></div>
+		<span class="sharp-text tooltip tooltip-exit"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		      data-style-width="(110 * root_scale) + 'px'"
+		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

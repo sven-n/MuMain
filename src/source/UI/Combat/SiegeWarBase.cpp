@@ -21,10 +21,21 @@ BYTE ToColorByte(float value)
     return static_cast<BYTE>(std::clamp(value, 0.f, 1.f) * 255.f);
 }
 
-DWORD MakeRgba(float red, float green, float blue, float alpha)
+} // namespace
+
+// The sprite row a CButton registered with ChangeButtonImgState(true, image, true) shows: up,
+// over, down stacked top to bottom.
+int mu::ui::window::ButtonFrame(CButton& button)
 {
-    return RGBA(ToColorByte(red), ToColorByte(green), ToColorByte(blue), ToColorByte(alpha));
-}
+    switch (button.GetBTState())
+    {
+    case BUTTON_STATE_OVER:
+        return 1;
+    case BUTTON_STATE_DOWN:
+        return 2;
+    default:
+        return 0;
+    }
 }
 
 mu::ui::window::CSiegeWarBase::CSiegeWarBase()
@@ -67,10 +78,8 @@ bool mu::ui::window::CSiegeWarBase::Create(int x, int y)
     if (!OnCreate(x, y))
         return false;
 
-    wchar_t szText[256] = {};
-    mu_swprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
-    m_BtnAlpha.ChangeText(szText);
-    m_BtnAlpha.ChangeButtonImgState(true, IMAGE_BTN_ALPHA, true);
+    // The buttons only hit-test and keep their up / over / down state here; siege_warfare.rml
+    // draws them.
     m_BtnAlpha.ChangeButtonInfo(m_BtnAlphaPos.x, m_BtnAlphaPos.y, BTN_ALPHA_WIDTH, BTN_ALPHA_HEIGHT);
 
     if (battleCastle::IsBattleCastleStart() == true)
@@ -107,91 +116,52 @@ bool mu::ui::window::CSiegeWarBase::Update()
     return true;
 }
 
-bool mu::ui::window::CSiegeWarBase::Render()
+void mu::ui::window::CSiegeWarBase::FillRmlModel(SiegeWarfareRmlModel& model)
 {
-    wchar_t szText[256] = { 0, };
-    const BYTE miniMapAlpha = ToColorByte(m_fMiniMapAlpha);
-    const DWORD miniMapColor = RGBA(255, 255, 255, miniMapAlpha);
+    model.frameX = static_cast<float>(m_MiniMapFramePos.x);
+    model.frameY = static_cast<float>(m_MiniMapFramePos.y);
+    model.alpha = m_fMiniMapAlpha;
 
-    EnableAlphaTest();
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 255, miniMapAlpha);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
+    // RenderBitmap(IMAGE_MINIMAP, ..., 128 x 128, u = offset / (256 / scale), width 0.5 * scale):
+    // the 256 x 256 map's texels from offset * scale, 128 * scale of them.
+    model.mapRect = std::to_string(m_MiniMapScaleOffset.x * m_iMiniMapScale) + " " +
+                    std::to_string(m_MiniMapScaleOffset.y * m_iMiniMapScale) + " " +
+                    std::to_string(128 * m_iMiniMapScale) + " " + std::to_string(128 * m_iMiniMapScale);
 
-    RenderBitmap(IMAGE_MINIMAP, (float)(m_MiniMapPos.x), (float)(m_MiniMapPos.y), 128.f, 128.f,
-        m_fMiniMapTexU, m_fMiniMapTexV, 0.5f * m_iMiniMapScale, 0.5f * m_iMiniMapScale,
-        true, true, m_fMiniMapAlpha);
+    model.alphaLabel = std::to_string(static_cast<int>(m_fMiniMapAlpha * 100.5f));
+    model.alphaFrame = ButtonFrame(m_BtnAlpha);
 
-    RenderImage(IMAGE_MINIMAP_FRAME, m_MiniMapFramePos.x, m_MiniMapFramePos.y, MINIMAP_FRAME_WIDTH,
-        MINIMAP_FRAME_HEIGHT, 0.f, 0.f, miniMapColor);
-    RenderImage(IMAGE_TIME_FRAME, m_TimeUIPos.x, m_TimeUIPos.y, TIME_FRAME_WIDTH, TIME_FRAME_HEIGHT,
-        0.f, 0.f, miniMapColor);
-
-    if (battleCastle::IsBattleCastleStart())
+    // The remaining time, only while a siege runs; the colon never blinks (m_bSecond stays true
+    // in the original too).
+    model.timeVisible = battleCastle::IsBattleCastleStart();
+    if (model.timeVisible)
     {
-        g_pRenderText->SetFont(g_hFontBig);
-
         if ((WorldTime - m_fTime) > 500)
         {
             m_fTime = WorldTime;
             m_bSecond = true;
         }
-
-        if (m_bSecond)
-        {
-            if (m_iMinute < 10)
-            {
-                mu_swprintf(szText, L"%d:0%d", m_iHour, m_iMinute);
-            }
-            else
-            {
-                mu_swprintf(szText, L"%d:%d", m_iHour, m_iMinute);
-            }
-        }
-        else
-        {
-            if (m_iMinute < 10)
-            {
-                mu_swprintf(szText, L"%d 0%d", m_iHour, m_iMinute);
-            }
-            else
-            {
-                mu_swprintf(szText, L"%d %d", m_iHour, m_iMinute);
-            }
-        }
-        g_pRenderText->RenderText(m_TimeUIPos.x, m_TimeUIPos.y + 10, szText, 134, 0, RT3_SORT_CENTER);
+        wchar_t szText[64] = {};
+        mu_swprintf(szText, m_iMinute < 10 ? (m_bSecond ? L"%d:0%d" : L"%d 0%d") : (m_bSecond ? L"%d:%d" : L"%d %d"),
+                    m_iHour, m_iMinute);
+        model.timeText = StringUtils::WideToNarrow(szText);
     }
-
-    OnRender();
-
-    const unsigned int heroMarkerColor = (static_cast<unsigned int>(miniMapAlpha) << 24) | 0x00FFFF00u;
-    RenderColorQuadARGB((float)(m_HeroPosInMiniMap.x), (float)(m_HeroPosInMiniMap.y), 3, 3,
-        heroMarkerColor);
-
-    DisableAlphaBlend();
-
-    EnableAlphaTest();
-
-    if (m_bRenderSkillUI == true)
+    else
     {
-        RenderImage(IMAGE_BATTLESKILL_FRAME, m_SkillFramePos.x, m_SkillFramePos.y,
-            BATTLESKILL_FRAME_WIDTH, BATTLESKILL_FRAME_HEIGHT, 0.f, 0.f, miniMapColor);
-
-        RenderSkillIcon();
-
-        m_BtnSkillScroll[0].ChangeAlpha(m_fMiniMapAlpha);
-        m_BtnSkillScroll[1].ChangeAlpha(m_fMiniMapAlpha);
-        m_BtnSkillScroll[0].Render();
-        m_BtnSkillScroll[1].Render();
+        model.timeText.clear();
     }
 
-    m_BtnAlpha.SetFont(g_hFontBold);
-    m_BtnAlpha.ChangeAlpha(m_fMiniMapAlpha);
-    m_BtnAlpha.Render();
+    model.dots.clear();
+    model.commands.clear();
+    model.teams.clear();
+    model.orders.clear();
+    model.cursorVisible = false;
+    OnFillRmlModel(model);
 
-    DisableAlphaBlend();
+    model.heroLeft = static_cast<float>(m_HeroPosInMiniMap.x);
+    model.heroTop = static_cast<float>(m_HeroPosInMiniMap.y);
 
-    return true;
+    FillSkill(model);
 }
 
 bool mu::ui::window::CSiegeWarBase::InitBattleSkill()
@@ -207,9 +177,8 @@ bool mu::ui::window::CSiegeWarBase::InitBattleSkill()
         return false;
     }
 
-    m_BtnSkillScroll[0].ChangeButtonImgState(true, IMAGE_SKILL_BTN_SCROLL_UP, true);
-    m_BtnSkillScroll[0].ChangeButtonInfo(m_BtnSkillScrollUpPos.x, m_BtnSkillScrollUpPos.y, SKILL_BTN_SCROLL_WIDTH, SKILL_BTN_SCROLL_HEIGHT);
-    m_BtnSkillScroll[1].ChangeButtonImgState(true, IMAGE_SKILL_BTN_SCROLL_DN, true);
+    m_BtnSkillScroll[0].ChangeButtonInfo(m_BtnSkillScrollUpPos.x, m_BtnSkillScrollUpPos.y, SKILL_BTN_SCROLL_WIDTH,
+                                         SKILL_BTN_SCROLL_HEIGHT);
     m_BtnSkillScroll[1].ChangeButtonInfo(m_BtnSkillScrollDnPos.x, m_BtnSkillScrollDnPos.y, SKILL_BTN_SCROLL_WIDTH, SKILL_BTN_SCROLL_HEIGHT);
 
     switch (Hero->GuildStatus)
@@ -328,11 +297,6 @@ bool mu::ui::window::CSiegeWarBase::BtnProcess()
             m_fMiniMapAlpha = m_fMiniMapAlpha - 0.1f;
         }
 
-        wchar_t szText[256] = {};
-        mu_swprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
-        m_BtnAlpha.ChangeText(szText);
-        m_BtnAlpha.ChangeAlpha(m_fMiniMapAlpha);
-
         return true;
     }
 
@@ -415,84 +379,58 @@ void mu::ui::window::CSiegeWarBase::UpdateHeroPos()
     m_fMiniMapTexV = (float)(m_MiniMapScaleOffset.y) / (256.f / (float)m_iMiniMapScale);
 }
 
-void mu::ui::window::CSiegeWarBase::RenderCmdIconInMiniMap()
+POINT mu::ui::window::CSiegeWarBase::MiniMapPoint(int x, int y) const
 {
-    int iWidth, iHeight;
-    wchar_t szText[256] = { 0, };
-    POINT Pos;
-    memset(&Pos, 0, sizeof(POINT));
+    return {x / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x,
+            (256 - y) / m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y};
+}
 
+void mu::ui::window::CSiegeWarBase::FillCommands(SiegeWarfareRmlModel& model)
+{
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
-        int iBWidth;
-        switch (m_CmdBuffer[i].byCmd)
+        GuildCommander& command = m_CmdBuffer[i];
+        if (command.byCmd > 2 || command.byTeam > 6)
+            continue;
+
+        const POINT pos = MiniMapPoint(command.byX, command.byY);
+        if (pos.x < m_MiniMapPos.x || pos.x > m_MiniMapPos.x + 128 || pos.y < m_MiniMapPos.y ||
+            pos.y > m_MiniMapPos.y + 128)
+            continue;
+
+        // A new command pulses: green and blue follow 1 + sin(lifetime * 0.2), clamped.
+        BYTE pulse = 255;
+        if (command.byLifeTime > 0)
         {
-        case 0: iWidth = COMMAND_ATTACK_WIDTH; iHeight = COMMAND_ATTACK_HEIGHT; iBWidth = 16; break;
-        case 1: iWidth = COMMAND_DEFENCE_WIDTH; iHeight = COMMAND_DEFENCE_HEIGHT; iBWidth = 32; break;
-        case 2: iWidth = COMMAND_WAIT_WIDTH; iHeight = COMMAND_WAIT_HEIGHT; iBWidth = 16; break;
+            pulse = ToColorByte(1.f + sinf(command.byLifeTime * 0.2f));
+            command.byLifeTime--;
         }
 
-        if (m_CmdBuffer[i].byCmd != 3 && m_CmdBuffer[i].byTeam >= 0 && m_CmdBuffer[i].byTeam <= 6)
-        {
-            Pos.x = (m_CmdBuffer[i].byX) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
-            Pos.y = (256 - m_CmdBuffer[i].byY) / m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y;
-
-            if (Pos.x<m_MiniMapPos.x || Pos.x>m_MiniMapPos.x + 128 || Pos.y<m_MiniMapPos.y || Pos.y>m_MiniMapPos.y + 128)
-                continue;
-
-            DWORD commandColor;
-            BYTE pulseByte = 255;
-            if (m_CmdBuffer[i].byLifeTime > 0)
-            {
-                const float pulse = 1.f + sinf(m_CmdBuffer[i].byLifeTime * 0.2f);
-                pulseByte = ToColorByte(pulse);
-                commandColor = MakeRgba(1.f, pulse, pulse, m_fMiniMapAlpha);
-                m_CmdBuffer[i].byLifeTime--;
-            }
-            else
-            {
-                commandColor = MakeRgba(1.f, 1.f, 1.f, m_fMiniMapAlpha);
-            }
-            g_pRenderText->SetTextColor(255, pulseByte, pulseByte, ToColorByte(m_fMiniMapAlpha));
-            mu_swprintf(szText, L"%d", m_CmdBuffer[i].byTeam + 1);
-            g_pRenderText->RenderText(Pos.x - 12, Pos.y - 5, szText);
-            RenderColorBitmap(IMAGE_COMMAND_ATTACK + m_CmdBuffer[i].byCmd, Pos.x - 7, Pos.y - 7,
-                11.f, 11.f, 0.f, 0.f, ((float)iWidth - 1.f) / (float)iBWidth,
-                ((float)iHeight - 1.f) / 16.f, commandColor);
-        }
+        SiegeWarCommandEntry entry;
+        entry.left = static_cast<float>(pos.x);
+        entry.top = static_cast<float>(pos.y);
+        entry.command = command.byCmd;
+        entry.team = std::to_string(command.byTeam + 1);
+        entry.color = "rgb(255, " + std::to_string(pulse) + ", " + std::to_string(pulse) + ")";
+        model.commands.push_back(std::move(entry));
     }
 }
 
-void mu::ui::window::CSiegeWarBase::RenderSkillIcon()
+void mu::ui::window::CSiegeWarBase::FillSkill(SiegeWarfareRmlModel& model)
 {
-    int iUseSkillDestKill;
-    int iSelectSkill;
-    int iCurKillCount;
+    model.skillVisible = m_bRenderSkillUI && m_iterCurBattleSkill != m_listBattleSkill.end();
+    if (!model.skillVisible)
+        return;
 
-    wchar_t szText[256] = {};
-
-    iUseSkillDestKill = SkillAttribute[Hero->GuildSkill].KillCount;
-
-    iSelectSkill = (*m_iterCurBattleSkill);
-    iCurKillCount = Hero->GuildMasterKillCount;
-
-    const DWORD skillColor = Hero->GuildMasterKillCount < iUseSkillDestKill
-        ? MakeRgba(1.f, 0.5f, 0.5f, m_fMiniMapAlpha)
-        : MakeRgba(1.f, 1.f, 1.f, m_fMiniMapAlpha);
-
-    int src_x, src_y;
-    src_x = ((iSelectSkill - 57) % 8) * 20.f;
-    src_y = ((iSelectSkill - 57) / 8) * 28.f;
-
-    RenderImage(IMAGE_SKILL_ICON, m_SkillIconPos.x + 1, m_SkillIconPos.y, (float)SKILL_ICON_WIDTH,
-        (float)SKILL_ICON_HEIGHT, src_x, src_y, skillColor);
-
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->SetTextColor(255, 255, 255, ToColorByte(m_fMiniMapAlpha));
-    mu_swprintf(szText, L"%d", iUseSkillDestKill);
-    g_pRenderText->RenderText(m_UseSkillDestKillPos.x, m_UseSkillDestKillPos.y, szText);
-    mu_swprintf(szText, L"%d", iCurKillCount);
-    g_pRenderText->RenderText(m_CurKillCountPos.x, m_CurKillCountPos.y, szText);
+    const int killsNeeded = SkillAttribute[Hero->GuildSkill].KillCount;
+    const int selectedSkill = *m_iterCurBattleSkill;
+    model.skillRect = std::to_string(((selectedSkill - 57) % 8) * 20) + " " +
+                      std::to_string(((selectedSkill - 57) / 8) * 28) + " 20 28";
+    model.skillColor = Hero->GuildMasterKillCount < killsNeeded ? "rgb(255, 127, 127)" : "rgb(255, 255, 255)";
+    model.killsNeeded = std::to_string(killsNeeded);
+    model.kills = std::to_string(Hero->GuildMasterKillCount);
+    model.scrollUpFrame = ButtonFrame(m_BtnSkillScroll[0]);
+    model.scrollDownFrame = ButtonFrame(m_BtnSkillScroll[1]);
 
     if (m_bRenderToolTip == true)
     {
@@ -569,38 +507,4 @@ void mu::ui::window::CSiegeWarBase::SetMapInfo(GuildCommander& data)
 void mu::ui::window::CSiegeWarBase::SetRenderSkillUI(bool bRenderSkillUI)
 {
     m_bRenderSkillUI = bRenderSkillUI;
-}
-
-void mu::ui::window::CSiegeWarBase::LoadImages()
-{
-    LoadBitmap(L"World31\\Map1.jpg", IMAGE_MINIMAP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_SW_Minimap_Frame.tga", IMAGE_MINIMAP_FRAME, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_SW_Time_Frame.tga", IMAGE_TIME_FRAME, GL_LINEAR);
-    LoadBitmap(L"Interface\\i_attack.tga", IMAGE_COMMAND_ATTACK);
-    LoadBitmap(L"Interface\\i_defense.tga", IMAGE_COMMAND_DEFENCE);
-    LoadBitmap(L"Interface\\i_wait.tga", IMAGE_COMMAND_WAIT);
-    LoadBitmap(L"Interface\\newui_SW_BattleSkill_Frame.tga", IMAGE_BATTLESKILL_FRAME, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_skill_scroll_up.jpg", IMAGE_SKILL_BTN_SCROLL_UP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_skill_scroll_dn.jpg", IMAGE_SKILL_BTN_SCROLL_DN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL_ICON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_SW_MiniMap_Bt_clearness.jpg", IMAGE_BTN_ALPHA, GL_LINEAR);
-
-    OnLoadImages();
-}
-
-void mu::ui::window::CSiegeWarBase::UnLoadImages()
-{
-    DeleteBitmap(IMAGE_MINIMAP);
-    DeleteBitmap(IMAGE_MINIMAP_FRAME);
-    DeleteBitmap(IMAGE_TIME_FRAME);
-    DeleteBitmap(IMAGE_COMMAND_ATTACK);
-    DeleteBitmap(IMAGE_COMMAND_DEFENCE);
-    DeleteBitmap(IMAGE_COMMAND_WAIT);
-    DeleteBitmap(IMAGE_BATTLESKILL_FRAME);
-    DeleteBitmap(IMAGE_SKILL_BTN_SCROLL_UP);
-    DeleteBitmap(IMAGE_SKILL_BTN_SCROLL_DN);
-    DeleteBitmap(IMAGE_SKILL_ICON);
-    DeleteBitmap(IMAGE_BTN_ALPHA);
-
-    OnUnloadImages();
 }

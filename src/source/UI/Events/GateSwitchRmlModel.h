@@ -1,0 +1,24 @@
+#pragma once
+
+#include <RmlUi/Core/Types.h>
+
+namespace mu::ui::window
+{
+struct GateSwitchRmlModel
+{
+    // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
+    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+    float textPx = 0.f;     // native normal text size in physical px (RmlRootTransform.h)
+    float boldTextPx = 0.f; // native bold text size
+
+    Rml::String title;
+    float titlePx = 0.f; // shrunk to its 160-unit box like the original's
+    Rml::String line1, line2, warning;
+    bool gateOpened = false;
+    Rml::String buttonText;
+    // CButton::Render(): 29 / 2 - h / 2 whole units down, the native line height in physical px.
+    float labelTop = 0.f;
+    float labelLinePx = 0.f;
+    Rml::String exitTooltip;
+};
+} // namespace mu::ui::window

@@ -17,16 +17,6 @@ namespace mu::ui::window
     class CNPCShop : public CObject
     {
     public:
-        enum IMAGE_LIST
-        {
-            // Kept solely because CastleWindow.h's IMAGE_CASTLEWINDOW_MONEY aliases this numeric
-            // bitmap slot for its own (still-native, unrelated) LoadBitmap() call -- not used by
-            // this window's own rendering anymore, now that its money strip is RmlUi (see
-            // NPCShopRmlModel). CNPCQuest used to alias it too (IMAGE_NPCQUEST_ZEN), but that whole
-            // enum was retired when CNPCQuest itself moved to RmlUi.
-            IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
-        };
-
         enum
         {
             NPCSHOP_POS_X = 260,

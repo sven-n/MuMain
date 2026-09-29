@@ -1,0 +1,58 @@
+/* Legacy theme for CGateSwitchWindow, reproducing its RenderFrame()/Render(): the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the title bold
+   (220, 220, 220) in its 160-unit box at (15, 13), the three lines in the same bold grey centred on
+   x 95 at y 50 / 67 / 84 (the warning on a (160, 0, 0) text box), the item table round the gate,
+   doorCL / doorOP (155 x 168) at (17.5, 120), the newui_btn_empty button (108 x 29) at (41, 320),
+   the exit button at (13, 391). Reference px inside #panel. */
+
+@spritesheet gs-gate-closed-sheet { src: "../../../doorCL.jpg"; gs-gate-closed: 0px 0px 155px 168px; }
+@spritesheet gs-gate-opened-sheet { src: "../../../doorOP.jpg"; gs-gate-opened: 0px 0px 155px 168px; }
+@spritesheet gs-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; gs-edge-top: 0px 0px 1px 14px; }
+@spritesheet gs-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; gs-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet gs-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; gs-edge-left: 0px 0px 14px 1px; }
+@spritesheet gs-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; gs-edge-right: 0px 0px 14px 1px; }
+@spritesheet gs-btn-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	gs-btn-up: 0px 0px 108px 29px;
+	gs-btn-over: 0px 29px 108px 29px;
+	gs-btn-down: 0px 58px 108px 29px;
+}
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+#title { left: 15px; top: 13px; font-weight: bold; color: #dcdcdc; }
+.gs-line { left: -55px; font-weight: bold; color: #dcdcdc; }
+.gs-warning { background-color: #a00000; }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }
+.t-edge-top { height: 14px; decorator: image(gs-edge-top); }
+.t-edge-bottom { height: 14px; decorator: image(gs-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(gs-edge-left); }
+.t-edge-right { width: 14px; decorator: image(gs-edge-right); }
+.t-corner { width: 14px; height: 14px; }
+.t-tl { decorator: image(docked-corner-tl); }
+.t-tr { decorator: image(docked-corner-tr); }
+.t-bl { decorator: image(docked-corner-bl); }
+.t-br { decorator: image(docked-corner-br); }
+#gate { position: absolute; left: 17.5px; top: 120px; width: 155px; height: 168px; decorator: image(gs-gate-closed); }
+#gate.opened { decorator: image(gs-gate-opened); }
+
+#btn_toggle {
+	display: block;
+	position: absolute;
+	left: 41px;
+	top: 320px;
+	width: 108px;
+	height: 29px;
+	decorator: image(gs-btn-up);
+	pointer-events: auto;
+}
+#btn_toggle:hover { decorator: image(gs-btn-over); }
+#btn_toggle:active { decorator: image(gs-btn-down); }
+.gs-label { left: 0; color: #ffffff; }
+#btn_exit { top: 391px; }
+.tooltip { display: none; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

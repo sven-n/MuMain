@@ -5,6 +5,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Audio/DSPlaySound.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 using namespace SEASON3B;
@@ -83,22 +84,21 @@ bool mu::ui::window::CSetItemExplanation::UpdateKeyEvent()
 
 bool mu::ui::window::CSetItemExplanation::Update()
 {
-    // The original drew the table in Render(); its RenderTipTextList() call now records it
-    // (g_pTipTextListRecord) for the document.
+    // The original drew the table in Render(); it is laid out here (UI::TipTextList) for the
+    // document.
     TipTextListRecord record;
     if (IsVisible())
-    {
-        g_pTipTextListRecord = &record;
-        RecordTable();
-        g_pTipTextListRecord = nullptr;
-    }
+        RecordTable(record);
     m_View.Sync(IsVisible(), record);
     return true;
 }
 
-void mu::ui::window::CSetItemExplanation::RecordTable()
+void mu::ui::window::CSetItemExplanation::RecordTable(TipTextListRecord& record)
 {
-    g_csItemOption.RenderOptionHelper();
+    // RenderOptionHelper(): the set's table centred on x 0 at y 0.
+    const int textNum = g_csItemOption.BuildOptionHelperTextList();
+    if (textNum > 0)
+        UI::TipTextList::Record(record, 0, 0, textNum, 0, RT3_SORT_CENTER, STRP_NONE, true);
 }
 
 bool mu::ui::window::CSetItemExplanation::Render()

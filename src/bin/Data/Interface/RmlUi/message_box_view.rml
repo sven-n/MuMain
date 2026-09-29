@@ -6,7 +6,7 @@
 </head>
 <body>
 	<!-- A native message box drawn by RmlUi (UI/Dialogs/MessageBoxView.h): the box art, its text
-	     lines and its buttons. The box keeps its callbacks; a click is queued with
+	     lines, its buttons or its progress bar. The box keeps its callbacks; a click is queued with
 	     message_box_button(n). root_x/root_y/root_scale come from the message box manager's
 	     layout; everything inside is reference px; text is .sharp-text at the native size,
 	     counter-scaled out of the panel. -->
@@ -16,6 +16,10 @@
 		<div id="box_top"></div>
 		<div class="box-middle" data-for="m : middles" data-style-top="(67 + m * 15) + 'px'"></div>
 		<div id="box_bottom" data-style-top="(67 + middle_count * 15) + 'px'"></div>
+
+		<div id="progress_back" data-if="progress_shown" data-style-top="progress_top + 'px'"></div>
+		<div id="progress_bar" data-if="progress_shown" data-style-top="(progress_top + 5) + 'px'"
+		     data-style-width="progress_width + 'px'"></div>
 
 		<span class="sharp-text box-line" data-for="l : lines" data-class-bold="l.bold"
 		      data-style-left="l.left + 'px'" data-style-top="l.top + 'px'" data-style-color="l.color"

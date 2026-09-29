@@ -1,0 +1,44 @@
+/* Modern theme for CCatapultWindow: docked_panel_frame.rcss's forged panel (linked first), modern
+   buttons, the chosen area and a locked Shoot dimmed. Geometry is the legacy one (reference px
+   under the dock transform). */
+
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; transform-origin: left top; }
+.cp-title { left: 0; top: 13px; font-weight: bold; color: token(text-warm); }
+.cp-line { left: 0; font-weight: bold; color: token(text-primary); }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
+
+.cp-area, #btn_fire {
+	display: block;
+	position: absolute;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.cp-area { width: 46px; height: 36px; }
+.cp-area.big { width: 77px; height: 47px; }
+#btn_fire { left: 41px; top: 250px; width: 108px; height: 28px; }
+.cp-area:hover, #btn_fire:hover { border-color: token(accent-steel-hover); }
+.cp-area.locked, #btn_fire.locked { background-color: token(surface-recessed); border-color: token(border-frame); }
+.cp-label { left: 0; color: token(text-primary); }
+.cp-area-label { text-align: left; }
+.locked .cp-label { color: token(text-muted); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+.tooltip { display: none; top: 365px; }
+.tooltip-exit { left: -24px; }
+#btn_exit:hover ~ .tooltip-exit { display: block; }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Object/ZzzInventory.h"
+#include "UI/Inventory/TipTextListLayout.h"
 #include "UI/Inventory/TipTextListRmlModel.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
@@ -11,7 +11,7 @@ class ElementDocument;
 
 namespace mu::ui::window
 {
-// Draws what RenderTipTextList() recorded (TipTextListRecord) through RmlUi: the black frames and
+// Draws a RenderTipTextList() table (TipTextListRecord, UI::TipTextList) through RmlUi: the black frames and
 // fills, the lines and their coloured text boxes. For the windows that were nothing but such
 // tables (CItemExplanationWindow, CSetItemExplanation); each owns one with its own document.
 class TipTextListView

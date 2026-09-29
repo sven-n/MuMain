@@ -56,6 +56,9 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
             c.Bind("back_height", &model.backHeight);
             c.RegisterArray<std::vector<int>>();
             c.Bind("middles", &model.middles);
+            c.Bind("progress_shown", &model.progressShown);
+            c.Bind("progress_top", &model.progressTop);
+            c.Bind("progress_width", &model.progressWidth);
 
             auto line = c.RegisterStruct<MessageBoxViewLineEntry>();
             line.RegisterMember("text", &MessageBoxViewLineEntry::text);
@@ -92,14 +95,49 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
         return;
     }
 
-    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
-    model.middleCount = middleCount;
-    model.backHeight = backHeight;
-    for (int i = 0; i < middleCount; ++i)
-        model.middles.push_back(i);
+    SetFrame(middleCount, backHeight);
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
                                                   "Data/Interface/RmlUi/message_box_view.rml");
+}
+
+void mu::ui::window::MessageBoxView::SetFrame(int middleCount, float backHeight)
+{
+    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
+    if (model.middleCount == middleCount && model.backHeight == backHeight &&
+        static_cast<int>(model.middles.size()) == middleCount)
+        return;
+    model.middleCount = middleCount;
+    model.backHeight = backHeight;
+    model.middles.clear();
+    for (int i = 0; i < middleCount; ++i)
+        model.middles.push_back(i);
+    m_RmlBinder.MarkDirty("middle_count");
+    m_RmlBinder.MarkDirty("back_height");
+    m_RmlBinder.MarkDirty("middles");
+}
+
+void mu::ui::window::MessageBoxView::SetProgress(float top, float fraction)
+{
+    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
+    const bool shown = top >= 0.f;
+    // RenderProgress(): the fill 150 units wide at the full fraction, not clamped.
+    const float width = 150.f * fraction;
+    if (model.progressShown != shown)
+    {
+        model.progressShown = shown;
+        m_RmlBinder.MarkDirty("progress_shown");
+    }
+    if (model.progressTop != top)
+    {
+        model.progressTop = top;
+        m_RmlBinder.MarkDirty("progress_top");
+    }
+    if (model.progressWidth != width)
+    {
+        model.progressWidth = width;
+        m_RmlBinder.MarkDirty("progress_width");
+    }
 }
 
 void mu::ui::window::MessageBoxView::Destroy()

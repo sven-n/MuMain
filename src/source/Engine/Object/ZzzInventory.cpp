@@ -200,8 +200,6 @@ int getLevelGeneration(int level, unsigned int* color)
     return lvl;
 }
 
-TipTextListRecord* g_pTipTextListRecord = nullptr;
-
 wchar_t TextList[50][100];
 int  TextListColor[50];
 int  TextBold[50];
@@ -317,8 +315,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         fHeight += static_cast<float>(lineSize.cy) * (halfLine ? 0.55f : 1.1f);
     }
 
-    if (g_pTipTextListRecord == nullptr)
-        EnableAlphaTest();
+    EnableAlphaTest();
     if (Tab > 0)
         fWidth = Tab * 2;
     fWidth += 4;
@@ -344,18 +341,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
     }break;
     }
 
-    TipTextListRecord* const record = g_pTipTextListRecord;
-    if (bUseBG == TRUE && TextNum > 0 && record != nullptr)
-    {
-        // RenderColor(..., 1.0f, 1): opaque black; the fill black at 0.8.
-        const unsigned int black = 0xFF000000u;
-        record->boxes.push_back({(float)iPos_x - 1, fsy - 1, (float)fWidth + 1, 1.f, black});
-        record->boxes.push_back({(float)iPos_x - 1, fsy - 1, 1.f, (float)fHeight + 1, black});
-        record->boxes.push_back({(float)iPos_x - 1 + fWidth + 1, fsy - 1, 1.f, (float)fHeight + 1, black});
-        record->boxes.push_back({(float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, 1.f, black});
-        record->boxes.push_back({(float)iPos_x, fsy, (float)fWidth, (float)fHeight, 0xCC000000u});
-    }
-    else if (bUseBG == TRUE && TextNum > 0)
+    if (bUseBG == TRUE && TextNum > 0)
     {
         RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1, 1.0f, 1);
         RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
@@ -420,36 +406,13 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
                 g_pRenderText->SetBgColor(0);
             }
             SIZE TextSize;
-            if (record != nullptr)
-            {
-                // RenderText()'s reported size: the measured size, shrunk with the text when it is
-                // wider than its box.
-                TextSize = g_pRenderText->MeasureText(TextList[i], lstrlen(TextList[i]));
-                const float box = fWidth - 2;
-                if (box > 0 && TextSize.cx > box)
-                {
-                    const auto role = TextBold[i] ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-                    const auto transform = UI::Scaling::GetActiveTransform();
-                    const float ratio =
-                        UI::Scaling::NativeTextPixelSizeInBox(role, transform, (float)TextSize.cx, box) /
-                        UI::Scaling::NativeTextPixelSize(role, transform);
-                    TextSize.cx = static_cast<LONG>(std::lround(TextSize.cx * ratio));
-                    TextSize.cy = static_cast<LONG>(std::lround(TextSize.cy * ratio));
-                }
-                record->lines.push_back({TextList[i], fsx, fsy, box, static_cast<float>(TextSize.cy), iSort,
-                                         TextBold[i] != 0, g_pRenderText->GetTextColor(), g_pRenderText->GetBgColor()});
-            }
-            else
-            {
-                g_pRenderText->RenderText(fsx, fsy, TextList[i], (fWidth - 2), 0, iSort, &TextSize);
-            }
+            g_pRenderText->RenderText(fsx, fsy, TextList[i], (fWidth - 2), 0, iSort, &TextSize);
             fHeight = TextSize.cy;
         }
         fsy += fHeight * 1.1f;
     }
 
-    if (record == nullptr)
-        DisableAlphaBlend();
+    DisableAlphaBlend();
 }
 
 // Declared in ZzzInventory.h -- shared by every other hover-tooltip call site still building its

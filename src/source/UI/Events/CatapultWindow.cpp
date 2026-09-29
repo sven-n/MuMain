@@ -7,7 +7,18 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
+#include "UI/Core/WindowGeometry.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <span>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -16,151 +27,27 @@ using namespace mu::ui::window;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CCatapultWindow::CCatapultGroupButton::CCatapultGroupButton()
+namespace
 {
-    m_pButton = NULL;
-
-    Initialize();
-}
-
-mu::ui::window::CCatapultWindow::CCatapultGroupButton::~CCatapultGroupButton()
+// CCatapultGroupButton::Create(): each side's target areas, in reference px in the window.
+struct CatapultArea
 {
-    SAFE_DELETE_ARRAY(m_pButton);
-}
-
-void mu::ui::window::CCatapultWindow::CCatapultGroupButton::Initialize()
-{
-    SAFE_DELETE_ARRAY(m_pButton);
-
-    m_iType = 0;
-    m_iIndex = -1;
-}
-
-void mu::ui::window::CCatapultWindow::CCatapultGroupButton::Create(int iType, POINT ptWindow)
-{
-    Initialize();
-
-    m_iType = iType;
-
-    if (iType == CATAPULT_ATTACK)
-    {
-        m_iBtnNum = 4;
-        m_pButton = new CButton[m_iBtnNum];
-        m_pButton[0].ChangeText(&I18N::Game::CastleGate1);
-        m_pButton[0].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[0].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
-        m_pButton[0].ChangeButtonInfo(ptWindow.x + 22, ptWindow.y + 135, 46, 36);
-        m_pButton[0].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[0].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[1].ChangeText(&I18N::Game::CastleGate2);
-        m_pButton[1].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[1].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
-        m_pButton[1].ChangeButtonInfo(ptWindow.x + 74, ptWindow.y + 135, 46, 36);
-        m_pButton[1].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[1].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[2].ChangeText(&I18N::Game::CastleGate3);
-        m_pButton[2].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[2].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
-        m_pButton[2].ChangeButtonInfo(ptWindow.x + 126, ptWindow.y + 135, 46, 36);
-        m_pButton[2].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[2].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[3].ChangeText(&I18N::Game::FrontYard);
-        m_pButton[3].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[3].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
-        m_pButton[3].ChangeButtonInfo(ptWindow.x + 59, ptWindow.y + 182, 77, 47);
-        m_pButton[3].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[3].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    }
-    else if (iType == CATAPULT_DEFENSE)
-    {
-        m_iBtnNum = 3;
-        m_pButton = new CButton[m_iBtnNum];
-        m_pButton[0].ChangeText(&I18N::Game::FrontYard1);
-        m_pButton[0].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[0].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
-        m_pButton[0].ChangeButtonInfo(ptWindow.x + 18, ptWindow.y + 125, 77, 47);
-        m_pButton[0].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[0].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[1].ChangeText(&I18N::Game::FrontYard2);
-        m_pButton[1].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[1].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
-        m_pButton[1].ChangeButtonInfo(ptWindow.x + 97, ptWindow.y + 125, 77, 47);
-        m_pButton[1].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[1].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[2].ChangeText(&I18N::Game::Bridge);
-        m_pButton[2].ChangeTextBackColor(RGBA(255, 255, 255, 0));
-        m_pButton[2].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
-        m_pButton[2].ChangeButtonInfo(ptWindow.x + 56, ptWindow.y + 179, 77, 47);
-        m_pButton[2].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[2].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    }
-}
-
-void mu::ui::window::CCatapultWindow::CCatapultGroupButton::AllUnLock()
-{
-    for (int i = 0; i < m_iBtnNum; ++i)
-    {
-        m_pButton[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_pButton[i].ChangeTextColor(RGBA(255, 255, 255, 255));
-        m_pButton[i].UnLock();
-    }
-}
-
-void mu::ui::window::CCatapultWindow::CCatapultGroupButton::BtnSelected(int iIndex)
-{
-    if (iIndex < 0 || iIndex > m_iBtnNum)
-    {
-        return;
-    }
-
-    AllUnLock();
-
-    m_pButton[iIndex].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-    m_pButton[iIndex].ChangeTextColor(RGBA(100, 100, 100, 255));
-    m_pButton[iIndex].Lock();
-}
-
-int mu::ui::window::CCatapultWindow::CCatapultGroupButton::GetIndex()
-{
-    return m_iIndex;
-}
-
-int mu::ui::window::CCatapultWindow::CCatapultGroupButton::UpdateMouseEvent()
-{
-    int iResult = -1;
-
-    for (int i = 0; i < m_iBtnNum; ++i)
-    {
-        if (m_pButton[i].UpdateMouseEvent() == true)
-        {
-            BtnSelected(i);
-            m_iIndex = i;
-            iResult = i;
-            break;
-        }
-    }
-
-    return iResult;
-}
-
-void mu::ui::window::CCatapultWindow::CCatapultGroupButton::Render()
-{
-    int iCount = 0;
-
-    if (m_iType == CATAPULT_ATTACK)
-    {
-        iCount = 4;
-    }
-    else if (m_iType == CATAPULT_DEFENSE)
-    {
-        iCount = 3;
-    }
-
-    for (int i = 0; i < iCount; ++i)
-    {
-        m_pButton[i].Render();
-    }
-}
+    const wchar_t* const* label;
+    int left, top;
+    bool big; // newui_Btn_round 77 x 47, else newui_Btn_gate 46 x 36
+};
+const CatapultArea kAttackAreas[] = {
+    {&I18N::Game::CastleGate1, 22, 135, false},
+    {&I18N::Game::CastleGate2, 74, 135, false},
+    {&I18N::Game::CastleGate3, 126, 135, false},
+    {&I18N::Game::FrontYard, 59, 182, true},
+};
+const CatapultArea kDefenseAreas[] = {
+    {&I18N::Game::FrontYard1, 18, 125, true},
+    {&I18N::Game::FrontYard2, 97, 125, true},
+    {&I18N::Game::Bridge, 56, 179, true},
+};
+} // namespace
 
 mu::ui::window::CCatapultWindow::CCatapultWindow()
 {
@@ -185,9 +72,8 @@ bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    SetButtonInfo();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -196,7 +82,7 @@ bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CCatapultWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -205,26 +91,10 @@ void mu::ui::window::CCatapultWindow::Release()
     }
 }
 
-void mu::ui::window::CCatapultWindow::SetButtonInfo()
-{
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
-    m_BtnFire.ChangeText(&I18N::Game::Shoot);
-    m_BtnFire.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnFire.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_FIRE, true);
-    m_BtnFire.ChangeButtonInfo(m_Pos.x + 41, m_Pos.y + 250, 108, 29);
-    m_BtnFire.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnFire.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-}
-
 void mu::ui::window::CCatapultWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnFire.ChangeButtonInfo(m_Pos.x + 41, m_Pos.y + 250, 108, 29);
 }
 
 bool mu::ui::window::CCatapultWindow::UpdateMouseEvent()
@@ -254,81 +124,43 @@ bool mu::ui::window::CCatapultWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CCatapultWindow::Update()
 {
+    // Clicks RmlUi reported, in the original's BtnProcess() order: exit, an area, Shoot.
+    const int area = m_PendingArea;
+    const bool fire = m_PendingFire;
+    const bool exit = m_PendingExit;
+    m_PendingArea = -1;
+    m_PendingFire = m_PendingExit = false;
+    if (IsVisible())
+    {
+        const int areaCount = m_iType == CATAPULT_ATTACK    ? static_cast<int>(std::size(kAttackAreas))
+                              : m_iType == CATAPULT_DEFENSE ? static_cast<int>(std::size(kDefenseAreas))
+                                                            : 0;
+        if (exit)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
+        }
+        else if (area >= 0 && area < areaCount && area != m_iAreaIndex)
+        {
+            // CCatapultGroupButton::BtnSelected(): the chosen area locks, Shoot unlocks.
+            m_iAreaIndex = area;
+            m_bFireLocked = false;
+        }
+        else if (fire && !m_bFireLocked && m_iAreaIndex > -1)
+        {
+            SocketClient->ToGameServer()->SendFireCatapultRequest(m_iNpcKey, m_iAreaIndex + 1);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
+        }
+    }
+
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CCatapultWindow::Render()
 {
-    EnableAlphaTest();
-    RenderFrame();
-    RenderOutlineUpper(m_Pos.x + 0, m_Pos.y + 120, 162, 100);
-    RenderOutlineLower(m_Pos.x + 0, m_Pos.y + 120, 162, 100);
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
+    // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
+    // requires the override.
     return true;
-}
-
-void mu::ui::window::CCatapultWindow::RenderFrame()
-{
-    RenderImage(IMAGE_CATAPULT_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_CATAPULT_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_CATAPULT_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CATAPULT_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CATAPULT_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
-}
-
-void mu::ui::window::CCatapultWindow::RenderTexts()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0);
-    if (m_iType == CATAPULT_ATTACK)
-    {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13.f, I18N::Game::WeaponForInvadingTeam, 190, 0, RT3_SORT_CENTER);
-    }
-    else if (m_iType == CATAPULT_DEFENSE)
-    {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13.f, I18N::Game::WeaponForDefendingTeam, 190, 0, RT3_SORT_CENTER);
-    }
-
-    float fLine = 50.f;
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + fLine, I18N::Game::DesiredAttackingLocation, 190, 0, RT3_SORT_CENTER);
-    fLine += 15.f;
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + fLine, I18N::Game::SelectTheButtonAndPress, 190, 0, RT3_SORT_CENTER);
-    fLine += 15.f;
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + fLine, I18N::Game::ToShoot, 190, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CCatapultWindow::RenderButtons()
-{
-    m_BtnExit.Render();
-    m_BtnFire.Render();
-
-    m_BtnChoiceArea.Render();
-}
-
-void mu::ui::window::CCatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
-{
-    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
-    float fBoxWidth = fWidth;
-
-    RenderImage(IMAGE_CATAPULT_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
-    RenderImage(IMAGE_CATAPULT_TABLE_TOP_RIGHT, ptOrigin.x + fBoxWidth + 4, ptOrigin.y - 4, 14, 14);
-    RenderImage(IMAGE_CATAPULT_TABLE_TOP_PIXEL, ptOrigin.x + 25, ptOrigin.y - 4, fBoxWidth - 21, 14);
-}
-
-void mu::ui::window::CCatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
-{
-    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
-    float fBoxWidth = fWidth;
-    float fBoxHeight = fHeight;
-
-    RenderImage(IMAGE_CATAPULT_TABLE_LEFT_PIXEL, ptOrigin.x + 12, ptOrigin.y + 9, 14, fBoxHeight);
-    RenderImage(IMAGE_CATAPULT_TABLE_RIGHT_PIXEL, ptOrigin.x + fBoxWidth + 4, ptOrigin.y + 9, 14, fBoxHeight);
-    RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_LEFT, ptOrigin.x + 12, ptOrigin.y + fBoxHeight + 3, 14, 14);
-    RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT, ptOrigin.x + fBoxWidth + 4, ptOrigin.y + fBoxHeight + 3, 14, 14);
-    RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL, ptOrigin.x + 25, ptOrigin.y + fBoxHeight + 3, fBoxWidth - 21, 14);
 }
 
 float mu::ui::window::CCatapultWindow::GetLayerDepth()
@@ -342,9 +174,8 @@ void mu::ui::window::CCatapultWindow::OpenningProcess()
     m_iNpcKey = 0;
     Vector(0.f, 0.f, 0.f, m_vCameraPos);
 
-    m_BtnFire.Lock();
-    m_BtnFire.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-    m_BtnFire.ChangeTextColor(RGBA(100, 100, 100, 255));
+    // Shoot locked until an area is chosen.
+    m_bFireLocked = true;
 }
 
 void mu::ui::window::CCatapultWindow::ClosingProcess()
@@ -357,14 +188,8 @@ void mu::ui::window::CCatapultWindow::Init(int iKey, int iType)
     m_iNpcKey = iKey;
     m_iType = iType;
 
-    if (m_iType == CATAPULT_ATTACK)
-    {
-        m_BtnChoiceArea.Create(CATAPULT_ATTACK, m_Pos);
-    }
-    else if (m_iType == CATAPULT_DEFENSE)
-    {
-        m_BtnChoiceArea.Create(CATAPULT_DEFENSE, m_Pos);
-    }
+    // CCatapultGroupButton::Create(): the side's areas, none chosen.
+    m_iAreaIndex = -1;
 }
 
 void mu::ui::window::CCatapultWindow::DoFire(int iKey, int iResult, int iType, int iPositionX, int iPositionY)
@@ -448,82 +273,174 @@ void mu::ui::window::CCatapultWindow::GetCameraPos(vec3_t& vPos)
     }
 }
 
-void mu::ui::window::CCatapultWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CATAPULT_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CATAPULT_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CATAPULT_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CATAPULT_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CATAPULT_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CATAPULT_BTN_EXIT, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_CATAPULT_BTN_FIRE, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_Btn_gate.tga", IMAGE_CATAPULT_BTN_SMALL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Btn_round.tga", IMAGE_CATAPULT_BTN_BIG, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_CATAPULT_TABLE_TOP_LEFT);
-    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_CATAPULT_TABLE_TOP_RIGHT);
-    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_CATAPULT_TABLE_BOTTOM_LEFT);
-    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT);
-    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_CATAPULT_TABLE_TOP_PIXEL);
-    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL);
-    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_CATAPULT_TABLE_LEFT_PIXEL);
-    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CATAPULT_TABLE_RIGHT_PIXEL);
-}
-
-void mu::ui::window::CCatapultWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_CATAPULT_BTN_BIG);
-    DeleteBitmap(IMAGE_CATAPULT_BTN_SMALL);
-    DeleteBitmap(IMAGE_CATAPULT_BTN_FIRE);
-
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_RIGHT_PIXEL);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_LEFT_PIXEL);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_TOP_PIXEL);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_BOTTOM_LEFT);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_TOP_RIGHT);
-    DeleteBitmap(IMAGE_CATAPULT_TABLE_TOP_LEFT);
-
-    DeleteBitmap(IMAGE_CATAPULT_BTN_EXIT);
-    DeleteBitmap(IMAGE_CATAPULT_BOTTOM);
-    DeleteBitmap(IMAGE_CATAPULT_RIGHT);
-    DeleteBitmap(IMAGE_CATAPULT_LEFT);
-    DeleteBitmap(IMAGE_CATAPULT_TOP);
-    DeleteBitmap(IMAGE_CATAPULT_BACK);
-}
-
 bool mu::ui::window::CCatapultWindow::BtnProcess()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
+    // Top-right corner close "X" (shared frame). Hides + swallows the click. The area, Shoot and
+    // exit buttons are RmlUi's (see Update()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CATAPULT))
         return true;
 
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
-        return true;
-    }
-
-    int iIndex = 0;
-    iIndex = m_BtnChoiceArea.UpdateMouseEvent();
-
-    if (iIndex > -1)
-    {
-        m_BtnFire.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_BtnFire.ChangeTextColor(RGBA(255, 255, 255, 255));
-        m_BtnFire.UnLock();
-        return true;
-    }
-
-    iIndex = m_BtnChoiceArea.GetIndex();
-    if (iIndex > -1 && m_BtnFire.UpdateMouseEvent() == true)
-    {
-        SocketClient->ToGameServer()->SendFireCatapultRequest(m_iNpcKey, iIndex + 1);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
-    }
-
     return false;
+}
+
+void mu::ui::window::CCatapultWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(
+        RmlUiRuntime::Instance().GetContext(), "catapult",
+        [this](Rml::DataModelConstructor& c, CatapultRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("line_height_px", &model.lineHeightPx);
+            c.Bind("title", &model.title);
+            c.Bind("title_px", &model.titlePx);
+            auto line = c.RegisterStruct<CatapultLineEntry>();
+            line.RegisterMember("text", &CatapultLineEntry::text);
+            line.RegisterMember("text_px", &CatapultLineEntry::textPx);
+            c.RegisterArray<std::vector<CatapultLineEntry>>();
+            c.Bind("lines", &model.lines);
+            auto area = c.RegisterStruct<CatapultAreaEntry>();
+            area.RegisterMember("label", &CatapultAreaEntry::label);
+            area.RegisterMember("index", &CatapultAreaEntry::index);
+            area.RegisterMember("left", &CatapultAreaEntry::left);
+            area.RegisterMember("top", &CatapultAreaEntry::top);
+            area.RegisterMember("big", &CatapultAreaEntry::big);
+            area.RegisterMember("locked", &CatapultAreaEntry::locked);
+            area.RegisterMember("label_top", &CatapultAreaEntry::labelTop);
+            area.RegisterMember("label_left", &CatapultAreaEntry::labelLeft);
+            area.RegisterMember("label_px", &CatapultAreaEntry::labelPx);
+            c.RegisterArray<std::vector<CatapultAreaEntry>>();
+            c.Bind("areas", &model.areas);
+            c.Bind("fire_text", &model.fireText);
+            c.Bind("fire_locked", &model.fireLocked);
+            c.Bind("fire_label_top", &model.fireLabelTop);
+            c.Bind("exit_tooltip", &model.exitTooltip);
+            c.BindEventCallback("catapult_area",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        m_PendingArea = arguments[0].Get<int>(-1);
+                                });
+            c.BindEventCallback("catapult_fire", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingFire = true; });
+            c.BindEventCallback("catapult_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingExit = true; });
+        });
+    if (!modelCreated)
+        return;
+
+    m_pRmlDoc =
+        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/catapult.rml");
+}
+
+void mu::ui::window::CCatapultWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void mu::ui::window::CCatapultWindow::SyncRmlModel()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    // Layer depth 5: over the HUD like every panel the original opened.
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    CatapultRmlModel& model = m_RmlBinder.GetModel();
+    auto sync = [&](auto field, const char* name, auto value)
+    {
+        if (!(model.*field == value))
+        {
+            model.*field = std::move(value);
+            m_RmlBinder.MarkDirty(name);
+        }
+    };
+    // RenderText() in a 190-unit box, bold: shrunk to it when wider.
+    auto boldPxIn = [&](const wchar_t* text)
+    {
+        g_pRenderText->SetFont(g_hFontBold);
+        const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform, static_cast<float>(width),
+                                                     190.f);
+    };
+
+    // The original's RenderTexts(): the side's title and the three lines, bold (220, 220, 220).
+    const wchar_t* title = m_iType == CATAPULT_ATTACK    ? I18N::Game::WeaponForInvadingTeam
+                           : m_iType == CATAPULT_DEFENSE ? I18N::Game::WeaponForDefendingTeam
+                                                         : L"";
+    sync(&CatapultRmlModel::title, "title", StringUtils::WideToNarrow(title));
+    sync(&CatapultRmlModel::titlePx, "title_px", title[0] != L'\0' ? boldPxIn(title) : 0.f);
+    const wchar_t* const texts[] = {I18N::Game::DesiredAttackingLocation, I18N::Game::SelectTheButtonAndPress,
+                                    I18N::Game::ToShoot};
+    std::vector<CatapultLineEntry> lines;
+    for (const wchar_t* text : texts)
+        lines.push_back({StringUtils::WideToNarrow(text), boldPxIn(text)});
+    const bool sameLines =
+        model.lines.size() == lines.size() && std::equal(model.lines.begin(), model.lines.end(), lines.begin(),
+                                                         [](const CatapultLineEntry& x, const CatapultLineEntry& y)
+                                                         { return x.text == y.text && x.textPx == y.textPx; });
+    if (!sameLines)
+    {
+        model.lines = std::move(lines);
+        m_RmlBinder.MarkDirty("lines");
+    }
+
+    // The buttons' labels in the normal font at CButton::Render()'s whole-unit centre.
+    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
+    sync(&CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    std::vector<CatapultAreaEntry> areas;
+    const std::span<const CatapultArea> sideAreas =
+        m_iType == CATAPULT_ATTACK    ? std::span<const CatapultArea>(kAttackAreas)
+        : m_iType == CATAPULT_DEFENSE ? std::span<const CatapultArea>(kDefenseAreas)
+                                      : std::span<const CatapultArea>();
+    for (std::size_t i = 0; i < sideAreas.size(); ++i)
+    {
+        const CatapultArea& a = sideAreas[i];
+        const int width = a.big ? 77 : 46;
+        const int height = a.big ? 47 : 36;
+        g_pRenderText->SetFont(g_hFont);
+        const int measured = g_pRenderText->MeasureText(*a.label, static_cast<int>(wcslen(*a.label))).cx;
+        areas.push_back(
+            {StringUtils::WideToNarrow(*a.label), static_cast<int>(i), static_cast<float>(a.left),
+             static_cast<float>(a.top), a.big, static_cast<int>(i) == m_iAreaIndex,
+             static_cast<float>(height / 2 - lineHeight / 2), static_cast<float>(width / 2 - measured / 2),
+             UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
+                                                   static_cast<float>(measured), static_cast<float>(width))});
+    }
+    const bool sameAreas = model.areas.size() == areas.size() &&
+                           std::equal(model.areas.begin(), model.areas.end(), areas.begin(),
+                                      [](const CatapultAreaEntry& x, const CatapultAreaEntry& y)
+                                      {
+                                          return x.label == y.label && x.left == y.left && x.top == y.top &&
+                                                 x.big == y.big && x.locked == y.locked && x.labelTop == y.labelTop &&
+                                                 x.labelLeft == y.labelLeft && x.labelPx == y.labelPx;
+                                      });
+    if (!sameAreas)
+    {
+        model.areas = std::move(areas);
+        m_RmlBinder.MarkDirty("areas");
+    }
+    sync(&CatapultRmlModel::fireText, "fire_text", StringUtils::WideToNarrow(I18N::Game::Shoot));
+    sync(&CatapultRmlModel::fireLocked, "fire_locked", m_bFireLocked);
+    sync(&CatapultRmlModel::fireLabelTop, "fire_label_top", static_cast<float>(29 / 2 - lineHeight / 2));
+    sync(&CatapultRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

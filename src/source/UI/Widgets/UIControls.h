@@ -7,6 +7,7 @@
 #include "GameLogic/Quests/QuestMng.h"
 #include "Core/Time/Timer.h"
 #include <limits>
+#include <type_traits>
 #include <memory>
 #include <vector>
 
@@ -305,6 +306,15 @@ enum UILISTBOX_SCROLL_TYPE
     UILISTBOX_SCROLL_UPDOWN
 };
 
+// A list box's scroll bar in reference px: its track and its thumb's top.
+struct TextListScrollBarGeometry
+{
+    float rangeTop = 0.f;
+    float rangeBottom = 0.f;
+    float thumbTop = 0.f;
+    bool dragged = false;
+};
+
 template <class T> class CUITextListBox : public CUIControl
 {
 public:
@@ -352,7 +362,8 @@ public:
 
     // The lines Render() draws, in its order: visit(line, item, selected) with line 0 the first
     // drawn. For windows that draw the list elsewhere (RmlUi) and keep this control for its data,
-    // scrolling and line clicks.
+    // scrolling and line clicks. A visit returning false skips the item without using up its line,
+    // as a RenderDataLine() returning FALSE does.
     template <typename Visit> void ForEachRenderLine(Visit&& visit)
     {
         MoveRenderLine();
@@ -360,8 +371,22 @@ public:
         {
             if (m_TextListIter == m_TextList.end())
                 break;
-            visit(i, *m_TextListIter, SLGetSelectLineNum() == m_iCurrentRenderEndLine + i + 1);
+            const bool selected = SLGetSelectLineNum() == m_iCurrentRenderEndLine + i + 1;
+            if constexpr (std::is_void_v<decltype(visit(i, *m_TextListIter, selected))>)
+                visit(i, *m_TextListIter, selected);
+            else if (!visit(i, *m_TextListIter, selected))
+                --i;
         }
+    }
+
+    // The new-style scroll bar RenderInterface() draws (m_bUseNewUIScrollBar): computed as the
+    // render does unless the thumb is being dragged.
+    TextListScrollBarGeometry GetScrollBarGeometry()
+    {
+        const bool dragged = GetState() == UISTATE_SCROLL;
+        if (!dragged)
+            ComputeScrollBar();
+        return {m_fScrollBarRange_top, m_fScrollBarRange_bottom, m_fScrollBarPos_y, dragged};
     }
 
 protected:
@@ -744,11 +769,13 @@ public:
     }
     void Sort();
 
+    // The y (reference px) Render() draws line `iLineNumber` at.
+    virtual int GetRenderLinePos_y(int iLineNumber);
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
 class CUIBCGuildListBox : public CUITextListBox<BCGUILD_TEXT>
@@ -767,11 +794,13 @@ public:
         return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
     }
 
+    // The y (reference px) Render() draws line `iLineNumber` at.
+    virtual int GetRenderLinePos_y(int iLineNumber);
+
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
 class CUIMoveCommandListBox : public CUITextListBox<MOVECOMMAND_TEXT>

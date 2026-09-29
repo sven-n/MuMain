@@ -15,9 +15,9 @@ namespace mu::ui::window
 {
 // The RmlUi side of a native message box (a CMessageBoxBase) drawn as newui_msgbox_top, 15-unit
 // middle strips and newui_msgbox_bottom over the newui_msgbox_back fill, with text lines and
-// newui_btn_empty_small buttons (CGuild_ToPerson_Position). One box at a time. The box owns it while it exists and
-// keeps its callbacks: a button RmlUi reports is taken with TakePressedButton() and sent as the
-// box's own event.
+// newui_btn_empty_small buttons, or a progress bar (CGuild_ToPerson_Position, CProgressMsgBox). One box at a time. The
+// box owns it while it exists and keeps its callbacks: a button RmlUi reports is taken with TakePressedButton() and
+// sent as the box's own event.
 class MessageBoxView
 {
 public:
@@ -46,6 +46,10 @@ public:
     MessageBoxView& operator=(const MessageBoxView&) = delete;
 
     void Create(int middleCount, float backHeight);
+    // A box whose size changes after Create() (CProgressMsgBox grows with its text).
+    void SetFrame(int middleCount, float backHeight);
+    // CProgressMsgBox's bar at `top`, `fraction` (0 .. 1) filled; a negative top hides it.
+    void SetProgress(float top, float fraction);
     void Destroy();
 
     // Per frame, inside the message box manager's transform scope.

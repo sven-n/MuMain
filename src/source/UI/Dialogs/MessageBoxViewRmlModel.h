@@ -42,6 +42,11 @@ struct MessageBoxViewRmlModel
     float backHeight = 0.f;   // the newui_msgbox_back fill from y 2, 222 wide
     std::vector<int> middles; // 0 .. middleCount - 1, for data-for
     std::vector<MessageBoxViewLineEntry> lines;
+    // CProgressMsgBox's bar: newui_Bar_switch01 (160 x 18) centred at progressTop, the
+    // newui_Bar_switch02 fill stretched to progressWidth (0 .. 150) inside it.
+    bool progressShown = false;
+    float progressTop = 0.f;
+    float progressWidth = 0.f;
     std::vector<MessageBoxViewButtonEntry> buttons;
 };
 } // namespace mu::ui::window
