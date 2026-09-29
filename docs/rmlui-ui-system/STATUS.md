@@ -867,7 +867,8 @@ for "the full architecture is in place":
   2026-09-29**: each now carries its fields across the rebuild (`component-catalog.md`'s "Theming").
   At Login it was worse than lost text: the emptied fields read as an edit, so the next check
   revoked the saved credentials. MsgWin's resident-password field also lost its `maxlength`.
-  `CGenericConfirmDialog`'s text mode is still open: it reseeds from a consumed seed on reload.
+  `CGenericConfirmDialog`'s text mode rewrote the field from its initial-text seed, which the first
+  show had already consumed; it now configures the field and writes the typed text back.
 - **`LayoutMode::Legacy` (`UI/Scaling/UITransform.h`/`.cpp`, applied via
   `UI::Layout::ForInterface()` in `UILayoutPolicy.cpp`) papers over windows whose own rendering
   still assumes a fixed resolution, on windows the migration ledger already marks "done."** The

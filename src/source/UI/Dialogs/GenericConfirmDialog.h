@@ -204,9 +204,11 @@ namespace mu::ui::window
         void Resolve(ClickResult which); // hides the document, invokes the chosen callback, then ShowNext()
 
         void UpdateProgress();      // advances the progress-bar fraction, auto-resolves on elapse
-        // Pushes this invocation's Mode::Text settings onto #gcd_input (type/maxlength) and seeds
-        // its value -- this dialog is shared, so the field is reconfigured on every Show().
-        void ApplyInputFieldConfig();
+        // Pushes this invocation's Mode::Text settings onto #gcd_input (type/maxlength), then writes
+        // `value`: the initial text on Show(), the typed text on a theme reload. This dialog is
+        // shared, so the field is reconfigured on every Show().
+        void ApplyInputFieldConfig(const Rml::String& value);
+        Rml::String InitialInputText() const;
         // #panel is centered via `.center-both` (`left:50%; top:50%; transform:translate(-50%,-50%)`,
         // base.rcss) -- GetAbsoluteOffset() walks the ancestor chain summing offsets but does NOT
         // apply CSS `transform` at any level, so every element inside #panel is off by half the
@@ -324,9 +326,6 @@ namespace mu::ui::window
         // NumericKeypad's own click-accumulated digit buffer (never the real keyboard focus) --
         // shuffled mapping gives anti-shoulder-surfing behavior.
         std::wstring m_KeypadBuffer;
-        // Mode::Text's InputField::initialText, held between Show() and the ApplyInputFieldConfig()
-        // that seeds #gcd_input -- the element only exists once the document has been shown.
-        std::wstring m_PendingInputSeed;
         std::vector<int> m_KeypadMapping; // 10 entries, shuffled per Show()
 
         DWORD m_dwProgressStartTime = 0;

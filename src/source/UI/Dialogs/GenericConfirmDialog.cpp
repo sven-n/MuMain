@@ -202,6 +202,9 @@ void CGenericConfirmDialog::ReloadRmlTheme()
     if (!m_pRmlDoc) return;
 
     const bool wasVisible = m_pRmlDoc->IsVisible();
+    // Destroy() resets the model, so carry the typed text across the rebuild.
+    const Rml::String typedValue = m_RmlBinder.GetModel().inputValue;
+
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
@@ -226,7 +229,7 @@ void CGenericConfirmDialog::ReloadRmlTheme()
         ShowChrome();
         if (m_pRmlDoc)
             m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
-        ApplyInputFieldConfig();
+        ApplyInputFieldConfig(typedValue);
     }
 }
 
@@ -275,13 +278,8 @@ void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
     m_KeypadMapping.clear();
     m_bItem3DDebugLogged = false;
 
-    if (m_Active.input)
-    {
-        if (m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
-            m_KeypadMapping = ShuffledDigits();
-        else
-            m_PendingInputSeed = m_Active.input->initialText;
-    }
+    if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
+        m_KeypadMapping = ShuffledDigits();
 
     if (m_Active.progress)
     {
@@ -296,7 +294,7 @@ void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
         // Modal: blocks the game world/other UI from stealing focus or clicks while this is open.
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
         m_pRmlDoc->PullToFront();
-        ApplyInputFieldConfig();
+        ApplyInputFieldConfig(InitialInputText());
     }
 }
 
@@ -317,13 +315,8 @@ void CGenericConfirmDialog::ShowNext()
     m_KeypadMapping.clear();
     m_bItem3DDebugLogged = false;
 
-    if (m_Active.input)
-    {
-        if (m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
-            m_KeypadMapping = ShuffledDigits();
-        else
-            m_PendingInputSeed = m_Active.input->initialText;
-    }
+    if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
+        m_KeypadMapping = ShuffledDigits();
 
     if (m_Active.progress)
     {
@@ -337,7 +330,7 @@ void CGenericConfirmDialog::ShowNext()
         SyncRmlModel();
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
         m_pRmlDoc->PullToFront();
-        ApplyInputFieldConfig();
+        ApplyInputFieldConfig(InitialInputText());
     }
 }
 
@@ -389,7 +382,12 @@ bool CGenericConfirmDialog::Render()
     return true;
 }
 
-void CGenericConfirmDialog::ApplyInputFieldConfig()
+Rml::String CGenericConfirmDialog::InitialInputText() const
+{
+    return m_Active.input ? StringUtils::WideToNarrow(m_Active.input->initialText.c_str()) : Rml::String();
+}
+
+void CGenericConfirmDialog::ApplyInputFieldConfig(const Rml::String& value)
 {
     if (!m_pRmlDoc || !m_Active.input
         || m_Active.input->mode != GenericDialogConfig::InputField::Mode::Text)
@@ -406,9 +404,8 @@ void CGenericConfirmDialog::ApplyInputFieldConfig()
     field->SetAttribute("maxlength", m_Active.input->maxLength);
     field->SetClass(UI::RmlBridge::NumericFieldClass, m_Active.input->numericOnly);
 
-    m_RmlBinder.GetModel().inputValue = StringUtils::WideToNarrow(m_PendingInputSeed.c_str());
+    m_RmlBinder.GetModel().inputValue = value;
     m_RmlBinder.MarkDirty("input_value");
-    m_PendingInputSeed.clear();
 
     // This dialog opens with FocusFlag::Document, so the field needs an explicit focus rather than
     // an autofocus attribute -- the attribute would also fight the keypad mode, which shares the row.
