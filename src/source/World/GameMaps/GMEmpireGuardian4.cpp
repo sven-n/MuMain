@@ -1591,11 +1591,13 @@ void GMEmpireGuardian4::PlayObjectSound(OBJECT* o)
 
 void GMEmpireGuardian4::PlayBGM()
 {
+    // All four Empire Guardian maps share one track, so only stop it when leaving
+    // Empire Guardian altogether; otherwise the other maps would stop it every frame.
     if (gMapManager.IsEmpireGuardian4())
     {
         PlayMp3(MUSIC_EMPIREGUARDIAN4);
     }
-    else
+    else if (!gMapManager.IsEmpireGuardian())
     {
         StopMp3(MUSIC_EMPIREGUARDIAN4);
     }
