@@ -457,6 +457,15 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   that is no longer visible. `Blur()` on an element that isn't the focus only clears its parent's
   pointer, so the document then remembers the parent.
 
+- **A self-deleting listener gets one `OnDetach()` per registration, not one per element.**
+  `EventDispatcher` calls `OnAttach()` on every `AddEventListener()`, and `OnDetach()` for every
+  registration it drops — including all of them at once, from `DetachAllEvents()`, when the element
+  is destroyed. So `OnDetach() { delete this; }` is only safe for a listener registered once.
+  `MakeDraggable()` registers one listener for `dragstart`/`drag`/`dragend`, so it counts its
+  attachments and deletes itself after the last one; deleting on the first detach left the other two
+  entries pointing at freed memory, and unloading the document crashed in `DetachAllEvents()`.
+  A listener registered for more than one event, or on more than one element, needs the same count.
+
 - **`<input type="range">` computes the wrong value inside a `transform: scale()` panel, while still
   hit-testing correctly.** `WidgetSlider::AbsolutePositionToBarPosition()` takes the raw mouse pixel
   from the event and divides it against `track->GetAbsoluteOffset()` and `track->GetBox().GetSize()`,
