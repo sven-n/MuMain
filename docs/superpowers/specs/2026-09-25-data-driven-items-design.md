@@ -26,8 +26,10 @@ code**:
 - Item names are **translatable**; logs always use a stable, language-neutral
   identifier.
 
-Scope: **items only.** Skills, monsters, maps, etc. may follow the same
-pattern later but are not part of this work.
+Scope: **items only.** What goes beyond items (effects and particles,
+skills, monsters and NPCs, and the look format and editing rules they
+share with items) is planned in the
+[roadmap](2026-09-29-data-driven-content-roadmap-design.md).
 
 ## Decisions so far
 
@@ -55,8 +57,8 @@ pattern later but are not part of this work.
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model. Phase 12 (level variants as items of their own) then shares models without loading them twice. |
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
-| D25 | Looks in data | Items keep referencing their looks by name (the render style and the effects; the glow colors already are names in data). What a named look is made of moves from code into data files in `Data/Effects/` (phase 13): a list of building blocks, namely draw passes (mesh or body, flags, texture, color, alpha, texture scrolling), things placed on bones (sprites, particles, lightning between two bones, effects), animated object values (glow mesh brightness, hidden mesh, texture scrolling), timing (pulses, random chances per frame) and conditions (item level, doppelganger, ...). The drawing code runs these lists; the item data written in phase 4 stays valid. A named look is shared: changing it changes every item that uses it, so the editor lists the items of a look and warns with that list before a change to a shared look is saved. Skills, monsters and NPCs use the same look format and the same look editor (see "Beyond items"); effect and particle types are referenced by the names of the effect catalogue (FX1), and become data themselves later (FX2). |
-| D26 | Shared definitions | Anything that several things use is defined once, with a name, in a data file, and its users reference that name: glow colors, looks, effect types, skills. Editors show where a definition is used (items, skills, monsters, NPCs, other effects). Saving a change to a definition that others use first shows the list of those users; a copy makes a variant for one user; renaming updates all references; a definition that is still used cannot be deleted (the list shows why). Unknown names are reported when loading. Names are resolved when loading, so drawing and game logic never look names up. Every move from code into data is compared with the old code (recorder) before the old code goes. |
+| D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
+| D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
@@ -381,7 +383,7 @@ table:
 | **Rules** | Flags as a matrix (items × tradable, droppable, storable, sellable, …) for bulk editing. |
 | **Categories** | Tag-centered view: pick a tag, see and change its items. |
 | **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
-| **Look editor** (phase 13) | Edits a named look (D25) as its list of building blocks, with a live preview of the model and its animations. Shows the skeleton with every bone's number and its name from the `.bmd` file, highlights the bones the look uses, and picks bones by clicking them instead of looking up numbers in the model file. Lists all items that use the look; saving a change to a look that other items share shows a warning with the list of those items. A new look starts as a copy of another. |
+| **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
 | **Translations** | Items × languages grid, filter for missing translations. |
 | **OpenMU sync** | Import, diff and export of the exchange file. |
 
@@ -414,13 +416,9 @@ in both repos (as separate PRs, one per repo).
 | 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
 | 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, 4d, A | Move items into new groups for the new client; level variants become items of their own; legacy ids for the original client (D21). |
 | D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
-| FX1 | Effect catalogue *(own design document)* | Client | MuMain | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values in `Data/Effects/`; behavior stays code. Effect browser with preview and "used by". See "Beyond items". |
+| FX1 | Effect catalogue *([roadmap](2026-09-29-data-driven-content-roadmap-design.md))* | Client | MuMain | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values in `Data/Effects/`; behavior stays code. |
 | 13 | Looks in data | Client | MuMain | 4c, 6, FX1 | What the named render styles and effects are made of moves from code into `Data/Effects/` as building blocks (D25), with the look editor in MuEditor (preview, bones, the items that use a look). |
-| SK1 | Skills as data *(own design document)* | Client, server sync later | MuMain | 2 | `Skill.bmd` into JSON like the items in phase 2; focused skill editors. |
-| SK2 | Skill looks *(own design document)* | Client | MuMain | SK1, FX1, 13 | How skills look when cast, flying and hitting, as looks (D25); preview with a test character. |
-| MN | Monsters and NPCs *(own design document)* | Client, server sync later | MuMain | FX1, 13, SK1 | Monster and NPC setup, looks and skills into data; monster and NPC editors. |
-| FX2 | Effect behavior as data *(own design document)* | Client | MuMain | FX1 | How effects and particles move, fade, spawn and draw, as building blocks; effect editor with live preview. |
-| 14 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model, the design documents of the areas beyond items that do not have one yet, then remove this document. |
+| 14 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -566,8 +564,8 @@ server with original clients (after phases 6 and B).
        and capes, or on one mesh). It replaces `PartObjectColor`,
        `PartObjectColor2`, `PartObjectColor3`, the mesh choices of
        `RenderPartObjectBodyColor(2)` and the item cases of the glow level
-       switch. Still in code: the glow of monsters (area MN: monsters have
-       their own models, data and code), of the event models
+       switch. Still in code: the glow of monsters (area MN of the roadmap:
+       monsters have their own models, data and code), of the event models
        of level variants (with 4d and phase 12, when they get model entries
        and the drawing code knows the item), of the inventory model of the
        Phoenix Soul Armor (see the last step below), and the Deadly Staff's
@@ -764,18 +762,15 @@ server with original clients (after phases 6 and B).
     made of moves from code into data files in `Data/Effects/`, as lists of
     building blocks, one look at a time; the item data keeps naming them.
     Particle and effect types are referenced by their names from the effect
-    catalogue (FX1) and stay code until FX2. Effects place sprites and
-    particles on bones of the model, so they follow its animation. Bones are
-    values by number, as in the code: the names in the `.bmd` files are
-    export names that do not help to find a bone (of the 778 item model
-    files, 340 have the biped skeleton with names like "Bip01 L Hand", 249
-    only names like `Bone01`, `Box02` or `zx12`, and in 396 the bone called
-    "BoneNN" is not bone NN); the look editor shows numbers and names
-    together, and the model loader checks that the bones exist. The lists
-    are resolved when loading (textures, bones, particle types), so drawing
-    is not slower. Verified like phase 4c: every look draws and spawns the
-    same things with the same values as its code did, per item and level.
-    The look editor of section 9 comes with it.
+    catalogue (FX1, roadmap) and stay code until FX2. Effects place sprites
+    and particles on bones of the model, so they follow its animation. Bones
+    are values by number, as in the code (see "Bones" in the roadmap for
+    why); the look editor shows numbers and names together, and the model
+    loader checks that the bones exist. The lists are resolved when loading
+    (textures, bones, particle types), so drawing is not slower. Verified
+    like phase 4c: every look draws and spawns the same things with the same
+    values as its code did, per item and level. The look editor of section 9
+    comes with it.
 14. **Cleanup**, once the work has landed:
     - The glow of the inventory model of the Phoenix Soul Armor
       (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
@@ -785,49 +780,18 @@ server with original clients (after phases 6 and B).
       other inventory models (probably a copy-paste leftover; to keep or to
       drop then). Left for last because it only shows in the inventory and
       is easiest to check once everything else is in data.
-    - The design documents of the areas beyond items (next section) that
-      do not have one yet, written before this one is removed, so the plan
-      for them is not lost.
+    - Whatever later areas still need from this document moves to the
+      roadmap, so it is not lost.
     - Remove this document.
 
-## Beyond items: effects, skills, monsters and NPCs
+## Beyond items
 
-Items are not the only users of the effect code. About 3,950 calls create
-effects, particles, lightning and sprites: about 1,600 for the maps and
-their monsters (`World/GameMaps`), 1,100 for characters, objects and items
-(`Engine`), 760 inside the effects themselves, 290 for skills, combat,
-pets and events (`GameLogic`) and 140 for skill results from the server
-(`Network`). The effect code knows about 440 effect types, 100 particle
-types and 30 lightning types; `Render/Effects/EffectRegistry` has started
-to describe them as a table instead of three large switches. Skills are
-still read from `Skill.bmd` (with a table editor, as items had before
-phase 2), and monsters and NPCs are set up in a switch of 403 cases in
-`ZzzCharacter.cpp`.
-
-What belongs together is refactored together, on the rules of D26, in
-this order. Each area gets its own design document and its own phases:
-
-| Area | Name | Depends on | What moves into data | Editor |
-|---|---|---|---|---|
-| FX1 | Effect catalogue | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`. Behavior stays code. Items, skills and monsters then name effects instead of using type numbers. | Effect browser: each effect with a preview, its values, and where it is used. |
-| 13 | Looks in data (items) | FX1, 6 | What the item looks are made of (D25). | Look editor (section 9). |
-| SK1 | Skills as data | 2 | `Skill.bmd` into JSON, like the items in phase 2: names, requirements, rules; later synced with OpenMU like the items (phases 7 and B). | Focused skill editors, like section 9 for items; "used by" (classes, items that give a skill, monsters). |
-| SK2 | Skill looks | SK1, FX1, 13 | How a skill looks when cast, flying and hitting (effects, particles, sounds, character animations), as looks in the format of D25. Skills place effects on bones too, mostly of the caster (hands, weapon), whose biped skeleton has readable bone names ("Bip01 R Hand"). | The look editor with its bone picking, with a preview of the skill cast by a test character. |
-| MN | Monsters and NPCs | FX1, 13, SK1 | The monster and NPC setup (model, size, the equipment of player-shaped NPCs), their looks (glow, render styles and effects in the format of D25; the plate of the helper NPCs, `helperNpcPlate`, moves from the items to them; the player transformations) and their skills. | Monster and NPC editors with preview; the look editor. |
-| FX2 | Effect behavior as data | FX1 | How effects and particles move, fade, spawn and draw, as building blocks, one effect family at a time (continuing the handlers of the registry). New effects without code. | Effect editor with a live preview. |
-| later | Map objects, buffs, pets, sounds | FX1 | To decide: the objects of the maps with their effects (most of `World/GameMaps`), buff visuals, pets, sound names. | – |
-
-- **The effect catalogue comes first.** Its names are what the looks of
-  items (13), skills (SK2) and monsters (MN) reference. It moves no
-  behavior, so it is small and can be checked like the render styles.
-- **One look format and one look editor** for items, skills, monsters and
-  NPCs. A look made for an item can be used by a monster, and the "used
-  by" list of a look shows all of them.
-- **Effect behavior comes last.** Once everything references effects by
-  name, their behavior can move into data without touching their users.
-- **The editors share their parts:** the look editor, the effect editor
-  and the bone viewer are opened from the item, skill and monster editors,
-  and all of them follow D26.
+Effects and particles, skills, monsters and NPCs are areas of the
+[roadmap](2026-09-29-data-driven-content-roadmap-design.md), each with
+its own design document when its work starts. They share the look format
+(D25), the rules for shared definitions (D26) and the editor parts (look
+editor, effect editor, bones) with the items. Item phase 13 depends on the
+effect catalogue (FX1) there.
 
 ## Open questions
 
