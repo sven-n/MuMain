@@ -597,28 +597,18 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 }
 
 // ---------------------------------------------------------------------------
-// StopMusic — stop the current music stream
-// MEDIUM-3 (code-review-finalize 2026-03-19): Documents pause vs stop semantics.
+// StopMusic — stop and release the current music stream
 // LOW-3 (code-review-finalize 2026-03-19): Documents nullptr name behaviour.
 //
-// enforce=true:  Hard stop — calls ma_sound_uninit(), releases file handle and
-//                decoder. Current track name is cleared. Matches wzAudioStop().
-// enforce=false: Soft pause — calls ma_sound_stop() only. Stream/decoder remain
-//                open. Use this only when you intend to resume later. To avoid
-//                resource leaks, always call with enforce=true when done with a track.
+// Every stop releases the stream (file handle + decoder) and clears the current
+// track name, like the old StopMp3() cleared Mp3FileName. Keeping the name after
+// a stop would make the next PlayMusic() of the same track hit the same-track
+// guard and stay silent (e.g. Lorencia -> Arena -> Lorencia).
 //
 // name semantics:
-//   Non-null name + enforce=false: only stop if the named track is currently playing.
+//   Non-null name + enforce=false: only stop if the named track is the current one.
 //   nullptr       + enforce=false: stop the current track regardless of name.
 //   name is ignored when enforce=true (always stops regardless).
-//
-// KNOWN LIMITATION (LOW-NEW-2): After StopMusic(nullptr, FALSE) (soft pause),
-// m_musicLoaded=true and m_currentMusicName is unchanged. The next PlayMusic() call
-// with the same track name hits the same-track guard and returns early — the music
-// stays paused with no way to resume from the current position. IPlatformAudio has
-// no ResumeMusic() method. In practice, all game call sites use enforce=TRUE (hard
-// stop via the StopMusic() free function in MuMain.cpp), so this dead-end path is
-// not reachable from current gameplay. A ResumeMusic() API may be added in 5.2.2.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 {
@@ -628,7 +618,6 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
     }
 
     // If not enforced, only stop if the name matches the current track.
-    // nullptr name means "stop current track regardless of name" (unconditional soft stop).
     // Same comparison as PlayMusic()'s guard — see IsSameMusicTrack().
     if (!enforce && name != nullptr && !m_currentMusicName.empty())
     {
@@ -639,14 +628,9 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
     }
 
     ma_sound_stop(&m_musicSound);
-
-    if (enforce)
-    {
-        // Hard stop: release stream resources to avoid file handle / decoder leaks.
-        ma_sound_uninit(&m_musicSound);
-        m_musicLoaded = false;
-        m_currentMusicName.clear();
-    }
+    ma_sound_uninit(&m_musicSound);
+    m_musicLoaded = false;
+    m_currentMusicName.clear();
 }
 
 // ---------------------------------------------------------------------------
