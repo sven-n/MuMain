@@ -119,7 +119,9 @@ namespace mu::ui::window
             bool canLevelUp = false;   // CharacterAttribute->LevelUpPoint > 0
             bool showCharisma = false; // base class == CLASS_DARK_LORD
 
-            Rml::String nameText, nameColor;
+            // CHARACTER::PK, not a colour: the theme decides what each outlaw level looks like.
+            Rml::String nameText;
+            int pkLevel = 0;
             Rml::String classNameText, serverNameText;
             float classNameOpacity = 1.f, serverNameOpacity = 0.f;
 
@@ -130,11 +132,14 @@ namespace mu::ui::window
             Rml::String pointText;
 
             Rml::String strLabel, agiLabel, vitLabel, eneLabel, cmdLabel;
-            Rml::String strValueText, strValueColor;
-            Rml::String agiValueText, agiValueColor;
-            Rml::String vitValueText, vitValueColor;
-            Rml::String eneValueText, eneValueColor;
-            Rml::String cmdValueText, cmdValueColor;
+            // *ValueSource is where the attribute's current total comes from -- "potion" while a
+            // Secret Potion is up, "boosted" when items or a buff add to it, "base" otherwise.
+            // What each of the three looks like is the theme's to decide.
+            Rml::String strValueText, strValueSource;
+            Rml::String agiValueText, agiValueSource;
+            Rml::String vitValueText, vitValueSource;
+            Rml::String eneValueText, eneValueSource;
+            Rml::String cmdValueText, cmdValueSource;
 
             std::vector<StatLine> strLines;
             std::vector<StatLine> agiLines;

@@ -275,7 +275,19 @@ Examples:
 - Zen wealth tier: `GameLogic::Items::ClassifyGoldAmount()`, `.gold-*`;
 - trade partner level bucket: `.level-bucket-*`;
 - quest row kind: reported by `CQuestMng::GetRequestRewardText()`, `.row-*`;
-- character-select balloon name status: `.name-*`.
+- character-select balloon name status: `.name-*`;
+- outlaw level: `CHARACTER::PK` bound as `pk_level`, `#name.pk-*`;
+- where an attribute's total comes from: `AttributeSource()` → `"potion"`/`"boosted"`/`"base"`,
+  `.attr-potion`/`.attr-boosted` over the base colour on `.attr-value`.
+
+**This is the shape to reach for whenever C++ is about to build a colour.** The last two came from
+`CCharacterInfoWindow`, which had 57 `MakeColorRgba()` calls and pushed six colour strings through
+its model -- so the theme could not restyle a stat or an outlaw level, and modern's own
+`#name { color: token(text-warm) }` had never once taken effect, because a `data-style-*` binding is
+an inline property and inline beats every stylesheet rule in this build (`engine-findings.md`).
+Note what is *not* on this list: that window's derived-stat rows still carry `line.color`, because
+they are a transcribed display list rather than a value with a meaning -- see
+`tracked-deferrals.md`'s ownership-boundary entry for that distinction.
 
 Do not unpack the engine's packed text colours into CSS: they are `A<<24 | B<<16 | G<<8 | R`, and
 reading them as RGB swaps red and blue.

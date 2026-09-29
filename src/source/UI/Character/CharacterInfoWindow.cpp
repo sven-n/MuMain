@@ -78,20 +78,13 @@ namespace
         return StringUtils::WideToNarrow(buf);
     }
 
-    // Mirrors UI::Chat::SetPlayerColor(BYTE) -- that function sets g_pRenderText's live text
-    // color state rather than returning one, which this binding needs instead.
-    Rml::String GetPlayerColorRgba(BYTE pk)
+    // Which of the three states RenderAttribute() coloured an attribute's value for. The states
+    // are the meaning; each theme's character_info.rcss decides what they look like.
+    const char* AttributeSource(bool potionBuffed, bool boosted)
     {
-        switch (pk)
-        {
-        case 0: return MakeColorRgba(150, 255, 240, 255); // npc
-        case 1: return MakeColorRgba(100, 120, 255, 255);
-        case 2: return MakeColorRgba(140, 180, 255, 255);
-        case 3: return MakeColorRgba(200, 220, 255, 255); // normal
-        case 4: return MakeColorRgba(255, 150, 60, 255);  // pk1
-        case 5: return MakeColorRgba(255, 80, 30, 255);   // pk2
-        default: return MakeColorRgba(255, 0, 0, 255);    // pk3
-        }
+        if (potionBuffed)
+            return "potion";
+        return boosted ? "boosted" : "base";
     }
 }
 
@@ -145,7 +138,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
                 c.Bind("show_charisma", &model.showCharisma);
 
                 c.Bind("name_text", &model.nameText);
-                c.Bind("name_color", &model.nameColor);
+                c.Bind("pk_level", &model.pkLevel);
                 c.Bind("classname_text", &model.classNameText);
                 c.Bind("servername_text", &model.serverNameText);
                 c.Bind("classname_opacity", &model.classNameOpacity);
@@ -163,15 +156,15 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
                 c.Bind("ene_label", &model.eneLabel);
                 c.Bind("cmd_label", &model.cmdLabel);
                 c.Bind("str_value_text", &model.strValueText);
-                c.Bind("str_value_color", &model.strValueColor);
+                c.Bind("str_value_source", &model.strValueSource);
                 c.Bind("agi_value_text", &model.agiValueText);
-                c.Bind("agi_value_color", &model.agiValueColor);
+                c.Bind("agi_value_source", &model.agiValueSource);
                 c.Bind("vit_value_text", &model.vitValueText);
-                c.Bind("vit_value_color", &model.vitValueColor);
+                c.Bind("vit_value_source", &model.vitValueSource);
                 c.Bind("ene_value_text", &model.eneValueText);
-                c.Bind("ene_value_color", &model.eneValueColor);
+                c.Bind("ene_value_source", &model.eneValueSource);
                 c.Bind("cmd_value_text", &model.cmdValueText);
-                c.Bind("cmd_value_color", &model.cmdValueColor);
+                c.Bind("cmd_value_source", &model.cmdValueSource);
 
                 auto statLine = c.RegisterStruct<StatLine>();
                 statLine.RegisterMember("text", &StatLine::text);
@@ -481,9 +474,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
     auto& model = m_RmlBinder.GetModel();
 
     model.nameText = StringUtils::WideToNarrow(CharacterAttribute->Name);
-    model.nameColor = GetPlayerColorRgba(Hero->PK);
+    model.pkLevel = Hero->PK;
     m_RmlBinder.MarkDirty("name_text");
-    m_RmlBinder.MarkDirty("name_color");
+    m_RmlBinder.MarkDirty("pk_level");
 
     wchar_t strClassName[256];
     mu_swprintf(strClassName, L"(%ls)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
@@ -636,26 +629,15 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     wStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 
-    Rml::String strengthColor;
-    if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
-    {
-        strengthColor = MakeColorRgba(255, 120, 0, 255);
-    }
-    else if (CharacterAttribute->AddStrength)
-    {
-        strengthColor = MakeColorRgba(100, 150, 255, 255);
-    }
-    else
-    {
-        strengthColor = MakeColorRgba(230, 230, 0, 255);
-    }
+    const char* strengthSource = AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1),
+                                                 CharacterAttribute->AddStrength != 0);
 
     wchar_t strStrength[32];
     mu_swprintf(strStrength, L"%d", wStrength);
     model.strValueText = StringUtils::WideToNarrow(strStrength);
-    model.strValueColor = strengthColor;
+    model.strValueSource = strengthSource;
     m_RmlBinder.MarkDirty("str_value_text");
-    m_RmlBinder.MarkDirty("str_value_color");
+    m_RmlBinder.MarkDirty("str_value_source");
 
     wchar_t strAttakMamage[256];
     int iAttackDamageMin = 0;
@@ -966,27 +948,16 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
     }
     m_RmlBinder.MarkDirty("str_lines");
 
-    Rml::String dexterityColor;
-    if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
-    {
-        dexterityColor = MakeColorRgba(255, 120, 0, 255);
-    }
-    else if (CharacterAttribute->AddDexterity)
-    {
-        dexterityColor = MakeColorRgba(100, 150, 255, 255);
-    }
-    else
-    {
-        dexterityColor = MakeColorRgba(230, 230, 0, 255);
-    }
+    const char* dexteritySource = AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2),
+                                                  CharacterAttribute->AddDexterity != 0);
 
     wchar_t strDexterity[32];
     WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     mu_swprintf(strDexterity, L"%d", wDexterity);
     model.agiValueText = StringUtils::WideToNarrow(strDexterity);
-    model.agiValueColor = dexterityColor;
+    model.agiValueSource = dexteritySource;
     m_RmlBinder.MarkDirty("agi_value_text");
-    m_RmlBinder.MarkDirty("agi_value_color");
+    m_RmlBinder.MarkDirty("agi_value_source");
 
     bool bDexSuccess = true;
     int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -1234,32 +1205,31 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     WORD wVitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
 
-    Rml::String vitalityColor;
+    // The Our-Forces HP buff counts as boosted like an item bonus does, but it also has to
+    // recompute the total first, so this one keeps its branches rather than folding into
+    // AttributeSource()'s two conditions.
+    const char* vitalitySource = "base";
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        vitalityColor = MakeColorRgba(255, 120, 0, 255);
+        vitalitySource = "potion";
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
     {
         CharacterMachine->CalculateAll();
         wVitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-        vitalityColor = MakeColorRgba(100, 150, 255, 255);
+        vitalitySource = "boosted";
     }
     else if (CharacterAttribute->AddVitality)
     {
-        vitalityColor = MakeColorRgba(100, 150, 255, 255);
-    }
-    else
-    {
-        vitalityColor = MakeColorRgba(230, 230, 0, 255);
+        vitalitySource = "boosted";
     }
 
     wchar_t strVitality[256];
     mu_swprintf(strVitality, L"%d", wVitality);
     model.vitValueText = StringUtils::WideToNarrow(strVitality);
-    model.vitValueColor = vitalityColor;
+    model.vitValueSource = vitalitySource;
     m_RmlBinder.MarkDirty("vit_value_text");
-    m_RmlBinder.MarkDirty("vit_value_color");
+    m_RmlBinder.MarkDirty("vit_value_source");
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -1306,26 +1276,15 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     WORD wEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
 
-    Rml::String energyColor;
-    if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
-    {
-        energyColor = MakeColorRgba(255, 120, 0, 255);
-    }
-    else if (CharacterAttribute->AddEnergy)
-    {
-        energyColor = MakeColorRgba(100, 150, 255, 255);
-    }
-    else
-    {
-        energyColor = MakeColorRgba(230, 230, 0, 255);
-    }
+    const char* energySource = AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4),
+                                               CharacterAttribute->AddEnergy != 0);
 
     wchar_t strEnergy[256];
     mu_swprintf(strEnergy, L"%d", wEnergy);
     model.eneValueText = StringUtils::WideToNarrow(strEnergy);
-    model.eneValueColor = energyColor;
+    model.eneValueSource = energySource;
     m_RmlBinder.MarkDirty("ene_value_text");
-    m_RmlBinder.MarkDirty("ene_value_color");
+    m_RmlBinder.MarkDirty("ene_value_source");
 
     model.eneLines.clear();
 
@@ -1623,25 +1582,14 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
         wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-        Rml::String charismaColor;
-        if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
-        {
-            charismaColor = MakeColorRgba(255, 120, 0, 255);
-        }
-        else if (CharacterAttribute->AddCharisma)
-        {
-            charismaColor = MakeColorRgba(100, 150, 255, 255);
-        }
-        else
-        {
-            charismaColor = MakeColorRgba(230, 230, 0, 255);
-        }
+        const char* charismaSource = AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5),
+                                                     CharacterAttribute->AddCharisma != 0);
 
         wchar_t strCharisma[256];
         mu_swprintf(strCharisma, L"%d", wCharisma);
         model.cmdValueText = StringUtils::WideToNarrow(strCharisma);
-        model.cmdValueColor = charismaColor;
+        model.cmdValueSource = charismaSource;
         m_RmlBinder.MarkDirty("cmd_value_text");
-        m_RmlBinder.MarkDirty("cmd_value_color");
+        m_RmlBinder.MarkDirty("cmd_value_source");
     }
 }

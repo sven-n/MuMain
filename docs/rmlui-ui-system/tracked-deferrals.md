@@ -333,15 +333,21 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
 - **The display-list port above.** Highest leverage precisely because it is a *method*: applied to
   a window it produces every other finding here at once, and it has been applied 32 times. Worth
   ruling on before the next port more than retrofitting the existing 32.
-- **Colour decided in C++ where the semantic value is in hand.** `CharacterInfoWindow.cpp` alone
-  has 57 `MakeColorRgba` calls: `GetPlayerColorRgba(pk)` maps PK level straight to literals, and
-  the stat blocks map potion-buffed / item-boosted / base to three colours, repeated for all five
-  stats. The correct translation already ships in the neighbouring family — `gold_tier`,
-  `level_bucket` and `cost_tier` classify in C++ and let `base.rcss`/`trade.rcss` own the colour —
-  so this is an unevenly applied house pattern, not an open design question. Also here:
-  `ChatCommandWindow`'s `edit_color` (a compile-time constant through the model), and CryWolf's
-  banner fade as `RGBA(255,255,255,alpha)` where a bound opacity would leave the colour to the
-  theme.
+- **Colour decided in C++ where the semantic value is in hand.** The correct translation already
+  shipped in the neighbouring family — `gold_tier`, `level_bucket` and `cost_tier` classify in C++
+  and let `base.rcss`/`trade.rcss` own the colour — so this was an unevenly applied house pattern,
+  not an open design question.
+  **`CCharacterInfoWindow` done**, as the pilot: `GetPlayerColorRgba(pk)`'s six literals became
+  `pk_level`, and the five three-branch stat blocks became `AttributeSource()` returning
+  `"potion"`/`"boosted"`/`"base"`, with both themes' RCSS holding the colours (23 of its 57
+  `MakeColorRgba` calls gone). Vitality keeps its branches -- its Our-Forces case also calls
+  `CalculateAll()` and recomputes the total, so it cannot fold into two booleans. It confirmed the
+  cost of the old shape too: modern's `#name { color: token(text-warm) }` had never taken effect,
+  and both themes were given the same palette so the change is ownership only, not a redesign.
+  **Still open**: `ChatCommandWindow`'s `edit_color` (a compile-time constant through the model),
+  and CryWolf's banner fade as `RGBA(255,255,255,alpha)` where a bound opacity would leave the
+  colour to the theme. `CCharacterInfoWindow`'s own derived-stat rows (`line.color`) stay out --
+  they are display-list, not a value with a meaning.
 - **`kLayoutPanelWidth` exists three times.** `WindowSystem.cpp`'s `constexpr int kLayoutPanelWidth
   = 190` decides where the next dock column starts; both themes' `docked_panel_frame.rcss`
   independently declare `width: 190px` for how wide the panel draws. A theme widening its dock

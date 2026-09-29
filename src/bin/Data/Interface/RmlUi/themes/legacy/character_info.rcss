@@ -110,8 +110,8 @@
 	font-weight: bold;
 	pointer-events: none;
 }
-.attr-label { left: 12px; width: 74px; }
-.attr-value { left: 86px; width: 86px; }
+.attr-label { left: 12px; width: 74px; color: rgb(230, 230, 0); }
+.attr-value { left: 86px; width: 86px; color: rgb(230, 230, 0); }
 .attr-label-str, .attr-value-str { top: 126px; }
 .attr-label-agi, .attr-value-agi { top: 181px; }
 .attr-label-vit, .attr-value-vit { top: 246px; }
@@ -180,3 +180,19 @@
 /* data-class-hidden on display:block leaves: base.rcss's .hidden has the same specificity as the
    leaf rules above and loses to them, so it is repeated here with the leaf class. */
 .levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
+
+/* Outlaw level, from the model's pk_level -- the original's UI::Chat::SetPlayerColor() palette,
+   which used to arrive as a colour string C++ built. #name's own colour is the fallback. */
+#name.pk-0 { color: rgb(150, 255, 240); }
+#name.pk-1 { color: rgb(100, 120, 255); }
+#name.pk-2 { color: rgb(140, 180, 255); }
+#name.pk-3 { color: rgb(200, 220, 255); }
+#name.pk-4 { color: rgb(255, 150, 60); }
+#name.pk-5 { color: rgb(255, 80, 30); }
+#name.pk-6 { color: rgb(255, 0, 0); }
+
+
+/* Where an attribute's total comes from, from the model's *_value_source. The original coloured
+   the value for each of the three; the base colour lives on .attr-value/.attr-label above. */
+.attr-value.attr-boosted, .attr-label.attr-boosted { color: rgb(100, 150, 255); }
+.attr-value.attr-potion,  .attr-label.attr-potion  { color: rgb(255, 120, 0); }

@@ -30,7 +30,7 @@
 			<div class="docked-rail-accent"></div>
 		</div>
 
-		<span id="name" data-style-color="name_color">{{name_text}}</span>
+		<span id="name" data-class-pk-0="pk_level == 0" data-class-pk-1="pk_level == 1" data-class-pk-2="pk_level == 2" data-class-pk-3="pk_level == 3" data-class-pk-4="pk_level == 4" data-class-pk-5="pk_level == 5" data-class-pk-6="pk_level >= 6">{{name_text}}</span>
 		<span id="classname" data-style-opacity="classname_opacity">{{classname_text}}</span>
 		<span id="servername" data-style-opacity="servername_opacity">{{servername_text}}</span>
 
@@ -44,7 +44,7 @@
 		<!-- STR row -->
 		<div class="attr-textbox attr-textbox-str"></div>
 		<span class="attr-label attr-label-str">{{str_label}}</span>
-		<span class="attr-value attr-value-str" data-style-color="str_value_color">{{str_value_text}}</span>
+		<span class="attr-value attr-value-str" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'">{{str_value_text}}</span>
 		<div class="attr-lines attr-lines-str">
 			<span data-for="line : str_lines" data-style-color="line.color">{{line.text}}</span>
 		</div>
@@ -54,7 +54,7 @@
 		<!-- AGI row -->
 		<div class="attr-textbox attr-textbox-agi"></div>
 		<span class="attr-label attr-label-agi">{{agi_label}}</span>
-		<span class="attr-value attr-value-agi" data-style-color="agi_value_color">{{agi_value_text}}</span>
+		<span class="attr-value attr-value-agi" data-class-attr-potion="agi_value_source == 'potion'" data-class-attr-boosted="agi_value_source == 'boosted'">{{agi_value_text}}</span>
 		<div class="attr-lines attr-lines-agi">
 			<span data-for="line : agi_lines" data-style-color="line.color">{{line.text}}</span>
 		</div>
@@ -64,7 +64,7 @@
 		<!-- VIT row -->
 		<div class="attr-textbox attr-textbox-vit"></div>
 		<span class="attr-label attr-label-vit">{{vit_label}}</span>
-		<span class="attr-value attr-value-vit" data-style-color="vit_value_color">{{vit_value_text}}</span>
+		<span class="attr-value attr-value-vit" data-class-attr-potion="vit_value_source == 'potion'" data-class-attr-boosted="vit_value_source == 'boosted'">{{vit_value_text}}</span>
 		<div class="attr-lines attr-lines-vit">
 			<span data-for="line : vit_lines" data-style-color="line.color">{{line.text}}</span>
 		</div>
@@ -74,7 +74,7 @@
 		<!-- ENE row -->
 		<div class="attr-textbox attr-textbox-ene"></div>
 		<span class="attr-label attr-label-ene">{{ene_label}}</span>
-		<span class="attr-value attr-value-ene" data-style-color="ene_value_color">{{ene_value_text}}</span>
+		<span class="attr-value attr-value-ene" data-class-attr-potion="ene_value_source == 'potion'" data-class-attr-boosted="ene_value_source == 'boosted'">{{ene_value_text}}</span>
 		<div class="attr-lines attr-lines-ene">
 			<span data-for="line : ene_lines" data-style-color="line.color">{{line.text}}</span>
 		</div>
@@ -84,7 +84,7 @@
 		<!-- CMD row -- Dark Lord only. -->
 		<div class="attr-textbox attr-textbox-cmd" data-class-hidden="!show_charisma"></div>
 		<span class="attr-label attr-label-cmd" data-class-hidden="!show_charisma">{{cmd_label}}</span>
-		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-style-color="cmd_value_color">{{cmd_value_text}}</span>
+		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'">{{cmd_value_text}}</span>
 		<div class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
 		     data-event-click="chainfo_increase_stat(4)">+</div>
 
