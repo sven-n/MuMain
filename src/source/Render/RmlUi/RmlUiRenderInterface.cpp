@@ -5,6 +5,7 @@
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlPremultiply.h"
 #include <algorithm>
 
 RmlUiRenderInterface::RmlUiRenderInterface(SDL_GPUDevice* device, SDL_Window* window)
@@ -45,6 +46,20 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
 
     BITMAP_t* bmp = Bitmaps.GetTexture(bitmapIndex);
     if (!bmp) return 0;
+
+    // RmlUi composites premultiplied (RenderInterface_SDL_GPU's blend state is ONE,
+    // ONE_MINUS_SRC_ALPHA, and its own LoadTexture premultiplies every file before
+    // GenerateTexture()); the game's files are straight alpha, so a transparent pixel with a
+    // non-black colour would be added at full strength (the mini map's markers drew white squares).
+    // Premultiply this exclusive copy -- native rendering never samples it -- and re-upload it.
+    // Only 4-component (TGA/OZT) images carry alpha; JPEGs are opaque.
+    if (bmp->Components == 4 && bmp->Buffer != nullptr && bmp->Width > 0 && bmp->Height > 0)
+    {
+        const auto width = static_cast<std::uint32_t>(bmp->Width);
+        const auto height = static_cast<std::uint32_t>(bmp->Height);
+        Render::RmlUi::PremultiplyAlpha(bmp->Buffer, static_cast<std::size_t>(width) * height);
+        mu::GetRenderer().QueueTextureUpdate(bmp->BitmapIndex, bmp->Buffer, width, height);
+    }
 
     // BITMAP_t::TextureNumber is GLuint-typed for legacy naming continuity, but on this backend
     // it holds CGlobalBitmap's own logical texture id (set from CreateTexture()'s return value,

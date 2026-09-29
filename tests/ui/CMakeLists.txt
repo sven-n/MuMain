@@ -17,6 +17,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME rml_premultiply_tests
+    SOURCES
+        test_rml_premultiply.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/RmlUi/RmlPremultiply.cpp
+)
+
+mu_add_test(
     NAME party_list_layout_tests
     SOURCES
         test_party_list_layout.cpp
