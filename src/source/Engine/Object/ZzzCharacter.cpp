@@ -191,7 +191,7 @@ int GetFenrirType(CHARACTER* c)
 
 void FallingMonster(CHARACTER* c, OBJECT* o)
 {
-    float AngleY;
+    float AngleY = o->Angle[2];
     o->Gravity += 2.5f;
     o->Angle[0] -= 4.f;
     o->m_bActionStart = true;
@@ -2683,14 +2683,11 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             if (c->TargetCharacter != -1)
             {
                 CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                if (c->TargetCharacter != -1)
+                OBJECT* to = &tc->Object;
+                if (10 <= c->AttackTime && to->Live)
                 {
-                    OBJECT* to = &tc->Object;
-                    if (10 <= c->AttackTime && to->Live)
-                    {
-                        //PlayBuffer( SOUND_THUNDER01);
-                        to->m_byHurtByDeathstab = 35;
-                    }
+                    // PlayBuffer( SOUND_THUNDER01);
+                    to->m_byHurtByDeathstab = 35;
                 }
             }
         }
@@ -6274,7 +6271,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             Position[0] += rand() % 64 - 32.f;
             Position[1] += rand() % 64 - 32.f;
             Position[2] += 50.f;
-            VectorScale(Position, FPS_ANIMATION_FACTOR, Position)
+            VectorScale(Position, FPS_ANIMATION_FACTOR, Position);
 
             CreateParticle(BITMAP_WATERFALL_5, Position, o->Angle, Light, 1);
         }
@@ -6501,8 +6498,8 @@ void MoveCharactersClient()
     MoveBlurs();
 }
 
-// TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — active-character count and
-// which animation path was taken this tick, read by the debug HUD (SceneManager.cpp).
+// Active-character count and which animation path this tick took (worker thread pool or
+// the main thread), shown as "Characters animated" by the $details overlay (SceneManager.cpp).
 size_t g_LastActiveCharacterCount = 0;
 bool g_LastAnimationWasParallel = false;
 
@@ -6522,6 +6519,7 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     }
 
     g_LastActiveCharacterCount = activeChars.size();
+    g_LastAnimationWasParallel = false;
 
     if (activeChars.empty()) return;
 
@@ -12385,11 +12383,11 @@ DWORD GetGuildRelationShipTextColor(BYTE GuildRelationShip)
     DWORD dwColor = 0;
 
     if (GuildRelationShip == GR_NONE)
-        dwColor = (255 << 24) + (255 << 16) + (230 << 8) + (230);
+        dwColor = (255u << 24) + (255u << 16) + (230u << 8) + (230u);
     else if (GuildRelationShip == GR_RIVAL || GuildRelationShip == GR_RIVALUNION)
-        dwColor = (255 << 24) + (0 << 16) + (30 << 8) + (255);
+        dwColor = (255u << 24) + (0u << 16) + (30u << 8) + (255u);
     else
-        dwColor = (255 << 24) + (0 << 16) + (255 << 8) + (200);
+        dwColor = (255u << 24) + (0u << 16) + (255u << 8) + (200u);
 
     return dwColor;
 }
@@ -12399,11 +12397,11 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip)
     DWORD dwColor = 0;
 
     if (GuildRelationShip == GR_NONE)
-        dwColor = (150 << 24) + (50 << 16) + (30 << 8) + (10);
+        dwColor = (150u << 24) + (50u << 16) + (30u << 8) + (10u);
     else if (GuildRelationShip == GR_RIVAL || GuildRelationShip == GR_RIVALUNION)
-        dwColor = (150 << 24) + (0 << 16) + (0 << 8) + (0);
+        dwColor = (150u << 24) + (0u << 16) + (0u << 8) + (0u);
     else
-        dwColor = (150 << 24) + (80 << 16) + (50 << 8) + (20);
+        dwColor = (150u << 24) + (80u << 16) + (50u << 8) + (20u);
 
     return dwColor;
 }

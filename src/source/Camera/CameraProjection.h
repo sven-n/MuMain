@@ -40,6 +40,13 @@ public:
     static void SetViewport(int x, int y, int width, int height);
 
     /**
+     * @brief Aspect ratio (width / height) of the viewport the 3D world is drawn into
+     *
+     * In MainScene the world viewport leaves room for the HUD; elsewhere it is the window.
+     */
+    static float WorldAspectRatio();
+
+    /**
      * @brief Converts screen coordinates to world ray direction
      *
      * Replaces CreateScreenVector().
