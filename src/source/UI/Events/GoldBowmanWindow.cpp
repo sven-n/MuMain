@@ -2,32 +2,41 @@
 #include "UI/Events/GoldBowmanWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Inventory/MyInventory.h"
 #include "I18N/All.h"
 
-#include "GameLogic/Items/MixMgr.h"
+#include "Core/Utilities/StringUtils.h"
+#include "UI/RmlBridge/RmlKeyboardFocus.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
+
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <string>
 
 #define MAXGOLDBOWMANSESERIAL 12
 
-namespace
-{
-    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
-    {
-        g_pRenderText->SetFont(g_hFont);
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(color);
-        g_pRenderText->SetBgColor(backcolor);
-        g_pRenderText->RenderText(x, y, text, sx, sy, sort);
-
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
-    }
-};
-
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// The original's exit button (newui_exit_00, CButton at (13, 392), 36 x 29).
+constexpr float kExitX = 13.f;
+constexpr float kExitY = 392.f;
+constexpr float kExitWidth = 36.f;
+constexpr float kExitHeight = 29.f;
+
+// The original printed its notes through mu_swprintf() as formats ("100%%" shows "100%").
+std::wstring Formatted(const wchar_t* format)
+{
+    wchar_t text[100] = {};
+    mu_swprintf(text, format);
+    return text;
+}
+} // namespace
 
 CGoldBowmanWindow::CGoldBowmanWindow()
 {
@@ -51,26 +60,17 @@ bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    m_ExitTooltip.SetText(&I18N::Game::Close388);
+    m_ExitTooltip.SetAnchorAbove(true);
 
-    // Input Box
-    m_EditBox = new CUITextInputBox;
-    m_EditBox->Init(g_hWnd, 200, 14, MAXGOLDBOWMANSESERIAL);
-    m_EditBox->SetPosition(m_Pos.x + 50, m_Pos.y + 260);
-    m_EditBox->SetTextColor(255, 255, 230, 230);
-    m_EditBox->SetBackColor(0, 0, 0, 25);
-    m_EditBox->SetFont(g_hFont);
-    m_EditBox->SetState(UISTATE_DISABLE);
-
-    // Serial Button
-    m_BtnSerial.ChangeButtonImgState(true, IMAGE_GB_BTN_SERIAL, false);
-    m_BtnSerial.ChangeButtonInfo(m_Pos.x + 45, m_Pos.y + 285, 108, 29);
-    m_BtnSerial.ChangeText(&I18N::Game::LuckyNumberRegistered);
-
-    // Exit Button
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_GB_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this,
+                                          [this]
+                                          {
+                                              // A new document: its field starts empty and unfocused.
+                                              m_View.ReloadTheme();
+                                              m_SerialFocusPending = IsVisible();
+                                          });
 
     Show(false);
 
@@ -79,39 +79,45 @@ bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CGoldBowmanWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-    SAFE_DELETE(m_EditBox);
+}
+
+Rml::Element* CGoldBowmanWindow::GetSerialField() const
+{
+    return m_View.GetElementById("serial_field");
+}
+
+void CGoldBowmanWindow::ClearSerialField()
+{
+    if (Rml::Element* field = GetSerialField())
+    {
+        field->SetAttribute("value", Rml::String());
+        field->Blur();
+    }
 }
 
 void CGoldBowmanWindow::OpeningProcess()
 {
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
-    ChangeEditBox(UISTATE_NORMAL);
+    ClearSerialField();
+    m_SerialFocusPending = true;
 }
 
 void CGoldBowmanWindow::ClosingProcess()
 {
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
-    ChangeEditBox(UISTATE_HIDE);
+    ClearSerialField();
+    m_SerialFocusPending = false;
+    SetRelatedWnd(g_hWnd);
+    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
     SocketClient->ToGameServer()->SendEventChipExitDialog();
-}
-
-void CGoldBowmanWindow::ChangeEditBox(const UISTATES type)
-{
-    m_EditBox->SetState(type);
-
-    if (type == UISTATE_NORMAL)
-    {
-        m_EditBox->GiveFocus();
-    }
-
-    m_EditBox->SetText(NULL);
 }
 
 bool CGoldBowmanWindow::UpdateMouseEvent()
@@ -120,45 +126,11 @@ bool CGoldBowmanWindow::UpdateMouseEvent()
         return true;
     }
 
-    if (m_EditBox) {
-        m_EditBox->DoAction();
-    }
-
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // Top-right corner close "X" (shared frame): hides + swallows the click. Register and the exit
+    // button are RmlUi's (see Update()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GOLD_BOWMAN))
     {
         return false;
-    }
-
-    if (m_BtnExit.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GOLD_BOWMAN);
-        return false;
-    }
-
-    if (m_EditBox && m_BtnSerial.UpdateMouseEvent())
-    {
-        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-        if (pNewInventoryCtrl->FindEmptySlot(2, 4) == -1)
-        {
-            mu::ui::window::CreateOkMessageBox(I18N::Game::LeaveAtLeastOneEmptySlotInYourInventory);
-        }
-        else
-        {
-            wchar_t strSerial[12] = {};
-            m_EditBox->GetText(strSerial);
-
-            wchar_t strSerial1[5] = L"0,";
-            wmemcpy(strSerial1, strSerial, 4); strSerial1[4] = 0;
-
-            wchar_t strSerial2[5] = L"0,";
-            wmemcpy(strSerial2, strSerial + 4, 4); strSerial2[4] = 0;
-
-            wchar_t strSerial3[5] = L"0,";
-            wmemcpy(strSerial3, strSerial + 8, 4); strSerial3[4] = 0;
-
-            SocketClient->ToGameServer()->SendLuckyNumberRequest(MU_C16(strSerial1), MU_C16(strSerial2), MU_C16(strSerial3));
-        }
     }
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY))
@@ -204,131 +176,111 @@ bool CGoldBowmanWindow::UpdateKeyEvent()
 
 bool CGoldBowmanWindow::Update()
 {
+    SyncView();
+
+    // A click RmlUi reported (the original's CButton handling in UpdateMouseEvent()).
+    const int pressed = m_View.TakePressedButton();
     if (!IsVisible())
         return true;
-
-    if (m_EditBox)
+    if (pressed == BUTTON_SERIAL)
     {
-        if (m_EditBox->HaveFocus() && GetRelatedWnd() != m_EditBox->GetHandle())
-        {
-            SetRelatedWnd(m_EditBox->GetHandle());
-        }
-        if (!m_EditBox->HaveFocus() && GetRelatedWnd() != g_hWnd)
-        {
-            SetRelatedWnd(g_hWnd);
-        }
+        SendSerial();
+    }
+    else if (pressed == BUTTON_EXIT)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GOLD_BOWMAN);
     }
     return true;
 }
 
-void CGoldBowmanWindow::RenderFrame()
+void CGoldBowmanWindow::SendSerial()
 {
-    // frame
-    RenderImage(IMAGE_GB_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_GB_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_GB_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GB_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GB_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-
-    // edit box
-    RenderImage(IMAGE_GB_EDITBOX, m_Pos.x + 45, m_Pos.y + 255, 108.f, 23.f);
-}
-
-void CGoldBowmanWindow::RenderTexts()
-{
-    wchar_t Text[100];
-
-    auto name = getMonsterName(236); // npc Name file
-    RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::EnterThe12DigitLuckyNumber); //"100%%
-    RenderText(Text, m_Pos.x, m_Pos.y + 80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::WrittenOnThe100WinningCard);
-    RenderText(Text, m_Pos.x, m_Pos.y + 95, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::LuckyNumberRegistrationPeriod);
-    RenderText(Text, m_Pos.x, m_Pos.y + 110, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::Oct282003Nov30);
-    RenderText(Text, m_Pos.x, m_Pos.y + 125, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    /////////////////////////////// bottom text /////////////////////////////////////////////////////
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::EnterTheLuckyNumber);
-    RenderText(Text, m_Pos.x, m_Pos.y + 180, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::ExAUS919DKL2J9);
-    RenderText(Text, m_Pos.x, m_Pos.y + 195, 190, 0, 0xFF18FF00, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::PleaseMakeSureToDifferentiate);
-    RenderText(Text, m_Pos.x, m_Pos.y + 210, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    Text[0] = L'\0';
-    mu_swprintf(Text, I18N::Game::AlphabetOAndNumber0AndAlphabetIAndNumber1);
-    RenderText(Text, m_Pos.x, m_Pos.y + 225, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    if (wcscmp(g_strGiftName, L""))
+    mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+    if (pNewInventoryCtrl->FindEmptySlot(2, 4) == -1)
     {
-        RenderText(g_strGiftName, m_Pos.x, m_Pos.y + 330, 190, 0, 0xFFFFD200, 0x00000000, RT3_SORT_CENTER);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::LeaveAtLeastOneEmptySlotInYourInventory);
+        return;
     }
 
-    if (m_EditBox) {
-        m_EditBox->Render();
-    }
+    // The number as three groups of four characters, empty groups where it is shorter.
+    std::wstring serial;
+    if (Rml::Element* field = GetSerialField())
+        serial = StringUtils::NarrowToWide(field->GetAttribute<Rml::String>("value", Rml::String()));
+    serial.resize(MAXGOLDBOWMANSESERIAL, L'\0');
+
+    wchar_t strSerial1[5] = {};
+    wmemcpy(strSerial1, serial.c_str(), 4);
+
+    wchar_t strSerial2[5] = {};
+    wmemcpy(strSerial2, serial.c_str() + 4, 4);
+
+    wchar_t strSerial3[5] = {};
+    wmemcpy(strSerial3, serial.c_str() + 8, 4);
+
+    SocketClient->ToGameServer()->SendLuckyNumberRequest(MU_C16(strSerial1), MU_C16(strSerial2), MU_C16(strSerial3));
 }
 
-void CGoldBowmanWindow::RendeerButton()
+void CGoldBowmanWindow::SyncView()
 {
-    m_BtnSerial.Render();
+    if (IsVisible())
+    {
+        // The original's RenderTexts(): every line in the normal font, centred on the 190-unit
+        // window; the example number green, the registered gift's name (from the server's answer)
+        // at y 330.
+        const DWORD white = 0xFFFFFFFF;
+        const float width = INVENTORY_WIDTH;
+        std::vector<EventItemEntryView::Text> texts{
+            {getMonsterName(236), 0.f, 15.f, width, false, white},
+            {Formatted(I18N::Game::EnterThe12DigitLuckyNumber), 0.f, 80.f, width, false, white},
+            {Formatted(I18N::Game::WrittenOnThe100WinningCard), 0.f, 95.f, width, false, white},
+            {Formatted(I18N::Game::LuckyNumberRegistrationPeriod), 0.f, 110.f, width, false, white},
+            {Formatted(I18N::Game::Oct282003Nov30), 0.f, 125.f, width, false, white},
+            {Formatted(I18N::Game::EnterTheLuckyNumber), 0.f, 180.f, width, false, white},
+            {Formatted(I18N::Game::ExAUS919DKL2J9), 0.f, 195.f, width, false, 0xFF18FF00},
+            {Formatted(I18N::Game::PleaseMakeSureToDifferentiate), 0.f, 210.f, width, false, white},
+            {Formatted(I18N::Game::AlphabetOAndNumber0AndAlphabetIAndNumber1), 0.f, 225.f, width, false, white}};
+        if (wcscmp(g_strGiftName, L"") != 0)
+            texts.push_back({g_strGiftName, 0.f, 330.f, width, false, 0xFFFFD200});
+        m_View.SetTexts(std::move(texts));
 
-    m_BtnExit.Render();
+        // Register: newui_btn_empty (108 x 29) at (45, 285) with a normal label; the exit button.
+        m_View.SetButtons({{I18N::Game::LuckyNumberRegistered, 45.f, 285.f, false, MSGBOX_BTN_EMPTY_WIDTH,
+                            MSGBOX_BTN_EMPTY_HEIGHT, false, "wide"},
+                           {L"", kExitX, kExitY, false, kExitWidth, kExitHeight, false, "exit"}});
+    }
+    m_View.Sync(IsVisible(), m_Pos);
+
+    if (!IsVisible())
+    {
+        UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
+        return;
+    }
+
+    Rml::Element* field = GetSerialField();
+    if (field == nullptr)
+        return;
+    if (m_SerialFocusPending)
+    {
+        field->Focus();
+        if (field->IsPseudoClassSet("focus"))
+            m_SerialFocusPending = false;
+    }
+    // The original pointed its related window at the focused edit box, so Escape still closes the
+    // window while the player types.
+    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, field->GetOwnerDocument());
 }
 
 bool CGoldBowmanWindow::Render()
 {
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RendeerButton();
-    DisableAlphaBlend();
+    // Nothing native left: the frame, the texts, the field and the buttons are RmlUi. The exit
+    // button's hover tooltip (the shared RmlUi one) is shown from here, where the original's
+    // CButton::Render() showed it, after the hover checks of the windows under it.
+    m_ExitTooltip.Render(m_Pos.x + static_cast<int>(kExitX), m_Pos.y + static_cast<int>(kExitY),
+                         static_cast<int>(kExitWidth), static_cast<int>(kExitHeight));
     return true;
 }
 
 float CGoldBowmanWindow::GetLayerDepth()
 {
     return 3.4f;
-}
-
-void CGoldBowmanWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GB_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_GB_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GB_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GB_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GB_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GB_EXCHANGEBTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GB_BTN_SERIAL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GB_BTN_EXIT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_guildmakeeditbox.tga", IMAGE_GB_EDITBOX, GL_LINEAR);
-}
-
-void CGoldBowmanWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_GB_EDITBOX);
-    DeleteBitmap(IMAGE_GB_BTN_EXIT);
-    DeleteBitmap(IMAGE_GB_BTN_SERIAL);
-    DeleteBitmap(IMAGE_GB_EXCHANGEBTN);
-    DeleteBitmap(IMAGE_GB_BOTTOM);
-    DeleteBitmap(IMAGE_GB_RIGHT);
-    DeleteBitmap(IMAGE_GB_LEFT);
-    DeleteBitmap(IMAGE_GB_TOP);
-    DeleteBitmap(IMAGE_GB_BACK);
 }

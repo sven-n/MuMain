@@ -61,13 +61,15 @@ private:
         SlotKind kind = SlotKind::Hidden;
         float x = -1.0f, y = -1.0f, width = -1.0f, height = -1.0f;
         std::uint32_t boxColor = 1;
-        std::string boxDecorator;
+        bool additive = false;           // the box adds its colour (an additive-fill decorator)
+        std::uint32_t additiveColor = 0; // ABGR of that fill
+
         float textOffset = -1.0f, textPixelSize = -1.0f, lineHeight = -1.0f;
         bool bold = false;
         std::uint32_t textColor = 1;
         std::string utf8;
-        std::string imageSource;
-        std::string imageRect;
+        const wchar_t* imageFile = nullptr; // the recorded file name the src was built from
+        float sourceX = -1.0f, sourceY = -1.0f, sourceWidth = -1.0f, sourceHeight = -1.0f;
         float imageAlpha = -1.0f;
     };
 
@@ -83,11 +85,13 @@ private:
         float height;
     };
     void SetBox(Slot& slot, const Rect& rect, std::uint32_t abgr);
-    void SetDecorator(Slot& slot, const std::string& decorator);
+    void SetFill(Slot& slot, const Rect& rect, std::uint32_t abgr, Render::Renderer::RecordedBlend blend);
+    void SetAdditive(Slot& slot, bool additive, std::uint32_t abgr);
 
     Rml::ElementDocument* m_document = nullptr;
     std::vector<Slot> m_slots;
     std::size_t m_used = 0;
+    std::size_t m_shown = 0; // slots used by the last finished frame
     bool m_registered = false;
 };
 } // namespace UI::Character

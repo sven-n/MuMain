@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+#include <string_view>
 
 // A scoped seam that turns the native 2D primitives' draws into records: while an
 // Overlay2DRecordScope is active, CUIRenderTextSDLTtf::RenderText(), RenderColorQuadARGB() and
@@ -12,27 +12,29 @@
 // a top-left origin; colours keep each primitive's own packing (documented per field).
 namespace Render::Renderer
 {
+// How a recorded quad or text background combines with what is behind it: the native blend state it
+// was drawn under.
+enum class RecordedBlend
+{
+    Alpha,    // EnableAlphaTest() and most modes: ordinary alpha blending
+    Additive, // EnableAlphaBlend(): BlendMode::Glow (ONE, ONE), the colour is added
+    Opaque,   // DisableAlphaBlend(): blending off, alpha ignored
+};
+
 struct RecordedText
 {
     float boxX = 0.0f;
     float boxY = 0.0f;
     float boxWidth = 0.0f;
     float boxHeight = 0.0f;
-    std::uint32_t backColor = 0; // ABGR (mu::sdlttf::PackColorDWORD); alpha 0 draws no box
-    float textX = 0.0f;          // the text's left edge (alignment applied); its top is boxY
-    float textPixelSize = 0.0f;  // font pixel size, shrink-to-box included
+    std::uint32_t backColor = 0;                    // ABGR (mu::sdlttf::PackColorDWORD); alpha 0 draws no box
+    RecordedBlend backBlend = RecordedBlend::Alpha; // the blend state the box was drawn under
+    float textX = 0.0f;                             // the text's left edge (alignment applied); its top is boxY
+    float textPixelSize = 0.0f;                     // font pixel size, shrink-to-box included
     float lineHeight = 0.0f;
     bool bold = false;
     std::uint32_t textColor = 0; // ABGR
-    std::string utf8;
-};
-
-// How a recorded quad combines with what is behind it: the native blend state it was drawn under.
-enum class RecordedBlend
-{
-    Alpha,    // EnableAlphaTest() and most modes: ordinary alpha blending
-    Additive, // EnableAlphaBlend(): BlendMode::Glow (ONE, ONE), the colour is added
-    Opaque,   // DisableAlphaBlend(): blending off, alpha ignored
+    std::string_view utf8;       // borrowed: valid only during the RecordText() call
 };
 
 struct RecordedQuad

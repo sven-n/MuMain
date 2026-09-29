@@ -6,14 +6,12 @@
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "I18N/All.h"
-
+#include "UI/RmlBridge/RmlTheme.h"
 
 namespace mu::ui::window
 {
     CRegistrationLuckyCoin::CRegistrationLuckyCoin()
     {
-        m_width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-        m_height = MSGBOX_BTN_EMPTY_HEIGHT;
         m_RegistCount = 0;
         m_CoinItem = NULL;
         m_ItemAngle = false;
@@ -33,8 +31,8 @@ namespace mu::ui::window
         m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION, this);
 
         SetPos(x, y);
-        LoadImages();
-        SetBtnInfo();
+        m_View.Build();
+        UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
         Show(false);
         return true;
     }
@@ -47,53 +45,40 @@ namespace mu::ui::window
 
     bool CRegistrationLuckyCoin::Render()
     {
+        // Nothing native left but the 3D coin: the frame, the texts and the buttons are RmlUi.
         EnableAlphaTest();
-        RenderFrame();
-        RenderTexts();
-        RenderButtons();
         RenderLuckyCoin();
         DisableAlphaBlend();
         return true;
     }
 
-    void CRegistrationLuckyCoin::RenderFrame()
+    void CRegistrationLuckyCoin::SyncView()
     {
-        RenderImage(IMAGE_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-        RenderImage(IMAGE_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-        RenderImage(IMAGE_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-        RenderImage(IMAGE_RIGHT, m_Pos.x + LUCKYCOIN_REG_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-        RenderImage(IMAGE_BOTTOM, m_Pos.x, m_Pos.y + LUCKYCOIN_REG_HEIGHT - 45, 190.f, 45.f);
-    }
+        if (IsVisible())
+        {
+            // The original's RenderTexts(): white, centred on the 190-unit panel from y 25.
+            const DWORD white = RGBA(255, 255, 255, 255);
+            const float width = LUCKYCOIN_REG_WIDTH;
+            const float top = 25.f;
+            wchar_t count[256] = {};
+            mu_swprintf(count, I18N::Game::XDCoins, GetRegistCount());
+            m_View.SetTexts({{I18N::Game::LuckyCoinRegistration, 0.f, top, width, true, white},
+                             {I18N::Game::Register255LuckyCoinsDuringTheEvent, 0.f, top + 40, width, false, white},
+                             {I18N::Game::ForAChanceToGet, 0.f, top + 60, width, false, white},
+                             {I18N::Game::TheAbsoluteWeapon, 0.f, top + 80, width, false, white},
+                             {I18N::Game::PleaseCheckTheWebPageForTheEventDetails, 0.f, top + 100, width, false, white},
+                             {I18N::Game::Registered, 0.f, top + 120, width, true, white},
+                             {count, 24.f, top + 150, width, true, white}});
 
-    void CRegistrationLuckyCoin::RenderTexts()
-    {
-        wchar_t szText[256] = { 0, };
-        float _x = GetPos().x;
-        float _y = GetPos().y + 25;
-
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->SetFont(g_hFontBold);
-        mu_swprintf(szText, I18N::Game::LuckyCoinRegistration);
-        g_pRenderText->RenderText(_x, _y, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-
-        g_pRenderText->SetFont(g_hFont);
-        mu_swprintf(szText, I18N::Game::Register255LuckyCoinsDuringTheEvent);
-        g_pRenderText->RenderText(_x, _y + 40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::ForAChanceToGet);
-        g_pRenderText->RenderText(_x, _y + 60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::TheAbsoluteWeapon);
-        g_pRenderText->RenderText(_x, _y + 80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, I18N::Game::PleaseCheckTheWebPageForTheEventDetails);
-        g_pRenderText->RenderText(_x, _y + 100, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-
-        g_pRenderText->SetFont(g_hFontBold);
-
-        mu_swprintf(szText, I18N::Game::Registered);
-        g_pRenderText->RenderText(_x, _y + 120, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-
-        mu_swprintf(szText, I18N::Game::XDCoins, GetRegistCount());
-        g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
+            // The original's SetBtnInfo(): both 64 x 29 newui_btn_empty_small with a bold label,
+            // Register at the panel's height - 220, Close at y 360.
+            const float buttonX = LUCKYCOIN_REG_WIDTH / 2.0f - MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.0f;
+            m_View.SetButtons({{I18N::Game::Register, buttonX, LUCKYCOIN_REG_HEIGHT - 220, m_RegisterLocked,
+                                MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT, true, "small"},
+                               {I18N::Game::Close388, buttonX, 360.f, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
+                                MSGBOX_BTN_EMPTY_HEIGHT, true, "small"}});
+        }
+        m_View.Sync(IsVisible(), m_Pos);
     }
 
     // Pre-panel proj/view snapshot, restored around EndBitmap()/BeginBitmap() -- same shape as CGoldBowmanLena::Render3D.
@@ -140,55 +125,34 @@ namespace mu::ui::window
         BeginBitmap();
     }
 
-    void CRegistrationLuckyCoin::RenderButtons()
-    {
-        m_CloseButton.Render();
-        m_RegistButton.Render();
-    }
-
     bool CRegistrationLuckyCoin::BtnProcess()
     {
-        // Top-right corner close "X" (shared frame): hides + swallows the click.
+        // Top-right corner close "X" (shared frame): hides + swallows the click. The Register and
+        // Close buttons are RmlUi's (see Update()).
         if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION))
             return false;
 
-        if (m_CloseButton.UpdateMouseEvent() == true)
-        {
-            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
-            {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
-                return true;
-            }
-            return false;
-        }
-
-        if (m_RegistButton.UpdateMouseEvent() == true)
-        {
-            mu::ui::window::CInventoryCtrl::BackupPickedItem();
-            SocketClient->ToGameServer()->SendLuckyCoinRegistrationRequest();
-            LockLuckyCoinRegBtn();
-            return true;
-        }
         return false;
-    }
-
-    void CRegistrationLuckyCoin::SetBtnInfo()
-    {
-        float _x = GetPos().x + LUCKYCOIN_REG_WIDTH / 2.0f - MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.0f;
-        float _y = GetPos().y + LUCKYCOIN_REG_HEIGHT - 220;
-
-        m_RegistButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
-        m_RegistButton.ChangeButtonInfo(_x, _y, m_width, m_height);
-        m_RegistButton.SetFont(g_hFontBold);
-        m_RegistButton.ChangeText(&I18N::Game::Register);
-        m_CloseButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
-        m_CloseButton.ChangeButtonInfo(_x, 360, m_width, m_height);
-        m_CloseButton.SetFont(g_hFontBold);
-        m_CloseButton.ChangeText(&I18N::Game::Close388);
     }
 
     bool CRegistrationLuckyCoin::Update()
     {
+        SyncView();
+
+        // A click RmlUi reported (the original's button handling in BtnProcess()).
+        const int pressed = m_View.TakePressedButton();
+        if (!IsVisible())
+            return true;
+        if (pressed == 0)
+        {
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
+            SocketClient->ToGameServer()->SendLuckyCoinRegistrationRequest();
+            LockLuckyCoinRegBtn();
+        }
+        else if (pressed == 1)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
+        }
         return true;
     }
 
@@ -262,29 +226,9 @@ namespace mu::ui::window
         SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
     }
 
-    void CRegistrationLuckyCoin::LoadImages()
-    {
-        LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_BACK, GL_LINEAR);
-        LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_TOP, GL_LINEAR);
-        LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_LEFT, GL_LINEAR);
-        LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_RIGHT, GL_LINEAR);
-        LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_BOTTOM, GL_LINEAR);
-        LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_CLOSE_REGIST, GL_LINEAR);
-    }
-
-    void CRegistrationLuckyCoin::UnloadImages()
-    {
-        DeleteBitmap(IMAGE_CLOSE_REGIST);
-        DeleteBitmap(IMAGE_BOTTOM);
-        DeleteBitmap(IMAGE_RIGHT);
-        DeleteBitmap(IMAGE_LEFT);
-        DeleteBitmap(IMAGE_TOP);
-        DeleteBitmap(IMAGE_BACK);
-    }
-
     void CRegistrationLuckyCoin::Release()
     {
-        UnloadImages();
+        UI::RmlBridge::UnregisterForThemeReload(this);
 
         if (m_pNewUIMng)
         {
@@ -295,13 +239,11 @@ namespace mu::ui::window
 
     void CRegistrationLuckyCoin::LockLuckyCoinRegBtn()
     {
-        m_RegistButton.Lock();
-        m_RegistButton.ChangeTextColor(0xff808080);
+        m_RegisterLocked = true;
     }
 
     void CRegistrationLuckyCoin::UnLockLuckyCoinRegBtn()
     {
-        m_RegistButton.UnLock();
-        m_RegistButton.ChangeTextColor(0xffffffff);
+        m_RegisterLocked = false;
     }
 }

@@ -112,7 +112,7 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | `CNPCShop` | `CObject`-tier + live-3D | Done | Hybrid RmlUi/native 3D | Listed under Inventory/Shop above |
 | `CNPCDialogue` | `CObject`-tier | Done | RmlUi-only 2D | The window a quest-giving NPC actually opens first (`ProcessOpening()`/`ReceiveQuestByNPCEPList`/`ReceiveQuestByEtcEPList`) — was the source of a modern-theme "looks legacy" report, since it had zero RmlUi/theme participation before this port; only after picking a step from it does the server push a `PMSG_QUEST_STEP_INFO` that opens the already-ported `CQuestProgress`/`CQuestProgressByEtc` above. Own `npc_dialogue.rml`/`.rcss` (not shared with `quest_progress.rcss` despite reusing the same `Quest_bt_L/R.tga` sprite asset — the layout isn't a near-identical sibling: two independently paginated lists in one document, an NPC-word pager (top) and a sel-text pager (bottom) whose rows come from either `GetNPCDlgAnswer()` or quest-list-mode's `SetQuestListText()` quest subjects, both reduced to the same `{text, index}` row shape via `NPCDialogueRmlModel`). The "page to the end reveals the list" gate is preserved exactly (now a same-click side effect, matching the native single-button double-duty). Retires all 5 `CButton`s and every native `Render*()` call — no hybrid native-draw boundary left at all, unlike `CQuestProgress`'s reward-item popup. Gens contribute-point banner (NPC 543/544) and the Gens join/secede/reward flows (`ASG_ADD_GENS_SYSTEM`/`PBG_ADD_GENSRANKING`, unconditionally on in this build) are untouched native logic, just reactively synced into the model. Fixed a fragile-transitive-include situation this same session's earlier `QuestProgress.h` cleanup had patched around: `NPCDialogue.h` no longer needs `MessageBox.h`/`MyInventory.h`/`MyQuestInfoWindow.h`/`QuestProgress.h`/`Button.h` at all (those were only for texture-slot enum aliasing and the now-removed `CButton` members). Build verified (`RelWithDebInfo`) and confirmed working in-game. |
 | `CGatemanWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `gateman.rml` + both themes, right-docked; guest, staff and master pages. |
-| `CEmpireGuardianTimer` | `CObject`-tier | Not started | TBD | |
+| `CEmpireGuardianTimer` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `empire_guardian_timer.rml` through `UI/Events/EventTimerView` (`event_timer.rcss`, shared with the Blood Castle and Chaos Castle timers). |
 | `CEmpireGuardianNPC` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-27) | Hybrid | `empire_guardian_enter.rml` (texts, buttons) + `empire_guardian_enter_bg.rml` (frame, background context) through `UI/Events/EventItemEntryView`, shared with `CDoppelGangerWindow`; Gaion's Order stays a native 3D preview over the frame. |
 
 ### Combat / Duel
@@ -123,33 +123,33 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | `CGuardWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `guard_window.rml` + both themes with its guild lists; the owner line and the period's tab labels show (the original lost the first to an unterminated buffer and froze the second). |
 | `CDuelWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `duel_window.rml` + both themes, in the **background context** behind its other documents: the original drew it under every panel (layer 1.1). |
 | `CDuelWatchWindow` | `CObject`-tier | Done (2026-09-27) | RmlUi-only 2D | `duel_watch.rml` + both themes; right-docked, `docked_panel_frame.rcss`. |
-| `CDuelWatchUserListWindow` | `CObject`-tier | Not started | TBD | |
-| `CDuelWatchMainFrameWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Not started | TBD (likely Hybrid) | |
+| `CDuelWatchUserListWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `duel_watch_spectators.rml` + both themes: a `Pk_box` per spectator above the spectator frame's right end; takes no pointer events (C++ keeps the pointer over the boxes from the world). The boxes' fill is the colour the original's `RenderColor()` left current (measured). |
+| `CDuelWatchMainFrameWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-28) | RmlUi-only 2D (the 3D hook draws nothing) | `duel_watch_frame.rml` + both themes, in the main frame's place while the duel-watch buff is on: frame, health/shield gauges with their catch-up effect bars (the catch-up stays in C++, `Update()`), score marks, names, the exit button (RmlUi click queued, C++ keeps its tooltip and the channel quit request). Fixed: the right shield bar's catch-up speed was measured against the left fighter's shield. |
 | `CSiegeWarfare` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `siege_warfare.rml` + both themes, background context behind its other documents (layer depth 1.6); observer, soldier and commander fill one model (`SiegeWarfareRmlModel`), buttons still hit-test natively. |
 
-### Events (small, self-contained per-event status/timer windows; the entry windows marked Done)
+### Events (small, self-contained per-event status/timer windows)
 
 | Component | Category | Notes |
 |---|---|---|
 | `CCatapultWindow` | `CObject`-tier | Done (2026-09-28): `catapult.rml` + both themes, right-docked |
 | `CEnterBloodCastle` | `CObject`-tier | Done (2026-09-27): `blood_castle_enter.rml` through `UI/Events/EventEntryView` (shared with `CEnterDevilSquare`, `event_entry.rcss`) |
 | `CBattleSoccerScore` | `CObject`-tier | Done (2026-09-27): `battle_soccer_score.rml`, background context like `CDuelWindow`; guild marks as 8 x 8 cells (`Guild::MarkPalette`) |
-| `CBloodCastle` | `CObject`-tier | |
-| `CChaosCastleTime` | `CObject`-tier | |
+| `CBloodCastle` | `CObject`-tier | Done (2026-09-28): `blood_castle_time.rml` through `UI/Events/EventTimerView` |
+| `CChaosCastleTime` | `CObject`-tier | Done (2026-09-28): `chaos_castle_time.rml` through `UI/Events/EventTimerView` |
 | `CCursedTempleResult` | `CObject`-tier | Done (2026-09-27): `cursed_temple_result.rml` + both themes; the fading banner blends from the start, where the native alpha test (0.25) hid its first moments |
-| `CCryWolf` | `CObject`-tier | |
-| `CCursedTempleSystem` | `CObject`-tier | |
+| `CCryWolf` | `CObject`-tier | Done (2026-09-28): `crywolf.rml` + both themes (battle panel, result banner, rank/exp digits, ready notice; main context, pulled to the front); the in-render yes/no box only the unused `MoveMvp_Interface()` opened is not ported |
+| `CCursedTempleSystem` | `CObject`-tier | Done (2026-09-28): `cursed_temple_system.rml` + both themes: the Illusion Temple HUD (time, mini map and markers, skill panel, score effect, tutorial) in RmlUi |
 | `CCursedTempleEnter` | `CObject`-tier | Done (2026-09-27): `cursed_temple_enter.rml` + both themes |
-| `CDoppelGangerFrame` | `CObject`-tier | |
+| `CDoppelGangerFrame` | `CObject`-tier | Done (2026-09-28): `doppelganger_frame.rml` + both themes, background context; gauge and markers still step 0.01 a frame in C++ |
 | `CDoppelGangerWindow` | `CObject`-tier + live-3D (`I3DRenderObj`) | Done (2026-09-27), Hybrid: `doppelganger_enter.rml` + `doppelganger_enter_bg.rml` (frame in the background context, under the native 3D preview) through `UI/Events/EventItemEntryView` |
 | `CEnterDevilSquare` | `CObject`-tier | Done (2026-09-27): `devil_square_enter.rml` through `UI/Events/EventEntryView` |
 | `CGateSwitchWindow` | `CObject`-tier | Done (2026-09-28): `gate_switch.rml` + both themes, right-docked |
-| `CGoldBowmanLena` | `CObject`-tier, incidental 3D render call | Signal is an NPC-model render, not necessarily a Hybrid-shape icon — verify at port time |
-| `CGoldBowmanWindow` | `CObject`-tier | |
-| `CExchangeLuckyCoin` | `CObject`-tier | |
-| `CRegistrationLuckyCoin` | `CObject`-tier, incidental 3D render call | Same caveat as `CGoldBowmanLena` |
-| `CKanturu2ndEnterNpc` | `CObject`-tier | |
-| `CKanturuInfoWindow` | `CObject`-tier | |
+| `CGoldBowmanLena` | `CObject`-tier, incidental 3D render call | Done (2026-09-28): `gold_bowman_lena.rml` + `gold_bowman_lena_bg.rml` through `UI/Events/EventItemEntryView` |
+| `CGoldBowmanWindow` | `CObject`-tier | Done (2026-09-28): `gold_bowman.rml` + `gold_bowman_bg.rml` through `UI/Events/EventItemEntryView`; the number field is an RmlUi text input |
+| `CExchangeLuckyCoin` | `CObject`-tier | Done (2026-09-28): `lucky_coin_exchange.rml` + `_bg` through `UI/Events/EventItemEntryView` |
+| `CRegistrationLuckyCoin` | `CObject`-tier, incidental 3D render call | Done (2026-09-28): `lucky_coin_registration.rml` + `_bg` through `UI/Events/EventItemEntryView`; the coin stays a native 3D model |
+| `CKanturu2ndEnterNpc` | `CObject`-tier | Done (2026-09-28): `kanturu_enter.rml` + both themes |
+| `CKanturuInfoWindow` | `CObject`-tier | Done (2026-09-28): `kanturu_info.rml` + both themes (boss-battle HUD) |
 
 ### Options / System
 

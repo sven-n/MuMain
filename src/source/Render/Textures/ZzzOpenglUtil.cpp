@@ -1112,6 +1112,13 @@ static inline std::uint32_t ArgbToAbgr(unsigned int argb)
     return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+Render::Renderer::RecordedBlend CurrentRecordedBlend()
+{
+    return AlphaBlendType == 3   ? Render::Renderer::RecordedBlend::Additive
+           : AlphaBlendType == 0 ? Render::Renderer::RecordedBlend::Opaque
+                                 : Render::Renderer::RecordedBlend::Alpha;
+}
+
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
 {
     x = ConvertPositionX(x);
@@ -1121,10 +1128,7 @@ void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned i
 
     if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
     {
-        const Render::Renderer::RecordedBlend blend = AlphaBlendType == 3   ? Render::Renderer::RecordedBlend::Additive
-                                                      : AlphaBlendType == 0 ? Render::Renderer::RecordedBlend::Opaque
-                                                                            : Render::Renderer::RecordedBlend::Alpha;
-        recorder->RecordQuad({x, y, Width, Height, argbColor, blend});
+        recorder->RecordQuad({x, y, Width, Height, argbColor, CurrentRecordedBlend()});
         return;
     }
 

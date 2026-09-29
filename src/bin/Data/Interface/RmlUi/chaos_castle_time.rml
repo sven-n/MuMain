@@ -1,0 +1,33 @@
+<rml>
+<head>
+	<title>Chaos Castle time (CChaosCastleTime)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="event_timer.rcss"/>
+</head>
+<body data-model="chaos_castle_time">
+	<!-- The Chaos Castle time (CChaosCastleTime) HUD above the bottom HUD's right end (UI/Events/EventTimerView.h): the frame,
+	     the kill count, "Time left" and the time. A LayoutMode::Hud window, so .screen is the
+	     640x480 reference screen stretched W/640 x H/480 like the original and #panel sits at the
+	     window's reference position. Text does not stretch: each line takes its native size,
+	     in its bound colour, centred on its bound box and
+	     shrunk to it like the original's, and cancels the stretch. Takes no
+	     pointer events. -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+			<div id="back"></div>
+			<span class="timer-text" id="kills" data-if="kills_text != ''" data-style-color="kills_color"
+			      data-style-left="box_left + 'px'" data-style-font-size="kills_text_px + 'px'"
+			      data-style-width="(box_width * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{kills_text}}</span>
+			<span class="timer-text" id="time_left" data-if="time_left_text != ''" data-style-color="time_left_color"
+			      data-style-left="box_left + 'px'" data-style-font-size="time_left_text_px + 'px'"
+			      data-style-width="(box_width * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{time_left_text}}</span>
+			<span class="timer-text" id="time" data-style-color="time_color"
+			      data-style-left="box_left + 'px'" data-style-font-size="time_text_px + 'px'"
+			      data-style-width="(box_width * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{time_text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

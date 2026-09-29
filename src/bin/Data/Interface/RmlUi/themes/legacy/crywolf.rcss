@@ -1,0 +1,62 @@
+/* Legacy theme for CCryWolf, reproducing its Render() at the 640x480 reference positions under
+   .screen's W/640 x H/480 stretch: the result banner (329 x 94) at y 50, the rank table (196 x 141)
+   at (230, 150), the rank label (110 x 28) at y 188 and the letter (29 x 28) at (370, 188), the
+   experience label (60 x 19) at (229, 235) and nine 15 x 19 digits from x 289; the battle panel
+   in_main-New (122 x 119) at (518, 278), the altars (13 x 13), the dark elf icon (15 x 15) at
+   (623, 358), t_main-New (104 x 37) at (538, 392), the dark elf count centred on x 582 at y 359
+   and Balgass centred on x 600 at y 380 in the normal font, (255, 148, 21), Balgass's icon at
+   (623, 379) and his health bar (8 high) at (548, 388), the time's 14 x 14 FontTest digits at
+   y 402, the statue's shield bar (30 high) at y 323; the notice's lines at x 190 in the bold font
+   on a black box of alpha 170. */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+img { position: absolute; }
+
+#banner { top: 50px; width: 329px; height: 94px; }
+#rank_table { left: 230px; top: 150px; width: 196px; height: 141px; }
+#rank_label { top: 188px; width: 110px; height: 28px; }
+#rank_letter { left: 370px; top: 188px; width: 29px; height: 28px; }
+#exp_label { left: 229px; top: 235px; width: 60px; height: 19px; }
+.exp-digit { width: 15px; height: 19px; }
+
+#main { left: 518px; top: 278px; width: 122px; height: 119px; }
+.altar { width: 13px; height: 13px; }
+#dark_elf_icon { left: 623px; top: 358px; width: 15px; height: 15px; }
+#plate { left: 538px; top: 392px; width: 104px; height: 37px; }
+#balgass_icon { left: 623px; top: 379px; width: 15px; height: 15px; }
+#balgass_bar { left: 548px; top: 388px; height: 8px; }
+.timer-digit { width: 14px; height: 14px; }
+#statue_bar { top: 323px; height: 30px; }
+
+.hud-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+	color: #ff9415;
+}
+#dark_elf_text { left: 482px; top: 359px; }
+#balgass_text { left: 500px; top: 380px; }
+
+.notice {
+	display: block;
+	position: absolute;
+	left: 190px;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	background-color: rgba(0, 0, 0, 170);
+}

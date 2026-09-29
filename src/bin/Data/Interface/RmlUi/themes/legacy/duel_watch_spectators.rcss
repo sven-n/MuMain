@@ -1,0 +1,37 @@
+/* Legacy theme for CDuelWatchUserListWindow, reproducing its Render(): each box a flat fill (the
+   original's RenderColor() in the colour its frame left current, measured in the original client)
+   under Pk_box (57 x 17, its middle transparent), the name centred on it in the normal font.
+   Reference px under .screen's W/640 x H/480 stretch. */
+
+@spritesheet dws-box-sheet { src: "../../../Pk_box.tga"; dws-box: 0px 0px 57px 17px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.box {
+	position: absolute;
+	width: 57px;
+	height: 17px;
+	background-color: #6a6158;
+	decorator: image(dws-box);
+}
+
+.name {
+	display: block;
+	position: absolute;
+	left: 0;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+	font-family: "token(font-body)";
+	color: #ffffff;
+}

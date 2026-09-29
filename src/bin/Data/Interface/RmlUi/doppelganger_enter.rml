@@ -21,8 +21,8 @@
 		<div class="entry-btn" data-for="b : buttons" data-class-locked="b.locked"
 		     data-style-left="b.left + 'px'" data-style-top="b.top + 'px'" data-event-click="item_entry_press(b.index)">
 			<span class="sharp-text entry-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(53 * root_scale) + 'px'" data-style-top="label_top + 'px'"
-			      data-style-line-height="label_line_px + 'px'"
+			      data-style-width="(b.width * root_scale) + 'px'" data-style-top="b.label_top + 'px'"
+			      data-style-line-height="b.label_line_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
 		</div>
 	</div>

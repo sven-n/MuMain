@@ -2,6 +2,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/NPCs/EmpireGuardianTimer.h"
 #include "I18N/All.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -32,7 +33,8 @@ bool CEmpireGuardianTimer::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -41,7 +43,7 @@ bool CEmpireGuardianTimer::Create(CManager* pNewUIMng, int x, int y)
 
 void CEmpireGuardianTimer::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -70,62 +72,65 @@ bool CEmpireGuardianTimer::UpdateKeyEvent()
 
 bool CEmpireGuardianTimer::Update()
 {
-    if (!IsVisible())
-        return true;
+    SyncView();
 
     return true;
 }
 
 bool CEmpireGuardianTimer::Render()
 {
-    EnableAlphaTest();
-
-    RenderImage(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, m_Pos.x, m_Pos.y, float(TIMER_WINDOW_WIDTH), float(TIMER_WINDOW_HEIGHT));
-
-    wchar_t szText[256] = {};
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-
-    mu_swprintf(szText, I18N::Game::RoundDZoneD, m_iDay, m_iZone);
-    g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
-
-    switch (m_iType)
-    {
-    case 0:
-    case 1:
-        g_pRenderText->SetTextColor(10, 200, 10, 255);
-        g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, I18N::Game::StandbyTime, 110, 0, RT3_SORT_CENTER);
-        break;
-    case 2:
-        g_pRenderText->SetTextColor(255, 150, 0, 255);
-        mu_swprintf(szText, L"%ls (%ls)", I18N::Game::TimeLeft, I18N::Game::RemainingMonsters);
-        g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, szText, 110, 0, RT3_SORT_CENTER);
-        break;
-    }
-
-    int iSecond = m_dTime / 1000;
-    int iMinute = iSecond / 60;
-
-    if (2 < iMinute)
-    {
-        g_pRenderText->SetTextColor(255, 150, 0, 255);
-    }
-    else if (0 < iMinute && iMinute <= 2)
-    {
-        g_pRenderText->SetTextColor(255, 70, 0, 255);
-    }
-    else if (iMinute == 0)
-    {
-        g_pRenderText->SetTextColor(255, 0, 0, 255);
-    }
-
-    mu_swprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 50, szText, 110, 0, RT3_SORT_CENTER);
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the frame and the texts are RmlUi (SyncView()). Kept because CObject
+    // requires the override.
     return true;
+}
+
+void CEmpireGuardianTimer::SyncView()
+{
+    // The original's Render(): the round and zone, the standby / time-left caption, then the time
+    // and the monsters left in the big font, orange, red-orange under three minutes, red under one;
+    // every line centred on 110 units from x 7.
+    EventTimerView::Line round;
+    EventTimerView::Line caption;
+    EventTimerView::Line time;
+    if (IsVisible())
+    {
+        wchar_t szText[256] = {};
+        mu_swprintf(szText, I18N::Game::RoundDZoneD, m_iDay, m_iZone);
+        // The original set no colour for the round: it took whatever the text renderer was left
+        // in by the window drawn before it, white in every capture (the windows drawn before it
+        // reset to white). White here.
+        round = {szText, RGBA(255, 255, 255, 255)};
+        switch (m_iType)
+        {
+        case 0:
+        case 1:
+            caption = {I18N::Game::StandbyTime, RGBA(10, 200, 10, 255)};
+            break;
+        case 2:
+            mu_swprintf(szText, L"%ls (%ls)", I18N::Game::TimeLeft, I18N::Game::RemainingMonsters);
+            caption = {szText, RGBA(255, 150, 0, 255)};
+            break;
+        default:
+            break;
+        }
+        const int iSecond = static_cast<int>(m_dTime / 1000);
+        const int iMinute = iSecond / 60;
+        unsigned long timeColor = caption.color;
+        if (2 < iMinute)
+            timeColor = RGBA(255, 150, 0, 255);
+        else if (0 < iMinute && iMinute <= 2)
+            timeColor = RGBA(255, 70, 0, 255);
+        else if (iMinute == 0)
+            timeColor = RGBA(255, 0, 0, 255);
+        mu_swprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
+        time = {szText, timeColor};
+    }
+    m_View.Sync(IsVisible(), m_Pos, round, caption, time, TIMER_WINDOW_WIDTH / 2.f - 55.f, 110.f);
+}
+
+void CEmpireGuardianTimer::ReloadRmlTheme()
+{
+    m_View.ReloadTheme();
 }
 
 bool CEmpireGuardianTimer::BtnProcess()
@@ -142,16 +147,4 @@ void CEmpireGuardianTimer::OpenningProcess()
 {
 }
 
-void CEmpireGuardianTimer::ClosingProcess()
-{
-}
-
-void CEmpireGuardianTimer::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, GL_LINEAR);
-}
-
-void CEmpireGuardianTimer::UnloadImages()
-{
-    DeleteBitmap(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW);
-}
+void CEmpireGuardianTimer::ClosingProcess() {}

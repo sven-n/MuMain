@@ -1,0 +1,21 @@
+<rml>
+<head>
+	<title>Duel spectators (CDuelWatchUserListWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="duel_watch_spectators.rcss"/>
+</head>
+<body data-model="duel_watch_spectators">
+	<!-- The spectators of the watched duel (CDuelWatchUserListWindow), shown with the spectator
+	     frame: a 57 x 17 box per name, 18 apart, stacked upwards from the frame's top at the
+	     window's x (the first name on top). A LayoutMode::Hud window, so .screen is the 640x480
+	     reference screen stretched W/640 x H/480; the names take their native size and cancel the
+	     stretch. Takes no pointer events (C++ keeps the pointer over the boxes from the world). -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div class="box" data-for="s : spectators" data-style-left="panel_x + 'px'" data-style-top="s.top + 'px'">
+			<span class="name" data-style-top="text_top + 'px'" data-style-font-size="text_px + 'px'"
+			      data-style-width="(57 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{s.name}}</span>
+		</div>
+	</div>
+</body>
+</rml>

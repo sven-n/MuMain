@@ -1,0 +1,32 @@
+<rml>
+<head>
+	<title>Duel spectator frame (CDuelWatchMainFrameWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="duel_watch_frame.rcss"/>
+</head>
+<body data-model="duel_watch_frame">
+	<!-- The spectator's duel frame (CDuelWatchMainFrameWindow), in the main frame's place while the
+	     duel-watch buff is on: the frame (menu_pk_01..03, 640 x 51 at the bottom) and the exit
+	     button always; for a watched channel also the fighters' health and shield gauges (each
+	     with its catch-up effect bar while it moves), their score marks and their names. A
+	     LayoutMode::Hud window, so .screen is the 640x480 reference screen stretched W/640 x H/480
+	     like the original; the names take their native size and cancel the stretch. Only the
+	     exit button takes pointer events: its click is queued with duel_watch_exit, C++ keeps its
+	     tooltip and sends the channel quit request. -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div id="back1"></div>
+		<div id="back2"></div>
+		<div id="back3"></div>
+		<div id="fight" data-if="watching">
+			<img class="gauge" data-for="g : gauges" data-attr-src="g.src" data-attr-rect="g.rect"
+			     data-class-mirrored="g.mirrored" data-style-left="g.left + 'px'" data-style-top="g.top + 'px'"
+			     data-style-width="g.width + 'px'" data-style-height="g.height + 'px'"/>
+			<div class="score" data-for="left : score_marks" data-style-left="left + 'px'"></div>
+			<span class="name" data-for="n : names" data-style-left="n.left + 'px'"
+			      data-style-font-size="n.text_px + 'px'" data-style-width="(55 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{n.text}}</span>
+		</div>
+		<div id="exit" data-event-click="duel_watch_exit"></div>
+	</div>
+</body>
+</rml>

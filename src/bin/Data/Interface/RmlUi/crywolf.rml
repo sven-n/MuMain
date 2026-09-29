@@ -1,0 +1,57 @@
+<rml>
+<head>
+	<title>Crywolf (CCryWolf)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="crywolf.rcss"/>
+</head>
+<body data-model="crywolf">
+	<!-- The Crywolf HUD (CCryWolf): the end-of-battle result (the success or failure banner, the
+	     rank table, the rank letter and the experience), the battle panel of the ready and start
+	     states (altars, dark elves, Balgass and his health, the time, the statue's shield) and the
+	     ready-state notice. A LayoutMode::Hud window drawn at fixed 640x480 reference positions, so
+	     .screen is that screen stretched W/640 x H/480 like the original. Text does not stretch: it
+	     takes the native size and cancels the stretch. Takes no pointer events. An image whose src is
+	     bound also binds its rect: RmlUi drops a static rect when it first loads an empty src. -->
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<div id="result" data-if="result_visible">
+			<img id="banner" data-attr-src="banner_src" data-attr-rect="'0 0 328 93'"
+			     data-style-left="banner_left + 'px'" data-style-image-color="banner_color"/>
+			<img id="rank_table" src="../../../icon_Rank_table.tga" rect="0 0 195 140"/>
+			<img id="rank_label" src="../../../icon_Rank_rank.tga" rect="0 0 110 27"
+			     data-style-left="rank_label_left + 'px'"/>
+			<div data-if="rank_details_visible">
+				<img id="rank_letter" data-if="rank_letter_src != ''" data-attr-src="rank_letter_src" data-attr-rect="'0 0 29 27'"/>
+				<img id="exp_label" src="../../../icon_Rank_exp.tga" rect="0 0 60 19"/>
+				<img class="exp-digit" data-for="d : exp_digits" data-attr-src="d.src" data-attr-rect="d.rect"
+				     data-style-left="d.left + 'px'" data-style-top="d.top + 'px'"/>
+			</div>
+		</div>
+		<div id="hud" data-if="hud_visible">
+			<img id="main" src="../../../in_main-New.tga" rect="0 0 120 118"/>
+			<img class="altar" data-for="a : altars" data-attr-src="a.src" data-attr-rect="a.rect"
+			     data-style-left="a.left + 'px'" data-style-top="a.top + 'px'"/>
+			<img id="dark_elf_icon" data-attr-src="dark_elf_icon_src" data-attr-rect="'0 0 14 14'"/>
+			<img id="plate" src="../../../t_main-New.tga" rect="0 0 104 36"/>
+			<span class="hud-text" id="dark_elf_text" data-style-font-size="normal_text_px + 'px'"
+			      data-style-width="(200 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{dark_elf_text}}</span>
+			<div data-if="balgass_visible">
+				<img id="balgass_icon" src="../../../in_main_icon_bal1.tga" rect="0 0 14 14"/>
+				<span class="hud-text" id="balgass_text" data-style-font-size="normal_text_px + 'px'"
+				      data-style-width="(200 * scale_x) + 'px'"
+				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{balgass_text}}</span>
+				<img id="balgass_bar" src="../../../in_bar2.jpg" data-attr-rect="balgass_bar_rect"
+				     data-style-width="balgass_bar_width + 'px'"/>
+			</div>
+			<img class="timer-digit" data-for="d : timer_digits" data-attr-src="d.src" data-attr-rect="d.rect"
+			     data-style-left="d.left + 'px'" data-style-top="d.top + 'px'" data-style-image-color="timer_color"/>
+			<img id="statue_bar" data-if="statue_bar_width > 0" src="../../../in_main2-New.tga"
+			     data-attr-rect="statue_bar_rect" data-style-left="statue_bar_left + 'px'"
+			     data-style-width="statue_bar_width + 'px'"/>
+			<span class="notice" data-for="n : notices" data-style-top="n.top + 'px'" data-style-color="n.color"
+			      data-style-font-size="bold_text_px + 'px'" data-style-line-height="bold_line_px + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{n.text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

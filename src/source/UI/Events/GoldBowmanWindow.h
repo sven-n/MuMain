@@ -1,73 +1,72 @@
 
 #pragma once
 #include "UI/Core/WindowManager.h"
-#include "UI/Inventory/InventoryCtrl.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
-#include "Guild/GuildMakeWindow.h"
+#include "UI/Events/EventItemEntryView.h"
+#include "UI/Widgets/Window/Tooltip.h"
+
+namespace Rml
+{
+class Element;
+}
 
 namespace mu::ui::window
 {
-    class CGoldBowmanWindow : public CObject
+// The Golden Archer's lucky number (scratch ticket) registration window. gold_bowman.rml draws
+// it (the frame and the field's back in the background context): the texts, the 12-character
+// number field, Register and the exit button. C++ keeps the field's focus, the registration
+// request, the exit tooltip, Escape and the dialog-exit request on closing.
+class CGoldBowmanWindow : public CObject
+{
+private:
+    enum
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_GB_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK, // Reference
-            IMAGE_GB_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_GB_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GB_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GB_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GB_EXCHANGEBTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_GB_BTN_SERIAL = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_GB_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GB_EDITBOX = BITMAP_GUILDMAKE_BEGIN,
-        };
-
-    private:
-        enum
-        {
-            INVENTORY_WIDTH = 190,
-            INVENTORY_HEIGHT = 429,
-        };
-
-    public:
-        CManager* m_pNewUIMng;
-        CUITextInputBox* m_EditBox;
-        CButton			m_BtnSerial;
-        CButton			m_BtnExit;
-        POINT					m_Pos;
-
-    public:
-        CGoldBowmanWindow();
-        virtual ~CGoldBowmanWindow();
-
-        bool Create(CManager* pNewUIMng, int x, int y);
-        void Release();
-
-        void SetPos(int x, int y);
-        const POINT& GetPos();
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
-
-        float GetLayerDepth();	// 3.4f
-
-    public:
-        void OpeningProcess();
-        void ClosingProcess();
-
-    private:
-        void LoadImages();
-        void UnloadImages();
-        void RenderFrame();
-        void RenderTexts();
-        void RendeerButton();
-        void ChangeEditBox(const UISTATES type);
+        INVENTORY_WIDTH = 190,
+        INVENTORY_HEIGHT = 429,
     };
+
+    enum BUTTON
+    {
+        BUTTON_SERIAL = 0,
+        BUTTON_EXIT,
+    };
+
+public:
+    CManager* m_pNewUIMng;
+    POINT m_Pos;
+
+public:
+    CGoldBowmanWindow();
+    virtual ~CGoldBowmanWindow();
+
+    bool Create(CManager* pNewUIMng, int x, int y);
+    void Release();
+
+    void SetPos(int x, int y);
+    const POINT& GetPos();
+
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool Update();
+    bool Render();
+
+    float GetLayerDepth(); // 3.4f
+
+public:
+    void OpeningProcess();
+    void ClosingProcess();
+
+private:
+    void SyncView();
+    void ClearSerialField();
+    void SendSerial();
+    Rml::Element* GetSerialField() const;
+
+    EventItemEntryView m_View{"gold_bowman", "Data/Interface/RmlUi/gold_bowman.rml", "gold_bowman_bg",
+                              "Data/Interface/RmlUi/gold_bowman_bg.rml"};
+    CTooltip m_ExitTooltip;
+    // The field takes the focus once the document shows it, as the original's GiveFocus() did.
+    bool m_SerialFocusPending = false;
+};
 
     inline
         void CGoldBowmanWindow::SetPos(int x, int y)

@@ -14,6 +14,21 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "I18N/All.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+#include "World/GameMaps/GMCrywolf1st.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/StringUtilities.h>
+
+#include <algorithm>
+#include <string>
+
 extern bool	View_Bal;
 extern char	Suc_Or_Fail;
 extern char	View_Suc_Or_Fail;
@@ -52,6 +67,16 @@ extern int m_StatueHP;
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
+namespace
+{
+// The original drew the HUD at layer depth 10, over the inventory, the chat and the other panels:
+// the document sits in the main context, pulled to the front when it is shown.
+Rml::Context* CryWolfContext()
+{
+    return RmlUiRuntime::Instance().GetContext();
+}
+} // namespace
+
 mu::ui::window::CCryWolf::CCryWolf()
 {
     m_pNewUIMng = NULL;
@@ -81,6 +106,8 @@ bool mu::ui::window::CCryWolf::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     LoadImages();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     return true;
 }
 
@@ -106,6 +133,14 @@ void mu::ui::window::CCryWolf::OpenningProcess()
 
 void mu::ui::window::CCryWolf::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    if (m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        Rml::Context* context = CryWolfContext();
+        m_RmlBinder.Destroy(context);
+        context->UnloadDocument(m_pRmlDoc);
+        m_pRmlDoc = nullptr;
+    }
     UnloadImages();
 
     if (m_pNewUIMng)
@@ -132,22 +167,131 @@ bool mu::ui::window::CCryWolf::UpdateKeyEvent()
 
 bool mu::ui::window::CCryWolf::Render()
 {
-    if (M34CryWolf1st::IsCyrWolf1st() == false)
-        return true;
+    // Nothing native left: the result, the battle HUD and the notice are RmlUi (SyncView()).
+    // Kept because CObject requires the override.
+    return true;
+}
 
-    EnableAlphaTest();
+bool mu::ui::window::CCryWolf::Update()
+{
+    SyncView();
+    return true;
+}
 
-    wchar_t Text[300];
+namespace
+{
+// A file of Data/Interface, relative to crywolf.rml.
+Rml::String InterfaceImage(const char* file)
+{
+    return Rml::String("../../../") + file;
+}
 
-    float Main[] = { 518.f,278.f,122.f,119.f,120.f / 128.f,118.f / 128.f };
-    float Number[5][6] = { {565.f,280.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {582.f,282.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {598.f,286.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {613.f,294.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {625.f,306.f,13.f,13.f,12.f / 16.f,12.f / 16.f} };
-    float Dark_Elf_Icon[] = { 623.f,358.f,15.f,15.f,14.f / 16.f,14.f / 16.f };
-    float Val_Icon[] = { 623.f,379.f,15.f,15.f,14.f / 16.f,14.f / 16.f };
-    int TotDelay = 400;
+Rml::String TexelRect(float x, float y, float width, float height)
+{
+    return Rml::CreateString("%g %g %g %g", x, y, width, height);
+}
+
+// RenderNumber2D(x, y, number, 14, 14): FontTest's 16 x 16 texel digit cells, 14 x 14 reference
+// px, centred on x and 9.8 px apart.
+void AddTimerDigits(std::vector<CryWolfSpriteEntry>& digits, const Rml::Vector2f& centre, int number)
+{
+    const std::string text = std::to_string(std::max(number, 0));
+    float left = centre.x - 14.f * static_cast<float>(text.size()) / 2;
+    for (const char digit : text)
+    {
+        digits.push_back({left, centre.y, InterfaceImage("FontTest.tga"),
+                          TexelRect(static_cast<float>((digit - '0') * 16), 0.f, 16.f, 16.f)});
+        left += 14.f * 0.7f;
+    }
+}
+
+bool SameSprites(const std::vector<CryWolfSpriteEntry>& a, const std::vector<CryWolfSpriteEntry>& b)
+{
+    return a.size() == b.size() &&
+           std::equal(a.begin(), a.end(), b.begin(), [](const CryWolfSpriteEntry& l, const CryWolfSpriteEntry& r)
+                      { return l.left == r.left && l.top == r.top && l.src == r.src && l.rect == r.rect; });
+}
+
+bool SameNotices(const std::vector<CryWolfNoticeEntry>& a, const std::vector<CryWolfNoticeEntry>& b)
+{
+    return a.size() == b.size() &&
+           std::equal(a.begin(), a.end(), b.begin(), [](const CryWolfNoticeEntry& l, const CryWolfNoticeEntry& r)
+                      { return l.top == r.top && l.text == r.text && l.color == r.color; });
+}
+} // namespace
+
+void mu::ui::window::CCryWolf::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated = m_RmlBinder.Create(CryWolfContext(), "crywolf",
+                                                 [](Rml::DataModelConstructor& c, CryWolfRmlModel& model)
+                                                 {
+                                                     auto sprite = c.RegisterStruct<CryWolfSpriteEntry>();
+                                                     sprite.RegisterMember("left", &CryWolfSpriteEntry::left);
+                                                     sprite.RegisterMember("top", &CryWolfSpriteEntry::top);
+                                                     sprite.RegisterMember("src", &CryWolfSpriteEntry::src);
+                                                     sprite.RegisterMember("rect", &CryWolfSpriteEntry::rect);
+                                                     c.RegisterArray<std::vector<CryWolfSpriteEntry>>();
+                                                     auto notice = c.RegisterStruct<CryWolfNoticeEntry>();
+                                                     notice.RegisterMember("top", &CryWolfNoticeEntry::top);
+                                                     notice.RegisterMember("text", &CryWolfNoticeEntry::text);
+                                                     notice.RegisterMember("color", &CryWolfNoticeEntry::color);
+                                                     c.RegisterArray<std::vector<CryWolfNoticeEntry>>();
+
+                                                     c.Bind("scale_x", &model.scaleX);
+                                                     c.Bind("scale_y", &model.scaleY);
+                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
+                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
+                                                     c.Bind("normal_text_px", &model.normalTextPx);
+                                                     c.Bind("bold_text_px", &model.boldTextPx);
+                                                     c.Bind("bold_line_px", &model.boldLinePx);
+                                                     c.Bind("result_visible", &model.resultVisible);
+                                                     c.Bind("banner_left", &model.bannerLeft);
+                                                     c.Bind("banner_src", &model.bannerSrc);
+                                                     c.Bind("banner_color", &model.bannerColor);
+                                                     c.Bind("rank_label_left", &model.rankLabelLeft);
+                                                     c.Bind("rank_details_visible", &model.rankDetailsVisible);
+                                                     c.Bind("rank_letter_src", &model.rankLetterSrc);
+                                                     c.Bind("exp_digits", &model.expDigits);
+                                                     c.Bind("hud_visible", &model.hudVisible);
+                                                     c.Bind("altars", &model.altars);
+                                                     c.Bind("dark_elf_icon_src", &model.darkElfIconSrc);
+                                                     c.Bind("dark_elf_text", &model.darkElfText);
+                                                     c.Bind("balgass_visible", &model.balgassVisible);
+                                                     c.Bind("balgass_text", &model.balgassText);
+                                                     c.Bind("balgass_bar_width", &model.balgassBarWidth);
+                                                     c.Bind("balgass_bar_rect", &model.balgassBarRect);
+                                                     c.Bind("timer_digits", &model.timerDigits);
+                                                     c.Bind("timer_color", &model.timerColor);
+                                                     c.Bind("statue_bar_left", &model.statueBarLeft);
+                                                     c.Bind("statue_bar_width", &model.statueBarWidth);
+                                                     c.Bind("statue_bar_rect", &model.statueBarRect);
+                                                     c.Bind("notices", &model.notices);
+                                                 });
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(CryWolfContext(), "Data/Interface/RmlUi/crywolf.rml");
+}
+
+void mu::ui::window::CCryWolf::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = CryWolfContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+// The original Render()'s first part: the result banner slides in from the left, holds for 400
+// frames, slides out to the right and then opens the result dialog; the rank table stays, its
+// label slides in, then the rank letter and the experience show. Frame-counted like the original.
+void mu::ui::window::CCryWolf::SyncResult(CryWolfRmlModel& updated)
+{
+    constexpr int TotDelay = 400;
 
     if (Suc_Or_Fail == 1)
     {
@@ -159,171 +303,145 @@ bool mu::ui::window::CCryWolf::Render()
         }
     }
 
-    if (Suc_Or_Fail >= 0)
+    if (Suc_Or_Fail < 0)
+        return;
+
+    float A_Value = 0.f;
+    const int aa = (Delay * 2) % 140;
+    if (aa > 70)
+        A_Value = 1.f - (static_cast<float>(aa - 70) * 0.01f);
+    else
+        A_Value = 0.3f + (static_cast<float>(aa) * 0.01f);
+
+    if (Delay_Add_inter <= 0)
+        Delay_Add_inter = 0;
+    else
+        Delay_Add_inter -= 15;
+
+    updated.resultVisible = true;
+    updated.bannerSrc = InterfaceImage(Add_Num == 11 ? "icon_success.tga" : "icon_failure.tga");
+    const BYTE alpha = static_cast<BYTE>(std::clamp(A_Value, 0.f, 1.f) * 255.f);
+    updated.bannerColor = UI::RmlBridge::RgbaToCss(RGBA(255, 255, 255, alpha));
+    if ((Delay * 15) > 479)
     {
-        float A_Value = 0.f;
-        int aa = (Delay * 2) % 140;
+        updated.bannerLeft = 150.f;
+    }
+    else if (Suc_Or_Fail == 0)
+    {
+        updated.bannerLeft = static_cast<float>(150 + (Delay * 15));
 
-        if (aa > 70)
-            A_Value = 1.f - ((aa - 70) * 0.01f);
-        else
-            A_Value = 0.3f + (aa * 0.01f);
-
-        if (Delay_Add_inter <= 0)
-            Delay_Add_inter = 0;
-        else
-            Delay_Add_inter -= 15;
-
+        Delay++;
         if ((Delay * 15) > 479)
         {
-            g_pCryWolfInterface->Render(150, 50, 329, 94, 0.f, 0.f, 328.f / 512.f, 93.f / 128.f, Add_Num, false, false, A_Value);
-        }
-        else if (Suc_Or_Fail == 0)
-        {
-            g_pCryWolfInterface->Render(150 + (Delay * 15), 50, 329, 94, 0.f, 0.f, 328.f / 512.f, 93.f / 128.f, Add_Num, false, false, A_Value);
+            Delay = 0;
+            Suc_Or_Fail = -1;
 
-            Delay++;
-            if ((Delay * 15) > 479)
+            Delay_Add_inter = 390;
+            View_End_Result = true;
+
+            mu::ui::window::GenericDialogConfig cfg;
+            wchar_t szResultText[300];
+            mu_swprintf(szResultText, L"%ls    %ls    %ls    %ls", I18N::Game::Rank, I18N::Game::Character,
+                        I18N::Game::Class, I18N::Game::Score);
+            cfg.lines.push_back({szResultText, false});
+            for (int i = 0; i < 5; i++)
             {
-                Delay = 0;
-                Suc_Or_Fail = -1;
-
-                Delay_Add_inter = 390;
-                View_End_Result = true;
-
-                mu::ui::window::GenericDialogConfig cfg;
-                wchar_t szResultText[300];
-                mu_swprintf(szResultText, L"%ls    %ls    %ls    %ls", I18N::Game::Rank, I18N::Game::Character, I18N::Game::Class, I18N::Game::Score);
-                cfg.lines.push_back({ szResultText, false });
-                for (int i = 0; i < 5; i++)
-                {
-                    if (HeroScore[i] == -1)
-                        continue;
-                    mu_swprintf(szResultText, L"%d      %ls      %ls      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
-                    cfg.lines.push_back({ szResultText, false });
-                }
-                cfg.lines.push_back({ L"    ", false });
-                cfg.lines.push_back({ L"    ", false });
-                cfg.lines.push_back({ L"    ", false });
-                cfg.lines.push_back({ L"    ", false });
-                if (View_Suc_Or_Fail == 1)
-                {
-                    cfg.lines.push_back({ I18N::Game::MonsterStrengthDecreased10, false });
-                    cfg.lines.push_back({ I18N::Game::_5IncreaseInCastleAndArenaInvitationCombineRate, false });
-                }
-                else
-                {
-                    cfg.lines.push_back({ I18N::Game::AllNPCsInCrywolfHaveBeenDeleted, false });
-                }
-                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+                if (HeroScore[i] == -1)
+                    continue;
+                mu_swprintf(szResultText, L"%d      %ls      %ls      %d", i + 1, HeroName[i],
+                            gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
+                cfg.lines.push_back({szResultText, false});
             }
-        }
-        else
-        {
-            //Delay_Add_inter
-            g_pCryWolfInterface->Render(-329 + (Delay * 15), 50, 329, 94, 0.f, 0.f, 328.f / 512.f, 93.f / 128.f, Add_Num, false, false, A_Value);
-        }
-
-        g_pCryWolfInterface->Render(230, 150, 196, 141, 0.f, 0.f, 195.f / 256.f, 140.f / 256.f, 26);
-        g_pCryWolfInterface->Render(250 + Delay_Add_inter, 188, 110, 28, 0.f, 0.f, 110.f / 128.f, 27.f / 32.f, 27);
-
-        if (Delay_Add_inter == 0)
-        {
-            int Exp_val[9] = { 0,0,0,0,0,0,0,0,0 }, Exp_Dummy = 0, Val = 0;
-
-            g_pCryWolfInterface->Render(250 + 120, 188, 29, 28, 0.f, 0.f, 29.f / 32.f, 27.f / 32.f, 28 + Rank);
-
-            for (int i = 0; i < 9; i++)
+            cfg.lines.push_back({L"    ", false});
+            cfg.lines.push_back({L"    ", false});
+            cfg.lines.push_back({L"    ", false});
+            cfg.lines.push_back({L"    ", false});
+            if (View_Suc_Or_Fail == 1)
             {
-                if (Exp >= Val)
-                {
-                    if (Val > 0)
-                    {
-                        Exp_Dummy = Exp / Val;
-                        Exp_val[8 - i] = Exp_Dummy % 10;
-                    }
-                    else
-                    {
-                        Exp_val[8 - i] = Exp % 10;
-                        Val = 1;
-                    }
-                }
-                else
-                    break;
-
-                Val *= 10;
-            }
-            int Move_X = 29;
-
-            g_pCryWolfInterface->Render(200 + Move_X, 235, 60, 19, 0.f, 0.f, 60.f / 64.f, 19.f / 32.f, 43);
-            g_pCryWolfInterface->Render(250 + 130 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[8]);
-            g_pCryWolfInterface->Render(250 + 115 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[7]);
-            g_pCryWolfInterface->Render(250 + 100 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[6]);
-            g_pCryWolfInterface->Render(250 + 85 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[5]);
-            g_pCryWolfInterface->Render(250 + 70 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[4]);
-            g_pCryWolfInterface->Render(250 + 55 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[3]);
-            g_pCryWolfInterface->Render(250 + 40 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[2]);
-            g_pCryWolfInterface->Render(250 + 25 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[1]);
-            g_pCryWolfInterface->Render(250 + 10 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[0]);
-        }
-    }
-
-    if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
-        return true;
-
-    g_pCryWolfInterface->Render(Main[0], Main[1], Main[2], Main[3], 0.f, 0.f, Main[4], Main[5], 3);
-
-    //23,24;
-
-    for (int ia = 0; ia < 5; ia++)
-    {
-        BYTE Use = (m_AltarState[ia] & 0xf0) >> 4;
-        BYTE State = (m_AltarState[ia] & 0x0f);
-        if (Use == CRYWOLF_ALTAR_STATE_CONTRACTED)
-        {
-            if (State == 1)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 23);
-            }
-            else if (State == 2)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 24);
+                cfg.lines.push_back({I18N::Game::MonsterStrengthDecreased10, false});
+                cfg.lines.push_back({I18N::Game::_5IncreaseInCastleAndArenaInvitationCombineRate, false});
             }
             else
             {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 25);
+                cfg.lines.push_back({I18N::Game::AllNPCsInCrywolfHaveBeenDeleted, false});
             }
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         }
-        else
-        {
-            if (State == 1)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 7);
-            }
-            else if (State == 2)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 8);
-            }
-        }
-    }
-
-    if (Dark_elf_Num == 0)
-    {
-        g_pCryWolfInterface->Render(Dark_Elf_Icon[0], Dark_Elf_Icon[1], Dark_Elf_Icon[2], Dark_Elf_Icon[3], 0.f, 0.f, Dark_Elf_Icon[4], Dark_Elf_Icon[5], 6);
     }
     else
     {
-        g_pCryWolfInterface->Render(Dark_Elf_Icon[0], Dark_Elf_Icon[1], Dark_Elf_Icon[2], Dark_Elf_Icon[3], 0.f, 0.f, Dark_Elf_Icon[4], Dark_Elf_Icon[5], 5);
+        updated.bannerLeft = static_cast<float>(-329 + (Delay * 15));
     }
 
-    g_pCryWolfInterface->Render(538, 392, 104, 37, 0.f, 0.f, 104.f / 128.f, 36.f / 64.f, 12);
+    updated.rankLabelLeft = static_cast<float>(250 + Delay_Add_inter);
+    updated.rankDetailsVisible = Delay_Add_inter == 0;
+    if (!updated.rankDetailsVisible)
+        return;
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 148, 21, 255);
-    g_pRenderText->SetBgColor(0);
+    // icon_Rank_D, C, B, A, S for ranks 0 to 4. The original drew whatever image followed for any
+    // other rank (a digit); the port draws no letter then.
+    static const char* const RankLetters[] = {"icon_Rank_D.tga", "icon_Rank_C.tga", "icon_Rank_B.tga",
+                                              "icon_Rank_A.tga", "icon_Rank_S.tga"};
+    updated.rankLetterSrc = Rank < 5 ? InterfaceImage(RankLetters[Rank]) : Rml::String();
+
+    // Nine digits, zero-padded: the experience's last nine digits (none for a negative value).
+    int Exp_val[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int Val = 0;
+    for (int i = 0; i < 9; i++)
+    {
+        if (Exp < Val)
+            break;
+        if (Val > 0)
+            Exp_val[8 - i] = (Exp / Val) % 10;
+        else
+        {
+            Exp_val[8 - i] = Exp % 10;
+            Val = 1;
+        }
+        Val *= 10;
+    }
+    for (int i = 0; i < 9; i++)
+    {
+        const Rml::String file = "icon_Rank_" + std::to_string(Exp_val[i]) + ".tga";
+        updated.expDigits.push_back({static_cast<float>(250 + 10 + 29 + 15 * i), 235.f, InterfaceImage(file.c_str()),
+                                     TexelRect(0.f, 0.f, 15.f, 19.f)});
+    }
+}
+
+// The original Render()'s battle HUD, for the ready and start states.
+void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
+{
+    if (M34CryWolf1st::Get_State_Only_Elf() == false)
+        return;
+
+    updated.hudVisible = true;
+
+    static const float AltarPos[5][2] = {
+        {565.f, 280.f}, {582.f, 282.f}, {598.f, 286.f}, {613.f, 294.f}, {625.f, 306.f}};
+    for (int ia = 0; ia < 5; ia++)
+    {
+        const BYTE Use = (m_AltarState[ia] & 0xf0) >> 4;
+        const BYTE State = (m_AltarState[ia] & 0x0f);
+        const char* file = nullptr;
+        if (Use == CRYWOLF_ALTAR_STATE_CONTRACTED)
+            file = State == 1   ? "in_main_number1_1.tga"
+                   : State == 2 ? "in_main_number2_1.tga"
+                                : "in_main_number0_2.tga";
+        else if (State == 1)
+            file = "in_main_number1.tga";
+        else if (State == 2)
+            file = "in_main_number2.tga";
+        if (file != nullptr)
+            updated.altars.push_back(
+                {AltarPos[ia][0], AltarPos[ia][1], InterfaceImage(file), TexelRect(0.f, 0.f, 12.f, 12.f)});
+    }
+
+    updated.darkElfIconSrc = InterfaceImage(Dark_elf_Num == 0 ? "in_main_icon_dl2.tga" : "in_main_icon_dl1.tga");
+    wchar_t Text[300];
     mu_swprintf(Text, I18N::Game::DarkElfD12, Dark_elf_Num);
-    g_pRenderText->RenderText(582, 359, Text, 0, 0, RT3_WRITE_CENTER);
+    updated.darkElfText = StringUtils::WideToNarrow(Text);
 
+    // Balgass shows 21 frames after he appears, and leaves at once.
     if (View_Bal == true)
     {
         if (Deco_Insert < 21.f)
@@ -332,44 +450,33 @@ bool mu::ui::window::CCryWolf::Render()
         }
         else
         {
-            g_pCryWolfInterface->Render(Val_Icon[0], Val_Icon[1], Val_Icon[2], Val_Icon[3], 0.f, 0.f, Val_Icon[4], Val_Icon[5], 4);
-
-            mu_swprintf(Text, I18N::Game::Balgass);
-            g_pRenderText->RenderText(600, 380, Text, 0, 0, RT3_WRITE_CENTER);
-
-            float Hp = ((67.f / 100.f) * (float)Val_Hp);
-            float nx = ((68.f / 100.f) * (float)Val_Hp);
-
-            g_pCryWolfInterface->Render(548, 388, nx, 8, 0.f, 0.f, Hp / 128.f, 8.f / 8.f, 1);
+            updated.balgassVisible = true;
+            updated.balgassText = StringUtils::WideToNarrow(I18N::Game::Balgass);
+            const float Hp = ((67.f / 100.f) * (float)Val_Hp);
+            updated.balgassBarWidth = (68.f / 100.f) * (float)Val_Hp;
+            updated.balgassBarRect = TexelRect(0.f, 0.f, Hp, 8.f);
         }
     }
-    if (View_Bal == false)
+    else if (Deco_Insert > 0.f)
     {
-        if (Deco_Insert > 0.f)
-        {
-            Deco_Insert -= 1.f;
-        }
+        Deco_Insert -= 1.f;
     }
 
     if (m_bTimeStart == true && m_CrywolfState == CRYWOLF_STATE_START)
     {
-        const DWORD timerColor = View_Bal
-            ? RGBA(255, 77, 77, 255)
-            : RGBA(255, 255, 255, 255);
-        m_iSecond = m_iSecond - (GetTickCount() - m_dwSyncTime);
-
-        if (m_iMinute < 10)
-        {
-            RenderNumber2D(510 + 60, 384 + 18, 0, 14, 14, timerColor);
-        }
-        RenderNumber2D(510 + 70, 384 + 18, m_iMinute, 14, 14, timerColor);
-        if (m_iSecond / 1000 < 10)
-        {
-            RenderNumber2D(520 + 77, 384 + 18, 0, 14, 14, timerColor);
-        }
-        RenderNumber2D(520 + 87, 384 + 18, m_iSecond / 1000, 14, 14, timerColor);
-
+        updated.timerColor = UI::RmlBridge::RgbaToCss(View_Bal ? RGBA(255, 77, 77, 255) : RGBA(255, 255, 255, 255));
+        m_iSecond = m_iSecond - static_cast<int>(GetTickCount() - m_dwSyncTime);
         m_dwSyncTime = GetTickCount();
+
+        // The original drew a negative second count (a minus sign's garbage cell) when no new time
+        // arrived in time; the seconds stop at 0 here.
+        const int seconds = std::max(m_iSecond, 0) / 1000;
+        if (m_iMinute < 10)
+            AddTimerDigits(updated.timerDigits, {570.f, 402.f}, 0);
+        AddTimerDigits(updated.timerDigits, {580.f, 402.f}, m_iMinute);
+        if (seconds < 10)
+            AddTimerDigits(updated.timerDigits, {597.f, 402.f}, 0);
+        AddTimerDigits(updated.timerDigits, {607.f, 402.f}, seconds);
 
         if (m_iMinute <= 0 && m_iSecond <= 0)
         {
@@ -380,125 +487,111 @@ bool mu::ui::window::CCryWolf::Render()
     }
     else
     {
-        RenderNumber2D(510 + 60, 384 + 18, 0, 14, 14);
-        RenderNumber2D(510 + 70, 384 + 18, 0, 14, 14);
-        RenderNumber2D(520 + 77, 384 + 18, 0, 14, 14);
-        RenderNumber2D(520 + 87, 384 + 18, 0, 14, 14);
+        updated.timerColor = UI::RmlBridge::RgbaToCss(RGBA(255, 255, 255, 255));
+        AddTimerDigits(updated.timerDigits, {570.f, 402.f}, 0);
+        AddTimerDigits(updated.timerDigits, {580.f, 402.f}, 0);
+        AddTimerDigits(updated.timerDigits, {597.f, 402.f}, 0);
+        AddTimerDigits(updated.timerDigits, {607.f, 402.f}, 0);
     }
 
-    int HpS = 100 - m_StatueHP;
-    float Hp = ((88.f / 100.f) * (float)HpS);
-    float nx = ((89.f / 100.f) * (float)HpS);
-    RenderImage(IMAGE_MVP_INTERFACE + 9, 548 + nx, 323, 89.f - nx, 30, Hp / 128.f, 0.f, ((((88.f / 100.f) * (float)(100.f - HpS))) / 128.f), 29.f / 32.f);
+    // The statue's shield: the bar's right part, shortened from the left as the shield drops.
+    const int HpS = 100 - m_StatueHP;
+    const float Hp = ((88.f / 100.f) * (float)HpS);
+    const float nx = ((89.f / 100.f) * (float)HpS);
+    updated.statueBarLeft = 548.f + nx;
+    updated.statueBarWidth = 89.f - nx;
+    updated.statueBarRect = TexelRect(Hp, 0.f, (88.f / 100.f) * (float)(100 - HpS), 29.f);
 
-    M34CryWolf1st::RenderNoticesCryWolf();
-
-    if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
-        return true;
-
-    int Yes = 250;
-    int No = 330;
-
-    g_pRenderText->SetTextColor(255, 148, 21, 255);
-    g_pRenderText->SetBgColor(0x00000000);
-
-    if (Message_Box == 1)
+    std::wstring texts[4];
+    if (M34CryWolf1st::AdvanceNoticeTexts(texts))
     {
-        g_pCryWolfInterface->Render(212, 206, 209, 80, 0.f, 0.f, 206.f / 256.f, 77.f / 128.f, 22);
-        if (MouseX > No && MouseX < No + 54 && MouseY > 250 && MouseY < 250 + 30)
+        for (int i = 0; i < 4; i++)
         {
-            if (Button_Down == 1)
-            {
-                g_pCryWolfInterface->Render(No, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 15);
-
-                Message_Box = 0;
-                Button_Down = 0;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(No, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 14);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(No, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 13);
-        }
-
-        if (MouseX > Yes && MouseX < Yes + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (Button_Down == 2)
-            {
-                g_pCryWolfInterface->Render(Yes, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 21);
-                Message_Box = 0;
-                Button_Down = 0;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(Yes, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 20);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(Yes, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 19);
-        }
-
-        if (Box_String[0][0] != 0)
-        {
-            int Y_loc = 239;
-            if (Box_String[1][0] != 0)
-                Y_loc = 227;
-            g_pRenderText->RenderText(317, Y_loc, Box_String[0], 0, 0, RT3_WRITE_CENTER);
-        }
-        if (Box_String[1][0] != 0)
-        {
-            g_pRenderText->RenderText(317, 238, Box_String[1], 0, 0, RT3_WRITE_CENTER);
+            updated.notices.push_back(
+                {static_cast<float>(63 + i * 13), StringUtils::WideToNarrow(texts[i].c_str()),
+                 UI::RmlBridge::RgbaToCss(i == 0 ? RGBA(100, 200, 255, 255) : RGBA(100, 150, 255, 255))});
         }
     }
-    else if (Message_Box == 2)
-    {
-        g_pCryWolfInterface->Render(212, 206, 209, 80, 0.f, 0.f, 206.f / 256.f, 77.f / 128.f, 22);
-
-        if (MouseX > 290 && MouseX < 290 + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (Button_Down == 3)
-            {
-                g_pCryWolfInterface->Render(290, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 18);
-
-                Message_Box = 0;
-                Button_Down = 0;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(290, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 17);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(290, 250, 54, 30, 0.f, 0.f, 53.f / 64.f, 30.f / 32.f, 16);
-        }
-
-        if (Box_String[0][0] != 0)
-        {
-            int Y_loc = 239;
-            if (Box_String[1][0] != 0)
-                Y_loc = 227;
-            g_pRenderText->RenderText(317, Y_loc, Box_String[0], 0, 0, RT3_WRITE_CENTER);
-        }
-
-        if (Box_String[1][0] != 0)
-        {
-            g_pRenderText->RenderText(317, 238, Box_String[1], 0, 0, RT3_WRITE_CENTER);
-        }
-    }
-
-    DisableAlphaBlend();
-
-    return true;
 }
 
-bool mu::ui::window::CCryWolf::Update()
+void mu::ui::window::CCryWolf::SyncView()
 {
-    return true;
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    CryWolfRmlModel updated;
+    const bool onMap = IsVisible() && M34CryWolf1st::IsCyrWolf1st();
+    if (onMap)
+    {
+        SyncResult(updated);
+        SyncHud(updated);
+    }
+
+    const bool visible = updated.resultVisible || updated.hudVisible;
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    if (!visible)
+        return;
+
+    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    updated.scaleX = transform.scaleX;
+    updated.scaleY = transform.scaleY;
+    updated.inverseScaleX = 1.0f / transform.scaleX;
+    updated.inverseScaleY = 1.0f / transform.scaleY;
+    updated.normalTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
+    updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    updated.boldLinePx =
+        static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY;
+
+    CryWolfRmlModel& model = m_RmlBinder.GetModel();
+    auto sync = [&](auto CryWolfRmlModel::* field, const char* name)
+    {
+        if (model.*field == updated.*field)
+            return;
+        model.*field = std::move(updated.*field);
+        m_RmlBinder.MarkDirty(name);
+    };
+    sync(&CryWolfRmlModel::scaleX, "scale_x");
+    sync(&CryWolfRmlModel::scaleY, "scale_y");
+    sync(&CryWolfRmlModel::inverseScaleX, "inverse_scale_x");
+    sync(&CryWolfRmlModel::inverseScaleY, "inverse_scale_y");
+    sync(&CryWolfRmlModel::normalTextPx, "normal_text_px");
+    sync(&CryWolfRmlModel::boldTextPx, "bold_text_px");
+    sync(&CryWolfRmlModel::boldLinePx, "bold_line_px");
+    sync(&CryWolfRmlModel::resultVisible, "result_visible");
+    sync(&CryWolfRmlModel::bannerLeft, "banner_left");
+    sync(&CryWolfRmlModel::bannerSrc, "banner_src");
+    sync(&CryWolfRmlModel::bannerColor, "banner_color");
+    sync(&CryWolfRmlModel::rankLabelLeft, "rank_label_left");
+    sync(&CryWolfRmlModel::rankDetailsVisible, "rank_details_visible");
+    sync(&CryWolfRmlModel::rankLetterSrc, "rank_letter_src");
+    sync(&CryWolfRmlModel::hudVisible, "hud_visible");
+    sync(&CryWolfRmlModel::darkElfIconSrc, "dark_elf_icon_src");
+    sync(&CryWolfRmlModel::darkElfText, "dark_elf_text");
+    sync(&CryWolfRmlModel::balgassVisible, "balgass_visible");
+    sync(&CryWolfRmlModel::balgassText, "balgass_text");
+    sync(&CryWolfRmlModel::balgassBarWidth, "balgass_bar_width");
+    sync(&CryWolfRmlModel::balgassBarRect, "balgass_bar_rect");
+    sync(&CryWolfRmlModel::timerColor, "timer_color");
+    sync(&CryWolfRmlModel::statueBarLeft, "statue_bar_left");
+    sync(&CryWolfRmlModel::statueBarWidth, "statue_bar_width");
+    sync(&CryWolfRmlModel::statueBarRect, "statue_bar_rect");
+    auto syncSprites = [&](std::vector<CryWolfSpriteEntry> CryWolfRmlModel::* field, const char* name)
+    {
+        if (SameSprites(model.*field, updated.*field))
+            return;
+        model.*field = std::move(updated.*field);
+        m_RmlBinder.MarkDirty(name);
+    };
+    syncSprites(&CryWolfRmlModel::expDigits, "exp_digits");
+    syncSprites(&CryWolfRmlModel::altars, "altars");
+    syncSprites(&CryWolfRmlModel::timerDigits, "timer_digits");
+    if (!SameNotices(model.notices, updated.notices))
+    {
+        model.notices = std::move(updated.notices);
+        m_RmlBinder.MarkDirty("notices");
+    }
 }
 
 float mu::ui::window::CCryWolf::ConvertX(float x)

@@ -5,82 +5,83 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Events/EventItemEntryView.h"
 #include "Engine/Object/ZzzInventory.h"
 
 namespace mu::ui::window
 {
-    class CRegistrationLuckyCoin : public CObject
+// Delgado's lucky coin registration window. lucky_coin_registration.rml draws it (the frame in
+// the background context, under the native 3D coin); C++ keeps the count, the Register lock,
+// the coin preview and every request it sends.
+class CRegistrationLuckyCoin : public CObject
+{
+private:
+    static constexpr float LUCKYCOIN_REG_WIDTH = 190.0f;
+    static constexpr float LUCKYCOIN_REG_HEIGHT = 429.0f;
+
+public:
+    CRegistrationLuckyCoin();
+    virtual ~CRegistrationLuckyCoin();
+
+    bool Create(CManager* pNewUIMng, int x, int y);
+
+    void SetPos(int x, int y);
+    const POINT& GetPos()
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_CLOSE_REGIST = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
-        };
+        return m_Pos;
+    }
 
-    private:
-        static constexpr float LUCKYCOIN_REG_WIDTH = 190.0f;
-        static constexpr float LUCKYCOIN_REG_HEIGHT = 429.0f;
+    bool Render();
+    bool Update();
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool BtnProcess();
 
-    public:
-        CRegistrationLuckyCoin();
-        virtual ~CRegistrationLuckyCoin();
+    float GetLayerDepth()
+    {
+        return 4.2f;
+    }
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+    const int& GetRegistCount()
+    {
+        return m_RegistCount;
+    }
 
-        void SetPos(int x, int y);
-        const POINT& GetPos() { return m_Pos; }
+    void SetRegistCount(int nRegistCount)
+    {
+        m_RegistCount = nRegistCount;
+    }
 
-        bool Render();
-        bool Update();
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool BtnProcess();
-        void SetBtnInfo();
+    bool GetItemRotation()
+    {
+        return m_ItemAngle;
+    }
+    void SetItemRotation(bool _bInput)
+    {
+        m_ItemAngle = _bInput;
+    }
 
-        float GetLayerDepth()
-        {
-            return 4.2f;
-        }
+    void LockLuckyCoinRegBtn();
+    void UnLockLuckyCoinRegBtn();
 
-        const int& GetRegistCount() { return m_RegistCount; }
+    void OpeningProcess();
+    void ClosingProcess();
 
-        void SetRegistCount(int nRegistCount) { m_RegistCount = nRegistCount; }
+    void Release();
 
-        bool GetItemRotation() { return m_ItemAngle; }
-        void SetItemRotation(bool _bInput) { m_ItemAngle = _bInput; }
+private:
+    void SyncView();
+    void RenderLuckyCoin();
 
-        void LockLuckyCoinRegBtn();
-        void UnLockLuckyCoinRegBtn();
-
-        void OpeningProcess();
-        void ClosingProcess();
-
-        void Release();
-
-    private:
-        void LoadImages();
-        void UnloadImages();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-        void RenderLuckyCoin();
-
-    private:
-        CManager* m_pNewUIMng;
-        POINT m_Pos;
-        ITEM* m_CoinItem;
-        bool m_ItemAngle;
-        float m_width, m_height;
-        int m_RegistCount;
-        CButton m_CloseButton;
-        CButton m_RegistButton;
-    };
+private:
+    CManager* m_pNewUIMng;
+    POINT m_Pos;
+    ITEM* m_CoinItem;
+    bool m_ItemAngle;
+    int m_RegistCount;
+    bool m_RegisterLocked = false;
+    EventItemEntryView m_View{"lucky_coin_registration", "Data/Interface/RmlUi/lucky_coin_registration.rml",
+                              "lucky_coin_registration_bg", "Data/Interface/RmlUi/lucky_coin_registration_bg.rml"};
+};
 }

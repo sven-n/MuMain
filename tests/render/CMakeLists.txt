@@ -12,6 +12,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME overlay2d_recorder_tests
+    SOURCES
+        test_overlay2d_recorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/Overlay2DRecorder.cpp
+)
+
+mu_add_test(
     NAME quad_topology_tests
     SOURCES
         test_quad_topology.cpp

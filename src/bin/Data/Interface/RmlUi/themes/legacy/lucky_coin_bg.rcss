@@ -1,0 +1,6 @@
+/* Legacy frame of Delgado's lucky coin windows (CRegistrationLuckyCoin, CExchangeLuckyCoin):
+   docked_panel_frame.rcss's pieces (linked first) with the newui_item_back04 top, as their
+   RenderFrame() drew. Background context. */
+
+.frame-top { decorator: image(docked-bg-top-a); }
+#panel { pointer-events: none; }

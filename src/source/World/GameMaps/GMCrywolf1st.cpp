@@ -223,17 +223,12 @@ void M34CryWolf1st::DoTankerFireFixStartPosition(int SourceX, int SourceY, int P
     }
 }
 
-void M34CryWolf1st::RenderNoticesCryWolf()
+bool M34CryWolf1st::AdvanceNoticeTexts(std::wstring (&texts)[4])
 {
     if (m_CrywolfState != CRYWOLF_STATE_READY)
     {
-        return;
+        return false;
     }
-
-    int iTemp = 0;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0, 0, 0, 170);
 
     if (GetTimeCheck(10000))
     {
@@ -241,10 +236,33 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         if (iNextNotice >= 4)
             iNextNotice = 0;
     }
-    iTemp = 4 * iNextNotice;
+    const int iTemp = 4 * iNextNotice;
+    for (int i = 0; i < 4; i++)
+    {
+        const int nText = 1957 + i + iTemp;
+        if (1966 == nText || 1967 == nText)
+        {
+            // These two are format strings ("10%% ..."): printed, like the original did.
+            wchar_t szText[256];
+            mu_swprintf(szText, I18N::Game::Lookup(nText));
+            texts[i] = szText;
+        }
+        else
+            texts[i] = I18N::Game::Lookup(nText);
+    }
+    return true;
+}
 
-    wchar_t szText[256];
-    int nText = 0;
+void M34CryWolf1st::RenderNoticesCryWolf()
+{
+    std::wstring texts[4];
+    if (!AdvanceNoticeTexts(texts))
+    {
+        return;
+    }
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 170);
 
     for (int i = 0; i < 4; i++)
     {
@@ -256,14 +274,7 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         {
             g_pRenderText->SetTextColor(100, 150, 255, 255);
         }
-        nText = 1957 + i + iTemp;
-        if (1966 == nText || 1967 == nText)
-        {
-            mu_swprintf(szText, I18N::Game::Lookup(nText));
-            g_pRenderText->RenderText(190, 63 + i * 13, szText);
-        }
-        else
-            g_pRenderText->RenderText(190, 63 + i * 13, I18N::Game::Lookup(nText));
+        g_pRenderText->RenderText(190, 63 + i * 13, texts[i].c_str());
     }
 }
 

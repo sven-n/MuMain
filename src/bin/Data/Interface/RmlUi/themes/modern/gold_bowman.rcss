@@ -1,0 +1,19 @@
+/* Modern theme for the Golden Archer's windows, over event_item_entry.rcss (linked first): its
+   modern buttons at the original sizes (bound), a modern exit button, the number field in the
+   modern text colour over the background document's recessed back. Geometry is the legacy one. */
+
+.entry-text { white-space: pre; }
+.entry-text.left-aligned { text-align: left; }
+
+.gb-btn.exit { cursor: pointer; }
+
+#serial_field {
+	text-align: left;
+	left: 50px;
+	top: 260px;
+	padding: 0;
+	border-width: 0;
+	background-color: transparent;
+	color: token(text-primary);
+	pointer-events: auto;
+}

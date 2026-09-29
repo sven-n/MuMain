@@ -5,6 +5,15 @@
 #include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Combat/DuelMgr.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -26,7 +35,8 @@ bool CDuelWatchUserListWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -35,7 +45,7 @@ bool CDuelWatchUserListWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CDuelWatchUserListWindow::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -71,36 +81,14 @@ bool CDuelWatchUserListWindow::UpdateKeyEvent()
 
 bool CDuelWatchUserListWindow::Update()
 {
-    // 	if(IsVisible())
-    // 	{
-    // 	}
+    SyncView();
     return true;
 }
 
 bool CDuelWatchUserListWindow::Render()
 {
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    g_pRenderText->SetFont(g_hFont);
-    const float fFontHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
-
-    POINT ptSize = {57, 17};
-    POINT ptOrigin = {
-        static_cast<LONG>(m_Pos.x),
-        static_cast<LONG>(m_Pos.y - (ptSize.y + 1) * static_cast<long>(g_DuelMgr.GetDuelWatchUserCount()) +
-                          (ptSize.y - static_cast<long>(fFontHeight)) / 2 + 1)
-    };
-
-    for (int i = 0; i < g_DuelMgr.GetDuelWatchUserCount(); ++i)
-    {
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, g_DuelMgr.GetDuelWatchUser(i), ptSize.x, 0, RT3_SORT_CENTER);
-        ptOrigin.y += ptSize.y + 1;
-    }
-
-    DisableAlphaBlend();
-
+    // Nothing native left: the boxes and the names are RmlUi (SyncView()). Kept because CObject
+    // requires the override.
     return true;
 }
 
@@ -113,30 +101,103 @@ float CDuelWatchUserListWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CDuelWatchUserListWindow::LoadImages()
+namespace
 {
-    LoadBitmap(L"Interface\\Pk_box.tga", IMAGE_DUELWATCH_USERLIST_BOX, GL_LINEAR);
+template <typename T>
+void SyncField(RmlModelBinder<DuelWatchSpectatorsRmlModel>& binder, T DuelWatchSpectatorsRmlModel::* field,
+               const char* name, T value)
+{
+    DuelWatchSpectatorsRmlModel& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+} // namespace
+
+void CDuelWatchUserListWindow::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    const bool modelCreated = m_RmlBinder.Create(context, "duel_watch_spectators",
+                                                 [](Rml::DataModelConstructor& c, DuelWatchSpectatorsRmlModel& model)
+                                                 {
+                                                     c.Bind("scale_x", &model.scaleX);
+                                                     c.Bind("scale_y", &model.scaleY);
+                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
+                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
+                                                     c.Bind("panel_x", &model.panelX);
+                                                     c.Bind("text_px", &model.textPx);
+                                                     c.Bind("text_top", &model.textTop);
+                                                     auto spectator = c.RegisterStruct<DuelWatchSpectatorEntry>();
+                                                     spectator.RegisterMember("name", &DuelWatchSpectatorEntry::name);
+                                                     spectator.RegisterMember("top", &DuelWatchSpectatorEntry::top);
+                                                     c.RegisterArray<std::vector<DuelWatchSpectatorEntry>>();
+                                                     c.Bind("spectators", &model.spectators);
+                                                 });
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/duel_watch_spectators.rml");
 }
 
-void CDuelWatchUserListWindow::UnloadImages()
+void CDuelWatchUserListWindow::ReloadRmlTheme()
 {
-    DeleteBitmap(IMAGE_DUELWATCH_USERLIST_BOX);
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
 }
 
-void CDuelWatchUserListWindow::RenderFrame()
+void CDuelWatchUserListWindow::SyncView()
 {
-    POINT ptSize = {57, 17};
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
 
-    int i;
-    for (i = 0; i < g_DuelMgr.GetDuelWatchUserCount(); ++i)
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::textPx, "text_px",
+              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
+
+    // The original's Render(): a 57 x 17 box per spectator, 18 apart upwards from m_Pos.y, the
+    // first name in the top box; each name centred on the box, (17 - font height) / 2 + 1 whole
+    // units down.
+    g_pRenderText->SetFont(g_hFont);
+    const long fontHeight = static_cast<long>(g_pRenderText->MeasureText(L"Q", 1).cy);
+    SyncField(m_RmlBinder, &DuelWatchSpectatorsRmlModel::textTop, "text_top",
+              static_cast<float>((17 - fontHeight) / 2 + 1));
+
+    const int count = g_DuelMgr.GetDuelWatchUserCount();
+    std::vector<DuelWatchSpectatorEntry> spectators;
+    spectators.reserve(static_cast<size_t>(std::max(0, count)));
+    for (int i = 0; i < count; ++i)
     {
-        RenderColor(m_Pos.x, m_Pos.y - (ptSize.y + 1) * (i + 1), ptSize.x, ptSize.y);
+        spectators.push_back({StringUtils::WideToNarrow(g_DuelMgr.GetDuelWatchUser(i)),
+                              static_cast<float>(m_Pos.y - 18 * count + 18 * i)});
     }
-    EndRenderColor();
-
-    for (i = 0; i < g_DuelMgr.GetDuelWatchUserCount(); ++i)
+    DuelWatchSpectatorsRmlModel& model = m_RmlBinder.GetModel();
+    const bool same = model.spectators.size() == spectators.size() &&
+                      std::equal(model.spectators.begin(), model.spectators.end(), spectators.begin(),
+                                 [](const DuelWatchSpectatorEntry& a, const DuelWatchSpectatorEntry& b)
+                                 { return a.name == b.name && a.top == b.top; });
+    if (!same)
     {
-        RenderImage(IMAGE_DUELWATCH_USERLIST_BOX, m_Pos.x, m_Pos.y - (ptSize.y + 1) * (i + 1), ptSize.x, ptSize.y);
+        model.spectators = std::move(spectators);
+        m_RmlBinder.MarkDirty("spectators");
     }
 }
 

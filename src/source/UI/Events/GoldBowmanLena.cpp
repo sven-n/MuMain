@@ -1,34 +1,39 @@
-
 #include "stdafx.h"
 #include "UI/Events/GoldBowmanLena.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Inventory/MyInventory.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/MixMgr.h"
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
-
-namespace
-{
-    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
-    {
-        g_pRenderText->SetFont(g_hFont);
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(color);
-        g_pRenderText->SetBgColor(backcolor);
-        g_pRenderText->RenderText(x, y, text, sx, sy, sort);
-
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
-    }
-};
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// The original's CButtons: Register (newui_btn_empty, 108 x 29) at (45, 285) and the exit button
+// (newui_exit_00, 36 x 29) at (13, 392), both with a tooltip above them.
+constexpr float kRegisterX = 45.f;
+constexpr float kRegisterY = 285.f;
+constexpr float kExitX = 13.f;
+constexpr float kExitY = 392.f;
+constexpr float kExitWidth = 36.f;
+constexpr float kExitHeight = 29.f;
+
+// The original printed its notes through mu_swprintf() as formats.
+std::wstring Formatted(const wchar_t* format)
+{
+    wchar_t text[100] = {};
+    mu_swprintf(text, format);
+    return text;
+}
+} // namespace
 
 CGoldBowmanLena::CGoldBowmanLena()
 {
@@ -50,18 +55,13 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    m_RegisterTooltip.SetText(&I18N::Game::RegisteringRena);
+    m_RegisterTooltip.SetAnchorAbove(true);
+    m_ExitTooltip.SetText(&I18N::Game::Close388);
+    m_ExitTooltip.SetAnchorAbove(true);
 
-    // Register Button
-    m_BtnRegister.ChangeButtonImgState(true, IMAGE_GBL_BTN_SERIAL, false);
-    m_BtnRegister.ChangeButtonInfo(m_Pos.x + 45, m_Pos.y + 285, 108, 29);
-    m_BtnRegister.ChangeText(&I18N::Game::RegisteringRena);
-    m_BtnRegister.ChangeToolTipText(&I18N::Game::RegisteringRena, true);
-
-    // Exit Button
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_GBL_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "닫기"
+    m_View.Build();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
 
     Show(false);
 
@@ -70,31 +70,14 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 
 void CGoldBowmanLena::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    HideTooltips();
 }
 
-void CGoldBowmanLena::LoadImages()
+void CGoldBowmanLena::HideTooltips()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GBL_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_GBL_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GBL_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GBL_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GBL_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GBL_EXCHANGEBTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GBL_BTN_SERIAL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GBL_BTN_EXIT, GL_LINEAR);
-}
-
-void CGoldBowmanLena::UnloadImages()
-{
-    DeleteBitmap(IMAGE_GBL_BTN_EXIT);
-    DeleteBitmap(IMAGE_GBL_BTN_SERIAL);
-    DeleteBitmap(IMAGE_GBL_EXCHANGEBTN);
-    DeleteBitmap(IMAGE_GBL_BOTTOM);
-    DeleteBitmap(IMAGE_GBL_RIGHT);
-    DeleteBitmap(IMAGE_GBL_LEFT);
-    DeleteBitmap(IMAGE_GBL_TOP);
-    DeleteBitmap(IMAGE_GBL_BACK);
+    UI::RmlBridge::Tooltip::Hide(&m_RegisterTooltip);
+    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 }
 
 void CGoldBowmanLena::OpeningProcess()
@@ -103,6 +86,7 @@ void CGoldBowmanLena::OpeningProcess()
 
 void CGoldBowmanLena::ClosingProcess()
 {
+    HideTooltips();
     g_bEventChipDialogEnable = 0;
     g_shEventChipCount = 0;
     SocketClient->ToGameServer()->SendEventChipExitDialog();
@@ -114,26 +98,10 @@ bool CGoldBowmanLena::UpdateMouseEvent()
         return true;
     }
 
-    if (m_BtnRegister.UpdateMouseEvent()) {
-        int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
-
-        if (registerItem != 0) {
-            int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 21, 0);
-
-            if (index != -1) {
-                SocketClient->ToGameServer()->SendEventChipRegistrationRequest(0, index);
-            }
-        }
-    }
-
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // Top-right corner close "X" (shared frame): hides + swallows the click. Register and the exit
+    // button are RmlUi's (see Update()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA))
     {
-        return false;
-    }
-
-    if (m_BtnExit.UpdateMouseEvent()) {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA);
         return false;
     }
 
@@ -158,6 +126,7 @@ bool CGoldBowmanLena::UpdateMouseEvent()
         }
         return false;
     }
+
     return true;
 }
 
@@ -177,78 +146,87 @@ bool CGoldBowmanLena::UpdateKeyEvent()
 
 bool CGoldBowmanLena::Update()
 {
+    SyncView();
+
+    // A click RmlUi reported (the original's CButton handling in UpdateMouseEvent()).
+    const int pressed = m_View.TakePressedButton();
+    if (!IsVisible())
+        return true;
+    if (pressed == BUTTON_REGISTER)
+    {
+        int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
+        if (registerItem != 0)
+        {
+            int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 21, 0);
+            if (index != -1)
+            {
+                SocketClient->ToGameServer()->SendEventChipRegistrationRequest(0, index);
+            }
+        }
+    }
+    else if (pressed == BUTTON_EXIT)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA);
+    }
     return true;
+}
+
+void CGoldBowmanLena::SyncView()
+{
+    if (IsVisible())
+    {
+        // The original's RenderTexts(), all in the normal font on the 190-unit window: the notes
+        // centred, the two captions light blue from x 20, the counts ("    X    n", spaces kept)
+        // centred from x 5 beside the 3D Rena, the closing notes purple.
+        const DWORD white = 0xFFFFFFFF;
+        const DWORD caption = 0xFF47DFFA;
+        const DWORD notice = 0xFFFA47D6;
+        const float width = INVENTORY_WIDTH;
+        std::vector<EventItemEntryView::Text> texts;
+        texts.push_back({getMonsterName(236), 0.f, 15.f, width, false, white});
+        for (int i = 0; i < 3; ++i)
+            texts.push_back({Formatted(I18N::Game::Lookup(700 + i)), 0.f, 100.f + static_cast<float>(i) * 15.f, width,
+                             false, white});
+
+        wchar_t count[100] = {};
+        const int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
+        texts.push_back({I18N::Game::NumberOfRenaYouHaveCollected, 20.f, 180.f, width, false, caption, true});
+        mu_swprintf(count, L"    X    %d", registerItem);
+        texts.push_back({count, 5.f, 202.f, width, false, white});
+        texts.push_back({I18N::Game::NumberOfRegisteredRena, 20.f, 225.f, width, false, caption, true});
+        mu_swprintf(count, L"    X    %d", g_shEventChipCount);
+        texts.push_back({count, 5.f, 245.f, width, false, white});
+        for (int j = 0; j < 2; ++j)
+            texts.push_back({Formatted(I18N::Game::Lookup(703 + j)), 0.f, 350.f + static_cast<float>(j) * 15.f, width,
+                             false, notice});
+        m_View.SetTexts(std::move(texts));
+
+        m_View.SetButtons({{I18N::Game::RegisteringRena, kRegisterX, kRegisterY, false, MSGBOX_BTN_EMPTY_WIDTH,
+                            MSGBOX_BTN_EMPTY_HEIGHT, false, "wide"},
+                           {L"", kExitX, kExitY, false, kExitWidth, kExitHeight, false, "exit"}});
+    }
+    m_View.Sync(IsVisible(), m_Pos);
+
+    if (!IsVisible())
+        HideTooltips();
 }
 
 bool CGoldBowmanLena::Render()
 {
+    // The frame, the texts and the buttons are RmlUi (the frame in the background context, under
+    // the Rena); the two Rena stay native 3D, over the frame as before, in the render state the
+    // original's 2D pass left them.
     EnableAlphaTest();
-
-    RenderFrame();
-
-    RenderTexts();
-
-    RendeerButton();
-
     DisableAlphaBlend();
-
     Render3D();
 
+    // The buttons' hover tooltips (the shared RmlUi one), shown from here as the original's
+    // CButton::Render() showed them, after the hover checks of the windows under it.
+    m_RegisterTooltip.Render(m_Pos.x + static_cast<int>(kRegisterX), m_Pos.y + static_cast<int>(kRegisterY),
+                             static_cast<int>(MSGBOX_BTN_EMPTY_WIDTH), static_cast<int>(MSGBOX_BTN_EMPTY_HEIGHT));
+    m_ExitTooltip.Render(m_Pos.x + static_cast<int>(kExitX), m_Pos.y + static_cast<int>(kExitY),
+                         static_cast<int>(kExitWidth), static_cast<int>(kExitHeight));
     return true;
-}
-
-void CGoldBowmanLena::RenderFrame()
-{
-    // frame
-    RenderImage(IMAGE_GBL_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_GBL_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_GBL_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GBL_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_GBL_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
-}
-
-void CGoldBowmanLena::RenderTexts()
-{
-    const wchar_t* name = getMonsterName(236);
-    RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    wchar_t Text[100];
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    for (int i = 0; i < 3; ++i) {
-        memset(&Text, 0, sizeof(wchar_t) * 100);
-        mu_swprintf(Text, I18N::Game::Lookup(700 + i));
-        RenderText(Text, m_Pos.x, m_Pos.y + 100 + (i * 15), 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-    }
-
-    int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, L"%ls", I18N::Game::NumberOfRenaYouHaveCollected);
-    RenderText(Text, m_Pos.x + 20, m_Pos.y + 180, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, L"    X    %d", registerItem);
-    RenderText(Text, m_Pos.x + 5, m_Pos.y + 202, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, L"%ls", I18N::Game::NumberOfRegisteredRena);
-    RenderText(Text, m_Pos.x + 20, m_Pos.y + 225, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, L"    X    %d", g_shEventChipCount);
-    RenderText(Text, m_Pos.x + 5, m_Pos.y + 245, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-
-    for (int j = 0; j < 2; ++j) {
-        memset(&Text, 0, sizeof(wchar_t) * 100);
-        mu_swprintf(Text, I18N::Game::Lookup(703 + j));
-        RenderText(Text, m_Pos.x, m_Pos.y + 350 + (j * 15), 190, 0, 0xFFFA47D6, 0x00000000, RT3_SORT_CENTER);
-    }
-}
-
-void CGoldBowmanLena::RendeerButton()
-{
-    m_BtnRegister.Render();
-    m_BtnExit.Render();
 }
 
 float CGoldBowmanLena::GetLayerDepth()	// 3.4f

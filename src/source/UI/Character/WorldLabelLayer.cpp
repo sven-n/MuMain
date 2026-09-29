@@ -12,6 +12,7 @@
 #include <RmlUi/Core/ElementText.h>
 
 #include <cstdio>
+#include <cwchar>
 
 namespace
 {
@@ -75,7 +76,17 @@ void UI::Character::WorldLabelLayer::Release()
         UI::RmlBridge::UnregisterForThemeReload(this);
         m_registered = false;
     }
-    Hide();
+    // Unload the document while its context still exists; at shutdown the runtime may already be
+    // gone, and with it the document. Idempotent.
+    if (m_document != nullptr && RmlUiRuntime::Instance().IsCreated())
+    {
+        if (Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext())
+            context->UnloadDocument(m_document);
+    }
+    m_document = nullptr;
+    m_slots.clear();
+    m_used = 0;
+    m_shown = 0;
 }
 
 void UI::Character::WorldLabelLayer::Build()
@@ -88,6 +99,7 @@ void UI::Character::WorldLabelLayer::Build()
     m_document = UI::RmlBridge::LoadThemedDocument(context, kDocumentPath);
     m_slots.clear();
     m_used = 0;
+    m_shown = 0;
 }
 
 void UI::Character::WorldLabelLayer::ReloadTheme()
@@ -125,8 +137,10 @@ void UI::Character::WorldLabelLayer::BeginFrame()
 
 void UI::Character::WorldLabelLayer::EndFrame()
 {
-    for (std::size_t i = m_used; i < m_slots.size(); ++i)
+    // Only the slots used last frame but not this one: the ones beyond were hidden already.
+    for (std::size_t i = m_used; i < m_shown && i < m_slots.size(); ++i)
         SetKind(m_slots[i], SlotKind::Hidden);
+    m_shown = m_used;
 }
 
 UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(SlotKind kind)
@@ -193,10 +207,18 @@ void UI::Character::WorldLabelLayer::SetBox(Slot& slot, const Rect& rect, std::u
 void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::RecordedText& text)
 {
     Slot& slot = NextSlot(SlotKind::Text);
-    // The native renderer draws no box for a fully transparent background colour.
-    SetBox(slot, {text.boxX, text.boxY, text.boxWidth, text.boxHeight},
-           (text.backColor >> 24) == 0 ? 0u : text.backColor);
-    SetDecorator(slot, {});
+    // The native renderer draws no box for a fully transparent background colour; a box keeps the
+    // blend state it was drawn under (opaque after the F8 health bars' DisableAlphaBlend()).
+    const Rect box{text.boxX, text.boxY, text.boxWidth, text.boxHeight};
+    if ((text.backColor >> 24) == 0)
+    {
+        SetBox(slot, box, 0u);
+        SetAdditive(slot, false, 0u);
+    }
+    else
+    {
+        SetFill(slot, box, text.backColor, text.backBlend);
+    }
     SetPx(slot.text, Rml::PropertyId::Left, slot.textOffset, text.textX - text.boxX);
     SetPx(slot.text, Rml::PropertyId::FontSize, slot.textPixelSize, text.textPixelSize);
     SetPx(slot.text, Rml::PropertyId::LineHeight, slot.lineHeight, text.lineHeight);
@@ -213,63 +235,72 @@ void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::Recorded
     }
     if (slot.utf8 != text.utf8)
     {
-        slot.utf8 = text.utf8;
-        slot.textNode->SetText(text.utf8);
+        slot.utf8.assign(text.utf8);
+        slot.textNode->SetText(slot.utf8);
     }
 }
 
 void UI::Character::WorldLabelLayer::RecordQuad(const Render::Renderer::RecordedQuad& quad)
 {
     Slot& slot = NextSlot(SlotKind::Quad);
-    std::uint32_t abgr = AbgrFromArgb(quad.argb);
-    std::string decorator;
-    if (quad.blend == Render::Renderer::RecordedBlend::Additive)
-    {
-        // Added to what is behind it (Render::RmlUi::RegisterAdditiveFillDecorator), no plain fill.
-        char fill[40];
-        std::snprintf(fill, sizeof(fill), "additive-fill(#%02x%02x%02x)", abgr & 0xFFu, (abgr >> 8) & 0xFFu,
-                      (abgr >> 16) & 0xFFu);
-        decorator = fill;
-        abgr = 0;
-    }
-    else if (quad.blend == Render::Renderer::RecordedBlend::Opaque)
-    {
-        abgr |= 0xFF000000u;
-    }
-    SetBox(slot, {quad.x, quad.y, quad.width, quad.height}, abgr);
-    SetDecorator(slot, decorator);
+    SetFill(slot, {quad.x, quad.y, quad.width, quad.height}, AbgrFromArgb(quad.argb), quad.blend);
 }
 
-void UI::Character::WorldLabelLayer::SetDecorator(Slot& slot, const std::string& decorator)
+void UI::Character::WorldLabelLayer::SetFill(Slot& slot, const Rect& rect, std::uint32_t abgr,
+                                             Render::Renderer::RecordedBlend blend)
 {
-    if (slot.boxDecorator == decorator)
-        return;
-    slot.boxDecorator = decorator;
-    if (decorator.empty())
-        slot.box->RemoveProperty(Rml::PropertyId::Decorator);
+    // Added to what is behind it (Render::RmlUi::RegisterAdditiveFillDecorator), no plain fill; an
+    // opaque draw ignores the alpha.
+    const bool additive = blend == Render::Renderer::RecordedBlend::Additive;
+    if (additive)
+        SetBox(slot, rect, 0u);
     else
-        slot.box->SetProperty("decorator", decorator);
+        SetBox(slot, rect, blend == Render::Renderer::RecordedBlend::Opaque ? abgr | 0xFF000000u : abgr);
+    SetAdditive(slot, additive, abgr);
+}
+
+void UI::Character::WorldLabelLayer::SetAdditive(Slot& slot, bool additive, std::uint32_t abgr)
+{
+    // Formats the decorator only when the fill changes.
+    if (slot.additive == additive && (!additive || slot.additiveColor == abgr))
+        return;
+    slot.additive = additive;
+    slot.additiveColor = abgr;
+    if (!additive)
+    {
+        slot.box->RemoveProperty(Rml::PropertyId::Decorator);
+        return;
+    }
+    char fill[40];
+    std::snprintf(fill, sizeof(fill), "additive-fill(#%02x%02x%02x)", abgr & 0xFFu, (abgr >> 8) & 0xFFu,
+                  (abgr >> 16) & 0xFFu);
+    slot.box->SetProperty("decorator", fill);
 }
 
 void UI::Character::WorldLabelLayer::RecordBitmap(const Render::Renderer::RecordedBitmap& bitmap)
 {
     Slot& slot = NextSlot(SlotKind::Bitmap);
     SetBox(slot, {bitmap.x, bitmap.y, bitmap.width, bitmap.height}, 0u);
-    SetDecorator(slot, {});
+    SetAdditive(slot, false, 0u);
 
-    std::string source = ImageSource(bitmap.fileName);
-    if (slot.imageSource != source)
+    // The recorded file names are CGlobalBitmap's own, stable strings: the src is rebuilt only when
+    // the name changes (compared by content, so a different pointer to the same name is equal).
+    if (slot.imageFile == nullptr || bitmap.fileName == nullptr || std::wcscmp(slot.imageFile, bitmap.fileName) != 0)
     {
-        slot.imageSource = std::move(source);
-        slot.image->SetAttribute("src", slot.imageSource);
+        slot.imageFile = bitmap.fileName;
+        slot.image->SetAttribute("src", ImageSource(bitmap.fileName));
     }
-    char rect[96];
-    std::snprintf(rect, sizeof(rect), "%g %g %g %g", bitmap.sourceX, bitmap.sourceY, bitmap.sourceWidth,
-                  bitmap.sourceHeight);
-    if (slot.imageRect != rect)
+    if (slot.sourceX != bitmap.sourceX || slot.sourceY != bitmap.sourceY || slot.sourceWidth != bitmap.sourceWidth ||
+        slot.sourceHeight != bitmap.sourceHeight)
     {
-        slot.imageRect = rect;
-        slot.image->SetAttribute("rect", slot.imageRect);
+        slot.sourceX = bitmap.sourceX;
+        slot.sourceY = bitmap.sourceY;
+        slot.sourceWidth = bitmap.sourceWidth;
+        slot.sourceHeight = bitmap.sourceHeight;
+        char rect[96];
+        std::snprintf(rect, sizeof(rect), "%g %g %g %g", bitmap.sourceX, bitmap.sourceY, bitmap.sourceWidth,
+                      bitmap.sourceHeight);
+        slot.image->SetAttribute("rect", Rml::String(rect));
     }
     if (slot.imageAlpha != bitmap.alpha)
     {

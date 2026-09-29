@@ -4,6 +4,18 @@
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <algorithm>
+#include <cstdio>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -37,7 +49,8 @@ bool CDoppelGangerFrame::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    BuildRmlUi();
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -46,7 +59,7 @@ bool CDoppelGangerFrame::Create(CManager* pNewUIMng, int x, int y)
 
 void CDoppelGangerFrame::Release()
 {
-    UnloadImages();
+    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -75,135 +88,241 @@ bool CDoppelGangerFrame::UpdateKeyEvent()
 
 bool CDoppelGangerFrame::Update()
 {
-    if (!IsVisible())
-        return true;
+    SyncView();
 
     return true;
 }
 
 bool CDoppelGangerFrame::Render()
 {
-    EnableAlphaTest();
+    // Nothing native left: the frame, the texts, the gauge and the markers are RmlUi (SyncView()).
+    // Kept because CObject requires the override.
+    return true;
+}
 
-    RenderImage(IMAGE_DOPPELGANGER_FRAME_WINDOW, m_Pos.x, m_Pos.y, float(DOPPELGANGER_FRAME_WINDOW_WIDTH), float(DOPPELGANGER_FRAME_WINDOW_HEIGHT));
+namespace
+{
+// The original drew the background context's HUDs under every panel (layer depth 1.2): the
+// document sits in the background context, behind its other documents.
+Rml::Context* FrameContext()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
+    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
+}
 
+template <typename T>
+void SyncField(RmlModelBinder<DoppelGangerFrameRmlModel>& binder, T DoppelGangerFrameRmlModel::* field,
+               const char* name, T value)
+{
+    DoppelGangerFrameRmlModel& model = binder.GetModel();
+    if (model.*field == value)
+        return;
+    model.*field = std::move(value);
+    binder.MarkDirty(name);
+}
+
+// One step of the original's per-frame approach of `value` towards `target`, 0.01 at a time.
+void Approach(float& value, float target)
+{
+    const float speed = 0.01f;
+    if (value + speed <= target)
+        value += speed;
+    else if (value - speed >= target)
+        value -= speed;
+    else
+        value = target;
+}
+
+// A gauge piece: the right-aligned `fill` of Double_bar (165 texels of it) over 167 units from x 59.
+DoppelGangerFrameBarEntry BarPiece(const char* src, float fill)
+{
+    char rect[64];
+    std::snprintf(rect, sizeof(rect), "%g 0 %g 6", 165.f * (1.0f - fill), 165.f * fill);
+    return {src, rect, 59 + 167.f * (1.0f - fill), 167.f * fill};
+}
+} // namespace
+
+void CDoppelGangerFrame::BuildRmlUi()
+{
+    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+
+    const bool modelCreated =
+        m_RmlBinder.Create(FrameContext(), "doppelganger_frame",
+                           [](Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model)
+                           {
+                               c.Bind("scale_x", &model.scaleX);
+                               c.Bind("scale_y", &model.scaleY);
+                               c.Bind("inverse_scale_x", &model.inverseScaleX);
+                               c.Bind("inverse_scale_y", &model.inverseScaleY);
+                               c.Bind("panel_x", &model.panelX);
+                               c.Bind("panel_y", &model.panelY);
+                               auto text = c.RegisterStruct<DoppelGangerFrameTextEntry>();
+                               text.RegisterMember("text", &DoppelGangerFrameTextEntry::text);
+                               text.RegisterMember("top", &DoppelGangerFrameTextEntry::top);
+                               text.RegisterMember("text_px", &DoppelGangerFrameTextEntry::textPx);
+                               text.RegisterMember("big", &DoppelGangerFrameTextEntry::big);
+                               text.RegisterMember("color", &DoppelGangerFrameTextEntry::color);
+                               c.RegisterArray<std::vector<DoppelGangerFrameTextEntry>>();
+                               c.Bind("texts", &model.texts);
+                               auto bar = c.RegisterStruct<DoppelGangerFrameBarEntry>();
+                               bar.RegisterMember("src", &DoppelGangerFrameBarEntry::src);
+                               bar.RegisterMember("rect", &DoppelGangerFrameBarEntry::rect);
+                               bar.RegisterMember("left", &DoppelGangerFrameBarEntry::left);
+                               bar.RegisterMember("width", &DoppelGangerFrameBarEntry::width);
+                               c.RegisterArray<std::vector<DoppelGangerFrameBarEntry>>();
+                               c.Bind("bars", &model.bars);
+                               c.Bind("ice_walker_visible", &model.iceWalkerVisible);
+                               c.Bind("ice_walker_left", &model.iceWalkerLeft);
+                               auto marker = c.RegisterStruct<DoppelGangerFrameMarkerEntry>();
+                               marker.RegisterMember("left", &DoppelGangerFrameMarkerEntry::left);
+                               marker.RegisterMember("hero", &DoppelGangerFrameMarkerEntry::hero);
+                               c.RegisterArray<std::vector<DoppelGangerFrameMarkerEntry>>();
+                               c.Bind("markers", &model.markers);
+                           });
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(FrameContext(), "Data/Interface/RmlUi/doppelganger_frame.rml");
+}
+
+void CDoppelGangerFrame::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = FrameContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+}
+
+void CDoppelGangerFrame::StepGauges()
+{
+    // The original's Render() moved the monster gauge, the Ice Walker and every party marker 0.01
+    // towards the received position each frame it drew.
+    Approach(m_fMonsterGauge, m_fMonsterGaugeRcvd);
+    if (m_bIceWalkerEnabled == TRUE)
+        Approach(m_fIceWalkerPosition, m_fIceWalkerPositionRcvd);
+    for (auto& [index, position] : m_PartyPositionMap)
+    {
+        if (position.m_fPositionRcvd != -1)
+            Approach(position.m_fPosition, position.m_fPositionRcvd);
+    }
+}
+
+void CDoppelGangerFrame::SyncView()
+{
+    BuildRmlUi();
+    if (!m_pRmlDoc)
+        return;
+
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, IsVisible());
+    if (!IsVisible())
+        return;
+
+    StepGauges();
+
+    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
+
+    // The original's texts: the monsters that passed (orange, red-orange after one, red after two),
+    // "Time left" and the time, both orange, each centred on 110 units and shrunk to them.
+    auto textEntry = [&](const wchar_t* text, float top, bool big, unsigned long color)
+    {
+        const auto role = big ? UI::Scaling::FontRole::Big : UI::Scaling::FontRole::Normal;
+        g_pRenderText->SetFont(big ? g_hFontBig : g_hFont);
+        const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        return DoppelGangerFrameTextEntry{
+            StringUtils::WideToNarrow(text), top,
+            UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), 110.f), big,
+            UI::RmlBridge::RgbaToCss(color)};
+    };
+    const unsigned long orange = RGBA(255, 150, 0, 255);
+    unsigned long passedColor = orange;
+    if (m_iEnteredMonsters == 1)
+        passedColor = RGBA(255, 70, 0, 255);
+    else if (m_iEnteredMonsters >= 2)
+        passedColor = RGBA(255, 0, 0, 255);
     wchar_t szText[256] = {};
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
+    std::vector<DoppelGangerFrameTextEntry> texts;
+    mu_swprintf(szText, I18N::Game::MonstersPassedDD, m_iEnteredMonsters, m_iMaxMonsters);
+    texts.push_back(textEntry(szText, 13.f, false, passedColor));
+    texts.push_back(textEntry(I18N::Game::TimeLeft, 38.f, false, orange));
+    const int iMinute = m_iTime / 60;
+    const int iSecond = m_bStopTimer == TRUE ? 0 : 99 - static_cast<int>(WorldTime) % 100;
+    mu_swprintf(szText, L"%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
+    texts.push_back(textEntry(szText, 50.f, true, orange));
+    DoppelGangerFrameRmlModel& model = m_RmlBinder.GetModel();
+    const bool sameTexts = model.texts.size() == texts.size() &&
+                           std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
+                                      [](const DoppelGangerFrameTextEntry& a, const DoppelGangerFrameTextEntry& b)
+                                      {
+                                          return a.text == b.text && a.top == b.top && a.textPx == b.textPx &&
+                                                 a.big == b.big && a.color == b.color;
+                                      });
+    if (!sameTexts)
+    {
+        model.texts = std::move(texts);
+        m_RmlBinder.MarkDirty("texts");
+    }
 
+    // The gauge: yellow up to the first monster, then yellow under orange, then orange under red.
+    const char* yellow = "../../../Double_bar(Y).jpg";
+    const char* orangeBar = "../../../Double_bar(O).jpg";
+    const char* red = "../../../Double_bar(R).jpg";
+    std::vector<DoppelGangerFrameBarEntry> bars;
     if (m_iEnteredMonsters == 0)
     {
-        g_pRenderText->SetTextColor(255, 150, 0, 255);
+        bars.push_back(BarPiece(yellow, m_fMonsterGauge));
     }
     else if (m_iEnteredMonsters == 1)
     {
-        g_pRenderText->SetTextColor(255, 70, 0, 255);
-    }
-    else if (m_iEnteredMonsters >= 2)
-    {
-        g_pRenderText->SetTextColor(255, 0, 0, 255);
-    }
-
-    mu_swprintf(szText, I18N::Game::MonstersPassedDD, m_iEnteredMonsters, m_iMaxMonsters);
-    g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(255, 150, 0, 255);
-    g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 38, I18N::Game::TimeLeft, 110, 0, RT3_SORT_CENTER);
-
-    int iMinute = m_iTime / 60;
-    int iSecond = 99 - (int)WorldTime % 100;
-    if (m_bStopTimer == TRUE)
-    {
-        iSecond = 0;
-    }
-
-    mu_swprintf(szText, L"%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 50, szText, 110, 0, RT3_SORT_CENTER);
-
-    float fMonsterGaugeSpeed = 0.01f;
-    if (m_fMonsterGauge + fMonsterGaugeSpeed <= m_fMonsterGaugeRcvd)
-    {
-        m_fMonsterGauge += fMonsterGaugeSpeed;
-    }
-    else if (m_fMonsterGauge - fMonsterGaugeSpeed >= m_fMonsterGaugeRcvd)
-    {
-        m_fMonsterGauge -= fMonsterGaugeSpeed;
+        bars.push_back(BarPiece(yellow, 1.0f));
+        bars.push_back(BarPiece(orangeBar, m_fMonsterGauge));
     }
     else
     {
-        m_fMonsterGauge = m_fMonsterGaugeRcvd;
+        bars.push_back(BarPiece(orangeBar, 1.0f));
+        bars.push_back(BarPiece(red, m_fMonsterGauge));
     }
-
-    if (m_iEnteredMonsters == 0)
+    const bool sameBars =
+        model.bars.size() == bars.size() &&
+        std::equal(model.bars.begin(), model.bars.end(), bars.begin(),
+                   [](const DoppelGangerFrameBarEntry& a, const DoppelGangerFrameBarEntry& b)
+                   { return a.src == b.src && a.rect == b.rect && a.left == b.left && a.width == b.width; });
+    if (!sameBars)
     {
-        RenderImage(IMAGE_DOPPELGANGER_GUAGE_YELLOW, m_Pos.x + 59 + 167.f * (1.0f - m_fMonsterGauge), m_Pos.y + 78,
-            167.f * m_fMonsterGauge, 8.f - 1, 165.f / 256.f * (1.0f - m_fMonsterGauge), 0, 165.f / 256.f * m_fMonsterGauge, 6.f / 8.f);
+        model.bars = std::move(bars);
+        m_RmlBinder.MarkDirty("bars");
     }
-    else if (m_iEnteredMonsters == 1)
+
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::iceWalkerVisible, "ice_walker_visible",
+              m_bIceWalkerEnabled == TRUE);
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::iceWalkerLeft, "ice_walker_left",
+              59 - 6.5f + 167 * m_fIceWalkerPosition);
+
+    std::vector<DoppelGangerFrameMarkerEntry> markers;
+    for (const auto& [index, position] : m_PartyPositionMap)
     {
-        RenderImage(IMAGE_DOPPELGANGER_GUAGE_YELLOW, m_Pos.x + 59, m_Pos.y + 78,
-            167.f, 8.f - 1, 0, 0, 165.f / 256.f, 6.f / 8.f);
-        RenderImage(IMAGE_DOPPELGANGER_GUAGE_ORANGE, m_Pos.x + 59 + 167.f * (1.0f - m_fMonsterGauge), m_Pos.y + 78,
-            167.f * m_fMonsterGauge, 8.f - 1, 165.f / 256.f * (1.0f - m_fMonsterGauge), 0, 165.f / 256.f * m_fMonsterGauge, 6.f / 8.f);
+        if (position.m_fPositionRcvd == -1)
+            continue;
+        markers.push_back({59 - 4.5f + 167 * position.m_fPosition, index == Hero->Key});
     }
-    else if (m_iEnteredMonsters >= 2)
+    const bool sameMarkers = model.markers.size() == markers.size() &&
+                             std::equal(model.markers.begin(), model.markers.end(), markers.begin(),
+                                        [](const DoppelGangerFrameMarkerEntry& a, const DoppelGangerFrameMarkerEntry& b)
+                                        { return a.left == b.left && a.hero == b.hero; });
+    if (!sameMarkers)
     {
-        RenderImage(IMAGE_DOPPELGANGER_GUAGE_ORANGE, m_Pos.x + 59, m_Pos.y + 78,
-            167.f, 8.f - 1, 0, 0, 165.f / 256.f, 6.f / 8.f);
-        RenderImage(IMAGE_DOPPELGANGER_GUAGE_RED, m_Pos.x + 59 + 167.f * (1.0f - m_fMonsterGauge), m_Pos.y + 78,
-            167.f * m_fMonsterGauge, 8.f - 1, 165.f / 256.f * (1.0f - m_fMonsterGauge), 0, 165.f / 256.f * m_fMonsterGauge, 6.f / 8.f);
+        model.markers = std::move(markers);
+        m_RmlBinder.MarkDirty("markers");
     }
-
-    if (m_bIceWalkerEnabled == TRUE)
-    {
-        if (m_fIceWalkerPosition + fMonsterGaugeSpeed <= m_fIceWalkerPositionRcvd)
-        {
-            m_fIceWalkerPosition += fMonsterGaugeSpeed;
-        }
-        else if (m_fIceWalkerPosition - fMonsterGaugeSpeed >= m_fIceWalkerPositionRcvd)
-        {
-            m_fIceWalkerPosition -= fMonsterGaugeSpeed;
-        }
-        else
-        {
-            m_fIceWalkerPosition = m_fIceWalkerPositionRcvd;
-        }
-
-        RenderImage(IMAGE_DOPPELGANGER_GUAGE_ICEWALKER, m_Pos.x + 59 - 6.5f + 167 * m_fIceWalkerPosition, m_Pos.y + 78 - 1, 13.0f, 7.0f);
-    }
-
-    for (std::map<WORD, PARTY_POSITION>::iterator iter = m_PartyPositionMap.begin(); iter != m_PartyPositionMap.end(); ++iter)
-    {
-        if (iter->second.m_fPositionRcvd == -1) continue;
-
-        float fPartyPositionSpeed = 0.01f;
-        if (iter->second.m_fPosition + fPartyPositionSpeed <= iter->second.m_fPositionRcvd)
-        {
-            iter->second.m_fPosition += fPartyPositionSpeed;
-        }
-        else if (iter->second.m_fPosition - fPartyPositionSpeed >= iter->second.m_fPositionRcvd)
-        {
-            iter->second.m_fPosition -= fPartyPositionSpeed;
-        }
-        else
-        {
-            iter->second.m_fPosition = iter->second.m_fPositionRcvd;
-        }
-
-        if (iter->first == Hero->Key)
-        {
-            RenderImage(IMAGE_DOPPELGANGER_GUAGE_PLAYER, m_Pos.x + 59 - 4.5f + 167 * iter->second.m_fPosition, m_Pos.y + 78 + 1, 9.0f, 8.0f);
-        }
-        else
-        {
-            RenderImage(IMAGE_DOPPELGANGER_GUAGE_PARTY_MEMBER, m_Pos.x + 59 - 4.5f + 167 * iter->second.m_fPosition, m_Pos.y + 78 + 1, 9.0f, 8.0f);
-        }
-    }
-
-    DisableAlphaBlend();
-
-    return true;
 }
 
 bool CDoppelGangerFrame::BtnProcess()
@@ -235,22 +354,6 @@ void CDoppelGangerFrame::OpenningProcess()
 void CDoppelGangerFrame::ClosingProcess()
 {
     EnabledDoppelGangerEvent(FALSE);
-}
-
-void CDoppelGangerFrame::LoadImages()
-{
-    LoadBitmap(L"Interface\\Double_back.tga", IMAGE_DOPPELGANGER_FRAME_WINDOW, GL_LINEAR);
-    LoadBitmap(L"Interface\\Double_bar(R).jpg", IMAGE_DOPPELGANGER_GUAGE_RED, GL_LINEAR);
-    LoadBitmap(L"Interface\\Double_bar(O).jpg", IMAGE_DOPPELGANGER_GUAGE_ORANGE, GL_LINEAR);
-    LoadBitmap(L"Interface\\Double_bar(Y).jpg", IMAGE_DOPPELGANGER_GUAGE_YELLOW, GL_LINEAR);
-    LoadBitmap(L"Interface\\Double_Baricon04.tga", IMAGE_DOPPELGANGER_GUAGE_PLAYER, GL_LINEAR);
-    LoadBitmap(L"Interface\\Double_Baricon01.tga", IMAGE_DOPPELGANGER_GUAGE_PARTY_MEMBER, GL_LINEAR);
-    LoadBitmap(L"Interface\\Double_Micon01.tga", IMAGE_DOPPELGANGER_GUAGE_ICEWALKER, GL_LINEAR);
-}
-
-void CDoppelGangerFrame::UnloadImages()
-{
-    DeleteBitmap(IMAGE_DOPPELGANGER_FRAME_WINDOW);
 }
 
 void CDoppelGangerFrame::SetMonsterGauge(float fValue)

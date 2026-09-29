@@ -314,6 +314,7 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
         record.boxWidth = layout.boxWidth;
         record.boxHeight = layout.boxHeight;
         record.backColor = m_backColor;
+        record.backBlend = CurrentRecordedBlend();
         record.textX = layout.renderX + layout.alignmentOffset;
         record.textPixelSize = static_cast<float>(UI::Scaling::CachedFontPointSize(m_activeRole)) * metrics.scale;
         record.lineHeight = metrics.height;

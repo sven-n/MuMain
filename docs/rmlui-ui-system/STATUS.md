@@ -271,6 +271,22 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     `<img rect="x y w h">` in texels bound from C++; no clipping box needed.
   - **A native button can keep its input** (`CButton` hit-test and up / over / down state) while
     RmlUi draws it from the reported row, when the window's input is native anyway.
+- **Event HUDs, event NPC windows and the duel spectator** — **done, both themes (2026-09-28)**:
+  `CKanturu2ndEnterNpc`, `CKanturuInfoWindow`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin`,
+  `CGoldBowmanWindow`, `CGoldBowmanLena`, `CBloodCastle`, `CChaosCastleTime`,
+  `CDoppelGangerFrame`, `CEmpireGuardianTimer`,
+  `CCryWolf`, `CCursedTempleSystem`, `CDuelWatchMainFrameWindow`, `CDuelWatchUserListWindow`.
+  Legacy matches the original at the eight sizes (paired replays or hand probes over injected
+  packets; the event maps by a client-only map change). Worth carrying to the next port:
+
+  - **Animations the original stepped in `Render()`** (gauges and markers moving 0.01 a frame, the
+    spectator gauges' catch-up bars) move to `Update()`; the view only mirrors the result, so a
+    comparison waits for them to settle.
+  - **Entry windows with an item and buttons** share `UI/Events/EventItemEntryView` (texts with
+    per-line alignment, per-button size and label font, a background document for the frame under
+    a native 3D preview).
+  - **A bar drawn mirrored** (negative texture width) is an `<img rect>` with `transform:
+    scale(-1, 1)`; `rect` takes the texels the original sampled.
 - **World labels (`CNameWindow`)** — **done, both themes (2026-09-28)**: names, chat balloons,
   guild and union lines, shop titles, Gens marks, the selected monster's name and bar, the F8
   health bars, ground item names, the macro bar and event times. Legacy matches the original with
