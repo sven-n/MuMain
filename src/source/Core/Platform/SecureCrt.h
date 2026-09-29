@@ -95,7 +95,16 @@ inline int _vsnwprintf_s(wchar_t* buf, size_t count, size_t maxcount, const wcha
     if (buf == nullptr || count == 0 || fmt == nullptr) return -1;
     const size_t lim = (maxcount == _TRUNCATE || maxcount + 1 > count) ? count : maxcount + 1;
     const int r = vswprintf(buf, lim, fmt, argptr);
-    if (r < 0) { if (maxcount != _TRUNCATE) buf[0] = L'\0'; return -1; }
+    if (r < 0)
+    {
+        // MSVC truncates and terminates with _TRUNCATE; vswprintf leaves the
+        // buffer unterminated on overflow, so terminate it here the same way.
+        if (maxcount == _TRUNCATE)
+            buf[lim - 1] = L'\0';
+        else
+            buf[0] = L'\0';
+        return -1;
+    }
     return r;
 }
 

@@ -28,6 +28,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME secure_crt_tests
+    SOURCES
+        test_secure_crt.cpp
+)
+
+mu_add_test(
     NAME bundled_font_role_tests
     SOURCES
         test_bundled_font_roles.cpp
