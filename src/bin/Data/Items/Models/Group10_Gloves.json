@@ -329,7 +329,8 @@
       },
       "glow": {
         "color": "steelBlue"
-      }
+      },
+      "effect": "divineSet"
     },
     {
       "number": 20,

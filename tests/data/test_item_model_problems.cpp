@@ -140,12 +140,23 @@ TEST_CASE("A render style that does not exist is a warning [data][items]")
 {
     ItemModelProblem problem = MakeMissingTexture(0, "");
     problem.type = ItemModelProblemType::RenderStyleUnknown;
-    problem.renderStyle = "stormCorw";
+    problem.name = "stormCorw";
 
     // The item keeps its model and textures; only its look is lost.
     CHECK_FALSE(problem.IsError());
     CHECK(problem.ToLogString() ==
           "(0,33): render style stormCorw does not exist; Data/Item/Sword34.bmd is drawn plainly " + SwordModels);
+}
+
+TEST_CASE("An effect that does not exist is a warning [data][items]")
+{
+    ItemModelProblem problem = MakeMissingTexture(0, "");
+    problem.type = ItemModelProblemType::EffectUnknown;
+    problem.name = "wingOfEternl";
+
+    CHECK_FALSE(problem.IsError());
+    CHECK(problem.ToLogString() ==
+          "(0,33): effect wingOfEternl does not exist; Data/Item/Sword34.bmd is drawn without it " + SwordModels);
 }
 
 TEST_CASE("The item model error message lists the errors only, up to a limit [data][items]")

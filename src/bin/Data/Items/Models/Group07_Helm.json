@@ -291,7 +291,8 @@
       },
       "glow": {
         "color": "steelBlue"
-      }
+      },
+      "effect": "divineSet"
     },
     {
       "number": 21,
@@ -340,7 +341,8 @@
       },
       "glow": {
         "color": "copper"
-      }
+      },
+      "effect": "redSpirit"
     },
     {
       "number": 25,

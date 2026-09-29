@@ -5,6 +5,7 @@
 #include "MuItemEditorUI.h"
 #include "ItemEditorTable.h"
 #include "ItemEditorActions.h"
+#include "ItemEditorLooks.h"
 #include "ItemEditorPopups.h"
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
@@ -156,6 +157,9 @@ void CMuItemEditorUI::Render(bool& showEditor)
         ImGui::SameLine();
         ImGui::Checkbox(I18N::Editor::FreezeIndexName, &m_bFreezeColumns);
         ImGui::Separator();
+
+        // The looks of the selected item (read only).
+        CItemEditorLooks::Render(m_selectedRow);
 
         // Convert search to lowercase for case-insensitive search
         std::string searchLower = m_szItemSearchBuffer;

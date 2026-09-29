@@ -24,6 +24,7 @@ constexpr const char* File = "file";
 constexpr const char* TextureFolders = "textureFolders";
 constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
 constexpr const char* RenderStyle = "renderStyle";
+constexpr const char* Effect = "effect";
 } // namespace Keys
 
 constexpr std::string_view ModelFileExtension = ".bmd";
@@ -86,6 +87,10 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     {
         json[Keys::RenderStyle] = model.renderStyle;
     }
+    if (!model.effect.empty())
+    {
+        json[Keys::Effect] = model.effect;
+    }
     return json;
 }
 
@@ -111,7 +116,7 @@ private:
     bool ReadFile(const OrderedJson& json, std::string& file);
     void ReadTextureFolders(const OrderedJson& json, std::vector<std::string>& folders);
     void ReadNoneBlendMeshes(const OrderedJson& json, std::vector<int>& meshes);
-    void ReadRenderStyle(const OrderedJson& json, std::string& renderStyle);
+    void ReadLookName(const OrderedJson& json, const char* key, std::string& name);
     void WarnAboutUnknownKeys(const OrderedJson& json);
 
     const std::string& m_source;
@@ -209,20 +214,21 @@ void ItemModelReader::ReadNoneBlendMeshes(const OrderedJson& json, std::vector<i
     }
 }
 
-// Whether the style exists is checked when the models are opened.
-void ItemModelReader::ReadRenderStyle(const OrderedJson& json, std::string& renderStyle)
+// A render style or an effect; whether it exists is checked when the models
+// are opened.
+void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std::string& name)
 {
-    const auto field = json.find(Keys::RenderStyle);
+    const auto field = json.find(key);
     if (field == json.end())
     {
         return;
     }
     if (!field->is_string() || !Json::IsName(field->get_ref<const std::string&>()))
     {
-        AddError(Keys::RenderStyle, "must be a name of letters and digits");
+        AddError(key, "must be a name of letters and digits");
         return;
     }
-    renderStyle = field->get<std::string>();
+    name = field->get<std::string>();
 }
 
 void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json)
@@ -235,7 +241,8 @@ void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json)
                                                               DisplayJson::GroundKey,
                                                               DisplayJson::ClothKey,
                                                               GlowJson::GlowKey,
-                                                              Keys::RenderStyle};
+                                                              Keys::RenderStyle,
+                                                              Keys::Effect};
     for (const auto& [key, value] : json.items())
     {
         if (!KnownKeys.contains(key))
@@ -267,7 +274,8 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     { AddIssue(severity, field, message); };
     DisplayJson::Read(json, model, report);
     GlowJson::Read(json, model, report);
-    ReadRenderStyle(json, model.renderStyle);
+    ReadLookName(json, Keys::RenderStyle, model.renderStyle);
+    ReadLookName(json, Keys::Effect, model.effect);
     WarnAboutUnknownKeys(json);
     return !m_hasErrors;
 }

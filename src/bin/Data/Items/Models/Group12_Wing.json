@@ -77,7 +77,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "effect": "wingsOfSoul"
     },
     {
       "number": 5,
@@ -93,7 +94,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "effect": "wingsOfDragon"
     },
     {
       "number": 6,
@@ -110,7 +112,8 @@
         "level": 0,
         "excellent": false
       },
-      "renderStyle": "wingsOfDarkness"
+      "renderStyle": "wingsOfDarkness",
+      "effect": "wingsOfDarkness"
     },
     {
       "number": 7,
@@ -319,7 +322,8 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "effect": "darkLordScroll"
     },
     {
       "number": 22,
@@ -330,7 +334,8 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "effect": "darkLordScroll"
     },
     {
       "number": 23,
@@ -341,7 +346,8 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "effect": "darkLordScroll"
     },
     {
       "number": 24,
@@ -352,7 +358,8 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "effect": "darkLordScroll"
     },
     {
       "number": 30,
@@ -432,7 +439,8 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "effect": "darkLordScroll"
     },
     {
       "number": 36,
@@ -448,7 +456,8 @@
         "level": 0,
         "excellent": false
       },
-      "renderStyle": "wingOfStorm"
+      "renderStyle": "wingOfStorm",
+      "effect": "wingOfStorm"
     },
     {
       "number": 37,
@@ -464,7 +473,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "effect": "wingOfEternal"
     },
     {
       "number": 38,
@@ -480,7 +490,8 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "effect": "wingOfIllusion"
     },
     {
       "number": 39,
@@ -498,7 +509,8 @@
         "level": 0,
         "excellent": false
       },
-      "renderStyle": "wingOfRuin"
+      "renderStyle": "wingOfRuin",
+      "effect": "wingOfRuin"
     },
     {
       "number": 40,
@@ -565,7 +577,8 @@
         "level": 0,
         "excellent": false
       },
-      "renderStyle": "wingOfDimension"
+      "renderStyle": "wingOfDimension",
+      "effect": "wingOfDimension"
     },
     {
       "number": 44,
@@ -640,7 +653,8 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "effect": "darkLordScroll"
     },
     {
       "number": 49,
@@ -691,6 +705,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeed"
     },
     {
@@ -703,6 +720,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeed"
     },
@@ -717,6 +737,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeed"
     },
     {
@@ -729,6 +752,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeed"
     },
@@ -743,6 +769,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeed"
     },
     {
@@ -756,6 +785,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeed"
     },
     {
@@ -768,6 +800,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -780,6 +815,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -792,6 +830,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -827,6 +868,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -839,6 +883,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -853,6 +900,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -865,6 +915,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -879,6 +932,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -891,6 +947,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -905,6 +964,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -917,6 +979,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -931,6 +996,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -943,6 +1011,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -957,6 +1028,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -969,6 +1043,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -983,6 +1060,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -995,6 +1075,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1009,6 +1092,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1021,6 +1107,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1035,6 +1124,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1047,6 +1139,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1061,6 +1156,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1073,6 +1171,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1087,6 +1188,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1099,6 +1203,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1113,6 +1220,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1125,6 +1235,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1139,6 +1252,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1151,6 +1267,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1165,6 +1284,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1177,6 +1299,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },
@@ -1191,6 +1316,9 @@
       "ground": {
         "scale": 0.6
       },
+      "glow": {
+        "level": 0
+      },
       "renderStyle": "socketSeedSphere"
     },
     {
@@ -1203,6 +1331,9 @@
       },
       "ground": {
         "scale": 0.6
+      },
+      "glow": {
+        "level": 0
       },
       "renderStyle": "socketSeedSphere"
     },

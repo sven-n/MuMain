@@ -66,7 +66,8 @@
       "inventory": {
         "anchor": [0.5, 0.9]
       },
-      "renderStyle": "contractSummon"
+      "renderStyle": "contractSummon",
+      "effect": "hiddenMeshByLevel"
     },
     {
       "number": 8,
@@ -102,7 +103,8 @@
       "inventory": {
         "anchor": [0.5, 0.8]
       },
-      "renderStyle": "lifeStone"
+      "renderStyle": "lifeStone",
+      "effect": "hideMesh1"
     },
     {
       "number": 12,
@@ -141,7 +143,8 @@
       "inventory": {
         "anchor": [0.6, 1],
         "scale": 0.003
-      }
+      },
+      "effect": "fruits"
     },
     {
       "number": 16,
@@ -167,7 +170,8 @@
       "ground": {
         "rotation": [-45, -5, 18],
         "scale": 0.48
-      }
+      },
+      "effect": "bloodBone"
     },
     {
       "number": 18,
@@ -181,7 +185,8 @@
       "ground": {
         "rotation": [165, -168, 198],
         "scale": 0.48
-      }
+      },
+      "effect": "invisibilityCloak"
     },
     {
       "number": 21,
@@ -302,7 +307,8 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "rotation": [-90, -90, 0]
-      }
+      },
+      "effect": "spirit"
     },
     {
       "number": 32,
@@ -395,7 +401,8 @@
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
         "rotation": [-198, 0, 0]
-      }
+      },
+      "effect": "harmonyShine"
     },
     {
       "number": 39,
@@ -459,7 +466,8 @@
         "rotation": [90, 0, -45],
         "scale": 0.5
       },
-      "renderStyle": "sealOfAscension"
+      "renderStyle": "sealOfAscension",
+      "effect": "sealShine"
     },
     {
       "number": 44,
@@ -475,7 +483,8 @@
         "rotation": [90, 0, -45],
         "scale": 0.5
       },
-      "renderStyle": "sealOfWealth"
+      "renderStyle": "sealOfWealth",
+      "effect": "sealShine"
     },
     {
       "number": 45,
@@ -491,7 +500,8 @@
         "rotation": [90, 0, -45],
         "scale": 0.5
       },
-      "renderStyle": "sealOfSustenance"
+      "renderStyle": "sealOfSustenance",
+      "effect": "sealShine"
     },
     {
       "number": 46,
@@ -574,7 +584,8 @@
         "level": 0,
         "shineHiddenMesh": 1
       },
-      "renderStyle": "illusionSorcererCovenant"
+      "renderStyle": "illusionSorcererCovenant",
+      "effect": "harmonyShine"
     },
     {
       "number": 51,
@@ -1160,7 +1171,8 @@
         "rotation": [0, 0, 90],
         "scale": 0.5
       },
-      "renderStyle": "sealOfAscension"
+      "renderStyle": "sealOfAscension",
+      "effect": "sealShine"
     },
     {
       "number": 94,
@@ -1172,7 +1184,8 @@
         "rotation": [-90, 0, 0],
         "scale": 0.0021
       },
-      "renderStyle": "sealOfWealth"
+      "renderStyle": "sealOfWealth",
+      "effect": "sealShine"
     },
     {
       "number": 97,
@@ -1402,7 +1415,8 @@
         "rotation": [90, 0, -45],
         "scale": 0.5
       },
-      "renderStyle": "sealOfWealth"
+      "renderStyle": "sealOfWealth",
+      "effect": "sealShine"
     },
     {
       "number": 121,

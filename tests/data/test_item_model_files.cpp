@@ -13,8 +13,9 @@
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
-#include "Render/Items/ItemDisplay.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemGlow.h"
 #include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -708,4 +709,106 @@ TEST_CASE("Styles that pick something per item draw other items plainly [data][i
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     object.Type = MODEL_ITEM + MakeItemType(12, 65);
     CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+}
+
+TEST_CASE("The effects of shipped item models exist [data][items]")
+{
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (!model.effect.empty())
+        {
+            INFO("(" << model.group << "," << model.number << ") " << model.effect);
+            CHECK(Render::Items::Effects::Exists(model.effect));
+        }
+    }
+    CHECK_FALSE(Render::Items::Effects::Exists("wingOfEternl"));
+}
+
+// The effects of the old drawing code (RenderPartObjectEffect), recorded per
+// item: spot checks.
+TEST_CASE("Shipped item models keep the effects of the old drawing code [data][items]")
+{
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+    const auto effectOf = [&](int group, int number)
+    {
+        const ItemModelDefinition* model = FindModel(models, group, number);
+        REQUIRE(model != nullptr);
+        return model->effect;
+    };
+
+    CHECK(effectOf(0, 0).empty());
+    CHECK(effectOf(12, 37) == "wingOfEternal");
+    CHECK(effectOf(14, 18) == "devilsKey");
+    CHECK(effectOf(14, 19) == "devilsInvitation");
+    CHECK(effectOf(14, 0) == "potion");
+    CHECK(effectOf(14, 6) == "potion");
+    // Items with the same code share it.
+    CHECK(effectOf(14, 7) == "hiddenMeshByLevel");
+    CHECK(effectOf(13, 7) == "hiddenMeshByLevel");
+    // The shine below +3.
+    CHECK(effectOf(13, 43) == "sealShine");
+    CHECK(effectOf(13, 94) == "sealShine");
+    CHECK(effectOf(14, 42) == "harmonyShine");
+    CHECK(effectOf(13, 50) == "harmonyShine");
+    CHECK(effectOf(14, 64) == "cursedCastleWater");
+
+    // The socket seeds and spheres and zen glow like level 0, whatever their
+    // level (the old code set their level to 0, or drew zen plainly).
+    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+    for (const int itemType :
+         {MakeItemType(12, 60), MakeItemType(12, 100), MakeItemType(12, 129), MakeItemType(14, 15)})
+    {
+        INFO("item type " << itemType);
+        CHECK(Render::Items::Glow::GetLevel(MODEL_ITEM + itemType, 9) == 0);
+    }
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("Item effects run before the model is drawn [data][items]")
+{
+    using namespace Render::Items;
+    using Effects::Result;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+
+    // A model without meshes draws nothing, so only the values change here.
+    BMD model;
+    OBJECT object;
+    const auto apply = [&](int itemType, int& level)
+    {
+        object.Type = MODEL_ITEM + itemType;
+        return Effects::Apply(&model, &object, object.Type, 1.f, level);
+    };
+
+    // Potions with a level glow like +7.
+    int level = 3;
+    CHECK(apply(MakeItemType(14, 0), level) == Result::Applied);
+    CHECK(level == 7);
+    level = 0;
+    CHECK(apply(MakeItemType(14, 0), level) == Result::Applied);
+    CHECK(level == 0);
+    // The siege potion hides a mesh by level.
+    level = 0;
+    CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
+    CHECK(object.HiddenMesh == 1);
+    level = 1;
+    CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
+    CHECK(object.HiddenMesh == 0);
+    // Some effects draw the model themselves.
+    level = 2;
+    CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
+    // Items without an effect, and models that are not items.
+    CHECK(apply(ITEM_KRIS, level) == Result::None);
+    object.Type = MODEL_PLAYER;
+    CHECK(Effects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
+
+    // The shine below +3 of the seals; other items are drawn plainly.
+    vec3_t light = {1.f, 1.f, 1.f};
+    object.Type = MODEL_ITEM + ITEM_KRIS;
+    CHECK_FALSE(Effects::RenderBelowPlus3(&model, &object, object.Type, 1.f, RENDER_TEXTURE, light));
+    object.Type = MODEL_ITEM + MakeItemType(13, 43);
+    CHECK(Effects::RenderBelowPlus3(&model, &object, object.Type, 1.f, RENDER_TEXTURE, light));
+
+    // The effects follow the database when it is built again.
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    CHECK(apply(MakeItemType(14, 0), level) == Result::None);
 }

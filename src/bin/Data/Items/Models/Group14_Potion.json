@@ -9,7 +9,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 1,
@@ -18,7 +19,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 2,
@@ -27,7 +29,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 3,
@@ -36,7 +39,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 4,
@@ -45,7 +49,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 5,
@@ -54,7 +59,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 6,
@@ -63,7 +69,8 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
-      }
+      },
+      "effect": "potion"
     },
     {
       "number": 7,
@@ -72,7 +79,8 @@
       "inventory": {
         "anchor": [0.5, 0.5]
       },
-      "renderStyle": "siegePotion"
+      "renderStyle": "siegePotion",
+      "effect": "hiddenMeshByLevel"
     },
     {
       "number": 8,
@@ -156,6 +164,9 @@
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
+      },
+      "glow": {
+        "level": 0
       }
     },
     {
@@ -186,7 +197,8 @@
       },
       "glow": {
         "level": [0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13]
-      }
+      },
+      "effect": "devilsEye"
     },
     {
       "number": 18,
@@ -201,7 +213,8 @@
       },
       "glow": {
         "level": [0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13]
-      }
+      },
+      "effect": "devilsKey"
     },
     {
       "number": 19,
@@ -216,7 +229,8 @@
       },
       "glow": {
         "level": [0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13]
-      }
+      },
+      "effect": "devilsInvitation"
     },
     {
       "number": 20,
@@ -245,7 +259,8 @@
       },
       "ground": {
         "rotation": [270, 0, 90]
-      }
+      },
+      "effect": "rena"
     },
     {
       "number": 22,
@@ -321,7 +336,8 @@
         "anchor": [0.5, 0.95],
         "rotation": [270, 0, 0],
         "scale": 0.0035
-      }
+      },
+      "effect": "meshesPerLevel"
     },
     {
       "number": 28,
@@ -486,7 +502,8 @@
       },
       "glow": {
         "level": 0
-      }
+      },
+      "effect": "harmonyShine"
     },
     {
       "number": 43,
@@ -624,7 +641,8 @@
       "ground": {
         "rotation": [0, 0, -10],
         "scale": 0.4
-      }
+      },
+      "effect": "gmGift"
     },
     {
       "number": 53,
@@ -750,7 +768,8 @@
       "ground": {
         "rotation": [70, 0, -45],
         "scale": 1.5
-      }
+      },
+      "effect": "firecracker"
     },
     {
       "number": 64,
@@ -769,7 +788,8 @@
         "level": 0,
         "shineHiddenMesh": 0
       },
-      "renderStyle": "cursedCastleWater"
+      "renderStyle": "cursedCastleWater",
+      "effect": "cursedCastleWater"
     },
     {
       "number": 65,

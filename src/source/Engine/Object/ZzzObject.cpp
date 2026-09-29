@@ -46,6 +46,7 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Render/Items/ItemGlow.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 
 // DevEditor function declarations
@@ -6637,9 +6638,96 @@ void NextGradeObjectRender(CHARACTER* c)
     } //for
 }
 
+// The effects of the event models of level variants, which have no model
+// entry yet (the items have theirs in Render/Items/ItemEffects).
+static Render::Items::Effects::Result ApplyEventModelEffect(BMD* b, OBJECT* o, int Type, int Level, int ItemLevel)
+{
+    using Render::Items::Effects::Result;
+    if (o->Type == MODEL_EVENT + 14 && Level == 9)
+    {
+        Vector(0.3f, 0.8f, 1.f, b->BodyLight);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        Vector(1.f, 0.8f, 0.3f, b->BodyLight);
+        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        return Result::Drawn;
+    }
+    if (o->Type == MODEL_EVENT + 11)
+    {
+        Vector(0.9f, 0.9f, 0.9f, b->BodyLight);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, BITMAP_CHROME + 1);
+        return Result::Drawn;
+    }
+    if (Type == MODEL_EVENT + 5 && ItemLevel == 14)
+    {
+        Vector(0.2f, 0.3f, 0.5f, b->BodyLight);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        Vector(0.1f, 0.3f, 1.f, b->BodyLight);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        return Result::Drawn;
+    }
+    if (Type == MODEL_EVENT + 5 && ItemLevel == 15)
+    {
+        Vector(0.5f, 0.3f, 0.2f, b->BodyLight);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        Vector(1.f, 0.3f, 0.1f, b->BodyLight);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        return Result::Drawn;
+    }
+    if (o->Type == MODEL_EVENT + 12)
+    {
+        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
+        vec3_t p, Position, EffLight;
+        Vector(0.f, 0.f, 15.f, p);
+
+        float Scale = Luminosity * 0.8f + 2.f;
+        Vector(Luminosity * 0.32f, Luminosity * 0.32f, Luminosity * 2.f, EffLight);
+
+        b->TransformPosition(BoneTransform[0], p, Position);
+        VectorAdd(Position, o->Position, Position);
+
+        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
+        return Result::Applied;
+    }
+    if (o->Type == MODEL_EVENT + 6 && Level == 13)
+    {
+        Vector(0.4f, 0.6f, 1.0f, b->BodyLight);
+        b->RenderBody(RENDER_COLOR, 1.0f, 0, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 1.0f, 0, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        return Result::Drawn;
+    }
+    if (o->Type == MODEL_EVENT + 13)
+    {
+        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
+        vec3_t p, Position, EffLight;
+        Vector(0.f, -5.f, -15.f, p);
+
+        float Scale = Luminosity * 0.8f + 2.5f;
+        Vector(Luminosity * 2.f, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
+
+        b->StreamMesh = 0;
+        o->BlendMeshTexCoordV = (int)-WorldTime % 4000 * 0.00025f;
+
+        b->TransformPosition(BoneTransform[0], p, Position);
+        VectorAdd(Position, o->Position, Position);
+
+        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
+        return Result::Applied;
+    }
+    if (Type == MODEL_EVENT + 18)
+    {
+        o->BlendMesh = 1;
+        return Result::Applied;
+    }
+    return Result::None;
+}
+
 extern float g_Luminosity;
 
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, int Select, int RenderType)
+void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags,
+                            int ancientDiscriminator, int Select, int RenderType)
 {
     int Level = ItemLevel;
     if (RenderType & RENDER_WAVE)
@@ -6703,556 +6791,16 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         Level = std::min<int>(Level, g_pOption->GetRenderLevel() * 2 + 5);
     }
 
-    if (o->Type == MODEL_BILL_OF_BALROG)
+    // Items have the effect of their model entry; the event models of level
+    // variants have theirs in ApplyEventModelEffect.
+    Render::Items::Effects::Result effect = Render::Items::Effects::Apply(b, o, Type, Alpha, Level);
+    if (effect == Render::Items::Effects::Result::None)
     {
-        Vector(0.5f, 0.5f, 1.5f, b->BodyLight);
-        b->StreamMesh = 0;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
-        b->StreamMesh = -1;
+        effect = ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
     }
-    else if (o->Type == MODEL_POTION + 27)
+    if (effect == Render::Items::Effects::Result::Drawn)
     {
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->StreamMesh = 0;
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        if (Level == 1)
-        {
-        }
-        else if (Level == 2)
-        {
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
-            b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
-        }
-        else if (Level == 3)
-        {
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
-            b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
-            b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
-        }
-        b->StreamMesh = -1;
         return;
-    }
-    else if (o->Type == MODEL_FIRECRACKER)
-    {
-        b->StreamMesh = 0;
-        o->BlendMeshLight = 1.f;
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        Vector(1.f, 0.f, 0.f, b->BodyLight);
-        b->LightEnable = true;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->StreamMesh = -1;
-        return;
-    }
-    else if (o->Type == MODEL_GM_GIFT)
-    {
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->LightEnable = true;
-        Vector(0.1f, 0.6f, 0.4f, b->BodyLight);
-        o->Alpha = 0.5f;
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return;
-    }
-    else if (o->Type == MODEL_EVENT + 14 && Level == 9)
-    {
-        Vector(0.3f, 0.8f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        Vector(1.f, 0.8f, 0.3f, b->BodyLight);
-        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return;
-    }
-    else if ((o->Type >= MODEL_SCROLL_OF_FIREBURST && o->Type <= MODEL_SCROLL_OF_ELECTRIC_SPARK)
-        || o->Type == MODEL_SCROLL_OF_FIRE_SCREAM
-        || (o->Type == MODEL_SCROLL_OF_CHAOTIC_DISEIER)
-        )
-    {
-        b->BeginRender(o->Alpha);
-        o->BlendMeshLight = 1.f;
-        b->RenderMesh(0, RENDER_TEXTURE, Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 2, 1 - o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->EndRender();
-        return;
-    }
-    else if (o->Type == MODEL_SPIRIT)
-    {
-        b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        switch (Level)
-        {
-        case 0:
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            break;
-
-        case 1:
-            Vector(0.3f, 0.8f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            break;
-        }
-        return;
-    }
-    else if (o->Type >= MODEL_POTION && o->Type <= MODEL_LARGE_MANA_POTION)
-    {
-        if (Level > 0)
-            Level = 7;
-    }
-    else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
-    {
-        Level = 0;
-    }
-    else if (o->Type == MODEL_FRUITS)
-    {
-        switch (Level)
-        {
-        case 0: Vector(0.0f, 0.5f, 1.0f, b->BodyLight); break;
-        case 1: Vector(1.0f, 0.2f, 0.0f, b->BodyLight); break;
-        case 2: Vector(1.0f, 0.8f, 0.0f, b->BodyLight); break;
-        case 3: Vector(0.6f, 0.8f, 0.4f, b->BodyLight); break;
-        }
-        b->RenderBody(RENDER_METAL, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
-        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
-        return;
-    }
-    else if (o->Type == MODEL_EVENT + 11)
-    {
-        Vector(0.9f, 0.9f, 0.9f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, BITMAP_CHROME + 1);
-        return;
-    }
-    else if (Type == MODEL_EVENT + 5 && ItemLevel == 14)
-    {
-        Vector(0.2f, 0.3f, 0.5f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        Vector(0.1f, 0.3f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return;
-    }
-    else if (Type == MODEL_EVENT + 5 && ItemLevel == 15)
-    {
-        Vector(0.5f, 0.3f, 0.2f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        Vector(1.f, 0.3f, 0.1f, b->BodyLight);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return;
-    }
-    else if (o->Type == MODEL_BLOOD_BONE)
-    {
-        o->BlendMeshTexCoordU = sinf(gMapManager.WorldActive * 0.0001f);
-        o->BlendMeshTexCoordV = -WorldTime * 0.0005f;
-        Vector(.9f, .9f, .9f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        Vector(.9f, .1f, .1f, b->BodyLight);
-        Models[o->Type].StreamMesh = 0;
-        b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
-        Models[o->Type].StreamMesh = -1;
-        return;
-    }
-    else if (o->Type == MODEL_INVISIBILITY_CLOAK)
-    {
-        Vector(0.8f, 0.8f, 0.8f, b->BodyLight);
-        float sine = float(sinf(WorldTime * 0.002f) * 0.3f) + 0.7f;
-
-        b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        return;
-    }
-    else if (o->Type == MODEL_EVENT + 12)
-    {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, 0.f, 15.f, p);
-
-        float Scale = Luminosity * 0.8f + 2.f;
-        Vector(Luminosity * 0.32f, Luminosity * 0.32f, Luminosity * 2.f, EffLight);
-
-        b->TransformPosition(BoneTransform[0], p, Position);
-        VectorAdd(Position, o->Position, Position);
-
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    }
-    else if (o->Type == MODEL_EVENT + 6 && Level == 13)
-    {
-        Vector(0.4f, 0.6f, 1.0f, b->BodyLight);
-        b->RenderBody(RENDER_COLOR, 1.0f, 0, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 1.0f, 0, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        return;
-    }
-    else if (o->Type == MODEL_EVENT + 13)
-    {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, -5.f, -15.f, p);
-
-        float Scale = Luminosity * 0.8f + 2.5f;
-        Vector(Luminosity * 2.f, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
-
-        b->StreamMesh = 0;
-        o->BlendMeshTexCoordV = (int)-WorldTime % 4000 * 0.00025f;
-
-        b->TransformPosition(BoneTransform[0], p, Position);
-        VectorAdd(Position, o->Position, Position);
-
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    }
-    else if (o->Type == MODEL_DEVILS_EYE)
-    {
-        float   sine = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
-
-        o->BlendMesh = 1;
-        o->BlendMeshLight = sine;
-        o->BlendMeshTexCoordV = (int)WorldTime % 2000 * 0.0005f;
-        o->Alpha = 2.0f;
-
-        float Luminosity = sine;
-        Vector(Luminosity / 5.0f, Luminosity / 5.0f, Luminosity / 5.0f, o->Light);
-    }
-    else if (o->Type == MODEL_DEVILS_KEY)
-    {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, 0.f, 0.f, p);
-
-        float Scale = Luminosity * 0.8f;
-        Vector(Luminosity * 2, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
-
-        b->TransformPosition(BoneTransform[1], p, Position);
-        VectorAdd(Position, o->Position, Position);
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-
-        b->TransformPosition(BoneTransform[2], p, Position);
-        VectorAdd(Position, o->Position, Position);
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    }
-    else if (o->Type == MODEL_DEVILS_INVITATION)
-    {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, 0.f, 0.f, p);
-
-        float Scale = Luminosity * 0.8f;
-        Vector(Luminosity * 2, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
-
-        b->TransformPosition(BoneTransform[9], p, Position);
-        VectorAdd(Position, o->Position, Position);
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-
-        b->TransformPosition(BoneTransform[10], p, Position);
-        VectorAdd(Position, o->Position, Position);
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    }
-    else if (o->Type == MODEL_RENA)
-    {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.25f + 0.75f;
-        vec3_t EffLight;
-
-        Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.f, EffLight);
-        CreateSprite(BITMAP_SPARK + 1, o->Position, 2.5f, EffLight, o);
-    }
-    else if (o->Type == MODEL_WINGS_OF_DRAGON)
-    {
-        o->BlendMeshLight = (float)(sinf(WorldTime * 0.001f) + 1.f) / 4.f;
-    }
-    else if (o->Type == MODEL_WINGS_OF_SOUL)
-    {
-        o->BlendMeshLight = (float)sinf(WorldTime * 0.001f) + 1.1f;
-    }
-    else if (Type == MODEL_RED_SPIRIT_PANTS || Type == MODEL_RED_SPIRIT_HELM)
-    {
-        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
-    }
-    else if (o->Type == MODEL_STAFF_OF_KUNDUN)
-    {
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-    }
-    else if (Type == MODEL_DIVINE_HELM || Type == MODEL_DIVINE_GLOVES || Type == MODEL_DIVINE_BOOTS)
-    {
-        o->BlendMeshLight = 1.f;
-    }
-    else if (Type == MODEL_SIEGE_POTION)
-    {
-        switch (Level)
-        {
-        case 0: o->HiddenMesh = 1; break;
-        case 1: o->HiddenMesh = 0; break;
-        }
-    }
-    else if (Type == MODEL_CONTRACT_SUMMON)
-    {
-        switch (Level)
-        {
-        case 0: o->HiddenMesh = 1; break;
-        case 1: o->HiddenMesh = 0; break;
-        }
-    }
-    else if (Type == MODEL_LIFE_STONE_ITEM)
-    {
-        o->HiddenMesh = 1;
-    }
-    else if (Type == MODEL_EVENT + 18)
-    {
-        o->BlendMesh = 1;
-    }
-    else if (o->Type == MODEL_WINGS_OF_DARKNESS)
-    {
-        vec3_t  posCenter, p, Position, Light;
-        float   Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.3f;
-
-        Scale = (Scale * 10.f) + 20.f;
-
-        Vector(0.6f, 0.3f, 0.8f, Light);
-
-        Vector(0.f, 0.f, 0.f, p);
-
-        for (int i = 0; i < 5; ++i)
-        {
-            b->TransformPosition(BoneTransform[22 - i], p, posCenter, true);
-            b->TransformPosition(BoneTransform[30 - i], p, Position, true);
-            if (rand_fps_check(1))
-            {
-                CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
-                CreateJoint(BITMAP_JOINT_SPIRIT, posCenter, Position, o->Angle, 4, o, Scale + 5);
-            }
-
-            CreateSprite(BITMAP_FLARE_BLUE, posCenter, Scale / 28.f, Light, o);
-        }
-
-        for (int i = 0; i < 5; ++i)
-        {
-            b->TransformPosition(BoneTransform[7 - i], p, posCenter, true);
-            b->TransformPosition(BoneTransform[11 + i], p, Position, true);
-            if (rand_fps_check(1))
-            {
-                CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
-                CreateJoint(BITMAP_JOINT_SPIRIT, posCenter, Position, o->Angle, 4, o, Scale + 5);
-            }
-
-            CreateSprite(BITMAP_FLARE_BLUE, posCenter, Scale / 28.f, Light, o);
-        }
-    }
-    else if (Type == MODEL_WING_OF_STORM)
-    {
-        vec3_t vRelativePos, vPos, vLight;
-        Vector(0.f, 0.f, 0.f, vRelativePos);
-        Vector(0.f, 0.f, 0.f, vPos);
-        Vector(0.f, 0.f, 0.f, vLight);
-
-        float fLuminosity = absf(sinf(WorldTime * 0.0004f)) * 0.4f;
-        Vector(0.5f + fLuminosity, 0.5f + fLuminosity, 0.5f + fLuminosity, vLight);
-        int iBone[] = { 9, 20, 19, 10, 18,
-                        28, 27, 36, 35, 38,
-                        37, 53, 48, 62, 70,
-                        72, 71, 78, 79, 80,
-                        87, 90, 91, 106, 102 };
-        float fScale = 0.f;
-
-        for (int i = 0; i < 25; ++i)
-        {
-            b->TransformPosition(BoneTransform[iBone[i]], vRelativePos, vPos, true);
-            fScale = 0.5f;// (rand()%10) * 0.05f + 0.3f;
-            CreateSprite(BITMAP_CLUD64, vPos, fScale, vLight, o, WorldTime * 0.01f, 1);
-        }
-
-        int iBoneThunder[] = { 11, 21, 29, 63, 81, 89 };
-        if (rand_fps_check(2))
-        {
-            for (int i = 0; i < 6; ++i)
-            {
-                b->TransformPosition(BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
-                if (rand_fps_check(20))
-                {
-                    Vector(0.6f, 0.6f, 0.9f, vLight);
-                    CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);
-                }
-            }
-        }
-
-        int iBoneLight[] = { 64, 61, 69, 77, 86,
-                            98, 97, 99, 104, 103,
-                            105, 12, 8, 17, 26,
-                            34, 52, 44, 51, 50,
-                            49, 45 };
-
-        fScale = absf(sinf(WorldTime * 0.003f)) * 0.2f;
-
-        for (int i = 0; i < 22; ++i)
-        {
-            b->TransformPosition(BoneTransform[iBoneLight[i]], vRelativePos, vPos, true);
-            if (iBoneLight[i] == 12 || iBoneLight[i] == 64 || iBoneLight[i] == 98 || iBoneLight[i] == 52)
-            {
-                Vector(0.9f, 0.0f, 0.0f, vLight);
-                CreateSprite(BITMAP_LIGHT, vPos, fScale + 1.4f, vLight, o);
-            }
-            else
-            {
-                Vector(0.8f, 0.5f, 0.2f, vLight);
-                CreateSprite(BITMAP_LIGHT, vPos, fScale + 0.3f, vLight, o);
-            }
-        }
-    }
-    else if (Type == MODEL_WING_OF_ETERNAL)
-    {
-        vec3_t  p, Position, Light;
-        Vector(0.f, 0.f, 0.f, p);
-        float Scale = absf(sinf(WorldTime * 0.003f)) * 0.2f;
-        float Luminosity = absf(sinf(WorldTime * 0.003f)) * 0.3f;
-
-        Vector(0.5f + Luminosity, 0.5f + Luminosity, 0.6f + Luminosity, Light);
-        //int iRedFlarePos[] = { 25, 32, 53, 15, 9, 35 };
-        int iRedFlarePos[] = { 24, 31, 15, 8, 53, 35 };
-        for (int i = 0; i < 6; ++i)
-        {
-            b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
-            CreateSprite(BITMAP_LIGHT, Position, Scale + 1.3f, Light, o);
-        }
-
-        Vector(0.1f, 0.1f, 0.9f, Light);
-        //int iGreenFlarePos[] = { 23, 22, 24, 34, 5, 31, 14, 12, 27, 8, 6, 7, 16, 13, 56, 37, 58, 40, 39, 38 };
-        int iGreenFlarePos[] = { 22, 23, 25, 29, 30, 28, 32, 13, 16, 14, 12, 9, 7, 6, 57, 58, 40, 39 };
-
-        for (int i = 0; i < 18; ++i)
-        {
-            b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
-            CreateSprite(BITMAP_LIGHT, Position, Scale + 1.5f, Light, o);
-        }
-        int iGreenFlarePos2[] = { 56, 38, 51, 45 };
-
-        for (int i = 0; i < 4; ++i)
-        {
-            b->TransformPosition(BoneTransform[iGreenFlarePos2[i]], p, Position, true);
-            CreateSprite(BITMAP_LIGHT, Position, Scale + 0.5f, Light, o);
-        }
-    }
-    else if (Type == MODEL_WING_OF_ILLUSION)
-    {
-        vec3_t  p, Position, Light;
-        Vector(0.f, 0.f, 0.f, p);
-        float Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
-        float Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
-
-        Vector(0.5f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, Light);
-        int iRedFlarePos[] = { 5, 6, 7, 8, 18, 19, 23, 24, 25, 27, 37, 38 };
-        for (int i = 0; i < 12; ++i)
-        {
-            b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
-            CreateSprite(BITMAP_FLARE, Position, Scale + 0.6f, Light, o);
-        }
-
-        Vector(0.0f + Luminosity, 0.5f + Luminosity, 0.0f + Luminosity, Light);
-        int iGreenFlarePos[] = { 4, 9, 13, 14, 26, 32, 31, 33 };
-
-        for (int i = 0; i < 8; ++i)
-        {
-            b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
-            CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
-        }
-
-        Vector(1.0f, 1.0f, 1.0f, Light);
-        float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
-        Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, Light);
-        CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o, 0.5f);
-        if (rand_fps_check(2))
-        {
-            b->TransformPosition(BoneTransform[13], p, Position, true);
-            CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
-            b->TransformPosition(BoneTransform[31], p, Position, true);
-            CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
-        }
-    }
-    else if (Type == MODEL_WING_OF_RUIN)
-    {
-        vec3_t  p, Position, Light;
-        Vector(0.f, 0.f, 0.f, p);
-        float Scale = absf(sinf(WorldTime * 0.003f)) * 0.2f;
-        float Luminosity = absf(sinf(WorldTime * 0.003f)) * 0.3f;
-
-        Vector(0.7f + Luminosity, 0.5f + Luminosity, 0.8f + Luminosity, Light);
-        int iRedFlarePos[] = { 6, 15, 24, 56, 47, 38 };
-        for (int i = 0; i < 6; ++i)
-        {
-            b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
-            CreateSprite(BITMAP_LIGHT, Position, Scale + 1.5f, Light, o);
-        }
-
-        Vector(0.6f, 0.4f, 0.7f, Light);
-        int iSparkPos[] = { 7, 16, 25, 57, 48, 39,
-                            11, 22, 31, 63, 54, 40,
-                            10, 21, 30, 62, 53, 41,
-                            9, 20, 29, 61, 52, 42,
-                            8, 19, 28, 60, 51, 43,
-                            18, 27, 59, 50,
-                            17, 26, 58, 49 };
-        int iNumParticle = 1;
-
-        for (int i = 0; i < 6; ++i)
-        {
-            b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
-            for (int j = 0; j < iNumParticle; ++j)
-                if (rand_fps_check(1))
-                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.1f);
-        }
-
-        for (int i = 6; i < 18; ++i)
-        {
-            b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
-            for (int j = 0; j < iNumParticle; ++j)
-                if (rand_fps_check(1))
-                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.3f);
-        }
-
-        for (int i = 18; i < 30; ++i)
-        {
-            b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
-            for (int j = 0; j < iNumParticle; ++j)
-                if (rand_fps_check(1))
-                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.5f);
-        }
-
-        for (int i = 30; i < 38; ++i)
-        {
-            b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
-            for (int j = 0; j < iNumParticle; ++j)
-                if (rand_fps_check(1))
-                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.7f);
-        }
-    }
-    else if (Type == MODEL_WING_OF_DIMENSION)
-    {
-        vec3_t  p, Position, Light;
-        Vector(0.f, 0.f, 0.f, p);
-        float Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
-        float Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
-
-        Vector((1.0f + Luminosity) / 2.f, (0.7f + Luminosity) / 2.f, (0.2f + Luminosity) / 2.f, Light);
-        int iFlarePos0[] = { 7, 30, 31, 43, 8, 20 };
-
-        int icnt;
-        for (icnt = 0; icnt < 2; ++icnt)
-        {
-            b->TransformPosition(BoneTransform[iFlarePos0[icnt]], p, Position, true);
-            CreateSprite(BITMAP_FLARE, Position, Scale + 2.0f, Light, o);
-        }
-        Vector((1.0f + Luminosity) / 4.f, (0.7f + Luminosity) / 4.f, (0.2f + Luminosity) / 4.f, Light);
-        for (; icnt < 6; ++icnt)
-        {
-            b->TransformPosition(BoneTransform[iFlarePos0[icnt]], p, Position, true);
-            CreateSprite(BITMAP_FLARE, Position, Scale + 0.5f, Light, o);
-        }
-
-        Vector((0.5f + Luminosity) / 2.f, (0.1f + Luminosity) / 2.f, (0.4f + Luminosity) / 2.f, Light);
-        int iGreenFlarePos[] = { 29, 38, 42, 19, 15, 6 };
-
-        for (int i = 0; i < 6; ++i)
-        {
-            b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
-            CreateSprite(BITMAP_FLARE, Position, Scale + 2.0f, Light, o);
-        }
     }
 
     if (!o->EnableShadow)
@@ -7302,56 +6850,14 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 1.f, b->BodyLight);
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }
-        else if (Level < 3 || o->Type == MODEL_ZEN)
+        else if (Level < 3)
         {
-            if (o->Type == MODEL_CURSED_CASTLE_WATER)
-            {
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 0.5f, RENDER_TEXTURE | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 0.5f);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (o->Type == MODEL_ILLUSION_SORCERER_COVENANT)
+            // Some items shine below +3 (the effect of their model entry).
+            if (!Render::Items::Effects::RenderBelowPlus3(b, o, Type, Alpha, RenderType, Light))
             {
                 VectorCopy(Light, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (o->Type == MODEL_JEWEL_OF_HARMONY || o->Type == MODEL_MOONSTONE_PENDANT)
-            {
-                VectorCopy(Light, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-
-                RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else
-                if (o->Type == MODEL_SEAL_OF_ASCENSION || o->Type == MODEL_MASTER_SEAL_OF_ASCENSION)
-                {
-                    Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                    RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-                    RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                }
-                else if (o->Type == MODEL_SEAL_OF_WEALTH || o->Type == MODEL_MASTER_SEAL_OF_WEALTH || o->Type == MODEL_HELPER + 116)
-                {
-                    Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                    RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-                    RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                }
-                else if (o->Type == MODEL_SEAL_OF_SUSTENANCE)
-                {
-                    Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                    RenderPartObjectBodyColor2(b, o, Type, 1.5f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.5f);
-                    RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                }
-                else
-                {
-                    VectorCopy(Light, b->BodyLight);
-                    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                }
         }
         else if (Level < 5)
         {

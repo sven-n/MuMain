@@ -56,7 +56,7 @@ share with items) is planned in the
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model. Phase 12 (level variants as items of their own) then shares models without loading them twice. |
-| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and a list of particle effects (`RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
+| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
 | D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
@@ -402,7 +402,7 @@ in both repos (as separate PRs, one per repo).
 | 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
-| 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** particle effects. |
+| 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
@@ -532,7 +532,7 @@ server with original clients (after phases 6 and B).
      "inventory": { "offset": [-0.02, 0.03], "rotation": [180, 270, 15], "scale": 0.0039 },
      "ground": { "rotation": [60, 0, -45], "scale": 1.0 },
      "glow": { "color": "gold", "meshes": [0] },
-     "renderStyle": "chromeMesh0", "effects": ["flameSparks"] }
+     "renderStyle": "chromeMesh0", "effect": "flameSparks" }
    ```
 
    Every item keeps its model slot `MODEL_ITEM + item type` (D23, own model slots). Three
@@ -590,15 +590,25 @@ server with original clients (after phases 6 and B).
        loaded their models); their recipe (textured, then
        `RENDER_BRIGHT | RENDER_CHROME2`) comes back as a style with their
        model entries.
-     - **4c3 Particle effects:** `effects` names the particle effects of
-       `RenderPartObjectEffect` (about 80 item branches, 31 distinct). Each
-       effect is named code, like the render styles; which values they
-       take (bones, colors, sizes) comes with phase 13, when what the named
-       looks are made of moves into data (D25). MuEditor gets a read-only
-       view of the looks: for the selected item its model file, glow,
-       render style and effects, and for a look all items that use it
-       (D26). It only reads the model data, so it needs no change to the
-       drawing code.
+     - **4c3 Item effects:** `effect` names what the model does besides
+       being drawn, from the type chain of `RenderPartObjectEffect`: 29 item
+       branches for 80 items become 27 effects in
+       `Render/Items/ItemEffects.cpp` (moved unchanged; the Siege Potion and
+       the Contract share one), and the shine of 10 items below +3 becomes
+       three more (`harmonyShine`, `sealShine`, `cursedCastleWater`). An
+       effect places sprites, particles and lightning on bones, changes
+       values of the drawing (a pulsing glow mesh, a mesh hidden by level,
+       the level potions glow like), or draws the model itself. The socket
+       seeds and spheres and zen need no effect: they glow like level 0
+       (`"glow": {"level": 0}`), which is what their level checks did. The
+       effects of the event models of level variants stay in
+       `RenderPartObjectEffect` (no model entries yet). Which values the
+       effects take (bones, colors, sizes) comes with phase 13, when what
+       the named looks are made of moves into data (D25). MuEditor gets a
+       read-only view of the looks above the item table: for the selected
+       item its model file, glow, render style and effect, and for a look
+       all items that use it (D26). It only reads the model data, so it
+       needs no change to the drawing code.
 
    Verified like phase 3: one-time comparisons of the old and the new code
    (which files and texture folders are loaded for each model; the

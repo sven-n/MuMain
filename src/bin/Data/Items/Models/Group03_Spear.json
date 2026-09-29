@@ -135,7 +135,8 @@
       },
       "glow": {
         "color": "red"
-      }
+      },
+      "effect": "billOfBalrog"
     },
     {
       "number": 10,

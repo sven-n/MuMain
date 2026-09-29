@@ -1824,16 +1824,6 @@ const RenderStyle RenderStyles[] = {
     {"luckyItem", RenderLuckyItem},
 };
 
-// The render style of every item type, taken from the item model database
-// after each build of it.
-struct ItemStyleTable
-{
-    int databaseVersion = -1;
-    std::vector<const RenderStyle*> styles;
-};
-
-ItemStyleTable g_itemStyles;
-
 const RenderStyle* FindStyle(std::string_view name)
 {
     const auto found = std::find_if(std::begin(RenderStyles), std::end(RenderStyles),
@@ -1841,32 +1831,15 @@ const RenderStyle* FindStyle(std::string_view name)
     return found != std::end(RenderStyles) ? found : nullptr;
 }
 
-const std::vector<const RenderStyle*>& GetItemStyles()
-{
-    const int databaseVersion = g_ItemModelDatabase.GetVersion();
-    if (g_itemStyles.databaseVersion != databaseVersion)
-    {
-        g_itemStyles.databaseVersion = databaseVersion;
-        g_itemStyles.styles.assign(MAX_ITEM, nullptr);
-        const std::span<const Data::Items::ItemModelDefinition> models = g_ItemModelDatabase.GetAllSlots();
-        for (size_t itemType = 0; itemType < models.size(); ++itemType)
-        {
-            // Names that are not styles are drawn plainly; the model loader
-            // reports them.
-            if (models[itemType].Exists() && !models[itemType].renderStyle.empty())
-            {
-                g_itemStyles.styles[itemType] = FindStyle(models[itemType].renderStyle);
-            }
-        }
-    }
-    return g_itemStyles.styles;
-}
-
-const RenderStyle* FindItemStyle(int modelType)
-{
-    const int itemType = GetItemTypeOfModel(modelType);
-    return itemType >= 0 ? GetItemStyles()[itemType] : nullptr;
-}
+// The render style of every item type, taken from the item model database
+// after each build of it.
+ItemModelTable<const RenderStyle*> g_itemStyles{[](const Data::Items::ItemModelDefinition& model)
+                                                {
+                                                    // Names that are not styles are drawn plainly; the model
+                                                    // loader reports them.
+                                                    return model.renderStyle.empty() ? nullptr
+                                                                                     : FindStyle(model.renderStyle);
+                                                }};
 } // namespace
 
 bool Exists(std::string_view name)
@@ -1876,13 +1849,13 @@ bool Exists(std::string_view name)
 
 bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType)
 {
-    const RenderStyle* style = FindItemStyle(modelType);
+    const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr && style->Render(b, o, modelType, alpha, renderType);
 }
 
 bool RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
 {
-    const RenderStyle* style = FindItemStyle(modelType);
+    const RenderStyle* style = g_itemStyles.Find(modelType);
     if (style == nullptr || style->glow == nullptr)
     {
         return false;
