@@ -92,7 +92,12 @@ warns: the theme's rule simply has no effect.
    theme own the colour (`base.rcss`'s `.gold-*`, `trade.rcss`'s `.level-bucket-*`).
 2. **Never bind a coordinate that does not change with the data.** Static chrome positions belong
    in RCSS, addressed by id. Bind the root transform and genuinely per-frame values (marker
-   positions, projected world labels) — nothing else.
+   positions, projected world labels) — nothing else. `Tools/check_rml_bound_geometry.py` enforces
+   this at build time: a document binding `left`/`top`/`right`/`bottom`/`width`/`height` needs a line
+   in `Tools/rml_bound_geometry_allowlist.txt` saying why, and expressions reading only
+   `root_x`/`root_y`/`root_scale` are exempt. **If that check sends you here, the answer is almost
+   always RCSS** — the allowlist is for geometry that genuinely varies per frame, not for a
+   coordinate that was easier to push from C++.
 3. **If you are writing `a / 2 - b / 2` or `y += stripHeight`, you are writing RCSS in C++.**
    Centering and stacking are what the layout engine is for.
 4. **A constant that appears in both C++ and RCSS is a bug waiting.** Author it in RCSS and read it

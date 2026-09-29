@@ -419,13 +419,28 @@ sprites on an 800x600-reference per-axis scale `dp` cannot reproduce). Each is a
 with an explicit, recorded constraint. The last one has an expiry, though, and nothing currently
 links the two: it ends when those background sprites port.
 
-### Worth more than any individual fix
+### The guard that freezes the population
 
-A check that flags a `data-style-left`/`top`/`width`/`height` bound to anything but `root_*` would
-make the two populations of document distinguishable mechanically. Today nothing does: a developer
-editing RCSS on a display-list window gets no warning, no parse error and no visible change — they
-get silence, and go looking in C++. `Tools/check_rml_rcss_drift.py` is the natural home — it
-already parses both sides of this exact seam (every `Bind()` name against every copy of the
-document that can load), so the marginal cost is a rule, not a new scanner. It would need an
-allowlist for the genuine per-frame binders named above, which is itself the point: the list of
-windows entitled to bind geometry becomes explicit and reviewed instead of implicit.
+`Tools/check_rml_bound_geometry.py`, wired into the build beside the syntax and drift checks. It
+fails when a document binds `left`/`top`/`right`/`bottom`/`width`/`height` from a model without a
+line in `Tools/rml_bound_geometry_allowlist.txt`, and prints allowlist entries that are no longer
+needed so the inventory shrinks as work lands. Expressions that reference only `root_x`/`root_y`/
+`root_scale` are allowed everywhere unlisted -- that pair *is* the scaling bridge, not something a
+theme should override.
+
+**89 documents are listed**, each with a reason in one of three buckets: `per-frame data` (marker
+and tooltip positions, resize-driven heights), `counter-scale bridge` (`.sharp-text` layers), and
+`display-list port` -- the population the audit named, where the window's native `Render()` was
+transcribed into its model. The reasons are a first pass; sharpen one when you next touch its
+document.
+
+What this does and does not do: it does not shrink the set -- retrofitting a transcribed window is a
+re-port, not a cleanup (§26). It makes the set **reviewed rather than implicit**, and it closes the
+silent failure. Before it, a developer editing RCSS on a display-list window got no warning, no parse
+error and no visible change; nothing distinguished those documents from the ones where an RCSS edit
+works. Now a new one cannot land without someone writing down why.
+
+A deliberate narrowing: the guard covers the four box offsets and the two sizes only. A bound
+`color`, `decorator` or `font-size` has the same override problem, but each of those is a judgement
+call per case, whereas a bound static coordinate is nearly always layout that belongs in RCSS. Widen
+it when a bound colour actually bites.

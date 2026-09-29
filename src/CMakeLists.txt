@@ -962,6 +962,17 @@ add_custom_target(CheckRmlRcssDrift ALL
 )
 add_dependencies(Main CheckRmlRcssDrift)
 
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_rml_bound_geometry.py's own docstring for why a bound coordinate is worth a guard.
+add_custom_target(CheckRmlBoundGeometry ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_rml_bound_geometry.py"
+          --asset-root "${ASSETS_DIR}/Data/Interface/RmlUi"
+          --allowlist "${REPO_ROOT}/tools/rml_bound_geometry_allowlist.txt"
+  COMMENT "Checking RML bound-geometry ownership (layout a theme cannot override)"
+  VERBATIM
+)
+add_dependencies(Main CheckRmlBoundGeometry)
+
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
 # For turbojpeg and wzAudio we link against the logically named libraries,

@@ -1,0 +1,107 @@
+# Documents allowed to bind left/top/right/bottom/width/height from a C++ model.
+#
+# Read Tools/check_rml_bound_geometry.py's docstring first: a bound geometry property is an
+# inline property, and in this build inline beats every stylesheet rule with no !important, so
+# each line below is a document whose layout a theme cannot change. The list exists to FREEZE
+# that set, not to bless it -- a document binding geometry without a line here fails the build,
+# so new work cannot quietly join it.
+#
+# Format: <path relative to the RmlUi asset root>: <why>
+#
+# The reasons are a first pass, from the 2026-09-30 ownership audit
+# (docs/rmlui-ui-system/tracked-deferrals.md). "display-list port" means the window's native
+# Render() was transcribed into its model, so the whole layout arrives as coordinates -- that is
+# the population the audit named, and retrofitting it is a re-port rather than a cleanup
+# (architecture-principles.md §26). Sharpen a reason when you next touch its document, and delete
+# the line when the document stops binding geometry; the checker prints entries that are no longer
+# needed on every build.
+
+battle_soccer_score.rml: display-list port
+blood_castle_enter.rml: display-list port
+blood_castle_time.rml: display-list port
+castle_window.rml: display-list port
+catapult.rml: display-list port
+chaos_castle_time.rml: display-list port
+char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame
+chat_command.rml: display-list port
+chat_input.rml: per-frame data -- tooltip offset follows the hovered button
+chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
+command_window.rml: per-frame data -- target marker follows the selected command
+crywolf.rml: display-list port
+cursed_temple_enter.rml: display-list port
+cursed_temple_result.rml: display-list port
+cursed_temple_system.rml: display-list port
+devil_square_enter.rml: display-list port
+doppelganger_enter.rml: display-list port
+doppelganger_frame.rml: per-frame data -- boss-bar marker positions, per frame
+duel_watch.rml: display-list port
+duel_watch_frame.rml: display-list port
+duel_watch_spectators.rml: display-list port
+duel_window.rml: display-list port
+empire_guardian_enter.rml: display-list port
+empire_guardian_timer.rml: display-list port
+friend_window.rml: display-list port, and mirrors the native list's scrollbar geometry
+gate_switch.rml: display-list port
+gateman.rml: display-list port
+generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
+generic_menu_dialog.rml: per-frame data -- native companion geometry for the menu it still measures
+gens_ranking.rml: display-list port, and mirrors the native list's scrollbar geometry
+gold_bowman.rml: display-list port
+gold_bowman_lena.rml: display-list port
+guard_window.rml: display-list port
+guild_info.rml: display-list port, and mirrors the native list's scrollbar geometry
+guild_make.rml: display-list port
+help_window.rml: per-frame data -- native renderer geometry for the page it still measures
+item_endurance.rml: per-frame data -- placed against the hovered item
+item_explanation.rml: per-frame data -- placed against the hovered item
+kanturu_enter.rml: display-list port
+kanturu_info.rml: display-list port
+login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 formula, not dp
+lucky_coin_exchange.rml: display-list port
+lucky_coin_registration.rml: display-list port
+map_name.rml: per-frame data -- the name slides in; its offset is per frame
+master_level.rml: display-list port
+message_box_view.rml: display-list port, and mirrors the native list's scrollbar geometry
+mini_map.rml: per-frame data -- marker and cursor positions, per frame
+move_command.rml: per-frame data -- panel height follows the row count
+mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
+mu_helper_skill_picker.rml: per-frame data -- fan-out is data-driven; recorded as the per-frame carve-out at port time
+notices.rml: display-list port
+npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked deferral, see tracked-deferrals.md
+party_info.rml: counter-scale bridge -- counter-scaled member rows
+party_list.rml: per-frame data -- cards are placed per frame as members join and leave
+pet_info.rml: counter-scale bridge -- counter-scaled rows and gauge fills
+reconnect_dialog.rml: display-list port
+server_msg.rml: display-list port
+server_select.rml: per-frame data -- gauge width is the server load
+set_item_explanation.rml: per-frame data -- placed against the hovered item
+siege_warfare.rml: per-frame data -- hero/target/dot positions on the map, per frame
+themes/legacy/buff_strip.rml: per-frame data -- strip offset follows the HUD anchor
+themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
+themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures
+themes/legacy/inventory_extension.rml: counter-scale bridge -- counter-scaled text layers
+themes/legacy/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
+themes/legacy/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
+themes/legacy/main_frame.rml: per-frame data -- HUD gauges and their anchors, per frame
+themes/legacy/mix_inventory.rml: display-list port, and mirrors the native list's scrollbar geometry
+themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
+themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
+themes/legacy/trade.rml: counter-scale bridge -- counter-scaled text layers
+themes/legacy/window_shell.rml: counter-scale bridge -- counter-scaled text layers in the shared shell
+themes/modern/command_window.rml: per-frame data -- target marker follows the selected command
+themes/modern/generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
+themes/modern/inventory_extension.rml: counter-scale bridge -- counter-scaled text layers
+themes/modern/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
+themes/modern/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
+themes/modern/main_frame.rml: per-frame data -- HUD gauges and their anchors, per frame
+themes/modern/main_frame_bg.rml: per-frame data -- HUD chrome follows the same anchors, per frame
+themes/modern/mix_inventory.rml: display-list port, and mirrors the native list's scrollbar geometry
+themes/modern/mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
+themes/modern/npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked deferral, see tracked-deferrals.md
+themes/modern/party_info.rml: counter-scale bridge -- counter-scaled member rows
+themes/modern/pet_info.rml: counter-scale bridge -- counter-scaled rows and gauge fills
+themes/modern/trade.rml: counter-scale bridge -- counter-scaled text layers
+themes/modern/window_shell.rml: counter-scale bridge -- counter-scaled text layers in the shared shell
+tooltip.rml: per-frame data -- tooltip is placed against the pointer
+united_market_place.rml: display-list port, and mirrors the native list's scrollbar geometry
+window_menu.rml: display-list port
