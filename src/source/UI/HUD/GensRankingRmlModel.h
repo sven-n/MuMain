@@ -6,18 +6,14 @@
 
 namespace mu::ui::window
 {
-// One RenderText() of the Gens ranking window: its box, alignment and colour, its size shrunk to
-// the box like the original's.
-struct GensRankingTextEntry
+// One line of the Gens ranking window. Where it sits, what colour it is and how it is aligned are
+// the theme's; only what it says and the size the native renderer shrank it to travel.
+struct GensLine
 {
     Rml::String text;
-    float left = 0.f; // reference px in the panel
-    float top = 0.f;
-    float width = 0.f; // 0 = no box
     float textPx = 0.f;
-    int align = 0; // 0 left, 1 centred, 2 right
-    bool bold = false;
-    Rml::String color;
+
+    bool operator==(const GensLine&) const = default;
 };
 
 struct GensRankingRmlModel
@@ -30,7 +26,28 @@ struct GensRankingRmlModel
 
     // The family mark: "d" (Duprian) or "v" (Vanert) and the rank's cell 0..13, empty for none.
     Rml::String markSprite;
-    std::vector<GensRankingTextEntry> texts;
+
+    GensLine title;
+    GensLine gensLabel;
+    GensLine gensName;
+    GensLine levelLabel;
+    GensLine titleName;
+    GensLine rankLabel;
+    GensLine rankValue;
+    GensLine contribLabel;
+    GensLine contribValue;
+    GensLine descLabel;
+
+    // How much more contribution the next rank needs, cut to the window's width -- present only
+    // while there is a next rank, so the theme gives the group its own rows.
+    std::vector<GensLine> promoLines;
+
+    // CTextBox::Render()'s visible lines from its scroll position. Their pitch is one measured
+    // text height + 2, so it is the renderer's, not the theme's; the box they start from is the
+    // theme's.
+    std::vector<GensLine> descLines;
+    float descLineStep = 0.f;
+
     float thumbTop = 0.f; // the scroll bar's thumb, reference px
     bool thumbActive = true;
     Rml::String exitTooltip;

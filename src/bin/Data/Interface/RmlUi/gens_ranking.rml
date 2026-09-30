@@ -11,9 +11,10 @@
 	     and its scroll bar, the exit button. The text box and the scroll bar stay native controls
 	     (their lines and thumb are bound here); the thumb is dragged natively, so #panel leaves the
 	     pointer alone outside the exit button. root_x/root_y/root_scale come from the dock
-	     transform; everything inside is reference px; text is .sharp-text at the native size,
-	     counter-scaled out of the panel. The window's layout is Hud (the original stretched it per
-	     axis): root_scale is x, root_scale_y is y. -->
+	     transform; every position and size below is the theme's. A .sharp-text layer's own width
+	     and font size stay bound: it is laid out in physical pixels and counter-scaled out of the
+	     panel (base.rcss). The window's layout is Hud (the original stretched it per axis):
+	     root_scale is x, root_scale_y is y. -->
 	<div id="panel" data-model="gens_ranking" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ', ' + root_scale_y + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -24,40 +25,85 @@
 		<div id="rank_back"></div>
 		<div id="mark" data-if="mark_sprite != ''" data-attr-class="mark_sprite"></div>
 
-		<div class="fill" style="left: 16px; top: 252px; width: 52px; height: 20px;"></div>
-		<div class="fill" style="left: 16px; top: 272px; width: 161px; height: 113px;"></div>
-		<div class="t-corner t-tl" style="left: 13px; top: 250px;"></div>
-		<div class="t-corner t-tr" style="left: 59px; top: 250px;"></div>
-		<div class="t-corner t-tr" style="left: 167px; top: 270px;"></div>
-		<div class="t-corner t-bl" style="left: 13px; top: 376px;"></div>
-		<div class="t-corner t-br" style="left: 167px; top: 376px;"></div>
-		<div class="t-edge-top" style="left: 19px; top: 250px; width: 48px;"></div>
-		<div class="t-edge-right" style="left: 59px; top: 256px; height: 14px;"></div>
-		<div class="t-edge-top" style="left: 68px; top: 270px; width: 102px;"></div>
-		<div class="t-edge-right" style="left: 167px; top: 276px; height: 106px;"></div>
-		<div class="t-edge-bottom" style="left: 19px; top: 376px; width: 156px;"></div>
-		<div class="t-edge-left" style="left: 13px; top: 256px; height: 126px;"></div>
+		<!-- The rank strip and the description box: their fills, corners and edges, each placed by
+		     the theme rather than by a style attribute no theme could override. -->
+		<div class="fill fill-strip"></div>
+		<div class="fill fill-desc"></div>
+		<div class="t-corner corner-strip-tl"></div>
+		<div class="t-corner corner-strip-tr"></div>
+		<div class="t-corner corner-desc-tr"></div>
+		<div class="t-corner corner-bl"></div>
+		<div class="t-corner corner-br"></div>
+		<div class="t-edge-top edge-strip-top"></div>
+		<div class="t-edge-right edge-strip-right"></div>
+		<div class="t-edge-top edge-desc-top"></div>
+		<div class="t-edge-right edge-desc-right"></div>
+		<div class="t-edge-bottom edge-bottom"></div>
+		<div class="t-edge-left edge-left"></div>
 
-		<div class="text-back" style="top: 151px;"></div>
-		<div class="text-back" style="top: 175px;"></div>
+		<div class="text-back text-back-level"></div>
+		<div class="text-back text-back-rank"></div>
 
-		<div class="s-top" style="top: 273px;"></div>
-		<div class="s-mid" style="top: 276px;"></div>
-		<div class="s-mid" style="top: 291px;"></div>
-		<div class="s-mid" style="top: 306px;"></div>
-		<div class="s-mid" style="top: 321px;"></div>
-		<div class="s-mid" style="top: 336px;"></div>
-		<div class="s-mid" style="top: 351px;"></div>
-		<div class="s-mid" style="top: 366px; height: 14px;"></div>
-		<div class="s-bottom" style="top: 380px;"></div>
+		<div class="gr-scroll">
+			<div class="s-top"></div>
+			<div class="s-mid"></div>
+			<div class="s-mid"></div>
+			<div class="s-mid"></div>
+			<div class="s-mid"></div>
+			<div class="s-mid"></div>
+			<div class="s-mid"></div>
+			<div class="s-mid"></div>
+			<div class="s-bottom"></div>
+		</div>
 		<div class="thumb" data-class-off="!thumb_active" data-style-top="thumb_top + 'px'"></div>
 
-		<span class="sharp-text gr-text" data-for="t : texts" data-class-bold="t.bold"
-		      data-class-centred="t.align == 1" data-class-right="t.align == 2"
-		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
-		      data-style-font-size="t.text_px + 'px'"
-		      data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{t.text}}</span>
+		<span id="gr_title" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="title.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{title.text}}</span>
+		<span id="gr_gens_label" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="gens_label.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{gens_label.text}}</span>
+		<span id="gr_gens_name" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="gens_name.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{gens_name.text}}</span>
+		<span id="gr_level_label" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="level_label.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{level_label.text}}</span>
+		<span id="gr_title_name" class="sharp-text gr-line" data-style-width="(174 * root_scale) + 'px'"
+		      data-style-font-size="title_name.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{title_name.text}}</span>
+		<span id="gr_rank_label" class="sharp-text gr-line" data-style-width="(74 * root_scale) + 'px'"
+		      data-style-font-size="rank_label.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{rank_label.text}}</span>
+		<span id="gr_rank_value" class="sharp-text gr-line" data-style-width="(170 * root_scale) + 'px'"
+		      data-style-font-size="rank_value.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{rank_value.text}}</span>
+		<span id="gr_contrib_label" class="sharp-text gr-line" data-style-width="(74 * root_scale) + 'px'"
+		      data-style-font-size="contrib_label.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{contrib_label.text}}</span>
+		<span id="gr_contrib_value" class="sharp-text gr-line" data-style-width="(170 * root_scale) + 'px'"
+		      data-style-font-size="contrib_value.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{contrib_value.text}}</span>
+		<span id="gr_desc_label" class="sharp-text gr-line" data-style-width="(58 * root_scale) + 'px'"
+		      data-style-font-size="desc_label.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{desc_label.text}}</span>
+
+		<!-- The promotion note, present only while there is a next rank: the theme gives the group
+		     its own rows (gens_ranking.rcss). -->
+		<div class="gr-promo">
+			<span class="sharp-text gr-promo-line" data-for="l : promo_lines" data-style-width="(180 * root_scale) + 'px'"
+			      data-style-font-size="l.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{l.text}}</span>
+		</div>
+
+		<!-- The description box's visible lines. The theme places the box; the pitch inside it is
+		     the text renderer's own measured line height, so it stays bound. -->
+		<div class="gr-desc">
+			<span class="sharp-text gr-desc-line" data-for="l, i : desc_lines"
+			      data-style-top="(i * desc_line_step) + 'px'" data-style-width="(150 * root_scale) + 'px'"
+			      data-style-font-size="l.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{l.text}}</span>
+		</div>
 
 		<div id="btn_exit" data-event-click="gens_ranking_exit"></div>
 		<span class="sharp-text tooltip tooltip-exit"

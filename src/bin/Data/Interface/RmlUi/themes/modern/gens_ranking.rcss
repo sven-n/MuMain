@@ -82,9 +82,6 @@
 .thumb.off { background-color: token(surface-raised); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
-.gr-text.centred { text-align: center; }
-.gr-text.right { text-align: right; }
-.gr-text.bold { font-weight: bold; }
 
 #btn_exit {
 	position: absolute;
@@ -101,3 +98,64 @@
 .tooltip { display: none; top: 365px; }
 .tooltip-exit { left: -24px; }
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* The rank strip and the description box, piece by piece. */
+.fill-strip { left: 16px; top: 252px; width: 52px; height: 20px; }
+.fill-desc { left: 16px; top: 272px; width: 161px; height: 113px; }
+.corner-strip-tl { left: 13px; top: 250px; }
+.corner-strip-tr { left: 59px; top: 250px; }
+.corner-desc-tr { left: 167px; top: 270px; }
+.corner-bl { left: 13px; top: 376px; }
+.corner-br { left: 167px; top: 376px; }
+.edge-strip-top { left: 19px; top: 250px; width: 48px; }
+.edge-strip-right { left: 59px; top: 256px; height: 14px; }
+.edge-desc-top { left: 68px; top: 270px; width: 102px; }
+.edge-desc-right { left: 167px; top: 276px; height: 106px; }
+.edge-bottom { left: 19px; top: 376px; width: 156px; }
+.edge-left { left: 13px; top: 256px; height: 126px; }
+.text-back-level { top: 151px; }
+.text-back-rank { top: 175px; }
+
+/* The scroll track: its top cap, seven 15 px middles (the last one cut to 14) and its bottom. */
+.gr-scroll { position: static; }
+.s-top { top: 273px; }
+.s-mid:nth-child(2) { top: 276px; }
+.s-mid:nth-child(3) { top: 291px; }
+.s-mid:nth-child(4) { top: 306px; }
+.s-mid:nth-child(5) { top: 321px; }
+.s-mid:nth-child(6) { top: 336px; }
+.s-mid:nth-child(7) { top: 351px; }
+.s-mid:nth-child(8) { top: 366px; height: 14px; }
+.s-bottom { top: 380px; }
+
+/* The window's own lines. */
+.gr-line, .gr-promo-line, .gr-desc-line { position: absolute; }
+#gr_title { left: 0; top: 15px; text-align: center; font-weight: bold; }
+#gr_gens_label { left: 102px; top: 90px; font-weight: bold; }
+#gr_gens_name { left: 102px; top: 110px; }
+#gr_level_label { left: 100px; top: 134px; }
+#gr_title_name { left: 66px; top: 134px; text-align: center; }
+#gr_rank_label { left: 13px; top: 157px; text-align: center; font-weight: bold; }
+#gr_rank_value { left: 0; top: 157px; text-align: right; }
+#gr_contrib_label { left: 13px; top: 180px; text-align: center; font-weight: bold; }
+#gr_contrib_value { left: 0; top: 180px; text-align: right; }
+#gr_desc_label { left: 13px; top: 258px; text-align: center; font-weight: bold; }
+
+/* The promotion note: up to NUM_LINE_CMB rows 15 units apart from y 200. */
+.gr-promo { position: static; }
+.gr-promo-line { left: 20px; }
+.gr-promo-line:nth-child(1) { top: 200px; }
+.gr-promo-line:nth-child(2) { top: 215px; }
+.gr-promo-line:nth-child(3) { top: 230px; }
+.gr-promo-line:nth-child(4) { top: 245px; }
+.gr-promo-line:nth-child(5) { top: 260px; }
+.gr-promo-line:nth-child(6) { top: 275px; }
+.gr-promo-line:nth-child(7) { top: 290px; }
+
+/* The description box the text box's lines start from; their pitch is bound. */
+.gr-desc { position: absolute; left: 20px; top: 280px; }
+.gr-desc-line { left: 0; }
+
+.gr-line, .gr-promo-line, .gr-desc-line { color: token(text-primary); }
+#gr_gens_label { color: token(accent-gold); }
+#gr_rank_label, #gr_contrib_label, #gr_desc_label { color: token(accent-gold); }

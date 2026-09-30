@@ -10,7 +10,7 @@
 #include "Core/Utilities/UsefulDef.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
-#include "UI/RmlBridge/RmlColor.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -385,17 +385,23 @@ void CGensRanking::BuildRmlUi()
             c.Bind("root_scale_y", &model.rootScaleY);
             c.Bind("text_px", &model.textPx);
             c.Bind("mark_sprite", &model.markSprite);
-            auto text = c.RegisterStruct<GensRankingTextEntry>();
-            text.RegisterMember("text", &GensRankingTextEntry::text);
-            text.RegisterMember("left", &GensRankingTextEntry::left);
-            text.RegisterMember("top", &GensRankingTextEntry::top);
-            text.RegisterMember("width", &GensRankingTextEntry::width);
-            text.RegisterMember("text_px", &GensRankingTextEntry::textPx);
-            text.RegisterMember("align", &GensRankingTextEntry::align);
-            text.RegisterMember("bold", &GensRankingTextEntry::bold);
-            text.RegisterMember("color", &GensRankingTextEntry::color);
-            c.RegisterArray<std::vector<GensRankingTextEntry>>();
-            c.Bind("texts", &model.texts);
+            auto lineType = c.RegisterStruct<GensLine>();
+            lineType.RegisterMember("text", &GensLine::text);
+            lineType.RegisterMember("text_px", &GensLine::textPx);
+            c.Bind("title", &model.title);
+            c.Bind("gens_label", &model.gensLabel);
+            c.Bind("gens_name", &model.gensName);
+            c.Bind("level_label", &model.levelLabel);
+            c.Bind("title_name", &model.titleName);
+            c.Bind("rank_label", &model.rankLabel);
+            c.Bind("rank_value", &model.rankValue);
+            c.Bind("contrib_label", &model.contribLabel);
+            c.Bind("contrib_value", &model.contribValue);
+            c.Bind("desc_label", &model.descLabel);
+            c.RegisterArray<std::vector<GensLine>>();
+            c.Bind("promo_lines", &model.promoLines);
+            c.Bind("desc_lines", &model.descLines);
+            c.Bind("desc_line_step", &model.descLineStep);
             c.Bind("thumb_top", &model.thumbTop);
             c.Bind("thumb_active", &model.thumbActive);
             c.Bind("exit_tooltip", &model.exitTooltip);
@@ -447,46 +453,38 @@ void CGensRanking::SyncRmlModel()
 void CGensRanking::SyncContent()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    std::vector<GensRankingTextEntry> texts;
-    // RenderText(x, y, text, width, 0, sort), in panel coordinates; `width` 0 = no box.
-    auto addText = [&](const wchar_t* text, float x, float y, float width, int align, DWORD color, bool bold)
+
+    // One of the window's own lines: the document places it, so only what it says and the size the
+    // native renderer would have shrunk it to for its box travel through the model.
+    auto line = [&](const wchar_t* text, bool boldFont, float boxWidth) -> GensLine
     {
         if (text == nullptr || text[0] == L'\0')
-            return;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+            return {};
+        g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-        const float px =
-            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
-                        : UI::Scaling::NativeTextPixelSize(role, transform);
-        texts.push_back(
-            {StringUtils::WideToNarrow(text), x, y, width, px, align, bold, UI::RmlBridge::RgbaToCss(color)});
+        const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        return {StringUtils::WideToNarrow(text),
+                UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)};
     };
-    const DWORD white = RGBA(255, 255, 255, 255);
-    const DWORD yellow = RGBA(230, 230, 0, 255);
 
     // The original's RenderTexts().
     wchar_t szText[TEMP_MAX_TEXT_LENGTH] = {};
-    float y = 15;
-    addText(I18N::Game::GensInfoWindow, 0, y, GENSRANKING_WIDTH, 1, white, true);
-    y += 75;
-    addText(I18N::Game::Gens, 102, y, GENSRANKING_WIDTH, 0, RGBA(246, 209, 73, 255), true);
-    y += 20;
-    addText(GetGensTeamName(), 102, y, GENSRANKING_WIDTH, 0, white, false);
-    y += 24;
-    addText(I18N::Game::Level3095, 100, y, GENSRANKING_WIDTH, 0, white, false);
+    GensLine title = line(I18N::Game::GensInfoWindow, true, GENSRANKING_WIDTH);
+    GensLine gensLabel = line(I18N::Game::Gens, true, GENSRANKING_WIDTH);
+    GensLine gensName = line(GetGensTeamName(), false, GENSRANKING_WIDTH);
+    GensLine levelLabel = line(I18N::Game::Level3095, false, GENSRANKING_WIDTH);
     // Past the leading space DivideStringByPixel() inserted.
-    const wchar_t* title = GetTitleName(Hero->GensRanking);
-    addText(title[0] != L'\0' ? title + 1 : title, 66, y, GENSRANKING_WIDTH - 16, 1, white, false);
-    y += 23;
-    addText(I18N::Game::GensRanking, 13, y, 74, 1, yellow, true);
+    const wchar_t* titleText = GetTitleName(Hero->GensRanking);
+    GensLine titleName = line(titleText[0] != L'\0' ? titleText + 1 : titleText, false, GENSRANKING_WIDTH - 16);
+    GensLine rankLabel = line(I18N::Game::GensRanking, true, 74.f);
     mu_swprintf(szText, I18N::Game::S, GetRanking());
-    addText(szText, 0, y, GENSRANKING_WIDTH - 20, 2, white, false);
-    y += 23;
-    addText(I18N::Game::GainContribution, 13, y, 74, 1, yellow, true);
+    GensLine rankValue = line(szText, false, GENSRANKING_WIDTH - 20);
+    GensLine contribLabel = line(I18N::Game::GainContribution, true, 74.f);
     mu_swprintf(szText, L"%d", GetContribution());
-    addText(szText, 0, y, GENSRANKING_WIDTH - 20, 2, white, false);
+    GensLine contribValue = line(szText, false, GENSRANKING_WIDTH - 20);
+    GensLine descLabel = line(I18N::Game::GensDescription, true, 58.f);
 
+    std::vector<GensLine> promoLines;
     if (GetNextContribution() > 0)
     {
         // The original cut into an uninitialised buffer: CutStr() writes no terminator, so a
@@ -500,37 +498,45 @@ void CGensRanking::SyncContent()
         const int lineCount =
             ::DivideStringByPixel(&lines[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, tempText, 140, true, '#');
         for (int j = 0; j < lineCount; ++j)
-            addText(lines[j], 20, y + static_cast<float>(j * 15) + 20, 180, 0, white, false);
+            promoLines.push_back(line(lines[j], false, 180.f));
     }
-    y += 78;
-    addText(I18N::Game::GensDescription, 13, y, 58, 1, yellow, true);
 
     // CTextBox::Render(): its visible lines from the scroll position, one text height + 2 apart.
+    std::vector<GensLine> descLines;
+    float descLineStep = 0.f;
     if (m_pTextBox)
     {
         g_pRenderText->SetFont(g_hFont);
-        const int lineHeight = g_pRenderText->MeasureText(L"A", 1).cy + 2;
+        descLineStep = static_cast<float>(g_pRenderText->MeasureText(L"A", 1).cy + 2);
         for (int i = 0; i < m_pTextBox->GetLimitLine(); ++i)
         {
-            const std::wstring line = m_pTextBox->GetLineText(m_pTextBox->GetCurLine() + i);
-            addText(line.c_str(), 20, 280 + static_cast<float>(i * lineHeight), 150, 0, white, false);
+            const std::wstring text = m_pTextBox->GetLineText(m_pTextBox->GetCurLine() + i);
+            descLines.push_back(line(text.c_str(), false, 150.f));
         }
     }
 
     GensRankingRmlModel& model = m_RmlBinder.GetModel();
-    const bool sameTexts = model.texts.size() == texts.size() &&
-                           std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
-                                      [](const GensRankingTextEntry& a, const GensRankingTextEntry& b)
-                                      {
-                                          return a.text == b.text && a.left == b.left && a.top == b.top &&
-                                                 a.width == b.width && a.textPx == b.textPx && a.align == b.align &&
-                                                 a.bold == b.bold && a.color == b.color;
-                                      });
-    if (!sameTexts)
+    SyncField(m_RmlBinder, &GensRankingRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::gensLabel, "gens_label", std::move(gensLabel));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::gensName, "gens_name", std::move(gensName));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::levelLabel, "level_label", std::move(levelLabel));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::titleName, "title_name", std::move(titleName));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::rankLabel, "rank_label", std::move(rankLabel));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::rankValue, "rank_value", std::move(rankValue));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::contribLabel, "contrib_label", std::move(contribLabel));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::contribValue, "contrib_value", std::move(contribValue));
+    SyncField(m_RmlBinder, &GensRankingRmlModel::descLabel, "desc_label", std::move(descLabel));
+    if (model.promoLines != promoLines)
     {
-        model.texts = std::move(texts);
-        m_RmlBinder.MarkDirty("texts");
+        model.promoLines = std::move(promoLines);
+        m_RmlBinder.MarkDirty("promo_lines");
     }
+    if (model.descLines != descLines)
+    {
+        model.descLines = std::move(descLines);
+        m_RmlBinder.MarkDirty("desc_lines");
+    }
+    SyncField(m_RmlBinder, &GensRankingRmlModel::descLineStep, "desc_line_step", descLineStep);
 
     // The original's RenderMark(): the rank's 50 x 69 cell of the family's mark sheet.
     Rml::String markSprite;
