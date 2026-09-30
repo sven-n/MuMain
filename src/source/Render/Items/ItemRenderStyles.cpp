@@ -32,9 +32,9 @@ struct RenderStyle
     {
     }
 
-    // Styles that shine below +3.
-    constexpr RenderStyle(const char* styleName, StyleFunction recipe, const ShineBelowPlus3& shineBelowPlus3)
-        : name(styleName), render(recipe), shine(&shineBelowPlus3)
+    // Styles that shine below +3; the shine is a named constant.
+    constexpr RenderStyle(const char* styleName, StyleFunction recipe, const ShineBelowPlus3* shineBelowPlus3)
+        : name(styleName), render(recipe), shine(shineBelowPlus3)
     {
     }
 
@@ -1741,10 +1741,10 @@ const RenderStyle RenderStyles[] = {
     {"guardianShield", RenderGuardianShield},
     {"crossShield", RenderCrossShield},
     {"oldScroll", RenderOldScroll},
-    {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, HarmonyShine},
+    {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, &HarmonyShine},
     {"scrollOfBlood", RenderScrollOfBlood},
-    {"cursedCastleWater", RenderCursedCastleWater, CursedCastleWaterShine},
-    {"harmonyShine", RenderPlainly, HarmonyShine},
+    {"cursedCastleWater", RenderCursedCastleWater, &CursedCastleWaterShine},
+    {"harmonyShine", RenderPlainly, &HarmonyShine},
     {"condorFlame", RenderCondorFlame},
     {"condorFeather", RenderCondorFeather},
     {"deathBeamKnightFlame", RenderThirdClassQuestItem, BITMAP_ITEM_EFFECT_DBSTONE_R},

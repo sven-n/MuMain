@@ -31,12 +31,14 @@ struct Look
     std::vector<std::pair<int, std::string>> users;
 };
 
-// What the section shows for the selected item, built when the selection or
-// the item model data changes (not every frame).
+// What the section shows for the selected item, built when the selection, the
+// item model data or the items (their names in the lists) change, not every
+// frame.
 struct LooksCache
 {
     int itemType = -1;
-    int databaseVersion = -1;
+    int modelDatabaseVersion = -1;
+    int itemDatabaseVersion = -1;
     std::string glow;
     Look renderStyle;
     Look itemEffect;
@@ -73,13 +75,16 @@ Look TakeLook(const ItemModelDefinition& model, LookName look)
 
 void Refresh(int itemType, const ItemModelDefinition& model)
 {
-    const int databaseVersion = g_ItemModelDatabase.GetVersion();
-    if (g_cache.itemType == itemType && g_cache.databaseVersion == databaseVersion)
+    const int modelDatabaseVersion = g_ItemModelDatabase.GetVersion();
+    const int itemDatabaseVersion = g_ItemDatabase.GetVersion();
+    if (g_cache.itemType == itemType && g_cache.modelDatabaseVersion == modelDatabaseVersion &&
+        g_cache.itemDatabaseVersion == itemDatabaseVersion)
     {
         return;
     }
     g_cache.itemType = itemType;
-    g_cache.databaseVersion = databaseVersion;
+    g_cache.modelDatabaseVersion = modelDatabaseVersion;
+    g_cache.itemDatabaseVersion = itemDatabaseVersion;
     g_cache.glow = DescribeGlow(model);
     g_cache.renderStyle = TakeLook(model, &ItemModelDefinition::renderStyle);
     g_cache.itemEffect = TakeLook(model, &ItemModelDefinition::itemEffect);

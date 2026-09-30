@@ -91,6 +91,13 @@ public:
 
     int GetExistingItemCount() const { return m_existingItemCount; }
 
+    // Counts the changes of the items; views taken from them (e.g. the item
+    // names the editor lists) take them again when it changes.
+    int GetVersion() const
+    {
+        return m_version;
+    }
+
     // Item editor changes. Set replaces the item at the definition's
     // (group, number); an item without names counts as not existing.
     void Set(const ItemDefinition& definition);
@@ -126,6 +133,7 @@ private:
     std::vector<RuleData> m_ruleData;
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
+    int m_version = 0;
 };
 } // namespace Data::Items
 
