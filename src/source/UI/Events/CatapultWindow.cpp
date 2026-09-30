@@ -12,6 +12,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -366,14 +367,6 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
 
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CatapultRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name, auto value)
-    {
-        if (!(model.*field == value))
-        {
-            model.*field = std::move(value);
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
     // RenderText() in a 190-unit box, bold: shrunk to it when wider.
     auto boldPxIn = [&](const wchar_t* text)
     {
@@ -387,8 +380,8 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     const wchar_t* title = m_iType == CATAPULT_ATTACK    ? I18N::Game::WeaponForInvadingTeam
                            : m_iType == CATAPULT_DEFENSE ? I18N::Game::WeaponForDefendingTeam
                                                          : L"";
-    sync(&CatapultRmlModel::title, "title", StringUtils::WideToNarrow(title));
-    sync(&CatapultRmlModel::titlePx, "title_px", title[0] != L'\0' ? boldPxIn(title) : 0.f);
+    SyncField(m_RmlBinder, &CatapultRmlModel::title, "title", StringUtils::WideToNarrow(title));
+    SyncField(m_RmlBinder, &CatapultRmlModel::titlePx, "title_px", title[0] != L'\0' ? boldPxIn(title) : 0.f);
     const wchar_t* const texts[] = {I18N::Game::DesiredAttackingLocation, I18N::Game::SelectTheButtonAndPress,
                                     I18N::Game::ToShoot};
     std::vector<CatapultLineEntry> lines;
@@ -406,7 +399,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
 
     // The buttons' labels in the normal font at CButton::Render()'s whole-unit centre.
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    sync(&CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlBinder, &CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
     std::vector<CatapultAreaEntry> areas;
     const std::span<const CatapultArea> sideAreas =
         m_iType == CATAPULT_ATTACK    ? std::span<const CatapultArea>(kAttackAreas)
@@ -439,8 +432,8 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
         model.areas = std::move(areas);
         m_RmlBinder.MarkDirty("areas");
     }
-    sync(&CatapultRmlModel::fireText, "fire_text", StringUtils::WideToNarrow(I18N::Game::Shoot));
-    sync(&CatapultRmlModel::fireLocked, "fire_locked", m_bFireLocked);
-    sync(&CatapultRmlModel::fireLabelTop, "fire_label_top", static_cast<float>(29 / 2 - lineHeight / 2));
-    sync(&CatapultRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlBinder, &CatapultRmlModel::fireText, "fire_text", StringUtils::WideToNarrow(I18N::Game::Shoot));
+    SyncField(m_RmlBinder, &CatapultRmlModel::fireLocked, "fire_locked", m_bFireLocked);
+    SyncField(m_RmlBinder, &CatapultRmlModel::fireLabelTop, "fire_label_top", static_cast<float>(29 / 2 - lineHeight / 2));
+    SyncField(m_RmlBinder, &CatapultRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

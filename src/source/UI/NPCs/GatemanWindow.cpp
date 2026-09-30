@@ -20,6 +20,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -440,18 +441,10 @@ void CGatemanWindow::SyncContent()
         model.buttons = std::move(buttons);
         m_RmlBinder.MarkDirty("buttons");
     }
-    auto sync = [&](auto field, const char* name, auto value)
-    {
-        if (!(model.*field == value))
-        {
-            model.*field = value;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
-    sync(&GatemanRmlModel::masterMode, "master_mode", type == TOUCH_TYPE_GUILD_MASTER);
-    sync(&GatemanRmlModel::isPublic, "is_public", g_pUIGateKeeper->IsPublic() == TRUE);
+    SyncField(m_RmlBinder, &GatemanRmlModel::masterMode, "master_mode", type == TOUCH_TYPE_GUILD_MASTER);
+    SyncField(m_RmlBinder, &GatemanRmlModel::isPublic, "is_public", g_pUIGateKeeper->IsPublic() == TRUE);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    sync(&GatemanRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
-    sync(&GatemanRmlModel::labelTop, "label_top", static_cast<float>(23 / 2 - lineHeight / 2));
-    sync(&GatemanRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlBinder, &GatemanRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlBinder, &GatemanRmlModel::labelTop, "label_top", static_cast<float>(23 / 2 - lineHeight / 2));
+    SyncField(m_RmlBinder, &GatemanRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

@@ -22,6 +22,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -967,23 +968,15 @@ void CCastleWindow::SyncContent()
     }
 
     CastleWindowRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name, auto value)
-    {
-        if (!(model.*field == value))
-        {
-            model.*field = std::move(value);
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
-    sync(&CastleWindowRmlModel::tabs, "tabs", std::move(tabs));
-    sync(&CastleWindowRmlModel::pieces, "pieces", std::move(pieces));
-    sync(&CastleWindowRmlModel::buttons, "buttons", std::move(buttons));
-    sync(&CastleWindowRmlModel::taxArrows, "tax_arrows", m_iNumCurOpenTab == TAB_TAX_MANAGING);
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::tabs, "tabs", std::move(tabs));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::pieces, "pieces", std::move(pieces));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::buttons, "buttons", std::move(buttons));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::taxArrows, "tax_arrows", m_iNumCurOpenTab == TAB_TAX_MANAGING);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    sync(&CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
-    sync(&CastleWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
-    sync(&CastleWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
-    sync(&CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
 
 void CCastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)

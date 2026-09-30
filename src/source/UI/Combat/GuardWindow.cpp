@@ -21,6 +21,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -787,14 +788,6 @@ void CGuardWindow::SyncContent()
     }
 
     GuardWindowRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name, auto value)
-    {
-        if (!(model.*field == value))
-        {
-            model.*field = std::move(value);
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
     const bool sameTabs =
         model.tabs.size() == tabs.size() &&
         std::equal(model.tabs.begin(), model.tabs.end(), tabs.begin(),
@@ -840,17 +833,17 @@ void CGuardWindow::SyncContent()
         model.buttons = std::move(buttons);
         m_RmlBinder.MarkDirty("buttons");
     }
-    sync(&GuardWindowRmlModel::listShown, "list_shown", listShown);
-    sync(&GuardWindowRmlModel::listHasFooter, "list_has_footer", listHasFooter);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::listShown, "list_shown", listShown);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::listHasFooter, "list_has_footer", listHasFooter);
     // RenderScrollBarFrame() at the list's right edge - 8 over the track, the thumb at - 12.
-    sync(&GuardWindowRmlModel::scrollShown, "scroll_shown", scrollShown);
-    sync(&GuardWindowRmlModel::scrollTop, "scroll_top", scroll.rangeTop - y0);
-    sync(&GuardWindowRmlModel::scrollHeight, "scroll_height", scroll.rangeBottom - scroll.rangeTop);
-    sync(&GuardWindowRmlModel::thumbTop, "thumb_top", scroll.thumbTop - y0);
-    sync(&GuardWindowRmlModel::thumbDragged, "thumb_dragged", scroll.dragged && MouseLButtonPush);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollShown, "scroll_shown", scrollShown);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollTop, "scroll_top", scroll.rangeTop - y0);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollHeight, "scroll_height", scroll.rangeBottom - scroll.rangeTop);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::thumbTop, "thumb_top", scroll.thumbTop - y0);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::thumbDragged, "thumb_dragged", scroll.dragged && MouseLButtonPush);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    sync(&GuardWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
-    sync(&GuardWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
-    sync(&GuardWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
-    sync(&GuardWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

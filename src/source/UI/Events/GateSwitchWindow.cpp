@@ -12,6 +12,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -217,35 +218,27 @@ void CGateSwitchWindow::SyncRmlModel()
     // each centred on x 95, the warning on a (160, 0, 0) text box; Open or Close by the gate state.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     GateSwitchRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name, auto value)
-    {
-        if (!(model.*field == value))
-        {
-            model.*field = value;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
     g_pRenderText->SetFont(g_hFontBold);
     const int titleWidth =
         g_pRenderText->MeasureText(I18N::Game::CastleGateSwitch, static_cast<int>(wcslen(I18N::Game::CastleGateSwitch)))
             .cx;
-    sync(&GateSwitchRmlModel::boldTextPx, "bold_text_px",
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    sync(&GateSwitchRmlModel::titlePx, "title_px",
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::titlePx, "title_px",
          UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth),
                                                160.f));
-    sync(&GateSwitchRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::CastleGateSwitch));
-    sync(&GateSwitchRmlModel::line1, "line1", StringUtils::WideToNarrow(I18N::Game::CanCommandToOpenOrClose));
-    sync(&GateSwitchRmlModel::line2, "line2", StringUtils::WideToNarrow(I18N::Game::TheCastleGateInFront));
-    sync(&GateSwitchRmlModel::warning, "warning",
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::CastleGateSwitch));
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::line1, "line1", StringUtils::WideToNarrow(I18N::Game::CanCommandToOpenOrClose));
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::line2, "line2", StringUtils::WideToNarrow(I18N::Game::TheCastleGateInFront));
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::warning, "warning",
          StringUtils::WideToNarrow(I18N::Game::BeCarefulItMightBeBeneficialToTheEnemy));
     const bool opened = npcGateSwitch::IsGateOpened();
-    sync(&GateSwitchRmlModel::gateOpened, "gate_opened", opened);
-    sync(&GateSwitchRmlModel::buttonText, "button_text",
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::gateOpened, "gate_opened", opened);
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::buttonText, "button_text",
          StringUtils::WideToNarrow(opened ? I18N::Game::Close388 : I18N::Game::Open1107));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     const int labelTop = 29 / 2 - lineHeight / 2;
-    sync(&GateSwitchRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
-    sync(&GateSwitchRmlModel::labelLinePx, "label_line_px", static_cast<float>(lineHeight) * transform.scaleY);
-    sync(&GateSwitchRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::labelLinePx, "label_line_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlBinder, &GateSwitchRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
