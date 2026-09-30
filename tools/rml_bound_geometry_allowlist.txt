@@ -40,7 +40,7 @@ duel_watch_spectators.rml: display-list port
 duel_window.rml: display-list port
 empire_guardian_enter.rml: display-list port
 empire_guardian_timer.rml: display-list port
-friend_window.rml: display-list port, and mirrors the native list's scrollbar geometry
+friend_window.rml: the family is still a native CUIBaseWindow subsystem, and FriendWindowRmlBuilder transcribes it -- every box, button and field's geometry is read off a live CUITextInputBox / CUIButton (GetPosition_x(), GetWidth(), GetTextColor()) each frame, so the native controls are authoritative for layout and hit-testing and this is §2's native-geometry direction, not a C++ constant leaking out of RCSS. FriendWindowView::PlaceField() writes straight onto the element for the same reason. The prerequisite is porting that family off CUIBaseWindow; moving literals cannot resolve it
 gate_switch.rml: display-list port
 gateman.rml: display-list port
 generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
@@ -61,7 +61,7 @@ lucky_coin_exchange.rml: display-list port
 lucky_coin_registration.rml: display-list port
 map_name.rml: per-frame data -- the name slides in; its offset is per frame
 master_level.rml: display-list port
-message_box_view.rml: display-list port, and mirrors the native list's scrollbar geometry
+message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; most buttons come from the box's own CMessageBoxButton, and its list mirrors the native list's scrollbar. Residue: one box class (CGuildAppointMsgBox) has four literal button positions, which cannot move to RCSS while every box class shares this one document -- splitting it per class is the prerequisite
 mini_map.rml: per-frame data -- marker and cursor positions, per frame
 move_command.rml: per-frame data -- panel height follows the row count
 mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
@@ -79,7 +79,6 @@ siege_warfare.rml: per-frame data -- hero/target/dot positions on the map, per f
 themes/legacy/buff_strip.rml: per-frame data -- strip offset follows the HUD anchor
 themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures
-themes/legacy/inventory_extension.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/main_frame.rml: per-frame data -- HUD gauges and their anchors, per frame
@@ -90,7 +89,6 @@ themes/legacy/trade.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/window_shell.rml: counter-scale bridge -- counter-scaled text layers in the shared shell
 themes/modern/command_window.rml: per-frame data -- target marker follows the selected command
 themes/modern/generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
-themes/modern/inventory_extension.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/main_frame.rml: per-frame data -- HUD gauges and their anchors, per frame

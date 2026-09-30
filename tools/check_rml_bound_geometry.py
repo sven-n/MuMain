@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bound-geometry ownership guard.
+"""Inline-geometry ownership guard.
 
 `data-style-*` writes an *inline* property, and this RmlUi build resolves inline
 properties ahead of every stylesheet rule with no `!important` for a theme to reach
@@ -8,6 +8,12 @@ So a `left`/`top`/`width`/`height` bound from a C++ model is not merely awkward 
 restyle -- it is a property **no theme, mod or user stylesheet can override at all**,
 and the failure mode is silence: the theme author's rule simply has no effect, with no
 parse error and no log line.
+
+A plain `style="left: 16px"` attribute in the markup is the same inline property by the
+same mechanism, and so is just as unreachable. It is easy to miss, because it looks like
+ordinary authoring rather than a binding, and a scan for C++ presentation members will
+not see it at all: gens_ranking.rml placed its rank strip, description box and scroll
+track this way. Both forms are checked here.
 
 That makes it worth a mechanical check, because the tree currently holds two
 populations of document that are indistinguishable from the outside:
@@ -45,9 +51,14 @@ import re
 import sys
 
 # The properties this guard covers, and the whole of what it covers.
+GEOMETRY_PROPERTIES = "left|top|right|bottom|width|height"
 GEOMETRY_BINDING_RE = re.compile(
-    r'data-style-(left|top|right|bottom|width|height)\s*=\s*"([^"]*)"'
+    r'data-style-(%s)\s*=\s*"([^"]*)"' % GEOMETRY_PROPERTIES
 )
+# A style attribute, and the geometry declarations inside one. `style` matched on its own
+# word boundary so `data-style-left` does not also land here.
+STYLE_ATTRIBUTE_RE = re.compile(r'(?<![-\w])style\s*=\s*"([^"]*)"')
+STYLE_GEOMETRY_RE = re.compile(r'(?:^|;)\s*(%s)\s*:' % GEOMETRY_PROPERTIES)
 # Anything that could be a model field reference. Dotted forms (`b.left`, `t.label_left`)
 # and loop variables both land here, which is what we want -- they are all model data.
 IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_.]*")
@@ -68,10 +79,13 @@ def bound_fields(expression):
 
 
 def offending_fields(text):
-    """Every non-root-transform field this document binds to a geometry property."""
+    """What this document puts out of a theme's reach: every non-root-transform field bound
+    to a geometry property, and every geometry property set by a style attribute."""
     found = set()
     for _property, expression in GEOMETRY_BINDING_RE.findall(text):
         found |= bound_fields(expression) - ROOT_TRANSFORM_FIELDS
+    for declarations in STYLE_ATTRIBUTE_RE.findall(text):
+        found |= {"style=" + name for name in STYLE_GEOMETRY_RE.findall(declarations)}
     return found
 
 
@@ -127,17 +141,18 @@ def main():
         # Good news, not a failure: these documents stopped binding geometry. Printed every
         # build so the inventory shrinks as work lands instead of quietly over-covering.
         print(
-            "RML bound-geometry guard: %d allowlist entr%s no longer needed, delete: %s"
+            "RML inline-geometry guard: %d allowlist entr%s no longer needed, delete: %s"
             % (len(stale), "y is" if len(stale) == 1 else "ies are", ", ".join(stale))
         )
 
     if unlisted:
         sys.stderr.write(
-            "RML bound-geometry guard: %d document(s) bind layout from C++ without being "
-            "allowlisted.\n\n"
-            "A bound left/top/width/height is an inline property, which no theme can "
-            "override -- see this script's docstring and\n"
-            "docs/rmlui-ui-system/building-new-ui.md's Ownership section. Place static "
+            "RML inline-geometry guard: %d document(s) put layout out of a theme's reach "
+            "without being allowlisted.\n\n"
+            "A bound left/top/width/height, and a style= attribute setting one, are both "
+            "inline properties, which no theme can\n"
+            "override -- see this script's docstring and "
+            "docs/rmlui-ui-system/building-new-ui.md's Ownership section. Place static\n"
             "layout in RCSS, by id or class.\n\n"
             "If the geometry genuinely varies with data per frame, add a line to %s with the "
             "reason.\n\n" % (len(unlisted), args.allowlist)
@@ -147,7 +162,7 @@ def main():
         return 1
 
     print(
-        "RML bound-geometry guard: OK (%d .rml checked, %d allowlisted)"
+        "RML inline-geometry guard: OK (%d .rml checked, %d allowlisted)"
         % (len(documents), len(listed_and_binding))
     )
     return 0
