@@ -8,36 +8,106 @@
 <body>
 	<!-- The castle gatekeeper (CGatemanWindow), docked right: the guest, guild member or guild
 	     master page. For the master: the public checkbox (hit-tested natively), the fee backdrop
-	     and the fee arrows. root_x/root_y/root_scale come from the dock transform; everything
-	     inside is reference px; text is .sharp-text at the native size, counter-scaled out of the
-	     panel. C++ keeps the gatekeeper state and every request; a click is queued with
-	     gateman_button(n). -->
-	<div id="panel" data-model="gateman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     and the fee arrows. root_x/root_y/root_scale come from the dock transform; every position
+	     and size below is the theme's. A .sharp-text layer's own width and font size stay bound: it
+	     is laid out in physical pixels and counter-scaled out of the panel (base.rcss). C++ keeps
+	     the gatekeeper state and every request; a click is queued with gateman_button(n). -->
+	<div id="panel" data-model="gateman" data-class-master="page == 1"
+	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<div data-if="master_mode">
+		<span id="heading" class="sharp-text gk-heading" data-style-width="(160 * root_scale) + 'px'"
+		      data-style-font-size="title.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
+
+		<div class="gk-page" data-if="page == 1">
 			<div id="checkbox"><div id="check_mark" data-if="is_public"></div></div>
 			<div id="fee_back"></div>
 			<div class="fee-btn fee-up" data-event-click="gateman_button(2)"></div>
 			<div class="fee-btn fee-down" data-event-click="gateman_button(3)"></div>
+
+			<span id="restriction" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="restriction.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{restriction.text}}</span>
+			<span id="members_1" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="members_line1.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{members_line1.text}}</span>
+			<span id="members_2" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="members_line2.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{members_line2.text}}</span>
+			<span id="members_3" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="members_line3.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{members_line3.text}}</span>
+			<span id="open_to_non_members" class="sharp-text gk-note"
+			      data-style-font-size="open_to_non_members.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{open_to_non_members.text}}</span>
+			<span id="entrance_fee" class="sharp-text gk-note" data-style-font-size="entrance_fee.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{entrance_fee.text}}</span>
+			<span id="fee_setting_label" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="fee_setting_label.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{fee_setting_label.text}}</span>
+			<span id="view_fee" class="sharp-text sharp-right gk-note" data-style-font-size="view_fee.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{view_fee.text}}</span>
+			<span id="fee_range" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="fee_range.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{fee_range.text}}</span>
+			<span id="fee_range_for" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="fee_range_for.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{fee_range_for.text}}</span>
+			<span id="fee_increment" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="fee_increment.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{fee_increment.text}}</span>
 		</div>
 
-		<span class="sharp-text gk-text" data-for="t : texts" data-class-bold="t.bold"
-		      data-class-centred="t.align == 1" data-class-right="t.align == 2"
-		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
-		      data-style-font-size="t.text_px + 'px'"
-		      data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+		<div class="gk-page" data-if="page == 2">
+			<span id="member_question" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="member_question.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{member_question.text}}</span>
+		</div>
 
-		<div class="gk-btn" data-for="b : buttons" data-class-locked="b.locked"
-		     data-style-left="b.left + 'px'" data-style-top="b.top + 'px'" data-event-click="gateman_button(b.id)">
+		<div class="gk-page" data-if="page == 3">
+			<div data-if="is_public">
+				<span id="guest_fee" class="sharp-text gk-line" data-class-unaffordable="!guest_can_afford"
+				      data-style-width="(190 * root_scale) + 'px'" data-style-font-size="guest_fee.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{guest_fee.text}}</span>
+				<span id="guest_pay_prompt" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+				      data-style-font-size="guest_pay_prompt.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{guest_pay_prompt.text}}</span>
+				<span id="guest_question" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+				      data-style-font-size="guest_question.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{guest_question.text}}</span>
+			</div>
+			<div data-if="!is_public">
+				<span id="denied_1" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+				      data-style-font-size="denied_line1.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{denied_line1.text}}</span>
+				<span id="denied_2" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+				      data-style-font-size="denied_line2.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{denied_line2.text}}</span>
+				<span id="denied_3" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+				      data-style-font-size="denied_line3.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{denied_line3.text}}</span>
+				<span id="denied_4" class="sharp-text gk-line" data-style-width="(190 * root_scale) + 'px'"
+				      data-style-font-size="denied_line4.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{denied_line4.text}}</span>
+			</div>
+		</div>
+
+		<div id="btn_confirm" class="gk-btn" data-if="confirm_button.shown"
+		     data-class-locked="confirm_button.locked" data-event-click="gateman_button(1)">
 			<span class="sharp-text gk-label" data-style-font-size="text_px + 'px'" data-style-top="label_top + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{confirm_button.label}}</span>
+		</div>
+		<div id="btn_enter" class="gk-btn" data-if="enter_button.shown"
+		     data-class-locked="enter_button.locked" data-event-click="gateman_button(0)">
+			<span class="sharp-text gk-label" data-style-font-size="text_px + 'px'" data-style-top="label_top + 'px'"
+			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{enter_button.label}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="gateman_button(4)"></div>

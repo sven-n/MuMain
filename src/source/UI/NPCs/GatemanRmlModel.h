@@ -2,33 +2,27 @@
 
 #include <RmlUi/Core/Types.h>
 
-#include <vector>
-
 namespace mu::ui::window
 {
-// One RenderText() of the gatekeeper window: its box and alignment, font and colour, its size
-// shrunk to the box like the original's.
-struct GatemanTextEntry
+// One line of the gatekeeper window's text: the document places it, so only what it says and the
+// size the native renderer shrank it to for its box travel through the model.
+struct GatemanLine
 {
     Rml::String text;
-    float left = 0.f; // reference px in the panel
-    float top = 0.f;
-    float width = 0.f; // 0 = no box
     float textPx = 0.f;
-    int align = 0; // 0 left, 1 centred, 2 right edge at left + width
-    bool bold = false;
-    Rml::String color;
+
+    bool operator==(const GatemanLine&) const = default;
 };
 
-// A 53 x 23 newui_btn_empty_very_small button (Enter, Confirm): locked ones tinted
-// (100, 100, 100) with a grey label, never hovered.
-struct GatemanButtonEntry
+// One of the window's two buttons (Enter, Confirm). Where it sits and what a locked one looks
+// like are the theme's; whether it is there and whether it is locked are not.
+struct GatemanActionButton
 {
     Rml::String label;
-    int id = 0; // CGatemanWindow::GATEMAN_BUTTON
-    float left = 0.f;
-    float top = 0.f;
+    bool shown = false;
     bool locked = false;
+
+    bool operator==(const GatemanActionButton&) const = default;
 };
 
 struct GatemanRmlModel
@@ -39,10 +33,45 @@ struct GatemanRmlModel
     float lineHeightPx = 0.f;
     float labelTop = 0.f; // CButton::Render(): 23 / 2 - h / 2 whole units
 
-    std::vector<GatemanTextEntry> texts;
-    std::vector<GatemanButtonEntry> buttons;
-    bool masterMode = false; // the checkbox, the fee backdrop and the fee arrows
+    // Which page the gatekeeper shows: 0 none, 1 the guild master's, 2 a guild member's,
+    // 3 a guest's (CUIGateKeeper::GetType()).
+    int page = 0;
     bool isPublic = false;
+
+    GatemanLine title;
+
+    // The guild master's page: the entrance restriction, the public checkbox's label, the fee in
+    // force, and the fee it is being set to with its permitted range.
+    GatemanLine restriction;
+    GatemanLine membersLine1;
+    GatemanLine membersLine2;
+    GatemanLine membersLine3;
+    GatemanLine openToNonMembers;
+    GatemanLine entranceFee;
+    GatemanLine feeSettingLabel;
+    GatemanLine viewFee;
+    GatemanLine feeRange;
+    GatemanLine feeRangeFor;
+    GatemanLine feeIncrement;
+
+    // A guild member's page.
+    GatemanLine memberQuestion;
+
+    // A guest's page, when the gate is open: the fee, and whether the hero can afford it.
+    GatemanLine guestFee;
+    bool guestCanAfford = false;
+    GatemanLine guestPayPrompt;
+    GatemanLine guestQuestion;
+
+    // A guest's page, when it is not.
+    GatemanLine deniedLine1;
+    GatemanLine deniedLine2;
+    GatemanLine deniedLine3;
+    GatemanLine deniedLine4;
+
+    GatemanActionButton confirmButton;
+    GatemanActionButton enterButton;
+
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window

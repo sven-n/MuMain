@@ -34,9 +34,6 @@
 #panel { pointer-events: none; }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
-.gk-text.centred { text-align: center; }
-.gk-text.right { text-align: right; }
-.gk-text.bold { font-weight: bold; }
 
 #checkbox { position: absolute; left: 35px; top: 110px; width: 9px; height: 9px; border: 1px #928679; box-sizing: border-box; }
 #check_mark { position: absolute; left: 1px; top: 1px; width: 5px; height: 5px; decorator: image(gk-check); }
@@ -60,3 +57,44 @@
 #btn_exit { top: 391px; pointer-events: auto; }
 .tooltip { display: none; bottom: 38px; } /* 429 - 391 */
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* The window's own text. Each line is named, so the theme decides where it sits, what colour it
+   is and how it is aligned; only its width and font size stay bound for the counter-scale. */
+.gk-page { position: static; }
+.gk-heading, .gk-line { text-align: center; }
+.gk-heading { left: 15px; top: 13px; font-weight: bold; }
+.gk-line { left: 0; }
+
+#restriction { top: 50px; font-weight: bold; }
+#members_1 { top: 70px; }
+#members_2 { top: 80px; }
+#members_3 { top: 90px; }
+#open_to_non_members { left: 55px; top: 110px; }
+#entrance_fee { left: 35px; top: 128px; }
+#fee_setting_label { top: 158px; font-weight: bold; }
+/* RT3_WRITE_RIGHT_TO_LEFT: the text ends at x 80. */
+#view_fee { right: 110px; top: 190px; text-align: right; }
+#fee_range { top: 248px; }
+#fee_range_for { top: 261px; }
+#fee_increment { top: 274px; }
+
+#member_question { top: 50px; font-weight: bold; }
+
+#guest_fee { top: 50px; font-weight: bold; }
+#guest_pay_prompt { top: 60px; font-weight: bold; }
+#guest_question { top: 70px; font-weight: bold; }
+#denied_1 { top: 50px; font-weight: bold; }
+#denied_2 { top: 60px; font-weight: bold; }
+#denied_3 { top: 70px; font-weight: bold; }
+#denied_4 { top: 80px; font-weight: bold; }
+
+/* The master's page pushes Enter below the fee controls. */
+#btn_confirm { left: 68px; top: 220px; }
+#btn_enter { left: 68px; top: 100px; }
+#panel.master #btn_enter { top: 320px; }
+
+.gk-heading, .gk-line, .gk-note { color: #dcdcdc; }
+#fee_range, #fee_range_for, #fee_increment, #guest_pay_prompt, #guest_question { color: #ffffff; }
+/* RenderGuestMode() reddened the fee the hero cannot pay. */
+#guest_fee { color: rgb(255, 255, 100); }
+#guest_fee.unaffordable { color: rgb(255, 100, 50); }

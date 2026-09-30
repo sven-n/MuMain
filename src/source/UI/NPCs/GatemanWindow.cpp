@@ -249,27 +249,38 @@ void CGatemanWindow::BuildRmlUi()
             c.Bind("text_px", &model.textPx);
             c.Bind("line_height_px", &model.lineHeightPx);
             c.Bind("label_top", &model.labelTop);
-            auto text = c.RegisterStruct<GatemanTextEntry>();
-            text.RegisterMember("text", &GatemanTextEntry::text);
-            text.RegisterMember("left", &GatemanTextEntry::left);
-            text.RegisterMember("top", &GatemanTextEntry::top);
-            text.RegisterMember("width", &GatemanTextEntry::width);
-            text.RegisterMember("text_px", &GatemanTextEntry::textPx);
-            text.RegisterMember("align", &GatemanTextEntry::align);
-            text.RegisterMember("bold", &GatemanTextEntry::bold);
-            text.RegisterMember("color", &GatemanTextEntry::color);
-            c.RegisterArray<std::vector<GatemanTextEntry>>();
-            c.Bind("texts", &model.texts);
-            auto button = c.RegisterStruct<GatemanButtonEntry>();
-            button.RegisterMember("label", &GatemanButtonEntry::label);
-            button.RegisterMember("id", &GatemanButtonEntry::id);
-            button.RegisterMember("left", &GatemanButtonEntry::left);
-            button.RegisterMember("top", &GatemanButtonEntry::top);
-            button.RegisterMember("locked", &GatemanButtonEntry::locked);
-            c.RegisterArray<std::vector<GatemanButtonEntry>>();
-            c.Bind("buttons", &model.buttons);
-            c.Bind("master_mode", &model.masterMode);
+            auto lineType = c.RegisterStruct<GatemanLine>();
+            lineType.RegisterMember("text", &GatemanLine::text);
+            lineType.RegisterMember("text_px", &GatemanLine::textPx);
+            c.Bind("title", &model.title);
+            c.Bind("restriction", &model.restriction);
+            c.Bind("members_line1", &model.membersLine1);
+            c.Bind("members_line2", &model.membersLine2);
+            c.Bind("members_line3", &model.membersLine3);
+            c.Bind("open_to_non_members", &model.openToNonMembers);
+            c.Bind("entrance_fee", &model.entranceFee);
+            c.Bind("fee_setting_label", &model.feeSettingLabel);
+            c.Bind("view_fee", &model.viewFee);
+            c.Bind("fee_range", &model.feeRange);
+            c.Bind("fee_range_for", &model.feeRangeFor);
+            c.Bind("fee_increment", &model.feeIncrement);
+            c.Bind("member_question", &model.memberQuestion);
+            c.Bind("guest_fee", &model.guestFee);
+            c.Bind("guest_pay_prompt", &model.guestPayPrompt);
+            c.Bind("guest_question", &model.guestQuestion);
+            c.Bind("denied_line1", &model.deniedLine1);
+            c.Bind("denied_line2", &model.deniedLine2);
+            c.Bind("denied_line3", &model.deniedLine3);
+            c.Bind("denied_line4", &model.deniedLine4);
+            auto actionButton = c.RegisterStruct<GatemanActionButton>();
+            actionButton.RegisterMember("label", &GatemanActionButton::label);
+            actionButton.RegisterMember("shown", &GatemanActionButton::shown);
+            actionButton.RegisterMember("locked", &GatemanActionButton::locked);
+            c.Bind("confirm_button", &model.confirmButton);
+            c.Bind("enter_button", &model.enterButton);
+            c.Bind("page", &model.page);
             c.Bind("is_public", &model.isPublic);
+            c.Bind("guest_can_afford", &model.guestCanAfford);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("gateman_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -316,133 +327,123 @@ void CGatemanWindow::SyncRmlModel()
 void CGatemanWindow::SyncContent()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    std::vector<GatemanTextEntry> texts;
-    std::vector<GatemanButtonEntry> buttons;
-    // RenderText(x, y, text, width, 0, sort) in panel coordinates, in the font and colour the
-    // original had set at that point (its draws leak them from one call to the next).
-    bool bold = true;
-    DWORD color = RGBA(220, 220, 220, 255);
-    auto addText = [&](const wchar_t* text, float x, float y, float width, int align)
+
+    // One of the window's own lines: the document places it, so only what it says and the size the
+    // native renderer would have shrunk it to for its box travel through the model.
+    auto line = [&](const wchar_t* text, bool boldFont, float boxWidth) -> GatemanLine
     {
         if (text == nullptr || text[0] == L'\0')
-            return;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+            return {};
+        g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         const float px =
-            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
-                        : UI::Scaling::NativeTextPixelSize(role, transform);
-        texts.push_back(
-            {StringUtils::WideToNarrow(text), x, y, width, px, align, bold, UI::RmlBridge::RgbaToCss(color)});
+            boxWidth > 0.f
+                ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)
+                : UI::Scaling::NativeTextPixelSize(role, transform);
+        return {StringUtils::WideToNarrow(text), px};
     };
-    auto addButton = [&](GATEMAN_BUTTON id, const wchar_t* label, float top, bool locked)
-    {
-        buttons.push_back(
-            {StringUtils::WideToNarrow(label), id, static_cast<float>(INVENTORY_WIDTH / 2 - 27), top, locked});
-    };
+    // A page's line: the original's 190-unit centring box.
+    auto pageLine = [&](const wchar_t* text, bool boldFont) { return line(text, boldFont, 190.f); };
 
-    // RenderFrame(): the title, bold (220, 220, 220), which the page then inherits.
-    addText(I18N::Game::GuardNPC, 15, 13, 160, 1);
+    // RenderFrame(): the title, in the bold font, which the page then inherited.
+    GatemanLine title = line(I18N::Game::GuardNPC, true, 160.f);
+
+    GatemanLine restriction, membersLine1, membersLine2, membersLine3;
+    GatemanLine openToNonMembers, entranceFee, feeSettingLabel, viewFee;
+    GatemanLine feeRange, feeRangeFor, feeIncrement;
+    GatemanLine memberQuestion;
+    GatemanLine guestFee, guestPayPrompt, guestQuestion;
+    GatemanLine deniedLine1, deniedLine2, deniedLine3, deniedLine4;
+    GatemanActionButton confirmButton, enterButton;
+    bool guestCanAfford = true;
 
     wchar_t szText[256] = {};
     wchar_t szGold[64] = {};
     const BYTE type = g_pUIGateKeeper->GetType();
-    float y = 50;
+    int page = 0;
     if (type == TOUCH_TYPE_GUILD_MASTER)
     {
-        addText(I18N::Game::EntranceRestriction, 0, y, 190, 1);
-        bold = false;
-        y += 20;
-        addText(I18N::Game::OnlyTheGuildMembers, 0, y, 190, 1);
-        y += 10;
-        addText(I18N::Game::AreAllowedToEnter, 0, y, 190, 1);
-        y += 10;
-        addText(I18N::Game::IsAllowed, 0, y, 190, 1);
-        y += 20;
-        addText(I18N::Game::OpenItToNonMembers, 55, y, 0, 0);
-        y += 18;
+        // RenderGuildMasterMode().
+        page = 1;
+        restriction = pageLine(I18N::Game::EntranceRestriction, true);
+        membersLine1 = pageLine(I18N::Game::OnlyTheGuildMembers, false);
+        membersLine2 = pageLine(I18N::Game::AreAllowedToEnter, false);
+        membersLine3 = pageLine(I18N::Game::IsAllowed, false);
+        openToNonMembers = line(I18N::Game::OpenItToNonMembers, false, 0.f);
         ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
         mu_swprintf(szText, I18N::Game::EntranceFeeSZen, szGold);
-        addText(szText, 35, y, 0, 0);
-        y += 30;
-        bold = true;
-        addText(I18N::Game::EntranceFeeSetting, 0, y, 190, 1);
-        bold = false;
+        entranceFee = line(szText, false, 0.f);
+        feeSettingLabel = pageLine(I18N::Game::EntranceFeeSetting, true);
         ConvertGold(g_pUIGateKeeper->GetViewEnteranceFee(), szGold);
         mu_swprintf(szText, L"%ls %ls", szGold, I18N::Game::Zen);
-        // RT3_WRITE_RIGHT_TO_LEFT: the text ends at x 80.
-        addText(szText, 80 - 200, y + 32, 200, 2);
-        addButton(GATEMAN_BUTTON_SET, I18N::Game::Confirm, 220, false);
-        // Past the fee arrows and Confirm, as the original's ptOrigin advanced (20 + 20 + 25 + 25).
-        y += 90;
-        color = RGBA(255, 255, 255, 255);
+        viewFee = line(szText, false, 200.f);
+        confirmButton = {StringUtils::WideToNarrow(I18N::Game::Confirm), true, false};
         ConvertGold(g_pUIGateKeeper->GetMaxEnteranceFee(), szGold);
         mu_swprintf(szText, I18N::Game::EntranceFeeRange0SZen, szGold);
-        addText(szText, 0, y, 190, 1);
-        y += 13;
-        addText(I18N::Game::ForSetting, 0, y, 190, 1);
-        y += 13;
+        feeRange = pageLine(szText, false);
+        feeRangeFor = pageLine(I18N::Game::ForSetting, false);
         ConvertGold(g_pUIGateKeeper->GetAddEnteranceFee(), szGold);
         mu_swprintf(szText, I18N::Game::IncreaseUnitSZen, szGold);
-        addText(szText, 0, y, 190, 1);
-        addButton(GATEMAN_BUTTON_ENTER, I18N::Game::Enter, 320, false);
+        feeIncrement = pageLine(szText, false);
+        enterButton = {StringUtils::WideToNarrow(I18N::Game::Enter), true, false};
     }
     else if (type == TOUCH_TYPE_GUILD_STAFF)
     {
-        addText(I18N::Game::WouldYouLikeToEnter, 0, y, 190, 1);
-        addButton(GATEMAN_BUTTON_ENTER, I18N::Game::Enter, 100, false);
+        // RenderGuildMemberMode(): the title's bold font was still set.
+        page = 2;
+        memberQuestion = pageLine(I18N::Game::WouldYouLikeToEnter, true);
+        enterButton = {StringUtils::WideToNarrow(I18N::Game::Enter), true, false};
     }
     else if (type == TOUCH_TYPE_PERSON)
     {
+        // RenderGuestMode(): likewise still bold.
+        page = 3;
         if (g_pUIGateKeeper->IsPublic())
         {
             ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
             mu_swprintf(szText, I18N::Game::EntranceFeeSzen, szGold);
-            color = g_pUIGateKeeper->GetEnteranceFee() > (int)CharacterMachine->Gold ? RGBA(255, 100, 50, 255)
-                                                                                     : RGBA(255, 255, 100, 255);
-            addText(szText, 0, y, 190, 1);
-            color = RGBA(255, 255, 255, 255);
-            addText(I18N::Game::PayEntranceFeeToEnter, 0, y + 10, 190, 1);
-            addText(I18N::Game::WouldYouLikeToEnter, 0, y + 20, 190, 1);
+            guestCanAfford = g_pUIGateKeeper->GetEnteranceFee() <= (int)CharacterMachine->Gold;
+            guestFee = pageLine(szText, true);
+            guestPayPrompt = pageLine(I18N::Game::PayEntranceFeeToEnter, true);
+            guestQuestion = pageLine(I18N::Game::WouldYouLikeToEnter, true);
         }
         else
         {
-            addText(I18N::Game::EnteringIsNotAllowed, 0, y, 190, 1);
-            addText(I18N::Game::ApprovalFromTheLordOfACastleIsRequired, 0, y + 10, 190, 1);
-            addText(I18N::Game::ForEntering, 0, y + 20, 190, 1);
-            addText(I18N::Game::PleaseGoBack, 0, y + 30, 190, 1);
+            deniedLine1 = pageLine(I18N::Game::EnteringIsNotAllowed, true);
+            deniedLine2 = pageLine(I18N::Game::ApprovalFromTheLordOfACastleIsRequired, true);
+            deniedLine3 = pageLine(I18N::Game::ForEntering, true);
+            deniedLine4 = pageLine(I18N::Game::PleaseGoBack, true);
         }
-        addButton(GATEMAN_BUTTON_ENTER, I18N::Game::Enter, 100, !g_pUIGateKeeper->IsPublic());
+        enterButton = {StringUtils::WideToNarrow(I18N::Game::Enter), true,
+                       g_pUIGateKeeper->IsPublic() == FALSE};
     }
 
-    GatemanRmlModel& model = m_RmlBinder.GetModel();
-    const bool sameTexts = model.texts.size() == texts.size() &&
-                           std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
-                                      [](const GatemanTextEntry& a, const GatemanTextEntry& b)
-                                      {
-                                          return a.text == b.text && a.left == b.left && a.top == b.top &&
-                                                 a.width == b.width && a.textPx == b.textPx && a.align == b.align &&
-                                                 a.bold == b.bold && a.color == b.color;
-                                      });
-    if (!sameTexts)
-    {
-        model.texts = std::move(texts);
-        m_RmlBinder.MarkDirty("texts");
-    }
-    const bool sameButtons = model.buttons.size() == buttons.size() &&
-                             std::equal(model.buttons.begin(), model.buttons.end(), buttons.begin(),
-                                        [](const GatemanButtonEntry& a, const GatemanButtonEntry& b)
-                                        {
-                                            return a.label == b.label && a.id == b.id && a.left == b.left &&
-                                                   a.top == b.top && a.locked == b.locked;
-                                        });
-    if (!sameButtons)
-    {
-        model.buttons = std::move(buttons);
-        m_RmlBinder.MarkDirty("buttons");
-    }
-    SyncField(m_RmlBinder, &GatemanRmlModel::masterMode, "master_mode", type == TOUCH_TYPE_GUILD_MASTER);
+    SyncField(m_RmlBinder, &GatemanRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlBinder, &GatemanRmlModel::restriction, "restriction", std::move(restriction));
+    SyncField(m_RmlBinder, &GatemanRmlModel::membersLine1, "members_line1", std::move(membersLine1));
+    SyncField(m_RmlBinder, &GatemanRmlModel::membersLine2, "members_line2", std::move(membersLine2));
+    SyncField(m_RmlBinder, &GatemanRmlModel::membersLine3, "members_line3", std::move(membersLine3));
+    SyncField(m_RmlBinder, &GatemanRmlModel::openToNonMembers, "open_to_non_members", std::move(openToNonMembers));
+    SyncField(m_RmlBinder, &GatemanRmlModel::entranceFee, "entrance_fee", std::move(entranceFee));
+    SyncField(m_RmlBinder, &GatemanRmlModel::feeSettingLabel, "fee_setting_label", std::move(feeSettingLabel));
+    SyncField(m_RmlBinder, &GatemanRmlModel::viewFee, "view_fee", std::move(viewFee));
+    SyncField(m_RmlBinder, &GatemanRmlModel::feeRange, "fee_range", std::move(feeRange));
+    SyncField(m_RmlBinder, &GatemanRmlModel::feeRangeFor, "fee_range_for", std::move(feeRangeFor));
+    SyncField(m_RmlBinder, &GatemanRmlModel::feeIncrement, "fee_increment", std::move(feeIncrement));
+    SyncField(m_RmlBinder, &GatemanRmlModel::memberQuestion, "member_question", std::move(memberQuestion));
+    SyncField(m_RmlBinder, &GatemanRmlModel::guestFee, "guest_fee", std::move(guestFee));
+    SyncField(m_RmlBinder, &GatemanRmlModel::guestPayPrompt, "guest_pay_prompt", std::move(guestPayPrompt));
+    SyncField(m_RmlBinder, &GatemanRmlModel::guestQuestion, "guest_question", std::move(guestQuestion));
+    SyncField(m_RmlBinder, &GatemanRmlModel::deniedLine1, "denied_line1", std::move(deniedLine1));
+    SyncField(m_RmlBinder, &GatemanRmlModel::deniedLine2, "denied_line2", std::move(deniedLine2));
+    SyncField(m_RmlBinder, &GatemanRmlModel::deniedLine3, "denied_line3", std::move(deniedLine3));
+    SyncField(m_RmlBinder, &GatemanRmlModel::deniedLine4, "denied_line4", std::move(deniedLine4));
+    SyncField(m_RmlBinder, &GatemanRmlModel::confirmButton, "confirm_button", std::move(confirmButton));
+    SyncField(m_RmlBinder, &GatemanRmlModel::enterButton, "enter_button", std::move(enterButton));
+    SyncField(m_RmlBinder, &GatemanRmlModel::page, "page", page);
     SyncField(m_RmlBinder, &GatemanRmlModel::isPublic, "is_public", g_pUIGateKeeper->IsPublic() == TRUE);
+    SyncField(m_RmlBinder, &GatemanRmlModel::guestCanAfford, "guest_can_afford", guestCanAfford);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlBinder, &GatemanRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
     SyncField(m_RmlBinder, &GatemanRmlModel::labelTop, "label_top", static_cast<float>(23 / 2 - lineHeight / 2));
