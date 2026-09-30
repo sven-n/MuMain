@@ -285,6 +285,14 @@ and this build resolves inline properties ahead of every stylesheet rule with no
 escape (`engine-findings.md`). Each of those bindings is therefore a property **no theme can
 override at all**, silently.
 
+**The scan behind this entry undercounted it.** It looked for C++ presentation *members*, so it
+missed the same defect written directly in the markup: a `style="left: 16px"` attribute is the
+same inline property. Twelve documents carried 158 of them, six of which are not named below at
+all (`char_make`, `duel_watch`, `gate_switch`, `move_command`, `quick_command`, `window_menu`).
+`gens_ranking`, `char_make` and `quick_command` are converted;
+`Tools/check_rml_bound_geometry.py` now checks both forms, so the rest are frozen behind the same
+allowlist as the bindings rather than able to grow.
+
 ### The root pattern, which most of the rest follow from
 
 **A port that transcribes the window's own native `Render()` into the model.** The model stops

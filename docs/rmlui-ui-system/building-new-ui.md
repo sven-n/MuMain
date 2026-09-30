@@ -86,6 +86,11 @@ anywhere (see `engine-findings.md`). A coordinate or colour bound from the model
 can ever override** — not by specificity, not by shipping its own copy of the document. Nothing
 warns: the theme's rule simply has no effect.
 
+**The same applies to a `style=` attribute in the markup**, which writes the same inline property.
+Layout belongs in RCSS addressed by id or class, never in a `style=` attribute — not even for a
+handful of repeated rows, which is where it keeps appearing. For rows whose count varies, give the
+set its own container and let the theme address them with `:nth-child` (`engine-findings.md`).
+
 1. **A model field is a fact about the game or the UI's state, never a rendering of it.** Expose
    `pk_level`, not `name_color`; `str_source = "potion" | "item" | "base"`, not `str_value_color`.
    The shape to copy already ships: `gold_tier` and `level_bucket` classify in C++ and let each
@@ -217,7 +222,7 @@ way the native-3D/world-overlay boundary is. Wrap, don't reimplement, until that
 - [`component-catalog.md`](component-catalog.md) — the RmlUi/RCSS-layer component catalog, the
   parallel axis to this doc's C++ object layer.
 - [`engine-findings.md`](engine-findings.md) — why the Ownership section's rules are hard rules:
-  a `data-style-*` binding is an inline property, and inline beats every stylesheet rule in this
-  build with no `!important` escape.
+  a `data-style-*` binding and a `style=` attribute are both inline properties, and inline beats
+  every stylesheet rule in this build with no `!important` escape.
 - [`tracked-deferrals.md`](tracked-deferrals.md) — the ownership-boundary entry: which shipped
   windows already violate those rules, and in what order they are worth fixing.

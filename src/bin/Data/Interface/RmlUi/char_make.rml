@@ -24,11 +24,11 @@
 
 		<div id="stat_panel" class="stat-panel">
 			<div class="stat-bg" data-class-tall="dark_lord_extra"></div>
-			<div class="stat-row" style="top: 10px;"><span class="stat-label">{{stat_label0}}</span><span class="stat-value">{{stat_value0}}</span></div>
-			<div class="stat-row" style="top: 27px;"><span class="stat-label">{{stat_label1}}</span><span class="stat-value">{{stat_value1}}</span></div>
-			<div class="stat-row" style="top: 44px;"><span class="stat-label">{{stat_label2}}</span><span class="stat-value">{{stat_value2}}</span></div>
-			<div class="stat-row" style="top: 61px;"><span class="stat-label">{{stat_label3}}</span><span class="stat-value">{{stat_value3}}</span></div>
-			<div class="stat-row" style="top: 78px;" data-class-hidden="!dark_lord_extra"><span class="stat-label">{{stat_label4}}</span><span class="stat-value">25</span></div>
+			<div class="stat-row stat-row-0"><span class="stat-label">{{stat_label0}}</span><span class="stat-value">{{stat_value0}}</span></div>
+			<div class="stat-row stat-row-1"><span class="stat-label">{{stat_label1}}</span><span class="stat-value">{{stat_value1}}</span></div>
+			<div class="stat-row stat-row-2"><span class="stat-label">{{stat_label2}}</span><span class="stat-value">{{stat_value2}}</span></div>
+			<div class="stat-row stat-row-3"><span class="stat-label">{{stat_label3}}</span><span class="stat-value">{{stat_value3}}</span></div>
+			<div class="stat-row stat-row-4" data-class-hidden="!dark_lord_extra"><span class="stat-label">{{stat_label4}}</span><span class="stat-value">25</span></div>
 		</div>
 
 		<!-- desc-line-1/-2 use classes, not inline style like stat-row, so modern can add

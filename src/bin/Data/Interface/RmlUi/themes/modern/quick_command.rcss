@@ -42,3 +42,14 @@
 	color: token(text-primary);
 }
 .quick-row.selected .quick-label { color: token(accent-gold-hover); }
+
+/* The frame's own middle bands and its separator lines, so a theme can move them -- they were
+   style attributes, which are inline properties no theme can override. */
+.frame-middle-1 { top: 45px; }
+.frame-middle-2 { top: 60px; }
+.frame-middle-3 { top: 75px; }
+.frame-middle-4 { top: 90px; }
+.line-1 { top: 55px; }
+.line-2 { top: 74px; }
+.line-3 { top: 93px; }
+.line-4 { top: 112px; }

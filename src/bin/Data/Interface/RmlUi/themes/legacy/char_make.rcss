@@ -183,3 +183,11 @@
 .btn-cancel {
 	decorator: image(charmake-cancel-idle);
 }
+
+/* The stat rows' own places, so a theme can move them -- they were style attributes, which are
+   inline properties no theme can override. */
+.stat-row-0 { top: 10px; }
+.stat-row-1 { top: 27px; }
+.stat-row-2 { top: 44px; }
+.stat-row-3 { top: 61px; }
+.stat-row-4 { top: 78px; }

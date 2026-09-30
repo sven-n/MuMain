@@ -68,6 +68,13 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   rules treat "bind only what actually varies with data" as a hard rule. The root transform
   (`root_x`/`root_y`/`root_scale`) and the `.sharp-text` counter-scale are the accepted exceptions:
   both are the scaling bridge itself, which no theme should be overriding.
+  **A plain `style="left: 16px"` attribute in the markup is the same inline property, reached the
+  same way, and is therefore just as unreachable** — the same dictionary, written by the parser
+  instead of by a data view. It is easier to miss than a binding, because it reads as ordinary
+  authoring and a scan for C++ presentation members will not see it at all; `gens_ranking.rml`
+  placed its whole rank strip, description box and scroll track this way, and `char_make.rml`
+  carried a comment noting that modern could not restyle its stat rows without knowing why.
+  `Tools/check_rml_bound_geometry.py` checks both forms.
 - **An absolutely-positioned, `display:block`, multi-line (`white-space:pre-line`) box needs an
   explicit `width`** — left to shrink-to-fit, this build's width computation undersizes to the
   longest *word*, not the longest *line*.

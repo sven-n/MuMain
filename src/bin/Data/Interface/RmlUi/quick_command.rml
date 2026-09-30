@@ -15,15 +15,15 @@
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back"></div>
 		<div id="frame_up"></div>
-		<div class="frame-middle" style="top: 45px;"></div>
-		<div class="frame-middle" style="top: 60px;"></div>
-		<div class="frame-middle" style="top: 75px;"></div>
-		<div class="frame-middle frame-middle-short" style="top: 90px;"></div>
+		<div class="frame-middle frame-middle-1"></div>
+		<div class="frame-middle frame-middle-2"></div>
+		<div class="frame-middle frame-middle-3"></div>
+		<div class="frame-middle frame-middle-short frame-middle-4"></div>
 		<div id="frame_down"></div>
-		<div class="line" style="top: 55px;"></div>
-		<div class="line" style="top: 74px;"></div>
-		<div class="line" style="top: 93px;"></div>
-		<div class="line" style="top: 112px;"></div>
+		<div class="line line-1"></div>
+		<div class="line line-2"></div>
+		<div class="line line-3"></div>
+		<div class="line line-4"></div>
 
 		<span class="sharp-text" id="name" data-style-font-size="bold_text_px + 'px'"
 		      data-style-width="(112 * root_scale) + 'px'"
