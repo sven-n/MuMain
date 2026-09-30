@@ -19,9 +19,38 @@
 .thumb.dragged { background-color: token(accent-steel-hover); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
-.gd-text.centred { text-align: center; }
 .gd-text.right { text-align: right; }
 .gd-text.bold { font-weight: bold; }
+
+.gd-heading { color: token(text-primary); }
+.gd-owner, .gd-line { color: token(text-secondary); }
+
+/* The window's own text. Each line is named, so the theme decides where it sits, what colour it
+   is and how it is aligned; only its width and font size stay bound for the counter-scale. */
+.gd-heading, .gd-owner, .gd-line { left: 0; text-align: center; }
+.gd-heading { left: 15px; top: 13px; font-weight: bold; }
+.gd-owner { font-weight: bold; }
+#owner_master { top: 50px; }
+#owner_guild { top: 65px; }
+
+.gd-page { position: static; }
+#status_start { top: 125px; }
+#status_end { top: 139px; }
+#status_period { top: 153px; }
+#status_expected_label { top: 188px; }
+#status_expected_time { top: 202px; }
+#status_next_stage { top: 237px; }
+#register_message { top: 125px; }
+#register_message2 { top: 139px; }
+#register_acquired { top: 155px; }
+#register_registered { top: 169px; }
+/* The List tab's own message kept the headers' bold font. */
+#list_message { top: 125px; font-weight: bold; }
+.gd-line.bold { font-weight: bold; }
+
+#btn_proclaim { top: 120px; }
+#btn_register { top: 200px; }
+#btn_give_up { top: 370px; }
 
 .gd-btn {
 	display: block;

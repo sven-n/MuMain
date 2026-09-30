@@ -30,14 +30,25 @@ struct GuardBoxEntry
     Rml::String color;
 };
 
-// A 53 x 23 newui_btn_empty_very_small button (Announce, Register, Abandon): locked ones tinted
-// (100, 100, 100) with a grey label, never hovered.
-struct GuardButtonEntry
+// One of the window's three buttons (Announce, Register, Abandon). Where it sits and what a
+// locked one looks like are the theme's; whether it is there and whether it is locked are not.
+struct GuardActionButton
 {
     Rml::String label;
-    int id = 0; // CGuardWindow::GUARD_BUTTON
-    float top = 0.f;
+    bool shown = false;
     bool locked = false;
+
+    bool operator==(const GuardActionButton&) const = default;
+};
+
+// One line of the window's own text: the document places it, so only what it says and the size
+// the native renderer shrank it to for its box travel through the model.
+struct GuardLine
+{
+    Rml::String text;
+    float textPx = 0.f;
+
+    bool operator==(const GuardLine&) const = default;
 };
 
 // One of the three newui_guild_tab04 radio tabs (56 x 22): the selected one on its second row,
@@ -45,7 +56,6 @@ struct GuardButtonEntry
 struct GuardTabEntry
 {
     Rml::String label;
-    float labelLeft = 0.f; // CRadioButton::Render(): whole-unit centre in the tab
     bool selected = false;
 };
 
@@ -58,7 +68,37 @@ struct GuardWindowRmlModel
     float buttonLabelTop = 0.f; // CButton::Render(): 23 / 2 - h / 2 whole units
     float tabLabelTop = 0.f;    // CRadioButton::Render(): 22 / 2 - h / 2 whole units
 
+    int activeTab = 0; // CGuardWindow::CURR_OPEN_TAB_BUTTON -- which page the document shows.
     std::vector<GuardTabEntry> tabs;
+
+    // The window's own heading, fitted to the original's 160-unit box.
+    GuardLine title;
+    GuardLine ownerMaster;
+    GuardLine ownerGuild;
+
+    // The Status page.
+    GuardLine statusStart;
+    GuardLine statusEnd;
+    GuardLine statusPeriod;
+    GuardLine statusExpectedLabel;
+    GuardLine statusExpectedTime;
+    GuardLine statusNextStage;
+
+    // The Register / Announce page. The original drew the "period has ended" and truce lines in
+    // the bold font and every other state's in the normal one; no rule behind that was recoverable,
+    // so it stays a flag the theme can ignore.
+    GuardLine registerMessage;
+    GuardLine registerMessage2;
+    GuardLine registerAcquired;
+    GuardLine registerRegistered;
+    bool registerBold = false;
+
+    // The List page's message, for the states that have no list.
+    GuardLine listMessage;
+
+    GuardActionButton proclaimButton;
+    GuardActionButton registerButton;
+    GuardActionButton giveUpButton;
     // The List tab's frame: 0 none, 1 the declared guilds (registration), 2 the siege guilds.
     // Whether the guild list is on screen, and whether it has its own summary row underneath.
     // Its frame is the theme's to draw; these two say what there is to frame.
@@ -71,7 +111,6 @@ struct GuardWindowRmlModel
     bool thumbDragged = false;
     std::vector<GuardBoxEntry> boxes;
     std::vector<GuardTextEntry> texts;
-    std::vector<GuardButtonEntry> buttons;
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window
