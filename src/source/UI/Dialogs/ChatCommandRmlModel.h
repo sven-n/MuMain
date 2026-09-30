@@ -6,20 +6,28 @@
 
 namespace mu::ui::window
 {
-// One line of the chat command window: left-aligned in its box (centred for the template's
-// remove "x"), shrunk to it like the original's RenderText().
-struct ChatCommandTextEntry
+// One line of the chat command window's own text. Where it sits and what colour it is are the
+// theme's; only what it says and the size the native renderer shrank it to for its box travel.
+struct ChatCommandLine
 {
     Rml::String text;
-    float left = 0.f;   // reference px in the panel
-    float top = 0.f;    // reference px in the panel
-    float width = 0.f;  // box width, reference px
-    float textPx = 0.f; // physical px
-    bool centred = false;
-    Rml::String color; // CSS colour of the native text colour
+    float textPx = 0.f;
+
+    bool operator==(const ChatCommandLine&) const = default;
 };
 
-// What a click on a ChatCommandHitEntry does (the original's CheckMouseIn() areas).
+// One command in the list. The favourite marker and the colour that goes with it are the theme's.
+struct ChatCommandRow
+{
+    Rml::String text;
+    float textPx = 0.f;
+    bool favourite = false;
+
+    bool operator==(const ChatCommandRow&) const = default;
+};
+
+// What a click on a row does. The document names these numbers directly in its
+// chat_command_hit(action, index) calls.
 enum class ChatCommandAction
 {
     PickCommand = 1,
@@ -30,16 +38,20 @@ enum class ChatCommandAction
     RemoveTemplate = 6,
 };
 
-// A clickable area; a parameter's value area also draws the dark value box.
-struct ChatCommandHitEntry
+// One of the selected command's parameters: its label, whether a required value is still missing
+// (which is what blocks sending), and the value in its box -- the valid values as a placeholder
+// while there is none. The edited one shows the field instead.
+struct ChatCommandParameterRow
 {
-    float left = 0.f; // reference px in the panel
-    float top = 0.f;
-    float width = 0.f;
-    float height = 0.f;
-    int action = 0; // ChatCommandAction
-    int index = 0;  // the row, parameter or template
-    bool valueBox = false;
+    Rml::String label;
+    float labelTextPx = 0.f;
+    bool missing = false;
+    Rml::String value;
+    float valueTextPx = 0.f;
+    bool placeholder = false;
+    bool edited = false;
+
+    bool operator==(const ChatCommandParameterRow&) const = default;
 };
 
 struct ChatCommandRmlModel
@@ -53,11 +65,26 @@ struct ChatCommandRmlModel
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
     float windowHeight = 0.f;
 
-    ChatCommandTextEntry title;
-    std::vector<ChatCommandTextEntry> texts;
-    std::vector<ChatCommandHitEntry> hits;
+    int page = 0; // CChatCommandWindow's PAGE_*
+    ChatCommandLine title;
+    // Shown in place of a page's rows when it has none.
+    ChatCommandLine emptyMessage;
 
-    // The value field of the parameter being edited (the original's CUITextInputBox).
+    std::vector<ChatCommandRow> commandRows;
+    std::vector<ChatCommandLine> descriptionLines;
+    std::vector<ChatCommandLine> templateRows;
+
+    // The parameters and the two actions sit below however many description lines and parameters
+    // there are, so where each group starts is content, not layout. Inside a group the theme
+    // places every row.
+    std::vector<ChatCommandParameterRow> parameters;
+    float parameterTop = 0.f;
+    float actionTop = 0.f;
+    ChatCommandLine favouriteAction;
+    ChatCommandLine saveAction;
+
+    // The value field is one element the window focuses and reads by id, so it stays outside the
+    // repeated parameters and is told which row to sit on.
     bool editing = false;
     float editTop = 0.f;
 

@@ -20,25 +20,6 @@
 #panel { pointer-events: auto; }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
-.cc-text.centred, #title { text-align: center; }
-#title { font-weight: bold; }
-
-.value-box { position: absolute; background-color: rgba(0, 0, 0, 160); pointer-events: none; }
-.hit { position: absolute; pointer-events: auto; }
-
-#value_field {
-	display: none;
-	/* CUITextInputBox::SetTextColor(255, 255, 230, 210) -- used to arrive as a model colour. */
-	color: rgba(255, 255, 230, 210);
-	left: 24px;
-	padding: 0;
-	border-width: 0;
-	border-radius: 0;
-	background-color: transparent;
-	pointer-events: auto;
-}
-#value_field.editing { display: block; }
-
 .cc-btn {
 	display: block;
 	position: absolute;
@@ -57,3 +38,83 @@
 /* docked_panel_frame.rcss's exit tooltip, hidden until hovered (.sharp-text above shows it). */
 .tooltip { display: none; }
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* Every row below is on the original's own grid: CONTENT_TOP, one ROW_HEIGHT apart. */
+.cc-page, .cc-rows { position: static; }
+.cc-title, .cc-line, .cc-cell, .cc-row-line, .cc-param-label, .cc-param-value, .cc-remove-mark {
+	position: absolute;
+}
+.cc-title { left: 0; top: 12px; text-align: center; font-weight: bold; }
+#cc_empty { left: 22px; top: 36px; }
+
+.cc-row { position: absolute; left: 22px; width: 146px; height: 15px; pointer-events: auto; }
+.cc-row-line { left: 22px; }
+.cc-cell { left: 0; }
+.cc-row:nth-child(1), .cc-row-line:nth-child(1) { top: 36px; }
+.cc-row:nth-child(2), .cc-row-line:nth-child(2) { top: 51px; }
+.cc-row:nth-child(3), .cc-row-line:nth-child(3) { top: 66px; }
+.cc-row:nth-child(4), .cc-row-line:nth-child(4) { top: 81px; }
+.cc-row:nth-child(5), .cc-row-line:nth-child(5) { top: 96px; }
+.cc-row:nth-child(6), .cc-row-line:nth-child(6) { top: 111px; }
+.cc-row:nth-child(7), .cc-row-line:nth-child(7) { top: 126px; }
+.cc-row:nth-child(8), .cc-row-line:nth-child(8) { top: 141px; }
+.cc-row:nth-child(9), .cc-row-line:nth-child(9) { top: 156px; }
+.cc-row:nth-child(10), .cc-row-line:nth-child(10) { top: 171px; }
+.cc-row:nth-child(11), .cc-row-line:nth-child(11) { top: 186px; }
+.cc-row:nth-child(12), .cc-row-line:nth-child(12) { top: 201px; }
+.cc-row:nth-child(13), .cc-row-line:nth-child(13) { top: 216px; }
+.cc-row:nth-child(14), .cc-row-line:nth-child(14) { top: 231px; }
+.cc-row:nth-child(15), .cc-row-line:nth-child(15) { top: 246px; }
+.cc-row:nth-child(16), .cc-row-line:nth-child(16) { top: 261px; }
+.cc-row:nth-child(17), .cc-row-line:nth-child(17) { top: 276px; }
+.cc-row:nth-child(18), .cc-row-line:nth-child(18) { top: 291px; }
+.cc-row:nth-child(19), .cc-row-line:nth-child(19) { top: 306px; }
+.cc-row:nth-child(20), .cc-row-line:nth-child(20) { top: 321px; }
+
+/* The parameters and the two actions start wherever the content above them ends. */
+.cc-parameters, .cc-actions { position: absolute; left: 22px; }
+.cc-parameter { position: absolute; left: 0; width: 146px; height: 35px; }
+.cc-parameter:nth-child(1) { top: 0px; }
+.cc-parameter:nth-child(2) { top: 35px; }
+.cc-parameter:nth-child(3) { top: 70px; }
+.cc-parameter:nth-child(4) { top: 105px; }
+.cc-parameter:nth-child(5) { top: 140px; }
+.cc-parameter:nth-child(6) { top: 175px; }
+.cc-parameter:nth-child(7) { top: 210px; }
+.cc-parameter:nth-child(8) { top: 245px; }
+.cc-param-label { left: 0; top: 0; }
+.cc-value-box { position: absolute; left: 0; top: 15px; width: 146px; height: 16px; pointer-events: auto; }
+.cc-param-value { left: 2px; top: 16px; }
+/* The one value field, told which parameter row to sit on. */
+.cc-value-field { position: absolute; left: 24px; display: none; }
+.cc-value-field.editing { display: block; }
+.cc-actions .cc-row { left: 0; }
+.cc-actions .cc-row:nth-child(1) { top: 0; }
+.cc-actions .cc-row:nth-child(2) { top: 15px; }
+
+/* A template's label takes the row less the remove cell, which sits at its right edge. */
+.cc-template-hit { position: absolute; left: 0; top: 0; width: 131px; height: 15px; pointer-events: auto; }
+.cc-template-label { left: 0; }
+.cc-template-remove { position: absolute; left: 131px; top: 0; width: 15px; height: 15px; pointer-events: auto; }
+.cc-remove-mark { left: 0; text-align: center; }
+
+/* The original's own TextColor table (ChatCommandWindow.cpp). */
+.cc-title { color: rgb(255, 220, 120); }
+.cc-line, .cc-cell, .cc-param-label { color: rgb(220, 220, 220); }
+.cc-row.favourite .cc-cell { color: rgb(255, 220, 120); }
+.cc-row-line { color: rgb(200, 220, 255); }
+.cc-param-label.missing { color: rgb(255, 150, 150); }
+.cc-param-value { color: rgb(220, 220, 220); }
+.cc-param-value.placeholder { color: rgb(200, 220, 255); }
+.cc-action .cc-cell { color: rgb(150, 210, 255); }
+.cc-remove-mark { color: rgb(255, 150, 150); }
+.cc-value-box { background-color: rgba(0, 0, 0, 160); }
+/* CUITextInputBox::SetTextColor(255, 255, 230, 210) -- used to arrive as a model colour. */
+.cc-value-field {
+	color: rgba(255, 255, 230, 210);
+	padding: 0;
+	border-width: 0;
+	border-radius: 0;
+	background-color: transparent;
+	pointer-events: auto;
+}

@@ -10,10 +10,12 @@
 	     then one page -- the commands, the selected command's description and parameters (each
 	     value in a dark box; a typed value in the value field), or the saved templates -- and the
 	     left / right buttons and the exit button. root_x/root_y/root_scale come from the dock
-	     transform; everything inside is reference px; text is .sharp-text at the native size,
-	     counter-scaled out of the panel. C++ keeps the pages, the values, the wheel, the keys and
-	     the commands; a click is queued with chat_command_hit(action, index), chat_command_left,
-	     chat_command_right or chat_command_exit. -->
+	     transform, and #panel's height is the dock's. Every row below is placed by the theme; what
+	     stays bound is where the parameter and action groups start, which follows how many
+	     description lines and parameters there are. A row is its own hit target. C++ keeps the
+	     pages, the values, the wheel, the keys and the commands; a click is queued with
+	     chat_command_hit(action, index), chat_command_left, chat_command_right or
+	     chat_command_exit. -->
 	<div id="panel" data-model="chat_command" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-height="window_height + 'px'" data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -21,29 +23,79 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<div class="value-box" data-for="h : hits" data-if="h.value_box"
-		     data-style-left="h.left + 'px'" data-style-top="h.top + 'px'"
-		     data-style-width="h.width + 'px'" data-style-height="h.height + 'px'"></div>
-
-		<span class="sharp-text cc-text" id="title" data-style-left="title.left + 'px'" data-style-top="title.top + 'px'"
-		      data-style-color="title.color" data-style-font-size="title.text_px + 'px'"
-		      data-style-width="(title.width * root_scale) + 'px'"
+		<span id="cc_title" class="sharp-text cc-title" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="title.text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
-		<span class="sharp-text cc-text" data-for="t : texts" data-class-centred="t.centred"
-		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
-		      data-style-font-size="t.text_px + 'px'" data-style-width="(t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+		<span id="cc_empty" class="sharp-text cc-line" data-style-width="(146 * root_scale) + 'px'"
+		      data-style-font-size="empty_message.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{empty_message.text}}</span>
 
-		<div class="hit" data-for="h : hits" data-if="h.action != 0"
-		     data-style-left="h.left + 'px'" data-style-top="h.top + 'px'"
-		     data-style-width="h.width + 'px'" data-style-height="h.height + 'px'"
-		     data-event-click="chat_command_hit(h.action, h.index)"></div>
+		<!-- The commands. A favourite's marker is in the text the command list builds; the colour
+		     that goes with it is this row's class. -->
+		<div class="cc-rows" data-if="page == 0">
+			<div class="cc-row" data-for="r, i : command_rows" data-class-favourite="r.favourite"
+			     data-event-click="chat_command_hit(1, i)">
+				<span class="sharp-text cc-cell" data-style-width="(146 * root_scale) + 'px'"
+				      data-style-font-size="r.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.text}}</span>
+			</div>
+		</div>
 
-		<input id="value_field" data-value="edit_value" type="text" class="text-field sharp-text" data-class-editing="editing"
-		       data-style-top="edit_top + 'px'" data-style-font-size="text_px + 'px'"
-		       data-style-width="(142 * root_scale) + 'px'" data-style-height="(14 * root_scale) + 'px'"
-		       data-style-line-height="(14 * root_scale) + 'px'"
-		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>
+		<div class="cc-page" data-if="page == 1">
+			<div class="cc-rows cc-description">
+				<span class="sharp-text cc-row-line" data-for="l : description_lines"
+				      data-style-width="(146 * root_scale) + 'px'" data-style-font-size="l.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+			</div>
+
+			<div class="cc-parameters" data-style-top="parameter_top + 'px'">
+				<div class="cc-parameter" data-for="p, i : parameters">
+					<span class="sharp-text cc-param-label" data-class-missing="p.missing"
+					      data-style-width="(146 * root_scale) + 'px'" data-style-font-size="p.label_text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{p.label}}</span>
+					<div class="cc-value-box" data-if="!p.edited" data-event-click="chat_command_hit(2, i)"></div>
+					<span class="sharp-text cc-param-value" data-if="!p.edited" data-class-placeholder="p.placeholder"
+					      data-style-width="(142 * root_scale) + 'px'" data-style-font-size="p.value_text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{p.value}}</span>
+					<div class="cc-value-box" data-if="p.edited"></div>
+				</div>
+			</div>
+
+			<input id="value_field" data-value="edit_value" type="text" class="text-field sharp-text cc-value-field"
+			       data-class-editing="editing" data-style-top="edit_top + 'px'"
+			       data-style-font-size="text_px + 'px'" data-style-width="(142 * root_scale) + 'px'"
+			       data-style-height="(14 * root_scale) + 'px'" data-style-line-height="(14 * root_scale) + 'px'"
+			       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>
+
+			<div class="cc-actions" data-style-top="action_top + 'px'">
+				<div class="cc-row cc-action" data-event-click="chat_command_hit(3, 0)">
+					<span class="sharp-text cc-cell" data-style-width="(146 * root_scale) + 'px'"
+					      data-style-font-size="favourite_action.text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{favourite_action.text}}</span>
+				</div>
+				<div class="cc-row cc-action" data-event-click="chat_command_hit(4, 0)">
+					<span class="sharp-text cc-cell" data-style-width="(146 * root_scale) + 'px'"
+					      data-style-font-size="save_action.text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{save_action.text}}</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- The saved templates: the label runs a row's width less the remove cell, which the
+		     theme sizes. -->
+		<div class="cc-rows" data-if="page == 2">
+			<div class="cc-row" data-for="r, i : template_rows">
+				<div class="cc-template-hit" data-event-click="chat_command_hit(5, i)"></div>
+				<span class="sharp-text cc-cell cc-template-label" data-style-width="(131 * root_scale) + 'px'"
+				      data-style-font-size="r.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.text}}</span>
+				<div class="cc-template-remove" data-event-click="chat_command_hit(6, i)">
+					<span class="sharp-text cc-remove-mark" data-style-width="(15 * root_scale) + 'px'"
+					      data-style-font-size="text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">x</span>
+				</div>
+			</div>
+		</div>
 
 		<div class="cc-btn" id="btn_left" data-if="has_left_button" data-event-click="chat_command_left">
 			<span class="sharp-text cc-label" data-style-font-size="text_px + 'px'"
