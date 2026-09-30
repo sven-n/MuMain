@@ -14,7 +14,7 @@
 		     data-style-font-size="text_px + 'px'"
 		     data-style-height="line_px + 'px'" data-style-line-height="line_px + 'px'"
 		     data-style-margin-bottom="(row_px - line_px) + 'px'"
-		     data-style-background-color="back_color">{{line.text}}</div>
+		     ><div class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
 	</div>
 </body>
 </rml>

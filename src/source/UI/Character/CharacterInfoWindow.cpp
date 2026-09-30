@@ -72,13 +72,6 @@ namespace
         return multiplier;
     }
 
-    Rml::String MakeColorRgba(int r, int g, int b, int a)
-    {
-        wchar_t buf[32];
-        mu_swprintf(buf, L"rgba(%d,%d,%d,%d)", r, g, b, a);
-        return StringUtils::WideToNarrow(buf);
-    }
-
     // Which of the three states RenderAttribute() coloured an attribute's value for. The states
     // are the meaning; each theme's character_info.rcss decides what they look like.
     const char* AttributeSource(bool potionBuffed, bool boosted)
@@ -87,6 +80,10 @@ namespace
             return "potion";
         return boosted ? "boosted" : "base";
     }
+
+    // The derived rows use the same vocabulary: "boosted" is the pale blue an item or set adds
+    // (the primary stats' own .attr-boosted), "buffed" the colour a consumable buff sets, and
+    // each theme's character_info.rcss decides what they look like.
 }
 
 mu::ui::window::CCharacterInfoWindow::CCharacterInfoWindow()
@@ -169,7 +166,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
 
                 auto statLine = c.RegisterStruct<StatLine>();
                 statLine.RegisterMember("text", &StatLine::text);
-                statLine.RegisterMember("color", &StatLine::color);
+                statLine.RegisterMember("source", &StatLine::source);
                 c.RegisterArray<std::vector<StatLine>>();
                 c.Bind("str_lines", &model.strLines);
                 c.Bind("agi_lines", &model.agiLines);
@@ -905,23 +902,23 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         }
     }
 
-    Rml::String attackDamageColor = bAttackDamage ? MakeColorRgba(100, 150, 255, 255) : MakeColorRgba(255, 255, 255, 255);
+    const char* attackDamageSource = bAttackDamage ? "boosted" : "base";
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
     {
-        attackDamageColor = MakeColorRgba(255, 0, 240, 255);
+        attackDamageSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3))
     {
-        attackDamageColor = MakeColorRgba(255, 0, 240, 255);
+        attackDamageSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))
     {
-        attackDamageColor = MakeColorRgba(255, 0, 240, 255);
+        attackDamageSource = "buffed";
     }
 
     model.strLines.clear();
-    model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageColor });
+    model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageSource });
 
     if (iAttackRatingPK > 0)
     {
@@ -934,7 +931,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             mu_swprintf(strAttakMamage, I18N::Game::AttackRateD, iAttackRatingPK);
         }
 
-        model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageColor });
+        model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageSource });
     }
     m_RmlBinder.MarkDirty("str_lines");
 
@@ -1137,34 +1134,34 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     model.agiLines.clear();
 
-    Rml::String defenseColor = MakeColorRgba(255, 255, 255, 255);
+    const char* defenseSource = "base";
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3))
     {
-        defenseColor = MakeColorRgba(255, 0, 240, 255);
+        defenseSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2))
     {
-        defenseColor = MakeColorRgba(255, 0, 240, 255);
+        defenseSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
     {
-        defenseColor = MakeColorRgba(100, 150, 255, 255);
+        defenseSource = "boosted";
     }
-    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), defenseColor });
+    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), defenseSource });
 
     WORD wAttackSpeed = CLASS_WIZARD == iBaseClass || CLASS_SUMMONER == iBaseClass
         ? CharacterAttribute->MagicSpeed : CharacterAttribute->AttackSpeed;
 
     mu_swprintf(strBlocking, I18N::Game::AttackSpeedD, wAttackSpeed);
 
-    Rml::String attackSpeedColor = MakeColorRgba(255, 255, 255, 255);
+    const char* attackSpeedSource = "base";
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1))
     {
-        attackSpeedColor = MakeColorRgba(255, 0, 240, 255);
+        attackSpeedSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll1))
     {
-        attackSpeedColor = MakeColorRgba(255, 0, 240, 255);
+        attackSpeedSource = "buffed";
     }
 
     ITEM* phelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
@@ -1175,11 +1172,11 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
-                attackSpeedColor = MakeColorRgba(255, 0, 240, 255);
+                attackSpeedSource = "buffed";
             }
         }
     }
-    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), attackSpeedColor });
+    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), attackSpeedSource });
 
     if (itemoption380Defense != 0 || iDefenseRate != 0)
     {
@@ -1189,7 +1186,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
     {
         mu_swprintf(strBlocking, I18N::Game::DefenseRateD, CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp);
     }
-    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), MakeColorRgba(255, 255, 255, 255) });
+    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), "base" });
     m_RmlBinder.MarkDirty("agi_lines");
 
     WORD wVitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
@@ -1228,18 +1225,18 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         mu_swprintf(strVitality, I18N::Game::HPDD, CharacterAttribute->Life, CharacterAttribute->LifeMax);
     }
 
-    Rml::String hpColor = MakeColorRgba(255, 255, 255, 255);
+    const char* hpSource = "base";
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin4))
     {
-        hpColor = MakeColorRgba(255, 0, 240, 255);
+        hpSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll5))
     {
-        hpColor = MakeColorRgba(255, 0, 240, 255);
+        hpSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_RiceCake))
     {
-        hpColor = MakeColorRgba(255, 0, 240, 255);
+        hpSource = "buffed";
     }
     if (phelper->Durability != 0 && phelper->Type == ITEM_SPIRIT_OF_GUARDIAN)
     {
@@ -1247,18 +1244,18 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
-                hpColor = MakeColorRgba(255, 0, 240, 255);
+                hpSource = "buffed";
             }
         }
     }
 
     model.vitLines.clear();
-    model.vitLines.push_back({ StringUtils::WideToNarrow(strVitality), hpColor });
+    model.vitLines.push_back({ StringUtils::WideToNarrow(strVitality), hpSource });
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
         mu_swprintf(strVitality, I18N::Game::MeleeDamageD, 50 + (wVitality / 10));
-        model.vitLines.push_back({ StringUtils::WideToNarrow(strVitality), MakeColorRgba(255, 255, 255, 255) });
+        model.vitLines.push_back({ StringUtils::WideToNarrow(strVitality), "base" });
     }
     m_RmlBinder.MarkDirty("vit_lines");
 
@@ -1282,20 +1279,20 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
     else
         mu_swprintf(strEnergy, I18N::Game::ManaDD, CharacterAttribute->Mana, CharacterAttribute->ManaMax);
 
-    Rml::String manaColor = MakeColorRgba(255, 255, 255, 255);
+    const char* manaSource = "base";
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin5))
     {
-        manaColor = MakeColorRgba(255, 0, 240, 255);
+        manaSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll6))
     {
-        manaColor = MakeColorRgba(255, 0, 240, 255);
+        manaSource = "buffed";
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Liguor))
     {
-        manaColor = MakeColorRgba(255, 0, 240, 255);
+        manaSource = "buffed";
     }
-    model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), manaColor });
+    model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), manaSource });
 
     if (iBaseClass == CLASS_WIZARD || iBaseClass == CLASS_DARK || iBaseClass == CLASS_SUMMONER)
     {
@@ -1434,20 +1431,20 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             mu_swprintf(strEnergy, I18N::Game::WizardryDmgDD216, iMagicDamageMin + maxMg, iMagicDamageMax + maxMg);
         }
 
-        Rml::String magicDamageColor = MakeColorRgba(255, 255, 255, 255);
+        const char* magicDamageSource = "base";
         if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
         {
-            magicDamageColor = MakeColorRgba(255, 0, 240, 255);
+            magicDamageSource = "buffed";
         }
         if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
         {
-            magicDamageColor = MakeColorRgba(255, 0, 240, 255);
+            magicDamageSource = "buffed";
         }
         if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))
         {
-            magicDamageColor = MakeColorRgba(255, 0, 240, 255);
+            magicDamageSource = "buffed";
         }
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), magicDamageColor });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), magicDamageSource });
     }
 
     if (iBaseClass == CLASS_SUMMONER)
@@ -1535,31 +1532,31 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
                 iCurseDamageMin, iCurseDamageMax);
         }
 
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), "base" });
     }
 
     if (iBaseClass == CLASS_KNIGHT)
     {
         mu_swprintf(strEnergy, I18N::Game::SkillDamageD, 200 + (wEnergy / 10));
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), "base" });
     }
     if (iBaseClass == CLASS_DARK)
     {
         mu_swprintf(strEnergy, I18N::Game::SkillDamageD, 200);
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), "base" });
     }
     if (iBaseClass == CLASS_DARK_LORD)
     {
         mu_swprintf(strEnergy, I18N::Game::SkillDamageD, 200 + (wEnergy / 20));
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), "base" });
     }
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
         mu_swprintf(strEnergy, I18N::Game::DivineDamageRoarSlasherD, 50 + (wEnergy / 10));
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), "base" });
         mu_swprintf(strEnergy, I18N::Game::AOEDamageDarkSideD, 100 + (wDexterity / 8 + wEnergy / 10));
-        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), "base" });
     }
     m_RmlBinder.MarkDirty("ene_lines");
 

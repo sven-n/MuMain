@@ -100,7 +100,9 @@ namespace mu::ui::window
         struct StatLine
         {
             Rml::String text;
-            Rml::String color; // "rgba(r,g,b,a)"
+            // Why the row reads the way it does: "base", "boosted" by an item or set, or
+            // "buffed" by a consumable. Each theme's character_info.rcss owns the colours.
+            Rml::String source;
         };
 
         void BuildRmlUi();

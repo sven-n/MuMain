@@ -196,3 +196,9 @@
    the value for each of the three; the base colour lives on .attr-value/.attr-label above. */
 .attr-value.attr-boosted, .attr-label.attr-boosted { color: rgb(100, 150, 255); }
 .attr-value.attr-potion,  .attr-label.attr-potion  { color: rgb(255, 120, 0); }
+
+/* A derived row's own state: RenderAttribute() gave an item or set the same pale blue the primary
+   stats use, and a consumable buff its own colour. */
+.attr-lines span { color: #ffffff; }
+.attr-lines span.boosted { color: rgb(100, 150, 255); }
+.attr-lines span.buffed { color: rgb(255, 0, 240); }

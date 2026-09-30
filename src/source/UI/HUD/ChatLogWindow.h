@@ -289,7 +289,7 @@ namespace mu::ui::window
     {
         // Native applies the user's transparency setting to every line's own background quad, so
         // this is a per-line colour, not a panel fill.
-        Rml::String backColor = "rgba(0,0,0,153)";
+        float backAlpha = 0.6f; // the player's own transparency setting, 0 .. 1
         Rml::Vector<ChatLogLineEntry> lines;
 
         // The native renderer's geometry under the window's layout, in physical px (the legacy

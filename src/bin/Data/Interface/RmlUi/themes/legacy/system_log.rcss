@@ -34,9 +34,14 @@
 .syslog-line {
 	display: block;
 	white-space: nowrap;
+	position: relative;
 }
+/* RenderMessages() drew each line's own quad in black at the user's transparency; the colour is
+   the theme's, the transparency the player's. A backgrounded element with children paints an
+   unclosed box in this build, so the backdrop is a childless leaf (engine-findings.md). */
+.syslog-back { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: #000000; }
+.syslog-text { position: relative; }
 
-/* Native's two colours: system messages blue, everything else the error red. The shared black
-   background comes from C++ (the user's transparency setting) via data-style-background-color. */
+/* Native's two colours: system messages blue, everything else the error red. */
 .syslog-line--system { color: rgb(100, 150, 255); }
 .syslog-line--error  { color: rgb(255, 30, 0); }

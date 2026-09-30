@@ -153,3 +153,7 @@
    the value for each of the three; the base colour lives on .attr-value above. */
 .attr-value.attr-boosted { color: rgb(100, 150, 255); }
 .attr-value.attr-potion  { color: rgb(255, 120, 0); }
+
+.attr-lines span { color: token(text-primary); }
+.attr-lines span.boosted { color: rgb(100, 150, 255); }
+.attr-lines span.buffed { color: token(accent-gold); }

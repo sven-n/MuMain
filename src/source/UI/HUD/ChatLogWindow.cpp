@@ -11,6 +11,7 @@
 
 // RmlUi migration -- see ChatLogRmlModel (ChatLogWindow.h).
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/Scaling/UITransform.h"
@@ -1247,7 +1248,7 @@ void mu::ui::window::CSystemLogWindow::BuildRmlUi()
             c.RegisterArray<Rml::Vector<ChatLogLineEntry>>();
 
             c.Bind("lines", &model.lines);
-            c.Bind("back_color", &model.backColor);
+            c.Bind("back_alpha", &model.backAlpha);
             c.Bind("panel_x", &model.panelX);
             c.Bind("panel_y", &model.panelY);
             c.Bind("row_px", &model.rowPx);
@@ -1291,14 +1292,8 @@ void mu::ui::window::CSystemLogWindow::SyncRmlModel()
 
     SystemLogRmlModel& model = m_RmlBinder.GetModel();
 
-    char backColor[48] = { 0, };
-    const int alpha = static_cast<int>(std::clamp(m_fBackAlpha, 0.0f, 1.0f) * 255.0f);
-    snprintf(backColor, sizeof(backColor), "rgba(0,0,0,%d)", alpha);
-    if (model.backColor != backColor)
-    {
-        model.backColor = backColor;
-        m_RmlBinder.MarkDirty("back_color");
-    }
+    SyncField(m_RmlBinder, &SystemLogRmlModel::backAlpha, "back_alpha",
+              std::clamp(m_fBackAlpha, 0.0f, 1.0f));
 
     SyncNativeGeometry();
 

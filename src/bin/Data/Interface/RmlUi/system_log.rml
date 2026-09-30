@@ -11,10 +11,12 @@
 	<div id="panel">
 		<!-- Per-line background rather than one panel fill: native called RenderText() with the
 		     alpha set per message and no box width, so each line gets its own quad sized to its
-		     own text. back_color carries the user's transparency setting. -->
+		     own text. The backdrop is its own childless leaf so the theme
+		     owns its colour and only the user's transparency setting stays bound; the text is
+		     not faded, as native did not fade it. -->
 		<div data-for="line : lines"
 		     data-attr-class="'syslog-line syslog-line--' + line.kind"
-		     data-style-background-color="back_color">{{line.text}}</div>
+		     ><div class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
 	</div>
 </body>
 </rml>

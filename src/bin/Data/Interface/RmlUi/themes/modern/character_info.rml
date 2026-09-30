@@ -46,7 +46,7 @@
 		<span class="attr-label attr-label-str">{{str_label}}</span>
 		<span class="attr-value attr-value-str" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'">{{str_value_text}}</span>
 		<div class="attr-lines attr-lines-str">
-			<span data-for="line : str_lines" data-style-color="line.color">{{line.text}}</span>
+			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(0)">+</div>
@@ -56,7 +56,7 @@
 		<span class="attr-label attr-label-agi">{{agi_label}}</span>
 		<span class="attr-value attr-value-agi" data-class-attr-potion="agi_value_source == 'potion'" data-class-attr-boosted="agi_value_source == 'boosted'">{{agi_value_text}}</span>
 		<div class="attr-lines attr-lines-agi">
-			<span data-for="line : agi_lines" data-style-color="line.color">{{line.text}}</span>
+			<span data-for="line : agi_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(1)">+</div>
@@ -66,7 +66,7 @@
 		<span class="attr-label attr-label-vit">{{vit_label}}</span>
 		<span class="attr-value attr-value-vit" data-class-attr-potion="vit_value_source == 'potion'" data-class-attr-boosted="vit_value_source == 'boosted'">{{vit_value_text}}</span>
 		<div class="attr-lines attr-lines-vit">
-			<span data-for="line : vit_lines" data-style-color="line.color">{{line.text}}</span>
+			<span data-for="line : vit_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(2)">+</div>
@@ -76,7 +76,7 @@
 		<span class="attr-label attr-label-ene">{{ene_label}}</span>
 		<span class="attr-value attr-value-ene" data-class-attr-potion="ene_value_source == 'potion'" data-class-attr-boosted="ene_value_source == 'boosted'">{{ene_value_text}}</span>
 		<div class="attr-lines attr-lines-ene">
-			<span data-for="line : ene_lines" data-style-color="line.color">{{line.text}}</span>
+			<span data-for="line : ene_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(3)">+</div>
