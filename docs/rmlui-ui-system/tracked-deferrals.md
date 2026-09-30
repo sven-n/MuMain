@@ -325,9 +325,15 @@ Still affected, by the presentation-member scan: `SiegeWarfare`,
 Not every member in those files is a leak — `MiniMap`'s markers and `WorldLabelLayer`'s projected
 labels are genuine per-frame data; the leak is the static chrome riding in the same structs.
 
-Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `left`/`top`/`width`/
-`height`/`font-size`/`color` straight onto the element, sourced from a native `CUITextInputBox`'s
-`GetPosition_x()`/`GetTextColor()`.
+`FriendWindowView::PlaceField()` skips the model and writes `left`/`top`/`width`/`height`/
+`font-size`/`color` straight onto the element, sourced from a native `CUITextInputBox`'s
+`GetPosition_x()`/`GetTextColor()`. **Re-examined: this is not the same defect as the rest.** The
+friends family is still a native `CUIBaseWindow` subsystem, and `FriendWindowRmlBuilder`
+transcribes it -- every box, button and field's geometry is read off a live control each frame, so
+the native side is authoritative for layout *and* hit-testing and the flow runs in §2's accepted
+direction. Porting that family off `CUIBaseWindow` is the prerequisite; moving its literals cannot
+resolve it, and neither can routing them through the model, since they would still arrive as
+inline properties.
 
 ### The rest, in remediation order
 
