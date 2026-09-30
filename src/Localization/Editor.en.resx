@@ -475,8 +475,8 @@
   <data name="Render style" xml:space="preserve">
     <value>Render style</value>
   </data>
-  <data name="Effect" xml:space="preserve">
-    <value>Effect</value>
+  <data name="Item effect" xml:space="preserve">
+    <value>Item effect</value>
   </data>
   <data name="Used by" xml:space="preserve">
     <value>used by</value>

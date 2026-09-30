@@ -246,7 +246,7 @@ item files hold what client and server share.
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
 | `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
-| `effect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
+| `itemEffect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 
 `inventory` and `ground` hold these values; a missing value has the
@@ -346,15 +346,15 @@ and `sealOfSustenance` (the seals, light at 0.9), `illusionSorcererCovenant`
 and `harmonyShine` (the Jewel of Harmony and the Moonstone Pendant, which
 are drawn plainly otherwise), and `cursedCastleWater`.
 
-`effect` names what the model does before it is drawn:
+`itemEffect` names what the model does before it is drawn:
 
 ```json
-{ "number": 37, "file": "Data/Item/wing09.bmd", "textureFolders": ["Item"], "effect": "wingOfEternal" }
+{ "number": 37, "file": "Data/Item/wing09.bmd", "textureFolders": ["Item"], "itemEffect": "wingOfEternal" }
 ```
 
-Each effect is code with a name; the names are listed at the end of
-`src/source/Render/Items/ItemEffects.cpp`. An effect runs before the model
-is drawn and can:
+Each item effect is code with a name; the names are listed at the end of
+`src/source/Render/Items/ItemEffects.cpp`. An item effect runs every frame
+before the model is drawn and can:
 
 - place sprites, particles and lightning on bones of the model, so they
   follow its animation (the Devil's Key and Invitation, Rena, the wings of
@@ -368,8 +368,8 @@ is drawn and can:
   scrolls, `fruits`, `spirit`, `bloodBone`, `invisibilityCloak`,
   `firecracker`, `gmGift`, `meshesPerLevel`).
 
-Items with the same effect share it. The socket seeds and spheres and zen
-have no effect; they glow like level 0 (`"glow": {"level": 0}`), whatever
+Items with the same item effect share it. The socket seeds and spheres and
+zen have no item effect; they glow like level 0 (`"glow": {"level": 0}`), whatever
 their level.
 
 The effects of the event models that level variants are drawn with stay in
@@ -419,7 +419,7 @@ The problems are:
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
 | A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
 | `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
-| `effect` names an effect that does not exist; the model is drawn without it. | warning |
+| `itemEffect` names an item effect that does not exist; the model is drawn without it. | warning |
 
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts
@@ -458,8 +458,8 @@ To keep your changes, copy the changed files from
 
 The **Looks** section above the item table shows the model data of the
 selected item (`Data/Items/Models`), read only: its model file, its glow
-values, its render style and its effect. A render style or an effect
-opens to the list of all items that use it; clicking one selects it in
+values, its render style and its item effect. A render style or an item
+effect opens to the list of all items that use it; clicking one selects it in
 the table (the search is cleared when it hides that item). Items without
 item data are listed too; they are not in the table, but selecting one
 shows its looks. Changing the looks is done in the model files for now.

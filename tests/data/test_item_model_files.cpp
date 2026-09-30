@@ -713,29 +713,29 @@ TEST_CASE("Styles that pick something per item draw other items plainly [data][i
     CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
 }
 
-TEST_CASE("The effects of shipped item models exist [data][items]")
+TEST_CASE("The item effects of shipped item models exist [data][items]")
 {
     for (const ItemModelDefinition& model : ShippedModels().models)
     {
-        if (!model.effect.empty())
+        if (!model.itemEffect.empty())
         {
-            INFO("(" << model.group << "," << model.number << ") " << model.effect);
-            CHECK(Render::Items::Effects::Exists(model.effect));
+            INFO("(" << model.group << "," << model.number << ") " << model.itemEffect);
+            CHECK(Render::Items::ItemEffects::Exists(model.itemEffect));
         }
     }
-    CHECK_FALSE(Render::Items::Effects::Exists("wingOfEternl"));
+    CHECK_FALSE(Render::Items::ItemEffects::Exists("wingOfEternl"));
 }
 
 // The effects of the old drawing code (RenderPartObjectEffect), recorded per
 // item: spot checks.
-TEST_CASE("Shipped item models keep the effects of the old drawing code [data][items]")
+TEST_CASE("Shipped item models keep the item effects of the old drawing code [data][items]")
 {
     const std::vector<ItemModelDefinition>& models = ShippedModels().models;
     const auto effectOf = [&](int group, int number)
     {
         const ItemModelDefinition* model = FindModel(models, group, number);
         REQUIRE(model != nullptr);
-        return model->effect;
+        return model->itemEffect;
     };
 
     CHECK(effectOf(0, 0).empty());
@@ -766,7 +766,7 @@ TEST_CASE("Shipped item models keep the effects of the old drawing code [data][i
 TEST_CASE("Item effects run before the model is drawn [data][items]")
 {
     using namespace Render::Items;
-    using Effects::Result;
+    using ItemEffects::Result;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     // A model without meshes draws nothing, so only the values change here.
@@ -775,7 +775,7 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     const auto apply = [&](int itemType, int& level)
     {
         object.Type = MODEL_ITEM + itemType;
-        return Effects::Apply(&model, &object, object.Type, 1.f, level);
+        return ItemEffects::Apply(&model, &object, object.Type, 1.f, level);
     };
 
     // Potions with a level glow like +7.
@@ -798,7 +798,7 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // Items without an effect, and models that are not items.
     CHECK(apply(ITEM_KRIS, level) == Result::None);
     object.Type = MODEL_PLAYER;
-    CHECK(Effects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
+    CHECK(ItemEffects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
 
     // The effects follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
@@ -855,9 +855,9 @@ TEST_CASE("Some render styles shine below +3 like the old drawing code [data][it
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
-TEST_CASE("The effect of a model is the one of its item, or of its event model [data][items]")
+TEST_CASE("The item effect of a model is the one of its item, or of its event model [data][items]")
 {
-    using Render::Items::Effects::Result;
+    using Render::Items::ItemEffects::Result;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     BMD model;

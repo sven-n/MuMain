@@ -135,7 +135,7 @@ void OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& 
     MarkNoneBlendMeshes(itemType, model);
     CheckGlowMeshes(itemType, model);
     CheckLookName(model, model.renderStyle, lookNames.renderStyle, ItemModelProblemType::RenderStyleUnknown);
-    CheckLookName(model, model.effect, lookNames.effect, ItemModelProblemType::EffectUnknown);
+    CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
 }
 
 ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)

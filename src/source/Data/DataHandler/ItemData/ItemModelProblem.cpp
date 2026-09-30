@@ -64,8 +64,8 @@ std::string DescribeProblem(const ItemModelProblem& problem)
                std::to_string(problem.meshCount) + " meshes";
     case ItemModelProblemType::RenderStyleUnknown:
         return "render style " + problem.name + " does not exist; " + problem.modelFile + " is drawn plainly";
-    case ItemModelProblemType::EffectUnknown:
-        return "effect " + problem.name + " does not exist; " + problem.modelFile + " is drawn without it";
+    case ItemModelProblemType::ItemEffectUnknown:
+        return "item effect " + problem.name + " does not exist; " + problem.modelFile + " is drawn without it";
     }
     return {};
 }

@@ -172,7 +172,7 @@
         "color": "bronze"
       },
       "renderStyle": "staffOfKundun",
-      "effect": "staffOfKundun"
+      "itemEffect": "staffOfKundun"
     },
     {
       "number": 12,

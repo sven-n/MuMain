@@ -463,7 +463,7 @@ void OpenItems()
     // Without model data the game stops; the item models are not opened.
     if (OpenItemModelData())
     {
-        Data::Items::ModelLoader::OpenModels({Render::Items::Styles::Exists, Render::Items::Effects::Exists});
+        Data::Items::ModelLoader::OpenModels({Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
         PrepareGrandSoulPantsClothMesh();
     }
     OpenItemEffectModels();

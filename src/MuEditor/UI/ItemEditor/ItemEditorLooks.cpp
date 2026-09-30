@@ -39,7 +39,7 @@ struct LooksCache
     int databaseVersion = -1;
     std::string glow;
     Look renderStyle;
-    Look effect;
+    Look itemEffect;
 };
 
 LooksCache g_cache;
@@ -82,7 +82,7 @@ void Refresh(int itemType, const ItemModelDefinition& model)
     g_cache.databaseVersion = databaseVersion;
     g_cache.glow = DescribeGlow(model);
     g_cache.renderStyle = TakeLook(model, &ItemModelDefinition::renderStyle);
-    g_cache.effect = TakeLook(model, &ItemModelDefinition::effect);
+    g_cache.itemEffect = TakeLook(model, &ItemModelDefinition::itemEffect);
 }
 
 // A look with the number of items that use it; opened, the list of those
@@ -138,7 +138,7 @@ int CItemEditorLooks::Render(int itemType)
     ImGui::Text("%s: %s", I18N::Editor::ModelFile, model->file.c_str());
     ImGui::Text("%s: %s", I18N::Editor::Glow, g_cache.glow.c_str());
     const int clickedStyleUser = RenderLook(I18N::Editor::RenderStyle, g_cache.renderStyle);
-    const int clickedEffectUser = RenderLook(I18N::Editor::Effect, g_cache.effect);
+    const int clickedEffectUser = RenderLook(I18N::Editor::ItemEffect, g_cache.itemEffect);
     return clickedStyleUser >= 0 ? clickedStyleUser : clickedEffectUser;
 }
 

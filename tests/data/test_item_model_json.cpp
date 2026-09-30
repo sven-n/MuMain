@@ -53,7 +53,7 @@ ItemModelDefinition MakeDarkHorse()
     model.textureFolders = {"Item", "Skill"};
     model.noneBlendMeshes = {1, 3};
     model.renderStyle = "darkHorse";
-    model.effect = "darkHorseAura";
+    model.itemEffect = "darkHorseAura";
     return model;
 }
 } // namespace
@@ -172,21 +172,21 @@ TEST_CASE("The render style of a model is a name [data][items]")
     CHECK(result.models[0].renderStyle.empty());
 }
 
-TEST_CASE("The effect of a model is a name [data][items]")
+TEST_CASE("The item effect of a model is a name [data][items]")
 {
     const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{MakeDarkHorse()});
-    CHECK(text.find(R"("effect": "darkHorseAura")") != std::string::npos);
-    // The effect comes after the render style.
-    CHECK(text.find(R"("renderStyle")") < text.find(R"("effect")"));
+    CHECK(text.find(R"("itemEffect": "darkHorseAura")") != std::string::npos);
+    // The item effect comes after the render style.
+    CHECK(text.find(R"("renderStyle")") < text.find(R"("itemEffect")"));
 
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "effect": ["sparks"]})", "effect"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "effect": "red sparks"})", "effect"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "effect": ""})", "effect"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ["sparks"]})", "itemEffect"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": "red sparks"})", "itemEffect"));
+    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ""})", "itemEffect"));
 
-    // Without an effect the model is only drawn.
+    // Without an item effect the model is only drawn.
     const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd"})"));
     REQUIRE(result.models.size() == 1);
-    CHECK(result.models[0].effect.empty());
+    CHECK(result.models[0].itemEffect.empty());
 }
 
 TEST_CASE("A model with errors is not read [data][items]")

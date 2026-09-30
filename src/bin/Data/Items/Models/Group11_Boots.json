@@ -230,7 +230,7 @@
       "glow": {
         "color": "steelBlue"
       },
-      "effect": "divineSet"
+      "itemEffect": "divineSet"
     },
     {
       "number": 20,

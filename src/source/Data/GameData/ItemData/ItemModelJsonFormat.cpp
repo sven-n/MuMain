@@ -24,7 +24,7 @@ constexpr const char* File = "file";
 constexpr const char* TextureFolders = "textureFolders";
 constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
 constexpr const char* RenderStyle = "renderStyle";
-constexpr const char* Effect = "effect";
+constexpr const char* ItemEffect = "itemEffect";
 } // namespace Keys
 
 constexpr std::string_view ModelFileExtension = ".bmd";
@@ -87,9 +87,9 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     {
         json[Keys::RenderStyle] = model.renderStyle;
     }
-    if (!model.effect.empty())
+    if (!model.itemEffect.empty())
     {
-        json[Keys::Effect] = model.effect;
+        json[Keys::ItemEffect] = model.itemEffect;
     }
     return json;
 }
@@ -214,8 +214,8 @@ void ItemModelReader::ReadNoneBlendMeshes(const OrderedJson& json, std::vector<i
     }
 }
 
-// A render style or an effect; whether it exists is checked when the models
-// are opened.
+// A render style or an item effect; whether it exists is checked when the
+// models are opened.
 void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std::string& name)
 {
     const auto field = json.find(key);
@@ -242,7 +242,7 @@ void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json)
                                                               DisplayJson::ClothKey,
                                                               GlowJson::GlowKey,
                                                               Keys::RenderStyle,
-                                                              Keys::Effect};
+                                                              Keys::ItemEffect};
     for (const auto& [key, value] : json.items())
     {
         if (!KnownKeys.contains(key))
@@ -275,7 +275,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     DisplayJson::Read(json, model, report);
     GlowJson::Read(json, model, report);
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
-    ReadLookName(json, Keys::Effect, model.effect);
+    ReadLookName(json, Keys::ItemEffect, model.itemEffect);
     WarnAboutUnknownKeys(json);
     return !m_hasErrors;
 }

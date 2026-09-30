@@ -6640,9 +6640,9 @@ void NextGradeObjectRender(CHARACTER* c)
 
 // The effects of the event models of level variants, which have no model
 // entry yet (the items have theirs in Render/Items/ItemEffects).
-static Render::Items::Effects::Result ApplyEventModelEffect(BMD* b, OBJECT* o, int Type, int Level, int ItemLevel)
+static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* o, int Type, int Level, int ItemLevel)
 {
-    using Render::Items::Effects::Result;
+    using Render::Items::ItemEffects::Result;
     if (o->Type == MODEL_EVENT + 14 && Level == 9)
     {
         Vector(0.3f, 0.8f, 1.f, b->BodyLight);
@@ -6724,14 +6724,14 @@ static Render::Items::Effects::Result ApplyEventModelEffect(BMD* b, OBJECT* o, i
     return Result::None;
 }
 
-// Items have the effect of their model entry; the event models of level
+// Items have the item effect of their model entry; the event models of level
 // variants have theirs in ApplyEventModelEffect.
-Render::Items::Effects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
-                                                     int ItemLevel)
+Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
+                                                         int ItemLevel)
 {
-    const Render::Items::Effects::Result effect = Render::Items::Effects::Apply(b, o, Type, Alpha, Level);
-    return effect != Render::Items::Effects::Result::None ? effect
-                                                          : ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
+    const Render::Items::ItemEffects::Result effect = Render::Items::ItemEffects::Apply(b, o, Type, Alpha, Level);
+    return effect != Render::Items::ItemEffects::Result::None ? effect
+                                                              : ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
 }
 
 extern float g_Luminosity;
@@ -6801,7 +6801,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         Level = std::min<int>(Level, g_pOption->GetRenderLevel() * 2 + 5);
     }
 
-    if (ApplyPartObjectEffect(b, o, Type, Alpha, Level, ItemLevel) == Render::Items::Effects::Result::Drawn)
+    if (ApplyPartObjectEffect(b, o, Type, Alpha, Level, ItemLevel) == Render::Items::ItemEffects::Result::Drawn)
     {
         return;
     }

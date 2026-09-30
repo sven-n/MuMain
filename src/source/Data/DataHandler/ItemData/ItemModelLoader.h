@@ -18,15 +18,15 @@ inline bool NoLookExists(std::string_view)
 }
 
 // The looks that exist; they are drawing code (Render::Items::Styles::Exists,
-// Render::Items::Effects::Exists).
+// Render::Items::ItemEffects::Exists).
 struct LookNames
 {
     LookExists renderStyle = NoLookExists;
-    LookExists effect = NoLookExists;
+    LookExists itemEffect = NoLookExists;
 };
 
 // Opens the .bmd file of every item model; `lookNames` checks the names of
-// the "renderStyle" and "effect" values.
+// the "renderStyle" and "itemEffect" values.
 void OpenModels(const LookNames& lookNames);
 
 // Loads the textures of every item model from its texture folders.

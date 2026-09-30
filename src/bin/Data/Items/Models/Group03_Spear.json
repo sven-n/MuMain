@@ -136,7 +136,7 @@
       "glow": {
         "color": "red"
       },
-      "effect": "billOfBalrog"
+      "itemEffect": "billOfBalrog"
     },
     {
       "number": 10,

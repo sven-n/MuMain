@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <string_view>
 
-namespace Render::Items::Effects
+namespace Render::Items::ItemEffects
 {
 namespace
 {
@@ -595,7 +595,8 @@ ItemModelTable<const ItemEffect*> g_itemEffects{[](const Data::Items::ItemModelD
                                                 {
                                                     // Names that are not effects are drawn without one; the
                                                     // model loader reports them.
-                                                    return model.effect.empty() ? nullptr : FindEffect(model.effect);
+                                                    return model.itemEffect.empty() ? nullptr
+                                                                                    : FindEffect(model.itemEffect);
                                                 }};
 } // namespace
 
@@ -609,4 +610,4 @@ Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level)
     const ItemEffect* effect = g_itemEffects.Find(modelType);
     return effect != nullptr ? effect->apply(b, o, modelType, alpha, level) : Result::None;
 }
-} // namespace Render::Items::Effects
+} // namespace Render::Items::ItemEffects

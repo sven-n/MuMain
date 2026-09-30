@@ -10,7 +10,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 1,
@@ -20,7 +20,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 2,
@@ -30,7 +30,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 3,
@@ -40,7 +40,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 4,
@@ -50,7 +50,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 5,
@@ -60,7 +60,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 6,
@@ -70,7 +70,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "effect": "potion"
+      "itemEffect": "potion"
     },
     {
       "number": 7,
@@ -80,7 +80,7 @@
         "anchor": [0.5, 0.5]
       },
       "renderStyle": "siegePotion",
-      "effect": "hiddenMeshByLevel"
+      "itemEffect": "hiddenMeshByLevel"
     },
     {
       "number": 8,
@@ -198,7 +198,7 @@
       "glow": {
         "level": [0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13]
       },
-      "effect": "devilsEye"
+      "itemEffect": "devilsEye"
     },
     {
       "number": 18,
@@ -214,7 +214,7 @@
       "glow": {
         "level": [0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13]
       },
-      "effect": "devilsKey"
+      "itemEffect": "devilsKey"
     },
     {
       "number": 19,
@@ -230,7 +230,7 @@
       "glow": {
         "level": [0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13]
       },
-      "effect": "devilsInvitation"
+      "itemEffect": "devilsInvitation"
     },
     {
       "number": 20,
@@ -260,7 +260,7 @@
       "ground": {
         "rotation": [270, 0, 90]
       },
-      "effect": "rena"
+      "itemEffect": "rena"
     },
     {
       "number": 22,
@@ -337,7 +337,7 @@
         "rotation": [270, 0, 0],
         "scale": 0.0035
       },
-      "effect": "meshesPerLevel"
+      "itemEffect": "meshesPerLevel"
     },
     {
       "number": 28,
@@ -642,7 +642,7 @@
         "rotation": [0, 0, -10],
         "scale": 0.4
       },
-      "effect": "gmGift"
+      "itemEffect": "gmGift"
     },
     {
       "number": 53,
@@ -769,7 +769,7 @@
         "rotation": [70, 0, -45],
         "scale": 1.5
       },
-      "effect": "firecracker"
+      "itemEffect": "firecracker"
     },
     {
       "number": 64,

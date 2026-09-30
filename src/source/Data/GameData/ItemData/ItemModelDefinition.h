@@ -130,7 +130,7 @@ struct ItemModelDefinition
     // What the model does before it is drawn (sprites and particles on its
     // bones, a pulsing glow mesh, its own drawing, ...): the name of an item
     // effect (Render/Items/ItemEffects). Empty: none.
-    std::string effect;
+    std::string itemEffect;
 
     bool Exists() const
     {

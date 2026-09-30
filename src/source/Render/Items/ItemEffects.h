@@ -9,8 +9,8 @@ class OBJECT;
 // lightning on their bones, a pulsing glow mesh, a mesh hidden by level, the
 // level they glow like, or their own drawing instead of the usual one. Each
 // effect is code with a name; the model entry of an item names its effect
-// (Data/Items/Models, "effect"). Items with the same effect share it.
-namespace Render::Items::Effects
+// (Data/Items/Models, "itemEffect"). Items with the same effect share it.
+namespace Render::Items::ItemEffects
 {
 // Whether there is an effect of this name. The model loader checks the names
 // of the model entries with it.
@@ -26,8 +26,8 @@ enum class Result
     Drawn,
 };
 
-// Runs the effect of the item before its model is drawn (the effects are
+// Runs the item effect before the model is drawn (the item effects are
 // taken from the item model database after each build of it). It may change
 // the level the model glows like.
 Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level);
-} // namespace Render::Items::Effects
+} // namespace Render::Items::ItemEffects

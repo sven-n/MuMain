@@ -78,7 +78,7 @@
         "level": 0,
         "excellent": false
       },
-      "effect": "wingsOfSoul"
+      "itemEffect": "wingsOfSoul"
     },
     {
       "number": 5,
@@ -95,7 +95,7 @@
         "level": 0,
         "excellent": false
       },
-      "effect": "wingsOfDragon"
+      "itemEffect": "wingsOfDragon"
     },
     {
       "number": 6,
@@ -113,7 +113,7 @@
         "excellent": false
       },
       "renderStyle": "wingsOfDarkness",
-      "effect": "wingsOfDarkness"
+      "itemEffect": "wingsOfDarkness"
     },
     {
       "number": 7,
@@ -323,7 +323,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "effect": "darkLordScroll"
+      "itemEffect": "darkLordScroll"
     },
     {
       "number": 22,
@@ -335,7 +335,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "effect": "darkLordScroll"
+      "itemEffect": "darkLordScroll"
     },
     {
       "number": 23,
@@ -347,7 +347,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "effect": "darkLordScroll"
+      "itemEffect": "darkLordScroll"
     },
     {
       "number": 24,
@@ -359,7 +359,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "effect": "darkLordScroll"
+      "itemEffect": "darkLordScroll"
     },
     {
       "number": 30,
@@ -440,7 +440,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "effect": "darkLordScroll"
+      "itemEffect": "darkLordScroll"
     },
     {
       "number": 36,
@@ -457,7 +457,7 @@
         "excellent": false
       },
       "renderStyle": "wingOfStorm",
-      "effect": "wingOfStorm"
+      "itemEffect": "wingOfStorm"
     },
     {
       "number": 37,
@@ -474,7 +474,7 @@
         "level": 0,
         "excellent": false
       },
-      "effect": "wingOfEternal"
+      "itemEffect": "wingOfEternal"
     },
     {
       "number": 38,
@@ -491,7 +491,7 @@
         "level": 0,
         "excellent": false
       },
-      "effect": "wingOfIllusion"
+      "itemEffect": "wingOfIllusion"
     },
     {
       "number": 39,
@@ -510,7 +510,7 @@
         "excellent": false
       },
       "renderStyle": "wingOfRuin",
-      "effect": "wingOfRuin"
+      "itemEffect": "wingOfRuin"
     },
     {
       "number": 40,
@@ -578,7 +578,7 @@
         "excellent": false
       },
       "renderStyle": "wingOfDimension",
-      "effect": "wingOfDimension"
+      "itemEffect": "wingOfDimension"
     },
     {
       "number": 44,
@@ -654,7 +654,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "effect": "darkLordScroll"
+      "itemEffect": "darkLordScroll"
     },
     {
       "number": 49,
