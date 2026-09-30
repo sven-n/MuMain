@@ -96,11 +96,9 @@ Rml::Element* CGoldBowmanWindow::GetSerialField() const
 
 void CGoldBowmanWindow::ClearSerialField()
 {
+    m_View.SetInputValue(Rml::String());
     if (Rml::Element* field = GetSerialField())
-    {
-        field->SetAttribute("value", Rml::String());
         field->Blur();
-    }
 }
 
 void CGoldBowmanWindow::OpeningProcess()
@@ -210,9 +208,8 @@ void CGoldBowmanWindow::SendSerial()
     }
 
     // The number as three groups of four characters, empty groups where it is shorter.
-    std::wstring serial;
-    if (Rml::Element* field = GetSerialField())
-        serial = StringUtils::NarrowToWide(field->GetAttribute<Rml::String>("value", Rml::String()));
+    // The model, not the element: data-value writes the typed serial back into it.
+    std::wstring serial = StringUtils::NarrowToWide(m_View.InputValue());
     serial.resize(MAXGOLDBOWMANSESERIAL, L'\0');
 
     wchar_t strSerial1[5] = {};

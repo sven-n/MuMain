@@ -44,6 +44,10 @@ struct ChatCommandHitEntry
 
 struct ChatCommandRmlModel
 {
+    // The parameter value being edited. Two-way through data-value, so the typed text lives
+    // here rather than in the element's attribute.
+    Rml::String editValue;
+
     // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)

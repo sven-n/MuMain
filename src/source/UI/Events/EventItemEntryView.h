@@ -65,6 +65,11 @@ public:
     // An element of the main document (a window's own text field), or nullptr before Build().
     Rml::Element* GetElementById(const char* id) const;
 
+    // The window's own text field's contents, when its document has one. Two-way: the <input>'s
+    // data-value writes it back, so this is the value, not the element's attribute.
+    const Rml::String& InputValue() const;
+    void SetInputValue(const Rml::String& value);
+
     // #panel's own live RCSS size, for the owner's native hit test. Leaves both alone when the
     // document isn't up or laid out yet, so seed them with the window's own fallback constants
     // (UI::RmlBridge::RefreshLogicalPanelSize()'s convention, which this forwards to).

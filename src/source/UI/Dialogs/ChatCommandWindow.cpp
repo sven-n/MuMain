@@ -13,6 +13,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -407,8 +408,8 @@ void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterI
     }
 
     m_editedParameter = static_cast<int>(parameterIndex);
-    if (Rml::Element* field = GetValueField())
-        field->SetAttribute("value", StringUtils::WideToNarrow(m_parameterValues[parameterIndex].c_str()));
+    SyncField(m_RmlBinder, &ChatCommandRmlModel::editValue, "edit_value",
+              Rml::String(StringUtils::WideToNarrow(m_parameterValues[parameterIndex].c_str())));
 
     // The field takes the focus once the document shows it at its new place (SyncRmlModel());
     // Update() then claims RmlUi's text-input identity so Escape and Enter still reach this window.
@@ -700,10 +701,9 @@ Rml::Element* mu::ui::window::CChatCommandWindow::GetValueField() const
 
 std::wstring mu::ui::window::CChatCommandWindow::ReadValueField() const
 {
-    Rml::Element* field = GetValueField();
-    if (field == nullptr)
-        return {};
-    return StringUtils::NarrowToWide(field->GetAttribute<Rml::String>("value", Rml::String()));
+    // No element lookup: the value lives in the model, and the element only exists while the field
+    // is shown at its parameter. Its one caller already guards on m_editedParameter.
+    return StringUtils::NarrowToWide(m_RmlBinder.GetModel().editValue);
 }
 
 void mu::ui::window::CChatCommandWindow::BuildRmlUi()
@@ -745,6 +745,7 @@ void mu::ui::window::CChatCommandWindow::BuildRmlUi()
             c.Bind("hits", &model.hits);
 
             c.Bind("editing", &model.editing);
+            c.Bind("edit_value", &model.editValue);
             c.Bind("edit_top", &model.editTop);
             c.Bind("has_left_button", &model.hasLeftButton);
             c.Bind("has_right_button", &model.hasRightButton);
@@ -821,12 +822,8 @@ void mu::ui::window::CChatCommandWindow::SyncValueField()
     if (command != nullptr && static_cast<size_t>(m_editedParameter) < command->Parameters.size() &&
         command->Parameters[m_editedParameter].Type == ChatCommandParameterType::Number)
     {
-        const Rml::String value = field->GetAttribute<Rml::String>("value", Rml::String());
-        Rml::String digits;
-        std::copy_if(value.begin(), value.end(), std::back_inserter(digits),
-                     [](char c) { return c >= '0' && c <= '9'; });
-        if (digits != value)
-            field->SetAttribute("value", digits);
+        SyncField(m_RmlBinder, &ChatCommandRmlModel::editValue, "edit_value",
+                  UI::RmlBridge::KeepDigitsOnly(m_RmlBinder.GetModel().editValue));
     }
 
     // The field exists only while it is shown at its parameter (see chat_command.rml); focus it

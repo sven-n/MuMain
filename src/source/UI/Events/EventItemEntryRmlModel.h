@@ -41,6 +41,10 @@ struct EventItemEntryButtonEntry
 
 struct EventItemEntryRmlModel
 {
+    // The window's own text field, for a document that has one (gold_bowman.rml today).
+    // Two-way through data-value, so the typed text lives here rather than in the element.
+    Rml::String inputValue;
+
     // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     float textPx = 0.f;     // native normal text size in physical px (RmlRootTransform.h)

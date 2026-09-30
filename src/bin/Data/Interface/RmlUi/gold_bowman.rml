@@ -32,7 +32,7 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
 		</div>
 
-		<input id="serial_field" type="text" class="text-field sharp-text" maxlength="12"
+		<input id="serial_field" data-value="input_value" type="text" class="text-field sharp-text" maxlength="12"
 		       data-style-font-size="text_px + 'px'" data-style-width="(200 * root_scale) + 'px'"
 		       data-style-height="(14 * root_scale) + 'px'" data-style-line-height="(14 * root_scale) + 'px'"
 		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>

@@ -5,6 +5,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
@@ -37,6 +38,7 @@ void mu::ui::window::EventItemEntryView::Build()
             c.Bind("root_scale", &model.rootScale);
             c.Bind("text_px", &model.textPx);
             c.Bind("bold_text_px", &model.boldTextPx);
+            c.Bind("input_value", &model.inputValue);
 
             auto text = c.RegisterStruct<EventItemEntryTextEntry>();
             text.RegisterMember("text", &EventItemEntryTextEntry::text);
@@ -238,6 +240,16 @@ int mu::ui::window::EventItemEntryView::TakePressedButton()
 Rml::Element* mu::ui::window::EventItemEntryView::GetElementById(const char* id) const
 {
     return m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById(id) : nullptr;
+}
+
+const Rml::String& mu::ui::window::EventItemEntryView::InputValue() const
+{
+    return m_RmlBinder.GetModel().inputValue;
+}
+
+void mu::ui::window::EventItemEntryView::SetInputValue(const Rml::String& value)
+{
+    SyncField(m_RmlBinder, &EventItemEntryRmlModel::inputValue, "input_value", Rml::String(value));
 }
 
 void mu::ui::window::EventItemEntryView::RefreshPanelSize(float& width, float& height) const

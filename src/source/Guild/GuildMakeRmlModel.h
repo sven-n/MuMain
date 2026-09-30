@@ -40,6 +40,10 @@ struct GuildMakeRmlModel
     float labelTop = 0.f;
     float labelLinePx = 0.f;
 
+    // The typed guild name. Two-way: the <input> writes it back through data-value, so this is
+    // where the name lives -- not the element's value attribute.
+    Rml::String guildName;
+
     std::vector<GuildMakeCellEntry> cells;   // the 8 x 8 editor, row by row
     std::vector<GuildMakeCellEntry> palette; // the 16 colours, two rows of eight
     GuildMakeCellEntry selected;             // the colour being drawn with

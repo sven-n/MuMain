@@ -201,19 +201,17 @@ void CGuildMakeWindow::ChangeEditBox(const UISTATES type)
     if (type == UISTATE_NORMAL)
     {
         // Restore guild name if it exists BEFORE setting state
-        if (field != nullptr)
-            field->SetAttribute("value", StringUtils::WideToNarrow(GuildMark[MARK_EDIT].GuildName));
+        SyncField(m_RmlBinder, &GuildMakeRmlModel::guildName, "guild_name",
+                  Rml::String(StringUtils::WideToNarrow(GuildMark[MARK_EDIT].GuildName)));
         m_NameFieldShown = true;
         // Focused once the document shows it (SyncRmlModel()), as GiveFocus() did.
         m_NameFieldFocusPending = true;
     }
     else
     {
+        SyncField(m_RmlBinder, &GuildMakeRmlModel::guildName, "guild_name", Rml::String());
         if (field != nullptr)
-        {
-            field->SetAttribute("value", Rml::String());
             field->Blur();
-        }
         m_NameFieldShown = false;
         m_NameFieldFocusPending = false;
     }
@@ -226,10 +224,10 @@ Rml::Element* CGuildMakeWindow::GetNameField() const
 
 void CGuildMakeWindow::ReadNameField(wchar_t* text, int length) const
 {
-    Rml::Element* field = GetNameField();
-    if (field == nullptr || length <= 0)
+    if (length <= 0)
         return;
-    const std::wstring value = StringUtils::NarrowToWide(field->GetAttribute<Rml::String>("value", Rml::String()));
+    // The model, not the element: data-value writes the typed text back into it.
+    const std::wstring value = StringUtils::NarrowToWide(m_RmlBinder.GetModel().guildName);
     wcsncpy(text, value.c_str(), static_cast<size_t>(length - 1));
     text[length - 1] = L'\0';
 }
@@ -432,6 +430,7 @@ void CGuildMakeWindow::BuildRmlUi()
             c.Bind("palette_hint_1", &model.paletteHint1);
             c.Bind("palette_hint_2", &model.paletteHint2);
             c.Bind("exit_tooltip", &model.exitTooltip);
+            c.Bind("guild_name", &model.guildName);
             c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             auto cell = c.RegisterStruct<GuildMakeCellEntry>();
@@ -464,13 +463,19 @@ void CGuildMakeWindow::ReloadRmlTheme()
     if (!m_pRmlDoc)
         return;
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    const Rml::String typed = m_RmlBinder.GetModel().guildName;
     m_RmlBinder.Destroy(context);
     context->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
     if (m_NameFieldShown)
+    {
+        // ChangeEditBox() reseeds from the game data, so carry what was typed across the rebuild --
+        // Destroy() above cleared the model, which is now where the name lives.
         ChangeEditBox(UISTATE_NORMAL);
+        SyncField(m_RmlBinder, &GuildMakeRmlModel::guildName, "guild_name", Rml::String(typed));
+    }
 }
 
 void CGuildMakeWindow::SyncRmlModel()
