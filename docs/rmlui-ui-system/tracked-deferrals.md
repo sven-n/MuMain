@@ -289,18 +289,26 @@ override at all**, silently.
 
 **A port that transcribes the window's own native `Render()` into the model.** The model stops
 being a view model and becomes a draw list; the document becomes a generic replayer over
-`data-for`. `GuardWindowRmlModel.h`'s `GuardTextEntry {text, left, top, width, textPx, align,
-bold, color}` is `RenderText()` with its arguments renamed, and the producing side is literal
-(`addText(I18N::Game::GuardNPC, x0 + 15, y0 + 13, 160, 1)`). Neither theme can move that title,
-restyle it or realign it.
+`data-for`. `TipTextListRmlModel.h`'s `TipTextListLineEntry {text, left, top, width, textPx,
+align, bold, color}` is `RenderText()` with its arguments renamed. Neither theme can move such a
+line, restyle it or realign it.
 
-The decisive detail is that `CGuardWindow::Render()` paints nothing — its own comment says so. The
-native controls are retained for **hit-testing and data**, not rendering, so §2's native-geometry
-exception does not apply, and the flow runs the wrong way (C++ constant → RmlUi position) for the
-whole window.
+The decisive detail is that these windows' own `Render()` paints nothing — `CGuardWindow::Render()`
+says so in its own comment. The native controls are retained for **hit-testing and data**, not
+rendering, so §2's native-geometry exception does not apply, and the flow runs the wrong way
+(C++ constant → RmlUi position) for the whole window.
 
-Affected, by the presentation-member scan: `GuardWindow`, `CastleWindow`, `SiegeWarfare`,
-`GuildInfoWindow`, `GuildMakeWindow`, `GensRanking`, `GatemanWindow`, `MessageBoxView`,
+**Converted so far: `GuardWindow`, `GatemanWindow`, `CastleWindow`.** `GuardTextEntry`,
+`GuardBoxEntry`, `GuardButtonEntry`, `GatemanTextEntry`, `GatemanButtonEntry`, `CastlePieceEntry`
+and `CastleButtonEntry` are gone; each window's lines, buttons, table frames and list columns are
+named elements its themes place. `GatemanWindow` no longer registers a presentation member at all.
+The two that remain do so for a stated reason: a Guard list row's `top` follows the native list
+box's scroll position, and a Senatus map item's `left`/`top` is its slot on the map art. Guard's
+guild lists keep their native data, scrolling and selection — no client-reachable siege state
+renders either list, so retiring them has no way to be validated.
+
+Still affected, by the presentation-member scan: `SiegeWarfare`,
+`GuildInfoWindow`, `GuildMakeWindow`, `GensRanking`, `MessageBoxView`,
 `ChatCommandWindow`, `ReconnectDialog`, `CatapultWindow`, `CryWolf`, `CursedTempleEnter`/`Result`/
 `System`, `DoppelGangerFrame`, `EventEntryView`, `EventItemEntryView`, `EventTimerView`,
 `KanturuEvent`, `DuelWatch{MainFrame,UserList}Window`, `MasterLevel`, `Notices`,
@@ -332,7 +340,10 @@ Worst instance: `FriendWindowView::PlaceField()` skips the model and writes `lef
 
 - **The display-list port above.** Highest leverage precisely because it is a *method*: applied to
   a window it produces every other finding here at once, and it has been applied 32 times. Worth
-  ruling on before the next port more than retrofitting the existing 32.
+  ruling on before the next port more than retrofitting the existing 32. Three are now converted
+  (above); the rest wait on those being verified in game, and on `:nth-child` — the enabling
+  selector for any repeated list of variable length — being proved once at runtime, since nothing
+  in this tree has used it yet and counter-scaled layers cannot be stacked by flow.
 - **Colour decided in C++ where the semantic value is in hand.** The correct translation already
   shipped in the neighbouring family — `gold_tier`, `level_bucket` and `cost_tier` classify in C++
   and let `base.rcss`/`trade.rcss` own the colour — so this was an unevenly applied house pattern,
