@@ -21,10 +21,8 @@ CEnterBloodCastle::CEnterBloodCastle() : m_View("blood_castle_enter", "Data/Inte
 {
     m_pNewUIMng = NULL;
     memset(&m_Pos, 0, sizeof(POINT));
-    memset(&m_EnterUITextPos, 0, sizeof(POINT));
 
     m_iNumActiveBtn = 1;
-    m_BtnEnterStartPos.x = m_BtnEnterStartPos.y = 0;
 
     m_iBloodCastleLimitLevel[0][0] = 15;  m_iBloodCastleLimitLevel[0][1] = 80;
     m_iBloodCastleLimitLevel[1][0] = 81;  m_iBloodCastleLimitLevel[1][1] = 130;
@@ -89,19 +87,6 @@ void CEnterBloodCastle::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-    m_EnterUITextPos.x = m_Pos.x + 3;
-    m_EnterUITextPos.y = m_Pos.y + 55;
-
-    SetBtnPos(m_Pos.x + 6, m_Pos.y + 125);
-
-}
-
-//---------------------------------------------------------------------------------------------
-// SetBtnPos
-void CEnterBloodCastle::SetBtnPos(int x, int y)
-{
-    m_BtnEnterStartPos.x = x;
-    m_BtnEnterStartPos.y = y;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -252,7 +237,7 @@ void CEnterBloodCastle::ReloadRmlTheme()
 
 void CEnterBloodCastle::SetViewContent(const std::vector<EventEntryView::Button>& buttons)
 {
-    // The description, cut into lines of at most MAX_LENGTH_CMB characters, 20 units apart.
+    // The description, cut into lines of at most MAX_LENGTH_CMB characters.
     wchar_t txtline[NUM_LINE_CMB][MAX_LENGTH_CMB] = {0};
     const int tl =
         SeparateTextIntoLines(I18N::Game::YourWillToHelpTheArchangel, txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
@@ -260,6 +245,5 @@ void CEnterBloodCastle::SetViewContent(const std::vector<EventEntryView::Button>
     for (int j = 0; j < tl; ++j)
         lines.emplace_back(txtline[j]);
 
-    m_View.SetContent(I18N::Game::MessengerOfArchangel, lines, float(m_EnterUITextPos.y - m_Pos.y), 20.f, buttons,
-                      float(m_BtnEnterStartPos.y - m_Pos.y), float(ENTER_BTN_VAL));
+    m_View.SetContent(I18N::Game::MessengerOfArchangel, lines, buttons);
 }

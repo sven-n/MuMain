@@ -1,0 +1,19 @@
+/* Where CEnterBloodCastle's own lines and buttons sit. SetPos(): the description from y + 55, 20 units apart (at most NUM_LINE_CMB lines), the MAX_ENTER_GRADE level buttons from y + 125, ENTER_BTN_VAL apart.
+   The look they share is event_entry.rcss; only the rows are this window's. */
+
+.entry-line:nth-child(1) { top: 55px; }
+.entry-line:nth-child(2) { top: 75px; }
+.entry-line:nth-child(3) { top: 95px; }
+.entry-line:nth-child(4) { top: 115px; }
+.entry-line:nth-child(5) { top: 135px; }
+.entry-line:nth-child(6) { top: 155px; }
+.entry-line:nth-child(7) { top: 175px; }
+
+.entry-btn:nth-child(1) { top: 125px; }
+.entry-btn:nth-child(2) { top: 158px; }
+.entry-btn:nth-child(3) { top: 191px; }
+.entry-btn:nth-child(4) { top: 224px; }
+.entry-btn:nth-child(5) { top: 257px; }
+.entry-btn:nth-child(6) { top: 290px; }
+.entry-btn:nth-child(7) { top: 323px; }
+.entry-btn:nth-child(8) { top: 356px; }

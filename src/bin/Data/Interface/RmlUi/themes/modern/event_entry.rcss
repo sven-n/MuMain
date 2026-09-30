@@ -17,6 +17,8 @@
 	pointer-events: none;
 }
 
+.entry-lines, .entry-buttons { position: static; }
+
 .entry-line {
 	display: block;
 	position: absolute;

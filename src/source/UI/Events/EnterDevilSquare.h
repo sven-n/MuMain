@@ -52,8 +52,6 @@ namespace mu::ui::window
     private:
         CManager* m_pNewUIMng;
         POINT						m_Pos;
-        POINT						m_BtnEnterStartPos;
-        POINT						m_EnterUITextPos;
 
         // The window's RmlUi document (entry frame, lines, level buttons, exit).
         EventEntryView m_View;
@@ -85,7 +83,6 @@ namespace mu::ui::window
         void ReloadRmlTheme();
 
     private:
-        void SetBtnPos(int x, int y);
         // The title and description lines of the original's Render(), with the level buttons.
         void SetViewContent(const std::vector<EventEntryView::Button>& buttons);
 

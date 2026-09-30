@@ -1,0 +1,17 @@
+/* Where CEnterDevilSquare's own lines and buttons sit. SetPos(): the six description lines from y + 45, 15 units apart, the MAX_ENTER_GRADE level buttons from y + 155, ENTER_BTN_VAL apart.
+   The look they share is event_entry.rcss; only the rows are this window's. */
+
+.entry-line:nth-child(1) { top: 45px; }
+.entry-line:nth-child(2) { top: 60px; }
+.entry-line:nth-child(3) { top: 75px; }
+.entry-line:nth-child(4) { top: 90px; }
+.entry-line:nth-child(5) { top: 105px; }
+.entry-line:nth-child(6) { top: 120px; }
+
+.entry-btn:nth-child(1) { top: 155px; }
+.entry-btn:nth-child(2) { top: 188px; }
+.entry-btn:nth-child(3) { top: 221px; }
+.entry-btn:nth-child(4) { top: 254px; }
+.entry-btn:nth-child(5) { top: 287px; }
+.entry-btn:nth-child(6) { top: 320px; }
+.entry-btn:nth-child(7) { top: 353px; }

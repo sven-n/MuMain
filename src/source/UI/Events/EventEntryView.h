@@ -31,9 +31,10 @@ public:
     void Build();
     void ReloadTheme();
 
-    // The static content, set when the window opens.
-    void SetContent(const wchar_t* title, const std::vector<std::wstring>& lines, float firstLineTop, float lineSpacing,
-                    const std::vector<Button>& buttons, float firstButtonTop, float buttonSpacing);
+    // The static content, set when the window opens. Where the lines and buttons land is the
+    // theme's: each window's own .rcss gives its rows (event_entry.rcss).
+    void SetContent(const wchar_t* title, const std::vector<std::wstring>& lines,
+                    const std::vector<Button>& buttons);
 
     // Per frame, inside the window's CManager transform scope.
     void Sync(bool visible, const POINT& pos);

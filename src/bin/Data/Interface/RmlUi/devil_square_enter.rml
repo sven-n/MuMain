@@ -4,6 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="docked_panel_frame.rcss"/>
 	<link type="text/rcss" href="event_entry.rcss"/>
+	<link type="text/rcss" href="devil_square_enter.rcss"/>
 </head>
 <body>
 	<!-- The Devil Square entry (CEnterDevilSquare) window, docked right: the title, the description lines, one button per level
@@ -23,16 +24,24 @@
 		      data-style-line-height="title_line_px + 'px'" data-style-width="(72 * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
 
-		<span class="sharp-text entry-line" data-for="line : lines" data-style-top="line.top + 'px'"
-		      data-style-font-size="line.text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
+		<!-- The rows each of these lands on are the theme's: this window's own .rcss gives one
+		     :nth-child rule per row. Each repeated set has its own container so the count starts
+		     at the first line / first button. -->
+		<div class="entry-lines">
+			<span class="sharp-text entry-line" data-for="line : lines"
+			      data-style-font-size="line.text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
+		</div>
 
-		<div class="entry-btn" data-for="b : buttons" data-class-enabled="b.enabled" data-style-top="b.top + 'px'"
-		     data-event-click="entry_press(b.index)">
-			<span class="sharp-text entry-label" data-style-top="b.label_top + 'px'"
-			      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"
-			      data-style-width="(180 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		<div class="entry-buttons">
+			<div class="entry-btn" data-for="b, i : buttons" data-class-enabled="b.enabled"
+			     data-event-click="entry_press(i)">
+				<span class="sharp-text entry-label" data-style-top="button_label_top + 'px'"
+				      data-style-font-size="button_label_text_px + 'px'"
+				      data-style-line-height="button_label_line_px + 'px'"
+				      data-style-width="(180 * root_scale) + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+			</div>
 		</div>
 
 		<div id="btn_exit" data-event-click="entry_exit"></div>

@@ -43,24 +43,21 @@ void mu::ui::window::EventEntryView::Build()
             c.Bind("text_px", &model.textPx);
             c.Bind("title_text_px", &model.titleTextPx);
             c.Bind("title_line_px", &model.titleLinePx);
+            c.Bind("button_label_top", &model.buttonLabelTop);
+            c.Bind("button_label_line_px", &model.buttonLabelLinePx);
+            c.Bind("button_label_text_px", &model.buttonLabelTextPx);
             c.Bind("title_text", &model.titleText);
             c.Bind("exit_tooltip", &model.exitTooltip);
 
             auto line = c.RegisterStruct<EventEntryLineEntry>();
             line.RegisterMember("text", &EventEntryLineEntry::text);
-            line.RegisterMember("top", &EventEntryLineEntry::top);
             line.RegisterMember("text_px", &EventEntryLineEntry::textPx);
             c.RegisterArray<std::vector<EventEntryLineEntry>>();
             c.Bind("lines", &model.lines);
 
             auto button = c.RegisterStruct<EventEntryButtonEntry>();
             button.RegisterMember("label", &EventEntryButtonEntry::label);
-            button.RegisterMember("index", &EventEntryButtonEntry::index);
             button.RegisterMember("enabled", &EventEntryButtonEntry::enabled);
-            button.RegisterMember("top", &EventEntryButtonEntry::top);
-            button.RegisterMember("label_top", &EventEntryButtonEntry::labelTop);
-            button.RegisterMember("label_line_px", &EventEntryButtonEntry::labelLinePx);
-            button.RegisterMember("label_text_px", &EventEntryButtonEntry::labelTextPx);
             c.RegisterArray<std::vector<EventEntryButtonEntry>>();
             c.Bind("buttons", &model.buttons);
 
@@ -105,9 +102,7 @@ void mu::ui::window::EventEntryView::ReloadTheme()
 }
 
 void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std::vector<std::wstring>& lines,
-                                                float firstLineTop, float lineSpacing,
-                                                const std::vector<Button>& buttons, float firstButtonTop,
-                                                float buttonSpacing)
+                                                const std::vector<Button>& buttons)
 {
     Build();
     m_Title = title != nullptr ? title : L"";
@@ -116,19 +111,11 @@ void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std:
     EventEntryRmlModel& model = m_RmlBinder.GetModel();
     model.titleText = StringUtils::WideToNarrow(m_Title.c_str());
     model.lines.clear();
-    for (std::size_t i = 0; i < lines.size(); ++i)
-        model.lines.push_back(
-            {StringUtils::WideToNarrow(lines[i].c_str()), firstLineTop + lineSpacing * static_cast<float>(i), 0.f});
+    for (const std::wstring& text : lines)
+        model.lines.push_back({StringUtils::WideToNarrow(text.c_str()), 0.f});
     model.buttons.clear();
-    for (std::size_t i = 0; i < buttons.size(); ++i)
-    {
-        EventEntryButtonEntry entry;
-        entry.label = StringUtils::WideToNarrow(buttons[i].label.c_str());
-        entry.index = static_cast<int>(i);
-        entry.enabled = buttons[i].enabled;
-        entry.top = firstButtonTop + buttonSpacing * static_cast<float>(i);
-        model.buttons.push_back(std::move(entry));
-    }
+    for (const Button& button : buttons)
+        model.buttons.push_back({StringUtils::WideToNarrow(button.label.c_str()), button.enabled});
     m_RmlBinder.MarkDirty("title_text");
     m_RmlBinder.MarkDirty("lines");
     m_RmlBinder.MarkDirty("buttons");
@@ -185,23 +172,14 @@ void mu::ui::window::EventEntryView::SyncTextSizes()
     if (linesChanged)
         m_RmlBinder.MarkDirty("lines");
 
-    // CButton::Render(): the bold label at x + (180 / 2 - w / 2), y + (29 / 2 - h / 2), whole units.
+    // CButton::Render(): the bold label at x + (180 / 2 - w / 2), y + (29 / 2 - h / 2), whole
+    // units -- the same for every button, so it is the model's, not each entry's.
     const int boldHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold);
-    bool buttonsChanged = false;
-    for (EventEntryButtonEntry& button : model.buttons)
-    {
-        const float labelTop = static_cast<float>(kButtonHeight / 2 - boldHeight / 2);
-        const float linePx = static_cast<float>(boldHeight) * transform.scaleY;
-        if (button.labelTop != labelTop || button.labelLinePx != linePx || button.labelTextPx != boldPx)
-        {
-            button.labelTop = labelTop;
-            button.labelLinePx = linePx;
-            button.labelTextPx = boldPx;
-            buttonsChanged = true;
-        }
-    }
-    if (buttonsChanged)
-        m_RmlBinder.MarkDirty("buttons");
+    SyncField(m_RmlBinder, &EventEntryRmlModel::buttonLabelTop, "button_label_top",
+              static_cast<float>(kButtonHeight / 2 - boldHeight / 2));
+    SyncField(m_RmlBinder, &EventEntryRmlModel::buttonLabelLinePx, "button_label_line_px",
+              static_cast<float>(boldHeight) * transform.scaleY);
+    SyncField(m_RmlBinder, &EventEntryRmlModel::buttonLabelTextPx, "button_label_text_px", boldPx);
 }
 
 int mu::ui::window::EventEntryView::TakePressedButton()
