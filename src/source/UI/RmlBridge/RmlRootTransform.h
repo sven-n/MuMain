@@ -19,10 +19,21 @@ namespace UI::RmlBridge
     void SyncRootTransform(RmlModelBinder<Model>& binder, const POINT& pos)
     {
         const auto transform = UI::Scaling::GetActiveTransform();
+        const float rootX = static_cast<float>(pos.x) * transform.scaleX + transform.offsetX;
+        const float rootY = static_cast<float>(pos.y) * transform.scaleY + transform.offsetY;
+        const float rootScale = transform.scaleX;
+
+        // Dirty only on change, like SyncNativeTextSize() below. This is the most-called sync in the
+        // UI -- every docked and inventory window, every frame -- and each dirtied root_* re-runs
+        // every view bound to it, which on a window that binds its layout is dozens of writes for a
+        // panel that has not moved. The three change together, so one comparison covers them.
         Model& model = binder.GetModel();
-        model.rootX = static_cast<float>(pos.x) * transform.scaleX + transform.offsetX;
-        model.rootY = static_cast<float>(pos.y) * transform.scaleY + transform.offsetY;
-        model.rootScale = transform.scaleX;
+        if (model.rootX == rootX && model.rootY == rootY && model.rootScale == rootScale)
+            return;
+
+        model.rootX = rootX;
+        model.rootY = rootY;
+        model.rootScale = rootScale;
         binder.MarkDirty("root_x");
         binder.MarkDirty("root_y");
         binder.MarkDirty("root_scale");
