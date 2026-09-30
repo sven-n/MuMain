@@ -184,8 +184,7 @@
     },
     {
       "number": 12,
-      "file": "Data/Item/Gem06.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillCrystal",
       "inventory": {
         "anchor": [0.5, 0.75],
         "scale": 0.002
@@ -230,8 +229,7 @@
     },
     {
       "number": 15,
-      "file": "Data/Item/Jewel15.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfChaos",
       "inventory": {
         "scale": 0.002
       },
@@ -315,8 +313,7 @@
     },
     {
       "number": 21,
-      "file": "Data/Item/skillScroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "darkLordScroll",
       "inventory": {
         "scale": 0.002
       },
@@ -327,8 +324,7 @@
     },
     {
       "number": 22,
-      "file": "Data/Item/skillScroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "darkLordScroll",
       "inventory": {
         "scale": 0.002
       },
@@ -339,8 +335,7 @@
     },
     {
       "number": 23,
-      "file": "Data/Item/skillScroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "darkLordScroll",
       "inventory": {
         "scale": 0.002
       },
@@ -351,8 +346,7 @@
     },
     {
       "number": 24,
-      "file": "Data/Item/skillScroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "darkLordScroll",
       "inventory": {
         "scale": 0.002
       },
@@ -363,8 +357,7 @@
     },
     {
       "number": 30,
-      "file": "Data/Item/Jewel01.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfBless",
       "inventory": {
         "anchor": [0.55, 0.8],
         "scale": 0.004
@@ -378,8 +371,7 @@
     },
     {
       "number": 31,
-      "file": "Data/Item/Jewel02.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfSoul",
       "inventory": {
         "anchor": [0.55, 0.8],
         "scale": 0.004
@@ -432,8 +424,7 @@
     },
     {
       "number": 35,
-      "file": "Data/Item/skillScroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "darkLordScroll",
       "inventory": {
         "scale": 0.002
       },
@@ -582,8 +573,7 @@
     },
     {
       "number": 44,
-      "file": "Data/Item/Gem06.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillCrystal",
       "inventory": {
         "offset": [0.005, -0.015],
         "rotation": [270, 0, 0],
@@ -598,8 +588,7 @@
     },
     {
       "number": 45,
-      "file": "Data/Item/Gem06.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillCrystal",
       "inventory": {
         "offset": [0.005, -0.015],
         "rotation": [270, 0, 0],
@@ -614,8 +603,7 @@
     },
     {
       "number": 46,
-      "file": "Data/Item/Gem06.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillCrystal",
       "inventory": {
         "offset": [0.005, -0.015],
         "rotation": [270, 0, 0],
@@ -630,8 +618,7 @@
     },
     {
       "number": 47,
-      "file": "Data/Item/Gem06.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillCrystal",
       "inventory": {
         "offset": [0.005, -0.015],
         "rotation": [270, 0, 0],
@@ -646,8 +633,7 @@
     },
     {
       "number": 48,
-      "file": "Data/Item/skillScroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "darkLordScroll",
       "inventory": {
         "scale": 0.002
       },
@@ -658,8 +644,7 @@
     },
     {
       "number": 49,
-      "file": "Data/Item/Wing50.bmd",
-      "textureFolders": ["Item"],
+      "model": "capeOfFighter",
       "inventory": {
         "anchor": [0.5, 0.5],
         "offset": [0.015, 0.01],
@@ -696,8 +681,7 @@
     },
     {
       "number": 60,
-      "file": "Data/Item/s30_seed.bmd",
-      "textureFolders": ["Effect"],
+      "model": "socketSeed",
       "inventory": {
         "rotation": [10, -10, 10],
         "scale": 0.0022
@@ -712,8 +696,7 @@
     },
     {
       "number": 61,
-      "file": "Data/Item/s30_seed.bmd",
-      "textureFolders": ["Effect"],
+      "model": "socketSeed",
       "inventory": {
         "rotation": [10, -10, 10],
         "scale": 0.0022
@@ -728,8 +711,7 @@
     },
     {
       "number": 62,
-      "file": "Data/Item/s30_seed.bmd",
-      "textureFolders": ["Effect"],
+      "model": "socketSeed",
       "inventory": {
         "rotation": [10, -10, 10],
         "scale": 0.0022
@@ -744,8 +726,7 @@
     },
     {
       "number": 63,
-      "file": "Data/Item/s30_seed.bmd",
-      "textureFolders": ["Effect"],
+      "model": "socketSeed",
       "inventory": {
         "rotation": [10, -10, 10],
         "scale": 0.0022
@@ -760,8 +741,7 @@
     },
     {
       "number": 64,
-      "file": "Data/Item/s30_seed.bmd",
-      "textureFolders": ["Effect"],
+      "model": "socketSeed",
       "inventory": {
         "rotation": [10, -10, 10],
         "scale": 0.0022
@@ -776,8 +756,7 @@
     },
     {
       "number": 65,
-      "file": "Data/Item/s30_seed.bmd",
-      "textureFolders": ["Effect"],
+      "model": "socketSeed",
       "inventory": {
         "rotation": [10, -10, 10],
         "scale": 0.0022
@@ -859,8 +838,7 @@
     },
     {
       "number": 100,
-      "file": "Data/Item/s30_sphere01.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere1",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -875,8 +853,7 @@
     },
     {
       "number": 101,
-      "file": "Data/Item/s30_sphere01.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere1",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -891,8 +868,7 @@
     },
     {
       "number": 102,
-      "file": "Data/Item/s30_sphere01.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere1",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -907,8 +883,7 @@
     },
     {
       "number": 103,
-      "file": "Data/Item/s30_sphere01.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere1",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -923,8 +898,7 @@
     },
     {
       "number": 104,
-      "file": "Data/Item/s30_sphere01.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere1",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -939,8 +913,7 @@
     },
     {
       "number": 105,
-      "file": "Data/Item/s30_sphere01.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere1",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -955,8 +928,7 @@
     },
     {
       "number": 106,
-      "file": "Data/Item/s30_sphere02.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere2",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -971,8 +943,7 @@
     },
     {
       "number": 107,
-      "file": "Data/Item/s30_sphere02.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere2",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -987,8 +958,7 @@
     },
     {
       "number": 108,
-      "file": "Data/Item/s30_sphere02.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere2",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1003,8 +973,7 @@
     },
     {
       "number": 109,
-      "file": "Data/Item/s30_sphere02.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere2",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1019,8 +988,7 @@
     },
     {
       "number": 110,
-      "file": "Data/Item/s30_sphere02.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere2",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1035,8 +1003,7 @@
     },
     {
       "number": 111,
-      "file": "Data/Item/s30_sphere02.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere2",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1051,8 +1018,7 @@
     },
     {
       "number": 112,
-      "file": "Data/Item/s30_sphere03.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere3",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1067,8 +1033,7 @@
     },
     {
       "number": 113,
-      "file": "Data/Item/s30_sphere03.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere3",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1083,8 +1048,7 @@
     },
     {
       "number": 114,
-      "file": "Data/Item/s30_sphere03.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere3",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1099,8 +1063,7 @@
     },
     {
       "number": 115,
-      "file": "Data/Item/s30_sphere03.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere3",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1115,8 +1078,7 @@
     },
     {
       "number": 116,
-      "file": "Data/Item/s30_sphere03.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere3",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1131,8 +1093,7 @@
     },
     {
       "number": 117,
-      "file": "Data/Item/s30_sphere03.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere3",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1147,8 +1108,7 @@
     },
     {
       "number": 118,
-      "file": "Data/Item/s30_sphere04.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere4",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1163,8 +1123,7 @@
     },
     {
       "number": 119,
-      "file": "Data/Item/s30_sphere04.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere4",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1179,8 +1138,7 @@
     },
     {
       "number": 120,
-      "file": "Data/Item/s30_sphere04.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere4",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1195,8 +1153,7 @@
     },
     {
       "number": 121,
-      "file": "Data/Item/s30_sphere04.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere4",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1211,8 +1168,7 @@
     },
     {
       "number": 122,
-      "file": "Data/Item/s30_sphere04.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere4",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1227,8 +1183,7 @@
     },
     {
       "number": 123,
-      "file": "Data/Item/s30_sphere04.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere4",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1243,8 +1198,7 @@
     },
     {
       "number": 124,
-      "file": "Data/Item/s30_sphere05.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere5",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1259,8 +1213,7 @@
     },
     {
       "number": 125,
-      "file": "Data/Item/s30_sphere05.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere5",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1275,8 +1228,7 @@
     },
     {
       "number": 126,
-      "file": "Data/Item/s30_sphere05.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere5",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1291,8 +1243,7 @@
     },
     {
       "number": 127,
-      "file": "Data/Item/s30_sphere05.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere5",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1307,8 +1258,7 @@
     },
     {
       "number": 128,
-      "file": "Data/Item/s30_sphere05.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere5",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1323,8 +1273,7 @@
     },
     {
       "number": 129,
-      "file": "Data/Item/s30_sphere05.bmd",
-      "textureFolders": ["Item", "Effect"],
+      "model": "seedSphere5",
       "inventory": {
         "rotation": [0, 0, 0],
         "scale": 0.0017
@@ -1339,8 +1288,7 @@
     },
     {
       "number": 130,
-      "file": "Data/Item/DarkLordRobe.bmd",
-      "textureFolders": ["Item"],
+      "model": "capeOfLord",
       "inventory": {
         "scale": 0.0012
       },
@@ -1411,8 +1359,7 @@
     },
     {
       "number": 135,
-      "file": "Data/Item/Wing50.bmd",
-      "textureFolders": ["Item"],
+      "model": "capeOfFighter",
       "inventory": {
         "offset": [0.005, 0.05],
         "scale": 0.0012
@@ -1427,8 +1374,7 @@
     },
     {
       "number": 136,
-      "file": "Data/Item/Jewel03.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfLife",
       "inventory": {
         "anchor": [0.55, 0.82],
         "offset": [0, -0.025],
@@ -1443,8 +1389,7 @@
     },
     {
       "number": 137,
-      "file": "Data/Item/jewel22.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfCreation",
       "inventory": {
         "anchor": [0.55, 0.82]
       },
@@ -1457,8 +1402,7 @@
     },
     {
       "number": 138,
-      "file": "Data/Item/suho.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfGuardian",
       "inventory": {
         "anchor": [0.55, 0.82],
         "offset": [0, 0.05],
@@ -1473,8 +1417,7 @@
     },
     {
       "number": 139,
-      "file": "Data/Item/rs.bmd",
-      "textureFolders": ["Item"],
+      "model": "gemstone",
       "inventory": {
         "anchor": [0.55, 0.82],
         "rotation": [270, 90, 0],
@@ -1489,8 +1432,7 @@
     },
     {
       "number": 140,
-      "file": "Data/Item/jos.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfHarmony",
       "inventory": {
         "anchor": [0.55, 0.82],
         "scale": 0.005
@@ -1504,8 +1446,7 @@
     },
     {
       "number": 141,
-      "file": "Data/Item/Jewel15.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfChaos",
       "inventory": {
         "anchor": [0.55, 0.82],
         "offset": [0, 0.025],
@@ -1520,8 +1461,7 @@
     },
     {
       "number": 142,
-      "file": "Data/Item/LowRefineStone.bmd",
-      "textureFolders": ["Item"],
+      "model": "lowerRefiningStone",
       "inventory": {
         "anchor": [0.55, 0.82],
         "offset": [-0.05, 0],
@@ -1537,8 +1477,7 @@
     },
     {
       "number": 143,
-      "file": "Data/Item/HighRefineStone.bmd",
-      "textureFolders": ["Item"],
+      "model": "higherRefiningStone",
       "inventory": {
         "anchor": [0.55, 0.82],
         "offset": [-0.05, 0],

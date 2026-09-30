@@ -13,6 +13,7 @@
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
+#include <map>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -54,6 +55,7 @@ ItemModelProblem MakeProblem(ItemModelProblemType type, const ItemModelDefinitio
     problem.group = model.group;
     problem.number = model.number;
     problem.modelFile = model.file;
+    problem.sharedModel = model.model;
     return problem;
 }
 
@@ -120,7 +122,17 @@ void CheckLookName(const ItemModelDefinition& model, const std::string& name, Lo
     AddProblem(std::move(problem));
 }
 
-void OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
+// The checks of every item, also of the items that use the data of a shared
+// model that another item opened.
+void CheckModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
+{
+    CheckGlowMeshes(itemType, model);
+    CheckLookName(model, model.renderStyle, lookNames.renderStyle, ItemModelProblemType::RenderStyleUnknown);
+    CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
+}
+
+// Whether the file was opened.
+bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
 {
     const std::wstring path = ToLoaderPath(model.file);
     const size_t nameStart = path.find_last_of(LoaderSeparator) + 1; // 0 when there is no folder
@@ -130,12 +142,37 @@ void OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& 
     if (!gLoadData.AccessModel(MODEL_ITEM + itemType, folder.c_str(), name.c_str()))
     {
         AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
-        return;
+        return false;
     }
     MarkNoneBlendMeshes(itemType, model);
-    CheckGlowMeshes(itemType, model);
-    CheckLookName(model, model.renderStyle, lookNames.renderStyle, ItemModelProblemType::RenderStyleUnknown);
-    CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
+    CheckModel(itemType, model, lookNames);
+    return true;
+}
+
+// The item type whose slot opened the file of a shared model.
+constexpr int NotOpened = -1;
+
+// The first item of a shared model opens its file; the others use the data
+// of that slot.
+void OpenSharedModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames,
+                     std::map<std::string, int, std::less<>>& openedBy)
+{
+    const auto [opened, isFirst] = openedBy.try_emplace(model.model, NotOpened);
+    if (isFirst)
+    {
+        if (OpenModel(itemType, model, lookNames))
+        {
+            opened->second = itemType;
+        }
+        return;
+    }
+    if (opened->second == NotOpened)
+    {
+        AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
+        return;
+    }
+    gLoadData.ShareModel(MODEL_ITEM + itemType, MODEL_ITEM + opened->second);
+    CheckModel(itemType, model, lookNames);
 }
 
 ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)
@@ -191,13 +228,32 @@ template <typename TOpen> void ForEachModel(TOpen&& open)
 
 void OpenModels(const LookNames& lookNames)
 {
-    ForEachModel([&lookNames](int itemType, const ItemModelDefinition& model)
-                 { OpenModel(itemType, model, lookNames); });
+    std::map<std::string, int, std::less<>> sharedModelsOpenedBy;
+    ForEachModel(
+        [&](int itemType, const ItemModelDefinition& model)
+        {
+            if (model.model.empty())
+            {
+                OpenModel(itemType, model, lookNames);
+            }
+            else
+            {
+                OpenSharedModel(itemType, model, lookNames, sharedModelsOpenedBy);
+            }
+        });
 }
 
 void OpenTextures()
 {
-    ForEachModel(OpenModelTextures);
+    ForEachModel(
+        [](int itemType, const ItemModelDefinition& model)
+        {
+            // The textures of a shared model are loaded with the slot that opened it.
+            if (!Models[MODEL_ITEM + itemType].SharesData())
+            {
+                OpenModelTextures(itemType, model);
+            }
+        });
 }
 
 std::string TakeProblemMessage()

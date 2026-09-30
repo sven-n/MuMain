@@ -218,6 +218,9 @@ public:
     char				iBillType;
 
     bool				m_bCompletedAlloc;
+    // The loaded data (meshes, bones, actions, textures) is another slot's
+    // (ShareFrom); Release() only lets go of it.
+    bool m_bSharedData = false;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
     bool m_LastTranslate;       // Set by Transform(): true=Translate mode (BodyOrigin/BodyScale shift world pos),
@@ -267,6 +270,16 @@ public:
     bool Open2(const wchar_t* DirName, const wchar_t* FileName, bool bReAlloc = true);
     bool Save2(wchar_t* DirName, wchar_t* FileName);
     void Release();
+    // Uses the loaded data of the model in another slot, for items that share
+    // one model file (opened once). That slot keeps owning the data and must
+    // stay loaded while this one uses it. The data must not be changed
+    // through this slot: the owner and every other slot that shares it would
+    // change as well.
+    void ShareFrom(const BMD& owner);
+    bool SharesData() const
+    {
+        return m_bSharedData;
+    }
     void CreateBoundingBox();
 
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);

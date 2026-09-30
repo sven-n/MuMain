@@ -2919,8 +2919,46 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
     mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
 }
 
+void BMD::ShareFrom(const BMD& owner)
+{
+    Release();
+    // What Open2 reads from the file; the rest is this slot's own.
+    memcpy(Name, owner.Name, sizeof(Name));
+    Version = owner.Version;
+    NumMeshs = owner.NumMeshs;
+    NumBones = owner.NumBones;
+    NumActions = owner.NumActions;
+    Meshs = owner.Meshs;
+    Bones = owner.Bones;
+    Actions = owner.Actions;
+    Textures = owner.Textures;
+    IndexTexture = owner.IndexTexture;
+    m_bSharedData = true;
+    // What Init sets for this slot; the bounding boxes of the bones are the owner's.
+    renderCount = 0;
+    BoneHead = -1;
+    StreamMesh = -1;
+    m_bCompletedAlloc = true;
+}
+
 void BMD::Release()
 {
+    if (m_bSharedData)
+    {
+        // The data is the owner's.
+        Meshs = nullptr;
+        Bones = nullptr;
+        Actions = nullptr;
+        Textures = nullptr;
+        IndexTexture = nullptr;
+        NumBones = 0;
+        NumActions = 0;
+        NumMeshs = 0;
+        m_bSharedData = false;
+        m_bCompletedAlloc = false;
+        return;
+    }
+
     if (Bones)
     {
         for (int i = 0; i < NumBones; ++i)

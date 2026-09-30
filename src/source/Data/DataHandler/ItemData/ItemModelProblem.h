@@ -55,6 +55,10 @@ struct ItemModelProblem
     std::string field;
     // RenderStyleUnknown, ItemEffectUnknown: the name that does not exist.
     std::string name;
+    // The shared model of the item, if it has one. A problem with the model
+    // file, its textures or its meshes is then one of the shared model, which
+    // all its items have (it is reported for the first of them).
+    std::string sharedModel;
 
     // Only the problems that leave an item without its model or a texture
     // are errors that the player sees; the others are warnings in the log.

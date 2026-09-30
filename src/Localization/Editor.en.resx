@@ -469,6 +469,9 @@
   <data name="Model file" xml:space="preserve">
     <value>Model file</value>
   </data>
+  <data name="Shared model" xml:space="preserve">
+    <value>Shared model</value>
+  </data>
   <data name="Glow" xml:space="preserve">
     <value>Glow</value>
   </data>

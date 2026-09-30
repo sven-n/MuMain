@@ -4,6 +4,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <filesystem>
 #include <span>
@@ -32,7 +33,10 @@ ItemDataLoadResult LoadItemDataDirectory(const std::filesystem::path& directory)
 
 struct ItemModelDataLoadResult
 {
+    // With the file, texture folders and none-blend meshes of their shared
+    // model filled in.
     std::vector<ItemModelDefinition> models;
+    std::vector<SharedItemModel> sharedModels;
     std::vector<ItemDataIssue> issues;
 };
 
@@ -40,7 +44,8 @@ struct ItemModelDataLoadResult
 // use the same file names as the item data files.
 std::filesystem::path GetItemModelDataDirectory();
 
-// Reads every *.json file in the folder and validates the models.
+// Reads every *.json file in the folder (the group files and the shared
+// models, SharedModels.json) and validates the models.
 ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& directory);
 
 struct GlowColorsLoadResult
