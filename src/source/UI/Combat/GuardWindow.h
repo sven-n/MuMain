@@ -81,27 +81,29 @@ private:
     CUIBCGuildListBox m_GuildListBox;
 
     // UI ��� ��
-    CASTLESIEGE_STATE m_eTimeType;
+    // SetData() is the only writer and it needs the server's reply, which OpeningProcess() has
+    // only just asked for -- so every one of these is read for the first frames the window is up.
+    CASTLESIEGE_STATE m_eTimeType = CASTLESIEGE_STATE_NONE;
 
-    wchar_t m_szOwnerGuild[8 + 1];
-    wchar_t m_szOwnerGuildMaster[10 + 1];
+    wchar_t m_szOwnerGuild[8 + 1] = {};
+    wchar_t m_szOwnerGuildMaster[10 + 1] = {};
 
-    WORD m_wStartYear;
-    BYTE m_byStartMonth;
-    BYTE m_byStartDay;
-    BYTE m_byStartHour;
-    BYTE m_byStartMinute;
-    WORD m_wEndYear;
-    BYTE m_byEndMonth;
-    BYTE m_byEndDay;
-    BYTE m_byEndHour;
-    BYTE m_byEndMinute;
-    WORD m_wSiegeStartYear;
-    BYTE m_bySiegeStartMonth;
-    BYTE m_bySiegeStartDay;
-    BYTE m_bySiegeStartHour;
-    BYTE m_bySiegeStartMinute;
-    DWORD m_dwStateLeftSec;
+    WORD m_wStartYear = 0;
+    BYTE m_byStartMonth = 0;
+    BYTE m_byStartDay = 0;
+    BYTE m_byStartHour = 0;
+    BYTE m_byStartMinute = 0;
+    WORD m_wEndYear = 0;
+    BYTE m_byEndMonth = 0;
+    BYTE m_byEndDay = 0;
+    BYTE m_byEndHour = 0;
+    BYTE m_byEndMinute = 0;
+    WORD m_wSiegeStartYear = 0;
+    BYTE m_bySiegeStartMonth = 0;
+    BYTE m_bySiegeStartDay = 0;
+    BYTE m_bySiegeStartHour = 0;
+    BYTE m_bySiegeStartMinute = 0;
+    DWORD m_dwStateLeftSec = 0;
 
 public:
     CGuardWindow();
