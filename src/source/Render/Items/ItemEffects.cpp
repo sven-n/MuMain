@@ -159,21 +159,6 @@ Result ApplyFruits(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplyBloodBone(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
-{
-    o->BlendMeshTexCoordU = sinf(gMapManager.WorldActive * 0.0001f);
-    o->BlendMeshTexCoordV = -WorldTime * 0.0005f;
-    Vector(.9f, .9f, .9f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
-    Vector(.9f, .1f, .1f, b->BodyLight);
-    b->StreamMesh = 0;
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
-    b->StreamMesh = -1;
-    return Result::Drawn;
-}
-
 Result ApplyInvisibilityCloak(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 {
     Vector(0.8f, 0.8f, 0.8f, b->BodyLight);
@@ -561,7 +546,6 @@ const ItemEffect ItemEffects[] = {
     {"spirit", ApplySpirit},
     {"potion", ApplyPotion},
     {"fruits", ApplyFruits},
-    {"bloodBone", ApplyBloodBone},
     {"invisibilityCloak", ApplyInvisibilityCloak},
     {"devilsEye", ApplyDevilsEye},
     {"devilsKey", ApplyDevilsKey},

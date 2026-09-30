@@ -1690,6 +1690,26 @@ bool RenderLuckyItem(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return true;
 }
 
+// The bone in the light of its level (a little darker), then a red chrome
+// layer running over it; the level glow comes on top as for other items.
+bool RenderBloodBone(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    o->BlendMeshTexCoordU = sinf(gMapManager.WorldActive * 0.0001f);
+    o->BlendMeshTexCoordV = -WorldTime * 0.0005f;
+    vec3_t light;
+    VectorCopy(b->BodyLight, light);
+    Vector(light[0] * 0.9f, light[1] * 0.9f, light[2] * 0.9f, b->BodyLight);
+    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, o->HiddenMesh);
+    Vector(.9f, .1f, .1f, b->BodyLight);
+    b->StreamMesh = 0;
+    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+    b->StreamMesh = -1;
+    VectorCopy(light, b->BodyLight);
+    return true;
+}
+
 // ------------------------------------------------ glow passes
 
 // The whole staff glows, then its second mesh again, white; the object keeps
@@ -1742,6 +1762,7 @@ const RenderStyle RenderStyles[] = {
     {"crossShield", RenderCrossShield},
     {"oldScroll", RenderOldScroll},
     {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, &HarmonyShine},
+    {"bloodBone", RenderBloodBone},
     {"scrollOfBlood", RenderScrollOfBlood},
     {"cursedCastleWater", RenderCursedCastleWater, &CursedCastleWaterShine},
     {"harmonyShine", RenderPlainly, &HarmonyShine},

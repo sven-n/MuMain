@@ -171,7 +171,7 @@
         "rotation": [-45, -5, 18],
         "scale": 0.48
       },
-      "itemEffect": "bloodBone"
+      "renderStyle": "bloodBone"
     },
     {
       "number": 18,
@@ -578,7 +578,6 @@
         "scale": 0.6
       },
       "glow": {
-        "level": 0,
         "shineHiddenMesh": 1
       },
       "renderStyle": "illusionSorcererCovenant"

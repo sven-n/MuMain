@@ -590,29 +590,36 @@ server with original clients (after phases 6 and B).
        loaded their models); their recipe (textured, then
        `RENDER_BRIGHT | RENDER_CHROME2`) comes back as a style with their
        model entries.
-     - **4c3 Item effects:** `itemEffect` names what the model does before
-       it is drawn every frame, from the type chain of `RenderPartObjectEffect`: 29 item
-       branches for 81 items; 28 of them become 27 effects for 42 items in
-       `Render/Items/ItemEffects.cpp` (moved unchanged; the Siege Potion and
-       the Contract share one). An effect places sprites, particles and
-       lightning on bones, changes values of the drawing (a pulsing glow
+     - **4c3 Item effects:** `itemEffect` names what the model does before it
+       is drawn every frame, from the type chain of `RenderPartObjectEffect`:
+       29 item branches for 81 items; 28 of them become 27 effects for 42
+       items in `Render/Items/ItemEffects.cpp` (moved unchanged; the Siege
+       Potion and the Contract share one). An effect places sprites, particles
+       and lightning on bones, changes values of the drawing (a pulsing glow
        mesh, a mesh hidden by level, the level potions glow like), or draws
        the model itself. The socket seeds and spheres (the 39 items of the
-       last branch) and zen need no effect: they glow like level 0
-       (`"glow": {"level": 0}`), which is what their level checks did. The
-       shine of 10 items below +3 (two more shine passes) becomes values of
-       their render style, which the drawing code applies: the seals, the
-       Illusion Sorcerer Covenant and the Cursed Castle water have a style
-       already, the Jewel of Harmony and the Moonstone Pendant get
-       `harmonyShine` (138 styles now). The
-       effects of the event models of level variants stay in
-       `RenderPartObjectEffect` (no model entries yet). Which values the
-       effects take (bones, colors, sizes) comes with phase 13, when what
-       the named looks are made of moves into data (D25). MuEditor gets a
-       read-only view of the looks above the item table: for the selected
-       item its model file, glow, render style and effect, and for a look
-       all items that use it (D26). It only reads the model data, so it
-       needs no change to the drawing code.
+       last branch) and zen need no effect: they glow like level 0 (`"glow":
+       {"level": 0}`), which is what their level checks did. The shine of 10
+       items below +3 (two more shine passes) becomes values of their render
+       style, which the drawing code applies: the seals, the Illusion Sorcerer
+       Covenant and the Cursed Castle water have a style already, the Jewel of
+       Harmony and the Moonstone Pendant get `harmonyShine` (138 styles now).
+       Fixes found while testing, which change the look: the Devil's Eye, Key
+       and Invitation glow like twice their level up to +6 again, as in the
+       original client (a frame-rate change of 2023 had turned `Level *= 2`
+       into `Level *= pow(2, …)`, and its fix into `Level /= 2`, so +1 to +5
+       looked the same); the Blood Bone and the Illusion Sorcerer Covenant
+       glow by their level like the Scroll of Archangel and the Old Scroll
+       (the Blood Bone's own drawing ended the drawing before the level glow;
+       it is the render style `bloodBone` now, which leaves 26 effects for 41
+       items and 139 styles; the Covenant glowed like level 0). The effects of
+       the event models of level variants stay in `RenderPartObjectEffect` (no
+       model entries yet). Which values the effects take (bones, colors,
+       sizes) comes with phase 13, when what the named looks are made of moves
+       into data (D25). MuEditor gets a read-only view of the looks above the
+       item table: for the selected item its model file, glow, render style
+       and effect, and for a look all items that use it (D26). It only reads
+       the model data, so it needs no change to the drawing code.
 
    Verified like phase 3: one-time comparisons of the old and the new code
    (which files and texture folders are loaded for each model; the
