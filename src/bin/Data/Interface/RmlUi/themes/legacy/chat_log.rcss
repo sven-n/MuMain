@@ -21,8 +21,13 @@
 
 /* The window fill, split three ways: whether it paints at all is frame state (.framed, native's
    own RenderBackground() m_bShowFrame guard), how opaque it is comes from the user's cycled
-   transparency setting as a bound opacity, and the colour itself is this theme's. #backdrop sits
-   behind #lines so the fade never touches the text. */
+   transparency setting as a bound opacity, and its whole appearance is this rule's. #backdrop sits
+   behind #lines so the fade never touches the text.
+
+   Flat black here because that is what the original drew -- not a constraint. A theme can make this
+   a gradient, a ninepatch or a sprite by changing this one rule; `decorator` works, and the bound
+   opacity fades a decorator exactly as it fades a colour (see themes/modern/chat_log.rcss, which
+   does use a gradient). */
 #backdrop {
 	display: none;
 	position: absolute;

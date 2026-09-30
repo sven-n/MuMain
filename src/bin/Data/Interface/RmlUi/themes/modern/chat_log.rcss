@@ -19,8 +19,10 @@
 	border-radius: token(radius-sm)px;
 }
 
-/* The window fill -- see legacy/chat_log.rcss's note on the three-way split. The colour is this
-   theme's to choose; the fade and the frame state arrive from C++. */
+/* The window fill -- see legacy/chat_log.rcss's note on the three-way split. C++ supplies only the
+   fade and the frame state; what the backdrop actually looks like is entirely this rule's, flat or
+   decorated. The same dark-panel gradient docked_panel_frame.rcss gives this theme's docked
+   windows, so the chat log reads as part of that family rather than a flat black rectangle. */
 #backdrop {
 	display: none;
 	position: absolute;
@@ -29,7 +31,7 @@
 	right: 0;
 	bottom: 0;
 	z-index: 0;
-	background-color: rgb(0, 0, 0);
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
 	border-radius: token(radius-sm)px;
 }
 #panel.framed #backdrop { display: block; }
