@@ -15,6 +15,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -614,21 +615,13 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
     }
 
     KanturuEnterRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name)
-    {
-        if (!(model.*field == updated.*field))
-        {
-            model.*field = updated.*field;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
-    sync(&KanturuEnterRmlModel::labelTop, "label_top");
-    sync(&KanturuEnterRmlModel::labelLinePx, "label_line_px");
-    sync(&KanturuEnterRmlModel::refreshText, "refresh_text");
-    sync(&KanturuEnterRmlModel::enterText, "enter_text");
-    sync(&KanturuEnterRmlModel::closeText, "close_text");
-    sync(&KanturuEnterRmlModel::refreshLocked, "refresh_locked");
-    sync(&KanturuEnterRmlModel::enterLocked, "enter_locked");
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::labelTop, "label_top", updated);
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::labelLinePx, "label_line_px", updated);
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::refreshText, "refresh_text", updated);
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::enterText, "enter_text", updated);
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::closeText, "close_text", updated);
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::refreshLocked, "refresh_locked", updated);
+    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::enterLocked, "enter_locked", updated);
     const bool sameLines = model.lines.size() == updated.lines.size() &&
                            std::equal(model.lines.begin(), model.lines.end(), updated.lines.begin(),
                                       [](const KanturuEnterLineEntry& a, const KanturuEnterLineEntry& b)

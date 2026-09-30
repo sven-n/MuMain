@@ -23,6 +23,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -368,22 +369,14 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
                0xFF0000FF);
 
     CursedTempleResultRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name)
-    {
-        if (!(model.*field == updated.*field))
-        {
-            model.*field = updated.*field;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
-    sync(&CursedTempleResultRmlModel::lineHeightPx, "line_height_px");
-    sync(&CursedTempleResultRmlModel::labelTop, "label_top");
-    sync(&CursedTempleResultRmlModel::labelLinePx, "label_line_px");
-    sync(&CursedTempleResultRmlModel::closeText, "close_text");
-    sync(&CursedTempleResultRmlModel::banner, "banner");
-    sync(&CursedTempleResultRmlModel::bannerLeft, "banner_left");
-    sync(&CursedTempleResultRmlModel::bannerAlpha, "banner_alpha");
-    sync(&CursedTempleResultRmlModel::heroRowTops, "hero_row_tops");
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::lineHeightPx, "line_height_px", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::labelTop, "label_top", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::labelLinePx, "label_line_px", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::closeText, "close_text", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::banner, "banner", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::bannerLeft, "banner_left", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::bannerAlpha, "banner_alpha", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::heroRowTops, "hero_row_tops", updated);
     const bool sameTexts = model.texts.size() == updated.texts.size() &&
                            std::equal(model.texts.begin(), model.texts.end(), updated.texts.begin(),
                                       [](const CursedTempleResultTextEntry& a, const CursedTempleResultTextEntry& b)

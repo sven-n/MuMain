@@ -22,6 +22,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -369,21 +370,13 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
     }
 
     CursedTempleEnterRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [&](auto field, const char* name)
-    {
-        if (!(model.*field == updated.*field))
-        {
-            model.*field = updated.*field;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
-    sync(&CursedTempleEnterRmlModel::boldTextPx, "bold_text_px");
-    sync(&CursedTempleEnterRmlModel::lineHeightPx, "line_height_px");
-    sync(&CursedTempleEnterRmlModel::labelTop, "label_top");
-    sync(&CursedTempleEnterRmlModel::labelLinePx, "label_line_px");
-    sync(&CursedTempleEnterRmlModel::title, "title");
-    sync(&CursedTempleEnterRmlModel::enterText, "enter_text");
-    sync(&CursedTempleEnterRmlModel::closeText, "close_text");
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::boldTextPx, "bold_text_px", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::lineHeightPx, "line_height_px", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::labelTop, "label_top", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::labelLinePx, "label_line_px", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::title, "title", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::enterText, "enter_text", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::closeText, "close_text", updated);
     const bool sameLines = model.lines.size() == updated.lines.size() &&
                            std::equal(model.lines.begin(), model.lines.end(), updated.lines.begin(),
                                       [](const CursedTempleEnterLineEntry& a, const CursedTempleEnterLineEntry& b)

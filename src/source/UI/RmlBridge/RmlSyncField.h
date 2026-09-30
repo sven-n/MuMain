@@ -34,3 +34,20 @@ void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name
     model.*field = std::move(value);
     binder.MarkDirty(name);
 }
+
+// Copy one field across from a staged model, if it changed.
+//
+// Some windows build a whole `updated` model each frame and then reconcile it against the live one
+// field by field -- a different operation from SyncField() above, which takes a value. Worth its own
+// overload rather than writing SyncField(binder, &Model::x, "x", updated.x): that names the field
+// twice, and the two names are free to disagree while still compiling, which is the hazard this
+// header exists to remove. Here the field is named once and the value cannot come from elsewhere.
+template <typename Model, typename T>
+void SyncFieldFrom(RmlModelBinder<Model>& binder, T Model::* field, const char* name, Model& source)
+{
+    Model& model = binder.GetModel();
+    if (model.*field == source.*field)
+        return;
+    model.*field = std::move(source.*field);
+    binder.MarkDirty(name);
+}
