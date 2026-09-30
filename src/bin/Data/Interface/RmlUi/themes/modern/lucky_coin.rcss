@@ -2,4 +2,3 @@
    first): its modern buttons at the lucky coin buttons' sizes (bound), bold labels where the
    legacy ones are bold. */
 
-.entry-label.bold { font-weight: bold; }

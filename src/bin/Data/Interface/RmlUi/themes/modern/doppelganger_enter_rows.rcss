@@ -1,0 +1,16 @@
+/* Where doppelganger_enter.rml's own lines and buttons sit. CDoppelGangerWindow's RenderTexts(): the name bold in its 160-unit box, the description centred on 190 from y 50, the buttons 53 x 23 at x 68.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 15px; top: 13px; color: token(text-primary); font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 50px; color: token(text-primary); }
+.entry-text:nth-child(3) { left: 0px; top: 65px; color: token(text-primary); }
+.entry-text:nth-child(4) { left: 0px; top: 80px; color: token(text-primary); }
+.entry-text:nth-child(5) { left: 0px; top: 95px; color: token(text-primary); }
+.entry-text:nth-child(6) { left: 0px; top: 110px; color: token(text-primary); }
+.entry-text:nth-child(7) { left: 0px; top: 170px; color: token(text-primary); font-weight: bold; }
+.entry-text:nth-child(8) { left: 0px; top: 260px; color: token(text-primary); }
+.entry-text:nth-child(9) { left: 0px; top: 280px; color: token(text-primary); }
+
+.entry-btn:nth-child(1) { left: 68px; top: 190px; width: 53px; height: 23px; }
+
+.entry-btn:nth-child(2) { left: 68px; top: 360px; width: 53px; height: 23px; }

@@ -1,0 +1,27 @@
+/* Where empire_guardian_enter.rml's own lines and buttons sit. CEmpireGuardianNPC's RenderTexts(): the headings bold in their 110-unit box centred on the panel, the warning red, the round-7 note on 200 units from x -5.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 40px; top: 13px; color: #dcdcdc; font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 50px; color: #dcdcdc; }
+.entry-text:nth-child(3) { left: 0px; top: 70px; color: #dcdcdc; }
+.entry-text:nth-child(4) { left: 0px; top: 90px; color: #dcdcdc; }
+.entry-text:nth-child(5) { left: 0px; top: 110px; color: #dcdcdc; }
+.entry-text:nth-child(6) { left: 40px; top: 170px; color: rgb(255, 240, 0); font-weight: bold; }
+.entry-text:nth-child(7) { left: 40px; top: 260px; color: rgb(255, 0, 0); font-weight: bold; }
+.entry-text:nth-child(8) { left: -5px; top: 280px; color: #dcdcdc; }
+.entry-text:nth-child(9) { left: -5px; top: 300px; color: #dcdcdc; }
+.entry-text:nth-child(10) { left: -5px; top: 320px; color: #dcdcdc; }
+.entry-text:nth-child(11) { left: 0px; top: 340px; color: #dcdcdc; }
+.entry-text:nth-child(12) { left: 0px; top: 360px; color: #dcdcdc; }
+
+.entry-btn:nth-child(1) { left: 68px; top: 190px; width: 53px; height: 23px; }
+.entry-btn:nth-child(1) { decorator: image(item-entry-btn-up); }
+.entry-btn:nth-child(1):hover { decorator: image(item-entry-btn-over); }
+.entry-btn:nth-child(1):active { decorator: image(item-entry-btn-down); }
+.entry-btn:nth-child(1).locked, .entry-btn:nth-child(1).locked:hover, .entry-btn:nth-child(1).locked:active { decorator: image(item-entry-btn-up); image-color: #646464; }
+
+.entry-btn:nth-child(2) { left: 68px; top: 380px; width: 53px; height: 23px; }
+.entry-btn:nth-child(2) { decorator: image(item-entry-btn-up); }
+.entry-btn:nth-child(2):hover { decorator: image(item-entry-btn-over); }
+.entry-btn:nth-child(2):active { decorator: image(item-entry-btn-down); }
+.entry-btn:nth-child(2).locked, .entry-btn:nth-child(2).locked:hover, .entry-btn:nth-child(2).locked:active { decorator: image(item-entry-btn-up); image-color: #646464; }

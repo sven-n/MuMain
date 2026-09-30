@@ -128,30 +128,28 @@ void CEmpireGuardianNPC::SyncView()
         // The original's RenderFrame()/Render(): the title and the texts in (220, 220, 220),
         // Gaion's Order bold yellow, the warning bold red. Both cut texts share one buffer, the
         // second over the first, as the original's did.
-        const DWORD grey = RGBA(220, 220, 220, 255);
         const float centreX = static_cast<float>(NPC_WINDOW_WIDTH) / 2;
         wchar_t szTextOut[2][300] = {};
         std::vector<EventItemEntryView::Text> texts;
-        texts.push_back({I18N::Game::JerintTheAssistant, centreX - 55, 13.f, 110.f, true, grey});
-        texts.push_back({I18N::Game::WithoutGaionSOrder, 0.f, 50.f, 190.f, false, grey});
+        texts.push_back({I18N::Game::JerintTheAssistant, 110.f, true});
+        texts.push_back({I18N::Game::WithoutGaionSOrder, 190.f});
         g_pRenderText->SetFont(g_hFont);
         CutStr(I18N::Game::YouCannotEnterTheFortressOfEmpireGuardians, szTextOut[0], 150, 2, 300);
-        texts.push_back({szTextOut[0], 0.f, 70.f, 190.f, false, grey});
-        texts.push_back({szTextOut[1], 0.f, 90.f, 190.f, false, grey});
-        texts.push_back({I18N::Game::WillYouShowMeTheOrder, 0.f, 110.f, 190.f, false, grey});
-        texts.push_back({I18N::Game::GaionSOrder, centreX - 55, 170.f, 110.f, true, RGBA(255, 240, 0, 255)});
-        texts.push_back({I18N::Game::Warning2223, centreX - 55, 260.f, 110.f, true, RGBA(255, 0, 0, 255)});
-        texts.push_back({I18N::Game::TheRound7MapSundayCanOnly, centreX - 100, 280.f, 200.f, false, grey});
-        texts.push_back({I18N::Game::BeAccessedIfYouHaveA, centreX - 100, 300.f, 200.f, false, grey});
-        texts.push_back({I18N::Game::CompleteSecromicon2837, centreX - 100, 320.f, 200.f, false, grey});
+        texts.push_back({szTextOut[0], 190.f});
+        texts.push_back({szTextOut[1], 190.f});
+        texts.push_back({I18N::Game::WillYouShowMeTheOrder, 190.f});
+        texts.push_back({I18N::Game::GaionSOrder, 110.f, true});
+        texts.push_back({I18N::Game::Warning2223, 110.f, true});
+        texts.push_back({I18N::Game::TheRound7MapSundayCanOnly, 200.f});
+        texts.push_back({I18N::Game::BeAccessedIfYouHaveA, 200.f});
+        texts.push_back({I18N::Game::CompleteSecromicon2837, 200.f});
         g_pRenderText->SetFont(g_hFont);
         CutStr(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, szTextOut[0], 155, 2, 300);
-        texts.push_back({szTextOut[0], 0.f, 340.f, 200.f, false, grey});
-        texts.push_back({szTextOut[1], 0.f, 360.f, 200.f, false, grey});
+        texts.push_back({szTextOut[0], 200.f});
+        texts.push_back({szTextOut[1], 200.f});
         m_View.SetTexts(std::move(texts));
 
-        const float buttonX = centreX - 27;
-        m_View.SetButtons({{I18N::Game::Enter, buttonX, 190.f, false}, {I18N::Game::Close388, buttonX, 380.f, false}});
+        m_View.SetButtons({{I18N::Game::Enter, false}, {I18N::Game::Close388, false}});
     }
     m_View.Sync(IsVisible(), m_Pos);
 }

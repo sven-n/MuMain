@@ -177,6 +177,17 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   left on `auto` -- the next row started before the current row's gauge bar had room, visually
   clipping/overlapping it. Fixed by giving the wrapper an explicit height (sum of its children's own
   heights/margins) instead of relying on auto to compute it.
+- **`:nth-child(N)` works on `data-for`-generated elements, confirmed at runtime.** `data-for`
+  removes its element from the DOM and uses it as a template, inserting the clones as ordinary
+  children of the parent, so the structural selector counts them exactly as it would hand-written
+  siblings (`StyleSheetSelector.cpp`'s `Nth_Child` is the complete upstream matcher). This is how a
+  repeated list of *variable length* gets its rows from RCSS instead of a `top` per entry -- which
+  matters because the two obvious alternatives are both dead ends here: flow stacking hits the
+  auto-height finding above, and a counter-scaled `.sharp-text` layer's layout height is not its
+  rendered height anyway. Give each repeated set its own container so the count starts at 1 on the
+  first item rather than on whatever else shares the parent. Worked example:
+  `blood_castle_enter.rcss` / `devil_square_enter.rcss`, where two windows share one document shape
+  and differ only by their own row tables.
 - **`box-shadow` now genuinely renders on this engine, including blur — this entry is corrected
   from an earlier, now-stale finding that it parsed but didn't render.** As of the vendored SDL_GPU
   renderer's PR-989 integration, `RenderManager::PushLayer`/`CompositeLayers`/`CompileFilter`/

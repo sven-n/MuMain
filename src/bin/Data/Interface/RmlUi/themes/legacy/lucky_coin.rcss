@@ -19,14 +19,6 @@
 	coin-btn-wide-down: 0px 58px 108px 29px;
 }
 
-.entry-label.bold { font-weight: bold; }
 
-.coin-btn.small { decorator: image(coin-btn-small-up); }
-.coin-btn.small:hover { decorator: image(coin-btn-small-over); }
-.coin-btn.small:active { decorator: image(coin-btn-small-down); }
-.coin-btn.wide { decorator: image(coin-btn-wide-up); }
-.coin-btn.wide:hover { decorator: image(coin-btn-wide-over); }
-.coin-btn.wide:active { decorator: image(coin-btn-wide-down); }
-.coin-btn.small.locked, .coin-btn.small.locked:hover, .coin-btn.small.locked:active { decorator: image(coin-btn-small-up); image-color: #ffffff; }
-.coin-btn.wide.locked, .coin-btn.wide.locked:hover, .coin-btn.wide.locked:active { decorator: image(coin-btn-wide-up); image-color: #ffffff; }
-.coin-btn.locked .entry-label { color: #808080; }
+/* CButton::Lock()'s ChangeTextColor(0xff808080). */
+.entry-btn.locked .entry-label { color: #808080; }

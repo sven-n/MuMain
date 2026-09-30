@@ -57,26 +57,23 @@ namespace mu::ui::window
         if (IsVisible())
         {
             // The original's RenderTexts(): white, centred on the 190-unit panel from y 25.
-            const DWORD white = RGBA(255, 255, 255, 255);
             const float width = LUCKYCOIN_REG_WIDTH;
-            const float top = 25.f;
             wchar_t count[256] = {};
             mu_swprintf(count, I18N::Game::XDCoins, GetRegistCount());
-            m_View.SetTexts({{I18N::Game::LuckyCoinRegistration, 0.f, top, width, true, white},
-                             {I18N::Game::Register255LuckyCoinsDuringTheEvent, 0.f, top + 40, width, false, white},
-                             {I18N::Game::ForAChanceToGet, 0.f, top + 60, width, false, white},
-                             {I18N::Game::TheAbsoluteWeapon, 0.f, top + 80, width, false, white},
-                             {I18N::Game::PleaseCheckTheWebPageForTheEventDetails, 0.f, top + 100, width, false, white},
-                             {I18N::Game::Registered, 0.f, top + 120, width, true, white},
-                             {count, 24.f, top + 150, width, true, white}});
+            m_View.SetTexts({{I18N::Game::LuckyCoinRegistration, width, true},
+                             {I18N::Game::Register255LuckyCoinsDuringTheEvent, width},
+                             {I18N::Game::ForAChanceToGet, width},
+                             {I18N::Game::TheAbsoluteWeapon, width},
+                             {I18N::Game::PleaseCheckTheWebPageForTheEventDetails, width},
+                             {I18N::Game::Registered, width, true},
+                             {count, width, true}});
 
             // The original's SetBtnInfo(): both 64 x 29 newui_btn_empty_small with a bold label,
             // Register at the panel's height - 220, Close at y 360.
-            const float buttonX = LUCKYCOIN_REG_WIDTH / 2.0f - MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.0f;
-            m_View.SetButtons({{I18N::Game::Register, buttonX, LUCKYCOIN_REG_HEIGHT - 220, m_RegisterLocked,
-                                MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT, true, "small"},
-                               {I18N::Game::Close388, buttonX, 360.f, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
-                                MSGBOX_BTN_EMPTY_HEIGHT, true, "small"}});
+            m_View.SetButtons({{I18N::Game::Register, m_RegisterLocked, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
+                                MSGBOX_BTN_EMPTY_HEIGHT, true},
+                               {I18N::Game::Close388, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
+                                MSGBOX_BTN_EMPTY_HEIGHT, true}});
         }
         m_View.Sync(IsVisible(), m_Pos);
     }

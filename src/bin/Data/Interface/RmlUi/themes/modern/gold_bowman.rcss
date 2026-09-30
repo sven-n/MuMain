@@ -3,9 +3,9 @@
    modern text colour over the background document's recessed back. Geometry is the legacy one. */
 
 .entry-text { white-space: pre; }
-.entry-text.left-aligned { text-align: left; }
 
-.gb-btn.exit { cursor: pointer; }
+/* The exit button, whichever row it is in this family's two documents. */
+.entry-btn:last-child { cursor: pointer; }
 
 #serial_field {
 	text-align: left;

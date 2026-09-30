@@ -22,19 +22,16 @@
 	pointer-events: auto;
 }
 
-.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
-.entry-text.bold { font-weight: bold; }
+.entry-texts, .entry-buttons { position: static; }
 
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+
+/* Each button's own sprite, size and place are its row rule's (<document>_rows.rcss); what every
+   button shares is only that it is a button. */
 .entry-btn {
 	display: block;
 	position: absolute;
-	width: 53px;
-	height: 23px;
-	decorator: image(item-entry-btn-up);
 	pointer-events: auto;
 }
-.entry-btn:hover { decorator: image(item-entry-btn-over); }
-.entry-btn:active { decorator: image(item-entry-btn-down); }
-.entry-btn.locked, .entry-btn.locked:hover, .entry-btn.locked:active { decorator: image(item-entry-btn-up); image-color: #646464; }
 .entry-label { left: 0; color: #ffffff; }
 .entry-btn.locked .entry-label { color: #646464; }

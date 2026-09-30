@@ -6,37 +6,34 @@
 
 namespace mu::ui::window
 {
-// One RenderText() of the window: centred on its box (or from its left edge), shrunk to it like the
-// original's.
+// One RenderText() of the window. Where it sits, what colour it is and how it is aligned are the
+// theme's (each document's own <document>_rows.rcss, one :nth-child rule per line); `width` is the
+// box the native renderer shrank the text to, and rides along because a counter-scaled layer's own
+// width has to be that box times the root scale.
 struct EventItemEntryTextEntry
 {
     Rml::String text;
-    float left = 0.f;   // box left, reference px in the panel
-    float top = 0.f;    // reference px in the panel
-    float width = 0.f;  // box width, reference px
     float textPx = 0.f; // physical px
-    bool bold = false;
-    Rml::String color;        // CSS colour of the native text colour
-    bool leftAligned = false; // RT3_SORT_LEFT: from the box's left edge
+    float width = 0.f;  // box width, reference px
+
+    bool operator==(const EventItemEntryTextEntry&) const = default;
 };
 
-// A CButton with its label (53 x 23 newui_btn_empty_very_small unless the window's theme styles it
-// otherwise by its `style`); a locked one is tinted, its label grey, and never hovers.
+// A CButton with its label. Which button it is -- where it sits, how big it is and which sprite it
+// wears -- is the theme's, by the same row rules; a locked one is tinted, its label grey, and never
+// hovers.
 struct EventItemEntryButtonEntry
 {
     Rml::String label;
-    Rml::String style; // the window's own button kind, for its theme ("" for the default)
-    int index = 0;
     bool locked = false;
     bool bold = false; // the label in the bold font
-    float left = 0.f;  // reference px in the panel
-    float top = 0.f;
-    float width = 0.f; // reference px
-    float height = 0.f;
+    float width = 0.f; // reference px, the label's own centring box
     // CButton::Render(): height / 2 - h / 2 whole units down, the label font's line height in
-    // physical px.
+    // physical px. Both follow the button's own height, so they stay per button.
     float labelTop = 0.f;
     float labelLinePx = 0.f;
+
+    bool operator==(const EventItemEntryButtonEntry&) const = default;
 };
 
 struct EventItemEntryRmlModel

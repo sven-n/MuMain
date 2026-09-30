@@ -11,8 +11,9 @@
 	pointer-events: auto;
 }
 
+.entry-texts, .entry-buttons { position: static; }
+
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; transform-origin: left top; }
-.entry-text.bold { font-weight: bold; }
 
 .entry-btn {
 	display: block;

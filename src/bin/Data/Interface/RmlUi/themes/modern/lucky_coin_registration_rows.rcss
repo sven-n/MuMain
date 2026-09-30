@@ -1,0 +1,16 @@
+/* Where lucky_coin_registration.rml's own lines and buttons sit. CRegistrationLuckyCoin's RenderTexts(): white, centred on the 190-unit panel from y 25. Register at the panel's height - 220, Close at y 360.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 0px; top: 25px; color: token(text-primary); font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 65px; color: token(text-primary); }
+.entry-text:nth-child(3) { left: 0px; top: 85px; color: token(text-primary); }
+.entry-text:nth-child(4) { left: 0px; top: 105px; color: token(text-primary); }
+.entry-text:nth-child(5) { left: 0px; top: 125px; color: token(text-primary); }
+.entry-text:nth-child(6) { left: 0px; top: 145px; color: token(text-primary); font-weight: bold; }
+.entry-text:nth-child(7) { left: 24px; top: 175px; color: token(text-primary); font-weight: bold; }
+
+.entry-btn:nth-child(1) { left: 63px; top: 209px; width: 64px; height: 29px; }
+.entry-btn:nth-child(1) .entry-label { font-weight: bold; }
+
+.entry-btn:nth-child(2) { left: 63px; top: 360px; width: 64px; height: 29px; }
+.entry-btn:nth-child(2) .entry-label { font-weight: bold; }

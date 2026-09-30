@@ -21,12 +21,7 @@
 }
 
 .entry-text { white-space: pre; }
-.entry-text.left-aligned { text-align: left; }
 
-.gb-btn.wide, .gb-btn.wide:hover { decorator: image(gb-btn-wide-up); }
-.gb-btn.wide:active { decorator: image(gb-btn-wide-down); }
-.gb-btn.exit, .gb-btn.exit:hover { decorator: image(gb-exit-up); }
-.gb-btn.exit:active { decorator: image(gb-exit-down); }
 
 #serial_field {
 	text-align: left;

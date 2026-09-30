@@ -150,32 +150,28 @@ void CDoppelGangerWindow::SyncView()
         // shared with the original, kept. The original also dropped the second line of each cut
         // (finding EV1): that came from its uninitialised stack buffer, not from its layout, so
         // those lines are kept here.
-        const DWORD color = RGBA(220, 220, 220, 255);
-        const float originY = 50.f;
         wchar_t szTextOut[2][300] = {};
         std::vector<EventItemEntryView::Text> texts;
-        texts.push_back({I18N::Game::Lugard, 15.f, 13.f, 160.f, true, color});
+        texts.push_back({I18N::Game::Lugard, 160.f, true});
         g_pRenderText->SetFont(g_hFont);
         CutStr(I18N::Game::OnlyThoseInPossessionOfAMirrorOfDimensions, szTextOut[0], 140, 2, 300);
-        texts.push_back({szTextOut[0], 0.f, originY, 190.f, false, color});
-        texts.push_back({szTextOut[1], 0.f, originY + 15, 190.f, false, color});
+        texts.push_back({szTextOut[0], 190.f});
+        texts.push_back({szTextOut[1], 190.f});
         CutStr(I18N::Game::MayPassThroughTheDoppelgangerGate, szTextOut[0], 100, 2, 300);
-        texts.push_back({szTextOut[0], 0.f, originY + 30, 190.f, false, color});
-        texts.push_back({szTextOut[1], 0.f, originY + 45, 190.f, false, color});
-        texts.push_back({I18N::Game::WillYouShowMeYourMirror, 0.f, originY + 60, 190.f, false, color});
-        texts.push_back({I18N::Game::MirrorOfDimensions, 0.f, originY + 120, 190.f, true, color});
-        texts.push_back({I18N::Game::EntryTime, 0.f, originY + 210, 190.f, false, color});
+        texts.push_back({szTextOut[0], 190.f});
+        texts.push_back({szTextOut[1], 190.f});
+        texts.push_back({I18N::Game::WillYouShowMeYourMirror, 190.f});
+        texts.push_back({I18N::Game::MirrorOfDimensions, 190.f, true});
+        texts.push_back({I18N::Game::EntryTime, 190.f});
         wchar_t szText[256] = {};
         if (m_iRemainTime == 0)
             mu_swprintf(szText, I18N::Game::YouMayNowEnter);
         else
             mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, m_iRemainTime);
-        texts.push_back({szText, 0.f, originY + 230, 190.f, false, color});
+        texts.push_back({szText, 190.f});
         m_View.SetTexts(std::move(texts));
 
-        const float buttonX = static_cast<float>(INVENTORY_WIDTH) / 2 - 27;
-        m_View.SetButtons({{I18N::Game::Enter, buttonX, 190.f, m_bIsEnterButtonLocked == TRUE},
-                           {I18N::Game::Close388, buttonX, 360.f, false}});
+        m_View.SetButtons({{I18N::Game::Enter, m_bIsEnterButtonLocked == TRUE}, {I18N::Game::Close388, false}});
     }
     m_View.Sync(IsVisible(), m_Pos);
 }

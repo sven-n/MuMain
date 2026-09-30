@@ -4,6 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="event_item_entry.rcss"/>
 	<link type="text/rcss" href="gold_bowman.rcss"/>
+	<link type="text/rcss" href="gold_bowman_rows.rcss"/>
 </head>
 <body>
 	<!-- The Golden Archer's lucky number registration (CGoldBowmanWindow), docked right: its texts,
@@ -15,21 +16,24 @@
 	     Escape and the requests; a click is queued with item_entry_press. -->
 	<div id="panel" data-model="gold_bowman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
-		<span class="sharp-text entry-text" data-for="t : texts" data-class-left-aligned="t.left_aligned"
-		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
-		      data-style-font-size="t.text_px + 'px'" data-style-width="(t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+		<!-- The rows these land on are the theme's: this document's own _rows.rcss gives one
+		     :nth-child rule per line and per button. Each repeated set has its own container so
+		     the count starts at the first one. -->
+		<div class="entry-texts">
+			<span class="sharp-text entry-text" data-for="t : texts"
+			      data-style-font-size="t.text_px + 'px'" data-style-width="(t.width * root_scale) + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+		</div>
 
-		<div class="entry-btn gb-btn" data-for="b : buttons" data-class-wide="b.style == 'wide'"
-		     data-class-exit="b.style == 'exit'"
-		     data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
-		     data-style-width="b.width + 'px'" data-style-height="b.height + 'px'"
-		     data-event-click="item_entry_press(b.index)">
-			<span class="sharp-text entry-label" data-if="b.label != ''"
-			      data-style-font-size="text_px + 'px'"
-			      data-style-width="(b.width * root_scale) + 'px'" data-style-top="b.label_top + 'px'"
-			      data-style-line-height="b.label_line_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		<div class="entry-buttons">
+			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
+			     data-event-click="item_entry_press(i)">
+				<span class="sharp-text entry-label" data-if="b.label != ''"
+				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
+				      data-style-width="(b.width * root_scale) + 'px'" data-style-top="b.label_top + 'px'"
+				      data-style-line-height="b.label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+			</div>
 		</div>
 
 		<input id="serial_field" data-value="input_value" type="text" class="text-field sharp-text" maxlength="12"

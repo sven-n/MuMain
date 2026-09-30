@@ -24,27 +24,25 @@ namespace mu::ui::window
 class EventItemEntryView
 {
 public:
+    // Where a line sits, what colour it is and how it is aligned are the document's
+    // <document>_rows.rcss, one :nth-child rule per line. `width` is the box the native renderer
+    // shrinks the text to, and `bold` the font it measures in.
     struct Text
     {
         std::wstring text;
-        float left = 0.f;
-        float top = 0.f;
         float width = 0.f;
         bool bold = false;
-        DWORD color = 0;
-        bool leftAligned = false; // RT3_SORT_LEFT from the box's left edge instead of centred
     };
 
+    // Where a button sits and which sprite it wears are the same file's; `width` and `height` are
+    // the label's own centring box, which CButton::Render() measured against.
     struct Button
     {
         std::wstring label;
-        float left = 0.f;
-        float top = 0.f;
         bool locked = false;
         float width = 53.f; // newui_btn_empty_very_small
         float height = 23.f;
         bool bold = false;
-        std::string style; // the window's own button kind, for its theme
     };
 
     EventItemEntryView(const char* modelName, const char* documentPath, const char* bgModelName,

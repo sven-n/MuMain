@@ -1,0 +1,17 @@
+/* Where gold_bowman_lena.rml's own lines and buttons sit. CGoldBowmanLena's RenderTexts(): the two Rena captions from their box's left edge (RT3_SORT_LEFT), their counts centred under them, the closing notice at y 350.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 0px; top: 15px; color: token(text-primary); }
+.entry-text:nth-child(2) { left: 0px; top: 100px; color: token(text-primary); }
+.entry-text:nth-child(3) { left: 0px; top: 115px; color: token(text-primary); }
+.entry-text:nth-child(4) { left: 0px; top: 130px; color: token(text-primary); }
+.entry-text:nth-child(5) { left: 20px; top: 180px; color: token(accent-gold); text-align: left; }
+.entry-text:nth-child(6) { left: 5px; top: 202px; color: token(text-primary); }
+.entry-text:nth-child(7) { left: 20px; top: 225px; color: token(accent-gold); text-align: left; }
+.entry-text:nth-child(8) { left: 5px; top: 245px; color: token(text-primary); }
+.entry-text:nth-child(9) { left: 0px; top: 350px; color: token(text-muted); }
+.entry-text:nth-child(10) { left: 0px; top: 365px; color: token(text-muted); }
+
+.entry-btn:nth-child(1) { left: 45px; top: 285px; width: 108px; height: 29px; }
+
+.entry-btn:nth-child(2) { left: 13px; top: 392px; width: 36px; height: 29px; }

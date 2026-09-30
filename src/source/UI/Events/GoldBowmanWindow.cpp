@@ -231,26 +231,26 @@ void CGoldBowmanWindow::SyncView()
         // The original's RenderTexts(): every line in the normal font, centred on the 190-unit
         // window; the example number green, the registered gift's name (from the server's answer)
         // at y 330.
-        const DWORD white = 0xFFFFFFFF;
         const float width = INVENTORY_WIDTH;
         std::vector<EventItemEntryView::Text> texts{
-            {getMonsterName(236), 0.f, 15.f, width, false, white},
-            {Formatted(I18N::Game::EnterThe12DigitLuckyNumber), 0.f, 80.f, width, false, white},
-            {Formatted(I18N::Game::WrittenOnThe100WinningCard), 0.f, 95.f, width, false, white},
-            {Formatted(I18N::Game::LuckyNumberRegistrationPeriod), 0.f, 110.f, width, false, white},
-            {Formatted(I18N::Game::Oct282003Nov30), 0.f, 125.f, width, false, white},
-            {Formatted(I18N::Game::EnterTheLuckyNumber), 0.f, 180.f, width, false, white},
-            {Formatted(I18N::Game::ExAUS919DKL2J9), 0.f, 195.f, width, false, 0xFF18FF00},
-            {Formatted(I18N::Game::PleaseMakeSureToDifferentiate), 0.f, 210.f, width, false, white},
-            {Formatted(I18N::Game::AlphabetOAndNumber0AndAlphabetIAndNumber1), 0.f, 225.f, width, false, white}};
+            {getMonsterName(236), width},
+            {Formatted(I18N::Game::EnterThe12DigitLuckyNumber), width},
+            {Formatted(I18N::Game::WrittenOnThe100WinningCard), width},
+            {Formatted(I18N::Game::LuckyNumberRegistrationPeriod), width},
+            {Formatted(I18N::Game::Oct282003Nov30), width},
+            {Formatted(I18N::Game::EnterTheLuckyNumber), width},
+            {Formatted(I18N::Game::ExAUS919DKL2J9), width},
+            {Formatted(I18N::Game::PleaseMakeSureToDifferentiate), width},
+            {Formatted(I18N::Game::AlphabetOAndNumber0AndAlphabetIAndNumber1), width}};
+        // The registered gift's name, from the server's answer -- always the last line, so the
+        // rows above it keep their own rules whether it is there or not.
         if (wcscmp(g_strGiftName, L"") != 0)
-            texts.push_back({g_strGiftName, 0.f, 330.f, width, false, 0xFFFFD200});
+            texts.push_back({g_strGiftName, width});
         m_View.SetTexts(std::move(texts));
 
-        // Register: newui_btn_empty (108 x 29) at (45, 285) with a normal label; the exit button.
-        m_View.SetButtons({{I18N::Game::LuckyNumberRegistered, 45.f, 285.f, false, MSGBOX_BTN_EMPTY_WIDTH,
-                            MSGBOX_BTN_EMPTY_HEIGHT, false, "wide"},
-                           {L"", kExitX, kExitY, false, kExitWidth, kExitHeight, false, "exit"}});
+        m_View.SetButtons({{I18N::Game::LuckyNumberRegistered, false, MSGBOX_BTN_EMPTY_WIDTH,
+                            MSGBOX_BTN_EMPTY_HEIGHT},
+                           {L"", false, kExitWidth, kExitHeight}});
     }
     m_View.Sync(IsVisible(), m_Pos);
 

@@ -117,29 +117,24 @@ void CExchangeLuckyCoin::SyncView()
     {
         // The original's RenderTexts(): the title and "Exchange" bold white, the warning bold
         // yellow at y 80, the notice white two and three lines (14 units) below it.
-        const DWORD white = RGBA(255, 255, 255, 255);
         const float width = EXCHANGE_LUCKYCOIN_WINDOW_WIDTH;
-        const float textTop = 80.f;
-        m_View.SetTexts({{I18N::Game::LuckyCoinExchange, 0.f, 25.f, width, true, white},
-                         {I18N::Game::Exchange1940, 0.f, 200.f, width, true, white},
-                         {I18N::Game::Warning, 0.f, textTop, width, true, RGBA(255, 255, 0, 255)},
-                         {I18N::Game::ExchangedLuckyCoins, 0.f, textTop + EXCHANGE_TEXT_VAL * 2, width, false, white},
-                         {I18N::Game::WillNotBeReturned, 0.f, textTop + EXCHANGE_TEXT_VAL * 3, width, false, white}});
+        m_View.SetTexts({{I18N::Game::LuckyCoinExchange, width, true},
+                         {I18N::Game::Exchange1940, width, true},
+                         {I18N::Game::Warning, width, true},
+                         {I18N::Game::ExchangedLuckyCoins, width},
+                         {I18N::Game::WillNotBeReturned, width}});
 
         // The original's buttons: the three 108 x 29 newui_btn_empty exchange buttons with a bold
         // label from y 220, 33 units apart; Close, 64 x 29 newui_btn_empty_small, at y 360.
-        const float exchangeX = EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2 - MSGBOX_BTN_EMPTY_WIDTH / 2;
-        const float closeX = EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2 - MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2;
         std::vector<EventItemEntryView::Button> buttons;
         const wchar_t* labels[MAX_EXCHANGE_BTN] = {I18N::Game::Exchange10Coins, I18N::Game::Exchange20Coins,
                                                    I18N::Game::Exchange30Coins};
         for (int i = 0; i < MAX_EXCHANGE_BTN; i++)
         {
-            buttons.push_back({labels[i], exchangeX, 220.f + EXCHANGE_BTN_VAL * i, m_ExchangeLocked,
-                               MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT, true, "wide"});
+            buttons.push_back(
+                {labels[i], m_ExchangeLocked, MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT, true});
         }
-        buttons.push_back({I18N::Game::Close388, closeX, 360.f, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
-                           MSGBOX_BTN_EMPTY_HEIGHT, false, "small"});
+        buttons.push_back({I18N::Game::Close388, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT});
         m_View.SetButtons(buttons);
     }
     m_View.Sync(IsVisible(), m_Pos);

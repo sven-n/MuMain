@@ -185,32 +185,26 @@ void CGoldBowmanLena::SyncView()
         // The original's RenderTexts(), all in the normal font on the 190-unit window: the notes
         // centred, the two captions light blue from x 20, the counts ("    X    n", spaces kept)
         // centred from x 5 beside the 3D Rena, the closing notes purple.
-        const DWORD white = 0xFFFFFFFF;
-        const DWORD caption = 0xFF47DFFA;
-        const DWORD notice = 0xFFFA47D6;
         const float width = INVENTORY_WIDTH;
         std::vector<EventItemEntryView::Text> texts;
-        texts.push_back({getMonsterName(236), 0.f, 15.f, width, false, white});
+        texts.push_back({getMonsterName(236), width});
         for (int i = 0; i < 3; ++i)
-            texts.push_back({Formatted(I18N::Game::Lookup(700 + i)), 0.f, 100.f + static_cast<float>(i) * 15.f, width,
-                             false, white});
+            texts.push_back({Formatted(I18N::Game::Lookup(700 + i)), width});
 
         wchar_t count[100] = {};
         const int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
-        texts.push_back({I18N::Game::NumberOfRenaYouHaveCollected, 20.f, 180.f, width, false, caption, true});
+        texts.push_back({I18N::Game::NumberOfRenaYouHaveCollected, width});
         mu_swprintf(count, L"    X    %d", registerItem);
-        texts.push_back({count, 5.f, 202.f, width, false, white});
-        texts.push_back({I18N::Game::NumberOfRegisteredRena, 20.f, 225.f, width, false, caption, true});
+        texts.push_back({count, width});
+        texts.push_back({I18N::Game::NumberOfRegisteredRena, width});
         mu_swprintf(count, L"    X    %d", g_shEventChipCount);
-        texts.push_back({count, 5.f, 245.f, width, false, white});
+        texts.push_back({count, width});
         for (int j = 0; j < 2; ++j)
-            texts.push_back({Formatted(I18N::Game::Lookup(703 + j)), 0.f, 350.f + static_cast<float>(j) * 15.f, width,
-                             false, notice});
+            texts.push_back({Formatted(I18N::Game::Lookup(703 + j)), width});
         m_View.SetTexts(std::move(texts));
 
-        m_View.SetButtons({{I18N::Game::RegisteringRena, kRegisterX, kRegisterY, false, MSGBOX_BTN_EMPTY_WIDTH,
-                            MSGBOX_BTN_EMPTY_HEIGHT, false, "wide"},
-                           {L"", kExitX, kExitY, false, kExitWidth, kExitHeight, false, "exit"}});
+        m_View.SetButtons({{I18N::Game::RegisteringRena, false, MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT},
+                           {L"", false, kExitWidth, kExitHeight}});
     }
     m_View.Sync(IsVisible(), m_Pos);
 

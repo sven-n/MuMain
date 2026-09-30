@@ -6,7 +6,6 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -14,7 +13,6 @@
 
 #include <RmlUi/Core/ElementDocument.h>
 
-#include <algorithm>
 
 using namespace mu::ui::window;
 
@@ -42,26 +40,16 @@ void mu::ui::window::EventItemEntryView::Build()
 
             auto text = c.RegisterStruct<EventItemEntryTextEntry>();
             text.RegisterMember("text", &EventItemEntryTextEntry::text);
-            text.RegisterMember("left", &EventItemEntryTextEntry::left);
-            text.RegisterMember("top", &EventItemEntryTextEntry::top);
-            text.RegisterMember("width", &EventItemEntryTextEntry::width);
             text.RegisterMember("text_px", &EventItemEntryTextEntry::textPx);
-            text.RegisterMember("bold", &EventItemEntryTextEntry::bold);
-            text.RegisterMember("color", &EventItemEntryTextEntry::color);
-            text.RegisterMember("left_aligned", &EventItemEntryTextEntry::leftAligned);
+            text.RegisterMember("width", &EventItemEntryTextEntry::width);
             c.RegisterArray<std::vector<EventItemEntryTextEntry>>();
             c.Bind("texts", &model.texts);
 
             auto button = c.RegisterStruct<EventItemEntryButtonEntry>();
             button.RegisterMember("label", &EventItemEntryButtonEntry::label);
-            button.RegisterMember("style", &EventItemEntryButtonEntry::style);
-            button.RegisterMember("index", &EventItemEntryButtonEntry::index);
             button.RegisterMember("locked", &EventItemEntryButtonEntry::locked);
             button.RegisterMember("bold", &EventItemEntryButtonEntry::bold);
-            button.RegisterMember("left", &EventItemEntryButtonEntry::left);
-            button.RegisterMember("top", &EventItemEntryButtonEntry::top);
             button.RegisterMember("width", &EventItemEntryButtonEntry::width);
-            button.RegisterMember("height", &EventItemEntryButtonEntry::height);
             button.RegisterMember("label_top", &EventItemEntryButtonEntry::labelTop);
             button.RegisterMember("label_line_px", &EventItemEntryButtonEntry::labelLinePx);
             c.RegisterArray<std::vector<EventItemEntryButtonEntry>>();
@@ -162,19 +150,12 @@ void mu::ui::window::EventItemEntryView::SyncTexts()
         const UI::Scaling::FontRole role = text.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         g_pRenderText->SetFont(text.bold ? g_hFontBold : g_hFont);
         const int width = g_pRenderText->MeasureText(text.text.c_str(), static_cast<int>(text.text.size())).cx;
-        texts.push_back({StringUtils::WideToNarrow(text.text.c_str()), text.left, text.top, text.width,
-                         UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), text.width),
-                         text.bold, UI::RmlBridge::RgbaToCss(text.color), text.leftAligned});
+        texts.push_back(
+            {StringUtils::WideToNarrow(text.text.c_str()),
+             UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), text.width),
+             text.width});
     }
-    const bool same = model.texts.size() == texts.size() &&
-                      std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
-                                 [](const EventItemEntryTextEntry& a, const EventItemEntryTextEntry& b)
-                                 {
-                                     return a.text == b.text && a.left == b.left && a.top == b.top &&
-                                            a.width == b.width && a.textPx == b.textPx && a.bold == b.bold &&
-                                            a.color == b.color && a.leftAligned == b.leftAligned;
-                                 });
-    if (same)
+    if (model.texts == texts)
         return;
     model.texts = std::move(texts);
     m_RmlBinder.MarkDirty("texts");
@@ -200,29 +181,15 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
             CUIRenderTextSDLTtf::LineHeight(button.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal);
         EventItemEntryButtonEntry entry;
         entry.label = StringUtils::WideToNarrow(button.label.c_str());
-        entry.style = button.style;
-        entry.index = static_cast<int>(i);
         entry.locked = button.locked;
         entry.bold = button.bold;
-        entry.left = button.left;
-        entry.top = button.top;
         entry.width = button.width;
-        entry.height = button.height;
         // CButton::Render()'s whole-unit centring.
         entry.labelTop = static_cast<float>(static_cast<int>(button.height) / 2 - lineHeight / 2);
         entry.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
         entries.push_back(std::move(entry));
     }
-    const bool same = model.buttons.size() == entries.size() &&
-                      std::equal(model.buttons.begin(), model.buttons.end(), entries.begin(),
-                                 [](const EventItemEntryButtonEntry& a, const EventItemEntryButtonEntry& b)
-                                 {
-                                     return a.label == b.label && a.style == b.style && a.locked == b.locked &&
-                                            a.bold == b.bold && a.left == b.left && a.top == b.top &&
-                                            a.width == b.width && a.height == b.height && a.labelTop == b.labelTop &&
-                                            a.labelLinePx == b.labelLinePx;
-                                 });
-    if (same)
+    if (model.buttons == entries)
         return;
     model.buttons = std::move(entries);
     m_RmlBinder.MarkDirty("buttons");
