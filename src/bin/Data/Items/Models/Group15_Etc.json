@@ -89,8 +89,7 @@
     },
     {
       "number": 17,
-      "file": "Data/Item/Book18.bmd",
-      "textureFolders": ["Item"]
+      "model": "wizardScroll"
     },
     {
       "number": 18,
@@ -99,8 +98,7 @@
     },
     {
       "number": 19,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -114,8 +112,7 @@
     },
     {
       "number": 20,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -129,8 +126,7 @@
     },
     {
       "number": 21,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -144,8 +140,7 @@
     },
     {
       "number": 22,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -159,8 +154,7 @@
     },
     {
       "number": 23,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -174,8 +168,7 @@
     },
     {
       "number": 24,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -189,8 +182,7 @@
     },
     {
       "number": 25,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -204,8 +196,7 @@
     },
     {
       "number": 26,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -219,8 +210,7 @@
     },
     {
       "number": 27,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -234,18 +224,15 @@
     },
     {
       "number": 28,
-      "file": "Data/Item/Book18.bmd",
-      "textureFolders": ["Item"]
+      "model": "wizardScroll"
     },
     {
       "number": 29,
-      "file": "Data/Item/Book18.bmd",
-      "textureFolders": ["Item"]
+      "model": "wizardScroll"
     },
     {
       "number": 30,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -255,8 +242,7 @@
     },
     {
       "number": 31,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -266,8 +252,7 @@
     },
     {
       "number": 32,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -277,8 +262,7 @@
     },
     {
       "number": 33,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -288,8 +272,7 @@
     },
     {
       "number": 34,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -299,8 +282,7 @@
     },
     {
       "number": 35,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],
@@ -310,8 +292,7 @@
     },
     {
       "number": 36,
-      "file": "Data/Item/rollofpaper.bmd",
-      "textureFolders": ["Item"],
+      "model": "skillParchment",
       "inventory": {
         "offset": [0.03, 0.03],
         "rotation": [270, 0, 0],

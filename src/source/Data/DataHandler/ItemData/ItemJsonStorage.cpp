@@ -151,7 +151,17 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
     ItemModelDataLoadResult result;
     ReadJsonFiles(directory, "no item model files found", result.issues,
                   [&](std::string_view text, const std::string& source)
-                  { ReadItemModelGroupJson(text, source, result.models, result.issues); });
+                  {
+                      if (source == SharedItemModelsFileName)
+                      {
+                          ReadSharedItemModelsJson(text, source, result.sharedModels, result.issues);
+                      }
+                      else
+                      {
+                          ReadItemModelGroupJson(text, source, result.models, result.issues);
+                      }
+                  });
+    ApplySharedItemModels(result.models, result.sharedModels, SharedItemModelsFileName, result.issues);
     ValidateItemModels(result.models, result.issues);
     return result;
 }

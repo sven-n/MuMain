@@ -71,8 +71,7 @@
     },
     {
       "number": 8,
-      "file": "Data/Item/Ring01.bmd",
-      "textureFolders": ["Item"],
+      "model": "transformationRing",
       "inventory": {
         "anchor": [0.5, 0.7]
       }
@@ -87,8 +86,7 @@
     },
     {
       "number": 10,
-      "file": "Data/Item/Ring01.bmd",
-      "textureFolders": ["Item"],
+      "model": "transformationRing",
       "inventory": {
         "anchor": [0.5, 0.7]
       },
@@ -283,8 +281,7 @@
     },
     {
       "number": 30,
-      "file": "Data/Item/DarkLordRobe.bmd",
-      "textureFolders": ["Item"],
+      "model": "capeOfLord",
       "inventory": {
         "anchor": [0.5, 0.5],
         "rotation": [-90, 0, 0],
@@ -406,8 +403,7 @@
     },
     {
       "number": 39,
-      "file": "Data/Item/Ring01.bmd",
-      "textureFolders": ["Item"],
+      "model": "transformationRing",
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
@@ -418,8 +414,7 @@
     },
     {
       "number": 40,
-      "file": "Data/Item/Ring01.bmd",
-      "textureFolders": ["Item"],
+      "model": "transformationRing",
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
@@ -430,8 +425,7 @@
     },
     {
       "number": 41,
-      "file": "Data/Item/Ring01.bmd",
-      "textureFolders": ["Item"],
+      "model": "transformationRing",
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
@@ -442,8 +436,7 @@
     },
     {
       "number": 42,
-      "file": "Data/Item/Ring01.bmd",
-      "textureFolders": ["Item"],
+      "model": "transformationRing",
       "inventory": {
         "anchor": [0.5, 0.7],
         "rotation": [270, 0, 0]
@@ -1182,8 +1175,7 @@
     },
     {
       "number": 97,
-      "file": "Data/Item/Ingameshop/charactercard.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "characterCard",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0.002, -0.04],
@@ -1198,8 +1190,7 @@
     },
     {
       "number": 98,
-      "file": "Data/Item/Ingameshop/charactercard.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "characterCard",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0.002, -0.04],
@@ -1514,8 +1505,7 @@
     },
     {
       "number": 135,
-      "file": "Data/Item/LuckyItem/LuckyCardgreen.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketGreen",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1529,8 +1519,7 @@
     },
     {
       "number": 136,
-      "file": "Data/Item/LuckyItem/LuckyCardgreen.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketGreen",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1544,8 +1533,7 @@
     },
     {
       "number": 137,
-      "file": "Data/Item/LuckyItem/LuckyCardgreen.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketGreen",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1559,8 +1547,7 @@
     },
     {
       "number": 138,
-      "file": "Data/Item/LuckyItem/LuckyCardgreen.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketGreen",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1574,8 +1561,7 @@
     },
     {
       "number": 139,
-      "file": "Data/Item/LuckyItem/LuckyCardgreen.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketGreen",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1589,8 +1575,7 @@
     },
     {
       "number": 140,
-      "file": "Data/Item/LuckyItem/LuckyCardred.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketRed",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1604,8 +1589,7 @@
     },
     {
       "number": 141,
-      "file": "Data/Item/LuckyItem/LuckyCardred.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketRed",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1619,8 +1603,7 @@
     },
     {
       "number": 142,
-      "file": "Data/Item/LuckyItem/LuckyCardred.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketRed",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1634,8 +1617,7 @@
     },
     {
       "number": 143,
-      "file": "Data/Item/LuckyItem/LuckyCardred.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketRed",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
@@ -1649,8 +1631,7 @@
     },
     {
       "number": 144,
-      "file": "Data/Item/LuckyItem/LuckyCardred.bmd",
-      "textureFolders": ["Item/LuckyItem"],
+      "model": "luckyTicketRed",
       "inventory": {
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],

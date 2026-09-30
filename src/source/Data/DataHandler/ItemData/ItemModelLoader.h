@@ -26,10 +26,12 @@ struct LookNames
 };
 
 // Opens the .bmd file of every item model; `lookNames` checks the names of
-// the "renderStyle" and "itemEffect" values.
+// the "renderStyle" and "itemEffect" values. The file of a shared model is
+// opened once, by its first item; the others use the data of that slot.
 void OpenModels(const LookNames& lookNames);
 
-// Loads the textures of every item model from its texture folders.
+// Loads the textures of every item model from its texture folders (those of
+// a shared model once).
 void OpenTextures();
 
 // The message for the player about the missing model files and textures

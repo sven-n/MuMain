@@ -157,6 +157,38 @@ TEST_CASE("Texture folders and none-blend meshes are checked [data][items]")
     CHECK(result.models[0].noneBlendMeshes.empty());
 }
 
+TEST_CASE("A model can name a shared model instead of its file [data][items]")
+{
+    ItemModelDefinition ring;
+    ring.group = 13;
+    ring.number = 8;
+    ring.model = "transformationRing";
+    ring.renderStyle = "darkHorse";
+
+    const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{ring});
+    CHECK(text.find(R"("model": "transformationRing")") != std::string::npos);
+    CHECK(text.find(R"("file")") == std::string::npos);
+    // The shared model comes right after the number.
+    CHECK(text.find(R"("number")") < text.find(R"("model")"));
+    CHECK(text.find(R"("model")") < text.find(R"("renderStyle")"));
+
+    const ReadResult result = Read(text);
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0] == ring);
+    CHECK(result.models[0].Exists());
+}
+
+TEST_CASE("A model with a shared model leaves out its file, texture folders and none-blend meshes [data][items]")
+{
+    CHECK(HasError(R"({"number": 8, "model": "ring", "file": "Data/Item/Ring01.bmd"})", "file"));
+    CHECK(HasError(R"({"number": 8, "model": "ring", "textureFolders": ["Item"]})", "textureFolders"));
+    CHECK(HasError(R"({"number": 8, "model": "ring", "noneBlendMeshes": [1]})", "noneBlendMeshes"));
+    CHECK(HasError(R"({"number": 8, "model": "transformation ring"})", "model"));
+    CHECK(HasError(R"({"number": 8, "model": ""})", "model"));
+    CHECK(HasError(R"({"number": 8, "model": 3})", "model"));
+}
+
 TEST_CASE("The render style of a model is a name [data][items]")
 {
     const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{MakeDarkHorse()});
@@ -255,4 +287,121 @@ TEST_CASE("The item model database finds models by item type [data][items]")
     database.Build({}, glowColors);
     CHECK(database.GetModelCount() == 0);
     CHECK(database.Find(MakeItemType(13, 4)) == nullptr);
+}
+
+namespace
+{
+const std::string SharedSource = "SharedModels.json";
+
+struct SharedReadResult
+{
+    std::vector<SharedItemModel> models;
+    std::vector<ItemDataIssue> issues;
+};
+
+SharedReadResult ReadShared(const std::string& text)
+{
+    SharedReadResult result;
+    ReadSharedItemModelsJson(text, SharedSource, result.models, result.issues);
+    return result;
+}
+
+bool HasSharedError(const std::string& model, const std::string& field)
+{
+    return HasIssue(ReadShared(R"({"formatVersion": 1, "models": [)" + model + "]}").issues,
+                    ItemDataIssueSeverity::Error, field);
+}
+
+SharedItemModel MakeSkillParchment()
+{
+    return {"skillParchment", "Data/Item/rollofpaper.bmd", {"Item"}, {}};
+}
+
+SharedItemModel MakeSeedSphere()
+{
+    return {"seedSphere1", "Data/Item/s30_sphere01.bmd", {"Item", "Effect"}, {0, 2}};
+}
+
+ItemModelDefinition MakeSharedModelItem(int number, const std::string& model)
+{
+    ItemModelDefinition item;
+    item.group = 15;
+    item.number = number;
+    item.model = model;
+    return item;
+}
+} // namespace
+
+TEST_CASE("Shared model JSON keeps every value through write and read, sorted by name [data][items]")
+{
+    const std::vector<SharedItemModel> models{MakeSkillParchment(), MakeSeedSphere()};
+
+    const std::string text = WriteSharedItemModelsJson(models);
+    CHECK(text.find(R"("textureFolders": ["Item", "Effect"])") != std::string::npos);
+    CHECK(text.find(R"("noneBlendMeshes": [0, 2])") != std::string::npos);
+    CHECK(text.find("noneBlendMeshes", text.find("skillParchment")) == std::string::npos);
+
+    const SharedReadResult result = ReadShared(text);
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 2);
+    CHECK(result.models[0] == MakeSeedSphere());
+    CHECK(result.models[1] == MakeSkillParchment());
+}
+
+TEST_CASE("A shared model needs a name and a .bmd file [data][items]")
+{
+    CHECK(HasSharedError(R"({"file": "Data/Item/Ring01.bmd"})", "name"));
+    CHECK(HasSharedError(R"({"name": "a ring", "file": "Data/Item/Ring01.bmd"})", "name"));
+    // The fields of a shared model are named after it.
+    CHECK(HasSharedError(R"({"name": "ring"})", "ring.file"));
+    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.ozj"})", "ring.file"));
+    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.bmd", "textureFolders": ["../Item"]})",
+                         "ring.textureFolders"));
+    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": [-1]})",
+                         "ring.noneBlendMeshes"));
+
+    const SharedReadResult result =
+        ReadShared(R"({"formatVersion": 1, "models": [{"name": "ring", "file": "Data/Item/Ring01.bmd", "glow": {}}]})");
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "ring.glow"));
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(result.models.size() == 1);
+
+    CHECK(HasErrors(ReadShared("{").issues));
+    CHECK(HasErrors(ReadShared(R"({"formatVersion": 2, "models": []})").issues));
+    CHECK(HasIssue(ReadShared(R"({"formatVersion": 1})").issues, ItemDataIssueSeverity::Error, "models"));
+}
+
+TEST_CASE("The items that name a shared model get its file, texture folders and none-blend meshes [data][items]")
+{
+    std::vector<ItemModelDefinition> models{MakeSharedModelItem(19, "seedSphere1"), MakeSharedModelItem(20, "ring"),
+                                            MakeDarkHorse()};
+    const std::vector<SharedItemModel> shared{MakeSeedSphere(), MakeSkillParchment(), MakeSeedSphere()};
+    std::vector<ItemDataIssue> issues;
+
+    ApplySharedItemModels(models, shared, SharedSource, issues);
+
+    CHECK(models[0].model == "seedSphere1");
+    CHECK(models[0].file == "Data/Item/s30_sphere01.bmd");
+    CHECK(models[0].textureFolders == std::vector<std::string>{"Item", "Effect"});
+    CHECK(models[0].noneBlendMeshes == std::vector<int>{0, 2});
+    CHECK(models[2] == MakeDarkHorse());
+
+    const auto hasIssue =
+        [&](ItemDataIssueSeverity severity, const std::string& source, int number, const std::string& field)
+    {
+        return std::any_of(issues.begin(), issues.end(),
+                           [&](const ItemDataIssue& issue)
+                           {
+                               return issue.severity == severity && issue.source == source && issue.number == number &&
+                                      issue.field == field;
+                           });
+    };
+    // A name that is not a shared model.
+    CHECK(models[1].file.empty());
+    CHECK(hasIssue(ItemDataIssueSeverity::Error, "", 20, "model"));
+    // A shared model defined twice.
+    CHECK(hasIssue(ItemDataIssueSeverity::Error, SharedSource, ItemDataIssue::NoItem, "seedSphere1"));
+    // A shared model that no item uses.
+    CHECK(hasIssue(ItemDataIssueSeverity::Warning, SharedSource, ItemDataIssue::NoItem, "skillParchment"));
+    CHECK(issues.size() == 3);
 }

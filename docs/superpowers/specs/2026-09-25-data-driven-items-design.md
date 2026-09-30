@@ -55,7 +55,7 @@ share with items) is planned in the
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
-| D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model. Phase 12 (level variants as items of their own) then shares models without loading them twice. |
+| D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model (4d2). Phase 12 (level variants as items of their own) then shares models without loading them twice. |
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
 | D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
@@ -403,7 +403,7 @@ in both repos (as separate PRs, one per repo).
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
-| 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). |
+| 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** objects keep their item type. |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. |
@@ -630,16 +630,34 @@ server with original clients (after phases 6 and B).
    Loading stays as it is: all item models and textures are read at
    startup (`OpenBasicData()` on the loading screen). Textures are already
    shared by file name (`Bitmaps.LoadImage` counts references); meshes are
-   not, each model slot opens its own copy of the `.bmd` file. Loading
-   models only when an item is first drawn would be a separate step later.
+   not, each model slot opens its own copy of the `.bmd` file (until 4d1).
+   Loading models only when an item is first drawn would be a separate step
+   later.
 
-   **4d Shared models (D23):** models become entries of their own
-   (`"model": "magicBox"` on the item, the file and display values on the
-   model entry, optionally overridden per item). Each model is loaded once
-   into a slot of its own; the code asks the item database for an item's
-   model slot, and objects (`Weapon[]`, `BodyPart[]`, `Wing`, `Helper`,
-   dropped items) keep their item type instead of computing it back with
-   `- MODEL_ITEM`. Comes right after phase 4, so phase 12 can share models.
+   **4d Shared models (D23)**, in two parts:
+
+   - **4d1 Shared model entries (done):** the model files that several
+     items use (34 files, 145 items: the skill parchments, the socket
+     seeds and spheres, the jewels and their bundles, …) become named
+     models in `Data/Items/Models/SharedModels.json` with the file, texture
+     folders and none-blend meshes. The items name them (`"model":
+     "skillParchment"`) and keep their own inventory, ground, glow, render
+     style and item effect. The first item of a shared model opens the file
+     and loads its textures; the slots of the others use that data
+     (`BMD::ShareFrom`), so each file is read once. Every item keeps its
+     own model slot, so the code that computes `MODEL_ITEM + type` stays as
+     it is. Verified by recording what every item slot has loaded (meshes,
+     bones, actions, vertices, textures, none-blend flags) with the old and
+     the new loading: the same, apart from the numbers of the texture
+     slots (the users of the seed spheres no longer try the `Item` folder
+     first, which used up numbers). A test checks that every file several
+     items use is a shared model. The Looks view of MuEditor shows the
+     shared model and lists its items.
+   - **4d2 Objects keep their item type:** the code asks the item database
+     for an item's model slot, and objects (`Weapon[]`, `BodyPart[]`,
+     `Wing`, `Helper`, dropped items) keep their item type instead of
+     computing it back with `- MODEL_ITEM`. Comes before phase 12, so the
+     level variants can share models.
 
    **4e Clear model loading errors:** a missing model file or texture of an
    item model shows one message after loading instead of one popup per

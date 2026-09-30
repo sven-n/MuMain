@@ -40,6 +40,7 @@ struct LooksCache
     int modelDatabaseVersion = -1;
     int itemDatabaseVersion = -1;
     std::string glow;
+    Look sharedModel;
     Look renderStyle;
     Look itemEffect;
 };
@@ -86,6 +87,7 @@ void Refresh(int itemType, const ItemModelDefinition& model)
     g_cache.modelDatabaseVersion = modelDatabaseVersion;
     g_cache.itemDatabaseVersion = itemDatabaseVersion;
     g_cache.glow = DescribeGlow(model);
+    g_cache.sharedModel = TakeLook(model, &ItemModelDefinition::model);
     g_cache.renderStyle = TakeLook(model, &ItemModelDefinition::renderStyle);
     g_cache.itemEffect = TakeLook(model, &ItemModelDefinition::itemEffect);
 }
@@ -141,10 +143,18 @@ int CItemEditorLooks::Render(int itemType)
     }
     Refresh(itemType, *model);
     ImGui::Text("%s: %s", I18N::Editor::ModelFile, model->file.c_str());
+    const int clickedModelUser = RenderLook(I18N::Editor::SharedModel, g_cache.sharedModel);
     ImGui::Text("%s: %s", I18N::Editor::Glow, g_cache.glow.c_str());
     const int clickedStyleUser = RenderLook(I18N::Editor::RenderStyle, g_cache.renderStyle);
     const int clickedEffectUser = RenderLook(I18N::Editor::ItemEffect, g_cache.itemEffect);
-    return clickedStyleUser >= 0 ? clickedStyleUser : clickedEffectUser;
+    for (const int clicked : {clickedModelUser, clickedStyleUser, clickedEffectUser})
+    {
+        if (clicked >= 0)
+        {
+            return clicked;
+        }
+    }
+    return -1;
 }
 
 #endif // _EDITOR

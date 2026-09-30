@@ -133,8 +133,7 @@
     },
     {
       "number": 13,
-      "file": "Data/Item/Jewel01.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfBless",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.015],
@@ -146,8 +145,7 @@
     },
     {
       "number": 14,
-      "file": "Data/Item/Jewel02.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfSoul",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.015],
@@ -171,8 +169,7 @@
     },
     {
       "number": 16,
-      "file": "Data/Item/Jewel03.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfLife",
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
@@ -264,8 +261,7 @@
     },
     {
       "number": 22,
-      "file": "Data/Item/jewel22.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfCreation",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.015]
@@ -364,8 +360,7 @@
     },
     {
       "number": 31,
-      "file": "Data/Item/suho.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfGuardian",
       "inventory": {
         "anchor": [0.5, 0.5],
         "scale": 0.0035
@@ -475,8 +470,7 @@
     },
     {
       "number": 41,
-      "file": "Data/Item/rs.bmd",
-      "textureFolders": ["Item"],
+      "model": "gemstone",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.02],
@@ -489,8 +483,7 @@
     },
     {
       "number": 42,
-      "file": "Data/Item/jos.bmd",
-      "textureFolders": ["Item"],
+      "model": "jewelOfHarmony",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.02],
@@ -507,8 +500,7 @@
     },
     {
       "number": 43,
-      "file": "Data/Item/LowRefineStone.bmd",
-      "textureFolders": ["Item"],
+      "model": "lowerRefiningStone",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [-0.04, 0.015, 0.02],
@@ -525,8 +517,7 @@
     },
     {
       "number": 44,
-      "file": "Data/Item/HighRefineStone.bmd",
-      "textureFolders": ["Item"],
+      "model": "higherRefiningStone",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [-0.04, 0.015, 0.02],
@@ -557,8 +548,7 @@
     },
     {
       "number": 46,
-      "file": "Data/Item/hellowinscroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "jackOLanternScroll",
       "inventory": {
         "anchor": [0.5, 0.5]
       },
@@ -569,8 +559,7 @@
     },
     {
       "number": 47,
-      "file": "Data/Item/hellowinscroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "jackOLanternScroll",
       "inventory": {
         "anchor": [0.5, 0.5]
       },
@@ -581,8 +570,7 @@
     },
     {
       "number": 48,
-      "file": "Data/Item/hellowinscroll.bmd",
-      "textureFolders": ["Item"],
+      "model": "jackOLanternScroll",
       "inventory": {
         "anchor": [0.5, 0.5]
       },
@@ -854,8 +842,7 @@
     },
     {
       "number": 70,
-      "file": "Data/Item/partCharge2/EPotionR.bmd",
-      "textureFolders": ["Item/partCharge2"],
+      "model": "eliteHealingPotion",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.01, 0],
@@ -1195,8 +1182,7 @@
     },
     {
       "number": 92,
-      "file": "Data/Item/partCharge3/juju.bmd",
-      "textureFolders": ["Item/partCharge3"],
+      "model": "chaosCard",
       "inventory": {
         "anchor": [0.5, 0.95],
         "rotation": [270, 0, 0],
@@ -1210,8 +1196,7 @@
     },
     {
       "number": 93,
-      "file": "Data/Item/partCharge3/juju.bmd",
-      "textureFolders": ["Item/partCharge3"],
+      "model": "chaosCard",
       "inventory": {
         "anchor": [0.5, 0.95],
         "rotation": [270, 0, 0],
@@ -1225,8 +1210,7 @@
     },
     {
       "number": 94,
-      "file": "Data/Item/partCharge2/EPotionR.bmd",
-      "textureFolders": ["Item/partCharge2"],
+      "model": "eliteHealingPotion",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.01, 0],
@@ -1241,8 +1225,7 @@
     },
     {
       "number": 95,
-      "file": "Data/Item/partCharge3/juju.bmd",
-      "textureFolders": ["Item/partCharge3"],
+      "model": "chaosCard",
       "inventory": {
         "anchor": [0.5, 0.95],
         "rotation": [270, 0, 0],
@@ -1355,8 +1338,7 @@
     },
     {
       "number": 103,
-      "file": "Data/Item/secromicon_piece.bmd",
-      "textureFolders": ["Item"],
+      "model": "secromiconFragment",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.05],
@@ -1366,8 +1348,7 @@
     },
     {
       "number": 104,
-      "file": "Data/Item/secromicon_piece.bmd",
-      "textureFolders": ["Item"],
+      "model": "secromiconFragment",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.05],
@@ -1377,8 +1358,7 @@
     },
     {
       "number": 105,
-      "file": "Data/Item/secromicon_piece.bmd",
-      "textureFolders": ["Item"],
+      "model": "secromiconFragment",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.05],
@@ -1388,8 +1368,7 @@
     },
     {
       "number": 106,
-      "file": "Data/Item/secromicon_piece.bmd",
-      "textureFolders": ["Item"],
+      "model": "secromiconFragment",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.05],
@@ -1399,8 +1378,7 @@
     },
     {
       "number": 107,
-      "file": "Data/Item/secromicon_piece.bmd",
-      "textureFolders": ["Item"],
+      "model": "secromiconFragment",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.05],
@@ -1410,8 +1388,7 @@
     },
     {
       "number": 108,
-      "file": "Data/Item/secromicon_piece.bmd",
-      "textureFolders": ["Item"],
+      "model": "secromiconFragment",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0.005, 0.05],
@@ -1492,8 +1469,7 @@
     },
     {
       "number": 114,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1504,8 +1480,7 @@
     },
     {
       "number": 115,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1516,8 +1491,7 @@
     },
     {
       "number": 116,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1528,8 +1502,7 @@
     },
     {
       "number": 117,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1540,8 +1513,7 @@
     },
     {
       "number": 118,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1552,8 +1524,7 @@
     },
     {
       "number": 119,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1576,8 +1547,7 @@
     },
     {
       "number": 121,
-      "file": "Data/Item/Ingameshop/itembox_gold.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "goldenBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
@@ -1586,8 +1556,7 @@
     },
     {
       "number": 122,
-      "file": "Data/Item/Ingameshop/itembox_silver.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "silverBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
@@ -1596,8 +1565,7 @@
     },
     {
       "number": 123,
-      "file": "Data/Item/Ingameshop/itembox_gold.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "goldenBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
@@ -1606,8 +1574,7 @@
     },
     {
       "number": 124,
-      "file": "Data/Item/Ingameshop/itembox_silver.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "silverBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "scale": 0.0035
@@ -1616,8 +1583,7 @@
     },
     {
       "number": 126,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1628,8 +1594,7 @@
     },
     {
       "number": 127,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1640,8 +1605,7 @@
     },
     {
       "number": 128,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1652,8 +1616,7 @@
     },
     {
       "number": 129,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1664,8 +1627,7 @@
     },
     {
       "number": 130,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1676,8 +1638,7 @@
     },
     {
       "number": 131,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1688,8 +1649,7 @@
     },
     {
       "number": 132,
-      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "membershipItem",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.06],
@@ -1715,8 +1675,7 @@
     },
     {
       "number": 134,
-      "file": "Data/Item/Ingameshop/package_money_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "packageBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.05],
@@ -1727,8 +1686,7 @@
     },
     {
       "number": 135,
-      "file": "Data/Item/Ingameshop/package_money_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "packageBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.05],
@@ -1739,8 +1697,7 @@
     },
     {
       "number": 136,
-      "file": "Data/Item/Ingameshop/package_money_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "packageBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.05],
@@ -1751,8 +1708,7 @@
     },
     {
       "number": 137,
-      "file": "Data/Item/Ingameshop/package_money_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "packageBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.05],
@@ -1763,8 +1719,7 @@
     },
     {
       "number": 138,
-      "file": "Data/Item/Ingameshop/package_money_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "packageBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.05],
@@ -1775,8 +1730,7 @@
     },
     {
       "number": 139,
-      "file": "Data/Item/Ingameshop/package_money_item.bmd",
-      "textureFolders": ["Item/Ingameshop"],
+      "model": "packageBox",
       "inventory": {
         "anchor": [0.5, 0.95],
         "offset": [0, 0.05],
