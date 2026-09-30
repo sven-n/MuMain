@@ -20,6 +20,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -324,11 +325,8 @@ void mu::ui::window::CCharacterInfoWindow::OpenningProcess()
     ResetEquipmentLevel();
 
     const bool masterLevelEnabled = gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT;
-    if (m_RmlBinder.GetModel().masterLevelEnabled != masterLevelEnabled)
-    {
-        m_RmlBinder.GetModel().masterLevelEnabled = masterLevelEnabled;
-        m_RmlBinder.MarkDirty("master_level_enabled");
-    }
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::masterLevelEnabled, "master_level_enabled",
+              masterLevelEnabled);
 
     g_csItemOption.init();
 
@@ -459,10 +457,9 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
-    model.canLevelUp = CharacterAttribute->LevelUpPoint > 0;
-    m_RmlBinder.MarkDirty("can_level_up");
-    model.showCharisma = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD;
-    m_RmlBinder.MarkDirty("show_charisma");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::canLevelUp, "can_level_up", CharacterAttribute->LevelUpPoint > 0);
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::showCharisma, "show_charisma",
+              gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD);
 
     BuildSubjectTexts();
     BuildTableTexts();
@@ -473,29 +470,27 @@ void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
 {
     auto& model = m_RmlBinder.GetModel();
 
-    model.nameText = StringUtils::WideToNarrow(CharacterAttribute->Name);
-    model.pkLevel = Hero->PK;
-    m_RmlBinder.MarkDirty("name_text");
-    m_RmlBinder.MarkDirty("pk_level");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::nameText, "name_text",
+              StringUtils::WideToNarrow(CharacterAttribute->Name));
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::pkLevel, "pk_level", static_cast<int>(Hero->PK));
 
     wchar_t strClassName[256];
     mu_swprintf(strClassName, L"(%ls)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
-    model.classNameText = StringUtils::WideToNarrow(strClassName);
-    m_RmlBinder.MarkDirty("classname_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::classNameText, "classname_text",
+              StringUtils::WideToNarrow(strClassName));
 
     wchar_t strServerName[MAX_TEXT_LENGTH];
     const wchar_t* apszGlobalText[4]
         = { I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer };
     mu_swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
         g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    model.serverNameText = StringUtils::WideToNarrow(strServerName);
-    m_RmlBinder.MarkDirty("servername_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::serverNameText, "servername_text",
+              StringUtils::WideToNarrow(strServerName));
 
     const float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
-    model.classNameOpacity = (127 * (2.f - fAlpha)) / 255.f;
-    model.serverNameOpacity = (127 * fAlpha) / 255.f;
-    m_RmlBinder.MarkDirty("classname_opacity");
-    m_RmlBinder.MarkDirty("servername_opacity");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::classNameOpacity, "classname_opacity",
+              (127 * (2.f - fAlpha)) / 255.f);
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::serverNameOpacity, "servername_opacity", (127 * fAlpha) / 255.f);
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
@@ -533,23 +528,20 @@ void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
         mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::Create, 0, 0, I18N::Game::Decrease, 0, 0);
     }
 
-    model.levelText = StringUtils::WideToNarrow(strLevel);
-    m_RmlBinder.MarkDirty("level_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::levelText, "level_text", StringUtils::WideToNarrow(strLevel));
 
+    // Empty when there is nothing to spend, which is what the else branch used to clear it to.
+    Rml::String levelUpPointText;
     if (CharacterAttribute->LevelUpPoint > 0)
     {
         wchar_t strLevelUpPoint[128];
         mu_swprintf(strLevelUpPoint, I18N::Game::PointD, CharacterAttribute->LevelUpPoint);
-        model.levelUpPointText = StringUtils::WideToNarrow(strLevelUpPoint);
+        levelUpPointText = StringUtils::WideToNarrow(strLevelUpPoint);
     }
-    else
-    {
-        model.levelUpPointText.clear();
-    }
-    m_RmlBinder.MarkDirty("levelup_point_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::levelUpPointText, "levelup_point_text",
+              std::move(levelUpPointText));
 
-    model.expText = StringUtils::WideToNarrow(strExp);
-    m_RmlBinder.MarkDirty("exp_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::expText, "exp_text", StringUtils::WideToNarrow(strExp));
 
     int iAddPoint, iMinusPoint;
 
@@ -614,11 +606,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
 
     wchar_t strPointProbability[128];
     mu_swprintf(strPointProbability, I18N::Game::DD1907, iAddPoint, iMinusPoint);
-    model.pointProbabilityText = StringUtils::WideToNarrow(strPointProbability);
-    m_RmlBinder.MarkDirty("point_probability_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::pointProbabilityText, "point_probability_text",
+              StringUtils::WideToNarrow(strPointProbability));
 
-    model.pointText = StringUtils::WideToNarrow(strPoint);
-    m_RmlBinder.MarkDirty("point_text");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::pointText, "point_text", StringUtils::WideToNarrow(strPoint));
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
@@ -634,10 +625,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     wchar_t strStrength[32];
     mu_swprintf(strStrength, L"%d", wStrength);
-    model.strValueText = StringUtils::WideToNarrow(strStrength);
-    model.strValueSource = strengthSource;
-    m_RmlBinder.MarkDirty("str_value_text");
-    m_RmlBinder.MarkDirty("str_value_source");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::strValueText, "str_value_text",
+              StringUtils::WideToNarrow(strStrength));
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::strValueSource, "str_value_source", Rml::String(strengthSource));
 
     wchar_t strAttakMamage[256];
     int iAttackDamageMin = 0;
@@ -954,10 +944,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
     wchar_t strDexterity[32];
     WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     mu_swprintf(strDexterity, L"%d", wDexterity);
-    model.agiValueText = StringUtils::WideToNarrow(strDexterity);
-    model.agiValueSource = dexteritySource;
-    m_RmlBinder.MarkDirty("agi_value_text");
-    m_RmlBinder.MarkDirty("agi_value_source");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::agiValueText, "agi_value_text",
+              StringUtils::WideToNarrow(strDexterity));
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::agiValueSource, "agi_value_source", Rml::String(dexteritySource));
 
     bool bDexSuccess = true;
     int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -1226,10 +1215,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     wchar_t strVitality[256];
     mu_swprintf(strVitality, L"%d", wVitality);
-    model.vitValueText = StringUtils::WideToNarrow(strVitality);
-    model.vitValueSource = vitalitySource;
-    m_RmlBinder.MarkDirty("vit_value_text");
-    m_RmlBinder.MarkDirty("vit_value_source");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::vitValueText, "vit_value_text",
+              StringUtils::WideToNarrow(strVitality));
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::vitValueSource, "vit_value_source", Rml::String(vitalitySource));
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -1281,10 +1269,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     wchar_t strEnergy[256];
     mu_swprintf(strEnergy, L"%d", wEnergy);
-    model.eneValueText = StringUtils::WideToNarrow(strEnergy);
-    model.eneValueSource = energySource;
-    m_RmlBinder.MarkDirty("ene_value_text");
-    m_RmlBinder.MarkDirty("ene_value_source");
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::eneValueText, "ene_value_text",
+              StringUtils::WideToNarrow(strEnergy));
+    SyncField(m_RmlBinder, &CharacterInfoRmlModel::eneValueSource, "ene_value_source", Rml::String(energySource));
 
     model.eneLines.clear();
 
@@ -1587,9 +1574,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
         wchar_t strCharisma[256];
         mu_swprintf(strCharisma, L"%d", wCharisma);
-        model.cmdValueText = StringUtils::WideToNarrow(strCharisma);
-        model.cmdValueSource = charismaSource;
-        m_RmlBinder.MarkDirty("cmd_value_text");
-        m_RmlBinder.MarkDirty("cmd_value_source");
+        SyncField(m_RmlBinder, &CharacterInfoRmlModel::cmdValueText, "cmd_value_text",
+                  StringUtils::WideToNarrow(strCharisma));
+        SyncField(m_RmlBinder, &CharacterInfoRmlModel::cmdValueSource, "cmd_value_source", Rml::String(charismaSource));
     }
 }
