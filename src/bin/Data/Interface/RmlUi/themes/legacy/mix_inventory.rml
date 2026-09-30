@@ -29,38 +29,35 @@
 
 		<div class="mix-head sharp-text" data-class-hidden="!show_recipe"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">
-			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text" data-style-color="recipe_color">{{recipe_line1}}</span></div>
-			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text" data-style-color="recipe_color"
+			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text mix-recipe" data-class-ready="recipe_ready">{{recipe_line1}}</span></div>
+			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text mix-recipe" data-class-ready="recipe_ready"
 			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</span></div>
 			<div class="mix-row mix-row-wide" data-class-hidden="!show_success_rate"
-			     data-style-height="(20 * root_scale) + 'px'"><span class="mix-text"
-			     data-style-color="success_rate_color">{{success_rate_text}}</span></div>
+			     data-style-height="(20 * root_scale) + 'px'"><span class="mix-text mix-success" data-class-boosted="success_boosted">{{success_rate_text}}</span></div>
 			<!-- Native leaves the recipe colour set for the zen line unless a success line reset it. -->
 			<div class="mix-row mix-row-wide mix-required-zen" data-class-hidden="!show_required_zen"
 			     data-style-height="(20 * root_scale) + 'px'"><span
-			     class="mix-text" data-style-color="show_success_rate ? 'rgba(210,230,255,255)' : recipe_color"
-			     >{{required_zen_text}}</span></div>
+			     class="mix-text mix-zen" data-class-after-success="show_success_rate"
+			     data-class-ready="recipe_ready">{{required_zen_text}}</span></div>
 		</div>
 
 		<div class="mix-list sharp-text" data-class-hidden="!show_recipe"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
 			<div class="mix-list-line mix-prediction" data-class-hidden="!show_prediction"><span
 			     class="mix-text">{{prediction_text}}</span></div>
-			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text"
-			     data-style-color="s.color">{{s.text}}</span></div>
-			<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="s : status_lines"><span class="mix-text"
-			     data-style-color="s.color">{{s.text}}</span></div>
+			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text mix-kind" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</span></div>
+			<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="s : status_lines"><span class="mix-text mix-kind" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</span></div>
 			<div class="mix-advice" data-style-margin-top="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
-				<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="a : advice_lines"><span class="mix-text"
-				     data-style-color="a.color">{{a.text}}</span></div>
+				<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="a : advice_lines"><span class="mix-text mix-kind" data-class-missing="a.kind == 'missing'" data-class-partial="a.kind == 'partial'" data-class-ready="a.kind == 'ready'" data-class-normal="a.kind == 'normal'" data-class-warning="a.kind == 'warning'" data-class-loss="a.kind == 'loss'" data-class-dim="a.kind == 'dim'">{{a.text}}</span></div>
 			</div>
 		</div>
 
-		<div class="mix-descriptions" data-class-hidden="!show_recipe">
-			<div class="mix-description sharp-text" data-for="d : description_lines" data-style-top="d.top + 'px'"
-			     data-class-left="d.align_left" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		<div class="mix-descriptions" data-class-hidden="!show_recipe"
+		     data-class-lowered="descriptions_lowered">
+			<div class="mix-description sharp-text" data-for="d : description_lines"
+			     data-class-left="d.align_left" data-class-row-0="d.row == 0" data-class-row-1="d.row == 1" data-class-row-2="d.row == 2" data-class-row-3="d.row == 3" data-class-row-4="d.row == 4" data-class-row-5="d.row == 5" data-class-row-6="d.row == 6" data-class-row-7="d.row == 7" data-class-row-8="d.row == 8" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 			     data-style-width="((d.align_left ? 180 : 160) * root_scale) + 'px'">
-				<div class="mix-fit" data-style-color="d.color" data-style-transform="'scale(' + d.fit + ')'">{{d.text}}</div>
+				<div class="mix-fit mix-kind" data-class-missing="d.kind == 'missing'" data-class-partial="d.kind == 'partial'" data-class-ready="d.kind == 'ready'" data-class-normal="d.kind == 'normal'" data-class-warning="d.kind == 'warning'" data-class-loss="d.kind == 'loss'" data-class-dim="d.kind == 'dim'" data-style-transform="'scale(' + d.fit + ')'">{{d.text}}</div>
 			</div>
 		</div>
 

@@ -119,11 +119,11 @@ void CMixInventory::BuildRmlUi()
                 c.Bind("recipe_line1", &model.recipeLine1);
                 c.Bind("recipe_line2", &model.recipeLine2);
                 c.Bind("show_recipe_line2", &model.showRecipeLine2);
-                c.Bind("recipe_color", &model.recipeColor);
+                c.Bind("recipe_ready", &model.recipeReady);
 
                 c.Bind("show_success_rate", &model.showSuccessRate);
                 c.Bind("success_rate_text", &model.successRateText);
-                c.Bind("success_rate_color", &model.successRateColor);
+                c.Bind("success_boosted", &model.successBoosted);
 
                 c.Bind("show_required_zen", &model.showRequiredZen);
                 c.Bind("required_zen_text", &model.requiredZenText);
@@ -133,8 +133,8 @@ void CMixInventory::BuildRmlUi()
 
                 auto mixLine = c.RegisterStruct<MixLine>();
                 mixLine.RegisterMember("text", &MixLine::text);
-                mixLine.RegisterMember("color", &MixLine::color);
-                mixLine.RegisterMember("top", &MixLine::top);
+                mixLine.RegisterMember("kind", &MixLine::kind);
+                mixLine.RegisterMember("row", &MixLine::row);
                 mixLine.RegisterMember("align_left", &MixLine::alignLeft);
                 mixLine.RegisterMember("fit", &MixLine::fit);
                 c.RegisterArray<std::vector<MixLine>>();
@@ -142,6 +142,7 @@ void CMixInventory::BuildRmlUi()
                 c.Bind("status_lines", &model.statusLines);
                 c.Bind("advice_lines", &model.adviceLines);
                 c.Bind("description_lines", &model.descriptionLines);
+                c.Bind("descriptions_lowered", &model.descriptionsLowered);
 
                 c.Bind("show_socket_prompt", &model.showSocketPrompt);
                 c.Bind("socket_prompt_text", &model.socketPromptText);
@@ -718,10 +719,7 @@ void CMixInventory::SyncMixContentModel()
     if (!showRecipe)
         return;
 
-    if (g_MixRecipeMgr.IsReadyToMix())
-        syncColor(&MixInventoryRmlModel::recipeColor, "recipe_color", 255, 255, 48, 255);
-    else
-        syncColor(&MixInventoryRmlModel::recipeColor, "recipe_color", 255, 48, 48, 255);
+    syncBool(&MixInventoryRmlModel::recipeReady, "recipe_ready", g_MixRecipeMgr.IsReadyToMix() == TRUE);
 
     g_MixRecipeMgr.GetCurRecipeName(szText, 1);
     syncWide(&MixInventoryRmlModel::recipeLine1, "recipe_line1", szText);
@@ -749,7 +747,7 @@ void CMixInventory::SyncMixContentModel()
         {
             mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
             mu_swprintf(szText, L"%ls + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
-            syncColor(&MixInventoryRmlModel::successRateColor, "success_rate_color", 255, 255, 48, 255);
+            syncBool(&MixInventoryRmlModel::successBoosted, "success_boosted", true);
         }
         else
         {
@@ -770,7 +768,7 @@ void CMixInventory::SyncMixContentModel()
                 mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
                 break;
             }
-            syncColor(&MixInventoryRmlModel::successRateColor, "success_rate_color", 210, 230, 255, 255);
+            syncBool(&MixInventoryRmlModel::successBoosted, "success_boosted", false);
         }
         break;
     default:
@@ -839,23 +837,23 @@ void CMixInventory::SyncMixContentModel()
             const int iResult = g_MixRecipeMgr.GetSourceName(iLine, szText);
             if (iResult == SEASON3A::MIX_SOURCE_ERROR) break;
 
-            Rml::String color;
-            if (iResult == SEASON3A::MIX_SOURCE_NO) color = makeColor(255, 50, 20, 255);
-            else if (iResult == SEASON3A::MIX_SOURCE_PARTIALLY) color = makeColor(210, 230, 255, 255);
-            else if (iResult == SEASON3A::MIX_SOURCE_YES) color = makeColor(255, 255, 48, 255);
+            Rml::String kind;
+            if (iResult == SEASON3A::MIX_SOURCE_NO) kind = "missing";
+            else if (iResult == SEASON3A::MIX_SOURCE_PARTIALLY) kind = "partial";
+            else if (iResult == SEASON3A::MIX_SOURCE_YES) kind = "ready";
 
-            sourceLines.push_back({ StringUtils::WideToNarrow(szText), color });
+            sourceLines.push_back({ StringUtils::WideToNarrow(szText), kind });
         }
     }
     else if (g_MixRecipeMgr.IsMixInit())
     {
-        statusLines.push_back({ StringUtils::WideToNarrow(I18N::Game::PleaseUploadTheAssemblyItems), makeColor(255, 50, 20, 255) });
+        statusLines.push_back({ StringUtils::WideToNarrow(I18N::Game::PleaseUploadTheAssemblyItems), "missing" });
     }
     else
     {
         mu_swprintf(szText, I18N::Game::AssemblyPredictionS, L" ");
-        statusLines.push_back({ StringUtils::WideToNarrow(szText), makeColor(255, 50, 20, 255) });
-        statusLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ImproperItemsForCombination), makeColor(255, 50, 20, 255) });
+        statusLines.push_back({ StringUtils::WideToNarrow(szText), "missing" });
+        statusLines.push_back({ StringUtils::WideToNarrow(I18N::Game::ImproperItemsForCombination), "missing" });
     }
 
     syncBool(&MixInventoryRmlModel::showPrediction, "show_prediction", showPrediction);
@@ -867,7 +865,7 @@ void CMixInventory::SyncMixContentModel()
     // Recipe description (ready to mix) or advice for the closest match (not ready) -- former
     // trailing block, always rendered in the same reddish tone natively.
     std::vector<MixLine> adviceLines;
-    const Rml::String adviceColor = makeColor(255, 50, 20, 255);
+    const Rml::String adviceColor = "missing";
     if (g_MixRecipeMgr.IsReadyToMix())
     {
         if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 1) == TRUE) adviceLines.push_back({ StringUtils::WideToNarrow(szText), adviceColor });
@@ -887,29 +885,29 @@ void CMixInventory::SyncMixContentModel()
     std::vector<MixLine> descriptionLines;
     bool showSocketPrompt = false;
     wchar_t socketPromptText[128] = {};
-    const Rml::String white = makeColor(255, 255, 255, 255);
-    const Rml::String warning = makeColor(255, 40, 20, 255);
-    constexpr float kDescriptionTop = 250.f; // RenderMixDescriptions()'s fPos_y + 250 block
-    constexpr float kCastleSeniorDescriptionTop = 270.f;
-    constexpr float kDescriptionRow = 13.f;
+    const Rml::String white = "normal";
+    const Rml::String warning = "warning";
     // Native boxes: 160 centred at x+15, or 200 left-aligned from x+5 -- which runs 15 past the
     // 190-wide window; the left box is kept inside it (180) so no line overflows the frame.
     constexpr float kCentredDescriptionWidth = 160.f;
     constexpr float kLeftDescriptionWidth = 180.f;
-    auto describeAt = [&](float blockTop, const wchar_t* text, const Rml::String& color, int row, bool alignLeft)
+    // RenderMixDescriptions() walked its own block in 13-unit rows, skipping some; the row it
+    // chose is what travels, and the theme turns it into a top.
+    bool descriptionsLowered = false;
+    auto describeAt = [&](bool lowered, const wchar_t* text, const Rml::String& kind, int row, bool alignLeft)
     {
-        const float top = blockTop + static_cast<float>(row) * kDescriptionRow;
+        descriptionsLowered = lowered;
         const float fit = TextFitScale(fitProbe, text, alignLeft ? kLeftDescriptionWidth : kCentredDescriptionWidth,
                                        probeUnitsPerLayoutUnit, minimumFit);
-        descriptionLines.push_back({StringUtils::WideToNarrow(text), color, top, alignLeft, fit});
+        descriptionLines.push_back({StringUtils::WideToNarrow(text), kind, row, alignLeft, fit});
     };
-    auto describe = [&](const wchar_t* text, const Rml::String& color, int row, bool alignLeft = false)
-    { describeAt(kDescriptionTop, text, color, row, alignLeft); };
+    auto describe = [&](const wchar_t* text, const Rml::String& kind, int row, bool alignLeft = false)
+    { describeAt(false, text, kind, row, alignLeft); };
     switch (mixType)
     {
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
         for (int i = 0; i < 6; ++i)
-            describeAt(kCastleSeniorDescriptionTop, I18N::Game::Lookup(1644 + i), makeColor(200, 200, 200, 255), i,
+            describeAt(true, I18N::Game::Lookup(1644 + i), "dim", i,
                        false);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
@@ -918,7 +916,7 @@ void CMixInventory::SyncMixContentModel()
         mu_swprintf(szText, I18N::Game::SForOnlyS, I18N::Game::Refine, I18N::Game::WeaponsOrShields);
         describe(szText, white, 2);
         describe(I18N::Game::Allowed, white, 3);
-        describe(I18N::Game::ItemWillDisappearWhenFailed, makeColor(255, 0, 0, 255), 4);
+        describe(I18N::Game::ItemWillDisappearWhenFailed, "loss", 4);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
         describe(I18N::Game::RestorationIsDeletingThe, white, 0);
@@ -957,6 +955,7 @@ void CMixInventory::SyncMixContentModel()
         break;
     }
     syncLines(&MixInventoryRmlModel::descriptionLines, "description_lines", descriptionLines);
+    syncBool(&MixInventoryRmlModel::descriptionsLowered, "descriptions_lowered", descriptionsLowered);
     syncBool(&MixInventoryRmlModel::showSocketPrompt, "show_socket_prompt", showSocketPrompt);
     if (showSocketPrompt)
         syncWide(&MixInventoryRmlModel::socketPromptText, "socket_prompt_text", socketPromptText);

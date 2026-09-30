@@ -59,12 +59,14 @@ namespace mu::ui::window
         struct MixLine
         {
             Rml::String text;
-            Rml::String color; // "rgba(r,g,b,a)"
-            // Where native RenderMixDescriptions() drew a description line: its top in reference
-            // px from the window's top (fixed per mix type, with rows skipped between some lines)
-            // and whether it was left-aligned rather than centred. Unused (0/false) for the other
-            // line lists.
-            float top = 0.f;
+            // What the line is telling the player, which each theme colours: "missing" (a source
+            // this recipe has none of), "partial", "ready", or for a description "normal",
+            // "warning", "loss" (the item is destroyed on failure) and "dim".
+            Rml::String kind;
+            // Which row of the description block the line occupies -- RenderMixDescriptions()
+            // skipped rows between some lines, so this is the row it chose, not its position in
+            // the list. The theme turns it into a top. Unused (0/false) for the other line lists.
+            int row = 0;
             bool alignLeft = false;
             // Native RenderText() shrinks a line to its box (FontScaleForBounds); this is that
             // factor for description lines, against a box kept inside the window (measured in the
@@ -91,11 +93,11 @@ namespace mu::ui::window
             bool showRecipe = false;
             Rml::String recipeLine1, recipeLine2;
             bool showRecipeLine2 = false;
-            Rml::String recipeColor;
+            bool recipeReady = false; // IsReadyToMix(); the theme colours the recipe name
 
             bool showSuccessRate = false;
             Rml::String successRateText;
-            Rml::String successRateColor;
+            bool successBoosted = false; // a chaos-rate bonus is in the shown rate
 
             bool showRequiredZen = false;
             Rml::String requiredZenText;
@@ -107,6 +109,8 @@ namespace mu::ui::window
             std::vector<MixLine> statusLines;
             std::vector<MixLine> adviceLines;
             std::vector<MixLine> descriptionLines;
+        // The castle senior recipe's block starts a row lower than every other mix's.
+        bool descriptionsLowered = false;
 
             bool showSocketPrompt = false;
             Rml::String socketPromptText;

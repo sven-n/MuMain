@@ -102,3 +102,15 @@
 	z-index: 1;
 }
 #btn_mix:hover ~ .tooltip-mix { display: block; }
+
+.mix-recipe { color: token(semantic-danger); }
+.mix-recipe.ready { color: token(accent-gold); }
+.mix-success { color: token(text-secondary); }
+.mix-success.boosted { color: token(accent-gold); }
+.mix-kind.missing { color: token(semantic-danger); }
+.mix-kind.partial { color: token(text-secondary); }
+.mix-kind.ready { color: token(accent-gold); }
+.mix-kind.normal { color: token(text-primary); }
+.mix-kind.warning { color: token(semantic-danger); }
+.mix-kind.loss { color: token(semantic-danger); }
+.mix-kind.dim { color: token(text-muted); }

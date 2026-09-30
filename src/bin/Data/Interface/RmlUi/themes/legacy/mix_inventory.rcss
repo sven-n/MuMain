@@ -190,3 +190,41 @@
 .tooltip-text { background-color: rgba(0, 0, 0, 180); }
 .tooltip-mix { left: 34px; } /* button centre 95 */
 #btn_mix:hover ~ .tooltip-mix { display: block; }
+
+/* What each line is telling the player -- the colours native RenderMixDescriptions() and the
+   source list set, now the theme's. */
+.mix-recipe { color: rgb(255, 48, 48); }
+.mix-recipe.ready { color: rgb(255, 255, 48); }
+.mix-success { color: rgb(210, 230, 255); }
+.mix-success.boosted { color: rgb(255, 255, 48); }
+/* Native left the recipe colour set for the zen line unless a success line reset it. */
+.mix-zen { color: rgb(255, 48, 48); }
+.mix-zen.ready { color: rgb(255, 255, 48); }
+.mix-zen.after-success { color: rgb(210, 230, 255); }
+.mix-kind.missing { color: rgb(255, 50, 20); }
+.mix-kind.partial { color: rgb(210, 230, 255); }
+.mix-kind.ready { color: rgb(255, 255, 48); }
+.mix-kind.normal { color: #ffffff; }
+.mix-kind.warning { color: rgb(255, 40, 20); }
+.mix-kind.loss { color: rgb(255, 0, 0); }
+.mix-kind.dim { color: rgb(200, 200, 200); }
+
+/* RenderMixDescriptions()'s own block: 13-unit rows from y 250, a row lower for castle senior. */
+.mix-description.row-0 { top: 250px; }
+.mix-description.row-1 { top: 263px; }
+.mix-description.row-2 { top: 276px; }
+.mix-description.row-3 { top: 289px; }
+.mix-description.row-4 { top: 302px; }
+.mix-description.row-5 { top: 315px; }
+.mix-description.row-6 { top: 328px; }
+.mix-description.row-7 { top: 341px; }
+.mix-description.row-8 { top: 354px; }
+.mix-descriptions.lowered .mix-description.row-0 { top: 270px; }
+.mix-descriptions.lowered .mix-description.row-1 { top: 283px; }
+.mix-descriptions.lowered .mix-description.row-2 { top: 296px; }
+.mix-descriptions.lowered .mix-description.row-3 { top: 309px; }
+.mix-descriptions.lowered .mix-description.row-4 { top: 322px; }
+.mix-descriptions.lowered .mix-description.row-5 { top: 335px; }
+.mix-descriptions.lowered .mix-description.row-6 { top: 348px; }
+.mix-descriptions.lowered .mix-description.row-7 { top: 361px; }
+.mix-descriptions.lowered .mix-description.row-8 { top: 374px; }

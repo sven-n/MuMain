@@ -23,21 +23,21 @@
 		<div class="mix-tax-rate" data-class-hidden="!show_tax_rate">{{tax_rate_text}}</div>
 
 		<div class="mix-content" data-class-hidden="!show_recipe">
-			<div class="mix-line mix-recipe-line" data-style-color="recipe_color">{{recipe_line1}}</div>
-			<div class="mix-line mix-recipe-line" data-style-color="recipe_color"
+			<div class="mix-line mix-recipe-line mix-recipe" data-class-ready="recipe_ready">{{recipe_line1}}</div>
+			<div class="mix-line mix-recipe-line mix-recipe" data-class-ready="recipe_ready"
 			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</div>
 
-			<div class="mix-line mix-success-rate" data-class-hidden="!show_success_rate"
-			     data-style-color="success_rate_color">{{success_rate_text}}</div>
+			<div class="mix-line mix-success-rate mix-success" data-class-hidden="!show_success_rate"
+			     data-class-boosted="success_boosted">{{success_rate_text}}</div>
 
 			<div class="mix-line mix-required-zen" data-class-hidden="!show_required_zen">{{required_zen_text}}</div>
 
 			<div class="mix-line mix-prediction" data-class-hidden="!show_prediction">{{prediction_text}}</div>
 
-			<div class="mix-line" data-for="s : source_lines" data-style-color="s.color">{{s.text}}</div>
-			<div class="mix-line" data-for="s : status_lines" data-style-color="s.color">{{s.text}}</div>
-			<div class="mix-line" data-for="a : advice_lines" data-style-color="a.color">{{a.text}}</div>
-			<div class="mix-line" data-for="d : description_lines" data-style-color="d.color">{{d.text}}</div>
+			<div class="mix-line mix-kind" data-for="s : source_lines" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</div>
+			<div class="mix-line mix-kind" data-for="s : status_lines" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</div>
+			<div class="mix-line mix-kind" data-for="a : advice_lines" data-class-missing="a.kind == 'missing'" data-class-partial="a.kind == 'partial'" data-class-ready="a.kind == 'ready'" data-class-normal="a.kind == 'normal'" data-class-warning="a.kind == 'warning'" data-class-loss="a.kind == 'loss'" data-class-dim="a.kind == 'dim'">{{a.text}}</div>
+			<div class="mix-line mix-kind" data-for="d : description_lines" data-class-missing="d.kind == 'missing'" data-class-partial="d.kind == 'partial'" data-class-ready="d.kind == 'ready'" data-class-normal="d.kind == 'normal'" data-class-warning="d.kind == 'warning'" data-class-loss="d.kind == 'loss'" data-class-dim="d.kind == 'dim'">{{d.text}}</div>
 
 			<div class="mix-line mix-socket-prompt" data-class-hidden="!show_socket_prompt">{{socket_prompt_text}}</div>
 		</div>
