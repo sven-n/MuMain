@@ -9,10 +9,18 @@
 // RmlUi (CItemExplanationWindow, CSetItemExplanation, TipTextListView).
 struct TipTextListRecord
 {
+    // A piece of the tooltip's own chrome. Its size follows the text it wraps, but what it is --
+    // the 1 px border, the translucent fill, or a line's own backdrop -- is the theme's to colour.
+    enum class BoxKind
+    {
+        Border = 0,
+        Fill = 1,
+        LineBackdrop = 2,
+    };
     struct Box
     {
         float x, y, width, height;
-        unsigned int argb;
+        BoxKind kind;
     };
     struct Line
     {

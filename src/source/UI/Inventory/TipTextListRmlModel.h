@@ -6,14 +6,16 @@
 
 namespace mu::ui::window
 {
-// A RenderColor() box of RenderTipTextList(): its black frame, fill, or a line's coloured text box.
+// A piece of the tooltip's chrome. Its box follows the text it wraps -- the whole tooltip sizes
+// itself by measuring its lines -- but which piece it is (TipTextListRecord::BoxKind) is what the
+// theme colours.
 struct TipTextListBoxEntry
 {
     float left = 0.f; // reference px
     float top = 0.f;
     float width = 0.f;
     float height = 0.f;
-    Rml::String color;
+    int kind = 0;
 };
 
 // A line of RenderTipTextList(): RenderText() in its box, shrunk to it like the original's.

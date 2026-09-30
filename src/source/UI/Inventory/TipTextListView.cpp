@@ -26,7 +26,7 @@ Rml::String ArgbToCss(unsigned int argb)
 
 bool SameBox(const TipTextListBoxEntry& a, const TipTextListBoxEntry& b)
 {
-    return a.left == b.left && a.top == b.top && a.width == b.width && a.height == b.height && a.color == b.color;
+    return a.left == b.left && a.top == b.top && a.width == b.width && a.height == b.height && a.kind == b.kind;
 }
 
 bool SameLine(const TipTextListLineEntry& a, const TipTextListLineEntry& b)
@@ -57,7 +57,7 @@ void mu::ui::window::TipTextListView::Build()
                                                      box.RegisterMember("top", &TipTextListBoxEntry::top);
                                                      box.RegisterMember("width", &TipTextListBoxEntry::width);
                                                      box.RegisterMember("height", &TipTextListBoxEntry::height);
-                                                     box.RegisterMember("color", &TipTextListBoxEntry::color);
+                                                     box.RegisterMember("kind", &TipTextListBoxEntry::kind);
                                                      c.RegisterArray<std::vector<TipTextListBoxEntry>>();
                                                      c.Bind("boxes", &model.boxes);
                                                      auto line = c.RegisterStruct<TipTextListLineEntry>();
@@ -104,14 +104,15 @@ void mu::ui::window::TipTextListView::Sync(bool visible, const TipTextListRecord
 
     std::vector<TipTextListBoxEntry> boxes;
     for (const TipTextListRecord::Box& box : record.boxes)
-        boxes.push_back({box.x, box.y, box.width, box.height, ArgbToCss(box.argb)});
+        boxes.push_back({box.x, box.y, box.width, box.height, static_cast<int>(box.kind)});
 
     std::vector<TipTextListLineEntry> lines;
     for (const TipTextListRecord::Line& line : record.lines)
     {
         // RenderText()'s text box: the box width by the line's height, behind the text.
         if (line.bgColor >> 24 != 0)
-            boxes.push_back({line.x, line.y, line.boxWidth, line.height, UI::RmlBridge::RgbaToCss(line.bgColor)});
+            boxes.push_back({line.x, line.y, line.boxWidth, line.height,
+                             static_cast<int>(TipTextListRecord::BoxKind::LineBackdrop)});
         g_pRenderText->SetFont(line.bold ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(line.text.c_str(), static_cast<int>(line.text.size())).cx;
         const auto role = line.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;

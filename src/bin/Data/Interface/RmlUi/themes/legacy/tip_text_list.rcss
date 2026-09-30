@@ -8,3 +8,9 @@
 .tip-line.centred { text-align: center; }
 .tip-line.right { text-align: right; }
 .tip-line.bold { font-weight: bold; }
+
+/* RenderTipTextList()'s own chrome: a 1 px black border, a translucent black fill, and a line's
+   own backdrop. Their boxes follow the measured text; their colours are the theme's. */
+.tip-box.border { background-color: #000000; }
+.tip-box.fill { background-color: rgba(0, 0, 0, 204); }
+.tip-box.line-backdrop { background-color: rgba(0, 0, 0, 204); }

@@ -14,7 +14,8 @@
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="tip-box" data-for="b : boxes" data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
 		     data-style-width="b.width + 'px'" data-style-height="b.height + 'px'"
-		     data-style-background-color="b.color"></div>
+		     data-class-border="b.kind == 0" data-class-fill="b.kind == 1"
+		     data-class-line-backdrop="b.kind == 2"></div>
 		<span class="sharp-text tip-line" data-for="l : lines" data-class-bold="l.bold"
 		      data-class-centred="l.align == 1" data-class-right="l.align == 2"
 		      data-style-left="l.left + 'px'" data-style-top="l.top + 'px'" data-style-color="l.color"

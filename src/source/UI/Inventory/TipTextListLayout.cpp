@@ -79,12 +79,11 @@ void UI::TipTextList::Record(TipTextListRecord& record, int sx, int sy, int text
     {
         // RenderColor(..., 1.0f, 1): an opaque black frame; the fill black at 0.8.
         const float x = static_cast<float>(iPos_x);
-        const unsigned int black = 0xFF000000u;
-        record.boxes.push_back({x - 1, fsy - 1, fWidth + 1, 1.f, black});
-        record.boxes.push_back({x - 1, fsy - 1, 1.f, fHeight + 1, black});
-        record.boxes.push_back({x - 1 + fWidth + 1, fsy - 1, 1.f, fHeight + 1, black});
-        record.boxes.push_back({x - 1, fsy - 1 + fHeight + 1, fWidth + 2, 1.f, black});
-        record.boxes.push_back({x, fsy, fWidth, fHeight, 0xCC000000u});
+        record.boxes.push_back({x - 1, fsy - 1, fWidth + 1, 1.f, TipTextListRecord::BoxKind::Border});
+        record.boxes.push_back({x - 1, fsy - 1, 1.f, fHeight + 1, TipTextListRecord::BoxKind::Border});
+        record.boxes.push_back({x - 1 + fWidth + 1, fsy - 1, 1.f, fHeight + 1, TipTextListRecord::BoxKind::Border});
+        record.boxes.push_back({x - 1, fsy - 1 + fHeight + 1, fWidth + 2, 1.f, TipTextListRecord::BoxKind::Border});
+        record.boxes.push_back({x, fsy, fWidth, fHeight, TipTextListRecord::BoxKind::Fill});
     }
 
     for (int i = 0; i < textNum; i++)

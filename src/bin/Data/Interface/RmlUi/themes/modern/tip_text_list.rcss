@@ -7,3 +7,7 @@
 .tip-line.centred { text-align: center; }
 .tip-line.right { text-align: right; }
 .tip-line.bold { font-weight: bold; }
+
+.tip-box.border { background-color: token(border-frame); }
+.tip-box.fill { background-color: token(surface-recessed); }
+.tip-box.line-backdrop { background-color: token(surface-raised); }
