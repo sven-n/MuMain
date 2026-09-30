@@ -221,13 +221,9 @@ namespace
                 c.Bind("root_scale", &model.rootScale);
                 c.Bind("text_px", &model.textPx);
                 c.Bind("bold_text_px", &model.boldTextPx);
-                auto line = c.RegisterStruct<ReconnectLineEntry>();
-                line.RegisterMember("text", &ReconnectLineEntry::text);
-                line.RegisterMember("left", &ReconnectLineEntry::left);
-                line.RegisterMember("top", &ReconnectLineEntry::top);
-                line.RegisterMember("bold", &ReconnectLineEntry::bold);
-                c.RegisterArray<std::vector<ReconnectLineEntry>>();
-                c.Bind("lines", &model.lines);
+                c.Bind("title_text", &model.titleText);
+                c.Bind("step_text", &model.stepText);
+                c.Bind("countdown_text", &model.countdownText);
                 c.Bind("progress_width", &model.progressWidth);
                 c.BindEventCallback("reconnect_cancel", [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                                     { s_cancelClicked = true; });
@@ -243,31 +239,6 @@ namespace
     }
 
 
-    // DrawStatusTexts(): the title (bold), the step and the countdown, each centred in the panel's
-    // width.
-    std::vector<ReconnectLineEntry> StatusLines()
-    {
-        ReconnectManager& mgr = ReconnectManager::Instance();
-        std::vector<ReconnectLineEntry> lines;
-        auto add = [&lines](const wchar_t* text, float top, bool bold)
-        {
-            g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
-            const SIZE size = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text)));
-            const float left = size.cx < PANEL_W ? (PANEL_W - static_cast<float>(size.cx)) / 2.0f : 0.0f;
-            lines.push_back({StringUtils::WideToNarrow(text), left, top - PANEL_Y, bold});
-        };
-        add(I18N::Game::ConnectionLost, TITLE_Y, true);
-        add(StepLabel(mgr.GetPhase()), STEP_Y, false);
-        const int seconds = mgr.GetCountdownSeconds();
-        if (seconds > 0)
-        {
-            wchar_t countdown[64];
-            mu_swprintf(countdown, I18N::Game::RetryingInSeconds, seconds);
-            add(countdown, COUNTDOWN_Y, false);
-        }
-        return lines;
-    }
-
     // DrawBackdrop()'s dim and DrawNative()'s panel, gauge and Cancel.
     void SyncView(float dimAlpha, float fraction)
     {
@@ -282,7 +253,21 @@ namespace
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
         SyncField(s_binder, &ReconnectDialogRmlModel::boldTextPx, "bold_text_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-        SyncField(s_binder, &ReconnectDialogRmlModel::lines, "lines", StatusLines());
+        // DrawStatusTexts(): the title, the step and the countdown. The theme gives each its
+        // row and centres it across the panel.
+        ReconnectManager& mgr = ReconnectManager::Instance();
+        SyncField(s_binder, &ReconnectDialogRmlModel::titleText, "title_text",
+                  StringUtils::WideToNarrow(I18N::Game::ConnectionLost));
+        SyncField(s_binder, &ReconnectDialogRmlModel::stepText, "step_text",
+                  StringUtils::WideToNarrow(StepLabel(mgr.GetPhase())));
+        Rml::String countdownText;
+        if (const int seconds = mgr.GetCountdownSeconds(); seconds > 0)
+        {
+            wchar_t countdown[64];
+            mu_swprintf(countdown, I18N::Game::RetryingInSeconds, seconds);
+            countdownText = StringUtils::WideToNarrow(countdown);
+        }
+        SyncField(s_binder, &ReconnectDialogRmlModel::countdownText, "countdown_text", std::move(countdownText));
         SyncField(s_binder, &ReconnectDialogRmlModel::progressWidth, "progress_width", PROG_BAR_MAX_W * fraction);
     }
 

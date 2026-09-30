@@ -20,10 +20,17 @@
 		<div id="progress_back"></div>
 		<div id="progress_bar" data-if="progress_width > 0" data-style-width="progress_width + 'px'"></div>
 		<div id="cancel" data-event-mousedown="reconnect_cancel"></div>
-		<span class="sharp-text line" data-for="l : lines" data-class-bold="l.bold"
-		      data-style-left="l.left + 'px'" data-style-top="l.top + 'px'"
-		      data-style-font-size="(l.bold ? bold_text_px : text_px) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+		<!-- The three status lines; the theme gives each its row, and centres it across the
+		     panel where C++ used to measure the text and halve the remainder. -->
+		<span id="rc_title" class="sharp-text line" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-font-size="bold_text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+		<span id="rc_step" class="sharp-text line" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{step_text}}</span>
+		<span id="rc_countdown" class="sharp-text line" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{countdown_text}}</span>
 	</div>
 </body>
 </rml>

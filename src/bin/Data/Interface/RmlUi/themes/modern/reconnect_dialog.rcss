@@ -29,4 +29,9 @@ body { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-e
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; transform-origin: left top; }
 .line { color: token(text-primary); }
-.line.bold { font-weight: bold; }
+
+/* The status lines' own rows (PANEL_Y + 12 / 30 / 48) and the panel-wide centring box. */
+.line { left: 0; text-align: center; }
+#rc_title { top: 12px; font-weight: bold; }
+#rc_step { top: 30px; }
+#rc_countdown { top: 48px; }
