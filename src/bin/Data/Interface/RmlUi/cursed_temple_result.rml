@@ -16,32 +16,58 @@
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back"></div>
 		<div id="frame_top"></div>
-		<div class="frame-middle" style="top: 67px;"></div>
-		<div class="frame-middle" style="top: 82px;"></div>
-		<div class="frame-middle" style="top: 97px;"></div>
-		<div class="frame-middle" style="top: 112px;"></div>
-		<div class="frame-middle" style="top: 127px;"></div>
-		<div class="frame-middle" style="top: 142px;"></div>
-		<div class="frame-middle" style="top: 157px;"></div>
-		<div class="frame-middle" style="top: 172px;"></div>
-		<div class="frame-middle" style="top: 187px;"></div>
-		<div class="frame-middle" style="top: 202px;"></div>
-		<div class="frame-middle" style="top: 217px;"></div>
+		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
 		<div id="frame_bottom"></div>
-		<div class="line" style="top: 205px;"></div>
-		<div class="line" style="top: 45px;"></div>
+		<div class="line line-lower"></div>
+		<div class="line line-upper"></div>
 
 		<div class="result-banner success" data-if="banner == 1" data-style-left="banner_left + 'px'"
 		     data-style-opacity="banner_alpha"></div>
 		<div class="result-banner failure" data-if="banner == 2" data-style-left="banner_left + 'px'"
 		     data-style-opacity="banner_alpha"></div>
 
-		<div class="hero-row" data-for="row_top : hero_row_tops" data-style-top="row_top + 'px'"
-		     data-style-height="(line_height_px / root_scale) + 'px'"></div>
-		<span class="sharp-text result-text" data-for="t : texts" data-class-cell="t.width == 0"
-		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
-		      data-style-font-size="t.text_px + 'px'" data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+		<span id="ct_hero_list" class="sharp-text result-line" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-font-size="hero_list_label.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{hero_list_label.text}}</span>
+		<span id="ct_column_header" class="sharp-text result-line" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-font-size="column_header.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{column_header.text}}</span>
+		<span id="ct_reward_hint" class="sharp-text result-line" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-font-size="reward_hint.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{reward_hint.text}}</span>
+
+		<!-- The two teams' rows. The theme puts each block on its own row and colours it; a long
+		     name runs into the next cell, as it did. -->
+		<div class="result-rows rows-allied">
+			<div class="result-row" data-for="r : allied_rows">
+				<div class="hero-row" data-if="r.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
+				<span class="sharp-text result-cell cell-team" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.team}}</span>
+				<span class="sharp-text result-cell cell-name" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
+				<span class="sharp-text result-cell cell-class-name" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.class_name}}</span>
+				<span class="sharp-text result-cell cell-added-exp" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.added_exp}}</span>
+				<span class="sharp-text result-cell cell-point" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.point}}</span>
+			</div>
+		</div>
+		<div class="result-rows rows-illusion">
+			<div class="result-row" data-for="r : illusion_rows">
+				<div class="hero-row" data-if="r.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
+				<span class="sharp-text result-cell cell-team" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.team}}</span>
+				<span class="sharp-text result-cell cell-name" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
+				<span class="sharp-text result-cell cell-class-name" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.class_name}}</span>
+				<span class="sharp-text result-cell cell-added-exp" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.added_exp}}</span>
+				<span class="sharp-text result-cell cell-point" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.point}}</span>
+			</div>
+		</div>
 
 		<div class="result-btn" id="btn_close" data-event-click="result_close">
 			<span class="sharp-text result-label" data-style-font-size="text_px + 'px'"

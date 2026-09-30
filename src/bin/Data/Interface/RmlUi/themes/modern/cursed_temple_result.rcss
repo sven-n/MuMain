@@ -43,3 +43,52 @@
 .result-btn:hover { border-color: token(accent-steel-hover); }
 .result-btn:active { background-color: token(surface-recessed); }
 .result-label { left: 0; color: token(text-primary); }
+
+/* RenderText()'s own rows: the title, the column heading and the reward notice centred on the
+   window, then one 15-unit row per player in each team's block. */
+.frame-middles, .result-rows { position: static; }
+.result-line { position: absolute; left: 0; text-align: center; }
+#ct_hero_list { top: 13px; }
+#ct_column_header { top: 38px; }
+#ct_reward_hint { top: 245px; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+.frame-middles .frame-middle:nth-child(10) { top: 202px; }
+.frame-middles .frame-middle:nth-child(11) { top: 217px; }
+.line-upper { top: 45px; }
+.line-lower { top: 205px; }
+
+.result-row { position: absolute; left: 0; width: 230px; height: 15px; }
+.result-row:nth-child(1) { top: 0px; }
+.result-row:nth-child(2) { top: 15px; }
+.result-row:nth-child(3) { top: 30px; }
+.result-row:nth-child(4) { top: 45px; }
+.result-row:nth-child(5) { top: 60px; }
+.result-row:nth-child(6) { top: 75px; }
+.result-row:nth-child(7) { top: 90px; }
+.result-row:nth-child(8) { top: 105px; }
+.result-row:nth-child(9) { top: 120px; }
+.result-row:nth-child(10) { top: 135px; }
+.result-row:nth-child(11) { top: 150px; }
+.result-row:nth-child(12) { top: 165px; }
+.rows-allied .result-row { margin-top: 65px; }
+.rows-illusion .result-row { margin-top: 140px; }
+.result-cell { position: absolute; top: 0; }
+.cell-team { left: 5px; }
+.cell-name { left: 56px; }
+.cell-class-name { left: 106px; }
+.cell-added-exp { left: 150px; }
+.cell-point { left: 190px; }
+.hero-row { top: 0; }
+
+#ct_hero_list, #ct_column_header { color: token(accent-gold); }
+#ct_reward_hint { color: token(semantic-danger); }
+.rows-allied .result-cell { color: token(accent-steel); }
+.rows-illusion .result-cell { color: token(accent-gold); }

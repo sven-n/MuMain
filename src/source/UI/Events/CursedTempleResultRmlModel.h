@@ -6,16 +6,28 @@
 
 namespace mu::ui::window
 {
-// One RenderText() of the result window: a left-aligned cell of a player row, or a centred text
-// shrunk to its box like the original's.
-struct CursedTempleResultTextEntry
+// One of the result window's own centred lines. Where it sits and what colour it is are the
+// theme's; only what it says and the size it was shrunk to for its box travel.
+struct CursedTempleResultLine
 {
     Rml::String text;
-    float left = 0.f;   // reference px in the panel
-    float top = 0.f;    // reference px in the panel
-    float width = 0.f;  // centred box width, reference px; 0 = left-aligned, no box
-    float textPx = 0.f; // physical px
-    Rml::String color;  // CSS colour of the native RGBA text colour
+    float textPx = 0.f;
+
+    bool operator==(const CursedTempleResultLine&) const = default;
+};
+
+// One player's row of the result table: which side they fought for, who they are and what they
+// came away with. The hero's own row is marked so the theme can pick it out.
+struct CursedTempleResultRow
+{
+    Rml::String team;
+    Rml::String name;
+    Rml::String className;
+    Rml::String addedExp;
+    Rml::String point;
+    bool hero = false;
+
+    bool operator==(const CursedTempleResultRow&) const = default;
 };
 
 struct CursedTempleResultRmlModel
@@ -25,8 +37,12 @@ struct CursedTempleResultRmlModel
     float textPx = 0.f;       // native normal text size in physical px (RmlRootTransform.h)
     float lineHeightPx = 0.f; // native normal line height, physical px (the hero row's height)
 
-    std::vector<CursedTempleResultTextEntry> texts;
-    std::vector<float> heroRowTops; // reference px: the hero's rows, on a red text box
+    CursedTempleResultLine heroListLabel;
+    CursedTempleResultLine columnHeader;
+    CursedTempleResultLine rewardHint;
+    // The two teams' rows, each block starting at its own row in the theme.
+    std::vector<CursedTempleResultRow> alliedRows;
+    std::vector<CursedTempleResultRow> illusionRows;
     Rml::String closeText;
     // CButton::Render(): 23 / 2 - h / 2 whole units down, the native line height in physical px.
     float labelTop = 0.f;

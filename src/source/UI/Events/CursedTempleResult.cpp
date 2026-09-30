@@ -243,17 +243,22 @@ void mu::ui::window::CCursedTempleResult::BuildRmlUi()
             c.Bind("root_scale", &model.rootScale);
             c.Bind("text_px", &model.textPx);
             c.Bind("line_height_px", &model.lineHeightPx);
-            auto text = c.RegisterStruct<CursedTempleResultTextEntry>();
-            text.RegisterMember("text", &CursedTempleResultTextEntry::text);
-            text.RegisterMember("left", &CursedTempleResultTextEntry::left);
-            text.RegisterMember("top", &CursedTempleResultTextEntry::top);
-            text.RegisterMember("width", &CursedTempleResultTextEntry::width);
-            text.RegisterMember("text_px", &CursedTempleResultTextEntry::textPx);
-            text.RegisterMember("color", &CursedTempleResultTextEntry::color);
-            c.RegisterArray<std::vector<CursedTempleResultTextEntry>>();
-            c.Bind("texts", &model.texts);
-            c.RegisterArray<std::vector<float>>();
-            c.Bind("hero_row_tops", &model.heroRowTops);
+            auto lineType = c.RegisterStruct<CursedTempleResultLine>();
+            lineType.RegisterMember("text", &CursedTempleResultLine::text);
+            lineType.RegisterMember("text_px", &CursedTempleResultLine::textPx);
+            c.Bind("hero_list_label", &model.heroListLabel);
+            c.Bind("column_header", &model.columnHeader);
+            c.Bind("reward_hint", &model.rewardHint);
+            auto resultRow = c.RegisterStruct<CursedTempleResultRow>();
+            resultRow.RegisterMember("team", &CursedTempleResultRow::team);
+            resultRow.RegisterMember("name", &CursedTempleResultRow::name);
+            resultRow.RegisterMember("class_name", &CursedTempleResultRow::className);
+            resultRow.RegisterMember("added_exp", &CursedTempleResultRow::addedExp);
+            resultRow.RegisterMember("point", &CursedTempleResultRow::point);
+            resultRow.RegisterMember("hero", &CursedTempleResultRow::hero);
+            c.RegisterArray<std::vector<CursedTempleResultRow>>();
+            c.Bind("allied_rows", &model.alliedRows);
+            c.Bind("illusion_rows", &model.illusionRows);
             c.Bind("close_text", &model.closeText);
             c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
@@ -320,53 +325,43 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     const float fade = std::clamp(m_ResultEffectAlph, 0.f, 1.f);
     updated.bannerAlpha = fade > kAlphaTestReference ? fade : 0.f;
 
-    // The original's RenderText(): centred texts shrunk to the window's width, then one row per
-    // player, its cells left-aligned at fixed offsets (long names run into the next cell, as
-    // they did), the hero's row on a red text box.
-    updated.texts.clear();
-    updated.heroRowTops.clear();
-    auto addCentred = [&](const wchar_t* text, float top, DWORD color)
+    // The original's RenderText(): the centred lines shrunk to the window's width, then one row
+    // per player, its cells left-aligned at fixed offsets (long names run into the next cell, as
+    // they did), the hero's row on a text box. The theme places all of it.
+    auto line = [&](const wchar_t* text)
     {
-        updated.texts.push_back({StringUtils::WideToNarrow(text), 0.f, top, CURSEDTEMPLE_RESULT_WINDOW_WIDTH,
-                                 TextPxInBox(transform, text, CURSEDTEMPLE_RESULT_WINDOW_WIDTH),
-                                 UI::RmlBridge::RgbaToCss(color)});
+        return CursedTempleResultLine{StringUtils::WideToNarrow(text),
+                                      TextPxInBox(transform, text, CURSEDTEMPLE_RESULT_WINDOW_WIDTH)};
     };
-    auto addCell = [&](const wchar_t* text, float left, float top, DWORD color)
+    auto addRows = [&](const CT_GameResult_list& results, std::vector<CursedTempleResultRow>& rows)
     {
-        updated.texts.push_back(
-            {StringUtils::WideToNarrow(text), left, top, 0.f, textPx, UI::RmlBridge::RgbaToCss(color)});
-    };
-    auto addRows = [&](const CT_GameResult_list& results, float firstTop, DWORD color)
-    {
-        int i = 0;
         for (const CursedTempleGameResult& info : results)
         {
-            const float top = firstTop + static_cast<float>(i * 15);
-            if (wcscmp(info.s_characterId, Hero->ID) == 0)
-                updated.heroRowTops.push_back(top);
-
             wchar_t Text[200] = {};
-            addCell(SEASON3A::eTeam_Allied == info.s_team ? I18N::Game::MUAlliance : I18N::Game::IllusionSorcery, 5.f,
-                    top, color);
-            addCell(info.s_characterId, 56.f, top, color);
-            addCell(gCharacterManager.GetCharacterClassText(info.s_class), 106.f, top, color);
+            CursedTempleResultRow row;
+            row.team = StringUtils::WideToNarrow(SEASON3A::eTeam_Allied == info.s_team ? I18N::Game::MUAlliance
+                                                                                      : I18N::Game::IllusionSorcery);
+            row.name = StringUtils::WideToNarrow(info.s_characterId);
+            row.className = StringUtils::WideToNarrow(gCharacterManager.GetCharacterClassText(info.s_class));
             mu_swprintf(Text, L"%d", info.s_addexp);
-            addCell(Text, 150.f, top, color);
+            row.addedExp = StringUtils::WideToNarrow(Text);
             mu_swprintf(Text, L"%d", info.s_point);
-            addCell(Text, 190.f, top, color);
-            ++i;
+            row.point = StringUtils::WideToNarrow(Text);
+            row.hero = wcscmp(info.s_characterId, Hero->ID) == 0;
+            rows.push_back(std::move(row));
         }
     };
 
     wchar_t Text[200] = {};
-    addCentred(I18N::Game::HeroList, 13.f, 0xFF49B0FF);
+    updated.heroListLabel = line(I18N::Game::HeroList);
     mu_swprintf(Text, L"  %ls           %ls        %ls     %ls    %ls", I18N::Game::Camp, I18N::Game::Character,
                 I18N::Game::Class, I18N::Game::EXP, I18N::Game::Point);
-    addCentred(Text, 38.f, 0xFF49B0FF);
-    addRows(m_AlliedTeamGameResult, 65.f, 0xFFFBB264);
-    addRows(m_IllusionTeamGameResult, 140.f, 0xFF37d6fe);
-    addCentred(I18N::Game::YouMayBeCompensatedByClickingOnTheCloseButton, CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 55,
-               0xFF0000FF);
+    updated.columnHeader = line(Text);
+    updated.alliedRows.clear();
+    updated.illusionRows.clear();
+    addRows(m_AlliedTeamGameResult, updated.alliedRows);
+    addRows(m_IllusionTeamGameResult, updated.illusionRows);
+    updated.rewardHint = line(I18N::Game::YouMayBeCompensatedByClickingOnTheCloseButton);
 
     CursedTempleResultRmlModel& model = m_RmlBinder.GetModel();
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::lineHeightPx, "line_height_px", updated);
@@ -376,17 +371,9 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::banner, "banner", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::bannerLeft, "banner_left", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::bannerAlpha, "banner_alpha", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::heroRowTops, "hero_row_tops", updated);
-    const bool sameTexts = model.texts.size() == updated.texts.size() &&
-                           std::equal(model.texts.begin(), model.texts.end(), updated.texts.begin(),
-                                      [](const CursedTempleResultTextEntry& a, const CursedTempleResultTextEntry& b)
-                                      {
-                                          return a.text == b.text && a.left == b.left && a.top == b.top &&
-                                                 a.width == b.width && a.textPx == b.textPx && a.color == b.color;
-                                      });
-    if (!sameTexts)
-    {
-        model.texts = std::move(updated.texts);
-        m_RmlBinder.MarkDirty("texts");
-    }
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::heroListLabel, "hero_list_label", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::columnHeader, "column_header", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::rewardHint, "reward_hint", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::alliedRows, "allied_rows", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::illusionRows, "illusion_rows", updated);
 }
