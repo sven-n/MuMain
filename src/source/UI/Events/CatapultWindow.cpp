@@ -293,6 +293,7 @@ void mu::ui::window::CCatapultWindow::BuildRmlUi()
         RmlUiRuntime::Instance().GetContext(), "catapult",
         [this](Rml::DataModelConstructor& c, CatapultRmlModel& model)
         {
+            c.Bind("mode", &model.mode);
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
@@ -308,12 +309,9 @@ void mu::ui::window::CCatapultWindow::BuildRmlUi()
             auto area = c.RegisterStruct<CatapultAreaEntry>();
             area.RegisterMember("label", &CatapultAreaEntry::label);
             area.RegisterMember("index", &CatapultAreaEntry::index);
-            area.RegisterMember("left", &CatapultAreaEntry::left);
-            area.RegisterMember("top", &CatapultAreaEntry::top);
             area.RegisterMember("big", &CatapultAreaEntry::big);
             area.RegisterMember("locked", &CatapultAreaEntry::locked);
             area.RegisterMember("label_top", &CatapultAreaEntry::labelTop);
-            area.RegisterMember("label_left", &CatapultAreaEntry::labelLeft);
             area.RegisterMember("label_px", &CatapultAreaEntry::labelPx);
             c.RegisterArray<std::vector<CatapultAreaEntry>>();
             c.Bind("areas", &model.areas);
@@ -413,19 +411,18 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
         g_pRenderText->SetFont(g_hFont);
         const int measured = g_pRenderText->MeasureText(*a.label, static_cast<int>(wcslen(*a.label))).cx;
         areas.push_back(
-            {StringUtils::WideToNarrow(*a.label), static_cast<int>(i), static_cast<float>(a.left),
-             static_cast<float>(a.top), a.big, static_cast<int>(i) == m_iAreaIndex,
-             static_cast<float>(height / 2 - lineHeight / 2), static_cast<float>(width / 2 - measured / 2),
+            {StringUtils::WideToNarrow(*a.label), static_cast<int>(i), a.big,
+             static_cast<int>(i) == m_iAreaIndex, static_cast<float>(height / 2 - lineHeight / 2),
              UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
                                                    static_cast<float>(measured), static_cast<float>(width))});
     }
+    SyncField(m_RmlBinder, &CatapultRmlModel::mode, "mode", static_cast<int>(m_iType));
     const bool sameAreas = model.areas.size() == areas.size() &&
                            std::equal(model.areas.begin(), model.areas.end(), areas.begin(),
                                       [](const CatapultAreaEntry& x, const CatapultAreaEntry& y)
                                       {
-                                          return x.label == y.label && x.left == y.left && x.top == y.top &&
-                                                 x.big == y.big && x.locked == y.locked && x.labelTop == y.labelTop &&
-                                                 x.labelLeft == y.labelLeft && x.labelPx == y.labelPx;
+                                          return x.label == y.label && x.big == y.big && x.locked == y.locked &&
+                                                 x.labelTop == y.labelTop && x.labelPx == y.labelPx;
                                       });
     if (!sameAreas)
     {

@@ -26,7 +26,9 @@
 		<!-- Locked (not-yet-purchased) pages -- vector badge instead of legacy's raster lock
 		     glyph, matching this theme's forged-metal chrome language. Table/empty-slot backing
 		     art behind this stays native (InventoryExtension.cpp's RenderFrame()). -->
-		<div class="ext-locked-page" data-for="page : locked_pages" data-style-top="page.top + 'px'">
+		<div class="ext-locked-page" data-for="page : locked_pages"
+		     data-class-page-1="page.number == 1" data-class-page-2="page.number == 2"
+		     data-class-page-3="page.number == 3" data-class-page-4="page.number == 4">
 			<div class="ext-locked-badge">{{page.number}}</div>
 		</div>
 	</div>

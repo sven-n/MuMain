@@ -49,9 +49,7 @@ namespace mu::ui::window
         // same reasoning as CInventoryCtrl's own per-cell chrome staying native everywhere else.
         struct LockedExtPageEntry
         {
-            float top = 0.f;
             int number = 0;        // 1-based locked page number (matches former IMAGE_EXTENSION_NOn) -- modern theme renders this as a vector badge.
-            Rml::String decorator; // "image(ext-lock-N)" -- legacy theme's raster sprite reference, built from `number`.
         };
 
         struct InventoryExtensionRmlModel

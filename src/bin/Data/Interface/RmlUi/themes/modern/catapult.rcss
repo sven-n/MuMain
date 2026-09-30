@@ -24,7 +24,6 @@
 .cp-area:hover, #btn_fire:hover { border-color: token(accent-steel-hover); }
 .cp-area.locked, #btn_fire.locked { background-color: token(surface-recessed); border-color: token(border-frame); }
 .cp-label { left: 0; color: token(text-primary); }
-.cp-area-label { text-align: left; }
 .locked .cp-label { color: token(text-muted); }
 
 #btn_exit {
@@ -42,3 +41,15 @@
 .tooltip { display: none; top: 365px; }
 .tooltip-exit { left: -24px; }
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* The two modes' own target areas (kAttackAreas / kDefenseAreas). A label is centred on its
+   button, where C++ used to measure the text and halve the remainder. */
+.cp-areas { position: static; }
+.cp-area-label { left: 0; text-align: center; }
+.cp-areas.attack .cp-area:nth-child(1) { left: 22px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(2) { left: 74px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(3) { left: 126px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(4) { left: 59px; top: 182px; }
+.cp-areas.defense .cp-area:nth-child(1) { left: 18px; top: 125px; }
+.cp-areas.defense .cp-area:nth-child(2) { left: 97px; top: 125px; }
+.cp-areas.defense .cp-area:nth-child(3) { left: 56px; top: 179px; }

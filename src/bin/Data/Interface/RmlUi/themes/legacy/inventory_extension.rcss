@@ -79,3 +79,14 @@
 	pointer-events: none;
 	/* decorator set per-instance via data-style-decorator (inventory_extension.rml). */
 }
+
+/* Each locked page's own row (71 + HEIGHT_PER_EXT per page) and its marking. The pages shown are
+   sparse, so a row is identified by which page it is rather than by its place in the list. */
+.ext-locked-page.page-1 { top: 71px; }
+.ext-locked-page.page-2 { top: 158px; }
+.ext-locked-page.page-3 { top: 245px; }
+.ext-locked-page.page-4 { top: 332px; }
+.page-1 .ext-locked-icon { decorator: image(ext-lock-1); }
+.page-2 .ext-locked-icon { decorator: image(ext-lock-2); }
+.page-3 .ext-locked-icon { decorator: image(ext-lock-3); }
+.page-4 .ext-locked-icon { decorator: image(ext-lock-4); }

@@ -87,9 +87,7 @@ void CInventoryExtension::BuildRmlUi()
                 // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
                 // call, including from ReloadRmlTheme() -- no guard here.
                 auto lockedPage = c.RegisterStruct<LockedExtPageEntry>();
-                lockedPage.RegisterMember("top", &LockedExtPageEntry::top);
                 lockedPage.RegisterMember("number", &LockedExtPageEntry::number);
-                lockedPage.RegisterMember("decorator", &LockedExtPageEntry::decorator);
                 c.RegisterArray<std::vector<LockedExtPageEntry>>();
 
                 c.Bind("root_x", &model.rootX);
@@ -349,10 +347,10 @@ void CInventoryExtension::SyncRmlModel()
         if (i < CharacterAttribute->InventoryExtensions)
             continue;
 
+        // Which page it is; the theme places it and picks its marking (the pages are sparse, so
+        // the number is what identifies a row, not its place in the list).
         LockedExtPageEntry entry;
-        entry.top = 71.f + static_cast<float>(i) * HEIGHT_PER_EXT;
         entry.number = i + 1;
-        entry.decorator = Rml::String("image(ext-lock-") + static_cast<char>('0' + entry.number) + ")";
         model.lockedPages.push_back(entry);
     }
     m_RmlBinder.MarkDirty("locked_pages");

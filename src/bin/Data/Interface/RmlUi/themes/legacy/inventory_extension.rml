@@ -21,8 +21,10 @@
 		<!-- Locked (not-yet-purchased) pages' numbered lock glyph -- flat decorative overlay,
 		     no live 3D content underneath. Table/empty-slot backing art behind this stays native
 		     (InventoryExtension.cpp's RenderFrame()). -->
-		<div class="ext-locked-page" data-for="page : locked_pages" data-style-top="page.top + 'px'">
-			<div class="ext-locked-icon" data-style-decorator="page.decorator"></div>
+		<div class="ext-locked-page" data-for="page : locked_pages"
+		     data-class-page-1="page.number == 1" data-class-page-2="page.number == 2"
+		     data-class-page-3="page.number == 3" data-class-page-4="page.number == 4">
+			<div class="ext-locked-icon"></div>
 		</div>
 	</div>
 </body>

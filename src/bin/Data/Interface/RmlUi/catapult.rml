@@ -34,12 +34,16 @@
 		<div class="t-corner t-br" style="left: 166px; top: 223px;"></div>
 		<div class="t-edge-bottom" style="left: 25px; top: 223px; width: 141px;"></div>
 
-		<div class="cp-area" data-for="a : areas" data-class-big="a.big" data-class-locked="a.locked"
-		     data-style-left="a.left + 'px'" data-style-top="a.top + 'px'" data-event-click="catapult_area(a.index)">
-			<span class="sharp-text cp-label cp-area-label" data-style-font-size="a.label_px + 'px'"
-			      data-style-left="a.label_left + 'px'" data-style-top="a.label_top + 'px'"
-			      data-style-line-height="line_height_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{a.label}}</span>
+		<!-- The target areas. Which set is on screen depends on the mode, and the theme places
+		     each one; a label is centred on its own button. -->
+		<div class="cp-areas" data-class-attack="mode == 1" data-class-defense="mode == 2">
+			<div class="cp-area" data-for="a : areas" data-class-big="a.big" data-class-locked="a.locked"
+			     data-event-click="catapult_area(a.index)">
+				<span class="sharp-text cp-label cp-area-label" data-style-font-size="a.label_px + 'px'"
+				      data-style-top="a.label_top + 'px'"
+				      data-style-line-height="line_height_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{a.label}}</span>
+			</div>
 		</div>
 
 		<div id="btn_fire" data-class-locked="fire_locked" data-event-click="catapult_fire">

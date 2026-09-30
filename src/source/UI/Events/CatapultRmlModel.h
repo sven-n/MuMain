@@ -12,14 +12,10 @@ struct CatapultAreaEntry
 {
     Rml::String label;
     int index = 0;
-    float left = 0.f; // reference px in the panel
-    float top = 0.f;
-    bool big = false;
+    bool big = false;   // newui_Btn_round 77 x 47, else newui_Btn_gate 46 x 36
     bool locked = false;
     float labelTop = 0.f; // CButton::Render(): h / 2 - text height / 2, whole units
-    // CButton::Render(): w / 2 - text width / 2 whole units in, the text shrunk to the button's
-    // width when wider (then running from that point, left of the button).
-    float labelLeft = 0.f;
+    // The text shrunk to the button's width when wider; the centring itself is the theme's.
     float labelPx = 0.f;
 };
 
@@ -34,6 +30,9 @@ struct CatapultRmlModel
 {
     // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+    // CCatapultWindow::CATAPULT_ATTACK or _DEFENSE: the two have different target areas,
+    // and the theme lays each set out.
+    int mode = 0;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
     float lineHeightPx = 0.f;
 
