@@ -1319,11 +1319,23 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     const int w = static_cast<int>(width);
     const int h = static_cast<int>(height);
 
+    // Whether this call actually moves the window anywhere. COptionWindow::ApplyPendingUIScale()
+    // calls here with the size the window already has, purely to drive the resize that makes a new
+    // UI scale take effect -- so centering unconditionally made the whole app window jump to the
+    // middle of the display every time the user touched the scale dial. Centering is right when the
+    // size really changes (the old position may not fit any more) or when leaving fullscreen, and
+    // wrong otherwise.
+    int currentW = 0, currentH = 0;
+    SDL_GetWindowSize(g_sdlWindow, &currentW, &currentH);
+    const bool leavingFullscreen = (SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_FULLSCREEN) != 0;
+    const bool repositions = currentW != w || currentH != h || leavingFullscreen;
+
     if (windowed)
     {
         SDL_SetWindowFullscreen(g_sdlWindow, false);
         SDL_SetWindowSize(g_sdlWindow, w, h);
-        SDL_SetWindowPosition(g_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        if (repositions)
+            SDL_SetWindowPosition(g_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
     else
     {
