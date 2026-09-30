@@ -6,7 +6,6 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
@@ -58,13 +57,13 @@ void mu::ui::window::EventTimerView::Build()
                                                      c.Bind("box_width", &model.boxWidth);
                                                      c.Bind("kills_text", &model.killsText);
                                                      c.Bind("kills_text_px", &model.killsTextPx);
-                                                     c.Bind("kills_color", &model.killsColor);
+                                                     c.Bind("kills_state", &model.killsState);
                                                      c.Bind("time_left_text", &model.timeLeftText);
                                                      c.Bind("time_left_text_px", &model.timeLeftTextPx);
-                                                     c.Bind("time_left_color", &model.timeLeftColor);
+                                                     c.Bind("time_left_state", &model.timeLeftState);
                                                      c.Bind("time_text", &model.timeText);
                                                      c.Bind("time_text_px", &model.timeTextPx);
-                                                     c.Bind("time_color", &model.timeColor);
+                                                     c.Bind("time_state", &model.timeState);
                                                  });
     if (modelCreated)
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(TimerContext(), m_DocumentPath);
@@ -106,17 +105,17 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const POINT& pos, const 
     SyncField(m_RmlBinder, &EventTimerRmlModel::boxWidth, "box_width", boxWidth);
     auto syncLine = [&](const Line& line, UI::Scaling::FontRole role, HFONT font,
                         Rml::String EventTimerRmlModel::* text, const char* textName, float EventTimerRmlModel::* px,
-                        const char* pxName, Rml::String EventTimerRmlModel::* color, const char* colorName)
+                        const char* pxName, Rml::String EventTimerRmlModel::* state, const char* stateName)
     {
         SyncField(m_RmlBinder, text, textName, StringUtils::WideToNarrow(line.text.c_str()));
         SyncField(m_RmlBinder, px, pxName, TextPxInBox(role, font, transform, line.text, boxWidth));
-        SyncField(m_RmlBinder, color, colorName, UI::RmlBridge::RgbaToCss(line.color));
+        SyncField(m_RmlBinder, state, stateName, Rml::String(line.state));
     };
     syncLine(first, UI::Scaling::FontRole::Normal, g_hFont, &EventTimerRmlModel::killsText, "kills_text",
-             &EventTimerRmlModel::killsTextPx, "kills_text_px", &EventTimerRmlModel::killsColor, "kills_color");
+             &EventTimerRmlModel::killsTextPx, "kills_text_px", &EventTimerRmlModel::killsState, "kills_state");
     syncLine(second, UI::Scaling::FontRole::Normal, g_hFont, &EventTimerRmlModel::timeLeftText, "time_left_text",
-             &EventTimerRmlModel::timeLeftTextPx, "time_left_text_px", &EventTimerRmlModel::timeLeftColor,
-             "time_left_color");
+             &EventTimerRmlModel::timeLeftTextPx, "time_left_text_px", &EventTimerRmlModel::timeLeftState,
+             "time_left_state");
     syncLine(time, UI::Scaling::FontRole::Big, g_hFontBig, &EventTimerRmlModel::timeText, "time_text",
-             &EventTimerRmlModel::timeTextPx, "time_text_px", &EventTimerRmlModel::timeColor, "time_color");
+             &EventTimerRmlModel::timeTextPx, "time_text_px", &EventTimerRmlModel::timeState, "time_state");
 }

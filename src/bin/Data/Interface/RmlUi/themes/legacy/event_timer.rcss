@@ -32,3 +32,11 @@ body { pointer-events: none; }
 #kills { top: 13px; }
 #time_left { top: 38px; }
 #time { top: 50px; font-weight: bold; }
+
+/* How pressing the line is: the original's own colours per state. */
+.timer-text.plain { color: #ffffff; }
+.timer-text.standby { color: rgb(10, 200, 10); }
+.timer-text.normal { color: rgb(255, 150, 0); }
+.timer-text.closing { color: rgb(255, 70, 0); }
+.timer-text.imminent { color: rgb(255, 32, 32); }
+.timer-text.expiring { color: rgb(255, 0, 0); }

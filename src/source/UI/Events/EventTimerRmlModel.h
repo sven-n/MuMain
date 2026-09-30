@@ -5,7 +5,8 @@
 namespace mu::ui::window
 {
 // An event time HUD on newui_Figure_blood (EventTimerView): a first line, a second line and the
-// time in the big font, each centred on the same box and shrunk to it like the original's.
+// time in the big font, each centred on the same box and shrunk to it like the original's. Each
+// line carries how pressing it is (EventTimerView::Line::state), which the theme colours.
 struct EventTimerRmlModel
 {
     // The Hud layout's W/640 x H/480 stretch (UI::Scaling::GetActiveTransform() while CManager
@@ -21,12 +22,12 @@ struct EventTimerRmlModel
 
     Rml::String killsText; // the first line; empty: not drawn
     float killsTextPx = 0.f;
-    Rml::String killsColor;
+    Rml::String killsState;
     Rml::String timeLeftText;
     float timeLeftTextPx = 0.f;
-    Rml::String timeLeftColor;
+    Rml::String timeLeftState;
     Rml::String timeText;
     float timeTextPx = 0.f;
-    Rml::String timeColor;
+    Rml::String timeState;
 };
 } // namespace mu::ui::window

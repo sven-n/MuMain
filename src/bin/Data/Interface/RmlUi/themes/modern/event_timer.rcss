@@ -27,3 +27,10 @@ body { pointer-events: none; }
 #kills { top: 13px; }
 #time_left { top: 38px; }
 #time { top: 50px; font-weight: bold; }
+
+.timer-text.plain { color: token(text-primary); }
+.timer-text.standby { color: token(semantic-success); }
+.timer-text.normal { color: token(accent-gold); }
+.timer-text.closing { color: token(accent-gold-hover); }
+.timer-text.imminent { color: token(semantic-danger); }
+.timer-text.expiring { color: token(semantic-danger); }

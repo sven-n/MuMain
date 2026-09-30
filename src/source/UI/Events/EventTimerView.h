@@ -28,8 +28,11 @@ public:
 
     struct Line
     {
-        std::wstring text;       // empty: not drawn
-        unsigned long color = 0; // the native text colour (RGBA())
+        std::wstring text; // empty: not drawn
+        // How pressing the line is, which every theme colours: "plain", "standby" before the
+        // event starts, "normal", then "closing", "imminent" and "expiring" as the clock runs
+        // down. The original set a colour per state directly.
+        const char* state = "normal";
     };
 
     // Per frame, inside the window's CManager transform scope. Every line is centred on the box
