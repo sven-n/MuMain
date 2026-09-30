@@ -1279,6 +1279,26 @@ std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions()
     return resolutions;
 }
 
+// Wayland compositors own top-level window placement, so SDL rejects position
+// requests there. Not asking also keeps SDL from holding a pending position it
+// never clears on Wayland, which can pin a later borderless fullscreen to the
+// display the window was on at that point.
+static bool VideoDriverPositionsTopLevelWindows()
+{
+    constexpr std::string_view kWaylandVideoDriver = "wayland";
+    const char* driver = SDL_GetCurrentVideoDriver();
+    return driver == nullptr || driver != kWaylandVideoDriver;
+}
+
+static void CenterWindowAfterResize(SDL_Window* window)
+{
+    if (!VideoDriverPositionsTopLevelWindows())
+        return;
+
+    if (!SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED))
+        mu::log::Get("platform")->warn("SDL_SetWindowPosition failed: {}", SDL_GetError());
+}
+
 // Resolution change through SDL (issue #462). SDL owns the window on every
 // platform, so resize it via SDL rather than the OS. The old Windows path in
 // ApplyResolution() drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
@@ -1299,7 +1319,7 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     {
         SDL_SetWindowFullscreen(g_sdlWindow, false);
         SDL_SetWindowSize(g_sdlWindow, w, h);
-        SDL_SetWindowPosition(g_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        CenterWindowAfterResize(g_sdlWindow);
     }
     else
     {

@@ -26,9 +26,11 @@ What was added on top of that:
 - **Resolution changes go through SDL** (PR
   [#530](https://github.com/sven-n/MuMain/pull/530)), which makes the live
   apply actually work in windowed mode on Windows. Windowed resizes re-center
-  the window on the display. Fullscreen picks the closest real display mode
-  (or borderless desktop when nothing matches), and the combo and
-  `config.ini` record the mode that actually resulted, not the one requested.
+  the window on the display, except on Wayland, where the compositor places
+  windows (see [Linux - Terminal](build/linux/console.md#wayland)).
+  Fullscreen picks the closest real display mode (or borderless desktop when
+  nothing matches), and the combo and `config.ini` record the mode that
+  actually resulted, not the one requested.
 - **The resolution list comes from the current monitor.** Opening the options
   window queries SDL for that display's fullscreen modes, collapses duplicate
   refresh-rate entries to one width/height choice, and sorts the result.

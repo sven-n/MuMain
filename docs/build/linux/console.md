@@ -111,6 +111,18 @@ acceleration:
 MESA_LOADER_DRIVER_OVERRIDE=d3d12 ./Main
 ```
 
+### Wayland
+
+Wayland compositors decide where windows go, so changing the resolution in
+windowed mode resizes the client but does not re-center it: drag it where you
+want it, or restart the client. The resolution is already saved when you apply
+it, and the compositor places the new window. On COSMIC the window can also snap
+back to the previous size after you switch to another window; that is an SDL
+bug tracked in [#607](https://github.com/sven-n/MuMain/issues/607), and the
+same restart works around it. If you toggled windowed/fullscreen after the
+snap-back, select the resolution again before restarting: the toggle saves the
+reverted size.
+
 ## Reporting a Wayland problem
 
 From the repository root, run `scripts/wayland-diag.sh --timeout 60 --`.
