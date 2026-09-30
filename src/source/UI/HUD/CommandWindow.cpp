@@ -18,6 +18,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -41,15 +42,6 @@ const wchar_t* const* const kCommandLabels[COMMAND_END] = {
     &I18N::Game::AddFriend, &I18N::Game::Follow,   &I18N::Game::Duel,           &I18N::Game::SpecialCommands,
 };
 
-template <typename Model, typename Value>
-void SyncField(RmlModelBinder<Model>& binder, Value Model::* field, const char* name, const Value& value)
-{
-    Model& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = value;
-    binder.MarkDirty(name);
-}
 } // namespace
 
 mu::ui::window::CCommandWindow::CCommandWindow()

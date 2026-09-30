@@ -7,6 +7,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -108,17 +109,6 @@ Rml::Context* FrameContext()
 {
     Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
     return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-
-template <typename T>
-void SyncField(RmlModelBinder<DoppelGangerFrameRmlModel>& binder, T DoppelGangerFrameRmlModel::* field,
-               const char* name, T value)
-{
-    DoppelGangerFrameRmlModel& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
 }
 
 // One step of the original's per-frame approach of `value` towards `target`, 0.01 at a time.

@@ -7,6 +7,7 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -105,14 +106,6 @@ void BuildView()
     }
 }
 
-template <typename T> void SyncField(T LoginSceneRmlModel::* field, const char* name, T value)
-{
-    auto& model = s_binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    s_binder.MarkDirty(name);
-}
 
 // A line's text, converted only when the native string changed (or a theme reload emptied the
 // model): the overlay syncs every frame of the login scene.
@@ -121,7 +114,7 @@ void SyncText(Rml::String LoginSceneRmlModel::* field, const char* name, const w
     if (source == text && !(s_binder.GetModel().*field).empty())
         return;
     source = text;
-    SyncField(field, name, StringUtils::WideToNarrow(text));
+    SyncField(s_binder, field, name, StringUtils::WideToNarrow(text));
 }
 
 // The native levels: a BYTE from the clamped fade value, as RGBA(level, level, level, level).
@@ -144,17 +137,17 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // The logo: RenderColorBitmap() at (320 - 102.4, 25), 204.8 x 102.4, the glow first.
-    SyncField(&LoginSceneRmlModel::logoVisible, "logo_visible", tourMode);
+    SyncField(s_binder, &LoginSceneRmlModel::logoVisible, "logo_visible", tourMode);
     if (tourMode)
     {
         constexpr float logoWidth = 256.0f * 0.8f;
         constexpr float logoHeight = 128.0f * 0.8f;
-        SyncField(&LoginSceneRmlModel::logoLeft, "logo_left",
+        SyncField(s_binder, &LoginSceneRmlModel::logoLeft, "logo_left",
                   UI::Scaling::PositionX(transform, 320.0f - logoWidth / 2));
-        SyncField(&LoginSceneRmlModel::logoTop, "logo_top", UI::Scaling::PositionY(transform, 25.0f));
-        SyncField(&LoginSceneRmlModel::logoWidth, "logo_width", UI::Scaling::SizeX(transform, logoWidth));
-        SyncField(&LoginSceneRmlModel::logoHeight, "logo_height", UI::Scaling::SizeY(transform, logoHeight));
-        SyncField(&LoginSceneRmlModel::glowLevel, "glow_level", Level(logoAlpha - 0.3f));
+        SyncField(s_binder, &LoginSceneRmlModel::logoTop, "logo_top", UI::Scaling::PositionY(transform, 25.0f));
+        SyncField(s_binder, &LoginSceneRmlModel::logoWidth, "logo_width", UI::Scaling::SizeX(transform, logoWidth));
+        SyncField(s_binder, &LoginSceneRmlModel::logoHeight, "logo_height", UI::Scaling::SizeY(transform, logoHeight));
+        SyncField(s_binder, &LoginSceneRmlModel::glowLevel, "glow_level", Level(logoAlpha - 0.3f));
         const float logoLevel = Level(logoAlpha);
         // The colour follows the level; formatted only when the fade moves it.
         if (s_binder.GetModel().logoLevel != logoLevel || s_binder.GetModel().logoColor.empty())
@@ -162,9 +155,9 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
             char color[32];
             const long channel = std::lround(logoLevel * 255.f);
             std::snprintf(color, sizeof(color), "rgb(%ld, %ld, %ld)", channel, channel, channel);
-            SyncField(&LoginSceneRmlModel::logoColor, "logo_color", Rml::String(color));
+            SyncField(s_binder, &LoginSceneRmlModel::logoColor, "logo_color", Rml::String(color));
         }
-        SyncField(&LoginSceneRmlModel::logoLevel, "logo_level", logoLevel);
+        SyncField(s_binder, &LoginSceneRmlModel::logoLevel, "logo_level", logoLevel);
     }
 
     // The lines: RenderText() at (335 - width, 480 - height - 1), (335, ...) and (0, ...). The
@@ -174,13 +167,13 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
     const SIZE lineSize = g_pRenderText->MeasureText(L"Q", 1);
     const float cachedPx = static_cast<float>(UI::Scaling::CachedFontPointSize(UI::Scaling::FontRole::Normal));
     const float fontScale = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform) / cachedPx;
-    SyncField(&LoginSceneRmlModel::textPx, "text_px", cachedPx);
-    SyncField(&LoginSceneRmlModel::fontScale, "font_scale", fontScale);
-    SyncField(&LoginSceneRmlModel::lineHeightPx, "line_height_px",
+    SyncField(s_binder, &LoginSceneRmlModel::textPx, "text_px", cachedPx);
+    SyncField(s_binder, &LoginSceneRmlModel::fontScale, "font_scale", fontScale);
+    SyncField(s_binder, &LoginSceneRmlModel::lineHeightPx, "line_height_px",
               static_cast<float>(lineSize.cy) * transform.scaleY / fontScale);
-    SyncField(&LoginSceneRmlModel::lineTop, "line_top",
+    SyncField(s_binder, &LoginSceneRmlModel::lineTop, "line_top",
               UI::Scaling::PositionY(transform, static_cast<float>(REFERENCE_HEIGHT - lineSize.cy - 1)));
-    SyncField(&LoginSceneRmlModel::splitX, "split_x", UI::Scaling::PositionX(transform, 335.0f));
+    SyncField(s_binder, &LoginSceneRmlModel::splitX, "split_x", UI::Scaling::PositionX(transform, 335.0f));
     SyncText(&LoginSceneRmlModel::copyright, "copyright", copyright, s_copyrightSource);
     SyncText(&LoginSceneRmlModel::rights, "rights", rights, s_rightsSource);
     SyncText(&LoginSceneRmlModel::version, "version", version, s_versionSource);

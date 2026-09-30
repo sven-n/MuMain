@@ -6,6 +6,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -20,15 +21,6 @@ constexpr int kTitleBoxWidth = 72;
 constexpr int kLineBoxWidth = 190;
 constexpr int kButtonHeight = 29;
 
-template <typename Model, typename T>
-void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
-{
-    Model& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
-}
 } // namespace
 
 mu::ui::window::EventEntryView::EventEntryView(const char* modelName, const char* documentPath)

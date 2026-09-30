@@ -7,6 +7,7 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -103,16 +104,6 @@ float CDuelWatchUserListWindow::GetLayerDepth()
 
 namespace
 {
-template <typename T>
-void SyncField(RmlModelBinder<DuelWatchSpectatorsRmlModel>& binder, T DuelWatchSpectatorsRmlModel::* field,
-               const char* name, T value)
-{
-    DuelWatchSpectatorsRmlModel& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
-}
 } // namespace
 
 void CDuelWatchUserListWindow::BuildRmlUi()

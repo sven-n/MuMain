@@ -13,6 +13,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -60,16 +61,6 @@ DWORD ToRgba(const TextColor& color)
 int MeasureInReferenceUnits(const wchar_t* text, size_t length)
 {
     return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
-}
-
-template <typename Model, typename T>
-void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
-{
-    Model& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
 }
 
 bool SameText(const ChatCommandTextEntry& a, const ChatCommandTextEntry& b)

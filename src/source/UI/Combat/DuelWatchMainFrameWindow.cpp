@@ -7,6 +7,7 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -32,17 +33,6 @@ constexpr const char* kHpGauge = "../../../menu_pk_hp03(bar2).jpg";
 constexpr const char* kSdGauge = "../../../menu_pk_sd03(bar2).jpg";
 constexpr const char* kHpGaugeFx = "../../../menu_pk_hp06(bar).jpg";
 constexpr const char* kSdGaugeFx = "../../../menu_pk_sd05(bar).jpg";
-
-template <typename T>
-void SyncField(RmlModelBinder<DuelWatchFrameRmlModel>& binder, T DuelWatchFrameRmlModel::* field, const char* name,
-               T value)
-{
-    DuelWatchFrameRmlModel& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
-}
 
 DuelWatchGaugeEntry Gauge(const char* src, float sourceWidth, float sourceHeight, float left, float top, float width,
                           float height, bool mirrored)

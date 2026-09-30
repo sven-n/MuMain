@@ -22,6 +22,7 @@
 #include "Guild/GuildMarkPalette.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -120,15 +121,6 @@ void SyncList(std::vector<T>& current, std::vector<T>&& updated, Same same, RmlM
     binder.MarkDirty(name);
 }
 
-template <typename T>
-void SyncField(RmlModelBinder<GuildInfoRmlModel>& binder, T GuildInfoRmlModel::* field, const char* name, T value)
-{
-    GuildInfoRmlModel& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
-}
 } // namespace
 
 int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)

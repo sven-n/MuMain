@@ -16,6 +16,7 @@
 #include "Guild/GuildMarkPalette.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -103,16 +104,6 @@ namespace
         std::snprintf(color, sizeof(color), "#%02x%02x%02x%02x", (argb >> 16) & 0xFFu, (argb >> 8) & 0xFFu,
                       argb & 0xFFu, (argb >> 24) & 0xFFu);
         return {color, false};
-    }
-
-    template <typename Model, typename T>
-    void SyncField(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
-    {
-        Model& model = binder.GetModel();
-        if (model.*field == value)
-            return;
-        model.*field = std::move(value);
-        binder.MarkDirty(name);
     }
 
     bool SameCell(const mu::ui::window::GuildMakeCellEntry& a, const mu::ui::window::GuildMakeCellEntry& b)

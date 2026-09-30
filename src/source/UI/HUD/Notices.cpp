@@ -11,6 +11,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/HUD/NoticesRmlModel.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -159,14 +160,6 @@ namespace UI::Notices
         }
     }
 
-    template <typename T> void SyncField(T NoticesRmlModel::* field, const char* name, T value)
-    {
-        auto& model = s_binder.GetModel();
-        if (model.*field == value)
-            return;
-        model.*field = std::move(value);
-        s_binder.MarkDirty(name);
-    }
 
     // The original's per-line draw: RenderText(320, 300 + i * 13) centred, bold, on a
     // half-transparent black box sized to the text; empty lines draw nothing.
@@ -179,10 +172,10 @@ namespace UI::Notices
         const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
         g_pRenderText->SetFont(g_hFontBold);
         const SIZE lineSize = g_pRenderText->MeasureText(L"Q", 1);
-        SyncField(&NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
-        SyncField(&NoticesRmlModel::textPx, "text_px",
+        SyncField(s_binder, &NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
+        SyncField(s_binder, &NoticesRmlModel::textPx, "text_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-        SyncField(&NoticesRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineSize.cy) * transform.scaleY);
+        SyncField(s_binder, &NoticesRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineSize.cy) * transform.scaleY);
 
         std::vector<NoticeLineEntry> lines;
         for (int i = 0; i < MAX_NOTICE; i++)
@@ -199,7 +192,7 @@ namespace UI::Notices
             line.top = UI::Scaling::PositionY(transform, static_cast<float>(300 + i * 13));
             lines.push_back(std::move(line));
         }
-        SyncField(&NoticesRmlModel::lines, "lines", std::move(lines));
+        SyncField(s_binder, &NoticesRmlModel::lines, "lines", std::move(lines));
     }
 
     void RenderNative()

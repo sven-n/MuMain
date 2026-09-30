@@ -14,6 +14,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Dialogs/ReconnectDialogRmlModel.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -241,14 +242,6 @@ namespace
         }
     }
 
-    template <typename T> void SyncField(T ReconnectDialogRmlModel::* field, const char* name, T value)
-    {
-        auto& model = s_binder.GetModel();
-        if (model.*field == value)
-            return;
-        model.*field = std::move(value);
-        s_binder.MarkDirty(name);
-    }
 
     // DrawStatusTexts(): the title (bold), the step and the countdown, each centred in the panel's
     // width.
@@ -281,16 +274,16 @@ namespace
         UI::RmlBridge::SyncDocumentVisibilityInFront(s_document, true);
 
         const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-        SyncField(&ReconnectDialogRmlModel::dimAlpha, "dim_alpha", dimAlpha);
-        SyncField(&ReconnectDialogRmlModel::rootX, "root_x", UI::Scaling::PositionX(transform, PANEL_X));
-        SyncField(&ReconnectDialogRmlModel::rootY, "root_y", UI::Scaling::PositionY(transform, PANEL_Y));
-        SyncField(&ReconnectDialogRmlModel::rootScale, "root_scale", transform.scaleX);
-        SyncField(&ReconnectDialogRmlModel::textPx, "text_px",
+        SyncField(s_binder, &ReconnectDialogRmlModel::dimAlpha, "dim_alpha", dimAlpha);
+        SyncField(s_binder, &ReconnectDialogRmlModel::rootX, "root_x", UI::Scaling::PositionX(transform, PANEL_X));
+        SyncField(s_binder, &ReconnectDialogRmlModel::rootY, "root_y", UI::Scaling::PositionY(transform, PANEL_Y));
+        SyncField(s_binder, &ReconnectDialogRmlModel::rootScale, "root_scale", transform.scaleX);
+        SyncField(s_binder, &ReconnectDialogRmlModel::textPx, "text_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
-        SyncField(&ReconnectDialogRmlModel::boldTextPx, "bold_text_px",
+        SyncField(s_binder, &ReconnectDialogRmlModel::boldTextPx, "bold_text_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-        SyncField(&ReconnectDialogRmlModel::lines, "lines", StatusLines());
-        SyncField(&ReconnectDialogRmlModel::progressWidth, "progress_width", PROG_BAR_MAX_W * fraction);
+        SyncField(s_binder, &ReconnectDialogRmlModel::lines, "lines", StatusLines());
+        SyncField(s_binder, &ReconnectDialogRmlModel::progressWidth, "progress_width", PROG_BAR_MAX_W * fraction);
     }
 
     // ---- Native (message-box textured) rendering ----------------------------

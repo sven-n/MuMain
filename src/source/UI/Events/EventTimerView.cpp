@@ -5,6 +5,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -20,16 +21,6 @@ Rml::Context* TimerContext()
 {
     Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
     return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-
-template <typename T>
-void SyncField(RmlModelBinder<EventTimerRmlModel>& binder, T EventTimerRmlModel::* field, const char* name, T value)
-{
-    EventTimerRmlModel& model = binder.GetModel();
-    if (model.*field == value)
-        return;
-    model.*field = std::move(value);
-    binder.MarkDirty(name);
 }
 
 // RenderText(x, y, text, boxWidth, 0, RT3_SORT_CENTER) in `font`: the size it drew `text` at.
