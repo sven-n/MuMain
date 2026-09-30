@@ -27,6 +27,7 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -1193,19 +1194,12 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CursedTempleSystemRmlModel& model = m_RmlBinder.GetModel();
-    const auto sync = [&](auto CursedTempleSystemRmlModel::* field, auto value, const char* name)
-    {
-        if (model.*field == value)
-            return;
-        model.*field = std::move(value);
-        m_RmlBinder.MarkDirty(name);
-    };
-    sync(&CursedTempleSystemRmlModel::scaleX, transform.scaleX, "scale_x");
-    sync(&CursedTempleSystemRmlModel::scaleY, transform.scaleY, "scale_y");
-    sync(&CursedTempleSystemRmlModel::inverseScaleX, 1.0f / transform.scaleX, "inverse_scale_x");
-    sync(&CursedTempleSystemRmlModel::inverseScaleY, 1.0f / transform.scaleY, "inverse_scale_y");
-    sync(&CursedTempleSystemRmlModel::sprites, std::move(sprites), "sprites");
-    sync(&CursedTempleSystemRmlModel::tutorialLines, std::move(lines), "tutorial_lines");
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::sprites, "sprites", std::move(sprites));
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::tutorialLines, "tutorial_lines", std::move(lines));
 }
 
 bool mu::ui::window::CCursedTempleSystem::Render()

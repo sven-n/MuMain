@@ -5,6 +5,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -270,30 +271,22 @@ void mu::ui::window::MessageBoxView::SyncList(const List* list)
         return;
 
     MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
-    auto sync = [this](auto& field, const auto& value, const char* name)
-    {
-        if (field != value)
-        {
-            field = value;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
 
-    sync(model.listShown, list != nullptr, "list_shown");
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listShown, "list_shown", list != nullptr);
     if (!list)
         return;
 
-    sync(model.listLeft, list->left, "list_left");
-    sync(model.listTop, list->top, "list_top");
-    sync(model.listWidth, list->width, "list_width");
-    sync(model.listHeight, list->height, "list_height");
-    sync(model.listUpPressed, list->upPressed, "list_up_pressed");
-    sync(model.listDownPressed, list->downPressed, "list_down_pressed");
-    sync(model.listTrackTop, list->trackTop, "list_track_top");
-    sync(model.listTrackHeight, list->trackHeight, "list_track_height");
-    sync(model.listThumbTop, list->thumbTop, "list_thumb_top");
-    sync(model.listThumbHeight, list->thumbHeight, "list_thumb_height");
-    sync(model.listThumbBottomTop, list->thumbBottomTop, "list_thumb_bottom_top");
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listLeft, "list_left", list->left);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listTop, "list_top", list->top);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listWidth, "list_width", list->width);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listHeight, "list_height", list->height);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listUpPressed, "list_up_pressed", list->upPressed);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listDownPressed, "list_down_pressed", list->downPressed);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listTrackTop, "list_track_top", list->trackTop);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listTrackHeight, "list_track_height", list->trackHeight);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listThumbTop, "list_thumb_top", list->thumbTop);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listThumbHeight, "list_thumb_height", list->thumbHeight);
+    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listThumbBottomTop, "list_thumb_bottom_top", list->thumbBottomTop);
 
     std::vector<MessageBoxViewListRowEntry> rows;
     for (const List::Row& row : list->rows)

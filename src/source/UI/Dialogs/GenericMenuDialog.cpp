@@ -10,6 +10,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h" // CManager::AddUIObj
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDialogCanvas.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -270,18 +271,10 @@ void CGenericMenuDialog::SyncNativeFrame()
         m_RmlBinder.MarkDirty("native_height");
     }
 
-    const auto sync = [this](float& field, int value, const char* name)
-    {
-        const float wanted = static_cast<float>(value);
-        if (field == wanted)
-            return;
-        field = wanted;
-        m_RmlBinder.MarkDirty(name);
-    };
-    sync(model.nativeTextTop, frame.textTop, "native_text_top");
-    sync(model.nativeLineAdvance, frame.lineAdvance, "native_line_advance");
-    sync(model.nativeTextInset, frame.textInset, "native_text_inset");
-    sync(model.nativeDividerTop, frame.dividerTop, "native_divider_top");
+    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeTextTop, "native_text_top", static_cast<float>(frame.textTop));
+    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeLineAdvance, "native_line_advance", static_cast<float>(frame.lineAdvance));
+    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeTextInset, "native_text_inset", static_cast<float>(frame.textInset));
+    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeDividerTop, "native_divider_top", static_cast<float>(frame.dividerTop));
 }
 
 void CGenericMenuDialog::SyncCanvasTop()

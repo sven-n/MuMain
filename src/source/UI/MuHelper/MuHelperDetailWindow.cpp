@@ -8,6 +8,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/MuHelper/MuHelperShared.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlKeyboardFocus.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
@@ -498,16 +499,8 @@ void CMuHelperDetailWindow::SyncRmlModel()
     MuHelperDetailRmlModel& model = m_RmlBinder.GetModel();
     const ConfigData& config = UI::MuHelper::StagedConfig();
 
-    auto sync = [&](auto& field, auto value, const char* name)
-    {
-        if (field != value)
-        {
-            field = value;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
 
-    sync(model.page, m_iCurrentPage, "page");
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::page, "page", m_iCurrentPage);
 
     // The condition radios and the party checkboxes read the staged config live -- they write it
     // directly when clicked, so it is the one source of truth for what they show.
@@ -529,12 +522,12 @@ void CMuHelperDetailWindow::SyncRmlModel()
             }
         }
     }
-    sync(model.precon, precon, "precon");
-    sync(model.subcon, subcon, "subcon");
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::precon, "precon", precon);
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::subcon, "subcon", subcon);
 
-    sync(model.potionLevel, m_iCurrentPotionThreshold, "potion_level");
-    sync(model.healLevel, m_iCurrentHealThreshold, "heal_level");
-    sync(model.partyHealLevel, m_iCurrentPartyHealThreshold, "party_heal_level");
-    sync(model.partyHeal, config.bAutoHealParty, "party_heal");
-    sync(model.partyDuration, config.bBuffDurationParty, "party_duration");
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::potionLevel, "potion_level", m_iCurrentPotionThreshold);
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::healLevel, "heal_level", m_iCurrentHealThreshold);
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::partyHealLevel, "party_heal_level", m_iCurrentPartyHealThreshold);
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::partyHeal, "party_heal", config.bAutoHealParty);
+    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::partyDuration, "party_duration", config.bBuffDurationParty);
 }

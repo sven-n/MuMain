@@ -12,6 +12,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/MuHelper/MuHelperDetailWindow.h"
 #include "UI/MuHelper/MuHelperSkillPicker.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlKeyboardFocus.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
@@ -831,19 +832,11 @@ void CMuHelperConfigWindow::SyncRmlModel()
     MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
     const ConfigData& c = UI::MuHelper::StagedConfig();
 
-    auto sync = [&](auto& field, const auto& value, const char* name)
-    {
-        if (!(field == value))
-        {
-            field = value;
-            m_RmlBinder.MarkDirty(name);
-        }
-    };
 
-    sync(model.activeTab, m_iCurrentOpenTab, "active_tab");
-    sync(model.huntRange, c.iHuntingRange, "hunt_range");
-    sync(model.pickRange, c.iObtainingRange, "pick_range");
-    sync(model.ravenMode, c.iDarkRavenMode, "raven_mode");
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::activeTab, "active_tab", m_iCurrentOpenTab);
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::huntRange, "hunt_range", c.iHuntingRange);
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::pickRange, "pick_range", c.iObtainingRange);
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::ravenMode, "raven_mode", c.iDarkRavenMode);
 
     const UI::MuHelper::ClassFeatures f = UI::MuHelper::ResolveClassFeatures(BaseClass());
     MuHelperConfigFeatures features;
@@ -854,7 +847,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     features.autoHeal = f.autoHeal;
     features.drainLife = f.drainLife;
     features.potionSummoner = f.potionSummoner;
-    sync(model.features, features, "features");
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::features, "features", features);
 
     MuHelperConfigChecks checks;
     checks.potion = c.bUseHealPotion;
@@ -882,7 +875,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     checks.autoFriend = c.bAutoAcceptFriend;
     checks.autoGuild = c.bAutoAcceptGuild;
     checks.autoDefend = c.bUseSelfDefense;
-    sync(model.checks, checks, "checks");
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::checks, "checks", checks);
 
     MuHelperSlotIcons slots;
     slots.s0 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[0]);
@@ -891,7 +884,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     slots.s3 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[3]);
     slots.s4 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[4]);
     slots.s5 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[5]);
-    sync(model.slots, slots, "slots");
+    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::slots, "slots", slots);
 
     if (m_bExtraItemsDirty)
     {

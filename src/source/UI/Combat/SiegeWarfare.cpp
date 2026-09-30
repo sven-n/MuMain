@@ -10,6 +10,7 @@
 #include "World/MapInfra/MapManager.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
@@ -277,45 +278,38 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
 void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& next)
 {
     SiegeWarfareRmlModel& model = m_RmlBinder.GetModel();
-    const auto sync = [this](auto& field, const auto& value, const char* name)
-    {
-        if (field == value)
-            return;
-        field = value;
-        m_RmlBinder.MarkDirty(name);
-    };
-    sync(model.scaleX, next.scaleX, "scale_x");
-    sync(model.scaleY, next.scaleY, "scale_y");
-    sync(model.inverseScaleX, next.inverseScaleX, "inverse_scale_x");
-    sync(model.inverseScaleY, next.inverseScaleY, "inverse_scale_y");
-    sync(model.boldTextPx, next.boldTextPx, "bold_text_px");
-    sync(model.bigTextPx, next.bigTextPx, "big_text_px");
-    sync(model.frameX, next.frameX, "frame_x");
-    sync(model.frameY, next.frameY, "frame_y");
-    sync(model.alpha, next.alpha, "alpha");
-    sync(model.mapRect, next.mapRect, "map_rect");
-    sync(model.alphaLabel, next.alphaLabel, "alpha_label");
-    sync(model.alphaFrame, next.alphaFrame, "alpha_frame");
-    sync(model.timeVisible, next.timeVisible, "time_visible");
-    sync(model.timeText, next.timeText, "time_text");
-    sync(model.dots, next.dots, "dots");
-    sync(model.heroLeft, next.heroLeft, "hero_left");
-    sync(model.heroTop, next.heroTop, "hero_top");
-    sync(model.commands, next.commands, "commands");
-    sync(model.skillVisible, next.skillVisible, "skill_visible");
-    sync(model.skillRect, next.skillRect, "skill_rect");
-    sync(model.skillColor, next.skillColor, "skill_color");
-    sync(model.killsNeeded, next.killsNeeded, "kills_needed");
-    sync(model.kills, next.kills, "kills");
-    sync(model.scrollUpFrame, next.scrollUpFrame, "scroll_up_frame");
-    sync(model.scrollDownFrame, next.scrollDownFrame, "scroll_down_frame");
-    sync(model.teams, next.teams, "teams");
-    sync(model.orders, next.orders, "orders");
-    sync(model.cursorVisible, next.cursorVisible, "cursor_visible");
-    sync(model.cursorLeft, next.cursorLeft, "cursor_left");
-    sync(model.cursorTop, next.cursorTop, "cursor_top");
-    sync(model.cursorCommand, next.cursorCommand, "cursor_command");
-    sync(model.cursorTeam, next.cursorTeam, "cursor_team");
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scaleX, "scale_x", next.scaleX);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scaleY, "scale_y", next.scaleY);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::inverseScaleX, "inverse_scale_x", next.inverseScaleX);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::inverseScaleY, "inverse_scale_y", next.inverseScaleY);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::boldTextPx, "bold_text_px", next.boldTextPx);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::bigTextPx, "big_text_px", next.bigTextPx);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::frameX, "frame_x", next.frameX);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::frameY, "frame_y", next.frameY);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::alpha, "alpha", next.alpha);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::mapRect, "map_rect", next.mapRect);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::alphaLabel, "alpha_label", next.alphaLabel);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::alphaFrame, "alpha_frame", next.alphaFrame);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::timeVisible, "time_visible", next.timeVisible);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::timeText, "time_text", next.timeText);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::dots, "dots", next.dots);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::heroLeft, "hero_left", next.heroLeft);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::heroTop, "hero_top", next.heroTop);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::commands, "commands", next.commands);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillVisible, "skill_visible", next.skillVisible);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillRect, "skill_rect", next.skillRect);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillColor, "skill_color", next.skillColor);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::killsNeeded, "kills_needed", next.killsNeeded);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::kills, "kills", next.kills);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scrollUpFrame, "scroll_up_frame", next.scrollUpFrame);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scrollDownFrame, "scroll_down_frame", next.scrollDownFrame);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::teams, "teams", next.teams);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::orders, "orders", next.orders);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorVisible, "cursor_visible", next.cursorVisible);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorLeft, "cursor_left", next.cursorLeft);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorTop, "cursor_top", next.cursorTop);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorCommand, "cursor_command", next.cursorCommand);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorTeam, "cursor_team", next.cursorTeam);
 }
 
 float mu::ui::window::CSiegeWarfare::GetLayerDepth()
