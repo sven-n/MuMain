@@ -235,6 +235,10 @@ void CGenericConfirmDialog::ReloadRmlTheme()
 
 void CGenericConfirmDialog::Release()
 {
+    // Heap-owned by CSystem, so it can be destroyed before shutdown -- see
+    // RegisterForThemeReload()'s contract.
+    UI::RmlBridge::UnregisterForThemeReload(this);
+
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->Remove3DRenderObj(this);
 

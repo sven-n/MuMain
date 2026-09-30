@@ -158,6 +158,13 @@ namespace UI::RmlBridge
     // every Create()/BuildRmlUi() re-entry, including repeated calls across an object's lifetime
     // (e.g. a window whose Create() re-runs across scene transitions) -- always leaves exactly one
     // live callback per owner.
+    //
+    // **An owner that can be destroyed before shutdown must call UnregisterForThemeReload().** The
+    // registry holds the callback, and a typical callback captures `this`, so a destroyed owner that
+    // never unregistered leaves a dangling call waiting for the next theme switch. An app-lifetime
+    // owner -- a file-scope global, a function-local static -- need not bother, which is why roughly
+    // a fifth of the current callers don't: they cannot outlive the registry. Anything heap-owned
+    // should unregister in its Release()/destructor, as the windows on CManager already do.
     void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback);
 
     // Removes `owner`'s callback, if any -- a no-op if `owner` isn't registered (same shape as

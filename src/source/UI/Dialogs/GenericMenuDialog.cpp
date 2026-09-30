@@ -127,6 +127,10 @@ void CGenericMenuDialog::ReloadRmlTheme()
 
 void CGenericMenuDialog::Release()
 {
+    // Heap-owned by CSystem, so it can be destroyed before shutdown -- see
+    // RegisterForThemeReload()'s contract.
+    UI::RmlBridge::UnregisterForThemeReload(this);
+
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
     m_bActive = false;
