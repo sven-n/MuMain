@@ -6,28 +6,33 @@
 
 namespace mu::ui::window
 {
-// One RenderText() of the guardsman window: its box and alignment, font and colour, its size
-// shrunk to the box like the original's.
-struct GuardTextEntry
+// One guild that declared for the siege. `top` is the native list box's own scroll position for
+// this line, in reference px; which column each cell lands in and what a selected row looks like
+// are the theme's.
+struct GuardDeclareRow
 {
-    Rml::String text;
-    float left = 0.f; // reference px in the panel
+    Rml::String name;
+    Rml::String markCount;
+    Rml::String state; // acquired the sign, or gave up
+    Rml::String order; // the order it registered in
     float top = 0.f;
-    float width = 0.f; // 0 = no box
-    float textPx = 0.f;
-    int align = 0; // 0 left, 1 centred, 2 right edge at left + width
-    bool bold = false;
-    Rml::String color;
+    bool selected = false;
+
+    bool operator==(const GuardDeclareRow&) const = default;
 };
 
-// A RenderColor() box: the lists' backdrops and selected lines.
-struct GuardBoxEntry
+// One guild taking part in the siege: which side it joined and whether it is maintaining the
+// castle or assisting. A defending guild's row carries the same backdrop a selected one does.
+struct GuardSiegeRow
 {
-    float left = 0.f;
+    Rml::String name;
+    Rml::String side;
+    Rml::String involvement;
     float top = 0.f;
-    float width = 0.f;
-    float height = 0.f;
-    Rml::String color;
+    bool selected = false;
+    bool defending = false;
+
+    bool operator==(const GuardSiegeRow&) const = default;
 };
 
 // One of the window's three buttons (Announce, Register, Abandon). Where it sits and what a
@@ -99,18 +104,27 @@ struct GuardWindowRmlModel
     GuardActionButton proclaimButton;
     GuardActionButton registerButton;
     GuardActionButton giveUpButton;
-    // The List tab's frame: 0 none, 1 the declared guilds (registration), 2 the siege guilds.
-    // Whether the guild list is on screen, and whether it has its own summary row underneath.
-    // Its frame is the theme's to draw; these two say what there is to frame.
-    bool listShown = false;
-    bool listHasFooter = false;
+    // Which guild list the List tab shows: 0 none, 1 the guilds that declared (registration
+    // period), 2 the guilds in the siege. Only the siege list has a summary row underneath. Both
+    // lists' frames, backdrops, columns and row height are the theme's.
+    int listKind = 0;
+    std::vector<GuardDeclareRow> declareRows;
+    std::vector<GuardSiegeRow> siegeRows;
+    // The column headings, and the summary row's own value line.
+    Rml::String headerName;
+    Rml::String headerMarkCount;
+    Rml::String headerState;
+    Rml::String headerOrder;
+    Rml::String headerSide;
+    Rml::String headerInvolvement;
+    Rml::String scoreLabel;
+    Rml::String scoreValue;
+
     bool scrollShown = false;
     float scrollTop = 0.f; // the track, reference px
     float scrollHeight = 0.f;
     float thumbTop = 0.f;
     bool thumbDragged = false;
-    std::vector<GuardBoxEntry> boxes;
-    std::vector<GuardTextEntry> texts;
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window

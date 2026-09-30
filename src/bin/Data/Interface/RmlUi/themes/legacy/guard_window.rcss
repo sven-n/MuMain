@@ -43,7 +43,6 @@
 .t-edge-bottom { width: 161px; height: 14px; decorator: image(gd-edge-bottom); }
 .t-edge-left { width: 14px; decorator: image(gd-edge-left); }
 .t-edge-right { width: 14px; decorator: image(gd-edge-right); }
-.gd-box { position: absolute; }
 
 .s-top, .s-mid, .s-bottom { position: absolute; left: 167px; width: 7px; }
 .s-top { height: 3px; decorator: image(gd-scroll-top); }
@@ -53,8 +52,6 @@
 .thumb.dragged { image-color: #c8c8c8; }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
-.gd-text.right { text-align: right; }
-.gd-text.bold { font-weight: bold; }
 
 /* RenderFrame() and the pages drew every one of these in (220, 220, 220). */
 .gd-heading, .gd-owner, .gd-line { color: #dcdcdc; }
@@ -111,3 +108,44 @@
 .gd-foot-edge-right  { left: 166px; top: 345px; height: 25px; }
 .gd-foot-edge-top    { left: 14px;  top: 345px; }
 .gd-foot-edge-bottom { left: 14px;  top: 362px; }
+
+/* The two guild lists. The native list boxes still own the rows' data, scrolling and selection --
+   only a row's `top` still comes from C++, following their scroll position. */
+.gd-list { position: static; }
+.gd-header, .gd-cell { position: absolute; }
+.gd-header { top: 117px; font-weight: bold; }
+.hdr-name { left: 20px; }
+.hdr-mark-count { left: 65px; }
+.hdr-state { left: 113px; }
+.hdr-order { left: 138px; }
+.hdr-side { left: 95px; }
+.hdr-involvement { left: 135px; }
+
+.gd-row { position: absolute; left: 15px; width: 148px; height: 13px; }
+/* A backgrounded element with children paints an unclosed box in this build, so the
+   row's own backdrop is a childless leaf under it (engine-findings.md). */
+.gd-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
+.gd-cell { top: 3px; }
+.cell-name { left: 6px; }
+.cell-mark-count { right: 74px; text-align: right; }
+.cell-state { right: 24px; text-align: right; }
+.cell-order { right: 4px; text-align: right; }
+.cell-side { right: 44px; text-align: right; }
+.cell-involvement { right: 7px; text-align: right; }
+
+.score-label { left: 33px; top: 354px; }
+.score-value { left: 75px; top: 354px; }
+
+/* RenderInterface()'s own boxes: the list's backdrop and the summary row's two halves, all at the
+   colour its SetLineColor() left set. */
+.gd-list-back { position: absolute; left: 14px; top: 128px; width: 161px; height: 237px; background-color: rgba(0, 0, 0, 102); }
+.with-footer .gd-list-back { height: 197px; }
+.gd-foot-back-label { position: absolute; left: 14px; top: 348px; width: 61px; height: 20px; background-color: rgba(146, 134, 121, 102); }
+.gd-foot-back-value { position: absolute; left: 75px; top: 348px; width: 100px; height: 20px; background-color: rgba(0, 0, 0, 102); }
+
+.gd-header { color: #dcdcdc; }
+.gd-cell { color: rgb(230, 220, 200); }
+/* RenderDataLine(): a selected row, and a defending guild's row, carry the same backdrop; only a
+   selected row's text turns black against it. */
+.gd-row.selected .gd-row-back, .gd-row.defending .gd-row-back { background-color: rgba(0, 0, 0, 102); }
+.gd-row.selected .gd-cell { color: #000000; }

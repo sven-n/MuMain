@@ -11,7 +11,6 @@
 
 .t-edge-top, .t-edge-bottom { position: absolute; width: 161px; height: 1px; margin-top: 6px; background-color: token(border-frame); }
 .t-edge-left, .t-edge-right { position: absolute; width: 1px; margin-left: 6px; background-color: token(border-frame); }
-.gd-box { position: absolute; }
 
 .s-top, .s-bottom { display: none; }
 .s-mid { position: absolute; left: 169px; width: 3px; background-color: token(surface-recessed); }
@@ -19,8 +18,6 @@
 .thumb.dragged { background-color: token(accent-steel-hover); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
-.gd-text.right { text-align: right; }
-.gd-text.bold { font-weight: bold; }
 
 .gd-heading { color: token(text-primary); }
 .gd-owner, .gd-line { color: token(text-secondary); }
@@ -98,3 +95,41 @@
 .gd-foot-edge-right  { left: 166px; top: 345px; height: 25px; }
 .gd-foot-edge-top    { left: 14px;  top: 345px; }
 .gd-foot-edge-bottom { left: 14px;  top: 362px; }
+
+/* The two guild lists. The native list boxes still own the rows' data, scrolling and selection --
+   only a row's `top` still comes from C++, following their scroll position. */
+.gd-list { position: static; }
+.gd-header, .gd-cell { position: absolute; }
+.gd-header { top: 117px; font-weight: bold; }
+.hdr-name { left: 20px; }
+.hdr-mark-count { left: 65px; }
+.hdr-state { left: 113px; }
+.hdr-order { left: 138px; }
+.hdr-side { left: 95px; }
+.hdr-involvement { left: 135px; }
+
+.gd-row { position: absolute; left: 15px; width: 148px; height: 13px; }
+/* A backgrounded element with children paints an unclosed box in this build, so the
+   row's own backdrop is a childless leaf under it (engine-findings.md). */
+.gd-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
+.gd-cell { top: 3px; }
+.cell-name { left: 6px; }
+.cell-mark-count { right: 74px; text-align: right; }
+.cell-state { right: 24px; text-align: right; }
+.cell-order { right: 4px; text-align: right; }
+.cell-side { right: 44px; text-align: right; }
+.cell-involvement { right: 7px; text-align: right; }
+
+.score-label { left: 33px; top: 354px; }
+.score-value { left: 75px; top: 354px; }
+
+.gd-list-back { position: absolute; left: 14px; top: 128px; width: 161px; height: 237px; background-color: token(surface-recessed); }
+.with-footer .gd-list-back { height: 197px; }
+.gd-foot-back-label { position: absolute; left: 14px; top: 348px; width: 61px; height: 20px; background-color: token(surface-raised); }
+.gd-foot-back-value { position: absolute; left: 75px; top: 348px; width: 100px; height: 20px; background-color: token(surface-recessed); }
+
+.gd-header { color: token(text-muted); }
+.gd-cell { color: token(text-secondary); }
+.gd-row.defending .gd-row-back { background-color: token(surface-raised); }
+.gd-row.selected .gd-row-back { background-color: token(accent-steel); }
+.gd-row.selected .gd-cell { color: token(text-primary); }

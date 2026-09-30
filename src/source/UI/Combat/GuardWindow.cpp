@@ -444,32 +444,38 @@ void CGuardWindow::BuildRmlUi()
             c.Bind("proclaim_button", &model.proclaimButton);
             c.Bind("register_button", &model.registerButton);
             c.Bind("give_up_button", &model.giveUpButton);
-            c.Bind("list_shown", &model.listShown);
-            c.Bind("list_has_footer", &model.listHasFooter);
+            c.Bind("list_kind", &model.listKind);
+            auto declareRow = c.RegisterStruct<GuardDeclareRow>();
+            declareRow.RegisterMember("name", &GuardDeclareRow::name);
+            declareRow.RegisterMember("mark_count", &GuardDeclareRow::markCount);
+            declareRow.RegisterMember("state", &GuardDeclareRow::state);
+            declareRow.RegisterMember("order", &GuardDeclareRow::order);
+            declareRow.RegisterMember("top", &GuardDeclareRow::top);
+            declareRow.RegisterMember("selected", &GuardDeclareRow::selected);
+            c.RegisterArray<std::vector<GuardDeclareRow>>();
+            c.Bind("declare_rows", &model.declareRows);
+            auto siegeRow = c.RegisterStruct<GuardSiegeRow>();
+            siegeRow.RegisterMember("name", &GuardSiegeRow::name);
+            siegeRow.RegisterMember("side", &GuardSiegeRow::side);
+            siegeRow.RegisterMember("involvement", &GuardSiegeRow::involvement);
+            siegeRow.RegisterMember("top", &GuardSiegeRow::top);
+            siegeRow.RegisterMember("selected", &GuardSiegeRow::selected);
+            siegeRow.RegisterMember("defending", &GuardSiegeRow::defending);
+            c.RegisterArray<std::vector<GuardSiegeRow>>();
+            c.Bind("siege_rows", &model.siegeRows);
+            c.Bind("header_name", &model.headerName);
+            c.Bind("header_mark_count", &model.headerMarkCount);
+            c.Bind("header_state", &model.headerState);
+            c.Bind("header_order", &model.headerOrder);
+            c.Bind("header_side", &model.headerSide);
+            c.Bind("header_involvement", &model.headerInvolvement);
+            c.Bind("score_label", &model.scoreLabel);
+            c.Bind("score_value", &model.scoreValue);
             c.Bind("scroll_shown", &model.scrollShown);
             c.Bind("scroll_top", &model.scrollTop);
             c.Bind("scroll_height", &model.scrollHeight);
             c.Bind("thumb_top", &model.thumbTop);
             c.Bind("thumb_dragged", &model.thumbDragged);
-            auto box = c.RegisterStruct<GuardBoxEntry>();
-            box.RegisterMember("left", &GuardBoxEntry::left);
-            box.RegisterMember("top", &GuardBoxEntry::top);
-            box.RegisterMember("width", &GuardBoxEntry::width);
-            box.RegisterMember("height", &GuardBoxEntry::height);
-            box.RegisterMember("color", &GuardBoxEntry::color);
-            c.RegisterArray<std::vector<GuardBoxEntry>>();
-            c.Bind("boxes", &model.boxes);
-            auto text = c.RegisterStruct<GuardTextEntry>();
-            text.RegisterMember("text", &GuardTextEntry::text);
-            text.RegisterMember("left", &GuardTextEntry::left);
-            text.RegisterMember("top", &GuardTextEntry::top);
-            text.RegisterMember("width", &GuardTextEntry::width);
-            text.RegisterMember("text_px", &GuardTextEntry::textPx);
-            text.RegisterMember("align", &GuardTextEntry::align);
-            text.RegisterMember("bold", &GuardTextEntry::bold);
-            text.RegisterMember("color", &GuardTextEntry::color);
-            c.RegisterArray<std::vector<GuardTextEntry>>();
-            c.Bind("texts", &model.texts);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("guard_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -518,8 +524,6 @@ void CGuardWindow::SyncContent()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     const float x0 = static_cast<float>(m_Pos.x);
     const float y0 = static_cast<float>(m_Pos.y);
-    std::vector<GuardTextEntry> texts;
-    std::vector<GuardBoxEntry> boxes;
 
     // One of the window's own lines: the document places it, so only what it says and the size
     // the native renderer would have shrunk it to for its box travel through the model.
@@ -536,28 +540,6 @@ void CGuardWindow::SyncContent()
     // A page's line: the original's 190-unit centring box.
     auto pageLine = [&](const wchar_t* text, bool boldFont = false) { return line(text, boldFont, 190.f); };
 
-    // The lists' own drawing records: RenderText(x, y, text, width, 0, sort) in window coordinates,
-    // in the font and colour the original had set at that point (its draws leak them from one call
-    // to the next).
-    bool bold = true;
-    DWORD color = RGBA(220, 220, 220, 255);
-    auto addText = [&](const wchar_t* text, float x, float y, float width, int align)
-    {
-        if (text == nullptr || text[0] == L'\0')
-            return;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
-        const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-        const float px =
-            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
-                        : UI::Scaling::NativeTextPixelSize(role, transform);
-        texts.push_back(
-            {StringUtils::WideToNarrow(text), x - x0, y - y0, width, px, align, bold, UI::RmlBridge::RgbaToCss(color)});
-    };
-    // RT3_WRITE_RIGHT_TO_LEFT: the text ends at x.
-    auto addTextEndingAt = [&](const wchar_t* text, float x, float y) { addText(text, x - 200, y, 200, 2); };
-    auto addBox = [&](float x, float y, float width, float height, DWORD rgba)
-    { boxes.push_back({x - x0, y - y0, width, height, UI::RmlBridge::RgbaToCss(rgba)}); };
     wchar_t szText[256] = {};
 
     // RenderFrame(): the heading and the owner lines, in the bold font.
@@ -589,8 +571,10 @@ void CGuardWindow::SyncContent()
         m_eTimeType == CASTLESIEGE_STATE_IDLE_3 || m_eTimeType == CASTLESIEGE_STATE_ENDSIEGE;
     GuardActionButton proclaimButton, registerButton, giveUpButton;
 
-    bool listShown = false;
-    bool listHasFooter = false;
+    int listKind = 0;
+    std::vector<GuardDeclareRow> declareRows;
+    std::vector<GuardSiegeRow> siegeRows;
+    Rml::String scoreValue;
     TextListScrollBarGeometry scroll{};
     bool scrollShown = false;
     switch (m_iNumCurOpenTab)
@@ -721,27 +705,15 @@ void CGuardWindow::SyncContent()
     }
     case TAB_REGISTER_INFO:
     {
-        // RenderRegisterInfoTab() and the lists' RenderInterface()/RenderDataLine(): the list's
-        // backdrop and selected lines black at 40 % (SetLineColor(7, 0.4f), the colour the render
-        // left set), the headers in the tab's bold (220, 220, 220), the lines in the normal font.
-        const DWORD black40 = RGBA(0, 0, 0, 102);
-        const DWORD textColor = RGBA(230, 220, 200, 255);
+        // RenderRegisterInfoTab() and the lists' RenderInterface()/RenderDataLine(). The native
+        // list boxes still hold the rows, their scrolling and their selection, so a row's own
+        // `top` follows their scroll position -- everything else about a row is the theme's.
         if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
         {
-            listShown = true;
+            listKind = 1;
             CUIBCDeclareGuildListBox& list = m_DeclareGuildListBox;
-            const float lx = static_cast<float>(list.GetPosition_x());
-            const float ly = static_cast<float>(list.GetPosition_y());
-            const float lw = static_cast<float>(list.GetWidth());
-            const float lh = static_cast<float>(list.GetHeight());
-            addBox(lx - 1, ly - lh - 1, lw + 1, lh + 2, black40);
             scroll = list.GetScrollBarGeometry();
             scrollShown = true;
-            addText(I18N::Game::NAME, lx + 5, ly - lh - 12, 0, 0);
-            addText(I18N::Game::NoReg, lx + 50, ly - lh - 12, 0, 0);
-            addText(I18N::Game::Stat, lx + 98, ly - lh - 12, 0, 0);
-            addText(I18N::Game::Order, lx + 123, ly - lh - 12, 0, 0);
-            bold = false;
             list.ForEachRenderLine(
                 [&](int line, const BCDECLAREGUILD_TEXT& item, bool selected)
                 {
@@ -749,60 +721,50 @@ void CGuardWindow::SyncContent()
                     if (wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, item.szName) != 0 &&
                         wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, item.szName) != 0)
                         return false;
-                    const float ry = static_cast<float>(list.GetRenderLinePos_y(line));
-                    if (selected)
-                        addBox(lx, ry - 3, lw - 13 + 1, 13, black40);
-                    color = selected ? RGBA(0, 0, 0, 255) : textColor;
-                    addText(item.szName, lx + 6, ry, 0, 0);
                     wchar_t cell[64] = {};
+                    GuardDeclareRow row;
+                    row.name = StringUtils::WideToNarrow(item.szName);
                     mu_swprintf(cell, L"%d", item.nCount);
-                    addTextEndingAt(cell, lx + 74, ry);
-                    addTextEndingAt(item.byIsGiveUp ? I18N::Game::Failed : I18N::Game::Processing, lx + 124, ry);
+                    row.markCount = StringUtils::WideToNarrow(cell);
+                    row.state = StringUtils::WideToNarrow(item.byIsGiveUp ? I18N::Game::Failed
+                                                                          : I18N::Game::Processing);
                     mu_swprintf(cell, L"%u", item.bySeqNum);
-                    addTextEndingAt(cell, lx + 144, ry);
+                    row.order = StringUtils::WideToNarrow(cell);
+                    row.top = static_cast<float>(list.GetRenderLinePos_y(line)) - 3.f - y0;
+                    row.selected = selected;
+                    declareRows.push_back(std::move(row));
                     return true;
                 });
         }
         else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
         {
-            listShown = true;
-            listHasFooter = true;
+            listKind = 2;
             CUIBCGuildListBox& list = m_GuildListBox;
-            const float lx = static_cast<float>(list.GetPosition_x());
-            const float ly = static_cast<float>(list.GetPosition_y());
-            const float lw = static_cast<float>(list.GetWidth());
-            const float lh = static_cast<float>(list.GetHeight());
-            addBox(lx - 1, ly - lh - 1, lw + 1, lh + 2, black40);
-            addBox(lx - 1, ly + 25 - 1, lw - 100 + 1, 20, RGBA(146, 134, 121, 102));
-            addBox(lx - 1 + lw - 100 + 1, ly + 25 - 1, lw - 60, 20, black40);
             scroll = list.GetScrollBarGeometry();
             scrollShown = true;
-            addText(I18N::Game::NAME, lx + 5, ly - lh - 12, 0, 0);
-            addText(I18N::Game::Camp, lx + 80, ly - lh - 12, 0, 0);
-            addText(I18N::Game::Maintain, lx + 120, ly - lh - 12, 0, 0);
-            addText(I18N::Game::Score, lx + 18, ly + 31 - 1, 0, 0);
-            bold = false;
             list.ForEachRenderLine(
                 [&](int line, const BCGUILD_TEXT& item, bool selected)
                 {
-                    const float ry = static_cast<float>(list.GetRenderLinePos_y(line));
-                    if (selected || item.byJoinSide == 1)
-                        addBox(lx, ry - 3, lw - 13 + 1, 13, black40);
-                    color = selected ? RGBA(0, 0, 0, 255) : textColor;
-                    addText(item.szName, lx + 6, ry, 0, 0);
-                    addTextEndingAt(item.byJoinSide == 1 ? I18N::Game::DefendingTeam : I18N::Game::InvadingTeam,
-                                    lx + 104, ry);
-                    addTextEndingAt(item.byGuildInvolved == 1 ? I18N::Game::Maintain : I18N::Game::Assist, lx + 141,
-                                    ry);
+                    GuardSiegeRow row;
+                    row.name = StringUtils::WideToNarrow(item.szName);
+                    row.side = StringUtils::WideToNarrow(item.byJoinSide == 1 ? I18N::Game::DefendingTeam
+                                                                             : I18N::Game::InvadingTeam);
+                    row.involvement = StringUtils::WideToNarrow(
+                        item.byGuildInvolved == 1 ? I18N::Game::Maintain : I18N::Game::Assist);
+                    row.top = static_cast<float>(list.GetRenderLinePos_y(line)) - 3.f - y0;
+                    row.selected = selected;
+                    row.defending = item.byJoinSide == 1;
+                    siegeRows.push_back(std::move(row));
+                    // The summary row shows the guild the list has picked out, not the selected
+                    // line: a defending guild has no score to show.
                     if (list.Select_Guild == line)
                     {
-                        color = textColor;
                         wchar_t info[300] = {};
                         if (item.byJoinSide == 1)
                             mu_swprintf(info, L"--");
                         else
                             mu_swprintf(info, L"%ls :     %d", item.szName, item.iGuildScore);
-                        addText(info, lx + 60, ly + 31 - 1, 0, 0);
+                        scoreValue = StringUtils::WideToNarrow(info);
                     }
                 });
         }
@@ -830,30 +792,15 @@ void CGuardWindow::SyncContent()
         model.tabs = std::move(tabs);
         m_RmlBinder.MarkDirty("tabs");
     }
-    const bool sameBoxes = model.boxes.size() == boxes.size() &&
-                           std::equal(model.boxes.begin(), model.boxes.end(), boxes.begin(),
-                                      [](const GuardBoxEntry& a, const GuardBoxEntry& b)
-                                      {
-                                          return a.left == b.left && a.top == b.top && a.width == b.width &&
-                                                 a.height == b.height && a.color == b.color;
-                                      });
-    if (!sameBoxes)
+    if (model.declareRows != declareRows)
     {
-        model.boxes = std::move(boxes);
-        m_RmlBinder.MarkDirty("boxes");
+        model.declareRows = std::move(declareRows);
+        m_RmlBinder.MarkDirty("declare_rows");
     }
-    const bool sameTexts = model.texts.size() == texts.size() &&
-                           std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
-                                      [](const GuardTextEntry& a, const GuardTextEntry& b)
-                                      {
-                                          return a.text == b.text && a.left == b.left && a.top == b.top &&
-                                                 a.width == b.width && a.textPx == b.textPx && a.align == b.align &&
-                                                 a.bold == b.bold && a.color == b.color;
-                                      });
-    if (!sameTexts)
+    if (model.siegeRows != siegeRows)
     {
-        model.texts = std::move(texts);
-        m_RmlBinder.MarkDirty("texts");
+        model.siegeRows = std::move(siegeRows);
+        m_RmlBinder.MarkDirty("siege_rows");
     }
     SyncField(m_RmlBinder, &GuardWindowRmlModel::activeTab, "active_tab", m_iNumCurOpenTab);
     SyncField(m_RmlBinder, &GuardWindowRmlModel::title, "title", std::move(title));
@@ -877,8 +824,22 @@ void CGuardWindow::SyncContent()
     SyncField(m_RmlBinder, &GuardWindowRmlModel::proclaimButton, "proclaim_button", std::move(proclaimButton));
     SyncField(m_RmlBinder, &GuardWindowRmlModel::registerButton, "register_button", std::move(registerButton));
     SyncField(m_RmlBinder, &GuardWindowRmlModel::giveUpButton, "give_up_button", std::move(giveUpButton));
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::listShown, "list_shown", listShown);
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::listHasFooter, "list_has_footer", listHasFooter);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::listKind, "list_kind", listKind);
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::headerName, "header_name",
+              StringUtils::WideToNarrow(I18N::Game::NAME));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::headerMarkCount, "header_mark_count",
+              StringUtils::WideToNarrow(I18N::Game::NoReg));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::headerState, "header_state",
+              StringUtils::WideToNarrow(I18N::Game::Stat));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::headerOrder, "header_order",
+              StringUtils::WideToNarrow(I18N::Game::Order));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::headerSide, "header_side",
+              StringUtils::WideToNarrow(I18N::Game::Camp));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::headerInvolvement, "header_involvement",
+              StringUtils::WideToNarrow(I18N::Game::Maintain));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::scoreLabel, "score_label",
+              StringUtils::WideToNarrow(I18N::Game::Score));
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::scoreValue, "score_value", std::move(scoreValue));
     // RenderScrollBarFrame() at the list's right edge - 8 over the track, the thumb at - 12.
     SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollShown, "scroll_shown", scrollShown);
     SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollTop, "scroll_top", scroll.rangeTop - y0);
