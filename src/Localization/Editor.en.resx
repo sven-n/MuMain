@@ -463,4 +463,28 @@
   <data name="Item data could not be written" xml:space="preserve">
     <value>The item data files could not be written. See the console.</value>
   </data>
+  <data name="Looks" xml:space="preserve">
+    <value>Looks</value>
+  </data>
+  <data name="Model file" xml:space="preserve">
+    <value>Model file</value>
+  </data>
+  <data name="Glow" xml:space="preserve">
+    <value>Glow</value>
+  </data>
+  <data name="Render style" xml:space="preserve">
+    <value>Render style</value>
+  </data>
+  <data name="Item effect" xml:space="preserve">
+    <value>Item effect</value>
+  </data>
+  <data name="Used by" xml:space="preserve">
+    <value>used by</value>
+  </data>
+  <data name="Select an item" xml:space="preserve">
+    <value>Select an item in the table to see its looks.</value>
+  </data>
+  <data name="No model" xml:space="preserve">
+    <value>The selected item has no model.</value>
+  </data>
 </root>

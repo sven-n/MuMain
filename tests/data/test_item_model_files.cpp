@@ -13,8 +13,10 @@
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
-#include "Render/Items/ItemDisplay.h"
+#include "Engine/Object/ZzzObject.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemGlow.h"
 #include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -26,6 +28,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <utility>
@@ -451,7 +454,10 @@ TEST_CASE("Shipped item models keep the glow of the old drawing code [data][item
     CHECK(glowOf(4, 15).levels == GlowLevels{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31});
     // The Devil's Square items glow like half their square, the seventh
     // square like +13.
-    CHECK(glowOf(14, 17).levels == GlowLevels{0, 0, 1, 1, 2, 2, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13});
+    // The Devil's Square items glow like their level up to +6, so +1 and +2,
+    // +3 and +4, +5 and +6 look alike (the level glow changes at +3, +5 and
+    // +7), and like +13 from +7.
+    CHECK(glowOf(14, 17).levels == GlowLevels{0, 1, 2, 3, 4, 5, 6, 13, 13, 13, 13, 13, 13, 13, 13, 13});
     CHECK_FALSE(glowOf(12, 0).excellent);
     CHECK_FALSE(glowOf(13, 30).excellent);
 }
@@ -499,8 +505,13 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
 
     CHECK(GetLevel(MODEL_ARROWS, 0) == 0);
     CHECK(GetLevel(MODEL_ARROWS, 3) == 7);
-    CHECK(GetLevel(MODEL_DEVILS_EYE, 5) == 2);
+    CHECK(GetLevel(MODEL_DEVILS_EYE, 1) == 1);
+    CHECK(GetLevel(MODEL_DEVILS_EYE, 6) == 6);
     CHECK(GetLevel(MODEL_DEVILS_EYE, 7) == 13);
+    // The Blood Bone and the Illusion Sorcerer Covenant glow by their level,
+    // like the Scroll of Archangel and the Old Scroll.
+    CHECK(GetLevel(MODEL_ITEM + MakeItemType(13, 17), 5) == 5);
+    CHECK(GetLevel(MODEL_ITEM + MakeItemType(13, 50), 5) == 5);
     // The event models of level variants stay in code.
     CHECK(GetLevel(MODEL_EVENT + 14, 2) == 9);
     CHECK(GetLevel(MODEL_ITEM + MakeItemType(14, 13), 0) == 8);
@@ -568,6 +579,7 @@ TEST_CASE("Shipped item models keep the looks of the old drawing code [data][ite
     CHECK(styleOf(8, 9) == "helperNpcPlate");
     // The Deadly Staff also glows in its own way.
     CHECK(styleOf(5, 30) == "deadlyStaff");
+    CHECK(styleOf(13, 17) == "bloodBone");
 }
 
 TEST_CASE("Render styles that are not for every drawing leave it to the drawing code [data][items]")
@@ -708,4 +720,175 @@ TEST_CASE("Styles that pick something per item draw other items plainly [data][i
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     object.Type = MODEL_ITEM + MakeItemType(12, 65);
     CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+}
+
+TEST_CASE("The item effects of shipped item models exist [data][items]")
+{
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (!model.itemEffect.empty())
+        {
+            INFO("(" << model.group << "," << model.number << ") " << model.itemEffect);
+            CHECK(Render::Items::ItemEffects::Exists(model.itemEffect));
+        }
+    }
+    CHECK_FALSE(Render::Items::ItemEffects::Exists("wingOfEternl"));
+}
+
+// The effects of the old drawing code (RenderPartObjectEffect), recorded per
+// item: spot checks.
+TEST_CASE("Shipped item models keep the item effects of the old drawing code [data][items]")
+{
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+    const auto effectOf = [&](int group, int number)
+    {
+        const ItemModelDefinition* model = FindModel(models, group, number);
+        REQUIRE(model != nullptr);
+        return model->itemEffect;
+    };
+
+    CHECK(effectOf(0, 0).empty());
+    CHECK(effectOf(12, 37) == "wingOfEternal");
+    CHECK(effectOf(14, 18) == "devilsKey");
+    CHECK(effectOf(14, 19) == "devilsInvitation");
+    CHECK(effectOf(14, 0) == "potion");
+    CHECK(effectOf(14, 6) == "potion");
+    // Items with the same code share it.
+    CHECK(effectOf(14, 7) == "hiddenMeshByLevel");
+    CHECK(effectOf(13, 7) == "hiddenMeshByLevel");
+    // The shine below +3 is part of the render style; so is the red chrome of
+    // the Blood Bone, which glows by its level.
+    CHECK(effectOf(13, 43).empty());
+    CHECK(effectOf(13, 17).empty());
+    CHECK(effectOf(14, 64).empty());
+
+    // The socket seeds and spheres and zen glow like level 0, whatever their
+    // level (the old code set their level to 0, or drew zen plainly).
+    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+    for (const int itemType :
+         {MakeItemType(12, 60), MakeItemType(12, 100), MakeItemType(12, 129), MakeItemType(14, 15)})
+    {
+        INFO("item type " << itemType);
+        CHECK(Render::Items::Glow::GetLevel(MODEL_ITEM + itemType, 9) == 0);
+    }
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("Item effects run before the model is drawn [data][items]")
+{
+    using namespace Render::Items;
+    using ItemEffects::Result;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+
+    // A model without meshes draws nothing, so only the values change here.
+    BMD model;
+    OBJECT object;
+    const auto apply = [&](int itemType, int& level)
+    {
+        object.Type = MODEL_ITEM + itemType;
+        return ItemEffects::Apply(&model, &object, object.Type, 1.f, level);
+    };
+
+    // Potions with a level glow like +7.
+    int level = 3;
+    CHECK(apply(MakeItemType(14, 0), level) == Result::Applied);
+    CHECK(level == 7);
+    level = 0;
+    CHECK(apply(MakeItemType(14, 0), level) == Result::Applied);
+    CHECK(level == 0);
+    // The siege potion hides a mesh by level.
+    level = 0;
+    CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
+    CHECK(object.HiddenMesh == 1);
+    level = 1;
+    CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
+    CHECK(object.HiddenMesh == 0);
+    // Some effects draw the model themselves.
+    level = 2;
+    CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
+    // Items without an effect, and models that are not items.
+    CHECK(apply(ITEM_KRIS, level) == Result::None);
+    object.Type = MODEL_PLAYER;
+    CHECK(ItemEffects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
+
+    // The effects follow the database when it is built again.
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    CHECK(apply(MakeItemType(14, 0), level) == Result::None);
+}
+
+// The drawing below +3 of the old RenderPartObjectEffect: the light of the
+// item (scaled), the model, then two shine passes (RenderPartObjectBodyColor2).
+TEST_CASE("Some render styles shine below +3 like the old drawing code [data][items]")
+{
+    using namespace Render::Items;
+    using Shine = Styles::ShineBelowPlus3;
+    const std::vector<ItemModelDefinition>& models = ShippedModels().models;
+    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+
+    const Shine::Pass chrome2{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f};
+    const Shine::Pass chrome4{1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f};
+    const auto shineOf = [](int group, int number)
+    { return Styles::FindShineBelowPlus3(MODEL_ITEM + MakeItemType(group, number)); };
+    const auto sameAs =
+        [](const Shine* shine, std::optional<float> light, const Shine::Pass& first, const Shine::Pass& second)
+    {
+        const auto samePass = [](const Shine::Pass& a, const Shine::Pass& b)
+        { return a.alpha == b.alpha && a.renderType == b.renderType && a.bright == b.bright; };
+        return shine != nullptr && shine->light == light && samePass(shine->passes[0], first) &&
+               samePass(shine->passes[1], second);
+    };
+
+    // The seals: the light at 0.9.
+    for (const auto& [group, number] : {std::pair{13, 43}, {13, 44}, {13, 45}, {13, 93}, {13, 94}, {13, 116}})
+    {
+        INFO("(" << group << "," << number << ")");
+        CHECK(sameAs(shineOf(group, number), 0.9f, chrome2, chrome4));
+    }
+    // The Illusion Sorcerer Covenant, the Jewel of Harmony and the Moonstone
+    // Pendant: the light as it is.
+    for (const auto& [group, number] : {std::pair{13, 50}, {14, 42}, {13, 38}})
+    {
+        INFO("(" << group << "," << number << ")");
+        CHECK(sameAs(shineOf(group, number), 1.f, chrome2, chrome4));
+    }
+    // The water of the Cursed Castle keeps the light the model has.
+    CHECK(sameAs(shineOf(14, 64), std::nullopt, Shine::Pass{0.5f, RENDER_TEXTURE | RENDER_BRIGHT, 0.5f}, chrome4));
+
+    // Other items are drawn plainly below +3; so are the Jewel of Harmony and
+    // the Moonstone Pendant above it (their style only shines).
+    CHECK(shineOf(0, 0) == nullptr);
+    CHECK(shineOf(12, 37) == nullptr);
+    BMD model;
+    OBJECT object;
+    object.Type = MODEL_ITEM + MakeItemType(14, 42);
+    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+TEST_CASE("The item effect of a model is the one of its item, or of its event model [data][items]")
+{
+    using Render::Items::ItemEffects::Result;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+
+    BMD model;
+    OBJECT object;
+    int level = 3;
+    // An item with an effect: its effect, whatever the object is.
+    object.Type = MODEL_EVENT + 11;
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + MakeItemType(14, 0), 1.f, level, 3) == Result::Applied);
+    CHECK(level == 7);
+    // The event models of level variants have theirs in the drawing code: they
+    // only run when the item has no effect.
+    object.Type = MODEL_EVENT + 11;
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, level, 0) == Result::Drawn);
+    object.Type = MODEL_EVENT + 18;
+    object.BlendMesh = -1;
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_EVENT + 18, 1.f, level, 0) == Result::Applied);
+    CHECK(object.BlendMesh == 1);
+    // Neither.
+    object.Type = MODEL_ITEM + ITEM_KRIS;
+    CHECK(ApplyPartObjectEffect(&model, &object, object.Type, 1.f, level, 0) == Result::None);
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }

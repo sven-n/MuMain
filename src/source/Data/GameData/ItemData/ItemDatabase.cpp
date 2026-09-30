@@ -113,6 +113,7 @@ void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 
 void ItemDatabase::Store(int itemType, ItemDefinition definition)
 {
+    ++m_version;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     UpdateDisplayName(definition);

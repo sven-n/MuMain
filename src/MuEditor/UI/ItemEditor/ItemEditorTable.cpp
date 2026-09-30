@@ -24,6 +24,23 @@ void CItemEditorTable::RequestScrollToIndex(int index)
     s_scrollToIndex = index;
 }
 
+bool CItemEditorTable::IsListed(int itemIndex, const std::string& searchFilter)
+{
+    char nameBuffer[256];
+    WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[itemIndex].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
+    if (nameBuffer[0] == '\0')
+    {
+        return false;
+    }
+    if (searchFilter.empty())
+    {
+        return true;
+    }
+    std::string nameLower = nameBuffer;
+    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+    return nameLower.find(searchFilter) != std::string::npos;
+}
+
 void CItemEditorTable::InvalidateFilter()
 {
     m_isInitialized = false;
@@ -86,20 +103,10 @@ void CItemEditorTable::Render(
         m_filteredItems.clear();
         for (int i = 0; i < MAX_ITEM; i++)
         {
-            char nameBuffer[256];
-            WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
-
-            if (nameBuffer[0] == '\0') continue;
-
-            if (searchFilter.length() > 0)
+            if (IsListed(i, searchFilter))
             {
-                std::string nameLower = nameBuffer;
-                std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-                if (nameLower.find(searchFilter) == std::string::npos)
-                    continue;
+                m_filteredItems.push_back(i);
             }
-
-            m_filteredItems.push_back(i);
         }
         m_lastSearchFilter = searchFilter;
         m_isInitialized = true;
@@ -109,8 +116,14 @@ void CItemEditorTable::Render(
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 2));
 
-    // Create a table with scrolling
-    if (!ImGui::BeginTable("ItemTable", visibleColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
+    // Create a table with scrolling; it keeps some rows when the parts above it
+    // (the Looks section) take the height of the window.
+    const float minTableHeight = ImGui::GetFrameHeightWithSpacing() * 10.0f;
+    const ImVec2 tableSize(0.0f, std::max(ImGui::GetContentRegionAvail().y, minTableHeight));
+    if (!ImGui::BeginTable("ItemTable", visibleColumnCount,
+                           ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY |
+                               ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable,
+                           tableSize))
     {
         ImGui::PopStyleVar(2);
         return;
@@ -156,20 +169,18 @@ void CItemEditorTable::Render(
     ImGuiListClipper clipper;
     clipper.Begin((int)m_filteredItems.size());
 
-    // Handle scroll request
+    // Handle scroll request: the item is selected, and the table scrolls to its
+    // row when the search lists it.
+    int scrollRow = -1;
     if (s_scrollToIndex >= 0)
     {
-        // Find the row index in filtered items
-        for (int row = 0; row < (int)m_filteredItems.size(); row++)
+        const auto found = std::find(m_filteredItems.begin(), m_filteredItems.end(), s_scrollToIndex);
+        if (found != m_filteredItems.end())
         {
-            if (m_filteredItems[row] == s_scrollToIndex)
-            {
-                // Force the clipper to include this row and scroll to it
-                ImGui::SetScrollY(ImGui::GetTextLineHeightWithSpacing() * (row + 1)); // +1 for header
-                selectedRow = s_scrollToIndex;
-                break;
-            }
+            scrollRow = static_cast<int>(found - m_filteredItems.begin());
+            clipper.IncludeItemByIndex(scrollRow);
         }
+        selectedRow = s_scrollToIndex;
         s_scrollToIndex = -1; // Reset
     }
 
@@ -179,6 +190,10 @@ void CItemEditorTable::Render(
         {
             int i = m_filteredItems[row];
             ImGui::TableNextRow();
+            if (row == scrollRow)
+            {
+                ImGui::SetScrollHereY(0.5f);
+            }
 
             if (selectedRow == i)
             {

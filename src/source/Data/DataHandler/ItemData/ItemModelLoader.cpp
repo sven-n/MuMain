@@ -108,18 +108,19 @@ void CheckGlowMeshes(int itemType, const ItemModelDefinition& model)
                           });
 }
 
-void CheckRenderStyle(const ItemModelDefinition& model, RenderStyleExists renderStyleExists)
+void CheckLookName(const ItemModelDefinition& model, const std::string& name, LookExists exists,
+                   ItemModelProblemType unknown)
 {
-    if (model.renderStyle.empty() || renderStyleExists(model.renderStyle))
+    if (name.empty() || exists(name))
     {
         return;
     }
-    ItemModelProblem problem = MakeProblem(ItemModelProblemType::RenderStyleUnknown, model);
-    problem.renderStyle = model.renderStyle;
+    ItemModelProblem problem = MakeProblem(unknown, model);
+    problem.name = name;
     AddProblem(std::move(problem));
 }
 
-void OpenModel(int itemType, const ItemModelDefinition& model, RenderStyleExists renderStyleExists)
+void OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
 {
     const std::wstring path = ToLoaderPath(model.file);
     const size_t nameStart = path.find_last_of(LoaderSeparator) + 1; // 0 when there is no folder
@@ -133,7 +134,8 @@ void OpenModel(int itemType, const ItemModelDefinition& model, RenderStyleExists
     }
     MarkNoneBlendMeshes(itemType, model);
     CheckGlowMeshes(itemType, model);
-    CheckRenderStyle(model, renderStyleExists);
+    CheckLookName(model, model.renderStyle, lookNames.renderStyle, ItemModelProblemType::RenderStyleUnknown);
+    CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
 }
 
 ItemModelProblemType GetTextureProblemType(const TextureProblem& textureProblem)
@@ -187,10 +189,10 @@ template <typename TOpen> void ForEachModel(TOpen&& open)
 }
 } // namespace
 
-void OpenModels(RenderStyleExists renderStyleExists)
+void OpenModels(const LookNames& lookNames)
 {
-    ForEachModel([renderStyleExists](int itemType, const ItemModelDefinition& model)
-                 { OpenModel(itemType, model, renderStyleExists); });
+    ForEachModel([&lookNames](int itemType, const ItemModelDefinition& model)
+                 { OpenModel(itemType, model, lookNames); });
 }
 
 void OpenTextures()

@@ -135,7 +135,8 @@
       },
       "glow": {
         "color": "red"
-      }
+      },
+      "itemEffect": "billOfBalrog"
     },
     {
       "number": 10,

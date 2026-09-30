@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemRenderStyles.h"
-#include "ItemModelLookup.h"
+#include "ItemModelTable.h"
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
@@ -9,9 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
-#include <span>
 #include <string_view>
-#include <vector>
 
 namespace Render::Items::Styles
 {
@@ -34,10 +32,17 @@ struct RenderStyle
     {
     }
 
+    // Styles that shine below +3; the shine is a named constant.
+    constexpr RenderStyle(const char* styleName, StyleFunction recipe, const ShineBelowPlus3* shineBelowPlus3)
+        : name(styleName), render(recipe), shine(shineBelowPlus3)
+    {
+    }
+
     // Styles that share a recipe and only differ in its texture; they cannot
     // leave the texture out.
-    constexpr RenderStyle(const char* styleName, TexturedStyleFunction recipe, int recipeTexture)
-        : name(styleName), texturedRender(recipe), texture(recipeTexture)
+    constexpr RenderStyle(const char* styleName, TexturedStyleFunction recipe, int recipeTexture,
+                          const ShineBelowPlus3* shineBelowPlus3 = nullptr)
+        : name(styleName), texturedRender(recipe), texture(recipeTexture), shine(shineBelowPlus3)
     {
     }
 
@@ -52,9 +57,26 @@ struct RenderStyle
     TexturedStyleFunction texturedRender = nullptr;
     int texture = 0;
     GlowFunction glow = nullptr;
+    const ShineBelowPlus3* shine = nullptr;
 };
 
+// ------------------------------------------------ the shine below +3
+
+constexpr ShineBelowPlus3 HarmonyShine{
+    1.f, {{{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f}, {1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f}}}};
+constexpr ShineBelowPlus3 SealShine{
+    0.9f, {{{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f}, {1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f}}}};
+// Drawn with the light the model has.
+constexpr ShineBelowPlus3 CursedCastleWaterShine{
+    std::nullopt, {{{0.5f, RENDER_TEXTURE | RENDER_BRIGHT, 0.5f}, {1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f}}}};
+
 // ------------------------------------------------ the recipes
+
+// For styles that only shine below +3: the drawing code draws the model.
+bool RenderPlainly(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    return false;
+}
 
 bool RenderStormCrow(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
@@ -1668,6 +1690,26 @@ bool RenderLuckyItem(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return true;
 }
 
+// The bone in the light of its level (a little darker), then a red chrome
+// layer running over it; the level glow comes on top as for other items.
+bool RenderBloodBone(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    o->BlendMeshTexCoordU = sinf(gMapManager.WorldActive * 0.0001f);
+    o->BlendMeshTexCoordV = -WorldTime * 0.0005f;
+    vec3_t light;
+    VectorCopy(b->BodyLight, light);
+    Vector(light[0] * 0.9f, light[1] * 0.9f, light[2] * 0.9f, b->BodyLight);
+    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, o->HiddenMesh);
+    Vector(.9f, .1f, .1f, b->BodyLight);
+    b->StreamMesh = 0;
+    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+    b->StreamMesh = -1;
+    VectorCopy(light, b->BodyLight);
+    return true;
+}
+
 // ------------------------------------------------ glow passes
 
 // The whole staff glows, then its second mesh again, white; the object keeps
@@ -1719,9 +1761,11 @@ const RenderStyle RenderStyles[] = {
     {"guardianShield", RenderGuardianShield},
     {"crossShield", RenderCrossShield},
     {"oldScroll", RenderOldScroll},
-    {"illusionSorcererCovenant", RenderIllusionSorcererCovenant},
+    {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, &HarmonyShine},
+    {"bloodBone", RenderBloodBone},
     {"scrollOfBlood", RenderScrollOfBlood},
-    {"cursedCastleWater", RenderCursedCastleWater},
+    {"cursedCastleWater", RenderCursedCastleWater, &CursedCastleWaterShine},
+    {"harmonyShine", RenderPlainly, &HarmonyShine},
     {"condorFlame", RenderCondorFlame},
     {"condorFeather", RenderCondorFeather},
     {"deathBeamKnightFlame", RenderThirdClassQuestItem, BITMAP_ITEM_EFFECT_DBSTONE_R},
@@ -1736,9 +1780,9 @@ const RenderStyle RenderStyles[] = {
     {"rareItemTicket4", RenderRareItemTicket, BITMAP_RAREITEM4_R},
     {"rareItemTicket", RenderRareItemTicket, BITMAP_RAREITEM5_R},
     {"talismanOfLuck", RenderTalismanOfLuck},
-    {"sealOfAscension", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT43},
-    {"sealOfWealth", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT44},
-    {"sealOfSustenance", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT45},
+    {"sealOfAscension", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT43, &SealShine},
+    {"sealOfWealth", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT44, &SealShine},
+    {"sealOfSustenance", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT45, &SealShine},
     {"elitePotion", RenderElitePotion},
     {"textured", RenderTextured},
     {"rareItemTicket7", RenderRareItemTicket, BITMAP_RAREITEM7},
@@ -1824,16 +1868,6 @@ const RenderStyle RenderStyles[] = {
     {"luckyItem", RenderLuckyItem},
 };
 
-// The render style of every item type, taken from the item model database
-// after each build of it.
-struct ItemStyleTable
-{
-    int databaseVersion = -1;
-    std::vector<const RenderStyle*> styles;
-};
-
-ItemStyleTable g_itemStyles;
-
 const RenderStyle* FindStyle(std::string_view name)
 {
     const auto found = std::find_if(std::begin(RenderStyles), std::end(RenderStyles),
@@ -1841,32 +1875,15 @@ const RenderStyle* FindStyle(std::string_view name)
     return found != std::end(RenderStyles) ? found : nullptr;
 }
 
-const std::vector<const RenderStyle*>& GetItemStyles()
-{
-    const int databaseVersion = g_ItemModelDatabase.GetVersion();
-    if (g_itemStyles.databaseVersion != databaseVersion)
-    {
-        g_itemStyles.databaseVersion = databaseVersion;
-        g_itemStyles.styles.assign(MAX_ITEM, nullptr);
-        const std::span<const Data::Items::ItemModelDefinition> models = g_ItemModelDatabase.GetAllSlots();
-        for (size_t itemType = 0; itemType < models.size(); ++itemType)
-        {
-            // Names that are not styles are drawn plainly; the model loader
-            // reports them.
-            if (models[itemType].Exists() && !models[itemType].renderStyle.empty())
-            {
-                g_itemStyles.styles[itemType] = FindStyle(models[itemType].renderStyle);
-            }
-        }
-    }
-    return g_itemStyles.styles;
-}
-
-const RenderStyle* FindItemStyle(int modelType)
-{
-    const int itemType = GetItemTypeOfModel(modelType);
-    return itemType >= 0 ? GetItemStyles()[itemType] : nullptr;
-}
+// The render style of every item type, taken from the item model database
+// after each build of it.
+ItemModelTable<const RenderStyle*> g_itemStyles{[](const Data::Items::ItemModelDefinition& model)
+                                                {
+                                                    // Names that are not styles are drawn plainly; the model
+                                                    // loader reports them.
+                                                    return model.renderStyle.empty() ? nullptr
+                                                                                     : FindStyle(model.renderStyle);
+                                                }};
 } // namespace
 
 bool Exists(std::string_view name)
@@ -1876,13 +1893,19 @@ bool Exists(std::string_view name)
 
 bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType)
 {
-    const RenderStyle* style = FindItemStyle(modelType);
+    const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr && style->Render(b, o, modelType, alpha, renderType);
+}
+
+const ShineBelowPlus3* FindShineBelowPlus3(int modelType)
+{
+    const RenderStyle* style = g_itemStyles.Find(modelType);
+    return style != nullptr ? style->shine : nullptr;
 }
 
 bool RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
 {
-    const RenderStyle* style = FindItemStyle(modelType);
+    const RenderStyle* style = g_itemStyles.Find(modelType);
     if (style == nullptr || style->glow == nullptr)
     {
         return false;

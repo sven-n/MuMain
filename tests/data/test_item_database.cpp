@@ -211,6 +211,30 @@ TEST_CASE("Swapping items moves them with their ids [data][items]")
     CHECK(moved->names.GetNeutral() == "Kris");
 }
 
+TEST_CASE("The item database counts its changes [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
+    int version = database.GetVersion();
+
+    // Lookups change nothing.
+    CHECK(database.Find(SwordGroup, 0) != nullptr);
+    CHECK(database.GetLogName(MakeItemType(SwordGroup, 0)) == "Kris (0,0)");
+    CHECK(database.GetVersion() == version);
+
+    // Every editor change and every build does.
+    ItemDefinition changed = *database.Find(SwordGroup, 0);
+    changed.names = MakeItem(SwordGroup, 0, "Dagger").names;
+    database.Set(changed);
+    CHECK(database.GetVersion() != version);
+    version = database.GetVersion();
+    database.Swap(MakeItemType(SwordGroup, 0), MakeItemType(SwordGroup, 5));
+    CHECK(database.GetVersion() != version);
+    version = database.GetVersion();
+    database.Build({});
+    CHECK(database.GetVersion() != version);
+}
+
 TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
 {
     ItemDefinition wing = MakeItem(12, 0, "Wings of Elf");

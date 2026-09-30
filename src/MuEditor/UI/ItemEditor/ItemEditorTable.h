@@ -23,8 +23,13 @@ public:
                 int& selectedRow,
                 bool freezeColumns);
 
-    // Request scroll to a specific item index
+    // Selects the item and scrolls to it at the next Render; the selection is
+    // set even when the search filter hides the item.
     static void RequestScrollToIndex(int index);
+
+    // Whether the table lists the item with this (lowercase) search filter:
+    // items with a name that contains it.
+    static bool IsListed(int itemIndex, const std::string& searchFilter);
 
     // Force rebuild of filtered list (call after data changes)
     void InvalidateFilter();

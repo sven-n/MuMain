@@ -246,6 +246,7 @@ item files hold what client and server share.
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
 | `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
+| `itemEffect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 
 `inventory` and `ground` hold these values; a missing value has the
@@ -339,6 +340,41 @@ only in the hands of the Metal Balrog and the Orc Archer of Doom,
 `helperNpcPlate` only on the helper NPCs (Luke and Leo the Helper, Helper
 Ellen; in the code the flag of a PC room look, which no player gets).
 
+A few styles also shine below +3: the model is drawn with the light of the
+item scaled, then with two shine passes. `sealOfAscension`, `sealOfWealth`
+and `sealOfSustenance` (the seals, light at 0.9), `illusionSorcererCovenant`
+and `harmonyShine` (the Jewel of Harmony and the Moonstone Pendant, which
+are drawn plainly otherwise), and `cursedCastleWater`.
+
+`itemEffect` names what the model does before it is drawn:
+
+```json
+{ "number": 37, "file": "Data/Item/wing09.bmd", "textureFolders": ["Item"], "itemEffect": "wingOfEternal" }
+```
+
+Each item effect is code with a name; the names are listed at the end of
+`src/source/Render/Items/ItemEffects.cpp`. An item effect runs every frame
+before the model is drawn and can:
+
+- place sprites, particles and lightning on bones of the model, so they
+  follow its animation (the Devil's Key and Invitation, Rena, the wings of
+  the third tier, the Wings of Darkness);
+- change values of the drawing: a pulsing glow mesh (`wingsOfDragon`,
+  `wingsOfSoul`, `redSpirit`, `staffOfKundun`, `divineSet`), a mesh hidden
+  by level (`hiddenMeshByLevel` of the Siege Potion and the Contract,
+  `hideMesh1`), the level potions glow like (`potion`: +7 at every level
+  above 0);
+- draw the model itself instead of the usual drawing (the Dark Lord's
+  scrolls, `fruits`, `spirit`, `invisibilityCloak`, `firecracker`,
+  `gmGift`, `meshesPerLevel`).
+
+Items with the same item effect share it. The socket seeds and spheres and
+zen have no item effect; they glow like level 0 (`"glow": {"level": 0}`), whatever
+their level.
+
+The effects of the event models that level variants are drawn with stay in
+code; they get model entries later.
+
 - All item models are loaded at startup, on the loading screen.
 - An item without a model entry is not drawn. Some items are drawn with
   the model of another item or with an effect model; that choice, and
@@ -383,6 +419,7 @@ The problems are:
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
 | A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
 | `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
+| `itemEffect` names an item effect that does not exist; the model is drawn without it. | warning |
 
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts
@@ -416,6 +453,16 @@ The item editor (editor builds, F12) edits the items of the running game:
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
 `<build folder>/Data/Items` to `src/bin/Data/Items` and commit them.
+
+### Looks
+
+The **Looks** section above the item table shows the model data of the
+selected item (`Data/Items/Models`), read only: its model file, its glow
+values, its render style and its item effect. A render style or an item
+effect opens to the list of all items that use it; clicking one selects it in
+the table (the search is cleared when it hides that item). Items without
+item data are listed too; they are not in the table, but selecting one
+shows its looks. Changing the looks is done in the model files for now.
 
 ### Import from bmd / Export as bmd
 

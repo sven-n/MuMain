@@ -171,7 +171,8 @@
       "glow": {
         "color": "bronze"
       },
-      "renderStyle": "staffOfKundun"
+      "renderStyle": "staffOfKundun",
+      "itemEffect": "staffOfKundun"
     },
     {
       "number": 12,

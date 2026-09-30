@@ -66,7 +66,8 @@
       "inventory": {
         "anchor": [0.5, 0.9]
       },
-      "renderStyle": "contractSummon"
+      "renderStyle": "contractSummon",
+      "itemEffect": "hiddenMeshByLevel"
     },
     {
       "number": 8,
@@ -102,7 +103,8 @@
       "inventory": {
         "anchor": [0.5, 0.8]
       },
-      "renderStyle": "lifeStone"
+      "renderStyle": "lifeStone",
+      "itemEffect": "hideMesh1"
     },
     {
       "number": 12,
@@ -141,7 +143,8 @@
       "inventory": {
         "anchor": [0.6, 1],
         "scale": 0.003
-      }
+      },
+      "itemEffect": "fruits"
     },
     {
       "number": 16,
@@ -167,7 +170,8 @@
       "ground": {
         "rotation": [-45, -5, 18],
         "scale": 0.48
-      }
+      },
+      "renderStyle": "bloodBone"
     },
     {
       "number": 18,
@@ -181,7 +185,8 @@
       "ground": {
         "rotation": [165, -168, 198],
         "scale": 0.48
-      }
+      },
+      "itemEffect": "invisibilityCloak"
     },
     {
       "number": 21,
@@ -302,7 +307,8 @@
       "inventory": {
         "anchor": [0.5, 0.9],
         "rotation": [-90, -90, 0]
-      }
+      },
+      "itemEffect": "spirit"
     },
     {
       "number": 32,
@@ -395,7 +401,8 @@
         "anchor": [0.5, 0.7],
         "offset": [0, 0.02],
         "rotation": [-198, 0, 0]
-      }
+      },
+      "renderStyle": "harmonyShine"
     },
     {
       "number": 39,
@@ -571,7 +578,6 @@
         "scale": 0.6
       },
       "glow": {
-        "level": 0,
         "shineHiddenMesh": 1
       },
       "renderStyle": "illusionSorcererCovenant"

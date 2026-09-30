@@ -421,7 +421,8 @@
       },
       "glow": {
         "color": "copper"
-      }
+      },
+      "itemEffect": "redSpirit"
     },
     {
       "number": 25,
