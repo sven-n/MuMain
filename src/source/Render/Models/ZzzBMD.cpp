@@ -2934,7 +2934,10 @@ void BMD::ShareFrom(const BMD& owner)
     Textures = owner.Textures;
     IndexTexture = owner.IndexTexture;
     m_bSharedData = true;
-    Init(false);
+    // What Init sets for this slot; the bounding boxes of the bones are the owner's.
+    renderCount = 0;
+    BoneHead = -1;
+    StreamMesh = -1;
     m_bCompletedAlloc = true;
 }
 

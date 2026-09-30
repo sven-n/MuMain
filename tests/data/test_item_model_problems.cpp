@@ -111,6 +111,25 @@ TEST_CASE("A missing item model file names the item and the model entry [data][i
           ".bmd file) (Data/Items/Models/Group13_Helper.json)");
 }
 
+TEST_CASE("Problems with the file of a shared model name the shared model [data][items]")
+{
+    ItemModelProblem texture = MakeMissingTexture(0, "LuckyCardgreen.jpg");
+    texture.sharedModel = "luckyTicketGreen";
+    CHECK(Contains(texture.ToString(MakeItems()),
+                   "(Data/Items/Models/SharedModels.json, shared model luckyTicketGreen: all its items are affected)"));
+
+    ItemModelProblem file = texture;
+    file.type = ItemModelProblemType::ModelFileMissing;
+    CHECK(Contains(file.ToLogString(), "(Data/Items/Models/SharedModels.json, shared model luckyTicketGreen"));
+
+    // The glow, render style and item effect are the item's own.
+    ItemModelProblem glow = texture;
+    glow.type = ItemModelProblemType::GlowMeshMissing;
+    glow.field = "glow.meshes";
+    CHECK(Contains(glow.ToString(MakeItems()), SwordModels));
+    CHECK_FALSE(Contains(glow.ToString(MakeItems()), "SharedModels.json"));
+}
+
 TEST_CASE("A texture found only outside the texture folders is a warning that names the folder to add [data][items]")
 {
     ItemModelProblem problem = MakeMissingTexture(1, "Item762_Armor.jpg");

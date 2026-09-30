@@ -28,6 +28,9 @@ public:
     virtual ~CLoadData();
     // Returns false when the model file could not be opened.
     bool AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i = -1);
+    // Lets the slot `Type` use the model data that AccessModel opened into
+    // the slot `OwnerType` (BMD::ShareFrom).
+    void ShareModel(int Type, int OwnerType);
     // A texture the folder does not have is shown as an error.
     void OpenTexture(int Model, const wchar_t* SubFolder, int Wrap = GL_REPEAT, int Type = GL_NEAREST,
                      bool Check = true);

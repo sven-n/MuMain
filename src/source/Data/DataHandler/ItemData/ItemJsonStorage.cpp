@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <fstream>
 #include <iterator>
 #include <optional>
@@ -23,6 +24,16 @@ constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
 constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
     "Sword", "Axe",   "Mace",   "Spear", "Bow",  "Staff",  "Shield", "Helm",
     "Armor", "Pants", "Gloves", "Boots", "Wing", "Helper", "Potion", "Etc"};
+
+// The shared model file, whatever the case of its name: Windows does not
+// tell them apart, so "sharedModels.json" is the same file there.
+bool IsSharedItemModelsFile(std::string_view fileName)
+{
+    const std::string_view expected = SharedItemModelsFileName;
+    return std::equal(
+        fileName.begin(), fileName.end(), expected.begin(), expected.end(), [](char left, char right)
+        { return std::tolower(static_cast<unsigned char>(left)) == std::tolower(static_cast<unsigned char>(right)); });
+}
 
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
 {
@@ -152,7 +163,7 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
     ReadJsonFiles(directory, "no item model files found", result.issues,
                   [&](std::string_view text, const std::string& source)
                   {
-                      if (source == SharedItemModelsFileName)
+                      if (IsSharedItemModelsFile(source))
                       {
                           ReadSharedItemModelsJson(text, source, result.sharedModels, result.issues);
                       }
@@ -163,6 +174,14 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
                   });
     ApplySharedItemModels(result.models, result.sharedModels, SharedItemModelsFileName, result.issues);
     ValidateItemModels(result.models, result.issues);
+    // These checks go across files; the group file of the item is where to fix it.
+    for (ItemDataIssue& issue : result.issues)
+    {
+        if (issue.source.empty() && issue.group != ItemDataIssue::NoItem)
+        {
+            issue.source = GetItemGroupFileName(issue.group);
+        }
+    }
     return result;
 }
 

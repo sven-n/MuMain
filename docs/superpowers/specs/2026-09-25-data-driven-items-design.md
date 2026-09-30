@@ -657,7 +657,18 @@ server with original clients (after phases 6 and B).
      for an item's model slot, and objects (`Weapon[]`, `BodyPart[]`,
      `Wing`, `Helper`, dropped items) keep their item type instead of
      computing it back with `- MODEL_ITEM`. Comes before phase 12, so the
-     level variants can share models.
+     level variants can share models. Also from the review of 4d1: the
+     slots that share a model hold the raw pointers of the slot that
+     opened it, which nothing tracks, so releasing or reopening that slot
+     (e.g. reloading models from the editor) would leave them pointing at
+     freed memory; the shared data gets a use count or shared ownership,
+     or each shared model gets one slot once the code asks for an item's
+     model slot. The loaded data becomes read-only for the item slots, so
+     a write through one of them cannot change all items of the model. A
+     test of the loader opens items of one shared model into the model
+     slots: the first opens the file and loads the textures, the others
+     share it, and a first item whose file is missing makes the others
+     report the missing file too.
 
    **4e Clear model loading errors:** a missing model file or texture of an
    item model shows one message after loading instead of one popup per

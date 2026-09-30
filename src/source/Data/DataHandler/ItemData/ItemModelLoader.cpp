@@ -55,6 +55,7 @@ ItemModelProblem MakeProblem(ItemModelProblemType type, const ItemModelDefinitio
     problem.group = model.group;
     problem.number = model.number;
     problem.modelFile = model.file;
+    problem.sharedModel = model.model;
     return problem;
 }
 
@@ -170,7 +171,7 @@ void OpenSharedModel(int itemType, const ItemModelDefinition& model, const LookN
         AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
         return;
     }
-    Models[MODEL_ITEM + itemType].ShareFrom(Models[MODEL_ITEM + opened->second]);
+    gLoadData.ShareModel(MODEL_ITEM + itemType, MODEL_ITEM + opened->second);
     CheckModel(itemType, model, lookNames);
 }
 

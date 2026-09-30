@@ -69,6 +69,13 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
     return Success;
 }
 
+void CLoadData::ShareModel(int Type, int OwnerType)
+{
+    Models[Type].m_iBMDSeqID = Type;
+    Models[Type].ShareFrom(Models[OwnerType]);
+    RememberModelFile(Type, GetModelFile(OwnerType));
+}
+
 void CLoadData::RememberModelFile(int Model, const std::wstring& path)
 {
     if (Model < 0)

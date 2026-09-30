@@ -29,6 +29,15 @@ constexpr const char* RenderStyle = "renderStyle";
 constexpr const char* ItemEffect = "itemEffect";
 } // namespace Keys
 
+// The fields of a model entry and of a shared model; others are warned about.
+const std::set<std::string, std::less<>> ItemModelKeys{
+    Keys::Number,           Keys::Model,           Keys::File,
+    Keys::TextureFolders,   Keys::NoneBlendMeshes, DisplayJson::InventoryKey,
+    DisplayJson::GroundKey, DisplayJson::ClothKey, GlowJson::GlowKey,
+    Keys::RenderStyle,      Keys::ItemEffect};
+const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
+                                                         Keys::NoneBlendMeshes};
+
 constexpr std::string_view ModelFileExtension = ".bmd";
 constexpr char FolderSeparator = '/';
 constexpr char WindowsFolderSeparator = '\\';
@@ -112,6 +121,19 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     return json;
 }
 
+// The text of a model file, with the lists of numbers and names on one line.
+std::string DumpModelFile(const OrderedJson& root)
+{
+    std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+    for (const char* key :
+         {Keys::TextureFolders, Keys::NoneBlendMeshes, DisplayJson::AnchorKey, DisplayJson::OffsetKey,
+          DisplayJson::RotationKey, GlowJson::LevelKey, GlowJson::MeshesKey, GlowJson::ShineMeshesKey})
+    {
+        text = Json::PutListsOnOneLine(text, key);
+    }
+    return text + "\n";
+}
+
 // ---------------------------------------------------------------- reading
 
 // Reads the model currently being read and collects its problems.
@@ -124,7 +146,9 @@ public:
     }
 
     bool Read(const OrderedJson& json, ItemModelDefinition& model);
-    bool ReadShared(const OrderedJson& json, SharedItemModel& model);
+    // `index`: the position in the list, which names the entry until its
+    // name is read.
+    bool ReadShared(const OrderedJson& json, size_t index, SharedItemModel& model);
 
 private:
     void AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message);
@@ -252,9 +276,6 @@ void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std
     name = field->get<std::string>();
 }
 
-const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
-                                                         Keys::NoneBlendMeshes};
-
 void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys)
 {
     for (const auto& [key, value] : json.items())
@@ -265,12 +286,6 @@ void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::s
         }
     }
 }
-
-const std::set<std::string, std::less<>> ItemModelKeys{
-    Keys::Number,           Keys::Model,           Keys::File,
-    Keys::TextureFolders,   Keys::NoneBlendMeshes, DisplayJson::InventoryKey,
-    DisplayJson::GroundKey, DisplayJson::ClothKey, GlowJson::GlowKey,
-    Keys::RenderStyle,      Keys::ItemEffect};
 
 bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
 {
@@ -319,18 +334,19 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     return !m_hasErrors;
 }
 
-bool ItemModelReader::ReadShared(const OrderedJson& json, SharedItemModel& model)
+bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedItemModel& model)
 {
+    const std::string position = std::string(Keys::Models) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        AddError("", "a shared model must be an object");
+        AddError(position, "a shared model must be an object");
         return false;
     }
 
     const auto name = json.find(Keys::Name);
     if (name == json.end() || !name->is_string() || !Json::IsName(name->get_ref<const std::string&>()))
     {
-        AddError(Keys::Name, "missing or not a name of letters and digits");
+        AddError(position + "." + Keys::Name, "missing or not a name of letters and digits");
         return false;
     }
     model.name = name->get<std::string>();
@@ -344,6 +360,24 @@ bool ItemModelReader::ReadShared(const OrderedJson& json, SharedItemModel& model
     WarnAboutUnknownKeys(json, SharedModelKeys);
     return !m_hasErrors;
 }
+
+// Calls read(entry, index) for every entry of the "models" list of a model
+// file; a file without the list is an error.
+template <typename TRead>
+void ReadModelList(const OrderedJson& root, const std::string& source, int group, std::vector<ItemDataIssue>& issues,
+                   TRead&& read)
+{
+    const auto modelList = root.find(Keys::Models);
+    if (modelList == root.end() || !modelList->is_array())
+    {
+        Json::AddFileIssue(issues, source, group, Keys::Models, "missing or not a list");
+        return;
+    }
+    for (size_t index = 0; index < modelList->size(); ++index)
+    {
+        read((*modelList)[index], index);
+    }
+}
 } // namespace
 
 void ReadItemModelGroupJson(std::string_view text, const std::string& source, std::vector<ItemModelDefinition>& models,
@@ -356,22 +390,16 @@ void ReadItemModelGroupJson(std::string_view text, const std::string& source, st
         return;
     }
 
-    const auto modelList = root.find(Keys::Models);
-    if (modelList == root.end() || !modelList->is_array())
-    {
-        Json::AddFileIssue(issues, source, group, Keys::Models, "missing or not a list");
-        return;
-    }
-
-    for (const OrderedJson& json : *modelList)
-    {
-        ItemModelDefinition model;
-        ItemModelReader reader(source, group, issues);
-        if (reader.Read(json, model))
-        {
-            models.push_back(std::move(model));
-        }
-    }
+    ReadModelList(root, source, group, issues,
+                  [&](const OrderedJson& json, size_t)
+                  {
+                      ItemModelDefinition model;
+                      ItemModelReader reader(source, group, issues);
+                      if (reader.Read(json, model))
+                      {
+                          models.push_back(std::move(model));
+                      }
+                  });
 }
 
 std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefinition> models)
@@ -396,17 +424,7 @@ std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefiniti
     {
         root[Keys::Models].push_back(WriteModel(*model));
     }
-
-    std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
-    text = Json::PutListsOnOneLine(text, Keys::TextureFolders);
-    text = Json::PutListsOnOneLine(text, Keys::NoneBlendMeshes);
-    text = Json::PutListsOnOneLine(text, DisplayJson::AnchorKey);
-    text = Json::PutListsOnOneLine(text, DisplayJson::OffsetKey);
-    text = Json::PutListsOnOneLine(text, DisplayJson::RotationKey);
-    text = Json::PutListsOnOneLine(text, GlowJson::LevelKey);
-    text = Json::PutListsOnOneLine(text, GlowJson::MeshesKey);
-    text = Json::PutListsOnOneLine(text, GlowJson::ShineMeshesKey);
-    return text + "\n";
+    return DumpModelFile(root);
 }
 
 void ReadSharedItemModelsJson(std::string_view text, const std::string& source, std::vector<SharedItemModel>& models,
@@ -418,22 +436,16 @@ void ReadSharedItemModelsJson(std::string_view text, const std::string& source, 
         return;
     }
 
-    const auto modelList = root.find(Keys::Models);
-    if (modelList == root.end() || !modelList->is_array())
-    {
-        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::Models, "missing or not a list");
-        return;
-    }
-
-    for (const OrderedJson& json : *modelList)
-    {
-        SharedItemModel model;
-        ItemModelReader reader(source, ItemDataIssue::NoItem, issues);
-        if (reader.ReadShared(json, model))
-        {
-            models.push_back(std::move(model));
-        }
-    }
+    ReadModelList(root, source, ItemDataIssue::NoItem, issues,
+                  [&](const OrderedJson& json, size_t index)
+                  {
+                      SharedItemModel model;
+                      ItemModelReader reader(source, ItemDataIssue::NoItem, issues);
+                      if (reader.ReadShared(json, index, model))
+                      {
+                          models.push_back(std::move(model));
+                      }
+                  });
 }
 
 std::string WriteSharedItemModelsJson(std::span<const SharedItemModel> models)
@@ -456,10 +468,6 @@ std::string WriteSharedItemModelsJson(std::span<const SharedItemModel> models)
         WriteModelFile(model->file, model->textureFolders, model->noneBlendMeshes, json);
         root[Keys::Models].push_back(std::move(json));
     }
-
-    std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
-    text = Json::PutListsOnOneLine(text, Keys::TextureFolders);
-    text = Json::PutListsOnOneLine(text, Keys::NoneBlendMeshes);
-    return text + "\n";
+    return DumpModelFile(root);
 }
 } // namespace Data::Items

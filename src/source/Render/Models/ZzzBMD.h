@@ -272,7 +272,9 @@ public:
     void Release();
     // Uses the loaded data of the model in another slot, for items that share
     // one model file (opened once). That slot keeps owning the data and must
-    // stay loaded while this one uses it.
+    // stay loaded while this one uses it. The data must not be changed
+    // through this slot: the owner and every other slot that shares it would
+    // change as well.
     void ShareFrom(const BMD& owner);
     bool SharesData() const
     {

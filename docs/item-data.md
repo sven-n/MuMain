@@ -390,18 +390,18 @@ code; they get model entries later.
   also finds them on Linux and macOS.
 
 Model files are checked like the item files: invalid JSON, a missing
-`number` or `file`, a file that is not a `.bmd`, a path that leaves the
-game folder (starting with `/`, a drive letter or `..`), `\` in a path,
-display or glow values of the wrong kind (e.g. a rotation with two
-numbers, a scale of 0 or a color value above 1), an item with two
-models, `model` together with `file`, `textureFolders` or
-`noneBlendMeshes`, a `model` that is not in `SharedModels.json`, or a
-shared model defined twice stop the start with a message; unknown fields
-and a shared model that no item uses are warnings. The automated tests
-also check that every model file and texture folder exists, that every
-texture of a model is in one of its texture folders, that every texture is
-a `.jpg` or `.tga` texture, and that every model file that several items
-use is a shared model.
+`number`, a missing `file` (without `model`), a file that is not a
+`.bmd`, a path that leaves the game folder (starting with `/`, a drive
+letter or `..`), `\` in a path, display or glow values of the wrong kind
+(e.g. a rotation with two numbers, a scale of 0 or a color value above
+1), an item with two models, `model` together with `file`,
+`textureFolders` or `noneBlendMeshes`, a `model` that is not in
+`SharedModels.json`, or a shared model defined twice stop the start with
+a message; unknown fields and a shared model that no item uses are
+warnings. The automated tests also check that every model file and
+texture folder exists, that every texture of a model is in one of its
+texture folders, that every texture is a `.jpg` or `.tga` texture, and
+that every model file that several items use is a shared model.
 
 When a model file or a texture cannot be loaded, one message after
 loading lists the problems (up to 10; all of them are in `MuError.log`).

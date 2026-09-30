@@ -26,9 +26,11 @@
 #include <array>
 #include <cctype>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <optional>
+#include <random>
 #include <set>
 #include <string>
 #include <utility>
@@ -217,6 +219,66 @@ TEST_CASE("Every model file that several items use is a shared model [data][item
     CHECK(parchment->textureFolders == std::vector<std::string>{"Item"});
 }
 
+namespace
+{
+// A model folder whose files are written by the test.
+class TemporaryModelFolder
+{
+public:
+    TemporaryModelFolder()
+        // CTest runs the test cases as parallel processes; each needs its own folder.
+        : m_directory(std::filesystem::temp_directory_path() /
+                      ("mu_test_item_models_" + std::to_string(std::random_device{}())))
+    {
+        std::filesystem::remove_all(m_directory);
+        std::filesystem::create_directories(m_directory);
+    }
+
+    ~TemporaryModelFolder()
+    {
+        std::error_code ignored;
+        std::filesystem::remove_all(m_directory, ignored);
+    }
+
+    void Write(const std::string& fileName, const std::string& text) const
+    {
+        std::ofstream(m_directory / fileName, std::ios::binary) << text;
+    }
+
+    const std::filesystem::path& Directory() const
+    {
+        return m_directory;
+    }
+
+private:
+    std::filesystem::path m_directory;
+};
+} // namespace
+
+// Windows does not tell the case of file names apart, so the shared model
+// file is found whatever its case. Errors of an item name its group file.
+TEST_CASE("The shared model file is found in any case, and item errors name their group file [data][items]")
+{
+    TemporaryModelFolder folder;
+    folder.Write("Group15_Etc.json",
+                 R"({"formatVersion": 1, "group": 15, "models": [{"number": 19, "model": "skillParchment"},
+                                                                  {"number": 20, "model": "ring"}]})");
+    folder.Write(
+        "sharedModels.json",
+        R"({"formatVersion": 1, "models": [{"name": "skillParchment", "file": "Data/Item/rollofpaper.bmd"}]})");
+
+    const ItemModelDataLoadResult result = LoadItemModelDataDirectory(folder.Directory());
+
+    REQUIRE(result.issues.size() == 1);
+    CHECK(result.issues[0].source == "Group15_Etc.json");
+    CHECK(result.issues[0].number == 20);
+    CHECK(result.issues[0].field == "model");
+    REQUIRE(result.sharedModels.size() == 1);
+    const ItemModelDefinition* parchment = FindModel(result.models, 15, 19);
+    REQUIRE(parchment != nullptr);
+    CHECK(parchment->file == "Data/Item/rollofpaper.bmd");
+}
+
 // Items of a shared model use the data of the slot that opened it; letting
 // go of it leaves that slot's data alone.
 TEST_CASE("A model slot can share the loaded data of another one [data][items]")
@@ -240,8 +302,10 @@ TEST_CASE("A model slot can share the loaded data of another one [data][items]")
         CHECK(user.NumBones == owner->NumBones);
         CHECK(user.NumActions == owner->NumActions);
         CHECK(std::string(user.Name) == owner->Name);
-        // The rest of the slot stays its own.
+        // The rest of the slot stays its own, set like after opening a file.
         CHECK(user.BodyScale == 1.f);
+        CHECK(user.BoneHead == -1);
+        CHECK(user.StreamMesh == -1);
 
         user.Release();
         CHECK_FALSE(user.SharesData());

@@ -350,8 +350,12 @@ TEST_CASE("Shared model JSON keeps every value through write and read, sorted by
 
 TEST_CASE("A shared model needs a name and a .bmd file [data][items]")
 {
-    CHECK(HasSharedError(R"({"file": "Data/Item/Ring01.bmd"})", "name"));
-    CHECK(HasSharedError(R"({"name": "a ring", "file": "Data/Item/Ring01.bmd"})", "name"));
+    // Without a name the position in the list names the entry.
+    CHECK(HasSharedError(R"({"file": "Data/Item/Ring01.bmd"})", "models[0].name"));
+    CHECK(HasSharedError(R"({"name": "a ring", "file": "Data/Item/Ring01.bmd"})", "models[0].name"));
+    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.bmd"}, {"file": "Data/Item/Ring02.bmd"})",
+                         "models[1].name"));
+    CHECK(HasSharedError(R"(3)", "models[0]"));
     // The fields of a shared model are named after it.
     CHECK(HasSharedError(R"({"name": "ring"})", "ring.file"));
     CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.ozj"})", "ring.file"));

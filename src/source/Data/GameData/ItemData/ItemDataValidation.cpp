@@ -153,8 +153,10 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
         const auto shared = byName.find(model.model);
         if (shared == byName.end())
         {
+            // An entry that could not be read is left out, with an error of its own.
             issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, "model",
-                              "the shared model \"" + model.model + "\" is not in " + sharedModelsSource});
+                              "the shared model \"" + model.model + "\" is not in " + sharedModelsSource +
+                                  " or could not be read there"});
             continue;
         }
         model.file = shared->second->file;
