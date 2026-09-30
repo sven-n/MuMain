@@ -226,10 +226,7 @@ void CUnitedMarketPlaceWindow::BuildRmlUi()
             c.Bind("text_px", &model.textPx);
             c.Bind("bold_text_px", &model.boldTextPx);
             c.Bind("title", &model.title);
-            auto line = c.RegisterStruct<UnitedMarketPlaceLineEntry>();
-            line.RegisterMember("text", &UnitedMarketPlaceLineEntry::text);
-            line.RegisterMember("top", &UnitedMarketPlaceLineEntry::top);
-            c.RegisterArray<std::vector<UnitedMarketPlaceLineEntry>>();
+            c.RegisterArray<std::vector<Rml::String>>();
             c.Bind("lines", &model.lines);
             c.Bind("warp_text", &model.warpText);
             c.Bind("label_top", &model.labelTop);
@@ -307,8 +304,9 @@ void CUnitedMarketPlaceWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("warp_locked");
     }
 
-    // In the market, the way back to town; elsewhere, the market (the original's Render()). Every 20
-    // units from y 60, the last one at y 180.
+    // In the market, the way back to town; elsewhere, the market (the original's Render()). The
+    // theme gives each of the seven slots its own row; going back to town has nothing to say in
+    // three of them, which stay empty so the last line keeps its place.
     std::vector<const wchar_t*> texts;
     if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
         texts = {I18N::Game::WillYouBeGoingBackToTownNow,
@@ -326,17 +324,10 @@ void CUnitedMarketPlaceWindow::SyncRmlModel()
                  I18N::Game::YouCanSellThem,
                  I18N::Game::AtTheMarket,
                  I18N::Game::WouldYouLikeToGoToTheMarket};
-    std::vector<UnitedMarketPlaceLineEntry> lines;
-    for (std::size_t i = 0; i < texts.size(); ++i)
-    {
-        if (texts[i] != nullptr)
-            lines.push_back({StringUtils::WideToNarrow(texts[i]), 60.f + 20.f * static_cast<float>(i)});
-    }
-    const bool same = lines.size() == model.lines.size() &&
-                      std::equal(lines.begin(), lines.end(), model.lines.begin(),
-                                 [](const UnitedMarketPlaceLineEntry& a, const UnitedMarketPlaceLineEntry& b)
-                                 { return a.text == b.text && a.top == b.top; });
-    if (!same)
+    std::vector<Rml::String> lines;
+    for (const wchar_t* text : texts)
+        lines.push_back(text != nullptr ? StringUtils::WideToNarrow(text) : Rml::String{});
+    if (model.lines != lines)
     {
         model.lines = std::move(lines);
         m_RmlBinder.MarkDirty("lines");

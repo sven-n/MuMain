@@ -6,12 +6,6 @@
 
 namespace mu::ui::window
 {
-struct UnitedMarketPlaceLineEntry
-{
-    Rml::String text;
-    float top = 0.f; // reference px in the panel
-};
-
 struct UnitedMarketPlaceRmlModel
 {
     // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
@@ -20,7 +14,9 @@ struct UnitedMarketPlaceRmlModel
     float boldTextPx = 0.f; // native bold text size
 
     Rml::String title;
-    std::vector<UnitedMarketPlaceLineEntry> lines;
+    // The description's seven slots, in order; a slot the current place has nothing to say in is
+    // empty rather than absent, so the theme can keep placing the ones after it.
+    std::vector<Rml::String> lines;
     Rml::String warpText;
     // CButton::Render(): the label centred on its native line height, 23 / 2 - h / 2 whole units
     // down (reference px), its line box in physical px.

@@ -30,3 +30,13 @@
 #warp.locked, #warp.locked:hover { background-color: token(surface-recessed); border-color: token(border-frame); }
 #warp_label { left: 0; color: token(text-primary); }
 #warp.locked #warp_label { color: token(text-muted); }
+
+/* The description's own rows: every 20 units from y 60. */
+.market-lines { position: static; }
+.market-line:nth-child(1) { top: 60px; }
+.market-line:nth-child(2) { top: 80px; }
+.market-line:nth-child(3) { top: 100px; }
+.market-line:nth-child(4) { top: 120px; }
+.market-line:nth-child(5) { top: 140px; }
+.market-line:nth-child(6) { top: 160px; }
+.market-line:nth-child(7) { top: 180px; }
